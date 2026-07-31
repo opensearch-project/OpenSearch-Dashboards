@@ -10,6 +10,7 @@ import {
 } from './to_expression';
 import { VisColumn, VisFieldType, Positions, AxisRole } from '../types';
 import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
+import { getColors } from '../theme/default_colors';
 
 describe('Scatter Chart to_expression', () => {
   const mockData = [
@@ -61,16 +62,17 @@ describe('Scatter Chart to_expression', () => {
     it('returns an ECharts spec with dataset, series, and axes', () => {
       const result = createTwoMetricScatter(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result).toHaveProperty('xAxis');
-      expect(result).toHaveProperty('yAxis');
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('xAxis');
+      expect(result.spec).toHaveProperty('yAxis');
+      expect(result.legendItems).toEqual([]);
     });
 
     it('produces scatter-type series', () => {
       const result = createTwoMetricScatter(mockData, mockStyles, mockAxisMappings);
 
-      const scatterSeries = result.series.filter((s: any) => s.type === 'scatter');
+      const scatterSeries = result.spec.series.filter((s: any) => s.type === 'scatter');
       expect(scatterSeries.length).toBeGreaterThanOrEqual(1);
     });
   });
@@ -85,8 +87,92 @@ describe('Scatter Chart to_expression', () => {
     it('returns an ECharts spec with colored scatter series', () => {
       const result = createTwoMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+    });
+
+    it('emits series-target legend items while assigning category colors', () => {
+      const palette = getColors().categories;
+      const result = createTwoMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
+
+      expect(result.legendItems).toEqual([
+        {
+          label: 'A',
+          color: palette[0],
+          target: { type: 'series', name: 'A' },
+        },
+        {
+          label: 'B',
+          color: palette[1],
+          target: { type: 'series', name: 'B' },
+        },
+      ]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: expect.objectContaining({ color: palette[0] }),
+        }),
+        expect.objectContaining({
+          name: 'B',
+          itemStyle: expect.objectContaining({ color: palette[1] }),
+        }),
+      ]);
+    });
+
+    it('uses provided full data when assigning category colors', () => {
+      const palette = getColors().categories;
+      const result = createTwoMetricOneCateScatter(
+        [
+          { x: 10, y: 20, category: 'A' },
+          { x: 20, y: 30, category: 'C' },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { x: 10, y: 20, category: 'A' },
+          { x: 15, y: 25, category: 'B' },
+          { x: 20, y: 30, category: 'C' },
+        ]
+      );
+
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: expect.objectContaining({ color: palette[0] }),
+        }),
+        expect.objectContaining({
+          name: 'C',
+          itemStyle: expect.objectContaining({ color: palette[2] }),
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+    });
+
+    it('emits builder-owned colors for unfilled category scatter', () => {
+      const palette = getColors().categories;
+      const result = createTwoMetricOneCateScatter(
+        mockData,
+        { ...mockStyles, exclusive: { ...mockStyles.exclusive, filled: false } },
+        mockAxisMappings
+      );
+
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[1]]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: expect.objectContaining({
+            color: 'transparent',
+            borderColor: palette[0],
+          }),
+        }),
+        expect.objectContaining({
+          name: 'B',
+          itemStyle: expect.objectContaining({
+            color: 'transparent',
+            borderColor: palette[1],
+          }),
+        }),
+      ]);
     });
 
     it('throws when color field is missing', () => {
@@ -116,12 +202,61 @@ describe('Scatter Chart to_expression', () => {
     it('returns an ECharts spec with size-encoded scatter series', () => {
       const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('visualMap');
     });
 
-    it('clears the custom legend for size-only scatter charts', () => {
-      const onLegend = jest.fn();
+    it('emits category legend items while preserving size visualMap', () => {
+      const palette = getColors().categories;
+      const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
+
+      expect(result.legendItems).toEqual([
+        {
+          label: 'A',
+          color: palette[0],
+          target: { type: 'series', name: 'A' },
+        },
+        {
+          label: 'B',
+          color: palette[1],
+          target: { type: 'series', name: 'B' },
+        },
+      ]);
+      expect(result.spec.visualMap).toEqual([expect.objectContaining({ dimension: 2 })]);
+    });
+
+    it('uses provided full data when assigning color and size scatter colors', () => {
+      const palette = getColors().categories;
+      const result = createThreeMetricOneCateScatter(
+        [
+          { x: 10, y: 20, category: 'A', size: 5 },
+          { x: 20, y: 30, category: 'C', size: 15 },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { x: 10, y: 20, category: 'A', size: 5 },
+          { x: 15, y: 25, category: 'B', size: 10 },
+          { x: 20, y: 30, category: 'C', size: 15 },
+        ]
+      );
+
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: expect.objectContaining({ color: palette[0] }),
+        }),
+        expect.objectContaining({
+          name: 'C',
+          itemStyle: expect.objectContaining({ color: palette[2] }),
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+      expect(result.spec.visualMap).toEqual([expect.objectContaining({ dimension: 2 })]);
+    });
+
+    it('does not emit custom legend items for size-only scatter charts', () => {
       const styles = {
         ...mockStyles,
         exclusive: {
@@ -130,20 +265,40 @@ describe('Scatter Chart to_expression', () => {
         },
       };
 
-      createThreeMetricOneCateScatter(mockData, styles, mockSizeOnlyAxisMappings, onLegend);
+      const result = createThreeMetricOneCateScatter(mockData, styles, mockSizeOnlyAxisMappings);
 
-      expect(onLegend).toHaveBeenCalledWith({});
+      expect(result.legendItems).toEqual([]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'Y Value',
+          itemStyle: expect.objectContaining({
+            color: 'transparent',
+            borderColor: getColors().categories[0],
+          }),
+        }),
+      ]);
+      expect(result.spec.visualMap).toEqual([
+        expect.objectContaining({ dimension: 2 }),
+      ]);
     });
 
     it('keeps category legend entries when color and size mappings are both present', () => {
-      const onLegend = jest.fn();
+      const palette = getColors().categories;
 
-      createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings, onLegend);
+      const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
-      expect(onLegend).toHaveBeenCalledWith({
-        A: expect.any(String),
-        B: expect.any(String),
-      });
+      expect(result.legendItems).toEqual([
+        {
+          label: 'A',
+          color: palette[0],
+          target: { type: 'series', name: 'A' },
+        },
+        {
+          label: 'B',
+          color: palette[1],
+          target: { type: 'series', name: 'B' },
+        },
+      ]);
     });
 
     it('throws when size field is missing', () => {

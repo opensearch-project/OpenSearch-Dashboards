@@ -97,12 +97,11 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const x = props.axisColumnMappings.x?.[0];
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y) throw Error('Missing axis config for scatter chart');
-          const spec = createTwoMetricScatter(
-            props.data,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.onLegend
-          );
+          const { spec, legendItems } = createTwoMetricScatter(props.data, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -126,12 +125,13 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for scatter chart');
-          const spec = createTwoMetricOneCateScatter(
+          const { spec, legendItems } = createTwoMetricOneCateScatter(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -155,17 +155,17 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const y = props.axisColumnMappings.y?.[0];
           const size = props.axisColumnMappings.size?.[0];
           if (!x || !y || !size) throw Error('Missing axis config for scatter chart');
-          const spec = createThreeMetricOneCateScatter(
-            props.transformedData,
+          const { spec, legendItems } = createThreeMetricOneCateScatter(
+            props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.SIZE]: size },
-            props.onLegend
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.SIZE]: size }
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -186,12 +186,13 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const color = props.axisColumnMappings.color?.[0];
           const size = props.axisColumnMappings.size?.[0];
           if (!x || !y || !color || !size) throw Error('Missing axis config for scatter chart');
-          const spec = createThreeMetricOneCateScatter(
+          const { spec, legendItems } = createThreeMetricOneCateScatter(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.SIZE]: size },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
