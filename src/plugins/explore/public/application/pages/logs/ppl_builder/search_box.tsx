@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { monaco, setupPPLTokenization } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { analyzeSearchExpression } from './search_completion';
+import { compareValueSuggestions } from './value_suggestion_order';
 import { getCommandEnterAction } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/command_enter_action';
 
 export const PPL_SEARCH_LANGUAGE_ID = 'pplSearchExpression';
@@ -138,7 +139,8 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
       if (analysis.suggestValuesForField) {
         try {
           const values = await onRequestValuesRef.current(analysis.suggestValuesForField);
-          for (const v of values) {
+          const ordered = [...values].sort(compareValueSuggestions(analysis.partial));
+          ordered.forEach((v, i) => {
             const isNumeric = v.trim() !== '' && v === v.trim() && Number.isFinite(Number(v));
             const isBoolean = v === 'true' || v === 'false';
             const insert = isNumeric || isBoolean ? v : `"${v.replace(/"/g, '""')}"`;
@@ -150,10 +152,10 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
               }),
               insertText: `${insert} `,
               range,
-              sortText: `0_${v}`,
+              sortText: `0_${i.toString().padStart(ordered.length.toString().length, '0')}`,
               command: RETRIGGER_COMMAND,
             });
-          }
+          });
         } catch {
           // noop
         }

@@ -13,6 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { compareValueSuggestions } from './value_suggestion_order';
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -52,6 +53,9 @@ interface SearchPopoverMenuProps {
   onSearchChange?: (search: string) => void;
   // Server-side fetch in flight: drives the search-box spinner and "Loading…" row.
   loading?: boolean;
+  // Reorder filtered options by how well they match the typed text (prefix first,
+  // then shortest). Off by default so semantic lists (operators, fields) keep their order.
+  rankByQuery?: boolean;
   searchPlaceholder: string;
   emptyMessage: string;
   searchDataTestSubj?: string;
@@ -67,6 +71,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   onOpen,
   onSearchChange,
   loading,
+  rankByQuery,
   searchPlaceholder,
   emptyMessage,
   searchDataTestSubj,
@@ -130,10 +135,14 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
     firstMatchRef.current = null;
     const q = search.trim().toLowerCase();
     const items = options.filter((o) => (o.filterText ?? o.key).toLowerCase().includes(q));
+    if (rankByQuery && q) {
+      const compare = compareValueSuggestions(q);
+      items.sort((a, b) => compare(a.filterText ?? a.key, b.filterText ?? b.key));
+    }
     firstMatchRef.current = items[0] ?? null;
     const exact = options.some((o) => (o.filterText ?? o.key).toLowerCase() === q);
     return { filtered: items, allowCreateNow: !!allowCreate && q.length > 0 && !exact };
-  }, [search, options, allowCreate]);
+  }, [search, options, allowCreate, rankByQuery]);
 
   const applyFirst = () => {
     const q = search.trim();
