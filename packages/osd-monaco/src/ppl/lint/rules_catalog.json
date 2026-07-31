@@ -219,7 +219,7 @@
     "detector": "rex-scan-cost",
     "enabled": false,
     "severity": "info",
-    "message": "rex runs the pattern against every input row from the text field, even when it finds no match.",
+    "message": "Pattern extraction runs against every input row from the text field, even when it finds no match.",
     "howToFix": "Filter out rows that cannot match the pattern before extraction, using time or an indexed field.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
     "appliesTo": {},

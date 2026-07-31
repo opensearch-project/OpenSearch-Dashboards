@@ -19,7 +19,7 @@ export interface CatalogEntry {
   enabled: boolean;
   severity: LintSeverity;
   message: string;
-  /** Static, task-oriented guidance rendered as the hover card's `Fix` line. */
+  /** Repository-authored presentation metadata rendered as the hover card's `Fix` line. */
   howToFix: string;
   docUrl: string;
   appliesTo: AppliesTo;
@@ -36,6 +36,11 @@ export interface CatalogEntry {
   sourceScoped?: boolean;
 }
 
+/**
+ * Broad execution override API used by the lint engine and headless callers.
+ * Runtime PPL grammar bundles do not carry these catalog fields; the Dashboards
+ * settings adapter intentionally emits only enabled/severity overrides.
+ */
 export type BundleRuleOverrides = Record<string, Partial<CatalogEntry>>;
 
 export interface LintPayloadContext {

@@ -124,10 +124,10 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
           title: fix.title,
           arguments: [{ rule }],
         };
-        // Deduped per marker per lint pass: Monaco auto-triggers
-        // provideCodeActions on every cursor move over a marker, so emitting on
-        // each call would count caret ticks, not offers. `key` is the marker's
-        // canonical identity (position + message).
+        // Deduped for the exact marker while it remains active: Monaco
+        // auto-triggers provideCodeActions on every cursor move, so emitting on
+        // each call would count caret ticks and unchanged lint passes, not
+        // offers. `key` is the canonical position/message/rule identity.
         if (shouldEmitQuickfixOffered(model, key)) {
           emitPPLLintTelemetry({
             name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED,

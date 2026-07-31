@@ -17,6 +17,19 @@ function wildcardToRegExp(pattern: string): RegExp {
 }
 
 /**
+ * The inventory contains simple local names only. Diagnose only the source
+ * forms whose matching semantics can be reproduced exactly from that list.
+ */
+export function isSimpleLocalWildcardPattern(pattern: string): boolean {
+  return (
+    pattern.includes('*') &&
+    !pattern.startsWith('-') &&
+    !pattern.startsWith('.') &&
+    /^[A-Za-z0-9._+*-]+$/.test(pattern)
+  );
+}
+
+/**
  * Flag a wildcard `source=` pattern that matches none of the indices visible to
  * the user. Advisory only: the query is valid PPL and returns zero rows.
  *
@@ -43,7 +56,7 @@ export const wildcardSourceZeroMatchDetector: Detector = (
   // not a `tableSource`, and only the classifier covers both shapes. It also
   // normalizes quoting, so the pattern is compared and displayed unquoted.
   const source = classifyTopLevelSource(tree, ruleNameToIndex, context.isPipeFirst ?? false);
-  if (source.kind !== 'single-table' || !source.value.includes('*')) {
+  if (source.kind !== 'single-table' || !isSimpleLocalWildcardPattern(source.value)) {
     return [];
   }
 

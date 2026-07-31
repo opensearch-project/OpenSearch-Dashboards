@@ -8,6 +8,8 @@ import { LintSeverity } from './diagnostic';
 import rawCatalog from './rules_catalog.json';
 
 // TRACKING (opensearch-project/sql#4549): set maxVersion once that issue ships.
+// This validator owns OSD's repository-bundled presentation catalog. Runtime
+// grammar bundles contain parser/autocomplete data, not lint catalog entries.
 
 const VALID_SEVERITIES: ReadonlySet<string> = new Set<LintSeverity>(['error', 'warning', 'info']);
 
@@ -40,7 +42,7 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     typeof candidate.severity !== 'string' ||
     !VALID_SEVERITIES.has(candidate.severity) ||
     typeof candidate.message !== 'string' ||
-    typeof candidate.howToFix !== 'string' ||
+    !isNonEmptyString(candidate.howToFix) ||
     typeof candidate.docUrl !== 'string' ||
     !isValidAppliesTo(candidate.appliesTo)
   ) {

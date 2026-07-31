@@ -171,3 +171,35 @@ describe('metadata rules — runtime (engine ATN) vs compiled-simplified equival
     });
   }
 });
+
+describe('wildcard-source-zero-match — runtime vs compiled-simplified equivalence', () => {
+  const wildcardContext: LintRunContext = {
+    visibleIndices: ['logs-2025', 'metrics-2025'],
+  };
+
+  const wildcardShape = (
+    tree: ParserRuleContext,
+    rni: ReturnType<typeof createRuntimeRuleNameToIndex>
+  ) =>
+    runLint(tree, { ruleNameToIndex: rni, context: wildcardContext })
+      .filter((d) => d.ruleId === 'wildcard-source-zero-match')
+      .map((d) => d.ruleId);
+
+  const CASES: Array<{ query: string; fires: boolean }> = [
+    { query: 'source=missing-*', fires: true },
+    { query: 'source=logs-*', fires: false },
+    { query: 'source=logs-*,metrics-*', fires: false },
+    { query: 'source=-logs-*', fires: false },
+    { query: 'source=<logs-{now/d}-*>', fires: false },
+    { query: 'source=remote:logs-*', fires: false },
+  ];
+
+  it.each(CASES)('handles $query on both grammar surfaces', ({ query, fires }) => {
+    const runtime = wildcardShape(engineTree(query), engineRni);
+    const simplified = wildcardShape(simplifiedTree(query), simpRni);
+    const expected = fires ? ['wildcard-source-zero-match'] : [];
+
+    expect(runtime).toEqual(simplified);
+    expect(runtime).toEqual(expected);
+  });
+});

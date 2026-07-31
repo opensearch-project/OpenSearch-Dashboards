@@ -18,12 +18,14 @@ describe('renderHoverCard', () => {
   it('renders a concise, action-oriented division-by-zero card', () => {
     const entry = getCatalogEntryById('division-by-zero');
     const md = render({
+      ruleId: 'division-by-zero',
       message: 'Dividing by zero returns no value (null) instead of an error.',
       docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
     });
 
     expect(md).toContain('⚠️ **Warning**');
+    expect(md).toContain('Rule: `division-by-zero`');
     expect(md).toContain('Dividing by zero returns no value');
     expect(md).toContain('**Fix** — Use the intended divisor');
     expect(md).toContain(
@@ -34,7 +36,6 @@ describe('renderHoverCard', () => {
     expect(md).not.toContain('Why warning');
     expect(md).not.toContain('Your query');
     expect(md).not.toContain('Safe to ignore');
-    expect(md).not.toContain('division-by-zero');
   });
 
   it('renders the Fix line from catalog howToFix and no facts section', () => {
@@ -88,6 +89,17 @@ describe('renderHoverCard', () => {
     const md = render({ fixText: 'weird`name' });
     expect(md).toContain('weird`name');
     expect(md).not.toContain('weirdˋname');
+  });
+
+  it('fences an unusual rule id containing a backtick', () => {
+    const md = render({ ruleId: 'rule`id' });
+    expect(md).toContain('Rule: `` rule`id ``');
+  });
+
+  it('preserves inline-code Markdown in bundled howToFix guidance', () => {
+    const entry = getCatalogEntryById('head-without-sort');
+    const md = render({ howToFix: entry?.howToFix });
+    expect(md).toContain('Add `sort` before `head`');
   });
 
   it('escapes markdown-significant characters in the detector message', () => {

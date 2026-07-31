@@ -259,4 +259,60 @@ describe('processLintHighlighting — diagnostic_shown telemetry', () => {
 
     expect(events).toHaveLength(0);
   });
+
+  it('emits one exposure across 60 accepted passes with the same diagnostic', async () => {
+    const model = makeModel('t-volume');
+    mockLintFallback.mockResolvedValue(multiResult(['division-by-zero']));
+
+    for (let i = 0; i < 60; i++) {
+      await revalidatePPLModel(model);
+      await flush();
+    }
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+    ]);
+  });
+
+  it('starts a new rule episode after an accepted empty pass', async () => {
+    const model = makeModel('t-episode');
+    mockLintFallback
+      .mockResolvedValueOnce(multiResult(['division-by-zero']))
+      .mockResolvedValueOnce(multiResult([]))
+      .mockResolvedValueOnce(multiResult(['division-by-zero']));
+
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+    ]);
+  });
+
+  it('does not reconcile telemetry from a stale result', async () => {
+    const model = makeModel('t-stale');
+    let resolveStale!: (value: LintResult) => void;
+    let resolveFresh!: (value: LintResult) => void;
+    mockLintFallback
+      .mockReturnValueOnce(new Promise<LintResult>((resolve) => (resolveStale = resolve)))
+      .mockReturnValueOnce(new Promise<LintResult>((resolve) => (resolveFresh = resolve)));
+
+    void revalidatePPLModel(model);
+    void revalidatePPLModel(model);
+    await flush();
+
+    resolveFresh(multiResult(['head-without-sort']));
+    await flush();
+    resolveStale(multiResult(['division-by-zero']));
+    await flush();
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'head-without-sort' } },
+    ]);
+  });
 });

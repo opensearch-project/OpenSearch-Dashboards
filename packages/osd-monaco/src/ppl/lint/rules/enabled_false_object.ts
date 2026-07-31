@@ -8,6 +8,15 @@ import { Detector } from '../types';
 import { collectDottedPathNodes } from '../rule_index';
 import { rangeFromContext } from '../range_utils';
 
+function isUnderDisabledObject(path: string, disabled: ReadonlySet<string>): boolean {
+  for (const root of disabled) {
+    if (path === root || path.startsWith(root + '.')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Engine ground truth (verified live on OpenSearch 3.7): a field inside an object
 // mapped `enabled: false` is not indexed. A reference to it returns null with
 // schema type `undefined` and HTTP 200 — a silent failure, unlike flat_object
@@ -40,8 +49,7 @@ export const enabledFalseObjectDetector: Detector = (tree, config, context, rule
     // form the producer (`collectDisabledObjectFields`) emits. Match the full
     // path or any subfield beneath it; the `d + '.'` boundary keeps `log` from
     // matching an unrelated `logger.field`.
-    const disabledRoot = [...disabled].find((d) => path === d || path.startsWith(d + '.'));
-    if (!disabledRoot) {
+    if (!isUnderDisabledObject(path, disabled)) {
       continue;
     }
 

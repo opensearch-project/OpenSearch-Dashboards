@@ -4,12 +4,15 @@
  */
 
 import {
+  clearPPLLintTelemetry,
+  clearPPLLintTelemetryLayer,
   emitPPLLintTelemetry,
   PPL_LINT_QUICKFIX_COMMAND_ID,
   PPL_LINT_TELEMETRY_EVENTS,
   PPLLintTelemetryEvent,
+  reconcilePPLLintExplainTelemetry,
+  reconcilePPLLintStaticTelemetry,
   registerPPLLintTelemetry,
-  resetPPLLintTelemetryDedup,
   shouldEmitHoverShown,
   shouldEmitQuickfixOffered,
 } from '../telemetry';
@@ -84,39 +87,114 @@ describe('PPL lint telemetry', () => {
     ).not.toThrow();
   });
 
-  describe('per-pass dedup', () => {
-    it('shouldEmitHoverShown returns true once per marker key, then false until reset', () => {
+  describe('active finding lifecycle', () => {
+    it('keeps an unchanged finding deduped across accepted passes', () => {
       const model = {};
+      const events: PPLLintTelemetryEvent[] = [];
+      registerPPLLintTelemetry((event) => events.push(event));
+      const findings = [{ ruleId: 'rule-a', markerKey: 'k1' }];
+
+      reconcilePPLLintStaticTelemetry(model, findings);
       expect(shouldEmitHoverShown(model, 'k1')).toBe(true);
       expect(shouldEmitHoverShown(model, 'k1')).toBe(false);
-      // A different marker still counts.
-      expect(shouldEmitHoverShown(model, 'k2')).toBe(true);
-      // A new pass (reset) re-arms counting for the same key.
-      resetPPLLintTelemetryDedup(model);
-      expect(shouldEmitHoverShown(model, 'k1')).toBe(true);
+      reconcilePPLLintStaticTelemetry(model, findings);
+      expect(shouldEmitHoverShown(model, 'k1')).toBe(false);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'rule-a' } },
+      ]);
     });
 
-    it('shouldEmitQuickfixOffered returns true once per marker key, then false until reset', () => {
+    it('treats a changed range or message fingerprint as a new interaction, not a new rule episode', () => {
       const model = {};
+      const events: PPLLintTelemetryEvent[] = [];
+      registerPPLLintTelemetry((event) => events.push(event));
+
+      reconcilePPLLintStaticTelemetry(model, [
+        { ruleId: 'rule-a', markerKey: 'range-1:message-1' },
+      ]);
+      expect(shouldEmitHoverShown(model, 'range-1:message-1')).toBe(true);
+      reconcilePPLLintStaticTelemetry(model, [
+        { ruleId: 'rule-a', markerKey: 'range-2:message-1' },
+      ]);
+      expect(shouldEmitHoverShown(model, 'range-2:message-1')).toBe(true);
+      reconcilePPLLintStaticTelemetry(model, [
+        { ruleId: 'rule-a', markerKey: 'range-2:message-2' },
+      ]);
+      expect(shouldEmitQuickfixOffered(model, 'range-2:message-2')).toBe(true);
+
+      expect(events).toHaveLength(1);
+    });
+
+    it('emits for a newly active rule and re-arms a removed rule when it returns', () => {
+      const model = {};
+      const events: PPLLintTelemetryEvent[] = [];
+      registerPPLLintTelemetry((event) => events.push(event));
+
+      reconcilePPLLintStaticTelemetry(model, [{ ruleId: 'rule-a', markerKey: 'a' }]);
+      reconcilePPLLintStaticTelemetry(model, [
+        { ruleId: 'rule-a', markerKey: 'a' },
+        { ruleId: 'rule-b', markerKey: 'b' },
+      ]);
+      reconcilePPLLintStaticTelemetry(model, [{ ruleId: 'rule-b', markerKey: 'b' }]);
+      reconcilePPLLintStaticTelemetry(model, [
+        { ruleId: 'rule-a', markerKey: 'a' },
+        { ruleId: 'rule-b', markerKey: 'b' },
+      ]);
+
+      expect(events.map((event) => event.data.rule)).toEqual(['rule-a', 'rule-b', 'rule-a']);
+    });
+
+    it('tracks hover and quick-fix flags independently', () => {
+      const model = {};
+      reconcilePPLLintStaticTelemetry(model, [{ ruleId: 'rule-a', markerKey: 'k1' }]);
+      expect(shouldEmitHoverShown(model, 'k1')).toBe(true);
       expect(shouldEmitQuickfixOffered(model, 'k1')).toBe(true);
+      expect(shouldEmitHoverShown(model, 'k1')).toBe(false);
       expect(shouldEmitQuickfixOffered(model, 'k1')).toBe(false);
-      resetPPLLintTelemetryDedup(model);
-      expect(shouldEmitQuickfixOffered(model, 'k1')).toBe(true);
     });
 
-    it('tracks hover and quick-fix dedup independently', () => {
-      const model = {};
-      expect(shouldEmitHoverShown(model, 'k1')).toBe(true);
-      // Offering a quick-fix for the same key is a separate counter.
-      expect(shouldEmitQuickfixOffered(model, 'k1')).toBe(true);
-    });
-
-    it('keeps dedup state independent per model', () => {
+    it('keeps state independent per model and clears it explicitly', () => {
       const a = {};
       const b = {};
+      reconcilePPLLintStaticTelemetry(a, [{ ruleId: 'rule-a', markerKey: 'k1' }]);
+      reconcilePPLLintStaticTelemetry(b, [{ ruleId: 'rule-a', markerKey: 'k1' }]);
       expect(shouldEmitHoverShown(a, 'k1')).toBe(true);
-      // A different model has its own state.
       expect(shouldEmitHoverShown(b, 'k1')).toBe(true);
+      clearPPLLintTelemetry(a);
+      expect(shouldEmitHoverShown(a, 'k1')).toBe(false);
+    });
+
+    it('reconciles explain markers without emitting diagnostic_shown', () => {
+      const model = {};
+      const events: PPLLintTelemetryEvent[] = [];
+      registerPPLLintTelemetry((event) => events.push(event));
+
+      reconcilePPLLintExplainTelemetry(model, ['explain-1']);
+      expect(shouldEmitHoverShown(model, 'explain-1')).toBe(true);
+      reconcilePPLLintExplainTelemetry(model, ['explain-1']);
+      expect(shouldEmitHoverShown(model, 'explain-1')).toBe(false);
+      reconcilePPLLintExplainTelemetry(model, []);
+      reconcilePPLLintExplainTelemetry(model, ['explain-1']);
+      expect(shouldEmitHoverShown(model, 'explain-1')).toBe(true);
+      expect(events).toHaveLength(0);
+    });
+
+    it('clears one layer without disturbing the other', () => {
+      const model = {};
+      reconcilePPLLintStaticTelemetry(model, [{ ruleId: 'rule-a', markerKey: 'static-1' }]);
+      reconcilePPLLintExplainTelemetry(model, ['explain-1']);
+      expect(shouldEmitHoverShown(model, 'static-1')).toBe(true);
+      expect(shouldEmitHoverShown(model, 'explain-1')).toBe(true);
+
+      clearPPLLintTelemetryLayer(model, 'explain');
+      expect(shouldEmitHoverShown(model, 'explain-1')).toBe(false);
+      expect(shouldEmitQuickfixOffered(model, 'static-1')).toBe(true);
+    });
+
+    it('does not emit interactions for a marker that was never reconciled as active', () => {
+      const model = {};
+      expect(shouldEmitHoverShown(model, 'unknown')).toBe(false);
+      expect(shouldEmitQuickfixOffered(model, 'unknown')).toBe(false);
     });
   });
 

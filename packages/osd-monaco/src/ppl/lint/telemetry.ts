@@ -24,7 +24,7 @@
  * off the exact strings — treat them as a stable contract, not a display label.
  */
 export const PPL_LINT_TELEMETRY_EVENTS = {
-  /** A lint marker was produced for the model (deduped per rule per pass). */
+  /** A static-lint rule transitioned from absent to active in the model. */
   DIAGNOSTIC_SHOWN: 'ppl_lint_diagnostic_shown',
   /** The hover card rendered for a lint marker under the cursor. */
   HOVER_SHOWN: 'ppl_lint_hover_shown',
@@ -111,70 +111,143 @@ export function emitPPLLintTelemetry(event: PPLLintTelemetryEvent): void {
 }
 
 /**
- * Per-model, per-lint-pass dedup so `hover_shown` / `quickfix_offered` count
- * distinct user-facing occurrences rather than Monaco's repeated provider
- * invocations. Monaco re-invokes `provideHover` for every hover anchor (a single
- * character position) and auto-triggers `provideCodeActions` on every cursor move
- * over a marker, so emitting on each call would count mouse travel instead of
- * hovers/offers. This mirrors how `diagnostic_shown` counts once per rule per
- * pass: within one lint pass (a stable set of markers), each distinct marker's
- * hover/offer counts once; editing the query starts a new pass, which resets the
- * state and re-arms counting. Keyed by the model object via WeakMap so disposed
- * models are collected automatically; typed as `object` to keep the engine free
- * of a core/monaco type dependency here.
+ * Static findings carry both identities telemetry needs: the rule episode for
+ * diagnostic exposure and the exact marker fingerprint for interactions.
  */
-interface PPLLintTelemetryDedup {
-  /** Marker keys already counted as "hover shown" in the current lint pass. */
-  hoveredKeys: Set<string>;
-  /** Marker keys already counted as "quick-fix offered" in the current pass. */
-  offeredKeys: Set<string>;
+export interface PPLLintStaticFinding {
+  ruleId: string;
+  markerKey: string;
 }
 
-const dedupByModel = new WeakMap<object, PPLLintTelemetryDedup>();
+export type PPLLintTelemetryLayer = 'static' | 'explain';
 
-function getDedup(model: object): PPLLintTelemetryDedup {
-  let dedup = dedupByModel.get(model);
-  if (!dedup) {
-    dedup = { hoveredKeys: new Set<string>(), offeredKeys: new Set<string>() };
-    dedupByModel.set(model, dedup);
+interface MarkerTelemetryState {
+  hovered: boolean;
+  offered: boolean;
+}
+
+interface ModelTelemetryState {
+  activeStaticRules: Set<string>;
+  staticMarkers: Map<string, MarkerTelemetryState>;
+  explainMarkers: Map<string, MarkerTelemetryState>;
+}
+
+// State contains active findings only and is keyed weakly so abandoned models
+// remain collectible. Static and explain marker layers are separate because the
+// async explain render replaces Monaco's initial static marker set; an unchanged
+// static marker must keep its interaction flags through that replacement.
+const telemetryByModel = new WeakMap<object, ModelTelemetryState>();
+
+function getModelState(model: object): ModelTelemetryState {
+  let state = telemetryByModel.get(model);
+  if (!state) {
+    state = {
+      activeStaticRules: new Set<string>(),
+      staticMarkers: new Map<string, MarkerTelemetryState>(),
+      explainMarkers: new Map<string, MarkerTelemetryState>(),
+    };
+    telemetryByModel.set(model, state);
   }
-  return dedup;
+  return state;
+}
+
+function reconcileMarkers(
+  previous: Map<string, MarkerTelemetryState>,
+  activeKeys: Iterable<string>
+): Map<string, MarkerTelemetryState> {
+  const next = new Map<string, MarkerTelemetryState>();
+  for (const key of activeKeys) {
+    next.set(key, previous.get(key) ?? { hovered: false, offered: false });
+  }
+  return next;
 }
 
 /**
- * True the first time a hover card for `markerKey` is shown in the current lint
- * pass, collapsing Monaco's per-anchor re-invocation storm into one event per
- * distinct marker. A new lint pass resets the state so hovering the same finding
- * after an edit counts again.
+ * Reconcile an accepted static lint result. `diagnostic_shown` fires only when a
+ * rule enters the active set; unchanged rules survive typing passes, while a
+ * rule removed by an accepted pass is re-armed if it later returns.
+ */
+export function reconcilePPLLintStaticTelemetry(
+  model: object,
+  findings: readonly PPLLintStaticFinding[]
+): void {
+  const state = getModelState(model);
+  const nextRules = new Set<string>();
+  const newlyActiveRules: string[] = [];
+
+  for (const finding of findings) {
+    if (!nextRules.has(finding.ruleId) && !state.activeStaticRules.has(finding.ruleId)) {
+      newlyActiveRules.push(finding.ruleId);
+    }
+    nextRules.add(finding.ruleId);
+  }
+
+  state.activeStaticRules = nextRules;
+  state.staticMarkers = reconcileMarkers(
+    state.staticMarkers,
+    findings.map((finding) => finding.markerKey)
+  );
+
+  for (const rule of newlyActiveRules) {
+    emitPPLLintTelemetry({
+      name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN,
+      data: { rule },
+    });
+  }
+}
+
+/** Reconcile exact marker fingerprints produced by the async explain layer. */
+export function reconcilePPLLintExplainTelemetry(
+  model: object,
+  markerKeys: readonly string[]
+): void {
+  const state = getModelState(model);
+  state.explainMarkers = reconcileMarkers(state.explainMarkers, markerKeys);
+}
+
+/** Clear one marker layer when the current generation definitively removed it. */
+export function clearPPLLintTelemetryLayer(model: object, layer: PPLLintTelemetryLayer): void {
+  const state = telemetryByModel.get(model);
+  if (!state) {
+    return;
+  }
+  if (layer === 'static') {
+    state.activeStaticRules.clear();
+    state.staticMarkers.clear();
+  } else {
+    state.explainMarkers.clear();
+  }
+}
+
+/** Clear all telemetry lifecycle state for a disposed or non-PPL model. */
+export function clearPPLLintTelemetry(model: object): void {
+  telemetryByModel.delete(model);
+}
+
+function findActiveMarker(model: object, markerKey: string): MarkerTelemetryState | undefined {
+  const state = telemetryByModel.get(model);
+  return state?.staticMarkers.get(markerKey) ?? state?.explainMarkers.get(markerKey);
+}
+
+/**
+ * True once for an exact active marker fingerprint. Repeated provider calls and
+ * unchanged lint passes remain deduped; removal followed by return re-arms it.
  */
 export function shouldEmitHoverShown(model: object, markerKey: string): boolean {
-  const { hoveredKeys } = getDedup(model);
-  if (hoveredKeys.has(markerKey)) {
+  const marker = findActiveMarker(model, markerKey);
+  if (!marker || marker.hovered) {
     return false;
   }
-  hoveredKeys.add(markerKey);
+  marker.hovered = true;
   return true;
 }
 
-/**
- * True the first time a quick-fix for `markerKey` is offered in the current lint
- * pass; repeat `provideCodeActions` calls for the same marker (Monaco auto-fires
- * these on every cursor move) are deduped until the next pass resets the state.
- */
+/** Same lifecycle semantics as hover, tracked independently for quick-fix offers. */
 export function shouldEmitQuickfixOffered(model: object, markerKey: string): boolean {
-  const { offeredKeys } = getDedup(model);
-  if (offeredKeys.has(markerKey)) {
+  const marker = findActiveMarker(model, markerKey);
+  if (!marker || marker.offered) {
     return false;
   }
-  offeredKeys.add(markerKey);
+  marker.offered = true;
   return true;
-}
-
-/**
- * Reset a model's dedup state. Called by the lint lifecycle when a new pass
- * applies markers (a fresh opportunity, so the next hover/offer counts again)
- * and when a model is disposed or leaves PPL.
- */
-export function resetPPLLintTelemetryDedup(model: object): void {
-  dedupByModel.delete(model);
 }

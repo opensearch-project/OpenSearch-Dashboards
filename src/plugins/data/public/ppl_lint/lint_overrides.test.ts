@@ -70,6 +70,22 @@ describe('buildOverridesFromSettings', () => {
     expect(overrides).toEqual({ 'head-without-sort': { enabled: false } });
   });
 
+  it('ignores presentation fields injected through the raw JSON setting', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([
+        {
+          id: 'head-without-sort',
+          enabled: false,
+          severity: 'info',
+          message: 'remote message',
+          howToFix: 'remote guidance',
+          docUrl: 'https://example.invalid',
+        },
+      ])
+    );
+    expect(overrides).toEqual({ 'head-without-sort': { enabled: false } });
+  });
+
   it('passes through an allowed severity change', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'error' }])

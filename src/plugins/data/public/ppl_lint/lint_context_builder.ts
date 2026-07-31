@@ -117,6 +117,7 @@ export function buildPPLLintContext(
     lintFields.datasetId === dataset?.id &&
     lintFields.dataSourceId === dsId &&
     lintFields.datasetType === dataset?.type;
+  const cacheMatchesDataSource = lintFields.dataSourceId === dsId;
 
   // Only a reading the route actually took counts. The route fails open, so a
   // cached response from a failed read still says `calciteEnabled: true` — using
@@ -139,8 +140,9 @@ export function buildPPLLintContext(
     disabledObjectFields: cacheMatchesDataset ? lintFields.disabledObjectFields : undefined,
     selectedSourcePattern: cacheMatchesDataset ? lintFields.selectedSourcePattern : undefined,
     // Cluster-wide rather than dataset-scoped, so it is not gated on the
-    // dataset-identity check the field metadata uses.
-    visibleIndices: lintFields.visibleIndices,
+    // dataset-identity check the field metadata uses. It is still data-source
+    // scoped so names from one MDS cluster never leak into another.
+    visibleIndices: cacheMatchesDataSource ? lintFields.visibleIndices : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }
       : undefined,

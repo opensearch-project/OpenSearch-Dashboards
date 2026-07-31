@@ -4,15 +4,16 @@
  */
 
 import { monaco } from '../../../../monaco';
-import { LINT_MARKER_SOURCE } from '../../diagnostic_to_marker';
+import { LINT_MARKER_SOURCE, ruleIdOf } from '../../diagnostic_to_marker';
 import { markerFixKey, setModelFixes, clearModelFixes, MarkerFix } from '../../fix_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
 import { registerPPLDiagnosticActionContributor } from '../../diagnostic_action';
 import {
   PPLLintTelemetryEvent,
   PPL_LINT_TELEMETRY_EVENTS,
+  clearPPLLintTelemetry,
+  reconcilePPLLintStaticTelemetry,
   registerPPLLintTelemetry,
-  resetPPLLintTelemetryDedup,
 } from '../../telemetry';
 
 type Marker = monaco.editor.IMarker;
@@ -65,13 +66,24 @@ function markdownOf(hover: monaco.languages.Hover | null): string {
   return first.value;
 }
 
+function activateMarkers(markers: Marker[]): void {
+  reconcilePPLLintStaticTelemetry(
+    model,
+    markers.map((marker) => ({
+      ruleId: ruleIdOf(marker) ?? '',
+      markerKey: markerFixKey(marker),
+    }))
+  );
+}
+
 describe('pplLintHoverProvider', () => {
   it('returns a card for a lint marker under the cursor', () => {
     markersByOwner[LINT_OWNER] = [makeMarker({ message: 'Dividing by zero returns null.' })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    // Simplified card: severity glyph + message + the catalog Fix line, no rule-id header.
+    // The rule id is secondary metadata on the severity line, not the headline.
     expect(markdownOf(hover)).toContain('⚠️ **Warning**');
+    expect(markdownOf(hover)).toContain('Rule: `division-by-zero`');
     expect(markdownOf(hover)).toContain('Dividing by zero returns null.');
     expect(markdownOf(hover)).toContain('**Fix** — Use the intended divisor');
     expect(markdownOf(hover)).not.toContain('**Engine behavior**');
@@ -133,7 +145,13 @@ describe('pplLintHoverProvider', () => {
     expect(md).toContain('no code here');
     // No catalog entry → no Fix line, but never throws / never blank.
     expect(md).not.toContain('**Fix**');
+    expect(md).not.toContain('Rule:');
     expect(md).not.toContain('**Engine behavior**');
+  });
+
+  it('renders a plain-string marker code as the rule id', () => {
+    markersByOwner[LINT_OWNER] = [makeMarker({ code: 'agg-on-text' })];
+    expect(markdownOf(hoverAt(1, 7))).toContain('Rule: `agg-on-text`');
   });
 
   describe('contributed actions', () => {
@@ -200,19 +218,18 @@ describe('pplLintHoverProvider', () => {
     let events: PPLLintTelemetryEvent[];
     beforeEach(() => {
       events = [];
+      clearPPLLintTelemetry(model);
       registerPPLLintTelemetry((event) => events.push(event));
-      // The dedup state is per-model and persists across provideHover calls; the
-      // shared test model would otherwise leak dedup between tests. Reset it so
-      // each test starts from a fresh lint pass.
-      resetPPLLintTelemetryDedup(model);
     });
     afterEach(() => {
       registerPPLLintTelemetry(undefined);
-      resetPPLLintTelemetryDedup(model);
+      clearPPLLintTelemetry(model);
     });
 
     it('emits hover_shown with the rule id when a card is returned', () => {
       markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
       hoverAt(1, 7);
       expect(events).toEqual([
         { name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN, data: { rule: 'division-by-zero' } },
@@ -221,12 +238,16 @@ describe('pplLintHoverProvider', () => {
 
     it('does not emit when no lint marker is under the cursor', () => {
       markersByOwner[LINT_OWNER] = [makeMarker({ startColumn: 5, endColumn: 8 })];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
       hoverAt(1, 20);
       expect(events).toHaveLength(0);
     });
 
     it('emits hover_shown with an undefined rule when the marker has no code', () => {
       markersByOwner[LINT_OWNER] = [makeMarker({ code: undefined })];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
       hoverAt(1, 7);
       expect(events).toEqual([
         { name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN, data: { rule: undefined } },
@@ -235,6 +256,8 @@ describe('pplLintHoverProvider', () => {
 
     it('deduplicates repeated hovers over the same marker within a pass', () => {
       markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
       // Monaco re-invokes provideHover per hover anchor (character position);
       // three hovers over the same marker must count as one.
       hoverAt(1, 6);
@@ -243,12 +266,27 @@ describe('pplLintHoverProvider', () => {
       expect(events).toHaveLength(1);
     });
 
-    it('counts the hover again after a new lint pass resets the dedup', () => {
+    it('does not count an unchanged marker again on a new accepted pass', () => {
       markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
       hoverAt(1, 7);
-      resetPPLLintTelemetryDedup(model); // simulates a fresh marker set
+      activateMarkers(markersByOwner[LINT_OWNER]);
       hoverAt(1, 7);
-      expect(events).toHaveLength(2);
+      expect(events).toHaveLength(1);
+    });
+
+    it('counts the hover again after the marker disappears and returns', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      hoverAt(1, 7);
+      activateMarkers([]);
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      hoverAt(1, 7);
+      expect(
+        events.filter((event) => event.name === PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN)
+      ).toHaveLength(2);
     });
   });
 });

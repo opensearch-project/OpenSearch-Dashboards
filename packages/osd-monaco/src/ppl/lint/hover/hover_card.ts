@@ -20,6 +20,8 @@ export type SeverityLabel = 'Error' | 'Warning' | 'Info';
 
 export interface HoverCardInput {
   severityLabel: SeverityLabel;
+  /** Stable rule id used by Advanced Settings and support reports. */
+  ruleId?: string;
   /** The marker's short message — always shown as the card lead. */
   message: string;
   /** code.target — the specific doc link from the catalog. */
@@ -72,12 +74,11 @@ function encodeLinkTarget(url: string): string {
  * in `{ value, isTrusted: false }` and hands it to Monaco.
  */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { severityLabel, message, docUrl, howToFix, fixText } = input;
+  const { severityLabel, ruleId, message, docUrl, howToFix, fixText } = input;
   const lines: string[] = [];
 
-  // The rule id remains on the marker for lookup and support diagnostics, but it
-  // is implementation detail rather than the card's headline.
-  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**`);
+  const ruleMetadata = ruleId ? ` | Rule: ${code(ruleId)}` : '';
+  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**${ruleMetadata}`);
 
   // Lead: the short message (always present).
   lines.push('');
@@ -87,6 +88,9 @@ export function renderHoverCard(input: HoverCardInput): string {
   // automatic edit can be offered safely.
   if (howToFix) {
     lines.push('');
+    // Bundled repository-authored guidance intentionally retains inline-code
+    // Markdown. The provider does not read execution-time overrides here and
+    // returns the complete card with isTrusted:false.
     lines.push(`**Fix** — ${howToFix}`);
   }
 

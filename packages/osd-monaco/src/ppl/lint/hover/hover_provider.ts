@@ -87,6 +87,8 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const key = markerFixKey(marker);
     const fix = getModelFix(model, key);
 
+    // Hover guidance is bundled presentation metadata, not the execution-time
+    // merged rule config used by runLint/headless callers.
     const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
     const contributedActions = renderContributedActions(
       collectPPLDiagnosticActions({
@@ -102,6 +104,7 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
       {
         value: renderHoverCard({
           severityLabel: severityLabel(marker.severity),
+          ruleId,
           message: marker.message,
           docUrl: docUrlOf(marker),
           howToFix: entry?.howToFix,
@@ -116,9 +119,9 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
 
     // Feature-usage telemetry: the user hovered a lint marker and a card is
     // being returned. Emitted only on the card-returned path (not the null/no-
-    // marker branch above), and deduped per marker per lint pass so Monaco's
-    // per-character re-invocation of provideHover counts one hover, not mouse
-    // travel across the marker. No-ops until the host registers a sink.
+    // marker branch above), and deduped for the exact marker while it remains
+    // active so Monaco's per-character re-invocation counts one hover, not mouse
+    // travel or accepted lint passes. No-ops until the host registers a sink.
     if (shouldEmitHoverShown(model, key)) {
       emitPPLLintTelemetry({
         name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN,

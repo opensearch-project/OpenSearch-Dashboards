@@ -114,6 +114,26 @@ describe('catalog loading', () => {
     ).not.toBeNull();
   });
 
+  it('rejects an otherwise valid entry without howToFix guidance', () => {
+    expect(
+      validateCatalogEntry({
+        id: 'x',
+        detector: 'x',
+        enabled: true,
+        severity: 'warning',
+        message: 'm',
+        docUrl: 'd',
+        appliesTo: {},
+      })
+    ).toBeNull();
+  });
+
+  it('ships non-empty howToFix guidance for every bundled rule', () => {
+    for (const entry of getBundledCatalog()) {
+      expect(entry.howToFix.trim()).not.toBe('');
+    }
+  });
+
   it('rejects an invalid engine predicate', () => {
     expect(
       validateCatalogEntry({

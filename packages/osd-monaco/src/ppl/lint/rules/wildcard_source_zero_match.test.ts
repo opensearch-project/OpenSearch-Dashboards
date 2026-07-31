@@ -6,6 +6,7 @@
 import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
 import type { LintRunContext } from '../types';
 import { getBundledCatalog } from '../catalog';
+import { isSimpleLocalWildcardPattern } from './wildcard_source_zero_match';
 
 const RULE_ID = 'wildcard-source-zero-match';
 const VISIBLE = ['logs-2024', 'logs-2025', 'accounts'];
@@ -35,6 +36,16 @@ describe('wildcard-source-zero-match', () => {
       expect(
         diagnosticsFor('source=nope-*', { fields: new Set<string>(), visibleIndices: VISIBLE })
       ).toHaveLength(1);
+    });
+
+    it.each([
+      ['multi-target', 'source=logs-*,metrics-*'],
+      ['exclusion', 'source=-logs-*'],
+      ['date math', 'source=<logs-{now/d}-*>'],
+      ['cross-cluster', 'source=remote:logs-*'],
+      ['hidden/system', 'source=.plugins-*'],
+    ])('does not diagnose an unsupported %s source', (_label, code) => {
+      expect(diagnosticsFor(code, { visibleIndices: VISIBLE })).toHaveLength(0);
     });
   });
 
@@ -73,5 +84,25 @@ describe('wildcard-source-zero-match', () => {
       const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
       expect(diagnostic.range.startColumn).toBeLessThan(diagnostic.range.endColumn);
     });
+  });
+});
+
+describe('isSimpleLocalWildcardPattern', () => {
+  it.each(['logs-*', 'logs-2026.07.*', 'logs_+archive-*'])('accepts %s', (pattern) => {
+    expect(isSimpleLocalWildcardPattern(pattern)).toBe(true);
+  });
+
+  it.each([
+    'logs',
+    'logs-*,metrics-*',
+    '-logs-*',
+    '.plugins-*',
+    '<logs-{now/d}-*>',
+    'remote:logs-*',
+    'logs-?',
+    'logs *',
+    'logs\\-*',
+  ])('rejects unsupported pattern %s', (pattern) => {
+    expect(isSimpleLocalWildcardPattern(pattern)).toBe(false);
   });
 });

@@ -12,10 +12,11 @@ interface ResolveIndexResponse {
 }
 
 /**
- * Above this many visible indices the helper returns an empty list, which keeps
- * `wildcard-source-zero-match` dormant rather than shipping a huge name set to
- * the lint engine on every keystroke. A future per-pattern narrowing query can
- * lift this for very large clusters.
+ * Above this many visible names the helper returns an empty list. The cap bounds
+ * retained client state, sorting, worker serialization, and per-pass matching;
+ * it does not reduce OpenSearch resolution, HTTP transfer, or JSON parsing.
+ * A future per-pattern request is the server/network optimization for large
+ * clusters.
  */
 const MAX_VISIBLE_INDICES = 5000;
 
@@ -32,7 +33,7 @@ export async function fetchVisibleIndices(
   dataSourceId?: string
 ): Promise<string[]> {
   try {
-    const query: Record<string, string> = {};
+    const query: Record<string, string> = { expand_wildcards: 'all' };
     if (dataSourceId) {
       query.data_source = dataSourceId;
     }
@@ -43,13 +44,18 @@ export async function fetchVisibleIndices(
     if (!response) {
       return [];
     }
+    const nameCount =
+      (response.indices?.length ?? 0) +
+      (response.aliases?.length ?? 0) +
+      (response.data_streams?.length ?? 0);
+    if (nameCount > MAX_VISIBLE_INDICES) {
+      return [];
+    }
+
     const names: string[] = [];
     response.indices?.forEach((i) => names.push(i.name));
     response.aliases?.forEach((a) => names.push(a.name));
     response.data_streams?.forEach((d) => names.push(d.name));
-    if (names.length > MAX_VISIBLE_INDICES) {
-      return [];
-    }
     return names.sort();
   } catch {
     return [];

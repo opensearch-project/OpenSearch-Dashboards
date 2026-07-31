@@ -90,6 +90,15 @@ describe('enabled-false-object', () => {
       ).toHaveLength(1);
     });
 
+    it('reports one diagnostic when disabled roots overlap', () => {
+      expect(
+        diagnosticsFor(
+          'source=logs | where outer.inner.deep = 1',
+          withDisabled('outer', 'outer.inner')
+        )
+      ).toHaveLength(1);
+    });
+
     it('flags a direct reference to the nested disabled object itself', () => {
       expect(
         diagnosticsFor('source=logs | fields outer.inner', withDisabled('outer.inner'))

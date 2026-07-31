@@ -5,6 +5,7 @@
 
 import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
 import type { LintRunContext } from '../types';
+import { getBundledCatalog } from '../catalog';
 
 // `rex-scan-cost` is an advisory, `info`-severity rule that flags pattern
 // extraction (`rex`/`parse`/`grok`) over a `text`-mapped source field. It ships
@@ -146,6 +147,12 @@ describe('rex-scan-cost (compiled surface)', () => {
   });
 
   describe('message and hover facts', () => {
+    it('uses a command-neutral bundled fallback message', () => {
+      expect(getBundledCatalog().find((entry) => entry.id === 'rex-scan-cost')?.message).toBe(
+        'Pattern extraction runs against every input row from the text field, even when it finds no match.'
+      );
+    });
+
     it('names the extraction keyword and the text source field', () => {
       const found = diag('source=logs | rex field=raw_log "GET (?<path>\\S+)"');
       expect(found?.message).toContain('rex runs the pattern against every input row');
