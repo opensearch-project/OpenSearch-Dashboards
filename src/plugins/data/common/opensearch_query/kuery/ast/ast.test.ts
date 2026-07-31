@@ -106,16 +106,55 @@ describe('kuery AST API', () => {
     test('"and" should have a higher precedence than "or"', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('and', [
-            nodeTypes.function.buildNode('is', null, 'bar'),
-            nodeTypes.function.buildNode('is', null, 'baz'),
-          ]),
-          nodeTypes.function.buildNode('is', null, 'qux'),
+        nodeTypes.function.buildNode('and', [
+          nodeTypes.function.buildNode('is', null, 'bar'),
+          nodeTypes.function.buildNode('is', null, 'baz'),
         ]),
+        nodeTypes.function.buildNode('is', null, 'qux'),
       ]);
       const actual = fromKueryExpression('foo or bar and baz or qux');
       expect(actual).toEqual(expected);
+    });
+
+    test('should produce a flat or-node for multiple OR operands', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo or bar or baz');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should produce a flat and-node for multiple AND operands', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo and bar and baz');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should produce a flat or-node for field:(value OR ...) shorthand with many values', () => {
+      const values = Array.from({ length: 50 }, (_, i) => `val${i}`);
+      const expression = `field:(${values.join(' or ')})`;
+      const actual = fromKueryExpression(expression);
+      expect(actual.function).toBe('or');
+      expect(actual.arguments).toHaveLength(50);
+    });
+
+    test('should produce a flat AST or-node for many OR values in field shorthand', () => {
+      const values = Array.from({ length: 50 }, (_, i) => `"val${i}"`);
+      const expression = `field:(${values.join(' or ')})`;
+      const node = fromKueryExpression(expression);
+      // The root node must be a single flat 'or' with all 50 arguments, not a nested binary tree.
+      expect(node.function).toBe('or');
+      expect(node.arguments).toHaveLength(50);
+      // None of the direct children should themselves be 'or' nodes (no nesting).
+      node.arguments.forEach((child: KueryNode) => {
+        expect(child.function).not.toBe('or');
+      });
     });
 
     test('should support grouping to override default precedence', () => {

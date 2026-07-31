@@ -26,20 +26,22 @@ start
 
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
-  / left:AndQuery Or right:OrQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  / head:AndQuery tail:(Or AndQuery)* {
+    const nodes = [head, ...tail.map(t => t[1])];
+    const cursor = nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('or', [left, right]);
+    if (nodes.length === 1) return head;
+    return buildFunctionNode('or', nodes);
   }
-  / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  = head:NotQuery tail:(And NotQuery)* {
+    const nodes = [head, ...tail.map(t => t[1])];
+    const cursor = nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('and', [left, right]);
+    if (nodes.length === 1) return head;
+    return buildFunctionNode('and', nodes);
   }
-  / NotQuery
 
 NotQuery
   = Not query:SubQuery {
@@ -138,30 +140,32 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:AndListOfValues tail:(Or AndListOfValues)* {
+    const partials = [head, ...tail.map(t => t[1])];
+    const cursor = partials.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+    if (partials.length === 1) return head;
+    return (field) => buildFunctionNode('or', partials.map(p => p(field)));
   }
-  / AndListOfValues
 
 AndListOfValues
-  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:NotListOfValues tail:(And NotListOfValues)* {
+    const partials = [head, ...tail.map(t => t[1])];
+    const cursor = partials.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+    if (partials.length === 1) return head;
+    return (field) => buildFunctionNode('and', partials.map(p => p(field)));
   }
-  / NotListOfValues
 
 NotListOfValues
   = Not partial:ListOfValues {
