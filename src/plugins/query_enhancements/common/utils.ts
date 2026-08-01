@@ -182,6 +182,38 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
+ * PPL commands whose output rows are aggregate buckets rather than source documents.
+ */
+const PPL_AGGREGATING_COMMANDS = [
+  'stats',
+  'eventstats',
+  'timechart',
+  'chart',
+  'top',
+  'rare',
+  'transpose',
+  'xyseries',
+  'timewrap',
+  'addtotals',
+  'addcoltotals',
+];
+
+/**
+ * Detects whether a PPL query aggregates, i.e. its result rows are buckets rather than documents.
+ *
+ * A row limit such as `discover:sampleSize` is a document sample, so applying it to an aggregating
+ * query silently drops whole buckets. Bucket counts also scale with the selected time range when a
+ * `span()` grouping key is present, so no fixed limit is safe here.
+ *
+ * `head` commands inside subquery brackets are masked out, mirroring {@link queryEndsWithHead}, so
+ * an aggregation nested in a subquery does not count as aggregating the outer result.
+ */
+export const isPPLAggregationQuery = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return new RegExp(`\\|\\s*(${PPL_AGGREGATING_COMMANDS.join('|')})\\b`, 'i').test(masked);
+};
+
+/**
  * Test if a PPL query is using search command
  * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.md
  */

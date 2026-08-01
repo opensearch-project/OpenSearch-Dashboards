@@ -14,7 +14,12 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, queryEndsWithHead, throwFacetError } from '../../common/utils';
+import {
+  getFields,
+  isPPLAggregationQuery,
+  queryEndsWithHead,
+  throwFacetError,
+} from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
@@ -43,8 +48,13 @@ export const pplSearchStrategyProvider = (
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
 
+        // `fetchSize` lowers to a `head N` over the *final* result rows. For an aggregating query
+        // those rows are buckets, so a document-sample cap would silently drop whole buckets — and
+        // with a `span()` key the bucket count grows with the selected time range. Send it only for
+        // document searches, mirroring DQL where `discover:sampleSize` bounds just the doc table.
         const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
-        if (!hasHead) {
+        const aggregates = typeof query.query === 'string' && isPPLAggregationQuery(query.query);
+        if (!hasHead && !aggregates) {
           const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
           request.body = { ...request.body, fetchSize };
         }
@@ -92,9 +102,13 @@ export const pplSearchStrategyProvider = (
         if (usage) usage.trackSuccess(rawResponse.took);
 
         if (aggConfig) {
+          // These queries always end in `stats ... by span(...)`, so their rows are buckets. Build a
+          // request without the document-sample cap rather than reusing the primary search's body.
+          const { fetchSize: _fetchSize, ...aggRequestBody } = request.body;
+          const aggRequest = { ...request, body: aggRequestBody };
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            request.body.query.query = aggQueryString;
-            const rawAggs: any = await pplFacet.describeQuery(context, request);
+            aggRequest.body.query = { ...aggRequest.body.query, query: aggQueryString };
+            const rawAggs: any = await pplFacet.describeQuery(context, aggRequest);
             if (!rawAggs.success) continue;
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {

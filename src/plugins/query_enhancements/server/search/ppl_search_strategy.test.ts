@@ -313,6 +313,114 @@ describe('pplSearchStrategyProvider', () => {
     expect(requestArg.body.fetchSize).toBe(200);
   });
 
+  it.each([
+    ['stats', 'source = table | stats count() by span(`@timestamp`, 1h), extension'],
+    ['timechart', 'source = table | timechart span=1h count() by extension'],
+    ['top', 'source = table | top 5 extension'],
+    ['rare', 'source = table | rare extension'],
+    ['eventstats', 'source = table | eventstats avg(bytes) by extension'],
+  ])('should not send fetchSize for an aggregating query (%s)', async (_name, pplQuery) => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: { query: { query: pplQuery, dataset: { id: 'test-dataset' } } },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(mockRequestHandlerContext.core.uiSettings.client.get).not.toHaveBeenCalled();
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBeUndefined();
+  });
+
+  it('should still send fetchSize when stats appears only inside a subquery', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(500);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: {
+          query: {
+            query: 'source = table | where id in [source = other | stats count() by id]',
+            dataset: { id: 'test-dataset' },
+          },
+        },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(500);
+  });
+
+  it('should not carry fetchSize into the histogram aggregation queries', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(500);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: {
+          query: { query: 'source = table', dataset: { id: 'test-dataset' } },
+          aggConfig: {
+            qs: { '1': 'source = table | stats count() by span(`@timestamp`, 1h)' },
+          },
+        },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    // The primary document search keeps the sample cap ...
+    expect(mockDescribeQuery.mock.calls[0][1].body.fetchSize).toBe(500);
+    // ... but the bucket-producing histogram query must not inherit it.
+    expect(mockDescribeQuery.mock.calls[1][1].body.fetchSize).toBeUndefined();
+  });
+
   it('should attach highlights to dataFrame meta when rawResponse contains _highlight column', async () => {
     const mockHighlights = [{ title: ['<em>OpenSearch</em>'] }, { title: ['<em>Dashboards</em>'] }];
     const mockResponse = {
