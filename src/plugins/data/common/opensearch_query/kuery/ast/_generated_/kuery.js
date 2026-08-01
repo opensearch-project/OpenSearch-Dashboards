@@ -274,7 +274,7 @@ function peg$parse(input, options) {
       peg$c24 = function(partial) {
           if (partial.type === 'cursor') {
             return {
-              ...list,
+              ...partial,
               suggestionTypes: ['value']
             };
           }
