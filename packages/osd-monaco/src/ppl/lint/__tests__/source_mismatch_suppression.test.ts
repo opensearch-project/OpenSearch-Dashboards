@@ -36,8 +36,9 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
       ['qty', 'long'],
       ['attributes', 'flat_object'],
     ]),
-    // `meta` is mapped enabled:false on orders; rex-scan-cost ships disabled, so
-    // it needs an explicit override to be observable here.
+    // `meta` is mapped enabled:false on orders. rex-scan-cost now ships enabled;
+    // the override is kept so this fixture states the rule state it depends on
+    // rather than inheriting it from the shipped default.
     disabledObjectFields: new Set<string>(['meta']),
     overrides: { 'rex-scan-cost': { enabled: true } },
   });
