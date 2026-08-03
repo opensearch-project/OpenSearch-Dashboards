@@ -9,7 +9,7 @@ import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
-import { fieldPathPrefix, normalizeFieldPath } from '../field_path';
+import { fieldPathPrefix, isUnderDisabledObject, normalizeFieldPath } from '../field_path';
 import {
   findAllDescendantsByRule,
   findChildByRule,
@@ -138,6 +138,11 @@ function detectUnknownFields(
     return []; // R22.3 self-suppress
   }
 
+  // Empty when the mapping probe did not resolve. That only costs us the
+  // suppression below (a reference under a disabled object is then reported as
+  // unknown, as it was before) — it never adds a finding.
+  const disabledObjectFields = context.disabledObjectFields ?? new Set<string>();
+
   const { createdFields } = buildPipelineShape(tree, ruleNameToIndex);
   // Membership test over the two source sets rather than copying them into one
   // merged set on every keystroke. The suggestion path (cold — only runs once a
@@ -208,6 +213,13 @@ function detectUnknownFields(
         !hasExcludedAncestor(node, excludedIndices) &&
         !isKnown(name) &&
         !isKnown(leaf) &&
+        // A field beneath an `enabled: false` object DOES exist — it is in the
+        // mapping and in `_source`, just not indexed. It is absent from
+        // `_field_caps` (and therefore from `fields`), so without this check we
+        // would call it unknown and double-flag the same reference alongside
+        // `enabled-false-object`, which reports the accurate problem: stored but
+        // not searchable. Suppress here and let that rule own the finding.
+        !isUnderDisabledObject(name, disabledObjectFields) &&
         !seen.has(name)
       ) {
         seen.add(name);
