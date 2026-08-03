@@ -13,7 +13,7 @@ export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
   styleOptions: PieChartStyle,
   axisColumnMappings: { [AxisRole.SIZE]: VisColumn; [AxisRole.COLOR]: VisColumn },
-  colorDomainData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>
 ) => {
   const colorCol = axisColumnMappings[AxisRole.COLOR];
   const sizeCol = axisColumnMappings[AxisRole.SIZE];
@@ -31,7 +31,7 @@ export const createPieSpec = (
       styles: styleOptions,
       cateField: colorCol.column,
       valueField: sizeCol.column,
-      colorDomainData,
+      allData,
     }),
     assembleSpec
   )({

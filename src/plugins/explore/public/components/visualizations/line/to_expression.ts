@@ -118,7 +118,7 @@ export const createMultiLineChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  colorDomainData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -146,7 +146,7 @@ export const createMultiLineChart = (
       styles,
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-      colorDomainData,
+      allData,
       colorField,
     }),
     assembleSpec
@@ -207,7 +207,7 @@ export const createCategoryMultiLineChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  colorDomainData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -234,7 +234,7 @@ export const createCategoryMultiLineChart = (
       categoryField: cateField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
       addTimeMarker: false,
-      colorDomainData,
+      allData,
       colorField,
     }),
     assembleSpec

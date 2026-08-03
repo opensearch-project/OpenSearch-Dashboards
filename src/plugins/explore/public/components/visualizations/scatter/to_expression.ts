@@ -64,7 +64,7 @@ export const createTwoMetricOneCateScatter = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  colorDomainData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -87,7 +87,7 @@ export const createTwoMetricOneCateScatter = (
       xField: xCol.column,
       yField: yCol.column,
       colorField: colorCol.column,
-      colorDomainData,
+      allData,
     }),
     assembleSpec
   )({
@@ -109,7 +109,7 @@ export const createThreeMetricOneCateScatter = (
     [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
   },
-  colorDomainData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -129,7 +129,7 @@ export const createThreeMetricOneCateScatter = (
       yField: yCol.column,
       colorField: colorCol?.column,
       sizeField: sizeCol.column,
-      colorDomainData,
+      allData,
     }),
     assembleSpec,
     assembleScatterSpec

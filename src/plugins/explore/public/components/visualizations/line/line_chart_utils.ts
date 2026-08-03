@@ -9,8 +9,12 @@ import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getSeriesDisplayName } from '../utils/series';
 import { getColors } from '../theme/default_colors';
-import { normalizeEmptyValue } from '../utils/data_transformation';
-import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
 const getLineInterpolation = (lineMode: LineMode) => {
   switch (lineMode) {
@@ -44,14 +48,14 @@ export const createLineSeries =
     seriesFields,
     categoryField,
     addTimeMarker = true,
-    colorDomainData,
+    allData,
     colorField,
   }: {
     styles: LineChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
     categoryField: string;
     addTimeMarker?: boolean;
-    colorDomainData?: Array<Record<string, any>>;
+    allData?: Array<Record<string, any>>;
     colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
@@ -65,10 +69,12 @@ export const createLineSeries =
     }
 
     const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames =
-      colorDomainData && colorField
-        ? Array.from(new Set(colorDomainData.map((d) => normalizeEmptyValue(d[colorField])))).sort()
-        : seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields,
+      columns: allColumns,
+    });
     const legendItems: LegendItem[] = [];
 
     if (usedTimeMarker) {

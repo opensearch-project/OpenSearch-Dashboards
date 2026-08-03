@@ -4,6 +4,8 @@
  */
 
 import { normalizeEmptyValue } from './data_transformation';
+import { getSeriesDisplayName } from './series';
+import { VisColumn } from '../types';
 
 export interface LegendItem {
   label: string;
@@ -52,4 +54,22 @@ export const getLegendColor = (name: unknown, palette: string[], colorDomain: un
   const normalizedDomain = colorDomain.map(normalizeEmptyValue);
   const colorIndex = normalizedDomain.indexOf(normalizedName);
   return palette[(colorIndex >= 0 ? colorIndex : 0) % palette.length];
+};
+
+export const getLegendNameDomain = ({
+  data,
+  nameField,
+  seriesFields,
+  columns,
+}: {
+  data?: Array<Record<string, any>>;
+  nameField?: string;
+  seriesFields: string[];
+  columns: VisColumn[];
+}) => {
+  if (data && nameField) {
+    return Array.from(new Set(data.map((d) => normalizeEmptyValue(d[nameField])))).sort();
+  }
+
+  return seriesFields.map((field) => getSeriesDisplayName(field, columns)).sort();
 };

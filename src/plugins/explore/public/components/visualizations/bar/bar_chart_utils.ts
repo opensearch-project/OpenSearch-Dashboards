@@ -10,6 +10,12 @@ import { BarChartStyle } from './bar_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { getColors } from '../theme/default_colors';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -47,6 +53,8 @@ interface Options {
   seriesFields: string[] | ((headers?: string[]) => string[]);
   categoryEncode: 'x' | 'y';
   seriesEncode: 'x' | 'y';
+  allData?: Array<Record<string, any>>;
+  colorField?: string;
 }
 
 /**
@@ -55,7 +63,14 @@ interface Options {
 export const createBarSeries =
   <T extends BaseChartStyle>(options: Options): PipelineFn<T> =>
   (state) => {
-    const { styles, categoryField, categoryEncode = 'x', seriesEncode = 'y' } = options;
+    const {
+      styles,
+      categoryField,
+      categoryEncode = 'x',
+      seriesEncode = 'y',
+      allData,
+      colorField,
+    } = options;
     let seriesFields = options.seriesFields;
 
     const { axisColumnMappings, transformedData = [] } = state;
@@ -67,7 +82,13 @@ export const createBarSeries =
     }
 
     const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields,
+      columns: allColumns,
+    });
+    const legendItems: LegendItem[] = [];
 
     const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
 
@@ -78,7 +99,8 @@ export const createBarSeries =
 
     const series = seriesFields.map((seriesField, index) => {
       const name = getSeriesDisplayName(seriesField, allColumns);
-      const colorIndex = sortedNames.indexOf(name);
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
       const seriesConfig = {
         type: 'bar',
         emphasis: {
@@ -92,7 +114,7 @@ export const createBarSeries =
         barWidth,
         ...(index === 0 && thresholdLines),
         itemStyle: {
-          color: palette[colorIndex % palette.length],
+          color,
           ...(styles?.showBarBorder && {
             borderWidth: styles.barBorderWidth,
             borderColor: styles.barBorderColor,
@@ -105,6 +127,7 @@ export const createBarSeries =
       return seriesConfig as BarSeriesOption;
     }) as BarSeriesOption[];
     newState.series = series;
+    newState.legendItems = legendItems;
 
     return newState;
   };

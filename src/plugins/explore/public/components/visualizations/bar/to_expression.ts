@@ -15,7 +15,6 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
-  collectLegend,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
 import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
@@ -63,9 +62,8 @@ export const createBarSpec = (
   styles: BarChartStyle,
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const {
@@ -101,7 +99,6 @@ export const createBarSpec = (
       categoryEncode,
       seriesEncode,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -109,7 +106,7 @@ export const createBarSpec = (
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
   });
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -121,9 +118,8 @@ export const createTimeBarChart = (
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
     | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
-  timeRange?: { from: string; to: string },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  timeRange?: { from: string; to: string }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const {
@@ -164,7 +160,6 @@ export const createTimeBarChart = (
       categoryEncode,
       seriesEncode,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -174,7 +169,7 @@ export const createTimeBarChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -189,8 +184,8 @@ export const createGroupedTimeBarChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const xCol = axisColumnMappings[AxisRole.X];
@@ -246,8 +241,9 @@ export const createGroupedTimeBarChart = (
       },
       categoryEncode,
       seriesEncode,
+      allData,
+      colorField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -257,7 +253,7 @@ export const createGroupedTimeBarChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createStackedBarSpec = (
@@ -268,8 +264,8 @@ export const createStackedBarSpec = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const xCol = axisColumnMappings[AxisRole.X];
@@ -323,8 +319,9 @@ export const createStackedBarSpec = (
       },
       categoryEncode,
       seriesEncode,
+      allData,
+      colorField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -332,15 +329,14 @@ export const createStackedBarSpec = (
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
   });
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createDoubleNumericalBarChart = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
@@ -372,7 +368,6 @@ export const createDoubleNumericalBarChart = (
       categoryEncode: 'x',
       seriesEncode: 'y',
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -383,5 +378,5 @@ export const createDoubleNumericalBarChart = (
 
   result.xAxisConfig.type = 'category';
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

@@ -17,7 +17,12 @@ import { normalizeEmptyValue } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { PointShape, Positions } from '../types';
 import { DEFAULT_GRID } from '../constants';
-import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
 /**
  * Maps PointShape enum values to ECharts symbol types
@@ -222,13 +227,13 @@ export const createCategoryScatterSeries =
     xField,
     yField,
     colorField,
-    colorDomainData,
+    allData,
   }: {
     styles: ScatterChartStyle;
     xField: string;
     yField: string;
     colorField: string;
-    colorDomainData?: Array<Record<string, any>>;
+    allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData = [] } = state;
@@ -249,13 +254,12 @@ export const createCategoryScatterSeries =
 
     const thresholdLines = generateThresholdLines(styles.thresholdOptions);
     const palette = getColors().categories;
-    const sortedCategories = Array.from(
-      new Set(
-        colorDomainData
-          ? colorDomainData.map((d) => normalizeEmptyValue(d[colorField]))
-          : categories.map((category) => normalizeEmptyValue(category))
-      )
-    ).sort();
+    const sortedCategories = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: categories.map(String),
+      columns: [],
+    });
     const legendItems: LegendItem[] = [];
 
     // Create multiple scatter series
@@ -380,14 +384,14 @@ export const createSizeScatterSeries =
     yField,
     colorField,
     sizeField,
-    colorDomainData,
+    allData,
   }: {
     styles: ScatterChartStyle;
     xField: string;
     yField: string;
     colorField?: string;
     sizeField: string;
-    colorDomainData?: Array<Record<string, any>>;
+    allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData = [], axisColumnMappings } = state;
@@ -445,13 +449,12 @@ export const createSizeScatterSeries =
     );
 
     const palette = getColors().categories;
-    const sortedCategories = Array.from(
-      new Set(
-        colorDomainData
-          ? colorDomainData.map((d) => normalizeEmptyValue(d[colorField]))
-          : categories.map((category) => normalizeEmptyValue(category))
-      )
-    ).sort();
+    const sortedCategories = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: categories.map(String),
+      columns: [],
+    });
     const legendItems: LegendItem[] = [];
 
     // Data format: [x, y, size] where size is at dimension 2 for visualMap
