@@ -19,21 +19,14 @@ export type LegendTarget =
 export const getLegendTargetKey = (target: LegendTarget) =>
   `${target.type}:${target.type === 'data' ? (target.seriesIndex ?? 0) : ''}:${target.name}`;
 
-export const getLegendItemSelectionName = (item: LegendItem) => item.target.name;
-
-export const createSeriesLegendItem = (name: string, color: string, label = name): LegendItem => ({
-  label,
+export const createSeriesLegendItem = (name: string, color: string): LegendItem => ({
+  label: name,
   color,
   target: { type: 'series', name },
 });
 
-export const createDataLegendItem = (
-  name: string,
-  color: string,
-  seriesIndex = 0,
-  label = name
-): LegendItem => ({
-  label,
+export const createDataLegendItem = (name: string, color: string, seriesIndex = 0): LegendItem => ({
+  label: name,
   color,
   target: { type: 'data', name, seriesIndex },
 });

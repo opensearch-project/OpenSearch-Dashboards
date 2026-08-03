@@ -7,13 +7,7 @@ import React, { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
 import { Positions } from './types';
-import {
-  dedupeLegendItems,
-  getLegendItemSelectionName,
-  getLegendTargetKey,
-  LegendItem,
-  LegendTarget,
-} from './utils/legend';
+import { dedupeLegendItems, getLegendTargetKey, LegendItem, LegendTarget } from './utils/legend';
 
 import './custom_legend.scss';
 
@@ -40,7 +34,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
 
   const handleToggle = useCallback(
     (item: LegendItem) => {
-      const name = getLegendItemSelectionName(item);
+      const name = item.target.name;
       const prev = legendSelected$.getValue();
       const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
       legendSelected$.next(next);
@@ -50,7 +44,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
 
   const handleMouseEnter = useCallback(
     (item: LegendItem) => {
-      const name = getLegendItemSelectionName(item);
+      const name = item.target.name;
       const sel = legendSelected$.getValue();
       if (sel[name] !== false) {
         highlightedLegendTarget$.next(item.target);
@@ -75,7 +69,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
       data-test-subj="customLegend"
     >
       {legendItems.map((item) => {
-        const name = getLegendItemSelectionName(item);
+        const name = item.target.name;
         const isHidden = selected[name] === false;
         return (
           <button

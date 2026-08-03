@@ -49,6 +49,8 @@ const defaultStyleOptions: TableChartStyle = {
   globalAlignment: 'left',
 };
 
+const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+
 export const CommonVisualizationRender = ({
   visualizationData,
   visConfig,
@@ -63,20 +65,13 @@ export const CommonVisualizationRender = ({
     new BehaviorSubject<LegendTarget | undefined>(undefined)
   ).current;
   const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
+  const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
 
   useEffect(() => {
-    const visSupportCustomLegend = [
-      'area',
-      'line',
-      'bar',
-      'pie',
-      'scatter',
-      'state_timeline',
-    ].includes(visConfig?.type ?? '');
-    if (!visSupportCustomLegend) {
+    if (!supportsCustomLegend) {
       legend$.next({});
     }
-  }, [visConfig?.type, legend$]);
+  }, [supportsCustomLegend, legend$]);
 
   const timeRange = useMemo(() => {
     return {
@@ -161,6 +156,7 @@ export const CommonVisualizationRender = ({
   const isLegendAfter = legendPosition === Positions.BOTTOM || legendPosition === Positions.RIGHT;
 
   const renderLegend = () =>
+    supportsCustomLegend &&
     showLegend && (
       <CustomLegend
         legend$={legend$}

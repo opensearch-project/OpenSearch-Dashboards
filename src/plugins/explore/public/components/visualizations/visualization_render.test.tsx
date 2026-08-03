@@ -407,7 +407,7 @@ describe('VisualizationRender', () => {
       expect(screen.queryByTestId('customLegend')).not.toBeInTheDocument();
     });
 
-    it('clears legend$ when chart type does not support custom legend', () => {
+    it('does not render custom legend when chart type does not support custom legend', () => {
       const barConfig: RenderChartConfig = {
         type: 'bar',
         styles: { ...defaultBarChartStyles, addLegend: true, legendPosition: Positions.BOTTOM },
@@ -435,7 +435,7 @@ describe('VisualizationRender', () => {
       // Legend renders for bar chart
       expect(screen.getByTestId('customLegend')).toBeInTheDocument();
 
-      // Switch to metric — legend still renders (addLegend is true) but legend$ data is cleared
+      // Switch to metric: it can carry addLegend in styles, but it does not use CustomLegend.
       rerender(
         <CommonVisualizationRender
           visualizationData={mockVisData}
@@ -444,7 +444,7 @@ describe('VisualizationRender', () => {
         />
       );
 
-      expect(screen.getByTestId('customLegend')).toBeInTheDocument();
+      expect(screen.queryByTestId('customLegend')).not.toBeInTheDocument();
     });
   });
 });

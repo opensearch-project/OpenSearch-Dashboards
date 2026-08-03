@@ -28,7 +28,7 @@ import {
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
-import { createSeriesLegendItem, LegendItem } from './legend';
+import { LegendItem } from './legend';
 
 /**
  * Base style interface that all chart styles should extend
@@ -420,31 +420,3 @@ export const applyTimeRange = <T extends BaseChartStyle>(
     yAxisConfig: updatedYAxisConfig,
   };
 };
-
-/**
- * Collect legend data from series and notify via callback.
- * Read-only: does not assign colors. Each series builder must set itemStyle.color explicitly.
- * For scatter unfilled mode (color: 'transparent'), uses borderColor instead.
- */
-export const collectLegend =
-  <T extends BaseChartStyle>(onLegend?: (legendItems: LegendItem[]) => void): PipelineFn<T> =>
-  (state) => {
-    const { series } = state;
-    if (!series || !onLegend) return state;
-
-    const legendItems: LegendItem[] = [];
-    series.forEach((s) => {
-      const name = typeof s.name === 'string' ? s.name : undefined;
-      if (!name) return;
-      const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
-      const color = itemStyle?.color;
-      const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
-      if (legendColor && typeof legendColor === 'string') {
-        legendItems.push(createSeriesLegendItem(name, legendColor));
-      }
-    });
-
-    onLegend(legendItems);
-
-    return state;
-  };

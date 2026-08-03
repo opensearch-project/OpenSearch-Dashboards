@@ -171,7 +171,7 @@ describe('CustomLegend', () => {
     expect(getByTestId('customLegend')).toHaveClass('customLegend--vertical');
   });
 
-  it('sets indicator color from colorMap', () => {
+  it('sets indicator color from legend item color', () => {
     const { getByTestId } = render(
       <CustomLegend
         legend$={legend$}
