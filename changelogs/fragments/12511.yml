@@ -1,0 +1,2 @@
+fix:
+- Stop `discover:sampleSize` from truncating PPL aggregation results, which silently dropped buckets from Discover visualizations ([#12511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12511))
