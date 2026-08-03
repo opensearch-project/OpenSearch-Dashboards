@@ -133,9 +133,11 @@ export const createLineBarSeries =
     const newState = { ...state };
     const palette = getColors().categories;
     const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = [...valueField, ...value2Field]
-      .map((field) => getSeriesDisplayName(field, allColumns))
-      .sort();
+    const seriesFields = [...valueField, ...value2Field];
+    const sortedNames = getLegendNameDomain({
+      seriesFields,
+      columns: allColumns,
+    });
     const legendItems: LegendItem[] = [];
 
     // TODO: move this to buildAxisConfigs function
