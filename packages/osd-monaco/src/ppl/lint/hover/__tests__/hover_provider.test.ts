@@ -86,6 +86,7 @@ describe('pplLintHoverProvider', () => {
     expect(markdownOf(hover)).toContain('Rule: `division-by-zero`');
     expect(markdownOf(hover)).toContain('Dividing by zero returns null.');
     expect(markdownOf(hover)).toContain('**Fix** — Use the intended divisor');
+    expect(markdownOf(hover)).not.toContain('Learn more');
     expect(markdownOf(hover)).not.toContain('**Engine behavior**');
     expect(markdownOf(hover)).not.toContain('· Warning');
   });

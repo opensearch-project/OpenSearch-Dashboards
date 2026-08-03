@@ -6,9 +6,9 @@
 /**
  * Pure renderer for the lint hover card ("view more") body. Composes the
  * detector message, static per-rule guidance (`Fix`), an optional quick-fix
- * preview, and the doc link into a single Markdown string. Intentionally free of
- * any Monaco import so it is trivially unit-testable; the provider does the
- * Monaco-specific marker extraction and hands plain values here.
+ * preview into a single Markdown string. Intentionally free of any Monaco
+ * import so it is trivially unit-testable; the provider does the Monaco-specific
+ * marker extraction and hands plain values here.
  *
  * The detector message already identifies the problem and its consequence.
  * Keeping the card focused on that message and the next action avoids repeating
@@ -24,8 +24,6 @@ export interface HoverCardInput {
   ruleId?: string;
   /** The marker's short message — always shown as the card lead. */
   message: string;
-  /** code.target — the specific doc link from the catalog. */
-  docUrl?: string;
   /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
   howToFix?: string;
   /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
@@ -39,9 +37,8 @@ const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
 };
 
 // Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally
-// omitted: hover content renders with isTrusted:false (no command links), link targets are
-// built separately via encodeLinkTarget (which percent-encodes parentheses), and ! cannot
-// form an image because [ is already escaped here.
+// omitted because they do not affect inline text, and ! cannot form an image because [
+// is already escaped here.
 function escapeInline(text: string): string {
   return text.replace(/([\\`*_[\]<>~|])/g, '\\$1');
 }
@@ -61,20 +58,11 @@ function code(text: string): string {
 }
 
 /**
- * Make a URL safe to drop into a Markdown link target. An unescaped `)` would
- * close the `[text](url)` form early; percent-encoding parens keeps the link
- * intact and is decoded transparently by the browser.
- */
-function encodeLinkTarget(url: string): string {
-  return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
-}
-
-/**
  * Render the full hover card to a Markdown string. The provider wraps the result
  * in `{ value, isTrusted: false }` and hands it to Monaco.
  */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { severityLabel, ruleId, message, docUrl, howToFix, fixText } = input;
+  const { severityLabel, ruleId, message, howToFix, fixText } = input;
   const lines: string[] = [];
 
   const ruleMetadata = ruleId ? ` | Rule: ${code(ruleId)}` : '';
@@ -98,12 +86,6 @@ export function renderHoverCard(input: HoverCardInput): string {
   if (fixText !== undefined) {
     lines.push('');
     lines.push(`**Quick fix available** — ${code(fixText)}`);
-  }
-
-  // Learn more — the specific doc link.
-  if (docUrl) {
-    lines.push('');
-    lines.push(`[Learn more →](${encodeLinkTarget(docUrl)})`);
   }
 
   return lines.join('\n');

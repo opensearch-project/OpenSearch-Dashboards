@@ -20,7 +20,6 @@ describe('renderHoverCard', () => {
     const md = render({
       ruleId: 'division-by-zero',
       message: 'Dividing by zero returns no value (null) instead of an error.',
-      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
     });
 
@@ -28,9 +27,7 @@ describe('renderHoverCard', () => {
     expect(md).toContain('Rule: `division-by-zero`');
     expect(md).toContain('Dividing by zero returns no value');
     expect(md).toContain('**Fix** — Use the intended divisor');
-    expect(md).toContain(
-      '[Learn more →](https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators)'
-    );
+    expect(md).not.toContain('Learn more');
     // The verbose engine-outcomes sections are gone from the simplified card.
     expect(md).not.toContain('Engine behavior');
     expect(md).not.toContain('Why warning');
@@ -43,7 +40,6 @@ describe('renderHoverCard', () => {
     const md = render({
       message:
         'avg on text field "response_body" may return no value (null), because text is not stored as a number.',
-      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
     });
 
@@ -58,7 +54,6 @@ describe('renderHoverCard', () => {
     const md = render({
       severityLabel: 'Error',
       message: 'Unknown field "reveneu". Did you mean "revenue"?',
-      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
       fixText: 'revenue',
     });
@@ -73,7 +68,6 @@ describe('renderHoverCard', () => {
     const md = render({
       severityLabel: 'Info',
       message: 'Source pattern "lgos-*" matches no known index.',
-      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
       fixText: '`logs-2026.07.25`',
     });
@@ -107,13 +101,6 @@ describe('renderHoverCard', () => {
     expect(md).toContain(
       'use \\*star\\*, \\_under\\_, \\[brackets\\], \\~\\~strike\\~\\~, and pipe \\|'
     );
-  });
-
-  it('percent-encodes parentheses in the doc link target', () => {
-    const md = render({
-      docUrl: 'https://docs.example/path_(disambiguation)/#a',
-    });
-    expect(md).toContain('[Learn more →](https://docs.example/path_%28disambiguation%29/#a)');
   });
 
   it('degrades to the severity and message when no rule help is available', () => {
