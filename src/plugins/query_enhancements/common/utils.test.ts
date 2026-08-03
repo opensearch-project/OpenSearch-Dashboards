@@ -274,6 +274,10 @@ describe('isPPLAggregationQuery', () => {
     'source=t | timewrap 1d',
     'source=t | addtotals',
     'source=t | addcoltotals',
+    'source=t | patterns message mode=aggregation',
+    // Listed unconditionally — the default mode is a cluster setting, so the query text alone
+    // cannot tell us whether this aggregates.
+    'source=t | patterns message',
   ])('should detect aggregating query: %s', (query) => {
     expect(isPPLAggregationQuery(query)).toBe(true);
   });

@@ -196,6 +196,11 @@ const PPL_AGGREGATING_COMMANDS = [
   'timewrap',
   'addtotals',
   'addcoltotals',
+  // `patterns` only aggregates in `mode=aggregation`; its default mode comes from a cluster
+  // setting the front end cannot see, so the mode is not knowable from the query text. Listed
+  // unconditionally: skipping the cap on a row-preserving `patterns` shows some extra rows,
+  // whereas capping an aggregating one silently deletes buckets.
+  'patterns',
 ];
 
 /**
