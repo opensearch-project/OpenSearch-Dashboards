@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { BaseDataset, DatasetField } from '../../../../common';
 import { DatasetTypeConfig } from '../../../query/query_string/dataset_service';
+import { isValidTimeField } from './is_valid_time_field';
 
 export interface UseDatasetFieldsResult {
   allFields: DatasetField[];
@@ -40,7 +41,7 @@ export const useDatasetFields = (
       setLoading(true);
       try {
         const fields = await datasetType.fetchFields(baseDataset);
-        const filteredDateFields = fields?.filter((field) => field.type === 'date') || [];
+        const filteredDateFields = fields?.filter(isValidTimeField) || [];
         setDateFields(filteredDateFields);
         setAllFields(fields || []);
       } catch {

@@ -26,6 +26,7 @@ import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../.
 import { getIndexPatterns, getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
 import { DatasetIndexedView } from '../../../query/query_string/dataset_service';
+import { isValidTimeField } from './is_valid_time_field';
 
 export const Configurator = ({
   services,
@@ -119,7 +120,7 @@ export const Configurator = ({
       const datasetFields = await datasetType
         .fetchFields(baseDataset)
         .finally(() => setTimeFieldsLoading(false));
-      const dateFields = datasetFields?.filter((field) => field.type === 'date');
+      const dateFields = datasetFields?.filter(isValidTimeField);
       setTimeFields(dateFields || []);
     };
 

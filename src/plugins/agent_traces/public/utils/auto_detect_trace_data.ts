@@ -78,12 +78,16 @@ export async function detectTraceData(
     // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = traceFields.some((f) => f.name === 'traceId');
     // @ts-expect-error TS7006 TODO(ts-error): fixme
+    const hasStartTime = traceFields.some((f) => f.name === 'startTime');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasEndTime = traceFields.some((f) => f.name === 'endTime');
 
-    if (hasSpanId && hasTraceId && hasEndTime) {
+    if (hasSpanId && hasTraceId && (hasStartTime || hasEndTime)) {
       result.tracesDetected = true;
       result.tracePattern = 'otel-v1-apm-span*';
-      result.traceTimeField = 'endTime';
+      // Prefer startTime as the trace time field: it is the canonical span start
+      // timestamp for otel indices. Fall back to endTime only if startTime is absent.
+      result.traceTimeField = hasStartTime ? 'startTime' : 'endTime';
     }
   } catch {
     // No matching indices found, continue
