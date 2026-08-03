@@ -28,92 +28,69 @@
  * under the License.
  */
 
-import { fromKueryExpression } from './ast';
+import { repeat } from 'lodash';
+import { i18n } from '@osd/i18n';
 
-describe('dql syntax errors', () => {
-  it('should throw an error for a field query missing a value', () => {
-    expect(() => {
-      fromKueryExpression('response:');
-    }).toThrow(
-      'Expected "(", "{", value, whitespace but end of input found.\n' +
-        'response:\n' +
-        '---------^'
-    );
-  });
-
-  it('should throw an error for an OR query missing a right side sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:200 or ');
-    }).toThrow(
-      'Expected "(", NOT, field name, value but end of input found.\n' +
-        'response:200 or \n' +
-        '----------------^'
-    );
-  });
-
-  it('should throw an error for an OR list of values missing a right side sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:(200 or )');
-    }).toThrow(
-      'Expected "(", NOT, value but ")" found.\n' + 'response:(200 or )\n' + '-----------------^'
-    );
-  });
-
-  it('should throw an error for a NOT query missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:200 and not ');
-    }).toThrow(
-      'Expected "(", field name, value but end of input found.\n' +
-        'response:200 and not \n' +
-        '---------------------^'
-    );
-  });
-
-  it('should throw an error for a NOT list missing a sub-query', () => {
-    expect(() => {
-      fromKueryExpression('response:(200 and not )');
-    }).toThrow(
-      'Expected "(", value but ")" found.\n' +
-        'response:(200 and not )\n' +
-        '----------------------^'
-    );
-  });
-
-  it('should throw an error for unbalanced quotes', () => {
-    expect(() => {
-      fromKueryExpression('foo:"ba ');
-    }).toThrow('Expected "(", "{", value, whitespace but """ found.\n' + 'foo:"ba \n' + '----^');
-  });
-
-  it('should throw an error for unescaped quotes in a quoted string', () => {
-    expect(() => {
-      fromKueryExpression('foo:"ba "r"');
-    }).toThrow(
-      'Expected AND, OR, end of input, whitespace but "r" found.\n' + 'foo:"ba "r"\n' + '---------^'
-    );
-  });
-
-  it('should throw an error for unescaped special characters in literals', () => {
-    expect(() => {
-      fromKueryExpression('foo:ba:r');
-    }).toThrow(
-      'Expected AND, OR, end of input, whitespace but ":" found.\n' + 'foo:ba:r\n' + '------^'
-    );
-  });
-
-  it('should throw an error for range queries missing a value', () => {
-    expect(() => {
-      fromKueryExpression('foo > ');
-    }).toThrow('Expected literal, whitespace but end of input found.\n' + 'foo > \n' + '------^');
-  });
-
-  it('should throw an error for range queries missing a field', () => {
-    expect(() => {
-      fromKueryExpression('< 1000');
-    }).toThrow(
-      'Expected "(", NOT, end of input, field name, value, whitespace but "<" found.\n' +
-        '< 1000\n' +
-        '^'
-    );
-  });
+const endOfInputText = i18n.translate('data.common.dql.errors.endOfInputText', {
+  defaultMessage: 'end of input',
 });
+
+const grammarRuleTranslations: Record<string, string> = {
+  fieldName: i18n.translate('data.common.dql.errors.fieldNameText', {
+    defaultMessage: 'field name',
+  }),
+  value: i18n.translate('data.common.dql.errors.valueText', {
+    defaultMessage: 'value',
+  }),
+  literal: i18n.translate('data.common.dql.errors.literalText', {
+    defaultMessage: 'literal',
+  }),
+  whitespace: i18n.translate('data.common.dql.errors.whitespaceText', {
+    defaultMessage: 'whitespace',
+  }),
+};
+
+interface DQLSyntaxErrorData extends Error {
+  found: string;
+  expected: DQLSyntaxErrorExpected[] | null;
+  location: any;
+}
+
+interface DQLSyntaxErrorExpected {
+  description: string;
+}
+
+export class DQLSyntaxError extends Error {
+  shortMessage: string;
+
+  constructor(error: DQLSyntaxErrorData, expression: any) {
+    let message = error.message;
+    if (error.expected) {
+      const translatedExpectations = error.expected.map((expected) => {
+        return grammarRuleTranslations[expected.description] || expected.description;
+      });
+
+      const uniqueExpectations = translatedExpectations.filter(
+        (exp, index, arr) => exp && arr.indexOf(exp) === index
+      );
+
+      const translatedExpectationText = uniqueExpectations.join(', ');
+
+      message = i18n.translate('data.common.dql.errors.syntaxError', {
+        defaultMessage: 'Expected {expectedList} but {foundInput} found.',
+        values: {
+          expectedList: translatedExpectationText,
+          foundInput: error.found ? `"${error.found}"` : endOfInputText,
+        },
+      });
+    }
+
+    const fullMessage = [message, expression, repeat('-', error.location.start.offset) + '^'].join(
+      '\n'
+    );
+
+    super(fullMessage);
+    this.name = 'DQLSyntaxError';
+    this.shortMessage = message;
+  }
+}
