@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineSeriesOption } from 'echarts';
+import { BarSeriesOption, LineSeriesOption } from 'echarts';
 import { LineChartStyle, LineMode } from './line_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getSeriesDisplayName } from '../utils/series';
 import { getColors } from '../theme/default_colors';
+import { normalizeEmptyValue } from '../utils/data_transformation';
+import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
 
 const getLineInterpolation = (lineMode: LineMode) => {
   switch (lineMode) {
@@ -42,11 +44,15 @@ export const createLineSeries =
     seriesFields,
     categoryField,
     addTimeMarker = true,
+    colorDomainData,
+    colorField,
   }: {
     styles: LineChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
     categoryField: string;
     addTimeMarker?: boolean;
+    colorDomainData?: Array<Record<string, any>>;
+    colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
     const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
@@ -59,7 +65,11 @@ export const createLineSeries =
     }
 
     const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+    const sortedNames =
+      colorDomainData && colorField
+        ? Array.from(new Set(colorDomainData.map((d) => normalizeEmptyValue(d[colorField])))).sort()
+        : seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+    const legendItems: LegendItem[] = [];
 
     if (usedTimeMarker) {
       {
@@ -72,7 +82,8 @@ export const createLineSeries =
 
     const series = seriesFields?.map((item: string) => {
       const name = getSeriesDisplayName(item, allColumns);
-      const colorIndex = sortedNames.indexOf(name);
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
 
       return {
         name,
@@ -88,12 +99,13 @@ export const createLineSeries =
         ...generateLineStyles(styles),
         ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
         itemStyle: {
-          color: palette[colorIndex % palette.length],
+          color,
         },
       };
     });
 
     newState.series = series as LineSeriesOption[];
+    newState.legendItems = legendItems;
 
     return newState;
   };
@@ -113,6 +125,12 @@ export const createLineBarSeries =
   (state) => {
     const { xAxisConfig, axisColumnMappings } = state;
     const newState = { ...state };
+    const palette = getColors().categories;
+    const allColumns = Object.values(axisColumnMappings).flat();
+    const sortedNames = [...valueField, ...value2Field]
+      .map((field) => getSeriesDisplayName(field, allColumns))
+      .sort();
+    const legendItems: LegendItem[] = [];
 
     // TODO: move this to buildAxisConfigs function
     if (styles.addTimeMarker) {
@@ -126,10 +144,15 @@ export const createLineBarSeries =
 
     const series = [
       ...valueField.map((field) => {
-        const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+        const name = getSeriesDisplayName(field, allColumns);
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createSeriesLegendItem(name, color));
         return {
           type: 'line',
           name,
+          itemStyle: {
+            color,
+          },
           ...generateLineStyles(styles),
           ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
           yAxisIndex: 0,
@@ -143,10 +166,15 @@ export const createLineBarSeries =
         };
       }),
       ...value2Field.map((field) => {
-        const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+        const name = getSeriesDisplayName(field, allColumns);
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createSeriesLegendItem(name, color));
         return {
           type: 'bar',
           name,
+          itemStyle: {
+            color,
+          },
           yAxisIndex: 1,
           encode: {
             x: categoryField,
@@ -159,7 +187,8 @@ export const createLineBarSeries =
       }),
     ];
 
-    newState.series = series as LineSeriesOption[];
+    newState.series = series as Array<LineSeriesOption | BarSeriesOption>;
+    newState.legendItems = legendItems;
 
     return newState;
   };

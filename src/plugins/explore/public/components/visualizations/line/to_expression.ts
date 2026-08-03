@@ -13,7 +13,6 @@ import {
   buildAxisConfigs,
   assembleSpec,
   applyTimeRange,
-  collectLegend,
 } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
@@ -31,14 +30,12 @@ export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
   styles: LineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  timeRange?: { from: string; to: string },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  timeRange?: { from: string; to: string }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
@@ -52,7 +49,6 @@ export const createSimpleLineChart = (
       categoryField: timeField,
       seriesFields: valueField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -62,7 +58,7 @@ export const createSimpleLineChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -76,16 +72,13 @@ export const createLineBarChart = (
     [AxisRole.Y]: VisColumn[];
     [AxisRole.Y_SECOND]: VisColumn[];
   },
-  timeRange?: { from: string; to: string },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  timeRange?: { from: string; to: string }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings.x.column;
   const valueField = axisColumnMappings.y.map((y) => y.column);
-  const valueFieldNames = axisColumnMappings.y.map((y) => y.name) ?? [];
   const value2Field = axisColumnMappings.y2.map((y) => y.column);
-  const value2FieldNames = axisColumnMappings.y2.map((y) => y.name) ?? [];
 
   if (!timeField || !valueField || !value2Field) {
     throw Error('Missing axis config or color field for line-bar chart');
@@ -101,7 +94,6 @@ export const createLineBarChart = (
     buildAxisConfigs,
     applyTimeRange,
     createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -111,7 +103,7 @@ export const createLineBarChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -126,8 +118,8 @@ export const createMultiLineChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  colorDomainData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings[AxisRole.X].column;
@@ -154,8 +146,9 @@ export const createMultiLineChart = (
       styles,
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      colorDomainData,
+      colorField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -165,7 +158,7 @@ export const createMultiLineChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -174,14 +167,12 @@ export const createMultiLineChart = (
 export const createCategoryLineChart = (
   transformedData: Array<Record<string, any>>,
   styles: LineChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
@@ -197,7 +188,6 @@ export const createCategoryLineChart = (
       seriesFields: valueField,
       addTimeMarker: false,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -206,7 +196,7 @@ export const createCategoryLineChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createCategoryMultiLineChart = (
@@ -217,8 +207,8 @@ export const createCategoryMultiLineChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legendItems: LegendItem[]) => void
-): any => {
+  colorDomainData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const cateField = axisColumnMappings[AxisRole.X].column;
@@ -244,8 +234,9 @@ export const createCategoryMultiLineChart = (
       categoryField: cateField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
       addTimeMarker: false,
+      colorDomainData,
+      colorField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -254,5 +245,5 @@ export const createCategoryMultiLineChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

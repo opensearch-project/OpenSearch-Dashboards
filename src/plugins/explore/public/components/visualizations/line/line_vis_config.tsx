@@ -114,13 +114,13 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for line chart');
 
-          const spec = createSimpleLineChart(
+          const { spec, legendItems } = createSimpleLineChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.timeRange,
-            props.onLegend
+            props.timeRange
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -148,13 +148,13 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !y2 || y.length === 0 || y2.length === 0)
             throw Error('Missing axis config for line/bar combo chart');
 
-          const spec = createLineBarChart(
+          const { spec, legendItems } = createLineBarChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.Y_SECOND]: y2 },
-            props.timeRange,
-            props.onLegend
+            props.timeRange
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -180,13 +180,14 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
-          const spec = createMultiLineChart(
+          const { spec, legendItems } = createMultiLineChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -212,13 +213,14 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
-          const spec = createMultiLineChart(
+          const { spec, legendItems } = createMultiLineChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -243,12 +245,11 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category line chart');
 
-          const spec = createCategoryLineChart(
-            props.data,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.onLegend
-          );
+          const { spec, legendItems } = createCategoryLineChart(props.data, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -274,12 +275,13 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(
+          const { spec, legendItems } = createCategoryMultiLineChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -305,12 +307,13 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(
+          const { spec, legendItems } = createCategoryMultiLineChart(
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
