@@ -10,6 +10,7 @@ import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_s
 import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
+import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -513,9 +514,11 @@ export const createStateTimeLineSpec =
 
     const palette = getColors().categories;
     const sortedNames = mergeLabelCombo.map((m) => m.displayText || m.label).sort();
+    const legendItems: LegendItem[] = [];
     const allSeries = mergeLabelCombo.map((mapping, index: number) => {
       const name = mapping.displayText || mapping.label;
-      const colorIndex = sortedNames.indexOf(name);
+      const color = decideSeriesStyle(mapping) || getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
       return {
         name,
         type: 'custom',
@@ -524,7 +527,7 @@ export const createStateTimeLineSpec =
           : renderSingleStateTimeLineItem(styles, mapping.displayText),
         datasetIndex: index,
         itemStyle: {
-          color: decideSeriesStyle(mapping) || palette[colorIndex % palette.length],
+          color,
         },
         encode: {
           x: ['start', 'end'],
@@ -535,6 +538,7 @@ export const createStateTimeLineSpec =
     });
 
     newState.series = allSeries?.flat() as any;
+    newState.legendItems = legendItems;
 
     return newState;
   };

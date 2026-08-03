@@ -124,12 +124,12 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
-          const spec = createNumericalStateTimeline(
+          const { spec, legendItems } = createNumericalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color }
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -154,12 +154,12 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
-          const spec = createCategoricalStateTimeline(
+          const { spec, legendItems } = createCategoricalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color }
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -182,12 +182,12 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const x = props.axisColumnMappings.x?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
-          const spec = createSingleCategoricalStateTimeline(
+          const { spec, legendItems } = createSingleCategoricalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.onLegend
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
@@ -210,12 +210,12 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const x = props.axisColumnMappings.x?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
-          const spec = createSingleNumericalStateTimeline(
+          const { spec, legendItems } = createSingleNumericalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.onLegend
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
