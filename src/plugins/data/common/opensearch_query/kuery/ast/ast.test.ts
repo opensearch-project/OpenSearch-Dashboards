@@ -106,13 +106,11 @@ describe('kuery AST API', () => {
     test('"and" should have a higher precedence than "or"', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('and', [
-            nodeTypes.function.buildNode('is', null, 'bar'),
-            nodeTypes.function.buildNode('is', null, 'baz'),
-          ]),
-          nodeTypes.function.buildNode('is', null, 'qux'),
+        nodeTypes.function.buildNode('and', [
+          nodeTypes.function.buildNode('is', null, 'bar'),
+          nodeTypes.function.buildNode('is', null, 'baz'),
         ]),
+        nodeTypes.function.buildNode('is', null, 'qux'),
       ]);
       const actual = fromKueryExpression('foo or bar and baz or qux');
       expect(actual).toEqual(expected);
@@ -128,6 +126,47 @@ describe('kuery AST API', () => {
       ]);
       const actual = fromKueryExpression('(foo or bar) and baz');
       expect(actual).toEqual(expected);
+    });
+
+    test('should produce a flat "or" node for multiple OR clauses', () => {
+      const actual = fromKueryExpression('"a" or "b" or "c" or "d" or "e"');
+      expect(actual).toEqual(
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', null, 'a', true),
+          nodeTypes.function.buildNode('is', null, 'b', true),
+          nodeTypes.function.buildNode('is', null, 'c', true),
+          nodeTypes.function.buildNode('is', null, 'd', true),
+          nodeTypes.function.buildNode('is', null, 'e', true),
+        ])
+      );
+      // All operands should be direct children — no nested binary tree
+      expect(actual.arguments).toHaveLength(5);
+    });
+
+    test('should produce a flat "and" node for multiple AND clauses', () => {
+      const actual = fromKueryExpression('foo and bar and baz and qux');
+      expect(actual).toEqual(
+        nodeTypes.function.buildNode('and', [
+          nodeTypes.function.buildNode('is', null, 'foo'),
+          nodeTypes.function.buildNode('is', null, 'bar'),
+          nodeTypes.function.buildNode('is', null, 'baz'),
+          nodeTypes.function.buildNode('is', null, 'qux'),
+        ])
+      );
+      expect(actual.arguments).toHaveLength(4);
+    });
+
+    test('should produce a flat "or" node in field value list shorthand', () => {
+      const actual = fromKueryExpression('field:("a" or "b" or "c" or "d")');
+      expect(actual).toEqual(
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', 'field', 'a', true),
+          nodeTypes.function.buildNode('is', 'field', 'b', true),
+          nodeTypes.function.buildNode('is', 'field', 'c', true),
+          nodeTypes.function.buildNode('is', 'field', 'd', true),
+        ])
+      );
+      expect(actual.arguments).toHaveLength(4);
     });
 
     test('should support matching against specific fields', () => {
