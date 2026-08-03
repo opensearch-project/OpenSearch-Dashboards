@@ -21,4 +21,10 @@ export interface HoverFacts {
   /** Wildcard counts for replace-wildcard-asymmetry. */
   patternWildcards?: number;
   replacementWildcards?: number;
+  /**
+   * Which pushdown-relevant pipeline clause a perf finding is about, for the
+   * explain-backed rules (operation-not-pushed / operation-pushed-as-script).
+   * Lets the hover card name the clause rather than only the rule.
+   */
+  operation?: 'filter' | 'aggregation' | 'sort';
 }

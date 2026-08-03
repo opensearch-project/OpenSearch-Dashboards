@@ -153,5 +153,41 @@ describe('range_utils', () => {
       ]);
       expect(out.range).toEqual({ startLine: 2, startColumn: 4, endLine: 2, endColumn: 9 });
     });
+
+    it('shifts an explicit fix range too, so a quick-fix lands on the right span', () => {
+      const prefix = PIPE_FIRST_PREFIX.length;
+      const [out] = remapPipeFirstColumns([
+        {
+          ...diagnostic({
+            startLine: 1,
+            startColumn: prefix + 2,
+            endLine: 1,
+            endColumn: prefix + 6,
+          }),
+          fix: {
+            title: 'fix',
+            text: '',
+            range: { startLine: 1, startColumn: prefix + 3, endLine: 1, endColumn: prefix + 4 },
+          },
+        },
+      ]);
+      expect(out.fix?.range).toEqual({ startLine: 1, startColumn: 3, endLine: 1, endColumn: 4 });
+    });
+
+    it('leaves a fix without an explicit range alone (it reuses the shifted diagnostic range)', () => {
+      const prefix = PIPE_FIRST_PREFIX.length;
+      const [out] = remapPipeFirstColumns([
+        {
+          ...diagnostic({
+            startLine: 1,
+            startColumn: prefix + 2,
+            endLine: 1,
+            endColumn: prefix + 6,
+          }),
+          fix: { title: 'fix', text: 'x' },
+        },
+      ]);
+      expect(out.fix).toEqual({ title: 'fix', text: 'x' });
+    });
   });
 });

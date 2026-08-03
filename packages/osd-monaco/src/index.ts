@@ -58,6 +58,7 @@ export type {
   PPLLintContext,
   PPLLintBridge,
   PPLLintBridgeRequest,
+  PrepareExplainQuery,
   Diagnostic,
   DiagnosticRange,
   LintResult,

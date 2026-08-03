@@ -2308,10 +2308,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.14.0.tgz#d95243369de3b08c1986d2c871a0522546e4363f"
   integrity sha512-2MPb4JhCz6wO9meq5bOMqWxvW0uzsmkYvKjFRcIY/R1pPdcxHJsRfxCb4x4Ibg3gs6DjN2+O70zHYllJ6Mjo4w==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.22.1":
-  version "1.22.1"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.22.1.tgz#19b526341d73ed17c6ab8ccb3912dd9bd6c73947"
-  integrity sha512-F5LQtDtTARVIfuo7029cMN3BT9dsAanOxZwtGgI88q/VODhUoYmcT2Nj4dzXOlTlY6uk9lr0BMxaysCmqbwfDw==
+"@elastic/eui@npm:@opensearch-project/oui@1.24.1":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.24.1.tgz#6e4babafc1e2b1bf8c9b325bea318b6514937ea6"
+  integrity sha512-NaqPaVhj/jXuamAnn71hGfnMq1nCXD0ANqjZC1r+v/LorNpZutb2PwvvV9mUKwYaUJJTDOuFt1BZyHAXF29CSQ==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/react-beautiful-dnd" "^13.1.3"
@@ -2319,7 +2319,7 @@
     "@types/react-window" "^1.8.5"
     chroma-js "^2.4.2"
     classnames "^2.3.2"
-    lodash "^4.17.21"
+    lodash "^4.18.1"
     mdast-util-to-hast "^10.0.0"
     numeral "^2.0.6"
     prop-types "^15.8.1"
@@ -2343,7 +2343,7 @@
     unified "^9.2.0"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
-    uuid "^9.0.0"
+    uuid "^14.0.0"
     vfile "^4.2.0"
 
 "@elastic/good@^9.0.1-kibana3":
@@ -6576,10 +6576,10 @@ acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.15.0, acorn@^8.16.0, acorn
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.17.0.tgz#1785adb84faf8d8add10369b93826fc2bd08f1fe"
   integrity sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==
 
-adm-zip@^0.5.17:
-  version "0.5.18"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.18.tgz#283a05f2bf1e3fd315f0f31cde29b7a6e3c1619d"
-  integrity sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==
+adm-zip@^0.5.17, adm-zip@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
 
 after-all-results@^2.0.0:
   version "2.0.0"
@@ -7626,9 +7626,9 @@ brace-expansion@^2.0.1, brace-expansion@^2.0.2:
     balanced-match "^1.0.0"
 
 brace-expansion@^5.0.2, brace-expansion@^5.0.5:
-  version "5.0.7"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.7.tgz#1b0e46965b479dad65af737b4a02790a05498337"
-  integrity sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.8.tgz#135ad0d8d808eb18eb5e0ec9a21f3a0b92ef18cf"
+  integrity sha512-JZyDyq3D4AUifKTPOB7DELf6XsB3WdPuNxCtob1vFXPsSXhdAiHBWJ/tJ8HAc9aH84BK+5JFZLNkJKx3G9kzQg==
   dependencies:
     balanced-match "^4.0.2"
 
@@ -9695,10 +9695,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@*, dompurify@^3.4.11:
-  version "3.4.11"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.11.tgz#29c8ba496475f279ef4015784068452fb14a0680"
-  integrity sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw==
+dompurify@*, dompurify@^3.4.12:
+  version "3.4.12"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.12.tgz#6fa2265e9bbdce882c4ace4107626051b448ffa8"
+  integrity sha512-zQvGet8Z2sWbQhCmfFz/T5QWH2oBmjnqK3qvOjaqaNLrLEF912WamU+ohnTp0TCep/MFVHpdJuCZEdFOdTnEFg==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -12519,10 +12519,10 @@ invariant@^2.1.1, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-ip-address@^10.1.1, ip-address@^10.2.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.2.0.tgz#805fc178b20c518bd4c8548b24fe30892d7f3206"
-  integrity sha512-/+S6j4E9AHvW9SWMSEY9Xfy66O5PWvVEJ08O0y5JGyEKQpojb0K0GKpz/v5HJ/G0vi3D2sjGK78119oXZeE0qA==
+ip-address@^10.1.1, ip-address@^10.2.0, ip-address@^10.3.1:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.3.1.tgz#929f9629d1724f7e1b7485ce89752f3675336a10"
+  integrity sha512-1e9d3kb97NHJTIJDZW9rKqW2h6+dFa50Dy0fpPSMQp2ADje5gvKsXmdiK6dwY5t76TaTt5+P5N1Y/LoToIxP6g==
 
 ip-regex@^4.1.0:
   version "4.3.0"
@@ -14401,7 +14401,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
-lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@~4.18.1:
+lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@^4.18.1, lodash@~4.18.1:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==

@@ -14,6 +14,7 @@ import {
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { workspaceClientMock } from '../workspace_client.mock';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../../common/constants';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -107,7 +108,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         },
       });
 
-      expect(
+      await expect(
         mockedWrapperClient.create(
           'dashboard',
           {
@@ -118,6 +119,35 @@ describe('WorkspaceIdConsumerWrapper', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
       expect(mockedWorkspaceClient.get).toHaveBeenCalledTimes(0);
       expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(1);
+    });
+
+    it(`Should list all workspaces via the MAXIMUM_WORKSPACES_PER_PAGE sentinel`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+
+      mockedWorkspaceClient.list.mockResolvedValueOnce({
+        success: true,
+        result: { workspaces: [{ id: 'foo' }, { id: 'bar' }] },
+      });
+
+      await mockedWrapperClient.create(
+        'dashboard',
+        { name: 'foo' },
+        { workspaces: ['foo', 'bar'] }
+      );
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(expect.anything(), {
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
+      });
     });
   });
 
@@ -250,7 +280,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
         request: mockRequest,
       });
-      expect(
+      await expect(
         mockedWrapperClient.find({
           type: ['dashboard', 'visualization'],
           workspaces: ['foo', 'not-exist'],

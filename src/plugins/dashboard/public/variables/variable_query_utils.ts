@@ -17,6 +17,13 @@ export interface VariableOptionsResult {
   optionType?: VariableOptionType;
 }
 
+function parseVariableRegex(regex?: string): RegExp | undefined {
+  if (!regex) return undefined;
+
+  const match = regex.match(/^\/(.+)\/([gimsuy]*)$/);
+  return match ? new RegExp(match[1], match[2]) : new RegExp(regex);
+}
+
 /**
  * Adds "source = <dataset>" clause to PPL query if not present.
  * Handles backtick escaping for INDEXES and INDEX_PATTERN dataset types.
@@ -264,15 +271,69 @@ export async function executeVariableQuery(
   return parseResponseToQueryResult(response);
 }
 
-export function filterVariableOptionsByRegex(
+function getNonEmptyCapture(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmedValue = value.trim();
+  return trimmedValue ? trimmedValue : undefined;
+}
+
+function buildRegexOption(
+  option: NormalizedVariableOption,
+  match: RegExpExecArray
+): NormalizedVariableOption | undefined {
+  const groups = match.groups ?? {};
+
+  const hasNamedValue = Object.prototype.hasOwnProperty.call(groups, 'value');
+  const hasNamedLabel = Object.prototype.hasOwnProperty.call(groups, 'label');
+
+  if (hasNamedValue || hasNamedLabel) {
+    // Empty named captures should not erase the original option identity or display label.
+    const value = getNonEmptyCapture(groups.value) ?? option.value;
+    const label = getNonEmptyCapture(groups.label) ?? option.label;
+
+    return {
+      value,
+      ...(label ? { label } : {}),
+    };
+  }
+
+  return option;
+}
+
+export function applyRegexToVariableOptions(
   options: NormalizedVariableOption[],
   regex?: string
 ): NormalizedVariableOption[] {
   if (!regex) return options;
   try {
-    const match = regex.match(/^\/(.+)\/([gimsuy]*)$/);
-    const pattern = match ? new RegExp(match[1], match[2]) : new RegExp(regex);
-    return options.filter((option) => pattern.test(option.value));
+    const pattern = parseVariableRegex(regex);
+    if (!pattern) return options;
+
+    const optionMap = new Map<string, NormalizedVariableOption>();
+
+    options.forEach((option) => {
+      const match = new RegExp(pattern).exec(option.value);
+      if (!match) {
+        return;
+      }
+
+      const nextOption = buildRegexOption(option, match);
+      if (!nextOption) {
+        return;
+      }
+
+      const existingOption = optionMap.get(nextOption.value);
+      if (!existingOption) {
+        optionMap.set(nextOption.value, nextOption);
+      } else if (!existingOption.label && nextOption.label) {
+        optionMap.set(nextOption.value, { ...existingOption, label: nextOption.label });
+      }
+    });
+
+    return Array.from(optionMap.values());
   } catch {
     return options;
   }

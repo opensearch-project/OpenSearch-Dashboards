@@ -74,6 +74,15 @@ describe('createNewVisActions', () => {
       hidden: false,
     },
     {
+      name: 'hiddenAliasApp',
+      title: 'Hidden Alias App Vis',
+      icon: 'visGauge',
+      stage: 'production',
+      aliasApp: 'hiddenOtherApp',
+      aliasPath: '/hidden-path',
+      hidden: true,
+    },
+    {
       name: 'aliasAppWithPromotion',
       title: 'Alias App With Promotion',
       icon: 'visMetric',
@@ -84,6 +93,18 @@ describe('createNewVisActions', () => {
         description: 'This is a promoted visualization',
       },
       hidden: false,
+    },
+    {
+      name: 'hiddenAliasAppWithPromotion',
+      title: 'Hidden Alias App With Promotion',
+      icon: 'visMetric',
+      stage: 'production',
+      aliasApp: 'hiddenPromotedApp',
+      aliasPath: '/hidden-promoted',
+      promotion: {
+        description: 'This is a hidden promoted visualization',
+      },
+      hidden: true,
     },
   ];
 
@@ -124,6 +145,15 @@ describe('createNewVisActions', () => {
     };
   };
 
+  const getRegisteredAction = (services: ReturnType<typeof setupServices>, id: string) => {
+    const actionCall = services.uiActions.addTriggerAction.mock.calls.find(
+      ([, action]) => action.id === id
+    );
+
+    expect(actionCall).toBeDefined();
+    return actionCall![1];
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -133,7 +163,7 @@ describe('createNewVisActions', () => {
     createNewVisActions(services);
 
     // Should not register experimental vis
-    expect(services.uiActions.addTriggerAction).toHaveBeenCalledTimes(6);
+    expect(services.uiActions.addTriggerAction).toHaveBeenCalledTimes(8);
 
     // Verify standard vis is registered
     expect(services.uiActions.addTriggerAction).toHaveBeenCalledWith(
@@ -158,30 +188,24 @@ describe('createNewVisActions', () => {
 
     createNewVisActions(services);
 
-    // Should register all non-hidden vis types (7 total, including experimental)
-    expect(services.uiActions.addTriggerAction).toHaveBeenCalledTimes(7);
+    // Should register all vis actions, including hidden actions that are later marked incompatible
+    expect(services.uiActions.addTriggerAction).toHaveBeenCalledTimes(9);
   });
 
-  test('does not register hidden visualizations', () => {
+  test('marks hidden visualization actions incompatible', async () => {
     const services = setupServices();
     services.uiSettings.get.mockReturnValue(true); // Enable labs
     createNewVisActions(services);
 
-    // Check that the hidden vis is registered but has an isCompatible function that returns false
-    const hiddenVisActionCalls = Array.from({
-      length: services.uiActions.addTriggerAction.mock.calls.length,
-    })
-      .map((_, i) => services.uiActions.addTriggerAction.mock.calls[i])
-      .filter((call) => call[1].id === 'add_vis_action_hidden');
+    for (const id of [
+      'add_vis_action_hidden',
+      'add_vis_action_hiddenAliasApp',
+      'add_vis_action_hiddenAliasAppWithPromotion',
+    ]) {
+      const action = getRegisteredAction(services, id);
 
-    // The action is registered but should have an isCompatible function
-    expect(hiddenVisActionCalls.length).toBe(1);
-    if (hiddenVisActionCalls.length > 0) {
-      // If the action has an isCompatible function, it should return false for hidden visualizations
-      const action = hiddenVisActionCalls[0][1];
-      if (action.isCompatible) {
-        expect(action.isCompatible({} as ActionExecutionContext<{}>)).resolves.toBe(false);
-      }
+      expect(action.isCompatible).toEqual(expect.any(Function));
+      await expect(action.isCompatible?.({} as ActionExecutionContext<{}>)).resolves.toBe(false);
     }
   });
 

@@ -31,8 +31,8 @@ export const dedupConsecutiveUnsupportedDetector: Detector = (
   context,
   ruleNameToIndex
 ) => {
-  // Calcite gating is also enforced by the version filter, but guard here too
-  // so a direct detector invocation respects the engine predicate.
+  // The version filter enforces the same predicate, but a direct detector
+  // invocation bypasses it, so check here too.
   if (context.isCalcite !== true) {
     return [];
   }
