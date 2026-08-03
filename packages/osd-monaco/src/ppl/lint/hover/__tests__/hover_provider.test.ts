@@ -81,12 +81,13 @@ describe('pplLintHoverProvider', () => {
     markersByOwner[LINT_OWNER] = [makeMarker({ message: 'Dividing by zero returns null.' })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    // The rule id is secondary metadata on the severity line, not the headline.
+    // Severity leads the card; the rule id is not repeated here (Monaco renders it
+    // as the marker's `code`, linked to the rule's doc section).
     expect(markdownOf(hover)).toContain('⚠️ **Warning**');
-    expect(markdownOf(hover)).toContain('Rule: `division-by-zero`');
+    expect(markdownOf(hover)).not.toContain('Rule:');
     expect(markdownOf(hover)).toContain('Dividing by zero returns null.');
     expect(markdownOf(hover)).toContain('**Fix** — Use the intended divisor');
-    expect(markdownOf(hover)).not.toContain('Learn more');
+    expect(markdownOf(hover)).toContain('[Learn more →](https://docs.example/x)');
     expect(markdownOf(hover)).not.toContain('**Engine behavior**');
     expect(markdownOf(hover)).not.toContain('· Warning');
   });
@@ -150,9 +151,14 @@ describe('pplLintHoverProvider', () => {
     expect(md).not.toContain('**Engine behavior**');
   });
 
-  it('renders a plain-string marker code as the rule id', () => {
+  it('resolves the catalog entry from a plain-string marker code', () => {
+    // The id itself is no longer printed, so assert the thing it still drives:
+    // a bare-string `code` (no doc link) must still find the catalog Fix text.
     markersByOwner[LINT_OWNER] = [makeMarker({ code: 'agg-on-text' })];
-    expect(markdownOf(hoverAt(1, 7))).toContain('Rule: `agg-on-text`');
+    const md = markdownOf(hoverAt(1, 7));
+    expect(md).toContain('**Fix** —');
+    expect(md).not.toContain('Rule:');
+    expect(md).not.toContain('Learn more');
   });
 
   describe('contributed actions', () => {

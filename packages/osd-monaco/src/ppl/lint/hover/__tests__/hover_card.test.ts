@@ -18,16 +18,21 @@ describe('renderHoverCard', () => {
   it('renders a concise, action-oriented division-by-zero card', () => {
     const entry = getCatalogEntryById('division-by-zero');
     const md = render({
-      ruleId: 'division-by-zero',
       message: 'Dividing by zero returns no value (null) instead of an error.',
+      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
     });
 
     expect(md).toContain('⚠️ **Warning**');
-    expect(md).toContain('Rule: `division-by-zero`');
+    // The rule id is NOT repeated in the card: Monaco already renders it as the
+    // marker's `code`, linked to the rule's doc section.
+    expect(md).not.toContain('Rule:');
+    expect(md).not.toContain('division-by-zero');
     expect(md).toContain('Dividing by zero returns no value');
     expect(md).toContain('**Fix** — Use the intended divisor');
-    expect(md).not.toContain('Learn more');
+    expect(md).toContain(
+      '[Learn more →](https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators)'
+    );
     // The verbose engine-outcomes sections are gone from the simplified card.
     expect(md).not.toContain('Engine behavior');
     expect(md).not.toContain('Why warning');
@@ -85,10 +90,8 @@ describe('renderHoverCard', () => {
     expect(md).not.toContain('weirdˋname');
   });
 
-  it('fences an unusual rule id containing a backtick', () => {
-    const md = render({ ruleId: 'rule`id' });
-    expect(md).toContain('Rule: `` rule`id ``');
-  });
+  // The rule-id fencing case is gone with the id itself; `code()` is still covered
+  // by the quick-fix backtick case above, which is its only remaining caller.
 
   it('preserves inline-code Markdown in bundled howToFix guidance', () => {
     const entry = getCatalogEntryById('head-without-sort');
@@ -101,6 +104,13 @@ describe('renderHoverCard', () => {
     expect(md).toContain(
       'use \\*star\\*, \\_under\\_, \\[brackets\\], \\~\\~strike\\~\\~, and pipe \\|'
     );
+  });
+
+  it('percent-encodes parentheses in the doc link target', () => {
+    const md = render({
+      docUrl: 'https://docs.example/path_(disambiguation)/#a',
+    });
+    expect(md).toContain('[Learn more →](https://docs.example/path_%28disambiguation%29/#a)');
   });
 
   it('degrades to the severity and message when no rule help is available', () => {

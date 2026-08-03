@@ -48,6 +48,11 @@ function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
   }
 }
 
+function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
+  const code = marker.code;
+  return code && typeof code === 'object' && code.target ? code.target.toString() : undefined;
+}
+
 function markerContainsPosition(marker: monaco.editor.IMarker, position: monaco.Position): boolean {
   const { lineNumber, column } = position;
   return !(
@@ -99,8 +104,8 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
       {
         value: renderHoverCard({
           severityLabel: severityLabel(marker.severity),
-          ruleId,
           message: marker.message,
+          docUrl: docUrlOf(marker),
           howToFix: entry?.howToFix,
           fixText: fix?.text,
         }),

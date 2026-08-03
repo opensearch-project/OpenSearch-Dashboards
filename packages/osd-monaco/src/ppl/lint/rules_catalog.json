@@ -6,7 +6,7 @@
     "severity": "info",
     "message": "Without sort, head can return different rows each time the query runs.",
     "howToFix": "Add `sort` before `head` when you need stable top or bottom results.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/#example-3-retrieving-the-first-n-results-after-an-offset-m",
     "appliesTo": {}
   },
   {
@@ -26,7 +26,7 @@
     "severity": "error",
     "message": "This window function is not supported in eventstats/streamstats. Only row_number is supported.",
     "howToFix": "Use `row_number()` for a window value, or choose an aggregation supported by `eventstats` or `streamstats`, such as `avg()`.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/#aggregation-functions",
     "appliesTo": {
       "minVersion": "3.4.0"
     }
@@ -38,7 +38,7 @@
     "severity": "error",
     "message": "The multisearch command requires at least two subsearches.",
     "howToFix": "Add a second subsearch, or run the single subsearch as a normal query.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/#syntax",
     "runtimeOnly": true,
     "appliesTo": {
       "minVersion": "3.4.0"
@@ -51,7 +51,7 @@
     "severity": "warning",
     "message": "This join type is disabled by default.",
     "howToFix": "Use an `inner` or `left` join when it preserves the intended result. Otherwise, ask an administrator to enable `plugins.calcite.all_join_types.allowed`.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/#limitations",
     "appliesTo": {}
   },
   {
@@ -61,7 +61,7 @@
     "severity": "warning",
     "message": "consecutive=true uses an older query engine and may make this query slower.",
     "howToFix": "Remove `consecutive=true` to use regular deduplication. No equivalent option preserves consecutive-only behavior.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/#example-4-deduplicating-consecutive-documents",
     "appliesTo": {
       "minVersion": "3.3.0",
       "engine": "calcite"
@@ -74,7 +74,7 @@
     "severity": "error",
     "message": "The union command requires at least two datasets.",
     "howToFix": "Add another dataset to `union`, or remove `union` when using only one dataset.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/index/#ppl-commands",
     "runtimeOnly": true,
     "appliesTo": {
       "minVersion": "3.7.0",
@@ -88,7 +88,7 @@
     "severity": "error",
     "message": "The replace match and replacement have different numbers of \"*\" wildcards. The counts must match.",
     "howToFix": "Use the same number of `*` wildcards in the match and replacement patterns.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/#parameters",
     "runtimeOnly": true,
     "appliesTo": {
       "minVersion": "3.4.0",
@@ -102,7 +102,7 @@
     "severity": "error",
     "message": "Reference to an unknown field.",
     "howToFix": "Correct the field name or PPL syntax. PPL runs commands left to right, so define a new field with `eval` before referencing it in a later command.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/#parameters",
     "sourceScoped": true,
     "appliesTo": {}
   },
@@ -113,7 +113,7 @@
     "severity": "warning",
     "message": "Numeric aggregation on a text field may return no value (null), because text is not stored as a number.",
     "howToFix": "Aggregate a numeric field instead. If this field really does hold numbers, map it as a numeric type, or `cast` it before aggregating.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/#limitations",
     "needsContext": true,
     "sourceScoped": true,
     "appliesTo": {
@@ -128,7 +128,7 @@
     "severity": "error",
     "message": "PPL cannot search a field stored inside a flat_object field.",
     "howToFix": "Use another field or query this data with DQL or the Search API. To use it in PPL, map and reindex it as a regular object field.",
-    "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/object-fields/",
+    "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/",
     "needsContext": true,
     "sourceScoped": true,
     "appliesTo": {
@@ -143,7 +143,7 @@
     "severity": "warning",
     "message": "This field is numeric, but the compared value is not a number, so the comparison returns no rows.",
     "howToFix": "Compare the field with a number, such as `500`, or use the text field that contains the value you want.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#comparison-operators",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#basic-predicate-operators",
     "needsContext": true,
     "sourceScoped": true,
     "appliesTo": {
@@ -170,7 +170,7 @@
     "severity": "warning",
     "message": "This operation runs after the index scan, so OpenSearch must read and return its input rows first.",
     "howToFix": "Rewrite the highlighted operation with indexed fields and supported functions so the PPL engine can include it in the index request.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
     "appliesTo": {
       "minVersion": "3.3.0",
       "engine": "calcite"
@@ -184,7 +184,7 @@
     "severity": "info",
     "message": "OpenSearch evaluates this operation as a script for every candidate document instead of using a native index query.",
     "howToFix": "Use a direct field comparison or sort on an indexed field so OpenSearch can use a native query or field sort.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
     "appliesTo": {
       "minVersion": "3.3.0",
       "engine": "calcite"
@@ -201,7 +201,10 @@
     "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
     "needsContext": true,
     "sourceScoped": true,
-    "appliesTo": { "minVersion": "3.7.0", "engine": "calcite" }
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
   },
   {
     "id": "wildcard-source-zero-match",
@@ -210,7 +213,7 @@
     "severity": "info",
     "message": "Wildcard source pattern matches no known index.",
     "howToFix": "Correct the `source=` pattern or choose an existing index.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/#example-6-using-wildcards",
     "needsContext": true,
     "appliesTo": {}
   },
@@ -221,7 +224,7 @@
     "severity": "info",
     "message": "Pattern extraction runs against every input row from the text field, even when it finds no match.",
     "howToFix": "Filter out rows that cannot match the pattern before extraction, using time or an indexed field.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#example-3-replacing-text-using-sed-mode",
     "appliesTo": {},
     "needsContext": true,
     "sourceScoped": true

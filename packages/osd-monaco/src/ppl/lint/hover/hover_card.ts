@@ -6,7 +6,7 @@
 /**
  * Pure renderer for the lint hover card ("view more") body. Composes the
  * detector message, static per-rule guidance (`Fix`), an optional quick-fix
- * preview into a single Markdown string. Intentionally free of any Monaco
+ * preview, and the doc link into a single Markdown string. Intentionally free of any Monaco
  * import so it is trivially unit-testable; the provider does the Monaco-specific
  * marker extraction and hands plain values here.
  *
@@ -20,10 +20,10 @@ export type SeverityLabel = 'Error' | 'Warning' | 'Info';
 
 export interface HoverCardInput {
   severityLabel: SeverityLabel;
-  /** Stable rule id used by Advanced Settings and support reports. */
-  ruleId?: string;
   /** The marker's short message — always shown as the card lead. */
   message: string;
+  /** code.target — the specific doc link from the catalog. */
+  docUrl?: string;
   /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
   howToFix?: string;
   /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
@@ -57,16 +57,24 @@ function code(text: string): string {
   return `${fence}${pad}${text}${pad}${fence}`;
 }
 
+/** Percent-encode parentheses so they cannot close a Markdown link target. */
+function encodeLinkTarget(url: string): string {
+  return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
 /**
  * Render the full hover card to a Markdown string. The provider wraps the result
  * in `{ value, isTrusted: false }` and hands it to Monaco.
  */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { severityLabel, ruleId, message, howToFix, fixText } = input;
+  const { severityLabel, message, docUrl, howToFix, fixText } = input;
   const lines: string[] = [];
 
-  const ruleMetadata = ruleId ? ` | Rule: ${code(ruleId)}` : '';
-  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**${ruleMetadata}`);
+  // Severity only. The rule id is deliberately NOT repeated here: Monaco already
+  // renders it as the marker's `code`, where it is a live link to the rule's doc
+  // section (see diagnosticToMarker). Printing it again as inert text cost a line
+  // of the card without being actionable.
+  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**`);
 
   // Lead: the short message (always present).
   lines.push('');
@@ -86,6 +94,11 @@ export function renderHoverCard(input: HoverCardInput): string {
   if (fixText !== undefined) {
     lines.push('');
     lines.push(`**Quick fix available** — ${code(fixText)}`);
+  }
+
+  if (docUrl) {
+    lines.push('');
+    lines.push(`[Learn more →](${encodeLinkTarget(docUrl)})`);
   }
 
   return lines.join('\n');
