@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HoverFacts } from './hover_facts';
 import type { ExplainOutcome } from './explain/explain_types';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
@@ -15,8 +14,6 @@ export interface DiagnosticRange {
   endLine: number;
   endColumn: number;
 }
-
-export type DiagnosticHoverFacts = HoverFacts;
 
 // A deterministic quick-fix attached to a diagnostic. The code-action provider
 // turns it into a Monaco workspace edit. Attached only when the rewrite is
@@ -54,7 +51,6 @@ export interface Diagnostic {
   docUrl?: string;
   // Optional deterministic quick-fix. Absent for rules with no safe rewrite.
   fix?: DiagnosticFix;
-  hoverFacts?: DiagnosticHoverFacts;
   // Source attribution retained inside Dashboards only; set by the explain
   // range resolver once a whole-query finding is narrowed to one command.
   attribution?: DiagnosticAttribution;

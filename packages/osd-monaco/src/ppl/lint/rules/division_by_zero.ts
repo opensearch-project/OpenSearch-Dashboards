@@ -42,7 +42,6 @@ export const divisionByZeroDetector: Detector = (tree, config, _context, ruleNam
           message: config.message,
           range: rangeFromContext(divisor),
           docUrl: config.docUrl,
-          hoverFacts: { literal: divisor.getText() },
         });
       }
     }

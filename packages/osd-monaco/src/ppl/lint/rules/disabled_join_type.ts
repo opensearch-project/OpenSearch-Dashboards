@@ -86,7 +86,6 @@ export const disabledJoinTypeDetector: Detector = (tree, config, context, ruleNa
         message: config.message,
         range: rangeFromContext(detected.node),
         docUrl: config.docUrl,
-        hoverFacts: { joinType: detected.keyword },
       });
     }
   }

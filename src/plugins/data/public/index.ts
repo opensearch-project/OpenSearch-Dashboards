@@ -675,6 +675,10 @@ export {
 } from './ppl_lint/lint_context_builder';
 export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
 export { explainQueryPreparer } from './ppl_lint/explain_query_preparer';
+// Host metadata probes for the context-fed lint rules; both editor hosts call
+// them from their loadFields effect.
+export { fetchDisabledObjectFields } from './ppl_lint/disabled_object_fields';
+export { fetchVisibleIndices } from './ppl_lint/visible_indices';
 export type { LintFieldsCache } from './ppl_lint/lint_context_builder';
 export { lintRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_lint';
 export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';

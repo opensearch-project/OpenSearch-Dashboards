@@ -23,12 +23,9 @@ describe('disabled-join-type (compiled surface, option form)', () => {
     expect(ids('source=a | join type=cross b on a.id=b.id')).toContain('disabled-join-type');
   });
 
-  it('reports the catalog message (not a hardcoded literal) with the keyword in hoverFacts', () => {
+  it('reports the catalog message (not a hardcoded literal)', () => {
     const diagnostic = joinDiags('source=a | join type=cross b on a.id=b.id')[0];
-    expect(diagnostic?.message).toBe(
-      'This join type is disabled by default — enable plugins.calcite.all_join_types.allowed to use it.'
-    );
-    expect(diagnostic?.hoverFacts).toEqual({ joinType: 'cross' });
+    expect(diagnostic?.message).toBe('This join type is disabled by default.');
   });
 
   it('flags type=right', () => {
@@ -64,16 +61,16 @@ describe('disabled-join-type (compiled surface, option form)', () => {
     // join is disabled here (the outer join is a plain join).
     const diags = joinDiags('source=a | join b [ source=c | join type=cross d on c.id=d.id ]');
     expect(diags).toHaveLength(1);
-    expect(diags[0].hoverFacts).toEqual({ joinType: 'cross' });
   });
 
   it('reports the outer disabled join even when a nested join is also disabled', () => {
-    // Outer `type=full` and nested `type=cross`: both must be reported, and the
-    // outer `full` must not be masked by the nested traversal.
+    // Outer `type=full` and nested `type=cross`: both must be reported at
+    // distinct ranges, so the outer `full` is not masked by the nested traversal.
     const diags = joinDiags(
       'source=a | join type=full b [ source=c | join type=cross d on c.id=d.id ] on a.id=b.id'
     );
-    const keywords = diags.map((d) => d.hoverFacts?.joinType).sort();
-    expect(keywords).toEqual(['cross', 'full']);
+    expect(diags).toHaveLength(2);
+    const starts = diags.map((d) => `${d.range.startLine}:${d.range.startColumn}`);
+    expect(new Set(starts).size).toBe(2);
   });
 });

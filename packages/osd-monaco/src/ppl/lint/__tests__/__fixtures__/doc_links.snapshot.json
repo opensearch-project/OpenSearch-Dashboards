@@ -74,7 +74,7 @@
       "anchor": "comparison-operators",
       "quality": "close"
     },
-        "invalid-capture-group-name": {
+    "invalid-capture-group-name": {
       "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
       "anchor": "parameters",
@@ -93,6 +93,24 @@
       "anchor": "",
       "quality": "gap",
       "futureDocUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#pushdown-optimization"
+    },
+    "enabled-false-object": {
+      "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
+      "page": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/",
+      "anchor": "disabling-object-fields",
+      "quality": "exact"
+    },
+    "wildcard-source-zero-match": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "rex-scan-cost": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "",
+      "quality": "weak"
     }
   }
 }

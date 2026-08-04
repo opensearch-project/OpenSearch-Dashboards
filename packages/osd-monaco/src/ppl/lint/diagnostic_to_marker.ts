@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '../../monaco';
-import { Diagnostic, DiagnosticHoverFacts, DiagnosticRange, LintSeverity } from './diagnostic';
+import { Diagnostic, DiagnosticRange, LintSeverity } from './diagnostic';
 
 interface MonacoRange {
   startLineNumber: number;
@@ -30,6 +30,22 @@ export const LINT_MARKER_SOURCE = 'ppl-lint';
 // code-action provider recognize the syntax channel and offer command-typo
 // quick-fixes there, without disturbing the lint channel (`ppl-lint`).
 export const SYNTAX_MARKER_SOURCE = 'ppl-syntax';
+
+/**
+ * Read a marker's rule id back out of `code`, which `diagnosticToMarker` writes
+ * either as a bare string or as a `{ value, target }` pair when the rule has a
+ * doc link. Exported so the code-action and hover providers decode it the same
+ * way as it was encoded, rather than each keeping its own copy.
+ */
+export function ruleIdOf(marker: Pick<monaco.editor.IMarkerData, 'code'>): string | undefined {
+  const { code } = marker;
+  if (typeof code === 'string') {
+    return code;
+  }
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
+}
 
 function toMarkerSeverity(severity: LintSeverity): monaco.MarkerSeverity {
   switch (severity) {
@@ -79,14 +95,6 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
       text: diagnostic.fix.text,
       range: diagnostic.fix.range ? toMonacoRange(diagnostic.fix.range) : undefined,
     };
-  }
-
-  if (diagnostic.hoverFacts) {
-    (
-      marker as monaco.editor.IMarkerData & {
-        hoverFacts?: DiagnosticHoverFacts;
-      }
-    ).hoverFacts = diagnostic.hoverFacts;
   }
 
   return marker;

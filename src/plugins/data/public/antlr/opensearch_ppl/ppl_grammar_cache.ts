@@ -8,134 +8,19 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'opensearch-dashboards/public';
-import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
+import { CachedGrammar, deserializeGrammarBundle } from './ppl_grammar_deserialize';
 import { TokenDictionary } from '../opensearch_sql/table';
 import { getDataSourceEngineCapabilities, UI_SETTINGS } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
-const ATN_DESERIALIZE_OPTIONS = {
-  readOnly: false,
-  verifyATN: true,
-  generateRuleBypassTransitions: true,
-};
-
-export interface CachedGrammar {
-  lexerATN: ATN;
-  parserATN: ATN;
-  vocabulary: Vocabulary;
-  lexerRuleNames: string[];
-  parserRuleNames: string[];
-  channelNames: string[];
-  modeNames: string[];
-  startRuleIndex: number;
-  pipeStartRuleIndex?: number;
-  grammarHash: string;
-  tokenDictionary: TokenDictionary;
-  ignoredTokens: number[];
-  rulesToVisit: number[];
-  runtimeSymbolicNameToTokenType: Map<string, number>;
-  runtimeRuleNameToIndex: Map<string, number>;
-}
-
-function buildSymbolicNameToTokenType(symbolicNames: Array<string | null>): Map<string, number> {
-  const map = new Map<string, number>();
-  for (let i = 1; i < symbolicNames.length; i++) {
-    const name = symbolicNames[i];
-    if (name) map.set(name, i);
-  }
-  return map;
-}
-
-function buildRuleNameToIndex(parserRuleNames: string[]): Map<string, number> {
-  const map = new Map<string, number>();
-  for (let i = 0; i < parserRuleNames.length; i++) {
-    map.set(parserRuleNames[i], i);
-  }
-  return map;
-}
-
-function isFiniteInteger(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && Number.isFinite(value);
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string');
-}
-
-function isStringOrNullArray(value: unknown): value is Array<string | null> {
-  return Array.isArray(value) && value.every((item) => item === null || typeof item === 'string');
-}
-
-function isNumberArray(value: unknown): value is number[] {
-  return (
-    Array.isArray(value) && value.every((item) => typeof item === 'number' && Number.isFinite(item))
-  );
-}
-
-function isRecordOfNumbers(value: unknown): value is Record<string, number> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.values(value).every((item) => typeof item === 'number' && Number.isFinite(item))
-  );
-}
-
-function isValidBundleShape(bundle: unknown): bundle is PPLGrammarBundle {
-  if (typeof bundle !== 'object' || bundle === null) {
-    return false;
-  }
-
-  const candidate = bundle as Partial<PPLGrammarBundle>;
-
-  if (
-    !isNumberArray(candidate.lexerSerializedATN) ||
-    !isNumberArray(candidate.parserSerializedATN) ||
-    !isStringArray(candidate.lexerRuleNames) ||
-    !isStringArray(candidate.parserRuleNames) ||
-    !isStringArray(candidate.channelNames) ||
-    !isStringArray(candidate.modeNames) ||
-    !isStringOrNullArray(candidate.literalNames) ||
-    !isStringOrNullArray(candidate.symbolicNames) ||
-    !isFiniteInteger(candidate.startRuleIndex) ||
-    typeof candidate.grammarHash !== 'string'
-  ) {
-    return false;
-  }
-
-  if (
-    candidate.startRuleIndex < 0 ||
-    candidate.startRuleIndex >= candidate.parserRuleNames.length
-  ) {
-    return false;
-  }
-
-  if (
-    candidate.pipeStartRuleIndex !== undefined &&
-    (!isFiniteInteger(candidate.pipeStartRuleIndex) ||
-      candidate.pipeStartRuleIndex < 0 ||
-      candidate.pipeStartRuleIndex >= candidate.parserRuleNames.length)
-  ) {
-    return false;
-  }
-
-  if (candidate.tokenDictionary !== undefined && !isRecordOfNumbers(candidate.tokenDictionary)) {
-    return false;
-  }
-
-  if (candidate.ignoredTokens !== undefined && !isNumberArray(candidate.ignoredTokens)) {
-    return false;
-  }
-
-  if (candidate.rulesToVisit !== undefined && !isNumberArray(candidate.rulesToVisit)) {
-    return false;
-  }
-
-  return true;
-}
+// `CachedGrammar` and the bundle-deserialization logic now live in the Node-safe
+// `ppl_grammar_deserialize` module so both this browser cache and the headless
+// CI lint API share one implementation. Re-exported here to keep existing
+// `import { CachedGrammar } from './ppl_grammar_cache'` call sites working.
+export type { CachedGrammar } from './ppl_grammar_deserialize';
 
 /**
  * Single-slot in-memory cache for PPL grammar artifacts.
@@ -373,39 +258,15 @@ class PPLGrammarCache {
         clearTimeout(timeout);
       }
 
-      if (!isValidBundleShape(bundle)) {
+      // Shape validation + ATN deserialization live in the Node-safe
+      // `ppl_grammar_deserialize` module (shared with the headless CI lint API).
+      // A malformed bundle yields `null`; a corrupt-but-well-shaped ATN throws,
+      // which the enclosing try/catch turns into the silent compiled fallback —
+      // the browser's intended degrade-gracefully behavior.
+      const entry = deserializeGrammarBundle(bundle);
+      if (!entry) {
         return null;
       }
-
-      const literalNames = (bundle.literalNames || []).map((n) => (n === '' ? null : n));
-      const symbolicNames = (bundle.symbolicNames || []).map((n) => (n === '' ? null : n));
-      const vocabulary = new Vocabulary(literalNames, symbolicNames);
-
-      const lexerATN = new ATNDeserializer(ATN_DESERIALIZE_OPTIONS).deserialize(
-        bundle.lexerSerializedATN
-      );
-      const parserATN = new ATNDeserializer(ATN_DESERIALIZE_OPTIONS).deserialize(
-        bundle.parserSerializedATN
-      );
-
-      const entry: CachedGrammar = {
-        lexerATN,
-        parserATN,
-        vocabulary,
-        lexerRuleNames: bundle.lexerRuleNames,
-        parserRuleNames: bundle.parserRuleNames,
-        channelNames: bundle.channelNames,
-        modeNames: bundle.modeNames,
-        startRuleIndex: bundle.startRuleIndex,
-        pipeStartRuleIndex: bundle.pipeStartRuleIndex,
-        grammarHash: bundle.grammarHash,
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        tokenDictionary: (bundle.tokenDictionary ?? {}) as TokenDictionary,
-        ignoredTokens: bundle.ignoredTokens ?? [],
-        rulesToVisit: bundle.rulesToVisit ?? [],
-        runtimeSymbolicNameToTokenType: buildSymbolicNameToTokenType(bundle.symbolicNames),
-        runtimeRuleNameToIndex: buildRuleNameToIndex(bundle.parserRuleNames),
-      };
 
       // Only cache if the datasource hasn't changed while we were fetching.
       // A rapid ds-1 → ds-2 switch resets cachedDatasourceId; if ds-1's fetch
