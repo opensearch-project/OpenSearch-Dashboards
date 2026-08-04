@@ -67,11 +67,12 @@ describe('RightStyleOptionsPanel', () => {
     expect(screen.getByText('Visualize')).toBeInTheDocument();
   });
 
-  it('renders loading spinner when LOADING', () => {
+  it('renders loading spinner when LOADING but keeps style panel mounted (hidden)', () => {
     (useQueryBuilderState as jest.Mock).mockReturnValue(buildState(QueryExecutionStatus.LOADING));
     render(<RightStyleOptionsPanel />);
     expect(screen.getByTestId('loadingSpinner')).toBeInTheDocument();
-    expect(mockRenderStylePanel).not.toHaveBeenCalled();
+    expect(mockRenderStylePanel).toHaveBeenCalledWith({ className: 'visStylePanelBody' });
+    expect(screen.getByTestId('style-panel')).toBeInTheDocument();
   });
 
   it('renders style panel when READY', () => {

@@ -20,13 +20,7 @@ export const RightStyleOptionsPanel = React.memo(() => {
     queryStatus.status === QueryExecutionStatus.UNINITIALIZED ||
     queryStatus.status === QueryExecutionStatus.NO_RESULTS;
 
-  // Unmount the style panel to ensure outdated component state doesn't override current styles
-  if (queryStatus.status === QueryExecutionStatus.LOADING)
-    return (
-      <EuiPanel paddingSize="s" style={{ height: '100%' }} borderRadius="none" hasShadow={false}>
-        <StylePanelLoadingState />
-      </EuiPanel>
-    );
+  const isLoading = queryStatus.status === QueryExecutionStatus.LOADING;
 
   if (displayEmptyState) {
     return (
@@ -41,6 +35,9 @@ export const RightStyleOptionsPanel = React.memo(() => {
       </EuiPanel>
     );
   }
+
+  // keep the style panel mounted while loading and just hide it, so its component
+  // state (for example: including accordion open/closed state) is preserved across an Update.
   return (
     <EuiPanel
       paddingSize="s"
@@ -48,7 +45,10 @@ export const RightStyleOptionsPanel = React.memo(() => {
       borderRadius="none"
       hasShadow={false}
     >
-      {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
+      {isLoading && <StylePanelLoadingState />}
+      <div style={{ display: isLoading ? 'none' : 'block' }}>
+        {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
+      </div>
     </EuiPanel>
   );
 });
