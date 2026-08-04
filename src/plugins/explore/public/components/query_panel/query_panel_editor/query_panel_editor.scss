@@ -28,6 +28,17 @@
     color: $ouiColorDisabledText;
   }
 
+  &--ppl .monaco-hover {
+    // Keep lint guidance above navigation, popovers, and other page controls.
+    z-index: $ouiZLevel9 !important;
+
+    // Monaco inserts "View Problem" as the first marker action. Keep the
+    // remaining status-bar children so quick fixes stay visible.
+    .hover-row.status-bar > .actions > .action-container:first-child {
+      display: none !important;
+    }
+  }
+
   &--promptMode {
     padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way
 
@@ -59,6 +70,26 @@
 
       &.exploreQueryPanelEditor--promptIsTyping::after {
         filter: brightness(1.3) saturate(1.2);
+      }
+    }
+  }
+}
+
+// Monaco portals code-action menus outside the editor wrapper, so scope the
+// menu through the nearest Explore query container that contains a PPL editor.
+.exploreResizableQueryContainer__queryPanelInner:has(.exploreQueryPanelEditor--ppl) {
+  .action-widget {
+    z-index: $ouiZLevel9 !important;
+
+    // Monaco temporarily sets each row to `width: auto` to measure the menu.
+    // Include its surrounding chrome and expose the title's intrinsic width
+    // only during that pass; normal overflow handling resumes afterward.
+    .monaco-list-row.action[style*="width: auto"] {
+      padding-right: 28px;
+
+      .title {
+        flex: none;
+        overflow: visible;
       }
     }
   }
