@@ -127,7 +127,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const { spec, legendItems } = createNumericalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color }
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.allData
           );
           props.onLegend?.(legendItems);
           return (
@@ -157,7 +158,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const { spec, legendItems } = createCategoricalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color }
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.allData
           );
           props.onLegend?.(legendItems);
           return (
@@ -185,7 +187,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const { spec, legendItems } = createSingleCategoricalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color },
+            props.allData
           );
           props.onLegend?.(legendItems);
           return (
@@ -213,7 +216,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const { spec, legendItems } = createSingleNumericalStateTimeline(
             props.data,
             props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color },
+            props.allData
           );
           props.onLegend?.(legendItems);
           return (

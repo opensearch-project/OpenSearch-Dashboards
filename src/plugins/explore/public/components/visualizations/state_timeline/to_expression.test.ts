@@ -97,6 +97,34 @@ describe('State Timeline to_expression', () => {
       ]);
     });
 
+    it('uses provided full data when assigning numerical state colors', () => {
+      const palette = getColors().categories;
+      const result = createNumericalStateTimeline(
+        [
+          { timestamp: '2023-01-01', group: 'A', numValue: 10 },
+          { timestamp: '2023-01-02', group: 'A', numValue: 10 },
+          { timestamp: '2023-01-03', group: 'A', numValue: 30 },
+          { timestamp: '2023-01-04', group: 'A', numValue: 30 },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { timestamp: '2023-01-01', group: 'A', numValue: 10 },
+          { timestamp: '2023-01-02', group: 'A', numValue: 10 },
+          { timestamp: '2023-01-03', group: 'A', numValue: 20 },
+          { timestamp: '2023-01-04', group: 'A', numValue: 20 },
+          { timestamp: '2023-01-05', group: 'A', numValue: 30 },
+          { timestamp: '2023-01-06', group: 'A', numValue: 30 },
+        ]
+      );
+
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({ name: '10', itemStyle: { color: palette[0] } }),
+        expect.objectContaining({ name: '30', itemStyle: { color: palette[2] } }),
+      ]);
+    });
+
     it('throws when required fields are missing', () => {
       expect(() => createNumericalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
@@ -146,6 +174,34 @@ describe('State Timeline to_expression', () => {
       ]);
     });
 
+    it('uses provided full data when assigning categorical state colors', () => {
+      const palette = getColors().categories;
+      const result = createCategoricalStateTimeline(
+        [
+          { timestamp: '2023-01-01', group: 'A', color: 'red' },
+          { timestamp: '2023-01-02', group: 'A', color: 'red' },
+          { timestamp: '2023-01-03', group: 'A', color: 'green' },
+          { timestamp: '2023-01-04', group: 'A', color: 'green' },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { timestamp: '2023-01-01', group: 'A', color: 'blue' },
+          { timestamp: '2023-01-02', group: 'A', color: 'blue' },
+          { timestamp: '2023-01-03', group: 'A', color: 'green' },
+          { timestamp: '2023-01-04', group: 'A', color: 'green' },
+          { timestamp: '2023-01-05', group: 'A', color: 'red' },
+          { timestamp: '2023-01-06', group: 'A', color: 'red' },
+        ]
+      );
+
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[2], palette[1]]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({ name: 'red', itemStyle: { color: palette[2] } }),
+        expect.objectContaining({ name: 'green', itemStyle: { color: palette[1] } }),
+      ]);
+    });
+
     it('throws when required fields are missing', () => {
       expect(() => createCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
@@ -186,6 +242,34 @@ describe('State Timeline to_expression', () => {
       ]);
     });
 
+    it('uses provided full data when assigning single categorical state colors', () => {
+      const palette = getColors().categories;
+      const result = createSingleCategoricalStateTimeline(
+        [
+          { timestamp: '2023-01-01', color: 'red' },
+          { timestamp: '2023-01-02', color: 'red' },
+          { timestamp: '2023-01-03', color: 'green' },
+          { timestamp: '2023-01-04', color: 'green' },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { timestamp: '2023-01-01', color: 'blue' },
+          { timestamp: '2023-01-02', color: 'blue' },
+          { timestamp: '2023-01-03', color: 'green' },
+          { timestamp: '2023-01-04', color: 'green' },
+          { timestamp: '2023-01-05', color: 'red' },
+          { timestamp: '2023-01-06', color: 'red' },
+        ]
+      );
+
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[2], palette[1]]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({ name: 'red', itemStyle: { color: palette[2] } }),
+        expect.objectContaining({ name: 'green', itemStyle: { color: palette[1] } }),
+      ]);
+    });
+
     it('throws when required fields are missing', () => {
       expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
@@ -202,6 +286,34 @@ describe('State Timeline to_expression', () => {
 
       expect(result.spec).toHaveProperty('dataset');
       expect(result.spec).toHaveProperty('series');
+    });
+
+    it('uses provided full data when assigning single numerical state colors', () => {
+      const palette = getColors().categories;
+      const result = createSingleNumericalStateTimeline(
+        [
+          { timestamp: '2023-01-01', numValue: 10 },
+          { timestamp: '2023-01-02', numValue: 10 },
+          { timestamp: '2023-01-03', numValue: 30 },
+          { timestamp: '2023-01-04', numValue: 30 },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { timestamp: '2023-01-01', numValue: 10 },
+          { timestamp: '2023-01-02', numValue: 10 },
+          { timestamp: '2023-01-03', numValue: 20 },
+          { timestamp: '2023-01-04', numValue: 20 },
+          { timestamp: '2023-01-05', numValue: 30 },
+          { timestamp: '2023-01-06', numValue: 30 },
+        ]
+      );
+
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({ name: '10', itemStyle: { color: palette[0] } }),
+        expect.objectContaining({ name: '30', itemStyle: { color: palette[2] } }),
+      ]);
     });
 
     it('throws when required fields are missing', () => {
