@@ -2,7 +2,7 @@
   {
     "id": "head-without-sort",
     "detector": "head-without-sort",
-    "enabled": true,
+    "enabled": false,
     "severity": "info",
     "message": "Without sort, head can return different rows each time the query runs.",
     "howToFix": "Add `sort` before `head` when you need stable top or bottom results.",
@@ -47,7 +47,7 @@
   {
     "id": "disabled-join-type",
     "detector": "disabled-join-type",
-    "enabled": true,
+    "enabled": false,
     "severity": "warning",
     "message": "This join type is disabled by default.",
     "howToFix": "Use an `inner` or `left` join when it preserves the intended result. Otherwise, ask an administrator to enable `plugins.calcite.all_join_types.allowed`.",
@@ -57,7 +57,7 @@
   {
     "id": "dedup-consecutive-unsupported",
     "detector": "dedup-consecutive-unsupported",
-    "enabled": true,
+    "enabled": false,
     "severity": "warning",
     "message": "consecutive=true uses an older query engine and may make this query slower.",
     "howToFix": "Remove `consecutive=true` to use regular deduplication. No equivalent option preserves consecutive-only behavior.",
@@ -124,7 +124,7 @@
   {
     "id": "flat-object-subfield",
     "detector": "flat-object-subfield",
-    "enabled": true,
+    "enabled": false,
     "severity": "error",
     "message": "PPL cannot search a field stored inside a flat_object field.",
     "howToFix": "Use another field or query this data with DQL or the Search API. To use it in PPL, map and reindex it as a regular object field.",
@@ -166,7 +166,7 @@
   {
     "id": "operation-not-pushed",
     "detector": "operation-not-pushed",
-    "enabled": true,
+    "enabled": false,
     "severity": "warning",
     "message": "This operation runs after the index scan, so OpenSearch must read and return its input rows first.",
     "howToFix": "Rewrite the highlighted operation with indexed fields and supported functions so the PPL engine can include it in the index request.",
@@ -180,7 +180,7 @@
   {
     "id": "operation-pushed-as-script",
     "detector": "operation-pushed-as-script",
-    "enabled": true,
+    "enabled": false,
     "severity": "info",
     "message": "OpenSearch evaluates this operation as a script for every candidate document instead of using a native index query.",
     "howToFix": "Use a direct field comparison or sort on an indexed field so OpenSearch can use a native query or field sort.",
@@ -210,7 +210,7 @@
     "id": "wildcard-source-zero-match",
     "detector": "wildcard-source-zero-match",
     "enabled": true,
-    "severity": "info",
+    "severity": "warning",
     "message": "Wildcard source pattern matches no known index.",
     "howToFix": "Correct the `source=` pattern or choose an existing index.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/#example-6-using-wildcards",

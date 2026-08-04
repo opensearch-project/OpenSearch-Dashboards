@@ -75,9 +75,10 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
   };
 
   if (diagnostic.ruleId) {
-    marker.code = diagnostic.docUrl
-      ? { value: diagnostic.ruleId, target: monaco.Uri.parse(diagnostic.docUrl) }
-      : diagnostic.ruleId;
+    marker.code =
+      diagnostic.ruleId !== 'field-validation' && diagnostic.docUrl
+        ? { value: diagnostic.ruleId, target: monaco.Uri.parse(diagnostic.docUrl) }
+        : diagnostic.ruleId;
   }
 
   // Attach the quick-fix payload the code-action provider reads off the marker.

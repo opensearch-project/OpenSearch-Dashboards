@@ -76,7 +76,10 @@ describe('lintRuntimePPLQuery', () => {
 
     const result = await lintRuntimePPLQuery({
       content: 'source=logs | head 10',
-      context: { useRuntimeGrammar: true },
+      context: {
+        useRuntimeGrammar: true,
+        overrides: { 'head-without-sort': { enabled: true } },
+      },
       model: {} as any,
     });
 
@@ -90,7 +93,10 @@ describe('lintRuntimePPLQuery', () => {
 
       const pipeFirst = await lintRuntimePPLQuery({
         content: '| head 10',
-        context: { useRuntimeGrammar: true },
+        context: {
+          useRuntimeGrammar: true,
+          overrides: { 'head-without-sort': { enabled: true } },
+        },
         model: {} as any,
       });
       const head = pipeFirst!.diagnostics.find((d) => d.ruleId === 'head-without-sort');
@@ -105,7 +111,10 @@ describe('lintRuntimePPLQuery', () => {
 
       const regular = await lintRuntimePPLQuery({
         content: 'source=logs | head 10',
-        context: { useRuntimeGrammar: true },
+        context: {
+          useRuntimeGrammar: true,
+          overrides: { 'head-without-sort': { enabled: true } },
+        },
         model: {} as any,
       });
       const head = regular!.diagnostics.find((d) => d.ruleId === 'head-without-sort');
@@ -131,6 +140,10 @@ describe('lintRuntimePPLQuery', () => {
       fields,
       typeMap,
       disabledObjectFields: new Set(['raw']),
+      overrides: {
+        'flat-object-subfield': { enabled: true },
+        'head-without-sort': { enabled: true },
+      },
     };
 
     const runtimeIds = async (content: string): Promise<string[]> => {
@@ -202,7 +215,11 @@ describe('lintRuntimePPLQuery', () => {
       jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
       const result = await lintRuntimePPLQuery({
         content,
-        context: { useRuntimeGrammar: true, fields } as any,
+        context: {
+          useRuntimeGrammar: true,
+          fields,
+          overrides: { 'head-without-sort': { enabled: true } },
+        } as any,
         model: {} as any,
       });
       return result;

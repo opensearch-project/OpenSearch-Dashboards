@@ -108,7 +108,7 @@ describe('pplLintHoverProvider', () => {
 
   it('renders the quick-fix preview from the side table', () => {
     const marker = makeMarker({
-      code: { value: 'field-validation', target: monaco.Uri.parse('https://docs.example/f') },
+      code: 'field-validation',
       message: 'Unknown field "reveneu". Did you mean "revenue"?',
     });
     markersByOwner[LINT_OWNER] = [marker];
@@ -118,6 +118,7 @@ describe('pplLintHoverProvider', () => {
     const md = markdownOf(hoverAt(1, 7));
     expect(md).toContain('**Quick fix available** — `revenue`');
     expect(md).not.toContain('Closest known field');
+    expect(md).not.toContain('Learn more');
   });
 
   it('picks the innermost marker when several overlap', () => {
