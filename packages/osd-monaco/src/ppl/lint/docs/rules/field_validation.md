@@ -8,8 +8,8 @@ rule: field-validation
 
 The rule has two passes:
 
-- A referenced field is absent from the selected dataset and was not created by
-  an earlier pipeline stage.
+- A referenced field is absent from the selected dataset and is not recognized
+  as a pipeline-created field.
 - The source-field slot of `grok`, `parse`, or `patterns` contains an expression
   instead of one bare field, including Splunk-style `field=body` syntax.
 
@@ -42,3 +42,89 @@ Error severity, enabled by default, on all engine versions. Field existence
 checks require selected-dataset field metadata and self-suppress without it;
 field-slot shape checks can still run from query text. Source-scoped checks are
 suppressed on a proven dataset mismatch.
+
+## Implementation
+
+`fieldValidationDetector` in
+`packages/osd-monaco/src/ppl/lint/rules/field_validation.ts` combines three
+passes:
+
+1. The shape pass finds `grokCommand`, `parseCommand`, and `patternsCommand`,
+   takes their direct `expression` child, and accepts it only when one
+   `fieldExpression` spans the entire expression with no `comparisonOperator` or
+   `literalValue`. On the runtime grammar it reads the parse tree. On the
+   compiled-simplified grammar, where `field=body` error-recovers poorly, it
+   scans `context.sourceText` with `findCompiledFieldSlotShapeMatches`.
+2. The existence pass walks every `fieldExpression`. A reference is known when
+   either `context.fields` or `buildPipelineShape(...).createdFields` contains
+   its normalized path. It excludes source/table/join grammar contexts, declared
+   join-side aliases, and hard-pruned alternate-source subtrees.
+3. Overlap suppression removes an unknown-field diagnostic contained by a
+   shape diagnostic, so one malformed slot produces one finding.
+
+The context builder derives `fields` from the selected index pattern and carries
+it only when the cached dataset ID, data source ID, and dataset type still match.
+The catalog marks the rule `sourceScoped`; `runLint` suppresses it only when one
+non-wildcard top-level source is proven different from
+`selectedSourcePattern`. Missing metadata suppresses only the existence pass.
+
+Unknown-field ranges cover the `fieldExpression`; a close match adds an in-place
+replacement. The edit-distance threshold is `max(2, floor(name.length / 3))`.
+Shape ranges cover the source-slot expression. Only one `=` or `==` whose
+right-hand side is one bare field gets the `field=value` to `value` fix.
+Ambiguous expressions have no fix.
+
+## Hardcoded assumptions and maintenance
+
+- Keep `SHAPE_DOC_URL`, `SHAPE_COMMAND_KEYWORD`, the shape-pass command loop, and
+  `field_slot_shape_text.ts`'s `COMMANDS` map synchronized. If another grammar
+  rule adds `source_field = expression`, update all four surfaces and the
+  grammar census guard.
+- Every new PPL command must be classified in `COMMAND_ORDER_EFFECTS` in
+  `pipeline_shape.ts`; otherwise `buildPipelineShape` does not see the stage or
+  its created fields. Add bespoke created-field handling when output names are
+  not represented by generic `AS` or an `evalClause` left-hand side.
+- Created-field handling is hardcoded for `grok`/`parse`/`rex` captures,
+  `patterns` (`NEW_FIELD`, `patterns_field`, and `tokens`), `spath`
+  (`OUTPUT` or `indexablePath`), and `addtotals`/`addcoltotals`
+  (`FIELDNAME`, default `Total`). Reverify these defaults and grammar slots when
+  command or engine behavior changes.
+- `collectAlternateSourceSubtrees` prunes `lookup`, an `append` containing
+  `search`, `appendcol`, `appendpipe`, `foreach`, `subSearch`, and
+  `unionDataset`. Add new nested-source commands there. `graphlookup` is
+  intentionally not pruned because its `AS` name is an outer output field.
+- Created fields are currently accumulated for the whole outer pipeline, not by
+  stage. A reference before a later `eval` or alias definition is therefore
+  treated as known. Whole-command pruning can also omit outer outputs from
+  commands such as `lookup`; both behaviors need explicit review when command
+  semantics change.
+- `SOURCE_KEYWORDS` (`source`, `index`) is a compiled-grammar workaround.
+  `resolveExcludedAncestorIndices` and `collectJoinAliases` depend on the exact
+  grammar names `fromClause`, `tableSource`, `tableSourceClause`,
+  `tableQualifiedName`, `sourceReference`, `sideAlias`, `joinCriteria`, and
+  `qualifiedName`.
+- Dotted references are accepted when either the full path or its leading
+  segment is known. This avoids false positives for object children but can
+  hide an unknown child beneath a known object. Unbalanced paths, missing grammar
+  rules, absent fields, and detector exceptions produce no finding rather than
+  a speculative diagnostic.
+- Source scoping fails open for pipe-first, wildcard, multi-source, or otherwise
+  inconclusive queries. Alternate-source pruning is therefore the separate
+  protection for nested sources and must stay current.
+
+## Tests
+
+- `packages/osd-monaco/src/ppl/lint/__tests__/analyzer_lint.test.ts`: compiled
+  shape fallback, fixes/ranges, overlap suppression, and field metadata.
+- `packages/osd-monaco/src/ppl/lint/__tests__/field_slot_shape.test.ts` and
+  `field_slot_shape_text.test.ts`: runtime-tree and compiled-text predicates.
+- `packages/osd-monaco/src/ppl/lint/__tests__/field_slot_grammar_guard.test.ts`:
+  hardcoded field-slot command census.
+- `packages/osd-monaco/src/ppl/lint/__tests__/field_validation_alt_source.test.ts`:
+  join aliases, alternate sources, normalization, and created fields.
+- `packages/osd-monaco/src/ppl/lint/__tests__/pattern_fields.test.ts`: capture
+  names registered by extraction commands.
+- `packages/osd-monaco/src/ppl/lint/__tests__/source_mismatch_suppression.test.ts`:
+  selected-source gating and inconclusive-source behavior.
+- `src/plugins/data/public/antlr/opensearch_ppl/command_census.test.ts` and
+  `command_order_effects.test.ts`: new-command classification and output fields.

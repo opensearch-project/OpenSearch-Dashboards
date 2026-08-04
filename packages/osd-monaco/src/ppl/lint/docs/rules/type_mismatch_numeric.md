@@ -34,3 +34,62 @@ unknown.
 
 Warning severity, enabled by default, on Calcite engine version 3.7.0 or later.
 It requires selected-dataset type metadata and is source-scoped.
+
+## Implementation
+
+`typeMismatchNumericDetector` in
+`packages/osd-monaco/src/ppl/lint/rules/type_mismatch_numeric.ts` requires
+`context.isCalcite === true` and a nonempty `context.typeMap`. It walks
+`comparisonOperator` nodes, accepts only `=` or `==`, and takes the two rule-node
+siblings around the operator as operands. One operand must be a `stringLiteral`
+spanning the complete operand and the other exactly one bare `fieldExpression`;
+either operand order is supported.
+
+The detector canonicalizes the field path and performs an exact `typeMap`
+lookup. It strips the literal's outer quote pair and uses JavaScript `Number` as
+a deliberately permissive coercion oracle. Nonblank values accepted by
+`Number` are left alone; blank or nonnumeric strings are reported.
+
+The host builds `typeMap` only from fields with one unambiguous index-pattern
+`esTypes` value and forwards it only when cache provenance matches the active
+dataset. Catalog gates enforce `needsContext`, `sourceScoped`, Calcite, and
+version 3.7.0 or later; the detector repeats the engine/map checks. The
+diagnostic spans the comparison parent and has no automatic fix.
+
+## Hardcoded assumptions and maintenance
+
+- `VERIFIED_OPERATORS` contains only `=` and `==`. Add an operator only after
+  verifying its Calcite failure mode and both grammar surfaces.
+- `NUMERIC_TYPES` manually mirrors `OSD_FIELD_TYPES.NUMBER`: `byte`, `short`,
+  `integer`, `long`, `unsigned_long`, `half_float`, `float`, `double`,
+  `scaled_float`, and `token_count`. Keep the list synchronized when supported
+  field types change.
+- The grammar contract is `comparisonOperator`, `stringLiteral`, and
+  `fieldExpression`, with exactly two rule-node operands under the operator's
+  parent. Wrapped fields, computed expressions, field-to-field comparisons, and
+  compound literals intentionally produce no finding.
+- `Number` may accept formats that Calcite handles differently. This
+  over-acceptance is intentional: uncertain coercions become false negatives,
+  not false positives. Reverify before replacing or tightening the oracle.
+- Type lookup is exact. Created/renamed/extracted fields are not inferred, and
+  missing or conflicting mapping types suppress the rule.
+- The detector does not prune alternate-source subtrees, so comparisons in
+  lookup/append/subsearch/union can use the outer dataset's type map. Review
+  nested-source handling whenever command coverage expands.
+- Source mismatch gating is conclusive-only; wildcard, pipe-first, multi-source,
+  and inconclusive queries continue to run.
+
+## Tests
+
+- `packages/osd-monaco/src/ppl/lint/rules/type_mismatch_numeric.test.ts`:
+  operators, operand order, numeric types/coercion, exclusions, configured
+  diagnostics, and self-gating.
+- `packages/osd-monaco/src/ppl/lint/rules/local_rules_product_path.test.ts`:
+  catalog/registry/runner and `needsContext` plumbing.
+- `packages/osd-monaco/src/ppl/lint/__tests__/source_mismatch_suppression.test.ts`:
+  source-scoped behavior.
+- `src/plugins/data/public/antlr/opensearch_ppl/grammar_surface_equivalence.test.ts`
+  and `runtime_lint.test.ts`: runtime/compiled grammar behavior and context
+  forwarding.
+- `src/plugins/data/public/ppl_lint/lint_context_builder.test.ts`: numeric
+  metadata extraction, conflicting mappings, provenance, and Calcite state.

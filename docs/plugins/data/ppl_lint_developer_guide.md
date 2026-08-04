@@ -18,14 +18,14 @@ values through its `CatalogEntry`; do not duplicate them in a detector.
 
 Several other surfaces intentionally mirror or extend the catalog:
 
-| Surface                                                  | Contents                                                             | Enforcement                                                             |
-| -------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `src/plugins/query_enhancements/server/ui_settings.ts`   | Rule ID, enabled default, severity, order, plus `command-suggestion` | Automated by `ui_settings.test.ts`                                      |
-| `detector_registry.ts` and `explain/explain_registry.ts` | Detector key to implementation                                       | Partial product-path coverage; no complete catalog/registry parity test |
-| `src/plugins/data/public/ppl_lint/lint_overrides.ts`     | Severity floors and special syntax-channel setting handling          | Focused tests                                                           |
-| Lint README enabled/disabled lists and table             | Shipped rule summary                                                 | Manual review                                                           |
-| `docs/rules/*.md` `Availability` sections                | Per-rule default and applicability                                   | Manual review                                                           |
-| `__tests__/__fixtures__/doc_links.snapshot.json`         | External URL and link-quality classification                         | Offline catalog/snapshot parity test                                    |
+| Surface                                                  | Contents                                                                          | Enforcement                                                             |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `src/plugins/query_enhancements/server/ui_settings.ts`   | Rule ID, enabled default, severity, order, plus `command-suggestion`              | Automated by `ui_settings.test.ts`                                      |
+| `detector_registry.ts` and `explain/explain_registry.ts` | Detector key to implementation                                                    | Partial product-path coverage; no complete catalog/registry parity test |
+| `src/plugins/data/public/ppl_lint/lint_overrides.ts`     | Severity floors and special syntax-channel setting handling                       | Focused tests                                                           |
+| Lint README enabled/disabled lists and table             | Shipped rule summary                                                              | Manual review                                                           |
+| `docs/rules/*.md`                                        | Per-rule behavior, implementation, hardcoded assumptions, tests, and availability | Manual review                                                           |
+| `__tests__/__fixtures__/doc_links.snapshot.json`         | External URL and link-quality classification                                      | Offline catalog/snapshot parity test                                    |
 
 There is intentionally no test that parses prose documentation for parity.
 When a default, severity, applicability predicate, ID, or documentation URL
@@ -405,9 +405,14 @@ has no configurable severity, and is read separately from catalog overrides.
 1. Add the external URL and quality classification to
    `__tests__/__fixtures__/doc_links.snapshot.json`.
 2. Add `docs/rules/<rule_id_with_underscores>.md`.
-3. Use the five required headings: `What it detects`, `Why it matters`,
+3. Use the five user-facing headings: `What it detects`, `Why it matters`,
    `Example`, `How to fix it`, and `Availability`.
-4. Add the rule to the default-status list and rule table in the lint README.
+4. Add the developer headings `Implementation`, `Hardcoded assumptions and
+maintenance`, and `Tests`. Name the detector and shared helpers, explain its
+   evidence and fail-closed behavior, list command/grammar/type/plan constants
+   that can drift, record known limitations, and identify focused tests that
+   must change with the rule.
+5. Add the rule to the default-status list and rule table in the lint README.
 
 The doc-link test is offline. It verifies catalog/snapshot IDs, exact URL
 equality, domain and anchor shape, and explicit unpublished gaps. It does not
@@ -648,5 +653,7 @@ yarn docs:generateDevDocs
 - Explain changes update protocol or outcome versions when cache compatibility
   changes.
 - Positive, negative, range, and applicability tests exist.
+- The rule page names its implementation path, shared dependencies, hardcoded
+  assumptions, current limitations, and focused tests.
 - The settings default, doc-link snapshot, rule page, and README table are in
   sync.

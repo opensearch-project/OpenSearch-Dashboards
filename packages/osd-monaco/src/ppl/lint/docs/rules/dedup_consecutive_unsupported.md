@@ -31,5 +31,52 @@ equivalent rewrite that preserves consecutive-only behavior.
 
 ## Availability
 
-Warning severity, off by default, on Calcite engine version 3.3.0 or later. It
-needs only the query text and the positive Calcite signal.
+Warning severity, configured off by default, on Calcite engine version 3.3.0 or
+later. Users can opt in through the per-rule Advanced Setting. It needs only the
+query text and the positive Calcite signal.
+
+## Implementation
+
+`dedupConsecutiveUnsupportedDetector` in
+`packages/osd-monaco/src/ppl/lint/rules/dedup_consecutive_unsupported.ts` finds
+`dedupCommand` nodes and scans each command's flattened, lowercased token text
+with `/consecutive=(true|false)/`. It emits one diagnostic for the complete
+command when the first matched value is `true`; plain `dedup` and
+`consecutive=false` are ignored. No quick fix is attached.
+
+The catalog gates the rule with `minVersion: 3.3.0` and `engine: calcite`. The
+detector independently requires `context.isCalcite === true` so direct detector
+calls cannot bypass the engine gate. Unknown, false, or unmeasured engine state
+therefore suppresses the rule. Because this is warning severity, an unknown
+version does not suppress it once Calcite is positively known; a known version
+below 3.3 does.
+
+The host only derives a positive Calcite signal from measured cluster settings.
+A failed or unmeasured settings request leaves `isCalcite` undefined, keeping
+this rule quiet.
+
+## Hardcoded assumptions and maintenance
+
+- The detector depends on the grammar rule name `dedupCommand` and the exact
+  flattened spelling `consecutive=true|false`. Update the regex if the option
+  gains another separator, value syntax, or alias.
+- The regex reads only the first `consecutive` occurrence. If the grammar ever
+  permits repeated options, align detection with the engine's precedence rule.
+- The warning assumes Calcite throws `CalciteUnsupportedException`, the fallback
+  catches it unconditionally, and the legacy v2 `DedupeOperator` supports the
+  option. Revalidate the rule, severity, and 3.3 floor if fallback behavior
+  changes.
+- Keep the detector-level positive-engine check in sync with the catalog gate.
+  It is deliberate defense for tests and other callers that invoke the detector
+  directly.
+
+## Tests
+
+`rules/__tests__/dedup_consecutive_unsupported.test.ts` covers
+`consecutive=true`, `consecutive=false`, plain `dedup`, catalog message wiring,
+and suppression without a positive Calcite context.
+
+`__tests__/version_filter.test.ts` covers Calcite's positive-signal requirement,
+known and unknown versions, and severity-independent gate behavior. If the
+option syntax changes, add runtime-grammar coverage as well; the focused rule
+test currently exercises only the compiled surface.

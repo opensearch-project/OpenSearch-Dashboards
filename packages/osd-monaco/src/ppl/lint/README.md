@@ -301,6 +301,11 @@ version, Calcite, HTTP, and clean-parse gates must also pass.
 Users can opt in to a disabled rule through the
 `query:enhancements:pplLint:rules` Advanced Setting.
 
+Each linked rule page is also the detailed maintainer reference for that rule:
+it names the detector and shared implementation paths, hardcoded grammar,
+command, type, or plan assumptions, known failure and suppression behavior,
+and the focused tests that must change with it.
+
 | Rule                                                                                                   | Severity | Default | Applies to      | Flags                  |
 | ------------------------------------------------------------------------------------------------------ | -------- | ------- | --------------- | ---------------------- |
 | [`head-without-sort`](docs/rules/head_without_sort.md)                                                 | info     | off     | all versions    | none                   |
