@@ -66,6 +66,7 @@ import {
   TransformationService,
   registerAllTransformations,
 } from '../components/data_transformations';
+import { PanelDataService } from './panel_data_service';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -657,6 +658,15 @@ export class ExploreEmbeddable
     this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
 
+    // Update shared panel data store so the global fetch_panel_data tool returns fresh data
+    const savedExploreId = this.savedExplore.id;
+    if (savedExploreId) {
+      PanelDataService.getInstance().setPanelData(savedExploreId, {
+        rows: transformedRows,
+        panelTitle: this.panelTitle || this.savedExplore.title,
+      });
+    }
+
     // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
       const allColumns = [
@@ -722,6 +732,10 @@ export class ExploreEmbeddable
     // Cleanup transformation service
     if (this.transformationService) {
       this.transformationService.destroy();
+    }
+
+    if (this.savedExplore.id) {
+      PanelDataService.getInstance().removePanelData(this.savedExplore.id);
     }
 
     if (this.abortController) {

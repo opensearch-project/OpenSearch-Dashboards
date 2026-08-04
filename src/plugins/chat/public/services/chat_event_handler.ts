@@ -313,15 +313,16 @@ export class ChatEventHandler {
 
     // Strategy 1: Use explicitly provided parent message ID
     // This is the most reliable approach when the backend provides it
-    if (parentMessageId) {
-      this.addToolCallToMessage(parentMessageId, toolCall);
+    if (parentMessageId && this.addToolCallToMessage(parentMessageId, toolCall)) {
       return;
     }
 
     // Strategy 2: Determine placement based on message timeline positions
-    // Check if the last assistant message is still the most recent response
+    // Check if the last assistant message is still the most recent response.
+    // Skipped when the backend named a parent: it wants this tool call on a message of
+    // its own, not folded into the text message it has already ended.
     const timelineMessages = this.getTimeline();
-    if (this.lastTextMessageStartId) {
+    if (!parentMessageId && this.lastTextMessageStartId) {
       const lastAssistantTextMessageIndex = timelineMessages.findLastIndex(
         (message) => message.id === this.lastTextMessageStartId
       );
@@ -341,16 +342,18 @@ export class ChatEventHandler {
     // This handles the case where the LLM responds with tool calls but without any text message.
     // Since there's no TEXT_MESSAGE_START event, we need to create a fake assistant message
     // to hold the tool calls so they appear in the correct position in the timeline.
-    const fakeAssistantMessageId = `fake-assistant-message-` + new Date().getTime();
-    this.onTimelineUpdate((prev) => {
-      const newMessage: AssistantMessage = {
-        id: fakeAssistantMessageId,
-        role: 'assistant',
-        toolCalls: [toolCall],
-      };
-      return [...prev, newMessage];
-    });
-    this.lastTextMessageStartId = fakeAssistantMessageId;
+    const newMessageId = parentMessageId ?? `fake-assistant-message-` + new Date().getTime();
+    const newMessage: AssistantMessage = {
+      id: newMessageId,
+      role: 'assistant',
+      toolCalls: [toolCall],
+    };
+    // Register in the active map too, not just the timeline: TEXT_MESSAGE_CONTENT resolves
+    // its target through this map, so a timeline-only insert would silently drop any text
+    // the agent streams onto the same message id afterwards.
+    this.activeAssistantMessages.set(newMessageId, newMessage);
+    this.onTimelineUpdate((prev) => [...prev, newMessage]);
+    this.lastTextMessageStartId = newMessageId;
   }
 
   /**
@@ -403,7 +406,8 @@ export class ChatEventHandler {
             toolCall.function.name,
             args,
             toolCallId,
-            await this.chatService.getCurrentDataSourceId()
+            await this.chatService.getCurrentDataSourceInfo(),
+            this.chatService.getCurrentTimeRange()
           );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
@@ -626,7 +630,7 @@ export class ChatEventHandler {
   /**
    * Add tool call to a specific message in timeline
    */
-  private addToolCallToMessage(messageId: string, toolCall: ToolCall): void {
+  private addToolCallToMessage(messageId: string, toolCall: ToolCall): boolean {
     // Check if message is in active messages
     const activeMessage = this.activeAssistantMessages.get(messageId);
     if (activeMessage) {
@@ -643,8 +647,11 @@ export class ChatEventHandler {
         }
         return prev;
       });
-      return;
+      return true;
     }
+
+    const known = this.getTimeline().find((m) => m.id === messageId);
+    if (!known || known.role !== 'assistant') return false;
 
     // Otherwise find in timeline and update
     this.onTimelineUpdate((prev) => {
@@ -663,6 +670,8 @@ export class ChatEventHandler {
 
       return updated;
     });
+
+    return true;
   }
 
   /**
@@ -873,8 +882,25 @@ export class ChatEventHandler {
    * Simply sets the timeline to the saved messages
    */
   private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
-    // Set timeline to snapshot messages
-    this.onTimelineUpdate(() => event.messages || []);
+    // agent backends may serialize a user message's `InputContent[]` to str
+    // restore multimodal user messages
+    this.onTimelineUpdate((prev) => {
+      const snapshot = event.messages || [];
+
+      const localArrayContent = new Map<string, unknown>();
+      for (const message of prev) {
+        if (message.role === 'user' && Array.isArray(message.content)) {
+          localArrayContent.set(message.id, message.content);
+        }
+      }
+      if (localArrayContent.size === 0) return snapshot;
+
+      return snapshot.map((message) => {
+        if (message.role !== 'user' || typeof message.content !== 'string') return message;
+        const content = localArrayContent.get(message.id);
+        return content ? ({ ...message, content } as Message) : message;
+      });
+    });
 
     // Reset streaming state
     this.onStreamingStateChange(false);

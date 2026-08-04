@@ -11,6 +11,7 @@ import {
   ChatServiceStart,
   ChatImplementationFunctions,
   Message,
+  InputContent,
   ChatWindowState,
   ConversationMemoryProvider,
 } from './types';
@@ -171,7 +172,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       },
 
       sendMessageWithWindow: async (
-        content: string,
+        content: string | InputContent[],
         messages: Message[],
         options?: { clearConversation?: boolean }
       ) => {
