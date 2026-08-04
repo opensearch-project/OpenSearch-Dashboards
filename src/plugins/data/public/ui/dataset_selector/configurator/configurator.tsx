@@ -22,11 +22,17 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
+import {
+  BaseDataset,
+  DEFAULT_DATA,
+  Dataset,
+  DatasetField,
+  isValidTimeField,
+  Query,
+} from '../../../../common';
 import { getIndexPatterns, getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
 import { DatasetIndexedView } from '../../../query/query_string/dataset_service';
-import { isValidTimeField } from './is_valid_time_field';
 
 export const Configurator = ({
   services,

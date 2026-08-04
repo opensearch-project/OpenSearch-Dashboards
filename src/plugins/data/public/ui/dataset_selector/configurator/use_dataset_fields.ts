@@ -4,9 +4,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { BaseDataset, DatasetField } from '../../../../common';
+import { BaseDataset, DatasetField, isValidTimeField } from '../../../../common';
 import { DatasetTypeConfig } from '../../../query/query_string/dataset_service';
-import { isValidTimeField } from './is_valid_time_field';
 
 export interface UseDatasetFieldsResult {
   allFields: DatasetField[];

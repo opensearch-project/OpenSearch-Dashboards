@@ -21,7 +21,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { ExplorePluginSetup, ExplorePluginStart, ExploreServices } from './types';
 
 // Export trace auto-detection utilities for use by other plugins
-export { detectTraceData, DetectionResult } from './utils/auto_detect_trace_data';
+export {
+  detectTraceData,
+  detectTraceDataAcrossDataSources,
+  DetectionResult,
+} from './utils/auto_detect_trace_data';
 export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create_auto_datasets';
 
 // Visualization system for use by other plugins

@@ -4,7 +4,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
-import { IFieldSubType } from '../index_patterns/types';
+import type { IFieldSubType } from '../index_patterns/types';
 export * from './_structure_cache';
 
 /**

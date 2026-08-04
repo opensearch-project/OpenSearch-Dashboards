@@ -120,7 +120,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               id: 'default-dataset-id',
               title: 'otel-v1-apm-span-*',
               type: 'INDEX_PATTERN',
-              timeFieldName: 'endTime',
+              timeFieldName: 'startTime',
             },
         spanId: defaultSpanId,
       },
