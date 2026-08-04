@@ -127,6 +127,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
               spec={spec}
               styles={props.styleOptions}
               axisColumnMappings={mapping}
+              seriesName={props.renderContext?.seriesName}
             />
           );
         },
@@ -153,6 +154,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
               spec={spec}
               styles={props.styleOptions}
               axisColumnMappings={mapping}
+              seriesName={props.renderContext?.seriesName}
             />
           );
         },

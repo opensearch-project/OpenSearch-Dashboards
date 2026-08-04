@@ -21,6 +21,7 @@ import { groupDataBySplitField } from './utils/group_data_by_split';
 import { SplitContainer } from './split_container';
 import { ColorMap } from './utils/color_map';
 import { CustomLegend } from './custom_legend';
+import type { VisualizationRenderContext } from './utils/use_visualization_types';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -192,6 +193,9 @@ export const CommonVisualizationRender = ({
                 <ChartRender
                   data={{ ...visualizationData, transformedData: groupData }}
                   config={visConfig}
+                  renderContext={{
+                    seriesName: groupKey,
+                  }}
                   onLegend={(legend) =>
                     onLegend(
                       groupKey,
@@ -270,6 +274,7 @@ export const VisualizationRender = ({
 const ChartRender = ({
   data,
   config,
+  renderContext,
   onLegend,
   timeRange,
   onSelectTimeRange,
@@ -278,6 +283,7 @@ const ChartRender = ({
 }: {
   data?: VisData;
   config?: RenderChartConfig;
+  renderContext?: VisualizationRenderContext;
   onLegend?: (legend: ColorMap) => void;
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
@@ -317,6 +323,7 @@ const ChartRender = ({
     styleOptions: styles,
     axisColumnMappings,
     timeRange,
+    renderContext,
     onSelectTimeRange,
     onLegend,
     legendSelected$,
