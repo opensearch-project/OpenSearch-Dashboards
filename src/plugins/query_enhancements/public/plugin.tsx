@@ -366,7 +366,11 @@ export class QueryEnhancementsPlugin implements Plugin<
     const lintEnabled = !!core.application.capabilities.queryEnhancements?.pplLint;
     const runtimeGrammarEnabled =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
-    this.unregisterPplLintBridge = registerPplLint(lintEnabled, runtimeGrammarEnabled);
+    this.unregisterPplLintBridge = registerPplLint(lintEnabled, runtimeGrammarEnabled, {
+      data,
+      uiSettings: core.uiSettings,
+      getAppId: () => this.currentAppId$.getValue(),
+    });
 
     return {};
   }

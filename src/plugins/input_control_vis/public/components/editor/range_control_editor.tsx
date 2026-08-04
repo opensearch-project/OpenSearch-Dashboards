@@ -57,6 +57,7 @@ interface RangeControlEditorProps {
 interface RangeControlEditorState {
   IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
   allowedIndexPatternIds: Set<string>;
+  hasAnalyticEngine: boolean;
 }
 
 function filterField(field: IFieldType) {
@@ -70,6 +71,7 @@ export class RangeControlEditor extends Component<
   state: RangeControlEditorState = {
     IndexPatternSelect: null,
     allowedIndexPatternIds: new Set(),
+    hasAnalyticEngine: false,
   };
 
   componentDidMount() {
@@ -79,7 +81,7 @@ export class RangeControlEditor extends Component<
   async getIndexPatternSelect() {
     const [, { data }] = await this.props.deps.core.getStartServices();
 
-    // Get allowed index pattern IDs (excluding AnalyticEngine)
+    const allIndexPatterns = await data.indexPatterns.getCache();
     const indexPatternList = await data.indexPatterns.getCache({
       excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
     });
@@ -88,6 +90,7 @@ export class RangeControlEditor extends Component<
     this.setState({
       IndexPatternSelect: data.ui.IndexPatternSelect,
       allowedIndexPatternIds,
+      hasAnalyticEngine: (allIndexPatterns?.length ?? 0) > (indexPatternList?.length ?? 0),
     });
   }
 
@@ -106,6 +109,7 @@ export class RangeControlEditor extends Component<
           controlIndex={this.props.controlIndex}
           IndexPatternSelect={this.state.IndexPatternSelect}
           allowedIndexPatternIds={this.state.allowedIndexPatternIds}
+          hasAnalyticEngine={this.state.hasAnalyticEngine}
         />
 
         <FieldSelect

@@ -19,7 +19,7 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: PROMETHEUS_ICON },
     tooltip: 'Prometheus',
-    supportedAppNames: ['explore'],
+    supportedAppNames: ['explore', 'dashboard'],
   },
 
   toDataset: (path) => {

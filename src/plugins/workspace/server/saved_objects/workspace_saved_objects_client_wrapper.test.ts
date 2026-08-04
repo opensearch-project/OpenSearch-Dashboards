@@ -23,6 +23,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../../data_source/common';
+import { WORKSPACE_FETCH_ALL_PER_PAGE } from '../../common/constants';
 
 const DASHBOARD_ADMIN = 'dashboard_admin';
 const NO_DASHBOARD_ADMIN = 'no_dashboard_admin';
@@ -718,6 +719,51 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
           workspacesSearchOperator: 'OR',
         });
+      });
+      it('should look up permitted workspaces a page at a time at WORKSPACE_FETCH_ALL_PER_PAGE', async () => {
+        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        await wrapper.find({ type: 'dashboard' });
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'workspace',
+            perPage: WORKSPACE_FETCH_ALL_PER_PAGE,
+            page: 1,
+          })
+        );
+      });
+      it('should fan out every page when looking up permitted workspaces', async () => {
+        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        const total = WORKSPACE_FETCH_ALL_PER_PAGE * 2 + 1;
+        // Two full pages, then a short final page. Mock by page since the pages after the
+        // first are requested in parallel.
+        scopedClientMock.find.mockImplementation(async ({ page }) => {
+          const savedObjects =
+            page === 3
+              ? [{ id: 'page3-0', type: 'workspace', score: 1, attributes: {}, references: [] }]
+              : new Array(WORKSPACE_FETCH_ALL_PER_PAGE).fill(0).map((_, i) => ({
+                  id: `page${page}-${i}`,
+                  type: 'workspace',
+                  score: 1,
+                  attributes: {},
+                  references: [],
+                }));
+          return {
+            total,
+            per_page: WORKSPACE_FETCH_ALL_PER_PAGE,
+            page: page as number,
+            saved_objects: savedObjects,
+          };
+        });
+
+        await wrapper.find({ type: 'dashboard' });
+
+        expect(scopedClientMock.find).toHaveBeenCalledTimes(3);
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'workspace', page: 2 })
+        );
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'workspace', page: 3 })
+        );
       });
       it('should call client.find with ACLSearchParams when only ACLSearchParams provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();

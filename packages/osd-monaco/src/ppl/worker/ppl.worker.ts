@@ -12,9 +12,11 @@ import {
 } from '../ppl_language_analyzer';
 import { LintResult } from '../lint/diagnostic';
 import { LintRunContext, SerializableLintContext } from '../lint/types';
+import { CompiledPPLLintAnalysis } from '../lint/explain/attribution/snapshot';
 
-// Simple worker implementation that doesn't depend on Monaco's internal modules
-class PPLWorkerImpl {
+// Simple worker implementation that doesn't depend on Monaco's internal modules.
+// Exported so the structured-clone hydration path can be unit-tested.
+export class PPLWorkerImpl {
   private analyzer: PPLLanguageAnalyzer;
 
   async tokenize(content: string): Promise<PPLToken[]> {
@@ -35,25 +37,54 @@ class PPLWorkerImpl {
     if (!this.analyzer) {
       this.analyzer = getPPLLanguageAnalyzer();
     }
-    if (!context) {
-      return this.analyzer.lint(content);
-    }
-    // Rebuild the Sets/Maps that were flattened for structured-clone transfer.
-    const runContext: LintRunContext = {
-      isCalcite: context.isCalcite,
-      fields: context.fields ? new Set(context.fields) : undefined,
-      typeMap: context.typeMap ? new Map(Object.entries(context.typeMap)) : undefined,
-      disabledObjectFields: context.disabledObjectFields
-        ? new Set(context.disabledObjectFields)
-        : undefined,
-      visibleIndices: context.visibleIndices,
-      settings: context.settings,
-      overrides: context.overrides,
-      dataSourceId: context.dataSourceId,
-      dataSourceVersion: context.dataSourceVersion,
-    };
-    return this.analyzer.lint(content, runContext);
+    return this.analyzer.lint(content, rebuildRunContext(context));
   }
+
+  async analyzeLint(
+    content: string,
+    context?: SerializableLintContext
+  ): Promise<CompiledPPLLintAnalysis> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
+    return this.analyzer.analyzeLint(content, rebuildRunContext(context));
+  }
+
+  async validateLintQueries(queries: string[]): Promise<boolean[]> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
+    return this.analyzer.validateLintQueries(queries);
+  }
+}
+
+/**
+ * Rebuild the Sets/Maps that were flattened to arrays/objects for
+ * structured-clone transfer across `postMessage`. Shared by every analyzer
+ * entry point so the worker reconstitutes the context identically.
+ */
+function rebuildRunContext(context?: SerializableLintContext): LintRunContext | undefined {
+  if (!context) {
+    return undefined;
+  }
+  return {
+    isCalcite: context.isCalcite,
+    fields: context.fields ? new Set(context.fields) : undefined,
+    typeMap: context.typeMap ? new Map(Object.entries(context.typeMap)) : undefined,
+    disabledObjectFields: context.disabledObjectFields
+      ? new Set(context.disabledObjectFields)
+      : undefined,
+    visibleIndices: context.visibleIndices,
+    settings: context.settings,
+    overrides: context.overrides,
+    dataSourceId: context.dataSourceId,
+    dataSourceVersion: context.dataSourceVersion,
+    // Required by the source-scoped rules: without these two the runner cannot
+    // detect a dataset/source mismatch, so `sourceScoped` suppression silently
+    // stops firing for every field-type rule.
+    selectedSourcePattern: context.selectedSourcePattern,
+    engineType: context.engineType,
+  };
 }
 
 // Initialize worker
@@ -74,6 +105,12 @@ self.onmessage = async (e: MessageEvent) => {
         break;
       case 'lint':
         result = await worker.lint(args[0], args[1]);
+        break;
+      case 'analyzeLint':
+        result = await worker.analyzeLint(args[0], args[1]);
+        break;
+      case 'validateLintQueries':
+        result = await worker.validateLintQueries(args[0]);
         break;
       default:
         throw new Error(`Unknown method: ${method}`);

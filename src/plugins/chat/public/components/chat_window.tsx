@@ -88,6 +88,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const [availableDataSources, setAvailableDataSources] = useState<
       Array<{ id: string; title: string }>
     >([]);
+    const [isValidating, setIsValidating] = useState(false);
 
     const hasActiveToolCalls = useMemo(() => {
       if (toolCallStates instanceof Map) {
@@ -108,6 +109,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Use ref to track streaming state synchronously for React 18 compatibility
     // React 18 batches state updates, so we need a ref for immediate checks
     const isStreamingRef = useRef(false);
+    const isValidatingRef = useRef(false);
 
     const timelineRef = React.useRef<Message[]>(timeline);
 
@@ -348,10 +350,69 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       [chatService, pendingMessage, executeSlashCommand, subscribeToMessageStream, timeline]
     );
 
+    /**
+     * Validate the current data source before sending a message.
+     * Returns a result indicating whether the message can proceed.
+     */
+    const validateDataSource = useCallback(
+      async (
+        userMsg: UserMessage
+      ): Promise<
+        | { valid: true }
+        | { valid: false; reason: 'unsupported' | 'needs_selection' | 'no_data_sources' }
+      > => {
+        const currentDataSourceId = await chatService.getCurrentDataSourceId();
+
+        // 1. Check if current data source is unsupported (e.g. AnalyticEngine)
+        if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
+          const systemMsg: SystemMessage = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            role: 'system',
+            content: i18n.translate('chat.dataSourceUnsupported', {
+              defaultMessage: 'The current data source does not support AI features.',
+            }),
+          };
+          setTimeline((prev) => [...prev, systemMsg]);
+          return { valid: false, reason: 'unsupported' };
+        }
+
+        // 2. Check if current data source is valid (exists in available list)
+        const compatibleDataSources = await chatService.getAvailableDataSources();
+        const isValid =
+          currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
+
+        if (!isValid) {
+          if (compatibleDataSources.length >= 1) {
+            // Compatible data sources exist — prompt user to pick one.
+            // User message is already in timeline; handleDataSourceSelect will continue.
+            setPendingMessage(userMsg);
+            setAvailableDataSources(compatibleDataSources);
+            return { valid: false, reason: 'needs_selection' };
+          }
+
+          // 3. No data sources associated with this workspace
+          const infoMsg: Message = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            role: 'assistant',
+            content: i18n.translate('chat.noDataSourceMessage', {
+              defaultMessage:
+                'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
+            }),
+          };
+          setTimeline((prev) => [...prev, infoMsg]);
+          return { valid: false, reason: 'no_data_sources' };
+        }
+
+        return { valid: true };
+      },
+      [chatService, isUnsupportedDataSource]
+    );
+
     const handleSend = async (options?: { input?: string; messages?: Message[] }) => {
       const messageContent = options?.input ?? input.trim();
       // Use ref for immediate check since React 18 batches state updates
-      if (!messageContent || isStreamingRef.current || hasPendingResend) return;
+      if (!messageContent || isStreamingRef.current || isValidatingRef.current || hasPendingResend)
+        return;
 
       // Prepare additional messages for sending (but don't add to timeline yet)
       let additionalMessages = options?.messages ?? [];
@@ -375,65 +436,32 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       setInput('');
 
+      // Show user message immediately (optimistic rendering)
+      const userMsg = chatService.getUserMessage(messageContent);
+      setTimeline((prev) => [...prev, userMsg]);
+
       // Merge additional messages with current timeline for sending
       const messagesToSend = [...timeline, ...additionalMessages];
 
-      // Validate data source before sending
-      const currentDataSourceId = await chatService.getCurrentDataSourceId();
+      // Show loading indicator while validating data source
+      isValidatingRef.current = true;
+      setIsValidating(true);
 
-      // 1. Check if current data source is unsupported
-      if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
-        const userMsg = chatService.getUserMessage(messageContent);
-        const systemMsg: SystemMessage = {
-          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          role: 'system',
-          content: i18n.translate('chat.dataSourceUnsupported', {
-            defaultMessage: 'The current data source does not support AI features.',
-          }),
-        };
-        setTimeline((prev) => [...prev, userMsg, systemMsg]);
-        return;
+      try {
+        const result = await validateDataSource(userMsg);
+        if (!result.valid) return;
+
+        // Check if this is a slash command — pass userMsg so executeSlashCommand
+        // can replace it (by id) with the resolved command message.
+        const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
+        if (handled) return;
+
+        // Normal message flow — user message already in timeline, just stream
+        return subscribeToMessageStream(messagesToSend, userMsg);
+      } finally {
+        isValidatingRef.current = false;
+        setIsValidating(false);
       }
-
-      // 2. Check if current data source is valid (exists in available list)
-      const compatibleDataSources = await chatService.getAvailableDataSources();
-      const isValid =
-        currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
-
-      if (!isValid) {
-        if (compatibleDataSources.length >= 1) {
-          // Compatible data sources exist — prompt user to pick one.
-          // The user message is added to the timeline now so it stays visible while the
-          // selector is shown; handleDataSourceSelect replaces it once a source is chosen.
-          const userMsg = chatService.getUserMessage(messageContent);
-          setPendingMessage(userMsg);
-          setAvailableDataSources(compatibleDataSources);
-          setTimeline((prev) => [...prev, userMsg]);
-          return;
-        }
-
-        // 3. No data sources associated with this workspace
-        const userMsg = chatService.getUserMessage(messageContent);
-        const infoMsg: Message = {
-          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          role: 'assistant',
-          content: i18n.translate('chat.noDataSourceMessage', {
-            defaultMessage:
-              'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
-          }),
-        };
-        setTimeline((prev) => [...prev, userMsg, infoMsg]);
-        return;
-      }
-
-      // Check if this is a slash command
-      const handled = await executeSlashCommand(messageContent, messagesToSend);
-      if (handled) return;
-
-      // Normal message flow — add user message to timeline then stream
-      const userMsg = chatService.getUserMessage(messageContent);
-      setTimeline((prev) => [...prev, userMsg]);
-      return subscribeToMessageStream(messagesToSend, userMsg);
     };
 
     handleSendRef.current = handleSend;
@@ -543,6 +571,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setPendingConfirmation(null);
       setPendingMessage(null);
       setAvailableDataSources([]);
+      isValidatingRef.current = false;
+      setIsValidating(false);
       confirmationService.cleanAll();
       setShowHistory(false);
     }, [chatService, confirmationService, eventHandler, stopStreaming]);
@@ -736,6 +766,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               layoutMode={layoutMode}
               timeline={timeline}
               isStreaming={isStreaming}
+              isValidating={isValidating}
               onResendMessage={resendAvailable ? handleResendMessage : undefined}
               onResendToolResult={handleResendToolResult}
               onApproveConfirmation={handleApproveConfirmation}
@@ -808,7 +839,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                 hasActiveToolCalls ||
                 hasPendingResend ||
                 !!pendingConfirmation ||
-                availableDataSources.length > 0
+                availableDataSources.length > 0 ||
+                isValidating
               }
               placeholder={
                 availableDataSources.length > 0

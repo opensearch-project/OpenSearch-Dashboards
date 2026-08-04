@@ -23,7 +23,7 @@ import {
 import {
   buildVariableOptionsFromQueryResult,
   executeVariableQuery,
-  filterVariableOptionsByRegex,
+  applyRegexToVariableOptions,
   VariableQueryResult,
 } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
@@ -324,7 +324,7 @@ export class VariableService {
 
       let options = builtResult.options;
       if (queryVariable.regex) {
-        options = filterVariableOptionsByRegex(options, queryVariable.regex);
+        options = applyRegexToVariableOptions(options, queryVariable.regex);
       }
 
       // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance

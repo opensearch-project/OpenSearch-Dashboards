@@ -27,6 +27,7 @@ import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from '
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
 import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { UI_SETTINGS } from '../../../common';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import {
   PPL_AGGREGATE_FUNCTIONS,
@@ -256,7 +257,10 @@ export const getSimplifiedPPLSuggestions = async ({
     };
     // Check feature flag for runtime grammar (defaults to enabled)
     const runtimeGrammarEnabled =
-      services?.uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
+      services?.uiSettings?.get<boolean>(
+        UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR,
+        true
+      ) !== false;
 
     const runtimeSuggestions = runtimeGrammarEnabled
       ? tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false)
