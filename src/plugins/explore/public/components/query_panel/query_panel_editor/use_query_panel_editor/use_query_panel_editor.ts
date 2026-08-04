@@ -87,7 +87,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     switchEditorMode,
     editorRef,
     getEditorContainerHeight,
-    getVariableNames,
+    completionProviders,
   } = props;
 
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
@@ -401,61 +401,40 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
 
         const filteredSuggestions = suggestions?.filter((s) => 'detail' in s) || [];
 
-        const monacoSuggestions = filteredSuggestions.map((s: any) => ({
-          label: s.text,
-          kind: s.type as monaco.languages.CompletionItemKind,
-          insertText: s.insertText ?? s.text,
-          insertTextRules: s.insertTextRules ?? undefined,
-          range: defaultRange,
-          detail: s.detail,
-          sortText: s.sortText,
-          documentation: s.documentation
-            ? {
-                value: s.documentation,
-                isTrusted: true,
-              }
-            : '',
-          command: {
-            id: 'editor.action.triggerSuggest',
-            title: 'Trigger Next Suggestion',
-          },
-        }));
-
-        // Inject dashboard variable suggestions when the user types '$' or '${'.
-        // Only relevant for consumers that provide variable names (e.g. the in-context
-        // visualization editor embedded in a dashboard); no-op otherwise.
-        const variableNames = getVariableNames?.() ?? [];
-        if (variableNames.length > 0) {
-          const offset = model.getOffsetAt(position);
-          const textBeforeCursor = model.getValue().substring(0, offset);
-          const dollarMatch = textBeforeCursor.match(/\$\{?(\w*)$/);
-          if (dollarMatch) {
-            const fullPrefix = dollarMatch[0]; // e.g. "$", "$se", "${", "${se"
-            const varRange = new monaco.Range(
-              position.lineNumber,
-              position.column - fullPrefix.length,
-              position.lineNumber,
-              position.column
-            );
-            variableNames.forEach((name) => {
-              monacoSuggestions.push({
-                label: `\${${name}}`,
-                kind: monaco.languages.CompletionItemKind.Variable,
-                insertText: `\${${name}}`,
-                insertTextRules: undefined,
-                range: varRange,
-                detail: 'Dashboard variable',
-                sortText: `!${name}`,
-                documentation: {
-                  value: `Reference variable **${name}** — will be replaced at query time`,
+        const monacoSuggestions: monaco.languages.CompletionItem[] = filteredSuggestions.map(
+          (s: any) => ({
+            label: s.text,
+            kind: s.type as monaco.languages.CompletionItemKind,
+            insertText: s.insertText ?? s.text,
+            insertTextRules: s.insertTextRules ?? undefined,
+            range: defaultRange,
+            detail: s.detail,
+            sortText: s.sortText,
+            documentation: s.documentation
+              ? {
+                  value: s.documentation,
                   isTrusted: true,
-                },
-                command: {
-                  id: 'editor.action.triggerSuggest',
-                  title: 'Trigger Next Suggestion',
-                },
-              });
-            });
+                }
+              : '',
+            command: {
+              id: 'editor.action.triggerSuggest',
+              title: 'Trigger Next Suggestion',
+            },
+          })
+        );
+
+        // Merge in consumer-provided completion extensions.
+        if (completionProviders?.length) {
+          for (const provider of completionProviders) {
+            try {
+              const extraItems = await provider.provideCompletionItems(model, position, _, token);
+              if (extraItems?.length) {
+                monacoSuggestions.push(...extraItems);
+              }
+            } catch (extensionError) {
+              // eslint-disable-next-line no-console
+              console.error('[QueryPanelEditor] completion extension failed:', extensionError);
+            }
           }
         }
 
@@ -467,19 +446,27 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, dataViews, services, getVariableNames]
+    [isPromptModeRef, queryLanguage, dataViews, services, completionProviders]
   );
 
   const suggestionProvider = useMemo(() => {
     const languageTriggerCharacters =
       services?.data?.autocomplete?.getTriggerCharacters(queryLanguage);
+    const extensionTriggerCharacters = (completionProviders ?? []).flatMap(
+      (provider) => provider.triggerCharacters ?? []
+    );
     return {
       triggerCharacters: isPromptMode
         ? ['=']
-        : (languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
+        : Array.from(
+            new Set([
+              ...(languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
+              ...extensionTriggerCharacters,
+            ])
+          ),
       provideCompletionItems,
     };
-  }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
+  }, [isPromptMode, provideCompletionItems, queryLanguage, services, completionProviders]);
 
   const handleRun = useCallback(() => {
     onRun(editorTextRef.current);

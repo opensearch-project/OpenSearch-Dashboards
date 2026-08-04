@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryEditorProps } from '../../../components/query_panel/query_panel_editor/types';
 import { useQueryBuilderState } from './use_query_builder_state';
 import { EditorMode } from '../../utils/state_management/types';
 import { useEditorOperations } from './use_editor_operations';
+import { createVariableCompletionProvider } from '../utils/variable_completion_provider';
 
 export const useQueryPanelEditorProps = (): QueryEditorProps => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -37,6 +38,13 @@ export const useQueryPanelEditorProps = (): QueryEditorProps => {
     return panelEl?.clientHeight ?? domNode?.parentElement?.clientHeight ?? 100;
   }, []);
 
+  // Contribute dashboard variable (`${var}`) suggestions as a completion extension so the
+  // shared query editor need not know about the dashboard-variables feature.
+  const completionProviders = useMemo(
+    () => [createVariableCompletionProvider(() => queryBuilder.getVariableNames())],
+    [queryBuilder]
+  );
+
   return {
     services,
     editorRef: queryBuilder.editorRef,
@@ -47,6 +55,6 @@ export const useQueryPanelEditorProps = (): QueryEditorProps => {
     getEditorContainerHeight,
     handleEditorChange: (updates) => queryBuilder.updateQueryEditorState(updates),
     focusShortcutId: 'vis_editor_focus_query_bar',
-    getVariableNames: () => queryBuilder.getVariableNames(),
+    completionProviders,
   };
 };

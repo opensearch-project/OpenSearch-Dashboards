@@ -23,6 +23,26 @@ import { EditorMode } from '../../../application/utils/state_management/types';
 
 export type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
+/**
+ * A consumer-provided completion extension. Each extension contributes its own trigger
+ * characters and completion items, which are merged into the editor's built-in query
+ * suggestions. This keeps the shared editor agnostic of any specific feature.
+ */
+export interface EditorCompletionProvider {
+  /** Extra characters that should (re)trigger completion for this extension. */
+  triggerCharacters?: string[];
+  /**
+   * Contribute completion items for the current Monaco context. Called at completion
+   * time, so implementations may read the latest external state directly.
+   */
+  provideCompletionItems: (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ) => monaco.languages.CompletionItem[] | Promise<monaco.languages.CompletionItem[]>;
+}
+
 export type PartialQueryEditorState = Pick<
   QueryEditorState,
   'isQueryEditorDirty' | 'editorMode' | 'promptModeIsAvailable'
@@ -61,10 +81,10 @@ export interface QueryEditorProps {
   getEditorContainerHeight?: (domNode: HTMLElement | null) => number;
 
   /**
-   * Optional provider for dashboard variable names. When supplied, typing `$` or `${`
-   * surfaces these names as autocomplete suggestions (e.g. `${myVar}`). Implemented as a
-   * getter so the editor always reads the latest names at completion time rather than a
-   * value captured when the editor mounted.
+   * Optional completion extensions. Each contributes its own trigger characters and
+   * completion items, merged into the editor's built-in suggestions. Lets consumers
+   * inject domain-specific completions without the shared editor knowing about any
+   * particular feature.
    */
-  getVariableNames?: () => string[];
+  completionProviders?: EditorCompletionProvider[];
 }
