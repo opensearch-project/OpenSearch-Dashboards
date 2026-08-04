@@ -71,12 +71,12 @@ The project uses multiple files to manage the Node.js version for different purp
 
 | File | Format | Purpose | When to update |
 |------|--------|---------|----------------|
-| `.node-version` | Exact version (e.g. `20.20.2`) | Used by the build system to download Node.js binaries for release builds — this is the runtime bundled into the distributable and shipped to users | Patch, minor, and major bumps |
+| `.node-version` | Exact version (e.g. `22.23.0`) | Used by the build system to download Node.js binaries for release builds — this is the runtime bundled into the distributable and shipped to users | Patch, minor, and major bumps |
 | `.nvmrc` | Major version only (e.g. `18`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
 | `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
 
 The build-time (`.nvmrc`) and runtime (`.node-version`) majors are allowed to differ:
-OpenSearch Dashboards currently builds on Node.js 18 and ships a bundled Node.js 20
+OpenSearch Dashboards currently builds on Node.js 18 and ships a bundled Node.js 22
 runtime. Both must fall within `engines.node`, which
 `src/setup_node_env/node_version_validator.js` enforces at startup. The bundled
 runtime must never be *older* than the build-time version, since transpiled output
