@@ -277,9 +277,7 @@ describe('Scatter Chart to_expression', () => {
           }),
         }),
       ]);
-      expect(result.spec.visualMap).toEqual([
-        expect.objectContaining({ dimension: 2 }),
-      ]);
+      expect(result.spec.visualMap).toEqual([expect.objectContaining({ dimension: 2 })]);
     });
 
     it('keeps category legend entries when color and size mappings are both present', () => {
