@@ -38,6 +38,18 @@ offered because adding a filter can change the result set.
 Info severity, configured on by default, on all engine versions. It requires
 selected-dataset type metadata and is source-scoped.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                        |
+| Severity           | `info`                                                                                                                           |
+| Diagnostic message | Pattern extraction runs against every input row from the text field, even when it finds no match.                                |
+| Fix guidance       | Filter out rows that cannot match the pattern before extraction, using time or an indexed field.                                 |
+| Documentation      | [Rex sed-mode example](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#example-3-replacing-text-using-sed-mode) |
+
 ## Implementation
 
 `rexScanCostDetector` in
@@ -49,14 +61,14 @@ dataset type match the metadata cache; conflicting field types are omitted from
 that map. The detector independently requires `typeMap`, so fields-only,
 missing, stale, conflicting, or unknown type metadata produces no finding.
 
-The hardcoded `TEXT_TYPES` set contains only `text`. The
-`EXTRACTION_COMMANDS` table handles three grammar shapes:
+The `TEXT_TYPES` set contains only `text`. The `EXTRACTION_COMMANDS` table
+handles three source-field forms:
 
-- `rex` finds the direct `qualifiedName` under `rexExpr`, which avoids mistaking
-  a nested `offset_field` option for the source.
-- `parse` and `grok` find the direct `expression` and accept it only when exactly
-  one `fieldExpression` spans the entire expression. Computed and wrapped
-  expressions, including `parse field=...`, are left to field validation.
+- `rex` reads its source field without mistaking a nested `offset_field` option
+  for the source.
+- `parse` and `grok` accept the source only when exactly one bare field spans the
+  complete expression. Computed and wrapped expressions, including
+  `parse field=...`, are left to field validation.
 - A command rule absent from the active grammar resolves to no nodes, so
   unsupported shapes stay silent. The compiled simplified grammar and captured
   3.8 runtime bundle contain all three command rules, although the bundled
@@ -68,15 +80,15 @@ inside lookup, appended or bracketed pipelines, subsearches, or union datasets.
 It reports the full extraction command, emits no quick fix, and never inserts a
 prefilter because that could remove rows and change results.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - Adding an extraction command requires an `EXTRACTION_COMMANDS` entry and a
-  grammar-specific source-field resolver. Add coverage on every grammar surface
+  source-field resolver. Add coverage on every parser surface
   where the command exists; current focused rule tests exercise the compiled
   surface only.
-- If the source-field grammar for `rex`, `parse`, or `grok` changes, preserve the
-  bare-field and direct-child checks so options and computed expressions do not
-  acquire the wrong type.
+- If the source-field syntax for `rex`, `parse`, or `grok` changes, preserve the
+  bare-field checks so options and computed expressions do not acquire the wrong
+  type.
 - Adding another expensive mapping type requires evidence before changing
   `TEXT_TYPES`; `keyword` is intentionally excluded.
 - A new command with its own source must be added to

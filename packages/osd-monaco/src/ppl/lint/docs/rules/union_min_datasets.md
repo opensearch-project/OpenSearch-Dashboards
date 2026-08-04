@@ -35,6 +35,18 @@ Error severity, enabled by default, on Calcite engine version 3.7.0 or later.
 This is a runtime grammar rule, so it also requires a compatible grammar bundle
 for the active data source.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                             |
+| Severity           | `error`                                                                                               |
+| Diagnostic message | The union command requires at least two datasets.                                                     |
+| Fix guidance       | Add another dataset to `union`, or remove `union` when using only one dataset.                        |
+| Documentation      | [PPL commands index](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/index/#ppl-commands) |
+
 ## Implementation
 
 The catalog marks this rule `runtimeOnly`, Calcite-only, and
@@ -44,27 +56,22 @@ Calcite check so direct calls also stay silent when `context.isCalcite` is not
 exactly `true`.
 
 `unionMinDatasetsDetector` in
-`packages/osd-monaco/src/ppl/lint/rules/union_min_datasets.ts` finds
-`unionCommand` nodes and checks their parent. Only a direct `pplCommands` parent
-means query-initial union; a `commands` parent means the upstream pipeline is
-the implicit first dataset. It counts direct `unionDataset` children only for
-the query-initial form and reports the command when fewer than two exist. An
-unavailable `pplCommands` rule, unresolved parent, or missing runtime command
-rule suppresses the diagnostic.
+`packages/osd-monaco/src/ppl/lint/rules/union_min_datasets.ts` finds each
+`union` and determines whether it starts the query or follows an upstream
+pipeline. It counts explicit datasets only for the query-initial form and
+reports the command when fewer than two exist. An unresolved query position or
+unsupported runtime form suppresses the diagnostic.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
-- Query position is inferred from the exact parent rule names `pplCommands` and
-  `commands`. If the runtime grammar adds a wrapper, a new initial form, or a
-  union alias, update the parent discrimination and direct-child count rather
-  than treating all unions alike.
-- `pipeline_shape.ts` classifies `unionCommand` as order-invalidating and prunes
-  each `unionDataset` as an alternate-source subtree. Explain attribution also
-  lists union as branched. New union grammar nodes must be reflected in all
-  three places to avoid order, field-scope, or attribution errors.
-- Missing grammar names deliberately produce no finding. Preserve this
-  fail-closed behavior for fragments and pipe-first or recovery trees where the
-  query-initial relationship cannot be proven.
+- The detector must distinguish query-initial `union`, which needs two explicit
+  datasets, from mid-pipeline `union`, which inherits one dataset from upstream.
+  New union forms must preserve that distinction.
+- Union is order-invalidating and branched, and each union dataset is a separate
+  metadata scope. Update pipeline shape, explain attribution, and
+  alternate-source pruning together when union behavior expands.
+- Fragments and recovery trees where query position cannot be proven produce no
+  finding. Preserve that fail-closed behavior.
 - Update the catalog's version, engine, or `runtimeOnly` fields if backend
   availability changes; the detector cannot override those runner gates.
 
@@ -75,7 +82,7 @@ rule suppresses the diagnostic.
 - `rules/__tests__/runtime_rules_positive_path.test.ts` covers query-initial
   one/two-dataset counts, mid-pipeline union, and the detector's Calcite gate.
 - `rules/__tests__/runtime_rules_plumbing.test.ts` covers the real catalog and
-  registry, parent distinction, runtime-only gate, and Calcite gate.
+  registry, query-position distinction, runtime-only gate, and Calcite gate.
 - Changes to union grammar or ordering also require focused updates in
   `command_census.test.ts`, `command_order_effects.test.ts`, and alternate-source
   field-validation coverage.

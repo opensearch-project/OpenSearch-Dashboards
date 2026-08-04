@@ -33,6 +33,18 @@ Error severity, enabled by default, on engine version 3.4.0 or later. This is a
 runtime grammar rule, so it fires only after a compatible grammar bundle is
 loaded for the active data source.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                             |
+| Severity           | `error`                                                                                               |
+| Diagnostic message | The multisearch command requires at least two subsearches.                                            |
+| Fix guidance       | Add a second subsearch, or run the single subsearch as a normal query.                                |
+| Documentation      | [Multisearch syntax](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/#syntax) |
+
 ## Implementation
 
 The catalog marks this rule `runtimeOnly` with `minVersion: 3.4.0`. `runLint`
@@ -43,23 +55,20 @@ unparseable version suppresses it rather than risking a false error.
 
 `multisearchMinSubsearchDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/multisearch_min_subsearch.ts` finds every
-`multisearchCommand`, counts its direct `subSearch` children, and reports the
-full command when the count is less than two. Missing grammar rule names resolve
-to no matches, and detector exceptions are caught by `runLint`, so an
-incompatible grammar fails closed to no diagnostic.
+`multisearch`, counts its bracketed subsearches, and reports the full command
+when the count is less than two. Unsupported parser shapes resolve to no
+matches, and detector exceptions are caught by `runLint`, so an incompatible
+parser fails closed to no diagnostic.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
-- The detector assumes the runtime grammar names are `multisearchCommand` and
-  `subSearch`, and that subsearches are direct children of the command. If the
-  backend adds a wrapper or another subsearch form, update the detector and the
-  runtime stub rule maps in both runtime-rule suites.
-- `pipeline_shape.ts` classifies `multisearchCommand` as order-invalidating, and
-  explain attribution lists it as a branched command. A new command rule or
-  alias must be added to those command sets as well as this detector.
-- `collectAlternateSourceSubtrees` treats every `subSearch` as separate metadata
-  scope. Revisit that pruning if a new multisearch variant represents its
-  branches with a different grammar node.
+- The detector counts bracketed subsearches owned by the `multisearch` command.
+  If the backend adds another way to supply a branch, update the count and both
+  runtime-rule suites.
+- Multisearch must remain classified as order-invalidating and branched, and
+  each subsearch must remain a separate metadata scope. A new multisearch
+  variant requires coordinated updates to the detector, pipeline shape, explain
+  attribution, and alternate-source pruning.
 - If backend support moves from 3.4.0 or the rule stops being runtime-only,
   update `rules_catalog.json`; changing only the detector does not change the
   runner gates.
@@ -69,9 +78,9 @@ incompatible grammar fails closed to no diagnostic.
 - `rules/__tests__/multisearch_min_subsearch.test.ts` verifies that the compiled
   grammar surface stays silent.
 - `rules/__tests__/runtime_rules_positive_path.test.ts` verifies one versus two
-  direct `subSearch` children at detector level.
+  bracketed subsearches at detector level.
 - `rules/__tests__/runtime_rules_plumbing.test.ts` verifies the catalog,
   registry, runtime-surface gate, version context, and catalog message together.
-- When adding a grammar alias, also update `command_census.test.ts` and
+- When multisearch syntax changes, also update `command_census.test.ts` and
   `command_order_effects.test.ts` so the command remains visible to pipeline
   analysis.

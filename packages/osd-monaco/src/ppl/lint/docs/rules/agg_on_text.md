@@ -37,16 +37,27 @@ schema-specific.
 Warning severity, enabled by default, on Calcite engine version 3.7.0 or later.
 It requires selected-dataset type metadata and is source-scoped.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                             |
+| Severity           | `warning`                                                                                                                             |
+| Diagnostic message | Numeric aggregation on a text field may return no value (null), because text is not stored as a number.                               |
+| Fix guidance       | Aggregate a numeric field instead. If this field really does hold numbers, map it as a numeric type, or `cast` it before aggregating. |
+| Documentation      | [Stats limitations](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/#limitations)                                   |
+
 ## Implementation
 
 `aggOnTextDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/agg_on_text.ts` requires
 `context.isCalcite === true` and a nonempty `context.typeMap`. It walks every
-`statsFunction`, reads its direct `statsFunctionName` and `functionArgs`
-children, and continues only when the arguments contain exactly one
-`fieldExpression` whose text spans the complete argument. The field path is
-quote-aware and must parse successfully; its canonical full path is then looked
-up exactly in `typeMap`.
+`stats` aggregation and continues only when its arguments contain exactly one
+bare field spanning the complete argument. The field path is quote-aware and
+must parse successfully; its canonical full path is then looked up exactly in
+`typeMap`.
 
 `typeMap` comes from index-pattern `esTypes`. A field with no type or conflicting
 types remains in `fields` but is deliberately omitted from `typeMap`, which
@@ -55,19 +66,16 @@ dataset/data-source/type provenance matches. The catalog adds `needsContext`,
 `sourceScoped`, Calcite, and minimum-version gates; the detector repeats the
 Calcite and map checks so direct calls also fail closed.
 
-The diagnostic uses the catalog message and spans the complete `statsFunction`.
-No fix is emitted because neither a replacement field nor a valid conversion
-can be inferred from mapping metadata.
+The diagnostic uses the catalog message and spans the complete aggregation. No
+fix is emitted because neither a replacement field nor a valid conversion can
+be inferred from mapping metadata.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `NUMERIC_ONLY_AGGS` is `avg`, `sum`, `var_samp`, `var_pop`, `stddev_samp`,
   `stddev_pop`, and `median`; `TEXT_TYPES` is `text` and `keyword`. Reverify the
   live Calcite result and update both sets when aggregation or mapping semantics
   change. `count`, `min`, `max`, and percentile forms are intentionally absent.
-- The detector depends on the grammar names `statsFunction`,
-  `statsFunctionName`, `functionArgs`, and `fieldExpression`. A new aggregation
-  grammar alternative will not be covered automatically.
 - Only a bare field is classified. Computed arguments, multiple fields,
   malformed paths, absent/ambiguous types, and types outside `TEXT_TYPES`
   produce no finding.

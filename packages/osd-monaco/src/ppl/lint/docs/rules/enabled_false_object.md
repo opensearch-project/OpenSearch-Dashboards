@@ -36,6 +36,18 @@ equivalent reference in the current mapping.
 Warning severity, enabled by default, on Calcite engine version 3.7.0 or later.
 It requires disabled-object mapping metadata and is source-scoped.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                  |
+| Severity           | `warning`                                                                                                                  |
+| Diagnostic message | This field is stored but not searchable, so PPL returns null for it.                                                       |
+| Fix guidance       | Query an indexed field instead. To make this value searchable, enable indexing in the mapping and reindex the data.        |
+| Documentation      | [Disabling object fields](https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields) |
+
 ## Implementation
 
 The metadata producer in
@@ -49,9 +61,9 @@ The editor caches those paths as `disabledObjectFields`. The context builder
 forwards the set only when dataset ID, data source ID, and dataset type match the
 active dataset. `enabledFalseObjectDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/enabled_false_object.ts` then uses
-`collectDottedPathNodes`, which collects dotted `qualifiedName` and
-`wcQualifiedName` nodes. A path matches when it equals a disabled path or starts
-with that path plus `.`, preserving the segment boundary.
+`collectDottedPathNodes` to collect dotted field references. A path matches when
+it equals a disabled path or starts with that path plus `.`, preserving the
+segment boundary.
 
 The catalog gates the rule with `needsContext`, `sourceScoped`, Calcite, and
 version 3.7.0 or later. The diagnostic spans the complete dotted path, uses the
@@ -59,7 +71,7 @@ catalog message, and offers no fix. Missing mappings, malformed responses,
 missing titles, empty results, and fetch failures return no metadata, so the
 detector stays quiet instead of guessing.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - The producer assumes the response shape
   `{ [index]: { mappings: { properties } } }` with an optional transport
@@ -69,11 +81,10 @@ detector stays quiet instead of guessing.
   if a path is disabled in one matched index but enabled in another, the set
   still marks it disabled. Revisit the context model if findings must be
   index-specific.
-- `collectDottedPathNodes` recognizes only `qualifiedName` and
-  `wcQualifiedName`, and rejects node text without a dot. A bare top-level
-  disabled object such as `session` is not reported; a dotted disabled object
-  name such as `outer.inner` can be. New field-bearing grammar rules must be
-  added to `DOTTED_PATH_RULES`.
+- Only dotted references are inspected. A bare top-level disabled object such as
+  `session` is not reported; a dotted disabled object name such as
+  `outer.inner` can be. Command-specific field forms need explicit detector
+  coverage.
 - Matching uses raw node text rather than `parseFieldPath`; quoted path segments
   may therefore fail to match the unquoted names emitted by the mapping walker.
 - Unlike the other Calcite mapping detectors, this detector itself does not

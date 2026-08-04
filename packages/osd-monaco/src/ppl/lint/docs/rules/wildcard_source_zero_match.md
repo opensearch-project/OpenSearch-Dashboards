@@ -32,9 +32,21 @@ Correct the wildcard pattern or select an existing index.
 
 ## Availability
 
-Info severity, enabled by default, on all engine versions. It requires visible
-index metadata for the active data source and self-suppresses when that
+Warning severity, enabled by default, on all engine versions. It requires
+visible index metadata for the active data source and self-suppresses when that
 inventory is absent or empty.
+
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                        |
+| Severity           | `warning`                                                                                                                        |
+| Diagnostic message | Wildcard source pattern matches no known index.                                                                                  |
+| Fix guidance       | Correct the `source=` pattern or choose an existing index.                                                                       |
+| Documentation      | [Search command wildcard example](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/#example-6-using-wildcards) |
 
 ## Implementation
 
@@ -48,11 +60,10 @@ list, which makes the rule suppress rather than interpret missing inventory as
 zero matches. The lint context reuses the inventory across datasets only when
 the data source identity matches.
 
-`classifyTopLevelSource` recognizes `fromClause`/`tableSource` and
-`searchFieldComparison` forms whose field is `source` or `index`. It uses the
-original query's pipe-first flag so a synthetic parser prefix is never treated
-as a real source, and returns inconclusive for zero or multiple candidates. The
-rule continues only for one simple local wildcard.
+`classifyTopLevelSource` recognizes the supported `source` and `index` forms. It
+uses the original query's pipe-first flag so a synthetic parser prefix is never
+treated as a real source, and returns inconclusive for zero or multiple
+candidates. The rule continues only for one simple local wildcard.
 
 Simple patterns contain `*`, do not start with `-` or `.`, and contain only
 letters, digits, `.`, `_`, `+`, `-`, and `*`. Regex metacharacters are escaped,
@@ -61,12 +72,11 @@ to the full visible name. Exact names, multi-targets, exclusions, date math,
 cross-cluster sources, hidden-index forms, `?`, whitespace, and backslash forms
 are intentionally not evaluated.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `top_level_source.ts` hardcodes the source keywords `source` and `index` and
-  the two supported parse-tree shapes. Add new top-level source syntax there,
-  then verify both runtime and compiled grammar surfaces before this rule uses
-  it.
+  supports only the current top-level source forms. Add new source syntax there,
+  then verify both runtime and compiled parser surfaces before this rule uses it.
 - `isSimpleLocalWildcardPattern` and `wildcardToRegExp` reproduce only the
   documented `*` subset. Do not broaden the accepted characters or operators
   until local matching can reproduce backend semantics exactly.

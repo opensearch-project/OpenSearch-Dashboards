@@ -35,15 +35,26 @@ unknown.
 Warning severity, enabled by default, on Calcite engine version 3.7.0 or later.
 It requires selected-dataset type metadata and is source-scoped.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                        |
+| Severity           | `warning`                                                                                                                        |
+| Diagnostic message | This field is numeric, but the compared value is not a number, so the comparison returns no rows.                                |
+| Fix guidance       | Compare the field with a number, such as `500`, or use the text field that contains the value you want.                          |
+| Documentation      | [Basic predicate operators](https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#basic-predicate-operators) |
+
 ## Implementation
 
 `typeMismatchNumericDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/type_mismatch_numeric.ts` requires
 `context.isCalcite === true` and a nonempty `context.typeMap`. It walks
-`comparisonOperator` nodes, accepts only `=` or `==`, and takes the two rule-node
-siblings around the operator as operands. One operand must be a `stringLiteral`
-spanning the complete operand and the other exactly one bare `fieldExpression`;
-either operand order is supported.
+comparisons, accepts only `=` or `==`, and requires one operand to be a complete
+quoted string and the other to be exactly one bare field; either operand order
+is supported.
 
 The detector canonicalizes the field path and performs an exact `typeMap`
 lookup. It strips the literal's outer quote pair and uses JavaScript `Number` as
@@ -56,7 +67,7 @@ dataset. Catalog gates enforce `needsContext`, `sourceScoped`, Calcite, and
 version 3.7.0 or later; the detector repeats the engine/map checks. The
 diagnostic spans the comparison parent and has no automatic fix.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `VERIFIED_OPERATORS` contains only `=` and `==`. Add an operator only after
   verifying its Calcite failure mode and both grammar surfaces.
@@ -64,10 +75,9 @@ diagnostic spans the comparison parent and has no automatic fix.
   `integer`, `long`, `unsigned_long`, `half_float`, `float`, `double`,
   `scaled_float`, and `token_count`. Keep the list synchronized when supported
   field types change.
-- The grammar contract is `comparisonOperator`, `stringLiteral`, and
-  `fieldExpression`, with exactly two rule-node operands under the operator's
-  parent. Wrapped fields, computed expressions, field-to-field comparisons, and
-  compound literals intentionally produce no finding.
+- The rule handles only a simple binary equality between one bare field and one
+  quoted string. Wrapped fields, computed expressions, field-to-field
+  comparisons, and compound literals intentionally produce no finding.
 - `Number` may accept formats that Calcite handles differently. This
   over-acceptance is intentional: uncertain coercions become false negatives,
   not false positives. Reverify before replacing or tightening the oracle.

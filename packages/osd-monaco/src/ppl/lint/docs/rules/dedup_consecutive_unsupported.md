@@ -35,13 +35,25 @@ Warning severity, configured off by default, on Calcite engine version 3.3.0 or
 later. Users can opt in through the per-rule Advanced Setting. It needs only the
 query text and the positive Calcite signal.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | Off; per-rule opt-in and the global PPL lint capability are required                                                                                    |
+| Severity           | `warning`                                                                                                                                               |
+| Diagnostic message | consecutive=true uses an older query engine and may make this query slower.                                                                             |
+| Fix guidance       | Remove `consecutive=true` to use regular deduplication. No equivalent option preserves consecutive-only behavior.                                       |
+| Documentation      | [Deduplicating consecutive documents](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/#example-4-deduplicating-consecutive-documents) |
+
 ## Implementation
 
 `dedupConsecutiveUnsupportedDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/dedup_consecutive_unsupported.ts` finds
-`dedupCommand` nodes and scans each command's flattened, lowercased token text
-with `/consecutive=(true|false)/`. It emits one diagnostic for the complete
-command when the first matched value is `true`; plain `dedup` and
+each `dedup` and scans its flattened, lowercased token text with
+`/consecutive=(true|false)/`. It emits one diagnostic for the complete command
+when the first matched value is `true`; plain `dedup` and
 `consecutive=false` are ignored. No quick fix is attached.
 
 The catalog gates the rule with `minVersion: 3.3.0` and `engine: calcite`. The
@@ -55,11 +67,10 @@ The host only derives a positive Calcite signal from measured cluster settings.
 A failed or unmeasured settings request leaves `isCalcite` undefined, keeping
 this rule quiet.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
-- The detector depends on the grammar rule name `dedupCommand` and the exact
-  flattened spelling `consecutive=true|false`. Update the regex if the option
-  gains another separator, value syntax, or alias.
+- Detection depends on the flattened spelling `consecutive=true|false`. Update
+  the regex if the option gains another separator, value syntax, or alias.
 - The regex reads only the first `consecutive` occurrence. If the grammar ever
   permits repeated options, align detection with the engine's precedence rule.
 - The warning assumes Calcite throws `CalciteUnsupportedException`, the fallback

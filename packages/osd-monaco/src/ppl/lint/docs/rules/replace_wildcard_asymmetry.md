@@ -36,6 +36,18 @@ Error severity, enabled by default, on Calcite engine version 3.4.0 or later.
 This is a runtime grammar rule, so it also requires a compatible grammar bundle
 for the active data source.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                             |
+| Severity           | `error`                                                                                               |
+| Diagnostic message | The replace match and replacement have different numbers of "*" wildcards. The counts must match.     |
+| Fix guidance       | Use the same number of `*` wildcards in the match and replacement patterns.                           |
+| Documentation      | [Replace parameters](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/#parameters) |
+
 ## Implementation
 
 The catalog marks this rule `runtimeOnly`, Calcite-only, and
@@ -45,20 +57,18 @@ direct callers.
 
 `replaceWildcardAsymmetryDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/replace_wildcard_asymmetry.ts` reads the
-first two direct `stringLiteral` children of every `replacePair` as pattern and
-replacement, removes their outer quotes, and counts unescaped `*` characters. A
-star is escaped only when it has an odd number of immediately preceding
-backslashes. The rule reports when the replacement count is nonzero and differs
-from the pattern count; zero replacement wildcards intentionally means a fixed
-replacement. Pairs with fewer than two literals and unavailable grammar rules
-produce no diagnostic.
+first two strings in every replacement pair as pattern and replacement, removes
+their outer quotes, and counts unescaped `*` characters. A star is escaped only
+when it has an odd number of immediately preceding backslashes. The rule reports
+when the replacement count is nonzero and differs from the pattern count; zero
+replacement wildcards intentionally means a fixed replacement. Incomplete or
+unsupported pairs produce no diagnostic.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
-- The implementation assumes the runtime nodes are `replacePair` and
-  `stringLiteral`, with pattern then replacement as direct children. A grammar
-  wrapper, optional literal, or new replacement form requires a structural
-  extractor rather than relying on child order.
+- The implementation treats the first two string literals in a replacement
+  pair as pattern and replacement, in that order. A new replacement form needs
+  an explicit extractor rather than relying on position.
 - Wildcard parity is based on the raw query text after outer-quote removal. If
   engine escaping or wildcard semantics change, update
   `countUnescapedWildcards` and add cases for odd/even backslash runs before
@@ -66,9 +76,9 @@ produce no diagnostic.
 - `pipeline_shape.ts` classifies `replaceCommand` as order-invalidating. Add any
   new command rule or alias to `COMMAND_ORDER_EFFECTS`; otherwise it disappears
   from pipeline ordering and created-field analysis.
-- Keep the silent behavior for missing rule names or incomplete parse pairs.
-  Catalog version, Calcite, and runtime-only changes belong in
-  `rules_catalog.json`, not just in this detector.
+- Keep incomplete replacement pairs silent. Catalog version, Calcite, and
+  runtime-only changes belong in `rules_catalog.json`, not just in this
+  detector.
 
 ## Tests
 

@@ -45,21 +45,32 @@ only the query text. Like every PPL lint rule, it runs only when the global
 `queryEnhancements.ppl.lint.enabled` feature is enabled; that feature defaults
 to off.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                        |
+| Severity           | `error`                                                                                                          |
+| Diagnostic message | Invalid regex capture group name.                                                                                |
+| Fix guidance       | Use PPL named groups in the form `(?<name>...)`. Start each name with a letter and use only letters and numbers. |
+| Documentation      | [Rex parameters](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters)                    |
+
 ## Implementation
 
 `packages/osd-monaco/src/ppl/lint/rules/invalid_capture_group_name.ts` registers
-`invalidCaptureGroupNameDetector`, which walks the ANTLR tree for `rexExpr` and
-`parseCommand`. It excludes `rex mode=sed` by finding a `SED` terminal under a
-`rexOption`; `grok` is excluded because it is not in `REGEX_COMMAND_RULES`.
-`findPatternLiteral` uses the direct `stringLiteral` for `parse`, or the
-rightmost descendant string literal for the nested `rex` grammar shape.
+`invalidCaptureGroupNameDetector`, which inspects `rex` and `parse`. It excludes
+`rex mode=sed`; `grok` is excluded because it uses a different pattern
+dialect. `findPatternLiteral` locates the pattern argument for each supported
+command form.
 
 The detector scans the raw quoted literal with `CAPTURE_GROUP_OPENER`, then
 validates each captured name with `VALID_GROUP_NAME`. A Java opener with an
 invalid name produces one diagnostic. A Python/PCRE opener always produces a
 diagnostic, combining the syntax and name errors when both are invalid.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `VALID_GROUP_NAME` is hardcoded to
   `/^[A-Za-z][A-Za-z0-9]*$/`, matching
@@ -68,11 +79,10 @@ diagnostic, combining the syntax and name errors when both are invalid.
   openers in escaped text, character classes, `\Q...\E`, and lookbehind text.
   If the engine validator changes, update both expressions, the catalog's
   `minVersion`, and the engine-agreement cases.
-- `REGEX_COMMAND_RULES`, `isSedMode`, and `findPatternLiteral` encode parser
-  rule names and tree shapes. When a command or mode starts using the same
-  engine validator, add it only after checking its regex dialect and locating
-  its actual pattern argument. Do not include `grok` or sed substitution syntax
-  without a corresponding engine change.
+- Only `rex` extract mode and `parse` use this validator. When another command or
+  mode starts using it, add coverage only after checking its regex dialect and
+  locating its actual pattern argument. Do not include `grok` or sed
+  substitution syntax without a corresponding engine change.
 - The only quick fix removes the single `P` from a valid, case-sensitively
   unique `(?P<name>` opener. It is withheld if the name is invalid, converting
   it would duplicate another group, or no token-accurate edit range is
@@ -82,10 +92,10 @@ diagnostic, combining the syntax and name errors when both are invalid.
   on, but the global lint capability defaults off. Because this is an
   error-severity rule with a `3.4.0` floor, an unknown or unparseable data-source
   version suppresses it.
-- This rule is not `runtimeOnly`: it runs against either the runtime grammar or
-  the compiled-worker fallback. Keep the referenced rule names and pattern
-  shapes compatible with both. `query:enhancements:runtimePplGrammar` controls
-  that parser choice independently of the global lint feature.
+- This rule is not `runtimeOnly`: it runs against either the runtime parser or
+  the compiled-worker fallback. Keep pattern extraction compatible with both.
+  `query:enhancements:runtimePplGrammar` controls that parser choice
+  independently of the global lint feature.
 
 ## Tests
 

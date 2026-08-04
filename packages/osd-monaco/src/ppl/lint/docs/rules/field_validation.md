@@ -43,22 +43,33 @@ checks require selected-dataset field metadata and self-suppress without it;
 field-slot shape checks can still run from query text. Source-scoped checks are
 suppressed on a proven dataset mismatch.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                                                          |
+| Severity           | `error`                                                                                                                                            |
+| Diagnostic message | Reference to an unknown field.                                                                                                                     |
+| Fix guidance       | Correct the field name or PPL syntax. PPL runs commands left to right, so define a new field with `eval` before referencing it in a later command. |
+| Documentation      | [Fields command parameters](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/#parameters)                                        |
+
 ## Implementation
 
 `fieldValidationDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/field_validation.ts` combines three
 passes:
 
-1. The shape pass finds `grokCommand`, `parseCommand`, and `patternsCommand`,
-   takes their direct `expression` child, and accepts it only when one
-   `fieldExpression` spans the entire expression with no `comparisonOperator` or
-   `literalValue`. On the runtime grammar it reads the parse tree. On the
-   compiled-simplified grammar, where `field=body` error-recovers poorly, it
-   scans `context.sourceText` with `findCompiledFieldSlotShapeMatches`.
-2. The existence pass walks every `fieldExpression`. A reference is known when
-   either `context.fields` or `buildPipelineShape(...).createdFields` contains
-   its normalized path. It excludes source/table/join grammar contexts, declared
-   join-side aliases, and hard-pruned alternate-source subtrees.
+1. The shape pass finds `grok`, `parse`, and `patterns`, then accepts the
+   source-field argument only when one bare field spans the complete expression.
+   On the runtime parser it reads the tree. On the compiled fallback, where
+   `field=body` error-recovers poorly, it scans `context.sourceText` with
+   `findCompiledFieldSlotShapeMatches`.
+2. The existence pass walks field references. A reference is known when either
+   `context.fields` or `buildPipelineShape(...).createdFields` contains its
+   normalized path. It excludes source/table/join contexts, declared join-side
+   aliases, and hard-pruned alternate-source subtrees.
 3. Overlap suppression removes an unknown-field diagnostic contained by a
    shape diagnostic, so one malformed slot produces one finding.
 
@@ -68,18 +79,18 @@ The catalog marks the rule `sourceScoped`; `runLint` suppresses it only when one
 non-wildcard top-level source is proven different from
 `selectedSourcePattern`. Missing metadata suppresses only the existence pass.
 
-Unknown-field ranges cover the `fieldExpression`; a close match adds an in-place
+Unknown-field ranges cover the field reference; a close match adds an in-place
 replacement. The edit-distance threshold is `max(2, floor(name.length / 3))`.
 Shape ranges cover the source-slot expression. Only one `=` or `==` whose
 right-hand side is one bare field gets the `field=value` to `value` fix.
 Ambiguous expressions have no fix.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - Keep `SHAPE_DOC_URL`, `SHAPE_COMMAND_KEYWORD`, the shape-pass command loop, and
-  `field_slot_shape_text.ts`'s `COMMANDS` map synchronized. If another grammar
-  rule adds `source_field = expression`, update all four surfaces and the
-  grammar census guard.
+  `field_slot_shape_text.ts`'s `COMMANDS` map synchronized. If another
+  extraction command accepts `source_field = expression`, update all four
+  surfaces and the grammar census guard.
 - Every new PPL command must be classified in `COMMAND_ORDER_EFFECTS` in
   `pipeline_shape.ts`; otherwise `buildPipelineShape` does not see the stage or
   its created fields. Add bespoke created-field handling when output names are
@@ -87,27 +98,22 @@ Ambiguous expressions have no fix.
 - Created-field handling is hardcoded for `grok`/`parse`/`rex` captures,
   `patterns` (`NEW_FIELD`, `patterns_field`, and `tokens`), `spath`
   (`OUTPUT` or `indexablePath`), and `addtotals`/`addcoltotals`
-  (`FIELDNAME`, default `Total`). Reverify these defaults and grammar slots when
-  command or engine behavior changes.
+  (`FIELDNAME`, default `Total`). Reverify these defaults and field extraction
+  when command or engine behavior changes.
 - `collectAlternateSourceSubtrees` prunes `lookup`, an `append` containing
-  `search`, `appendcol`, `appendpipe`, `foreach`, `subSearch`, and
-  `unionDataset`. Add new nested-source commands there. `graphlookup` is
-  intentionally not pruned because its `AS` name is an outer output field.
+  `search`, `appendcol`, `appendpipe`, `foreach`, bracketed subsearches, and
+  union dataset branches. Add new nested-source commands there. `graphlookup`
+  is intentionally not pruned because its `AS` name is an outer output field.
 - Created fields are currently accumulated for the whole outer pipeline, not by
   stage. A reference before a later `eval` or alias definition is therefore
   treated as known. Whole-command pruning can also omit outer outputs from
   commands such as `lookup`; both behaviors need explicit review when command
   semantics change.
-- `SOURCE_KEYWORDS` (`source`, `index`) is a compiled-grammar workaround.
-  `resolveExcludedAncestorIndices` and `collectJoinAliases` depend on the exact
-  grammar names `fromClause`, `tableSource`, `tableSourceClause`,
-  `tableQualifiedName`, `sourceReference`, `sideAlias`, `joinCriteria`, and
-  `qualifiedName`.
 - Dotted references are accepted when either the full path or its leading
   segment is known. This avoids false positives for object children but can
-  hide an unknown child beneath a known object. Unbalanced paths, missing grammar
-  rules, absent fields, and detector exceptions produce no finding rather than
-  a speculative diagnostic.
+  hide an unknown child beneath a known object. Unbalanced paths, absent fields,
+  and detector exceptions produce no finding rather than a speculative
+  diagnostic.
 - Source scoping fails open for pipe-first, wildcard, multi-source, or otherwise
   inconclusive queries. Alternate-source pruning is therefore the separate
   protection for nested sources and must stay current.

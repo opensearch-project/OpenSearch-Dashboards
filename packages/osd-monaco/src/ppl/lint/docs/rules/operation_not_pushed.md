@@ -40,6 +40,18 @@ rule requires a parseable data-source version, a positively identified Calcite
 engine, HTTP access to `_explain`, and a clean parse. Fast mode is the default
 and omits ambiguous findings; thorough mode can issue isolation probes.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Default state      | Off; per-rule opt-in and the global PPL lint capability are required                                                                 |
+| Severity           | `warning`                                                                                                                            |
+| Diagnostic message | This operation runs after the index scan, so OpenSearch must read and return its input rows first.                                   |
+| Fix guidance       | Rewrite the highlighted operation with indexed fields and supported functions so the PPL engine can include it in the index request. |
+| Documentation      | [SQL and PPL performance limitations](https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance)                        |
+
 ## Implementation
 
 `packages/osd-monaco/src/ppl/lint/explain/rules/operation_not_pushed.ts`
@@ -57,15 +69,15 @@ aggregation and sort are `Aggregate`- and `Sort`-suffix relations without
 Suffix checks avoid treating joins such as `EnumerableSortMergeJoin` as sorts.
 
 The detector initially emits a whole-query diagnostic. The attribution snapshot
-narrows it to parser-derived `where` expressions, `statsAggTerm` nodes, or
-`sortField` nodes. One unambiguous candidate is resolved locally unless
-host-injected `where` clauses make filter counting unsafe. Fast mode drops
-unresolved findings; thorough mode validates and explains generated
-control/treatment queries before publishing causally attributed findings.
-Network, parse, stale-generation, invalid snapshot, unsupported-plan, and
-detector failures fail closed and leave static lint markers unchanged.
+narrows it to parser-derived `where` expressions, `stats` terms, or sort fields.
+One unambiguous candidate is resolved locally unless host-injected `where`
+clauses make filter counting unsafe. Fast mode drops unresolved findings;
+thorough mode validates and explains generated control/treatment queries before
+publishing causally attributed findings. Network, parse, stale-generation,
+invalid snapshot, unsupported-plan, and detector failures fail closed and leave
+static lint markers unchanged.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `SIGNALS` and the `ExplainOutcome` union define the supported operations.
   Adding a coordinator outcome requires updating the outcome type, signal map,
@@ -79,14 +91,15 @@ detector failures fail closed and leave static lint markers unchanged.
   operator suffixes, and coordinator `Aggregate`/`Sort` suffixes. Recheck both
   `json_tree` and legacy string plans when Calcite changes relation names,
   fields, tag spelling, or response shape.
-- Attribution recognizes only `whereCommand`, `statsCommand`, and
-  `sortCommand`. `BRANCHED_COMMANDS` hardcodes `join`, `append`, `appendcol`,
-  `union`, `multisearch`, and `lookup`. The shared alternate-source scan
+- Attribution recognizes only `where`, `stats`, and `sort`.
+  `BRANCHED_COMMANDS` lists `join`, `append`, `appendcol`, `union`,
+  `multisearch`, and `lookup`. The shared alternate-source scan
   separately hardcodes `lookup`, an `append` containing `search`, `appendcol`,
-  `appendpipe`, `foreach`, `subSearch`, and `unionDataset`; either condition
-  disables all three operations. `graphlookup` is deliberately not pruned
-  because its `AS` output belongs to the outer pipeline, so any independent-plan
-  behavior needs explicit explain handling rather than blind shared pruning.
+  `appendpipe`, `foreach`, bracketed subsearches, and union dataset branches;
+  either condition disables all three operations. `graphlookup` is deliberately
+  not pruned because its `AS` output belongs to the outer pipeline, so any
+  independent-plan behavior needs explicit explain handling rather than blind
+  shared pruning.
   Aggregation attribution also requires exactly one aggregation stage and that
   stage must be plain `stats`; `eventstats`, `streamstats`, and `timechart` are
   unsupported. Sort attribution requires exactly one outer `sort`.

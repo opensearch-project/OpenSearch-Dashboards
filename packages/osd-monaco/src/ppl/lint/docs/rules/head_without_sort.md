@@ -36,6 +36,18 @@ direction.
 Info severity, configured off by default, on all engine versions. Users can opt
 in through the per-rule Advanced Setting. It needs only the query text.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | Off; per-rule opt-in and the global PPL lint capability are required                                                                                                             |
+| Severity           | `info`                                                                                                                                                                           |
+| Diagnostic message | Without sort, head can return different rows each time the query runs.                                                                                                           |
+| Fix guidance       | Add `sort` before `head` when you need stable top or bottom results.                                                                                                             |
+| Documentation      | [Head command: retrieving results after an offset](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/#example-3-retrieving-the-first-n-results-after-an-offset-m) |
+
 ## Implementation
 
 `headWithoutSortDetector` in
@@ -60,14 +72,11 @@ existing order while their secondary pipelines are ignored.
 The catalog has no version, engine, grammar-surface, or metadata gate, so the
 detector runs on every available parse tree when the rule is enabled.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - Every new or renamed PPL command must be added to `COMMAND_ORDER_EFFECTS` as
   `preserves`, `establishes`, or `invalidates`. An omitted command is absent from
   the stage list and is silently treated as though it did not affect ordering.
-- Keep aliases for grammar drift. In particular, bundled grammars use
-  `topCommand` and `rareCommand`, while the captured 3.8 runtime grammar uses
-  `rareTopCommand`.
 - Recheck the classification against a live `_explain` plan whenever a command's
   execution changes. The current map assumes `sort`, `top`, `rare`, `chart`, and
   `timechart` establish order; joins, aggregations, and unions invalidate it.

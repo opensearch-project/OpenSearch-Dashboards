@@ -36,13 +36,24 @@ domain-specific.
 Warning severity, enabled by default, on all engine versions. It needs only the
 query text.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Default state      | On in the rule catalog; the global PPL lint capability still defaults off                                              |
+| Severity           | `warning`                                                                                                              |
+| Diagnostic message | Dividing by zero returns no value (null) instead of an error.                                                          |
+| Fix guidance       | Use the intended divisor, or handle zero before dividing, for example `if(total = 0, 0, errors / total)`.              |
+| Documentation      | [Arithmetic operators](https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators) |
+
 ## Implementation
 
 `divisionByZeroDetector` in
-`packages/osd-monaco/src/ppl/lint/rules/division_by_zero.ts` finds every
-`valueExpression` through the active grammar's rule-name map. For each
-expression, it looks for a direct terminal child whose text is `/` or `%`, then
-treats the first rule child to its right as the divisor.
+`packages/osd-monaco/src/ppl/lint/rules/division_by_zero.ts` walks arithmetic
+expressions, finds `/` or `%`, and treats the complete right operand as the
+divisor.
 
 `isZeroLiteral` removes enclosing parentheses repeatedly, removes one leading
 sign, accepts decimal digit forms such as `0`, `0.0`, `0.`, and `.0`, and
@@ -54,19 +65,14 @@ The catalog has no version, engine, grammar-surface, or metadata gate. If
 `valueExpression` is absent from an active grammar, the shared rule lookup
 returns no nodes and the detector produces no finding.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
-- Both grammar surfaces currently represent multiplicative arithmetic as a
-  `valueExpression` with direct `DIVIDE` (`/`) or `MODULE` (`%`) terminal
-  children. Update the traversal if either operator moves under a named operator
-  rule or a new expression rule.
 - Detection is intentionally literal-only. It does not evaluate identifiers,
   functions, casts, arithmetic that folds to zero, or non-decimal literal
   syntaxes. Expand `isZeroLiteral` and its tests if the grammar adds supported
   numeric forms such as exponent notation.
-- The "first rule child after the operator is the divisor" assumption follows
-  the current binary arithmetic tree. Grammar changes to postfix operators or
-  additional siblings can select the wrong range.
+- If arithmetic syntax expands, reverify that the detector selects the complete
+  right operand and reports its range rather than a nested expression.
 - The traversal runs on error-recovered trees. Keep it defensive: a missing
   divisor must remain a no-op rather than causing the runner to catch and skip
   the entire detector.

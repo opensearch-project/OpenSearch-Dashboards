@@ -302,9 +302,11 @@ Users can opt in to a disabled rule through the
 `query:enhancements:pplLint:rules` Advanced Setting.
 
 Each linked rule page is also the detailed maintainer reference for that rule:
-it names the detector and shared implementation paths, hardcoded grammar,
-command, type, or plan assumptions, known failure and suppression behavior,
-and the focused tests that must change with it.
+it records the reviewed default, severity, exact catalog message and fix
+guidance, and documentation link; names the detector and shared implementation
+paths; and documents behavioral assumptions, maintenance requirements, known
+failure and suppression behavior, and the focused tests that must change with
+it.
 
 | Rule                                                                                                   | Severity | Default | Applies to      | Flags                  |
 | ------------------------------------------------------------------------------------------------------ | -------- | ------- | --------------- | ---------------------- |
@@ -324,7 +326,7 @@ and the focused tests that must change with it.
 | [`operation-not-pushed`](docs/rules/operation_not_pushed.md)                                           | warning  | off     | 3.3.0+; Calcite | explain plan           |
 | [`operation-pushed-as-script`](docs/rules/operation_pushed_as_script.md)                               | info     | off     | 3.3.0+; Calcite | explain plan           |
 | [`enabled-false-object`](docs/rules/enabled_false_object.md)                                           | warning  | on      | 3.7.0+; Calcite | context; source scoped |
-| [`wildcard-source-zero-match`](docs/rules/wildcard_source_zero_match.md)                               | info     | on      | all versions    | context                |
+| [`wildcard-source-zero-match`](docs/rules/wildcard_source_zero_match.md)                               | warning  | on      | all versions    | context                |
 | [`rex-scan-cost`](docs/rules/rex_scan_cost.md)                                                         | info     | on      | all versions    | context; source scoped |
 
 ## Context

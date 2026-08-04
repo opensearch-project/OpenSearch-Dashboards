@@ -35,20 +35,30 @@ Warning severity, configured off by default, on all engine versions. Users can
 opt in through the per-rule Advanced Setting. The rule self-suppresses when the
 host reports that all join types are allowed.
 
+## Catalog configuration
+
+The message and fix guidance are copied verbatim from the reviewed rule catalog.
+
+| Field              | Reviewed value                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default state      | Off; per-rule opt-in and the global PPL lint capability are required                                                                                     |
+| Severity           | `warning`                                                                                                                                                |
+| Diagnostic message | This join type is disabled by default.                                                                                                                   |
+| Fix guidance       | Use an `inner` or `left` join when it preserves the intended result. Otherwise, ask an administrator to enable `plugins.calcite.all_join_types.allowed`. |
+| Documentation      | [Join limitations](https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/#limitations)                                                        |
+
 ## Implementation
 
 `disabledJoinTypeDetector` in
 `packages/osd-monaco/src/ppl/lint/rules/disabled_join_type.ts` enumerates every
-`joinCommand`. It supports both grammar shapes that carry the join type: a
-direct `sqlLikeJoinType` child for runtime syntax such as `join right ...`, and
-a `joinType` child under each direct `joinOption` for syntax such as
-`join type=cross ...`.
+`join`. It supports both forms that carry the join type: runtime syntax such as
+`join right ...` and option syntax such as `join type=cross ...`.
 
-Only direct `joinOption` children are inspected. Nested joins are found
-separately by the outer `joinCommand` walk, preventing a nested type from being
-reported twice or masking the outer type. Direct terminal text is lowercased and
-matched against `right`, `full`, and `cross`. The diagnostic spans the matched
-type rule, not the whole join, and has no quick fix.
+Only options owned by the current join are inspected. Nested joins are found
+separately, preventing a nested type from being reported twice or masking the
+outer type. The value is lowercased and matched against `right`, `full`, and
+`cross`. The diagnostic spans the matched type, not the whole join, and has no
+quick fix.
 
 The rule suppresses only when
 `context.settings.allJoinTypesAllowed === true`. Missing settings, failed cache
@@ -56,14 +66,14 @@ reads, and an explicit `false` all warn. This fail-closed policy is intentional:
 the cluster opt-in must be positively observed before the linter suppresses an
 execution-time warning.
 
-## Hardcoded assumptions and maintenance
+## Assumptions and maintenance
 
 - `DISABLED_JOIN_KEYWORDS` mirrors the engine's
   `highCostJoinTypes = RIGHT/CROSS/FULL`. Reconcile it when the backend changes
   the protected set. `outer` remains an alias for `left` and must not be added.
-- Keep both `sqlLikeJoinType` and `joinOption` -> `joinType` traversals when join
-  syntax or grammar labels change. A descendant search under the outer join
-  reintroduces duplicate nested diagnostics.
+- Keep both `join right ...` and `join type=right ...` syntax paths covered. A
+  broad descendant search under an outer join reintroduces duplicate findings
+  for nested joins.
 - The settings route reads
   `plugins.calcite.all_join_types.allowed` with transient, persistent, then
   default precedence and considers only the normalized string `true` enabled.
