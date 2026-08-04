@@ -1,0 +1,109 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export const AUTO_VISUALIZATION_TOOL_NAME = 'auto_create_visualization';
+
+const CHART_TYPE_INFO: Record<string, string> = {
+  line: 'trends over time. Use when user asks about trends, changes over time, or time-series',
+  bar: 'compare values across categories or time buckets. Use for comparisons, rankings, distributions across groups',
+  area: 'stacked/cumulative trends over time. Use for cumulative totals, composition over time',
+  pie: 'proportional breakdown of a whole. Use when user asks about proportions, shares, percentages, breakdown',
+  scatter: 'correlation between two numerical variables. Use color/size to add dimensions',
+  heatmap: 'density or intensity across two categorical dimensions',
+  metric: 'single aggregated number, optionally with sparkline. Use for KPIs, totals, counts',
+  gauge: 'single value against a threshold range',
+  bar_gauge: 'progress bars against threshold range',
+  histogram: 'frequency distribution of a numerical field (auto-binned)',
+  state_timeline: 'discrete status/value changes over time',
+  table: 'raw tabular display',
+};
+
+function buildChartTypeGuide(): string {
+  return Object.entries(CHART_TYPE_INFO)
+    .map(([type, desc]) => `\n"${type}" — ${desc}`)
+    .join('');
+}
+
+export const AutoVisMeta = {
+  name: AUTO_VISUALIZATION_TOOL_NAME,
+  description:
+    'Creates a visualization from a PPL query and its result column schema. This tool does NOT ' +
+    'execute the query itself — it resolves the axes mapping from the provided columns, renders a ' +
+    'chart preview, and provides an editor link.' +
+    '\n\nWORKFLOW (follow in order):' +
+    '\n1. IMPOARTANT: always Call the index mapping tool to look up the timeFieldName; if it exists, pass it in.' +
+    '\n2. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
+    '\n3. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
+    '\n4. from, to and timeFieldName go together: passing a time range without ' +
+    'timeFieldName is rejected.' +
+    '\n\nCHART TYPE GUIDE (choose based on user intent and data shape):' +
+    buildChartTypeGuide(),
+
+  parameters: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description:
+          'The PPL query to visualize (e.g. "source=flights | stats avg(delay) by carrier"). ' +
+          'This must be the same query previously run via pplQueryTool.',
+      },
+      indexName: {
+        type: 'string',
+        description: 'The index/dataset name to query',
+      },
+      potentialChartType: {
+        type: 'string',
+        description:
+          'Optional. The chart type you infer the user most likely wants, based on their input ' +
+          'The chart type must be on one of: "line", "bar", "area", "pie", "scatter", ' +
+          '"heatmap", "metric", "gauge", "histogram", "state_timeline", "table". ' +
+          'This is only a hint. Omit it when the user does not imply a specific chart type.',
+      },
+      columns: {
+        type: 'array',
+        description:
+          'The result column schema returned by ppl execution. Each column has a name and type ' +
+          '(e.g. "integer", "keyword", "date", "double", "long", "float", "text", "timestamp"). ' +
+          'Used to resolve which chart types and axes mappings are compatible.',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Field name' },
+            type: {
+              type: 'string',
+              description: 'Field type from the query result schema',
+            },
+          },
+          required: ['name', 'type'],
+        },
+      },
+      splitField: {
+        type: 'string',
+        description:
+          'Optional categorical or numerical field to split/facet the chart by (small multiples)' +
+          'Infer the user most likely wants.',
+      },
+      timeFieldName: {
+        type: 'string',
+        description:
+          'The time field name of the index (e.g. "@timestamp", "timestamp"). ' +
+          'Get this from the index mapping. ' +
+          'Required whenever you pass from/to - a time range without it is rejected.',
+      },
+      from: {
+        type: 'string',
+        description:
+          'Start time for the time range (e.g., "now-1h", "now-7d", "2024-01-01"). Must be date math or an ISO 8601 timestamp. If provided along with to, the time range will be updated.',
+      },
+      to: {
+        type: 'string',
+        description:
+          'End time for the time range (e.g., "now", "2024-01-31"). If provided along with from, the time range will be updated.',
+      },
+    },
+    required: ['query', 'indexName', 'columns'],
+  },
+};

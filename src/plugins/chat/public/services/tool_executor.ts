@@ -45,7 +45,8 @@ export class ToolExecutor {
     toolName: string,
     toolArgs: any,
     toolCallId: string,
-    datasourceId?: string
+    datasourceInfo?: { id: string; title?: string },
+    timeRange?: { from: string; to: string }
   ): Promise<ToolResult> {
     try {
       // Check if this tool requires confirmation
@@ -84,7 +85,14 @@ export class ToolExecutor {
       }
 
       // Include datasourceId in toolArgs if provided
-      const enrichedToolArgs = datasourceId ? { ...toolArgs, datasourceId } : toolArgs;
+
+      let enrichedToolArgs = datasourceInfo
+        ? { ...toolArgs, datasourceId: datasourceInfo.id, datasourceTitle: datasourceInfo.title }
+        : toolArgs;
+      // Include the current page time range
+      if (timeRange) {
+        enrichedToolArgs = { ...enrichedToolArgs, timeRange };
+      }
 
       // First, check if this is a registered assistant action
       const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);

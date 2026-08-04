@@ -26,7 +26,7 @@ import { DashboardVariables } from './dashboard_variables';
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings, keyboardShortcut, workspaces } = services;
+  const { chrome, uiSettings, keyboardShortcut, workspaces, chat } = services;
   // Master switch for the Dashboard Variables feature (dashboard.variables.enabled, default false).
   const variablesEnabled =
     services.pluginInitializerContext.config.get<{ variables?: { enabled?: boolean } }>()?.variables
@@ -58,6 +58,18 @@ export const DashboardEditor = () => {
     dashboardContainer: currentContainer,
     appState,
   });
+
+  useEffect(() => {
+    chat?.screenshot?.configure({
+      enabled: true,
+      title: i18n.translate('dashboard.editor.chat.addScreenshot', {
+        defaultMessage: 'Add dashboard screenshot',
+      }),
+    });
+    return () => {
+      chat?.screenshot.configure({ enabled: false });
+    };
+  }, [chat]);
 
   useEffect(() => {
     if (showActionsInGroup) setHeaderVariant?.(HeaderVariant.APPLICATION);
