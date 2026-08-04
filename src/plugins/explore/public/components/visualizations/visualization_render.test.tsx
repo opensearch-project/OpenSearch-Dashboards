@@ -18,8 +18,8 @@ const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Ren
 const mockFindRuleByAxesMapping = jest.fn();
 const mockSplitContainer = jest.fn(({ groups, renderChart }) => (
   <div data-test-subj="splitContainer">
-    {groups.map((group: { key: string; data: Array<Record<string, unknown>> }) => (
-      <div key={group.key}>{renderChart(group.data, group.key)}</div>
+    {groups.map((group: string) => (
+      <div key={group}>{renderChart(group)}</div>
     ))}
   </div>
 ));
@@ -337,7 +337,7 @@ describe('VisualizationRender', () => {
 
     expect(mockRender).toHaveBeenCalledWith(
       expect.objectContaining({
-        transformedData: [{ field1: 'value1', count: 10 }],
+        data: [{ field1: 'value1', count: 10 }],
         renderContext: expect.objectContaining({
           seriesName: 'value1',
         }),
