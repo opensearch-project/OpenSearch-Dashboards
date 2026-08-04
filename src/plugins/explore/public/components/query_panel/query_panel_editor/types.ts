@@ -59,4 +59,12 @@ export interface QueryEditorProps {
 
   // compute editor container height
   getEditorContainerHeight?: (domNode: HTMLElement | null) => number;
+
+  /**
+   * Optional provider for dashboard variable names. When supplied, typing `$` or `${`
+   * surfaces these names as autocomplete suggestions (e.g. `${myVar}`). Implemented as a
+   * getter so the editor always reads the latest names at completion time rather than a
+   * value captured when the editor mounted.
+   */
+  getVariableNames?: () => string[];
 }

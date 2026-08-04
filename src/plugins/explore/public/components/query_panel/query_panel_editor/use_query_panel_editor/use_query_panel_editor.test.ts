@@ -82,6 +82,7 @@ jest.mock('@osd/monaco', () => ({
       registerCompletionItemProvider: jest.fn(() => ({ dispose: jest.fn() })),
       CompletionItemKind: {
         Keyword: 1,
+        Variable: 4,
       },
     },
     Range: jest.fn(),
@@ -1007,6 +1008,74 @@ describe('useQueryPanelEditor', () => {
 
       expect(syncPPLLintContext).not.toHaveBeenCalled();
       expect(revalidatePPLModel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dashboard variable suggestions', () => {
+    const runCompletion = async (props: any, model: any, column: number) => {
+      const { result } = renderHook(() => useQueryPanelEditor(props));
+      let list: any;
+      await act(async () => {
+        list = await result.current.suggestionProvider.provideCompletionItems(
+          model,
+          { lineNumber: 1, column } as any,
+          // @ts-expect-error TS2345 test stub
+          {},
+          { isCancellationRequested: false }
+        );
+      });
+      return list;
+    };
+
+    it('injects variable suggestions when the caret follows a "$"', async () => {
+      const model = {
+        getValue: () => 'source=logs | where svc=$',
+        getOffsetAt: () => 25,
+        getWordUntilPosition: () => ({ startColumn: 25, endColumn: 25 }),
+      } as any;
+
+      const list = await runCompletion(
+        buildProps({ getVariableNames: () => ['env', 'service'] }),
+        model,
+        26
+      );
+
+      const labels = list.suggestions.map((s: any) => s.label);
+      expect(labels).toEqual(expect.arrayContaining(['${env}', '${service}']));
+      const envSuggestion = list.suggestions.find((s: any) => s.label === '${env}');
+      expect(envSuggestion.insertText).toBe('${env}');
+      expect(envSuggestion.detail).toBe('Dashboard variable');
+    });
+
+    it('does not inject variable suggestions when the caret is not after a "$"', async () => {
+      const model = {
+        getValue: () => 'source=logs',
+        getOffsetAt: () => 11,
+        getWordUntilPosition: () => ({ startColumn: 8, endColumn: 11 }),
+      } as any;
+
+      const list = await runCompletion(
+        buildProps({ getVariableNames: () => ['env', 'service'] }),
+        model,
+        12
+      );
+
+      const labels = list.suggestions.map((s: any) => s.label);
+      expect(labels).not.toContain('${env}');
+      expect(labels).not.toContain('${service}');
+    });
+
+    it('is a no-op when getVariableNames is not provided', async () => {
+      const model = {
+        getValue: () => 'source=logs | where svc=$',
+        getOffsetAt: () => 25,
+        getWordUntilPosition: () => ({ startColumn: 25, endColumn: 25 }),
+      } as any;
+
+      const list = await runCompletion(buildProps(), model, 26);
+
+      const labels = list.suggestions.map((s: any) => s.label);
+      expect(labels).not.toContain('${env}');
     });
   });
 });

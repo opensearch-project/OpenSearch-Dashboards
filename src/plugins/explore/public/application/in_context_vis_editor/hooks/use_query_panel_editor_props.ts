@@ -47,5 +47,6 @@ export const useQueryPanelEditorProps = (): QueryEditorProps => {
     getEditorContainerHeight,
     handleEditorChange: (updates) => queryBuilder.updateQueryEditorState(updates),
     focusShortcutId: 'vis_editor_focus_query_bar',
+    getVariableNames: () => queryBuilder.getVariableNames(),
   };
 };

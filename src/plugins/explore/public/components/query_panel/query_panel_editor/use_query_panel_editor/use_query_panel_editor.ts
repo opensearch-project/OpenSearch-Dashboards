@@ -87,6 +87,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     switchEditorMode,
     editorRef,
     getEditorContainerHeight,
+    getVariableNames,
   } = props;
 
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
@@ -420,6 +421,44 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
           },
         }));
 
+        // Inject dashboard variable suggestions when the user types '$' or '${'.
+        // Only relevant for consumers that provide variable names (e.g. the in-context
+        // visualization editor embedded in a dashboard); no-op otherwise.
+        const variableNames = getVariableNames?.() ?? [];
+        if (variableNames.length > 0) {
+          const offset = model.getOffsetAt(position);
+          const textBeforeCursor = model.getValue().substring(0, offset);
+          const dollarMatch = textBeforeCursor.match(/\$\{?(\w*)$/);
+          if (dollarMatch) {
+            const fullPrefix = dollarMatch[0]; // e.g. "$", "$se", "${", "${se"
+            const varRange = new monaco.Range(
+              position.lineNumber,
+              position.column - fullPrefix.length,
+              position.lineNumber,
+              position.column
+            );
+            variableNames.forEach((name) => {
+              monacoSuggestions.push({
+                label: `\${${name}}`,
+                kind: monaco.languages.CompletionItemKind.Variable,
+                insertText: `\${${name}}`,
+                insertTextRules: undefined,
+                range: varRange,
+                detail: 'Dashboard variable',
+                sortText: `!${name}`,
+                documentation: {
+                  value: `Reference variable **${name}** — will be replaced at query time`,
+                  isTrusted: true,
+                },
+                command: {
+                  id: 'editor.action.triggerSuggest',
+                  title: 'Trigger Next Suggestion',
+                },
+              });
+            });
+          }
+        }
+
         return {
           suggestions: monacoSuggestions,
           incomplete: false,
@@ -428,7 +467,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, dataViews, services]
+    [isPromptModeRef, queryLanguage, dataViews, services, getVariableNames]
   );
 
   const suggestionProvider = useMemo(() => {
