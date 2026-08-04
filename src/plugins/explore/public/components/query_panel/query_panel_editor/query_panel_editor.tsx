@@ -4,12 +4,14 @@
  */
 
 import classNames from 'classnames';
+import { EuiToolTip } from '@elastic/eui';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryPanelEditor } from './use_query_panel_editor';
 import './query_panel_editor.scss';
 import { QueryEditorProps } from './types';
 
 export const QueryPanelEditor = (props: QueryEditorProps) => {
+  const { readOnly = false, readOnlyTooltip } = props;
   const {
     isFocused,
     isPromptMode,
@@ -20,7 +22,7 @@ export const QueryPanelEditor = (props: QueryEditorProps) => {
     ...editorProps
   } = useQueryPanelEditor(props);
 
-  return (
+  const editor = (
     // Suppressing below as this should only happen for click events.
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
@@ -28,6 +30,7 @@ export const QueryPanelEditor = (props: QueryEditorProps) => {
         ['exploreQueryPanelEditor--focused']: isFocused,
         ['exploreQueryPanelEditor--promptMode']: isPromptMode,
         ['exploreQueryPanelEditor--promptIsTyping']: promptIsTyping,
+        ['exploreQueryPanelEditor--readOnly']: readOnly,
       })}
       data-test-subj="exploreQueryPanelEditor"
       onClick={onEditorClick}
@@ -38,4 +41,14 @@ export const QueryPanelEditor = (props: QueryEditorProps) => {
       ) : null}
     </div>
   );
+
+  if (readOnly && readOnlyTooltip) {
+    return (
+      <EuiToolTip content={readOnlyTooltip} position="top" display="block">
+        {editor}
+      </EuiToolTip>
+    );
+  }
+
+  return editor;
 };

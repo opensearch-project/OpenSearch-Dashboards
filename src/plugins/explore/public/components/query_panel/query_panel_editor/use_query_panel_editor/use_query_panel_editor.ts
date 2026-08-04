@@ -87,6 +87,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     switchEditorMode,
     editorRef,
     getEditorContainerHeight,
+    readOnly = false,
   } = props;
 
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
@@ -489,12 +490,15 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
       // Add Enter key handling for suggestions
       editor.addAction(getEnterAction(handleRun));
 
-      // Add Space bar key handling to switch to prompt mode
-      editor.addAction(
-        getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
-          switchEditorMode(EditorMode.Prompt)
-        )
-      );
+      // Add Space bar key handling to switch to prompt mode. Suppressed when the
+      // editor is read-only (builder-only mode), where AI generation is disabled.
+      if (!readOnly) {
+        editor.addAction(
+          getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
+            switchEditorMode(EditorMode.Prompt)
+          )
+        );
+      }
 
       // Add Escape key handling to switch to query mode
       editor.addAction(getEscapeAction(isPromptModeRef, () => switchEditorMode(EditorMode.Query)));
@@ -565,16 +569,14 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
       getValidationContext,
       getLintContext,
       getEditorContainerHeight,
+      readOnly,
     ]
   );
 
   const options = useMemo(() => {
-    if (isQueryMode) {
-      return queryEditorOptions;
-    } else {
-      return promptEditorOptions;
-    }
-  }, [isQueryMode]);
+    const base = isQueryMode ? queryEditorOptions : promptEditorOptions;
+    return readOnly ? { ...base, readOnly: true } : base;
+  }, [isQueryMode, readOnly]);
 
   const placeholder = useMemo(() => {
     const enabledPromptPlaceholder = i18n.translate(
