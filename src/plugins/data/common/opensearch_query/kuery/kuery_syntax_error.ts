@@ -70,7 +70,11 @@ export class DQLSyntaxError extends Error {
         return grammarRuleTranslations[expected.description] || expected.description;
       });
 
-      const translatedExpectationText = translatedExpectations.join(', ');
+      const uniqueExpectations = translatedExpectations.filter(
+        (exp, index, arr) => exp && arr.indexOf(exp) === index
+      );
+
+      const translatedExpectationText = uniqueExpectations.join(', ');
 
       message = i18n.translate('data.common.dql.errors.syntaxError', {
         defaultMessage: 'Expected {expectedList} but {foundInput} found.',
