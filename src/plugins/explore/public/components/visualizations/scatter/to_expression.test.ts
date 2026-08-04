@@ -107,11 +107,43 @@ describe('Scatter Chart to_expression', () => {
       [AxisRole.SIZE]: mockNumericalColumns[2],
     };
 
+    const mockSizeOnlyAxisMappings = {
+      [AxisRole.X]: mockNumericalColumns[0],
+      [AxisRole.Y]: mockNumericalColumns[1],
+      [AxisRole.SIZE]: mockNumericalColumns[2],
+    };
+
     it('returns an ECharts spec with size-encoded scatter series', () => {
       const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
+    });
+
+    it('clears the custom legend for size-only scatter charts', () => {
+      const onLegend = jest.fn();
+      const styles = {
+        ...mockStyles,
+        exclusive: {
+          ...mockStyles.exclusive,
+          filled: false,
+        },
+      };
+
+      createThreeMetricOneCateScatter(mockData, styles, mockSizeOnlyAxisMappings, onLegend);
+
+      expect(onLegend).toHaveBeenCalledWith({});
+    });
+
+    it('keeps category legend entries when color and size mappings are both present', () => {
+      const onLegend = jest.fn();
+
+      createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings, onLegend);
+
+      expect(onLegend).toHaveBeenCalledWith({
+        A: expect.any(String),
+        B: expect.any(String),
+      });
     });
 
     it('throws when size field is missing', () => {

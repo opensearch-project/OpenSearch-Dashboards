@@ -74,7 +74,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <LegendOptionsWrapper
             styleOptions={styleOptions}
             updateStyleOption={updateStyleOption}
-            shouldShow={hasColorMapping}
+            shouldShow={hasColorMapping || hasSizeMapping}
             hasSizeLegend={hasSizeMapping}
           />
 
