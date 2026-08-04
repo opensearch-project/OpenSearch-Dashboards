@@ -4,3 +4,8 @@
 
 ## max size of old space in megabytes
 #--max-old-space-size=4096
+
+## max size of semi space in megabytes
+## Node.js 20 changed young-generation GC sizing; raising this can reduce
+## scavenge pressure on write-heavy workloads.
+#--max-semi-space-size=64
