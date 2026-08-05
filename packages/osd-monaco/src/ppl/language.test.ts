@@ -4,6 +4,11 @@
  */
 
 import type { LintResult } from './lint/diagnostic';
+import {
+  PPLLintTelemetryEvent,
+  PPL_LINT_TELEMETRY_EVENTS,
+  registerPPLLintTelemetry,
+} from './lint/telemetry';
 
 // mock-prefixed for jest-hoist compatibility.
 const mockLintFallback = jest.fn();
@@ -18,6 +23,7 @@ jest.mock('../monaco', () => ({
       onWillDisposeModel: jest.fn(),
       getModels: () => [],
       defineTheme: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
     },
     languages: {
       register: jest.fn(),
@@ -62,12 +68,6 @@ jest.mock('./validation_provider', () => ({
 jest.mock('./lint/diagnostic_to_marker', () => ({
   diagnosticToMarker: (d: { ruleId: string }) => ({ message: d.ruleId, code: d.ruleId }),
 }));
-jest.mock('./lint/hover/hover_registry', () => ({
-  markerFixKey: (m: { code: string }) => m.code,
-  setModelHoverFacts: jest.fn(),
-  clearModelHoverFacts: jest.fn(),
-}));
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { revalidatePPLModel } = require('./language');
 
@@ -210,5 +210,109 @@ describe('worker context serialization (structured-clone safety)', () => {
 
     const workerContext = mockLintFallback.mock.calls[0][1];
     expect(workerContext.typeMap).toBeUndefined();
+  });
+});
+
+describe('processLintHighlighting — diagnostic_shown telemetry', () => {
+  let events: PPLLintTelemetryEvent[];
+  beforeEach(() => {
+    mockSetModelMarkers.mockClear();
+    mockLintFallback.mockReset();
+    events = [];
+    registerPPLLintTelemetry((event) => events.push(event));
+  });
+  afterEach(() => registerPPLLintTelemetry(undefined));
+
+  // A LintResult with an explicit list of diagnostics (possibly repeating a
+  // rule) so we can assert the per-rule dedup.
+  const multiResult = (ruleIds: string[]): LintResult => ({
+    diagnostics: ruleIds.map((ruleId) => ({
+      ruleId,
+      severity: 'warning',
+      message: ruleId,
+      range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+    })),
+  });
+
+  it('emits diagnostic_shown once per distinct rule after markers are applied', async () => {
+    const model = makeModel('t1');
+    // Two findings of one rule + one of another → two events, deduped.
+    mockLintFallback.mockResolvedValueOnce(
+      multiResult(['division-by-zero', 'division-by-zero', 'head-without-sort'])
+    );
+
+    await revalidatePPLModel(model);
+    await flush();
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'head-without-sort' } },
+    ]);
+  });
+
+  it('emits nothing when the pass produces no diagnostics', async () => {
+    const model = makeModel('t2');
+    mockLintFallback.mockResolvedValueOnce({ diagnostics: [] });
+
+    await revalidatePPLModel(model);
+    await flush();
+
+    expect(events).toHaveLength(0);
+  });
+
+  it('emits one exposure across 60 accepted passes with the same diagnostic', async () => {
+    const model = makeModel('t-volume');
+    mockLintFallback.mockResolvedValue(multiResult(['division-by-zero']));
+
+    for (let i = 0; i < 60; i++) {
+      await revalidatePPLModel(model);
+      await flush();
+    }
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+    ]);
+  });
+
+  it('starts a new rule episode after an accepted empty pass', async () => {
+    const model = makeModel('t-episode');
+    mockLintFallback
+      .mockResolvedValueOnce(multiResult(['division-by-zero']))
+      .mockResolvedValueOnce(multiResult([]))
+      .mockResolvedValueOnce(multiResult(['division-by-zero']));
+
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'division-by-zero' } },
+    ]);
+  });
+
+  it('does not reconcile telemetry from a stale result', async () => {
+    const model = makeModel('t-stale');
+    let resolveStale!: (value: LintResult) => void;
+    let resolveFresh!: (value: LintResult) => void;
+    mockLintFallback
+      .mockReturnValueOnce(new Promise<LintResult>((resolve) => (resolveStale = resolve)))
+      .mockReturnValueOnce(new Promise<LintResult>((resolve) => (resolveFresh = resolve)));
+
+    void revalidatePPLModel(model);
+    void revalidatePPLModel(model);
+    await flush();
+
+    resolveFresh(multiResult(['head-without-sort']));
+    await flush();
+    resolveStale(multiResult(['division-by-zero']));
+    await flush();
+
+    expect(events).toEqual([
+      { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'head-without-sort' } },
+    ]);
   });
 });

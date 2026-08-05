@@ -6,42 +6,35 @@
 import React, { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
-import { ColorMap } from './utils/color_map';
 import { Positions } from './types';
+import { dedupeLegendItems, getLegendTargetKey, LegendItem, LegendTarget } from './utils/legend';
 
 import './custom_legend.scss';
 
 interface CustomLegendProps {
-  legend$: BehaviorSubject<Record<string, ColorMap>>;
+  legend$: BehaviorSubject<Record<string, LegendItem[]>>;
   legendSelected$: BehaviorSubject<Record<string, boolean>>;
-  highlightedSeries$: BehaviorSubject<string | undefined>;
+  highlightedLegendTarget$: BehaviorSubject<LegendTarget | undefined>;
   position?: Positions;
 }
 
 export const CustomLegend: React.FC<CustomLegendProps> = ({
   legend$,
   legendSelected$,
-  highlightedSeries$,
+  highlightedLegendTarget$,
   position = Positions.BOTTOM,
 }) => {
   const legendMap = useObservable(legend$);
-  const colorMap = useMemo(() => {
-    if (!legendMap) return {};
-    const merged: ColorMap = {};
-    Object.values(legendMap).forEach((map) => Object.assign(merged, map));
-    const sorted: ColorMap = {};
-    Object.keys(merged)
-      .sort()
-      .forEach((name) => {
-        sorted[name] = merged[name];
-      });
-    return sorted;
+  const legendItems = useMemo(() => {
+    if (!legendMap) return [];
+    return dedupeLegendItems(Object.values(legendMap).flat());
   }, [legendMap]);
   const selected = useObservable(legendSelected$) ?? {};
   const isVertical = position === Positions.LEFT || position === Positions.RIGHT;
 
   const handleToggle = useCallback(
-    (name: string) => {
+    (item: LegendItem) => {
+      const name = item.target.name;
       const prev = legendSelected$.getValue();
       const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
       legendSelected$.next(next);
@@ -50,20 +43,21 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   );
 
   const handleMouseEnter = useCallback(
-    (name: string) => {
+    (item: LegendItem) => {
+      const name = item.target.name;
       const sel = legendSelected$.getValue();
       if (sel[name] !== false) {
-        highlightedSeries$.next(name);
+        highlightedLegendTarget$.next(item.target);
       }
     },
-    [highlightedSeries$, legendSelected$]
+    [highlightedLegendTarget$, legendSelected$]
   );
 
   const handleMouseLeave = useCallback(() => {
-    highlightedSeries$.next(undefined);
-  }, [highlightedSeries$]);
+    highlightedLegendTarget$.next(undefined);
+  }, [highlightedLegendTarget$]);
 
-  if (Object.keys(colorMap).length === 0) {
+  if (legendItems.length === 0) {
     return null;
   }
 
@@ -74,24 +68,25 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
       }`}
       data-test-subj="customLegend"
     >
-      {Object.entries(colorMap).map(([name, color]) => {
+      {legendItems.map((item) => {
+        const name = item.target.name;
         const isHidden = selected[name] === false;
         return (
           <button
-            key={name}
+            key={getLegendTargetKey(item.target)}
             className={`customLegend__item ${isHidden ? 'customLegend__item--hidden' : ''}`}
-            onClick={() => handleToggle(name)}
-            onMouseEnter={() => handleMouseEnter(name)}
+            onClick={() => handleToggle(item)}
+            onMouseEnter={() => handleMouseEnter(item)}
             onMouseLeave={handleMouseLeave}
-            title={name}
+            title={item.label}
             type="button"
             data-test-subj={`customLegendItem-${name}`}
           >
             <span
               className="customLegend__indicator"
-              style={{ backgroundColor: isHidden ? undefined : color }}
+              style={{ backgroundColor: isHidden ? undefined : item.color }}
             />
-            <span className="customLegend__label">{name}</span>
+            <span className="customLegend__label">{item.label}</span>
           </button>
         );
       })}

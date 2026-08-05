@@ -4,20 +4,16 @@
  */
 
 import { monaco } from '../../monaco';
-import { LINT_MARKER_SOURCE, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
+import { LINT_MARKER_SOURCE, ruleIdOf, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
 import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_registry';
 import { collectPPLDiagnosticActions } from './diagnostic_action';
 import { getCatalogEntryById } from './catalog';
-
-function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
-  const { code } = marker;
-  if (typeof code === 'string') {
-    return code;
-  }
-  return code && typeof code === 'object' && typeof code.value === 'string'
-    ? code.value
-    : undefined;
-}
+import {
+  emitPPLLintTelemetry,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  shouldEmitQuickfixOffered,
+} from './telemetry';
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -42,7 +38,8 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
     for (const marker of context.markers) {
       const key = markerFixKey(marker);
       let fix: MarkerFix | undefined;
-      if (marker.source === LINT_MARKER_SOURCE) {
+      const isLintMarker = marker.source === LINT_MARKER_SOURCE;
+      if (isLintMarker) {
         fix = getModelFix(model, key);
       } else if (marker.source === SYNTAX_MARKER_SOURCE) {
         fix = getModelSyntaxFix(model, key);
@@ -53,7 +50,7 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
       // Contributed actions (e.g. AI-assisted fix) run even without a deterministic
       // fix and read only catalog metadata, so no rule module is imported here.
       if (marker.source === LINT_MARKER_SOURCE) {
-        const ruleId = ruleIdOfMarker(marker);
+        const ruleId = ruleIdOf(marker);
         const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
         const contributed = collectPPLDiagnosticActions({
           marker,
@@ -106,14 +103,40 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         versionId: undefined,
       };
 
-      actions.push({
+      const action: monaco.languages.CodeAction = {
         title: fix.title,
         diagnostics: [marker],
         kind: 'quickfix',
         edit: {
           edits: [textEdit],
         },
-      });
+      };
+
+      // Lint quick-fixes carry a telemetry command so a `quickfix_clicked` event
+      // can be recorded when the fix is invoked. Monaco applies the edit before
+      // running the command, so the fix behavior is unchanged. Only the lint
+      // channel is instrumented; the syntax-error command-typo fix is not part
+      // of the lint feature-usage metrics.
+      if (isLintMarker) {
+        const rule = ruleIdOf(marker);
+        action.command = {
+          id: PPL_LINT_QUICKFIX_COMMAND_ID,
+          title: fix.title,
+          arguments: [{ rule }],
+        };
+        // Deduped for the exact marker while it remains active: Monaco
+        // auto-triggers provideCodeActions on every cursor move, so emitting on
+        // each call would count caret ticks and unchanged lint passes, not
+        // offers. `key` is the canonical position/message/rule identity.
+        if (shouldEmitQuickfixOffered(model, key)) {
+          emitPPLLintTelemetry({
+            name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED,
+            data: { rule },
+          });
+        }
+      }
+
+      actions.push(action);
     }
 
     return {

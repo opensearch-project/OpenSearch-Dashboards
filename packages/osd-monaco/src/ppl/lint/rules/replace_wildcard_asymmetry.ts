@@ -70,7 +70,6 @@ export const replaceWildcardAsymmetryDetector: Detector = (
         message: config.message,
         range: rangeFromContext(pair),
         docUrl: config.docUrl,
-        hoverFacts: { patternWildcards: patternCount, replacementWildcards: replacementCount },
       });
     }
   }

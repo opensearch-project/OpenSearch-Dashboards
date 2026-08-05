@@ -4,7 +4,7 @@
  */
 
 import { Token } from 'antlr4ng';
-import { CachedGrammar } from './ppl_grammar_cache';
+import { CachedGrammar } from './ppl_grammar_deserialize';
 
 export function tokenTypeBySymbolic(grammar: CachedGrammar, symbolicName: string): number {
   return grammar.runtimeSymbolicNameToTokenType.get(symbolicName) ?? Token.INVALID_TYPE;

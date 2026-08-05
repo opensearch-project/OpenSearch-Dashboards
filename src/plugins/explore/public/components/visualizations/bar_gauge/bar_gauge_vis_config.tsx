@@ -77,7 +77,7 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
             groupBy: categoryField,
             field: valueField,
             calculateType: props.styleOptions.valueCalculation,
-          })(props.transformedData);
+          })(props.data);
 
           const gaugeData = aggregated.map((row) => {
             return {

@@ -28,6 +28,7 @@ function makeRule(overrides: Partial<CatalogEntry>): CatalogEntry {
     enabled: true,
     severity: 'error',
     message: 'm',
+    howToFix: 'f',
     docUrl: 'd',
     appliesTo: {},
     ...overrides,

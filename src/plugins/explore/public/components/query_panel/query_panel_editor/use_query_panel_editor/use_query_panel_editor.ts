@@ -30,6 +30,8 @@ import {
   PPLDetachRefs,
   buildPPLLintContext,
   extractFieldMetadata,
+  fetchDisabledObjectFields,
+  fetchVisibleIndices,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -87,6 +89,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     switchEditorMode,
     editorRef,
     getEditorContainerHeight,
+    completionProviders,
   } = props;
 
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
@@ -128,6 +131,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
     lintContextRefresh: { current: undefined },
+    lintHoverPersistence: { current: undefined },
   });
 
   const getValidationContext = useCallback((): PPLValidationContext => {
@@ -237,6 +241,16 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
             return;
           }
           const { fields, typeMap } = extractFieldMetadata(indexPattern);
+          // Two metadata probes the field list cannot supply: `enabled:false` is
+          // stripped by _field_caps, and the visible-index list is cluster-wide.
+          // Both are best-effort — their rules self-suppress when absent.
+          const [disabledObjectFields, visibleIndices] = await Promise.all([
+            fetchDisabledObjectFields(services.http, indexPattern),
+            fetchVisibleIndices(services.http, dataSourceId),
+          ]);
+          if (cancelled) {
+            return;
+          }
           lintFieldsRef.current = {
             datasetId,
             dataSourceId,
@@ -244,6 +258,8 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
             selectedSourcePattern: sourcePattern,
             fields,
             typeMap,
+            disabledObjectFields,
+            visibleIndices,
           };
         } catch {
           if (cancelled) {
@@ -274,6 +290,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     dataViews,
     editorRef,
     getLintContext,
+    services.http,
   ]);
 
   // Cleanup validation + lint context on unmount
@@ -400,25 +417,42 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
 
         const filteredSuggestions = suggestions?.filter((s) => 'detail' in s) || [];
 
-        const monacoSuggestions = filteredSuggestions.map((s: any) => ({
-          label: s.text,
-          kind: s.type as monaco.languages.CompletionItemKind,
-          insertText: s.insertText ?? s.text,
-          insertTextRules: s.insertTextRules ?? undefined,
-          range: defaultRange,
-          detail: s.detail,
-          sortText: s.sortText,
-          documentation: s.documentation
-            ? {
-                value: s.documentation,
-                isTrusted: true,
+        const monacoSuggestions: monaco.languages.CompletionItem[] = filteredSuggestions.map(
+          (s: any) => ({
+            label: s.text,
+            kind: s.type as monaco.languages.CompletionItemKind,
+            insertText: s.insertText ?? s.text,
+            insertTextRules: s.insertTextRules ?? undefined,
+            range: defaultRange,
+            detail: s.detail,
+            sortText: s.sortText,
+            documentation: s.documentation
+              ? {
+                  value: s.documentation,
+                  isTrusted: true,
+                }
+              : '',
+            command: {
+              id: 'editor.action.triggerSuggest',
+              title: 'Trigger Next Suggestion',
+            },
+          })
+        );
+
+        // Merge in consumer-provided completion extensions.
+        if (completionProviders?.length) {
+          for (const provider of completionProviders) {
+            try {
+              const extraItems = await provider.provideCompletionItems(model, position, _, token);
+              if (extraItems?.length) {
+                monacoSuggestions.push(...extraItems);
               }
-            : '',
-          command: {
-            id: 'editor.action.triggerSuggest',
-            title: 'Trigger Next Suggestion',
-          },
-        }));
+            } catch (extensionError) {
+              // eslint-disable-next-line no-console
+              console.error('[QueryPanelEditor] completion extension failed:', extensionError);
+            }
+          }
+        }
 
         return {
           suggestions: monacoSuggestions,
@@ -428,19 +462,27 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, dataViews, services]
+    [isPromptModeRef, queryLanguage, dataViews, services, completionProviders]
   );
 
   const suggestionProvider = useMemo(() => {
     const languageTriggerCharacters =
       services?.data?.autocomplete?.getTriggerCharacters(queryLanguage);
+    const extensionTriggerCharacters = (completionProviders ?? []).flatMap(
+      (provider) => provider.triggerCharacters ?? []
+    );
     return {
       triggerCharacters: isPromptMode
         ? ['=']
-        : (languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
+        : Array.from(
+            new Set([
+              ...(languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
+              ...extensionTriggerCharacters,
+            ])
+          ),
       provideCompletionItems,
     };
-  }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
+  }, [isPromptMode, provideCompletionItems, queryLanguage, services, completionProviders]);
 
   const handleRun = useCallback(() => {
     onRun(editorTextRef.current);

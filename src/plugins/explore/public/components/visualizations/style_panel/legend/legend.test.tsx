@@ -34,7 +34,6 @@ describe('LegendOptionsPanel', () => {
     show: true,
     position: Positions.BOTTOM,
     title: 'Legend Title',
-    titleForSize: 'Size Legend Title',
   };
 
   const mockOnLegendChange = jest.fn();
@@ -53,21 +52,6 @@ describe('LegendOptionsPanel', () => {
 
     expect(legendModeSwitch).toBeInTheDocument();
     expect(legendPositionSelect).toBeInTheDocument();
-  });
-
-  it('renders second legend title input when hasSizeLegend is true', () => {
-    render(
-      <LegendOptionsPanel
-        legendOptions={mockLegend}
-        onLegendOptionsChange={mockOnLegendChange}
-        hasSizeLegend={true}
-      />
-    );
-
-    const legendTitleForSizeInput = screen.getByTestId('legendTitleForSizeInput');
-
-    expect(legendTitleForSizeInput).toBeInTheDocument();
-    expect(legendTitleForSizeInput).toHaveAttribute('placeholder', 'Size legend name');
   });
 
   it('updates legend mode correctly', () => {
@@ -93,23 +77,6 @@ describe('LegendOptionsPanel', () => {
     fireEvent.change(legendPositionSelect, { target: { value: Positions.RIGHT } });
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       position: Positions.RIGHT,
-    });
-  });
-
-  it('updates second legend title correctly when hasSizeLegend is true', () => {
-    render(
-      <LegendOptionsPanel
-        legendOptions={mockLegend}
-        onLegendOptionsChange={mockOnLegendChange}
-        hasSizeLegend={true}
-      />
-    );
-
-    const legendTitleForSizeInput = screen.getByTestId('legendTitleForSizeInput');
-
-    fireEvent.change(legendTitleForSizeInput, { target: { value: 'New Size Legend Title' } });
-    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
-      titleForSize: 'New Size Legend Title',
     });
   });
 

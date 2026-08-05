@@ -5,7 +5,6 @@
 
 import { render, screen, act } from '@testing-library/react';
 import { SplitContainer, getColumnCount } from './split_container';
-import { SplitGroup } from './utils/group_data_by_split';
 
 const mockObserve = jest.fn();
 const mockDisconnect = jest.fn();
@@ -59,15 +58,10 @@ describe('getColumnCount', () => {
 });
 
 describe('SplitContainer', () => {
-  const mockRenderChart = jest.fn((data) => (
-    <div data-test-subj="mockChart">{data.length} rows</div>
-  ));
+  const mockRenderChart = jest.fn((group) => <div data-test-subj="mockChart">{group}</div>);
 
-  const createGroups = (count: number): SplitGroup[] =>
-    Array.from({ length: count }, (_, i) => ({
-      key: `group_${i}`,
-      data: [{ value: i }],
-    }));
+  const createGroups = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `group_${i}`);
 
   it('renders all groups', () => {
     const groups = createGroups(3);
@@ -78,11 +72,11 @@ describe('SplitContainer', () => {
       jest.advanceTimersByTime(100);
     });
 
-    expect(screen.getAllByText(/rows/)).toHaveLength(3);
+    expect(screen.getAllByTestId('mockChart')).toHaveLength(3);
   });
 
   it('passes showLabel to chart instances', () => {
-    const groups: SplitGroup[] = [{ key: 'TestLabel', data: [{ v: 1 }] }];
+    const groups = ['TestLabel'];
 
     render(
       <SplitContainer
@@ -97,7 +91,7 @@ describe('SplitContainer', () => {
   });
 
   it('hides labels by default', () => {
-    const groups: SplitGroup[] = [{ key: 'HiddenLabel', data: [{ v: 1 }] }];
+    const groups = ['HiddenLabel'];
 
     render(<SplitContainer groups={groups} layout="auto" renderChart={mockRenderChart} />);
 

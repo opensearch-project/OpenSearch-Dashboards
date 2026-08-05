@@ -184,7 +184,7 @@ describe('QueryPanelEditor', () => {
     const customProps = {
       ...mockUseQueryPanelEditorReturn,
       value: 'SELECT COUNT(*) FROM users',
-      languageId: 'ppl',
+      languageId: 'PPL',
     };
 
     // @ts-expect-error TS2345 TODO(ts-error): fixme
@@ -194,7 +194,10 @@ describe('QueryPanelEditor', () => {
 
     const codeEditor = screen.getByTestId('code-editor');
     expect(codeEditor).toHaveAttribute('value', 'SELECT COUNT(*) FROM users');
-    expect(codeEditor).toHaveAttribute('languageId', 'ppl');
+    expect(codeEditor).toHaveAttribute('languageId', 'PPL');
+    expect(screen.getByTestId('exploreQueryPanelEditor')).toHaveClass(
+      'exploreQueryPanelEditor--ppl'
+    );
   });
 
   describe('onEditorClick', () => {

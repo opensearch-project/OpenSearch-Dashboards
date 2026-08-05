@@ -27,7 +27,7 @@ import {
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 import { HistogramChartStyle, HistogramChartStyleOptions } from '../histogram/histogram_vis_config';
 import { TimeRange } from '../../../../../data/public';
-import { ColorMap } from './color_map';
+import { LegendItem, LegendTarget } from './legend';
 
 export type ChartType =
   | 'line'
@@ -89,15 +89,16 @@ export interface VisualizationRenderContext {
 }
 
 export interface VisRenderProps<T extends ChartType> {
-  transformedData: Array<Record<string, any>>;
+  data: Array<Record<string, any>>;
+  allData: Array<Record<string, any>>;
   styleOptions: ChartStylesMapping[T];
   axisColumnMappings: AxisColumnMappings;
   timeRange?: { from: string; to: string };
   renderContext?: VisualizationRenderContext;
   onSelectTimeRange?: (timeRange: TimeRange) => void;
-  onLegend?: (legend: ColorMap) => void;
+  onLegend?: (legendItems: LegendItem[]) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;
-  highlightedSeries$?: BehaviorSubject<string | undefined>;
+  highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
 }
 
 export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType; multi?: boolean }>>;

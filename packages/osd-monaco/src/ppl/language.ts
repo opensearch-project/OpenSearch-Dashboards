@@ -32,7 +32,15 @@ import {
   setModelSyntaxFixes,
 } from './lint/fix_registry';
 import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
-import { clearModelHoverFacts, HoverFacts, setModelHoverFacts } from './lint/hover/hover_registry';
+import {
+  clearPPLLintTelemetry,
+  clearPPLLintTelemetryLayer,
+  emitPPLLintTelemetry,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  reconcilePPLLintExplainTelemetry,
+  reconcilePPLLintStaticTelemetry,
+} from './lint/telemetry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -290,7 +298,7 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
   if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
     clearModelFixes(model);
-    clearModelHoverFacts(model);
+    clearPPLLintTelemetry(model);
     return;
   }
 
@@ -332,7 +340,14 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
       // Render the static diagnostics immediately so squiggles never wait on a
       // network round-trip. The explain pass (below) re-renders with its extra
       // diagnostics merged in when it completes.
-      renderLintMarkers(model, lintResult.diagnostics);
+      const staticMarkers = renderLintMarkers(model, lintResult.diagnostics);
+      reconcilePPLLintStaticTelemetry(
+        model,
+        lintResult.diagnostics.map((diagnostic, index) => ({
+          ruleId: diagnostic.ruleId,
+          markerKey: markerFixKey(staticMarkers[index]),
+        }))
+      );
       layerExplainDiagnostics(
         model,
         content,
@@ -366,18 +381,19 @@ const isLintPassStale = (
 
 /**
  * Convert diagnostics to Monaco markers and apply them, capturing each
- * diagnostic's `fix` / `hoverFacts` into the side tables the code-action and
- * hover providers read (Monaco's MarkerService rebuilds markers from a fixed
- * field list and would otherwise drop those custom properties).
+ * diagnostic's `fix` into the side table the code-action provider reads
+ * (Monaco's MarkerService rebuilds markers from a fixed field list and would
+ * otherwise drop that custom property).
  */
-const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[]): void => {
+const renderLintMarkers = (
+  model: monaco.editor.IModel,
+  diagnostics: Diagnostic[]
+): monaco.editor.IMarkerData[] => {
   const markers = diagnostics.map(diagnosticToMarker);
   const fixes = new Map<string, MarkerFix>();
-  const hoverFacts = new Map<string, HoverFacts>();
   for (const marker of markers) {
     const withExtras = marker as monaco.editor.IMarkerData & {
       fix?: MarkerFix;
-      hoverFacts?: HoverFacts;
     };
     const key = markerFixKey(marker);
     if (withExtras.fix) {
@@ -397,14 +413,10 @@ const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[
       fixes.set(key, withExtras.fix);
       delete withExtras.fix;
     }
-    if (withExtras.hoverFacts) {
-      hoverFacts.set(key, withExtras.hoverFacts);
-      delete withExtras.hoverFacts;
-    }
   }
   setModelFixes(model, fixes);
-  setModelHoverFacts(model, hoverFacts);
   monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
+  return markers;
 };
 
 /**
@@ -447,6 +459,7 @@ const layerExplainDiagnostics = (
       isCalcite: lintContext?.isCalcite,
     })
   ) {
+    clearPPLLintTelemetryLayer(model, 'explain');
     return;
   }
   // Thorough only when explicitly asked for. It fires up to four extra probe
@@ -468,6 +481,7 @@ const layerExplainDiagnostics = (
     const snapshot =
       analysis.attribution && validateExplainAttributionSnapshot(analysis.attribution, content);
     if (!snapshot) {
+      clearPPLLintTelemetryLayer(model, 'explain');
       return;
     }
 
@@ -489,7 +503,11 @@ const layerExplainDiagnostics = (
       lintContext?.dataSourceId,
       { cacheKey: prepared.cacheKey, signal: controller?.signal }
     );
-    if (resolution.status !== 'ok' || isLintPassStale(model, generation, content)) {
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    if (resolution.status !== 'ok') {
+      clearPPLLintTelemetryLayer(model, 'explain');
       return;
     }
     const explainDiagnostics = runExplainLint(resolution.plan, {
@@ -499,6 +517,7 @@ const layerExplainDiagnostics = (
       isCalcite: lintContext?.isCalcite,
     });
     if (explainDiagnostics.length === 0) {
+      clearPPLLintTelemetryLayer(model, 'explain');
       return;
     }
 
@@ -522,7 +541,14 @@ const layerExplainDiagnostics = (
 
     // Fast, and the shared first pass for Thorough: render the uniquely-sourced
     // findings immediately (fixes withheld until a probe confirms them).
-    renderLintMarkers(model, [...staticDiagnostics, ...state.immediateDiagnostics]);
+    const immediateMarkers = renderLintMarkers(model, [
+      ...staticDiagnostics,
+      ...state.immediateDiagnostics,
+    ]);
+    reconcilePPLLintExplainTelemetry(
+      model,
+      immediateMarkers.slice(staticDiagnostics.length).map(markerFixKey)
+    );
 
     if (!thorough || !state.needsIsolation || isLintPassStale(model, generation, content)) {
       return;
@@ -535,10 +561,17 @@ const layerExplainDiagnostics = (
     if (isLintPassStale(model, generation, content)) {
       return;
     }
-    renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
+    const isolatedMarkers = renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
+    reconcilePPLLintExplainTelemetry(
+      model,
+      isolatedMarkers.slice(staticDiagnostics.length).map(markerFixKey)
+    );
   };
 
   void run().catch((e) => {
+    if (!isLintPassStale(model, generation, content)) {
+      clearPPLLintTelemetryLayer(model, 'explain');
+    }
     // eslint-disable-next-line no-console
     if (e) console.warn('[ppl-lint] explain lint layer error:', e);
   });
@@ -595,7 +628,7 @@ const setupPPLSyntaxHighlighting = () => {
           monaco.editor.setModelMarkers(model, LINT_OWNER, []);
           clearModelFixes(model);
           clearModelSyntaxFixes(model);
-          clearModelHoverFacts(model);
+          clearPPLLintTelemetry(model);
         }
       })
     );
@@ -625,7 +658,7 @@ const setupPPLSyntaxHighlighting = () => {
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
       clearModelFixes(model);
       clearModelSyntaxFixes(model);
-      clearModelHoverFacts(model);
+      clearPPLLintTelemetry(model);
     })
   );
 
@@ -640,6 +673,7 @@ const setupPPLSyntaxHighlighting = () => {
     lintAbortControllers.clear();
     lintGenerations.clear();
     syntaxGenerations.clear();
+    monaco.editor.getModels().forEach(clearPPLLintTelemetry);
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };
@@ -681,11 +715,26 @@ export const registerPPLLanguage = () => {
     pplLintHoverProvider
   );
 
+  // Register the command dispatched when a lint quick-fix is invoked. The
+  // quick-fix action carries both an `edit` and this `command`; Monaco applies
+  // the edit first, then runs the command, so recording here captures a genuine
+  // "user clicked the fix" signal. The rule id rides on the command arguments.
+  const quickfixCommandDisposable = monaco.editor.registerCommand(
+    PPL_LINT_QUICKFIX_COMMAND_ID,
+    (_accessor, args?: { rule?: string }) => {
+      emitPPLLintTelemetry({
+        name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_CLICKED,
+        data: { rule: args?.rule },
+      });
+    }
+  );
+
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
       codeActionDisposable.dispose();
       hoverDisposable.dispose();
+      quickfixCommandDisposable.dispose();
     },
   };
 };

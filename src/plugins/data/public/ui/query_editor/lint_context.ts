@@ -12,6 +12,7 @@ import {
 } from '@osd/monaco';
 import { MutableRefObject } from 'react';
 import { attachPPLGrammarRefresh, attachPPLValidationContext } from './validation_context';
+import { attachPPLLintHoverPersistence } from './lint_hover_persistence';
 import { calciteSettingsCache } from '../../ppl_lint/calcite_settings_cache';
 
 function applyLintContext(
@@ -117,6 +118,8 @@ export interface PPLDetachRefs {
   lintContext: DetachRef;
   lintGrammarRefresh: DetachRef;
   lintContextRefresh: DetachRef;
+  /** Keeps the lint hover card reachable; see attachPPLLintHoverPersistence. */
+  lintHoverPersistence: DetachRef;
 }
 
 /** Attach (or re-attach) all PPL validation + lint contexts; detaches previous ones first. */
@@ -146,7 +149,9 @@ export function attachPPLContexts(
   refs.lintContext.current?.();
   refs.lintGrammarRefresh.current?.();
   refs.lintContextRefresh.current?.();
+  refs.lintHoverPersistence.current?.();
   refs.lintContext.current = attachPPLLintContext(editor, getLintContext);
+  refs.lintHoverPersistence.current = attachPPLLintHoverPersistence(editor);
   refs.lintGrammarRefresh.current = attachPPLLintGrammarRefresh(
     editor,
     getLintContext,

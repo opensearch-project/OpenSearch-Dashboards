@@ -10,6 +10,7 @@ import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_s
 import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
+import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -386,6 +387,30 @@ function decideSeriesStyle(mapping: { label: any; color: any; displayText: any }
   return mapping.label === '_unmatched_' ? 'lightgrey' : resolveColor(mapping.color);
 }
 
+const getStateTimeLineSeriesMappings = (
+  transformedData?: any[]
+): Array<{ label: any; color: any; displayText: any }> => {
+  const seriesMappings: Array<{ label: any; color: any; displayText: any }> = [];
+
+  transformedData?.forEach((row) => {
+    const mergeLabelIndex = row[0].indexOf('mergedLabel');
+    const mergedColorIndex = row[0].indexOf('mergedColor');
+    const displayTextIndex = row[0].indexOf('displayText');
+    seriesMappings.push({
+      label: row[1][mergeLabelIndex],
+      color: row[1][mergedColorIndex],
+      displayText: row[1][displayTextIndex],
+    });
+  });
+
+  return seriesMappings;
+};
+
+export const getStateTimeLineLegendNameDomain = (transformedData?: any[]) =>
+  getStateTimeLineSeriesMappings(transformedData)
+    .map((m) => m.displayText || m.label)
+    .sort();
+
 const renderSingleStateTimeLineItem =
   (styles: StateTimeLineChartStyle, displayText?: string) => (params: any, api: any) => {
     const y = 5; // a fake y
@@ -477,29 +502,21 @@ export const createStateTimeLineSpec =
   <T extends BaseChartStyle>({
     styles,
     groupField,
+    legendNameDomain,
   }: {
     styles: StateTimeLineChartStyle;
     groupField?: string;
+    legendNameDomain?: string[];
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData, yAxisConfig } = state;
     const newState = { ...state };
-    const mergeLabelCombo: Array<{ label: any; color: any; displayText: any }> = [];
 
     // Transform data into serval datasets based on color mapping
     // Structure: [{ source: [headers, ...dataRows] }, { source: [headers, ...dataRows] }, ...]
     // Headers: [originalFields..., "start", "end", "mergedCount", "duration", "mergedColor", "mergedLabel", "displayText"]
     // Get mergedLabel/mergedColor/displayText combination for styling
-    transformedData?.forEach((row) => {
-      const mergeLabelIndex = row[0].indexOf('mergedLabel');
-      const mergedColorIndex = row[0].indexOf('mergedColor');
-      const displayTextIndex = row[0].indexOf('displayText');
-      mergeLabelCombo.push({
-        label: row[1][mergeLabelIndex],
-        color: row[1][mergedColorIndex],
-        displayText: row[1][displayTextIndex],
-      });
-    });
+    const mergeLabelCombo = getStateTimeLineSeriesMappings(transformedData);
 
     if (!groupField) {
       const newyAxisConfig = { ...yAxisConfig };
@@ -512,10 +529,12 @@ export const createStateTimeLineSpec =
     }
 
     const palette = getColors().categories;
-    const sortedNames = mergeLabelCombo.map((m) => m.displayText || m.label).sort();
+    const sortedNames = legendNameDomain ?? getStateTimeLineLegendNameDomain(transformedData);
+    const legendItems: LegendItem[] = [];
     const allSeries = mergeLabelCombo.map((mapping, index: number) => {
       const name = mapping.displayText || mapping.label;
-      const colorIndex = sortedNames.indexOf(name);
+      const color = decideSeriesStyle(mapping) || getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
       return {
         name,
         type: 'custom',
@@ -524,7 +543,7 @@ export const createStateTimeLineSpec =
           : renderSingleStateTimeLineItem(styles, mapping.displayText),
         datasetIndex: index,
         itemStyle: {
-          color: decideSeriesStyle(mapping) || palette[colorIndex % palette.length],
+          color,
         },
         encode: {
           x: ['start', 'end'],
@@ -535,6 +554,7 @@ export const createStateTimeLineSpec =
     });
 
     newState.series = allSeries?.flat() as any;
+    newState.legendItems = legendItems;
 
     return newState;
   };

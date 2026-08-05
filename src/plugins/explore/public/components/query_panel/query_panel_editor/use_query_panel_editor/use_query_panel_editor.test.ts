@@ -82,6 +82,7 @@ jest.mock('@osd/monaco', () => ({
       registerCompletionItemProvider: jest.fn(() => ({ dispose: jest.fn() })),
       CompletionItemKind: {
         Keyword: 1,
+        Variable: 4,
       },
     },
     Range: jest.fn(),
@@ -1007,6 +1008,112 @@ describe('useQueryPanelEditor', () => {
 
       expect(syncPPLLintContext).not.toHaveBeenCalled();
       expect(revalidatePPLModel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completion extensions (completionProviders)', () => {
+    const runCompletion = async (props: any, model: any, column: number) => {
+      const { result } = renderHook(() => useQueryPanelEditor(props));
+      let list: any;
+      await act(async () => {
+        list = await result.current.suggestionProvider.provideCompletionItems(
+          model,
+          { lineNumber: 1, column } as any,
+          // @ts-expect-error TS2345 test stub
+          {},
+          { isCancellationRequested: false }
+        );
+      });
+      return { list, hook: result };
+    };
+
+    const model = {
+      getValue: () => 'source=logs',
+      getOffsetAt: () => 11,
+      getWordUntilPosition: () => ({ startColumn: 8, endColumn: 11 }),
+    } as any;
+
+    it('merges items contributed by a completion extension', async () => {
+      const extensionItem = { label: '${env}', insertText: '${env}', detail: 'Custom' };
+      const provider = {
+        triggerCharacters: ['$'],
+        provideCompletionItems: jest.fn().mockResolvedValue([extensionItem]),
+      };
+
+      const { list } = await runCompletion(
+        buildProps({ completionProviders: [provider] }),
+        model,
+        12
+      );
+
+      expect(provider.provideCompletionItems).toHaveBeenCalled();
+      expect(list.suggestions.map((s: any) => s.label)).toContain('${env}');
+    });
+
+    it('isolates a throwing extension so other extensions and built-ins survive', async () => {
+      const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const bad = {
+        triggerCharacters: ['#'],
+        provideCompletionItems: jest.fn().mockRejectedValue(new Error('boom')),
+      };
+      const good = {
+        triggerCharacters: ['$'],
+        provideCompletionItems: jest
+          .fn()
+          .mockResolvedValue([{ label: '${ok}', insertText: '${ok}' }]),
+      };
+
+      const { list } = await runCompletion(
+        buildProps({ completionProviders: [bad, good] }),
+        model,
+        12
+      );
+
+      expect(bad.provideCompletionItems).toHaveBeenCalled();
+      expect(good.provideCompletionItems).toHaveBeenCalled();
+      // The failing extension must not prevent the healthy one's items from appearing.
+      expect(list.suggestions.map((s: any) => s.label)).toContain('${ok}');
+      expect(errSpy).toHaveBeenCalled();
+      errSpy.mockRestore();
+    });
+
+    it('folds extension trigger characters into the suggestion provider', () => {
+      const provider = {
+        triggerCharacters: ['$', '@'],
+        provideCompletionItems: jest.fn().mockResolvedValue([]),
+      };
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(buildProps({ completionProviders: [provider] }))
+      );
+      expect(result.current.suggestionProvider.triggerCharacters).toEqual(
+        expect.arrayContaining(['$', '@'])
+      );
+    });
+
+    it('does not fold extension trigger characters in prompt mode', () => {
+      const provider = {
+        triggerCharacters: ['$', '@'],
+        provideCompletionItems: jest.fn().mockResolvedValue([]),
+      };
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            completionProviders: [provider],
+            queryEditorState: {
+              editorMode: EditorMode.Prompt,
+              promptModeIsAvailable: true,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
+      expect(result.current.suggestionProvider.triggerCharacters).toEqual(['=']);
+    });
+
+    it('is a no-op when no completionProviders are supplied', async () => {
+      const { list } = await runCompletion(buildProps(), model, 12);
+      // Only built-in suggestions (none from getQuerySuggestions mock) — no throw, valid list.
+      expect(Array.isArray(list.suggestions)).toBe(true);
     });
   });
 });
