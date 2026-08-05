@@ -157,6 +157,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
       name: field.name,
       type: field.type,
       aggregatable: field?.aggregatable,
+      subType: field?.subType,
     }));
   },
 
