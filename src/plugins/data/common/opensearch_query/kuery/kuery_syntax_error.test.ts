@@ -35,9 +35,7 @@ describe('dql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:');
     }).toThrow(
-      'Expected whitespace, value but end of input found.\n' +
-        'response:\n' +
-        '---------^'
+      'Expected whitespace, value but end of input found.\n' + 'response:\n' + '---------^'
     );
   });
 
@@ -73,9 +71,7 @@ describe('dql syntax errors', () => {
     expect(() => {
       fromKueryExpression('response:(200 and not )');
     }).toThrow(
-      'Expected value but ")" found.\n' +
-        'response:(200 and not )\n' +
-        '----------------------^'
+      'Expected value but ")" found.\n' + 'response:(200 and not )\n' + '----------------------^'
     );
   });
 
@@ -88,17 +84,13 @@ describe('dql syntax errors', () => {
   it('should throw an error for unescaped quotes in a quoted string', () => {
     expect(() => {
       fromKueryExpression('foo:"ba "r"');
-    }).toThrow(
-      'Expected AND, OR, whitespace but "r" found.\n' + 'foo:"ba "r"\n' + '---------^'
-    );
+    }).toThrow('Expected AND, OR, whitespace but "r" found.\n' + 'foo:"ba "r"\n' + '---------^');
   });
 
   it('should throw an error for unescaped special characters in literals', () => {
     expect(() => {
       fromKueryExpression('foo:ba:r');
-    }).toThrow(
-      'Expected AND, OR, whitespace but ":" found.\n' + 'foo:ba:r\n' + '------^'
-    );
+    }).toThrow('Expected AND, OR, whitespace but ":" found.\n' + 'foo:ba:r\n' + '------^');
   });
 
   it('should throw an error for range queries missing a value', () => {
@@ -110,10 +102,6 @@ describe('dql syntax errors', () => {
   it('should throw an error for range queries missing a field', () => {
     expect(() => {
       fromKueryExpression('< 1000');
-    }).toThrow(
-      'Expected whitespace, NOT, field name, value but "<" found.\n' +
-        '< 1000\n' +
-        '^'
-    );
+    }).toThrow('Expected whitespace, NOT, field name, value but "<" found.\n' + '< 1000\n' + '^');
   });
 });
