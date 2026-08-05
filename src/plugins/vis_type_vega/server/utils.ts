@@ -64,8 +64,13 @@ export const extractDataSourceNamesInVegaSpec = (spec: string) => {
     const name = getDataSourceNameFromObject(node);
     if (name) names.add(name);
 
-    // Arrays yield their elements; objects yield their values
-    stack.push(...Object.values(node as Record<string, unknown>));
+    // Arrays yield their elements; objects yield their values. Push in reverse so the
+    // stack pops them in document order, keeping data source discovery (and thus the
+    // resulting reference order) deterministic and matching the spec's declared order.
+    const children = Object.values(node as Record<string, unknown>);
+    for (let i = children.length - 1; i >= 0; i--) {
+      stack.push(children[i]);
+    }
   }
 
   return names;
