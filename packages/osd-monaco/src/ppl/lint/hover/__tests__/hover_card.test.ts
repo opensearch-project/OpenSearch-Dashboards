@@ -7,7 +7,10 @@ import { getCatalogEntryById } from '../../catalog';
 import { HoverCardInput, renderHoverCard } from '../hover_card';
 
 function render(overrides: Partial<HoverCardInput> = {}): string {
-  return renderHoverCard(overrides);
+  return renderHoverCard({
+    severityLabel: 'Warning',
+    ...overrides,
+  });
 }
 
 describe('renderHoverCard', () => {
@@ -19,7 +22,7 @@ describe('renderHoverCard', () => {
       howToFix: entry?.howToFix,
     });
 
-    expect(md).not.toContain('Warning');
+    expect(md).toContain('⚠️ **Warning**');
     expect(md).not.toContain('Rule:');
     expect(md).not.toContain('division-by-zero');
     expect(md).not.toContain(markerMessage);
@@ -41,11 +44,12 @@ describe('renderHoverCard', () => {
   it('renders a deterministic quick-fix preview', () => {
     const entry = getCatalogEntryById('field-validation');
     const md = render({
+      severityLabel: 'Error',
       howToFix: entry?.howToFix,
       fixText: 'revenue',
     });
 
-    expect(md).not.toContain('Error');
+    expect(md).toContain('❌ **Error**');
     expect(md).toContain('**Quick fix available** — `revenue`');
     expect(md).not.toContain('Closest known field');
   });
@@ -53,11 +57,12 @@ describe('renderHoverCard', () => {
   it('does not add a facts/Details section for a wildcard source', () => {
     const entry = getCatalogEntryById('wildcard-source-zero-match');
     const md = render({
+      severityLabel: 'Info',
       howToFix: entry?.howToFix,
       fixText: '`logs-2026.07.25`',
     });
 
-    expect(md).not.toContain('Info');
+    expect(md).toContain('ℹ️ **Info**');
     expect(md).toContain('**Quick fix available** — `` `logs-2026.07.25` ``');
     expect(md).not.toContain('matched 0 of');
     expect(md).not.toContain('Did you mean one of');

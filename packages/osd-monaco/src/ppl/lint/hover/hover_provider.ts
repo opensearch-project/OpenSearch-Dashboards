@@ -6,7 +6,7 @@
 import { monaco } from '../../../monaco';
 import { LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
 import { getModelFix, markerFixKey } from '../fix_registry';
-import { renderHoverCard } from './hover_card';
+import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
 import {
@@ -36,6 +36,17 @@ function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdown
 }
 
 export const LINT_OWNER = 'PPL_LINT';
+
+function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
+  switch (severity) {
+    case monaco.MarkerSeverity.Error:
+      return 'Error';
+    case monaco.MarkerSeverity.Warning:
+      return 'Warning';
+    default:
+      return 'Info';
+  }
+}
 
 function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
   const code = marker.code;
@@ -90,6 +101,7 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     );
 
     const card = renderHoverCard({
+      severityLabel: severityLabel(marker.severity),
       docUrl: docUrlOf(marker),
       howToFix: entry?.howToFix,
       fixText: fix?.text,

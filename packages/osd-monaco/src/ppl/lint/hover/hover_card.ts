@@ -4,17 +4,21 @@
  */
 
 /**
- * Pure renderer for supplemental lint-hover guidance. Monaco's built-in marker
- * hover already renders the diagnostic message, severity, and linked rule code;
- * this renderer adds only the next action, an optional quick-fix preview, and
- * the documentation link.
+ * Pure renderer for lint-hover severity and supplemental guidance. Monaco's
+ * built-in marker hover already renders the diagnostic message and linked rule
+ * code; this renderer keeps the explicit severity label and adds only the next
+ * action, an optional quick-fix preview, and the documentation link.
  *
  * Intentionally free of any Monaco import so it is trivially unit-testable; the
  * provider does the Monaco-specific marker extraction and hands plain values
  * here.
  */
 
+export type SeverityLabel = 'Error' | 'Warning' | 'Info';
+
 export interface HoverCardInput {
+  /** Explicit severity label, which Monaco's native marker text does not show. */
+  severityLabel: SeverityLabel;
   /** code.target — the specific doc link from the catalog. */
   docUrl?: string;
   /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
@@ -22,6 +26,12 @@ export interface HoverCardInput {
   /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
   fixText?: string;
 }
+
+const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
+  Error: '❌',
+  Warning: '⚠️',
+  Info: 'ℹ️',
+};
 
 /**
  * Render a value as inline code. When the value itself contains backticks, fence
@@ -47,7 +57,7 @@ function encodeLinkTarget(url: string): string {
  * non-empty output in `{ value, isTrusted: false }` and hands it to Monaco.
  */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { docUrl, howToFix, fixText } = input;
+  const { severityLabel, docUrl, howToFix, fixText } = input;
   const sections: string[] = [];
 
   // Every known rule gives the user a concrete next action, whether or not an
@@ -68,5 +78,9 @@ export function renderHoverCard(input: HoverCardInput): string {
     sections.push(`[Learn more →](${encodeLinkTarget(docUrl)})`);
   }
 
-  return sections.join('\n\n');
+  if (sections.length === 0) {
+    return '';
+  }
+
+  return [`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**`, ...sections].join('\n\n');
 }

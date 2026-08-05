@@ -82,8 +82,9 @@ describe('pplLintHoverProvider', () => {
     markersByOwner[LINT_OWNER] = [makeMarker({ message: markerMessage })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    // Monaco's built-in marker hover owns severity, message, and linked rule id.
-    expect(markdownOf(hover)).not.toContain('Warning');
+    // Monaco's built-in marker hover owns the message and linked rule id; the
+    // supplemental card retains the explicit severity label.
+    expect(markdownOf(hover)).toContain('⚠️ **Warning**');
     expect(markdownOf(hover)).not.toContain('Rule:');
     expect(markdownOf(hover)).not.toContain(markerMessage);
     expect(markdownOf(hover)).toContain('**Fix** — Check your divisor');
