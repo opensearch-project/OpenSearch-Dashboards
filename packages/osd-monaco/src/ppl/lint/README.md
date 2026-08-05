@@ -540,7 +540,7 @@ rules. See the
 [SQL workflow guide](https://github.com/opensearch-project/sql/blob/main/scripts/ppl-lint/README.md)
 for local reproduction, artifacts, failure classification, and coordinated
 OSD/SQL changes. See
-[Maintain the SQL compatibility gate](../../../../../docs/plugins/data/ppl_lint_developer_guide.md#maintain-the-sql-compatibility-gate)
+[Maintain the SQL compatibility CI](../../../../../docs/plugins/data/ppl_lint_developer_guide.md#maintain-the-sql-compatibility-ci)
 for the required update flow when changing a rule in this package.
 
 ## Testing

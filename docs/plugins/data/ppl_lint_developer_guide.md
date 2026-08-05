@@ -417,7 +417,7 @@ maintenance`, and `Tests`. Name the detector and shared helpers, explain its
 6. Add the rule to the default-status list and rule table in the lint README.
 7. Add or update the companion SQL compatibility contract when the rule belongs
    to the active or dormant static-rule corpus. Follow
-   [Maintain the SQL compatibility gate](#maintain-the-sql-compatibility-gate).
+   [Maintain the SQL compatibility CI](#maintain-the-sql-compatibility-ci).
 
 The doc-link test is offline. It verifies catalog/snapshot IDs, exact URL
 equality, domain and anchor shape, and explicit unpublished gaps. It does not
@@ -547,7 +547,7 @@ The headless API accepts a candidate `knownVersion`. External grammar CI should
 pass the backend version being validated rather than relying on Dashboards'
 default horizon.
 
-## Maintain the SQL compatibility gate
+## Maintain the SQL compatibility CI
 
 The OpenSearch SQL repository owns the cross-repository
 [`[Linter] PPL compatibility`](https://github.com/opensearch-project/sql/blob/main/.github/workflows/ppl-lint-multiversion-validation.yml)
