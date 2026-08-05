@@ -12,7 +12,9 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  BaseChartStyle,
   collectLegend,
+  PipelineFn,
 } from '../utils/echarts_spec';
 import {
   createScatterSeries,
@@ -22,6 +24,13 @@ import {
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 import { ColorMap } from '../utils/color_map';
+
+const clearLegend =
+  <T extends BaseChartStyle>(onLegend?: (legend: ColorMap) => void): PipelineFn<T> =>
+  (state) => {
+    onLegend?.({});
+    return state;
+  };
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
@@ -109,7 +118,7 @@ export const createThreeMetricOneCateScatter = (
   axisColumnMappings: {
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
+    [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
   },
   onLegend?: (legend: ColorMap) => void
@@ -130,10 +139,10 @@ export const createThreeMetricOneCateScatter = (
       styles,
       xField: xCol.column,
       yField: yCol.column,
-      colorField: colorCol.column,
+      colorField: colorCol?.column,
       sizeField: sizeCol.column,
     }),
-    collectLegend(onLegend),
+    colorCol ? collectLegend(onLegend) : clearLegend(onLegend),
     assembleSpec,
     assembleScatterSpec
   )({

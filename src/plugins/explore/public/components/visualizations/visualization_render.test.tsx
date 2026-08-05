@@ -15,6 +15,13 @@ import { defaultMetricChartStyles } from './metric/metric_vis_config';
 
 const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
 const mockFindRuleByAxesMapping = jest.fn();
+const mockSplitContainer = jest.fn(({ groups, renderChart }) => (
+  <div data-test-subj="splitContainer">
+    {groups.map((group: { key: string; data: Array<Record<string, unknown>> }) => (
+      <div key={group.key}>{renderChart(group.data, group.key)}</div>
+    ))}
+  </div>
+));
 
 jest.mock('./visualization_registry', () => ({
   visualizationRegistry: {
@@ -34,6 +41,10 @@ jest.mock('./visualization_empty_state', () => ({
 
 jest.mock('./custom_legend', () => ({
   CustomLegend: jest.fn(() => <div data-test-subj="customLegend">Custom Legend</div>),
+}));
+
+jest.mock('./split_container', () => ({
+  SplitContainer: (props: any) => mockSplitContainer(props),
 }));
 
 jest.mock('../../services/services', () => ({
@@ -226,6 +237,39 @@ describe('VisualizationRender', () => {
     );
 
     expect(screen.getByTestId('metricChartRender')).toBeInTheDocument();
+  });
+
+  it('passes split group render context to chart render', () => {
+    const metricConfig: RenderChartConfig = {
+      type: 'metric',
+      styles: { ...defaultMetricChartStyles },
+      axesMapping: { value: 'count' },
+      splitField: 'field1',
+      showSplitLabel: true,
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(metricConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(mockSplitContainer.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        showLabel: true,
+      })
+    );
+
+    expect(mockRender).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transformedData: [{ field1: 'value1', count: 10 }],
+        renderContext: expect.objectContaining({
+          seriesName: 'value1',
+        }),
+      })
+    );
   });
 
   it('returns null when no matching rule is found', () => {

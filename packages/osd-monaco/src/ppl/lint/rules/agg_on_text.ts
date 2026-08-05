@@ -76,7 +76,6 @@ export const aggOnTextDetector: Detector = (tree, config, context, ruleNameToInd
         message: config.message,
         range: rangeFromContext(statsFunction),
         docUrl: config.docUrl,
-        hoverFacts: { field: parsed.canonical, esType, aggName },
       });
     }
   }

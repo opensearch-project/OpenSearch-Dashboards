@@ -36,6 +36,10 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
       ['qty', 'long'],
       ['attributes', 'flat_object'],
     ]),
+    // `meta` is mapped enabled:false on orders; rex-scan-cost ships disabled, so
+    // it needs an explicit override to be observable here.
+    disabledObjectFields: new Set<string>(['meta']),
+    overrides: { 'rex-scan-cost': { enabled: true } },
   });
 
   const ids = (code: string, ctx: LintRunContext): string[] =>
@@ -67,6 +71,18 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
         'field-validation'
       );
     });
+
+    it('suppresses enabled-false-object', () => {
+      // `meta` is mapped enabled:false on orders, but says nothing about returns.
+      expect(ids('source=returns | where meta.id = 1', ctx)).not.toContain('enabled-false-object');
+    });
+
+    it('suppresses rex-scan-cost', () => {
+      // `note` is text on orders; its type on returns is unknown from here.
+      expect(ids('source=returns | rex field=note "error (?<code>[0-9]+)"', ctx)).not.toContain(
+        'rex-scan-cost'
+      );
+    });
   });
 
   describe('still fires when the query source matches the selected dataset', () => {
@@ -86,6 +102,16 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
 
     it('fires field-validation', () => {
       expect(ids('source=orders | where onlyInReturns = 1', ctx)).toContain('field-validation');
+    });
+
+    it('fires enabled-false-object', () => {
+      expect(ids('source=orders | where meta.id = 1', ctx)).toContain('enabled-false-object');
+    });
+
+    it('fires rex-scan-cost', () => {
+      expect(ids('source=orders | rex field=note "error (?<code>[0-9]+)"', ctx)).toContain(
+        'rex-scan-cost'
+      );
     });
   });
 
@@ -116,5 +142,17 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
     // irrelevant and it must still fire.
     const ctx = ordersMetadata('orders');
     expect(ids('source=returns | head 5', ctx)).toContain('head-without-sort');
+  });
+
+  it('does not suppress wildcard-source-zero-match on a mismatch', () => {
+    // Deliberately NOT sourceScoped: it reads the cluster-wide visible-index list,
+    // not the selected dataset's metadata. Suppressing it on a mismatch would
+    // silence it in exactly the case it exists to catch — a source= naming
+    // something other than the selected dataset, which matches no index at all.
+    const ctx: LintRunContext = {
+      ...ordersMetadata('orders'),
+      visibleIndices: ['orders', 'returns'],
+    };
+    expect(ids('source=no-such-prefix-* | head 5', ctx)).toContain('wildcard-source-zero-match');
   });
 });

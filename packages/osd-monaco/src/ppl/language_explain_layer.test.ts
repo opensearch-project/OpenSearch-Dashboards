@@ -5,6 +5,14 @@
 
 import type { LintResult } from './lint/diagnostic';
 import type { PPLLintContext } from './lint_bridge';
+import { markerFixKey } from './lint/fix_registry';
+import {
+  PPLLintTelemetryEvent,
+  PPL_LINT_TELEMETRY_EVENTS,
+  clearPPLLintTelemetry,
+  registerPPLLintTelemetry,
+  shouldEmitHoverShown,
+} from './lint/telemetry';
 
 // mock-prefixed for jest-hoist compatibility.
 const mockSetModelMarkers = jest.fn();
@@ -19,6 +27,7 @@ jest.mock('../monaco', () => ({
       onWillDisposeModel: jest.fn(),
       getModels: () => [],
       defineTheme: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
     },
     languages: {
       register: jest.fn(),
@@ -108,12 +117,6 @@ jest.mock('./lint/diagnostic_to_marker', () => ({
   }),
   SYNTAX_MARKER_SOURCE: 'ppl-syntax',
 }));
-jest.mock('./lint/hover/hover_registry', () => ({
-  markerFixKey: (m: { code: string }) => m.code,
-  setModelHoverFacts: jest.fn(),
-  clearModelHoverFacts: jest.fn(),
-}));
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { revalidatePPLModel } = require('./language');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -211,6 +214,93 @@ describe('processLintHighlighting — explain layer', () => {
     );
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     expect(mockHttpPost.mock.calls[0][0]).toBe('/api/enhancements/ppl/explain');
+  });
+
+  it('preserves static marker interaction state through the explain re-render', async () => {
+    let resolvePlan!: (plan: unknown) => void;
+    mockHttpPost.mockReturnValue(new Promise((resolve) => (resolvePlan = resolve)));
+    mockLintContext = {
+      http: httpClient(),
+      isCalcite: true,
+      dataSourceVersion: '3.5.0',
+      dataSourceId: 'ds-static-state',
+      overrides: ENABLE_NOT_PUSHED,
+    } as any;
+    const model = makeModel('e-static-state');
+
+    await revalidatePPLModel(model);
+    await flush();
+    const staticKey = markerFixKey(lintMarkerCalls()[0][2][0]);
+    expect(shouldEmitHoverShown(model, staticKey)).toBe(true);
+
+    resolvePlan(NOT_PUSHED_PLAN);
+    await flush();
+    expect(lintMarkerCalls()).toHaveLength(2);
+    expect(shouldEmitHoverShown(model, staticKey)).toBe(false);
+    clearPPLLintTelemetry(model);
+  });
+
+  it('does not emit diagnostic_shown for explain-only findings', async () => {
+    const events: PPLLintTelemetryEvent[] = [];
+    registerPPLLintTelemetry((event) => events.push(event));
+    mockHttpPost.mockResolvedValue(NOT_PUSHED_PLAN);
+    mockLintContext = {
+      http: httpClient(),
+      isCalcite: true,
+      dataSourceVersion: '3.5.0',
+      dataSourceId: 'ds-explain-telemetry',
+      overrides: ENABLE_NOT_PUSHED,
+    } as any;
+
+    try {
+      await revalidatePPLModel(makeModel('e-explain-telemetry'));
+      await flush();
+      expect(events).toEqual([
+        {
+          name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN,
+          data: { rule: 'head-without-sort' },
+        },
+      ]);
+    } finally {
+      registerPPLLintTelemetry(undefined);
+    }
+  });
+
+  it('re-arms an explain marker after an accepted state removes it', async () => {
+    mockHttpPost.mockResolvedValue(NOT_PUSHED_PLAN);
+    const model = makeModel('e-explain-episode');
+    mockLintContext = {
+      http: httpClient(),
+      isCalcite: true,
+      dataSourceVersion: '3.5.0',
+      dataSourceId: 'ds-explain-episode',
+      overrides: ENABLE_NOT_PUSHED,
+    } as any;
+
+    await revalidatePPLModel(model);
+    await flush();
+    const firstExplain = lintMarkerCalls()
+      .slice(-1)[0][2]
+      .find((marker: any) => marker.code === 'operation-not-pushed');
+    const explainKey = markerFixKey(firstExplain);
+    expect(shouldEmitHoverShown(model, explainKey)).toBe(true);
+
+    mockLintContext = {
+      ...mockLintContext,
+      overrides: DISABLE_EXPLAIN,
+    } as any;
+    await revalidatePPLModel(model);
+    await flush();
+    expect(shouldEmitHoverShown(model, explainKey)).toBe(false);
+
+    mockLintContext = {
+      ...mockLintContext,
+      overrides: ENABLE_NOT_PUSHED,
+    } as any;
+    await revalidatePPLModel(model);
+    await flush();
+    expect(shouldEmitHoverShown(model, explainKey)).toBe(true);
+    clearPPLLintTelemetry(model);
   });
 
   it('issues no explain request when no explain rule is enabled', async () => {

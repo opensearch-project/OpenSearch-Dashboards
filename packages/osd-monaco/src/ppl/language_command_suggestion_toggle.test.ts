@@ -19,6 +19,7 @@ jest.mock('../monaco', () => ({
       onWillDisposeModel: jest.fn(),
       getModels: () => [],
       defineTheme: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
     },
     languages: {
       register: jest.fn(),

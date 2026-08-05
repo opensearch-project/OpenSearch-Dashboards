@@ -53,6 +53,8 @@ import {
   extractFieldMetadata,
   LintFieldsCache,
 } from '../../ppl_lint/lint_context_builder';
+import { fetchDisabledObjectFields } from '../../ppl_lint/disabled_object_fields';
+import { fetchVisibleIndices } from '../../ppl_lint/visible_indices';
 
 export interface QueryEditorProps {
   query: Query;
@@ -97,6 +99,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
     lintContextRefresh: { current: undefined },
+    lintHoverPersistence: { current: undefined },
   });
   // Cache of index-pattern field names per dataset id, populated asynchronously
   // for field-validation lint. Self-suppresses until loaded.
@@ -178,6 +181,16 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             return;
           }
           const { fields, typeMap } = extractFieldMetadata(indexPattern);
+          // Two metadata probes the field list cannot supply: `enabled:false` is
+          // stripped by _field_caps, and the visible-index list is cluster-wide.
+          // Both are best-effort — their rules self-suppress when absent.
+          const [disabledObjectFields, visibleIndices] = await Promise.all([
+            fetchDisabledObjectFields(services.http, indexPattern),
+            fetchVisibleIndices(services.http, dataSourceId),
+          ]);
+          if (cancelled) {
+            return;
+          }
           lintFieldsRef.current = {
             datasetId,
             dataSourceId,
@@ -185,6 +198,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             selectedSourcePattern: sourcePattern,
             fields,
             typeMap,
+            disabledObjectFields,
+            visibleIndices,
           };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.

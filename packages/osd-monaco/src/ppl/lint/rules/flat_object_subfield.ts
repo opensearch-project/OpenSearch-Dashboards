@@ -54,11 +54,6 @@ export const flatObjectSubfieldDetector: Detector = (tree, config, context, rule
         message: config.message,
         range: rangeFromContext(node),
         docUrl: config.docUrl,
-        hoverFacts: {
-          field: parsed.canonical,
-          root: typedPrefix.path,
-          esType: typedPrefix.type,
-        },
       });
     }
   }

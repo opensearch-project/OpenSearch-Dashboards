@@ -56,6 +56,20 @@ jest.mock('moment', () => {
 });
 
 describe('TelemetryService', () => {
+  // `reportOptInStatus` performs a real `fetch` call. Stub it so the tests that exercise it
+  // resolve immediately instead of hanging on a network request until the Jest timeout.
+  let originalFetch: (typeof window)['fetch'];
+
+  beforeAll(() => {
+    originalFetch = window.fetch;
+  });
+
+  // @ts-ignore
+  beforeEach(() => (window.fetch = jest.fn().mockResolvedValue({})));
+
+  // @ts-ignore
+  afterAll(() => (window.fetch = originalFetch));
+
   // TODO: enable this unit test when fetchTelemtry function is restored
   describe.skip('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {

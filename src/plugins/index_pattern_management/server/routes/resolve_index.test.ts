@@ -67,6 +67,25 @@ describe('registerResolveIndexRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('forwards expand_wildcards=all to the resolve-index request', async () => {
+    const { getHandler } = setup();
+    const transportRequest = jest.fn().mockResolvedValue({ body: { indices: [] } });
+    const context = {
+      core: {
+        opensearch: { client: { asCurrentUser: { transport: { request: transportRequest } } } },
+      },
+      dataSource: { opensearch: { getClient: jest.fn() } },
+    };
+    const req = { params: { query: '*' }, query: { expand_wildcards: 'all' } };
+
+    await getHandler()(context, req, resFactory());
+
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/_resolve/index/*?expand_wildcards=all',
+    });
+  });
+
   it('maps an opensearch-js ResponseError to res.customError preserving statusCode and body.error', async () => {
     const { getHandler } = setup();
     const transportRequest = jest.fn().mockRejectedValue({

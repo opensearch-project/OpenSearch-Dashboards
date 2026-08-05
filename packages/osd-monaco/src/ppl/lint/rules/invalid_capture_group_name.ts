@@ -181,7 +181,7 @@ export const invalidCaptureGroupNameDetector: Detector = (
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Invalid capture group name "${group.name}". Use only letters and numbers, and start with a letter.`,
+          message: `Capture group name "${group.name}" is invalid. Start with a letter and use only letters and numbers.`,
           range,
           docUrl: config.docUrl,
         });

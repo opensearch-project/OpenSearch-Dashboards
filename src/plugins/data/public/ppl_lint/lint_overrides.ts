@@ -107,6 +107,9 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
       continue;
     }
 
+    // Advanced Settings controls execution only. Presentation fields such as
+    // message/howToFix/docUrl are deliberately ignored even if raw JSON injects
+    // them into the stored object.
     const patch: Partial<CatalogEntry> = {};
 
     if (typeof rule.enabled === 'boolean' && rule.enabled !== entry.enabled) {

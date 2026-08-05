@@ -219,7 +219,6 @@ function detectUnknownFields(
           message: `Unknown field "${name}".${suffix}`,
           range: rangeFromContext(node),
           docUrl: config.docUrl,
-          hoverFacts: { field: name, ...(suggestion ? { suggestion } : {}) },
           // The diagnostic range spans exactly the field reference, so the fix
           // replaces it in place (no explicit fix range needed).
           ...(suggestion
@@ -385,7 +384,6 @@ function detectFieldSlotShape(
         message: `${keyword} expects a field name here, not an expression.`,
         range: rangeFromContext(expression),
         docUrl: SHAPE_DOC_URL[commandName] ?? config.docUrl,
-        hoverFacts: { field: expression.getText() },
         ...(rhs ? { fix: { title: `Remove "field=" (use "${rhs}")`, text: rhs } } : {}),
       });
     }
@@ -420,7 +418,6 @@ function detectCompiledFieldSlotShape(
     message: `${match.keyword} expects a field name here, not an expression.`,
     range: match.range,
     docUrl: SHAPE_DOC_URL[match.commandName] ?? config.docUrl,
-    hoverFacts: { field: match.expressionText },
     ...(match.replacement
       ? {
           fix: {

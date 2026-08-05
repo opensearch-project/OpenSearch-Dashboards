@@ -121,6 +121,7 @@ const config: CatalogEntry = {
   enabled: true,
   severity: 'warning',
   message: SENTINEL,
+  howToFix: 'f',
   docUrl: 'https://x',
   appliesTo: {},
 };
@@ -138,7 +139,6 @@ describe('type-mismatch-numeric (direct detector, sentinel config)', () => {
     expect(diags[0].severity).toBe('warning');
     // Message is the sentinel, proving it flows from config rather than a literal.
     expect(diags[0].message).toBe(SENTINEL);
-    expect(diags[0].hoverFacts).toEqual({ field: 'age', esType: 'long', literal: '"thirty"' });
   });
 
   it('self-suppresses (returns []) when the typeMap is empty', () => {
