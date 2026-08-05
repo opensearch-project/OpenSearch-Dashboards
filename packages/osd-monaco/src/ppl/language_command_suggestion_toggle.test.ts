@@ -91,7 +91,7 @@ const commandTypoResult = (): PPLValidationResult => ({
   isValid: false,
   errors: [
     {
-      message: "Unrecognized or misspelled command 'wherre'.",
+      message: "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?",
       code: 'UNKNOWN_COMMAND',
       fix: { title: 'Replace with "where"', text: 'where' },
       rawMessage: "mismatched input 'wherre' expecting {WHERE, FIELDS}",
@@ -130,7 +130,9 @@ describe('processSyntaxHighlighting — command-suggestion toggle', () => {
 
     const markers = lastSyntaxMarkers();
     expect(markers).toHaveLength(1);
-    expect(markers[0].message).toBe("Unrecognized or misspelled command 'wherre'.");
+    expect(markers[0].message).toBe(
+      "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?"
+    );
     // The quick-fix is registered on the syntax channel.
     expect(getModelSyntaxFix(model, markerFixKey(markers[0]))).toEqual({
       title: 'Replace with "where"',
@@ -162,7 +164,9 @@ describe('processSyntaxHighlighting — command-suggestion toggle', () => {
     await flush();
 
     const markers = lastSyntaxMarkers();
-    expect(markers[0].message).toBe("Unrecognized or misspelled command 'wherre'.");
+    expect(markers[0].message).toBe(
+      "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?"
+    );
   });
 
   it('suppresses the friendly rewrite when the global lint capability is off', async () => {

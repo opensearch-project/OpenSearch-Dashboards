@@ -12,8 +12,8 @@ import { GeneralErrorListener } from '../shared/general_error_listerner';
  * path. It augments {@link GeneralErrorListener} with command-typo suggestion:
  * when the offending token is a misspelled command keyword, ANTLR's noisy
  * "mismatched input ... expecting {40 keywords}" message is replaced with
- * `Unrecognized or misspelled command 'X'.` and a one-click quick-fix is
- * attached with the suggested replacement.
+ * `Unrecognized or misspelled command 'X'. Did you mean 'Y'?` and a one-click
+ * quick-fix is attached with the suggested replacement.
  *
  * SQL, DQL, PromQL, and PPL-autocomplete keep using the base class untouched;
  * only the PPL validation path swaps in this subclass.
