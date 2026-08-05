@@ -46,9 +46,7 @@ export interface ScatterChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type ScatterChartStyle = Required<
-  Omit<ScatterChartStyleOptions, 'legendTitle'>
-> &
+export type ScatterChartStyle = Required<Omit<ScatterChartStyleOptions, 'legendTitle'>> &
   Pick<ScatterChartStyleOptions, 'legendTitle'>;
 
 export const defaultScatterChartStyles: ScatterChartStyle = {
