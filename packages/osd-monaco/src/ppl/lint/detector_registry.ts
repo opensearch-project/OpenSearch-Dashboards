@@ -17,6 +17,9 @@ import { aggOnTextDetector } from './rules/agg_on_text';
 import { flatObjectSubfieldDetector } from './rules/flat_object_subfield';
 import { typeMismatchNumericDetector } from './rules/type_mismatch_numeric';
 import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
+import { enabledFalseObjectDetector } from './rules/enabled_false_object';
+import { wildcardSourceZeroMatchDetector } from './rules/wildcard_source_zero_match';
+import { rexScanCostDetector } from './rules/rex_scan_cost';
 
 const registry = new Map<string, Detector>();
 
@@ -47,6 +50,9 @@ export function registerBuiltInDetectors(): void {
   registerDetector('flat-object-subfield', flatObjectSubfieldDetector);
   registerDetector('type-mismatch-numeric', typeMismatchNumericDetector);
   registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
+  registerDetector('enabled-false-object', enabledFalseObjectDetector);
+  registerDetector('wildcard-source-zero-match', wildcardSourceZeroMatchDetector);
+  registerDetector('rex-scan-cost', rexScanCostDetector);
 }
 
 registerBuiltInDetectors();

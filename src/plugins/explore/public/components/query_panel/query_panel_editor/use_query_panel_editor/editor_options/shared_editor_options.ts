@@ -23,4 +23,11 @@ export const sharedEditorOptions: IEditorConstructionOptions = {
   overviewRulerLanes: 0,
   hideCursorInOverviewRuler: true,
   fixedOverflowWidgets: true,
+  // Widen the marker-to-card travel window so a lint hover card stays reachable
+  // on the mouse-MOVE path. The separate mouseleave path is handled by
+  // attachPPLLintHoverPersistence, which these options do not affect.
+  hover: {
+    sticky: true,
+    hidingDelay: 600,
+  },
 };

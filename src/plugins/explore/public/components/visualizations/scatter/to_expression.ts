@@ -12,9 +12,6 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
-  BaseChartStyle,
-  collectLegend,
-  PipelineFn,
 } from '../utils/echarts_spec';
 import {
   createScatterSeries,
@@ -23,21 +20,13 @@ import {
   assembleScatterSpec,
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
-import { ColorMap } from '../utils/color_map';
-
-const clearLegend =
-  <T extends BaseChartStyle>(onLegend?: (legend: ColorMap) => void): PipelineFn<T> =>
-  (state) => {
-    onLegend?.({});
-    return state;
-  };
+import { LegendItem } from '../utils/legend';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   styles: ScatterChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -56,7 +45,6 @@ export const createTwoMetricScatter = (
       xField: xCol.column,
       yField: yCol.column,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -65,7 +53,7 @@ export const createTwoMetricScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createTwoMetricOneCateScatter = (
@@ -76,8 +64,8 @@ export const createTwoMetricOneCateScatter = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -99,8 +87,8 @@ export const createTwoMetricOneCateScatter = (
       xField: xCol.column,
       yField: yCol.column,
       colorField: colorCol.column,
+      allData,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -109,7 +97,7 @@ export const createTwoMetricOneCateScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createThreeMetricOneCateScatter = (
@@ -121,8 +109,8 @@ export const createThreeMetricOneCateScatter = (
     [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -141,8 +129,8 @@ export const createThreeMetricOneCateScatter = (
       yField: yCol.column,
       colorField: colorCol?.column,
       sizeField: sizeCol.column,
+      allData,
     }),
-    colorCol ? collectLegend(onLegend) : clearLegend(onLegend),
     assembleSpec,
     assembleScatterSpec
   )({
@@ -152,5 +140,5 @@ export const createThreeMetricOneCateScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

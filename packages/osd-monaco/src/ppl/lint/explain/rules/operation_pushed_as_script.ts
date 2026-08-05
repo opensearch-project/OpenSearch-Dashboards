@@ -17,8 +17,8 @@ interface ScriptSignal {
   outcome: Extract<ExplainOutcome, 'filter:script' | 'sort:script'>;
   /**
    * Which pipeline clause this signal is about. Rides the diagnostic as
-   * `hoverFacts.operation` and `explainTarget.operation` so the hover card can
-   * name the clause and the range resolver can find the offending command.
+   * `explainTarget.operation` so the range resolver can find the offending
+   * command.
    */
   operation: 'filter' | 'sort';
   /**
@@ -72,7 +72,6 @@ export const operationPushedAsScriptDetector: ExplainDetector = (plan, config, c
         // parse tree is available (design §6).
         range: wholeQueryRange(context.query),
         docUrl: config.docUrl,
-        hoverFacts: { operation: signal.operation },
         explainTarget: { operation: signal.operation, outcome: signal.outcome, fields: [] },
       });
     }

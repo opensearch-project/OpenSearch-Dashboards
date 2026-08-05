@@ -17,6 +17,12 @@ import { normalizeEmptyValue } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { PointShape, Positions } from '../types';
 import { DEFAULT_GRID } from '../constants';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
 /**
  * Maps PointShape enum values to ECharts symbol types
@@ -172,6 +178,7 @@ export const createScatterSeries =
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
       newState.series = [];
+      newState.legendItems = [];
       return newState;
     }
 
@@ -206,6 +213,7 @@ export const createScatterSeries =
     ] as ScatterSeriesOption[];
 
     newState.series = series;
+    newState.legendItems = [];
     return newState;
   };
 
@@ -219,11 +227,13 @@ export const createCategoryScatterSeries =
     xField,
     yField,
     colorField,
+    allData,
   }: {
     styles: ScatterChartStyle;
     xField: string;
     yField: string;
     colorField: string;
+    allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData = [] } = state;
@@ -231,6 +241,7 @@ export const createCategoryScatterSeries =
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
       newState.series = [];
+      newState.legendItems = [];
       return newState;
     }
 
@@ -243,12 +254,19 @@ export const createCategoryScatterSeries =
 
     const thresholdLines = generateThresholdLines(styles.thresholdOptions);
     const palette = getColors().categories;
-    const sortedCategories = [...categories].map(String).sort();
+    const sortedCategories = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: categories.map(String),
+      columns: [],
+    });
+    const legendItems: LegendItem[] = [];
 
     // Create multiple scatter series
     const series = categories.map((category) => {
-      const name = String(category);
-      const colorIndex = sortedCategories.indexOf(name);
+      const name = normalizeEmptyValue(category);
+      const color = getLegendColor(name, palette, sortedCategories);
+      legendItems.push(createSeriesLegendItem(name, color));
       return {
         name,
         type: 'scatter',
@@ -262,12 +280,12 @@ export const createCategoryScatterSeries =
         itemStyle: styles.exclusive?.filled
           ? {
               opacity: 0.8,
-              color: palette[colorIndex % palette.length],
+              color,
             }
           : {
               opacity: 0.8,
               color: 'transparent',
-              borderColor: palette[colorIndex % palette.length],
+              borderColor: color,
               borderWidth: 2,
             },
         emphasis: {
@@ -281,6 +299,7 @@ export const createCategoryScatterSeries =
     // Set the pivot dataset and series
     newState.transformedData = pivotDataset;
     newState.series = series;
+    newState.legendItems = legendItems;
 
     return newState;
   };
@@ -365,12 +384,14 @@ export const createSizeScatterSeries =
     yField,
     colorField,
     sizeField,
+    allData,
   }: {
     styles: ScatterChartStyle;
     xField: string;
     yField: string;
     colorField?: string;
     sizeField: string;
+    allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData = [], axisColumnMappings } = state;
@@ -378,6 +399,7 @@ export const createSizeScatterSeries =
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
       newState.series = [];
+      newState.legendItems = [];
       return newState;
     }
 
@@ -412,6 +434,7 @@ export const createSizeScatterSeries =
       ] as ScatterSeriesOption[];
 
       newState.visualMap = buildSizeVisualMaps(styles, sizeRange, true);
+      newState.legendItems = [];
 
       return newState;
     }
@@ -426,12 +449,19 @@ export const createSizeScatterSeries =
     );
 
     const palette = getColors().categories;
-    const sortedCategories = [...categories].map(String).sort();
+    const sortedCategories = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: categories.map(String),
+      columns: [],
+    });
+    const legendItems: LegendItem[] = [];
 
-    // Create multiple scatter series, one for each color category
-    newState.series = categories.map((category) => {
-      const name = String(category);
-      const color = palette[sortedCategories.indexOf(name) % palette.length];
+    // Data format: [x, y, size] where size is at dimension 2 for visualMap
+    const series = categories.map((category) => {
+      const name = normalizeEmptyValue(category);
+      const color = getLegendColor(name, palette, sortedCategories);
+      legendItems.push(createSeriesLegendItem(name, color));
       return {
         ...buildSizeSeriesBase(styles),
         name,
@@ -454,6 +484,8 @@ export const createSizeScatterSeries =
       };
     }) as ScatterSeriesOption[];
 
+    newState.series = series;
+    newState.legendItems = legendItems;
     newState.visualMap = buildSizeVisualMaps(styles, sizeRange, false);
 
     return newState;

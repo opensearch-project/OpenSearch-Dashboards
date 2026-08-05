@@ -21,7 +21,7 @@ export interface MarkerFix {
 
 // Marker fields that survive Monaco's MarkerService rebuild. The key is built
 // only from these because the service rebuilds markers from a fixed field list
-// and drops everything else (custom `fix`/`hoverFacts` props are stripped).
+// and drops everything else (the custom `fix` prop is stripped).
 interface MarkerKeyParts {
   startLineNumber: number;
   startColumn: number;

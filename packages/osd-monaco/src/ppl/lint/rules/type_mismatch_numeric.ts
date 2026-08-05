@@ -122,7 +122,6 @@ export const typeMismatchNumericDetector: Detector = (tree, config, context, rul
       message: config.message,
       range: rangeFromContext(parent),
       docUrl: config.docUrl,
-      hoverFacts: { field: fieldName, esType, literal: literalSide.getText() },
     });
   }
 

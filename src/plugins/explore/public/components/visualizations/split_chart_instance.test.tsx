@@ -28,12 +28,9 @@ afterEach(() => {
 });
 
 describe('SplitChartInstance', () => {
-  const mockRenderChart = jest.fn((data) => (
-    <div data-test-subj="renderedChart">{data.length} items</div>
-  ));
+  const mockRenderChart = jest.fn((label) => <div data-test-subj="renderedChart">{label}</div>);
   const defaultProps = {
     label: 'Test Group',
-    data: [{ v: 1 }, { v: 2 }],
     renderChart: mockRenderChart,
   };
 
@@ -59,8 +56,8 @@ describe('SplitChartInstance', () => {
       intersectionCallback([{ isIntersecting: true }]);
     });
 
-    expect(mockRenderChart).toHaveBeenCalledWith(defaultProps.data, defaultProps.label);
-    expect(screen.getByText('2 items')).toBeInTheDocument();
+    expect(mockRenderChart).toHaveBeenCalledWith(defaultProps.label);
+    expect(screen.getByText('Test Group')).toBeInTheDocument();
   });
 
   it('disconnects observer after becoming visible', () => {

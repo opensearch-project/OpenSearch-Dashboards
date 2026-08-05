@@ -224,6 +224,45 @@ describe('buildPPLLintContext', () => {
     expect(ctx.fields).toBeUndefined();
   });
 
+  it('reuses visible indices across datasets on the same data source', () => {
+    const visibleIndices = ['logs-2025', 'logs-2026'];
+    const ctx = buildPPLLintContext(
+      dataset,
+      {
+        datasetId: 'other-dataset',
+        dataSourceId: 'mds-1',
+        datasetType: 'INDEX_PATTERN',
+        visibleIndices,
+      },
+      services
+    );
+    expect(ctx.visibleIndices).toBe(visibleIndices);
+  });
+
+  it('drops visible indices cached for a different data source', () => {
+    const ctx = buildPPLLintContext(
+      dataset,
+      {
+        datasetId: 'dataset-1',
+        dataSourceId: 'other-mds',
+        datasetType: 'INDEX_PATTERN',
+        visibleIndices: ['other-cluster-index'],
+      },
+      services
+    );
+    expect(ctx.visibleIndices).toBeUndefined();
+  });
+
+  it('reuses visible indices when both cache and dataset are local', () => {
+    const visibleIndices = ['local-index'];
+    const ctx = buildPPLLintContext(
+      { id: 'local-2' },
+      { datasetId: 'local-1', dataSourceId: undefined, visibleIndices },
+      services
+    );
+    expect(ctx.visibleIndices).toBe(visibleIndices);
+  });
+
   it('matches when both cache and dataset have no data source (local cluster)', () => {
     const localDataset = { id: 'local-1' };
     const fields = new Set(['x']);

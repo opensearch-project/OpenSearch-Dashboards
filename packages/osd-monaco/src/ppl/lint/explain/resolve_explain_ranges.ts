@@ -99,11 +99,6 @@ function resolveCandidate(
   return {
     ...resolved,
     fix: fix.fix,
-    hoverFacts: {
-      ...resolved.hoverFacts,
-      field: fix.field,
-      literal: fix.literal,
-    },
   };
 }
 

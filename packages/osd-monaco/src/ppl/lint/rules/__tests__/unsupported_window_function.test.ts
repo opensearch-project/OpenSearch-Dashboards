@@ -21,14 +21,13 @@ describe('unsupported-window-function-in-eventstats (compiled surface)', () => {
     );
   });
 
-  it('reports the catalog message (not a hardcoded literal) and carries the fn in hoverFacts', () => {
+  it('reports the catalog message (not a hardcoded literal)', () => {
     const diagnostic = analyzer
       .lint('source=logs | eventstats rank() as r by status', { dataSourceVersion: '3.8.0' })
       .diagnostics.find((d) => d.ruleId === 'unsupported-window-function-in-eventstats');
     expect(diagnostic?.message).toBe(
-      'This window function is not supported in eventstats/streamstats — only row_number is available.'
+      'This window function is not supported in eventstats/streamstats. Only row_number is supported.'
     );
-    expect(diagnostic?.hoverFacts).toEqual({ windowFunction: 'rank' });
   });
 
   it('does not flag row_number', () => {

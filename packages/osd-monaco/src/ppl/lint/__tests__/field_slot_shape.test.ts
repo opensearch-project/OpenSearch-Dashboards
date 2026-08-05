@@ -25,6 +25,7 @@ const config: CatalogEntry = {
   enabled: true,
   severity: 'warning',
   message: 'Reference to an unknown field.',
+  howToFix: 'f',
   docUrl: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/',
   appliesTo: {},
 };
