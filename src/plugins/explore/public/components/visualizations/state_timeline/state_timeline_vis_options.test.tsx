@@ -60,42 +60,33 @@ jest.mock('@osd/i18n', () => ({
 jest.mock('../style_panel/legend/legend_options_wrapper', () => {
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsWrapper: jest.fn(
-      ({ styleOptions, updateStyleOption, hasSizeLegend, shouldShow }) => {
-        if (!shouldShow) {
-          return null;
-        }
-
-        return (
-          <div data-test-subj="mockLegendOptionsWrapper">
-            <button
-              data-test-subj="mockLegendShow"
-              onClick={() => updateStyleOption('addLegend', !styleOptions.addLegend)}
-            >
-              Toggle Legend
-            </button>
-            <button
-              data-test-subj="mockLegendPosition"
-              onClick={() => updateStyleOption('legendPosition', PositionsEnum.BOTTOM)}
-            >
-              Change Position
-            </button>
-            <input
-              data-test-subj="legend-title-input"
-              placeholder="Legend Title"
-              onChange={(e) => updateStyleOption('legendTitle', e.target.value)}
-            />
-            {hasSizeLegend && (
-              <input
-                data-test-subj="legend-title-for-size-input"
-                placeholder="Legend Title for Size"
-                onChange={(e) => updateStyleOption('legendTitleForSize', e.target.value)}
-              />
-            )}
-          </div>
-        );
+    LegendOptionsWrapper: jest.fn(({ styleOptions, updateStyleOption, shouldShow }) => {
+      if (!shouldShow) {
+        return null;
       }
-    ),
+
+      return (
+        <div data-test-subj="mockLegendOptionsWrapper">
+          <button
+            data-test-subj="mockLegendShow"
+            onClick={() => updateStyleOption('addLegend', !styleOptions.addLegend)}
+          >
+            Toggle Legend
+          </button>
+          <button
+            data-test-subj="mockLegendPosition"
+            onClick={() => updateStyleOption('legendPosition', PositionsEnum.BOTTOM)}
+          >
+            Change Position
+          </button>
+          <input
+            data-test-subj="legend-title-input"
+            placeholder="Legend Title"
+            onChange={(e) => updateStyleOption('legendTitle', e.target.value)}
+          />
+        </div>
+      );
+    }),
   };
 });
 
