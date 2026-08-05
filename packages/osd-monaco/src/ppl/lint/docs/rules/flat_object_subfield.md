@@ -4,15 +4,8 @@ rule: flat-object-subfield
 
 # `flat_object` field referenced from PPL
 
-## What it detects
-
 A reference to a field whose longest known mapping prefix is `flat_object`,
 including the flat-object root itself and dotted paths below it.
-
-## Why it matters
-
-On the verified Calcite surface, PPL cannot resolve a `flat_object` root or
-subfield. The query fails with a field-not-found error.
 
 ## Example
 
@@ -30,76 +23,16 @@ Use another indexed field, query the value through DQL or the Search API, or
 map and reindex the data as a regular object. No automatic fix is offered
 because PPL has no equivalent reference for the existing mapping.
 
-## Availability
+## Requirements
 
-Error severity, off by default, on Calcite engine version 3.8.0 or later. It
-requires selected-dataset type metadata and is source-scoped.
+Requires Calcite 3.8 or later, selected-dataset type metadata, and matching source scope.
 
-## Catalog configuration
+## Rule settings
 
-The message and fix guidance are copied verbatim from the reviewed rule catalog.
-
-| Field              | Reviewed value                                                                                                                   |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| Default state      | Off; per-rule opt-in and the global PPL lint capability are required                                                             |
-| Severity           | `error`                                                                                                                          |
-| Diagnostic message | PPL cannot search a field stored inside a flat_object field.                                                                     |
-| Fix guidance       | Use another field or query this data with DQL or the Search API. To use it in PPL, map and reindex it as a regular object field. |
-| Documentation      | [`flat_object` field type](https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/)                    |
-
-## Implementation
-
-`flatObjectSubfieldDetector` in
-`packages/osd-monaco/src/ppl/lint/rules/flat_object_subfield.ts` requires
-`context.isCalcite === true` and a nonempty `context.typeMap`. It visits dotted
-field references, parses each path with quote-aware segment handling, and calls
-`findLongestTypedPrefix`. Prefixes are searched from the complete path toward
-the root, so a separately typed child such as `attributes.http` takes
-precedence over a `flat_object` ancestor such as `attributes`.
-
-`typeMap` is extracted from unambiguous index-pattern `esTypes` and is forwarded
-only while dataset/data-source/type provenance matches. The catalog applies
-`needsContext`, `sourceScoped`, Calcite, and minimum-version gates; the detector
-also checks Calcite and the map for direct-call safety.
-
-The diagnostic spans the matched path node and uses the catalog message.
-Positions are deduplicated because one reference can be reachable through both
-parser paths. No fix is offered because Calcite has no equivalent valid
-reference to the existing mapping.
-
-## Assumptions and maintenance
-
-- `FLAT_OBJECT_TYPES` contains only `flat_object`. Update it if OpenSearch adds
-  aliases or changes the mapping type exposed through index-pattern `esTypes`.
-- Only ordinary dotted field references are inspected. A command that carries a
-  field through a command-specific structure needs explicit detector coverage.
-- Longest-prefix behavior is deliberate: a more-specific typed field overrides
-  a flat-object ancestor. Reverify this if field-capabilities or multi-field
-  mapping semantics change.
-- Missing, empty, conflicting, or malformed type information produces no
-  finding. Since this is an error-severity rule with a minimum version, an
-  unknown data-source version also suppresses it even when Calcite is known.
-- Created fields are not typed by pipeline analysis. An `eval`, alias, or
-  extraction output is checked only if its exact path is already in `typeMap`.
-- The detector traverses the entire tree and does not prune alternate-source
-  subtrees. A reference inside lookup/append/subsearch/union can therefore be
-  classified with the outer dataset's mapping. New nested-source commands do
-  not become safe merely by updating `collectAlternateSourceSubtrees`.
-- Top-level source mismatch suppression fails open for wildcard, pipe-first,
-  multi-source, and inconclusive queries.
-
-## Tests
-
-- `packages/osd-monaco/src/ppl/lint/rules/flat_object_subfield.test.ts`: roots,
-  children, quoting, longest-prefix precedence, deduplication, ranges, and
-  detector self-gating.
-- `packages/osd-monaco/src/ppl/lint/field_path.test.ts`: quote-aware parsing and
-  longest typed-prefix selection.
-- `packages/osd-monaco/src/ppl/lint/rules/local_rules_product_path.test.ts`:
-  catalog/registry/runner plumbing and absent context.
-- `packages/osd-monaco/src/ppl/lint/__tests__/source_mismatch_suppression.test.ts`:
-  source-scoped behavior.
-- `src/plugins/data/public/antlr/opensearch_ppl/grammar_surface_equivalence.test.ts`
-  and `runtime_lint.test.ts`: runtime/compiled behavior.
-- `src/plugins/data/public/ppl_lint/lint_context_builder.test.ts`: type-map
-  provenance and ambiguous mapping types.
+| Setting       | Current value                                                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Default       | Off                                                                                                                              |
+| Severity      | `error`                                                                                                                          |
+| Message       | PPL cannot search a field stored inside a flat_object field.                                                                     |
+| Guidance      | Use another field or query this data with DQL or the Search API. To use it in PPL, map and reindex it as a regular object field. |
+| Documentation | [`flat_object` field type](https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/)                    |
