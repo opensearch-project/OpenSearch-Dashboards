@@ -4,6 +4,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import type { IFieldSubType } from '../index_patterns/types';
 export * from './_structure_cache';
 
 /**
@@ -313,6 +314,10 @@ export interface DatasetField {
   name: string;
   type: string;
   displayName?: string;
+  /** Whether the field can be used in aggregations. Nested/text fields are typically not aggregatable. */
+  aggregatable?: boolean;
+  /** Sub-type info. `subType.nested` marks a field that lives inside a nested object (e.g. `events.time`). */
+  subType?: IFieldSubType;
   // TODO:  osdFieldType?
 }
 

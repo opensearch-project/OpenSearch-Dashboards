@@ -19,8 +19,11 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CORE_SIGNAL_TYPES } from '../../../data/common';
 import { AgentTracesServices } from '../types';
-import { detectTraceDataAcrossDataSources, DetectionResult } from '../utils/auto_detect_trace_data';
-import { createAutoDetectedDatasets } from '../../../explore/public';
+import {
+  createAutoDetectedDatasets,
+  detectTraceDataAcrossDataSources,
+  DetectionResult,
+} from '../../../explore/public';
 import { DiscoverNoIndexPatterns } from '../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 
 const DISMISSED_KEY = 'agentTraces:traces:autoDetectDismissed';

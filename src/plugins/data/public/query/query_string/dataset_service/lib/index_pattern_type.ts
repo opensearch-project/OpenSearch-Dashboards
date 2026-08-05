@@ -69,6 +69,8 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return indexPattern.fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      aggregatable: field?.aggregatable,
+      subType: field?.subType,
     }));
   },
 
