@@ -77,9 +77,7 @@ describe('buildCommandSuggestion via PPLLanguageAnalyzer.validate (compiled path
     const err = firstError('source=logs | wherre a > 1');
     expect(err.code).toBe('UNKNOWN_COMMAND'); // stable identity
     expect(err.fix?.text).toBe('where'); // actionable correction
-    expect(err.message).toBe(
-      "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?"
-    );
+    expect(err.message).toBe("Unrecognized or misspelled command 'wherre'. Did you mean 'where'?");
   });
 
   it('suggests "head" for "hed"', () => {
