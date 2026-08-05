@@ -71,20 +71,21 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(
-            props.transformedData,
+          const { spec, legendItems } = createPieSpec(
+            props.data,
             props.styleOptions,
             {
               [AxisRole.SIZE]: size,
               [AxisRole.COLOR]: color,
             },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec ?? {}}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -101,20 +102,21 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(
-            props.transformedData,
+          const { spec, legendItems } = createPieSpec(
+            props.data,
             props.styleOptions,
             {
               [AxisRole.SIZE]: size,
               [AxisRole.COLOR]: color,
             },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec ?? {}}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
