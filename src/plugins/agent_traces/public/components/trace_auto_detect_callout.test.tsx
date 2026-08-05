@@ -10,14 +10,17 @@ import { coreMock } from '../../../../core/public/mocks';
 import { TraceAutoDetectCallout } from './trace_auto_detect_callout';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../types';
-import * as autoDetectModule from '../utils/auto_detect_trace_data';
-import * as createDatasetsModule from '../../../explore/public';
+import * as explorePublic from '../../../explore/public';
 
-// Mock the utility functions
-jest.mock('../utils/auto_detect_trace_data');
+// Mock explore/public which now provides both auto-detect and dataset creation
 jest.mock('../../../explore/public', () => ({
+  detectTraceDataAcrossDataSources: jest.fn(),
   createAutoDetectedDatasets: jest.fn(),
 }));
+
+// Aliases for backward compat with rest of the test
+const autoDetectModule = explorePublic;
+const createDatasetsModule = explorePublic;
 
 // Mock the DiscoverNoIndexPatterns component
 jest.mock(
