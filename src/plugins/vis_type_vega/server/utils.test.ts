@@ -163,15 +163,13 @@ describe('extractDataSourceNamesInVegaSpec()', () => {
   // Vega spec with no data field at all (marks-only visualization)
   test('Set should be empty when the Vega spec has no data field', () => {
     const noDataFieldJSON = loadJSONFromFile('/test_utils/vega_spec_no_data_field.json');
-    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(noDataFieldJSON))).toMatchObject(
-      new Set()
-    );
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(noDataFieldJSON))).toEqual(new Set());
   });
 
   // Vega spec with top-level data containing data_source_name
   test('Set should have one data_source_name from a Vega spec with data_source_name in data array', () => {
     const vegaWithDsName = loadJSONFromFile('/test_utils/vega_spec_with_data_source_name.json');
-    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaWithDsName))).toMatchObject(
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaWithDsName))).toEqual(
       new Set(['my-datasource'])
     );
   });
@@ -179,7 +177,7 @@ describe('extractDataSourceNamesInVegaSpec()', () => {
   // Vega-Lite spec with data_source_name nested inside layers
   test('Set should extract data_source_name from Vega-Lite layer composition', () => {
     const vegaLiteLayerSpec = loadJSONFromFile('/test_utils/vega_lite_spec_with_layers_mds.json');
-    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteLayerSpec))).toMatchObject(
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteLayerSpec))).toEqual(
       new Set(['my-datasource'])
     );
   });
@@ -189,7 +187,7 @@ describe('extractDataSourceNamesInVegaSpec()', () => {
     const vegaLiteHconcatSpec = loadJSONFromFile(
       '/test_utils/vega_lite_spec_with_hconcat_mds.json'
     );
-    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteHconcatSpec))).toMatchObject(
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteHconcatSpec))).toEqual(
       new Set(['datasource-alpha', 'datasource-beta'])
     );
   });
@@ -197,13 +195,183 @@ describe('extractDataSourceNamesInVegaSpec()', () => {
   // Vega-Lite spec with top-level data and facet/spec composition
   test('Set should extract data_source_name from top-level data in a faceted Vega-Lite spec', () => {
     const vegaLiteFacetSpec = loadJSONFromFile('/test_utils/vega_lite_spec_with_facet_mds.json');
-    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteFacetSpec))).toMatchObject(
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vegaLiteFacetSpec))).toEqual(
       new Set(['top-level-datasource'])
     );
   });
 
-  // Spec exceeding traversal node limit should not throw
-  test('Should not throw on a spec that exceeds the traversal node limit', () => {
+  // Vega-Lite spec with data_source_name in vconcat views
+  test('Set should extract data_source_names from Vega-Lite vconcat composition', () => {
+    const vconcatSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      vconcat: [
+        {
+          data: { url: { data_source_name: 'ds-top', index: 'idx-top', body: { size: 10 } } },
+          mark: 'bar',
+          encoding: {},
+        },
+        {
+          data: { url: { data_source_name: 'ds-bottom', index: 'idx-bottom', body: { size: 10 } } },
+          mark: 'line',
+          encoding: {},
+        },
+      ],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(vconcatSpec))).toEqual(
+      new Set(['ds-top', 'ds-bottom'])
+    );
+  });
+
+  // Vega-Lite spec with data_source_name in concat views
+  test('Set should extract data_source_names from Vega-Lite concat composition', () => {
+    const concatSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      concat: [
+        {
+          data: { url: { data_source_name: 'ds-one', index: 'idx-one', body: { size: 5 } } },
+          mark: 'point',
+          encoding: {},
+        },
+        {
+          data: { url: { data_source_name: 'ds-two', index: 'idx-two', body: { size: 5 } } },
+          mark: 'area',
+          encoding: {},
+        },
+      ],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(concatSpec))).toEqual(
+      new Set(['ds-one', 'ds-two'])
+    );
+  });
+
+  // Genuine multi-level nesting (layer inside facet's spec, hconcat inside vconcat)
+  test('Set should extract data_source_names from deeply nested composition', () => {
+    const nestedSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      vconcat: [
+        {
+          hconcat: [
+            {
+              data: { url: { data_source_name: 'ds-nested-a', index: 'idx-a', body: { size: 1 } } },
+              mark: 'bar',
+              encoding: {},
+            },
+          ],
+        },
+        {
+          facet: { field: 'region', type: 'nominal' },
+          spec: {
+            layer: [
+              {
+                data: {
+                  url: { data_source_name: 'ds-nested-b', index: 'idx-b', body: { size: 1 } },
+                },
+                mark: 'line',
+                encoding: {},
+              },
+              {
+                data: {
+                  url: { data_source_name: 'ds-nested-c', index: 'idx-c', body: { size: 1 } },
+                },
+                mark: 'point',
+                encoding: {},
+              },
+            ],
+          },
+        },
+      ],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(nestedSpec))).toEqual(
+      new Set(['ds-nested-a', 'ds-nested-b', 'ds-nested-c'])
+    );
+  });
+
+  // Lookup transform with embedded data_source_name
+  test('Set should extract data_source_name from lookup transform', () => {
+    const lookupSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      data: { url: { data_source_name: 'ds-primary', index: 'primary-idx', body: { size: 100 } } },
+      transform: [
+        {
+          lookup: 'id',
+          from: {
+            data: {
+              url: { data_source_name: 'ds-lookup', index: 'lookup-idx', body: { size: 50 } },
+            },
+            key: 'id',
+            fields: ['name'],
+          },
+        },
+      ],
+      mark: 'bar',
+      encoding: {},
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(lookupSpec))).toEqual(
+      new Set(['ds-primary', 'ds-lookup'])
+    );
+  });
+
+  // HJSON with nested layers (proves walk works with hjson's __WSC__ bookkeeping keys)
+  test('(HJSON) Set should extract data_source_name from nested layer composition', () => {
+    const hjsonSpec = `
+{
+  $schema: "https://vega.github.io/schema/vega-lite/v5.json"
+  // A comment that hjson supports, which injects __WSC__ bookkeeping keys
+  layer: [
+    {
+      data: {
+        url: {
+          data_source_name: "hjson-datasource"
+          index: "hjson-index"
+          body: {
+            size: 0
+          }
+        }
+      }
+      mark: {
+        type: "line"
+      }
+      encoding: {}
+    }
+  ]
+}`;
+    expect(extractDataSourceNamesInVegaSpec(hjsonSpec)).toEqual(new Set(['hjson-datasource']));
+  });
+
+  // Malformed data field (data: "foo") should return empty set, not throw
+  test('Set should be empty when data field is a string (malformed spec)', () => {
+    const malformedSpec = {
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+      data: 'this-is-not-valid',
+      marks: [],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(malformedSpec))).toEqual(new Set());
+  });
+
+  // Malformed data field (data: 42) should return empty set, not throw
+  test('Set should be empty when data field is a number (malformed spec)', () => {
+    const malformedSpec = {
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+      data: 42,
+      marks: [],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(malformedSpec))).toEqual(new Set());
+  });
+
+  // Null elements in data array should not throw
+  test('Set should handle null elements in data array gracefully', () => {
+    const specWithNulls = {
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+      data: [null, { url: { data_source_name: 'ds-valid', index: 'idx', body: {} } }, null],
+      marks: [],
+    };
+    expect(extractDataSourceNamesInVegaSpec(JSON.stringify(specWithNulls))).toEqual(
+      new Set(['ds-valid'])
+    );
+  });
+
+  // Spec exceeding traversal node limit should throw
+  test('Should throw on a spec that exceeds the traversal node limit', () => {
     // Build a spec with a layer array containing 15,000 items (exceeds MAX_TRAVERSAL_NODES of 10,000)
     const layers = Array.from({ length: 15000 }, (_, i) => ({
       data: {
@@ -220,13 +388,9 @@ describe('extractDataSourceNamesInVegaSpec()', () => {
       layer: layers,
     };
 
-    // Should not throw and should terminate gracefully
-    expect(() => extractDataSourceNamesInVegaSpec(JSON.stringify(wideSpec))).not.toThrow();
-
-    // Should find some data sources but not all 15,000 (capped by traversal limit)
-    const result = extractDataSourceNamesInVegaSpec(JSON.stringify(wideSpec));
-    expect(result.size).toBeGreaterThan(0);
-    expect(result.size).toBeLessThan(15000);
+    expect(() => extractDataSourceNamesInVegaSpec(JSON.stringify(wideSpec))).toThrow(
+      'Vega spec has too many data objects (exceeds limit of 10000)'
+    );
   });
 });
 

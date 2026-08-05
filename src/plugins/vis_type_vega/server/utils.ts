@@ -40,75 +40,45 @@ export const extractVegaSpecFromAttributes = (attributes: unknown) => {
   return undefined;
 };
 
-export const extractDataSourceNamesInVegaSpec = (spec: string) => {
-  const parsedSpec = parse(spec, { keepWsc: true });
-  const dataSourceNameSet = new Set<string>();
-
-  const dataObjects = collectDataObjects(parsedSpec);
-  for (const dataObject of dataObjects) {
-    const dataSourceName = getDataSourceNameFromObject(dataObject);
-    if (dataSourceName) {
-      dataSourceNameSet.add(dataSourceName);
-    }
-  }
-
-  return dataSourceNameSet;
-};
-
+// Maximum number of nodes to visit during spec traversal. Prevents CPU abuse from
+// adversarially large specs. hjson.parse already materializes the full spec in memory,
+// so this bounds traversal time rather than memory. If exceeded, the spec is rejected
+// as too complex rather than silently dropping data source references.
 const MAX_TRAVERSAL_NODES = 10000;
 
-const collectDataObjects = (root: Record<string, any>): Array<Record<string, any>> => {
-  const results: Array<Record<string, any>> = [];
-  const stack: Array<Record<string, any>> = [root];
+export const extractDataSourceNamesInVegaSpec = (spec: string) => {
+  const names = new Set<string>();
+  const stack: unknown[] = [parse(spec, { keepWsc: true })];
   let visited = 0;
 
   while (stack.length > 0) {
     if (++visited > MAX_TRAVERSAL_NODES) {
-      break;
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Vega spec has too many data objects (exceeds limit of ${MAX_TRAVERSAL_NODES})`
+      );
     }
 
     const node = stack.pop();
-    if (!node || typeof node !== 'object') {
-      continue;
-    }
+    if (node === null || typeof node !== 'object') continue;
 
-    // Collect data field (object or array)
-    if (node.data) {
-      if (Array.isArray(node.data)) {
-        results.push(...node.data);
-      } else if (typeof node.data === 'object') {
-        results.push(node.data);
-      }
-    }
+    const name = getDataSourceNameFromObject(node);
+    if (name) names.add(name);
 
-    // Traverse Vega-Lite composition fields
-    for (const key of ['layer', 'hconcat', 'vconcat', 'concat']) {
-      if (Array.isArray(node[key])) {
-        for (const child of node[key]) {
-          stack.push(child);
-        }
-      }
-    }
-
-    // Traverse facet/repeat inner spec
-    if (node.spec && typeof node.spec === 'object') {
-      stack.push(node.spec);
-    }
+    // Arrays yield their elements; objects yield their values
+    stack.push(...Object.values(node as Record<string, unknown>));
   }
 
-  return results;
+  return names;
 };
 
-const getDataSourceNameFromObject = (dataObject: any) => {
-  if (
-    dataObject.hasOwnProperty('url') &&
-    dataObject.url.hasOwnProperty('index') &&
-    dataObject.url.hasOwnProperty('data_source_name')
-  ) {
-    return dataObject.url.data_source_name;
-  }
-
-  return undefined;
+const getDataSourceNameFromObject = (node: unknown): string | undefined => {
+  if (node === null || typeof node !== 'object') return undefined;
+  const url = (node as Record<string, unknown>).url;
+  if (url === null || typeof url !== 'object') return undefined;
+  const urlObj = url as Record<string, unknown>;
+  return 'index' in urlObj && 'data_source_name' in urlObj
+    ? (urlObj.data_source_name as string)
+    : undefined;
 };
 
 const isVegaVisualization = (attributes: unknown) => {
