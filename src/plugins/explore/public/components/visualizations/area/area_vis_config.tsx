@@ -108,19 +108,19 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for area chart');
 
-          const spec = createSimpleAreaChart(
-            props.transformedData,
+          const { spec, legendItems } = createSimpleAreaChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.timeRange,
-            props.onLegend
+            props.timeRange
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -140,19 +140,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
 
-          const spec = createMultiAreaChart(
-            props.transformedData,
+          const { spec, legendItems } = createMultiAreaChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -172,19 +173,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
 
-          const spec = createMultiAreaChart(
-            props.transformedData,
+          const { spec, legendItems } = createMultiAreaChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -203,18 +205,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category area chart');
 
-          const spec = createCategoryAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.onLegend
-          );
+          const { spec, legendItems } = createCategoryAreaChart(props.data, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -234,18 +235,19 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(
-            props.transformedData,
+          const { spec, legendItems } = createStackedAreaChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -265,18 +267,19 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(
-            props.transformedData,
+          const { spec, legendItems } = createStackedAreaChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

@@ -121,7 +121,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
           const value = props.axisColumnMappings.value?.[0];
           if (!value) throw Error('Missing axis config for metric chart');
           const mapping: MetricAxisMapping = { [AxisRole.Value]: value };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}
@@ -148,7 +148,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
             [AxisRole.Value]: value,
             [AxisRole.Time]: time,
           };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}

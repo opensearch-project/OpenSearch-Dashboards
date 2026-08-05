@@ -10,16 +10,17 @@ import { BehaviorSubject } from 'rxjs';
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
 import { DEFAULT_GRID } from './constants';
+import { LegendTarget } from './utils/legend';
 
 interface Props {
   spec: echarts.EChartsOption;
   onSelectTimeRange?: (range: TimeRange) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;
-  highlightedSeries$?: BehaviorSubject<string | undefined>;
+  highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
 }
 
 export const EchartsRender = React.memo(
-  ({ spec, onSelectTimeRange, legendSelected$, highlightedSeries$ }: Props) => {
+  ({ spec, onSelectTimeRange, legendSelected$, highlightedLegendTarget$ }: Props) => {
     const [instance, setInstance] = useState<echarts.ECharts | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const instanceRef = useRef<echarts.ECharts | null>(null);
@@ -148,17 +149,19 @@ export const EchartsRender = React.memo(
       return () => sub.unsubscribe();
     }, [instance, legendSelected$]);
 
-    // Subscribe to highlightedSeries$ for hover highlight/downplay
+    // Subscribe to highlightedLegendTarget$ for hover highlight/downplay
     useEffect(() => {
-      if (!instance || !highlightedSeries$) return;
-      const sub = highlightedSeries$.subscribe((name) => {
-        if (name) {
-          const seriesArr = Array.isArray(spec.series) ? spec.series : [spec.series];
-          const isPie = seriesArr.some((s: any) => s?.type === 'pie');
-          if (isPie) {
-            instance.dispatchAction({ type: 'highlight', seriesIndex: 0, name });
+      if (!instance || !highlightedLegendTarget$) return;
+      const sub = highlightedLegendTarget$.subscribe((target) => {
+        if (target) {
+          if (target.type === 'data') {
+            instance.dispatchAction({
+              type: 'highlight',
+              seriesIndex: target.seriesIndex ?? 0,
+              name: target.name,
+            });
           } else {
-            instance.dispatchAction({ type: 'highlight', seriesName: name });
+            instance.dispatchAction({ type: 'highlight', seriesName: target.name });
           }
         } else {
           // clear highlight state
@@ -166,7 +169,7 @@ export const EchartsRender = React.memo(
         }
       });
       return () => sub.unsubscribe();
-    }, [instance, highlightedSeries$, spec.series]);
+    }, [instance, highlightedLegendTarget$]);
 
     return (
       <div
