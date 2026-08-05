@@ -246,7 +246,9 @@ describe('pplLintCodeActionProvider', () => {
     }
 
     it('offers a quick-fix for a syntax marker with a registered syntax fix', () => {
-      const marker = syntaxMarker({ message: 'Unknown command "wherre". Did you mean "where"?' });
+      const marker = syntaxMarker({
+        message: "Unrecognized or misspelled command 'wherre'.",
+      });
       seedSyntaxFix(marker, { title: 'Replace with "where"', text: 'where' });
       const actions = provide([marker]);
       expect(actions).toHaveLength(1);

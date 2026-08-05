@@ -229,7 +229,7 @@ describe('lintRuntimePPLQuery', () => {
       const result = await runtimeDiags('source=accounts | where nope > 1 | boguscmd foo');
       expect(result).not.toBeNull();
       expect(result!.diagnostics.map((d) => d.message)).toContainEqual(
-        expect.stringContaining('Unknown field "nope"')
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema.")
       );
     });
 

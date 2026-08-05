@@ -131,7 +131,7 @@ describe('enabled-false-object', () => {
 
   // A field under an `enabled: false` object is absent from `_field_caps`, so it is
   // absent from `context.fields` too — which means field-validation would call it
-  // "Unknown field" and put a second, wrong squiggle on the same reference. These
+  // missing from the schema and put a second, wrong squiggle on the same reference. These
   // assert the two rules divide the judgement: this rule owns it, field-validation
   // stays quiet, and a genuine typo is still caught.
   describe('does not double-flag with field-validation', () => {
@@ -153,7 +153,7 @@ describe('enabled-false-object', () => {
     it('still reports a genuine unknown field that is not under a disabled object', () => {
       const found = unknownField('source=logs | where nosuchfield = 1', withDisabled('session'));
       expect(found).toHaveLength(1);
-      expect(found[0].message).toContain('Unknown field');
+      expect(found[0].message).toContain('not defined or recognized in the current schema');
     });
 
     it('does not suppress a sibling whose name merely shares a prefix', () => {

@@ -6,7 +6,7 @@
 import { monaco } from '../../../monaco';
 import { LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
 import { getModelFix, markerFixKey } from '../fix_registry';
-import { renderHoverCard, SeverityLabel } from './hover_card';
+import { renderHoverCard } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
 import {
@@ -36,17 +36,6 @@ function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdown
 }
 
 export const LINT_OWNER = 'PPL_LINT';
-
-function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
-  switch (severity) {
-    case monaco.MarkerSeverity.Error:
-      return 'Error';
-    case monaco.MarkerSeverity.Warning:
-      return 'Warning';
-    default:
-      return 'Info';
-  }
-}
 
 function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
   const code = marker.code;
@@ -100,20 +89,22 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
       })
     );
 
-    const contents: monaco.IMarkdownString[] = [
-      {
-        value: renderHoverCard({
-          severityLabel: severityLabel(marker.severity),
-          message: marker.message,
-          docUrl: docUrlOf(marker),
-          howToFix: entry?.howToFix,
-          fixText: fix?.text,
-        }),
-        isTrusted: false,
-      },
-    ];
+    const card = renderHoverCard({
+      docUrl: docUrlOf(marker),
+      howToFix: entry?.howToFix,
+      fixText: fix?.text,
+    });
+    const contents: monaco.IMarkdownString[] = [];
+    if (card) {
+      contents.push({ value: card, isTrusted: false });
+    }
     if (contributedActions) {
       contents.push(contributedActions);
+    }
+    // Monaco's built-in marker participant still renders the diagnostic. Do not
+    // add an empty custom row when this marker has no supplemental guidance.
+    if (contents.length === 0) {
+      return null;
     }
 
     // Feature-usage telemetry: the user hovered a lint marker and a card is

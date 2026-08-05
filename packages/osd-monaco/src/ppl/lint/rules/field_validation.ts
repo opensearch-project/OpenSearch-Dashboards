@@ -33,7 +33,7 @@ const SHAPE_DOC_URL: Record<string, string> = {
 // `source` / `index` are the fromClause keywords. The compiled-simplified
 // grammar mis-parses `source=idx` into a fieldExpression for the `source`
 // keyword (the runtime grammar parses it as an excluded fromClause), so the
-// existence pass must skip these to avoid a false "Unknown field" on every
+// existence pass must skip these to avoid a false unknown-field finding on every
 // source-first query against a sub-3.6 cluster.
 const SOURCE_KEYWORDS: ReadonlySet<string> = new Set(['source', 'index']);
 
@@ -186,7 +186,7 @@ function detectUnknownFields(
       // On the compiled-simplified surface, `source=idx` / `index=idx` parses the
       // leading `source`/`index` keyword into a fieldExpression (the runtime
       // grammar instead parses it as an excluded fromClause). Skip that keyword
-      // so sub-3.6 clusters don't get a spurious "Unknown field" on every query.
+      // so sub-3.6 clusters don't get a spurious unknown-field finding on every query.
       if (skipSourceKeywords && SOURCE_KEYWORDS.has(name.toLowerCase())) {
         continue;
       }
@@ -228,7 +228,7 @@ function detectUnknownFields(
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Unknown field "${name}".${suffix}`,
+          message: `Field '${name}' is not defined or recognized in the current schema.${suffix}`,
           range: rangeFromContext(node),
           docUrl: config.docUrl,
           // The diagnostic range spans exactly the field reference, so the fix
@@ -462,7 +462,7 @@ function rangeContains(outer: DiagnosticRange, inner: DiagnosticRange): boolean 
  * PASS 3 — internal overlap suppression. Drop any existence finding whose range
  * is contained within a shape finding's range, so a single `grok field=body`
  * surfaces one actionable diagnostic rather than a confusing shape finding +
- * "Unknown field 'field'" pair. Shape findings are always kept.
+ * unknown-field pair. Shape findings are always kept.
  */
 function suppressContained(
   shapeDiagnostics: Diagnostic[],

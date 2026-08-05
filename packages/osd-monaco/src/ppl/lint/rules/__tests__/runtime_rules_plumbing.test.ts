@@ -93,7 +93,7 @@ describe('runtime-only rules: product-path plumbing (catalog + registry + runLin
     const union = diags.find((d) => d.ruleId === 'union-min-datasets');
     expect(union).toBeDefined();
     // Message flows from the catalog, not a hardcoded literal.
-    expect(union?.message).toBe('The union command requires at least two datasets.');
+    expect(union?.message).toBe('`union` requires at least two datasets.');
   });
 
   it('does not fire union-min-datasets on a mid-pipeline single-dataset union', () => {
@@ -111,7 +111,7 @@ describe('runtime-only rules: product-path plumbing (catalog + registry + runLin
     const diags = runRuntime(tree);
     const multi = diags.find((d) => d.ruleId === 'multisearch-min-subsearch');
     expect(multi).toBeDefined();
-    expect(multi?.message).toBe('The multisearch command requires at least two subsearches.');
+    expect(multi?.message).toBe('`multisearch` requires at least two subsearches.');
   });
 
   it('fires replace-wildcard-asymmetry end-to-end for asymmetric wildcard counts', () => {
@@ -124,7 +124,7 @@ describe('runtime-only rules: product-path plumbing (catalog + registry + runLin
     const replace = diags.find((d) => d.ruleId === 'replace-wildcard-asymmetry');
     expect(replace).toBeDefined();
     expect(replace?.message).toBe(
-      'The replace match and replacement have different numbers of "*" wildcards. The counts must match.'
+      'Mismatch between wildcards (`*`) in search pattern and replacement string.'
     );
   });
 
