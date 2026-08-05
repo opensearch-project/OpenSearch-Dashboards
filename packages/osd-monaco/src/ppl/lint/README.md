@@ -512,6 +512,37 @@ candidate backend version as both `dataSourceVersion` and, when appropriate,
 detectors; ownership of loading the built artifact and the external workflow
 remains with the consuming repository.
 
+## SQL compatibility CI
+
+The OpenSearch SQL repository owns the cross-repository
+[`[Linter] PPL compatibility`](https://github.com/opensearch-project/sql/blob/main/.github/workflows/ppl-lint-multiversion-validation.yml)
+workflow, introduced by
+[opensearch-project/sql#5678](https://github.com/opensearch-project/sql/pull/5678).
+Its
+[versioned contracts](https://github.com/opensearch-project/sql/tree/main/integ-test/src/test/resources/ppl-lint/contracts)
+run SQL backend queries and this package's production headless linter against
+three configurations:
+
+1. OpenSearch 2.19.6 with the compiled simplified grammar.
+2. The latest eligible GA OpenSearch release with its runtime grammar.
+3. The SQL pull request build with its candidate runtime grammar.
+
+The final `PPL compatibility` job publishes the complete 12 active-rule by
+three-configuration report and raw evidence before enforcing compatibility.
+Nightly runs additionally observe four default-off static rule contracts without
+making them part of the blocking matrix. The two explain-backed rules are
+outside this workflow.
+
+Each SQL-owned contract pins the normalized catalog wiring, frontend diagnostic
+count, severity, message and deterministic fix where applicable, plus observed
+backend behavior. The active contract census must equal the set of enabled lint
+rules. See the
+[SQL workflow guide](https://github.com/opensearch-project/sql/blob/main/scripts/ppl-lint/README.md)
+for local reproduction, artifacts, failure classification, and coordinated
+OSD/SQL changes. See
+[Maintain the SQL compatibility gate](../../../../../docs/plugins/data/ppl_lint_developer_guide.md#maintain-the-sql-compatibility-gate)
+for the required update flow when changing a rule in this package.
+
 ## Testing
 
 From the repository root:

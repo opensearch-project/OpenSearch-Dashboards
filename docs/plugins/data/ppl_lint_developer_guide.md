@@ -415,6 +415,9 @@ maintenance`, and `Tests`. Name the detector and shared helpers, explain its
    that can drift, record known limitations, and identify focused tests that
    must change with the rule.
 6. Add the rule to the default-status list and rule table in the lint README.
+7. Add or update the companion SQL compatibility contract when the rule belongs
+   to the active or dormant static-rule corpus. Follow
+   [Maintain the SQL compatibility gate](#maintain-the-sql-compatibility-gate).
 
 The doc-link test is offline. It verifies catalog/snapshot IDs, exact URL
 equality, domain and anchor shape, and explicit unpublished gaps. It does not
@@ -544,6 +547,83 @@ The headless API accepts a candidate `knownVersion`. External grammar CI should
 pass the backend version being validated rather than relying on Dashboards'
 default horizon.
 
+## Maintain the SQL compatibility gate
+
+The OpenSearch SQL repository owns the cross-repository
+[`[Linter] PPL compatibility`](https://github.com/opensearch-project/sql/blob/main/.github/workflows/ppl-lint-multiversion-validation.yml)
+workflow and
+[PPL lint contracts](https://github.com/opensearch-project/sql/tree/main/integ-test/src/test/resources/ppl-lint/contracts).
+The implementation is tracked in
+[opensearch-project/sql#5678](https://github.com/opensearch-project/sql/pull/5678),
+and the
+[SQL workflow guide](https://github.com/opensearch-project/sql/blob/main/scripts/ppl-lint/README.md)
+is authoritative for its commands, artifacts, and failure classes.
+
+The workflow bootstraps OpenSearch Dashboards once as a Node dependency and
+runs the production headless linter against backend observations from:
+
+| Configuration      | Frontend grammar surface | Backend                                                           |
+| ------------------ | ------------------------ | ----------------------------------------------------------------- |
+| OpenSearch 2.19.6  | Compiled simplified      | Official 2.19.6 image                                             |
+| Latest eligible GA | Runtime bundle           | Highest official GA version at or below the normalized SQL target |
+| SQL pull request   | Runtime bundle           | Candidate grammar and backend built from the SQL pull request     |
+
+The final `PPL compatibility` job always publishes the complete 12-rule by
+three-configuration report and evidence artifacts before it enforces drift or
+inconclusive cells. Pull request runs use OSD `main`; manual runs can target an
+OSD fork and branch for pre-merge evidence; nightly runs also observe four
+default-off static contracts as report-only cases. The two explain-backed
+rules, analytics backend behavior, syntax diagnostics, discovery tooling, and
+AI actions are outside the blocking matrix.
+
+### Keep the SQL contracts synchronized
+
+The SQL contract corpus is a second source of truth for cross-repository
+compatibility, not a generated copy of the OSD tests:
+
+- `manifest.json` must contain exactly the active enabled static rules. Its
+  `defaultError` set must equal the enabled error-severity catalog rules.
+  Default-off static rules may remain in `dormantContracts`; explain-backed
+  rules are not currently represented.
+- Each contract's `wiring` block is normalized and compared with the bundled
+  catalog entry. Update it when changing the detector key, enabled state,
+  severity, `runtimeOnly`, `needsContext`, `needsExplain`, `sourceScoped`, or
+  `appliesTo`.
+- Version-scoped expectations pin diagnostic counts, severity, exact message,
+  deterministic fix behavior where applicable, and standard-backend outcomes
+  for trigger and control queries. Keep old and new version ranges when backend
+  behavior changes across a release boundary.
+- Contract queries are sent to both sides. Do not use a pipe-first trigger when
+  OSD would prepend a synthetic source and thereby change the grammar context;
+  use a query-initial form that both sides evaluate identically.
+- A new, enabled, disabled, renamed, or retired static rule requires a matching
+  SQL manifest and contract update. A grammar-anchor, catalog-wiring,
+  diagnostic, fix, context, version-scope, or backend-semantic change requires
+  reviewing the existing contract even when the rule ID is unchanged.
+
+CI never rewrites expectations from observed behavior. Update a contract only
+after deciding that the OSD and backend behavior change is intentional.
+
+### Validate a coordinated change
+
+1. Push the OSD change to a branch that GitHub can fetch.
+2. Dispatch the SQL workflow with `osd_repo` and `osd_ref` targeting that
+   branch. A manual run provides pre-merge evidence but cannot satisfy SQL
+   branch protection.
+3. Inspect the final `PPL compatibility` summary and its drift report and
+   evidence artifacts. Do not infer compatibility from an individual
+   observation job.
+4. Update the SQL contract, manifest, or detector as directed by the reported
+   drift class. Keep OSD rule and SQL expectation changes in linked pull
+   requests.
+5. If the SQL change depends on the OSD change, merge OSD first. Then rerun the
+   required SQL pull request workflow against OSD `main`.
+
+For local reproduction from a SQL checkout, use
+`OSD_SOURCE_PATH=/path/to/OpenSearch-Dashboards ./scripts/ppl-lint-rule-validation.sh`.
+The SQL workflow guide documents reuse of artifacts and individual backend or
+detector passes.
+
 ## Maintain explain-backed rules
 
 Explain outcome detection is coupled to Calcite plan formats. It recognizes
@@ -622,6 +702,7 @@ Choose suites based on the changed surface:
 | Query preparation                       | Explain-query-preparer and search-interceptor cases for source, dashboard filters, time filter, and dataset type |
 | Documentation URL                       | Catalog test and offline doc-link test; manually verify the live page and anchor                                 |
 | Developer documentation                 | Formatting plus `docs:generateDevDocs`; review manual status surfaces                                            |
+| Catalog wiring or static rule behavior  | Matching SQL contract and manifest; manual workflow dispatch against the OSD branch                              |
 
 For a broad rule or integration change, run from the repository root:
 
@@ -655,6 +736,8 @@ yarn docs:generateDevDocs
 - Explain changes update protocol or outcome versions when cache compatibility
   changes.
 - Positive, negative, range, and applicability tests exist.
+- SQL compatibility contracts and the active/dormant manifest were reviewed;
+  coordinated changes have pre-merge workflow evidence.
 - The rule page records the reviewed default, severity, exact message and fix
   guidance, documentation link, implementation path, shared dependencies,
   assumptions, maintenance requirements, current limitations, and focused
