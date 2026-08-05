@@ -168,6 +168,38 @@ describe('indexPatternTypeConfig', () => {
     expect(result[1]).toEqual({ name: 'field2', type: 'number' });
   });
 
+  test('fetchFields passes through aggregatable and subType', async () => {
+    const mockIndexPattern = {
+      fields: [
+        { name: 'startTime', type: 'date', aggregatable: true, subType: undefined },
+        {
+          name: 'events.time',
+          type: 'date',
+          aggregatable: false,
+          subType: { nested: { path: 'events' } },
+        },
+      ],
+    };
+    const mockGet = jest.fn().mockResolvedValue(mockIndexPattern);
+    (services.getIndexPatterns as jest.Mock).mockReturnValue({ get: mockGet });
+
+    const mockDataset: Dataset = { id: 'test-pattern', title: 'Test', type: 'INDEX_PATTERN' };
+    const result = await indexPatternTypeConfig.fetchFields(mockDataset);
+
+    expect(result[0]).toEqual({
+      name: 'startTime',
+      type: 'date',
+      aggregatable: true,
+      subType: undefined,
+    });
+    expect(result[1]).toEqual({
+      name: 'events.time',
+      type: 'date',
+      aggregatable: false,
+      subType: { nested: { path: 'events' } },
+    });
+  });
+
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = {
       id: 'test-pattern',

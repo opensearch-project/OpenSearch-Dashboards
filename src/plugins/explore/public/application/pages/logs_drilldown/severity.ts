@@ -4,6 +4,10 @@
  */
 
 import { getColors } from '../../../components/visualizations/theme/default_colors';
+import {
+  DEFAULT_TIME_FIELD_CANDIDATES,
+  pickTimeField as pickTimeFieldFromCommon,
+} from '../../../../../data/common';
 
 /**
  * Canonical OTel-ish severity field precedence. Matches the repo convention in
@@ -24,28 +28,18 @@ export const SEVERITY_FIELD_CANDIDATES = [
 ];
 
 /**
- * Preferred time-field precedence — Data Prepper OTel mappings + PPL's expected default timestamp
- * fields. When an index has several date fields we pick the first match here (rather than an
- * arbitrary `dateFields[0]`), falling back to the first date field if none match.
+ * Re-export from data/common for backward compat — the canonical list is now shared.
+ * @see {@link DEFAULT_TIME_FIELD_CANDIDATES}
  */
-export const TIME_FIELD_CANDIDATES = [
-  '@timestamp',
-  'time',
-  'startTime',
-  'endTime',
-  'timestamp',
-  'observedTimestamp',
-];
+export const TIME_FIELD_CANDIDATES = DEFAULT_TIME_FIELD_CANDIDATES;
 
 /**
  * Choose the default time field from an index's date-typed field names, preferring the canonical
- * OTel/PPL order above; falls back to the first date field. Returns undefined if there are none.
+ * OTel/PPL order (from data/common); falls back to the first date field.
+ * Delegates to the shared `pickTimeField` in data/common.
  */
-export const pickTimeField = (dateFields: string[]): string | undefined => {
-  if (dateFields.length === 0) return undefined;
-  const set = new Set(dateFields);
-  return TIME_FIELD_CANDIDATES.find((f) => set.has(f)) ?? dateFields[0];
-};
+export const pickTimeField = (dateFields: string[]): string | undefined =>
+  pickTimeFieldFromCommon(dateFields, DEFAULT_TIME_FIELD_CANDIDATES);
 
 /**
  * Pick the severity field for an index from its available field names, or undefined if none is
