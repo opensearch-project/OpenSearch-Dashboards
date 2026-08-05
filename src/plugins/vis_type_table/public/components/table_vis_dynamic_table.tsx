@@ -466,31 +466,6 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                     style={{
                       width: typeof headerWidth === 'number' ? `${headerWidth}px` : headerWidth,
                     }}
-                    // onMouseDown={(e) => {
-                    //   const initialWidth = columnWidths[index];
-                    //   const startX = e.clientX;
-                    //   let hasDragged = false;
-
-                    //   const onMouseMove = (moveEvent: MouseEvent) => {
-                    //     const delta = moveEvent.clientX - startX;
-                    //     if (Math.abs(delta) > 5) hasDragged = true;
-                    //     const newWidth = Math.max(initialWidth + delta, MIN_COLUMN_WIDTH);
-                    //     handleColumnResize(index, newWidth);
-                    //   };
-
-                    //   const onMouseUp = () => {
-                    //     document.removeEventListener('mousemove', onMouseMove);
-                    //     document.removeEventListener('mouseup', onMouseUp);
-                    //     // Only trigger sort if the user didn't drag
-                    //     if (!hasDragged) {
-                    //       handleSort(index);
-                    //     }
-                    //   };
-
-                    //   document.addEventListener('mousemove', onMouseMove);
-                    //   document.addEventListener('mouseup', onMouseUp);
-                    //   e.preventDefault(); // Prevent text selection during drag
-                    // }}
                     onClick={() => handleSort(index)}
                   >
                     <span className="tableVisHeaderField__content">
