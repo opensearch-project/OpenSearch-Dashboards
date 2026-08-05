@@ -310,6 +310,13 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
         return finalWidth;
       });
 
+      // // Apply persisted widths before scaling so they are included in totalWidth
+      colWidth.forEach(({ colIndex: ci, width: w }) => {
+        if (ci >= 0 && ci < widths.length) {
+          widths[ci] = w;
+        }
+      });
+
       const totalWidth = widths.reduce((a, b) => a + b, 0);
 
       // Proportional scaling if total width exceeds container
@@ -322,12 +329,6 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
     };
 
     const newWidths = calculateColumnWidths();
-    // Apply any user-persisted column widths from uiState
-    colWidth.forEach(({ colIndex: ci, width: w }) => {
-      if (ci >= 0 && ci < newWidths.length) {
-        newWidths[ci] = w;
-      }
-    });
     setColumnWidths(newWidths);
 
     // Apply header truncation after widths are calculated
@@ -485,6 +486,13 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                     </span>
                     <span
                       className="tableVisHeaderField__resizeHandle"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      role="button"
+                      aria-label={i18n.translate('visTypeTable.tableVisResize.resizeColumn', {
+                        defaultMessage: 'Resize column',
+                      })}
+                      tabIndex={-1}
                       onMouseDown={(e) => {
                         e.stopPropagation();
                         const initialWidth = columnWidths[index] || MIN_COLUMN_WIDTH;

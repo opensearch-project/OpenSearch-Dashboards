@@ -289,6 +289,28 @@ describe('TableVisDynamicTable', () => {
     expect(mockUiState.setSort).not.toHaveBeenCalled();
   });
 
+  it('should not trigger sort when resize handle is clicked without dragging', () => {
+    const { container } = render(
+      <TableVisDynamicTable
+        table={mockTable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
+    expect(resizeHandle).not.toBeNull();
+
+    // A plain click (mousedown + mouseup + click) on the resize handle
+    fireEvent.mouseDown(resizeHandle!, { clientX: 100 });
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    fireEvent.click(resizeHandle!);
+
+    // Sort should NOT have been triggered
+    expect(mockUiState.setSort).not.toHaveBeenCalled();
+  });
+
   it('should handle empty sort state', () => {
     const uiStateNoSort: TableUiState = {
       ...mockUiState,
