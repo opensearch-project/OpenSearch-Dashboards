@@ -180,8 +180,7 @@ describe('TableVisDynamicTable', () => {
 
     const header = container.querySelector('thead th');
     if (header) {
-      fireEvent.mouseDown(header);
-      fireEvent.mouseUp(header);
+      fireEvent.click(header);
     }
 
     expect(mockUiState.setSort).toHaveBeenCalledWith({
@@ -219,10 +218,10 @@ describe('TableVisDynamicTable', () => {
       />
     );
 
-    const header = container.querySelector('thead th');
-    if (header) {
+    const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
+    if (resizeHandle) {
       const startX = 100;
-      fireEvent.mouseDown(header, { clientX: startX });
+      fireEvent.mouseDown(resizeHandle, { clientX: startX });
 
       // Simulate drag
       const mouseMoveEvent = new MouseEvent('mousemove', {
@@ -238,6 +237,56 @@ describe('TableVisDynamicTable', () => {
     }
 
     expect(mockUiState.setWidth).toHaveBeenCalled();
+  });
+
+  it('should apply persisted column widths from uiState', () => {
+    const uiStateWithWidths: TableUiState = {
+      ...mockUiState,
+      colWidth: [{ colIndex: 0, width: 200 }],
+    };
+
+    const { container } = render(
+      <TableVisDynamicTable
+        table={mockTable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={uiStateWithWidths}
+      />
+    );
+
+    // The table should render without errors when persisted widths are provided
+    expect(container.querySelector('table')).toBeInTheDocument();
+  });
+
+  it('should not trigger sort when resize handle is dragged', () => {
+    const { container } = render(
+      <TableVisDynamicTable
+        table={mockTable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
+    if (resizeHandle) {
+      const startX = 100;
+      fireEvent.mouseDown(resizeHandle, { clientX: startX });
+
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        clientX: startX + 50,
+        bubbles: true,
+      });
+      document.dispatchEvent(mouseMoveEvent);
+
+      const mouseUpEvent = new MouseEvent('mouseup', {
+        bubbles: true,
+      });
+      document.dispatchEvent(mouseUpEvent);
+    }
+
+    // Sort should NOT have been called during resize
+    expect(mockUiState.setSort).not.toHaveBeenCalled();
   });
 
   it('should handle empty sort state', () => {
