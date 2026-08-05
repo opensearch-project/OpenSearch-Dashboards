@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 420,
+  "height": 120,
+  "padding": 5,
+  "autosize": "none",
+  "signals": [
+    { "name": "target", "value": 100000 }
+  ],
+  "data": [
+    {
+      "name": "src",
+      "url": {
+        "data_source_name": "my-datasource",
+        "index": "my-index",
+        "body": { "size": 0, "aggs": { "total": { "sum": { "field": "amount" } } } }
+      },
+      "format": { "property": "aggregations" },
+      "transform": [
+        { "type": "formula", "as": "value", "expr": "datum.total.value" }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "type": "text",
+      "from": { "data": "src" },
+      "encode": {
+        "update": {
+          "text": { "field": "value" },
+          "x": { "signal": "width/2" },
+          "y": { "value": 60 },
+          "align": { "value": "center" },
+          "fontSize": { "value": 20 }
+        }
+      }
+    }
+  ]
+}

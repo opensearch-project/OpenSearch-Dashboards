@@ -1,0 +1,19 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": {
+      "data_source_name": "top-level-datasource",
+      "index": "sales-data",
+      "body": { "size": 100 }
+    },
+    "format": { "property": "hits.hits" }
+  },
+  "facet": { "field": "_source.region", "type": "nominal" },
+  "spec": {
+    "mark": "bar",
+    "encoding": {
+      "x": { "field": "_source.product", "type": "nominal" },
+      "y": { "field": "_source.revenue", "type": "quantitative" }
+    }
+  }
+}
