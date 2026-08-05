@@ -37,8 +37,6 @@ export interface ScatterChartStyleOptions {
   legendPosition?: Positions;
   // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
-  // @deprecated - removed this once migrated to echarts
-  legendTitleForSize?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];
 
@@ -49,9 +47,9 @@ export interface ScatterChartStyleOptions {
 }
 
 export type ScatterChartStyle = Required<
-  Omit<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>
+  Omit<ScatterChartStyleOptions, 'legendTitle'>
 > &
-  Pick<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>;
+  Pick<ScatterChartStyleOptions, 'legendTitle'>;
 
 export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls
