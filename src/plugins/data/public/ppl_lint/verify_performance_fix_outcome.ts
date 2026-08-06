@@ -63,12 +63,25 @@ export async function verifyPerformanceFixOutcome(
   }
 
   const outcome = outcomeText as ExplainOutcome;
+  // Prepare both treatments the same way the baseline was prepared (source
+  // prepend + injected filters) so their plans are comparable to the baseline's
+  // and to each other; key the cache on the time-stripped variant, exactly like
+  // the baseline and the attribution probes. Without this, a source-less query
+  // (the default authoring form in Explore) explains to a non-`ok` result and
+  // every candidate falsely reports performance-not-cleared. Mirrors
+  // ExplainAttribution.explainProbe (explain_attribution.ts).
+  const prepare =
+    lintContext.prepareExplainQuery ?? ((raw: string) => ({ query: raw, cacheKey: raw }));
+  const preparedOriginal = prepare(probes.originalTreatment);
+  const preparedFixed = prepare(probes.fixedTreatment);
   const [original, fixed] = await Promise.all([
-    explainCache.resolveResult(http, probes.originalTreatment, lintContext.dataSourceId, {
+    explainCache.resolveResult(http, preparedOriginal.query, lintContext.dataSourceId, {
       partition: 'probe',
+      cacheKey: preparedOriginal.cacheKey,
     }),
-    explainCache.resolveResult(http, probes.fixedTreatment, lintContext.dataSourceId, {
+    explainCache.resolveResult(http, preparedFixed.query, lintContext.dataSourceId, {
       partition: 'probe',
+      cacheKey: preparedFixed.cacheKey,
     }),
   ]);
   return (

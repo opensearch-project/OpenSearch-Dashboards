@@ -727,4 +727,13 @@ export type {
   PPLLintFixCardProps,
   PPLLintFixToolArgs,
 } from './chat_tools/ppl_lint_fix_card';
+// Host-parameterized launch lifecycle: supersession of a prior request, a TTL
+// that expires an abandoned request, and serialized chat launches. Shared by
+// both editor hosts so Explore reuses it rather than reimplementing addContext
+// with no cleanup or expiry.
+export {
+  addPPLLintFixAssistantContext,
+  PPLLintFixLifecycle,
+} from './ui/query_editor/ppl_lint_fix_lifecycle';
+export type { PPLLintFixLaunchFailure } from './ui/query_editor/ppl_lint_fix_lifecycle';
 export { fetchColumnValues } from './antlr/shared/utils';

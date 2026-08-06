@@ -6,7 +6,7 @@
 import { withTimeout } from '@osd/std';
 import type { AssistantContextStore } from '../../../../context_provider/public';
 import { cleanupPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
-import { PPL_LINT_FIX_DATA_CONTEXT_ID_PREFIX } from '../../chat_tools/ppl_lint_fix_tool_registration';
+import type { PPLLintFixHost } from '../../chat_tools/ppl_lint_fix_host';
 import type {
   AskPPLLintFixRequest,
   RemovePPLLintFixContextById,
@@ -26,14 +26,15 @@ let activePPLLintFixLifecycle: PPLLintFixLifecycle | undefined;
 
 export function addPPLLintFixAssistantContext(
   request: AskPPLLintFixRequest,
-  contextStore?: Pick<AssistantContextStore, 'addContext'>
+  contextStore: Pick<AssistantContextStore, 'addContext'> | undefined,
+  host: PPLLintFixHost
 ): void {
   if (!request.chatContext || !contextStore) {
     return;
   }
 
   contextStore.addContext({
-    id: PPL_LINT_FIX_DATA_CONTEXT_ID_PREFIX + request.requestId,
+    id: host.contextIdPrefix + request.requestId,
     description: 'OpenSearch PPL lint quick-fix request details',
     value: request.chatContext,
     label: 'PPL lint fix request',
@@ -52,6 +53,7 @@ export class PPLLintFixLifecycle {
   private expiryTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
+    private readonly host: PPLLintFixHost,
     private readonly removeContextById?: RemovePPLLintFixContextById,
     private readonly timeoutMs = PPL_LINT_FIX_CHAT_TIMEOUT_MS,
     private readonly requestTtlMs = PPL_LINT_FIX_REQUEST_TTL_MS
@@ -78,11 +80,7 @@ export class PPLLintFixLifecycle {
 
   public abandonRequest(requestId: string): boolean {
     const abandonedOwnedRequest = this.ownsRequest(requestId);
-    cleanupPPLLintFixRequest(
-      requestId,
-      PPL_LINT_FIX_DATA_CONTEXT_ID_PREFIX,
-      this.removeContextById
-    );
+    cleanupPPLLintFixRequest(requestId, this.host.contextIdPrefix, this.removeContextById);
     if (abandonedOwnedRequest) {
       this.clearExpiryTimer();
       this.ownedRequestId = undefined;

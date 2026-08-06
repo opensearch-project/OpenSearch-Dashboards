@@ -32,6 +32,48 @@ jest.mock('../../../../../../data/public', () => {
     cleanupPPLContexts: jest.fn(),
     syncPPLValidationContext: jest.fn(),
     syncPPLLintContext: jest.fn(),
+    // The launch lifecycle and its context helper are auto-mocked to no-ops by
+    // createMockFromModule, which would silently drop the addContext call the
+    // 'AI lint-fix launch' test pins. Provide behavior-faithful stand-ins:
+    // addPPLLintFixAssistantContext mirrors the real page-tagged addContext, and
+    // PPLLintFixLifecycle runs the launch immediately and forwards the result so
+    // the success branch (setActivePPLLintFixSession) still fires.
+    addPPLLintFixAssistantContext: jest.fn((request, contextStore, host) => {
+      if (!request.chatContext || !contextStore) return;
+      contextStore.addContext({
+        id: host.contextIdPrefix + request.requestId,
+        description: 'OpenSearch PPL lint quick-fix request details',
+        value: request.chatContext,
+        label: 'PPL lint fix request',
+        categories: ['page', 'chat', 'ppl-lint-fix'],
+      });
+    }),
+    PPLLintFixLifecycle: class {
+      private owned?: string;
+      constructor(_host: any, _removeContextById?: any) {}
+      beginRequest(requestId: string) {
+        this.owned = requestId;
+      }
+      ownsRequest(requestId: string) {
+        return this.owned === requestId;
+      }
+      abandonRequest(requestId: string) {
+        const owned = this.owned === requestId;
+        if (owned) this.owned = undefined;
+        return owned;
+      }
+      async waitForChatLaunch(requestId: string, launch: () => Promise<unknown>) {
+        try {
+          await launch();
+          return undefined;
+        } catch (error) {
+          return { error, abandonedOwnedRequest: this.abandonRequest(requestId) };
+        }
+      }
+      dispose() {
+        this.owned = undefined;
+      }
+    },
     // Simplified mock; full behavior covered in lint_context_builder.test.ts.
     buildPPLLintContext: jest.fn((dataset, _lintFields, services) => ({
       useRuntimeGrammar: false,
@@ -1166,6 +1208,73 @@ describe('useQueryPanelEditor', () => {
 
       expect(addContext).toHaveBeenCalledTimes(1);
       expect(addContext.mock.calls[0][0].categories).toContain('page');
+    });
+
+    it('warns and does not store a session when chat is unavailable', () => {
+      const addWarning = jest.fn();
+      mockServices.core = { chat: { isAvailable: jest.fn(() => true) } }; // no sendMessageWithWindow
+      mockServices.contextProvider = {
+        getAssistantContextStore: jest.fn(() => ({
+          addContext: jest.fn(),
+          removeContextById: jest.fn(),
+        })),
+      };
+      mockServices.notifications = { toasts: { addWarning } };
+
+      renderHook(() => useQueryPanelEditor(buildProps()));
+
+      act(() => {
+        getOnAskAiFix()({
+          requestId: 'req-unavailable',
+          chatMessage: 'Please fix this query',
+          chatContext: { requestId: 'req-unavailable' },
+        });
+      });
+
+      expect(addWarning).toHaveBeenCalled();
+    });
+
+    it('routes the launch through the shared lifecycle so the request is owned then released', async () => {
+      // The lifecycle (reused from the data host) is what supplies supersession
+      // and the TTL Explore previously lacked; here we prove onAskAiFix drives it
+      // via beginRequest/waitForChatLaunch rather than a bare addContext.
+      let resolveLaunch!: () => void;
+      const sendMessageWithWindow = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveLaunch = resolve;
+          })
+      );
+      mockServices.core = {
+        chat: {
+          isAvailable: jest.fn(() => true),
+          sendMessageWithWindow,
+          getThreadId: jest.fn(() => 'thread-1'),
+        },
+      };
+      mockServices.contextProvider = {
+        getAssistantContextStore: jest.fn(() => ({
+          addContext: jest.fn(),
+          removeContextById: jest.fn(),
+        })),
+      };
+      mockServices.notifications = { toasts: { addWarning: jest.fn() } };
+
+      renderHook(() => useQueryPanelEditor(buildProps()));
+
+      await act(async () => {
+        getOnAskAiFix()({
+          requestId: 'req-owned',
+          chatMessage: 'Please fix this query',
+          chatContext: { requestId: 'req-owned' },
+        });
+        resolveLaunch();
+        await Promise.resolve();
+      });
+
+      expect(sendMessageWithWindow).toHaveBeenCalledWith('Please fix this query', [], {
+        clearConversation: true,
+      });
     });
   });
 });

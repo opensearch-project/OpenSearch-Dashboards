@@ -12,7 +12,6 @@ import {
   revalidatePPLModel,
 } from '@osd/monaco';
 import { i18n } from '@osd/i18n';
-import { withTimeout } from '@osd/std';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 import {
@@ -32,9 +31,11 @@ import { getAutocompleteContext } from '../../../../application/utils/multi_quer
 import {
   syncPPLValidationContext,
   syncPPLLintContext,
+  addPPLLintFixAssistantContext,
   attachPPLContexts,
   cleanupPPLContexts,
   PPLDetachRefs,
+  PPLLintFixLifecycle,
   buildPPLLintContext,
   extractFieldMetadata,
   fetchDisabledObjectFields,
@@ -48,7 +49,6 @@ import {
 import { QueryEditorProps } from '../types';
 import {
   APPLY_PPL_LINT_FIX_EXPLORE_TOOL_NAME,
-  PPL_LINT_FIX_CONTEXT_ID_PREFIX,
   PPL_LINT_FIX_EXPLORE_HOST,
   setActivePPLLintFixSession,
 } from '../../actions/ppl_lint_fix_session';
@@ -166,18 +166,39 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     buildPPLLintContext(datasetRef.current, lintFieldsRef.current, services)
   );
 
+  // Owns the in-flight AI lint-fix request for this panel mount: supersedes an
+  // older request when the user asks to fix a different diagnostic, expires an
+  // abandoned request after a TTL (including the model's designed decline path,
+  // where no card ever mounts to clean up), and serializes chat launches.
+  // Mirrors the data search bar's lifecycle (query_editor.tsx); reusing it here
+  // instead of a bare addContext gives Explore cleanup + supersession + TTL.
+  const pplLintFixLifecycleRef = useRef<PPLLintFixLifecycle>();
+  if (!pplLintFixLifecycleRef.current) {
+    pplLintFixLifecycleRef.current = new PPLLintFixLifecycle(
+      PPL_LINT_FIX_EXPLORE_HOST,
+      (contextId) =>
+        services.contextProvider?.getAssistantContextStore?.()?.removeContextById?.(contextId)
+    );
+  }
+
   const chat = services.core?.chat;
   const chatIsAvailable = Boolean(chat?.isAvailable?.());
   const onAskAiFix = useCallback(
     (request: AskPPLLintFixRequest) => {
-      setActivePPLLintFixSession({
+      const pplLintFixLifecycle = pplLintFixLifecycleRef.current!;
+      // Supersede any older in-flight request (cleans its context under the
+      // Explore host prefix) and take ownership of this one.
+      pplLintFixLifecycle.beginRequest(request.requestId);
+
+      const session = {
         host: PPL_LINT_FIX_EXPLORE_HOST,
         request,
         getCurrentQuery: () => editorRef.current?.getValue() ?? editorTextRef.current,
         getLintContext: () => getLintContextRef.current(),
-      });
+      };
 
       if (!chat?.sendMessageWithWindow) {
+        pplLintFixLifecycle.abandonRequest(request.requestId);
         services.notifications?.toasts?.addWarning(
           i18n.translate('explore.queryPanelEditor.pplLintFix.chatUnavailable', {
             defaultMessage: 'AI chat is not available for this PPL fix.',
@@ -189,42 +210,45 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
       // Push the fix request's machine plumbing (correlation ids + tool-calling
       // instructions) into the assistant context store so the model receives it
       // via the AG-UI `context` array without it rendering as a chat bubble. The
-      // visible bubble stays the short human message (request.chatMessage).
-      // Keyed by requestId so the apply handler can drop it once the fix lands.
+      // visible bubble stays the short human message (request.chatMessage). The
+      // shared helper tags it `page` so it survives clearConversation, and the
+      // lifecycle's abandon/TTL plus the card's apply/dismiss cleanup remove it on
+      // every exit path — so it never leaks into an unrelated conversation.
       const contextStore = services.contextProvider?.getAssistantContextStore?.();
-      if (request.chatContext && contextStore) {
-        contextStore.addContext({
-          id: PPL_LINT_FIX_CONTEXT_ID_PREFIX + request.requestId,
-          description: 'OpenSearch PPL lint quick-fix request details',
-          value: request.chatContext,
-          label: 'PPL lint fix request',
-          // clearConversation runs newThread() -> clearDynamicContextFromStore()
-          // before the message is sent, which drops every non-`page` context. Tag
-          // `page` so the tool-calling instructions survive to reach the model;
-          // the .catch below and the apply/dismiss cleanup still remove this entry
-          // on every exit path so it never leaks into an unrelated conversation.
-          categories: ['page', 'chat', 'ppl-lint-fix'],
-        });
-      }
+      addPPLLintFixAssistantContext(request, contextStore, PPL_LINT_FIX_EXPLORE_HOST);
 
-      void withTimeout({
-        promise: chat.sendMessageWithWindow(request.chatMessage, [], { clearConversation: true }),
-        timeout: 4000,
-        errorMessage: i18n.translate('explore.queryPanelEditor.pplLintFix.chatTimeout', {
-          defaultMessage: 'Timed out opening AI chat for this PPL fix.',
-        }),
-      }).catch((error) => {
-        // On failure to open chat, drop the context entry we just added so it does
-        // not leak into an unrelated future conversation.
-        contextStore?.removeContextById?.(PPL_LINT_FIX_CONTEXT_ID_PREFIX + request.requestId);
-        services.notifications?.toasts?.addWarning(
-          error instanceof Error
-            ? error.message
-            : i18n.translate('explore.queryPanelEditor.pplLintFix.chatError', {
-                defaultMessage: 'Could not open AI chat for this PPL fix.',
-              })
-        );
-      });
+      void pplLintFixLifecycle
+        .waitForChatLaunch(request.requestId, () =>
+          chat.sendMessageWithWindow!(request.chatMessage, [], { clearConversation: true })
+        )
+        .then((failure) => {
+          if (!failure) {
+            // Activate only after the fresh chat reset so an older card cannot
+            // capture this request while its previous conversation is still live.
+            // The TTL armed by waitForChatLaunch expires this request even on the
+            // model's designed decline path, where no card ever mounts to clean up.
+            if (pplLintFixLifecycle.ownsRequest(request.requestId)) {
+              setActivePPLLintFixSession({
+                ...session,
+                chatThreadId: chat.getThreadId?.(),
+                getCurrentChatThreadId: () => chat.getThreadId?.(),
+              });
+            }
+            return;
+          }
+          // A late failure for a replaced request still cleaned that exact context,
+          // but must not warn for or disturb the newer owned request.
+          if (!failure.abandonedOwnedRequest) {
+            return;
+          }
+          services.notifications?.toasts?.addWarning(
+            failure.error instanceof Error
+              ? failure.error.message
+              : i18n.translate('explore.queryPanelEditor.pplLintFix.chatError', {
+                  defaultMessage: 'Could not open AI chat for this PPL fix.',
+                })
+          );
+        });
     },
     [chat, editorRef, services.notifications?.toasts, services.contextProvider]
   );
@@ -401,8 +425,15 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     services.http,
   ]);
 
-  // Cleanup validation + lint context on unmount
-  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+  // Cleanup validation + lint context on unmount, and release any in-flight AI
+  // lint-fix request this panel still owns (clears its assistant-context entry).
+  useEffect(
+    () => () => {
+      cleanupPPLContexts(detachRefs.current);
+      pplLintFixLifecycleRef.current?.dispose();
+    },
+    []
+  );
 
   // Revalidate immediately when lint rule settings change.
   useEffect(() => {

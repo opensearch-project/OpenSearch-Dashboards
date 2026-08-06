@@ -160,8 +160,12 @@ export function buildPPLLintContext(
     commandSuggestionEnabled: isCommandSuggestionEnabled(services.uiSettings),
     explainMode: readExplainMode(services.uiSettings),
     http: services.http,
-    // Host-registered by query_enhancements; undefined elsewhere (e.g. explore),
-    // in which case the explain layer explains the raw editor text.
+    // Registered by query_enhancements into this shared data/public singleton
+    // whenever the runtime-grammar bridge is active. Every host that runs PPL
+    // lint (Discover and Explore alike) reads the same singleton, so this is
+    // present in Explore too; it is undefined only in the compiled-worker
+    // fallback (bridge off), in which case the explain layer explains the raw
+    // editor text.
     prepareExplainQuery: explainQueryPreparer.get(),
     // Dataset metadata + AI-feature/chat hooks the "Ask AI to fix" command
     // reads via getPPLLintContext(model). enableAIFeatures hides the action

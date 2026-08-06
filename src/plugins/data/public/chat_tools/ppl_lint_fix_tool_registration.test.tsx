@@ -310,6 +310,51 @@ describe('PPLLintFixToolRegistration', () => {
     expect(screen.getByText('Apply to editor')).toBeInTheDocument();
     expect(getPPLLintFixSession()).toBeDefined();
     expect(removeContextById).not.toHaveBeenCalled();
+    // Guardrail: the retryable invalid-candidate path must NOT record a terminal
+    // outcome, or the corrected retry card above would lose its Apply button.
+    expect(getPPLLintFixOutcome(request.requestId)).toBeUndefined();
+  });
+
+  it('records a terminal failed outcome when the approved session is gone (missing-session)', async () => {
+    storeSession();
+    mockValidate.mockReturnValue({ accepted: true });
+    const config = renderRegistration();
+    // Bind the approval onto the args (sets the UI binding Symbol) while the
+    // session is live, then release the session before the handler runs.
+    const approvedArgs = bindApprovedArgs(config, {
+      fixedQuery: 'source=logs | where status_code = 500',
+    });
+    act(() => clearPPLLintFixSession());
+
+    let result: unknown;
+    await act(async () => {
+      result = await config.handler(approvedArgs);
+    });
+
+    expect(result).toEqual(expect.objectContaining({ success: false, reason: 'missing-request' }));
+    expect(getPPLLintFixOutcome(request.requestId)).toEqual({
+      kind: 'failed',
+      message: 'The active PPL lint fix request is no longer available.',
+    });
+    // The card self-heals to its red terminal state via the outcome subscription.
+    expect(
+      screen.getByText('The active PPL lint fix request is no longer available.')
+    ).toBeInTheDocument();
+  });
+
+  it('records a terminal failed outcome when the editor query went stale', async () => {
+    storeSession({ getCurrentQuery: jest.fn(() => 'source=logs | head 10') });
+    const config = renderRegistration();
+
+    const result = await executeApproved(config, {
+      requestId: 'request-1',
+      sourceQueryHash: 'hash-1',
+      fixedQuery: 'source=logs | where status_code = 500',
+    });
+
+    expect(result).toEqual(expect.objectContaining({ success: false, reason: 'stale-query' }));
+    const outcome = getPPLLintFixOutcome(request.requestId);
+    expect(outcome?.kind).toBe('failed');
   });
 
   it('applies a valid candidate through queryString.setQuery with force', async () => {
@@ -376,19 +421,22 @@ describe('PPLLintFixToolRegistration', () => {
       fixedQuery: 'source=logs | where status = 200',
     });
 
+    // Both treatments are prepared before explaining (source-prepend + injected
+    // filters); with no preparer on this lint context the fallback keys the cache
+    // on the query itself. Mirrors verify_performance_fix_outcome.
     expect(mockResolveExplain).toHaveBeenNthCalledWith(
       1,
       http,
       'source=logs | where status = 500',
       'ds-live',
-      { partition: 'probe' }
+      { partition: 'probe', cacheKey: 'source=logs | where status = 500' }
     );
     expect(mockResolveExplain).toHaveBeenNthCalledWith(
       2,
       http,
       'source=logs | where status = 200',
       'ds-live',
-      { partition: 'probe' }
+      { partition: 'probe', cacheKey: 'source=logs | where status = 200' }
     );
     expect(result).toEqual(expect.objectContaining({ success: true }));
     expect(queryString.setQuery).toHaveBeenCalled();
@@ -822,6 +870,58 @@ describe('PPLLintFixToolRegistration', () => {
     expect(screen.getByText('Apply to editor')).toBeInTheDocument();
     act(() => clearPPLLintFixSession(request.requestId));
     expect(screen.queryByText('Apply to editor')).not.toBeInTheDocument();
+  });
+
+  it('offers a Dismiss for a released session so the wedged confirmation resolves', () => {
+    storeSession();
+    const config = renderRegistration();
+    const onReject = jest.fn();
+    render(
+      <>
+        {config.render({
+          status: 'executing',
+          args: { fixedQuery: 'source=logs | where status_code = 500' },
+          onApprove: jest.fn(),
+          onReject,
+        })}
+      </>
+    );
+
+    expect(screen.getByText('Apply to editor')).toBeInTheDocument();
+
+    // Release the captured session (TTL expiry / Explore panel unmount).
+    act(() => clearPPLLintFixSession(request.requestId));
+
+    // The dead-end is now recoverable: no Apply, but an explanation + a Dismiss
+    // wired to onReject so the framework confirmation resolves and chat un-wedges.
+    expect(screen.queryByText('Apply to editor')).not.toBeInTheDocument();
+    expect(screen.getByText('This fix request is no longer available.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('pplLintFixDismissButton'));
+    expect(onReject).toHaveBeenCalledTimes(1);
+    // handleReject marks dismissed and clears the entry so the card leaves the
+    // released state on re-render.
+    expect(screen.queryByText('This fix request is no longer available.')).not.toBeInTheDocument();
+  });
+
+  it('does not offer the released Dismiss on a historical card that never captured a session', () => {
+    // No active session at first render: the card is a replayed/historical tool
+    // call, so requestId is never captured and the released branch must not fire.
+    const config = renderRegistration();
+    render(
+      <>
+        {config.render({
+          status: 'executing',
+          args: { fixedQuery: 'source=logs | where status_code = 500' },
+          onApprove: jest.fn(),
+          onReject: jest.fn(),
+        })}
+      </>
+    );
+
+    expect(screen.queryByText('Apply to editor')).not.toBeInTheDocument();
+    expect(screen.queryByText('This fix request is no longer available.')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pplLintFixDismissButton')).not.toBeInTheDocument();
   });
 
   it('hides request A actions without clearing replacement request B', () => {

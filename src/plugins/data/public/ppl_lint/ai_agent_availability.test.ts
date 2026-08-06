@@ -42,6 +42,37 @@ describe('getAiAgentAvailableForDataSource', () => {
     expect(await getAiAgentAvailableForDataSource(makeHttp(get), 'ds-3')).toBe(true);
   });
 
+  it('does not cache a fail-open guess: re-probes after a transient failure and recovers', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce({ available: false, reason: 'no-agent-configured' });
+    // First probe errors -> fails open to the caller, but nothing is cached.
+    expect(await getAiAgentAvailableForDataSource(makeHttp(get), 'ds-recover')).toBe(true);
+    // Second call re-probes (the guess was not pinned) and gets the real answer.
+    expect(await getAiAgentAvailableForDataSource(makeHttp(get), 'ds-recover')).toBe(false);
+    expect(get).toHaveBeenCalledTimes(2);
+    // The real measurement IS cached, so a third call does not re-probe.
+    expect(await getAiAgentAvailableForDataSource(makeHttp(get), 'ds-recover')).toBe(false);
+    expect(get).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails open for deduped concurrent callers when the probe errors', async () => {
+    let rejectGet: (e: Error) => void = () => {};
+    const get = jest.fn().mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectGet = reject;
+      })
+    );
+    const p1 = getAiAgentAvailableForDataSource(makeHttp(get), 'ds-concurrent-fail');
+    const p2 = getAiAgentAvailableForDataSource(makeHttp(get), 'ds-concurrent-fail');
+    rejectGet(new Error('offline'));
+    // Neither the primary caller nor the deduped one may resolve to undefined.
+    expect(await p1).toBe(true);
+    expect(await p2).toBe(true);
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+
   it('caches per data source so the probe runs once', async () => {
     const get = jest.fn().mockResolvedValue({ available: false });
     await getAiAgentAvailableForDataSource(makeHttp(get), 'ds-4');

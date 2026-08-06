@@ -147,6 +147,23 @@ export const PPLLintFixCard: React.FC<PPLLintFixCardProps> = ({
     !!args &&
     !!requestId &&
     !!session;
+  // The card captured a request, but its session was released (TTL expiry, or the
+  // Explore panel unmounting) with no outcome recorded — so the framework status
+  // stays 'executing' and both showActions and terminal are false, leaving the
+  // card with no button. That dead-ends the confirmation and wedges the chat
+  // input. Offer a Dismiss so onReject can resolve the confirmation and recover.
+  // Guards: `!!requestId` so an unbound/historical card never shows a no-op
+  // Dismiss; `!getPPLLintFixSession()` so this only fires when no request is
+  // active app-wide (the TTL/unmount wedge), not when a newer request has
+  // superseded this card — that live sibling still carries its own controls.
+  const released =
+    !terminal &&
+    !showActions &&
+    !!args &&
+    !!requestId &&
+    !session &&
+    !getPPLLintFixSession() &&
+    (status === 'pending' || status === 'executing');
 
   // The performance rules carry their explanation on the diagnostic itself (it
   // names the attributed operation), so prefer it over the model's prose.
@@ -281,6 +298,31 @@ export const PPLLintFixCard: React.FC<PPLLintFixCardProps> = ({
           <EuiText size="xs" color="danger">
             {failedMessage}
           </EuiText>
+        </>
+      )}
+
+      {released && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued" data-test-subj={`${testSubjPrefix}UnavailableMessage`}>
+            {i18n.translate('data.pplLint.fixTool.unavailableMessage', {
+              defaultMessage: 'This fix request is no longer available.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={handleReject}
+                data-test-subj={`${testSubjPrefix}DismissButton`}
+              >
+                {i18n.translate('data.pplLint.fixTool.dismissButton', {
+                  defaultMessage: 'Dismiss',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </EuiPanel>

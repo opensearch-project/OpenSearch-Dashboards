@@ -126,9 +126,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   // request when async launch work completes out of order.
   const pplLintFixLifecycleRef = useRef<PPLLintFixLifecycle>();
   if (!pplLintFixLifecycleRef.current) {
-    pplLintFixLifecycleRef.current = new PPLLintFixLifecycle((contextId) => {
-      services.contextProvider?.getAssistantContextStore()?.removeContextById(contextId);
-    });
+    pplLintFixLifecycleRef.current = new PPLLintFixLifecycle(
+      PPL_LINT_FIX_DATA_HOST,
+      (contextId) => {
+        services.contextProvider?.getAssistantContextStore()?.removeContextById(contextId);
+      }
+    );
   }
   const pplLintFixLifecycle = pplLintFixLifecycleRef.current;
   const { query } = useQueryStringManager({
@@ -195,7 +198,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     // receives it without it rendering as a chat bubble. The visible bubble is
     // the short human message (request.chatMessage). Keyed by requestId.
     const contextStore = services.contextProvider?.getAssistantContextStore?.();
-    addPPLLintFixAssistantContext(request, contextStore);
+    addPPLLintFixAssistantContext(request, contextStore, PPL_LINT_FIX_DATA_HOST);
 
     void pplLintFixLifecycle
       .waitForChatLaunch(request.requestId, () =>

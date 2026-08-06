@@ -26,6 +26,9 @@ import { PPL_LINT_FIX_EXPLORE_HOST } from './ppl_lint_fix_host';
 
 const mockRegisterAssistantAction = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
+// The enabled apply action threads this hook's removeContextById into the card;
+// spy on the underlying store remover so we can prove Dismiss/unmount reach it.
+const mockRemoveContextById = jest.fn();
 
 // The apply handler binds the confirmed args back to the card-captured request
 // via PPL_LINT_FIX_UI_BINDING (the card sets this on Approve). A confirmed call
@@ -58,6 +61,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
     services: {
       contextProvider: {
         actions: { registerAssistantAction: mockRegisterAssistantAction },
+        getAssistantContextStore: () => ({ removeContextById: mockRemoveContextById }),
       },
     },
   }),
@@ -142,7 +146,11 @@ describe('usePPLLintFixAction', () => {
     // requestId/sourceQueryHash (weak models filled them wrong and tripped a
     // false mismatch loop). The UI tracks the single active request instead.
     expect(action.parameters.required).toEqual(['fixedQuery']);
-    expect(action.render).toBe(renderPPLLintFixAction);
+    // The enabled site wraps renderPPLLintFixAction in an arrow that binds this
+    // hook's removeContextById, so it is no longer the bare reference; the
+    // dismiss-clears-context test below verifies the binding actually reaches
+    // the card.
+    expect(action.render).toEqual(expect.any(Function));
   });
 
   it('registers a silent test action that validates without updating the editor', async () => {
@@ -507,6 +515,61 @@ describe('usePPLLintFixAction', () => {
       })
     );
     expect(getActivePPLLintFixSession()).toBeUndefined();
+  });
+
+  it("threads the hook's removeContextById into the card so Dismiss clears the context entry", () => {
+    setSession();
+    // The last registered action is the enabled apply action; its render is the
+    // arrow that binds this hook's removeContextById into the card.
+    const action = renderAndGetAction();
+
+    render(
+      <>
+        {action.render({
+          status: 'pending',
+          args: {
+            requestId: 'req-1',
+            sourceQueryHash: 'hash-1',
+            fixedQuery: 'source=logs | where response_status = 500',
+          },
+          onApprove: jest.fn(),
+          onReject: jest.fn(),
+        })}
+      </>
+    );
+
+    fireEvent.click(screen.getByTestId('pplLintFixExploreDismissButton'));
+
+    // Before the fix the card got no remover, so this stayed at the default
+    // no-op and the page-tagged context leaked past clearConversation.
+    expect(mockRemoveContextById).toHaveBeenCalledWith('ppl-lint-fix-req-1');
+    expect(getPPLLintFixOutcome(request.requestId)).toEqual({ kind: 'dismissed' });
+  });
+
+  it('clears the context entry when the card unmounts with the session still live', () => {
+    setSession();
+    const action = renderAndGetAction();
+
+    const rendered = render(
+      <>
+        {action.render({
+          status: 'pending',
+          args: {
+            requestId: 'req-1',
+            sourceQueryHash: 'hash-1',
+            fixedQuery: 'source=logs | where response_status = 500',
+          },
+          onApprove: jest.fn(),
+          onReject: jest.fn(),
+        })}
+      </>
+    );
+
+    act(() => {
+      rendered.unmount();
+    });
+
+    expect(mockRemoveContextById).toHaveBeenCalledWith('ppl-lint-fix-req-1');
   });
 });
 

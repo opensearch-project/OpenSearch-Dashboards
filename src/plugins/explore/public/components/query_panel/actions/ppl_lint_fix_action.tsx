@@ -18,7 +18,11 @@ import {
   PPL_LINT_FIX_UI_BINDING,
   runPPLLintFixTestTool,
 } from '../../../../../data/public';
-import type { BoundPPLLintFixToolArgs, PPLLintFixCardProps } from '../../../../../data/public';
+import type {
+  BoundPPLLintFixToolArgs,
+  PPLLintFixCardProps,
+  RemovePPLLintFixContextById,
+} from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
@@ -65,11 +69,23 @@ export const TEST_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION = {
 
 // The assistant-action framework calls the registered `render` as a plain
 // function; return the card as an element so React mounts it as a component and
-// its hooks (the outcome subscription) work.
+// its hooks (the outcome subscription) work. `removeContextById` must be threaded
+// in explicitly: this function is shared by the disabled placeholder (no store
+// scope) and the enabled hook site (real remover in scope), so it cannot close
+// over the remover. Without it the shared card's cleanup no-ops and the Dismiss
+// path leaks the assistant-context entry — the data host passes it the same way.
 export function renderPPLLintFixAction(
-  props: Omit<PPLLintFixCardProps, 'host' | 'testSubjPrefix'>
+  props: Omit<PPLLintFixCardProps, 'host' | 'testSubjPrefix' | 'removeContextById'>,
+  removeContextById?: RemovePPLLintFixContextById
 ) {
-  return <PPLLintFixCard {...props} host={HOST} testSubjPrefix="pplLintFixExplore" />;
+  return (
+    <PPLLintFixCard
+      {...props}
+      host={HOST}
+      removeContextById={removeContextById}
+      testSubjPrefix="pplLintFixExplore"
+    />
+  );
 }
 
 export function registerDisabledPPLLintFixAction(
@@ -217,7 +233,12 @@ export function usePPLLintFixAction(
           );
         }
       },
-      render: renderPPLLintFixAction,
+      // Enabled site: hand the card this hook's real remover so Dismiss/unmount
+      // clean up the assistant-context entry. (The disabled placeholder has no
+      // store scope, so it renders without one — see registerDisabledPPLLintFixAction.)
+      render: (
+        renderProps: Omit<PPLLintFixCardProps, 'host' | 'testSubjPrefix' | 'removeContextById'>
+      ) => renderPPLLintFixAction(renderProps, removeContextById),
     });
   });
 

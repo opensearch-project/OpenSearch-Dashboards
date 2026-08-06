@@ -10,6 +10,7 @@ import {
   cleanupPPLLintFixRequest,
   getPPLLintFixSession,
   markPPLLintFixApplied,
+  markPPLLintFixFailed,
 } from './ppl_lint_fix_session';
 import type { RemovePPLLintFixContextById } from './ppl_lint_fix_session';
 import {
@@ -108,10 +109,12 @@ export const PPLLintFixToolRegistration: React.FC<PPLLintFixToolRegistrationProp
           PPL_LINT_FIX_DATA_HOST.contextIdPrefix,
           removeContextById
         );
-        return failure(
-          'missing-request',
-          'The active PPL lint fix request is no longer available.'
-        );
+        // Terminal: the request the card approved is gone, so record a local
+        // failed outcome (mirroring Explore's fail()) rather than leaving the card
+        // blank until the framework's slow tool-call status catches up.
+        const missingSessionMessage = 'The active PPL lint fix request is no longer available.';
+        markPPLLintFixFailed(capturedRequestId, missingSessionMessage);
+        return failure('missing-request', missingSessionMessage);
       }
       const requestId = session.request.requestId;
 
@@ -134,6 +137,12 @@ export const PPLLintFixToolRegistration: React.FC<PPLLintFixToolRegistrationProp
             PPL_LINT_FIX_DATA_HOST.contextIdPrefix,
             removeContextById
           );
+          // Terminal: the editor moved on, so this request can never apply. Mark
+          // it failed for immediate card feedback. The other non-ok reasons
+          // (invalid-candidate / empty-candidate / performance-not-cleared) are
+          // deliberately left unmarked so the model can re-propose against the
+          // still-live session.
+          markPPLLintFixFailed(requestId, evaluation.message);
         }
         return failure(evaluation.reason ?? 'invalid-candidate', evaluation.message, {
           validationReason: evaluation.validationReason,

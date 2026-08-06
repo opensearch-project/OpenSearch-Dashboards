@@ -31,15 +31,20 @@ interface AgentAvailableResponse {
  * this per-source answer into the lint context lets the "Ask AI to fix" action
  * toggle when the user switches clusters.
  *
- * Fails OPEN: any transport error resolves to `true`. The server route already
- * returns `available:true` for the external AG-UI path and for transient probe
- * errors; this catch only covers the request itself failing (offline, 4xx from
- * the router, etc.). We never want a probe failure to hide a button the existing
- * gates would otherwise show — the runtime error path stays the honest backstop.
+ * Fails OPEN: any transport error resolves to `true` for the caller. The server
+ * route already returns `available:true` for the external AG-UI path and for
+ * transient probe errors; this catch only covers the request itself failing
+ * (offline, 4xx from the router, abort, etc.). We never want a probe failure to
+ * hide a button the existing checks would otherwise show — the runtime error path
+ * stays the honest backstop.
+ *
+ * A failed probe is NOT a measurement, so it is never written to the cache: the
+ * caller sees `true`, but the next call re-probes rather than pinning a fail-open
+ * guess for the whole tab. Only a real answer (available true/false) is memoized.
  */
 const [getAiAgentAvailableForDataSource, clearAiAgentAvailabilityCache] = (() => {
   const availabilityByDataSource: Map<string | undefined, boolean> = new Map();
-  const pendingRequests: Map<string | undefined, Promise<boolean>> = new Map();
+  const pendingRequests: Map<string | undefined, Promise<boolean | undefined>> = new Map();
 
   return [
     async (http: HttpSetup, dataSourceId: string | undefined, timeout?: number) => {
@@ -47,18 +52,24 @@ const [getAiAgentAvailableForDataSource, clearAiAgentAvailabilityCache] = (() =>
       if (cached !== undefined) return cached;
 
       const pendingRequest = pendingRequests.get(dataSourceId);
-      if (pendingRequest !== undefined) return pendingRequest;
+      // A deduped concurrent caller must also fail open: an unmeasured `undefined`
+      // means the probe errored, not that the agent is unavailable.
+      if (pendingRequest !== undefined) return (await pendingRequest) ?? true;
 
       const controller = timeout ? new AbortController() : undefined;
       const timeoutId = timeout ? setTimeout(() => controller?.abort(), timeout) : undefined;
 
-      const availabilityPromise = http
+      // `undefined` = unmeasured (offline / OSD 5xx / abort), NOT a measured
+      // "available". Only a real answer is cached; an unmeasured result still
+      // fails open to the caller but leaves the cache empty so the next call
+      // re-probes rather than pinning a guess for the whole tab.
+      const availabilityPromise: Promise<boolean | undefined> = http
         .get<AgentAvailableResponse>(AGENT_AVAILABLE_API, {
           query: dataSourceId ? { dataSourceId } : {},
           signal: controller?.signal,
         })
         .then((response) => response?.available !== false)
-        .catch(() => true)
+        .catch(() => undefined)
         .finally(() => {
           pendingRequests.delete(dataSourceId);
           if (timeoutId) clearTimeout(timeoutId);
@@ -66,9 +77,11 @@ const [getAiAgentAvailableForDataSource, clearAiAgentAvailabilityCache] = (() =>
 
       pendingRequests.set(dataSourceId, availabilityPromise);
 
-      const available = await availabilityPromise;
-      availabilityByDataSource.set(dataSourceId, available);
-      return available;
+      const measured = await availabilityPromise;
+      if (measured !== undefined) {
+        availabilityByDataSource.set(dataSourceId, measured);
+      }
+      return measured ?? true;
     },
     () => {
       availabilityByDataSource.clear();
