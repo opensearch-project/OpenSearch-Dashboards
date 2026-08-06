@@ -1,0 +1,2 @@
+fix:
+- [Chat] Fix a race where an agent tool's TOOL_CALL_RESULT could be processed before the tool call was marked pending ([#12536](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12536))
