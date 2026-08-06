@@ -219,22 +219,13 @@ describe('TableVisDynamicTable', () => {
     );
 
     const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
-    if (resizeHandle) {
-      const startX = 100;
-      fireEvent.mouseDown(resizeHandle, { clientX: startX });
+    expect(resizeHandle).not.toBeNull();
 
-      // Simulate drag
-      const mouseMoveEvent = new MouseEvent('mousemove', {
-        clientX: startX + 50,
-        bubbles: true,
-      });
-      document.dispatchEvent(mouseMoveEvent);
+    const startX = 100;
+    fireEvent.mouseDown(resizeHandle!, { clientX: startX });
 
-      const mouseUpEvent = new MouseEvent('mouseup', {
-        bubbles: true,
-      });
-      document.dispatchEvent(mouseUpEvent);
-    }
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: startX + 50, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 
     expect(mockUiState.setWidth).toHaveBeenCalled();
   });
@@ -269,23 +260,22 @@ describe('TableVisDynamicTable', () => {
     );
 
     const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
-    if (resizeHandle) {
-      const startX = 100;
-      fireEvent.mouseDown(resizeHandle, { clientX: startX });
+    expect(resizeHandle).not.toBeNull();
 
-      const mouseMoveEvent = new MouseEvent('mousemove', {
-        clientX: startX + 50,
-        bubbles: true,
-      });
-      document.dispatchEvent(mouseMoveEvent);
+    const header = container.querySelector('thead th');
+    expect(header).not.toBeNull();
 
-      const mouseUpEvent = new MouseEvent('mouseup', {
-        bubbles: true,
-      });
-      document.dispatchEvent(mouseUpEvent);
-    }
+    const startX = 100;
+    fireEvent.mouseDown(resizeHandle!, { clientX: startX });
 
-    // Sort should NOT have been called during resize
+    // Drag far enough to set didDragRef
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: startX + 50, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+    // Simulate the browser's synthetic click on th (common ancestor)
+    fireEvent.click(header!);
+
+    // Sort should NOT have been called during/after resize drag
     expect(mockUiState.setSort).not.toHaveBeenCalled();
   });
 
@@ -309,6 +299,56 @@ describe('TableVisDynamicTable', () => {
 
     // Sort should NOT have been triggered
     expect(mockUiState.setSort).not.toHaveBeenCalled();
+  });
+
+  it('should allow sorting on next header click after a resize drag', () => {
+    const { container } = render(
+      <TableVisDynamicTable
+        table={mockTable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
+    const header = container.querySelector('thead th');
+    expect(resizeHandle).not.toBeNull();
+    expect(header).not.toBeNull();
+
+    // Perform a drag
+    fireEvent.mouseDown(resizeHandle!, { clientX: 100 });
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 160, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+    // Click on th immediately after drag - should be suppressed
+    fireEvent.click(header!);
+    expect(mockUiState.setSort).not.toHaveBeenCalled();
+
+    // Next click on th - didDragRef should be reset, sort should fire
+    fireEvent.click(header!);
+    expect(mockUiState.setSort).toHaveBeenCalledWith({ colIndex: 0, direction: 'desc' });
+  });
+
+  it('should not persist width when resize handle is clicked without dragging', () => {
+    const { container } = render(
+      <TableVisDynamicTable
+        table={mockTable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const resizeHandle = container.querySelector('.tableVisHeaderField__resizeHandle');
+    expect(resizeHandle).not.toBeNull();
+
+    // Plain click on resize handle - no drag
+    fireEvent.mouseDown(resizeHandle!, { clientX: 100 });
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+    // setWidth should NOT have been called since no drag occurred
+    expect(mockUiState.setWidth).not.toHaveBeenCalled();
   });
 
   it('should handle empty sort state', () => {
