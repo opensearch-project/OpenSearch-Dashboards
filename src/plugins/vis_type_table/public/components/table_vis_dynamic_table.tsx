@@ -1,4 +1,4 @@
-/*
+*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -241,7 +241,14 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
   const { rows, columns, formattedColumns } = table;
   const tableRef = useRef<HTMLTableElement>(null);
   const didDragRef = useRef(false);
-  // const [columnWidths, setColumnWidths] = useState<number[]>([]);
+
+  // Stable key for persisted column widths to avoid re-renders from new array references
+  const colWidthKey = useMemo(
+    () => colWidth.map(({ colIndex, width }) => `${colIndex}:${width}`).join(','),
+    [colWidth]
+  );
+
+  // Initialize column widths from persisted uiState to avoid flicker on load
   const [columnWidths, setColumnWidths] = useState<number[]>(() => {
     if (colWidth.length > 0) {
       const initial: number[] = [];
@@ -401,7 +408,8 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
         document.body.removeChild(measuringDiv);
       }
     };
-  }, [formattedColumns, rows, columnWidths.length, colWidth]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formattedColumns, rows, columnWidths.length, colWidthKey]);
 
   // Filter bucket function
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
@@ -494,7 +502,9 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                       width: typeof headerWidth === 'number' ? `${headerWidth}px` : headerWidth,
                     }}
                     onClick={() => {
-                      if (!didDragRef.current) handleSort(index);
+                      const didDrag = didDragRef.current;
+                      didDragRef.current = false;
+                      if (!didDrag) handleSort(index);
                     }}
                   >
                     <span className="tableVisHeaderField__content">
@@ -538,8 +548,10 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                         const onMouseUp = () => {
                           document.removeEventListener('mousemove', onMouseMove);
                           document.removeEventListener('mouseup', onMouseUp);
-                          // Persist the final width to uiState on drag end
-                          setWidth({ colIndex: index, width: currentWidth });
+                          // Only persist when an actual drag occurred
+                          if (didDragRef.current) {
+                            setWidth({ colIndex: index, width: currentWidth });
+                          }
                         };
 
                         document.addEventListener('mousemove', onMouseMove);
