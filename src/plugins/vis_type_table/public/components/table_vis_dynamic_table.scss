@@ -38,14 +38,14 @@
     bottom: 0;
     width: 7px;
     cursor: col-resize;
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: transparent;
     z-index: 2;
-    border-right: 2px solid rgba(0, 0, 0, 0.1);
+    border-right: 2px solid transparent;
 
     &:hover,
     &:active {
       border-right-color: $euiColorPrimary;
-      background-color: rgba($euiColorPrimary, 0.2);
+      background-color: $euiColorLightestShade;
     }
   }
 
