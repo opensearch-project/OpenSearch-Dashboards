@@ -170,10 +170,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       query.dataset?.type === DATASET.S3 && !queryEndsWithHead(queryWithFilters)
         ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
         : queryWithFilters;
+    // NEW:
+    const needsSort =
+      dataset?.timeFieldName &&
+      !finalQuery.toLowerCase().includes('| sort ') &&
+      !finalQuery.toLowerCase().includes('|sort ') &&
+      !finalQuery.toLowerCase().includes('| stats ');
 
+    const sortedQuery = needsSort
+      ? `${finalQuery} | sort - \`${dataset.timeFieldName}\``
+      : finalQuery;
+    
     return {
       ...query,
-      query: finalQuery,
+      query: sortedQuery,
     };
   }
 
