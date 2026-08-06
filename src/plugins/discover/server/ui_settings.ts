@@ -35,6 +35,7 @@ import { UiSettingsParams } from 'opensearch-dashboards/server';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
+  AGGREGATION_SAMPLE_SIZE_SETTING,
   AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -65,6 +66,21 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
       defaultMessage: 'The number of rows to show in the table',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
+  [AGGREGATION_SAMPLE_SIZE_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.aggregationSampleSizeTitle', {
+      defaultMessage: 'Number of aggregation rows',
+    }),
+    value: 2000,
+    description: i18n.translate('discover.advancedSettings.aggregationSampleSizeText', {
+      defaultMessage:
+        'The maximum number of rows returned for an aggregating query (e.g. stats). These rows ' +
+        'are aggregation buckets rather than documents, so this is kept separate from the ' +
+        'document sample size above. The effective limit is still capped by the ' +
+        'plugins.query.size_limit cluster setting.',
     }),
     category: ['discover'],
     schema: schema.number(),

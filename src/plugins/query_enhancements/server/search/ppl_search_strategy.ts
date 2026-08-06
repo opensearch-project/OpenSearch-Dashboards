@@ -24,6 +24,7 @@ import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
 const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+const AGGREGATION_SAMPLE_SIZE_SETTING = 'discover:aggregationSampleSize';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -48,14 +49,17 @@ export const pplSearchStrategyProvider = (
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
 
-        // `fetchSize` lowers to a `head N` over the *final* result rows. For an aggregating query
-        // those rows are buckets, so a document-sample cap would silently drop whole buckets — and
-        // with a `span()` key the bucket count grows with the selected time range. Send it only for
-        // document searches, mirroring DQL where `discover:sampleSize` bounds just the doc table.
+        // `fetchSize` lowers to a `head N` over the *final* result rows. An explicit `head` in the
+        // query wins, so send nothing then. Otherwise pick the limit by query shape: an aggregating
+        // query's final rows are buckets, not documents, so it uses its own (larger) sample size —
+        // a document-sized cap would silently drop whole buckets, and with a `span()` key the bucket
+        // count grows with the time range. Document searches keep `discover:sampleSize`, mirroring
+        // DQL where that setting bounds only the doc table.
         const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
         const aggregates = typeof query.query === 'string' && isPPLAggregationQuery(query.query);
-        if (!hasHead && !aggregates) {
-          const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+        if (!hasHead) {
+          const setting = aggregates ? AGGREGATION_SAMPLE_SIZE_SETTING : SAMPLE_SIZE_SETTING;
+          const fetchSize = await context.core.uiSettings.client.get<number>(setting);
           request.body = { ...request.body, fetchSize };
         }
 
@@ -102,10 +106,13 @@ export const pplSearchStrategyProvider = (
         if (usage) usage.trackSuccess(rawResponse.took);
 
         if (aggConfig) {
-          // These queries always end in `stats ... by span(...)`, so their rows are buckets. Build a
-          // request without the document-sample cap rather than reusing the primary search's body.
-          const { fetchSize: _fetchSize, ...aggRequestBody } = request.body;
-          const aggRequest = { ...request, body: aggRequestBody };
+          // The histogram queries always end in `stats ... by span(...)`, so their rows are buckets.
+          // Give them the aggregation sample size explicitly rather than reusing the primary search's
+          // body, whose fetchSize is document-sized when the primary query is a plain doc search.
+          const aggFetchSize = await context.core.uiSettings.client.get<number>(
+            AGGREGATION_SAMPLE_SIZE_SETTING
+          );
+          const aggRequest = { ...request, body: { ...request.body, fetchSize: aggFetchSize } };
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
             aggRequest.body.query = { ...aggRequest.body.query, query: aggQueryString };
             const rawAggs: any = await pplFacet.describeQuery(context, aggRequest);
