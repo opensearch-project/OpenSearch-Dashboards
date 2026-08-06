@@ -38,9 +38,9 @@
     bottom: 0;
     width: 7px;
     cursor: col-resize;
-    background-color: transparent;
+    background-color: $euiColorLightestShade;
     z-index: 2;
-    border-right: 2px solid transparent;
+    border-right: 2px solid $euiColorLightestShade;
 
     &:hover,
     &:active {
