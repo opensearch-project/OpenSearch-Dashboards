@@ -166,6 +166,38 @@ describe('Filter Utils', () => {
       );
     });
 
+    test('Assemble filter when saved object attribute is at non-first position in flat AND tree', () => {
+      // updatedAt is at position 1 (not 0) — with binary-tree path assumptions
+      // validateFilterKueryNode would return 'arguments.1.arguments.0' instead of 'arguments.1',
+      // causing get() to return undefined and the transformation to throw.
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes.bytes > 1000 and foo.updatedAt: 5678654567',
+          mockMappings
+        )
+      ).toEqual(
+        opensearchKuery.fromKueryExpression(
+          'foo.bytes > 1000 and (type: foo and updatedAt: 5678654567)'
+        )
+      );
+    });
+
+    test('Assemble filter when saved object attribute is at index 3 in flat AND tree', () => {
+      // updatedAt is at position 3 — exercises the full flat N-ary path resolution
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and foo.updatedAt: 5678654567 and (foo.attributes.description: t* or foo.attributes.description :*)',
+          mockMappings
+        )
+      ).toEqual(
+        opensearchKuery.fromKueryExpression(
+          'foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (type: foo and updatedAt: 5678654567) and (foo.description: t* or foo.description :*)'
+        )
+      );
+    });
+
     test('Lets make sure that we are throwing an exception if we get an error', () => {
       expect(() => {
         validateConvertFilterToKueryNode(

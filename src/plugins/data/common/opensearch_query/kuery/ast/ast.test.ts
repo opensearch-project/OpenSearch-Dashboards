@@ -402,6 +402,48 @@ describe('kuery AST API', () => {
   });
 
   describe('toOpenSearchQuery', () => {
+    // Measures the maximum nesting depth of a plain JS object/array structure.
+    function jsonNestingDepth(value: unknown): number {
+      if (typeof value !== 'object' || value === null) return 0;
+      const children = Array.isArray(value) ? value : Object.values(value);
+      if (children.length === 0) return 1;
+      return 1 + Math.max(...children.map(jsonNestingDepth));
+    }
+
+    test('should produce a flat bool.should clause for many OR clauses', () => {
+      // 50 OR values — old right-recursive grammar produced a binary tree: the top-level
+      // bool.should always had exactly 2 items (left operand + right nested OR), which
+      // caused stream_constraints_exception on OpenSearch 2.11+ at ~40 values.
+      const values = Array.from({ length: 50 }, (_, i) => `value${i}`);
+      const expression = `field:(${values.join(' or ')})`;
+      const node = fromKueryExpression(expression);
+      const result = toOpenSearchQuery(node, indexPattern);
+
+      // With a flat N-ary OR all 50 operands are direct siblings in bool.should.
+      // Old binary-tree grammar always produced bool.should.length === 2 here.
+      expect(result.bool.should).toHaveLength(50);
+    });
+
+    test('should produce a flat bool.filter clause for many top-level AND clauses', () => {
+      // Same regression guard for AND: old grammar produced bool.filter.length === 2.
+      const clauses = Array.from({ length: 50 }, (_, i) => `field${i}:value`);
+      const expression = clauses.join(' and ');
+      const node = fromKueryExpression(expression);
+      const result = toOpenSearchQuery(node, indexPattern);
+
+      expect(result.bool.filter).toHaveLength(50);
+    });
+
+    test('JSON nesting depth of a 50-value OR query must stay well below OpenSearch limit of 100', () => {
+      // Old binary tree produced JSON depth ~N/2; at 50 values that is ~25 levels of
+      // nested bool.should — at 40+ values it exceeded Jackson's limit of 100.
+      const values = Array.from({ length: 50 }, (_, i) => `value${i}`);
+      const node = fromKueryExpression(`field:(${values.join(' or ')})`);
+      const result = toOpenSearchQuery(node, indexPattern);
+      // Flat grammar keeps depth constant (~8 levels) regardless of operand count.
+      expect(jsonNestingDepth(result)).toBeLessThan(20);
+    });
+
     test("should return the given node type's OpenSearch query representation", () => {
       const node = nodeTypes.function.buildNode('exists', 'response');
       const expected = nodeTypes.function.toOpenSearchQuery(node, indexPattern);
