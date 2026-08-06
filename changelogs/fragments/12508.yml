@@ -1,0 +1,2 @@
+feat:
+- [Chat] Add telemetry events for tool execution and chat window visibility ([#12508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12508))
