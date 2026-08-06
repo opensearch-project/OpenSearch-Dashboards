@@ -355,6 +355,34 @@ describe('ChatEventHandler', () => {
       expect(toolMessages).toHaveLength(0);
     });
 
+    it('should never call executeAction for agent tools, so there is no await before markToolPending', async () => {
+      // Regression test for a real race: a backend agent's TOOL_CALL_RESULT could
+      // arrive and be processed before handleToolCallEnd's own async execution
+      // (routing through executeTool's local-action detour, which always awaits
+      // executeAction at least once even when doomed to fail) resolved and reached
+      // markToolPending. The fix is architectural, not timing-based: handleToolCallEnd
+      // calls `executeAgentTool` directly for tools it already knows are agent-routed
+      // (via `hasAction`), so `executeAction` — the only await that stood between
+      // computing `isAgentTool` and `markToolPending` — is never invoked on this path
+      // at all.
+      const toolCallId = 'tool-race-1';
+
+      mockAssistantActionService.hasAction.mockReturnValueOnce(false);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'raceTool',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(mockAssistantActionService.executeAction).not.toHaveBeenCalled();
+    });
+
     it('should handle tool call result from agent', async () => {
       const toolCallId = 'tool-123';
 

@@ -393,13 +393,24 @@ export class ChatEventHandler {
         args,
       });
 
-      // Execute the tool and update tool execution status
-      const result = await this.toolExecutor.executeTool(
-        toolCall.function.name,
-        args,
-        toolCallId,
-        await this.chatService.getCurrentDataSourceId()
-      );
+      // Execute the tool and update tool execution status.
+      //
+      // Agent tools skip `executeTool`'s local-action detour entirely: that detour
+      // always awaits `assistantActionService.executeAction` at least once — even
+      // when it's guaranteed to fail with "not found" — plus a redundant data source
+      // fetch that `executeAgentTool` never uses. Those extra awaits delay
+      // `markToolPending` below and open a window for the agent's own
+      // TOOL_CALL_RESULT to arrive and be processed first. Calling `executeAgentTool`
+      // directly means the only await between computing `isAgentTool` and marking the
+      // tool pending is `executeAgentTool` itself, which does no real async work.
+      const result = isAgentTool
+        ? await this.toolExecutor.executeAgentTool()
+        : await this.toolExecutor.executeTool(
+            toolCall.function.name,
+            args,
+            toolCallId,
+            await this.chatService.getCurrentDataSourceId()
+          );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
       if (result.cancelled) {
@@ -520,7 +531,12 @@ export class ChatEventHandler {
       result: resultContent,
     });
 
-    // Clear pending tool if it was an agent-only tool
+    // Clear pending tool if it was an agent-only tool. `handleToolCallEnd` calls
+    // `executeAgentTool` directly for agent tools (skipping `executeTool`'s
+    // local-action detour, which always awaits at least once even when doomed to
+    // fail), so the only await between computing `isAgentTool` and `markToolPending`
+    // running is `executeAgentTool` itself, which does no real async work — there is
+    // no window for a same-toolCallId TOOL_CALL_RESULT to arrive first.
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
       this.toolExecutor.clearPendingTool(toolCallId);
     }
