@@ -84,6 +84,7 @@ jobs:
         TAG=${GITHUB_REF#refs/tags/}
         
         echo "TAG=$TAG" >> $GITHUB_ENV
+        echo "CURRENT_VERSION=${{ steps.parse_tag.outputs.current_version }}" >> $GITHUB_ENV
         echo "NEXT_VERSION=${{ steps.parse_tag.outputs.next_version }}" >> $GITHUB_ENV
         echo "BASE_BRANCH=${{ steps.parse_tag.outputs.target_branch }}" >> $GITHUB_ENV
 
@@ -99,6 +100,10 @@ jobs:
     - name: Create PR for target branch
       uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
       with:
+        token: ${{ secrets.OPENSEARCH_CI_BOT_TOKEN }}
+        push-to-fork: opensearch-ci-bot/OpenSearch-Dashboards
+        committer: opensearch-ci-bot <opensearch-infra@amazon.com>
+        author: opensearch-ci-bot <opensearch-infra@amazon.com>
         base: ${{ env.BASE_BRANCH }}
         branch: 'create-pull-request/patch-${{ env.BASE_BRANCH }}'
         commit-message: Increment version to ${{ env.NEXT_VERSION }}
