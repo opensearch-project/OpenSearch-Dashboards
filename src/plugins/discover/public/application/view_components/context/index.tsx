@@ -11,6 +11,7 @@ import {
 } from '../../../../../opensearch_dashboards_react/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { useSearch, SearchContextValue } from '../utils/use_search';
+import { useExecuteQueryAction } from '../actions/execute_query_action';
 
 const SearchContext = React.createContext<SearchContextValue>({} as SearchContextValue);
 
@@ -31,19 +32,33 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
   // language, dataset and time range in classic Discover. Classic Discover
   // stores the query one level deeper under `_q.query` (vs `_q` in Explore).
   const usePageContext = services.contextProvider?.hooks?.usePageContext || NOOP_PAGE_CONTEXT_HOOK;
+  const languageService = services.data?.query?.queryString?.getLanguageService?.();
   usePageContext({
     description: 'Discover application page context',
-    convert: (urlState: any) => ({
-      appId: 'discover',
-      timeRange: urlState?._g?.time,
-      query: {
-        query: urlState?._q?.query?.query || '',
-        language: urlState?._q?.query?.language || 'kuery',
-      },
-      dataset: urlState?._q?.query?.dataset,
-    }),
+    convert: (urlState: any) => {
+      const languageKey = urlState?._q?.query?.language || 'kuery';
+      const languageDisplayName = languageService?.getLanguage(languageKey)?.title;
+      return {
+        appId: 'discover',
+        timeRange: urlState?._g?.time,
+        query: {
+          query: urlState?._q?.query?.query || '',
+          language: languageKey,
+          ...(languageDisplayName ? { languageDisplayName } : {}),
+        },
+        dataset: urlState?._q?.query?.dataset,
+      };
+    },
     categories: ['page', 'static'],
   });
+
+  // Register the execute query action for assistant integration
+  useExecuteQueryAction(
+    services,
+    searchParams.data$,
+    searchParams.refetch$,
+    searchParams.queryComplete$
+  );
 
   return (
     <OpenSearchDashboardsContextProvider services={services}>

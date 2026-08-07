@@ -38,6 +38,33 @@ export class AgentError extends Error {
   }
 }
 
+const parseEmbeddedJson = (value: unknown): any | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const jsonStart = value.indexOf('{');
+  if (jsonStart === -1) return undefined;
+  try {
+    return JSON.parse(value.slice(jsonStart));
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * The agent error `details` is often a wrapper string like
+ * `Error from remote service: {"OriginalMessage":"{...\"error\":\"<real cause>\"...}", ...}`.
+ */
+export const extractAgentErrorDetail = (details: string): string => {
+  if (!details) return details;
+  const outer = parseEmbeddedJson(details);
+  if (!outer) return details;
+  for (const candidate of [outer.OriginalMessage, outer.Message]) {
+    const inner = parseEmbeddedJson(candidate);
+    if (typeof inner?.error === 'string') return inner.error;
+    if (typeof inner?.message === 'string') return inner.message;
+  }
+  return details;
+};
+
 export const formatError = (error: ResponseError | Error): Error => {
   if ('body' in error) {
     if (error.body.statusCode === 429)

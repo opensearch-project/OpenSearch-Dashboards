@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useContext } from 'react';
+import React, { ReactNode, useContext } from 'react';
 import {
   EuiPanel,
   EuiText,
@@ -275,6 +275,7 @@ const getCustomizedRenderOptions = ({
   context,
   onApprove,
   onReject,
+  initialOpen,
 }: ToolCallRowProps & { context: AssistantActionContextValue | null }) => {
   // Check context toolCallStates for immediate data availability
   let args;
@@ -329,6 +330,11 @@ const getCustomizedRenderOptions = ({
     error: toolCall.status === 'error' ? new Error(toolCall.result || 'Unknown error') : undefined,
     onApprove,
     onReject,
+    // Lets a custom renderer opt into the same running-spinner/accordion
+    // (Parameters + Result via ToolResultRenderer) presentation that every
+    // other tool gets, for whichever states it doesn't want to customize --
+    // instead of being forced to replace the entire row unconditionally.
+    renderDefault: () => renderDefaultToolCall(toolCall, initialOpen),
   };
 };
 
@@ -341,66 +347,14 @@ const isValidJSON = (content: string) => {
   }
 };
 
-export const ToolCallRow: React.FC<ToolCallRowProps> = ({
-  toolCall,
-  onApprove,
-  onReject,
-  initialOpen,
-}) => {
-  // Always call useContext at the top level - React Hook rules
-  const context = useContext(AssistantActionContext);
-
-  // Try to get custom renderer if context is available
-  // Handle tool name mapping for graph visualization
-  const actualToolName =
-    toolCall.toolName === 'execute_promql_query' ? 'graph_timeseries_data' : toolCall.toolName;
-  const renderer = context?.getActionRenderer?.(actualToolName);
-
-  // Check if this is a graph visualization tool (handles both names)
-  const isGraphTool =
-    toolCall.toolName === 'graph_timeseries_data' || toolCall.toolName === 'execute_promql_query';
-
-  // Try to use context-based custom renderer first if available
-  const shouldUseCustomRenderer =
-    context &&
-    renderer &&
-    (toolCall.toolName === 'request_user_confirmation' || // Always render for user confirmation
-      isGraphTool || // Always render for graph visualization (both names)
-      context.shouldUseCustomRenderer?.(actualToolName) || // Use custom renderer if specified
-      (toolCall.status === 'completed' && toolCall.result && toolCall.toolName === 'ppl_query')); // Other completed tools
-
-  // Direct graph rendering for graph visualization tools
-  if (isGraphTool) {
-    if (shouldUseCustomRenderer) {
-      return (
-        <div className="toolCallRow">
-          {renderer(
-            getCustomizedRenderOptions({
-              toolCall,
-              context,
-            })
-          )}
-        </div>
-      );
-    }
-    // fallback
-    return renderFallbackGraphTool({
-      toolCall,
-      context,
-    });
-  }
-
-  if (shouldUseCustomRenderer) {
-    return renderer(
-      getCustomizedRenderOptions({
-        toolCall,
-        context,
-        onApprove,
-        onReject,
-      })
-    );
-  }
-
+/**
+ * The default tool call presentation: a running spinner while in-flight,
+ * or an accordion with Parameters/Result once settled. Extracted so it can
+ * be handed to custom renderers via `renderDefault` -- letting a custom
+ * renderer show its own UI (e.g. a confirmation prompt) for some states
+ * and fall back to this default for others, instead of being all-or-nothing.
+ */
+const renderDefaultToolCall = (toolCall: TimelineToolCall, initialOpen?: boolean): ReactNode => {
   const isRunning = toolCall.status === 'running';
 
   if (isRunning) {
@@ -426,6 +380,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
       </div>
     );
   }
+
   let iconType = 'checkInCircleEmpty';
   let iconColor = 'success';
   const isError = toolCall.status === 'error';
@@ -502,4 +457,69 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
       </EuiPanel>
     </EuiAccordion>
   );
+};
+
+export const ToolCallRow: React.FC<ToolCallRowProps> = ({
+  toolCall,
+  onApprove,
+  onReject,
+  initialOpen,
+}) => {
+  // Always call useContext at the top level - React Hook rules
+  const context = useContext(AssistantActionContext);
+
+  // Try to get custom renderer if context is available
+  // Handle tool name mapping for graph visualization
+  const actualToolName =
+    toolCall.toolName === 'execute_promql_query' ? 'graph_timeseries_data' : toolCall.toolName;
+  const renderer = context?.getActionRenderer?.(actualToolName);
+
+  // Check if this is a graph visualization tool (handles both names)
+  const isGraphTool =
+    toolCall.toolName === 'graph_timeseries_data' || toolCall.toolName === 'execute_promql_query';
+
+  // Try to use context-based custom renderer first if available
+  const shouldUseCustomRenderer =
+    context &&
+    renderer &&
+    (toolCall.toolName === 'request_user_confirmation' || // Always render for user confirmation
+      isGraphTool || // Always render for graph visualization (both names)
+      context.shouldUseCustomRenderer?.(actualToolName) || // Use custom renderer if specified
+      (toolCall.status === 'completed' && toolCall.result && toolCall.toolName === 'ppl_query')); // Other completed tools
+
+  // Direct graph rendering for graph visualization tools
+  if (isGraphTool) {
+    if (shouldUseCustomRenderer) {
+      return (
+        <div className="toolCallRow">
+          {renderer(
+            getCustomizedRenderOptions({
+              toolCall,
+              context,
+              initialOpen,
+            })
+          )}
+        </div>
+      );
+    }
+    // fallback
+    return renderFallbackGraphTool({
+      toolCall,
+      context,
+    });
+  }
+
+  if (shouldUseCustomRenderer) {
+    return renderer(
+      getCustomizedRenderOptions({
+        toolCall,
+        context,
+        onApprove,
+        onReject,
+        initialOpen,
+      })
+    );
+  }
+
+  return renderDefaultToolCall(toolCall, initialOpen);
 };

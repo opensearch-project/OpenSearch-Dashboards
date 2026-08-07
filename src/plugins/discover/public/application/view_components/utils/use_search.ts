@@ -13,9 +13,16 @@ import { useLocation } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { Filter, search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
+import {
+  Filter,
+  Query,
+  search,
+  syncQueryStateWithUrl,
+  UI_SETTINGS,
+} from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
+import { extractQueryError } from './format_error';
 import { useIndexPattern } from './use_index_pattern';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
@@ -96,12 +103,20 @@ export interface SearchData {
     elapsedMs?: number;
     startTime?: number;
   };
+  actualError?: string;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
 
 export type DataSubject = BehaviorSubject<SearchData>;
 export type RefetchSubject = Subject<SearchRefetch>;
+
+export interface QueryCompletion {
+  data: SearchData;
+  query: Query;
+  actualError?: string;
+}
+export type QueryCompleteSubject = Subject<QueryCompletion>;
 
 /**
  * A hook that provides functionality for fetching and managing discover search data.
@@ -249,22 +264,29 @@ export const useSearch = (services: DiscoverViewServices) => {
 
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
+  // Payload emitted on `queryComplete$` whenever a fetch reaches a final outcome.
+  const queryComplete$ = useMemo(() => new Subject<QueryCompletion>(), []);
+
   const fetch = useCallback(async () => {
     const currentTime = Date.now();
+    const ranQuery = data.query.queryString.getQuery();
     let dataset = indexPattern;
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime: currentTime },
       });
+      queryComplete$.next({ data: data$.getValue(), query: ranQuery });
       return;
     }
 
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
-      return data$.next({
+      data$.next({
         status: ResultStatus.NO_RESULTS,
         rows: [],
       });
+      queryComplete$.next({ data: data$.getValue(), query: ranQuery });
+      return;
     }
 
     // Abort any in-progress requests before fetching again
@@ -370,15 +392,23 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
+      queryComplete$.next({ data: data$.getValue(), query: ranQuery });
     } catch (error: any) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
       const queryLanguage = data.query.queryString.getQuery().language;
       if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        const actualError = extractQueryError(error?.body || error);
         data$.next({
           status: ResultStatus.NO_RESULTS,
           rows: [],
+          actualError,
+        });
+        queryComplete$.next({
+          data: data$.getValue(),
+          query: ranQuery,
+          actualError,
         });
 
         data.search.showError(error as Error);
@@ -440,6 +470,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
+      queryComplete$.next({ data: data$.getValue(), query: ranQuery });
     } finally {
       initalSearchComplete.current = true;
     }
@@ -455,6 +486,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
+    queryComplete$,
   ]);
 
   // This is a modified version of the above fetch that is to be used for CSV Download MAX option.
@@ -649,6 +681,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   return {
     data$,
     refetch$,
+    queryComplete$,
     indexPattern,
     savedSearch,
     inspectorAdapters,
