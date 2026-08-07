@@ -603,7 +603,7 @@ describe('PPLSearchInterceptor', () => {
         true
       );
       expect(result.query).toBe(
-        'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields *'
+        'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields * | sort - `@timestamp`'
       );
     });
 
@@ -662,7 +662,7 @@ describe('PPLSearchInterceptor', () => {
         mockTimeRange,
         undefined
       );
-      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields * | sort - `@timestamp`');
     });
 
     it('should not append time filter when hideDatePicker is false', async () => {
@@ -708,7 +708,7 @@ describe('PPLSearchInterceptor', () => {
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
       expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
-      expect(result.query).toBe('source=test_index | fields *');
+      expect(result.query).toBe('source=test_index | fields * | sort - `@timestamp`');
     });
 
     it('should handle query without dataset', async () => {
@@ -847,7 +847,7 @@ describe('PPLSearchInterceptor', () => {
 
       expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
 
-      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields * | sort - `@timestamp`');
     });
 
     it('should trim commands and join with proper spacing', async () => {
@@ -892,7 +892,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields * | sort - `@timestamp`');
     });
 
     it('should not apply filters when skipFilters is true in request body', async () => {
@@ -948,7 +948,7 @@ describe('PPLSearchInterceptor', () => {
       expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
       // Time filter should still be applied
       expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalled();
-      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields * | sort - `@timestamp`');
     });
 
     it('should apply filters when skipFilters is not set in request body', async () => {
@@ -1007,7 +1007,7 @@ describe('PPLSearchInterceptor', () => {
         true
       );
       expect(result.query).toBe(
-        'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields *'
+        'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields * | sort - `@timestamp`'
       );
     });
 

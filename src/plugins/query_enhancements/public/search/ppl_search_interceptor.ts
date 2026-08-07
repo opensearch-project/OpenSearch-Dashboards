@@ -171,9 +171,39 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
         : queryWithFilters;
 
+    // Append default descending sort on time field to match legacy Discover behavior.
+    // Skip if the user has customized the query beyond source + where.
+    const queryLower = finalQuery.toLowerCase();
+
+    // `| fields *` is equivalent to selecting all fields and should not block sorting.
+    // Only skip sort for `| fields` with specific field projections (e.g. `| fields a, b`).
+    const hasFieldsProjection =
+      (queryLower.includes('| fields ') || queryLower.includes('|fields ')) &&
+      !queryLower.match(/\|\s*fields\s+\*/);
+
+    const needsSort =
+      dataset?.timeFieldName &&
+      !queryLower.includes('| sort ') &&
+      !queryLower.includes('|sort ') &&
+      !queryLower.includes('| stats ') &&
+      !queryLower.includes('|stats ') &&
+      !hasFieldsProjection &&
+      !queryLower.includes('| head ') &&
+      !queryLower.includes('|head ') &&
+      !queryLower.includes('| rare ') &&
+      !queryLower.includes('|rare ') &&
+      !queryLower.includes('| top ') &&
+      !queryLower.includes('|top ') &&
+      !queryLower.includes('| rename ') &&
+      !queryLower.includes('|rename ');
+
+    const sortedQuery = needsSort
+      ? `${finalQuery} | sort - \`${dataset.timeFieldName}\``
+      : finalQuery;
+
     return {
       ...query,
-      query: finalQuery,
+      query: sortedQuery,
     };
   }
 
