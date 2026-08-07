@@ -408,7 +408,7 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
         document.body.removeChild(measuringDiv);
       }
     };
-    
+  
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formattedColumns, rows, columnWidths.length, colWidthKey]);
 
