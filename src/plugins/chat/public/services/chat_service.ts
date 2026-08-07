@@ -5,7 +5,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
-import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
+import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
 import type { ChatWindowInstance } from '../components/chat_window';
@@ -230,7 +230,7 @@ export class ChatService {
   }
 
   public async sendMessageWithWindow(
-    content: string,
+    content: string | InputContent[],
     messages: Message[],
     options?: { clearConversation?: boolean }
   ): Promise<{
@@ -255,7 +255,7 @@ export class ChatService {
     const userMessage: UserMessage = {
       id: this.generateMessageId(),
       role: 'user',
-      content: content.trim(),
+      content: typeof content === 'string' ? content.trim() : content,
     };
 
     // Return a dummy observable since ChatWindow handles everything internally
@@ -266,39 +266,42 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  /**
-   * Extract data source ID from page context
-   * Looks for page contexts with appId and dataset.dataSource.id structure
-   */
-  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
-    // Find page context by checking for 'page' category and appId in value
-    const pageContext = allContexts.find((ctx) => {
-      // Look for contexts in 'page' category instead of filtering by ID existence
-      if (!ctx.categories?.includes('page')) return false;
+  private getDataSourceFromPageContext() {
+    const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+    return dsId;
+  }
 
+  private getAllAssistantContexts(): any[] {
+    const contextStore = (window as any).assistantContextStore;
+    return contextStore ? contextStore.getAllContexts() : [];
+  }
+
+  /**
+   * Resolve the parsed value of the current page context (the one carrying appId).
+   */
+  private getPageContextValue(): any | undefined {
+    const pageContext = this.getAllAssistantContexts().find((ctx) => {
+      if (!ctx.categories?.includes('page')) return false;
       try {
         const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
-        return value?.appId; // Page contexts have appId
+        return value?.appId;
       } catch {
         return false;
       }
     });
-
     if (!pageContext) return undefined;
 
-    const contextValue =
-      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
-
-    // TODO: Consider adding more robust nested field search for dataSource.id
-    // if the standard dataset.dataSource.id pattern is not found
-    return contextValue?.dataset?.dataSource?.id;
+    return typeof pageContext.value === 'string'
+      ? JSON.parse(pageContext.value)
+      : pageContext.value;
   }
 
-  private getDataSourceFromPageContext() {
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    return this.extractDataSourceIdFromPageContext(allContexts);
+  public getCurrentTimeRange(): { from: string; to: string } | undefined {
+    const timeRange = this.getPageContextValue()?.timeRange;
+    if (timeRange?.from && timeRange?.to) {
+      return { from: timeRange.from, to: timeRange.to };
+    }
+    return undefined;
   }
 
   /**
@@ -357,6 +360,14 @@ export class ChatService {
       this.cachedDataSourceId ||
       (await this.getWorkspaceAwareDataSourceId())
     );
+  }
+
+  public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
+    const id = await this.getCurrentDataSourceId();
+    if (!id) return undefined;
+    const availableDs = await this.getAvailableDataSources();
+    const title = availableDs.find((ds) => ds.id === id)?.title;
+    return { id, title };
   }
 
   public async sendMessage(
@@ -969,7 +980,16 @@ export class ChatService {
   /**
    * Create a user message for timeline display
    */
-  public getUserMessage(content: string, rawMessage?: string): UserMessage {
+  public getUserMessage(content: string | InputContent[], rawMessage?: string): UserMessage {
+    if (Array.isArray(content)) {
+      return {
+        id: this.generateMessageId(),
+        role: 'user',
+        content,
+        ...(rawMessage ? { rawMessage } : {}),
+      };
+    }
+
     return {
       id: this.generateMessageId(),
       role: 'user',

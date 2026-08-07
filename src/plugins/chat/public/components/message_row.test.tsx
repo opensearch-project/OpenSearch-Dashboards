@@ -176,6 +176,63 @@ describe('MessageRow', () => {
       expect(screen.getByRole('img')).toBeInTheDocument();
       expect(screen.getByText('Plain text block')).toBeInTheDocument();
     });
+
+    it('should hide named blocks from the conversation view', () => {
+      const message: Message = {
+        id: 'msg-9',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/jpeg',
+            data: 'imagedata',
+          },
+          {
+            type: 'text',
+            text: '[Visualization Context] Chart Type: line',
+            name: 'visualization_context',
+          },
+          {
+            type: 'text',
+            text: 'Summarize this chart',
+          },
+        ],
+      };
+
+      render(<MessageRow message={message} />);
+
+      // Unnamed blocks stay visible
+      expect(screen.getByRole('img')).toBeInTheDocument();
+      expect(screen.getByText('Summarize this chart')).toBeInTheDocument();
+      // Named block is machine-only
+      expect(
+        screen.queryByText('[Visualization Context] Chart Type: line')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should hide named binary blocks', () => {
+      const message: Message = {
+        id: 'msg-10',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/png',
+            data: 'hiddenimage',
+            name: 'internal_screenshot',
+          },
+          {
+            type: 'text',
+            text: 'Visible text',
+          },
+        ],
+      };
+
+      render(<MessageRow message={message} />);
+
+      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+      expect(screen.getByText('Visible text')).toBeInTheDocument();
+    });
   });
 
   describe('role-based styling', () => {

@@ -10,6 +10,10 @@ export type {
   ITransformationService,
   FieldSchema,
   UrlTransformationState,
+  TransformationConfigSchema,
+  ConfigFieldSpec,
+  ConfigFieldKind,
+  ConfigEnumOption,
 } from './types';
 
 export {
@@ -17,11 +21,7 @@ export {
   createNoOpTransformationService,
   TRANSFORMATION_STATE_KEY,
 } from './transformation_service';
-export {
-  addTransformation,
-  removeTransformation,
-  updateTransformationConfig,
-} from './transformation_utils';
+export { addTransformation, removeTransformation } from './transformation_utils';
 export {
   createLimitTransformation,
   limitTransformationDefinition,

@@ -76,7 +76,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
-import { ExploreEmbeddableFactory } from './embeddable';
+import { ExploreEmbeddableFactory, PanelDataService } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
@@ -96,6 +96,16 @@ import {
   registerDisabledPPLExecuteQueryAction,
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import {
+  registerAutoVisualizationAction,
+  AUTO_VISUALIZATION_TOOL_NAME,
+} from './components/visualizations/actions/auto_visualization_action';
+import { registerGetTransformationSchemaAction } from './components/visualizations/actions/get_transformation_schema_action';
+import {
+  GET_TRANSFORMATION_SCHEMA_TOOL_NAME,
+  T2_DASHBOARD_TOOL_NAME,
+} from './components/visualizations/actions/utils';
+import { registerT2DashboardAction } from './components/visualizations/actions/t2_dashboard_action';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -135,6 +145,7 @@ export class ExplorePlugin implements Plugin<
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
+  private unregisterVisualizationTools?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -881,18 +892,7 @@ export class ExplorePlugin implements Plugin<
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
-    // Register disabled execute_ppl_query action as placeholder
-    // This will be overridden when query panel mounts and restored when it unmounts
-    if (plugins.contextProvider) {
-      registerDisabledPPLExecuteQueryAction(
-        plugins.contextProvider.actions.registerAssistantAction
-      );
-      this.unregisterPPLExecuteQueryAction = () =>
-        plugins.contextProvider!.actions.unregisterAssistantAction(
-          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
-        );
-    }
-
+    // Create saved explore loader so tool can use it
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
@@ -900,6 +900,40 @@ export class ExplorePlugin implements Plugin<
       chrome: core.chrome,
       overlays: core.overlays,
     });
+
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      const { registerAssistantAction, unregisterAssistantAction } =
+        plugins.contextProvider.actions;
+
+      registerDisabledPPLExecuteQueryAction(registerAssistantAction);
+      this.unregisterPPLExecuteQueryAction = () =>
+        unregisterAssistantAction(EXECUTE_PPL_QUERY_TOOL_DEFINITION.name);
+
+      // Register visualization tool for AI-driven visualization creation
+      registerAutoVisualizationAction(
+        registerAssistantAction,
+        core,
+        plugins.data,
+        plugins.contextProvider
+      );
+
+      // Register t2-dashboard tool for creating multi-panel dashboards from chat
+      registerT2DashboardAction(registerAssistantAction, core, plugins.data, savedExploreLoader);
+
+      // Register transformation schema lookup tool
+      registerGetTransformationSchemaAction(registerAssistantAction);
+
+      this.unregisterVisualizationTools = () => {
+        unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+        unregisterAssistantAction(T2_DASHBOARD_TOOL_NAME);
+        unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
+      };
+
+      // Inject contextProvider action helpers into PanelDataService
+      PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
+    }
 
     return {
       urlGenerator: this.urlGenerator,
@@ -916,6 +950,9 @@ export class ExplorePlugin implements Plugin<
       this.editorStopUrlTracking();
     }
     this.unregisterPPLExecuteQueryAction?.();
+    this.unregisterVisualizationTools?.();
+    // cleanup shared panel-data store + fetch_panel_data tool.
+    PanelDataService.getInstance().reset();
   }
 
   private registerEmbeddable(
