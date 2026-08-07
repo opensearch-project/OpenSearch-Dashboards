@@ -5,6 +5,7 @@
 
 import { monaco } from '../../monaco';
 import { Diagnostic, DiagnosticRange, LintSeverity } from './diagnostic';
+import type { AiFixMarkerMetadata } from './ai_fix/ai_fix_registry';
 
 interface MonacoRange {
   startLineNumber: number;
@@ -95,6 +96,27 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
       title: diagnostic.fix.title,
       text: diagnostic.fix.text,
       range: diagnostic.fix.range ? toMonacoRange(diagnostic.fix.range) : undefined,
+    };
+  }
+
+  // Per-instance AI policy plus, for the explain-backed rules, the attributed
+  // operation/outcome. Both ride the marker the same way as `fix`; language.ts
+  // moves them into the AI side table before calling setModelMarkers.
+  //
+  // The explain attribution is the AI host's input for re-verifying a candidate
+  // fix against `_explain`. Read the closed `ExplainOutcome` straight off
+  // `explainTarget` rather than reconstructing it from the rule ID: the union's
+  // members are literally `<operation>:<suffix>`, so this is the same value with
+  // the rule-ID coupling removed.
+  if (diagnostic.aiFix || diagnostic.explainTarget) {
+    (marker as monaco.editor.IMarkerData & { aiFix?: AiFixMarkerMetadata }).aiFix = {
+      ...(diagnostic.aiFix ?? {}),
+      ...(diagnostic.explainTarget
+        ? {
+            operation: diagnostic.explainTarget.operation,
+            outcome: diagnostic.explainTarget.outcome,
+          }
+        : {}),
     };
   }
 
