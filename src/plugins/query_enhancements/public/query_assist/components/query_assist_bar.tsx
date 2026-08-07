@@ -19,6 +19,7 @@ import { getStorage, getUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
+import { AskT2pplErrorButton } from './ask_t2ppl_error_button';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 import { useQueryAssist } from '../hooks';
@@ -28,8 +29,12 @@ interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
 }
 
+const NOOP_DYNAMIC_CONTEXT_HOOK = (_options?: any): string => '';
+
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
+  const useDynamicContext =
+    (services as any).contextProvider?.hooks?.useDynamicContext ?? NOOP_DYNAMIC_CONTEXT_HOOK;
   const queryString = services.data.query.queryString;
   const inputRef = useRef<HTMLInputElement>(null);
   const storage = getStorage();
@@ -47,7 +52,25 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
-  const { updateQueryState } = useQueryAssist();
+  const { queryState, updateQueryState } = useQueryAssist();
+
+  const naturalLanguageContextActive = !!queryState?.question;
+
+  useDynamicContext(
+    naturalLanguageContextActive
+      ? {
+          id: 'query-assist-natural-language-prompt',
+          description:
+            'The natural language question the user asked and the query generated from it with a standalone AI assist',
+          value: {
+            naturalLanguageQuestion: queryState.question,
+            generatedQuery: queryState.generatedQuery,
+          },
+          label: 'Natural language question',
+          categories: ['page', 'dynamic'],
+        }
+      : null
+  );
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
@@ -86,7 +109,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         setCallOutType('invalid_query');
         setAgentError(error);
       } else {
-        services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
+        const chatService = services.chat;
+        services.notifications.toasts.addError(error, {
+          title: 'Failed to generate results',
+          extraAction: chatService?.isAvailable?.() ? (
+            <AskT2pplErrorButton
+              as="button"
+              chatService={chatService}
+              error={error}
+              question={previousQuestionRef.current}
+            />
+          ) : undefined,
+        });
       }
       updateQueryState({
         question: previousQuestionRef.current,

@@ -79,6 +79,10 @@ declare module '../../share/public' {
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExplorePluginSetup } from '../../explore/public';
 import { ContextProviderStart } from '../../context_provider/public';
+import {
+  EXECUTE_QUERY_TOOL_DEFINITIONS,
+  registerAllDisabledExecuteQueryActions,
+} from './application/view_components/actions/execute_query_action';
 
 /**
  * @public
@@ -172,6 +176,7 @@ export class DiscoverPlugin implements Plugin<
   private servicesInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
+  private unregisterExecuteQueryAction?: () => void;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -464,6 +469,18 @@ export class DiscoverPlugin implements Plugin<
 
     this.initializeServices();
 
+    // Register disabled execute_query action as placeholder.
+    // This will be overridden when the Discover view mounts and restored when it unmounts.
+    if (plugins.contextProvider) {
+      registerAllDisabledExecuteQueryActions(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
+      this.unregisterExecuteQueryAction = () =>
+        EXECUTE_QUERY_TOOL_DEFINITIONS.forEach((definition) =>
+          plugins.contextProvider!.actions.unregisterAssistantAction(definition.name)
+        );
+    }
+
     return {
       urlGenerator: this.urlGenerator,
       savedSearchLoader: createSavedSearchesLoader({
@@ -480,6 +497,7 @@ export class DiscoverPlugin implements Plugin<
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.unregisterExecuteQueryAction?.();
   }
 
   /**
