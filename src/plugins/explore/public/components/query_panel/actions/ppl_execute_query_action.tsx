@@ -17,8 +17,12 @@ import { prepareQueryForLanguage } from '../../../application/utils/languages';
 // Shared tool definition for execute_ppl_query action
 export const EXECUTE_PPL_QUERY_TOOL_DEFINITION = {
   name: 'execute_ppl_query',
+
   description:
-    'Updates the query bar with a PPL query and executes it in the UI. IMPORTANT: This tool only updates the visual query interface and returns execution status (success/failure) - it does NOT return the actual query results or data. Use this tool when you want to help the user visualize data in the Explore interface. If you need to retrieve actual data for analysis or generating reports, use backend data retrieval tools instead, and make sure to pass the same time range (from/to) to those backend tools for consistent results. The query should NOT contain time filters - use the from/to parameters to specify the time range.',
+    'UI ONLY - DOES NOT RETURN DATA. Writes a PPL query into the Explore query bar and runs it so the user sees the results on their screen. The return value is nothing but an execution status (success/failure); it NEVER contains rows, fields, counts, aggregations, or any query output. ' +
+    'CHOOSING BETWEEN THIS TOOL AND THE BACKEND PPL TOOL: if you need the actual data - to answer a question, compute a number, inspect fields, validate a query, summarize, or generate a report - call the backend PPL query tool (pplQueryTool) instead; it is the only tool that returns query results. Call this tool only to change what the user is looking at, i.e. when the user asked to see, run, plot, or explore something in the Explore UI, or when you want to leave them with the final query for further exploration. ' +
+    'Never call this tool as a way to fetch data, and never claim or infer what the data contains from its status response. When you need both - the data and the on-screen view - call pplQueryTool first to get the data, then call this tool once with the same query and the same time range so the UI stays consistent with your answer. ' +
+    'The query must NOT contain time filters - use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.',
   parameters: {
     type: 'object' as const,
     properties: {
