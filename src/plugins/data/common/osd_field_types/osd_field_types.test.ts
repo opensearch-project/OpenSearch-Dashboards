@@ -98,6 +98,27 @@ describe('utils/osd_field_types', () => {
 
       expect(castTo).toBe('unknown');
     });
+
+    test('casts range field types to distinct range OSD types', () => {
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.INTEGER_RANGE)).toBe(
+        OSD_FIELD_TYPES.NUMBER_RANGE
+      );
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.FLOAT_RANGE)).toBe(
+        OSD_FIELD_TYPES.NUMBER_RANGE
+      );
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.LONG_RANGE)).toBe(
+        OSD_FIELD_TYPES.NUMBER_RANGE
+      );
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE)).toBe(
+        OSD_FIELD_TYPES.NUMBER_RANGE
+      );
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DATE_RANGE)).toBe(
+        OSD_FIELD_TYPES.DATE_RANGE
+      );
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.IP_RANGE)).toBe(
+        OSD_FIELD_TYPES.IP_RANGE
+      );
+    });
   });
 
   describe('getOsdTypeNames()', () => {
@@ -110,13 +131,16 @@ describe('utils/osd_field_types', () => {
         OSD_FIELD_TYPES.BOOLEAN,
         OSD_FIELD_TYPES.CONFLICT,
         OSD_FIELD_TYPES.DATE,
+        OSD_FIELD_TYPES.DATE_RANGE,
         OSD_FIELD_TYPES.GEO_POINT,
         OSD_FIELD_TYPES.GEO_SHAPE,
         OSD_FIELD_TYPES.HISTOGRAM,
         OSD_FIELD_TYPES.IP,
+        OSD_FIELD_TYPES.IP_RANGE,
         OSD_FIELD_TYPES.MURMUR3,
         OSD_FIELD_TYPES.NESTED,
         OSD_FIELD_TYPES.NUMBER,
+        OSD_FIELD_TYPES.NUMBER_RANGE,
         OSD_FIELD_TYPES.OBJECT,
         OSD_FIELD_TYPES.STRING,
         OSD_FIELD_TYPES.UNKNOWN,

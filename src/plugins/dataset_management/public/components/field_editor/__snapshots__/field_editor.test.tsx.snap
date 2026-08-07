@@ -909,6 +909,18 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "histogram",
             },
             Object {
+              "text": "number_range",
+              "value": "number_range",
+            },
+            Object {
+              "text": "date_range",
+              "value": "date_range",
+            },
+            Object {
+              "text": "ip_range",
+              "value": "ip_range",
+            },
+            Object {
               "text": "conflict",
               "value": "conflict",
             },
