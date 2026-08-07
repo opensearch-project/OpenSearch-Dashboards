@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isPPLSearchQuery, queryEndsWithHead, throwFacetError, formatDate } from './utils';
+import {
+  isPPLAggregationQuery,
+  isPPLSearchQuery,
+  queryEndsWithHead,
+  throwFacetError,
+  formatDate,
+} from './utils';
 import { Query } from 'src/plugins/data/common';
 
 describe('throwFacetError', () => {
@@ -251,6 +257,67 @@ describe('queryEndsWithHead', () => {
     expect(queryEndsWithHead("source=t | head 100 from 50 | where timestamp >= '2024-01-01'")).toBe(
       true
     );
+  });
+});
+
+describe('isPPLAggregationQuery', () => {
+  it.each([
+    'source=t | stats count()',
+    'source=t | stats count() by span(`@timestamp`, 1h), extension',
+    'source=t | eventstats avg(bytes) by extension',
+    'source=t | timechart span=1h count() by extension',
+    'source=t | chart count() over extension',
+    'source=t | top 5 extension',
+    'source=t | rare extension',
+    'source=t | transpose',
+    'source=t | xyseries extension bytes clientip',
+    'source=t | timewrap 1d',
+    'source=t | addtotals',
+    'source=t | addcoltotals',
+    'source=t | patterns message mode=aggregation',
+    // Listed unconditionally — the default mode is a cluster setting, so the query text alone
+    // cannot tell us whether this aggregates.
+    'source=t | patterns message',
+  ])('should detect aggregating query: %s', (query) => {
+    expect(isPPLAggregationQuery(query)).toBe(true);
+  });
+
+  it.each([
+    'source=t',
+    'source=t | fields firstname, lastname',
+    'source=t | where age > 20',
+    'source=t | sort name ASC | head 100',
+    'source=t | eval x = bytes * 2',
+    'source=t | dedup extension',
+  ])('should not detect non-aggregating query: %s', (query) => {
+    expect(isPPLAggregationQuery(query)).toBe(false);
+  });
+
+  it('should be case insensitive', () => {
+    expect(isPPLAggregationQuery('source=t | STATS count()')).toBe(true);
+    expect(isPPLAggregationQuery('source=t | Stats count()')).toBe(true);
+  });
+
+  it('should ignore aggregations inside subquery brackets', () => {
+    expect(
+      isPPLAggregationQuery('source=t | where id in [source=other | stats count() by id]')
+    ).toBe(false);
+  });
+
+  it('should still detect an outer aggregation alongside a subquery', () => {
+    expect(
+      isPPLAggregationQuery(
+        'source=t | where id in [source=other | stats count() by id] | stats count() by extension'
+      )
+    ).toBe(true);
+  });
+
+  it('should not match field names containing a command name', () => {
+    expect(isPPLAggregationQuery('source=t | fields statsValue, topLevel')).toBe(false);
+  });
+
+  it('should not match a bare source query naming a stats index', () => {
+    expect(isPPLAggregationQuery('source=stats_index')).toBe(false);
   });
 });
 
