@@ -36,10 +36,14 @@ describe('source-scoped rule suppression on a source/dataset mismatch (compiled 
       ['qty', 'long'],
       ['attributes', 'flat_object'],
     ]),
-    // `meta` is mapped enabled:false on orders; rex-scan-cost ships disabled, so
-    // it needs an explicit override to be observable here.
+    // Explicitly enable every default-off rule this suite exercises so source
+    // gating, rather than the product default, remains the behavior under test.
     disabledObjectFields: new Set<string>(['meta']),
-    overrides: { 'rex-scan-cost': { enabled: true } },
+    overrides: {
+      'flat-object-subfield': { enabled: true },
+      'head-without-sort': { enabled: true },
+      'rex-scan-cost': { enabled: true },
+    },
   });
 
   const ids = (code: string, ctx: LintRunContext): string[] =>

@@ -48,6 +48,11 @@ function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
   }
 }
 
+function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
+  const code = marker.code;
+  return code && typeof code === 'object' && code.target ? code.target.toString() : undefined;
+}
+
 function markerContainsPosition(marker: monaco.editor.IMarker, position: monaco.Position): boolean {
   const { lineNumber, column } = position;
   return !(
@@ -95,20 +100,23 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
       })
     );
 
-    const contents: monaco.IMarkdownString[] = [
-      {
-        value: renderHoverCard({
-          severityLabel: severityLabel(marker.severity),
-          ruleId,
-          message: marker.message,
-          howToFix: entry?.howToFix,
-          fixText: fix?.text,
-        }),
-        isTrusted: false,
-      },
-    ];
+    const card = renderHoverCard({
+      severityLabel: severityLabel(marker.severity),
+      docUrl: docUrlOf(marker),
+      howToFix: entry?.howToFix,
+      fixText: fix?.text,
+    });
+    const contents: monaco.IMarkdownString[] = [];
+    if (card) {
+      contents.push({ value: card, isTrusted: false });
+    }
     if (contributedActions) {
       contents.push(contributedActions);
+    }
+    // Monaco's built-in marker participant still renders the diagnostic. Do not
+    // add an empty custom row when this marker has no supplemental guidance.
+    if (contents.length === 0) {
+      return null;
     }
 
     // Feature-usage telemetry: the user hovered a lint marker and a card is
