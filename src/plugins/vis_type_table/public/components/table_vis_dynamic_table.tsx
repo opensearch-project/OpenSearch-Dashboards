@@ -240,7 +240,27 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
 }) => {
   const { rows, columns, formattedColumns } = table;
   const tableRef = useRef<HTMLTableElement>(null);
-  const [columnWidths, setColumnWidths] = useState<number[]>([]);
+  const didDragRef = useRef(false);
+
+  // Stable key for persisted column widths to avoid re-renders from new array references
+  const colWidthKey = useMemo(
+    () => colWidth.map(({ colIndex, width }) => `${colIndex}:${width}`).join(','),
+    [colWidth]
+  );
+
+  // Initialize column widths from persisted uiState to avoid flicker on load
+  const [columnWidths, setColumnWidths] = useState<number[]>(() => {
+    if (colWidth.length > 0) {
+      const initial: number[] = [];
+      colWidth.forEach(({ colIndex: ci, width: w }) => {
+        if (ci >= 0) {
+          initial[ci] = w;
+        }
+      });
+      return initial;
+    }
+    return [];
+  });
 
   // Pagination state
   const [pageIndex, setPageIndex] = useState(0);
@@ -310,12 +330,33 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
         return finalWidth;
       });
 
+      // Apply persisted widths before scaling so they are included in totalWidth
+      colWidth.forEach(({ colIndex: ci, width: w }) => {
+        if (ci >= 0 && ci < widths.length) {
+          widths[ci] = w;
+        }
+      });
+
       const totalWidth = widths.reduce((a, b) => a + b, 0);
 
       // Proportional scaling if total width exceeds container
       if (totalWidth > containerWidth) {
-        const scaleFactor = containerWidth / totalWidth;
-        return widths.map((width) => Math.max(width * scaleFactor, MIN_COLUMN_WIDTH));
+        // Only scale non-persisted columns; persisted widths are kept as-is
+        const persistedIndices = new Set(colWidth.map(({ colIndex: ci }) => ci));
+        const persistedTotal = colWidth.reduce((sum, { colIndex: ci, width: w }) => {
+          return ci >= 0 && ci < widths.length ? sum + w : sum;
+        }, 0);
+        const remainingWidth = containerWidth - persistedTotal;
+        const nonPersistedTotal = widths.reduce((sum, w, i) => {
+          return persistedIndices.has(i) ? sum : sum + w;
+        }, 0);
+
+        if (remainingWidth > 0 && nonPersistedTotal > 0) {
+          const scaleFactor = remainingWidth / nonPersistedTotal;
+          return widths.map((width, i) =>
+            persistedIndices.has(i) ? width : Math.max(width * scaleFactor, MIN_COLUMN_WIDTH)
+          );
+        }
       }
 
       return widths;
@@ -367,7 +408,9 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
         document.body.removeChild(measuringDiv);
       }
     };
-  }, [formattedColumns, rows, columnWidths.length]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formattedColumns, rows, columnWidths.length, colWidthKey]);
 
   // Filter bucket function
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
@@ -411,7 +454,11 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
   };
 
   const handleColumnResize = (columnIndex: number, width: number) => {
-    setWidth({ colIndex: columnIndex, width });
+    setColumnWidths((prev) => {
+      const updated = [...prev];
+      updated[columnIndex] = width;
+      return updated;
+    });
   };
 
   const handlePageChange = (newPageIndex: number) => {
@@ -455,30 +502,10 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                     style={{
                       width: typeof headerWidth === 'number' ? `${headerWidth}px` : headerWidth,
                     }}
-                    onMouseDown={(e) => {
-                      const initialWidth = columnWidths[index];
-                      const startX = e.clientX;
-                      let hasDragged = false;
-
-                      const onMouseMove = (moveEvent: MouseEvent) => {
-                        const delta = moveEvent.clientX - startX;
-                        if (Math.abs(delta) > 5) hasDragged = true;
-                        const newWidth = Math.max(initialWidth + delta, MIN_COLUMN_WIDTH);
-                        handleColumnResize(index, newWidth);
-                      };
-
-                      const onMouseUp = () => {
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                        // Only trigger sort if the user didn't drag
-                        if (!hasDragged) {
-                          handleSort(index);
-                        }
-                      };
-
-                      document.addEventListener('mousemove', onMouseMove);
-                      document.addEventListener('mouseup', onMouseUp);
-                      e.preventDefault(); // Prevent text selection during drag
+                    onClick={() => {
+                      const didDrag = didDragRef.current;
+                      didDragRef.current = false;
+                      if (!didDrag) handleSort(index);
                     }}
                   >
                     <span className="tableVisHeaderField__content">
@@ -496,6 +523,43 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                         className="tableVisHeaderField__sortIcon"
                       />
                     </span>
+                    <span
+                      className="tableVisHeaderField__resizeHandle"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      role="button"
+                      aria-label={i18n.translate('visTypeTable.tableVisResize.resizeColumn', {
+                        defaultMessage: 'Resize column',
+                      })}
+                      tabIndex={-1}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        didDragRef.current = false;
+                        const initialWidth = columnWidths[index] || MIN_COLUMN_WIDTH;
+                        const startX = e.clientX;
+                        let currentWidth = initialWidth;
+
+                        const onMouseMove = (moveEvent: MouseEvent) => {
+                          const delta = moveEvent.clientX - startX;
+                          if (Math.abs(delta) > 5) didDragRef.current = true;
+                          currentWidth = Math.max(initialWidth + delta, MIN_COLUMN_WIDTH);
+                          handleColumnResize(index, currentWidth);
+                        };
+
+                        const onMouseUp = () => {
+                          document.removeEventListener('mousemove', onMouseMove);
+                          document.removeEventListener('mouseup', onMouseUp);
+                          // Only persist when an actual drag occurred
+                          if (didDragRef.current) {
+                            setWidth({ colIndex: index, width: currentWidth });
+                          }
+                        };
+
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+                        e.preventDefault();
+                      }}
+                    />
                   </th>
                 );
               })}
