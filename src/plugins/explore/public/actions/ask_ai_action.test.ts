@@ -52,6 +52,7 @@ describe('createAskAiAction', () => {
     const mockContext = {
       document: { message: 'test log' },
       query: 'test query',
+      metadata: { dataSourceEngineType: 'OpenSearch' },
     };
 
     it('should return true when chatService is available', () => {
@@ -66,6 +67,24 @@ describe('createAskAiAction', () => {
       };
       const action = createAskAiAction(unavailableChatService);
       expect(action.isCompatible(mockContext)).toBe(false);
+    });
+
+    it('should return false when dataSourceEngineType is AnalyticEngine', () => {
+      const action = createAskAiAction(mockChatService);
+      const context = {
+        document: { message: 'test' },
+        metadata: { dataSourceEngineType: 'AnalyticEngine' },
+      };
+      expect(action.isCompatible(context)).toBe(false);
+    });
+
+    it('should return true when dataSourceEngineType is not AnalyticEngine', () => {
+      const action = createAskAiAction(mockChatService);
+      const context = {
+        document: { message: 'test' },
+        metadata: { dataSourceEngineType: 'OpenSearch' },
+      };
+      expect(action.isCompatible(context)).toBe(true);
     });
   });
 

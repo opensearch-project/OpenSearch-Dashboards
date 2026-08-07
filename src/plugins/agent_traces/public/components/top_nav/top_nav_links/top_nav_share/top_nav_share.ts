@@ -22,36 +22,35 @@ export const shareTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getShareButtonRun = (
-  services: AgentTracesServices,
-  savedAgentTraces?: SavedAgentTraces
-): TopNavMenuIconRun => async (anchorElement) => {
-  const { share, store } = services;
-  if (!savedAgentTraces || !share) return;
+export const getShareButtonRun =
+  (services: AgentTracesServices, savedAgentTraces?: SavedAgentTraces): TopNavMenuIconRun =>
+  async (anchorElement) => {
+    const { share, store } = services;
+    if (!savedAgentTraces || !share) return;
 
-  const legacyState = store.getState().legacy;
-  const sharingData = await getSharingData({
-    searchSource: savedAgentTraces.searchSource,
-    state: legacyState,
-    services,
-  });
+    const legacyState = store.getState().legacy;
+    const sharingData = await getSharingData({
+      searchSource: savedAgentTraces.searchSource,
+      state: legacyState,
+      services,
+    });
 
-  // Flush any pending URL state updates to ensure the share URL contains current state.
-  // URL updates are batched asynchronously, so without flushing, the URL may not reflect
-  // the latest state (e.g., _q and _a parameters) when captured.
-  services.osdUrlStateStorage?.flush();
+    // Flush any pending URL state updates to ensure the share URL contains current state.
+    // URL updates are batched asynchronously, so without flushing, the URL may not reflect
+    // the latest state (e.g., _q and _a parameters) when captured.
+    services.osdUrlStateStorage?.flush();
 
-  share.toggleShareContextMenu({
-    anchorElement,
-    allowEmbed: false,
-    allowShortUrl: services.capabilities.discover?.createShortUrl as boolean,
-    shareableUrl: unhashUrl(window.location.href),
-    objectId: savedAgentTraces.id,
-    objectType: 'search',
-    sharingData: {
-      ...sharingData,
-      title: savedAgentTraces.title,
-    },
-    isDirty: !savedAgentTraces.id || legacyState.isDirty || false,
-  });
-};
+    share.toggleShareContextMenu({
+      anchorElement,
+      allowEmbed: false,
+      allowShortUrl: services.capabilities.discover?.createShortUrl as boolean,
+      shareableUrl: unhashUrl(window.location.href),
+      objectId: savedAgentTraces.id,
+      objectType: 'search',
+      sharingData: {
+        ...sharingData,
+        title: savedAgentTraces.title,
+      },
+      isDirty: !savedAgentTraces.id || legacyState.isDirty || false,
+    });
+  };

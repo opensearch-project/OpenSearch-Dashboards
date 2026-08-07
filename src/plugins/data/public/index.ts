@@ -464,6 +464,7 @@ export {
   SearchError,
   SearchTimeoutError,
   PainlessError,
+  AnalyticEngineError,
 } from './search';
 
 export type { SearchSource } from './search';
@@ -527,6 +528,8 @@ export {
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
   useCancelButtonTiming,
+  PPLAnalyzePanel,
+  runPPLAnalyzeInBackground,
 } from './ui';
 
 /**
@@ -571,6 +574,14 @@ export {
   LanguageReference,
   DatasetIndexedViewsService,
   validateTimeRange,
+  getPPLAnalyzeResult$,
+  getPPLAnalyzeLoading$,
+  getPPLAnalyzeOpen$,
+  setPPLAnalyzeResult,
+  setPPLAnalyzeLoading,
+  setPPLAnalyzeOpen,
+  isPPLAnalyzeOpen,
+  PPLAnalyzeResult,
 } from './query';
 
 export { useSavedQuery } from './ui/search_bar';
@@ -651,4 +662,24 @@ export {
   attachPPLGrammarRefresh,
   syncPPLValidationContext,
 } from './ui/query_editor/validation_context';
+export {
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+} from './ui/query_editor/lint_context';
+export {
+  buildPPLLintContext,
+  extractFieldNames,
+  extractFieldMetadata,
+} from './ppl_lint/lint_context_builder';
+export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
+export { explainQueryPreparer } from './ppl_lint/explain_query_preparer';
+// Host metadata probes for the context-fed lint rules; both editor hosts call
+// them from their loadFields effect.
+export { fetchDisabledObjectFields } from './ppl_lint/disabled_object_fields';
+export { fetchVisibleIndices } from './ppl_lint/visible_indices';
+export type { LintFieldsCache } from './ppl_lint/lint_context_builder';
+export { lintRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_lint';
 export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';
+export { fetchColumnValues } from './antlr/shared/utils';

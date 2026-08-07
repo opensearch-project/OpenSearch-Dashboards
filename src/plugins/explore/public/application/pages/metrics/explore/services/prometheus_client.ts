@@ -66,7 +66,10 @@ export class PrometheusClient {
   private activeControllers = new Set<AbortController>();
   private aborted = false;
 
-  constructor(private services: ExploreServices, public readonly dataConnectionId: string) {}
+  constructor(
+    private services: ExploreServices,
+    public readonly dataConnectionId: string
+  ) {}
 
   abort(): void {
     this.aborted = true;
@@ -84,9 +87,8 @@ export class PrometheusClient {
   }
 
   private getResourceClient(): PrometheusResourceClientLike {
-    const rc = this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>(
-      'prometheus'
-    );
+    const rc =
+      this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>('prometheus');
     if (!rc) throw new Error('Prometheus resource client is not registered');
     return rc;
   }
@@ -249,12 +251,11 @@ export class PrometheusClient {
     if (!dataView) return [];
 
     const queryState = this.services.data.query.queryString.getQuery();
-    const dataset = await this.services.data.dataViews.convertToDataset(dataView);
     const searchSource = await this.services.data.search.searchSource.create();
     searchSource.setFields({
       index: dataView,
       size: 2000,
-      query: { ...queryState, dataset, query: promql },
+      query: { ...queryState, query: promql },
       highlightAll: false,
       version: false,
     });
@@ -266,7 +267,7 @@ export class PrometheusClient {
 
     try {
       const rawResults = await searchSource.fetch({ abortSignal: controller.signal });
-      const hits = ((rawResults?.hits?.hits ?? []) as unknown) as PrometheusSearchHit[];
+      const hits = (rawResults?.hits?.hits ?? []) as unknown as PrometheusSearchHit[];
       const result = this.transformHitsToSeries(hits);
       if (!this.aborted && !controller.signal.aborted) {
         this.dataCache.set(cacheKey, result);

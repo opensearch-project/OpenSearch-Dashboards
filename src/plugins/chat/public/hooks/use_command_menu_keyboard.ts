@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 import { slashCommandRegistry, SlashCommand } from '../services/slash_commands';
 
 interface UseCommandMenuKeyboardParams {
@@ -36,7 +36,8 @@ export const useCommandMenuKeyboard = ({
   const [commandSuggestions, setCommandSuggestions] = useState<SlashCommand[]>([]);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [ghostText, setGhostText] = useState('');
-
+  const inputValueRef = useRef(input);
+  inputValueRef.current = input;
   // Update command suggestions when input changes
   useEffect(() => {
     if (input.startsWith('/')) {
@@ -83,6 +84,16 @@ export const useCommandMenuKeyboard = ({
       setGhostText('');
     }
   }, [input]);
+
+  // Clear suggestions when commands are registered/unregistered
+  useEffect(() => {
+    if (!showCommandMenu) return;
+    return slashCommandRegistry.onChange(() => {
+      const suggestions = slashCommandRegistry.getSuggestions(inputValueRef.current);
+      setCommandSuggestions(suggestions);
+      setShowCommandMenu(suggestions.length > 0);
+    });
+  }, [showCommandMenu]);
 
   useEffect(() => {
     const textArea = inputRef.current;

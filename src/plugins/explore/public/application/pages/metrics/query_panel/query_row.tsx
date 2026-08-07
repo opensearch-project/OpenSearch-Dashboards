@@ -89,10 +89,10 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
               'This query cannot be represented in Builder mode. Simplify it or use Code mode.',
           })
         : row.mode === 'builder'
-        ? i18n.translate('explore.promqlBuilder.codeMayBeIrreversible', {
-            defaultMessage: 'Switching to Code mode may prevent switching back to Builder mode.',
-          })
-        : undefined;
+          ? i18n.translate('explore.promqlBuilder.codeMayBeIrreversible', {
+              defaultMessage: 'Switching to Code mode may prevent switching back to Builder mode.',
+            })
+          : undefined;
 
     const handleModeChange = useCallback(
       (id: string) => {

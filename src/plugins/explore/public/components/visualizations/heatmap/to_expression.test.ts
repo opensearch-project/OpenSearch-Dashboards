@@ -21,16 +21,12 @@ describe('Heatmap to_expression', () => {
       name: 'Category1',
       schema: VisFieldType.Categorical,
       column: 'category1',
-      validValuesCount: 4,
-      uniqueValuesCount: 2,
     },
     {
       id: 2,
       name: 'Category2',
       schema: VisFieldType.Categorical,
       column: 'category2',
-      validValuesCount: 4,
-      uniqueValuesCount: 2,
     },
   ];
 
@@ -40,8 +36,6 @@ describe('Heatmap to_expression', () => {
       name: 'Value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 4,
-      uniqueValuesCount: 4,
     },
   ];
 
@@ -75,32 +69,6 @@ describe('Heatmap to_expression', () => {
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       const heatmapSeries = (result?.series ?? []).filter((s: any) => s.type === 'heatmap');
       expect(heatmapSeries.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createRegularHeatmap(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisColumnMappings
-      );
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(noTitleResult?.title?.text).toBeUndefined();
-
-      const defaultTitleResult = createRegularHeatmap(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisColumnMappings
-      );
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(defaultTitleResult?.title?.text).toBe('Value by Category1 and Category2');
-
-      const customTitleResult = createRegularHeatmap(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Heatmap' } },
-        mockAxisColumnMappings
-      );
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(customTitleResult?.title?.text).toBe('Custom Heatmap');
     });
 
     it('throws when axis config is missing', () => {

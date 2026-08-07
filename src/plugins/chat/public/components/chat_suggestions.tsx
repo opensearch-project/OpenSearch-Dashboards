@@ -11,12 +11,13 @@ import {
   EuiText,
   IconType,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TextColor } from '@elastic/eui/src/components/text/text_color';
 import { useChatContext } from '../contexts/chat_context';
 import { Message } from '../../common/types';
 import { ChatContext } from '../services/suggested_action';
 import { SuggestedActions } from '../services/suggested_action/types';
+import { parseInlineSuggestions } from '../../common/parse_inline_suggestions';
 
 import './chat_suggestions.scss';
 
@@ -26,20 +27,21 @@ interface SuggestionBubbleProps {
   content: string;
   iconType?: IconType;
   actionType?: string;
+  selected?: boolean;
 }
 
 const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
   onClick,
   color,
   content,
-  iconType = 'chatRight',
+  iconType = 'returnKey',
   actionType,
+  selected = false,
 }: SuggestionBubbleProps) => {
   // Determine if this is a custom suggestion from a plugin
   const isCustomSuggestion = actionType === 'customize';
 
-  // Use different icon for custom suggestions
-  const suggestionIcon = isCustomSuggestion ? 'faceHappy' : iconType;
+  const suggestionIcon = selected ? 'check' : isCustomSuggestion ? 'faceHappy' : iconType;
 
   // Build CSS classes for visual distinction
   const panelClasses = [
@@ -47,7 +49,10 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
     isCustomSuggestion
       ? 'chat-suggestion-bubble-panel--custom'
       : 'chat-suggestion-bubble-panel--default',
-  ].join(' ');
+    selected ? 'chat-suggestion-bubble-panel--selected' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <EuiPanel
@@ -65,7 +70,7 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
           <EuiIcon
             type={suggestionIcon}
             style={{ marginRight: 5 }}
-            color={isCustomSuggestion ? 'primary' : undefined}
+            color={selected ? 'success' : isCustomSuggestion ? 'primary' : undefined}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -81,14 +86,33 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
 export const ChatSuggestions = ({
   messages,
   currentMessage,
+  onFillInput,
+  onRemoveInput,
+  inputValue,
 }: {
   messages: Message[];
   currentMessage: Message;
+  onFillInput?: (content: string) => void;
+  onRemoveInput?: (content: string) => void;
+  inputValue?: string;
 }) => {
   const { suggestedActionsService, chatService } = useChatContext();
 
   const [customSuggestions, setCustomSuggestions] = useState<SuggestedActions[]>([]);
   const [isLoadingCustomSuggestions, setIsLoadingCustomSuggestions] = useState(false);
+
+  // Parse inline suggestions from the current assistant message content
+  const inlineSuggestionActions: SuggestedActions[] = useMemo(() => {
+    if (currentMessage.role !== 'assistant' || typeof currentMessage.content !== 'string') {
+      return [];
+    }
+    const { suggestions } = parseInlineSuggestions(currentMessage.content);
+    return suggestions.map((text) => ({
+      actionType: 'send_as_input',
+      message: text,
+      action: async () => true,
+    }));
+  }, [currentMessage]);
 
   // Load custom suggestions when component mounts or context changes
   useEffect(() => {
@@ -117,27 +141,47 @@ export const ChatSuggestions = ({
     loadCustomSuggestions();
   }, [suggestedActionsService, chatService, messages, currentMessage]);
 
-  if (isLoadingCustomSuggestions || customSuggestions.length === 0) {
+  const allSuggestions = [...inlineSuggestionActions, ...customSuggestions];
+
+  if (isLoadingCustomSuggestions || allSuggestions.length === 0) {
     return null;
   }
+
+  const isSuggestionSelected = (message: string) => !!inputValue && inputValue.includes(message);
+
+  const handleSuggestionClick = (suggestedAction: SuggestedActions) => {
+    const isInline = suggestedAction.actionType === 'send_as_input';
+
+    if (isInline) {
+      if (isSuggestionSelected(suggestedAction.message)) {
+        onRemoveInput?.(suggestedAction.message);
+      } else {
+        onFillInput?.(suggestedAction.message);
+      }
+    } else {
+      suggestedAction.action();
+    }
+  };
+
   return (
     <div
       aria-label="chat suggestions"
       style={{ paddingLeft: 8, paddingBottom: 5, overflow: 'hidden' }}
     >
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
-        <small>Available suggestions</small>
+        <small>Follow up</small>
       </EuiText>
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-        {customSuggestions.map((suggestedAction, i) => (
-          <div key={i}>
+        {allSuggestions.map((suggestedAction) => (
+          <div key={`${suggestedAction.actionType}-${suggestedAction.message}`}>
             <EuiSpacer size="xs" />
             <EuiFlexItem grow={false}>
               <SuggestionBubble
-                onClick={suggestedAction.action}
-                color="default"
+                onClick={() => handleSuggestionClick(suggestedAction)}
+                color={isSuggestionSelected(suggestedAction.message) ? 'success' : 'default'}
                 content={suggestedAction.message}
                 actionType={suggestedAction.actionType}
+                selected={isSuggestionSelected(suggestedAction.message)}
               />
             </EuiFlexItem>
           </div>

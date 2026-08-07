@@ -39,7 +39,10 @@ import { IndexMapping } from '../../mappings';
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
-  (path: 'count', opts: CountOpts): Promise<{
+  (
+    path: 'count',
+    opts: CountOpts
+  ): Promise<{
     count: number;
     _shards: opensearchtypes.ShardStatistics;
   }>;
@@ -58,7 +61,10 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
-  (path: 'tasks.get', opts: { taskId: string }): Promise<{
+  (
+    path: 'tasks.get',
+    opts: { taskId: string }
+  ): Promise<{
     completed: boolean;
     error?: ErrorResponse;
   }>;

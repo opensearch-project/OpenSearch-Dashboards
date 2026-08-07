@@ -40,16 +40,11 @@ export function mockGetClusterStats(clusterStats: any) {
 
 describe('get_cluster_stats', () => {
   it('uses the opensearchClient to get the response from the `cluster.stats` API', async () => {
-    const response = Promise.resolve({ body: { cluster_uuid: '1234' } });
+    const clusterStatsBody = { cluster_uuid: '1234' };
     const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
-    opensearchClient.cluster.stats.mockImplementationOnce(
-      // @ts-ignore the method only cares about the response body
-      async (_params = { timeout: TIMEOUT }) => {
-        return response;
-      }
-    );
-    const result = getClusterStats(opensearchClient);
+    opensearchClient.cluster.stats.mockResolvedValueOnce({ body: clusterStatsBody } as any);
+    const result = await getClusterStats(opensearchClient);
     expect(opensearchClient.cluster.stats).toHaveBeenCalledWith({ timeout: TIMEOUT });
-    expect(result).toStrictEqual(response);
+    expect(result).toStrictEqual(clusterStatsBody);
   });
 });

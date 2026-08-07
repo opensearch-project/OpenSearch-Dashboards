@@ -58,3 +58,5 @@ export { DatasetSelector, DatasetSelectorAppearance } from './dataset_selector';
 export { AdvancedSelector } from './dataset_selector/advanced_selector';
 export { ConfiguratorV2 } from './dataset_selector/configurator/configurator_v2';
 export { useCancelButtonTiming } from './hooks';
+export { PPLAnalyzePanel } from './ppl_analyze_panel/ppl_analyze_panel';
+export { runPPLAnalyzeInBackground } from './ppl_analyze/run_ppl_analyze';

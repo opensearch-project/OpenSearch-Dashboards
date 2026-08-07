@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
+import {
+  UiSettingsType,
+  StringValidation,
+  ImageValidation,
+  UiSettingScope,
+} from '../../../../core/public';
 
 export interface FieldSetting {
   displayName: string;
@@ -46,6 +51,18 @@ export interface FieldSetting {
   isPermissionControlled: boolean;
   defVal: unknown;
   isCustom: boolean;
+  scope?: UiSettingScope | UiSettingScope[];
+  /**
+   * Scoped pages only (USER/WORKSPACE): true if this scope stores its own value,
+   * false if it inherits from global. Drives the source badge and "Use Application
+   * value" action. Undefined on the Application page.
+   */
+  isUserProvided?: boolean;
+  /**
+   * Scoped pages only: the value inherited from global, shown while a "Use Application
+   * value" change is pending. Undefined if global has no stored value.
+   */
+  inheritedValue?: unknown;
   validation?: StringValidation | ImageValidation;
   readOnly?: boolean;
   deprecation?: {
@@ -66,4 +83,9 @@ export interface FieldState {
   loading?: boolean;
   isInvalid?: boolean;
   error?: string | null;
+  /**
+   * "Use Application value" on a scoped page: persist null so this setting drops its
+   * per-scope value and inherits from global.
+   */
+  clearToInherit?: boolean;
 }

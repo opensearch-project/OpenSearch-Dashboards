@@ -80,8 +80,10 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
   field: IFieldType;
 }
 
-export interface MonacoCompatibleQuerySuggestion
-  extends Pick<QuerySuggestionBasic, 'description' | 'cursorIndex'> {
+export interface MonacoCompatibleQuerySuggestion extends Pick<
+  QuerySuggestionBasic,
+  'description' | 'cursorIndex'
+> {
   type: monaco.languages.CompletionItemKind;
   text: string;
   detail: string;
@@ -94,6 +96,4 @@ export interface MonacoCompatibleQuerySuggestion
 
 /** @public **/
 export type QuerySuggestion =
-  | QuerySuggestionBasic
-  | QuerySuggestionField
-  | MonacoCompatibleQuerySuggestion;
+  QuerySuggestionBasic | QuerySuggestionField | MonacoCompatibleQuerySuggestion;

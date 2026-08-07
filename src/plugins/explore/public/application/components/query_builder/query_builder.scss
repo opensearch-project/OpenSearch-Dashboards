@@ -1,0 +1,649 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$plqInk: $euiTextColor;
+$plqSub: $euiColorDarkShade;
+$plqBorder: $euiBorderColor;
+$plqPrimary: $euiColorPrimary;
+$plqBoxBg: mix($euiColorEmptyShade, $euiColorLightestShade, 55%);
+$plqCtlBg: $euiColorEmptyShade;
+$plqHoverBorder: $euiColorMediumShade;
+/* stylelint-disable @osd/stylelint/no_restricted_values */
+$plqBorderSoft: lightOrDarkTheme(#e6ebf2, $euiColorLightShade);
+$plqLabelChip: lightOrDarkTheme(#e9edf3, $euiColorLightShade);
+$plqChipBg: lightOrDarkTheme(#eef1f6, $euiColorLightShade);
+$plqXHover: lightOrDarkTheme(#dce2ea, shade($euiColorLightShade, 40%));
+$plqPrimarySoft: tintOrShade($euiColorPrimary, 90%, 70%);
+$plqFnText: lightOrDarkTheme(#00538c, $euiColorPrimary);
+$plqStr: lightOrDarkTheme(#8737a8, #c98fd8);
+/* stylelint-enable @osd/stylelint/no_restricted_values */
+$plqRadius: 2px;
+$plqControlHeight: 36px;
+
+%plq-mono {
+  // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+  font-family: $euiCodeFontFamily;
+  font-size: 11.5px;
+}
+
+%plq-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px 0 8px;
+  background: $plqChipBg;
+  color: $plqInk;
+  border-radius: $plqRadius;
+}
+
+.plqBuilder {
+  background: $plqBoxBg;
+  border: 1px solid $plqBorderSoft;
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: $plqInk;
+}
+
+.plqRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  & + & {
+    margin-top: 10px;
+  }
+}
+
+.plqRow--builder {
+  flex-wrap: wrap;
+}
+
+.plqRow__label {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: $plqControlHeight;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $plqInk;
+  white-space: nowrap;
+  background: $plqLabelChip;
+  border-radius: $plqRadius;
+  user-select: none;
+}
+
+.plqGroup {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: $plqCtlBg;
+  border: 1px solid $plqBorder;
+  border-radius: $plqRadius;
+  padding: 0 8px;
+  height: $plqControlHeight;
+
+  &--wrap {
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: $plqControlHeight;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    row-gap: 4px;
+  }
+
+  &__label {
+    position: absolute;
+    top: -7px;
+    left: 8px;
+    z-index: 1;
+    padding: 0 4px;
+    background: linear-gradient(180deg, $plqBoxBg 45%, $plqCtlBg 55%);
+    font-size: 10px;
+    line-height: 12px;
+    color: $plqSub;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .euiFormControlLayout,
+  .euiFormControlLayout__childrenWrapper,
+  .euiComboBox-isOpen .euiFormControlLayout,
+  .euiComboBox__inputWrap,
+  .euiComboBox,
+  .euiFieldText,
+  .euiFieldNumber,
+  .euiSuperSelectControl {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    min-height: 20px !important;
+    height: auto !important;
+  }
+
+  .euiSuperSelectControl {
+    padding-left: 0;
+    line-height: 20px;
+    font-size: 12.5px;
+    color: $plqInk;
+  }
+
+  .plqAggTrigger {
+    @extend %plq-mono;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    line-height: 20px;
+    color: $plqInk;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &__caret {
+      color: $plqSub;
+    }
+
+    &__label--placeholder {
+      color: $plqSub;
+    }
+
+    &:hover &__caret,
+    &:focus &__caret {
+      color: $plqPrimary;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .euiComboBox__inputWrap {
+    padding: 0 22px 0 0 !important;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .euiComboBoxPill--plainText {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 20px;
+  }
+
+  .euiButtonIcon {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.plqPills {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  &__caret.euiButtonIcon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    color: $plqSub;
+  }
+}
+
+.plqPill {
+  @extend %plq-chip;
+
+  gap: 2px;
+  height: 18px;
+
+  &__label {
+    @extend %plq-mono;
+
+    padding: 0;
+    line-height: 18px;
+    color: $plqInk;
+    user-select: none;
+  }
+}
+
+.plqPillX.euiButtonIcon {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  color: $plqInk;
+
+  .euiIcon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.plqChip {
+  @extend %plq-chip;
+
+  gap: 4px;
+  height: 18px;
+
+  &__mono {
+    @extend %plq-mono;
+
+    color: $plqInk;
+  }
+
+  &__nat {
+    font-size: 11.5px;
+    line-height: 18px;
+    color: $plqInk;
+    cursor: default;
+  }
+
+  &__param {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    box-shadow: none !important;
+    background: transparent;
+    outline: none;
+    line-height: 18px;
+    color: $plqInk;
+    text-align: left;
+    cursor: pointer;
+
+    &--invalid {
+      color: $euiColorDanger;
+    }
+  }
+
+  &__caret {
+    color: $plqSub;
+  }
+}
+
+.plqFn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  background: $plqChipBg;
+  color: $plqInk;
+  border-radius: $plqRadius;
+
+  &__name {
+    @extend %plq-mono;
+
+    color: $plqInk;
+    cursor: default;
+  }
+
+  &__param.euiFieldText,
+  &__param {
+    @extend %plq-mono;
+
+    height: 18px;
+    padding: 0 2px;
+    border: none;
+    box-shadow: none !important;
+    background: transparent;
+    outline: none;
+    color: $plqInk;
+    text-align: center;
+
+    &::placeholder {
+      color: $plqSub;
+    }
+  }
+}
+
+// A stats aggregation rendered as a pill inside the "Stats" group — mirrors the
+// where-filter chip so both operations read the same way.
+.plqAggChip {
+  @extend %plq-chip;
+
+  gap: 4px;
+  min-height: 18px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.plqX.euiButtonIcon {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: none;
+  border-radius: $plqRadius;
+  background: transparent;
+  color: $plqSub;
+  flex-shrink: 0;
+
+  &:hover,
+  &:focus {
+    background: $plqXHover;
+    color: $plqInk;
+  }
+}
+
+.plqIconBtn.euiButtonIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid $plqBorder;
+  border-radius: $plqRadius;
+  background: $plqCtlBg;
+  color: $plqSub;
+
+  &:hover,
+  &:focus {
+    border-color: $plqPrimary;
+    color: $plqPrimary;
+  }
+}
+
+.plqIconBtn--ghost.euiButtonIcon {
+  border-style: dashed;
+  background: transparent;
+}
+
+.plqIconBtn--active.euiButtonIcon {
+  background: $plqPrimarySoft;
+  border-color: $plqPrimary;
+  color: $plqPrimary;
+}
+
+.plqFxBtn.euiButtonIcon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: none;
+  background: transparent;
+  color: $plqSub;
+
+  &:hover,
+  &:focus {
+    background: $plqPrimarySoft;
+    color: $plqPrimary;
+  }
+}
+
+.plqFxBtn__label {
+  font-style: italic;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+
+.plqGhostAdd.euiButtonEmpty {
+  height: $plqControlHeight;
+  border: 1px dashed $plqBorder;
+  border-radius: $plqRadius;
+
+  .euiButtonEmpty__content {
+    padding: 0 10px;
+  }
+
+  .euiButtonEmpty__text {
+    font-size: 12px;
+    color: $plqSub;
+  }
+
+  &:hover,
+  &:focus {
+    border-color: $plqPrimary;
+
+    .euiButtonEmpty__text {
+      color: $plqPrimary;
+    }
+  }
+}
+
+.plqSpacer {
+  flex: 1 1 12px;
+}
+
+.plqWhere {
+  display: inline-flex;
+  align-items: center;
+
+  &__add.euiButtonIcon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}
+
+// Common shape for the inline chip trigger buttons (field / operator / value):
+// a borderless, transparent button that highlights on hover/focus. This is the
+// exact subset the three share; each adds its own extras below.
+%plq-chip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 18px;
+  padding: 0 4px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background: $plqXHover;
+    border-radius: $plqRadius;
+  }
+}
+
+// The field/operator triggers additionally render their text in the mono chip
+// font; the value trigger styles its own inner text span instead.
+%plq-chip-button-text {
+  @extend %plq-chip-button;
+  @extend %plq-mono;
+
+  line-height: 18px;
+  color: $plqInk;
+}
+
+.plqWhereChip {
+  @extend %plq-chip;
+
+  gap: 4px;
+  height: 18px;
+  max-width: 100%;
+  min-width: 0;
+
+  &__field {
+    @extend %plq-chip-button-text;
+
+    min-width: 0;
+    user-select: none;
+  }
+
+  &__op {
+    @extend %plq-chip-button-text;
+
+    white-space: nowrap;
+  }
+
+  &__val {
+    @extend %plq-chip-button;
+
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  &__valText {
+    @extend %plq-mono;
+
+    line-height: 18px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $plqStr;
+  }
+
+  &__val--empty &__valText {
+    color: $plqSub;
+  }
+
+  &__emptyVal {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiFontFamily;
+    font-style: italic;
+    color: $plqSub;
+  }
+
+  &__caret {
+    color: $plqSub;
+  }
+
+  &__range {
+    @extend %plq-mono;
+
+    max-width: 100%;
+    min-width: 0;
+    height: 18px;
+    padding: 0 2px;
+    border: none;
+    outline: none;
+    background: transparent;
+    line-height: 18px;
+    color: $plqStr;
+
+    &::placeholder {
+      color: $plqSub;
+    }
+  }
+
+  &__nat {
+    font-size: 11.5px;
+    line-height: 18px;
+    color: $plqSub;
+    user-select: none;
+  }
+}
+
+.plqDivider {
+  width: 1px;
+  align-self: stretch;
+  margin: 0 2px;
+  background: $plqBorder;
+  flex-shrink: 0;
+}
+
+.plqParamInput {
+  height: 20px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  outline: none;
+  // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+  font-family: $euiCodeFontFamily;
+  font-size: 12px;
+  color: $plqInk;
+
+  &::placeholder {
+    color: $plqSub;
+  }
+}
+
+.plqFnPopover {
+  width: 224px;
+
+  &__list {
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 4px;
+  }
+
+  &__group {
+    padding: 8px 10px 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $plqSub;
+  }
+
+  &__item {
+    display: block;
+    width: 100%;
+    padding: 5px 10px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiCodeFontFamily;
+    font-size: 12.5px;
+    color: $plqInk;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+
+    &:hover,
+    &:focus {
+      background: $plqPrimarySoft;
+      color: $plqPrimary;
+      outline: none;
+    }
+  }
+
+  &__empty {
+    padding: 10px;
+    font-size: 12px;
+    color: $plqSub;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__labeled {
+    display: block;
+  }
+
+  &__desc {
+    display: block;
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiFontFamily;
+    font-size: 11px;
+    font-weight: normal;
+    color: $plqSub;
+    white-space: normal;
+  }
+}
+
+.plqFieldOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &__check {
+    flex-shrink: 0;
+    color: $plqPrimary;
+
+    &--hidden {
+      visibility: hidden;
+    }
+  }
+
+  &__hint {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiFontFamily;
+    font-size: 11px;
+    color: $plqSub;
+  }
+}

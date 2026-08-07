@@ -43,9 +43,10 @@ const TableRowUI = ({
 }: TableRowProps) => {
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
-  const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
-    setIsExpanded,
-  ]);
+  const handleExpanding = useCallback(
+    () => setIsExpanded((prevState) => !prevState),
+    [setIsExpanded]
+  );
 
   const tableRow = (
     <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
@@ -157,7 +158,9 @@ const TableRowUI = ({
           <EuiFlexItem>
             <h4
               className="euiTitle euiTitle--xxsmall"
+              // eslint-disable-next-line react/no-unknown-property
               i18n-id="discover.docTable.tableRow.detailHeading"
+              // eslint-disable-next-line react/no-unknown-property
               i18n-default-message="Expanded document"
             >
               Expanded document

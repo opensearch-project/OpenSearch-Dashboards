@@ -10,7 +10,7 @@ import { getDataViewTitle, validateDataViewDataSourceReference } from './utils';
 
 describe('test validateDataViewDataSourceReference', () => {
   const getDataViewSavedObjectMock = (mockedFields: any = {}) =>
-    ({ ...mockedFields } as SavedObject<DataViewSavedObjectAttrs>);
+    ({ ...mockedFields }) as SavedObject<DataViewSavedObjectAttrs>;
   let dataViewSavedObjectMock;
   const dataSourceId = 'fakeDataSourceId';
 

@@ -170,6 +170,9 @@
 .embPanel__content[data-error],
 .embPanel__content[data-loading] {
   pointer-events: none;
+}
+
+.embPanel__content[data-loading] {
   filter: grayscale(100%);
   filter: gray;
 }

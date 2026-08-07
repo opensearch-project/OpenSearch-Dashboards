@@ -28,10 +28,8 @@
  * under the License.
  */
 
-import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { firstValueFrom, mapToObject } from '@osd/std';
-
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -50,66 +48,71 @@ import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { PermissionControlledUiSettingsWrapper } from './saved_objects/permission_controlled_ui_settings_wrapper';
 import {
-  savedObjectsConfig as savedObjectsDefinition,
-  SavedObjectsConfigType,
-} from '../saved_objects/saved_objects_config';
-import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
 } from './utils';
 import { getAIFeaturesSetting } from './settings/ai_features';
+import { InternalDynamicConfigServiceSetup } from '../config';
+import { getGlobalSettingControlSetting } from './settings/global_setting_control';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  dynamicConfig: InternalDynamicConfigServiceSetup;
 }
 
 /** @internal */
-export class UiSettingsService
-  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
+export class UiSettingsService implements CoreService<
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart
+> {
   private readonly log: Logger;
-  private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
+  private readonly config$: Observable<UiSettingsConfigType>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private permissionControlEnabled = false;
+  private permissionControlledUiSettingsWrapper?: PermissionControlledUiSettingsWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
 
-    this.config$ = combineLatest([
-      coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path),
-      coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsDefinition.path),
-    ]);
+    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
-  public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
+  public async setup({
+    http,
+    savedObjects,
+    dynamicConfig,
+  }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
     this.register(getCoreSettings());
 
-    const config = await firstValueFrom(
-      this.config$.pipe(
-        map(([uiSettingsConfig, savedObjectsConfig]) => {
-          return { uiSettingsConfig, savedObjectsConfig };
-        })
-      )
-    );
+    const uiSettingsConfig = await firstValueFrom(this.config$);
 
-    this.overrides = config.uiSettingsConfig.overrides || {};
+    this.overrides = uiSettingsConfig.overrides || {};
 
     // Use uiSettings.defaults from the config file
-    this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
+    this.validateAndUpdateConfiguredDefaults(uiSettingsConfig.defaults);
 
-    const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
-      config.savedObjectsConfig.permission.enabled
-    );
+    this.permissionControlEnabled = savedObjects.getPermissionControlEnabled();
+    // The dashboard-admin concept only exists when saved-objects permission control is
+    // enabled. Without it there is no admin scope, so we skip both the admin-only
+    // client wrapper and the admin "restrict global settings" toggle entirely.
+    if (this.permissionControlEnabled) {
+      this.permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
+        dynamicConfig
+      );
+      savedObjects.addClientWrapper(
+        PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
+        PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
+        this.permissionControlledUiSettingsWrapper.wrapperFactory
+      );
 
-    savedObjects.addClientWrapper(
-      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
-      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
-      permissionControlledUiSettingsWrapper.wrapperFactory
-    );
+      this.register(getGlobalSettingControlSetting());
+    }
 
     this.register(getAIFeaturesSetting());
 
@@ -122,8 +125,11 @@ export class UiSettingsService
     this.validatesDefinitions();
     this.validatesOverrides();
 
+    const asScopedToClient = this.getScopedClientFactory();
+    this.permissionControlledUiSettingsWrapper?.setAsScopedUiSettingsClient(asScopedToClient);
+
     return {
-      asScopedToClient: this.getScopedClientFactory(),
+      asScopedToClient,
     };
   }
 
@@ -142,6 +148,7 @@ export class UiSettingsService
         defaults: mapToObject(this.uiSettingsDefaults),
         overrides: this.overrides,
         log: this.log,
+        permissionControlEnabled: this.permissionControlEnabled,
       });
   }
 

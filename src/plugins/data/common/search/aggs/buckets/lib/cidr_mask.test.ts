@@ -36,17 +36,17 @@ describe('CidrMask', () => {
       () =>
         // @ts-ignore
         new CidrMask()
-    ).toThrowError();
+    ).toThrow();
 
-    expect(() => new CidrMask('')).toThrowError();
-    expect(() => new CidrMask('hello, world')).toThrowError();
-    expect(() => new CidrMask('0.0.0.0')).toThrowError();
-    expect(() => new CidrMask('0.0.0.0/0')).toThrowError();
-    expect(() => new CidrMask('0.0.0.0/33')).toThrowError();
-    expect(() => new CidrMask('256.0.0.0/32')).toThrowError();
-    expect(() => new CidrMask('0.0.0.0/32/32')).toThrowError();
-    expect(() => new CidrMask('1.2.3/1')).toThrowError();
-    expect(() => new CidrMask('0.0.0.0/123d')).toThrowError();
+    expect(() => new CidrMask('')).toThrow();
+    expect(() => new CidrMask('hello, world')).toThrow();
+    expect(() => new CidrMask('0.0.0.0')).toThrow();
+    expect(() => new CidrMask('0.0.0.0/0')).toThrow();
+    expect(() => new CidrMask('0.0.0.0/33')).toThrow();
+    expect(() => new CidrMask('256.0.0.0/32')).toThrow();
+    expect(() => new CidrMask('0.0.0.0/32/32')).toThrow();
+    expect(() => new CidrMask('1.2.3/1')).toThrow();
+    expect(() => new CidrMask('0.0.0.0/123d')).toThrow();
   });
 
   test('should correctly grab IP address and prefix length', () => {

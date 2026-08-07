@@ -57,7 +57,7 @@ const mockReadFile = ({
   uuid: string;
   error: any;
 }>) => {
-  ((readFile as unknown) as jest.Mock).mockImplementation(() => {
+  (readFile as unknown as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -67,7 +67,7 @@ const mockReadFile = ({
 };
 
 const mockWriteFile = (error?: object) => {
-  ((writeFile as unknown) as jest.Mock).mockImplementation(() => {
+  (writeFile as unknown as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {

@@ -40,12 +40,10 @@ export const [getApplication, setApplication] = createGetterSetter<ApplicationSt
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export const [getIndexPatterns, setIndexPatterns] =
+  createGetterSetter<IndexPatternsContract>('IndexPatterns');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');

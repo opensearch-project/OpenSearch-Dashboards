@@ -263,48 +263,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
     });
 
-    it('should create a facet line visualization using a query with one metric, two categories, one date', () => {
-      cy.explore.clearQueryEditor();
-
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
-      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
-
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category, unique_category`;
-      cy.explore.setQueryEditor(query, { submit: false });
-      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
-
-      // Run the query
-      cy.getElementByTestId('exploreQueryExecutionButton').click();
-      cy.osd.waitForLoader(true);
-
-      // Navigate to visualization tab
-      cy.get('#explore_visualization_tab').click();
-      cy.wait(1000);
-
-      // Verify visualization is created
-      cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
-
-      // Verify the line viz is displayed in the chart type selector as selected
-      cy.getElementByTestId('exploreChartTypeSelector').click();
-      cy.get('[role="option"][aria-selected="true"]')
-        .should('be.visible')
-        .and('contain.text', 'Line');
-
-      // Axes should be correctly set
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
-      cy.getElementByTestId('field-y').should('contain.text', 'count');
-      cy.getElementByTestId('field-color').should('contain.text', 'category');
-      cy.getElementByTestId('field-facet').should('contain.text', 'unique_category');
-
-      // Switch to table, the table should correctly render
-      cy.getElementByTestId('exploreChartTypeSelector-table').click();
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'unique_category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
-    });
-
-    it('should create a line and bar visualization using a query with one metric and two categories', () => {
+    it('should create a multi series line visualization using a query with two metrics and one date', () => {
       // Setup dataset
       cy.explore.clearQueryEditor();
       const datasetName = `${INDEX_WITH_TIME_1}*`;
@@ -323,24 +282,24 @@ export const runCreateVisTests = () => {
       // Verify visualization is created
       cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
-      // Verify the metric viz is displayed in the chart type selector
+      // Verify the line viz is displayed in the chart type selector
       cy.getElementByTestId('exploreVisStylePanel')
         .should('be.visible')
         .within(() => {
-          // Try finding the EuiSuperSelect button directly
           cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
         .and('contain.text', 'Line');
 
-      // Verify a line bar chart has been created
-      cy.contains('Y-Axis (2nd)');
-
       // Close dropdown
       cy.get('body').click(0, 0);
 
-      // Verify the visualization are displayed
+      // Verify both metrics are on the same Y-Axis as a multi-series line chart
+      cy.getElementByTestId('field-y').should('contain.text', 'avg_bytes');
+      cy.getElementByTestId('field-y').should('contain.text', 'max_bytes');
+
+      // Verify the visualization is displayed
       cy.get('.exploreVisContainer canvas').should('be.visible');
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });

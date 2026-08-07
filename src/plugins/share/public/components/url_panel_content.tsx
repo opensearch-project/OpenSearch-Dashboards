@@ -437,19 +437,19 @@ export class UrlPanelContent extends Component<Props, State> {
       return;
     }
 
-    const setParamValue = (paramName: string) => (
-      values: { [queryParam: string]: boolean } = {}
-    ): void => {
-      const stateUpdate = {
-        urlParams: {
-          ...this.state.urlParams,
-          [paramName]: {
-            ...values,
+    const setParamValue =
+      (paramName: string) =>
+      (values: { [queryParam: string]: boolean } = {}): void => {
+        const stateUpdate = {
+          urlParams: {
+            ...this.state.urlParams,
+            [paramName]: {
+              ...values,
+            },
           },
-        },
+        };
+        this.setState(stateUpdate, this.state.useShortUrl ? this.createShortUrl : this.setUrl);
       };
-      this.setState(stateUpdate, this.state.useShortUrl ? this.createShortUrl : this.setUrl);
-    };
 
     return (
       <React.Fragment>

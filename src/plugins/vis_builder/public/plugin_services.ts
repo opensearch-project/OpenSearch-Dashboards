@@ -11,9 +11,8 @@ import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
 import { UiActionsStart } from '../../ui_actions/public';
 
-export const [getSearchService, setSearchService] = createGetterSetter<
-  DataPublicPluginStart['search']
->('data.search');
+export const [getSearchService, setSearchService] =
+  createGetterSetter<DataPublicPluginStart['search']>('data.search');
 
 export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<
   ExpressionsStart['ExpressionLoader']
@@ -25,13 +24,11 @@ export const [getReactExpressionRenderer, setReactExpressionRenderer] = createGe
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<
-  DataPublicPluginStart['indexPatterns']
->('data.indexPatterns');
+export const [getIndexPatterns, setIndexPatterns] =
+  createGetterSetter<DataPublicPluginStart['indexPatterns']>('data.indexPatterns');
 
-export const [getSavedVisBuilderLoader, setSavedVisBuilderLoader] = createGetterSetter<
-  SavedVisBuilderLoader
->('SavedVisBuilderLoader');
+export const [getSavedVisBuilderLoader, setSavedVisBuilderLoader] =
+  createGetterSetter<SavedVisBuilderLoader>('SavedVisBuilderLoader');
 
 export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
 
@@ -40,6 +37,5 @@ export const [getTypeService, setTypeService] = createGetterSetter<TypeServiceSt
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 export const [getUIActions, setUIActions] = createGetterSetter<UiActionsStart>('UIActions');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');

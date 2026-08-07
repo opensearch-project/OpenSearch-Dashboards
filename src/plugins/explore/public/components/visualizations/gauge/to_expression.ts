@@ -18,7 +18,7 @@ export const createGauge = (
 
   const result = pipe(
     transform(convertTo2DArray()),
-    createBaseConfig({ title: '' }),
+    createBaseConfig({}),
     createGaugeSeries({ styles: styleOptions, seriesFields: [valueColumn.column] }),
     assembleGaugeSpec
   )({

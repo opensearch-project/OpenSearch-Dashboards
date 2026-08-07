@@ -45,21 +45,22 @@ const defaultContextValue = {
   notifications: createNotifications({}),
 };
 
-export const context = createContext<
-  OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices>
->(defaultContextValue);
+export const context =
+  createContext<OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices>>(
+    defaultContextValue
+  );
 
 export const useOpenSearchDashboards = <
-  Extra extends object = {}
+  Extra extends object = {},
 >(): OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices & Extra> =>
   useContext(
-    (context as unknown) as React.Context<
+    context as unknown as React.Context<
       OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices & Extra>
     >
   );
 
 export const withOpenSearchDashboards = <
-  Props extends { opensearchDashboards: OpenSearchDashboardsReactContextValue<any> }
+  Props extends { opensearchDashboards: OpenSearchDashboardsReactContextValue<any> },
 >(
   type: React.ComponentType<Props>
 ): React.FC<Omit<Props, 'opensearchDashboards'>> => {
@@ -77,7 +78,7 @@ export const UseOpenSearchDashboards: React.FC<{
 }> = ({ children }) => <>{children(useOpenSearchDashboards())}</>;
 
 export const createOpenSearchDashboardsReactContext = <
-  Services extends OpenSearchDashboardsServices
+  Services extends OpenSearchDashboardsServices,
 >(
   services: Services
 ): OpenSearchDashboardsReactContext<Services> => {
@@ -110,12 +111,11 @@ export const createOpenSearchDashboardsReactContext = <
   return {
     value,
     Provider,
-    Consumer: (context.Consumer as unknown) as React.Consumer<
+    Consumer: context.Consumer as unknown as React.Consumer<
       OpenSearchDashboardsReactContextValue<Services>
     >,
   };
 };
 
-export const {
-  Provider: OpenSearchDashboardsContextProvider,
-} = createOpenSearchDashboardsReactContext({});
+export const { Provider: OpenSearchDashboardsContextProvider } =
+  createOpenSearchDashboardsReactContext({});

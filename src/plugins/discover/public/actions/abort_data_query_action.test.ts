@@ -17,10 +17,10 @@ describe('createAbortDataQueryAction', () => {
   let refs: Array<React.MutableRefObject<{ abortController: AbortController | undefined }>>;
 
   beforeEach(() => {
-    mockAbortController = ({
+    mockAbortController = {
       abort: jest.fn(),
       signal: new AbortController().signal,
-    } as unknown) as AbortController;
+    } as unknown as AbortController;
 
     const ref = {
       current: {
@@ -67,10 +67,10 @@ describe('createAbortDataQueryAction', () => {
   });
 
   it('should abort multiple controllers when multiple refs are provided', async () => {
-    const secondMockAbortController = ({
+    const secondMockAbortController = {
       abort: jest.fn(),
       signal: new AbortController().signal,
-    } as unknown) as AbortController;
+    } as unknown as AbortController;
 
     const secondRef = {
       current: {

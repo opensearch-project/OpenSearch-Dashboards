@@ -23,7 +23,7 @@ test('it register page with sections', () => {
 test('it should throw error when register page with the same id', () => {
   const cms = new ContentManagementService();
   cms.registerPage({ id: 'page1' });
-  expect(() => cms.registerPage({ id: 'page1' })).toThrowError();
+  expect(() => cms.registerPage({ id: 'page1' })).toThrow();
 });
 
 test('it register content provider', () => {
@@ -90,13 +90,13 @@ test('it should throw error when register content provider with invalid target a
         };
       },
     })
-  ).toThrowError();
+  ).toThrow();
 });
 
 test('it should throw error if update page section with invalid target area', () => {
   const cms = new ContentManagementService();
   cms.registerPage({ id: 'page1', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
-  expect(() => cms.updatePageSection('invalid_target_area', jest.fn())).toThrowError();
+  expect(() => cms.updatePageSection('invalid_target_area', jest.fn())).toThrow();
 });
 
 test('it should update page section', () => {

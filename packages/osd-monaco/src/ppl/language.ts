@@ -10,9 +10,61 @@ import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_anal
 import { getPPLDocumentationLink } from './ppl_documentation';
 import { pplRangeFormatProvider } from './formatter';
 import { resolvePPLValidationResult } from './validation_provider';
+import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
+import { Diagnostic, LintResult } from './lint/diagnostic';
+import { SerializableLintContext } from './lint/types';
+import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
+import { hasExplainRules, runExplainLint } from './lint/explain/run_explain_lint';
+import { explainCache } from './lint/explain/explain_cache';
+import { resolveExplainRanges } from './lint/explain/resolve_explain_ranges';
+import {
+  createExplainAttributionState,
+  runExplainIsolation,
+} from './lint/explain/explain_attribution';
+import { validateExplainAttributionSnapshot } from './lint/explain/attribution/snapshot';
+import { pplLintCodeActionProvider } from './lint/code_action_provider';
+import {
+  clearModelFixes,
+  clearModelSyntaxFixes,
+  MarkerFix,
+  markerFixKey,
+  setModelFixes,
+  setModelSyntaxFixes,
+} from './lint/fix_registry';
+import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
+import {
+  clearPPLLintTelemetry,
+  clearPPLLintTelemetryLayer,
+  emitPPLLintTelemetry,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  reconcilePPLLintExplainTelemetry,
+  reconcilePPLLintStaticTelemetry,
+} from './lint/telemetry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
+const LINT_DEBOUNCE_MS = 500;
+const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const lintGenerations = new Map<string, number>();
+const syntaxGenerations = new Map<string, number>();
+// Per-model abort controller for the in-flight explain request(s). A new lint
+// pass, a dispose, or a language switch aborts the prior one so a superseded
+// `_explain` round-trip is cancelled rather than left to complete and be
+// discarded by the generation guard. Aborting is safe: explain_cache refcounts
+// subscribers per shared in-flight request (this model's abort cannot destroy
+// another still-current subscriber's response) and hands the aborting caller a
+// never-cached error, which the stale pass drops anyway.
+const lintAbortControllers = new Map<string, AbortController>();
+
+/** Abort and forget any in-flight explain request for the model. */
+const abortInFlightExplain = (modelId: string): void => {
+  const controller = lintAbortControllers.get(modelId);
+  if (controller) {
+    controller.abort();
+    lintAbortControllers.delete(modelId);
+  }
+};
 
 // PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -70,8 +122,8 @@ const createPPLLanguageConfiguration = (): monaco.languages.LanguageConfiguratio
 /**
  * Set up synchronous tokenization for PPL
  */
-const setupPPLTokenization = () => {
-  monaco.languages.setTokensProvider(PPL_LANGUAGE_ID, {
+export const setupPPLTokenization = (languageId: string = PPL_LANGUAGE_ID) => {
+  monaco.languages.setTokensProvider(languageId, {
     getInitialState: () => {
       const state = {
         clone: () => state,
@@ -101,7 +153,7 @@ const setupPPLTokenization = () => {
             });
           }
         }
-      } catch (error) {
+      } catch {
         // If ANTLR fails, return empty tokens
       }
 
@@ -121,8 +173,14 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
     // Clear any existing PPL markers if language changed
     monaco.editor.setModelMarkers(model, OWNER, []);
+    clearModelSyntaxFixes(model);
     return;
   }
+
+  // Stamp this run so a slower, earlier validation that resolves after a newer
+  // one cannot clobber the newer markers. Mirrors the lint path's guard.
+  const generation = (syntaxGenerations.get(model.id) ?? 0) + 1;
+  syntaxGenerations.set(model.id, generation);
 
   try {
     const content = model.getValue();
@@ -136,7 +194,36 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       async (query) => (await pplWorkerProxyService.validate(query)) as PPLValidationResult
     )) as PPLValidationResult;
 
+    // Bail if a newer run started, the model was disposed, its content changed,
+    // or it is no longer PPL while we were awaiting — writing now would resurrect
+    // stale markers (and a stale command-typo fix range) over fresher state.
+    if (
+      syntaxGenerations.get(model.id) !== generation ||
+      model.isDisposed() ||
+      model.getValue() !== content ||
+      model.getLanguageId() !== PPL_LANGUAGE_ID
+    ) {
+      return;
+    }
+
     if (validationResult.errors.length > 0) {
+      // A command-typo error carries a structured `fix`; collect those into the
+      // syntax-fix side table (keyed by the marker fields Monaco preserves) so
+      // the code-action provider can offer a one-click lightbulb. The fix is not
+      // hung off the marker because Monaco's MarkerService rebuilds markers from
+      // a fixed field list and drops custom properties — same constraint the
+      // lint path handles via setModelFixes.
+      const syntaxFixes = new Map<string, MarkerFix>();
+
+      // Command-typo suggestion is a UX layer on the syntax channel, toggleable
+      // via the same PPL-lint rules uiSetting (id `command-suggestion`). When it
+      // is disabled we revert the friendly rewrite: use ANTLR's raw message and
+      // drop the quick-fix, leaving the plain syntax error. The feature is also
+      // gated on the global PPL-lint capability: when lint is off, no suggestion
+      // enhancements fire (the raw syntax error still shows).
+      const commandSuggestionEnabled =
+        isPPLLintEnabled() && getPPLLintContext(model)?.commandSuggestionEnabled !== false;
+
       // Convert errors to Monaco markers
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
         // Map SyntaxError properties to Monaco marker properties
@@ -150,34 +237,356 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
         const safeStartColumn = Math.max(1, startColumn);
         const safeEndColumn = Math.max(safeStartColumn, endColumn);
 
-        const docLink = getPPLDocumentationLink(error.message);
-        return {
+        // A command-typo error is rewritten + carries a fix + keeps rawMessage.
+        // When suggestions are off, fall back to the raw ANTLR message and no fix.
+        const isSuppressedSuggestion =
+          !commandSuggestionEnabled && error.code === 'UNKNOWN_COMMAND';
+        const effectiveMessage = isSuppressedSuggestion
+          ? (error.rawMessage ?? error.message)
+          : error.message;
+        const effectiveFix = isSuppressedSuggestion ? undefined : error.fix;
+
+        const docLink = getPPLDocumentationLink(effectiveMessage);
+        const marker: monaco.editor.IMarkerData = {
           severity: monaco.MarkerSeverity.Error,
-          message: error.message,
+          message: effectiveMessage,
           startLineNumber: safeStartLine,
           startColumn: safeStartColumn,
           endLineNumber: safeEndLine,
           endColumn: safeEndColumn,
+          // Tag the channel so the code-action provider can serve syntax fixes
+          // without touching lint markers.
+          source: SYNTAX_MARKER_SOURCE,
           // Add error code for better categorization
           code: {
             value: 'View Documentation',
             target: monaco.Uri.parse(docLink.url),
           },
         };
+
+        if (effectiveFix) {
+          syntaxFixes.set(markerFixKey(marker), effectiveFix);
+        }
+
+        return marker;
       });
 
+      setModelSyntaxFixes(model, syntaxFixes);
       monaco.editor.setModelMarkers(model, OWNER, markers);
     } else {
-      // Clear markers if no errors
+      // Clear markers and any stale syntax fixes if no errors
+      clearModelSyntaxFixes(model);
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
-  } catch (error) {
+  } catch {
     // Silent error handling - continue without worker-based highlighting
   }
 };
 
 export const revalidatePPLModel = async (model: monaco.editor.IModel) => {
   await processSyntaxHighlighting(model);
+  processLintHighlighting(model);
+};
+
+const processLintHighlighting = (model: monaco.editor.IModel): void => {
+  const generation = (lintGenerations.get(model.id) ?? 0) + 1;
+  lintGenerations.set(model.id, generation);
+
+  // Supersede any in-flight explain request from the previous pass.
+  abortInFlightExplain(model.id);
+
+  if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
+    monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+    clearModelFixes(model);
+    clearPPLLintTelemetry(model);
+    return;
+  }
+
+  const content = model.getValue();
+
+  pplWorkerProxyService.setup();
+
+  // The compiled-worker fallback runs in a Web Worker, so the context must be
+  // structured-clone-safe: Sets/Maps are flattened and the http client (a
+  // function-bearing object) is dropped. The runtime bridge keeps the full context.
+  const lintContext = getPPLLintContext(model);
+  const workerContext: SerializableLintContext | undefined = lintContext
+    ? {
+        isCalcite: lintContext.isCalcite,
+        fields: lintContext.fields ? Array.from(lintContext.fields) : undefined,
+        typeMap: lintContext.typeMap ? Object.fromEntries(lintContext.typeMap) : undefined,
+        disabledObjectFields: lintContext.disabledObjectFields
+          ? Array.from(lintContext.disabledObjectFields)
+          : undefined,
+        visibleIndices: lintContext.visibleIndices,
+        settings: lintContext.settings,
+        overrides: lintContext.overrides,
+        dataSourceId: lintContext.dataSourceId,
+        dataSourceVersion: lintContext.dataSourceVersion,
+        selectedSourcePattern: lintContext.selectedSourcePattern,
+        engineType: lintContext.engineType,
+      }
+    : undefined;
+
+  void resolvePPLLintResult(
+    model,
+    content,
+    async (query) => (await pplWorkerProxyService.lint(query, workerContext)) as LintResult
+  )
+    .then((lintResult: LintResult) => {
+      if (isLintPassStale(model, generation, content)) {
+        return;
+      }
+      // Render the static diagnostics immediately so squiggles never wait on a
+      // network round-trip. The explain pass (below) re-renders with its extra
+      // diagnostics merged in when it completes.
+      const staticMarkers = renderLintMarkers(model, lintResult.diagnostics);
+      reconcilePPLLintStaticTelemetry(
+        model,
+        lintResult.diagnostics.map((diagnostic, index) => ({
+          ruleId: diagnostic.ruleId,
+          markerKey: markerFixKey(staticMarkers[index]),
+        }))
+      );
+      layerExplainDiagnostics(
+        model,
+        content,
+        lintContext,
+        workerContext,
+        generation,
+        lintResult.diagnostics
+      );
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      if (e) console.warn('[ppl-lint] lint pipeline error:', e);
+    });
+};
+
+/**
+ * True when a lint pass's result should be discarded: the model was superseded
+ * by a newer pass, disposed, edited out from under us, or switched languages.
+ * Shared by the static render and the async explain re-render so both drop stale
+ * results identically.
+ */
+const isLintPassStale = (
+  model: monaco.editor.IModel,
+  generation: number,
+  content: string
+): boolean =>
+  lintGenerations.get(model.id) !== generation ||
+  model.isDisposed() ||
+  model.getValue() !== content ||
+  model.getLanguageId() !== PPL_LANGUAGE_ID;
+
+/**
+ * Convert diagnostics to Monaco markers and apply them, capturing each
+ * diagnostic's `fix` into the side table the code-action provider reads
+ * (Monaco's MarkerService rebuilds markers from a fixed field list and would
+ * otherwise drop that custom property).
+ */
+const renderLintMarkers = (
+  model: monaco.editor.IModel,
+  diagnostics: Diagnostic[]
+): monaco.editor.IMarkerData[] => {
+  const markers = diagnostics.map(diagnosticToMarker);
+  const fixes = new Map<string, MarkerFix>();
+  for (const marker of markers) {
+    const withExtras = marker as monaco.editor.IMarkerData & {
+      fix?: MarkerFix;
+    };
+    const key = markerFixKey(marker);
+    if (withExtras.fix) {
+      // markerFixKey is range + message; two diagnostics that collide on that
+      // key but carry different fixes would silently last-write-wins. Today
+      // separate tables + suppressContained prevent it, so this is a latent
+      // tripwire that surfaces if a future rule introduces a real collision.
+      // The dead branch is eliminated from production bundles.
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        fixes.has(key) &&
+        JSON.stringify(fixes.get(key)) !== JSON.stringify(withExtras.fix)
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn('[ppl-lint] fix key collision:', key);
+      }
+      fixes.set(key, withExtras.fix);
+      delete withExtras.fix;
+    }
+  }
+  setModelFixes(model, fixes);
+  monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
+  return markers;
+};
+
+/**
+ * Layer the explain-backed diagnostics on top of the already-rendered static
+ * markers, narrowed to the offending command. Best-effort and fully async: it
+ * issues the `_explain` round-trip only when a Calcite-applicable explain rule
+ * is enabled and an http client is present, so a query with no explain rule
+ * active pays no network cost. Any failure (no plan, network error, non-Calcite
+ * cluster) leaves the static markers untouched.
+ *
+ * Incomplete queries are skipped before the round-trip: the pass parses first
+ * and only issues `_explain` when the parse-time attribution snapshot is present
+ * (a valid, complete query), so a half-typed query costs no network. Superseded
+ * requests are aborted via a per-model AbortController.
+ *
+ * The explain detectors flag a *whole-query* range. Before rendering, the
+ * attribution snapshot (built at parse time by `analyzeLint`) narrows each
+ * finding to the specific `where` / `stats` / `sort` command. When the flagged
+ * operation has exactly one candidate, that happens with no extra network. When
+ * several commands share the operation:
+ *  - Fast mode drops the finding (the resolver never emits a wide marker).
+ *  - Thorough mode fires bounded control/treatment `_explain` probes to pin the
+ *    culprit, then narrows to it.
+ * Thorough is the default; the mode rides on the lint context.
+ */
+const layerExplainDiagnostics = (
+  model: monaco.editor.IModel,
+  content: string,
+  lintContext: ReturnType<typeof getPPLLintContext>,
+  workerContext: SerializableLintContext | undefined,
+  generation: number,
+  staticDiagnostics: Diagnostic[]
+): void => {
+  const http = lintContext?.http;
+  if (
+    !http ||
+    !hasExplainRules({
+      overrides: lintContext?.overrides,
+      dataSourceVersion: lintContext?.dataSourceVersion,
+      isCalcite: lintContext?.isCalcite,
+    })
+  ) {
+    clearPPLLintTelemetryLayer(model, 'explain');
+    return;
+  }
+  // Thorough only when explicitly asked for. It fires up to four extra probe
+  // requests per pause, so an absent mode must not opt into that.
+  const thorough = lintContext?.explainMode === 'thorough';
+
+  const run = async (): Promise<void> => {
+    // Parse first, network second. The parse-time attribution snapshot is the
+    // authoritative "clean parse" signal — it is absent for an empty, syntax-
+    // error, or otherwise unparseable query. Gating the `_explain` round-trip on
+    // it means a half-typed query issues zero network requests (rather than one
+    // that resolves to an empty plan). Without a usable snapshot there is also no
+    // provenance to narrow a whole-query finding with, so it would be dropped
+    // anyway — checking it up front just saves the request.
+    const analysis = await pplWorkerProxyService.analyzeLint(content, workerContext);
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    const snapshot =
+      analysis.attribution && validateExplainAttributionSnapshot(analysis.attribution, content);
+    if (!snapshot) {
+      clearPPLLintTelemetryLayer(model, 'explain');
+      return;
+    }
+
+    // Explain the query the host would actually run (source-prepend + dashboard/
+    // time filters) so the plan matches execution; key the cache on the stable
+    // (time-stripped) variant so it is reused across time-picker moves. Falls
+    // back to the raw content when no preparer is registered (e.g. explore).
+    const prepared = lintContext?.prepareExplainQuery?.(content) ?? {
+      query: content,
+      cacheKey: content,
+    };
+    const controller = typeof AbortController === 'undefined' ? undefined : new AbortController();
+    if (controller) {
+      lintAbortControllers.set(model.id, controller);
+    }
+    const resolution = await explainCache.resolveResult(
+      http,
+      prepared.query,
+      lintContext?.dataSourceId,
+      { cacheKey: prepared.cacheKey, signal: controller?.signal }
+    );
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    if (resolution.status !== 'ok') {
+      clearPPLLintTelemetryLayer(model, 'explain');
+      return;
+    }
+    const explainDiagnostics = runExplainLint(resolution.plan, {
+      query: content,
+      overrides: lintContext?.overrides,
+      dataSourceVersion: lintContext?.dataSourceVersion,
+      isCalcite: lintContext?.isCalcite,
+    });
+    if (explainDiagnostics.length === 0) {
+      clearPPLLintTelemetryLayer(model, 'explain');
+      return;
+    }
+
+    const attributionInputs = {
+      query: content,
+      snapshot,
+      typeMap: lintContext?.typeMap,
+      baselineDiagnostics: explainDiagnostics,
+      http,
+      dataSourceId: lintContext?.dataSourceId,
+      validateGeneratedQueries: (queries: string[]) =>
+        pplWorkerProxyService.validateLintQueries(queries),
+      isCurrent: () => !isLintPassStale(model, generation, content),
+      // Probes edit the raw editor text, so each one is re-prepared with the
+      // same host preparer the baseline went through (source prepend + injected
+      // filters); its verdict is otherwise rendered against a different query.
+      prepareExplainQuery: lintContext?.prepareExplainQuery,
+      injectedWhereCount: prepared.injectedWhereCount,
+    };
+    const state = createExplainAttributionState(attributionInputs);
+
+    // Fast, and the shared first pass for Thorough: render the uniquely-sourced
+    // findings immediately (fixes withheld until a probe confirms them).
+    const immediateMarkers = renderLintMarkers(model, [
+      ...staticDiagnostics,
+      ...state.immediateDiagnostics,
+    ]);
+    reconcilePPLLintExplainTelemetry(
+      model,
+      immediateMarkers.slice(staticDiagnostics.length).map(markerFixKey)
+    );
+
+    if (!thorough || !state.needsIsolation || isLintPassStale(model, generation, content)) {
+      return;
+    }
+
+    // Thorough: disambiguate the remaining ambiguous findings with probes, then
+    // re-render with the culprit-narrowed set (which supersedes the immediate
+    // one and may add back a probe-confirmed quick fix).
+    const isolated = await runExplainIsolation(attributionInputs, state);
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    const isolatedMarkers = renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
+    reconcilePPLLintExplainTelemetry(
+      model,
+      isolatedMarkers.slice(staticDiagnostics.length).map(markerFixKey)
+    );
+  };
+
+  void run().catch((e) => {
+    if (!isLintPassStale(model, generation, content)) {
+      clearPPLLintTelemetryLayer(model, 'explain');
+    }
+    // eslint-disable-next-line no-console
+    if (e) console.warn('[ppl-lint] explain lint layer error:', e);
+  });
+};
+
+const scheduleLintHighlighting = (model: monaco.editor.IModel): void => {
+  const existing = lintDebounceTimers.get(model.id);
+  if (existing !== undefined) {
+    clearTimeout(existing);
+  }
+  const handle = setTimeout(() => {
+    lintDebounceTimers.delete(model.id);
+    processLintHighlighting(model);
+  }, LINT_DEBOUNCE_MS);
+  lintDebounceTimers.set(model.id, handle);
 };
 
 /**
@@ -202,6 +611,7 @@ const setupPPLSyntaxHighlighting = () => {
       model.onDidChangeContent(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
           await processSyntaxHighlighting(model);
+          scheduleLintHighlighting(model);
         }
       })
     );
@@ -211,8 +621,14 @@ const setupPPLSyntaxHighlighting = () => {
       model.onDidChangeLanguage(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
           await processSyntaxHighlighting(model);
+          processLintHighlighting(model);
         } else {
+          abortInFlightExplain(model.id);
           monaco.editor.setModelMarkers(model, OWNER, []);
+          monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+          clearModelFixes(model);
+          clearModelSyntaxFixes(model);
+          clearPPLLintTelemetry(model);
         }
       })
     );
@@ -220,6 +636,7 @@ const setupPPLSyntaxHighlighting = () => {
     // Process immediately if already PPL
     if (model.getLanguageId() === PPL_LANGUAGE_ID) {
       processSyntaxHighlighting(model);
+      processLintHighlighting(model);
     }
   };
 
@@ -229,7 +646,19 @@ const setupPPLSyntaxHighlighting = () => {
   // Listen for model disposal to clear markers
   disposables.push(
     monaco.editor.onWillDisposeModel((model) => {
+      const pending = lintDebounceTimers.get(model.id);
+      if (pending !== undefined) {
+        clearTimeout(pending);
+        lintDebounceTimers.delete(model.id);
+      }
+      abortInFlightExplain(model.id);
+      lintGenerations.delete(model.id);
+      syntaxGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
+      monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+      clearModelFixes(model);
+      clearModelSyntaxFixes(model);
+      clearPPLLintTelemetry(model);
     })
   );
 
@@ -238,6 +667,13 @@ const setupPPLSyntaxHighlighting = () => {
 
   // Return cleanup function
   return () => {
+    lintDebounceTimers.forEach(clearTimeout);
+    lintDebounceTimers.clear();
+    lintAbortControllers.forEach((c) => c.abort());
+    lintAbortControllers.clear();
+    lintGenerations.clear();
+    syntaxGenerations.clear();
+    monaco.editor.getModels().forEach(clearPPLLintTelemetry);
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };
@@ -267,9 +703,38 @@ export const registerPPLLanguage = () => {
   // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();
 
+  // Register the lint quick-fix code-action provider (the lightbulb). It reads
+  // the fix side tables for both the lint and syntax marker channels.
+  const codeActionDisposable = monaco.languages.registerCodeActionProvider(
+    PPL_LANGUAGE_ID,
+    pplLintCodeActionProvider
+  );
+
+  const hoverDisposable = monaco.languages.registerHoverProvider(
+    PPL_LANGUAGE_ID,
+    pplLintHoverProvider
+  );
+
+  // Register the command dispatched when a lint quick-fix is invoked. The
+  // quick-fix action carries both an `edit` and this `command`; Monaco applies
+  // the edit first, then runs the command, so recording here captures a genuine
+  // "user clicked the fix" signal. The rule id rides on the command arguments.
+  const quickfixCommandDisposable = monaco.editor.registerCommand(
+    PPL_LINT_QUICKFIX_COMMAND_ID,
+    (_accessor, args?: { rule?: string }) => {
+      emitPPLLintTelemetry({
+        name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_CLICKED,
+        data: { rule: args?.rule },
+      });
+    }
+  );
+
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
+      codeActionDisposable.dispose();
+      hoverDisposable.dispose();
+      quickfixCommandDisposable.dispose();
     },
   };
 };

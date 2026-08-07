@@ -146,7 +146,7 @@ export const EditIndexPattern = withRouter(
       try {
         indexPattern.displayName = displayName || undefined;
         await data.indexPatterns.updateSavedObject(indexPattern);
-      } catch (e) {
+      } catch {
         indexPattern.displayName = previousDisplayName;
         notifications.toasts.addDanger(
           i18n.translate('indexPatternManagement.editIndexPattern.saveDisplayNameError', {
@@ -276,7 +276,7 @@ export const EditIndexPattern = withRouter(
         <HeaderControl
           controls={[
             {
-              description: (descriptionText as unknown) as string,
+              description: descriptionText as unknown as string,
               links: [
                 {
                   href: docLinks.links.opensearch.indexTemplates.base,

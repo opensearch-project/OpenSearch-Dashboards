@@ -33,10 +33,12 @@ const rule = require('./disallow_license_headers');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('@babel/eslint-parser'),
-  parserOptions: {
-    ecmaVersion: 2015,
-    requireConfigFile: false,
+  languageOptions: {
+    parser: require('@babel/eslint-parser'),
+    parserOptions: {
+      ecmaVersion: 2015,
+      requireConfigFile: false,
+    },
   },
 });
 

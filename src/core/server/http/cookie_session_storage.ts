@@ -167,12 +167,12 @@ export async function createCookieSessionStorageFactory<T extends Record<string,
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite ?? false,
     },
-    validateFunc: async (req: Request, session: T | T[]) => {
+    validate: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);
       }
-      return { valid: result.isValid };
+      return { isValid: result.isValid, credentials: session };
     },
   });
 

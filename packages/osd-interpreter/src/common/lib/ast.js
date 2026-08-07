@@ -124,7 +124,7 @@ export function fromExpression(expression, type = 'expression') {
 export function safeElementFromExpression(expression) {
   try {
     return fromExpression(expression);
-  } catch (e) {
+  } catch {
     return fromExpression(
       `markdown
 "## Crud.

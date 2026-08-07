@@ -35,7 +35,7 @@ describe('DataSourceMultiSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', async () => {
@@ -56,12 +56,19 @@ describe('DataSourceMultiSelectable', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should render normally with local cluster hidden', async () => {
@@ -81,12 +88,19 @@ describe('DataSourceMultiSelectable', () => {
 
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should show toasts when exception happens', async () => {
@@ -109,8 +123,8 @@ describe('DataSourceMultiSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.add).toBeCalledTimes(1);
-    expect(toasts.add).toBeCalledWith({
+    expect(toasts.add).toHaveBeenCalledTimes(1);
+    expect(toasts.add).toHaveBeenCalledWith({
       color: 'danger',
       text: expect.any(Function),
       title: 'Failed to fetch data sources',
@@ -138,7 +152,7 @@ describe('DataSourceMultiSelectable', () => {
     });
     fireEvent.click(screen.getByText('Deselect all'));
 
-    expect(callbackMock).toBeCalledWith([]);
+    expect(callbackMock).toHaveBeenCalledWith([]);
   });
 
   it('should return correct state when ui Settings provided', async () => {

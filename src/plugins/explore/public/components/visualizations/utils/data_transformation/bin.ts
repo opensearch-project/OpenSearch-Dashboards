@@ -110,127 +110,129 @@ const getNiceNumber = (rawStep: number): number => {
  *   { start: 25, end: 45, value: 470 }
  * ]
  */
-export const bin = (options: {
-  bin?: BinConfig;
-  binField: string;
-  valueField?: string;
-  aggregationType?: AggregationType;
-}) => (data: Array<Record<string, any>>): Array<Record<string, any>> => {
-  const { bin: binConfig, binField, valueField, aggregationType } = options;
+export const bin =
+  (options: {
+    bin?: BinConfig;
+    binField: string;
+    valueField?: string;
+    aggregationType?: AggregationType;
+  }) =>
+  (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+    const { bin: binConfig, binField, valueField, aggregationType } = options;
 
-  // Handle empty data
-  if (!data || data.length === 0) {
-    return [];
-  }
-
-  // Extract valid numeric values from binField
-  const validRecords = data.filter((row) => {
-    const value = row[binField];
-    return value !== null && value !== undefined && !isNaN(Number(value));
-  });
-
-  // Handle case with no valid values
-  if (validRecords.length === 0) {
-    return [];
-  }
-
-  // Calculate min and max
-  const min = Math.min(...validRecords.map((row) => Number(row[binField])));
-  const max = Math.max(...validRecords.map((row) => Number(row[binField])));
-
-  // Handle single value case
-  if (min === max) {
-    let aggregatedValue: number;
-    if (valueField) {
-      const values = validRecords.map((row) => Number(row[valueField]));
-      aggregatedValue = aggregateValues(aggregationType || AggregationType.SUM, values) ?? 0;
-    } else {
-      aggregatedValue = validRecords.length;
+    // Handle empty data
+    if (!data || data.length === 0) {
+      return [];
     }
 
-    return [
-      {
-        start: min,
-        end: max,
-        value: aggregatedValue,
-      },
-    ];
-  }
-
-  // Calculate bin step size
-  let step: number;
-  if (binConfig?.size) {
-    // Priority 1: Use explicit size (don't round - user wants exact size)
-    step = binConfig.size;
-  } else if (binConfig?.count) {
-    // Priority 2: Calculate from count and round to nice number
-    const rawStep = (max - min) / binConfig.count;
-    step = getNiceNumber(rawStep);
-  } else {
-    // Priority 3: get step with default bucket count 30 and round to nice number
-    const rawStep = (max - min) / 30; // fallback to 30 bins
-    step = getNiceNumber(rawStep);
-  }
-
-  // Align bin start to a nice boundary (round down to nearest multiple of step)
-  // Example: min=42.2, step=5 → binStart=40 (gives bins like 40-45, 45-50, etc.)
-  const binStart = Math.floor(min / step) * step;
-
-  // Generate bin ranges
-  const bins: BinRange[] = [];
-  let currentBinStart = binStart;
-
-  while (currentBinStart <= max) {
-    const binEnd = currentBinStart + step;
-    bins.push({
-      start: currentBinStart,
-      end: binEnd,
-      values: [],
-    });
-    currentBinStart = binEnd;
-  }
-
-  // Assign data points to bins
-  for (const row of validRecords) {
-    const binValue = Number(row[binField]);
-
-    // Find the appropriate bin using [start, end) convention
-    const binIndex = bins.findIndex((binRange) => {
-      return binValue >= binRange.start && binValue < binRange.end;
+    // Extract valid numeric values from binField
+    const validRecords = data.filter((row) => {
+      const value = row[binField];
+      return value !== null && value !== undefined && !isNaN(Number(value));
     });
 
-    if (binIndex !== -1) {
-      if (valueField) {
-        const aggValue = Number(row[valueField]);
-        if (!isNaN(aggValue)) {
-          bins[binIndex].values.push(aggValue);
-        }
-      } else {
-        // For counting, just push a placeholder
-        bins[binIndex].values.push(1);
-      }
+    // Handle case with no valid values
+    if (validRecords.length === 0) {
+      return [];
     }
-  }
 
-  // Aggregate within each bin and format output
-  const result = bins
-    .filter((binRange) => binRange.values.length > 0) // Only include bins with data
-    .map((binRange) => {
+    // Calculate min and max
+    const min = Math.min(...validRecords.map((row) => Number(row[binField])));
+    const max = Math.max(...validRecords.map((row) => Number(row[binField])));
+
+    // Handle single value case
+    if (min === max) {
       let aggregatedValue: number;
-
-      if (valueField && aggregationType) {
-        aggregatedValue = aggregateValues(aggregationType, binRange.values) ?? 0;
+      if (valueField) {
+        const values = validRecords.map((row) => Number(row[valueField]));
+        aggregatedValue = aggregateValues(aggregationType || AggregationType.SUM, values) ?? 0;
       } else {
-        // Default to COUNT
-        aggregatedValue = aggregateValues(AggregationType.COUNT, binRange.values) ?? 0;
+        aggregatedValue = validRecords.length;
       }
 
-      return {
-        start: binRange.start,
-        end: binRange.end,
-        value: aggregatedValue,
-      };
-    });
+      return [
+        {
+          start: min,
+          end: max,
+          value: aggregatedValue,
+        },
+      ];
+    }
 
-  return result;
-};
+    // Calculate bin step size
+    let step: number;
+    if (binConfig?.size) {
+      // Priority 1: Use explicit size (don't round - user wants exact size)
+      step = binConfig.size;
+    } else if (binConfig?.count) {
+      // Priority 2: Calculate from count and round to nice number
+      const rawStep = (max - min) / binConfig.count;
+      step = getNiceNumber(rawStep);
+    } else {
+      // Priority 3: get step with default bucket count 30 and round to nice number
+      const rawStep = (max - min) / 30; // fallback to 30 bins
+      step = getNiceNumber(rawStep);
+    }
+
+    // Align bin start to a nice boundary (round down to nearest multiple of step)
+    // Example: min=42.2, step=5 → binStart=40 (gives bins like 40-45, 45-50, etc.)
+    const binStart = Math.floor(min / step) * step;
+
+    // Generate bin ranges
+    const bins: BinRange[] = [];
+    let currentBinStart = binStart;
+
+    while (currentBinStart <= max) {
+      const binEnd = currentBinStart + step;
+      bins.push({
+        start: currentBinStart,
+        end: binEnd,
+        values: [],
+      });
+      currentBinStart = binEnd;
+    }
+
+    // Assign data points to bins
+    for (const row of validRecords) {
+      const binValue = Number(row[binField]);
+
+      // Find the appropriate bin using [start, end) convention
+      const binIndex = bins.findIndex((binRange) => {
+        return binValue >= binRange.start && binValue < binRange.end;
+      });
+
+      if (binIndex !== -1) {
+        if (valueField) {
+          const aggValue = Number(row[valueField]);
+          if (!isNaN(aggValue)) {
+            bins[binIndex].values.push(aggValue);
+          }
+        } else {
+          // For counting, just push a placeholder
+          bins[binIndex].values.push(1);
+        }
+      }
+    }
+
+    // Aggregate within each bin and format output
+    const result = bins
+      .filter((binRange) => binRange.values.length > 0) // Only include bins with data
+      .map((binRange) => {
+        let aggregatedValue: number;
+
+        if (valueField && aggregationType) {
+          aggregatedValue = aggregateValues(aggregationType, binRange.values) ?? 0;
+        } else {
+          // Default to COUNT
+          aggregatedValue = aggregateValues(AggregationType.COUNT, binRange.values) ?? 0;
+        }
+
+        return {
+          start: binRange.start,
+          end: binRange.end,
+          value: aggregatedValue,
+        };
+      });
+
+    return result;
+  };

@@ -47,7 +47,7 @@ describe('useInitializeMetricsDataset', () => {
   };
 
   const createMockServices = (overrides?: Partial<ExploreServices>): ExploreServices => {
-    return ({
+    return {
       data: {
         query: {
           queryString: {
@@ -61,7 +61,7 @@ describe('useInitializeMetricsDataset', () => {
       notifications: {},
       http: {},
       ...overrides,
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
   };
 
   beforeEach(() => {

@@ -7,8 +7,9 @@ import classNames from 'classnames';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryPanelEditor } from './use_query_panel_editor';
 import './query_panel_editor.scss';
+import { QueryEditorProps } from './types';
 
-export const QueryPanelEditor = () => {
+export const QueryPanelEditor = (props: QueryEditorProps) => {
   const {
     isFocused,
     isPromptMode,
@@ -17,7 +18,7 @@ export const QueryPanelEditor = () => {
     promptIsTyping,
     showPlaceholder,
     ...editorProps
-  } = useQueryPanelEditor();
+  } = useQueryPanelEditor(props);
 
   return (
     // Suppressing below as this should only happen for click events.
@@ -27,6 +28,7 @@ export const QueryPanelEditor = () => {
         ['exploreQueryPanelEditor--focused']: isFocused,
         ['exploreQueryPanelEditor--promptMode']: isPromptMode,
         ['exploreQueryPanelEditor--promptIsTyping']: promptIsTyping,
+        ['exploreQueryPanelEditor--ppl']: editorProps.languageId?.toLowerCase() === 'ppl',
       })}
       data-test-subj="exploreQueryPanelEditor"
       onClick={onEditorClick}

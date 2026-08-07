@@ -32,8 +32,12 @@ export const capabilitiesProvider = () => ({
   advancedSettings: {
     show: true,
     save: true,
+    permissionControlEnabled: false,
   },
   userSettings: {
     enabled: false,
+  },
+  globalScopeEditable: {
+    enabled: true,
   },
 });

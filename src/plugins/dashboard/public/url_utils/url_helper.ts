@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { parseUrl, stringifyUrl } from 'query-string';
+import qs from 'query-string';
 import { DashboardConstants } from '../index';
 
 /** *
@@ -45,7 +45,7 @@ export function addEmbeddableToDashboardUrl(
   embeddableId: string,
   embeddableType: string
 ) {
-  const { url, query, fragmentIdentifier } = parseUrl(dashboardUrl, {
+  const { url, query, fragmentIdentifier } = qs.parseUrl(dashboardUrl, {
     parseFragmentIdentifier: true,
   });
 
@@ -54,5 +54,5 @@ export function addEmbeddableToDashboardUrl(
     query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
   }
 
-  return stringifyUrl({ url, query, fragmentIdentifier });
+  return qs.stringifyUrl({ url, query, fragmentIdentifier });
 }

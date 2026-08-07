@@ -122,7 +122,6 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._uiSettings = uiSettings;
     this._dataSourceRefId = dataSourceRefId;
 
-    // eslint-disable-next-line no-undef
     this._leafletLayer = this._leaflet.geoJson(null, {
       onEachFeature: (feature, layer) => {
         layer.on('click', () => {
@@ -133,7 +132,6 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
           mouseover: () => {
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
-              // eslint-disable-next-line no-undef
               const leafletGeojson = this._leaflet.geoJson(feature);
               location = leafletGeojson.getBounds().getCenter();
             }
@@ -265,7 +263,7 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
         });
       }
       return finalResult;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -510,7 +508,6 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
 
     const { min, max } = getMinMax(this._metrics);
 
-    // eslint-disable-next-line no-undef
     const boundsOfAllFeatures = new this._leaflet.LatLngBounds();
     return {
       leafletStyleFunction: (geojsonFeature) => {
@@ -518,7 +515,7 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
         if (!match) {
           return emptyStyle();
         }
-        // eslint-disable-next-line no-undef
+
         const boundsOfFeature = this._leaflet.geoJson(geojsonFeature).getBounds();
         boundsOfAllFeatures.extend(boundsOfFeature);
 

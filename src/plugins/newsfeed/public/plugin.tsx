@@ -41,8 +41,10 @@ import { getApi, NewsfeedApiEndpoint } from './lib/api';
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
 
-export class NewsfeedPublicPlugin
-  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart> {
+export class NewsfeedPublicPlugin implements Plugin<
+  NewsfeedPublicPluginSetup,
+  NewsfeedPublicPluginStart
+> {
   private readonly opensearchDashboardsVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);

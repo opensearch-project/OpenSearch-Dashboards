@@ -6,12 +6,12 @@
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
 import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
 import { AreaChartStyle } from './area_vis_config';
+import { getColors } from '../theme/default_colors';
 
 describe('Area Chart to_expression', () => {
   const mockTransformedData = [
@@ -28,8 +28,6 @@ describe('Area Chart to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 6,
-    uniqueValuesCount: 5,
   };
 
   const mockDateColumn: VisColumn = {
@@ -37,8 +35,6 @@ describe('Area Chart to_expression', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'date',
-    validValuesCount: 6,
-    uniqueValuesCount: 3,
   };
 
   const mockCategoricalColumns: VisColumn[] = [
@@ -47,16 +43,12 @@ describe('Area Chart to_expression', () => {
       name: 'Category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 6,
-      uniqueValuesCount: 2,
     },
     {
       id: 4,
       name: 'Category2',
       schema: VisFieldType.Categorical,
       column: 'category2',
-      validValuesCount: 6,
-      uniqueValuesCount: 2,
     },
   ];
 
@@ -73,10 +65,6 @@ describe('Area Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Solid,
     },
-    titleOptions: {
-      show: true,
-      titleName: '',
-    },
     standardAxes: [],
     showFullTimeRange: false,
   };
@@ -90,46 +78,38 @@ describe('Area Chart to_expression', () => {
     it('returns an ECharts spec with dataset, series, and axes', () => {
       const result = createSimpleAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result).toHaveProperty('xAxis');
-      expect(result).toHaveProperty('yAxis');
-      expect(result.title).toEqual({ text: 'Value Over Time' });
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('xAxis');
+      expect(result.spec).toHaveProperty('yAxis');
     });
 
     it('returns series with line type and area style', () => {
       const result = createSimpleAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
-      const mainSeries = result.series[0];
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
+      const mainSeries = result.spec.series[0];
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
     });
 
-    it('handles title display options', () => {
-      // No title
-      const noTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
+    it('emits series-target legend items while assigning metric colors', () => {
+      const palette = getColors().categories;
+      const result = createSimpleAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      // Default title
-      const defaultTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        axisColumnMappings
+      expect(result.legendItems).toEqual([
+        {
+          label: 'Value',
+          color: palette[0],
+          target: { type: 'series', name: 'Value' },
+        },
+      ]);
+      expect(result.spec.series[0]).toEqual(
+        expect.objectContaining({
+          name: 'Value',
+          itemStyle: { color: palette[0] },
+        })
       );
-      expect(defaultTitleResult.title.text).toBe('Value Over Time');
-
-      // Custom title
-      const customTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Area Chart Title' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Area Chart Title');
     });
   });
 
@@ -143,63 +123,39 @@ describe('Area Chart to_expression', () => {
     it('returns an ECharts spec with multiple series for each category', () => {
       const result = createMultiAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category');
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('handles title display options', () => {
-      const noTitleResult = createMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Multi-Area Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Multi-Area Chart');
-    });
-  });
-
-  describe('createFacetedMultiAreaChart', () => {
-    const axisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumns[0],
-      [AxisRole.FACET]: mockCategoricalColumns[1],
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
+    it('uses provided full data when assigning color series colors', () => {
+      const palette = getColors().categories;
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-03', value: 15, category: 'C' },
+        ],
         mockStyles,
-        axisColumnMappings
+        axisColumnMappings,
+        undefined,
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-02', value: 20, category: 'B' },
+          { date: '2023-01-03', value: 15, category: 'C' },
+        ]
       );
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Faceted Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Faceted Chart');
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: { color: palette[0] },
+        }),
+        expect.objectContaining({
+          name: 'C',
+          itemStyle: { color: palette[2] },
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
   });
 
@@ -212,26 +168,22 @@ describe('Area Chart to_expression', () => {
     it('returns an ECharts spec for category-based area chart', () => {
       const result = createCategoryAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category');
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('handles title display options', () => {
-      const noTitleResult = createCategoryAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
+    it('emits series-target legend items for category-based metric areas', () => {
+      const palette = getColors().categories;
+      const result = createCategoryAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      const customTitleResult = createCategoryAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Category Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Category Chart');
+      expect(result.legendItems).toEqual([
+        {
+          label: 'Value',
+          color: palette[0],
+          target: { type: 'series', name: 'Value' },
+        },
+      ]);
     });
   });
 
@@ -245,32 +197,44 @@ describe('Area Chart to_expression', () => {
     it('returns an ECharts spec with stacked series', () => {
       const result = createStackedAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category and Category2');
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
 
       // Verify stacked series
-      const mainSeries = result.series[0];
+      const mainSeries = result.spec.series[0];
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
       expect(mainSeries).toHaveProperty('stack');
     });
 
-    it('handles title display options', () => {
-      const noTitleResult = createStackedAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
+    it('uses provided full data when assigning stacked color series colors', () => {
+      const palette = getColors().categories;
+      const result = createStackedAreaChart(
+        [
+          { category: 'A', value: 10, category2: 'X' },
+          { category: 'C', value: 15, category2: 'Z' },
+        ],
+        mockStyles,
+        axisColumnMappings,
+        [
+          { category: 'A', value: 10, category2: 'X' },
+          { category: 'B', value: 20, category2: 'Y' },
+          { category: 'C', value: 15, category2: 'Z' },
+        ]
       );
-      expect(noTitleResult.title.text).toBeUndefined();
 
-      const customTitleResult = createStackedAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Stacked Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Stacked Chart');
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'X',
+          itemStyle: { color: palette[0] },
+        }),
+        expect.objectContaining({
+          name: 'Z',
+          itemStyle: { color: palette[2] },
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
 
     it('includes markLine for threshold when enabled', () => {
@@ -290,7 +254,7 @@ describe('Area Chart to_expression', () => {
       );
 
       // ECharts uses markLine within series for thresholds
-      const seriesWithMarkLine = result.series.find((s: any) => s.markLine);
+      const seriesWithMarkLine = result.spec.series.find((s: any) => s.markLine);
       expect(seriesWithMarkLine).toBeDefined();
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });

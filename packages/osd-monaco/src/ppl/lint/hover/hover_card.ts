@@ -1,0 +1,92 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Pure renderer for the lint hover card ("view more") body. Composes the
+ * detector message, static per-rule guidance (`Fix`), an optional quick-fix
+ * preview into a single Markdown string. Intentionally free of any Monaco
+ * import so it is trivially unit-testable; the provider does the Monaco-specific
+ * marker extraction and hands plain values here.
+ *
+ * The detector message already identifies the problem and its consequence.
+ * Keeping the card focused on that message and the next action avoids repeating
+ * the same field, value, and engine outcome in several differently named
+ * sections.
+ */
+
+export type SeverityLabel = 'Error' | 'Warning' | 'Info';
+
+export interface HoverCardInput {
+  severityLabel: SeverityLabel;
+  /** Stable rule id used by Advanced Settings and support reports. */
+  ruleId?: string;
+  /** The marker's short message — always shown as the card lead. */
+  message: string;
+  /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
+  howToFix?: string;
+  /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
+  fixText?: string;
+}
+
+const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
+  Error: '❌',
+  Warning: '⚠️',
+  Info: 'ℹ️',
+};
+
+// Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally
+// omitted because they do not affect inline text, and ! cannot form an image because [
+// is already escaped here.
+function escapeInline(text: string): string {
+  return text.replace(/([\\`*_[\]<>~|])/g, '\\$1');
+}
+
+/**
+ * Render a value as inline code. When the value itself contains backticks, fence
+ * it with a longer run of backticks (and pad with a space, per CommonMark §6.3)
+ * so the literal backticks survive verbatim rather than being substituted for a
+ * lookalike glyph.
+ */
+function code(text: string): string {
+  const runs = text.match(/`+/g);
+  const longestRun = runs ? Math.max(...runs.map((r) => r.length)) : 0;
+  const fence = '`'.repeat(longestRun + 1);
+  const pad = longestRun > 0 ? ' ' : '';
+  return `${fence}${pad}${text}${pad}${fence}`;
+}
+
+/**
+ * Render the full hover card to a Markdown string. The provider wraps the result
+ * in `{ value, isTrusted: false }` and hands it to Monaco.
+ */
+export function renderHoverCard(input: HoverCardInput): string {
+  const { severityLabel, ruleId, message, howToFix, fixText } = input;
+  const lines: string[] = [];
+
+  const ruleMetadata = ruleId ? ` | Rule: ${code(ruleId)}` : '';
+  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**${ruleMetadata}`);
+
+  // Lead: the short message (always present).
+  lines.push('');
+  lines.push(escapeInline(message));
+
+  // Every known rule gives the user a concrete next action, whether or not an
+  // automatic edit can be offered safely.
+  if (howToFix) {
+    lines.push('');
+    // Bundled repository-authored guidance intentionally retains inline-code
+    // Markdown. The provider does not read execution-time overrides here and
+    // returns the complete card with isTrusted:false.
+    lines.push(`**Fix** — ${howToFix}`);
+  }
+
+  // Exact replacement preview for deterministic quick fixes.
+  if (fixText !== undefined) {
+    lines.push('');
+    lines.push(`**Quick fix available** — ${code(fixText)}`);
+  }
+
+  return lines.join('\n');
+}

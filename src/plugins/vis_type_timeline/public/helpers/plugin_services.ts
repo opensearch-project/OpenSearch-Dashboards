@@ -32,10 +32,8 @@ import { IndexPatternsContract } from 'src/plugins/data/public';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export const [getIndexPatterns, setIndexPatterns] =
+  createGetterSetter<IndexPatternsContract>('IndexPatterns');
 
-export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
-  SavedObjectsClientContract
->('SavedObjectsClient');
+export const [getSavedObjectsClient, setSavedObjectsClient] =
+  createGetterSetter<SavedObjectsClientContract>('SavedObjectsClient');

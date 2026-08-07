@@ -15,12 +15,17 @@ import {
 import {
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
+  MAXIMUM_WORKSPACES_PER_PAGE,
 } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
-import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
-import { validateWorkspaceColor } from '../../common/utils';
+import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
+import {
+  validateWorkspaceColor,
+  getInvalidWorkspacePermissionsError,
+  normalizeWorkspacePermissions,
+} from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -137,7 +142,14 @@ export function registerRoutes({
         body: schema.object({
           search: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.string()),
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          // Accepts a number for regular paging, or the `MAXIMUM_WORKSPACES_PER_PAGE`
+          // sentinel to page by `workspace.maximum_workspaces` (resolved per request
+          // through the dynamic config service). Defaults to 20, keeping the original
+          // API behavior unchanged.
+          perPage: schema.oneOf(
+            [schema.number({ min: 0 }), schema.literal(MAXIMUM_WORKSPACES_PER_PAGE)],
+            { defaultValue: 20 }
+          ),
           page: schema.number({ min: 0, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
@@ -146,6 +158,8 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      // The `perPage` value (including the `MAXIMUM_WORKSPACES_PER_PAGE` sentinel) is
+      // resolved inside `client.list`.
       const result = await client.list(
         {
           request: req,
@@ -158,14 +172,13 @@ export function registerRoutes({
       const { workspaces } = result.result;
 
       // enrich workspace permissionMode
-      const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       workspaces.forEach((workspace) => {
-        const permissionMode = translatePermissionsToRole(
+        workspace.permissionMode = getPermissionMode({
           isPermissionControlEnabled,
-          workspace.permissions,
-          principals
-        );
-        workspace.permissionMode = permissionMode;
+          request: req,
+          permissionControlClient,
+          permissions: workspace.permissions,
+        });
       });
 
       return res.ok({
@@ -191,6 +204,15 @@ export function registerRoutes({
         id
       );
 
+      if (result.success) {
+        (result.result as WorkspaceAttributeWithPermission).permissionMode = getPermissionMode({
+          isPermissionControlEnabled,
+          request: req,
+          permissionControlClient,
+          permissions: (result.result as WorkspaceAttributeWithPermission).permissions,
+        });
+      }
+
       return res.ok({
         body: result,
       });
@@ -214,12 +236,19 @@ export function registerRoutes({
         dataConnections?: string[];
       } = attributes;
 
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
       if (isPermissionControlEnabled) {
-        createPayload.permissions = settings.permissions;
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
+        const normalizedPermissions = normalizeWorkspacePermissions(settings.permissions);
+        createPayload.permissions = normalizedPermissions;
         if (!!principals?.users?.length) {
           const currentUserId = principals.users[0];
           const acl = new ACL(
-            transferCurrentUserInPermissions(currentUserId, settings.permissions)
+            transferCurrentUserInPermissions(currentUserId, normalizedPermissions)
           );
           createPayload.permissions = acl.getPermissions();
         }
@@ -254,6 +283,15 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes, settings } = req.body;
 
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
+      if (isPermissionControlEnabled) {
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
+      }
+
       const result = await client.update(
         {
           request: req,
@@ -261,7 +299,9 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(isPermissionControlEnabled ? { permissions: settings.permissions } : {}),
+          ...(isPermissionControlEnabled
+            ? { permissions: normalizeWorkspacePermissions(settings.permissions) }
+            : {}),
           ...{ dataSources: settings.dataSources },
           ...{ dataConnections: settings.dataConnections },
         }

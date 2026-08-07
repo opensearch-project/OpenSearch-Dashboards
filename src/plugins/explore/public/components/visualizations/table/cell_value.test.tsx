@@ -115,6 +115,18 @@ describe('CellValue', () => {
     expect(container.querySelector('span')?.textContent).toBe('');
   });
 
+  it('renders object value as JSON string', () => {
+    const objValue = { name: 'John', age: 30 };
+    render(<CellValue {...baseProps} value={objValue} />);
+    expect(screen.getByText(JSON.stringify(objValue))).toBeInTheDocument();
+  });
+
+  it('renders array value as JSON string', () => {
+    const arrValue = ['tag1', 'tag2', 'tag3'];
+    render(<CellValue {...baseProps} value={arrValue} />);
+    expect(screen.getByText(JSON.stringify(arrValue))).toBeInTheDocument();
+  });
+
   it('renders a single link correctly', () => {
     const links: DataLink[] = [
       {

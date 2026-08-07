@@ -26,11 +26,11 @@ describe('DataSourceView', () => {
       get: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'get', getSingleDataSourceResponse);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', () => {
-    spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
+    jest.spyOn(utils, 'getDataSourceById').mockReturnValue([{ id: 'test1', label: 'test1' }]);
     component = shallow(
       <DataSourceView
         fullWidth={false}
@@ -41,13 +41,13 @@ describe('DataSourceView', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('When selected option is local cluster and hide local Cluster is true, should return error', async () => {
-    spyOn(utils, 'getDataSourceById').and.returnValue(
-      Promise.resolve([{ id: 'test1', label: 'test1' }])
-    );
+    jest
+      .spyOn(utils, 'getDataSourceById')
+      .mockReturnValue(Promise.resolve([{ id: 'test1', label: 'test1' }]));
 
     const onSelectedDataSources = jest.fn();
     let wrapper!: ReactWrapper;
@@ -66,7 +66,7 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(onSelectedDataSources).toBeCalledWith([]);
+    expect(onSelectedDataSources).toHaveBeenCalledWith([]);
   });
   it('Should return error when provided datasource has been filtered out', async () => {
     let wrapper!: ReactWrapper;
@@ -91,9 +91,9 @@ describe('DataSourceView', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('Should render successfully when provided datasource has not been filtered out', async () => {
-    spyOn(utils, 'getDataSourceById').and.returnValue(
-      Promise.resolve([{ id: 'test1', label: 'test1' }])
-    );
+    jest
+      .spyOn(utils, 'getDataSourceById')
+      .mockReturnValue(Promise.resolve([{ id: 'test1', label: 'test1' }]));
     let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
@@ -114,11 +114,11 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
   });
   it('should call getDataSourceById when only pass id with no label', async () => {
-    spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
+    jest.spyOn(utils, 'getDataSourceById').mockReturnValue([{ id: 'test1', label: 'test1' }]);
     let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
@@ -137,11 +137,13 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
   it('should call notification warning when there is data source fetch error', async () => {
-    spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
+    jest.spyOn(utils, 'getDataSourceById').mockImplementation(() => {
+      throw new Error('Data source is not available');
+    });
 
     let wrapper!: ReactWrapper;
     await act(async () => {
@@ -160,14 +162,14 @@ describe('DataSourceView', () => {
 
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-    expect(toasts.add).toBeCalledTimes(1);
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(toasts.add).toHaveBeenCalledTimes(1);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
   });
 
   it('should show popover when click on data source view button', async () => {
     const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
-    spyOn(utils, 'handleDataSourceFetchError').and.returnValue('');
+    jest.spyOn(utils, 'getDataSourceById').mockReturnValue([{ id: 'test1', label: 'test1' }]);
+    jest.spyOn(utils, 'handleDataSourceFetchError').mockReturnValue('');
     const container = render(
       <DataSourceView
         savedObjectsClient={client}
@@ -203,6 +205,6 @@ describe('DataSourceView', () => {
     });
 
     wrapper.update();
-    expect(onSelectedDataSource).toBeCalledWith([]);
+    expect(onSelectedDataSource).toHaveBeenCalledWith([]);
   });
 });

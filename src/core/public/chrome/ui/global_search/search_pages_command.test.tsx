@@ -136,8 +136,10 @@ describe('<SearchPagesCommand />', () => {
 
     (searchResult[0] as any).props?.callback();
 
-    expect(callbackFn).toBeCalledTimes(1);
-    expect(coreStartMock.application.navigateToApp).toBeCalledWith('dataAdministration-link1');
+    expect(callbackFn).toHaveBeenCalledTimes(1);
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith(
+      'dataAdministration-link1'
+    );
   });
 
   it('renders default breadcrumbs for regular nav groups', async () => {

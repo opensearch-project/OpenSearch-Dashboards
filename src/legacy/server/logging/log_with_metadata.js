@@ -33,7 +33,6 @@ import { isPlainObject } from 'lodash';
 import {
   metadataSymbol,
   attachMetaData,
-  // eslint-disable-next-line @osd/eslint/no-restricted-paths
 } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 export const logWithMetadata = {

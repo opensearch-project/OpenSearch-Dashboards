@@ -97,7 +97,7 @@ describe('SaveVisModal', () => {
     fireEvent.change(screen.getByTestId('title-input'), { target: { value: 'New Title' } });
     fireEvent.click(screen.getByTestId('saveVisandBackToDashboardConfirmButton'));
     await waitFor(() => {
-      expect(screen.getByTestId('titleDupicateWarnMsg')).toBeInTheDocument();
+      expect(screen.getByTestId('titleDuplicateWarnMsg')).toBeInTheDocument();
     });
   });
 });

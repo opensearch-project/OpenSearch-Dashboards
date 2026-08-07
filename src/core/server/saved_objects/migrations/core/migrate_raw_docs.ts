@@ -60,12 +60,22 @@ export async function migrateRawDocs(
     if (serializer.isRawSavedObject(raw)) {
       const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
-      processedDocs.push(
-        serializer.savedObjectToRaw({
-          references: [],
-          ...(await migrateDocWithoutBlocking(savedObject)),
-        })
-      );
+      try {
+        processedDocs.push(
+          serializer.savedObjectToRaw({
+            references: [],
+            ...(await migrateDocWithoutBlocking(savedObject)),
+          })
+        );
+      } catch (error) {
+        log.error(
+          `Failed to migrate saved object document _id="${raw._id}" type="${savedObject.type}": ${
+            error?.message ?? error
+          }`,
+          { rawDocument: raw }
+        );
+        throw error;
+      }
     } else {
       log.error(
         `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent OpenSearch Dashboards from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,

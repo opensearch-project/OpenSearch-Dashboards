@@ -46,6 +46,7 @@ import {
   isRangeFilter,
   Query,
   TimeRange,
+  UNSUPPORTED_ENGINE_TYPES,
 } from '../../../common';
 import {
   getRequestInspectorStats,
@@ -64,6 +65,7 @@ import {
 } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { serializeAggConfig } from './utils';
+import { AnalyticEngineError } from '../errors';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -273,6 +275,16 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
+
+    // Check if the index pattern uses an AnalyticEngine data source
+    const indexPatternList = await indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
+    const isAnalyticEngine = !indexPatternList?.some((i) => i.id === indexPattern.id);
+    if (isAnalyticEngine) {
+      throw new AnalyticEngineError();
+    }
+
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
@@ -293,7 +305,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
       partialRows: args.partialRows,
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
+      abortSignal: abortSignal as unknown as AbortSignal,
     });
 
     const table: OpenSearchDashboardsDatatable = {

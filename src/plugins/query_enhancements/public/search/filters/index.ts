@@ -4,3 +4,4 @@
  */
 
 export { PPLFilterUtils } from './ppl_filter_utils';
+export { SQLFilterUtils } from './sql_filter_utils';

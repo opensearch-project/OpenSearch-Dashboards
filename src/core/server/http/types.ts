@@ -57,9 +57,8 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  *
  * @public
  */
-export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> =
+  IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 /**
  * @public
@@ -294,8 +293,10 @@ export interface HttpServiceSetup {
 }
 
 /** @internal */
-export interface InternalHttpServiceSetup
-  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
+export interface InternalHttpServiceSetup extends Omit<
+  HttpServiceSetup,
+  'createRouter' | 'registerRouteHandlerContext'
+> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;

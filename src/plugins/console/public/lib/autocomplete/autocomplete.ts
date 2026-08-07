@@ -892,6 +892,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
     return context;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   const evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(
     pos: Position
   ) {
@@ -947,8 +948,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
 
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
-  },
-  100);
+  }, 100);
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();

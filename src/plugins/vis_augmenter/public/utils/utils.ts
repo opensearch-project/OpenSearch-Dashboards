@@ -92,8 +92,8 @@ export const getAugmentVisSavedObjs = async (
       },
       pluginResourceIdsSpecified ? ['pluginResource.id'] : undefined
     );
-    return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
-  } catch (e) {
+    return get(resp, 'hits', []) as any[] as ISavedAugmentVis[];
+  } catch {
     return [] as ISavedAugmentVis[];
   }
 };
@@ -115,7 +115,7 @@ export const buildPipelineFromAugmentVisSavedObjs = (objs: ISavedAugmentVis[]): 
     ) as Array<ExpressionAstFunctionBuilder<VisLayerFunctionDefinition>>;
     const ast = buildExpression(visLayerExpressionFns).toAst();
     return formatExpression(ast);
-  } catch (e) {
+  } catch {
     throw new Error('Expression function from augment-vis saved objects could not be generated');
   }
 };

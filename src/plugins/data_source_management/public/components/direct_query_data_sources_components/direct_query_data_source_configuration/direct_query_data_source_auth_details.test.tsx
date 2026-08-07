@@ -4,7 +4,7 @@
  */
 
 import { render, fireEvent, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { AuthDetails } from './direct_query_data_source_auth_details';
 import { AuthMethod } from '../../constants';
 

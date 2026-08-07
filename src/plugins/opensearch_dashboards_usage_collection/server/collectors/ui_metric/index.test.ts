@@ -68,7 +68,7 @@ describe('telemetry_ui_metric', () => {
         ({
           saved_objects: [],
           total: 0,
-        } as any)
+        }) as any
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
@@ -85,8 +85,7 @@ describe('telemetry_ui_metric', () => {
           { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
           { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
           {
-            id:
-              'opensearch-dashboards-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+            id: 'opensearch-dashboards-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
             attributes: { count: 1 },
           },
         ],

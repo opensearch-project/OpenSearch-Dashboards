@@ -5,7 +5,16 @@
 
 import moment from 'moment';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
-import { getWorkspacesWithRecentMessage, sortByRecentVisitedAndAlphabetical } from './utils';
+import {
+  WorkspaceFilterCriteria,
+  buildWorkspaceFilterCriteria,
+  filterWorkspaces,
+  getRecencyCutoff,
+  getWorkspaceRole,
+  getWorkspacesWithRecentMessage,
+  isWorkspaceFilterActive,
+  sortByRecentVisitedAndAlphabetical,
+} from './utils';
 
 describe('getWorkspacesWithRecentMessage', () => {
   const workspaces = [
@@ -89,5 +98,126 @@ describe('sortByRecentVisitedAndAlphabetical', () => {
   it('should sort alphabetically by name if neither workspace has a timestamp', () => {
     const sorted = [workspace4, workspace3].sort(sortByRecentVisitedAndAlphabetical);
     expect(sorted).toEqual([workspace3, workspace4]); // Sorted alphabetically by name
+  });
+});
+
+describe('getWorkspaceRole', () => {
+  it('returns owner when the owner flag is set', () => {
+    expect(getWorkspaceRole({ id: 'a', name: 'A', owner: true })).toBe('owner');
+  });
+
+  it('returns readonly when the readonly flag is set', () => {
+    expect(getWorkspaceRole({ id: 'a', name: 'A', readonly: true })).toBe('readonly');
+  });
+
+  it('returns readwrite when neither flag is set', () => {
+    expect(getWorkspaceRole({ id: 'a', name: 'A' })).toBe('readwrite');
+  });
+
+  it('prioritizes owner over readonly', () => {
+    expect(getWorkspaceRole({ id: 'a', name: 'A', owner: true, readonly: true })).toBe('owner');
+  });
+});
+
+describe('getRecencyCutoff', () => {
+  it('returns null for "all" (no recency filter)', () => {
+    expect(getRecencyCutoff('all')).toBeNull();
+  });
+
+  it('returns calendar start-of-period timestamps', () => {
+    expect(getRecencyCutoff('today')).toBe(moment().startOf('day').valueOf());
+    expect(getRecencyCutoff('week')).toBe(moment().startOf('week').valueOf());
+    expect(getRecencyCutoff('month')).toBe(moment().startOf('month').valueOf());
+  });
+});
+
+describe('isWorkspaceFilterActive', () => {
+  it('is false when all criteria are neutral', () => {
+    expect(isWorkspaceFilterActive({ searchQuery: '', roles: [], recency: 'all' })).toBe(false);
+  });
+
+  it('treats a whitespace-only query as inactive', () => {
+    expect(isWorkspaceFilterActive({ searchQuery: '   ', roles: [], recency: 'all' })).toBe(false);
+  });
+
+  it('is true when the search query is set', () => {
+    expect(isWorkspaceFilterActive({ searchQuery: 'abc', roles: [], recency: 'all' })).toBe(true);
+  });
+
+  it('is true when a role is selected', () => {
+    expect(isWorkspaceFilterActive({ searchQuery: '', roles: ['owner'], recency: 'all' })).toBe(
+      true
+    );
+  });
+
+  it('is true when recency is not "all"', () => {
+    expect(isWorkspaceFilterActive({ searchQuery: '', roles: [], recency: 'today' })).toBe(true);
+  });
+});
+
+describe('buildWorkspaceFilterCriteria', () => {
+  it('maps roleFilter "all" to an empty roles array', () => {
+    expect(
+      buildWorkspaceFilterCriteria({ searchQuery: 'x', roleFilter: 'all', recency: 'week' })
+    ).toEqual({ searchQuery: 'x', roles: [], recency: 'week' });
+  });
+
+  it('maps a specific roleFilter to a single-element roles array', () => {
+    expect(
+      buildWorkspaceFilterCriteria({ searchQuery: '', roleFilter: 'owner', recency: 'all' })
+    ).toEqual({ searchQuery: '', roles: ['owner'], recency: 'all' });
+  });
+});
+
+describe('filterWorkspaces', () => {
+  const now = Date.now();
+  const list = [
+    // Admin (owner), visited just now
+    { id: '1', name: 'Payments', owner: true, accessTimeStamp: now },
+    // Read only, never visited
+    { id: '2', name: 'Checkout Latency', readonly: true, accessTimeStamp: undefined },
+    // Read and write, visited two months ago
+    { id: '3', name: 'Ingestion', accessTimeStamp: moment().subtract(2, 'months').valueOf() },
+  ];
+  const neutral: WorkspaceFilterCriteria = { searchQuery: '', roles: [], recency: 'all' };
+  const ids = (result: Array<{ id: string }>) => result.map((w) => w.id);
+
+  it('returns all workspaces when no criteria are active', () => {
+    expect(ids(filterWorkspaces(list, neutral))).toEqual(['1', '2', '3']);
+  });
+
+  it('filters by case-insensitive name substring', () => {
+    expect(ids(filterWorkspaces(list, { ...neutral, searchQuery: 'lat' }))).toEqual(['2']);
+  });
+
+  it('trims the search query before matching', () => {
+    expect(ids(filterWorkspaces(list, { ...neutral, searchQuery: '  payments ' }))).toEqual(['1']);
+  });
+
+  it('filters by a single role', () => {
+    expect(ids(filterWorkspaces(list, { ...neutral, roles: ['readonly'] }))).toEqual(['2']);
+  });
+
+  it('filters by a set of roles (OR within roles)', () => {
+    expect(ids(filterWorkspaces(list, { ...neutral, roles: ['owner', 'readwrite'] }))).toEqual([
+      '1',
+      '3',
+    ]);
+  });
+
+  it('filters by recency and excludes items without an accessTimeStamp', () => {
+    // "today" keeps only id 1 (visited now); id 2 (undefined) and id 3 (old) are excluded
+    expect(ids(filterWorkspaces(list, { ...neutral, recency: 'today' }))).toEqual(['1']);
+    // "month" still excludes id 2 (undefined) and id 3 (two months old)
+    expect(ids(filterWorkspaces(list, { ...neutral, recency: 'month' }))).toEqual(['1']);
+  });
+
+  it('combines all criteria with AND', () => {
+    expect(
+      ids(filterWorkspaces(list, { searchQuery: 'payments', roles: ['owner'], recency: 'today' }))
+    ).toEqual(['1']);
+    expect(
+      filterWorkspaces(list, { searchQuery: 'payments', roles: ['readonly'], recency: 'all' })
+    ).toEqual([]);
   });
 });

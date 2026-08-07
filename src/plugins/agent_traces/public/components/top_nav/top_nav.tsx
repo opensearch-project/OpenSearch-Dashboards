@@ -5,8 +5,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
+import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
@@ -184,6 +186,19 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
     openButtonRun({} as HTMLElement);
   }, [services]);
 
+  // The side-nav "Browse saved searches" popover action navigates here with a
+  // `_openSaved=true` hash marker (popover actions only get navigateToApp, not
+  // `overlays`). useOpenOnUrlMarker reads the marker on mount + window
+  // `hashchange` and opens the flyout once per marker arrival (edge-triggered),
+  // then strips it.
+  //
+  // We intentionally do NOT key on the react-router location: the app
+  // re-serializes the hash via silent `history.replace` on ordinary actions
+  // (e.g. running a query), which would otherwise reopen the flyout if a stale
+  // marker reappeared. Same-app re-clicks still work because core dispatches a
+  // synthetic window `hashchange` for same-app popover navigations.
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut);
+
   const handleSaveShortcut = useCallback(() => {
     if (savedAgentTraces) {
       const saveButtonRun = getSaveButtonRun(
@@ -267,16 +282,23 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
     );
   }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
 
+  // When chrome is hidden (e.g. `?embed=true`) the header portal isn't
+  // rendered, so render the search bar + date picker inline instead.
+  const isEmbedded = !useObservable(services.chrome.getIsVisible$(), true);
+  const datePickerMode = isEmbedded
+    ? TopNavMenuItemRenderType.IN_PLACE
+    : showDatePicker && TopNavMenuItemRenderType.IN_PORTAL;
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
-      config={topNavLinks}
+      config={isEmbedded ? [] : topNavLinks}
       data={data}
       showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
-      showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
+      showDatePicker={datePickerMode}
       showSaveQuery={false}
       useDefaultBehaviors={false}
-      setMenuMountPoint={setHeaderActionMenu}
+      setMenuMountPoint={isEmbedded ? undefined : setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}

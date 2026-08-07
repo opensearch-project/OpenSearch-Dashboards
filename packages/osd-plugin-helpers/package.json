@@ -27,9 +27,9 @@
     "vinyl-fs": "^3.0.3"
   },
   "devDependencies": {
-    "@types/extract-zip": "^1.6.2",
     "@types/gulp-zip": "^4.0.1",
     "@types/inquirer": "^7.3.1",
-    "extract-zip": "^2.0.1"
+    "@types/yauzl": "^3.4.0",
+    "yauzl": "^3.4.0"
   }
 }

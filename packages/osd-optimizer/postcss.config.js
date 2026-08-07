@@ -28,6 +28,8 @@
  * under the License.
  */
 
+const Path = require('path');
+
 /**
  * Strips dependency messages from @tailwindcss/postcss.
  *
@@ -47,42 +49,33 @@ function stripTailwindDeps() {
 stripTailwindDeps.postcss = true;
 
 /**
- * Removes @layer wrappers from Tailwind v4 output.
- *
- * Layered rules always lose to unlayered ones. Since OSD's existing styles
- * (EUI, etc.) are unlayered, Tailwind utilities inside @layer get overridden.
- * Only runs when @tailwindcss/postcss processed the file.
- *  - Removes @layer base (Tailwind reset conflicts with OSD)
- *  - Unwraps @layer theme / utilities (keeps content, drops wrapper)
- *  - Keeps @layer properties (@property declarations are fine in layers)
+ * Restores the space between the import URL and the `prefix(...)` directive
+ * in `@import "tailwindcss/..." prefix(xxx)` rules. Sass `style: 'compressed'`
+ * strips whitespace inside `@import` params, producing
+ * `@import"tailwindcss/theme"prefix(osd)`, which @tailwindcss/postcss does
+ * not parse — it silently skips the import and emits zero utilities.
  */
-function stripCssLayers() {
+function normalizeTailwindImports() {
   return {
-    postcssPlugin: 'postcss-strip-css-layers',
-    OnceExit(root, { result }) {
-      const tailwindRan = result.messages.some((msg) => msg.plugin === '@tailwindcss/postcss');
-      if (!tailwindRan) return;
-
-      root.walkAtRules('layer', (rule) => {
-        const name = rule.params.trim();
-        if (name === 'base' || name === 'components' || name.includes(',')) {
-          rule.remove();
-        } else if (name === 'theme' || name === 'utilities') {
-          rule.replaceWith(rule.nodes);
-        }
+    postcssPlugin: 'postcss-normalize-tailwind-imports',
+    Once(root) {
+      root.walkAtRules('import', (rule) => {
+        rule.params = rule.params.replace(/("tailwindcss\/[^"]+")(prefix)/g, '$1 $2');
       });
     },
   };
 }
-stripCssLayers.postcss = true;
+normalizeTailwindImports.postcss = true;
 
-module.exports = {
+module.exports = (ctx) => ({
   plugins: [
     /*require('autoprefixer')()*/
+    normalizeTailwindImports(),
     // Safe to include unconditionally. Bails out for files without Tailwind directives.
     // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
-    require('@tailwindcss/postcss')(),
-    stripCssLayers(),
+    require('@tailwindcss/postcss')({
+      base: ctx && ctx.file ? Path.dirname(ctx.file) : process.cwd(),
+    }),
     stripTailwindDeps(),
   ],
-};
+});

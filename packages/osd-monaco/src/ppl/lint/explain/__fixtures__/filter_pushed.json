@@ -1,0 +1,6 @@
+{
+  "calcite": {
+    "logical": "LogicalSystemLimit(fetch=[10000], type=[QUERY_SIZE_LIMIT])\n  LogicalProject(age=[$8])\n    LogicalFilter(condition=[>($8, 30)])\n      CalciteLogicalIndexScan(table=[[OpenSearch, accounts]])\n",
+    "physical": "CalciteEnumerableIndexScan(table=[[OpenSearch, accounts]], PushDownContext=[[PROJECT->[age], FILTER->>($0, 30), LIMIT->10000], OpenSearchRequestBuilder(sourceBuilder={\"from\":0,\"size\":10000,\"timeout\":\"1m\",\"query\":{\"range\":{\"age\":{\"from\":30,\"to\":null,\"include_lower\":false,\"include_upper\":true,\"boost\":1.0}}},\"_source\":{\"includes\":[\"age\"]}}, requestedTotalSize=10000, pageSize=null, startFrom=0)])\n"
+  }
+}

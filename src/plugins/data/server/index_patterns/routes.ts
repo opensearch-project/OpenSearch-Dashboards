@@ -66,7 +66,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
-      } catch (error) {
+      } catch {
         return response.badRequest();
       }
 
@@ -127,7 +127,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
-      } catch (error) {
+      } catch {
         return response.badRequest();
       }
 
@@ -145,7 +145,7 @@ export function registerRoutes(http: HttpServiceSetup) {
             'content-type': 'application/json',
           },
         });
-      } catch (error) {
+      } catch {
         return response.notFound();
       }
     }

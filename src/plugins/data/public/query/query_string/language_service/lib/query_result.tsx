@@ -63,7 +63,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     const interval = setInterval(updateElapsedTime, 1000);
 
     return () => {
-      clearInterval((interval as unknown) as NodeJS.Timeout);
+      clearInterval(interval as unknown as NodeJS.Timeout);
       setElapsedTime(0);
     };
   }, [props.queryStatus.startTime]);

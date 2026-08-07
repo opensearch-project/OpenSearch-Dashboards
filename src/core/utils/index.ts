@@ -42,6 +42,7 @@ export {
   WORKSPACE_PATH_PREFIX,
   WORKSPACE_TYPE,
   ENABLE_AI_FEATURES,
+  ENABLE_GLOBAL_SETTING_CONTROL,
 } from './constants';
 export {
   getWorkspaceIdFromUrl,

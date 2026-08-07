@@ -23,7 +23,7 @@ export const useDataSourceTitle = (
           const dataSourceSavedObject = await savedObjectsClient.get('data-source', dataSourceId);
           const attributes = dataSourceSavedObject.attributes as any;
           setDataSourceTitle(attributes.title || dataSourceId);
-        } catch (error) {
+        } catch {
           // Fallback to ID if fetch fails
           setDataSourceTitle(dataSourceId);
         }

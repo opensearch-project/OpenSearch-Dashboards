@@ -25,12 +25,14 @@ export const openTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getOpenButtonRun = (services: AgentTracesServices): TopNavMenuIconRun => () => {
-  const flyoutSession = services.overlays.openFlyout(
-    toMountPoint(
-      <OpenSearchDashboardsContextProvider services={services}>
-        <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
-      </OpenSearchDashboardsContextProvider>
-    )
-  );
-};
+export const getOpenButtonRun =
+  (services: AgentTracesServices): TopNavMenuIconRun =>
+  () => {
+    const flyoutSession = services.overlays.openFlyout(
+      toMountPoint(
+        <OpenSearchDashboardsContextProvider services={services}>
+          <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
+        </OpenSearchDashboardsContextProvider>
+      )
+    );
+  };

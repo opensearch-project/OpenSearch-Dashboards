@@ -52,7 +52,7 @@ export function siblingBuckets(
           try {
             const bucket = fn(metric, series.metrics, bucketSize);
             overwrite(doc, `aggs.${series.id}.aggs.${metric.id}`, bucket);
-          } catch (e) {
+          } catch {
             // meh
           }
         }

@@ -4,12 +4,18 @@
  */
 
 import { LineSeriesOption } from 'echarts';
-import { TimeUnit } from '../types';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -32,121 +38,75 @@ export const replaceNullWithZero = (
   });
 };
 
-export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) => {
-  switch (interval) {
-    case TimeUnit.YEAR:
-      return 'year';
-    case TimeUnit.MONTH:
-      return 'month';
-    case TimeUnit.DATE:
-      return 'day';
-    case TimeUnit.HOUR:
-      return 'hour';
-    case TimeUnit.MINUTE:
-      return 'minute';
-    case TimeUnit.SECOND:
-      return 'second';
-    default:
-      return 'day';
-  }
-};
-
 /**
  * Create area series configuration for ECharts
  */
-export const createAreaSeries = <T extends BaseChartStyle>({
-  styles,
-  seriesFields,
-  categoryField,
-  stack,
-}: {
-  styles: AreaChartStyle;
-  seriesFields: string[] | ((headers?: string[]) => string[]);
-  categoryField: string;
-  stack?: boolean;
-}): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings } = state;
-  const newState = { ...state };
+export const createAreaSeries =
+  <T extends BaseChartStyle>({
+    styles,
+    seriesFields,
+    categoryField,
+    stack,
+    allData,
+    colorField,
+  }: {
+    styles: AreaChartStyle;
+    seriesFields: string[] | ((headers?: string[]) => string[]);
+    categoryField: string;
+    stack?: boolean;
+    allData?: Array<Record<string, any>>;
+    colorField?: string;
+  }): PipelineFn<T> =>
+  (state) => {
+    const { transformedData = [], axisColumnMappings } = state;
+    const palette = getColors().categories;
+    const newState = { ...state };
 
-  if (!Array.isArray(seriesFields)) {
-    seriesFields = seriesFields(transformedData[0]);
-  }
+    if (!Array.isArray(seriesFields)) {
+      seriesFields = seriesFields(transformedData[0]);
+    }
 
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-  const series = seriesFields?.map((item: string, index: number) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
+    const allColumns = Object.values(axisColumnMappings).flat();
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields,
+      columns: allColumns,
+    });
 
-    return {
-      name,
-      type: 'line',
-      showSymbol: false,
-      connectNulls: true,
-      stack: stack ? 'Total' : undefined,
-      areaStyle: {
-        opacity: styles.areaOpacity || DEFAULT_OPACITY,
-      },
-      smooth: true,
-      encode: {
-        x: categoryField,
-        y: item,
-      },
-      emphasis: {
-        focus: 'self',
-      },
-      ...(index === 0 && thresholdLines),
-    };
-  });
+    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+    const legendItems: LegendItem[] = [];
+    const series = seriesFields?.map((item: string, index: number) => {
+      const name = getSeriesDisplayName(item, allColumns);
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
 
-  newState.series = series as LineSeriesOption[];
+      return {
+        name,
+        type: 'line',
+        showSymbol: false,
+        connectNulls: true,
+        stack: stack ? 'Total' : undefined,
+        areaStyle: {
+          opacity: styles.areaOpacity || DEFAULT_OPACITY,
+        },
+        smooth: true,
+        encode: {
+          x: categoryField,
+          y: item,
+        },
+        emphasis: {
+          focus: 'self',
+        },
+        itemStyle: {
+          color,
+        },
+        ...(index === 0 && thresholdLines),
+      };
+    });
 
-  return newState;
-};
+    newState.series = series as LineSeriesOption[];
+    newState.legendItems = legendItems;
 
-/**
- * Create faceted area series configuration for ECharts
- */
-export const createFacetAreaSeries = <T extends BaseChartStyle>({
-  styles,
-  seriesFields,
-  categoryField,
-}: {
-  styles: AreaChartStyle;
-  seriesFields: (headers?: string[]) => string[];
-  categoryField: string;
-}): PipelineFn<T> => (state) => {
-  const { transformedData } = state;
-  const newState = { ...state };
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-
-  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
-    const header = seriesData[0];
-    const cateColumns = seriesFields(header);
-    return cateColumns.map((item: string, seriesIndex: number) => ({
-      name: String(item),
-      type: 'line',
-      showSymbol: false,
-      stack: `Total_${index}`, // Use unique stack name for each facet
-      connectNulls: true,
-      areaStyle: {
-        opacity: styles.areaOpacity || DEFAULT_OPACITY,
-      },
-      smooth: true,
-      encode: {
-        x: categoryField,
-        y: item,
-      },
-      datasetIndex: index,
-      gridIndex: index,
-      xAxisIndex: index,
-      yAxisIndex: index,
-      emphasis: {
-        focus: 'self',
-      },
-      ...(seriesIndex === 0 && (thresholdLines as any)),
-    }));
-  });
-
-  newState.series = allSeries?.flat() as LineSeriesOption[];
-
-  return newState;
-};
+    return newState;
+  };

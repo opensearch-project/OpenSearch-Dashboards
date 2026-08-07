@@ -106,6 +106,7 @@ export class DataSourceAggregatedView extends React.Component<
       'auth.type',
       'dataSourceVersion',
       'installedPlugins',
+      'dataSourceEngineType',
     ])
       .then(async (fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();

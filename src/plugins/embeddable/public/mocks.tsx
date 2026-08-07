@@ -102,7 +102,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
 export const mockRefOrValEmbeddable = <
   OriginalEmbeddableType,
   ValTypeInput extends EmbeddableInput = EmbeddableInput,
-  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 >(
   embeddable: IEmbeddable,
   options: {
@@ -110,7 +110,8 @@ export const mockRefOrValEmbeddable = <
     mockedByValueInput: ValTypeInput;
   }
 ): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  const newEmbeddable: ReferenceOrValueEmbeddable =
+    embeddable as unknown as ReferenceOrValueEmbeddable;
   newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
     !!(input as RefTypeInput).savedObjectId;
   newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);

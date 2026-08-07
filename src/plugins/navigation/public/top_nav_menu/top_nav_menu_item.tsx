@@ -81,7 +81,7 @@ function TopNavMenuLegacyItem(props: TopNavMenuLegacyData) {
         label={upperFirst(props.label || props.id!)}
         checked={props.emphasize || false}
         onChange={(e) => {
-          handleClick((e as unknown) as MouseEvent<HTMLButtonElement>);
+          handleClick(e as unknown as MouseEvent<HTMLButtonElement>);
         }}
         data-test-subj={props.testId}
         className={props.className}

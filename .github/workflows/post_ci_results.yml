@@ -21,14 +21,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Resolve the PR number from the workflow_run event.
       # For PRs within the same repo, pull_requests[] is populated directly.
       # For fork PRs it is empty, so we fall back to searching by head branch.
       - name: Get PR number
         id: get-pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const run = context.payload.workflow_run;
@@ -48,7 +48,7 @@ jobs:
 
       - name: Download unit test JUnit artifacts
         if: github.event.workflow_run.conclusion == 'failure' && steps.get-pr.outputs.pr_number != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           # Matches junit-jest-group1-Linux, junit-jest-group2-Windows, etc.
           # Each artifact lands in its own subdirectory; the script recurses into all of them.
@@ -59,7 +59,7 @@ jobs:
 
       - name: Download integration test JUnit artifacts
         if: github.event.workflow_run.conclusion == 'failure' && steps.get-pr.outputs.pr_number != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           # Matches junit-jest-integration-Linux, junit-jest-integration-Windows
           pattern: junit-jest-integration*
@@ -92,7 +92,7 @@ jobs:
       - name: Find existing comment
         id: find-comment
         if: steps.get-pr.outputs.pr_number != ''
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3
         with:
           issue-number: ${{ steps.get-pr.outputs.pr_number }}
           comment-author: 'github-actions[bot]'
@@ -105,7 +105,7 @@ jobs:
         if: |
           steps.get-pr.outputs.pr_number != '' &&
           (github.event.workflow_run.conclusion == 'failure' || steps.find-comment.outputs.comment-id != '')
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ steps.get-pr.outputs.pr_number }}

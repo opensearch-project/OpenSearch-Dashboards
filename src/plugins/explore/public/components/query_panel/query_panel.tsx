@@ -5,7 +5,7 @@
 
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
-import { QueryPanelEditor } from './query_panel_editor';
+import { ExploreQueryPanelEditor } from './query_panel_editor';
 import { QueryPanelWidgets } from './query_panel_widgets';
 import {
   selectIsLoading,
@@ -16,7 +16,13 @@ import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
 import { useSetEditorTextWithQuery } from '../../application/hooks';
 import './query_panel.scss';
 
-const QueryPanel = () => {
+interface QueryPanelProps {
+  analyzeIsOpen?: boolean;
+  onToggleAnalyze?: () => void;
+  hasAnalyzeResult?: boolean;
+}
+
+const QueryPanel = ({ analyzeIsOpen, onToggleAnalyze, hasAnalyzeResult }: QueryPanelProps) => {
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
@@ -29,9 +35,13 @@ const QueryPanel = () => {
 
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
-      <QueryPanelWidgets />
+      <QueryPanelWidgets
+        analyzeIsOpen={analyzeIsOpen}
+        onToggleAnalyze={onToggleAnalyze}
+        hasAnalyzeResult={hasAnalyzeResult}
+      />
       <div className="exploreQueryPanel__editorsWrapper">
-        <QueryPanelEditor />
+        <ExploreQueryPanelEditor />
         <QueryPanelGeneratedQuery />
       </div>
       {isLoading && (

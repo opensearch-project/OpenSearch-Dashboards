@@ -52,7 +52,8 @@ export const DataSourceComponentType = {
   DataSourceMultiSelectable: 'DataSourceMultiSelectable',
 } as const;
 
-export type DataSourceComponentType = typeof DataSourceComponentType[keyof typeof DataSourceComponentType];
+export type DataSourceComponentType =
+  (typeof DataSourceComponentType)[keyof typeof DataSourceComponentType];
 
 export interface DataSourceViewConfig extends DataSourceBaseConfig {
   activeOption: DataSourceOption[];

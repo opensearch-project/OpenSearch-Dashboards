@@ -114,7 +114,7 @@ export function modifyUrl(
       query: modifiedParts.query,
       slashes: modifiedParts.slashes,
     } as UrlObject);
-  } catch (error) {
+  } catch {
     return url; // Safe fallback to original url
   }
 }
@@ -140,7 +140,7 @@ export function isRelativeUrl(candidatePath: string) {
       return false;
     }
     return true;
-  } catch (error) {
+  } catch {
     return false; // Safe fallback to "not relative"
   }
 }
@@ -155,7 +155,7 @@ export function getUrlOrigin(url: string): string | null {
       return null;
     }
     return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
-  } catch (error) {
+  } catch {
     return null; // Safe fallback to null
   }
 }

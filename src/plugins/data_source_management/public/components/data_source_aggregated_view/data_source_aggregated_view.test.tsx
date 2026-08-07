@@ -137,12 +137,19 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
 
       // Renders normally
       expect(component).toMatchSnapshot();
-      expect(client.find).toBeCalledWith({
-        fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      expect(client.find).toHaveBeenCalledWith({
+        fields: [
+          'id',
+          'title',
+          'auth.type',
+          'dataSourceVersion',
+          'installedPlugins',
+          'dataSourceEngineType',
+        ],
         perPage: 10000,
         type: 'data-source',
       });
-      expect(toasts.addWarning).toBeCalledTimes(0);
+      expect(toasts.addWarning).toHaveBeenCalledTimes(0);
       await nextTick();
 
       // Renders correctly for hide local cluster configuration
@@ -258,12 +265,19 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
 
       // Should render normally
       expect(component).toMatchSnapshot();
-      expect(client.find).toBeCalledWith({
-        fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      expect(client.find).toHaveBeenCalledWith({
+        fields: [
+          'id',
+          'title',
+          'auth.type',
+          'dataSourceVersion',
+          'installedPlugins',
+          'dataSourceEngineType',
+        ],
         perPage: 10000,
         type: 'data-source',
       });
-      expect(toasts.addWarning).toBeCalledTimes(0);
+      expect(toasts.addWarning).toHaveBeenCalledTimes(0);
 
       // Should render only active options
       const euiSwitch = component.find(EuiSwitch);
@@ -532,7 +546,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
 
       expect(component).toMatchSnapshot();
       await nextTick();
-      expect(toasts.add).toBeCalled();
+      expect(toasts.add).toHaveBeenCalled();
       expect(component.state('showError')).toBe(true);
     }
   );
@@ -595,7 +609,7 @@ describe('DataSourceAggregatedView warning messages', () => {
       );
       await nextTick();
 
-      expect(toasts.add).toBeCalledWith(expect.objectContaining({ title: defaultMessage }));
+      expect(toasts.add).toHaveBeenCalledWith(expect.objectContaining({ title: defaultMessage }));
     }
   );
 });

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CollapsibleNav renders links grouped by category 1`] = `
 <CollapsibleNav
@@ -698,7 +698,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               Object {
                                 "aria-label": "recent 1",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent%201",
+                                "href": "http://localhost:5601/test/recent%201",
                                 "label": "recent 1",
                                 "onClick": [Function],
                                 "title": "recent 1",
@@ -706,7 +706,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               Object {
                                 "aria-label": "recent 2",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent%202",
+                                "href": "http://localhost:5601/test/recent%202",
                                 "label": "recent 2",
                                 "onClick": [Function],
                                 "title": "recent 2",
@@ -729,7 +729,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               aria-label="recent 1"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent%201"
+                              href="http://localhost:5601/test/recent%201"
                               key="title-0"
                               label="recent 1"
                               onClick={[Function]}
@@ -745,7 +745,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   aria-label="recent 1"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent%201"
+                                  href="http://localhost:5601/test/recent%201"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent 1"
@@ -763,7 +763,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               aria-label="recent 2"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent%202"
+                              href="http://localhost:5601/test/recent%202"
                               key="title-1"
                               label="recent 2"
                               onClick={[Function]}
@@ -779,7 +779,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   aria-label="recent 2"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent%202"
+                                  href="http://localhost:5601/test/recent%202"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent 2"
@@ -3674,7 +3674,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
                               Object {
                                 "aria-label": "recent",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent",
+                                "href": "http://localhost:5601/test/recent",
                                 "label": "recent",
                                 "onClick": [Function],
                                 "title": "recent",
@@ -3697,7 +3697,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
                               aria-label="recent"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent"
+                              href="http://localhost:5601/test/recent"
                               key="title-0"
                               label="recent"
                               onClick={[Function]}
@@ -3713,7 +3713,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
                                   aria-label="recent"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent"
+                                  href="http://localhost:5601/test/recent"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent"
@@ -4793,7 +4793,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
                               Object {
                                 "aria-label": "recent",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent",
+                                "href": "http://localhost:5601/test/recent",
                                 "label": "recent",
                                 "onClick": [Function],
                                 "title": "recent",
@@ -4816,7 +4816,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
                               aria-label="recent"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent"
+                              href="http://localhost:5601/test/recent"
                               key="title-0"
                               label="recent"
                               onClick={[Function]}
@@ -4832,7 +4832,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
                                   aria-label="recent"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent"
+                                  href="http://localhost:5601/test/recent"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent"
@@ -5905,7 +5905,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                               Object {
                                 "aria-label": "recent",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent",
+                                "href": "http://localhost:5601/test/recent",
                                 "label": "recent",
                                 "onClick": [Function],
                                 "title": "recent",
@@ -5928,7 +5928,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                               aria-label="recent"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent"
+                              href="http://localhost:5601/test/recent"
                               key="title-0"
                               label="recent"
                               onClick={[Function]}
@@ -5944,7 +5944,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                                   aria-label="recent"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent"
+                                  href="http://localhost:5601/test/recent"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent"
@@ -7013,7 +7013,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                               Object {
                                 "aria-label": "recent",
                                 "data-test-subj": "collapsibleNavAppLink--recent",
-                                "href": "http://localhost/test/recent",
+                                "href": "http://localhost:5601/test/recent",
                                 "label": "recent",
                                 "onClick": [Function],
                                 "title": "recent",
@@ -7036,7 +7036,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                               aria-label="recent"
                               color="subdued"
                               data-test-subj="collapsibleNavAppLink--recent"
-                              href="http://localhost/test/recent"
+                              href="http://localhost:5601/test/recent"
                               key="title-0"
                               label="recent"
                               onClick={[Function]}
@@ -7052,7 +7052,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                                   aria-label="recent"
                                   className="euiListGroupItem__button"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/recent"
+                                  href="http://localhost:5601/test/recent"
                                   onClick={[Function]}
                                   rel="noreferrer"
                                   title="recent"

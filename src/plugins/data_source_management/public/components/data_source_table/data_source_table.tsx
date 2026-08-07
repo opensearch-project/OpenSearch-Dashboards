@@ -488,7 +488,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           break;
         }
       }
-    } catch (e) {
+    } catch {
       handleDisplayToastMessage({
         message: i18n.translate(
           'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',

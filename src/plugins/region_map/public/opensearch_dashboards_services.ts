@@ -37,20 +37,16 @@ import { SharePluginStart } from '../../share/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+export const [getFormatService, setFormatService] =
+  createGetterSetter<DataPublicPluginStart['fieldFormats']>('data.fieldFormats');
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
-  OpenSearchDashboardsLegacyStart
->('OpenSearchDashboardsLegacy');
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] =
+  createGetterSetter<OpenSearchDashboardsLegacyStart>('OpenSearchDashboardsLegacy');

@@ -22,7 +22,14 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
+import {
+  BaseDataset,
+  DEFAULT_DATA,
+  Dataset,
+  DatasetField,
+  isValidTimeField,
+  Query,
+} from '../../../../common';
 import { getIndexPatterns, getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
 import { DatasetIndexedView } from '../../../query/query_string/dataset_service';
@@ -46,11 +53,13 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const supportedLanguages = type?.supportedLanguages(baseDataset) || [];
-  const languages = supportedLanguages.filter(
-    (langId) =>
-      !services.appName ||
-      languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
-  );
+  const languages = supportedLanguages.filter((langId) => {
+    const langConfig = languageService.getLanguage(langId);
+    return (
+      (!services.appName || langConfig?.supportedAppNames?.includes(services.appName)) &&
+      (!langConfig || languageService.isLanguageSupportedForDataset(langConfig, baseDataset))
+    );
+  });
   const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
 
   const [language, setLanguage] = useState<string>(() => {
@@ -117,7 +126,7 @@ export const Configurator = ({
       const datasetFields = await datasetType
         .fetchFields(baseDataset)
         .finally(() => setTimeFieldsLoading(false));
-      const dateFields = datasetFields?.filter((field) => field.type === 'date');
+      const dateFields = datasetFields?.filter(isValidTimeField);
       setTimeFields(dateFields || []);
     };
 
@@ -136,9 +145,8 @@ export const Configurator = ({
 
     let connectedDataSource;
     if (dataset.dataSource?.id) {
-      const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
-        dataset
-      );
+      const connectedDataSourceSavedObj: any =
+        await indexedViewsService.getConnectedDataSource(dataset);
       if (connectedDataSourceSavedObj) {
         connectedDataSource = {
           id: connectedDataSourceSavedObj.id,

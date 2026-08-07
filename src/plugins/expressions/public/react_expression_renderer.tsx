@@ -93,9 +93,8 @@ export const ReactExpressionRenderer = ({
   const hasHandledErrorRef = useRef(false);
 
   // will call done() in LayoutEffect when done with rendering custom error state
-  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
-    null
-  );
+  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> =
+    useRef(null);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()

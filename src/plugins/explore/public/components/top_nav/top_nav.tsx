@@ -5,9 +5,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { useSyncQueryStateWithUrl } from '../../../../data/public';
+import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
+import { useSyncQueryStateWithUrl, runPPLAnalyzeInBackground } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -161,8 +163,19 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         editorRef.current?.getValue() ?? String(queryString.getQuery().query || '');
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
+
+      // Refresh the analyze panel (if open) with the freshly-executed query text.
+      // Sourced from the editor rather than the query bar's own state so it stays
+      // in sync with what actually ran.
+      const currentQuery = queryString.getQuery();
+      runPPLAnalyzeInBackground({
+        query: { ...currentQuery, query: editorText },
+        http: services.http,
+        timefilter: timefilter.timefilter,
+        onlyIfOpen: true,
+      });
     },
-    [dispatch, services, editorRef, queryString]
+    [dispatch, services, editorRef, queryString, timefilter]
   );
 
   const handleQueryCancel = useCallback(() => {
@@ -185,6 +198,20 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     const openButtonRun = getOpenButtonRun(services);
     openButtonRun({} as HTMLElement);
   }, [services]);
+
+  // The side-nav "Browse saved searches" popover action navigates here with a
+  // `_openSaved=true` hash marker (it can't open the flyout itself — popover
+  // actions only get navigateToApp, not `overlays`). useOpenOnUrlMarker reads
+  // the marker on mount + window `hashchange` and opens the flyout once per
+  // marker arrival (edge-triggered), then strips it.
+  //
+  // We intentionally do NOT key on the react-router location here. The app
+  // re-serializes the hash via silent `history.replace` on ordinary actions
+  // (e.g. running a query), which would otherwise re-trigger the check and
+  // reopen the flyout if a stale marker momentarily reappeared. Same-app
+  // re-clicks of the popover action are still handled: core dispatches a
+  // synthetic window `hashchange` for same-app popover navigations.
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut);
 
   const handleSaveShortcut = useCallback(() => {
     if (savedExplore) {
@@ -269,17 +296,24 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     );
   }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
 
+  // When chrome is hidden (e.g. `?embed=true`) the header portal isn't
+  // rendered, so render the search bar + date picker inline instead.
+  const isEmbedded = !useObservable(services.chrome.getIsVisible$(), true);
+  const datePickerMode = isEmbedded
+    ? TopNavMenuItemRenderType.IN_PLACE
+    : showDatePicker && TopNavMenuItemRenderType.IN_PORTAL;
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
-      config={topNavLinks}
+      config={isEmbedded ? [] : topNavLinks}
       data={data}
       showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
-      showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
+      showDatePicker={datePickerMode}
       showSaveQuery={false}
       useDefaultBehaviors={false}
       disableTimeRangeTool={true}
-      setMenuMountPoint={setHeaderActionMenu}
+      setMenuMountPoint={isEmbedded ? undefined : setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}

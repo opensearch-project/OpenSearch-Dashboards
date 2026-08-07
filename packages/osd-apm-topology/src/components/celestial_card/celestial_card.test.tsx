@@ -121,7 +121,8 @@ describe('CelestialCard', () => {
         wrapper: Providers,
       });
       const card = container.firstChild as HTMLElement;
-      expect(card.style.borderColor).toBe('#6366f1');
+      // jsdom converts hex to rgb
+      expect(card.style.borderColor).toBe('rgb(99, 102, 241)');
       expect(card.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
     });
 

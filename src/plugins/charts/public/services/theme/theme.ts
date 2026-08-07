@@ -28,6 +28,7 @@
  * under the License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 

@@ -160,11 +160,12 @@ describe('Table', () => {
     let component = shallowWithI18nProvider(<Table {...props} />);
 
     let table = component.find('EuiBasicTable');
-    let columns = table.prop<
-      Array<{ render: (id: string, record: unknown) => React.ReactElement }>
-    >('columns');
+    let columns =
+      table.prop<Array<{ render: (id: string, record: unknown) => React.ReactElement }>>('columns');
     let content = columns[1].render('My-Dashboard-test', item);
-    expect(content.props.href).toEqual('http://localhost/w/ws-1/app/dashboards#/view/dashboard-1');
+    expect(content.props.href).toEqual(
+      'http://localhost:5601/w/ws-1/app/dashboards#/view/dashboard-1'
+    );
 
     // in a workspace
     const currentWorkspaceId = 'foo-ws';
@@ -176,7 +177,7 @@ describe('Table', () => {
     columns = table.prop('columns');
     content = columns[1].render('My-Dashboard-test', item);
     expect(content.props.href).toEqual(
-      `http://localhost/w/${currentWorkspaceId}/app/dashboards#/view/dashboard-1`
+      `http://localhost:5601/w/${currentWorkspaceId}/app/dashboards#/view/dashboard-1`
     );
   });
 
@@ -307,8 +308,7 @@ describe('Table', () => {
         icon: 'indexPatternApp',
         editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
         inAppUrl: {
-          path:
-            '/app/management/opensearch-dashboards/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197%3A%3Aotel_v1_apm_span_sample_1',
+          path: '/app/management/opensearch-dashboards/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197%3A%3Aotel_v1_apm_span_sample_1',
           uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
         },
       },
@@ -338,8 +338,7 @@ describe('Table', () => {
         icon: 'indexPatternApp',
         editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
         inAppUrl: {
-          path:
-            '/app/management/opensearch-dashboards/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197%3A%3Aotel_v1_apm_span_sample_1',
+          path: '/app/management/opensearch-dashboards/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197%3A%3Aotel_v1_apm_span_sample_1',
           uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
         },
       },
@@ -353,12 +352,11 @@ describe('Table', () => {
     const component = shallowWithI18nProvider(<Table {...props} />);
 
     const table = component.find('EuiBasicTable');
-    const columns = table.prop<
-      Array<{ render: (id: string, record: unknown) => React.ReactElement }>
-    >('columns');
+    const columns =
+      table.prop<Array<{ render: (id: string, record: unknown) => React.ReactElement }>>('columns');
     const content = columns[1].render('MyIndexPattern*', item);
     expect(content.props.href).toEqual(
-      'http://localhost/w/ws-1/app/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197::otel_v1_apm_span_sample_1'
+      'http://localhost:5601/w/ws-1/app/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197::otel_v1_apm_span_sample_1'
     );
   });
 });

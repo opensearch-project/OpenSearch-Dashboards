@@ -59,25 +59,19 @@ import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_s
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { ConfigSchema } from '../config';
 
-export const [
-  getRenderAccelerationDetailsFlyout,
-  setRenderAccelerationDetailsFlyout,
-] = createGetterSetter<(params: RenderAccelerationDetailsFlyoutParams) => void>(
-  'renderAccelerationDetailsFlyout'
-);
+export const [getRenderAccelerationDetailsFlyout, setRenderAccelerationDetailsFlyout] =
+  createGetterSetter<(params: RenderAccelerationDetailsFlyoutParams) => void>(
+    'renderAccelerationDetailsFlyout'
+  );
 
-export const [
-  getRenderCreateAccelerationFlyout,
-  setRenderCreateAccelerationFlyout,
-] = createGetterSetter<(params: RenderAccelerationFlyoutParams) => void>(
-  'renderCreateAccelerationFlyout'
-);
-export const [
-  getRenderAssociatedObjectsDetailsFlyout,
-  setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<(params: RenderAssociatedObjectsDetailsFlyoutParams) => void>(
-  'renderAssociatedObjectsDetailsFlyout'
-);
+export const [getRenderCreateAccelerationFlyout, setRenderCreateAccelerationFlyout] =
+  createGetterSetter<(params: RenderAccelerationFlyoutParams) => void>(
+    'renderCreateAccelerationFlyout'
+  );
+export const [getRenderAssociatedObjectsDetailsFlyout, setRenderAssociatedObjectsDetailsFlyout] =
+  createGetterSetter<(params: RenderAssociatedObjectsDetailsFlyoutParams) => void>(
+    'renderAssociatedObjectsDetailsFlyout'
+  );
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -107,14 +101,12 @@ export interface DataSourceManagementPluginStart {
  */
 export const DSM_APP_ID = 'dataSources';
 
-export class DataSourceManagementPlugin
-  implements
-    Plugin<
-      DataSourceManagementPluginSetup,
-      DataSourceManagementPluginStart,
-      DataSourceManagementSetupDependencies,
-      ConfigSchema
-    > {
+export class DataSourceManagementPlugin implements Plugin<
+  DataSourceManagementPluginSetup,
+  DataSourceManagementPluginStart,
+  DataSourceManagementSetupDependencies,
+  ConfigSchema
+> {
   private started: boolean = false;
   private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
   private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();

@@ -56,10 +56,10 @@ export async function fetchAnchor(
     );
   }
 
-  return ({
+  return {
     ...doc,
     isAnchor: true,
-  } as unknown) as OpenSearchHitRecord;
+  } as unknown as OpenSearchHitRecord;
 }
 
 export function updateSearchSource(

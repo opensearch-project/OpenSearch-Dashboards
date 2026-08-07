@@ -16,7 +16,7 @@ import {
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
-import { createSingleMetric, createMultiMetric, MetricAxisMapping } from './to_expression';
+import { createSingleMetric, MetricAxisMapping } from './to_expression';
 import { MetricChartRender } from './metric_component';
 
 export type TextAlignment = 'auto' | 'center';
@@ -121,12 +121,13 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
           const value = props.axisColumnMappings.value?.[0];
           if (!value) throw Error('Missing axis config for metric chart');
           const mapping: MetricAxisMapping = { [AxisRole.Value]: value };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}
               styles={props.styleOptions}
               axisColumnMappings={mapping}
+              seriesName={props.renderContext?.seriesName}
             />
           );
         },
@@ -147,75 +148,13 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
             [AxisRole.Value]: value,
             [AxisRole.Time]: time,
           };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}
               styles={props.styleOptions}
               axisColumnMappings={mapping}
-            />
-          );
-        },
-      },
-      {
-        priority: 50,
-        mappings: [
-          {
-            [AxisRole.Value]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const value = props.axisColumnMappings.value?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!value || !facet) throw Error('Missing axis config for metric chart');
-          const mapping: MetricAxisMapping = {
-            [AxisRole.Value]: value,
-            [AxisRole.FACET]: facet,
-          };
-          const specs = createMultiMetric(
-            props.transformedData,
-            props.styleOptions,
-            mapping as MetricAxisMapping & { [AxisRole.FACET]: typeof facet }
-          );
-          return (
-            <MetricChartRender
-              spec={specs}
-              styles={props.styleOptions}
-              axisColumnMappings={mapping}
-            />
-          );
-        },
-      },
-      {
-        priority: 50,
-        mappings: [
-          {
-            [AxisRole.Value]: { type: VisFieldType.Numerical },
-            [AxisRole.Time]: { type: VisFieldType.Date },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const value = props.axisColumnMappings.value?.[0];
-          const time = props.axisColumnMappings.time?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!value || !time || !facet) throw Error('Missing axis config for metric chart');
-          const mapping: MetricAxisMapping = {
-            [AxisRole.Value]: value,
-            [AxisRole.Time]: time,
-            [AxisRole.FACET]: facet,
-          };
-          const specs = createMultiMetric(
-            props.transformedData,
-            props.styleOptions,
-            mapping as MetricAxisMapping & { [AxisRole.FACET]: typeof facet }
-          );
-          return (
-            <MetricChartRender
-              spec={specs}
-              styles={props.styleOptions}
-              axisColumnMappings={mapping}
+              seriesName={props.renderContext?.seriesName}
             />
           );
         },

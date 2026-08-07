@@ -17,14 +17,16 @@ import {
   createScatterSeries,
   createCategoryScatterSeries,
   createSizeScatterSeries,
+  assembleScatterSpec,
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
+import { LegendItem } from '../utils/legend';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   styles: ScatterChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn }
-): any => {
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -33,7 +35,7 @@ export const createTwoMetricScatter = (
 
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
-    createBaseConfig({ title: `${xCol.name} vs ${yCol.name}` }),
+    createBaseConfig({}),
     buildAxisConfigs,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h === yCol.column),
@@ -51,7 +53,7 @@ export const createTwoMetricScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createTwoMetricOneCateScatter = (
@@ -61,8 +63,9 @@ export const createTwoMetricOneCateScatter = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
-): any => {
+  },
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -77,15 +80,14 @@ export const createTwoMetricOneCateScatter = (
       }),
       convertTo2DArray()
     ),
-    createBaseConfig({
-      title: `${xCol.name} vs ${yCol.name} by ${colorCol.name}`,
-    }),
+    createBaseConfig({}),
     buildAxisConfigs,
     createCategoryScatterSeries({
       styles,
       xField: xCol.column,
       yField: yCol.column,
       colorField: colorCol.column,
+      allData,
     }),
     assembleSpec
   )({
@@ -95,7 +97,7 @@ export const createTwoMetricOneCateScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createThreeMetricOneCateScatter = (
@@ -104,10 +106,11 @@ export const createThreeMetricOneCateScatter = (
   axisColumnMappings: {
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
+    [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
-  }
-): any => {
+  },
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
   const yCol = axisColumnMappings[AxisRole.Y];
@@ -118,18 +121,18 @@ export const createThreeMetricOneCateScatter = (
 
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
-    createBaseConfig({
-      title: `${xCol.name} vs ${yCol.name} by ${colorCol.name} (Size: ${sizeCol.name})`,
-    }),
+    createBaseConfig({}),
     buildAxisConfigs,
     createSizeScatterSeries({
       styles,
       xField: xCol.column,
       yField: yCol.column,
-      colorField: colorCol.column,
+      colorField: colorCol?.column,
       sizeField: sizeCol.column,
+      allData,
     }),
-    assembleSpec
+    assembleSpec,
+    assembleScatterSpec
   )({
     data: transformedData,
     styles,
@@ -137,5 +140,5 @@ export const createThreeMetricOneCateScatter = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

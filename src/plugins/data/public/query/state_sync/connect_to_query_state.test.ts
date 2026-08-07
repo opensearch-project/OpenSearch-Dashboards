@@ -137,9 +137,9 @@ describe('connect_storage_to_query_state', () => {
       application: startMock.application,
       notifications: startMock.notifications,
     });
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     queryString = queryServiceStart.queryString;
     queryChangeTriggered = jest.fn();
@@ -149,7 +149,7 @@ describe('connect_storage_to_query_state', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    window.location.href = '/';
+    window.location.href = 'http://localhost:5601/';
     history = createBrowserHistory();
     osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 
@@ -357,9 +357,9 @@ describe('connect_to_global_state', () => {
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     globalState = createStateContainer({});
     globalStateChangeTriggered = jest.fn();
@@ -420,7 +420,7 @@ describe('connect_to_global_state', () => {
       time: { from: 'now-30m', to: 'now' },
     });
 
-    expect(globalStateChangeTriggered).toBeCalledTimes(1);
+    expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
 
     expect(filterManager.getGlobalFilters()).toHaveLength(2);
     expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 100 });
@@ -454,7 +454,7 @@ describe('connect_to_global_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF1, aF2]);
 
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(globalState.get().filters).toHaveLength(1);
 
       stop();
@@ -467,7 +467,7 @@ describe('connect_to_global_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF2, aF1]);
 
-      expect(globalStateChangeTriggered).toBeCalledTimes(2);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(2);
       expect(globalState.get().filters).toHaveLength(1);
 
       stop();
@@ -507,7 +507,7 @@ describe('connect_to_global_state', () => {
 
       globalStateChangeTriggered.mockClear();
       const stop = connectToQueryGlobalState(queryServiceStart, globalState);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(globalState.get().filters).toHaveLength(0);
 
       stop();
@@ -524,7 +524,7 @@ describe('connect_to_global_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -538,7 +538,7 @@ describe('connect_to_global_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(2);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -550,7 +550,7 @@ describe('connect_to_global_state', () => {
       const stop = connectToQueryGlobalState(queryServiceStart, globalState);
       globalState.set({ ...globalState.get(), filters: [gF1, gF2] });
 
-      expect(filterManagerChangeTriggered).toBeCalledTimes(0);
+      expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(0);
       stop();
     });
 
@@ -602,9 +602,9 @@ describe('connect_to_app_state', () => {
       application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     appState = createStateContainer({});
     appStateChangeTriggered = jest.fn();
@@ -649,7 +649,7 @@ describe('connect_to_app_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF2, aF1]);
 
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(appState.get().filters).toHaveLength(1);
 
       stop();
@@ -662,7 +662,7 @@ describe('connect_to_app_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF1, aF2]);
 
-      expect(appStateChangeTriggered).toBeCalledTimes(2);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(2);
       expect(appState.get().filters).toHaveLength(1);
 
       stop();
@@ -702,7 +702,7 @@ describe('connect_to_app_state', () => {
 
       appStateChangeTriggered.mockClear();
       const stop = connectToQueryAppState(queryServiceStart, appState);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(appState.get().filters).toHaveLength(0);
 
       stop();
@@ -719,7 +719,7 @@ describe('connect_to_app_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -732,7 +732,7 @@ describe('connect_to_app_state', () => {
 
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getGlobalFilters()).toHaveLength(2);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -744,7 +744,7 @@ describe('connect_to_app_state', () => {
       const stop = connectToQueryAppState(queryServiceStart, appState);
       appState.set({ filters: [aF1, aF2] });
 
-      expect(filterManagerChangeTriggered).toBeCalledTimes(0);
+      expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(0);
       stop();
     });
 
@@ -793,9 +793,9 @@ describe('filters with different state', () => {
       application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     state = createStateContainer({});
     stateChangeTriggered = jest.fn();
@@ -836,7 +836,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(3);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(3);
 
     stop();
   });
@@ -848,7 +848,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(1);
 
     stop();
   });
@@ -860,7 +860,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(1);
 
     stop();
   });

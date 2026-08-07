@@ -59,7 +59,14 @@ export {
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
 export { RightNavigationOrder, HeaderVariant } from './constants';
-export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
+export {
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  NavGroupItemInMap,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
+} from './nav_group';
 export {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,

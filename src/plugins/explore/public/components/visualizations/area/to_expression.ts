@@ -14,15 +14,15 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import { createAreaSeries, createFacetAreaSeries, replaceNullWithZero } from './area_chart_utils';
+import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
   sortByTime,
   pivot,
-  facetTransform,
   aggregate,
 } from '../utils/data_transformation';
+import { LegendItem } from '../utils/legend';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -32,19 +32,17 @@ export const createSimpleAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
   timeRange?: { from: string; to: string }
-): any => {
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
     transform(sortByTime(timeField), convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} Over Time`,
       legend: { show: false },
     }),
     buildAxisConfigs,
@@ -63,7 +61,7 @@ export const createSimpleAreaChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -77,8 +75,9 @@ export const createMultiAreaChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  timeRange?: { from: string; to: string }
-): any => {
+  timeRange?: { from: string; to: string },
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings[AxisRole.X].column;
@@ -99,10 +98,7 @@ export const createMultiAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      }`,
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
@@ -114,6 +110,8 @@ export const createMultiAreaChart = (
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       stack: true,
+      allData,
+      colorField,
     }),
     assembleSpec
   )({
@@ -124,67 +122,7 @@ export const createMultiAreaChart = (
     timeRange,
   });
 
-  return result.spec;
-};
-
-/**
- * Create a faceted multi-area chart with one metric, one date, and two categorical columns
- */
-export const createFacetedMultiAreaChart = (
-  transformedData: Array<Record<string, any>>,
-  styles: AreaChartStyle,
-  axisColumnMappings: {
-    [AxisRole.X]: VisColumn;
-    [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
-    [AxisRole.FACET]: VisColumn;
-  },
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getAxisConfig(styles);
-
-  const timeField = axisColumnMappings[AxisRole.X].column;
-  const valueField = axisColumnMappings[AxisRole.Y].column;
-  const colorField = axisColumnMappings[AxisRole.COLOR].column;
-  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-        timeUnit: TimeUnit.SECOND,
-        aggregationType: AggregationType.SUM,
-      }),
-      (data) => replaceNullWithZero(data, [timeField]),
-      convertTo2DArray()
-    ),
-    createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      } (Faceted by ${axisColumnMappings[AxisRole.FACET].name})`,
-      legend: { show: styles.addLegend },
-    }),
-    buildAxisConfigs,
-    applyTimeRange,
-    createFacetAreaSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
-
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -194,12 +132,11 @@ export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-): any => {
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
@@ -213,7 +150,6 @@ export const createCategoryAreaChart = (
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} by ${axisColumnMappings[AxisRole.X].name}`,
       legend: { show: false },
     }),
     buildAxisConfigs,
@@ -230,7 +166,7 @@ export const createCategoryAreaChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createStackedAreaChart = (
@@ -240,8 +176,9 @@ export const createStackedAreaChart = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
-): any => {
+  },
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
@@ -260,10 +197,7 @@ export const createStackedAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} by ${
-        axisColumnMappings[AxisRole.X].name
-      } and ${axisColumnMappings[AxisRole.COLOR].name}`,
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     buildVisMap({
@@ -274,6 +208,8 @@ export const createStackedAreaChart = (
       categoryField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       stack: true,
+      allData,
+      colorField,
     }),
     assembleSpec
   )({
@@ -283,5 +219,5 @@ export const createStackedAreaChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

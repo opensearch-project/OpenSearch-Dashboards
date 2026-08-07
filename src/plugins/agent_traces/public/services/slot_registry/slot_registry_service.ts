@@ -37,9 +37,8 @@ interface BaseSlotItemConfig<T extends keyof SlotTypeDefinitions> {
 /**
  * Slot item configuration with type-safe render method
  */
-export type SlotItemConfig<
-  T extends keyof SlotTypeDefinitions = keyof SlotTypeDefinitions
-> = BaseSlotItemConfig<T> & SlotTypeDefinitions[T];
+export type SlotItemConfig<T extends keyof SlotTypeDefinitions = keyof SlotTypeDefinitions> =
+  BaseSlotItemConfig<T> & SlotTypeDefinitions[T];
 
 /**
  * Helper type to extract slot items for a specific slot type

@@ -154,6 +154,7 @@ export class DataSourceSelector extends React.Component<
         'auth.type',
         'dataSourceVersion',
         'installedPlugins',
+        'dataSourceEngineType',
       ]);
 
       // 2. Process

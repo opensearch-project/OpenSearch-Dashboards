@@ -14,7 +14,6 @@ import {
   VisFieldType,
   AxisRole,
   StandardAxes,
-  TitleOptions,
   AggregationType,
   BucketOptions,
   TimeUnit,
@@ -26,7 +25,6 @@ import { getColors } from '../theme/default_colors';
 import {
   createBarSpec,
   createDoubleNumericalBarChart,
-  createFacetedTimeBarChart,
   createGroupedTimeBarChart,
   createStackedBarSpec,
   createTimeBarChart,
@@ -56,8 +54,6 @@ export interface BarChartStyleOptions {
   thresholdLines?: ThresholdLines;
   // Axes configuration
   standardAxes?: StandardAxes[];
-
-  titleOptions?: TitleOptions;
 
   // histogram bucket config
   bucket?: BucketOptions;
@@ -98,10 +94,6 @@ export const defaultBarChartStyles: BarChartStyle = {
   },
   useThresholdColor: false,
   standardAxes: [{ ...DEFAULT_X_AXIS_CONFIG, grid: { showLines: false } }],
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
   bucket: {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
@@ -128,11 +120,18 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for bar chart');
 
-          const spec = createBarSpec(props.transformedData, props.styleOptions, {
+          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
           });
-          return <EchartsRender spec={spec} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -148,11 +147,18 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y || x.length === 0) throw Error('Missing axis config for bar chart');
 
-          const spec = createBarSpec(props.transformedData, props.styleOptions, {
+          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
           });
-          return <EchartsRender spec={spec} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -168,13 +174,21 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for time bar chart');
 
-          const spec = createTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -190,13 +204,21 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y || x.length === 0) throw Error('Missing axis config for time bar chart');
 
-          const spec = createTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -214,13 +236,22 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for grouped time bar chart');
 
-          const spec = createGroupedTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createGroupedTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -238,13 +269,22 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for grouped time bar chart');
 
-          const spec = createGroupedTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createGroupedTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -262,13 +302,22 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for grouped time bar chart');
 
-          const spec = createGroupedTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createGroupedTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -286,121 +335,22 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for grouped time bar chart');
 
-          const spec = createGroupedTimeBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createGroupedTimeBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 60,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted time bar chart');
-
-          const spec = createFacetedTimeBarChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 60,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical },
-            [AxisRole.Y]: { type: VisFieldType.Date },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted time bar chart');
-
-          const spec = createFacetedTimeBarChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 100,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted time bar chart');
-
-          const spec = createFacetedTimeBarChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 100,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical },
-            [AxisRole.Y]: { type: VisFieldType.Date },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted time bar chart');
-
-          const spec = createFacetedTimeBarChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
       {
@@ -418,12 +368,25 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked bar chart');
 
-          const spec = createStackedBarSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createStackedBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+              [AxisRole.COLOR]: color,
+            },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -441,12 +404,25 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked bar chart');
 
-          const spec = createStackedBarSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createStackedBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+              [AxisRole.COLOR]: color,
+            },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -464,12 +440,25 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked bar chart');
 
-          const spec = createStackedBarSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createStackedBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+              [AxisRole.COLOR]: color,
+            },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -487,12 +476,25 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked bar chart');
 
-          const spec = createStackedBarSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createStackedBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+              [AxisRole.COLOR]: color,
+            },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -509,11 +511,23 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for double numerical bar chart');
 
-          const spec = createDoubleNumericalBarChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createDoubleNumericalBarChart(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            }
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
     ];

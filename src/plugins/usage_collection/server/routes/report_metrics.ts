@@ -77,7 +77,7 @@ export function registerUiMetricRoute(
         }
 
         return res.ok({ body: { status: 'ok' } });
-      } catch (error) {
+      } catch {
         return res.ok({ body: { status: 'fail' } });
       }
     }

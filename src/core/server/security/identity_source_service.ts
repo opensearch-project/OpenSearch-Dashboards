@@ -8,7 +8,8 @@ import { IdentitySourceHandler } from './types';
 
 export class IdentitySourceService {
   // A identity source to store all registered identity source handlers.
-  private identitySource: Record<string, IdentitySourceHandler> = {};
+  // Use Object.create(null) to avoid prototype pollution from keys like 'constructor', '__proto__', etc.
+  private identitySource: Record<string, IdentitySourceHandler> = Object.create(null);
   private logger: Logger;
 
   constructor(logger: Logger) {
@@ -20,7 +21,7 @@ export class IdentitySourceService {
    */
   public registerIdentitySourceHandler(source: string, handler: IdentitySourceHandler): void {
     if (this.identitySource[source]) {
-      throw new Error(`Identity source '${source}' has already been registered`);
+      throw new Error(`Identity source for field 'source' has already been registered`);
     }
     this.identitySource[source] = handler;
     this.logger.info(`Register ${source} type identity source handler`);
@@ -32,7 +33,9 @@ export class IdentitySourceService {
   public getIdentitySourceHandler(source: string): IdentitySourceHandler {
     const handler = this.identitySource[source];
     if (!handler) {
-      throw new Error(`Identity source '${source}' has not been registered`);
+      throw new Error(
+        `Invalid input for field 'source', no matching identity source handler found`
+      );
     }
     return handler;
   }

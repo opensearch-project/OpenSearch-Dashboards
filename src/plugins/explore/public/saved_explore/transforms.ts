@@ -14,6 +14,7 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { AxisFieldNameMappings } from '../components/visualizations/types';
+import { UrlTransformationState } from '../components/data_transformations';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -25,11 +26,15 @@ interface VisState {
   chartType?: ChartType;
   styleOptions?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: string;
+  showSplitLabel?: boolean;
+  serializedPipeline?: UrlTransformationState[];
 }
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  flavorId: string,
+  flavorId?: string,
   tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
@@ -44,6 +49,10 @@ export const saveStateToSavedObject = (
     chartType: visState?.chartType ?? 'line',
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,
+    splitField: visState?.splitField,
+    splitLayout: visState?.splitLayout,
+    showSplitLabel: visState?.showSplitLabel,
+    dataTransformations: visState?.serializedPipeline,
   });
 
   obj.uiState = JSON.stringify({
@@ -81,7 +90,7 @@ export const getStateFromSavedObject = (obj: SavedExploreAttributes): ExploreSav
         query: queryState,
       },
     };
-  } catch (error) {
+  } catch {
     throw new InvalidJSONProperty(
       i18n.translate('explore.getStateFromSavedObject.genericJSONError', {
         defaultMessage:
@@ -106,7 +115,7 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
       columns: legacyState.columns || [],
       sort: legacyState.sort || [],
     };
-  } catch (error) {
+  } catch {
     return {
       columns: [],
       sort: [],
@@ -131,7 +140,7 @@ export const updateLegacyPropertiesInSavedObject = (
 
     savedExplore.legacyState = JSON.stringify(updatedLegacyState);
     return savedExplore;
-  } catch (error) {
+  } catch {
     return savedExplore;
   }
 };

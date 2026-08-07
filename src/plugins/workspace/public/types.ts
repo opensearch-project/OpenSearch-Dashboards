@@ -56,5 +56,4 @@ export interface WorkspacePluginSetup {
   ui: {
     AddCollaboratorsModal: typeof AddCollaboratorsModal;
   };
-  registerSupportedUseCasesForServerlessCollections: UseCaseService['registerSupportedUseCasesForServerlessCollections'];
 }

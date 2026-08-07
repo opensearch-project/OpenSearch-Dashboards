@@ -27,11 +27,6 @@ describe('area_vis_config', () => {
         thresholds: [],
         thresholdStyle: ThresholdMode.Off,
       });
-
-      expect(defaultAreaChartStyles.titleOptions).toMatchObject({
-        show: false,
-        titleName: '',
-      });
     });
   });
 

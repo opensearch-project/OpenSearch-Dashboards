@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export type SlashCommandResult =
+  string | { localMessage: string; title?: string; role?: 'system' | 'assistant' };
+
 export interface SlashCommand {
   command: string;
   description: string;
   usage?: string;
   hint?: string; // Placeholder hint text shown after the command
-  handler: (args: string) => Promise<string> | string;
+  handler: (args: string) => Promise<SlashCommandResult> | SlashCommandResult;
 }
 
 class SlashCommandRegistry {
   private commands: Map<string, SlashCommand> = new Map();
+  private listeners: Set<() => void> = new Set();
 
   register(command: SlashCommand) {
     if (this.commands.has(command.command)) {
@@ -21,10 +25,21 @@ class SlashCommandRegistry {
       return;
     }
     this.commands.set(command.command, command);
+    this.notifyListeners();
   }
 
   unregister(commandName: string) {
     this.commands.delete(commandName);
+    this.notifyListeners();
+  }
+
+  onChange(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach((fn) => fn());
   }
 
   get(commandName: string): SlashCommand | undefined {
@@ -42,7 +57,13 @@ class SlashCommandRegistry {
     return this.getAll().filter((cmd) => cmd.command.toLowerCase().startsWith(query));
   }
 
-  async execute(input: string): Promise<{ handled: boolean; message?: string }> {
+  async execute(input: string): Promise<{
+    handled: boolean;
+    message?: string;
+    localMessage?: string;
+    title?: string;
+    role?: 'system' | 'assistant';
+  }> {
     if (!input.startsWith('/')) {
       return { handled: false };
     }
@@ -57,8 +78,16 @@ class SlashCommandRegistry {
     }
 
     try {
-      const message = await command.handler(args);
-      return { handled: true, message };
+      const result = await command.handler(args);
+      if (typeof result === 'object' && result !== null && 'localMessage' in result) {
+        return {
+          handled: true,
+          localMessage: result.localMessage,
+          title: result.title,
+          role: result.role,
+        };
+      }
+      return { handled: true, message: result };
     } catch (error) {
       return {
         handled: true,

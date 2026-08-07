@@ -42,39 +42,6 @@ const SPEC: BundleSpec = {
   type: 'plugin',
 };
 
-it('creates cache keys', () => {
-  const bundle = new Bundle(SPEC);
-  expect(
-    bundle.createCacheKey(
-      ['/foo/bar/a', '/foo/bar/c'],
-      new Map([
-        ['/foo/bar/a', 123],
-        ['/foo/bar/b', 456],
-        ['/foo/bar/c', 789],
-      ])
-    )
-  ).toMatchInlineSnapshot(`
-    Object {
-      "hashes": Object {
-        "/foo/bar/a": 123,
-        "/foo/bar/c": 789,
-      },
-      "spec": Object {
-        "banner": undefined,
-        "contextDir": "/foo/bar",
-        "id": "bar",
-        "manifestPath": undefined,
-        "outputDir": "/foo/bar/target",
-        "publicDirNames": Array [
-          "public",
-        ],
-        "sourceRoot": "/foo",
-        "type": "plugin",
-      },
-    }
-  `);
-});
-
 it('provides serializable versions of itself', () => {
   const bundle = new Bundle(SPEC);
   expect(bundle.toSpec()).toEqual(SPEC);

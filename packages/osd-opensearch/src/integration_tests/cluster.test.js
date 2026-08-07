@@ -126,7 +126,7 @@ describe('#installSource()', () => {
   it('rejects if installSource() rejects', async () => {
     installSource.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installSource()).rejects.toThrowError('foo');
+    await expect(cluster.installSource()).rejects.toThrow('foo');
   });
 });
 
@@ -165,7 +165,7 @@ describe('#installSnapshot()', () => {
   it('rejects if installSnapshot() rejects', async () => {
     installSnapshot.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installSnapshot()).rejects.toThrowError('foo');
+    await expect(cluster.installSnapshot()).rejects.toThrow('foo');
   });
 });
 
@@ -204,7 +204,7 @@ describe('#installArchive(path)', () => {
   it('rejects if installArchive() rejects', async () => {
     installArchive.mockRejectedValue(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.installArchive()).rejects.toThrowError('foo');
+    await expect(cluster.installArchive()).rejects.toThrow('foo');
   });
 });
 
@@ -212,7 +212,7 @@ describe('#start(installPath)', () => {
   it('rejects when bin/OpenSearch exists with 0 before starting', async () => {
     mockOpenSearchBin({ exitCode: 0, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+    await expect(new Cluster({ log }).start()).rejects.toThrow(
       'OpenSearch exited without starting'
     );
   });
@@ -220,7 +220,7 @@ describe('#start(installPath)', () => {
   it('rejects when bin/opensearch exists with 143 before starting', async () => {
     mockOpenSearchBin({ exitCode: 143, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+    await expect(new Cluster({ log }).start()).rejects.toThrow(
       'OpenSearch exited without starting'
     );
   });
@@ -228,7 +228,7 @@ describe('#start(installPath)', () => {
   it('rejects when bin/opensearch exists with 130 before starting', async () => {
     mockOpenSearchBin({ exitCode: 130, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+    await expect(new Cluster({ log }).start()).rejects.toThrow(
       'OpenSearch exited without starting'
     );
   });
@@ -236,9 +236,7 @@ describe('#start(installPath)', () => {
   it('rejects when bin/opensearch exists with 1 before starting', async () => {
     mockOpenSearchBin({ exitCode: 1, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError(
-      'OpenSearch exited with code 1'
-    );
+    await expect(new Cluster({ log }).start()).rejects.toThrow('OpenSearch exited with code 1');
   });
 
   it('resolves when bin/opensearch logs "started"', async () => {
@@ -252,7 +250,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start();
-    await expect(cluster.start()).rejects.toThrowError('OpenSearch has already been started');
+    await expect(cluster.start()).rejects.toThrow('OpenSearch has already been started');
   });
 
   it('rejects if #run() was called previously', async () => {
@@ -260,7 +258,7 @@ describe('#start(installPath)', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run();
-    await expect(cluster.start()).rejects.toThrowError('OpenSearch has already been started');
+    await expect(cluster.start()).rejects.toThrow('OpenSearch has already been started');
   });
 
   // TODO: [RENAMEME] REPLACE PKCS12 FILES, CERTS, AND KEYS. Temporarily removed until we regenerate them ourselves.
@@ -344,7 +342,7 @@ describe('#run()', () => {
   it('rejects when bin/opensearch exists with 1', async () => {
     mockOpenSearchBin({ exitCode: 1 });
 
-    await expect(new Cluster({ log }).run()).rejects.toThrowError('OpenSearch exited with code 1');
+    await expect(new Cluster({ log }).run()).rejects.toThrow('OpenSearch exited with code 1');
   });
 
   it('rejects if #start() was called previously', async () => {
@@ -352,7 +350,7 @@ describe('#run()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.start();
-    await expect(cluster.run()).rejects.toThrowError('OpenSearch has already been started');
+    await expect(cluster.run()).rejects.toThrow('OpenSearch has already been started');
   });
 
   it('rejects if #run() was called previously', async () => {
@@ -360,7 +358,7 @@ describe('#run()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run();
-    await expect(cluster.run()).rejects.toThrowError('OpenSearch has already been started');
+    await expect(cluster.run()).rejects.toThrow('OpenSearch has already been started');
   });
 
   it('sets up SSL when enabled', async () => {
@@ -394,7 +392,7 @@ describe('#run()', () => {
 describe('#stop()', () => {
   it('rejects if #run() or #start() was not called', async () => {
     const cluster = new Cluster({ log });
-    await expect(cluster.stop()).rejects.toThrowError('OpenSearch has not been started');
+    await expect(cluster.stop()).rejects.toThrow('OpenSearch has not been started');
   });
 
   it('resolves when OpenSearch exits with 0', async () => {
@@ -425,7 +423,7 @@ describe('#stop()', () => {
     mockOpenSearchBin({ exitCode: 1, start: true });
 
     const cluster = new Cluster({ log });
-    await expect(cluster.run()).rejects.toThrowError('OpenSearch exited with code 1');
-    await expect(cluster.stop()).rejects.toThrowError('OpenSearch exited with code 1');
+    await expect(cluster.run()).rejects.toThrow('OpenSearch exited with code 1');
+    await expect(cluster.stop()).rejects.toThrow('OpenSearch exited with code 1');
   });
 });

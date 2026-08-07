@@ -124,6 +124,8 @@ const inspectTestSuite = () => {
         'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'
       ).click();
 
+      cy.scrollTo('bottom', { duration: 3000 });
+
       cy.getElementByTestId('visualizationLoader').should(
         'have.length',
         NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD

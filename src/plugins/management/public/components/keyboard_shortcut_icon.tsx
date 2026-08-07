@@ -12,6 +12,10 @@ interface KeyboardShortcutIconProps {
   core?: CoreStart;
 }
 
+export function KeyboardShortcutListener({ core }: KeyboardShortcutIconProps) {
+  return <KeyboardShortcutHelpModal keyboardShortcutService={core?.keyboardShortcut} />;
+}
+
 export function KeyboardShortcutIcon({ core }: KeyboardShortcutIconProps) {
   const tooltipContent = i18n.translate('management.keyboardShortcut.icon.nav.title', {
     defaultMessage: 'Keyboard shortcuts',

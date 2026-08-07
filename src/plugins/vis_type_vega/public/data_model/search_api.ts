@@ -40,10 +40,12 @@ import {
   DataPublicPluginStart,
   IOpenSearchSearchResponse,
   IOpenSearchSearchRequest,
+  AnalyticEngineError,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder, RequestStatistics } from '../../../inspector/public';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
 
 interface RawPPLStrategySearchResponse {
   rawResponse: {
@@ -73,13 +75,16 @@ export class SearchAPI {
   async search(searchRequests: SearchRequest[], options?: { strategy?: string }) {
     const { search } = this.dependencies.search;
     const requestResponders: any = {};
+    // PPL queries (strategy 'pplraw') are valid against AnalyticEngine data sources, so the
+    // AnalyticEngine guard only applies to DSL queries.
+    const isPPLQuery = options?.strategy === 'pplraw';
 
     return combineLatest(
       await Promise.all(
         searchRequests.map(async (request) => {
           const requestId = request.name;
           const dataSourceId = !!request.data_source_name
-            ? await this.findDataSourceIdbyName(request.data_source_name)
+            ? await this.findDataSourceIdbyName(request.data_source_name, isPPLQuery)
             : undefined;
 
           const params = getSearchParamsFromRequest(request, {
@@ -117,7 +122,7 @@ export class SearchAPI {
     );
   }
 
-  async findDataSourceIdbyName(dataSourceName: string) {
+  async findDataSourceIdbyName(dataSourceName: string, isPPLQuery: boolean = false) {
     if (!this.dependencies.dataSourceEnabled) {
       throw new Error('data_source_name cannot be used because data_source.enabled is false');
     }
@@ -134,7 +139,17 @@ export class SearchAPI {
       );
     }
 
-    return possibleDataSourceIds.pop()?.id;
+    const dataSource = possibleDataSourceIds[0];
+    // AnalyticEngine only supports PPL, so only block it for DSL queries.
+    if (
+      !isPPLQuery &&
+      dataSource?.attributes?.dataSourceEngineType &&
+      UNSUPPORTED_ENGINE_TYPES.includes(dataSource?.attributes?.dataSourceEngineType)
+    ) {
+      throw new AnalyticEngineError();
+    }
+
+    return dataSource.id;
   }
 
   async dataSourceFindQuery(dataSourceName: string) {
@@ -143,7 +158,7 @@ export class SearchAPI {
       perPage: 10,
       search: `"${dataSourceName}"`,
       searchFields: ['title'],
-      fields: ['id', 'title'],
+      fields: ['id', 'title', 'dataSourceEngineType'],
     });
   }
 

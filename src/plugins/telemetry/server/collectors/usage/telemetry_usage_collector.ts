@@ -60,7 +60,7 @@ export function isFileReadable(path: string): boolean {
     // ignore files above the limit
     const stats = statSync(path);
     return stats.size <= MAX_FILE_SIZE;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -87,7 +87,7 @@ export async function readTelemetryFile<T extends object>(
         return ensureDeepObject(data);
       }
     }
-  } catch (e) {
+  } catch {
     // ignored
   }
 

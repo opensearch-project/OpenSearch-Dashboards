@@ -210,6 +210,7 @@ export const AddCollaboratorsModal = ({
           collaboratorIdInputPlaceholder={inputPlaceholder}
           addAnotherButtonLabel={addAnotherButtonLabel}
           errors={errors}
+          onErrorsChange={setErrors}
           identitySource={identitySource}
           http={http}
         />

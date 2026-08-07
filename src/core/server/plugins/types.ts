@@ -212,6 +212,29 @@ export interface PluginManifest {
    * when adding OpenSearch cluster as data sources.
    */
   readonly requiredOSDataSourcePlugins?: readonly PluginName[];
+
+  /**
+   * Specifies data source engine types that this plugin does NOT support. Index patterns and
+   * data sources whose `dataSourceEngineType` matches any value listed here should be excluded
+   * from selectors owned by this plugin (e.g. legacy Discover hides AnalyticEngine domains).
+   *
+   * Values come from the `DataSourceEngineType` enum (string form), e.g. "AnalyticEngine",
+   * "Elasticsearch". Omit or leave empty to support all engines (current default behavior).
+   *
+   * Negative form is intentional: most plugins are mostly compatible with new engines and only
+   * need to declare specific incompatibilities, which keeps existing manifests stable as new
+   * engines are added.
+   */
+  readonly unsupportedOSDataSourceEngineTypes?: readonly string[];
+
+  /**
+   * Specifies minimum data source engine versions required by this plugin. Data sources whose
+   * engine version is below the declared minimum for their engine type will be hidden from
+   * selectors in this plugin's context.
+   *
+   * Keyed by engine type (e.g. "Elasticsearch"), value is a semver minimum (e.g. "7.9.0").
+   */
+  readonly minDataSourceEngineVersions?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -290,7 +313,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -318,11 +341,11 @@ export const SharedGlobalConfigKeys = {
 export type SharedGlobalConfig = RecursiveReadonly<{
   opensearchDashboards: Pick<
     OpenSearchDashboardsConfigType,
-    typeof SharedGlobalConfigKeys.opensearchDashboards[number]
+    (typeof SharedGlobalConfigKeys.opensearchDashboards)[number]
   >;
-  opensearch: Pick<OpenSearchConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
-  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
+  opensearch: Pick<OpenSearchConfigType, (typeof SharedGlobalConfigKeys.opensearch)[number]>;
+  path: Pick<PathConfigType, (typeof SharedGlobalConfigKeys.path)[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, (typeof SharedGlobalConfigKeys.savedObjects)[number]>;
 }>;
 
 /**
@@ -355,5 +378,5 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

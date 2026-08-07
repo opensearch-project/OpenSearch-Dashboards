@@ -1,36 +1,3 @@
-.multi-metric-container {
-  display: flex;
-  gap: 2px;
-  width: 100%;
-  height: 100%;
-
-  &.layout-auto {
-    flex-wrap: wrap;
-    align-content: stretch;
-  }
-
-  &.layout-horizontal {
-    flex-flow: row nowrap;
-    overflow-x: auto;
-    align-items: stretch;
-  }
-
-  &.layout-vertical {
-    flex-flow: column nowrap;
-    overflow-y: auto;
-    align-items: stretch;
-
-    .multi-metric-item {
-      min-height: 80px;
-    }
-  }
-}
-
-.multi-metric-item {
-  display: flex;
-  flex: 1;
-}
-
 .metric-component {
   position: relative;
   width: 100%;

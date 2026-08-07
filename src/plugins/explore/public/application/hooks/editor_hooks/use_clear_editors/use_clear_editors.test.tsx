@@ -29,7 +29,7 @@ describe('useClearEditors', () => {
     jest.clearAllMocks();
     (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
     (useSetEditorText as jest.Mock).mockReturnValue(mockSetEditorText);
-    ((resetEditorMode as unknown) as jest.Mock).mockReturnValue({
+    (resetEditorMode as unknown as jest.Mock).mockReturnValue({
       type: 'queryEditor/resetEditorMode',
     });
   });

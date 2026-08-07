@@ -97,7 +97,7 @@ describe('ExplorePlugin', () => {
 
   function createMockSetupDeps(): ExploreSetupDependencies {
     return {
-      data: ({
+      data: {
         __enhance: jest.fn(),
         query: {
           state$: {
@@ -106,21 +106,21 @@ describe('ExplorePlugin', () => {
             }),
           },
         },
-      } as unknown) as DataPublicPluginSetup,
-      urlForwarding: ({
+      } as unknown as DataPublicPluginSetup,
+      urlForwarding: {
         forwardApp: jest.fn(),
-      } as Partial<UrlForwardingSetup>) as UrlForwardingSetup,
-      embeddable: ({
+      } as Partial<UrlForwardingSetup> as UrlForwardingSetup,
+      embeddable: {
         registerEmbeddableFactory: jest.fn(),
-      } as Partial<EmbeddableSetup>) as EmbeddableSetup,
-      visualizations: ({
+      } as Partial<EmbeddableSetup> as EmbeddableSetup,
+      visualizations: {
         registerAlias: jest.fn(),
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsSetup>) as VisualizationsSetup,
-      uiActions: ({
+      } as Partial<VisualizationsSetup> as VisualizationsSetup,
+      uiActions: {
         getTriggerActions: jest.fn().mockReturnValue([]),
-      } as Partial<UiActionsSetup>) as UiActionsSetup,
+      } as Partial<UiActionsSetup> as UiActionsSetup,
       navigation: {} as NavigationStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacySetup,
       usageCollection: {} as UsageCollectionSetup,
@@ -131,7 +131,7 @@ describe('ExplorePlugin', () => {
 
   function createMockStartDeps(): ExploreStartDependencies {
     return {
-      data: ({
+      data: {
         indexPatterns: {},
         dataViews: {},
         search: {},
@@ -142,10 +142,13 @@ describe('ExplorePlugin', () => {
           },
           queryString: {
             clearQuery: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              registerDatasetFilter: jest.fn(),
+            }),
           },
         },
-      } as unknown) as DataPublicPluginStart,
-      uiActions: ({
+      } as unknown as DataPublicPluginStart,
+      uiActions: {
         registerAction: jest.fn(),
         addTriggerAction: jest.fn(),
         detachAction: jest.fn(),
@@ -157,20 +160,20 @@ describe('ExplorePlugin', () => {
         attachAction: jest.fn(),
         getAction: jest.fn(),
         hasAction: jest.fn(),
-      } as Partial<UiActionsStart>) as UiActionsStart,
+      } as Partial<UiActionsStart> as UiActionsStart,
       dashboard: {} as DashboardStart,
-      expressions: ({
+      expressions: {
         ExpressionLoader: jest.fn(),
-      } as Partial<ExpressionsStart>) as ExpressionsStart,
-      charts: ({
+      } as Partial<ExpressionsStart> as ExpressionsStart,
+      charts: {
         theme: {},
-      } as Partial<ChartsPluginStart>) as ChartsPluginStart,
+      } as Partial<ChartsPluginStart> as ChartsPluginStart,
       navigation: {} as NavigationStart,
       inspector: {} as InspectorPublicPluginStart,
       urlForwarding: {} as UrlForwardingStart,
       embeddable: {} as EmbeddableStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacyStart,
-      contextProvider: ({
+      contextProvider: {
         getAssistantContextStore: jest.fn().mockReturnValue({
           addContext: jest.fn(),
         }),
@@ -178,11 +181,11 @@ describe('ExplorePlugin', () => {
           registerAssistantAction: jest.fn(),
           unregisterAssistantAction: jest.fn(),
         },
-      } as Partial<ContextProviderStart>) as ContextProviderStart,
-      visualizations: ({
+      } as Partial<ContextProviderStart> as ContextProviderStart,
+      visualizations: {
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsStart>) as VisualizationsStart,
+      } as Partial<VisualizationsStart> as VisualizationsStart,
     };
   }
 
@@ -280,9 +283,11 @@ describe('ExplorePlugin', () => {
   });
 
   describe('setup', () => {
-    it('should register explore applications', () => {
+    it('should register explore applications (logs drilldown OFF by default)', () => {
       plugin.setup(coreSetup as any, setupDeps as any);
 
+      // logsDrilldown flag is off in the default mock config → the drilldown app is NOT registered,
+      // so only the 5 always-on apps register (visualization editor + logs/traces/metrics + explore).
       expect(coreSetup.application.register).toHaveBeenCalledTimes(5);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -307,6 +312,25 @@ describe('ExplorePlugin', () => {
           id: 'explore',
           title: 'Discover',
         })
+      );
+      // The feature-flagged Logs Drilldown app is absent.
+      expect(coreSetup.application.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
+      );
+    });
+
+    it('registers the Logs Drilldown app + query-bar action when the feature flag is ON', () => {
+      initializerContext.config.get.mockReturnValue({
+        discoverTraces: { enabled: false },
+        logsDrilldown: { enabled: true },
+      });
+      plugin = new ExplorePlugin(initializerContext as any);
+      plugin.setup(coreSetup as any, setupDeps as any);
+
+      // The 5 always-on apps + the drilldown app = 6 registrations.
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(6);
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
       );
     });
 
@@ -573,7 +597,8 @@ describe('ExplorePlugin', () => {
 
   describe('disabled PPL query action registration', () => {
     // Cast the imported mocked function to jest.Mock
-    const mockRegisterDisabledPPLExecuteQueryAction = registerDisabledPPLExecuteQueryAction as jest.Mock;
+    const mockRegisterDisabledPPLExecuteQueryAction =
+      registerDisabledPPLExecuteQueryAction as jest.Mock;
 
     beforeEach(() => {
       // Clear the mock before each test
@@ -621,13 +646,13 @@ describe('ExplorePlugin', () => {
         callOrder.push('registerAction');
       });
 
-      const startDepsWithTracking = ({
+      const startDepsWithTracking = {
         ...startDeps,
         uiActions: {
           ...startDeps.uiActions,
           registerAction: originalRegisterAction,
         },
-      } as unknown) as ExploreStartDependencies;
+      } as unknown as ExploreStartDependencies;
 
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDepsWithTracking);

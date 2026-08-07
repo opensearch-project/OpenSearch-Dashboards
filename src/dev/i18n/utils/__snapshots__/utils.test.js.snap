@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`i18n utils should create verbose parser error message 1`] = `
 "Unexpected token, expected \\",\\" (4:19):

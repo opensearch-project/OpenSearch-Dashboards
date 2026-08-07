@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Metrics Over Time",
+  "layer": [
+    {
+      "data": {
+        "url": {
+          "%context%": true,
+          "%timefield%": "timestamp",
+          "data_source_name": "my-datasource",
+          "index": "my-index",
+          "body": {
+            "size": 0,
+            "aggs": {
+              "weekly": {
+                "date_histogram": { "field": "timestamp", "calendar_interval": "week", "min_doc_count": 0 },
+                "aggs": {
+                  "total": { "sum": { "field": "amount" } },
+                  "cumulative": { "cumulative_sum": { "buckets_path": "total" } }
+                }
+              }
+            }
+          }
+        },
+        "format": { "property": "aggregations.weekly.buckets" }
+      },
+      "mark": { "type": "line", "point": true },
+      "encoding": {
+        "x": { "field": "key", "type": "temporal", "axis": { "title": "Date" } },
+        "y": { "field": "cumulative.value", "type": "quantitative", "axis": { "title": "Cumulative Total" } },
+        "color": { "datum": "Actual" }
+      }
+    },
+    {
+      "data": { "values": [{ "date": "2026-01-01", "expected": 0 }, { "date": "2026-12-31", "expected": 100000 }] },
+      "mark": { "type": "line", "strokeDash": [6, 4] },
+      "encoding": {
+        "x": { "field": "date", "type": "temporal" },
+        "y": { "field": "expected", "type": "quantitative" },
+        "color": { "datum": "Target" }
+      }
+    }
+  ]
+}

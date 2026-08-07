@@ -142,7 +142,7 @@ export class Cache {
   }
 
   close() {
-    clearTimeout((this.timer as unknown) as NodeJS.Timeout);
+    clearTimeout(this.timer as unknown as NodeJS.Timeout);
     return this.codes?.close?.();
   }
 

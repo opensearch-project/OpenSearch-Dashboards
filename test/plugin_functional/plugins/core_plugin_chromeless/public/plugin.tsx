@@ -30,8 +30,10 @@
 
 import { Plugin, CoreSetup } from 'opensearch-dashboards/public';
 
-export class CorePluginChromelessPlugin
-  implements Plugin<CorePluginChromelessPluginSetup, CorePluginChromelessPluginStart> {
+export class CorePluginChromelessPlugin implements Plugin<
+  CorePluginChromelessPluginSetup,
+  CorePluginChromelessPluginStart
+> {
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'chromeless',

@@ -103,7 +103,7 @@ export interface BaseStateContainer<State extends BaseState> {
 export interface StateContainer<
   State extends BaseState,
   PureTransitions extends object = object,
-  PureSelectors extends object = {}
+  PureSelectors extends object = {},
 > extends BaseStateContainer<State> {
   transitions: Readonly<PureTransitionsToTransitions<PureTransitions>>;
   selectors: Readonly<PureSelectorsToSelectors<PureSelectors>>;
@@ -117,7 +117,7 @@ export interface StateContainer<
 export interface ReduxLikeStateContainer<
   State extends BaseState,
   PureTransitions extends object = {},
-  PureSelectors extends object = {}
+  PureSelectors extends object = {},
 > extends StateContainer<State, PureTransitions, PureSelectors> {
   getState: () => State;
   reducer: Reducer<State>;
@@ -154,16 +154,14 @@ export type Reducer<State extends BaseState> = (
  * Utility type for inferring state shape from {@link StateContainer}
  * @public
  */
-export type UnboxState<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<infer T, any> ? T : never;
+export type UnboxState<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<infer T, any> ? T : never;
 /**
  * Utility type for inferring transitions type from {@link StateContainer}
  * @public
  */
-export type UnboxTransitions<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<any, infer T> ? T : never;
+export type UnboxTransitions<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<any, infer T> ? T : never;
 
 /**
  * @public
@@ -212,7 +210,7 @@ export type MapStateToProps<State extends BaseState, StateProps extends object> 
  */
 export type Connect<State extends BaseState> = <
   Props extends object,
-  StatePropKeys extends keyof Props
+  StatePropKeys extends keyof Props,
 >(
   mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>
 ) => (component: ComponentType<Props>) => FC<Omit<Props, StatePropKeys>>;

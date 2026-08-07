@@ -31,7 +31,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 import { SampleDataSetCard, INSTALLED_STATUS, UNINSTALLED_STATUS } from './sample_data_set_card';
 
@@ -54,6 +54,7 @@ export class SampleDataSetCards extends React.Component {
     this.state = {
       sampleDataSets: [],
       processingStatus: {},
+      isLoaded: false,
     };
   }
 
@@ -71,7 +72,7 @@ export class SampleDataSetCards extends React.Component {
     if (this.props.isDataSourceEnabled) {
       this._isMounted = true;
       if (prevProps && prevProps.dataSourceId !== this.props.dataSourceId) {
-        this.setState({ dataSourceId: this.props.dataSourceId }, () =>
+        this.setState({ dataSourceId: this.props.dataSourceId, isLoaded: false }, () =>
           this.loadSampleDataSets(this.state.dataSourceId)
         );
       }
@@ -101,6 +102,7 @@ export class SampleDataSetCards extends React.Component {
         return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       }),
       processingStatus: {},
+      isLoaded: true,
     });
   };
 
@@ -216,6 +218,30 @@ export class SampleDataSetCards extends React.Component {
   };
 
   render() {
+    const { sampleDataSets, isLoaded } = this.state;
+
+    if (isLoaded && sampleDataSets.length === 0) {
+      return (
+        <>
+          <EuiCallOut
+            title={i18n.translate('home.sampleDataSet.notSupportedTitle', {
+              defaultMessage: 'Sample data not available',
+            })}
+            color="warning"
+            iconType="alert"
+            data-test-subj="sampleDataSetEmptyCallout"
+          >
+            <p>
+              {i18n.translate('home.sampleDataSet.notSupportedMessage', {
+                defaultMessage:
+                  'Sample datasets are not supported for the selected data source. Switch to a supported data source to import sample data.',
+              })}
+            </p>
+          </EuiCallOut>
+        </>
+      );
+    }
+
     return (
       <EuiFlexGrid
         columns={3}

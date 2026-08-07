@@ -30,7 +30,7 @@
 
 import { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -58,7 +58,7 @@ const SavedObjectsEditionPage = ({
   const { service: serviceName, id } = useParams<{ service: string; id: string }>();
 
   const { search } = useLocation();
-  const query = parse(search);
+  const query = qs.parse(search);
   const service = serviceRegistry.get(serviceName);
 
   useEffect(() => {

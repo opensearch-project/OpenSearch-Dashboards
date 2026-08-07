@@ -16,7 +16,12 @@ type IResponse<T> =
     };
 
 export const createMockWorkspaceClient = (): jest.Mocked<
-  IWorkspaceClient & { enterWorkspace: (id: string) => Promise<IResponse<null>>; init: () => {} }
+  IWorkspaceClient & {
+    enterWorkspace: (id: string) => Promise<IResponse<null>>;
+    init: () => {};
+    refreshWorkspace: (id: string) => Promise<IResponse<any>>;
+    setPermissionEnabled: (enabled: boolean) => void;
+  }
 > => ({
   getCurrentWorkspaceId: jest.fn(),
   getCurrentWorkspace: jest.fn(),
@@ -32,6 +37,8 @@ export const createMockWorkspaceClient = (): jest.Mocked<
   enterWorkspace: jest.fn(),
   init: jest.fn(),
   batchDelete: jest.fn(),
+  refreshWorkspace: jest.fn(),
+  setPermissionEnabled: jest.fn(),
 });
 
 export const workspaceClientMock = createMockWorkspaceClient();

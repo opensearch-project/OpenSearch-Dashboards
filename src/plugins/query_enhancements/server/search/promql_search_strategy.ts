@@ -79,8 +79,7 @@ export const promqlSearchStrategyProvider = (
         const datasetId = dataset?.id ?? '';
 
         const requestOptions = requestBody.options as
-          | { queryType?: string; time?: string; step?: number }
-          | undefined;
+          { queryType?: string; time?: string; step?: number } | undefined;
         const isInstantQuery = requestOptions?.queryType?.toUpperCase() === 'INSTANT';
 
         const parsedQueries = splitMultiQueries(query as string);
@@ -178,66 +177,63 @@ async function executeMultipleQueries(
   datasetId: string,
   logger: Logger
 ): Promise<LabeledQueryResult[]> {
-  const promises = queries.map(
-    async (parsedQuery): Promise<LabeledQueryResult> => {
-      const queryOptions: PromQLQueryParams['body']['options'] =
-        options.queryType === 'instant'
-          ? { queryType: 'instant', time: options.time.toString() }
-          : {
-              queryType: 'range',
-              start: options.timeRange.start.toString(),
-              end: options.timeRange.end.toString(),
-              step: options.step,
-            };
+  const promises = queries.map(async (parsedQuery): Promise<LabeledQueryResult> => {
+    const queryOptions: PromQLQueryParams['body']['options'] =
+      options.queryType === 'instant'
+        ? { queryType: 'instant', time: options.time.toString() }
+        : {
+            queryType: 'range',
+            start: options.timeRange.start.toString(),
+            end: options.timeRange.end.toString(),
+            step: options.step,
+          };
 
-      const params: PromQLQueryParams = {
-        body: {
-          query: parsedQuery.query,
-          language: options.language,
-          maxResults: options.maxResults,
-          timeout: options.timeout,
-          options: queryOptions,
-        },
-        dataconnection: datasetId,
+    const params: PromQLQueryParams = {
+      body: {
+        query: parsedQuery.query,
+        language: options.language,
+        maxResults: options.maxResults,
+        timeout: options.timeout,
+        options: queryOptions,
+      },
+      dataconnection: datasetId,
+    };
+
+    try {
+      const queryRes = await prometheusManager.query(context, request, params);
+
+      return {
+        label: parsedQuery.label,
+        response: queryRes,
       };
+    } catch (error) {
+      let errorMessage = `Query ${parsedQuery.label} failed`;
 
-      try {
-        const queryRes = await prometheusManager.query(context, request, params);
-
-        return {
-          label: parsedQuery.label,
-          response: queryRes,
-        };
-      } catch (error) {
-        let errorMessage = `Query ${parsedQuery.label} failed`;
-
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-
-        // Try to extract detailed error from response body from SQL plugin
-        const responseBody = (error as any)?.body ?? (error as any)?.response;
-        if (responseBody) {
-          try {
-            const parsed =
-              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
-            errorMessage =
-              parsed?.error?.details ??
-              parsed?.error?.reason ??
-              parsed?.error?.message ??
-              errorMessage;
-          } catch {
-            // error might come from other places, use original message if failed
-          }
-        }
-
-        return {
-          label: parsedQuery.label,
-          error: errorMessage,
-        };
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
+
+      // Try to extract detailed error from response body from SQL plugin
+      const responseBody = (error as any)?.body ?? (error as any)?.response;
+      if (responseBody) {
+        try {
+          const parsed = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+          errorMessage =
+            parsed?.error?.details ??
+            parsed?.error?.reason ??
+            parsed?.error?.message ??
+            errorMessage;
+        } catch {
+          // error might come from other places, use original message if failed
+        }
+      }
+
+      return {
+        label: parsedQuery.label,
+        error: errorMessage,
+      };
     }
-  );
+  });
 
   return Promise.all(promises);
 }

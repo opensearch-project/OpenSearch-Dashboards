@@ -69,7 +69,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest<any, CustomError>(httpClient, {
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest<any, CustomError>(httpClient, {
     path: privilegesEndpoint,
     method: 'get',
   });

@@ -9,6 +9,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
 import type { Message, AssistantMessage } from '../../common/types';
+import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
 import { ShareModal } from './share_modal';
 import './message_row.scss';
 
@@ -50,10 +51,16 @@ export const MessageRow: React.FC<MessageRowProps> = ({
 
   // Handle multimodal content (text + images) or simple string content
   const renderContent = () => {
-    const content =
+    const rawContent =
       message.role === 'user' && 'rawMessage' in message && message.rawMessage
         ? message.rawMessage
         : message.content || '';
+
+    // Strip inline suggestions from assistant messages before display
+    const content =
+      typeof rawContent === 'string' && message.role === 'assistant'
+        ? stripInlineSuggestions(rawContent)
+        : rawContent;
 
     // If content is a string, render as markdown
     if (typeof content === 'string') {

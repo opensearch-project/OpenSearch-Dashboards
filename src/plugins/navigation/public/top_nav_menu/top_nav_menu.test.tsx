@@ -126,11 +126,11 @@ describe('TopNavMenu', () => {
   });
 
   it('mounts the data source menu if showDataSourceMenu is true', async () => {
-    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
-    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
-    spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
+    jest.spyOn(testUtils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(testUtils, 'getUiSettings').mockReturnValue({ id: 'test2' });
+    jest.spyOn(testUtils, 'getHideLocalCluster').mockReturnValue(true);
+    jest.spyOn(testUtils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(testUtils, 'getWorkspaces').mockReturnValue(mockWorkspaces);
     const component = shallowWithIntl(
       <TopNavMenu
         appName={'test'}
@@ -152,11 +152,11 @@ describe('TopNavMenu', () => {
   });
 
   it('mounts the data source menu as well as top nav menu', async () => {
-    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
-    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
-    spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
-    spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(testUtils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(testUtils, 'getUiSettings').mockReturnValue({ id: 'test2' });
+    jest.spyOn(testUtils, 'getHideLocalCluster').mockReturnValue(true);
+    jest.spyOn(testUtils, 'getWorkspaces').mockReturnValue(mockWorkspaces);
+    jest.spyOn(testUtils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const component = shallowWithIntl(
       <TopNavMenu
@@ -235,13 +235,13 @@ describe('TopNavMenu', () => {
     });
 
     it('mounts the data source menu with group actions enabled', async () => {
-      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
-      spyOn(testUtils, 'getUiSettings').and.returnValue(
-        uiSettingsServiceMock.createStartContract()
-      );
-      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
-      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
-      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+      jest.spyOn(testUtils, 'getApplication').mockReturnValue(applicationServiceMock);
+      jest
+        .spyOn(testUtils, 'getUiSettings')
+        .mockReturnValue(uiSettingsServiceMock.createStartContract());
+      jest.spyOn(testUtils, 'getWorkspaces').mockReturnValue(mockWorkspaces);
+      jest.spyOn(testUtils, 'getHideLocalCluster').mockReturnValue(true);
+      jest.spyOn(testUtils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
       const component = mountWithIntl(
         <TopNavMenu
@@ -273,13 +273,13 @@ describe('TopNavMenu', () => {
     });
 
     it('mounts without data source menu with group actions enabled and showSearchBar in portal', async () => {
-      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
-      spyOn(testUtils, 'getUiSettings').and.returnValue(
-        uiSettingsServiceMock.createStartContract()
-      );
-      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
-      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+      jest.spyOn(testUtils, 'getApplication').mockReturnValue(applicationServiceMock);
+      jest
+        .spyOn(testUtils, 'getUiSettings')
+        .mockReturnValue(uiSettingsServiceMock.createStartContract());
+      jest.spyOn(testUtils, 'getWorkspaces').mockReturnValue(mockWorkspaces);
+      jest.spyOn(testUtils, 'getHideLocalCluster').mockReturnValue(false);
+      jest.spyOn(testUtils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
       const component = mountWithIntl(
         <TopNavMenu
@@ -305,13 +305,13 @@ describe('TopNavMenu', () => {
     });
 
     it('mounts without data source menu with group actions enabled and showSearchBar in place', async () => {
-      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
-      spyOn(testUtils, 'getUiSettings').and.returnValue(
-        uiSettingsServiceMock.createStartContract()
-      );
-      spyOn(testUtils, 'getWorkspaces').and.returnValue(mockWorkspaces);
-      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+      jest.spyOn(testUtils, 'getApplication').mockReturnValue(applicationServiceMock);
+      jest
+        .spyOn(testUtils, 'getUiSettings')
+        .mockReturnValue(uiSettingsServiceMock.createStartContract());
+      jest.spyOn(testUtils, 'getWorkspaces').mockReturnValue(mockWorkspaces);
+      jest.spyOn(testUtils, 'getHideLocalCluster').mockReturnValue(false);
+      jest.spyOn(testUtils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
       const component = mountWithIntl(
         <TopNavMenu

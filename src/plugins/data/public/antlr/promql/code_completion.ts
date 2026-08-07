@@ -173,7 +173,7 @@ export const getSuggestions = async ({
     });
 
     return finalSuggestions;
-  } catch (error) {
+  } catch {
     // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
     return [];
   }

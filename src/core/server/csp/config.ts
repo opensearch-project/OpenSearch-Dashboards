@@ -44,7 +44,7 @@ export const config = {
     rules: schema.arrayOf(schema.string(), {
       defaultValue: LOOSE_CSP_RULES_DEFAULT_VALUE,
     }),
-    enable: schema.boolean({ defaultValue: false }),
+    enable: schema.boolean({ defaultValue: true }),
     /** @deprecated Use `enable` instead. */
     strict: schema.boolean({ defaultValue: false }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),

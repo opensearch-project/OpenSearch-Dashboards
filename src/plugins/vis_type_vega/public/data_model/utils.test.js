@@ -84,7 +84,7 @@ describe('Utils.handleInvalidQuery', () => {
     maliciousQueries.forEach((value) => {
       expect(() => {
         Utils.handleInvalidQuery(value);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 

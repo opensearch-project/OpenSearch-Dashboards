@@ -190,6 +190,7 @@ export class DataSourceSelectable extends React.Component<
         'auth.type',
         'dataSourceVersion',
         'installedPlugins',
+        'dataSourceEngineType',
       ]);
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(

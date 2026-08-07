@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
 import { RecentQueriesButton } from './recent_queries_button';
@@ -15,12 +18,31 @@ import './query_panel_widgets.scss';
 import { AskAIButton } from './ask_ai_button';
 import { useFlavorId } from '../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../common';
+import {
+  selectQueryLanguage,
+  selectIsPromptEditorMode,
+} from '../../../application/utils/state_management/selectors';
+export { useAnalyzePanelState } from './use_analyze_panel_state';
 
-export const QueryPanelWidgets = () => {
+interface QueryPanelWidgetsProps {
+  analyzeIsOpen?: boolean;
+  onToggleAnalyze?: () => void;
+  hasAnalyzeResult?: boolean;
+}
+
+export const QueryPanelWidgets = ({
+  analyzeIsOpen,
+  onToggleAnalyze,
+  hasAnalyzeResult,
+}: QueryPanelWidgetsProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryPanelActionsRegistry } = services;
   const flavorId = useFlavorId();
   const isMetrics = flavorId === ExploreFlavor.Metrics;
+  const queryLanguage = useSelector(selectQueryLanguage);
+  const isPromptMode = useSelector(selectIsPromptEditorMode);
+  // Only show Analyze for PPL queries in query mode — not SQL, not prompt mode
+  const isPPLQueryMode = queryLanguage === 'PPL' && !isPromptMode;
 
   return (
     <div className="exploreQueryPanelWidgets">
@@ -42,6 +64,20 @@ export const QueryPanelWidgets = () => {
 
       {/* Right Section */}
       <div className="exploreQueryPanelWidgets__right">
+        {isPPLQueryMode && onToggleAnalyze && (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={onToggleAnalyze}
+              isSelected={analyzeIsOpen}
+              data-test-subj="exploreAnalyzeButton"
+              iconType="inspect"
+            >
+              Inspect Query
+            </EuiButtonEmpty>
+            <div className="exploreQueryPanelWidgets__verticalSeparator" />
+          </>
+        )}
         <AskAIButton />
       </div>
     </div>

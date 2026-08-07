@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import qs from 'query-string';
 import fn from './quandl';
 import moment from 'moment';
 import fetchMock from 'node-fetch';
@@ -37,7 +37,7 @@ const parseURL = require('url').parse;
 const tlConfig = require('./fixtures/tl_config')();
 
 function parseUrlParams(url) {
-  return parse(parseURL(url).query, { sort: false });
+  return qs.parse(parseURL(url).query, { sort: false });
 }
 
 jest.mock('node-fetch', () =>
@@ -94,7 +94,7 @@ describe('quandl', function () {
   });
 
   it('should throw an error is passed an unsupported interval', function () {
-    return expect(invoke(fn, [], { time: { interval: '2d' } })).rejects.toThrowError();
+    return expect(invoke(fn, [], { time: { interval: '2d' } })).rejects.toThrow();
   });
 
   it('should use the configured API key when talking to quandl', function () {

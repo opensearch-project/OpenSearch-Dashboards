@@ -27,7 +27,10 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
 
   private readonly http: HttpSetup;
 
-  constructor(http: HttpSetup, private dataSourceIdProvider: () => Promise<string | undefined>) {
+  constructor(
+    http: HttpSetup,
+    private dataSourceIdProvider: () => Promise<string | undefined>
+  ) {
     this.http = http;
   }
 

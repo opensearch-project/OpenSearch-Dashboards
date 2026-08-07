@@ -4,6 +4,7 @@
  */
 
 import type { Message, AssistantMessage, UserMessage, ToolMessage } from '../../../common/types';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../../common';
 import {
   collectChatExportData,
   findPrecedingQuestion,
@@ -65,7 +66,7 @@ describe('findPrecedingQuestion', () => {
 
   it('should return empty text for user message with empty array content', () => {
     const timeline: Message[] = [
-      ({ id: 'u1', role: 'user', content: [] } as unknown) as UserMessage,
+      { id: 'u1', role: 'user', content: [] } as unknown as UserMessage,
       { id: 'a1', role: 'assistant', content: 'Answer' } as AssistantMessage,
     ];
     expect(findPrecedingQuestion(timeline, 1)).toEqual({ text: '' });
@@ -142,13 +143,13 @@ describe('extractTraces', () => {
       {
         id: 'tr1',
         role: 'tool',
-        content: 'Error occurred',
+        content: `${TOOL_EXECUTION_ERROR_PREFIX}timeout`,
         toolCallId: 'tc1',
-        error: 'timeout',
       } as ToolMessage,
     ];
     const traces = extractTraces(timeline, 1);
     expect(traces[0].error).toBe('timeout');
+    expect(traces[0].result).toBeUndefined();
   });
 
   it('should extract multiple tool calls', () => {

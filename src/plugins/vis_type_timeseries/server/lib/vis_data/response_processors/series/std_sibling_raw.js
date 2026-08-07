@@ -36,8 +36,16 @@ import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 /**
  * stdSiblingRaw - Modified version of stdSibling for the raw endpoint
  *
- * This processor is identical to stdSibling except it appends the metric ID
- * to the series ID for client-side differentiation, similar to stdMetricRaw.
+ * This processor is identical to stdSibling except that, when the series ends
+ * in a math metric, it emits one component series per sibling (bucket)
+ * aggregation and appends the metric ID to the series ID, so the client-side
+ * code (process_math_series.js) can find the component metrics for a math
+ * series by matching series IDs against the pattern "series-id:*".
+ *
+ * For a regular (non-math) sibling series the id is left untouched
+ * (id = split.id), mirroring stdMetricRaw. Suffixing every series with the
+ * metric ID would break downstream colon-based split detection and produce
+ * phantom split labels.
  */
 export function stdSiblingRaw(resp, panel, series, meta) {
   return (next) => (results) => {
@@ -84,8 +92,7 @@ export function stdSiblingRaw(resp, panel, series, meta) {
         return [bucket.key, getSiblingAggValue(split, metric)];
       });
       results.push({
-        // MODIFIED: Append metric ID to series ID for client-side differentiation
-        id: `${split.id}:${metric.id}`,
+        id: split.id,
         label: split.label,
         color: split.color,
         data,

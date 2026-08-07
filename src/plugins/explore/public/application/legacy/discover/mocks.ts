@@ -51,7 +51,7 @@ export type Start = jest.Mocked<ExplorePluginStart>;
 const createSetupContract = (): Setup => {
   // @ts-expect-error TS2322 TODO(ts-error): fixme
   const setupContract: Setup = {
-    visualizationRegistry: (jest.fn() as unknown) as VisualizationRegistry,
+    visualizationRegistry: jest.fn() as unknown as VisualizationRegistry,
     docViews: {
       addDocView: jest.fn(),
     },

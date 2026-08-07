@@ -166,7 +166,7 @@ describe('PluginsService', () => {
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },
-      } as Plugin<void, typeof pluginStartContract, {}, {}>);
+      }) as Plugin<void, typeof pluginStartContract, {}, {}>;
 
     jest.doMock(
       posix.join(pluginPath, 'server'),

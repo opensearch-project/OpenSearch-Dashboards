@@ -77,7 +77,7 @@ describe('ChatSuggestions', () => {
 
     // Wait for suggestions to load
     await waitFor(() => {
-      expect(screen.getByText('Available suggestions')).toBeInTheDocument();
+      expect(screen.getByText('Follow up')).toBeInTheDocument();
     });
 
     // Check that both suggestions are rendered

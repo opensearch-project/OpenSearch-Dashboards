@@ -29,11 +29,8 @@
  */
 
 import moment from 'moment';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
-
 import { createListStream, createPromiseFromStreams } from '../../../core/server/utils';
-
 import OsdLoggerStringFormat from './log_format_string';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);

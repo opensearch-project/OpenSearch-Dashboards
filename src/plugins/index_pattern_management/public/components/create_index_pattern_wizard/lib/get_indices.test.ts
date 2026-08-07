@@ -217,7 +217,7 @@ describe('getIndices', () => {
           searchClient,
           dataSourceId,
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
     });
   });
 });

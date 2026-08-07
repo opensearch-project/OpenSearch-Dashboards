@@ -4,7 +4,7 @@
  */
 
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
 import { VisFieldType, VisColumn, AxisRole, AxisColumnMappings, Positions } from '../types';
@@ -28,16 +28,12 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'X Value',
     schema: VisFieldType.Numerical,
     column: 'x',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 2,
     name: 'Y Value',
     schema: VisFieldType.Numerical,
     column: 'y',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -47,8 +43,6 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 6,
-    uniqueValuesCount: 2,
   },
 ];
 
@@ -120,7 +114,7 @@ jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, hasSizeLegend }) => (
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
@@ -139,35 +133,10 @@ jest.mock('../style_panel/legend/legend', () => {
           placeholder="Legend Title"
           onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
         />
-        {hasSizeLegend && (
-          <input
-            data-test-subj="mockLegendTitleForSize"
-            placeholder="Size Legend Title"
-            onChange={(e) => onLegendOptionsChange({ titleForSize: e.target.value })}
-          />
-        )}
       </div>
     )),
   };
 });
-
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
 
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
@@ -228,23 +197,19 @@ describe('ScatterVisStyleControls (updated structure)', () => {
         name: 'Category',
         schema: VisFieldType.Categorical,
         column: 'category',
-        validValuesCount: 6,
-        uniqueValuesCount: 2,
       },
     },
   };
 
-  const propsWithCategoryColorAndSize: ScatterVisStyleControlsProps = {
-    ...propsWithCategoryColor,
+  const propsWithSize: ScatterVisStyleControlsProps = {
+    ...mockProps,
     axisColumnMappings: {
-      ...propsWithCategoryColor.axisColumnMappings,
+      ...mockProps.axisColumnMappings,
       [AxisRole.SIZE]: {
         id: 5,
         name: 'Size Value',
         schema: VisFieldType.Numerical,
         column: 'size',
-        validValuesCount: 6,
-        uniqueValuesCount: 6,
       },
     },
   };
@@ -264,7 +229,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
   it('renders and shows legend panel when categorical color column is present', () => {
@@ -277,6 +241,16 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+  });
+
+  it('renders and shows legend panel when size column is present without color', () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithSize} />
+      </Provider>
+    );
+
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
@@ -313,22 +287,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
 
     expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
       legendTitle: 'New Legend Title',
-    });
-  });
-
-  it('calls onStyleChange with correct parameters for second legend title when size mapping is present', async () => {
-    render(
-      <Provider store={store}>
-        <ScatterVisStyleControls {...propsWithCategoryColorAndSize} />
-      </Provider>
-    );
-
-    // Test second legend title change
-    const legendTitleForSizeInput = screen.getByTestId('mockLegendTitleForSize');
-    await userEvent.type(legendTitleForSizeInput, 'New Size Legend Title');
-
-    expect(propsWithCategoryColorAndSize.onStyleChange).toHaveBeenCalledWith({
-      legendTitleForSize: 'New Size Legend Title',
     });
   });
 
@@ -409,57 +367,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
       exclusive: {
         angle: 180,
       },
-    });
-  });
-
-  it('updates title show option correctly', async () => {
-    render(
-      <Provider store={store}>
-        <ScatterVisStyleControls {...mockProps} />
-      </Provider>
-    );
-
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: true,
-      },
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(
-      <Provider store={store}>
-        <ScatterVisStyleControls {...props} />
-      </Provider>
-    );
-
-    const titleInput = screen.getByPlaceholderText('Default title');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
     });
   });
 

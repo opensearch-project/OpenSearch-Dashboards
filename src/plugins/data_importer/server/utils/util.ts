@@ -112,7 +112,7 @@ export const fetchDepthLimit = async (client: OpenSearchClient) => {
 
     // To ensure maximum compatibility, we're only considering the minimum of all 3 settings
     return Math.min(defaultSettings, persistentSettings, transientSettings);
-  } catch (e) {
+  } catch {
     return defaultLimit;
   }
 };

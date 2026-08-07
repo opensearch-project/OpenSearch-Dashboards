@@ -596,7 +596,7 @@ export function showDisplayValue(
   const displayValue =
     isValidNumber && calculatedValue
       ? selectedUnit && selectedUnit?.display
-        ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
+        ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol).label
         : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
       : '-';
 

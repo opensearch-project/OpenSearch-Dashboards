@@ -101,10 +101,10 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getSpanHierarchyTableColumns(traceTimeRange, availableWidth), [
-    traceTimeRange,
-    availableWidth,
-  ]);
+  const columns = useMemo(
+    () => getSpanHierarchyTableColumns(traceTimeRange, availableWidth),
+    [traceTimeRange, availableWidth]
+  );
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
   const renderCellValue = useCallback(

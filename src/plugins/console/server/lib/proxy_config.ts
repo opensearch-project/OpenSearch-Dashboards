@@ -66,7 +66,7 @@ export class ProxyConfig {
         rawMatches.path,
         `${rawMatches.protocol}://${rawMatches.host}:${rawMatches.port}`
       ).toString();
-    } catch (e) {
+    } catch {
       this.id = '*';
     }
 

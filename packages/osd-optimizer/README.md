@@ -4,9 +4,9 @@
 
 OpenSearch Dashboards Platform plugins with `"ui": true` in their `opensearch_dashboards.json` file will have their `public/index.ts` file (and all of its dependencies) bundled into the `target/public` directory of the plugin. The build output does not need to be updated when other plugins are updated and is included in the distributable without requiring that we ship `@osd/optimizer` 🎉.
 
-## Webpack config
+## Rspack config
 
-The [Webpack config][WebpackConfig] is designed to provide the majority of what was available in the legacy optimizer and is the same for all plugins to promote consistency and keep things sane for the operations team. It has support for JS/TS built with babel, url imports of image and font files, and support for importing `scss` and `css` files. SCSS is pre-processed by [postcss][PostCss], built for both light and dark mode and injected automatically into the page when the parent module is loaded (page reloads are still required for switching between light/dark mode). CSS is injected into the DOM as it is written on disk when the parent module is loaded (no postcss support).
+The [Rspack config][RspackConfig] is designed to provide the majority of what was available in the legacy optimizer and is the same for all plugins to promote consistency and keep things sane for the operations team. It has support for JS/TS built with babel, url imports of image and font files, and support for importing `scss` and `css` files. SCSS is pre-processed by [postcss][PostCss], built for both light and dark mode and injected automatically into the page when the parent module is loaded (page reloads are still required for switching between light/dark mode). CSS is injected into the DOM as it is written on disk when the parent module is loaded (no postcss support).
 
 Source maps are enabled except when building the distributable. They show the code actually being executed by the browser to strike a balance between debuggability and performance. They are not configurable at this time but will be configurable once we have a developer configuration solution that doesn't rely on the server (see [#615](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/615)).
 
@@ -26,9 +26,11 @@ We only limit the number of workers we will start at any given time. If we start
 
 ### Caching
 
-Bundles built by the optimizer include a cache file which describes the information needed to determine if the bundle needs to be rebuilt when the optimizer is restarted. Caching is enabled by default and is very aggressive about invalidating the cache output, but if you need to disable caching you can pass `--no-cache` to `node scripts/build_opensearch_dashboards_platform_plugins`, or set the `OSD_OPTIMIZER_NO_CACHE` environment variable to anything (env overrides everything).
+Build caching is handled by rspack's persistent cache, which stores module-level compilation artifacts on disk and reuses them on subsequent builds. This makes no-op and incremental rebuilds fast without requiring a separate application-level cache layer.
 
-When a bundle is determined to be up-to-date a worker is not started for the bundle. If running the optimizer with the `--dev/--watch` flag, then all the files referenced by cached bundles are watched for changes. Once a change is detected in any of the files referenced by the built bundle a worker is started. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
+To disable the persistent cache (forcing a full rebuild), pass `--no-cache` to `node scripts/build_opensearch_dashboards_platform_plugins`, or set the `OSD_OPTIMIZER_NO_CACHE` environment variable to anything (env overrides everything).
+
+When running the optimizer with the `--dev/--watch` flag, all bundles are watched for changes. Once a change is detected in any of the files referenced by a bundle, a worker is started to rebuild it. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
 
 ## Bundle Refs
 
@@ -92,7 +94,7 @@ This is essentially what we're doing in [`script/build_opensearch_dashboards_pla
 
 ## Internals
 
-The optimizer runs webpack instances in worker processes. Each worker is configured via a [`WorkerConfig`][WorkerConfig] object and an array of [`Bundle`][Bundle] objects which are JSON serialized and passed to the worker as it's arguments.
+The optimizer runs rspack instances in worker processes. Each worker is configured via a [`WorkerConfig`][WorkerConfig] object and an array of [`Bundle`][Bundle] objects which are JSON serialized and passed to the worker as it's arguments.
 
 Plugins/bundles are assigned to workers based on the number of modules historically seen in each bundle in an effort to evenly distribute the load across the worker pool (see [`assignBundlesToWorkers`][AssignBundlesToWorkers]).
 
@@ -100,7 +102,7 @@ The number of workers that will be started at any time is automatically chosen b
 
 The [`WorkerConfig`][WorkerConfig] includes the location of the repo (it might be one of many builds, or the main repo), wether we are running in watch mode, wether we are building a distributable, and other global config items.
 
-The [`Bundle`][Bundle] objects which include the details necessary to create a webpack config for a specific plugin's bundle (created using [`webpack.config.ts`][WebpackConfig]).
+The [`Bundle`][Bundle] objects which include the details necessary to create an rspack config for a specific plugin's bundle (created using [`rspack.config.ts`][RspackConfig]).
 
 Each worker communicates state back to the main process by sending [`WorkerMsg`][WorkerMsg] and [`CompilerMsg`][CompilerMsg] objects using IPC.
 
@@ -133,7 +135,7 @@ For an example of how to handle these states checkout the [`logOptimizerState()`
 [CompilerMsg]: src/common/compiler_messages.ts
 [WorkerMsg]: src/common/worker_messages.ts
 [Bundle]: src/common/bundle.ts
-[WebpackConfig]: src/worker/webpack.config.ts
+[RspackConfig]: src/worker/rspack.config.ts
 [BundleDefinition]: src/common/bundle_definition.ts
 [WorkerConfig]: src/common/worker_config.ts
 [OptimizerConfig]: src/optimizer_config.ts

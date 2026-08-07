@@ -122,7 +122,7 @@ export const ServiceStatusLevels = deepFreeze({
  * A convenience type that represents the union of each value in {@link ServiceStatusLevels}.
  * @public
  */
-export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+export type ServiceStatusLevel = (typeof ServiceStatusLevels)[keyof typeof ServiceStatusLevels];
 
 /**
  * Status of core services.
@@ -249,8 +249,10 @@ export interface StatusServiceSetup {
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup
-  extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
+export interface InternalStatusServiceSetup extends Pick<
+  StatusServiceSetup,
+  'core$' | 'overall$' | 'isStatusPageAnonymous'
+> {
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

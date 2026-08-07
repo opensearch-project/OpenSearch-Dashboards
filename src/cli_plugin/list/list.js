@@ -40,7 +40,7 @@ export function list(pluginDir, logger) {
         const packagePath = join(pluginDir, name, 'opensearch_dashboards.json');
         const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
         logger.log(pkg.id + '@' + pkg.version);
-      } catch (e) {
+      } catch {
         throw new Error('Unable to read opensearch_dashboards.json file for plugin ' + name);
       }
     }

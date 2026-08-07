@@ -312,3 +312,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export type { IndexPatternsService } from './index_patterns';
+
+export {
+  isAnalyticEngineDataSource,
+  validateNotAnalyticEngineDataSource,
+  throwError,
+} from './data_sources/analytic_engine_utils';

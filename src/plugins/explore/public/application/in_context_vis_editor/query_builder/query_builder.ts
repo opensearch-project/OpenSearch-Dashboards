@@ -6,6 +6,7 @@
 import { BehaviorSubject, Subscription, from, of, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, debounceTime, filter, skip } from 'rxjs/operators';
 import moment from 'moment';
+import { MutableRefObject } from 'react';
 import { firstValueFrom } from '@osd/std';
 import { isEqual } from 'lodash';
 import type { monaco } from '@osd/monaco';
@@ -27,7 +28,6 @@ import {
 } from '../../../../../query_enhancements/common/query_assist';
 
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
-import { getSummaryAgentIsAvailable } from '../../../application/utils/get_summary_agent_is_available';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
 import {
   queryExecution,
@@ -38,7 +38,11 @@ import {
   handleAgentError,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
-import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
+import {
+  QUERY_BUILDER_QUERY_STATE_KEY,
+  QUERY_EDITOR_STATE_KEY,
+  ActiveBottomPanelTab,
+} from '../types';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -69,13 +73,13 @@ export interface QueryEditorState {
   editorMode: EditorMode;
   promptModeIsAvailable: boolean;
   promptToQueryIsLoading: boolean;
-  summaryAgentIsAvailable: boolean;
 
   isQueryEditorDirty: boolean;
   dateRange?: { from: string; to: string };
   userInitiatedQuery: boolean;
   languageType: SupportLanguageType;
   lastExecutedTranslatedQuery?: string; // last generated query
+  activeBottomPanelTab?: ActiveBottomPanelTab; // track which panel tab is active
 }
 
 export type QueryResultState = ISearchResult | undefined;
@@ -97,12 +101,12 @@ const initialQueryEditorState: QueryEditorState = {
   editorMode: EditorMode.Query,
   promptModeIsAvailable: false,
   promptToQueryIsLoading: false,
-  summaryAgentIsAvailable: false,
   isQueryEditorDirty: false,
   dateRange: undefined,
   userInitiatedQuery: false, // user click the refresh button
   languageType: SupportLanguageType.ppl,
   lastExecutedTranslatedQuery: undefined,
+  activeBottomPanelTab: 'QUERY_TAB',
 };
 
 /**
@@ -125,16 +129,18 @@ export class QueryBuilder {
   });
   public variableNames$ = new BehaviorSubject<string[]>([]);
   private isInitialized = false;
-  private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
+  public editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> = {
+    current: null,
+  };
   private subscriptions = Array<Subscription>();
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
   public lastExecutedInterpolatedQuery?: string;
+  private onDatasetChangedCallback?: () => void;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
   }
-
   async init(options?: { savedQueryState?: QueryState }) {
     if (this.isInitialized) {
       return;
@@ -145,9 +151,8 @@ export class QueryBuilder {
 
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (urlStateStorage) {
-      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>(
-        QUERY_EDITOR_STATE_KEY
-      );
+      queryEditorStateFromUrl =
+        urlStateStorage?.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY);
       queryStateFromUrl = urlStateStorage?.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
     }
 
@@ -170,8 +175,12 @@ export class QueryBuilder {
       preferredDataset
     );
 
-    if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
+    this.updateQueryEditorState({ languageType: languageType as SupportLanguageType });
+
+    if (queryEditorStateFromUrl?.activeBottomPanelTab) {
+      this.updateQueryEditorState({
+        activeBottomPanelTab: queryEditorStateFromUrl.activeBottomPanelTab,
+      });
     }
 
     // read isQueryEditorDirty from url to prevent losing state after reloading page
@@ -211,7 +220,11 @@ export class QueryBuilder {
     const urlSync = combineLatest([
       this.queryState$,
       this.queryEditorState$.pipe(
-        map((s) => ({ languageType: s.languageType, isQueryEditorDirty: s.isQueryEditorDirty }))
+        map((s) => ({
+          languageType: s.languageType,
+          isQueryEditorDirty: s.isQueryEditorDirty,
+          ...(s.activeBottomPanelTab ? { activeBottomPanelTab: s.activeBottomPanelTab } : {}),
+        }))
       ),
     ])
       .pipe(debounceTime(500))
@@ -256,7 +269,6 @@ export class QueryBuilder {
     if (!dataset) {
       this.updateQueryEditorState({
         promptModeIsAvailable: false,
-        summaryAgentIsAvailable: false,
       });
       return undefined;
     }
@@ -281,6 +293,9 @@ export class QueryBuilder {
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
           if (isDatasetChanged || isLanguageChanged || !this.isInitialized) {
+            if (isDatasetChanged && this.isInitialized) {
+              this.onDatasetChangedCallback?.();
+            }
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
             return from(this.handleDatasetChange(newQuery.dataset));
           }
@@ -341,22 +356,9 @@ export class QueryBuilder {
     this.subscriptions.push(languageSyncSub);
   }
 
-  private async checkAgentAvailability(datasourceId?: string) {
-    const [promptMode, summaryAgent] = await Promise.allSettled([
-      getPromptModeIsAvailable(this.getServices()),
-      getSummaryAgentIsAvailable(this.getServices(), datasourceId || ''),
-    ]);
-
-    const updates: Partial<QueryEditorState> = {};
-    if (promptMode.status === 'fulfilled') {
-      updates.promptModeIsAvailable = promptMode.value;
-    }
-    if (summaryAgent.status === 'fulfilled') {
-      updates.summaryAgentIsAvailable = summaryAgent.value;
-    }
-    if (Object.keys(updates).length > 0) {
-      this.updateQueryEditorState(updates);
-    }
+  private async checkAgentAvailability(_datasourceId?: string) {
+    const result = await getPromptModeIsAvailable(this.getServices());
+    this.updateQueryEditorState({ promptModeIsAvailable: result });
   }
 
   private async fetchDataView(dataset: Dataset) {
@@ -378,7 +380,8 @@ export class QueryBuilder {
           http: this.getServices().http,
           data: this.getServices().data,
         },
-        false
+        false,
+        dataset?.signalType // set data view signalType from dataset
       );
 
       // Try to get it again from cache
@@ -409,11 +412,11 @@ export class QueryBuilder {
   }
 
   async callAgent() {
-    if (!this.editorRef) return;
+    if (!this.editorRef.current) return;
 
     // for prompt mode, we won't store the prompt and generated query
     // so directly read user input
-    const editorText = this.editorRef.getValue();
+    const editorText = this.editorRef.current.getValue();
 
     if (!editorText.length) {
       showMissingPromptWarning(this.getServices().notifications.toasts);
@@ -586,12 +589,18 @@ export class QueryBuilder {
     return this.variableNames$.value;
   }
 
-  setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {
-    this.editorRef = editor;
+  setEditor(editor: monaco.editor.IStandaloneCodeEditor | null) {
+    this.editorRef.current = editor;
   }
 
-  getEditorRef(): monaco.editor.IStandaloneCodeEditor | null {
-    return this.editorRef;
+  getEditor(): monaco.editor.IStandaloneCodeEditor | null {
+    return this.editorRef.current;
+  }
+
+  // register a callback that fires when the dataset changes,
+  // for example, used to clear the transformation pipeline on dataset switch.
+  setOnDatasetChanged(callback: () => void) {
+    this.onDatasetChangedCallback = callback;
   }
 
   getQueryEditorState() {
@@ -626,7 +635,7 @@ export class QueryBuilder {
       error: null,
     });
     this.variableNames$ = new BehaviorSubject<string[]>([]);
-    this.editorRef = null;
+    this.editorRef.current = null;
     this.isInitialized = false;
   }
 }

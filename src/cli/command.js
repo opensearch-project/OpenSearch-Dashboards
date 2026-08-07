@@ -46,7 +46,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64); // eslint-disable-line no-process-exit
+  process.exit(64);
 };
 
 Command.prototype.defaultHelp = function () {
@@ -57,7 +57,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64); // eslint-disable-line no-process-exit
+  process.exit(64);
 };
 
 Command.prototype.unknownArgv = function (argv) {
@@ -94,7 +94,7 @@ Command.prototype.collectUnknownOptions = function () {
       let val = opt[1];
       try {
         val = JSON.parse(opt[1]);
-      } catch (e) {
+      } catch {
         val = opt[1];
       }
 

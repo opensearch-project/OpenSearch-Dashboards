@@ -13,8 +13,6 @@ describe('createGauge', () => {
     name: 'value',
     column: 'value',
     schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockData = [{ value: 10 }, { value: 20 }, { value: 30 }];

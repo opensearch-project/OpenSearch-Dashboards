@@ -10,8 +10,9 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { DatasetManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useOpenSearchDashboards<DatasetManagmentContext>().services
-    .docLinks?.links.noDocumentation.scriptedFields;
+  const docLinksScriptedFields =
+    useOpenSearchDashboards<DatasetManagmentContext>().services.docLinks?.links.noDocumentation
+      .scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

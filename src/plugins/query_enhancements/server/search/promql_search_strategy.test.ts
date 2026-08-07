@@ -20,7 +20,7 @@ describe('promqlSearchStrategy', () => {
   let config$: Observable<SharedGlobalConfig>;
   let logger: Logger;
   let usage: SearchUsage;
-  const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
+  const emptyRequestHandlerContext = {} as unknown as RequestHandlerContext;
 
   const mockPrometheusManagerQuery = (mockResponse: any) => {
     (prometheusManager.query as jest.Mock).mockResolvedValue(mockResponse);
@@ -28,13 +28,13 @@ describe('promqlSearchStrategy', () => {
 
   beforeEach(() => {
     config$ = of({} as SharedGlobalConfig);
-    logger = ({
+    logger = {
       error: jest.fn(),
-    } as unknown) as Logger;
-    usage = ({
+    } as unknown as Logger;
+    usage = {
       trackSuccess: jest.fn(),
       trackError: jest.fn(),
-    } as unknown) as SearchUsage;
+    } as unknown as SearchUsage;
   });
 
   afterEach(() => {
@@ -73,7 +73,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'node_cpu_seconds_total',
@@ -85,7 +85,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -148,7 +148,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'empty_metric',
@@ -160,7 +160,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -191,7 +191,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -203,7 +203,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -249,7 +249,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'node_cpu',
@@ -261,7 +261,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -298,7 +298,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'jvm_cpu_count',
@@ -310,7 +310,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -349,7 +349,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'test_metric',
@@ -361,7 +361,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -394,7 +394,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const resultData = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'many_series',
@@ -406,7 +406,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -439,7 +439,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const resultData = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'few_series',
@@ -451,7 +451,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -471,7 +471,7 @@ describe('promqlSearchStrategy', () => {
     await expect(
       strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: { query: 'failing_query', dataset: { id: 'dataset-1' } },
             timeRange: {
@@ -479,7 +479,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow('Query failed');
@@ -528,7 +528,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; metric_b',
@@ -540,7 +540,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -582,7 +582,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; metric_b',
@@ -594,7 +594,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -645,7 +645,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; metric_b',
@@ -657,7 +657,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -699,7 +699,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; bad_metric',
@@ -711,7 +711,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -751,7 +751,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'single_metric',
@@ -763,7 +763,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -805,7 +805,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric{label=";test"}',
@@ -817,7 +817,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -832,7 +832,7 @@ describe('promqlSearchStrategy', () => {
       await expect(
         strategy.search(
           emptyRequestHandlerContext,
-          ({
+          {
             body: {
               query: {
                 query: 'failing_single_query',
@@ -844,7 +844,7 @@ describe('promqlSearchStrategy', () => {
                 to: '2021-12-01T01:00:00.000Z',
               },
             },
-          } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+          } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
           {}
         )
       ).rejects.toThrow('Single query failed');
@@ -884,7 +884,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; bad_metric',
@@ -896,7 +896,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -940,7 +940,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'metric_a; bad_metric',
@@ -952,7 +952,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -984,7 +984,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -996,7 +996,7 @@ describe('promqlSearchStrategy', () => {
               time: '1753309221',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1033,7 +1033,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -1045,7 +1045,7 @@ describe('promqlSearchStrategy', () => {
               time: '1753309221',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1078,7 +1078,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: '1',
@@ -1090,7 +1090,7 @@ describe('promqlSearchStrategy', () => {
               time: '1773874502',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1109,7 +1109,7 @@ describe('promqlSearchStrategy', () => {
       await expect(
         strategy.search(
           emptyRequestHandlerContext,
-          ({
+          {
             body: {
               query: {
                 query: 'up',
@@ -1124,7 +1124,7 @@ describe('promqlSearchStrategy', () => {
                 queryType: 'INSTANT',
               },
             },
-          } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+          } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
           {}
         )
       ).rejects.toThrow('Time or time range option missing');
@@ -1151,7 +1151,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -1163,7 +1163,7 @@ describe('promqlSearchStrategy', () => {
               time: 'now-5m',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1193,7 +1193,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -1205,7 +1205,7 @@ describe('promqlSearchStrategy', () => {
               time: '1753309221',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1237,7 +1237,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -1252,7 +1252,7 @@ describe('promqlSearchStrategy', () => {
               step: 60,
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 
@@ -1282,7 +1282,7 @@ describe('promqlSearchStrategy', () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await strategy.search(
         emptyRequestHandlerContext,
-        ({
+        {
           body: {
             query: {
               query: 'up',
@@ -1294,7 +1294,7 @@ describe('promqlSearchStrategy', () => {
               to: '2021-12-01T01:00:00.000Z',
             },
           },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       );
 

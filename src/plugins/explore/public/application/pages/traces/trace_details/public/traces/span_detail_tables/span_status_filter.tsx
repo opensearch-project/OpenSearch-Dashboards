@@ -89,9 +89,10 @@ export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
     setOptions(newOptions);
   }, [spanFilters]);
 
-  const selectedCount = useMemo(() => options.filter((option) => option.checked === 'on').length, [
-    options,
-  ]);
+  const selectedCount = useMemo(
+    () => options.filter((option) => option.checked === 'on').length,
+    [options]
+  );
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {

@@ -68,12 +68,8 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
-  const {
-    queryState,
-    isQuerySummaryCollapsed,
-    isSummaryAgentAvailable,
-    updateQueryState,
-  } = useQueryAssist();
+  const { queryState, isQuerySummaryCollapsed, isSummaryAgentAvailable, updateQueryState } =
+    useQueryAssist();
 
   const [results, setResults] = useState<any[]>([]);
   // the question and answer used last time to generate summary
@@ -206,7 +202,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         });
         setSummary(response);
         reportCountMetric(SUCCESS_METRIC, 1);
-      } catch (error) {
+      } catch {
         reportCountMetric(SUCCESS_METRIC, 0);
         setSummary(errorPrompt);
       } finally {

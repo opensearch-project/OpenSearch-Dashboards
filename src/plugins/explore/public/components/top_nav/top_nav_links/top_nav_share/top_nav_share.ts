@@ -22,36 +22,35 @@ export const shareTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getShareButtonRun = (
-  services: ExploreServices,
-  savedExplore?: SavedExplore
-): TopNavMenuIconRun => async (anchorElement) => {
-  const { share, store } = services;
-  if (!savedExplore || !share) return;
+export const getShareButtonRun =
+  (services: ExploreServices, savedExplore?: SavedExplore): TopNavMenuIconRun =>
+  async (anchorElement) => {
+    const { share, store } = services;
+    if (!savedExplore || !share) return;
 
-  const legacyState = store.getState().legacy;
-  const sharingData = await getSharingData({
-    searchSource: savedExplore.searchSource,
-    state: legacyState,
-    services,
-  });
+    const legacyState = store.getState().legacy;
+    const sharingData = await getSharingData({
+      searchSource: savedExplore.searchSource,
+      state: legacyState,
+      services,
+    });
 
-  // Flush any pending URL state updates to ensure the share URL contains current state.
-  // URL updates are batched asynchronously, so without flushing, the URL may not reflect
-  // the latest state (e.g., _q and _a parameters) when captured.
-  services.osdUrlStateStorage?.flush();
+    // Flush any pending URL state updates to ensure the share URL contains current state.
+    // URL updates are batched asynchronously, so without flushing, the URL may not reflect
+    // the latest state (e.g., _q and _a parameters) when captured.
+    services.osdUrlStateStorage?.flush();
 
-  share.toggleShareContextMenu({
-    anchorElement,
-    allowEmbed: false,
-    allowShortUrl: services.capabilities.discover?.createShortUrl as boolean,
-    shareableUrl: unhashUrl(window.location.href),
-    objectId: savedExplore.id,
-    objectType: 'search',
-    sharingData: {
-      ...sharingData,
-      title: savedExplore.title,
-    },
-    isDirty: !savedExplore.id || legacyState.isDirty || false,
-  });
-};
+    share.toggleShareContextMenu({
+      anchorElement,
+      allowEmbed: false,
+      allowShortUrl: services.capabilities.discover?.createShortUrl as boolean,
+      shareableUrl: unhashUrl(window.location.href),
+      objectId: savedExplore.id,
+      objectType: 'search',
+      sharingData: {
+        ...sharingData,
+        title: savedExplore.title,
+      },
+      isDirty: !savedExplore.id || legacyState.isDirty || false,
+    });
+  };

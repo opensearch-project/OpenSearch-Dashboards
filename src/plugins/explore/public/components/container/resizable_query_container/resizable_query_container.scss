@@ -8,17 +8,6 @@
   min-height: 0;
   gap: $ouiSizeXS;
 
-  // In prompt (AI) mode, hide the resize handle and lower its z-index
-  // so it cannot overlap the generated-query bar.
-  &--promptMode {
-    .exploreResizableQueryContainer__resizeHandle {
-      visibility: hidden;
-      z-index: 0;
-      height: 0;
-      margin: 0;
-    }
-  }
-
   &__queryPanel {
     overflow: visible;
     display: flex;
@@ -44,6 +33,26 @@
       flex-direction: column;
       min-height: 0;
       overflow: visible;
+    }
+
+    .exploreQueryPanel__widgetsRow {
+      flex-grow: 0;
+    }
+
+    .exploreQueryPanel__contentRow {
+      flex-grow: 1;
+      min-height: 0;
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      >.euiFlexItem {
+        align-self: stretch;
+        min-height: 0;
+      }
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      >.euiFlexItem:has(> .plqBuilder) {
+        overflow-y: auto;
+      }
     }
 
     .exploreQueryPanel__editorsWrapper {

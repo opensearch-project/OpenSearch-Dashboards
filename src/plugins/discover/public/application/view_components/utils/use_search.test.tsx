@@ -282,10 +282,10 @@ describe('useSearch', () => {
     });
 
     await waitFor(() => {
-      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQuery);
     });
 
-    expect(services.filterManager.setAppFilters).toBeCalledWith(
+    expect(services.filterManager.setAppFilters).toHaveBeenCalledWith(
       expect.arrayContaining([mockFilterB])
     );
   });
@@ -301,7 +301,7 @@ describe('useSearch', () => {
     });
 
     await waitFor(() => {
-      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockDefaultQuery);
     });
   });
 

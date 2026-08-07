@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* globals global */
+
 jest.mock('repl', () => ({ start: (opts) => ({ opts, context: {} }) }), { virtual: true });
 
 describe('repl', () => {

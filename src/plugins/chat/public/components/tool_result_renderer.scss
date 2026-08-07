@@ -1,0 +1,117 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Tool result code blocks keep their capped height (overflowHeight) so long
+ * results don't dominate the conversation, but we clip overflow instead of
+ * allowing an inner scrollbar. A nested scroll area competes with the chat
+ * window's own scrolling and hurts the reading experience. Users open the
+ * code block fullscreen control to view the full, scrollable content.
+ *
+ * The `.euiCodeBlock-isFullScreen` guard below is required because EuiCodeBlock
+ * forwards this className to the fullscreen overlay too; without it we would
+ * also clip (and break scrolling in) the fullscreen view.
+ */
+.toolResultCodeBlock {
+  // Clip the inline code block instead of letting it scroll internally. A nested
+  // scroll area competes with the chat window's own scrolling and hurts reading.
+  .euiCodeBlock__pre {
+    overflow: hidden !important;
+  }
+
+  // Fullscreen overlay reuses this className (EuiCodeBlock forwards it), and there
+  // we DO want the full content to scroll — restore it.
+  &.euiCodeBlock-isFullScreen .euiCodeBlock__pre {
+    overflow: auto !important;
+  }
+}
+
+/**
+ * When a result is truncated, the built-in EuiCodeBlock copy button only copies
+ * the visible (truncated) text, so we render our own copy button wired to the
+ * full original text instead. Position it where the built-in one would be, with
+ * the fullscreen-expand button directly above it.
+ *
+ * Note: `.toolResultCodeBlock__copyFull` is applied via EuiCopy's `anchorClassName`
+ * prop, which targets the `<span class="euiToolTipAnchor">` EuiToolTip wraps around
+ * the button — NOT the button itself. EuiToolTip renders its floating tooltip via a
+ * portal and positions it by measuring the anchor's actual rendered rect, so
+ * absolutely-positioning the *anchor* (rather than the button inside it) keeps the
+ * tooltip correctly aligned with the visible button. Positioning the button alone
+ * (leaving the anchor in normal flow) decouples the two, causing the tooltip to
+ * appear at the anchor's original in-flow position instead of over the button.
+ */
+.toolResultCodeBlock__wrapper {
+  position: relative;
+}
+
+.toolResultCodeBlock__expandFull {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.toolResultCodeBlock__copyFull {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  z-index: 1;
+}
+
+/**
+ * Fullscreen modal for a truncated code block result — shows the complete,
+ * untruncated content (not just the same slice as the inline preview).
+ */
+.toolResultCodeBlock__modal {
+  min-width: 60vw;
+  max-width: 90vw;
+}
+
+.toolResultCodeBlock__modalBlock {
+  max-height: 75vh;
+
+  .euiCodeBlock__pre {
+    overflow: auto !important;
+  }
+}
+
+/**
+ * Inline markdown content: clip the preview to a fixed height (matching code
+ * blocks) with no scrolling, plus a fullscreen control that opens the full,
+ * scrollable content in a modal.
+ */
+.toolResultMarkdown {
+  position: relative;
+  max-width: 100%;
+
+  &__controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  &__preview {
+    overflow: hidden;
+  }
+
+  // Give the fullscreen button room so it doesn't overlap the table header.
+  &__preview table {
+    margin-top: $euiSizeL;
+  }
+
+  &__modal {
+    min-width: 60vw;
+    max-width: 90vw;
+
+    // Center the table when it fits; when wider than the container it stays flush
+    // left and scrolls horizontally (margin:auto only adds space when there is free
+    // room, so the left edge remains reachable while scrolling).
+    table {
+      margin: 0 auto;
+    }
+  }
+}

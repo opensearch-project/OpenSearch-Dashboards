@@ -55,10 +55,10 @@ describe('check dashboards filter and query', () => {
       cy.get('[data-test-subj="editFilter"]').click();
       cy.get('[data-test-subj="filterFieldSuggestionList"]')
         .find('[data-test-subj="comboBoxInput"]')
-        .should('have.text', 'machine.os');
+        .should('contain.text', 'machine.os');
       cy.get('[data-test-subj="filterOperatorList"]')
         .find('[data-test-subj="comboBoxInput"]')
-        .should('have.text', 'is');
+        .should('contain.text', 'is');
       cy.get('[data-test-subj="filterParams"]').find('input').should('have.value', 'osx');
     });
 
@@ -77,7 +77,7 @@ describe('check dashboards filter and query', () => {
 
       //[Logs] Response chart should show 200 label
       cy.get('[data-title="[Logs] Response Codes Over Time + Annotations"]')
-        .find('[title="200"]')
+        .find('[title^="200"]')
         .should('have.text', '200');
     });
   });

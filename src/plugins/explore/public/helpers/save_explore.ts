@@ -26,7 +26,7 @@ export async function saveSavedExplore({
 }: {
   savedExplore: SavedExplore;
   newTitle: string;
-  saveOptions: { isTitleDuplicateConfirmed: boolean; onTitleDuplicate: () => void };
+  saveOptions: { isTitleDuplicateConfirmed: boolean; onTitleDuplicate?: () => void };
   searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
   startSyncingQueryStateWithUrl: () => void;
@@ -77,7 +77,10 @@ export async function saveSavedExplore({
       });
 
       if (id !== originalId) {
-        services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}`);
+        const currentHash = services.scopedHistory?.location.hash || '';
+        const hashSearch =
+          currentHash.indexOf('?') >= 0 ? currentHash.substring(currentHash.indexOf('?')) : '';
+        services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}${hashSearch}`);
       } else {
         // Update browser title and breadcrumbs
         chrome.docTitle.change(newTitle);

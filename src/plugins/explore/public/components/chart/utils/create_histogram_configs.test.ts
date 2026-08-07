@@ -11,7 +11,7 @@ describe('createHistogramConfigs', () => {
     timeFieldName: '@timestamp',
   } as Dataset;
 
-  const mockData = ({
+  const mockData = {
     query: {
       timefilter: {
         timefilter: {
@@ -28,7 +28,7 @@ describe('createHistogramConfigs', () => {
       },
       showError: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 
   beforeEach(() => {
     jest.clearAllMocks();

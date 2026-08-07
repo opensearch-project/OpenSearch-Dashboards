@@ -128,7 +128,11 @@ export const TraceAutoDetectCallout: React.FC = () => {
 
       // Create datasets for each detected datasource
       for (const detection of detections) {
-        const result = await createAutoDetectedDatasets(services.savedObjects.client, detection);
+        const result = await createAutoDetectedDatasets(
+          services.savedObjects.client,
+          services.dataViews,
+          detection
+        );
 
         if (result.traceDatasetId || result.logDatasetId) {
           totalCreated++;

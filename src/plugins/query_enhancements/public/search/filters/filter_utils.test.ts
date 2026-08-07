@@ -286,15 +286,29 @@ describe('convertFiltersToClause', () => {
 });
 
 describe('getTimeFilterCommand', () => {
-  it('should create a time filter command with the correct format', () => {
-    const timeRange: TimeRange = {
-      from: '2023-01-01T00:00:00Z',
-      to: '2023-01-02T00:00:00Z',
-    };
+  const timeRange: TimeRange = {
+    from: '2023-01-01T00:00:00Z',
+    to: '2023-01-02T00:00:00Z',
+  };
 
+  it('emits bare string literals for OpenSearch (folds to a native range query, no scripts)', () => {
+    const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'OpenSearch');
+    expect(result).toBe(
+      "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
+    );
+  });
+
+  it('defaults to bare string literals when the engine type is unknown/undefined (fail-open)', () => {
     const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange);
     expect(result).toBe(
       "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
+    );
+  });
+
+  it('wraps literals in TIMESTAMP() for legacy Elasticsearch (Open Distro rejects bare strings)', () => {
+    const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'Elasticsearch');
+    expect(result).toBe(
+      "WHERE `timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
     );
   });
 });

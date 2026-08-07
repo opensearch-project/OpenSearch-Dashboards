@@ -36,7 +36,8 @@ export const CellValue = (props: Props) => {
     columnId,
   } = props;
 
-  const valueDisplay = `${value ?? ''}`;
+  const valueDisplay =
+    value !== null && typeof value === 'object' ? JSON.stringify(value) : `${value ?? ''}`;
 
   useEffect(() => {
     const cellStyle: React.CSSProperties = { textAlign };

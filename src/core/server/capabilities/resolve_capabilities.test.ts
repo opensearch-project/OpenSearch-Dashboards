@@ -174,4 +174,72 @@ describe('resolveCapabilities', () => {
       },
     });
   });
+
+  describe('applications merge into navLinks', () => {
+    it('adds each application id to navLinks as true', async () => {
+      const result = await resolveCapabilities(defaultCaps, [], request, ['app_a', 'app_b']);
+      expect(result.navLinks).toEqual({
+        app_a: true,
+        app_b: true,
+      });
+    });
+
+    it('preserves existing navLinks entries not listed in applications', async () => {
+      const caps = {
+        ...defaultCaps,
+        navLinks: {
+          existing_app: false,
+        },
+      };
+      const result = await resolveCapabilities(caps, [], request, ['new_app']);
+      expect(result.navLinks).toEqual({
+        existing_app: false,
+        new_app: true,
+      });
+    });
+
+    it('overwrites an existing navLinks entry when the application id is listed', async () => {
+      const caps = {
+        ...defaultCaps,
+        navLinks: {
+          app_a: false,
+        },
+      };
+      const result = await resolveCapabilities(caps, [], request, ['app_a']);
+      expect(result.navLinks).toEqual({
+        app_a: true,
+      });
+    });
+
+    it('does not mutate the caller-provided navLinks when applications are supplied', async () => {
+      const originalNavLinks = { existing: false };
+      const caps = {
+        ...defaultCaps,
+        navLinks: originalNavLinks,
+      };
+      await resolveCapabilities(caps, [], request, ['app_a']);
+      expect(originalNavLinks).toEqual({ existing: false });
+    });
+
+    it('is tolerant of an empty applications array', async () => {
+      const caps = {
+        ...defaultCaps,
+        navLinks: { kept: true },
+      };
+      const result = await resolveCapabilities(caps, [], request, []);
+      expect(result.navLinks).toEqual({ kept: true });
+    });
+
+    it('resolves in reasonable time for the maximum allowed input', async () => {
+      const applications = Array.from({ length: 1000 }, (_, i) => `app_${i}`);
+      const switchers = Array.from(
+        { length: 10 },
+        () => (_req: OpenSearchDashboardsRequest, caps: Capabilities) => caps
+      );
+      const start = Date.now();
+      const result = await resolveCapabilities(defaultCaps, switchers, request, applications);
+      expect(Date.now() - start).toBeLessThan(1000);
+      expect(Object.keys(result.navLinks)).toHaveLength(1000);
+    });
+  });
 });

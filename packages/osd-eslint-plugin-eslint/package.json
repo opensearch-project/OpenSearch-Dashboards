@@ -7,12 +7,12 @@
     "devOnly": true
   },
   "peerDependencies": {
-    "eslint": "^8.57.1",
-    "@babel/eslint-parser": "^7.25.0"
+    "eslint": "^10.6.0",
+    "@babel/eslint-parser": "^8.0.1"
   },
   "dependencies": {
     "micromatch": "^4.0.7",
     "dedent": "^0.7.0",
-    "eslint-module-utils": "2.5.0"
+    "eslint-module-utils": "^2.14.0"
   }
 }

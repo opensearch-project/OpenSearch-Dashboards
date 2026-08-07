@@ -42,7 +42,28 @@ import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
 import { embeddablePluginMock, createEmbeddablePanelMock } from '../../mocks';
 
-test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
+let intersectionCallback: (entries: Array<{ isIntersecting: boolean }>) => void;
+let mockDisconnect: jest.Mock;
+const originalIO = window.IntersectionObserver;
+
+beforeEach(() => {
+  mockDisconnect = jest.fn();
+  const MockIntersectionObserver = jest.fn().mockImplementation((callback) => {
+    intersectionCallback = callback;
+    return {
+      observe: jest.fn(),
+      disconnect: mockDisconnect,
+      unobserve: jest.fn(),
+    };
+  });
+  window.IntersectionObserver = MockIntersectionObserver as any;
+});
+
+afterEach(() => {
+  window.IntersectionObserver = originalIO;
+});
+
+test('EmbeddableChildPanel renders an embeddable when it is done loading and visible', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
@@ -84,14 +105,159 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
   await nextTick();
   component.update();
 
-  // Due to the way embeddables mount themselves on the dom node, they are not forced to be
-  // react components, and hence, we can't use the usual
-  // findTestSubject(component, 'embeddablePanelHeading-HelloTheonGreyjoy');
+  // Simulate panel entering viewport
+  intersectionCallback([{ isIntersecting: true }]);
+  await nextTick();
+  component.update();
+
   expect(
     component
       .getDOMNode()
       .querySelectorAll('[data-test-subj="embeddablePanelHeading-HelloTheonGreyjoy"]').length
   ).toBe(1);
+});
+
+test('EmbeddableChildPanel does not mount PanelComponent when not visible', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
+  );
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
+
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
+    getEmbeddableFactory,
+  } as any);
+  await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Theon',
+    lastName: 'Greyjoy',
+    id: '123',
+  });
+
+  const testPanel = createEmbeddablePanelMock({
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    getEmbeddableFactory,
+    inspector,
+  });
+
+  const component = mount(
+    <EmbeddableChildPanel container={container} embeddableId={'123'} PanelComponent={testPanel} />
+  );
+
+  await nextTick();
+  component.update();
+
+  // Observer has not fired isIntersecting=true, so panel should show loading
+  expect(component.find('EuiLoadingChart').length).toBe(1);
+  expect(
+    component
+      .getDOMNode()
+      .querySelectorAll('[data-test-subj="embeddablePanelHeading-HelloTheonGreyjoy"]').length
+  ).toBe(0);
+});
+
+test('EmbeddableChildPanel mounts PanelComponent when it becomes visible', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
+  );
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
+
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
+    getEmbeddableFactory,
+  } as any);
+  const newEmbeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Theon',
+    lastName: 'Greyjoy',
+    id: '123',
+  });
+
+  const testPanel = createEmbeddablePanelMock({
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    getEmbeddableFactory,
+    inspector,
+  });
+
+  const component = mount(
+    <EmbeddableChildPanel
+      container={container}
+      embeddableId={newEmbeddable.id}
+      PanelComponent={testPanel}
+    />
+  );
+
+  await nextTick();
+  component.update();
+
+  // Initially not visible
+  expect(component.find('EuiLoadingChart').length).toBe(1);
+
+  // Simulate scrolling into view
+  intersectionCallback([{ isIntersecting: true }]);
+  await nextTick();
+  component.update();
+
+  // Now PanelComponent should be mounted
+  expect(component.find('EuiLoadingChart').length).toBe(0);
+  expect(
+    component
+      .getDOMNode()
+      .querySelectorAll('[data-test-subj="embeddablePanelHeading-HelloTheonGreyjoy"]').length
+  ).toBe(1);
+  expect(mockDisconnect).toHaveBeenCalled();
+});
+
+test('EmbeddableChildPanel disconnects observer on unmount', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
+  );
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
+
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
+    getEmbeddableFactory,
+  } as any);
+  await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+    id: '456',
+  });
+
+  const testPanel = createEmbeddablePanelMock({
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    getEmbeddableFactory,
+    inspector,
+  });
+
+  const component = mount(
+    <EmbeddableChildPanel container={container} embeddableId={'456'} PanelComponent={testPanel} />
+  );
+
+  await nextTick();
+  component.update();
+
+  component.unmount();
+  expect(mockDisconnect).toHaveBeenCalled();
 });
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
@@ -110,6 +276,11 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
   );
 
+  await nextTick();
+  component.update();
+
+  // Simulate visibility so the error panel can mount
+  intersectionCallback([{ isIntersecting: true }]);
   await nextTick();
   component.update();
 

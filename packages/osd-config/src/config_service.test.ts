@@ -452,7 +452,10 @@ test('throws during validation is any schema is invalid', async () => {
   await configService.setSchema('numberKey', schema.number());
 
   await expect(configService.validate()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [stringKey]]: expected value of type [string] but got [number]"`
+    `
+"[config validation of [stringKey]]: expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
   );
 });
 

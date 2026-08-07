@@ -41,7 +41,7 @@ export interface EditorInstance<TCollapsed, TExpanded, TBody> {
 export function createEditor<
   TCollapsed extends React.JSX.IntrinsicAttributes,
   TExpanded extends React.JSX.IntrinsicAttributes,
-  TBody extends React.JSX.IntrinsicAttributes
+  TBody extends React.JSX.IntrinsicAttributes,
 >(
   collapsed: CollapsedComponent<TCollapsed>,
   expanded: ExpandedComponent<TExpanded>,
@@ -137,7 +137,8 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
               lineNumbers: 'off', // Disabled line numbers
               // lineHeight: 40,
               fontSize: 14,
-              fontFamily: 'Roboto Mono',
+              fontFamily:
+                "'Roboto Mono', 'Source Code Pro', Consolas, Menlo, Monaco, 'Courier New', monospace",
               minimap: {
                 enabled: false,
               },

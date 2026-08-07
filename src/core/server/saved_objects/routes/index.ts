@@ -42,7 +42,7 @@ import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
 import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
-import { registerImportRoute } from './import';
+import { registerImportRoute, CapabilitiesResolver } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
 
@@ -51,13 +51,28 @@ export function registerRoutes({
   logger,
   config,
   migratorPromise,
+  getCapabilities,
 }: {
   http: InternalHttpServiceSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IOpenSearchDashboardsMigrator>;
+  getCapabilities?: () => CapabilitiesResolver | undefined;
 }) {
   const router = http.createRouter('/api/saved_objects/');
+
+  // Reject compressed payloads on import/resolve_import_errors routes to prevent
+  // decompression bomb DoS (content-encoding is decoded before maxBytes is enforced).
+  http.registerOnPreAuth((request, response, toolkit) => {
+    if (
+      request.headers['content-encoding'] &&
+      (request.url.pathname === '/api/saved_objects/_import' ||
+        request.url.pathname === '/api/saved_objects/_resolve_import_errors')
+    ) {
+      return response.badRequest({ body: 'Content-Encoding is not supported for this endpoint' });
+    }
+    return toolkit.next();
+  });
 
   registerGetRoute(router);
   registerCreateRoute(router);
@@ -69,8 +84,8 @@ export function registerRoutes({
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, config);
-  registerImportRoute(router, config);
-  registerResolveImportErrorsRoute(router, config);
+  registerImportRoute(router, config, getCapabilities);
+  registerResolveImportErrorsRoute(router, config, getCapabilities);
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

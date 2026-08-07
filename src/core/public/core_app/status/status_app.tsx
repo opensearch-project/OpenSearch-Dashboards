@@ -78,7 +78,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
       if (!this._isMounted) return;
 
       this.setState({ loading: false, fetchError: false, data });
-    } catch (e) {
+    } catch {
       if (!this._isMounted) return;
 
       this.setState({ fetchError: true, loading: false, data: null });

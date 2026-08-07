@@ -4,7 +4,7 @@
  */
 
 import './workspace_initial.scss';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   EuiLink,
@@ -28,6 +28,13 @@ import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceUseCaseCard } from './workspace_use_case_card';
+import { WorkspaceSearchBar } from './workspace_search_bar';
+import {
+  WorkspaceFilterCriteria,
+  WorkspaceRecency,
+  WorkspaceRoleFilter,
+  buildWorkspaceFilterCriteria,
+} from './utils';
 import { WorkspaceUseCaseFlyout } from '../workspace_form';
 import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
 
@@ -47,6 +54,14 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   const [isUseCaseFlyoutVisible, setIsUseCaseFlyoutVisible] = useState(false);
   const [defaultExpandedUseCaseId, setDefaultExpandedUseCaseId] = useState(availableUseCases[0].id);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recency, setRecency] = useState<WorkspaceRecency>('all');
+  const [roleFilter, setRoleFilter] = useState<WorkspaceRoleFilter>('all');
+  const filterCriteria: WorkspaceFilterCriteria = useMemo(
+    () => buildWorkspaceFilterCriteria({ searchQuery, roleFilter, recency }),
+    [searchQuery, roleFilter, recency]
+  );
+
   const handleClickUseCaseInformation = useCallback((useCaseId: string) => {
     setIsUseCaseFlyoutVisible(true);
     setDefaultExpandedUseCaseId(useCaseId);
@@ -64,6 +79,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           application={application}
           http={http}
           isDashboardAdmin={isDashboardAdmin}
+          filterCriteria={filterCriteria}
           handleClickUseCaseInformation={handleClickUseCaseInformation}
         />
       </EuiFlexItem>
@@ -186,6 +202,18 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           <EuiFlexItem grow={false}>{isDashboardAdmin && createWorkspacePopover}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {workspaceList.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <WorkspaceSearchBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            recency={recency}
+            onRecencyChange={setRecency}
+            roleFilter={roleFilter}
+            onRoleFilterChange={setRoleFilter}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" className="eui-xScroll">
           {useCaseCards}

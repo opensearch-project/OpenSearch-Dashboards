@@ -40,10 +40,11 @@ describe('rangeControlFactory', () => {
       options: {},
       type: CONTROL_TYPES.RANGE,
       label: 'test',
-      indexPattern: {} as any,
+      indexPattern: 'mockIndexPattern' as any,
       parent: {} as any,
     };
     const useTimeFilter = false;
+    const allowedIndexPatternIds = new Set(['mockIndexPattern']);
 
     test('should set min and max from aggregation results', async () => {
       const opensearchSearchResponse = {
@@ -59,7 +60,12 @@ describe('rangeControlFactory', () => {
         },
       });
 
-      const rangeControl = await rangeControlFactory(controlParams, useTimeFilter, deps);
+      const rangeControl = await rangeControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
       await rangeControl.fetch();
 
       expect(rangeControl.isEnabled()).toBe(true);
@@ -82,7 +88,12 @@ describe('rangeControlFactory', () => {
         },
       });
 
-      const rangeControl = await rangeControlFactory(controlParams, useTimeFilter, deps);
+      const rangeControl = await rangeControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
       await rangeControl.fetch();
 
       expect(rangeControl.isEnabled()).toBe(false);
@@ -99,7 +110,12 @@ describe('rangeControlFactory', () => {
         },
       });
 
-      const rangeControl = await rangeControlFactory(controlParams, useTimeFilter, deps);
+      const rangeControl = await rangeControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
       await rangeControl.fetch();
 
       expect(rangeControl.isEnabled()).toBe(false);

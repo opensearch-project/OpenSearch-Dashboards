@@ -55,9 +55,9 @@ describe('rollDailyData', () => {
       }
     });
     await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(undefined);
-    expect(savedObjectClient.get).not.toBeCalled();
-    expect(savedObjectClient.bulkCreate).not.toBeCalled();
-    expect(savedObjectClient.delete).not.toBeCalled();
+    expect(savedObjectClient.get).not.toHaveBeenCalled();
+    expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
+    expect(savedObjectClient.delete).not.toHaveBeenCalled();
   });
 
   test('migrate some docs', async () => {

@@ -39,8 +39,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     let indexPatternId = '';
 
     it('can get all ids', async () => {
-      const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))
-        .body;
+      const body = await (
+        await supertest.get('/api/index-patterns-plugin/get-all').expect(200)
+      ).body;
       indexPatternId = body[0];
       expect(body.length > 0).to.equal(true);
     });

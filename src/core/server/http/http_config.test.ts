@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
 import { CspReportOnlyConfig } from '../csp_report_only';
@@ -93,9 +93,10 @@ describe('requestId', () => {
           ipAllowlist: ['1200:0000:AB00:1234:O000:2552:7777:1313', '[2001:db8:0:1]:80'],
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address
+      Cause: value must be a valid ipv4 or ipv6 address"
+    `);
   });
 
   test('rejects if allowFromAnyIp is `true` and `ipAllowlist` is non-empty', () => {
@@ -106,9 +107,10 @@ describe('requestId', () => {
           ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist
+      Cause: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"
+    `);
 
     expect(() => {
       config.schema.validate({
@@ -117,9 +119,10 @@ describe('requestId', () => {
           ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist
+      Cause: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"
+    `);
   });
 });
 
@@ -165,10 +168,11 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
 
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
-  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
-  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
-    `"[uuid]: must be a valid uuid"`
-  );
+  expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(`
+    "[uuid]: must be a valid uuid
+    Cause: must be a valid uuid"
+  `);
 });
 
 test('uses os.hostname() as default for server.name', () => {
@@ -184,9 +188,10 @@ test('throws if xsrf.whitelist element does not start with a slash', () => {
       whitelist: ['/valid-path', 'invalid-path'],
     },
   };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[xsrf.whitelist.1]: must start with a slash"`
-  );
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+    "[xsrf.whitelist.1]: must start with a slash
+    Cause: must start with a slash"
+  `);
 });
 
 test('accepts any type of objects for custom headers', () => {

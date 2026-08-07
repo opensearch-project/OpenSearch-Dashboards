@@ -11,7 +11,7 @@ import {
   ParserInterpreter,
   Token,
 } from 'antlr4ng';
-import { GeneralErrorListener } from '../shared/general_error_listerner';
+import { PPLCommandErrorListener } from './ppl_command_error_listener';
 import { CachedGrammar, pplGrammarCache } from './ppl_grammar_cache';
 
 interface PipeStripResult {
@@ -127,7 +127,7 @@ function validateWithGrammar(query: string, grammar: CachedGrammar): PPLValidati
   const spaceToken = resolveSpaceToken(grammar);
   const startRuleIndex = pickStartRuleIndex(query, grammar);
   const pipeStrip = stripLeadingPipe(query);
-  const errorListener = new GeneralErrorListener(spaceToken);
+  const errorListener = new PPLCommandErrorListener(spaceToken);
 
   const lexer = new LexerInterpreter(
     'PPL',
@@ -185,6 +185,13 @@ function validateWithGrammar(query: string, grammar: CachedGrammar): PPLValidati
       column: error.startColumn,
       endLine: error.endLine,
       endColumn: error.endColumn,
+      // Carry the command-suggestion identity + quick-fix through to the marker
+      // builder. Absent on ordinary syntax errors.
+      ...(error.code ? { code: error.code } : {}),
+      ...(error.fix ? { fix: error.fix } : {}),
+      // Preserve ANTLR's raw message so the marker builder can revert the friendly
+      // rewrite when command suggestions are disabled.
+      ...(error.rawMessage ? { rawMessage: error.rawMessage } : {}),
     })),
   };
 

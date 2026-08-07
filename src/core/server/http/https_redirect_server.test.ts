@@ -115,3 +115,20 @@ test('forwards http requests to https', async () => {
       expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
     });
 });
+
+describe('rejects protocol-relative paths to prevent open redirects', () => {
+  beforeEach(async () => {
+    await server.start(config);
+  });
+
+  test.each([
+    ['//attacker.com/aa/'],
+    ['///attacker.com/aa/'],
+    ['/////attacker.com/'],
+    ['/\\attacker.com/aa/'],
+  ])('rejects %s with 404 and no Location header', async (path) => {
+    const res = await supertest(getServerListener(server)).get(path);
+    expect(res.status).toBe(404);
+    expect(res.header.location).toBeUndefined();
+  });
+});

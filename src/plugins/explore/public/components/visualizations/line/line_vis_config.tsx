@@ -14,7 +14,6 @@ import {
   Positions,
   AxisRole,
   VisFieldType,
-  TitleOptions,
   ThresholdOptions,
   StandardAxes,
 } from '../types';
@@ -25,7 +24,6 @@ import {
   createSimpleLineChart,
   createLineBarChart,
   createMultiLineChart,
-  createFacetedMultiLineChart,
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
@@ -62,7 +60,6 @@ export interface LineChartStyleOptions {
   valueAxes?: ValueAxis[];
   standardAxes?: StandardAxes[];
 
-  titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
 
   showFullTimeRange?: boolean;
@@ -95,11 +92,6 @@ export const defaultLineChartStyles: LineChartStyle = {
 
   standardAxes: [],
 
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
-
   showFullTimeRange: false,
 };
 
@@ -122,13 +114,21 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for line chart');
 
-          const spec = createSimpleLineChart(
-            props.transformedData,
+          const { spec, legendItems } = createSimpleLineChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -148,13 +148,21 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !y2 || y.length === 0 || y2.length === 0)
             throw Error('Missing axis config for line/bar combo chart');
 
-          const spec = createLineBarChart(
-            props.transformedData,
+          const { spec, legendItems } = createLineBarChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.Y_SECOND]: y2 },
             props.timeRange
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -172,13 +180,22 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
-          const spec = createMultiLineChart(
-            props.transformedData,
+          const { spec, legendItems } = createMultiLineChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -196,67 +213,22 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
-          const spec = createMultiLineChart(
-            props.transformedData,
+          const { spec, legendItems } = createMultiLineChart(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.allData
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 100,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-line chart');
-
-          const spec = createFacetedMultiLineChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 80,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-line chart');
-
-          const spec = createFacetedMultiLineChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
       {
@@ -273,11 +245,19 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category line chart');
 
-          const spec = createCategoryLineChart(props.transformedData, props.styleOptions, {
+          const { spec, legendItems } = createCategoryLineChart(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
           });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -295,12 +275,21 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createCategoryMultiLineChart(
+            props.data,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
       {
@@ -318,12 +307,21 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const { spec, legendItems } = createCategoryMultiLineChart(
+            props.data,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.allData
+          );
+          props.onLegend?.(legendItems);
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
+            />
+          );
         },
       },
     ];

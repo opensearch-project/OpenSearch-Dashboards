@@ -39,7 +39,7 @@ export interface StartServices<Plugins = unknown, OwnContract = unknown, Core = 
 export type StartServicesGetter<
   Plugins = unknown,
   OwnContract = unknown,
-  Core = CoreStart
+  Core = CoreStart,
 > = () => StartServices<Plugins, OwnContract>;
 
 /**

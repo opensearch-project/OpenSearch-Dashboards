@@ -40,7 +40,10 @@ test('works for any value', () => {
 
 test('is required by default', () => {
   expect(() => schema.any().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [any] but got [undefined]"`
+    `
+"expected value of type [any] but got [undefined]
+Cause: expected value of type [any] but got [undefined]"
+`
   );
 });
 
@@ -48,7 +51,10 @@ test('includes namespace in failure', () => {
   expect(() =>
     schema.any().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [any] but got [undefined]"`
+    `
+"[foo-namespace]: expected value of type [any] but got [undefined]
+Cause: expected value of type [any] but got [undefined]"
+`
   );
 });
 

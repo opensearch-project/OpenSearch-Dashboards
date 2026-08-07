@@ -23,8 +23,8 @@ describe('debounce', () => {
     }
 
     jest.advanceTimersByTime(1001);
-    expect(fn).toBeCalledTimes(1);
-    expect(fn).toBeCalledWith(99);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenCalledWith(99);
   });
 
   test("with a leading invocation, it should call the debounced fn once, if the time doens't pass", () => {
@@ -36,8 +36,8 @@ describe('debounce', () => {
 
     jest.advanceTimersByTime(999);
 
-    expect(fn).toBeCalledTimes(1);
-    expect(fn).toBeCalledWith(0);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn).toHaveBeenCalledWith(0);
   });
 
   test('with a leading invocation, it should call the debounced fn twice (at the beginning and at the end)', () => {
@@ -49,8 +49,8 @@ describe('debounce', () => {
 
     jest.advanceTimersByTime(1500);
 
-    expect(fn).toBeCalledTimes(2);
-    expect(fn).toBeCalledWith(0);
-    expect(fn).toBeCalledWith(99);
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(fn).toHaveBeenCalledWith(0);
+    expect(fn).toHaveBeenCalledWith(99);
   });
 });

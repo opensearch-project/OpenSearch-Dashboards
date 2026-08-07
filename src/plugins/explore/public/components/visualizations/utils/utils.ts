@@ -28,7 +28,7 @@ export const applyAxisStyling = ({
   disableGrid?: boolean;
   defaultAxisTitle?: string;
 }): AxisConfig => {
-  const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
+  const gridEnabled = disableGrid ? false : (axisStyle?.grid.showLines ?? true);
 
   const fullAxisConfig: AxisConfig = {
     // Grid settings
@@ -107,11 +107,9 @@ export const getAxisConfig = (styles: { standardAxes?: StandardAxes[] }): AxisSt
   return { xAxisStyle, yAxisStyle, y2AxisStyle };
 };
 
-export const getColumnsFromAxisColumnMapping = (
-  axisColumnMappings: {
-    [K in AxisRole]?: VisColumn | VisColumn[];
-  }
-) => {
+export const getColumnsFromAxisColumnMapping = (axisColumnMappings: {
+  [K in AxisRole]?: VisColumn | VisColumn[];
+}) => {
   const allColumns = [
     ...Object.values(axisColumnMappings ?? {}).flatMap((cols) =>
       Array.isArray(cols) ? cols.map((col) => col.column) : [cols.column]

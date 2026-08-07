@@ -7,12 +7,12 @@ import {
   createSimpleLineChart,
   createLineBarChart,
   createMultiLineChart,
-  createFacetedMultiLineChart,
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
 import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
 import { defaultLineChartStyles } from './line_vis_config';
+import { getColors } from '../theme/default_colors';
 
 describe('Line Chart to_expression', () => {
   const mockData = [
@@ -26,8 +26,6 @@ describe('Line Chart to_expression', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'date',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockNumericColumn: VisColumn = {
@@ -35,8 +33,6 @@ describe('Line Chart to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockNumericColumn2: VisColumn = {
@@ -44,8 +40,6 @@ describe('Line Chart to_expression', () => {
     name: 'Value2',
     schema: VisFieldType.Numerical,
     column: 'value2',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockCategoricalColumn: VisColumn = {
@@ -53,8 +47,6 @@ describe('Line Chart to_expression', () => {
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockCategoricalColumn2: VisColumn = {
@@ -62,8 +54,6 @@ describe('Line Chart to_expression', () => {
     name: 'Category2',
     schema: VisFieldType.Categorical,
     column: 'category2',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockStyles = {
@@ -75,7 +65,6 @@ describe('Line Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Off,
     },
-    titleOptions: { show: true, titleName: '' },
     showFullTimeRange: false,
   };
 
@@ -88,34 +77,36 @@ describe('Line Chart to_expression', () => {
     it('returns an ECharts spec with dataset, series, and axes', () => {
       const result = createSimpleLineChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result).toHaveProperty('xAxis');
-      expect(result).toHaveProperty('yAxis');
-      expect(result.title).toEqual({ text: 'Value Over Time' });
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec).toHaveProperty('xAxis');
+      expect(result.spec).toHaveProperty('yAxis');
     });
 
     it('produces line-type series', () => {
       const result = createSimpleLineChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
-      expect(result.series[0].type).toBe('line');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec.series[0].type).toBe('line');
     });
 
-    it('handles title display options', () => {
-      const noTitle = createSimpleLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
+    it('emits series-target legend items while assigning metric colors', () => {
+      const palette = getColors().categories;
+      const result = createSimpleLineChart(mockData, mockStyles, mockAxisMappings);
 
-      const customTitle = createSimpleLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Line' } },
-        mockAxisMappings
+      expect(result.legendItems).toEqual([
+        {
+          label: 'Value',
+          color: palette[0],
+          target: { type: 'series', name: 'Value' },
+        },
+      ]);
+      expect(result.spec.series[0]).toEqual(
+        expect.objectContaining({
+          name: 'Value',
+          itemStyle: { color: palette[0] },
+        })
       );
-      expect(customTitle.title.text).toBe('Custom Line');
     });
   });
 
@@ -129,19 +120,39 @@ describe('Line Chart to_expression', () => {
     it('returns an ECharts spec with dataset and series', () => {
       const result = createLineBarChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value (Bar) and Value2 (Line) Over Time');
-      expect(result.series.length).toBeGreaterThanOrEqual(2);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('handles title display options', () => {
-      const noTitle = createLineBarChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
+    it('emits legend items for line and bar series', () => {
+      const palette = getColors().categories;
+      const result = createLineBarChart(mockData, mockStyles, mockAxisMappings);
+
+      expect(result.legendItems).toEqual([
+        {
+          label: 'Value',
+          color: palette[0],
+          target: { type: 'series', name: 'Value' },
+        },
+        {
+          label: 'Value2',
+          color: palette[1],
+          target: { type: 'series', name: 'Value2' },
+        },
+      ]);
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          type: 'line',
+          name: 'Value',
+          itemStyle: { color: palette[0] },
+        }),
+        expect.objectContaining({
+          type: 'bar',
+          name: 'Value2',
+          itemStyle: { color: palette[1] },
+        }),
+      ]);
     });
 
     it('throws when axis config is missing', () => {
@@ -159,52 +170,39 @@ describe('Line Chart to_expression', () => {
     it('returns an ECharts spec with multiple series', () => {
       const result = createMultiLineChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category');
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('handles title display options', () => {
-      const noTitle = createMultiLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
+    it('uses provided full data when assigning color series colors', () => {
+      const palette = getColors().categories;
+      const result = createMultiLineChart(
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-02', value: 20, category: 'C' },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        undefined,
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-02', value: 20, category: 'B' },
+          { date: '2023-01-03', value: 30, category: 'C' },
+        ]
       );
-      expect(noTitle.title.text).toBeUndefined();
 
-      const customTitle = createMultiLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Multi-Line' } },
-        mockAxisMappings
-      );
-      expect(customTitle.title.text).toBe('Custom Multi-Line');
-    });
-  });
-
-  describe('createFacetedMultiLineChart', () => {
-    const mockAxisMappings = {
-      [AxisRole.Y]: mockNumericColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumn,
-      [AxisRole.FACET]: mockCategoricalColumn2,
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiLineChart(mockData, mockStyles, mockAxisMappings);
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createFacetedMultiLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'A',
+          itemStyle: { color: palette[0] },
+        }),
+        expect.objectContaining({
+          name: 'C',
+          itemStyle: { color: palette[2] },
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
   });
 
@@ -217,19 +215,22 @@ describe('Line Chart to_expression', () => {
     it('returns an ECharts spec for category-based line chart', () => {
       const result = createCategoryLineChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category');
-      expect(result.series[0].type).toBe('line');
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series[0].type).toBe('line');
     });
 
-    it('handles title display options', () => {
-      const noTitle = createCategoryLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
+    it('emits series-target legend items for category-based metric lines', () => {
+      const palette = getColors().categories;
+      const result = createCategoryLineChart(mockData, mockStyles, mockAxisMappings);
+
+      expect(result.legendItems).toEqual([
+        {
+          label: 'Value',
+          color: palette[0],
+          target: { type: 'series', name: 'Value' },
+        },
+      ]);
     });
   });
 
@@ -243,19 +244,38 @@ describe('Line Chart to_expression', () => {
     it('returns an ECharts spec with multiple category-based series', () => {
       const result = createCategoryMultiLineChart(mockData, mockStyles, mockAxisMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category and Category2');
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toHaveProperty('dataset');
+      expect(result.spec).toHaveProperty('series');
+      expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('handles title display options', () => {
-      const noTitle = createCategoryMultiLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
+    it('uses provided full data when assigning category color series colors', () => {
+      const palette = getColors().categories;
+      const result = createCategoryMultiLineChart(
+        [
+          { category: 'A', value: 10, category2: 'X' },
+          { category: 'B', value: 20, category2: 'Z' },
+        ],
+        mockStyles,
+        mockAxisMappings,
+        [
+          { category: 'A', value: 10, category2: 'X' },
+          { category: 'B', value: 20, category2: 'Y' },
+          { category: 'C', value: 30, category2: 'Z' },
+        ]
       );
-      expect(noTitle.title.text).toBeUndefined();
+
+      expect(result.spec.series).toEqual([
+        expect.objectContaining({
+          name: 'X',
+          itemStyle: { color: palette[0] },
+        }),
+        expect.objectContaining({
+          name: 'Z',
+          itemStyle: { color: palette[2] },
+        }),
+      ]);
+      expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
 
     it('includes markLine for threshold when enabled', () => {
@@ -270,7 +290,7 @@ describe('Line Chart to_expression', () => {
 
       const result = createCategoryMultiLineChart(mockData, stylesWithThreshold, mockAxisMappings);
 
-      const seriesWithMarkLine = result.series.find((s: any) => s.markLine);
+      const seriesWithMarkLine = result.spec.series.find((s: any) => s.markLine);
       expect(seriesWithMarkLine).toBeDefined();
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });

@@ -43,6 +43,100 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
       expect(fetchDataSourcesVersionResponse.dataSourceEngineType).toBe('OpenSearch');
     });
 
+    test('fetchDataSourceInfo - tags AnalyticEngine when cluster.pluggable.dataformat=composite and dataformat.enabled=true', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            version: { number: '3.0.0', distribution: 'opensearch' },
+          },
+        })
+      );
+      opensearchClient.cluster.getSettings.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            persistent: {
+              cluster: {
+                pluggable: {
+                  dataformat: 'composite',
+                  'dataformat.enabled': 'true',
+                },
+              },
+            },
+          },
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const info = await dataSourceValidator.fetchDataSourceInfo();
+      expect(info.dataSourceEngineType).toBe('AnalyticEngine');
+    });
+
+    test('fetchDataSourceInfo - stays OpenSearch when dataformat.enabled is false', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: { version: { number: '3.0.0', distribution: 'opensearch' } },
+        })
+      );
+      opensearchClient.cluster.getSettings.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            persistent: {
+              cluster: {
+                pluggable: { dataformat: 'composite', 'dataformat.enabled': 'false' },
+              },
+            },
+          },
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const info = await dataSourceValidator.fetchDataSourceInfo();
+      expect(info.dataSourceEngineType).toBe('OpenSearch');
+    });
+
+    test('fetchDataSourceInfo - stays OpenSearch when cluster.getSettings throws', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: { version: { number: '3.0.0', distribution: 'opensearch' } },
+        })
+      );
+      opensearchClient.cluster.getSettings.mockRejectedValue(new Error('forbidden'));
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const info = await dataSourceValidator.fetchDataSourceInfo();
+      expect(info.dataSourceEngineType).toBe('OpenSearch');
+    });
+
+    test('fetchDataSourceInfo - Elasticsearch domains are not promoted to AnalyticEngine even if cluster.pluggable matches', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: { version: { number: '7.10.2' } },
+        })
+      );
+      opensearchClient.cluster.getSettings.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            persistent: {
+              cluster: {
+                pluggable: { dataformat: 'composite', 'dataformat.enabled': 'true' },
+              },
+            },
+          },
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const info = await dataSourceValidator.fetchDataSourceInfo();
+      expect(info.dataSourceEngineType).toBe('Elasticsearch');
+    });
+
     test('fetchInstalledPlugins - Success: opensearch client response code is 200 and response body have installed plugin list', async () => {
       const opensearchClient = opensearchServiceMock.createOpenSearchClient();
       opensearchClient.info.mockResolvedValue(

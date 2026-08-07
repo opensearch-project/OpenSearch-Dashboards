@@ -68,7 +68,7 @@ test(`fails on circular references`, () => {
       [property]: value,
     };
     test(`can submit ${JSON.stringify(obj)}`, () => {
-      expect(() => validateObject(obj)).not.toThrowError();
+      expect(() => validateObject(obj)).not.toThrow();
     });
   });
 });

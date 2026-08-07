@@ -30,3 +30,4 @@
 
 export * from './embeddable_panel';
 export * from './panel_header';
+export * from './embeddable_error_label';

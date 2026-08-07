@@ -37,10 +37,6 @@ describe('createPieConfig', () => {
     expect(defaults.exclusive.showValues).toBe(false);
     expect(defaults.exclusive.showLabels).toBe(false);
     expect(defaults.exclusive.truncate).toBe(100);
-
-    // Verify title
-    expect(defaults.titleOptions.show).toBe(false);
-    expect(defaults.titleOptions.titleName).toBe('');
   });
 
   it('should render the PieVisStyleControls component with the provided props', () => {
@@ -58,10 +54,6 @@ describe('createPieConfig', () => {
           showValues: true,
           showLabels: false,
           truncate: 100,
-        },
-        titleOptions: {
-          show: true,
-          titleName: '',
         },
       },
       onStyleChange: jest.fn(),

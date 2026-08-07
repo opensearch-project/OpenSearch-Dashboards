@@ -624,7 +624,7 @@ describe('workspace service api integration test when savedObjects.permission.en
         .send({
           attributes: omitId(testWorkspace),
           settings: {
-            permissions: { read: { users: ['foo'] } },
+            permissions: { library_read: { users: ['foo'] }, read: { users: ['foo'] } },
             dataSources: [],
           },
         })
@@ -638,7 +638,7 @@ describe('workspace service api integration test when savedObjects.permission.en
             .createInternalRepository([WORKSPACE_TYPE])
             .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
         ).permissions
-      ).toEqual({ read: { users: ['foo'] } });
+      ).toEqual({ library_read: { users: ['foo'] }, read: { users: ['foo'] } });
     });
     it('update', async () => {
       const result: any = await osdTestServer.request
@@ -655,7 +655,7 @@ describe('workspace service api integration test when savedObjects.permission.en
             ...omitId(testWorkspace),
           },
           settings: {
-            permissions: { write: { users: ['foo'] } },
+            permissions: { library_write: { users: ['foo'] }, write: { users: ['foo'] } },
             dataSources: [],
           },
         })
@@ -668,7 +668,117 @@ describe('workspace service api integration test when savedObjects.permission.en
             .createInternalRepository([WORKSPACE_TYPE])
             .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
         ).permissions
-      ).toEqual({ write: { users: ['foo'] } });
+      ).toEqual({ library_write: { users: ['foo'] }, write: { users: ['foo'] } });
+    });
+
+    it('create should reject permissions that do not form a recognized access level', async () => {
+      const createResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+          settings: {
+            // `library_write` alone (missing read/write) is not a valid collaborator role.
+            permissions: {
+              library_write: { groups: ['obs-admins'] },
+              read: { groups: ['obs-users'] },
+            },
+            dataSources: [],
+          },
+        })
+        .expect(400);
+
+      expect(createResult.body.message).toContain('Invalid workspace permissions');
+      expect(createResult.body.message).toContain('obs-admins');
+      expect(createResult.body.message).toContain('obs-users');
+    });
+
+    it('create should normalize a principal granted redundant permission modes to its highest access level', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+          settings: {
+            // All four modes should collapse to admin (library_write + write).
+            permissions: {
+              library_write: { users: ['foo'] },
+              write: { users: ['foo'] },
+              library_read: { users: ['foo'] },
+              read: { users: ['foo'] },
+            },
+            dataSources: [],
+          },
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(true);
+      expect(
+        (
+          await osd.coreStart.savedObjects
+            .createInternalRepository([WORKSPACE_TYPE])
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
+        ).permissions
+      ).toEqual({ library_write: { users: ['foo'] }, write: { users: ['foo'] } });
+    });
+
+    it('update should reject permissions that do not form a recognized access level', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      const updateResult: any = await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+          },
+          settings: {
+            // `read` alone (missing library_read) is not a valid collaborator role.
+            permissions: { read: { users: ['foo'] } },
+            dataSources: [],
+          },
+        })
+        .expect(400);
+
+      expect(updateResult.body.message).toContain('Invalid workspace permissions');
+      expect(updateResult.body.message).toContain('foo');
+    });
+
+    it('update should normalize a principal granted redundant permission modes to its highest access level', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+          },
+          settings: {
+            // library_write + write + read should collapse to admin (library_write + write).
+            permissions: {
+              library_write: { groups: ['obs-admins'] },
+              write: { groups: ['obs-admins'] },
+              read: { groups: ['obs-admins'] },
+            },
+            dataSources: [],
+          },
+        })
+        .expect(200);
+
+      expect(
+        (
+          await osd.coreStart.savedObjects
+            .createInternalRepository([WORKSPACE_TYPE])
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
+        ).permissions
+      ).toEqual({ library_write: { groups: ['obs-admins'] }, write: { groups: ['obs-admins'] } });
     });
   });
 

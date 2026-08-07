@@ -32,8 +32,6 @@ import Fs from 'fs';
 import Path from 'path';
 
 export interface State {
-  optimizerCacheKey?: unknown;
-  cacheKey?: unknown;
   moduleCount?: number;
   workUnits?: number;
   files?: string[];
@@ -70,7 +68,7 @@ export class BundleCache {
       let partialCache: Partial<State>;
       try {
         partialCache = JSON.parse(json || DEFAULT_STATE_JSON);
-      } catch (error) {
+      } catch {
         partialCache = {};
       }
 
@@ -104,16 +102,8 @@ export class BundleCache {
     return this.get().bundleRefExportIds;
   }
 
-  public getCacheKey() {
-    return this.get().cacheKey;
-  }
-
   public getWorkUnits() {
     return this.get().workUnits;
-  }
-
-  public getOptimizerCacheKey() {
-    return this.get().optimizerCacheKey;
   }
 
   public clear() {

@@ -90,24 +90,18 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const catCol: VisColumn = {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const dateCol: VisColumn = {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
 
     it('should return exact matches when column counts match rule mappings', () => {
@@ -227,8 +221,6 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
 
     it('should return null when no rules match', () => {
@@ -283,16 +275,12 @@ describe('VisualizationRegistry', () => {
         name: 'count',
         schema: VisFieldType.Numerical,
         column: 'count',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const catCol: VisColumn = {
         id: 2,
         name: 'category',
         schema: VisFieldType.Categorical,
         column: 'category',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [numCol], [catCol], []);
@@ -327,24 +315,18 @@ describe('VisualizationRegistry', () => {
         name: 'revenue',
         schema: VisFieldType.Numerical,
         column: 'revenue',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const numCol2: VisColumn = {
         id: 2,
         name: 'cost',
         schema: VisFieldType.Numerical,
         column: 'cost',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const dateCol: VisColumn = {
         id: 3,
         name: 'timestamp',
         schema: VisFieldType.Date,
         column: 'timestamp',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [numCol1, numCol2], [], [dateCol]);
@@ -367,8 +349,6 @@ describe('VisualizationRegistry', () => {
         name: 'timestamp',
         schema: VisFieldType.Date,
         column: 'timestamp',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [], [], [dateCol]);
@@ -382,24 +362,18 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const catCol: VisColumn = {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const dateCol: VisColumn = {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const allColumns = [numCol, catCol, dateCol];
 
@@ -510,8 +484,6 @@ describe('VisualizationRegistry', () => {
         name: 'value2',
         schema: VisFieldType.Numerical,
         column: 'value2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const rule = makeRule(100, [
         {
@@ -552,8 +524,6 @@ describe('VisualizationRegistry', () => {
         name: 'value2',
         schema: VisFieldType.Numerical,
         column: 'value2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const rule = makeRule(100, [
         {
@@ -600,8 +570,6 @@ describe('VisualizationRegistry', () => {
       name,
       schema,
       column: name,
-      validValuesCount: 10,
-      uniqueValuesCount: 5,
     });
 
     it('should return the saved mapping when all fields still exist and types match', () => {
@@ -800,6 +768,226 @@ describe('VisualizationRegistry', () => {
         allColumns
       );
       expect(result).toEqual({ [AxisRole.X]: 'new_date', [AxisRole.Y]: 'new_num' });
+    });
+
+    it('should handle multi-axis with array values (all fields survive)', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const allColumns = [
+        col('timestamp', VisFieldType.Date, 1),
+        col('max(field)', VisFieldType.Numerical, 2),
+        col('count', VisFieldType.Numerical, 3),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['max(field)', 'count'] },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: ['max(field)', 'count'],
+      });
+    });
+
+    it('should handle multi-axis with partial field survival (variable change scenario)', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // Variable changed from max to min: "max(field)" is gone, "count" survives
+      const allColumns = [
+        col('timestamp', VisFieldType.Date, 1),
+        col('min(field)', VisFieldType.Numerical, 2),
+        col('count', VisFieldType.Numerical, 3),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['max(field)', 'count'] },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: ['count', 'min(field)'],
+      });
+    });
+
+    it('should handle multi-axis with all fields missing', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // All Y fields are gone, but new numerical columns are available
+      const allColumns = [
+        col('timestamp', VisFieldType.Date, 1),
+        col('new_field1', VisFieldType.Numerical, 2),
+        col('new_field2', VisFieldType.Numerical, 3),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['max(field)', 'count'] },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: ['new_field1', 'new_field2'],
+      });
+    });
+
+    it('should return undefined for multi-axis when no fields available', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // No numerical columns available
+      const allColumns = [col('timestamp', VisFieldType.Date, 1)];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['max(field)', 'count'] },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle empty saved mapping value (undefined/null)', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const allColumns = [
+        col('timestamp', VisFieldType.Date, 1),
+        col('value', VisFieldType.Numerical, 2),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: undefined as any },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: 'value',
+      });
+    });
+
+    it('should preserve array structure for multi-axis even with partial survival', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('metric', 'Metric', [rule]));
+
+      // "field1" survives, "field2" and "field3" are gone
+      const allColumns = [
+        col('field1', VisFieldType.Numerical, 1),
+        col('field4', VisFieldType.Numerical, 2),
+        col('field5', VisFieldType.Numerical, 3),
+      ];
+      const result = registry.reuseAxesMapping(
+        'metric',
+        { [AxisRole.Y]: ['field1', 'field2', 'field3'] },
+        allColumns
+      );
+      // Should return array structure with surviving field + new fields
+      expect(result).toEqual({
+        [AxisRole.Y]: ['field1', 'field4', 'field5'],
+      });
+    });
+
+    it('should try multiple rules and return first successful match', () => {
+      // Rule 1 requires x, y, color (needs 1 categorical + 2 numerical)
+      const rule1 = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+          [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      // Rule 2 requires only x, y (needs 1 categorical + 1 numerical)
+      const rule2 = makeRule(90, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('bar', 'Bar', [rule1, rule2]));
+
+      // Saved mapping has 3 roles, but only 1 numerical column available
+      // Rule 1 will fail, Rule 2 should succeed
+      const allColumns = [
+        col('category', VisFieldType.Categorical, 1),
+        col('value', VisFieldType.Numerical, 2),
+      ];
+      const result = registry.reuseAxesMapping(
+        'bar',
+        {
+          [AxisRole.X]: 'old_category',
+          [AxisRole.Y]: 'old_value1',
+          [AxisRole.COLOR]: 'old_value2',
+        },
+        allColumns
+      );
+      // Should fail since savedAxesMapping has 3 roles but no rule matches 3 roles
+      expect(result).toBeUndefined();
+    });
+
+    it('should fallback to simpler rule when complex rule cannot be filled', () => {
+      // Register a chart type with the same roles but different column requirements
+      const rule1 = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      const rule2 = makeRule(90, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical }, // Non-multi, only needs 1
+        },
+      ]);
+      registry.registerVisualization(makeVisType('bar', 'Bar', [rule1, rule2]));
+
+      // Saved has multi-axis Y, but only 1 numerical column available
+      const allColumns = [
+        col('category', VisFieldType.Categorical, 1),
+        col('value', VisFieldType.Numerical, 2),
+      ];
+      const result = registry.reuseAxesMapping(
+        'bar',
+        {
+          [AxisRole.X]: 'old_category',
+          [AxisRole.Y]: ['old_value1', 'old_value2'], // Multi-axis
+        },
+        allColumns
+      );
+      // Rule 1 (multi) needs at least 1 field but both are missing, can use available "value"
+      // Rule 2 (single) also matches but Y is array which doesn't match
+      // Since both old fields are gone and we have 1 numerical column, Rule 1 should succeed
+      expect(result).toEqual({
+        [AxisRole.X]: 'category',
+        [AxisRole.Y]: ['value'],
+      });
     });
   });
 });

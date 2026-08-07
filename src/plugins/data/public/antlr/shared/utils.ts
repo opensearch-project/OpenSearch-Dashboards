@@ -18,7 +18,12 @@ import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
-import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
+import {
+  DEFAULT_DATA,
+  getDataSourceEngineCapabilities,
+  IFieldType,
+  UI_SETTINGS,
+} from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getDataViews } from '../../services';
 
@@ -108,7 +113,11 @@ export const fetchColumnValues = async (
   services: IDataPluginServices,
   indexPattern: IndexPattern,
   datasetType: string | undefined,
-  skipTimeFilter?: boolean
+  skipTimeFilter?: boolean,
+  // When set, values are narrowed server-side to those containing the term. The
+  // unfiltered top-N caches (`values`/`topValues`) are bypassed and left
+  // untouched — a narrowed result is not the canonical top-N for the field.
+  searchTerm?: string
 ): Promise<any[]> => {
   const fieldInOsd = indexPattern.fields.getByName(column);
 
@@ -119,6 +128,26 @@ export const fetchColumnValues = async (
   // For Boolean fields directly return the values
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
+  }
+
+  const trimmedSearch = searchTerm?.trim();
+
+  // A search term always fires a fresh, filtered live query and returns its
+  // results directly, so the caches below are only consulted for the
+  // unfiltered (open-the-picker) path.
+  if (trimmedSearch) {
+    return (
+      (await updateFieldValuesAsync(
+        table,
+        column,
+        services,
+        indexPattern,
+        datasetType,
+        fieldInOsd,
+        skipTimeFilter,
+        trimmedSearch
+      )) ?? []
+    );
   }
 
   // Return cached Autocomplete Results if available
@@ -159,6 +188,30 @@ export const fetchColumnValues = async (
   return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
+const escapeLikeLiteral = (term: string): string =>
+  `'%${term.replace(/'/g, "''").replace(/[%_]/g, '\\$&')}%'`;
+
+const buildColumnValueQuery = (
+  table: string,
+  column: string,
+  limit: number,
+  language: 'PPL' | 'SQL',
+  searchTerm?: string
+): string => {
+  if (language === 'SQL') {
+    const where = searchTerm
+      ? ` WHERE ${escapeIdentifier(column)} LIKE ${escapeLikeLiteral(searchTerm)}`
+      : '';
+    return `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
+      table
+    )}${where} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(*) DESC LIMIT ${limit}`;
+  }
+  const where = searchTerm
+    ? ` | where like(${escapeIdentifier(column)}, ${escapeLikeLiteral(searchTerm)})`
+    : '';
+  return `source = ${escapeIdentifier(table)}${where} | top ${limit} ${escapeIdentifier(column)}`;
+};
+
 // Non-blocking async function to update field values in background
 const updateFieldValuesAsync = async (
   table: string,
@@ -167,8 +220,9 @@ const updateFieldValuesAsync = async (
   indexPattern: IndexPattern,
   datasetType: string | undefined,
   fieldInOsd: IndexPatternField | undefined,
-  skipTimeFilter?: boolean
-): Promise<void> => {
+  skipTimeFilter?: boolean,
+  searchTerm?: string
+): Promise<any[] | undefined> => {
   try {
     // Check if conditions allow API call
     if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
@@ -186,12 +240,22 @@ const updateFieldValuesAsync = async (
 
     const dataset = await getDataViews().convertToDataset(indexPattern);
 
+    const engineType = dataset.dataSource?.engineType ?? dataset.dataSource?.type;
+    const caps = getDataSourceEngineCapabilities(engineType);
+
+    if (caps.columnValueSuggestionLanguage === 'none') {
+      return;
+    }
+
+    const language = caps.columnValueSuggestionLanguage;
+    const queryString = buildColumnValueQuery(table, column, limit, language, searchTerm);
+
     const searchSource = await services.data.search.searchSource.create();
     searchSource.setFields({
       index: indexPattern,
       query: {
-        query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
-        language: 'PPL',
+        query: queryString,
+        language,
         dataset,
       },
       skipTimeFilter,
@@ -201,6 +265,12 @@ const updateFieldValuesAsync = async (
 
     // Extract field values from response
     const values = response.hits.hits.map((hit) => hit._source?.[column]);
+
+    // A filtered (searched) result is not the canonical top-N, so return it
+    // without writing to the field's suggestion cache.
+    if (searchTerm) {
+      return values;
+    }
 
     if (values) {
       // Update the field with fresh API values
@@ -212,8 +282,11 @@ const updateFieldValuesAsync = async (
       // Save the updated IndexPattern to cache
       getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
     }
-  } catch (error) {
+
+    return values;
+  } catch {
     // Silently failing here not blocking the user
+    return;
   }
 };
 
@@ -277,7 +350,7 @@ export const formatAvailableFieldsToSuggestions = (
 const singleParseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
-  P extends ParserType
+  P extends ParserType,
 >({
   Lexer,
   Parser,
@@ -313,7 +386,7 @@ const singleParseQuery = <
 
   const { tokens, rules } = core.collectCandidates(
     cursorTokenIndex,
-    (parseTree as unknown) as ParserRuleContext
+    parseTree as unknown as ParserRuleContext
   );
 
   tokens.forEach((producerRules, tokenType) => {
@@ -351,7 +424,7 @@ const singleParseQuery = <
 export const parseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
-  P extends ParserType
+  P extends ParserType,
 >({
   Lexer,
   Parser,
@@ -440,10 +513,10 @@ export const parseQuery = <
         case 'object':
           if (Array.isArray(value)) {
             const combined = [
-              ...(((result[field as keyof A] as unknown) as any[]) ?? []),
-              ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
+              ...((result[field as keyof A] as unknown as any[]) ?? []),
+              ...((nextResult[field as keyof A] as unknown as any[]) ?? []),
             ];
-            ((result[field as keyof A] as unknown) as any[]) = combined.filter(
+            (result[field as keyof A] as unknown as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );
           }

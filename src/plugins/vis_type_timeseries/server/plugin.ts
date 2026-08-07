@@ -42,11 +42,10 @@ import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { VisTypeTimeseriesConfig } from './config';
-import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
+import { getVisDataRaw, GetVisDataOptions } from './lib/get_vis_data_raw';
 import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { PluginStart } from '../../data/server';
-import { visDataRoutes } from './routes/vis';
 import { visDataRawRoutes } from './routes/vis_raw';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
@@ -77,7 +76,7 @@ export interface VisTypeTimeseriesSetup {
     requestContext: RequestHandlerContext,
     fakeRequest: FakeRequest,
     options: GetVisDataOptions
-  ) => ReturnType<GetVisData>;
+  ) => ReturnType<typeof getVisDataRaw>;
   addSearchStrategy: SearchStrategyRegistry['addStrategy'];
 }
 
@@ -134,7 +133,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
         ...plugins,
         globalConfig$,
       });
-      visDataRoutes(router, framework, validationTelemetry);
       visDataRawRoutes(router, framework, validationTelemetry);
 
       fieldsRoutes(framework);
@@ -146,7 +144,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
         fakeRequest: FakeRequest,
         options: GetVisDataOptions
       ) => {
-        return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
+        return await getVisDataRaw(requestContext, { ...fakeRequest, body: options }, framework);
       },
       addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };

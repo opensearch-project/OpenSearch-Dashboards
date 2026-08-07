@@ -105,7 +105,7 @@ describe('fetchDataSourceIdByName()', () => {
   it('should throw errors when MDS is disabled', async () => {
     await expect(
       fetchDataSourceIdByName({ ...config, data_source_name: 'Some Data Source' }, client)
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'data_source_name is not supported. Contact your administrator to start using multiple data sources'
     );
   });
@@ -128,7 +128,7 @@ describe('fetchDataSourceIdByName()', () => {
     async ({ dataSourceName, expectedResultCount }) => {
       await expect(
         fetchDataSourceIdByName({ ...config, data_source_name: dataSourceName }, client)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${expectedResultCount} results`
       );
     }

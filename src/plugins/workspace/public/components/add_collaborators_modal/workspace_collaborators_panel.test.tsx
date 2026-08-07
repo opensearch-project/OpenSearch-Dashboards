@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, act } from '@testing-library/react';
 import { WorkspaceCollaboratorsPanel } from './workspace_collaborators_panel';
 
 describe('WorkspaceCollaboratorsPanel', () => {
@@ -107,5 +107,61 @@ describe('WorkspaceCollaboratorsPanel', () => {
     );
     // When identitySource is provided, EuiComboBox is rendered instead of EuiFieldText
     expect(container.querySelector('[role="textbox"]')).toBeInTheDocument();
+  });
+
+  describe('handleSearchError', () => {
+    const identitySource = { source: 'LDAP', type: 'user' };
+    const httpMock = { get: jest.fn() } as any;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('calls onErrorsChange with error when search fails', async () => {
+      const onErrorsChange = jest.fn();
+      httpMock.get.mockRejectedValue({ body: { message: 'Server error' }, name: 'Error' });
+      render(
+        <WorkspaceCollaboratorsPanel
+          {...defaultProps}
+          identitySource={identitySource}
+          http={httpMock}
+          onErrorsChange={onErrorsChange}
+        />
+      );
+      const input = screen.getAllByRole('textbox')[0];
+      fireEvent.change(input, { target: { value: 'test' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(onErrorsChange).toHaveBeenCalledWith({ 1: 'Server error' });
+    });
+
+    it('calls onErrorsChange removing error on successful search', async () => {
+      const onErrorsChange = jest.fn();
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice' }]);
+      render(
+        <WorkspaceCollaboratorsPanel
+          {...defaultProps}
+          identitySource={identitySource}
+          http={httpMock}
+          errors={{ 1: 'Previous error' }}
+          onErrorsChange={onErrorsChange}
+        />
+      );
+      const input = screen.getAllByRole('textbox')[0];
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(onErrorsChange).toHaveBeenCalledWith({});
+    });
   });
 });

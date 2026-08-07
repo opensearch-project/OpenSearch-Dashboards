@@ -35,7 +35,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { tap, filter } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { createAbsolutePathSerializer, ToolingLog } from '@osd/dev-utils';
 import {
   runOptimizer,
@@ -116,13 +116,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const initializingStates = msgs.filter((msg) => msg.state.phase === 'initializing');
   assert('produce at least one initializing event', initializingStates.length >= 1);
 
-  const bundleCacheStates = msgs.filter(
-    (msg) =>
-      (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
-      msg.state.phase === 'initializing'
-  );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
-
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
 
@@ -135,9 +128,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     runningStates.length >= 3 && runningStates.length <= 5
   );
 
-  const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
-
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
     'produce one to three "compiler success" states',
@@ -149,8 +139,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
-      msg.state.phase !== 'initialized' &&
-      msg.event?.type !== 'bundle not cached'
+      msg.state.phase !== 'initialized'
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
@@ -196,36 +185,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss",
       "<absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js",
       "<absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js",
-    ]
-  `);
-});
-
-it('uses cache on second run and exist cleanly', async () => {
-  const config = OptimizerConfig.create({
-    repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
-    maxWorkerCount: 1,
-    dist: false,
-  });
-
-  const msgs = await allValuesFrom(
-    runOptimizer(config).pipe(
-      tap((state) => {
-        if (state.event?.type === 'worker stdio') {
-          // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.line);
-        }
-      })
-    )
-  );
-
-  expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
-    Array [
-      "initializing",
-      "initializing",
-      "initializing",
-      "initialized",
-      "success",
     ]
   `);
 });

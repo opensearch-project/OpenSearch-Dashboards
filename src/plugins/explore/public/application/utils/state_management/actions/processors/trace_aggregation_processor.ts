@@ -130,7 +130,7 @@ export const processTraceAggregationResults = ({
           }
           // Cache the xAxisFormat
           histogramConfigCache.set(cacheKey, { xAxisFormat, bucketInterval, intervalMs });
-        } catch (error) {
+        } catch {
           // Fall back to default format if histogram config fails
         }
       }
@@ -173,7 +173,7 @@ export const processTraceAggregationResults = ({
     }
 
     result.bucketInterval = bucketInterval;
-  } catch (error) {
+  } catch {
     // Error during processing
   }
 

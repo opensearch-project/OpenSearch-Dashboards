@@ -28,6 +28,7 @@
  * under the License.
  */
 
+export * from './cidr';
 export * from './package_json';
 export * from './path';
 export * from './build/rspack';

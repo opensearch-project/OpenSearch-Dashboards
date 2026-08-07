@@ -27,10 +27,6 @@ describe('bar_vis_config', () => {
           thresholds: [],
           thresholdStyle: ThresholdMode.Off,
         },
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
         bucket: {
           aggregationType: AggregationType.SUM,
           bucketTimeUnit: TimeUnit.AUTO,

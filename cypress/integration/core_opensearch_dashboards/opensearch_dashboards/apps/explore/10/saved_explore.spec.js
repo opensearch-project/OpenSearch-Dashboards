@@ -65,7 +65,7 @@ const runSavedExploreTests = () => {
 
       // Set query input
       cy.explore.clearQueryEditor();
-      const query = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
+      const query = `source = \`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
       cy.explore.setQueryEditor(query, { submit: false });
 
       // Run the query
@@ -85,20 +85,12 @@ const runSavedExploreTests = () => {
       cy.getElementByTestId('confirmSaveSavedObjectButton').click();
       cy.getElementByTestId('savedExploreSuccess').should('be.visible');
 
-      // Open left nav
-      cy.get('body').then(($body) => {
-        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
-        if (shrinkButton.length === 0) {
-          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
-        }
-      });
-
       // Navigate to assets page
-      cy.getElementByTestId('collapsibleNavAppLink-objects')
-        .should('exist')
-        .scrollIntoView()
-        .click();
-      cy.osd.waitForLoader(true);
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'objects',
+        isEnhancement: true,
+      });
 
       // Check the saved search can be found
       cy.getElementByTestId('savedObjectsTable').should('contain.text', savedSearchName);
@@ -112,7 +104,7 @@ const runSavedExploreTests = () => {
 
       // Update the saved search with a new query
       cy.explore.clearQueryEditor();
-      const newQuery = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count()`;
+      const newQuery = `source = \`${INDEX_PATTERN_WITH_TIME}\` | stats count()`;
       cy.explore.setQueryEditor(newQuery, { submit: false });
 
       // Run the query
@@ -141,20 +133,12 @@ const runSavedExploreTests = () => {
       cy.getElementByTestId('confirmSaveSavedObjectButton').click();
       cy.getElementByTestId('savedExploreSuccess').should('be.visible');
 
-      // Open left nav
-      cy.get('body').then(($body) => {
-        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
-        if (shrinkButton.length === 0) {
-          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
-        }
-      });
-
       // Navigate to assets page
-      cy.getElementByTestId('collapsibleNavAppLink-objects')
-        .should('exist')
-        .scrollIntoView()
-        .click();
-      cy.osd.waitForLoader(true);
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'objects',
+        isEnhancement: true,
+      });
 
       // Check the old saved search cannot be found because name update
       cy.getElementByTestId('savedObjectsTable').should('not.contain.text', savedSearchName);

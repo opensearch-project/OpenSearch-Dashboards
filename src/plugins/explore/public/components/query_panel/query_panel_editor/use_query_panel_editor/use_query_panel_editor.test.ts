@@ -23,74 +23,32 @@ jest.mock('@ag-ui/core', () => ({
   },
 }));
 
-// Mock the query_assist module to prevent transitive @ag-ui imports
-jest.mock('../../../../application/utils/query_assist', () => ({
-  generatePromQLWithAgUi: jest.fn(),
-}));
-
-// Mock all dependencies BEFORE any imports - targeting the specific problematic chain
-jest.mock('react-redux', () => ({
-  useSelector: jest.fn(),
-  useDispatch: jest.fn(),
-  connect: jest.fn(() => (component: any) => component),
-}));
-
-// Mock the specific problematic opensearch_dashboards_react import
-jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: jest.fn(),
-  withOpenSearchDashboards: jest.fn((component) => component),
-  CodeEditor: jest.fn(),
-  EuiCodeEditor: jest.fn(),
-}));
-
-// Mock the hooks that import from opensearch_dashboards_react
-jest.mock(
-  '../../../../application/hooks/editor_hooks/use_change_query_editor/use_change_query_editor',
-  () => ({
-    useChangeQueryEditor: jest.fn(),
-  })
-);
-
-jest.mock('../../../../application/hooks', () => ({
-  useEditorRef: jest.fn(),
-}));
-
-jest.mock('../../../../application/context');
 jest.mock('../../../../../../data/public', () => {
   const actual = jest.createMockFromModule<any>('../../../../../../data/public');
+  const overrides = { 'some-rule': { enabled: false } };
   return {
     ...actual,
-    attachPPLValidationContext: jest.fn(() => jest.fn()),
-    attachPPLGrammarRefresh: jest.fn(() => jest.fn()),
+    attachPPLContexts: jest.fn(),
+    cleanupPPLContexts: jest.fn(),
     syncPPLValidationContext: jest.fn(),
+    syncPPLLintContext: jest.fn(),
+    // Simplified mock; full behavior covered in lint_context_builder.test.ts.
+    buildPPLLintContext: jest.fn((dataset, _lintFields, services) => ({
+      useRuntimeGrammar: false,
+      dataSourceId: dataset?.dataSource?.id,
+      dataSourceVersion: dataset?.dataSource?.version,
+      overrides: services.uiSettings ? overrides : undefined,
+      http: services.http,
+    })),
+    UI_SETTINGS: { QUERY_ENHANCEMENTS_PPL_LINT_RULES: 'query:enhancements:pplLint:rules' },
     shouldUseRuntimeGrammar: jest.fn(() => false),
     pplGrammarCache: {
       subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
+      subscribeToVersionResolved: jest.fn(() => jest.fn()),
     },
+    runPPLAnalyzeInBackground: jest.fn(),
   };
 });
-jest.mock('../../../../application/utils/state_management/actions/query_editor');
-jest.mock('../../../../application/utils/state_management/slices');
-jest.mock('../../../../application/utils/state_management/selectors', () => ({
-  selectIsPromptEditorMode: jest.fn((state) => state.isPromptEditorMode),
-  selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
-  selectQueryLanguage: jest.fn((state) => state.queryLanguage),
-  selectQueryString: jest.fn((state) => state.queryString),
-  selectDataset: jest.fn((state) => state.dataset),
-}));
-jest.mock('../../../../application/utils/state_management/types', () => ({
-  EditorMode: {
-    Query: 'Query',
-    Prompt: 'Prompt',
-  },
-  QueryExecutionStatus: {
-    UNINITIALIZED: 'uninitialized',
-    LOADING: 'loading',
-    READY: 'ready',
-    NO_RESULTS: 'none',
-    ERROR: 'error',
-  },
-}));
 jest.mock('./command_enter_action');
 jest.mock('./shift_enter_action');
 jest.mock('./tab_action');
@@ -99,6 +57,12 @@ jest.mock('./spacebar_action');
 jest.mock('./escape_action');
 jest.mock('./use_prompt_is_typing', () => ({
   usePromptIsTyping: jest.fn(),
+}));
+jest.mock('./use_multi_query_decorations', () => ({
+  useMultiQueryDecorations: jest.fn(() => ({
+    updateDecorations: jest.fn(),
+    clearDecorations: jest.fn(),
+  })),
 }));
 jest.mock('./editor_options', () => ({
   queryEditorOptions: { readOnly: false },
@@ -118,6 +82,7 @@ jest.mock('@osd/monaco', () => ({
       registerCompletionItemProvider: jest.fn(() => ({ dispose: jest.fn() })),
       CompletionItemKind: {
         Keyword: 1,
+        Variable: 4,
       },
     },
     Range: jest.fn(),
@@ -136,44 +101,59 @@ jest.mock('@osd/monaco', () => ({
 // Now import after mocking
 import { act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import { useSelector, useDispatch } from 'react-redux';
-import { monaco } from '@osd/monaco';
+import { monaco, revalidatePPLModel } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';
-import { useEditorRef } from '../../../../application/hooks';
-import { useDatasetContext } from '../../../../application/context';
-import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
-import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
-import { setEditorMode } from '../../../../application/utils/state_management/slices';
+import {
+  getEffectiveLanguageForAutoComplete,
+  attachPPLContexts,
+  buildPPLLintContext,
+  syncPPLLintContext,
+  extractFieldMetadata,
+} from '../../../../../../data/public';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { usePromptIsTyping } from './use_prompt_is_typing';
-import {
-  selectIsPromptEditorMode,
-  selectPromptModeIsAvailable,
-  selectQueryLanguage,
-  selectQueryString,
-  selectIsQueryEditorDirty,
-} from '../../../../application/utils/state_management/selectors';
+import { QueryEditorProps } from '../types';
 
-const mockUseSelector = jest.mocked(useSelector);
-const mockUseDispatch = jest.mocked(useDispatch);
-const mockUseEditorRef = jest.mocked(useEditorRef);
-const mockUseDatasetContext = jest.mocked(useDatasetContext);
-const mockUseOpenSearchDashboards = jest.mocked(useOpenSearchDashboards);
 const mockGetEffectiveLanguageForAutoComplete = jest.mocked(getEffectiveLanguageForAutoComplete);
 const mockUsePromptIsTyping = jest.mocked(usePromptIsTyping);
 
 describe('useQueryPanelEditor', () => {
-  let mockDispatch: jest.Mock;
   let mockEditor: any;
   let mockServices: any;
   let mockDataset: any;
   let mockEditorRef: any;
   let mockHandleChangeForPromptIsTyping: jest.Mock;
+  let mockOnRun: jest.Mock;
+  let mockSwitchEditorMode: jest.Mock;
+  let mockHandleEditorChange: jest.Mock;
+
+  // Builds a full QueryEditorProps object; override any field per-test.
+  const buildProps = (overrides: Partial<QueryEditorProps> = {}): QueryEditorProps => ({
+    services: mockServices,
+    queryState: {
+      query: '',
+      language: 'PPL',
+      dataset: undefined,
+    },
+    queryEditorState: {
+      editorMode: EditorMode.Query,
+      promptModeIsAvailable: false,
+      isQueryEditorDirty: false,
+    },
+    onRun: mockOnRun,
+    switchEditorMode: mockSwitchEditorMode,
+    handleEditorChange: mockHandleEditorChange,
+    editorRef: mockEditorRef,
+    focusShortcutId: 'test_focus_query_bar',
+    getEditorContainerHeight: () => 100,
+    ...overrides,
+  });
 
   beforeEach(() => {
-    mockDispatch = jest.fn();
     mockHandleChangeForPromptIsTyping = jest.fn();
+    mockOnRun = jest.fn();
+    mockSwitchEditorMode = jest.fn();
+    mockHandleEditorChange = jest.fn();
     mockEditorRef = { current: null };
 
     mockEditor = {
@@ -209,13 +189,26 @@ describe('useQueryPanelEditor', () => {
     };
 
     mockServices = {
+      http: { fetch: jest.fn() },
+      keyboardShortcut: {
+        useKeyboardShortcut: jest.fn(),
+      },
+      appName: 'explore',
       data: {
+        dataViews: {
+          get: jest.fn(() => Promise.resolve(mockDataset)),
+        },
         query: {
           queryString: {
             getQuery: jest.fn(() => ({ dataset: { id: 'test-id', type: 'INDEX_PATTERN' } })),
             getLanguageService: jest.fn(() => ({
               getLanguage: jest.fn((languageId: string) => ({ title: languageId })),
             })),
+          },
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            },
           },
         },
         autocomplete: {
@@ -231,85 +224,17 @@ describe('useQueryPanelEditor', () => {
           getTriggerCharacters: jest.fn(() => []),
         },
       },
-      datasets: {
-        get: jest.fn(() => Promise.resolve(mockDataset)),
+      uiSettings: {
+        get: jest.fn(),
+        getUpdate$: jest.fn(() => ({ subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })) })),
       },
     };
 
-    // Mock implementations
-    mockUseDispatch.mockReturnValue(mockDispatch);
-    mockUseEditorRef.mockReturnValue(mockEditorRef);
-    mockUseDatasetContext.mockReturnValue({
-      dataset: mockDataset,
-      isLoading: false,
-      error: null,
-    });
-    mockUseOpenSearchDashboards.mockReturnValue({
-      services: mockServices,
-      overlays: {
-        openFlyout: jest.fn(),
-        openModal: jest.fn(),
-        sidecar: jest.fn(),
-      },
-      notifications: {
-        toasts: {
-          show: jest.fn(),
-          success: jest.fn(),
-          warning: jest.fn(),
-          danger: jest.fn(),
-        },
-      },
-    });
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('PPL');
     mockUsePromptIsTyping.mockReturnValue({
       promptIsTyping: false,
       handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
     });
-
-    // Default selector values
-    mockUseSelector.mockImplementation((selector) => {
-      if (!selector) return '';
-      const selectorString = selector.toString();
-      if (selectorString.includes('selectPromptModeIsAvailable')) return false;
-      if (selectorString.includes('selectQueryLanguage')) return 'PPL';
-      if (selectorString.includes('selectIsPromptEditorMode')) return false;
-      if (selectorString.includes('selectQueryString')) return '';
-      if (selectorString.includes('selectIsQueryEditorDirty')) return false;
-      if (selectorString.includes('selectDataset')) return undefined;
-      return '';
-    });
-
-    // Mock action creators
-    jest.doMock('./command_enter_action', () => ({
-      getCommandEnterAction: jest.fn(() => ({
-        id: 'command-enter',
-        run: jest.fn(),
-      })),
-    }));
-    jest.doMock('./shift_enter_action', () => ({
-      getShiftEnterAction: jest.fn(() => ({
-        id: 'shift-enter',
-        run: jest.fn(),
-      })),
-    }));
-    jest.doMock('./tab_action', () => ({
-      getTabAction: jest.fn(() => ({ id: 'tab', run: jest.fn() })),
-    }));
-    jest.doMock('./enter_action', () => ({
-      getEnterAction: jest.fn(() => ({ id: 'enter', run: jest.fn() })),
-    }));
-    jest.doMock('./spacebar_action', () => ({
-      getSpacebarAction: jest.fn(() => ({
-        id: 'spacebar',
-        run: jest.fn(),
-      })),
-    }));
-    jest.doMock('./escape_action', () => ({
-      getEscapeAction: jest.fn(() => ({
-        id: 'escape',
-        run: jest.fn(),
-      })),
-    }));
   });
 
   afterEach(() => {
@@ -318,18 +243,7 @@ describe('useQueryPanelEditor', () => {
 
   describe('basic hook behavior', () => {
     it('should return query editor options when in query mode', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
-        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
-        if (selectorString.includes('selectQueryString')) return '';
-        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
-        return '';
-      });
-
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       expect(result.current.options).toBeDefined();
     });
@@ -337,16 +251,17 @@ describe('useQueryPanelEditor', () => {
 
   describe('placeholder text', () => {
     it('should return disabled prompt placeholder when prompt mode is not available', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectPromptModeIsAvailable) return false;
-        if (selector === selectIsPromptEditorMode) return false;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (selector === selectQueryString) return '';
-        if (selector === selectIsQueryEditorDirty) return false;
-        return '';
-      });
-
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryEditorState: {
+              editorMode: EditorMode.Query,
+              promptModeIsAvailable: false,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
 
       expect(result.current.placeholder).toContain('PPL');
     });
@@ -354,44 +269,37 @@ describe('useQueryPanelEditor', () => {
 
   describe('showPlaceholder logic', () => {
     it('should show placeholder when text is empty', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       expect(result.current.showPlaceholder).toBe(true);
     });
 
     it('should not show placeholder when text is present', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
-      // Add text to local state through onChange
       act(() => {
         result.current.onChange('some text');
       });
 
-      // The text should now be 'some text' from local state
       expect(result.current.value).toBe('some text');
-
-      // Since text is present, showPlaceholder should be false
       expect(result.current.showPlaceholder).toBe(false);
     });
   });
 
   describe('onChange handler', () => {
     it('should update local text state when onChange is called', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
-      // Initial value should be empty (from selector)
       expect(result.current.value).toBe('');
 
       act(() => {
         result.current.onChange('new text');
       });
 
-      // Value should be updated in local state
       expect(result.current.value).toBe('new text');
     });
 
     it('should call handleChangeForPromptIsTyping when in prompt mode', () => {
-      // Create a fresh mock for this test
       const localMockHandleChangeForPromptIsTyping = jest.fn();
 
       mockUsePromptIsTyping.mockReturnValue({
@@ -399,20 +307,18 @@ describe('useQueryPanelEditor', () => {
         handleChangeForPromptIsTyping: localMockHandleChangeForPromptIsTyping,
       });
 
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsPromptEditorMode) return true;
-        if (selector === selectPromptModeIsAvailable) return false;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectQueryString')) return '';
-        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
-        return '';
-      });
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryEditorState: {
+              editorMode: EditorMode.Prompt,
+              promptModeIsAvailable: false,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
 
-      const { result } = renderHook(() => useQueryPanelEditor());
-
-      // First, let's verify that isPromptMode is correctly set
       expect(result.current.isPromptMode).toBe(true);
 
       act(() => {
@@ -424,18 +330,7 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should not call handleChangeForPromptIsTyping when not in prompt mode', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
-        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
-        if (selectorString.includes('selectQueryString')) return '';
-        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
-        return '';
-      });
-
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.onChange('new text');
@@ -444,13 +339,23 @@ describe('useQueryPanelEditor', () => {
       expect(result.current.value).toBe('new text');
       expect(mockHandleChangeForPromptIsTyping).not.toHaveBeenCalled();
     });
+
+    it('should call handleEditorChange to mark dirty on first change', () => {
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
+
+      act(() => {
+        result.current.onChange('new text');
+      });
+
+      expect(mockHandleEditorChange).toHaveBeenCalledWith({ isQueryEditorDirty: true });
+    });
   });
 
   describe('onEditorClick handler', () => {
     it('should focus the editor when clicked', () => {
       mockEditorRef.current = mockEditor;
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.onEditorClick();
@@ -462,7 +367,7 @@ describe('useQueryPanelEditor', () => {
     it('should not throw when editor ref is null', () => {
       mockEditorRef.current = null;
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       expect(() => {
         act(() => {
@@ -474,7 +379,7 @@ describe('useQueryPanelEditor', () => {
 
   describe('editorDidMount', () => {
     it('should set up editor with all actions and event listeners', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         const cleanup = result.current.editorDidMount(mockEditor);
@@ -490,13 +395,12 @@ describe('useQueryPanelEditor', () => {
     it('should handle content size changes correctly', () => {
       mockEditor.getContentHeight.mockReturnValue(150); // Exceeds max height
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
       });
 
-      // Trigger content size change
       const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
       act(() => {
         contentSizeChangeCallback();
@@ -521,7 +425,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.onDidFocusEditorText.mockReturnValue(mockFocusDisposable);
       mockEditor.onDidBlurEditorText.mockReturnValue(mockBlurDisposable);
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       let cleanup: any;
       act(() => {
@@ -534,6 +438,141 @@ describe('useQueryPanelEditor', () => {
 
       expect(mockFocusDisposable.dispose).toHaveBeenCalled();
       expect(mockBlurDisposable.dispose).toHaveBeenCalled();
+    });
+
+    it('clears the shared editor ref when the editor unmounts', () => {
+      mockEditorRef.current = mockEditor;
+
+      const { unmount } = renderHook(() => useQueryPanelEditor(buildProps()));
+
+      unmount();
+
+      expect(mockEditorRef.current).toBeNull();
+    });
+  });
+
+  describe('PPL lint context (Fix 1: datasetRef + overrides)', () => {
+    const mdsDataset = {
+      id: 'ds-dataset',
+      title: 'MDS Dataset',
+      type: 'INDEX_PATTERN',
+      dataSource: { id: 'mds-1', title: 'local', type: 'OpenSearch', version: '3.8.0' },
+    } as any;
+
+    beforeEach(() => {
+      // queryString.getQuery() returns a dataset-less query (stale-closure scenario).
+      mockServices.data.query.queryString.getQuery = jest.fn(() => ({ dataset: undefined }));
+    });
+
+    const captureContexts = () => {
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryState: { query: '', language: 'PPL', dataset: mdsDataset },
+          })
+        )
+      );
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      const calls = (attachPPLContexts as jest.Mock).mock.calls;
+      const lastCall = calls[calls.length - 1];
+      return {
+        getValidationContext: lastCall[2] as () => any,
+        getLintContext: lastCall[3] as () => any,
+      };
+    };
+
+    it('getLintContext reads dataSourceId from the dataset, not queryString', () => {
+      const ctx = captureContexts().getLintContext();
+      expect(ctx.dataSourceId).toBe('mds-1');
+      expect(ctx.dataSourceVersion).toBe('3.8.0');
+    });
+
+    it('getLintContext delegates to buildPPLLintContext with the live dataset', () => {
+      captureContexts().getLintContext();
+      // The live dataset (from datasetRef), not the dataset-less queryString.getQuery().
+      expect(buildPPLLintContext).toHaveBeenCalledWith(
+        mdsDataset,
+        expect.any(Object),
+        mockServices
+      );
+    });
+
+    it('getValidationContext reads dataSourceId from the dataset, not queryString', () => {
+      expect(captureContexts().getValidationContext().dataSourceId).toBe('mds-1');
+    });
+
+    it('getLintContext includes overrides built from uiSettings', () => {
+      const ctx = captureContexts().getLintContext();
+      expect(ctx.overrides).toEqual({ 'some-rule': { enabled: false } });
+    });
+
+    describe('loadFields effect caches field names and the type map', () => {
+      const indexPattern = {
+        id: 'ds-dataset',
+        fields: [
+          { name: 'age', esTypes: ['long'] },
+          { name: 'name', esTypes: ['text'] },
+        ],
+      };
+
+      beforeEach(() => {
+        (extractFieldMetadata as jest.Mock).mockReturnValue({
+          fields: new Set(['age', 'name']),
+          typeMap: new Map([
+            ['age', 'long'],
+            ['name', 'text'],
+          ]),
+        });
+        mockServices.data.dataViews = {
+          get: jest.fn().mockResolvedValue(indexPattern),
+        };
+      });
+
+      const lastLintFieldsCache = async () => {
+        const { result } = renderHook(() =>
+          useQueryPanelEditor(
+            buildProps({
+              queryState: { query: '', language: 'PPL', dataset: mdsDataset },
+            })
+          )
+        );
+        await act(async () => {
+          result.current.editorDidMount(mockEditor);
+          // Let the async loadFields effect resolve.
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        const calls = (buildPPLLintContext as jest.Mock).mock.calls;
+        return calls[calls.length - 1][1];
+      };
+
+      it('extracts both the field names and the type map from the index pattern', async () => {
+        await lastLintFieldsCache();
+        expect(extractFieldMetadata).toHaveBeenCalledWith(indexPattern);
+      });
+
+      it('caches the type map keyed by dataset and data source id', async () => {
+        const cache = await lastLintFieldsCache();
+        expect(cache.datasetId).toBe('ds-dataset');
+        expect(cache.dataSourceId).toBe('mds-1');
+        expect(cache.typeMap).toEqual(
+          new Map([
+            ['age', 'long'],
+            ['name', 'text'],
+          ])
+        );
+      });
+
+      it('does not carry a stale type map when the field load fails', async () => {
+        mockServices.data.dataViews = {
+          get: jest.fn().mockRejectedValue(new Error('load failed')),
+        };
+        const cache = await lastLintFieldsCache();
+        expect(cache.typeMap).toBeUndefined();
+        expect(cache.fields).toBeUndefined();
+      });
     });
   });
 
@@ -554,30 +593,11 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should trigger autosuggestion on focus when in query mode with text', () => {
-      // Set up hook with text in local state
-      const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Add text to local state
-      act(() => {
-        result.current.onChange('SELECT *');
-      });
-
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
-        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
-        if (selectorString.includes('selectQueryString')) return '';
-        return '';
-      });
-
       const mockOnDidFocusDisposable = { dispose: jest.fn() };
       mockEditor.onDidFocusEditorWidget.mockReturnValue(mockOnDidFocusDisposable);
       mockEditorRef.current = mockEditor;
 
-      // Re-render hook to apply new selector values and trigger useEffect
-      renderHook(() => useQueryPanelEditor());
+      renderHook(() => useQueryPanelEditor(buildProps()));
 
       // Check that focus event was set up
       expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
@@ -596,16 +616,9 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should trigger autosuggestion immediately when text is empty', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectQueryString')) return '';
-        return false;
-      });
       mockEditorRef.current = mockEditor;
 
-      renderHook(() => useQueryPanelEditor());
+      renderHook(() => useQueryPanelEditor(buildProps()));
 
       // Should set up focus event listener and trigger suggestions immediately when text is empty
       expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
@@ -618,15 +631,15 @@ describe('useQueryPanelEditor', () => {
   });
 
   describe('handleRun and handleEscape', () => {
-    it('should dispatch onEditorRunActionCreator when handleRun is called', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+    it('should call onRun with the editor text when handleRun is called', () => {
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       // Set text in local state
       act(() => {
         result.current.onChange('test query');
       });
 
-      // Get handleRun from editorDidMount actions
+      // Register editor actions
       act(() => {
         result.current.editorDidMount(mockEditor);
       });
@@ -639,15 +652,12 @@ describe('useQueryPanelEditor', () => {
         handleRunCall();
       });
 
-      expect(mockDispatch).toHaveBeenCalledWith(
-        onEditorRunActionCreator(mockServices, 'test query')
-      );
+      expect(mockOnRun).toHaveBeenCalledWith('test query');
     });
 
-    it('should not clear local text and set query mode when handleEscape is called', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
+    it('should call switchEditorMode with Query mode when escape action fires', () => {
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
-      // Set some text first
       act(() => {
         result.current.onChange('some text');
       });
@@ -658,7 +668,7 @@ describe('useQueryPanelEditor', () => {
         result.current.editorDidMount(mockEditor);
       });
 
-      // Find the escape action and call its handler
+      // Find the escape action and call its handler (2nd arg is the switch-to-query callback)
       const escapeModule = jest.requireMock('./escape_action');
       const handleEscapeCall = escapeModule.getEscapeAction.mock.calls[0][1];
 
@@ -666,9 +676,9 @@ describe('useQueryPanelEditor', () => {
         handleEscapeCall();
       });
 
-      // Text should be cleared
+      // Local text is preserved
       expect(result.current.value).toBe('some text');
-      expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
+      expect(mockSwitchEditorMode).toHaveBeenCalledWith(EditorMode.Query);
     });
   });
 
@@ -679,7 +689,7 @@ describe('useQueryPanelEditor', () => {
         handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
       });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       expect(result.current.promptIsTyping).toBe(true);
     });
@@ -690,7 +700,7 @@ describe('useQueryPanelEditor', () => {
         handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
       });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       expect(result.current.promptIsTyping).toBe(false);
     });
@@ -698,32 +708,36 @@ describe('useQueryPanelEditor', () => {
 
   describe('PPL language switching', () => {
     it('should return PPL languageId when in query mode', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsPromptEditorMode) return false;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (selector === selectPromptModeIsAvailable) return true;
-        if (selector === selectQueryString) return '';
-        if (selector === selectIsQueryEditorDirty) return false;
-        return '';
-      });
-
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryState: { query: '', language: 'PPL', dataset: undefined },
+            queryEditorState: {
+              editorMode: EditorMode.Query,
+              promptModeIsAvailable: true,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
 
       expect(result.current.languageId).toBe('PPL');
       expect(result.current.isPromptMode).toBe(false);
     });
 
-    it('should return plaintext languageId when in AI/prompt mode', () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsPromptEditorMode) return true;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (selector === selectPromptModeIsAvailable) return true;
-        if (selector === selectQueryString) return '';
-        if (selector === selectIsQueryEditorDirty) return false;
-        return '';
-      });
-
-      const { result } = renderHook(() => useQueryPanelEditor());
+    it('should return AI languageId when in AI/prompt mode', () => {
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryState: { query: '', language: 'PPL', dataset: undefined },
+            queryEditorState: {
+              editorMode: EditorMode.Prompt,
+              promptModeIsAvailable: true,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
 
       expect(result.current.languageId).toBe('AI');
       expect(result.current.isPromptMode).toBe(true);
@@ -744,20 +758,21 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should call getQuerySuggestions with baseLanguage=PPL and language=AI in AI mode', async () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsPromptEditorMode) return true;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (selector === selectPromptModeIsAvailable) return true;
-        if (selector === selectQueryString) return '';
-        if (selector === selectIsQueryEditorDirty) return false;
-        return '';
-      });
-
       mockGetEffectiveLanguageForAutoComplete.mockReturnValue('AI');
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            queryState: { query: '', language: 'PPL', dataset: undefined },
+            queryEditorState: {
+              editorMode: EditorMode.Prompt,
+              promptModeIsAvailable: true,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
 
-      // Mock objects for completion call
       const mockModel = {
         getValue: () => 'show me logs',
         getOffsetAt: () => 10,
@@ -765,7 +780,6 @@ describe('useQueryPanelEditor', () => {
       } as any;
       const mockPosition = { lineNumber: 1, column: 10 } as any;
 
-      // Call the completion provider directly
       await act(async () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
@@ -776,7 +790,6 @@ describe('useQueryPanelEditor', () => {
         );
       });
 
-      // Verify that getQuerySuggestions was called with correct parameters
       expect(mockServices.data.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           language: 'AI', // effectiveLanguage for AI mode
@@ -787,20 +800,10 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should call getQuerySuggestions with baseLanguage=PPL and language=PPL_Simplified in PPL mode', async () => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsPromptEditorMode) return false;
-        if (selector === selectQueryLanguage) return 'PPL';
-        if (selector === selectPromptModeIsAvailable) return true;
-        if (selector === selectQueryString) return '';
-        if (selector === selectIsQueryEditorDirty) return false;
-        return '';
-      });
-
       mockGetEffectiveLanguageForAutoComplete.mockReturnValue('PPL_Simplified');
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
-      // Mock objects for completion call
       const mockModel = {
         getValue: () => 'search source=logs',
         getOffsetAt: () => 15,
@@ -808,7 +811,6 @@ describe('useQueryPanelEditor', () => {
       } as any;
       const mockPosition = { lineNumber: 1, column: 15 } as any;
 
-      // Call the completion provider directly
       await act(async () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
@@ -819,7 +821,6 @@ describe('useQueryPanelEditor', () => {
         );
       });
 
-      // Verify that getQuerySuggestions was called with correct parameters
       expect(mockServices.data.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           language: 'PPL_Simplified', // effectiveLanguage (transformed by getEffectiveLanguageForAutoComplete)
@@ -837,7 +838,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 10, endLineNumber: 20 }]);
       mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -858,7 +859,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 10, endLineNumber: 20 }]);
       mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -878,7 +879,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getPosition.mockReturnValue({ lineNumber: 5 });
       mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 1, endLineNumber: 3 }]);
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -899,7 +900,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 1, endLineNumber: 10 }]);
       mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -920,7 +921,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 15, endLineNumber: 25 }]);
       mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -940,7 +941,7 @@ describe('useQueryPanelEditor', () => {
       mockEditor.getPosition.mockReturnValue({ lineNumber: 10 });
       mockEditor.getVisibleRanges.mockReturnValue([]);
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -957,6 +958,162 @@ describe('useQueryPanelEditor', () => {
 
       // Should not reveal when no visible ranges
       expect(mockEditor.revealLine).not.toHaveBeenCalled();
+    });
+  });
+
+  // B3: rule setting change must immediately revalidate, not wait for next keystroke.
+  describe('re-lints on a pplLint rule setting change (B3)', () => {
+    let subscribeCallback: ((event: { key: string }) => void) | undefined;
+
+    beforeEach(() => {
+      subscribeCallback = undefined;
+      mockServices.uiSettings = {
+        get: jest.fn(),
+        getUpdate$: jest.fn(() => ({
+          subscribe: (cb: (event: { key: string }) => void) => {
+            subscribeCallback = cb;
+            return { unsubscribe: jest.fn() };
+          },
+        })),
+      };
+    });
+
+    it('re-syncs the lint context and revalidates when the pplLint:rules key changes', () => {
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      (syncPPLLintContext as jest.Mock).mockClear();
+      (revalidatePPLModel as jest.Mock).mockClear();
+
+      act(() => {
+        subscribeCallback?.({ key: 'query:enhancements:pplLint:rules' });
+      });
+
+      expect(syncPPLLintContext).toHaveBeenCalledTimes(1);
+      expect(revalidatePPLModel).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores unrelated uiSettings keys', () => {
+      const { result } = renderHook(() => useQueryPanelEditor(buildProps()));
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      (syncPPLLintContext as jest.Mock).mockClear();
+      (revalidatePPLModel as jest.Mock).mockClear();
+
+      act(() => {
+        subscribeCallback?.({ key: 'theme:darkMode' });
+      });
+
+      expect(syncPPLLintContext).not.toHaveBeenCalled();
+      expect(revalidatePPLModel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completion extensions (completionProviders)', () => {
+    const runCompletion = async (props: any, model: any, column: number) => {
+      const { result } = renderHook(() => useQueryPanelEditor(props));
+      let list: any;
+      await act(async () => {
+        list = await result.current.suggestionProvider.provideCompletionItems(
+          model,
+          { lineNumber: 1, column } as any,
+          // @ts-expect-error TS2345 test stub
+          {},
+          { isCancellationRequested: false }
+        );
+      });
+      return { list, hook: result };
+    };
+
+    const model = {
+      getValue: () => 'source=logs',
+      getOffsetAt: () => 11,
+      getWordUntilPosition: () => ({ startColumn: 8, endColumn: 11 }),
+    } as any;
+
+    it('merges items contributed by a completion extension', async () => {
+      const extensionItem = { label: '${env}', insertText: '${env}', detail: 'Custom' };
+      const provider = {
+        triggerCharacters: ['$'],
+        provideCompletionItems: jest.fn().mockResolvedValue([extensionItem]),
+      };
+
+      const { list } = await runCompletion(
+        buildProps({ completionProviders: [provider] }),
+        model,
+        12
+      );
+
+      expect(provider.provideCompletionItems).toHaveBeenCalled();
+      expect(list.suggestions.map((s: any) => s.label)).toContain('${env}');
+    });
+
+    it('isolates a throwing extension so other extensions and built-ins survive', async () => {
+      const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const bad = {
+        triggerCharacters: ['#'],
+        provideCompletionItems: jest.fn().mockRejectedValue(new Error('boom')),
+      };
+      const good = {
+        triggerCharacters: ['$'],
+        provideCompletionItems: jest
+          .fn()
+          .mockResolvedValue([{ label: '${ok}', insertText: '${ok}' }]),
+      };
+
+      const { list } = await runCompletion(
+        buildProps({ completionProviders: [bad, good] }),
+        model,
+        12
+      );
+
+      expect(bad.provideCompletionItems).toHaveBeenCalled();
+      expect(good.provideCompletionItems).toHaveBeenCalled();
+      // The failing extension must not prevent the healthy one's items from appearing.
+      expect(list.suggestions.map((s: any) => s.label)).toContain('${ok}');
+      expect(errSpy).toHaveBeenCalled();
+      errSpy.mockRestore();
+    });
+
+    it('folds extension trigger characters into the suggestion provider', () => {
+      const provider = {
+        triggerCharacters: ['$', '@'],
+        provideCompletionItems: jest.fn().mockResolvedValue([]),
+      };
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(buildProps({ completionProviders: [provider] }))
+      );
+      expect(result.current.suggestionProvider.triggerCharacters).toEqual(
+        expect.arrayContaining(['$', '@'])
+      );
+    });
+
+    it('does not fold extension trigger characters in prompt mode', () => {
+      const provider = {
+        triggerCharacters: ['$', '@'],
+        provideCompletionItems: jest.fn().mockResolvedValue([]),
+      };
+      const { result } = renderHook(() =>
+        useQueryPanelEditor(
+          buildProps({
+            completionProviders: [provider],
+            queryEditorState: {
+              editorMode: EditorMode.Prompt,
+              promptModeIsAvailable: true,
+              isQueryEditorDirty: false,
+            },
+          })
+        )
+      );
+      expect(result.current.suggestionProvider.triggerCharacters).toEqual(['=']);
+    });
+
+    it('is a no-op when no completionProviders are supplied', async () => {
+      const { list } = await runCompletion(buildProps(), model, 12);
+      // Only built-in suggestions (none from getQuerySuggestions mock) — no throw, valid list.
+      expect(Array.isArray(list.suggestions)).toBe(true);
     });
   });
 });

@@ -43,14 +43,12 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 
-export class SearchExamplesPlugin
-  implements
-    Plugin<
-      SearchExamplesPluginSetup,
-      SearchExamplesPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    > {
+export class SearchExamplesPlugin implements Plugin<
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples }: AppPluginSetupDependencies

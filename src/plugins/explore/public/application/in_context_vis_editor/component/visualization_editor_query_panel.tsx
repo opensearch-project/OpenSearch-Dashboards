@@ -11,6 +11,7 @@ import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { QueryPanelWidgets } from './query_panel_widget';
 import { QueryPanelEditor } from './query_editor';
 import { QueryPanelGeneratedQuery } from './generated_query_panel';
+import '../visualization_editor.scss';
 
 export const QueryPanel = ({
   queryEditorState$,
@@ -27,8 +28,10 @@ export const QueryPanel = ({
     <EuiPanel
       paddingSize="s"
       borderRadius="none"
-      className="exploreInContexQueryPanel"
+      className="visualizationEditorTabPanel"
       style={{ height: '100%' }}
+      hasBorder={false}
+      hasShadow={false}
     >
       <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">

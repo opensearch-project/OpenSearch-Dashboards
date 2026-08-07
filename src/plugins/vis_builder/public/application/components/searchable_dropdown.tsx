@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import {
   EuiLoadingSpinner,
   EuiFormControlLayout,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiButtonEmpty,
   EuiPopover,
   EuiSelectable,
@@ -30,6 +31,7 @@ interface SearchableDropdownProps {
   loading: boolean;
   error?: Error;
   prepend: string;
+  footer?: ReactNode;
   // not just the first time!
   onOpen?: () => void;
   // @ts-expect-error TS7006 TODO(ts-error): fixme
@@ -51,6 +53,7 @@ export const SearchableDropdown = ({
   loading,
   prepend,
   onOpen,
+  footer,
 }: SearchableDropdownProps) => {
   const [localOptions, setLocalOptions] = useState<any[] | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -176,7 +179,10 @@ export const SearchableDropdown = ({
   return (
     <div className="searchableDropdown">
       <EuiPopover button={formControl} isOpen={isPopoverOpen} closePopover={closePopover}>
-        <div className="searchableDropdown--fixedWidthChild">{selectable}</div>
+        <div className="searchableDropdown--fixedWidthChild">
+          {selectable}
+          {footer && <EuiPopoverFooter>{footer}</EuiPopoverFooter>}
+        </div>
       </EuiPopover>
     </div>
   );

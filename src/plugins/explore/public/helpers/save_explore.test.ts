@@ -110,6 +110,52 @@ describe('saveSavedExplore', () => {
     expect(services.store.dispatch).toHaveBeenCalledWith(setSavedSearch('456'));
   });
 
+  it('should preserve hash search params when navigating to new explore id', async () => {
+    savedExplore.save.mockResolvedValue('456');
+    const pushMock = jest.fn();
+    services.scopedHistory = {
+      location: {
+        hash: '#?_v=(chartType:bar,axesMapping:(x:field1,y:field2))&_q=(query:test)&_a=(tab:vis)',
+      },
+      push: pushMock,
+    };
+
+    await saveSavedExplore({
+      savedExplore,
+      newTitle: 'New Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+    });
+
+    expect(pushMock).toHaveBeenCalledWith(
+      '#/view/456?_v=(chartType:bar,axesMapping:(x:field1,y:field2))&_q=(query:test)&_a=(tab:vis)'
+    );
+  });
+
+  it('should navigate without search params when hash has no query string', async () => {
+    savedExplore.save.mockResolvedValue('456');
+    const pushMock = jest.fn();
+    services.scopedHistory = {
+      location: { hash: '#/' },
+      push: pushMock,
+    };
+
+    await saveSavedExplore({
+      savedExplore,
+      newTitle: 'New Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+    });
+
+    expect(pushMock).toHaveBeenCalledWith('#/view/456');
+  });
+
   it('should handle save failure', async () => {
     savedExplore.save.mockRejectedValue(new Error('Save failed'));
 

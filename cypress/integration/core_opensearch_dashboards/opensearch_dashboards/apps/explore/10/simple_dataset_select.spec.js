@@ -45,7 +45,7 @@ export const runSimpleDatasetSelectorTests = () => {
         ['use-case-observability'] // features
       );
       // Creating the Non Timebased Dataset
-      // eslint-disable-next-line no-loop-func
+
       cy.get('@DATASOURCE_ID').then((datasourceId) => {
         cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
           cy.osd.createDatasetByEndpoint(

@@ -8,9 +8,9 @@ import { useExistingDashboard } from './use_existing_dashboard';
 import { SavedObjectsClientContract } from 'src/core/public';
 
 // Mock saved objects client
-const mockSavedObjectsClient = ({
+const mockSavedObjectsClient = {
   find: jest.fn(),
-} as unknown) as SavedObjectsClientContract;
+} as unknown as SavedObjectsClientContract;
 
 const mockDashboards = [
   {

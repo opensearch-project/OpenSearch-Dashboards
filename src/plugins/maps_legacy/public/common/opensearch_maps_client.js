@@ -19,7 +19,7 @@ export class OpenSearchMapsClient extends EMSClient {
     let result;
     try {
       result = await this._fetchWithTimeout(this._manifestServiceUrl);
-    } catch (e) {
+    } catch {
       // silently ignoring the exception and returning true to make sure
       // OpenSearchMapsClient is still enabled when can't access OpenSearch maps service.
       return true;

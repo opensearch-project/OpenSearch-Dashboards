@@ -28,12 +28,13 @@ import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } fr
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  MAXIMUM_WORKSPACES_PER_PAGE,
 } from '../common/constants';
 import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { ConfigSchema } from '../config';
+import { IWorkspaceConfigService, fetchAllWorkspaces } from './services';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -45,21 +46,17 @@ const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
   defaultMessage: 'workspace not found',
 });
 
-interface ConfigType {
-  maximum_workspaces?: ConfigSchema['maximum_workspaces'];
-}
-
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
   private uiSettings?: UiSettingsServiceStart;
-  private config?: ConfigType;
+  private configService?: IWorkspaceConfigService;
 
-  constructor(core: CoreSetup, logger: Logger, config?: ConfigType) {
+  constructor(core: CoreSetup, logger: Logger, configService?: IWorkspaceConfigService) {
     this.setupDep = core;
     this.logger = logger;
-    this.config = config;
+    this.configService = configService;
   }
 
   private getScopedClientWithoutPermission(
@@ -132,16 +129,19 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
 
-      if (this.config?.maximum_workspaces) {
+      const maximumWorkspaces = await this.configService
+        ?.asScopedToRequest(requestDetail.request)
+        .getMaximumWorkspaces();
+      if (maximumWorkspaces) {
         const workspaces = await clientWithoutPermission?.find({
           type: WORKSPACE_TYPE,
         });
-        if (workspaces && workspaces.total >= this.config.maximum_workspaces) {
+        if (workspaces && workspaces.total >= maximumWorkspaces) {
           throw new Error(
             i18n.translate('workspace.maximum.error', {
               defaultMessage: 'Maximum number of workspaces ({length}) reached',
               values: {
-                length: this.config.maximum_workspaces,
+                length: maximumWorkspaces,
               },
             })
           );
@@ -182,7 +182,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         try {
           await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
-        } catch (e) {
+        } catch {
           this.logger.error('Set default data source error');
         } finally {
           // Reset workspace state
@@ -210,16 +210,34 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
-      const {
-        saved_objects: savedObjects,
-        ...others
-      } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
-        {
-          ...options,
-          type: WORKSPACE_TYPE,
+      const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const { perPage, ...findOptions } = options;
+
+      // The `MAXIMUM_WORKSPACES_PER_PAGE` sentinel means "give me every workspace", so
+      // exhaust all pages instead of guessing a single large page size. Any other value
+      // pages as usual, keeping the default behavior unchanged.
+      if (perPage === MAXIMUM_WORKSPACES_PER_PAGE) {
+        const savedObjects = await fetchAllWorkspaces(client, {
+          ...findOptions,
           ACLSearchParams: { permissionModes: options.permissionModes },
-        }
-      );
+        });
+        return {
+          success: true,
+          result: {
+            page: 1,
+            per_page: savedObjects.length,
+            total: savedObjects.length,
+            workspaces: savedObjects.map((item) => this.getFlattenedResultWithSavedObject(item)),
+          },
+        };
+      }
+
+      const { saved_objects: savedObjects, ...others } = await client.find<WorkspaceAttribute>({
+        ...findOptions,
+        perPage,
+        type: WORKSPACE_TYPE,
+        ACLSearchParams: { permissionModes: options.permissionModes },
+      });
       return {
         success: true,
         result: {
@@ -239,9 +257,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     id: string
   ): Promise<IResponse<WorkspaceAttribute>> {
     try {
-      const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).get<
-        WorkspaceAttribute
-      >(WORKSPACE_TYPE, id);
+      const result = await this.getSavedObjectClientsFromRequestDetail(
+        requestDetail
+      ).get<WorkspaceAttribute>(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: this.getFlattenedResultWithSavedObject(result),
@@ -353,7 +371,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           await checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
           // Doc version may changed after default data source updated.
           workspaceInDB = await client.get(WORKSPACE_TYPE, id);
-        } catch (error) {
+        } catch {
           this.logger.error('Set default data source error during workspace updating');
         }
       }

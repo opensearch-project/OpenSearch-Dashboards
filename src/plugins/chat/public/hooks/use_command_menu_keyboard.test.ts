@@ -13,6 +13,7 @@ jest.mock('../services/slash_commands', () => {
   const mockRegistry = {
     getSuggestions: jest.fn(),
     get: jest.fn(),
+    onChange: jest.fn(() => jest.fn()),
   };
   return {
     slashCommandRegistry: mockRegistry,
@@ -661,6 +662,69 @@ describe('useCommandMenuKeyboard', () => {
       });
 
       expect(mockOnKeyDown).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe('onChange registry subscription', () => {
+    it('should not subscribe to onChange when command menu is hidden', () => {
+      (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([]);
+      (slashCommandRegistry.onChange as jest.Mock).mockClear();
+
+      renderHook(() =>
+        useCommandMenuKeyboard({
+          input: 'hello',
+          onInputChange: mockOnInputChange,
+          onKeyDown: mockOnKeyDown,
+          inputRef,
+        })
+      );
+
+      expect(slashCommandRegistry.onChange).not.toHaveBeenCalled();
+    });
+
+    it('should subscribe to onChange when command menu is shown', () => {
+      (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([mockCommands[0]]);
+      (slashCommandRegistry.onChange as jest.Mock).mockClear();
+
+      renderHook(() =>
+        useCommandMenuKeyboard({
+          input: '/h',
+          onInputChange: mockOnInputChange,
+          onKeyDown: mockOnKeyDown,
+          inputRef,
+        })
+      );
+
+      expect(slashCommandRegistry.onChange).toHaveBeenCalled();
+    });
+
+    it('should update suggestions when onChange fires', () => {
+      let onChangeCallback: (() => void) | undefined;
+      (slashCommandRegistry.onChange as jest.Mock).mockImplementation((cb) => {
+        onChangeCallback = cb;
+        return jest.fn();
+      });
+      (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([mockCommands[0]]);
+
+      const { result } = renderHook(() =>
+        useCommandMenuKeyboard({
+          input: '/h',
+          onInputChange: mockOnInputChange,
+          onKeyDown: mockOnKeyDown,
+          inputRef,
+        })
+      );
+
+      expect(result.current.commandSuggestions).toHaveLength(1);
+
+      // Simulate command unregistration
+      (slashCommandRegistry.getSuggestions as jest.Mock).mockReturnValue([]);
+      act(() => {
+        onChangeCallback?.();
+      });
+
+      expect(result.current.commandSuggestions).toHaveLength(0);
+      expect(result.current.showCommandMenu).toBe(false);
     });
   });
 });

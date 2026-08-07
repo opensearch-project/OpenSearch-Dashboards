@@ -167,6 +167,7 @@ test('log warning when plugin expected OpenSearch Dashboards version has differe
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -206,6 +207,7 @@ test('log warning when plugin expected OpenSearch Dashboards version cannot be i
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -262,6 +264,7 @@ test('log warning when plugin expected OpenSearch Dashboards version has differe
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -294,6 +297,7 @@ test('log warning when plugin has lower major version', async () => {
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -448,6 +452,7 @@ describe('requiredEnginePlugins', () => {
       ui: false,
       supportedOSDataSourceVersions: '',
       requiredOSDataSourcePlugins: [],
+      unsupportedOSDataSourceEngineTypes: [],
     });
   });
 });
@@ -512,6 +517,7 @@ test('set defaults for all missing optional fields', async () => {
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -558,6 +564,7 @@ test('return all set optional fields as they are in manifest', async () => {
       'some-required-data-source-plugin-1',
       'some-required-data-source-plugin-2',
     ],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -589,6 +596,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
     ui: false,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
   });
 });
 
@@ -619,5 +627,55 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     ui: true,
     supportedOSDataSourceVersions: '',
     requiredOSDataSourcePlugins: [],
+    unsupportedOSDataSourceEngineTypes: [],
+  });
+});
+
+describe('unsupportedOSDataSourceEngineTypes', () => {
+  test('passes through array values from the manifest', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: 'some-version',
+          opensearchDashboardsVersion: 'opensearchDashboards',
+          server: true,
+          unsupportedOSDataSourceEngineTypes: ['AnalyticEngine'],
+        })
+      )
+    );
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.unsupportedOSDataSourceEngineTypes).toEqual(['AnalyticEngine']);
+  });
+
+  test('defaults to empty array when missing', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: 'some-version',
+          opensearchDashboardsVersion: 'opensearchDashboards',
+          server: true,
+        })
+      )
+    );
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.unsupportedOSDataSourceEngineTypes).toEqual([]);
+  });
+
+  test('coerces non-array values to empty array', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: 'some-version',
+          opensearchDashboardsVersion: 'opensearchDashboards',
+          server: true,
+          unsupportedOSDataSourceEngineTypes: 'AnalyticEngine',
+        })
+      )
+    );
+    const manifest = await parseManifest(pluginPath, packageInfo, logger);
+    expect(manifest.unsupportedOSDataSourceEngineTypes).toEqual([]);
   });
 });

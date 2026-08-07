@@ -12,9 +12,8 @@ import { DataPublicPluginStart } from '../../../plugins/data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { CoreStart } from '../../../core/public';
 
-export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
-  SavedObjectLoaderAugmentVis
->('savedAugmentVisLoader');
+export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] =
+  createGetterSetter<SavedObjectLoaderAugmentVis>('savedAugmentVisLoader');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -22,13 +21,11 @@ export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('
 
 export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart>('embeddable');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
-export const [getVisualizations, setVisualizations] = createGetterSetter<VisualizationsStart>(
-  'visualizations'
-);
+export const [getVisualizations, setVisualizations] =
+  createGetterSetter<VisualizationsStart>('visualizations');
 
 export const [getCore, setCore] = createGetterSetter<CoreStart>('Core');
 

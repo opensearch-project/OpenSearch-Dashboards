@@ -38,7 +38,6 @@ import { stdMetric } from './std_metric';
 import { stdSibling } from './std_sibling';
 import { timeShift } from './time_shift';
 import { dropLastBucket } from './drop_last_bucket';
-import { mathAgg } from './math';
 
 export const processors = [
   percentile,
@@ -47,7 +46,6 @@ export const processors = [
   stdDeviationSibling,
   stdMetric,
   stdSibling,
-  mathAgg,
   seriesAgg,
   timeShift,
   dropLastBucket,

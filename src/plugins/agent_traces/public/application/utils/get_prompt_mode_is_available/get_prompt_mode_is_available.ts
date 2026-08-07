@@ -22,7 +22,7 @@ export const getPromptModeIsAvailable = async (services: AgentTracesServices): P
     return await firstValueFrom(
       queryAssistExtension.isEnabled$({} as QueryEditorExtensionDependencies)
     );
-  } catch (error) {
+  } catch {
     return false;
   }
 };

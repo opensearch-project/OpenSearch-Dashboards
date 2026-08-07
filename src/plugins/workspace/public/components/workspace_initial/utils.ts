@@ -29,6 +29,84 @@ export const getWorkspacesWithRecentMessage = (
   });
 };
 
+export type WorkspaceRole = 'owner' | 'readwrite' | 'readonly';
+export type WorkspaceRecency = 'all' | 'today' | 'week' | 'month';
+
+export interface WorkspaceFilterCriteria {
+  searchQuery: string;
+  roles: WorkspaceRole[];
+  recency: WorkspaceRecency;
+}
+
+export type WorkspaceRoleFilter = 'all' | WorkspaceRole;
+
+export const buildWorkspaceFilterCriteria = ({
+  searchQuery,
+  roleFilter,
+  recency,
+}: {
+  searchQuery: string;
+  roleFilter: WorkspaceRoleFilter;
+  recency: WorkspaceRecency;
+}): WorkspaceFilterCriteria => ({
+  searchQuery,
+  roles: roleFilter === 'all' ? [] : [roleFilter],
+  recency,
+});
+
+export const getWorkspaceRole = (workspace: WorkspaceObject): WorkspaceRole => {
+  if (workspace.owner) {
+    return 'owner';
+  }
+  if (workspace.readonly) {
+    return 'readonly';
+  }
+  return 'readwrite';
+};
+
+export const getRecencyCutoff = (recency: WorkspaceRecency): number | null => {
+  switch (recency) {
+    case 'today':
+      return moment().startOf('day').valueOf();
+    case 'week':
+      return moment().startOf('week').valueOf();
+    case 'month':
+      return moment().startOf('month').valueOf();
+    default:
+      return null;
+  }
+};
+
+export const isWorkspaceFilterActive = ({
+  searchQuery,
+  roles,
+  recency,
+}: WorkspaceFilterCriteria): boolean =>
+  !!searchQuery.trim() || roles.length > 0 || recency !== 'all';
+
+export const filterWorkspaces = (
+  workspaces: UpdatedWorkspaceObject[],
+  { searchQuery, roles, recency }: WorkspaceFilterCriteria
+): UpdatedWorkspaceObject[] => {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const recencyCutoff = getRecencyCutoff(recency);
+  return workspaces.filter((workspace) => {
+    if (normalizedQuery && !workspace.name.toLowerCase().includes(normalizedQuery)) {
+      return false;
+    }
+    if (roles.length > 0 && !roles.includes(getWorkspaceRole(workspace))) {
+      return false;
+    }
+    if (
+      recencyCutoff !== null &&
+      (!workspace.accessTimeStamp || workspace.accessTimeStamp < recencyCutoff)
+    ) {
+      return false;
+    }
+    return true;
+  });
+};
+
 export const sortByRecentVisitedAndAlphabetical = (
   ws1: UpdatedWorkspaceObject,
   ws2: UpdatedWorkspaceObject

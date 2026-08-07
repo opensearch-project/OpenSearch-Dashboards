@@ -10,8 +10,6 @@ import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
@@ -34,10 +32,9 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  // Determine if the legend should be shown based on the registration of a COLOR or FACET field
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
-  const shouldShowLegend = hasColorMapping || hasFacetMapping;
+  const hasColorMapping =
+    !!axisColumnMappings?.[AxisRole.COLOR] && axisColumnMappings?.[AxisRole.COLOR].length > 0;
+  const shouldShowLegend = hasColorMapping;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -45,17 +42,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="area"
-        />
-      </EuiFlexItem>
-
       {hasMappingSelected && (
         <>
           <EuiFlexItem>
@@ -84,18 +70,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
             updateStyleOption={updateStyleOption}
             shouldShow={shouldShowLegend}
           />
-
-          <EuiFlexItem grow={false}>
-            <TitleOptionsPanel
-              titleOptions={styleOptions.titleOptions}
-              onShowTitleChange={(titleOptions) => {
-                updateStyleOption('titleOptions', {
-                  ...styleOptions.titleOptions,
-                  ...titleOptions,
-                });
-              }}
-            />
-          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel

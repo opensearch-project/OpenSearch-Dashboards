@@ -143,6 +143,40 @@ export class AssistantActionService {
     });
   };
 
+  /**
+   * Remove a tool call state entry. Safe to call when the entry does not
+   * exist — it is a no-op in that case. Subscribers are only notified when
+   * the map actually changes.
+   */
+  clearToolCallState = (id: string) => {
+    const currentState = this.state$.getValue();
+    if (!currentState.toolCallStates.has(id)) return;
+
+    const newToolCallStates = new Map(currentState.toolCallStates);
+    newToolCallStates.delete(id);
+
+    this.state$.next({
+      ...currentState,
+      toolCallStates: newToolCallStates,
+    });
+  };
+
+  /**
+   * Remove all tool call state entries in a single update. Useful when
+   * resetting conversation state (e.g. switching conversations) so stale
+   * entries from a previous run do not bleed into the next. No-ops and
+   * avoids notifying subscribers when the map is already empty.
+   */
+  clearAllToolCallStates = () => {
+    const currentState = this.state$.getValue();
+    if (currentState.toolCallStates.size === 0) return;
+
+    this.state$.next({
+      ...currentState,
+      toolCallStates: new Map(),
+    });
+  };
+
   getActionRenderer = (name: string) => {
     const currentState = this.state$.getValue();
     const action = currentState.actions.get(name);

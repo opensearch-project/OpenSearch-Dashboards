@@ -4,13 +4,16 @@ on:
   issues:
     types: [opened, reopened, transferred]
 
+permissions:
+  issues: write
+
 jobs:
   apply-label-if-not-collaborator:
     runs-on: ubuntu-latest
     steps:
       - name: Check if issue author is a collaborator
         id: check-collaborator
-        uses: actions/github-script@v6
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const issueAuthor = context.payload.issue.user.login;
@@ -56,7 +59,7 @@ jobs:
 
       - name: Apply label if not a collaborator
         if: steps.check-collaborator.outputs.is_collaborator == 'false'
-        uses: actions/github-script@v6
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             console.log('Attempting to add "untriaged" label');

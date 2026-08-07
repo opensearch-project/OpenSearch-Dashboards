@@ -51,5 +51,6 @@ import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution'; //
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints'; // For parameter hints
 import 'monaco-editor/esm/vs/editor/contrib/format/browser/formatActions'; // For document formatting
 import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment'; // For comment/uncomment support
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions'; // For quick-fix lightbulb + editor.action.quickFix
 
 export { monaco };

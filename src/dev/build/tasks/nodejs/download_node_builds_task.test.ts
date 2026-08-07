@@ -46,9 +46,8 @@ jest.mock('../../lib/get_build_number');
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-const { getNodeDownloadInfo, getNodeVersionDownloadInfo } = jest.requireMock(
-  './node_download_info'
-);
+const { getNodeDownloadInfo, getNodeVersionDownloadInfo } =
+  jest.requireMock('./node_download_info');
 const { getNodeShasums } = jest.requireMock('./node_shasums');
 const { download } = jest.requireMock('../../lib/download');
 

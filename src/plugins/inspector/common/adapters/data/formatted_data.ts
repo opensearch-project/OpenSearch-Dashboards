@@ -29,7 +29,10 @@
  */
 
 class FormattedData {
-  constructor(public readonly raw: any, public readonly formatted: any) {}
+  constructor(
+    public readonly raw: any,
+    public readonly formatted: any
+  ) {}
 }
 
 export { FormattedData };

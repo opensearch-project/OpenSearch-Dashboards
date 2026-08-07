@@ -60,7 +60,7 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
       store.dispatch(setBreakdownField(undefined));
-      store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
+      store.dispatch(resetLegacyStateActionCreator(services) as unknown as AnyAction);
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),

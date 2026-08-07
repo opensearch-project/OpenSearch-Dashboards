@@ -216,7 +216,7 @@ const importIdMap = new Map([
 
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let bulkCreate: typeof savedObjectsClient['bulkCreate'];
+  let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
 
   /**
    * Creates an options object to be used as an argument for createSavedObjects
@@ -281,7 +281,7 @@ describe('#createSavedObjects', () => {
     }),
     conflict: (type: string, id: string) => {
       const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return ({ type, id, error } as unknown) as SavedObject;
+      return { type, id, error } as unknown as SavedObject;
     },
     unresolvableConflict: (type: string, id: string) => {
       const conflictMock = getResultMock.conflict(type, id);
@@ -519,7 +519,7 @@ describe('#createSavedObjects', () => {
   };
 
   const testBulkCreateOptions = async (namespace?: string) => {
-    const overwrite = (Symbol() as unknown) as boolean;
+    const overwrite = Symbol() as unknown as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
 
@@ -533,7 +533,7 @@ describe('#createSavedObjects', () => {
     dataSourceId?: string,
     dataSourceTitle?: string
   ) => {
-    const overwrite = (Symbol() as unknown) as boolean;
+    const overwrite = Symbol() as unknown as boolean;
     const options = setupParams({
       objects: dataSourceObjs,
       namespace,
@@ -868,6 +868,148 @@ describe('#createSavedObjects', () => {
 
       await createSavedObjects(options);
       expect(bulkCreate.mock.calls[0][1]?.hasOwnProperty('workspaces')).toEqual(false);
+    });
+  });
+
+  describe('inline dataset.id rewriting', () => {
+    test('rewrites searchSourceJSON.query.dataset.id using importIdMap when dataSourceId is provided', async () => {
+      const exploreObj: SavedObject = {
+        type: 'explore',
+        id: 'explore-1',
+        attributes: {
+          title: 'My Explore',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              query: {
+                query: 'source = logs-*',
+                language: 'PPL',
+                dataset: {
+                  id: 'old-ip-id',
+                  title: 'logs-*',
+                  type: 'INDEX_PATTERN',
+                  timeFieldName: '@timestamp',
+                },
+              },
+              filter: [],
+            }),
+          },
+        },
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            type: 'index-pattern',
+            id: 'old-ip-id',
+          },
+        ],
+      };
+
+      importIdMap.set('index-pattern:old-ip-id', { id: 'ds-123_new-ip-uuid' });
+      importIdMap.set('explore:explore-1', { id: 'ds-123_new-explore-uuid' });
+
+      const options = setupParams({
+        objects: [exploreObj],
+        dataSourceId: 'ds-123',
+        dataSourceTitle: 'My Data Source',
+      });
+
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [{ ...exploreObj, id: 'ds-123_new-explore-uuid' }],
+      });
+
+      await createSavedObjects(options);
+
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+      const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
+      const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.query.dataset.id).toBe('ds-123_new-ip-uuid');
+    });
+
+    test('does not modify searchSourceJSON when dataset.id is not in importIdMap', async () => {
+      const exploreObj: SavedObject = {
+        type: 'explore',
+        id: 'explore-2',
+        attributes: {
+          title: 'My Explore',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              query: {
+                query: 'source = logs-*',
+                language: 'PPL',
+                dataset: {
+                  id: 'unknown-ip-id',
+                  title: 'logs-*',
+                  type: 'INDEX_PATTERN',
+                },
+              },
+            }),
+          },
+        },
+        references: [],
+      };
+
+      importIdMap.set('explore:explore-2', { id: 'ds-123_new-explore-uuid' });
+
+      const options = setupParams({
+        objects: [exploreObj],
+        dataSourceId: 'ds-123',
+      });
+
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [{ ...exploreObj, id: 'ds-123_new-explore-uuid' }],
+      });
+
+      await createSavedObjects(options);
+
+      const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
+      const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.query.dataset.id).toBe('unknown-ip-id');
+    });
+
+    test('rewrites dataset.id for dashboard type as well', async () => {
+      const dashboardObj: SavedObject = {
+        type: 'dashboard',
+        id: 'dashboard-1',
+        attributes: {
+          title: 'My Dashboard',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              query: {
+                query: '',
+                language: 'kuery',
+                dataset: {
+                  id: 'old-ip-id',
+                  title: 'logs-*',
+                  type: 'INDEX_PATTERN',
+                  timeFieldName: '@timestamp',
+                },
+              },
+              filter: [],
+            }),
+          },
+        },
+        references: [],
+      };
+
+      importIdMap.set('index-pattern:old-ip-id', { id: 'ds-123_new-ip-uuid' });
+      importIdMap.set('dashboard:dashboard-1', { id: 'ds-123_new-dashboard-uuid' });
+
+      const options = setupParams({
+        objects: [dashboardObj],
+        dataSourceId: 'ds-123',
+      });
+
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [{ ...dashboardObj, id: 'ds-123_new-dashboard-uuid' }],
+      });
+
+      await createSavedObjects(options);
+
+      const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
+      const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(searchSource.query.dataset.id).toBe('ds-123_new-ip-uuid');
     });
   });
 });

@@ -3,24 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
-import { Observable } from 'rxjs';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
+
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
 import { VisualizationEmptyState } from './visualization_empty_state';
-import { RenderChartConfig } from './types';
+import { Positions, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { getAxisConfigByColumnMapping } from './utils/axis';
+import { filterDataBySplitField, getSplitKeysBySplitField } from './utils/group_data_by_split';
+import { SplitContainer } from './split_container';
+import { CustomLegend } from './custom_legend';
+import type { VisualizationRenderContext } from './utils/use_visualization_types';
+import { LegendItem, LegendTarget } from './utils/legend';
 
 interface Props {
   data$: Observable<VisData | undefined>;
   config$: Observable<RenderChartConfig | undefined>;
   showRawTable$: Observable<boolean>;
+  timeRange?: TimeRange;
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+}
+
+interface CommonProps {
+  visualizationData: VisData | undefined;
+  visConfig: RenderChartConfig | undefined;
+  showRawTable: boolean;
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
@@ -34,23 +49,36 @@ const defaultStyleOptions: TableChartStyle = {
   globalAlignment: 'left',
 };
 
-export const VisualizationRender = ({
-  data$,
-  config$,
-  showRawTable$,
+const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+
+export const CommonVisualizationRender = ({
+  visualizationData,
+  visConfig,
+  showRawTable,
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
-}: Props) => {
-  const visualizationData = useObservable(data$);
-  const visConfig = useObservable(config$);
-  const showRawTable = useObservable(showRawTable$);
+}: CommonProps) => {
   const { from, to } = inputTimeRange || {};
+  const legendSelected$ = useRef(new BehaviorSubject<Record<string, boolean>>({})).current;
+  const highlightedLegendTarget$ = useRef(
+    new BehaviorSubject<LegendTarget | undefined>(undefined)
+  ).current;
+  const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
+  const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
+
+  useEffect(() => {
+    if (!supportsCustomLegend) {
+      legend$.next({});
+    }
+  }, [supportsCustomLegend, legend$]);
 
   const timeRange = useMemo(() => {
     return {
-      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
-      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+      from: from ? (dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '') : '',
+      to: to
+        ? (dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '')
+        : '',
     };
   }, [from, to]);
 
@@ -63,12 +91,30 @@ export const VisualizationRender = ({
       ...(visualizationData?.numericalColumns ?? []),
       ...(visualizationData?.categoricalColumns ?? []),
       ...(visualizationData?.dateColumns ?? []),
+      ...(visualizationData?.unknownColumns ?? []),
     ];
   }, [
     visualizationData?.numericalColumns,
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
+    visualizationData?.unknownColumns,
   ]);
+
+  const onLegend = useCallback(
+    (key: string, legendItems: LegendItem[], validKeys?: string[]) => {
+      const current = legend$.getValue();
+      let next = { ...current, [key]: legendItems };
+      if (validKeys) {
+        const pruned: Record<string, LegendItem[]> = {};
+        validKeys.forEach((k) => {
+          if (next[k]) pruned[k] = next[k];
+        });
+        next = pruned;
+      }
+      legend$.next(next);
+    },
+    [legend$]
+  );
 
   if (!visualizationData || columns.length === 0) {
     return null;
@@ -89,8 +135,6 @@ export const VisualizationRender = ({
   if (showRawTable) {
     return (
       <TableVis
-        // This key ensures re-rendering when switching to table visualization
-        // from a non-table visualization with the "show raw data" option enabled
         key="table-vis-raw"
         rows={rows}
         columns={columns}
@@ -101,31 +145,145 @@ export const VisualizationRender = ({
     );
   }
 
+  const showLegend =
+    visConfig?.styles && 'addLegend' in visConfig.styles ? visConfig.styles.addLegend : false;
+  const legendPosition =
+    visConfig?.styles && 'legendPosition' in visConfig.styles
+      ? visConfig.styles.legendPosition
+      : Positions.BOTTOM;
+  const isHorizontalLayout =
+    legendPosition === Positions.LEFT || legendPosition === Positions.RIGHT;
+  const isLegendAfter = legendPosition === Positions.BOTTOM || legendPosition === Positions.RIGHT;
+
+  const renderLegend = () =>
+    supportsCustomLegend &&
+    showLegend && (
+      <CustomLegend
+        legend$={legend$}
+        legendSelected$={legendSelected$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
+        position={legendPosition}
+      />
+    );
+
+  // Split grouping: when splitField is configured and chart type is not 'table',
+  // group data by the split field and render via SplitContainer
+  if (visConfig?.splitField) {
+    const splitColumn = columns.find((col) => col.name === visConfig.splitField);
+    if (splitColumn) {
+      const groups = getSplitKeysBySplitField(rows, splitColumn.column);
+
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: isHorizontalLayout ? 'row' : 'column',
+            height: '100%',
+          }}
+        >
+          {!isLegendAfter && renderLegend()}
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+            <SplitContainer
+              groups={groups}
+              layout={visConfig.splitLayout ?? 'auto'}
+              showLabel={visConfig.showSplitLabel}
+              renderChart={(groupKey) => (
+                <ChartRender
+                  data={{ ...visualizationData }}
+                  dataFilter={(data) => filterDataBySplitField(data, splitColumn.column, groupKey)}
+                  config={visConfig}
+                  renderContext={{
+                    seriesName: groupKey,
+                  }}
+                  onLegend={(legend) => onLegend(groupKey, legend, groups)}
+                  timeRange={timeRange}
+                  onSelectTimeRange={onSelectTimeRange}
+                  legendSelected$={legendSelected$}
+                  highlightedLegendTarget$={highlightedLegendTarget$}
+                />
+              )}
+            />
+          </div>
+          {isLegendAfter && renderLegend()}
+        </div>
+      );
+    }
+    // splitField references non-existent column: fall through to ungrouped single-chart render
+  }
+
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
     return (
-      <ChartRender
-        data={visualizationData}
-        config={visConfig}
-        timeRange={timeRange}
-        onSelectTimeRange={onSelectTimeRange}
-      />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: isHorizontalLayout ? 'row' : 'column',
+          height: '100%',
+        }}
+      >
+        {!isLegendAfter && renderLegend()}
+        <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+          <ChartRender
+            data={visualizationData}
+            config={visConfig}
+            onLegend={(legend) => onLegend('__default__', legend, ['__default__'])}
+            timeRange={timeRange}
+            onSelectTimeRange={onSelectTimeRange}
+            legendSelected$={legendSelected$}
+            highlightedLegendTarget$={highlightedLegendTarget$}
+          />
+        </div>
+        {isLegendAfter && renderLegend()}
+      </div>
     );
   }
 
   return <VisualizationEmptyState />;
 };
 
+export const VisualizationRender = ({
+  data$,
+  config$,
+  showRawTable$,
+  timeRange: inputTimeRange,
+  onSelectTimeRange,
+  onStyleChange,
+}: Props) => {
+  const visualizationData = useObservable(data$);
+  const visConfig = useObservable(config$);
+  const showRawTable = useObservable(showRawTable$);
+  return (
+    <CommonVisualizationRender
+      visConfig={visConfig}
+      visualizationData={visualizationData}
+      showRawTable={!!showRawTable}
+      timeRange={inputTimeRange}
+      onSelectTimeRange={onSelectTimeRange}
+      onStyleChange={onStyleChange}
+    />
+  );
+};
+
 const ChartRender = ({
   data,
+  dataFilter,
   config,
+  renderContext,
+  onLegend,
   timeRange,
   onSelectTimeRange,
+  legendSelected$,
+  highlightedLegendTarget$,
 }: {
   data?: VisData;
+  dataFilter?: (data: Array<Record<string, any>>) => Array<Record<string, any>>;
   config?: RenderChartConfig;
+  renderContext?: VisualizationRenderContext;
+  onLegend?: (legendItems: LegendItem[]) => void;
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  legendSelected$?: BehaviorSubject<Record<string, boolean>>;
+  highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
 }) => {
   if (!data) {
     return null;
@@ -136,9 +294,9 @@ const ChartRender = ({
   }
 
   const columns = [
-    ...(data?.numericalColumns ?? []),
-    ...(data?.categoricalColumns ?? []),
-    ...(data?.dateColumns ?? []),
+    ...(data.numericalColumns ?? []),
+    ...(data.categoricalColumns ?? []),
+    ...(data.dateColumns ?? []),
   ];
 
   const rule = visualizationRegistry.findRuleByAxesMapping(
@@ -150,16 +308,21 @@ const ChartRender = ({
     return null;
   }
   const standardAxes = 'standardAxes' in config.styles ? config.styles.standardAxes : [];
-  const axisColumnMappings = convertStringsToMappings(config?.axesMapping ?? {}, columns);
-  // initialize axis config
+  const axisColumnMappings = convertStringsToMappings(config.axesMapping ?? {}, columns);
   const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
   const styles = { ...config.styles, standardAxes: allAxisConfig };
+  const visibleData = dataFilter ? dataFilter(data.transformedData) : data.transformedData;
 
   return rule.render({
-    transformedData: data.transformedData,
+    data: visibleData,
+    allData: data.transformedData,
     styleOptions: styles,
     axisColumnMappings,
     timeRange,
+    renderContext,
     onSelectTimeRange,
+    onLegend,
+    legendSelected$,
+    highlightedLegendTarget$,
   });
 };

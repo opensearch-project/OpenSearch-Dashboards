@@ -200,7 +200,8 @@ describe('NodeShell', () => {
       </NodeShell>
     );
     const shell = container.firstChild as HTMLElement;
-    expect(shell.style.borderColor).toBe('#ff0000');
+    // jsdom converts hex to rgb
+    expect(shell.style.borderColor).toBe('rgb(255, 0, 0)');
   });
 
   it('applies custom backgroundColor inline style', () => {

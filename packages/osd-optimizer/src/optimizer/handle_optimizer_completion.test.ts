@@ -70,7 +70,7 @@ it('errors if the optimizer completes in phase "issue"', async () => {
 
   await expect(
     allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"webpack issue"`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"rspack issue"`);
 });
 
 it('errors if the optimizer completes in phase "initializing"', async () => {
@@ -80,16 +80,6 @@ it('errors if the optimizer completes in phase "initializing"', async () => {
     allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"optimizer unexpectedly exit in phase \\"initializing\\""`
-  );
-});
-
-it('errors if the optimizer completes in phase "reallocating"', async () => {
-  const update$ = createUpdate$('reallocating');
-
-  await expect(
-    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"optimizer unexpectedly exit in phase \\"reallocating\\""`
   );
 });
 
@@ -107,7 +97,7 @@ it('passes through errors on the source stream', async () => {
   const error = new Error('foo');
   const update$ = Rx.throwError(error);
 
-  await expect(
-    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowError(error);
+  await expect(allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))).rejects.toThrow(
+    error
+  );
 });

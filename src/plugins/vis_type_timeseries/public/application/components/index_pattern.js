@@ -30,7 +30,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import {
   htmlIdGenerator,
   EuiCompressedFieldText,
@@ -64,8 +64,22 @@ import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/time
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [OSD_FIELD_TYPES.DATE];
+
+/**
+ * Creates a filter function to exclude data sources of type AnalyticEngine
+ * @returns A filter function for data sources
+ */
+const createDataSourceFilterForAnalyticEngine = () => {
+  return (dataSource) => {
+    return (
+      !dataSource?.attributes?.dataSourceEngineType ||
+      !UNSUPPORTED_ENGINE_TYPES.includes(dataSource?.attributes?.dataSourceEngineType)
+    );
+  };
+};
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -126,6 +140,18 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
     ? getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector
     : undefined;
 
+  const [hasAnalyticEngine, setHasAnalyticEngine] = useState(false);
+  const dataSourceFilter = useMemo(() => {
+    const baseFilter = createDataSourceFilterForAnalyticEngine();
+    return (dataSource) => {
+      const allowed = baseFilter(dataSource);
+      if (!allowed) {
+        setHasAnalyticEngine(true);
+      }
+      return allowed;
+    };
+  }, []);
+
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -179,6 +205,14 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               label={i18n.translate('visTypeTimeseries.indexPattern.dataSourceLabel', {
                 defaultMessage: 'Data source',
               })}
+              helpText={
+                hasAnalyticEngine
+                  ? i18n.translate('visTypeTimeseries.indexPattern.optimizedEngineNotSupported', {
+                      defaultMessage:
+                        "TSVB supports only DSL queries. Optimized engine (AnalyticEngine type) data sources aren't supported and don't appear in this selector.",
+                    })
+                  : undefined
+              }
             >
               <DataSourceSelector
                 savedObjectsClient={getSavedObjectsClient().client}
@@ -192,6 +226,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 compressed={true}
                 removePrepend={true}
                 isClearable={false}
+                dataSourceFilter={dataSourceFilter}
               />
             </EuiCompressedFormRow>
           </EuiFlexItem>

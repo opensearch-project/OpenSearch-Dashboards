@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import './tabs.scss';
 import { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
@@ -31,6 +32,11 @@ import { DiscoverNoResults } from '../../application/legacy/discover/application
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { useDatasetContext } from '../../application/context';
 import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_mode_context';
+import {
+  TransformationService,
+  registerAllTransformations,
+  UrlTransformationState,
+} from '../../components/data_transformations';
 
 export const EXPLORE_ACTION_BAR_SLOT_ID = 'explore-action-bar-slot';
 
@@ -90,6 +96,10 @@ export const ExploreTabs = () => {
         return false;
       }
       if (isPatternsTab || isFieldStatsTab) {
+        // Hide patterns and field statistics tabs for SQL queries
+        if (query?.language === 'SQL') {
+          return false;
+        }
         return registeredFlavor && isDefaultDataset;
       }
       return registeredFlavor;

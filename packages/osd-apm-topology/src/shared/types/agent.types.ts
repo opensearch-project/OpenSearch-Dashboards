@@ -18,13 +18,7 @@ import type { BaseNodeData } from '../../types';
  * - Unknown operations → `'other'`
  */
 export type AgentNodeKind =
-  | 'agent'
-  | 'llm'
-  | 'tool'
-  | 'retrieval'
-  | 'embeddings'
-  | 'content'
-  | 'other';
+  'agent' | 'llm' | 'tool' | 'retrieval' | 'embeddings' | 'content' | 'other';
 
 export interface AgentNodeData extends BaseNodeData {
   nodeKind: AgentNodeKind;

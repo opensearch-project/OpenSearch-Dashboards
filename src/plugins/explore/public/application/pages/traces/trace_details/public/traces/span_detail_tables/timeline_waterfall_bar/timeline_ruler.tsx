@@ -27,8 +27,8 @@ export const TimelineRuler: React.FC<TimelineRulerProps> = ({
           index === 0
             ? 'exploreTimelineRuler__label--first'
             : index === ticks.length - 1
-            ? 'exploreTimelineRuler__label--last'
-            : 'exploreTimelineRuler__label--center';
+              ? 'exploreTimelineRuler__label--last'
+              : 'exploreTimelineRuler__label--center';
 
         return (
           <div

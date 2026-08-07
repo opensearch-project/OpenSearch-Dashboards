@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
+import { isValidTimeField, pickTimeField, TRACE_TIME_FIELD_CANDIDATES } from '../../../data/common';
 import { IndexPatternsContract } from '../../../data/public';
 
 export interface DetectionResult {
@@ -61,7 +62,7 @@ export async function detectTraceData(
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If loading fails, continue with detection
   }
 
@@ -77,15 +78,22 @@ export async function detectTraceData(
     const hasSpanId = traceFields.some((f) => f.name === 'spanId');
     // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = traceFields.some((f) => f.name === 'traceId');
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    const hasEndTime = traceFields.some((f) => f.name === 'endTime');
 
-    if (hasSpanId && hasTraceId && hasEndTime) {
+    // Filter to date fields actually valid for a Date Histogram (aggregatable, non-nested),
+    // then apply trace-specific precedence (startTime → endTime).
+    const validDateFieldNames = traceFields
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
+      .filter((f) => isValidTimeField(f))
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
+      .map((f) => f.name);
+    const traceTimeField = pickTimeField(validDateFieldNames, TRACE_TIME_FIELD_CANDIDATES);
+
+    if (hasSpanId && hasTraceId && traceTimeField) {
       result.tracesDetected = true;
       result.tracePattern = 'otel-v1-apm-span*';
-      result.traceTimeField = 'endTime';
+      result.traceTimeField = traceTimeField;
     }
-  } catch (error) {
+  } catch {
     // No matching indices found, continue
   }
 
@@ -109,7 +117,7 @@ export async function detectTraceData(
       result.logPattern = 'logs-otel-v1*';
       result.logTimeField = 'time';
     }
-  } catch (error) {
+  } catch {
     // No matching indices found
   }
 
@@ -152,12 +160,12 @@ export async function detectTraceDataAcrossDataSources(
           };
           results.push(detectionWithSource);
         }
-      } catch (error) {
+      } catch {
         // Skip this datasource if detection fails
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If fetching data sources fails, fall through
   }
 
@@ -179,7 +187,7 @@ export async function detectTraceDataAcrossDataSources(
         };
         results.push(detectionWithSource);
       }
-    } catch (error) {
+    } catch {
       // Continue if local cluster check fails
     }
   }

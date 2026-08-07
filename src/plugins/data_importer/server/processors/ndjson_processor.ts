@@ -60,7 +60,7 @@ export class NDJSONProcessor implements IFileProcessor {
                 index: indexName,
                 body: doc,
               });
-            } catch (e) {
+            } catch {
               failedRows.push(curRow);
             }
           })();

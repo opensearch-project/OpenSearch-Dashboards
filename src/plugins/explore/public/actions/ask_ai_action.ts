@@ -17,12 +17,12 @@ export function createAskAiAction(chatService: ChatServiceStart): LogActionDefin
     iconType: 'generate',
     order: 1,
 
-    isCompatible: () => {
-      return chatService.isAvailable();
+    isCompatible: (context) => {
+      if (!chatService.isAvailable()) return false;
+      return context.metadata?.dataSourceEngineType !== 'AnalyticEngine';
     },
 
     component: (props) => {
-      // chatService is always defined since we're using core service
       return AskAIActionItem({ ...props, chatService });
     },
   };

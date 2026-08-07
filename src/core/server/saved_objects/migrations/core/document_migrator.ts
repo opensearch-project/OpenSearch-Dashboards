@@ -323,7 +323,8 @@ function wrapWithTry(
       const failedTransform = `${type}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.warn(
-        `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
+        `Failed to transform document _id="${doc.id}" type="${doc.type}". ` +
+          `Transform: ${failedTransform}\nDoc: ${failedDoc}`
       );
       throw error;
     }
@@ -393,6 +394,14 @@ function applicableTransforms(
   prop: string
 ) {
   const minVersion = propVersion(doc, prop);
+  if (!migrations[prop]) {
+    throw new Error(
+      `No migrations registered for property "${prop}". ` +
+        `Document id="${doc.id}", type="${doc.type}". ` +
+        `This usually means the plugin owning this saved-object type is not loaded ` +
+        `(orphan document).`
+    );
+  }
   const { transforms } = migrations[prop];
   return minVersion
     ? transforms.filter(({ version }) => Semver.gt(version, minVersion))

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`metric_utils assembleForMetric should configure spec correctly for metric visualization 1`] = `
 Object {

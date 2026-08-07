@@ -8,15 +8,16 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '../../../core/server/mocks';
-import { UiSettingScope } from '../../../core/server';
+import { PermissionModeId, UiSettingScope } from '../../../core/server';
 import {
   generateRandomId,
+  getPermissionMode,
   updateDashboardAdminStateForRequest,
   transferCurrentUserInPermissions,
   getDataSourcesList,
   checkAndSetDefaultDataSource,
 } from './utils';
-import { getWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import { OSD_ADMIN_WILDCARD_MATCH_ALL } from '../common/constants';
 
@@ -94,6 +95,120 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
+  it('should handle configUsers as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configGroups as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['admin_group'];
+    const users: string[] = [];
+    const configGroups = 'admin_group' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configUsers as wildcard string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = OSD_ADMIN_WILDCARD_MATCH_ALL as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not grant admin when configUsers string is a substring match', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['a'];
+    const configGroups: string[] = [];
+    const configUsers = 'admin' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should split configUsers string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1,user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1 user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1,group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1 group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1\tuser2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1\tgroup2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not crash when configUsers or configGroups is null or undefined', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    updateDashboardAdminStateForRequest(
+      mockRequest,
+      groups,
+      users,
+      null as unknown as string[],
+      undefined as unknown as string[]
+    );
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
@@ -162,7 +277,7 @@ describe('workspace utils', () => {
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue(dataSources[0]);
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
-    expect(uiSettingsClient.set).not.toBeCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
   });
 
   it('should check then set first data sources as default if needed when checking', async () => {
@@ -191,5 +306,60 @@ describe('workspace utils', () => {
       undefined,
       UiSettingScope.WORKSPACE
     );
+  });
+});
+
+describe('getPermissionMode', () => {
+  it('should return Owner when user is dashboard admin', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: true });
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: { getPrincipalsFromRequest: jest.fn() } as any,
+      permissions: { read: { users: ['user1'] } },
+    });
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should fall back to translatePermissionsToRole when user is not dashboard admin', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: false });
+
+    const mockPermissionControlClient = {
+      getPrincipalsFromRequest: jest.fn().mockReturnValue({ users: ['user1'], groups: [] }),
+    } as any;
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: mockPermissionControlClient,
+      permissions: {
+        write: { users: ['user1'] },
+        library_write: { users: ['user1'] },
+      },
+    });
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return Read when non-admin user only has read permission', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: false });
+
+    const mockPermissionControlClient = {
+      getPrincipalsFromRequest: jest.fn().mockReturnValue({ users: ['user1'], groups: [] }),
+    } as any;
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: mockPermissionControlClient,
+      permissions: { read: { users: ['user1'] } },
+    });
+
+    expect(result).toBe(PermissionModeId.Read);
   });
 });

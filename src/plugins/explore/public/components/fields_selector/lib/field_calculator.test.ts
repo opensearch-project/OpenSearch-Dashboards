@@ -86,7 +86,7 @@ describe('field_calculator', function () {
     it('should throw an error if any value is a plain object', function () {
       expect(function () {
         groupValues([{}, true, false], grouped);
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('should handle values with dots in them', function () {

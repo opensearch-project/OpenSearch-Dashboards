@@ -52,8 +52,8 @@ const mockServices = {
 beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue(mockServices);
-  delete (window as any).location;
-  (window as any).location = { hash: '' };
+  // Reset hash to empty via the History API (jsdom 26 compatible).
+  window.history.pushState({}, '', window.location.pathname);
 });
 
 describe('useInitialContainerContext', () => {
@@ -392,7 +392,7 @@ describe('useInitialContainerContext', () => {
 
     it('auto-selects when single dashboard references visualization', async () => {
       // Set up test-specific configuration
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
 
       const dashboards = [{ id: 'dashboard-1', title: 'Dashboard 1', description: 'Desc' }];
       mockFindReferencingDashboards.mockResolvedValue(dashboards);
@@ -412,7 +412,7 @@ describe('useInitialContainerContext', () => {
     });
 
     it('shows selection modal when multiple dashboards reference visualization', async () => {
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
 
       const dashboards = [
         { id: 'dashboard-1', title: 'Dashboard 1' },
@@ -430,7 +430,7 @@ describe('useInitialContainerContext', () => {
     });
 
     it('does nothing when no dashboards reference visualization', async () => {
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
       mockFindReferencingDashboards.mockResolvedValue([]);
 
       const { result } = renderHook(() => useInitialContainerContext());
@@ -446,7 +446,7 @@ describe('useInitialContainerContext', () => {
     });
 
     it('does not check references when not in edit mode', async () => {
-      (window as any).location.hash = '#/create';
+      window.history.pushState({}, '', window.location.pathname + '#/create');
       mockFindReferencingDashboards.mockResolvedValue([]);
 
       renderHook(() => useInitialContainerContext());
@@ -461,7 +461,7 @@ describe('useInitialContainerContext', () => {
     it('selects dashboard and loads variables', async () => {
       mockGetIncomingEditorState.mockReturnValue(undefined);
       mockOsdUrlStateStorage.get.mockReturnValue(null);
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
 
       const dashboards = [
         { id: 'dashboard-1', title: 'Dashboard 1' },
@@ -503,7 +503,7 @@ describe('useInitialContainerContext', () => {
     it('does nothing when dashboard not found', async () => {
       mockGetIncomingEditorState.mockReturnValue(undefined);
       mockOsdUrlStateStorage.get.mockReturnValue(null);
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
 
       const dashboards = [
         { id: 'dashboard-1', title: 'Dashboard 1' },
@@ -532,7 +532,7 @@ describe('useInitialContainerContext', () => {
     it('dismisses dashboard selection modal', async () => {
       mockGetIncomingEditorState.mockReturnValue(undefined);
       mockOsdUrlStateStorage.get.mockReturnValue(null);
-      (window as any).location.hash = '#/edit/viz-123';
+      window.history.pushState({}, '', window.location.pathname + '#/edit/viz-123');
 
       const dashboards = [
         { id: 'dashboard-1', title: 'Dashboard 1' },

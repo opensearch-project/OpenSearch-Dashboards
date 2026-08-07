@@ -21,8 +21,7 @@ import {
 } from './configure_client.test.mocks';
 import { OpenSearchClientPool, OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
-import { ClientOptions } from '@opensearch-project/opensearch';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { ClientOptions, Transport } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -137,6 +136,33 @@ describe('configureClient', () => {
     authRegistryCredentialProviderMock.mockReset();
   });
 
+  test('configureClient passes customTransport to the Client constructor when provided', async () => {
+    class FakeTransport {}
+    parseClientOptionsMock.mockReturnValue(clientOptions);
+    savedObjectsMock.get.mockReset();
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: { type: AuthType.NoAuth, credentials: undefined },
+      },
+      references: [],
+    });
+
+    await configureClient(
+      {
+        ...dataSourceClientParams,
+        customTransport: FakeTransport as unknown as typeof Transport,
+      },
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ Transport: FakeTransport }));
+  });
+
   test('configure client with auth.type == no_auth, will call new Client() to create client', async () => {
     savedObjectsMock.get.mockReset().mockResolvedValueOnce({
       id: DATA_SOURCE_ID,
@@ -223,7 +249,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: 'accessKey',
@@ -262,7 +288,7 @@ describe('configureClient', () => {
 
     await expect(
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
@@ -277,7 +303,7 @@ describe('configureClient', () => {
 
     await expect(
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
@@ -309,7 +335,7 @@ describe('configureClient', () => {
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: sigV4AuthContent.accessKey,
@@ -351,7 +377,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: mockCredentials.accessKey,
@@ -387,7 +413,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: sigV4AuthContent.accessKey,

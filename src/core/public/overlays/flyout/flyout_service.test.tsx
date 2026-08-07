@@ -79,7 +79,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
         expect(modalContent.html()).toMatchSnapshot();
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {
@@ -87,7 +87,7 @@ describe('FlyoutService', () => {
         ref1.onClose.then(onCloseComplete);
         flyouts.open(mountText('Flyout content 2'));
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -99,7 +99,7 @@ describe('FlyoutService', () => {
       ref.onClose.then(onCloseComplete);
       flyouts.close();
       await ref.onClose;
-      expect(onCloseComplete).toBeCalledTimes(1);
+      expect(onCloseComplete).toHaveBeenCalledTimes(1);
     });
 
     it('can be called multiple times', async () => {
@@ -123,8 +123,8 @@ describe('FlyoutService', () => {
 
       flyouts.close();
       flyouts.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -153,8 +153,8 @@ describe('FlyoutService', () => {
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -10,7 +11,7 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../visualization_editor.scss';
 
-export const RightStyleOptionsPanel = () => {
+export const RightStyleOptionsPanel = React.memo(() => {
   const { queryEditorState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
@@ -19,13 +20,7 @@ export const RightStyleOptionsPanel = () => {
     queryStatus.status === QueryExecutionStatus.UNINITIALIZED ||
     queryStatus.status === QueryExecutionStatus.NO_RESULTS;
 
-  // Unmount the style panel to ensure outdated component state doesn't override current styles
-  if (queryStatus.status === QueryExecutionStatus.LOADING)
-    return (
-      <EuiPanel paddingSize="s" style={{ height: '100%' }} borderRadius="none" hasShadow={false}>
-        <StylePanelLoadingState />
-      </EuiPanel>
-    );
+  const isLoading = queryStatus.status === QueryExecutionStatus.LOADING;
 
   if (displayEmptyState) {
     return (
@@ -40,6 +35,9 @@ export const RightStyleOptionsPanel = () => {
       </EuiPanel>
     );
   }
+
+  // keep the style panel mounted while loading and just hide it, so its component
+  // state (for example: including accordion open/closed state) is preserved across an Update.
   return (
     <EuiPanel
       paddingSize="s"
@@ -47,10 +45,13 @@ export const RightStyleOptionsPanel = () => {
       borderRadius="none"
       hasShadow={false}
     >
-      {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
+      {isLoading && <StylePanelLoadingState />}
+      <div style={{ display: isLoading ? 'none' : 'block' }}>
+        {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
+      </div>
     </EuiPanel>
   );
-};
+});
 
 export const StylePanelEmptyState = () => {
   return (

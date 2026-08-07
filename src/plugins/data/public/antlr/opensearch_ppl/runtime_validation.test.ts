@@ -108,4 +108,39 @@ describe('validateRuntimePPLQuery', () => {
     expect((result?.errors.length ?? 0) > 0).toBe(true);
     expect(result?.errors[0].column).toBeGreaterThanOrEqual(1);
   });
+
+  describe('command-typo suggestion (PPLCommandErrorListener)', () => {
+    // This exercises the load-bearing quirk: on a ParserInterpreter,
+    // `e.getExpectedTokens()` yields the command set while
+    // `recognizer.getExpectedTokens()` yields the useless post-recovery set. The
+    // suggestion only fires if the listener prefers `e`.
+    it('rewrites a misspelled command into a suggestion with a fix', () => {
+      jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+      const result = validateRuntimePPLQuery({
+        content: 'source=logs | wherre a > 1',
+        context: { useRuntimeGrammar: true },
+        model: {} as any,
+      });
+
+      expect(result?.isValid).toBe(false);
+      const hit = result?.errors.find((e) => (e as any).code === 'UNKNOWN_COMMAND');
+      expect(hit).toBeDefined();
+      expect((hit as any).fix?.text).toBe('where');
+      expect(hit?.message).toContain('where');
+    });
+
+    it("leaves ANTLR's message untouched for unrecognizable garbage", () => {
+      jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+      const result = validateRuntimePPLQuery({
+        content: 'source=logs | zzzzzzzz',
+        context: { useRuntimeGrammar: true },
+        model: {} as any,
+      });
+
+      const codes = (result?.errors ?? []).map((e) => (e as any).code);
+      expect(codes).not.toContain('UNKNOWN_COMMAND');
+    });
+  });
 });

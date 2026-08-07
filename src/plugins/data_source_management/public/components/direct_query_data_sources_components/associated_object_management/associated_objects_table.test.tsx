@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { AssociatedObjectsTable } from './associated_objects_table';
 // @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer from 'react-test-renderer';
@@ -116,7 +116,7 @@ describe('AssociatedObjectsTable', () => {
   it.skip('should call the correct action when clicking on the "Discover" button', async () => {
     // TODO: need to enable MDS
     const { uiSettings } = coreMock.createSetup();
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
 
     renderComponent(props);
 

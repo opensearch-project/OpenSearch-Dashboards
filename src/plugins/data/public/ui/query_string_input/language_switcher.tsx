@@ -52,8 +52,8 @@ interface Props {
 }
 
 export function QueryLanguageSwitcher(props: Props) {
-  const osdDQLDocs = useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql
-    .base;
+  const osdDQLDocs =
+    useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql.base;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const luceneLabel = (
     <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />

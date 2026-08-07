@@ -15,4 +15,24 @@
       justify-content: left;
     }
   }
+
+  // Right-anchor wrapper for the inline action buttons + overflow popover.
+  // The parent (`.exploreQueryPanelWidgets__left`) is a flex row whose
+  // outer container uses `justify-content: space-between` — meaning
+  // `__left` only takes its content width, so `flex: 1` here would have
+  // nothing to grow into. `margin-left: auto` instead pushes this wrapper
+  // to the right edge of `__left` regardless of how wide `__left` is,
+  // visually separating the actions from the save / recent / dataset
+  // controls on the left without an explicit divider.
+  &__group {
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__overflowList {
+    display: flex;
+    flex-direction: column;
+  }
 }

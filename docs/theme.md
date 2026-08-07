@@ -6,7 +6,7 @@
 
 Themes are defined in OUI via https://github.com/opensearch-project/oui/blob/main/src/themes/themes.ts. When Building OUI, there are several theming artifacts generated (beyond the react components) for each mode (light/dark) of each theme:
 
-1. Theme compiled stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.css`). Consumed as entry files in [/packages/osd-ui-shared-deps/webpack.config.js](/packages/osd-ui-shared-deps/webpack.config.js) and republished by `osd-ui-shared-deps` (e.g. [UiSharedDeps.themeCssDistFilenames](/packages/osd-ui-shared-deps/index.js)).
+1. Theme compiled stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.css`). Consumed as entry files in [/packages/osd-ui-shared-deps/rspack.config.js](/packages/osd-ui-shared-deps/rspack.config.js) and republished by `osd-ui-shared-deps` (e.g. [UiSharedDeps.themeCssDistFilenames](/packages/osd-ui-shared-deps/index.js)).
 2. Theme compiled and minified stylesheets (e.g. `@elastic/eui/dist/eui_theme_dark.min.css`). These appear unused by OpenSearch Dashboards
 3. Theme computed SASS variables as JSON (e.g. `@elastic/eui/dist/eui_theme_dark.json`). Consumed by [/packages/osd-ui-shared-deps/theme.ts](/packages/osd-ui-shared-deps/theme.ts) and made available to other components via the mode and theme aware `euiThemeVars`. In general, these should not be consumed by any other component directly.
 4. Theme type definition file for SASS variables as JSON (e.g. `@elastic/eui/dist/eui_theme_dark.json.d.ts`)
@@ -18,8 +18,8 @@ In addition to these artifacts, OpenSearch Dashboards also makes heavy use of th
 ### Theme definitions in OpenSearch Dashboards
 
 1. Theme tags are defined in [/packages/osd-optimizer/src/common/theme_tags.ts](/packages/osd-optimizer/src/common/theme_tags.ts) corresponding to each mode (light/dark) of each OUI theme.
-2. These tags must correspond to entrypoint SCSS files in [/src/core/public/core_app/styles/](/src/core/public/core_app/styles/_globals_v8dark.scss), because they are imported by all SCSS files as part of the `sass-loader` in [/packages/osd-optimizer/src/worker/webpack.config.ts](/packages/osd-optimizer/src/worker/webpack.config.ts) and [/packages/osd-optimizer/src/worker/theme_loader.ts](/packages/osd-optimizer/src/worker/theme_loader.ts). Note that the optimizer webpack will compile a separate stylesheet for each unique mode and theme combination.
-3. OUI SCSS source files are also imported by `osd-ui-framework`, which generates the legacy KUI stylesheets (e.g. [/packages/osd-ui-framework/src/kui_next_dark.scss](/packages/osd-ui-framework/src/kui_next_dark.scss)). KUI is a UI library that predates EUI/OUI, and should be deprecated and fully removed via [#1060](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1060). Because it's a legacy package it has its own build process that doesn't use webpack; it just [compiles the SCSS files with grunt](/packages/osd-ui-framework/Gruntfile.js). But similarly to 2., a separate stylesheet is generated for each mode and theme combination.
+2. These tags must correspond to entrypoint SCSS files in [/src/core/public/core_app/styles/](/src/core/public/core_app/styles/_globals_v8dark.scss), because they are imported by all SCSS files as part of the `sass-loader` in [/packages/osd-optimizer/src/worker/rspack.config.ts](/packages/osd-optimizer/src/worker/rspack.config.ts) and [/packages/osd-optimizer/src/worker/theme_loader.ts](/packages/osd-optimizer/src/worker/theme_loader.ts). Note that the optimizer rspack will compile a separate stylesheet for each unique mode and theme combination.
+3. OUI SCSS source files are also imported by `osd-ui-framework`, which generates the legacy KUI stylesheets (e.g. [/packages/osd-ui-framework/src/kui_next_dark.scss](/packages/osd-ui-framework/src/kui_next_dark.scss)). KUI is a UI library that predates EUI/OUI, and should be deprecated and fully removed via [#1060](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1060). The compiled CSS files are committed in `packages/osd-ui-framework/dist/`. But similarly to 2., a separate stylesheet is generated for each mode and theme combination.
 
 ### Thmemed assets in OpenSearch Dasboards
 
@@ -108,9 +108,9 @@ sequenceDiagram
 
 Each of the following are loaded in the browser by the [bootstrap script](/src/legacy/ui/ui_render/bootstrap/template.js.hbs) in this order. Currently, these are never unloaded.
 
-1. Monaco editor styles (e.g. [/packages/osd-ui-shared-deps/target/osd-ui-shared-deps.css](/packages/osd-ui-shared-deps/target/osd-ui-shared-deps.css)), packaged by [/packages/osd-ui-shared-deps/webpack.config.js](/packages/osd-ui-shared-deps/webpack.config.js). In theory, this file could include styles from other shared dependencies, but currently `osd-monaco` is the only package that exports styles. Note that these are the default, un-themed styles; theming of monaco editors is handled by [/src/plugins/opensearch_dashboards_react/public/code_editor/editor_theme.ts](/src/plugins/opensearch_dashboards_react/public/code_editor/editor_theme.ts).
-2. Theme and mode-specific OUI styles (e.g. [](), compiled by `packages/osd-ui-shared-deps/webpack.config.js`).
-3. Theme and mode-specific KUI styles (e.g. `packages/osd-ui-framework/src/kui_next_dark.scss`, compiled by `packages/osd-ui-framework/Gruntfile.js`). Separate stylesheets for each theme version/dark mode combo (colors).
+1. Monaco editor styles (e.g. [/packages/osd-ui-shared-deps/target/osd-ui-shared-deps.css](/packages/osd-ui-shared-deps/target/osd-ui-shared-deps.css)), packaged by [/packages/osd-ui-shared-deps/rspack.config.js](/packages/osd-ui-shared-deps/rspack.config.js). In theory, this file could include styles from other shared dependencies, but currently `osd-monaco` is the only package that exports styles. Note that these are the default, un-themed styles; theming of monaco editors is handled by [/src/plugins/opensearch_dashboards_react/public/code_editor/editor_theme.ts](/src/plugins/opensearch_dashboards_react/public/code_editor/editor_theme.ts).
+2. Theme and mode-specific OUI styles (e.g. [](), compiled by `packages/osd-ui-shared-deps/rspack.config.js`).
+3. Theme and mode-specific KUI styles (e.g. `packages/osd-ui-framework/src/kui_next_dark.scss`, compiled CSS committed in `packages/osd-ui-framework/dist/`). Separate stylesheets for each theme version/dark mode combo (colors).
 4. Mode-specific legacy styles (e.g. [/src/core/server/core_app/assets/legacy_dark_theme.css](/src/core/server/core_app/assets/legacy_dark_theme.css))
 
 Component styles are not loaded as stylesheets.
@@ -142,11 +142,10 @@ Update `DEFAULT_THEME_VERSION` in `src/core/server/ui_settings/ui_settings_confi
 2. Update OSD to consume new OUI version
 3. Make the following changes in OSD:
     1. Load your theme by creating sass files in `src/core/public/core_app/styles`
-    2. Update [webpack config](packages/osd-ui-shared-deps/webpack.config.js) to create css files for your theme
+    2. Update [rspack config](packages/osd-ui-shared-deps/rspack.config.js) to create css files for your theme
     2. Add kui css files:
         1. Create kui sass files for your theme in `packages/osd-ui-framework/src/`
-        2. Update `packages/osd-ui-framework/Gruntfile.js` to build these files
-        3. Generate the files by running `npx grunt compileCss` from this package root
+        2. Compile the SCSS and commit the resulting CSS in `packages/osd-ui-framework/dist/`
     3. Add fonts to OSD:
         1. Make sure your theme fonts are in [/src/core/server/core_app/assets/fonts](/src/core/server/core_app/assets/fonts/readme.md)
         2. Update `src/core/server/rendering/views/fonts.tsx` to reference those files

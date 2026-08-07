@@ -38,6 +38,7 @@ import {
   createListStream,
   createConcatStream,
 } from '../../utils/streams';
+import { validateObject } from '../../http/prototype_pollution/validate_object';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -45,7 +46,15 @@ export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable)
     createSplitStream('\n'),
     createMapStream((str: string) => {
       if (str && str.trim() !== '') {
-        return JSON.parse(str);
+        const parsed = JSON.parse(str);
+        try {
+          validateObject(parsed);
+        } catch (e) {
+          throw new Error(
+            `Invalid object in import stream: ${e instanceof Error ? e.message : String(e)}`
+          );
+        }
+        return parsed;
       }
     }),
     createFilterStream<SavedObject | SavedObjectsExportResultDetails>(

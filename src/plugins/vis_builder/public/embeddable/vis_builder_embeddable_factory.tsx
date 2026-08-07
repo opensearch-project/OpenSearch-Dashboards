@@ -34,14 +34,12 @@ export interface VisBuilderEmbeddableFactoryDeps {
   start: StartServicesGetter<VisBuilderPluginStartDependencies>;
 }
 
-export class VisBuilderEmbeddableFactory
-  implements
-    EmbeddableFactoryDefinition<
-      SavedObjectEmbeddableInput,
-      VisBuilderOutput | EmbeddableOutput,
-      VisBuilderEmbeddable,
-      VisBuilderSavedObjectAttributes
-    > {
+export class VisBuilderEmbeddableFactory implements EmbeddableFactoryDefinition<
+  SavedObjectEmbeddableInput,
+  VisBuilderOutput | EmbeddableOutput,
+  VisBuilderEmbeddable,
+  VisBuilderSavedObjectAttributes
+> {
   public readonly type = VISBUILDER_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     // TODO: Update to include most vis functionality

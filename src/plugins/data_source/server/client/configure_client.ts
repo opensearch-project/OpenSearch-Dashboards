@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client, ClientOptions } from '@opensearch-project/opensearch';
+import { Client, ClientOptions, Transport } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
 import { Logger, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
@@ -25,6 +25,7 @@ import {
   getAWSCredential,
   getCredential,
   getDataSource,
+  getDataSourceInternal,
   getAuthenticationMethod,
   generateCacheKey,
 } from './configure_client_utils';
@@ -34,11 +35,13 @@ export const configureClient = async (
   {
     dataSourceId,
     savedObjects,
+    internalSavedObjects,
     cryptography,
     testClientDataSourceAttr,
     customApiSchemaRegistryPromise,
     request,
     authRegistry,
+    customTransport,
   }: DataSourceClientParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
@@ -60,13 +63,26 @@ export const configureClient = async (
         ((type === AuthType.UsernamePasswordType && !credentials?.password) ||
           (type === AuthType.SigV4 && !credentials?.accessKey && !credentials?.secretKey))
       ) {
+        // Verify user can access the data source (scoped client enforces tenant/workspace permissions),
+        // then fetch with credentials via internal repository to avoid the credential-stripping wrapper.
         dataSource = await getDataSource(dataSourceId, savedObjects);
+        if (internalSavedObjects) {
+          dataSource = await getDataSourceInternal(dataSourceId, internalSavedObjects);
+        }
       } else {
         dataSource = testClientDataSourceAttr;
         requireDecryption = false;
       }
     } else {
+      // Verify user can access the data source (scoped client enforces tenant/workspace permissions).
+      // This throws a 404 / Forbidden if the user does not have access, preventing use of a
+      // data source the caller is not authorised to access.
+      // The scoped client returns credentials stripped by the wrapper; if an internal repository
+      // is available, use it to re-fetch with full encrypted credentials for decryption below.
       dataSource = await getDataSource(dataSourceId!, savedObjects);
+      if (internalSavedObjects) {
+        dataSource = await getDataSourceInternal(dataSourceId!, internalSavedObjects);
+      }
     }
 
     const authenticationMethod = getAuthenticationMethod(dataSource, authRegistry);
@@ -95,7 +111,8 @@ export const configureClient = async (
       dataSourceId,
       request,
       clientParams,
-      requireDecryption
+      requireDecryption,
+      customTransport
     );
   } catch (error: any) {
     logger.debug(
@@ -131,7 +148,8 @@ const getQueryClient = async (
   dataSourceId?: string,
   request?: OpenSearchDashboardsRequest,
   clientParams?: ClientParameters,
-  requireDecryption: boolean = true
+  requireDecryption: boolean = true,
+  customTransport?: typeof Transport
 ): Promise<Client> => {
   let credential;
   let cacheKeySuffix;
@@ -140,6 +158,10 @@ const getQueryClient = async (
     endpoint,
   } = dataSourceAttr;
   const clientOptions = parseClientOptions(config, endpoint, registeredSchema);
+  if (customTransport) {
+    // The Transport applies to the root client; children created via .child() inherit it.
+    clientOptions.Transport = customTransport;
+  }
 
   if (clientParams !== undefined) {
     credential = clientParams.credentials;

@@ -90,19 +90,14 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
-      const [
-        clusterInfo,
-        clusterStats,
-        nodesUsage,
-        opensearchDashboards,
-        dataTelemetry,
-      ] = await Promise.all([
-        getClusterInfo(opensearchClient), // cluster info
-        getClusterStats(opensearchClient), // cluster stats (not to be confused with cluster _state_)
-        getNodesUsage(opensearchClient), // nodes_usage info
-        getOpenSearchDashboards(usageCollection, callCluster, opensearchClient),
-        getDataTelemetry(opensearchClient),
-      ]);
+      const [clusterInfo, clusterStats, nodesUsage, opensearchDashboards, dataTelemetry] =
+        await Promise.all([
+          getClusterInfo(opensearchClient), // cluster info
+          getClusterStats(opensearchClient), // cluster stats (not to be confused with cluster _state_)
+          getNodesUsage(opensearchClient), // nodes_usage info
+          getOpenSearchDashboards(usageCollection, callCluster, opensearchClient),
+          getDataTelemetry(opensearchClient),
+        ]);
       return handleLocalStats(
         clusterInfo,
         {

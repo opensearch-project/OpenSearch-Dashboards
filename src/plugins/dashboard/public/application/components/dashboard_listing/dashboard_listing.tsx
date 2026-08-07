@@ -83,7 +83,7 @@ export const DashboardListing = () => {
           }
           return new Promise(() => {});
         }
-      } catch (e) {
+      } catch {
         notifications.toasts.addWarning(
           i18n.translate('dashboard.listing. savedObjectWarning', {
             defaultMessage: 'Unable to filter by title',
@@ -96,11 +96,10 @@ export const DashboardListing = () => {
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
 
-  const tableColumns = useMemo(() => getTableColumns(application, history, uiSettings), [
-    application,
-    history,
-    uiSettings,
-  ]);
+  const tableColumns = useMemo(
+    () => getTableColumns(application, history, uiSettings),
+    [application, history, uiSettings]
+  );
 
   const createItem = useCallback(() => {
     history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);

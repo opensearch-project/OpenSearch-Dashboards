@@ -146,9 +146,8 @@ export interface SearchSourceDependencies extends FetchHandlers {
   // search options required here and returning a promise instead of observable.
   search: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends
-      | IOpenSearchDashboardsSearchResponse
-      | IDataFrameResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+      IOpenSearchSearchResponse,
   >(
     request: SearchStrategyRequest,
     options: ISearchOptions
@@ -364,11 +363,14 @@ export class SearchSource {
     const indexPattern = this.getField('index');
 
     let response;
-    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+
+    // Unsupported queries' type will be processed as unsupported and legacyFetch cannot parse {type: 'unsupported'} correctly
+    // need to call fetchExternalSearch before COURIER_BATCH_SEARCHES check
+    if (this.isUnsupportedRequest(searchRequest)) {
+      response = await this.fetchExternalSearch(searchRequest, options);
+    } else if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.legacyFetch(searchRequest, options);
-    } else if (this.isUnsupportedRequest(searchRequest)) {
-      response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.fetchSearch(searchRequest, options);

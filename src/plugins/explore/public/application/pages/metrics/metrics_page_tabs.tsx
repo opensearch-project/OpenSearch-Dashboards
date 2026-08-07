@@ -5,7 +5,14 @@
 
 import './metrics_page_tabs.scss';
 import React from 'react';
-import { EuiTabs, EuiTab, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
 import { MetricsExploreTab } from './explore';
@@ -34,23 +41,30 @@ const PAGE_TABS: Array<{ id: MetricsPageMode; label: string; iconType: string }>
 export const MetricsPageTabs: React.FC = () => {
   const dispatch = useDispatch();
   const mode = useSelector((state: RootState) => state.ui.metricsPageMode) || 'explore';
+
   return (
     <MetricsPageModeContext.Provider value={mode}>
       <div className="metricsPageTabs__tabBar">
-        <DatasetSelectWidget />
-        <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
-          {PAGE_TABS.map((tab) => (
-            <EuiTab
-              key={tab.id}
-              isSelected={mode === tab.id}
-              onClick={() => dispatch(setMetricsPageMode(tab.id))}
-              data-test-subj={`metricsPageTab-${tab.id}`}
-            >
-              <EuiIcon type={tab.iconType} size="m" style={{ marginRight: 6 }} />
-              {tab.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <DatasetSelectWidget />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
+              {PAGE_TABS.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={mode === tab.id}
+                  onClick={() => dispatch(setMetricsPageMode(tab.id))}
+                  data-test-subj={`metricsPageTab-${tab.id}`}
+                >
+                  <EuiIcon type={tab.iconType} size="m" style={{ marginRight: 6 }} />
+                  {tab.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       {mode === 'explore' ? (
         <div className="explore-layout__canvas metricsPageTabs__exploreCanvas">

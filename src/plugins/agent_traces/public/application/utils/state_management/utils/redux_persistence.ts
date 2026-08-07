@@ -45,7 +45,7 @@ export const persistReduxState = (state: RootState, services: AgentTracesService
       },
       { replace: true }
     );
-  } catch (err) {
+  } catch {
     return;
   }
 };
@@ -135,7 +135,7 @@ export const loadReduxState = async (services: AgentTracesServices): Promise<Roo
       queryEditor: finalQueryEditorState,
       meta: finalMetaState,
     };
-  } catch (err) {
+  } catch {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
@@ -225,7 +225,7 @@ const fetchFirstAvailableDataset = async (
               return dataset;
             }
           }
-        } catch (error) {
+        } catch {
           // Continue to next dataset if this one fails
           continue;
         }
@@ -234,7 +234,7 @@ const fetchFirstAvailableDataset = async (
     }
 
     return undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -271,7 +271,7 @@ const resolveDataset = async (
           return existingDataset;
         }
       }
-    } catch (error) {
+    } catch {
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
     }

@@ -38,6 +38,12 @@ interface Props {
 
 export function EmbeddableErrorLabel(props: Props) {
   if (!props.error) return null;
+
+  // Don't show badge for AnalyticEngineError - it's rendered by ErrorEmbeddable
+  if (props.error.name === 'AnalyticEngineError') {
+    return null;
+  }
+
   const labelText =
     props.error.name === 'AbortError'
       ? i18n.translate('embeddableApi.panel.labelAborted', {

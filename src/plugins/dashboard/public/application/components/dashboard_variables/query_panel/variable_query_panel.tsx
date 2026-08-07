@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButtonGroup,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -26,10 +27,13 @@ import {
 } from '../../../../../../opensearch_dashboards_react/public';
 import { DashboardServices } from '../../../../types';
 import {
-  executeQueryForOptions,
-  filterOptionsByRegex,
+  buildVariableOptionsFromQueryResult,
+  executeVariableQuery,
+  applyRegexToVariableOptions,
+  VariableQueryResult,
 } from '../../../../variables/variable_query_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
+import { NormalizedVariableOption } from '../../../../variables/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { LanguageToggle } from './language_toggle';
@@ -41,6 +45,10 @@ import './variable_query_panel.scss';
  * This prevents performance issues with large result sets.
  */
 const MAX_PREVIEW_OPTIONS = 100;
+const EMPTY_FIELDS: string[] = [];
+
+const getPreviewOptionDisplayText = (option: NormalizedVariableOption): string =>
+  option.label ? `${option.label} (${option.value})` : option.value;
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
@@ -104,14 +112,19 @@ export interface VariableQueryPanelProps {
   onDatasetChange: (dataset: any) => void;
   existingVariableNames?: string[];
   interpolationService?: IVariableInterpolationService;
-  /** Regex filter string for preview results */
+  /** Regex filter/extractor string for preview results */
   regex?: string;
   onRegexChange?: (regex: string) => void;
   /** Whether to refresh on time range change */
   useTimeFilter?: boolean;
   onUseTimeFilterChange?: (useTimeFilter: boolean) => void;
+  valueField?: string;
+  onValueFieldChange?: (valueField: string) => void;
+  labelField?: string;
+  onLabelFieldChange?: (labelField: string) => void;
   /** Callback to notify parent about preview validation state */
   onPreviewValidationChange?: (isValid: boolean) => void;
+  currentVariableName?: string;
 }
 
 export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
@@ -127,17 +140,22 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   onRegexChange,
   useTimeFilter = false,
   onUseTimeFilterChange,
+  valueField = '',
+  onValueFieldChange,
+  labelField = '',
+  onLabelFieldChange,
   onPreviewValidationChange,
+  currentVariableName,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { data } = services;
 
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [previewValues, setPreviewValues] = useState<string[]>([]);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
+  const [queryResult, setQueryResult] = useState<VariableQueryResult | null>(null);
+  const [executionError, setExecutionError] = useState<string | null>(null);
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+  const initialQueryRef = useRef(query);
 
   const placeholder = useMemo(() => {
     const lang = language.toUpperCase();
@@ -167,6 +185,73 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
       onPreviewValidationChange(false);
     }
   }, [query, dataset, language, onPreviewValidationChange]);
+
+  const availableFields = queryResult?.fields ?? EMPTY_FIELDS;
+
+  const previewOptionsResult = useMemo(() => {
+    if (!queryResult) {
+      return { options: [] as NormalizedVariableOption[] };
+    }
+
+    return buildVariableOptionsFromQueryResult(queryResult, {
+      valueField: valueField || undefined,
+      labelField: labelField || undefined,
+    });
+  }, [queryResult, valueField, labelField]);
+
+  const filteredPreviewOptions = useMemo(
+    () => applyRegexToVariableOptions(previewOptionsResult.options, regex),
+    [previewOptionsResult.options, regex]
+  );
+
+  const previewOptions = useMemo(
+    () => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS),
+    [filteredPreviewOptions]
+  );
+
+  const isTruncated = filteredPreviewOptions.length > MAX_PREVIEW_OPTIONS;
+  const selectedValueField = valueField || availableFields[0];
+  const previewResultError = useMemo(() => {
+    if (!queryResult || filteredPreviewOptions.length > 0) {
+      return null;
+    }
+
+    if (queryResult.rows.length === 0) {
+      return i18n.translate('dashboard.variableQueryPanel.noResults', {
+        defaultMessage: 'Query returned no results',
+      });
+    }
+
+    if (!selectedValueField) {
+      return i18n.translate('dashboard.variableQueryPanel.noValueField', {
+        defaultMessage: 'Query returned results, but no fields are available for variable values',
+      });
+    }
+
+    if (!availableFields.includes(selectedValueField)) {
+      return i18n.translate('dashboard.variableQueryPanel.valueFieldMissing', {
+        defaultMessage: 'Selected value field was not found in query results',
+      });
+    }
+
+    if (previewOptionsResult.options.length === 0) {
+      return i18n.translate('dashboard.variableQueryPanel.noScalarValues', {
+        defaultMessage:
+          'Query returned results, but the selected value field does not contain string, number, or boolean values',
+      });
+    }
+
+    return i18n.translate('dashboard.variableQueryPanel.noRegexMatches', {
+      defaultMessage: 'No options match the regex',
+    });
+  }, [
+    availableFields,
+    filteredPreviewOptions.length,
+    previewOptionsResult.options.length,
+    queryResult,
+    selectedValueField,
+  ]);
+  const previewError = executionError || previewResultError;
 
   // --- Autocomplete (adapted from useQueryPanelEditor.provideCompletionItems) ---
   const provideCompletionItems = useCallback(
@@ -209,7 +294,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           selectionEnd: offset,
           language: effectiveLanguage,
           baseLanguage: currentLanguage,
-          indexPattern: currentDataView,
+          indexPattern: currentDataView ?? currentDataset,
           datasetType: currentDataset?.type,
           position,
           services: servicesWithAppName as any,
@@ -278,7 +363,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         }
 
         return { suggestions: monacoSuggestions, incomplete: false };
-      } catch (e) {
+      } catch {
         return { suggestions: [], incomplete: false };
       }
     },
@@ -355,7 +440,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
 
   const handleRunQuery = useCallback(async () => {
     if (!query.trim()) {
-      setPreviewError(
+      setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.queryEmpty', {
           defaultMessage: 'Query is empty',
         })
@@ -364,18 +449,20 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     }
 
     setIsLoading(true);
-    setPreviewError(null);
-    setPreviewValues([]);
-    setIsTruncated(false);
+    setExecutionError(null);
 
     try {
       // Interpolate variable references before executing the preview query
       let queryToExecute = query.trim();
       if (interpolationService && interpolationService.hasVariables(queryToExecute)) {
-        queryToExecute = interpolationService.interpolate(queryToExecute, language);
+        queryToExecute = interpolationService.interpolate(
+          queryToExecute,
+          language,
+          currentVariableName
+        );
       }
 
-      const options = await executeQueryForOptions(
+      const result = await executeVariableQuery(
         data,
         {
           query: queryToExecute,
@@ -386,31 +473,15 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         useTimeFilter
       );
 
-      // Apply regex filter to preview results
-      const filteredOptions = filterOptionsByRegex(options, regex);
-
-      // Check if we need to truncate
-      setIsTruncated(filteredOptions.length > MAX_PREVIEW_OPTIONS);
-
-      // Limit to MAX_PREVIEW_OPTIONS to prevent UI performance issues
-      const limitedOptions = filteredOptions.slice(0, MAX_PREVIEW_OPTIONS);
-
-      setPreviewValues(limitedOptions);
+      setQueryResult(result);
       if (onPreviewValidationChange) {
         onPreviewValidationChange(true);
-      }
-      if (filteredOptions.length === 0) {
-        setPreviewError(
-          i18n.translate('dashboard.variableQueryPanel.noResults', {
-            defaultMessage: 'Query returned no results',
-          })
-        );
       }
     } catch (err: any) {
       if (onPreviewValidationChange) {
         onPreviewValidationChange(false);
       }
-      setPreviewError(
+      setExecutionError(
         err.message ||
           i18n.translate('dashboard.variableQueryPanel.executionFailed', {
             defaultMessage: 'Failed to execute query',
@@ -425,9 +496,9 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     data,
     language,
     dataset,
-    regex,
     useTimeFilter,
     onPreviewValidationChange,
+    currentVariableName,
   ]);
 
   // Keep ref updated for use in editorDidMount closure
@@ -435,9 +506,58 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     handleRunQueryRef.current = handleRunQuery;
   }, [handleRunQuery]);
 
+  useEffect(() => {
+    // Existing query variables should show their preview immediately when edited.
+    // New query variables start empty, so users still run preview explicitly.
+    if (!initialQueryRef.current.trim()) {
+      return;
+    }
+
+    handleRunQueryRef.current();
+  }, []);
+
   const onEditorClick = useCallback(() => {
     editorRef.current?.focus();
   }, []);
+
+  const valueFieldOptions = useMemo(() => {
+    const options = availableFields.map((field) => ({ value: field, text: field }));
+    if (valueField && !availableFields.includes(valueField)) {
+      options.unshift({
+        value: valueField,
+        text: valueField,
+      });
+    }
+    return options.length > 0
+      ? options
+      : [
+          {
+            value: '',
+            text: i18n.translate('dashboard.variableQueryPanel.noFieldsOption', {
+              defaultMessage: 'Run preview to load fields',
+            }),
+          },
+        ];
+  }, [availableFields, valueField]);
+
+  const labelFieldOptions = useMemo(() => {
+    const options = [
+      {
+        value: '',
+        text: i18n.translate('dashboard.variableQueryPanel.noLabelFieldOption', {
+          defaultMessage: 'None',
+        }),
+      },
+      ...availableFields.map((field) => ({ value: field, text: field })),
+    ];
+    if (labelField && !availableFields.includes(labelField)) {
+      options.push({
+        value: labelField,
+        text: labelField,
+      });
+    }
+    return options;
+  }, [availableFields, labelField]);
 
   return (
     <>
@@ -528,6 +648,46 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           {/* Preview of values */}
         </div>
       </EuiFormRow>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableQueryPanel.valueFieldLabel', {
+              defaultMessage: 'Value field',
+            })}
+            helpText={i18n.translate('dashboard.variableQueryPanel.valueFieldHelp', {
+              defaultMessage: 'Field used as the stored variable value.',
+            })}
+          >
+            <EuiSelect
+              value={valueField || availableFields[0] || ''}
+              options={valueFieldOptions}
+              onChange={(e) => onValueFieldChange?.(e.target.value)}
+              disabled={availableFields.length === 0 && !valueField}
+              data-test-subj="variableEditorValueField"
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableQueryPanel.labelFieldLabel', {
+              defaultMessage: 'Label field',
+            })}
+            helpText={i18n.translate('dashboard.variableQueryPanel.labelFieldHelp', {
+              defaultMessage: 'Optional field used as the display label.',
+            })}
+          >
+            <EuiSelect
+              value={labelField}
+              options={labelFieldOptions}
+              onChange={(e) => onLabelFieldChange?.(e.target.value)}
+              disabled={availableFields.length === 0 && !labelField}
+              data-test-subj="variableEditorLabelField"
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {/* Regex filter */}
       {onRegexChange && (
         <EuiFormRow
@@ -535,13 +695,14 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
             defaultMessage: 'Regex',
           })}
           helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
-            defaultMessage: 'Optional regex to filter options. Only matching options are shown.',
+            defaultMessage:
+              'Optional regex to filter options or extract values with capture groups.',
           })}
         >
           <EuiFieldText
             value={regex}
             onChange={(e) => onRegexChange(e.target.value)}
-            placeholder="/^prod-/"
+            placeholder="/^env=(?<value>[^,]+),label=(?<label>.+)$/"
             data-test-subj="variableEditorRegex"
             compressed
           />
@@ -588,16 +749,16 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           isTruncated
             ? i18n.translate('dashboard.variableQueryPanel.previewTitleTruncated', {
                 defaultMessage: 'Preview of values ({count}, showing first {max})',
-                values: { count: previewValues.length, max: MAX_PREVIEW_OPTIONS },
+                values: { count: filteredPreviewOptions.length, max: MAX_PREVIEW_OPTIONS },
               })
             : i18n.translate('dashboard.variableQueryPanel.previewTitle', {
                 defaultMessage: 'Preview of values ({count})',
-                values: { count: previewValues.length },
+                values: { count: filteredPreviewOptions.length },
               })
         }
       >
         <>
-          {(previewValues.length > 0 || previewError) && (
+          {(previewOptions.length > 0 || previewError) && (
             <>
               <EuiPanel
                 paddingSize="s"
@@ -611,9 +772,9 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
                   </EuiText>
                 ) : (
                   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                    {previewValues.map((val) => (
-                      <EuiFlexItem key={val} grow={false}>
-                        <EuiBadge color="hollow">{val}</EuiBadge>
+                    {previewOptions.map((option) => (
+                      <EuiFlexItem key={option.value} grow={false}>
+                        <EuiBadge color="hollow">{getPreviewOptionDisplayText(option)}</EuiBadge>
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>

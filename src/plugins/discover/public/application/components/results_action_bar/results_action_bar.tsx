@@ -5,6 +5,7 @@
 
 import './results_action_bar.scss';
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -32,16 +33,12 @@ export const DiscoverResultsActionBar = ({
       direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
+      alignItems="center"
       className="dscResultsActionBar"
       data-test-subj="dscResultsActionBar"
     >
       <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          direction="row"
-          gutterSize="none"
-          justifyContent="flexStart"
-        >
+        <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <HitsCounter
               hits={hits}

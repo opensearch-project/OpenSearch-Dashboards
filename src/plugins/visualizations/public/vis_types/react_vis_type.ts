@@ -43,7 +43,8 @@ export type ReactVisTypeOptions<TVisParams> = Omit<
  */
 export class ReactVisType<TVisParams>
   extends BaseVisType<TVisParams>
-  implements VisType<TVisParams> {
+  implements VisType<TVisParams>
+{
   constructor(opts: ReactVisTypeOptions<TVisParams>) {
     super({
       ...opts,

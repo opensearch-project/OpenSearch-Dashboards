@@ -14,9 +14,9 @@ describe('Remote Connections', () => {
   let mockHttp: jest.Mocked<HttpSetup>;
 
   beforeEach(() => {
-    mockHttp = ({
+    mockHttp = {
       get: jest.fn(),
-    } as unknown) as jest.Mocked<HttpSetup>;
+    } as unknown as jest.Mocked<HttpSetup>;
   });
 
   describe('getRemoteClusterConnections', () => {

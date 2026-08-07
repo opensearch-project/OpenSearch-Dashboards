@@ -484,7 +484,16 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       log.debug('waitForRenderComplete');
       const count = await this.getSharedItemsCount();
       // eslint-disable-next-line radix
-      await renderable.waitForRender(parseInt(count));
+      const panelCount = parseInt(count);
+
+      // Scroll each panel into view to trigger lazy loading via IntersectionObserver
+      const panels = await testSubjects.findAll('dashboardPanel');
+      for (const panel of panels) {
+        await panel.scrollIntoViewIfNecessary();
+      }
+      await browser.scrollTop();
+
+      await renderable.waitForRender(panelCount);
     }
 
     public async getSharedContainerData() {
@@ -542,7 +551,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
           'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
         );
         return Number.parseInt(await count.getVisibleText(), 10);
-      } catch (e) {
+      } catch {
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }

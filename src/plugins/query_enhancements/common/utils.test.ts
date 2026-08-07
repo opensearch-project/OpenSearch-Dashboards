@@ -17,7 +17,7 @@ describe('throwFacetError', () => {
       },
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {
@@ -35,7 +35,7 @@ describe('throwFacetError', () => {
       },
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {
@@ -53,7 +53,7 @@ describe('throwFacetError', () => {
       },
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {
@@ -69,7 +69,7 @@ describe('throwFacetError', () => {
       data: error,
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {
@@ -87,7 +87,7 @@ describe('throwFacetError', () => {
       },
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {
@@ -102,7 +102,7 @@ describe('throwFacetError', () => {
       data: {},
     };
 
-    expect(() => throwFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrow();
     try {
       throwFacetError(response);
     } catch (err: any) {

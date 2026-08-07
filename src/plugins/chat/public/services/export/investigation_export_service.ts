@@ -9,6 +9,8 @@ import type {
   ToolMessage,
   TextInputContent,
 } from '../../../common/types';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../../common';
+import { stripInlineSuggestions } from '../../../common/parse_inline_suggestions';
 import { ChatExportData, ChatExportOptions, ChatTraceStep, QuestionImage } from './types';
 import { generatePDFReport } from './pdf_template';
 import { generateMarkdownReport } from './markdown_template';
@@ -35,7 +37,7 @@ export async function collectChatExportData(
   return {
     question,
     questionImage,
-    answer: targetMessage.content || '',
+    answer: stripInlineSuggestions(targetMessage.content || ''),
     traces: options.includeTraces ? extractTraces(timeline, targetIndex) : [],
     metadata: options.includeMetadata
       ? { timestamp: new Date().toISOString(), threadId }
@@ -156,11 +158,21 @@ export function extractTraces(timeline: Message[], targetIndex: number): ChatTra
         (m) => m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
       ) as ToolMessage | undefined;
 
+      // Local tool execution errors are now encoded as a prefix on the
+      // ToolMessage content (see chat_event_handler.handleToolCallEnd).
+      // Strip the prefix for the export so the trace shows the raw error
+      // message in the dedicated `error` slot, and omit the redundant
+      // `result` in that case.
+      const hasExecutionError = toolResult?.content?.startsWith(TOOL_EXECUTION_ERROR_PREFIX);
+      const error = hasExecutionError
+        ? toolResult!.content.slice(TOOL_EXECUTION_ERROR_PREFIX.length)
+        : undefined;
+
       traces.push({
         toolName: toolCall.function.name,
         arguments: toolCall.function.arguments,
-        result: toolResult?.content,
-        error: toolResult?.error,
+        result: hasExecutionError ? undefined : toolResult?.content,
+        error,
       });
     }
   }

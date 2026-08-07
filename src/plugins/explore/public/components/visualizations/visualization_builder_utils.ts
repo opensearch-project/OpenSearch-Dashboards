@@ -106,6 +106,20 @@ export const adaptLegacyData = (config?: ChartConfig) => {
 
   let transformedConfig = { ...config };
 
+  // Migrate legacy FACET axis mapping to splitField
+  if (transformedConfig.axesMapping?.facet && !transformedConfig.splitField) {
+    const facetValue = transformedConfig.axesMapping.facet;
+    const fieldName = Array.isArray(facetValue) ? facetValue[0] : facetValue;
+    if (fieldName) {
+      const { facet, ...remainingMapping } = transformedConfig.axesMapping;
+      transformedConfig = {
+        ...transformedConfig,
+        splitField: fieldName,
+        axesMapping: remainingMapping,
+      };
+    }
+  }
+
   // only transform data when user saved old custom ranges config or threshold-lines config
   // and once user makes some updates on threshold, will only focus on threshold
   if (transformedConfig.type === 'metric') {
@@ -152,10 +166,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
     transformedConfig.type === 'area'
   ) {
     const styles = config.styles as
-      | BarChartStyleOptions
-      | LineChartStyleOptions
-      | AreaChartStyleOptions
-      | undefined;
+      BarChartStyleOptions | LineChartStyleOptions | AreaChartStyleOptions | undefined;
     const { thresholdOptions, thresholdLines } = styles || {};
     if (thresholdLines && !thresholdOptions) {
       const thresholds = transformThresholdLinesToThreshold(thresholdLines);
@@ -200,8 +211,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
     const standardAxes: StandardAxes[] = [];
     const { valueAxes, categoryAxes } = transformedConfig.styles as
-      | AreaChartStyleOptions
-      | LineChartStyleOptions;
+      AreaChartStyleOptions | LineChartStyleOptions;
     if (categoryAxes || valueAxes) {
       transformedConfig = {
         ...transformedConfig,

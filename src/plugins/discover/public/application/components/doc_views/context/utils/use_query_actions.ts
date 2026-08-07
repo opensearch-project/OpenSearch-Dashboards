@@ -66,7 +66,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         anchorStatus: { value: LOADING_STATUS.LOADED },
       }));
       return fetchAnchorResult;
-    } catch (error) {
+    } catch {
       setContextQueryState((prevState) => ({
         ...prevState,
         anchorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
@@ -118,7 +118,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
             successorsStatus: { value: LOADING_STATUS.LOADED },
           }));
         }
-      } catch (error) {
+      } catch {
         if (type === SurrDocType.PREDECESSORS) {
           setContextQueryState((prevState) => ({
             ...prevState,
@@ -161,7 +161,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
         await fetchAnchorRow().then(
           (anchor) => anchor && fetchContextRows(predecessorCount, successorCount, filters, anchor)
         );
-      } catch (error) {
+      } catch {
         toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to fetch all documents',

@@ -5,7 +5,7 @@
 
 import './metrics_vis_tab.scss';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { createPortal } from 'react-dom';
@@ -18,7 +18,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiAccordion,
   EuiTitle,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { VisualizationContainer } from '../visualizations/visualization_container';
@@ -30,6 +34,11 @@ import { getVisualizationBuilder } from '../visualizations/visualization_builder
 import { shouldSkipQueryExecution } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { ChartType } from '../visualizations/utils/use_visualization_types';
+
+import {
+  TransformPanel,
+  useTransformationService as useMetricsTransformationService,
+} from '../../components/data_transformations';
 
 const DEFAULT_SERIES_LIMIT = 20;
 
@@ -56,7 +65,7 @@ const QUICK_CHART_TYPES: Array<{ id: ChartType; label: string; iconType: string 
   },
 ];
 
-export const MetricsVisTab = () => {
+export const MetricsVisTab = React.memo(() => {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
   const [showAllSeries, setShowAllSeries] = useState(false);
@@ -103,9 +112,10 @@ export const MetricsVisTab = () => {
 
   // Override VisualizationContainer's handleData with limited rows.
   // React fires child effects before parent effects, so this runs after
-  // VisualizationContainer's own handleData(allRows) call.
+  // VisualizationContainer's own handleData(allRows) call. Must also re-fire
+  // when showAllSeries toggles, since VisualizationContainer doesn't depend on it.
   useEffect(() => {
-    if (results && limitedRows !== (results.hits?.hits || [])) {
+    if (results) {
       const fieldSchema = results.fieldSchema || [];
       visualizationBuilder.handleData(limitedRows, fieldSchema);
     }
@@ -128,6 +138,30 @@ export const MetricsVisTab = () => {
     },
     [visualizationBuilder]
   );
+
+  const transformationService = useMetricsTransformationService(visualizationBuilder);
+
+  const renderTransformPanel = () => {
+    return (
+      <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
+        <EuiAccordion
+          id="metricsVisTab__transformPanel"
+          buttonContent={
+            <EuiText size="s" style={{ fontWeight: 600 }}>
+              {i18n.translate('explore.metricsVisTab.transformPanelTitle', {
+                defaultMessage: 'Transformations',
+              })}
+            </EuiText>
+          }
+          paddingSize="none"
+          initialIsOpen={true}
+        >
+          <EuiSpacer size="s" />
+          <TransformPanel transformationService={transformationService} />
+        </EuiAccordion>
+      </EuiPanel>
+    );
+  };
 
   const chartTypeToggle = showSettings && visConfig?.type && (
     <div className="metricsVisTab__chartTypeToggle">
@@ -246,9 +280,12 @@ export const MetricsVisTab = () => {
           {settingsPanel}
         </div>
       </div>
+      <EuiHorizontalRule margin="xs" />
+      {renderTransformPanel()}
+      <EuiHorizontalRule margin="xs" />
       <div className="metricsVisTab__rawTable">
         <ExploreMetricsRawTable />
       </div>
     </div>
   );
-};
+});

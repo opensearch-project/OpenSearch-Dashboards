@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* globals localStorage */
+
 import { useState, useEffect } from 'react';
 import { ExperienceSelectionModal } from './explore_experience';
 import { I18nProvider } from '@osd/i18n/react';
@@ -116,7 +118,7 @@ export function HomeApp({ directories, solutions }) {
           setIsCheckingExperience(false);
           return;
         }
-      } catch (storageErr) {
+      } catch {
         // Ignore storage errors and continue with saved objects check
       }
 
@@ -135,7 +137,7 @@ export function HomeApp({ directories, solutions }) {
           setShowExperienceSelection(false);
         }
         return;
-      } catch (error) {
+      } catch {
         setShowExperienceSelection(false);
       } finally {
         setIsCheckingExperience(false);
@@ -157,8 +159,6 @@ export function HomeApp({ directories, solutions }) {
       if (!result.error) {
         savedObjectSuccess = true;
       }
-    } catch (err) {
-      // eslint-disable-next-line no-empty
     } finally {
       // If saving to savedObjects failed for any reason or for read-only user, use local storage as fallback
       if (!savedObjectSuccess) {

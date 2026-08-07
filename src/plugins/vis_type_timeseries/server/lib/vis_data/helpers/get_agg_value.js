@@ -28,9 +28,10 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum, noop } from 'lodash';
+import { includes, max, min, sum, noop } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
+import { safeGet } from './safe_get';
 
 const aggFns = {
   max,
@@ -47,9 +48,9 @@ export const getAggValue = (row, metric) => {
     const isStdDeviation = /^std_deviation/.test(metric.type);
     const modeIsBounds = ~['upper', 'lower'].indexOf(metric.mode);
     if (isStdDeviation && modeIsBounds) {
-      return get(row, `${metric.id}.std_deviation_bounds.${metric.mode}`);
+      return safeGet(row, `${metric.id}.std_deviation_bounds.${metric.mode}`);
     }
-    return get(row, `${metric.id}.${metric.type}`);
+    return safeGet(row, `${metric.id}.${metric.type}`);
   }
 
   switch (metric.type) {
@@ -66,19 +67,19 @@ export const getAggValue = (row, metric) => {
         return null;
       }
 
-      const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map((doc) => get(doc, `_source.${metric.field}`));
+      const hits = safeGet(row, [metric.id, 'docs', 'hits', 'hits'], []);
+      const values = hits.map((doc) => safeGet(doc, `_source.${metric.field}`));
       const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
 
       return aggWith(values);
     case METRIC_TYPES.COUNT:
-      return get(row, 'doc_count', null);
+      return safeGet(row, 'doc_count', null);
     default:
       // Derivatives
-      const normalizedValue = get(row, `${metric.id}.normalized_value`, null);
+      const normalizedValue = safeGet(row, `${metric.id}.normalized_value`, null);
 
       // Everything else
-      const value = get(row, `${metric.id}.value`, null);
+      const value = safeGet(row, `${metric.id}.value`, null);
       return normalizedValue || value;
   }
 };

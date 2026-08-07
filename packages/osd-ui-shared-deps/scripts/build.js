@@ -32,12 +32,11 @@ const Path = require('path');
 const Fs = require('fs');
 
 const { run, createFailError, CiStatsReporter } = require('@osd/dev-utils');
-// const webpack = require('webpack');
+// eslint-disable-next-line import/no-unresolved
 const { rspack } = require('@rspack/core');
-// const Stats = require('webpack/lib/Stats');
 const del = require('del');
 
-const { getWebpackConfig } = require('../webpack.config');
+const { getRspackConfig } = require('../rspack.config');
 
 const DIST_DIR = Path.resolve(__dirname, '../target');
 
@@ -47,7 +46,7 @@ run(
     await del(DIST_DIR);
 
     const compiler = rspack(
-      getWebpackConfig({
+      getRspackConfig({
         dev: flags.dev,
       })
     );
@@ -85,12 +84,12 @@ run(
           await reporter.metrics(metrics);
         }
 
-        log.success(`webpack completed in about ${took} seconds`);
+        log.success(`rspack completed in about ${took} seconds`);
         return;
       }
 
       throw createFailError(
-        `webpack failure in about ${took} seconds\n${stats.toString({
+        `rspack failure in about ${took} seconds\n${stats.toString({
           colors: true,
           preset: 'minimal',
         })}`
@@ -110,12 +109,12 @@ run(
           process.stdout.clearScreenDown();
         }
 
-        log.info('Running webpack compilation...');
+        log.info('Running rspack compilation...');
       });
 
       compiler.watch({}, (error) => {
         if (error) {
-          log.error('Fatal webpack error');
+          log.error('Fatal rspack error');
           log.error(error);
           process.exit(1);
         }

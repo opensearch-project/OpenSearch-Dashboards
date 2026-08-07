@@ -17,7 +17,7 @@ const makeCustomVar = (overrides: Partial<CustomVariableWithState> = {}): Variab
   type: VariableType.Custom,
   current: ['api'],
   customOptions: ['api', 'web', 'worker'],
-  options: ['api', 'web', 'worker'],
+  options: [{ value: 'api' }, { value: 'web' }, { value: 'worker' }],
   ...overrides,
 });
 
@@ -28,7 +28,7 @@ const makeMultiVar = (overrides: Partial<CustomVariableWithState> = {}): Variabl
   current: ['us-east', 'us-west'],
   multi: true,
   customOptions: ['us-east', 'us-west', 'eu-west'],
-  options: ['us-east', 'us-west', 'eu-west'],
+  options: [{ value: 'us-east' }, { value: 'us-west' }, { value: 'eu-west' }],
   ...overrides,
 });
 
@@ -214,6 +214,42 @@ describe('VariableInterpolationService', () => {
         makeMultiVar({ current: ['120', '223'], optionType: 'number' }),
       ]);
       expect(svc.interpolate('$region')).toBe('120, 223');
+    });
+  });
+
+  describe('interpolate — order constraint', () => {
+    it('should only interpolate variables that come before currentVarName', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeCustomVar({ id: '1', name: 'a', current: ['value-a'] }),
+        makeCustomVar({ id: '2', name: 'b', current: ['value-b'] }),
+        makeCustomVar({ id: '3', name: 'c', current: ['value-c'] }),
+      ]);
+      // When interpolating for variable 'b', only 'a' (before 'b') should be interpolated
+      expect(svc.interpolate('$a and $b and $c', undefined, 'b')).toBe('value-a and $b and $c');
+    });
+
+    it('should interpolate all variables when currentVarName is not provided', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeCustomVar({ id: '1', name: 'a', current: ['value-a'] }),
+        makeCustomVar({ id: '2', name: 'b', current: ['value-b'] }),
+      ]);
+      expect(svc.interpolate('$a and $b')).toBe('value-a and value-b');
+    });
+
+    it('should interpolate nothing when currentVarName is the first variable', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeCustomVar({ id: '1', name: 'a', current: ['value-a'] }),
+        makeCustomVar({ id: '2', name: 'b', current: ['value-b'] }),
+      ]);
+      expect(svc.interpolate('$a and $b', undefined, 'a')).toBe('$a and $b');
+    });
+
+    it('should handle both ${var} and $var syntax with order constraint', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeCustomVar({ id: '1', name: 'a', current: ['value-a'] }),
+        makeCustomVar({ id: '2', name: 'b', current: ['value-b'] }),
+      ]);
+      expect(svc.interpolate('${a} and $b', undefined, 'b')).toBe('value-a and $b');
     });
   });
 

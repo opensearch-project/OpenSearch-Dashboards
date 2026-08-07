@@ -59,13 +59,13 @@ export const resolveDatasetByLanguage = async (
         existingDataset.id,
         existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
       );
-      // Get effective signal type from dataView or preferredDataset (for Prometheus)
-      const effectiveSignalType = dataView?.signalType || preferredDataset?.signalType;
+      // Get effective signal type from dataView or existingDataset
+      const effectiveSignalType = dataView?.signalType || existingDataset?.signalType;
       // Validate signal type matches flavor
       if (isSignalTypeCompatible(effectiveSignalType, requiredSignalType)) {
         return existingDataset;
       }
-    } catch (error) {
+    } catch {
       // Dataset no longer exists or validation failed
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
@@ -144,12 +144,9 @@ export const isSignalTypeCompatible = (
     return effectiveSignalType === requiredSignalType;
   }
 
-  // If requiredSignalType is not specified (i.e., Logs flavor),
-  // dataset should not have signalType equal to Traces or Metrics
-  return (
-    effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-    effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
-  );
+  // If requiredSignalType is not specified, for languageType: ppl
+  // dataset should not have signalType equal to Metrics
+  return effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS;
 };
 
 export const queryExecution = async ({
@@ -161,8 +158,6 @@ export const queryExecution = async ({
 }: {
   services: ExploreServices;
   queryString: string;
-  // query: Query;
-  // queryEditorState: QueryEditorState;
   updateEditorStateFn: (updates: Partial<QueryEditorState>) => void;
   updateResultFn: (result: ISearchResult) => void;
   activeQueryAbortControllers: Map<string, AbortController>;
@@ -176,7 +171,6 @@ export const queryExecution = async ({
 
   try {
     updateEditorStateFn({
-      // currentRunningQuery: cacheKey,
       queryStatus: {
         status: QueryExecutionStatus.LOADING,
         startTime: queryStartTime,
@@ -261,11 +255,11 @@ export const queryExecution = async ({
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
     updateResultFn(rawResultsWithMeta);
     updateEditorStateFn({
-      // currentRunningQuery: cacheKey,
       queryStatus: {
         status:
           rawResults.hits?.hits?.length > 0
@@ -283,7 +277,6 @@ export const queryExecution = async ({
     // Handle abort errors - reset query status to initial state
     if (error instanceof Error && error.name === 'AbortError') {
       updateEditorStateFn({
-        // currentRunningQuery: cacheKey,
         queryStatus: {
           status: QueryExecutionStatus.UNINITIALIZED,
           startTime: undefined,

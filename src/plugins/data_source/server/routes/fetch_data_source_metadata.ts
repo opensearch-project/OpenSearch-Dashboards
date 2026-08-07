@@ -4,20 +4,24 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
+import { IRouter, Logger, OpenSearchClient } from 'opensearch-dashboards/server';
 import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
+import { isValidURL } from '../util/endpoint_validator';
 
 export const registerFetchDataSourceMetaDataRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
   authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
-  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
+  logger: Logger,
+  endpointDeniedIPs?: string[],
+  endpointAllowlistedSuffixes?: string[]
 ) => {
   const authRegistry = await authRegistryPromise;
   router.post(
@@ -75,6 +79,26 @@ export const registerFetchDataSourceMetaDataRoute = async (
     },
     async (context, request, response) => {
       const { dataSourceAttr, id: dataSourceId } = request.body;
+
+      const { endpoint } = dataSourceAttr;
+
+      const validationResult = await isValidURL(
+        endpoint,
+        endpointDeniedIPs,
+        endpointAllowlistedSuffixes
+      );
+      if (!validationResult.valid) {
+        logger.error(`Endpoint validation failed for ${endpoint}: ${validationResult.error}`);
+
+        return response.customError({
+          statusCode: 400,
+          body: {
+            message:
+              validationResult.userMessage ||
+              'Fetch data source metadata endpoint validation failed',
+          },
+        });
+      }
 
       try {
         const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(

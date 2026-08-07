@@ -9,7 +9,8 @@
  * GitHub history for details.
  */
 
-const UTF8_TEXT_MIME_RE = /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i;
+const UTF8_TEXT_MIME_RE =
+  /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i;
 
 /**
  * Prepend a UTF-8 BOM (U+FEFF) to a Blob whose MIME type indicates

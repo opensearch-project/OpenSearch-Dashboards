@@ -39,6 +39,7 @@ describe('http resources service', () => {
       root = osdTestServer.createRoot({
         csp: {
           rules: [defaultCspRules],
+          enable: false,
         },
         plugins: { initialize: false },
       });

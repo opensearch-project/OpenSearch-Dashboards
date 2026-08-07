@@ -66,7 +66,7 @@ export const isPhraseFilter = (filter: any): filter is PhraseFilter => {
 };
 
 export const isScriptedPhraseFilter = (filter: any): filter is PhraseFilter =>
-  Boolean(get(filter, 'script.script.params.value'));
+  get(filter, 'script.script.params.value') != null;
 
 export const getPhraseFilterField = (filter: PhraseFilter) => {
   const queryConfig = filter.query.match_phrase || filter.query.match;

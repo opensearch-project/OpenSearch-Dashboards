@@ -35,7 +35,7 @@ describe('ast toExpression', () => {
     it('throws if no type included', () => {
       const errMsg = 'Objects must have a type property';
       const astObject = { hello: 'world' };
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws if not correct type', () => {
@@ -44,7 +44,7 @@ describe('ast toExpression', () => {
         type: 'hi',
         hello: 'world',
       };
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws if expression without chain', () => {
@@ -53,7 +53,7 @@ describe('ast toExpression', () => {
         type: 'expression',
         hello: 'world',
       };
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws if arguments type is invalid', () => {
@@ -61,7 +61,7 @@ describe('ast toExpression', () => {
       const invalidTypes = [null, []];
 
       function validate(obj) {
-        expect(() => toExpression(obj)).toThrowError(errMsg);
+        expect(() => toExpression(obj)).toThrow(errMsg);
       }
 
       for (let i = 0; i < invalidTypes.length; i++) {
@@ -76,7 +76,6 @@ describe('ast toExpression', () => {
           ],
         };
 
-        // eslint-disable-next-line no-loop-func
         validate(astObject);
       }
     });
@@ -88,7 +87,7 @@ describe('ast toExpression', () => {
         function: 'pointseries',
         arguments: null,
       };
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws on invalid argument type', () => {
@@ -112,7 +111,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws on expressions without chains', () => {
@@ -136,7 +135,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('throws on nameless functions and partials', () => {
@@ -152,7 +151,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).toThrowError(errMsg);
+      expect(() => toExpression(astObject)).toThrow(errMsg);
     });
 
     it('single expression', () => {

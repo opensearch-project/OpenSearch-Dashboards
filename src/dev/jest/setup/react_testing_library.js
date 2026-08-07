@@ -42,14 +42,19 @@ import { act } from 'react';
 // instead of default 'data-testid', use opensearch-dashboards's 'data-test-subj'
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
 
+// Capture a reference to the real setTimeout at module-load time, before any
+// test can install fake timers. This is used in the afterEach below.
+const realSetTimeout = setTimeout;
+
 // React 18 concurrent mode fix: Ensure all pending React work is flushed before cleanup
 // This prevents "Cannot read properties of null (reading 'body')" errors when React
 // tries to commit async updates after jsdom has cleaned up the document
 afterEach(async () => {
-  // Flush all pending React work using act()
+  // Flush all pending React work using act().
+  // We intentionally use the real setTimeout (captured above) so that tests
+  // which call jest.useFakeTimers() do not cause this hook to hang.
   await act(async () => {
-    // Allow any pending timers and promises to resolve
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => realSetTimeout(resolve, 0));
   });
   // Then run the standard cleanup
   cleanup();

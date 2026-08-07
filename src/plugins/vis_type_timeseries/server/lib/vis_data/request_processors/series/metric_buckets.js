@@ -52,7 +52,7 @@ export function metricBuckets(
           try {
             const bucket = fn(metric, series.metrics, intervalString);
             overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}`, bucket);
-          } catch (e) {
+          } catch {
             // meh
           }
         }

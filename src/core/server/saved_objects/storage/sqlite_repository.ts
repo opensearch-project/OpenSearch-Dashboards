@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterOptions,
@@ -65,7 +65,7 @@ interface BetterSqlite3Statement {
 let Database: any;
 try {
   Database = require('better-sqlite3');
-} catch (e) {
+} catch {
   // optional dependency
 }
 
@@ -159,7 +159,7 @@ export class SqliteSavedObjectsRepository implements ISavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const id = options.id || uuid.v4();
+    const id = options.id || uuidv4();
     const namespace = options.namespace || '';
     const now = new Date().toISOString();
 
@@ -279,7 +279,7 @@ export class SqliteSavedObjectsRepository implements ISavedObjectsRepository {
     const txn = this.db.transaction(() => {
       for (const obj of objects) {
         try {
-          const id = obj.id || uuid.v4();
+          const id = obj.id || uuidv4();
           const namespace = options.namespace || '';
           const now = new Date().toISOString();
 

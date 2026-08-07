@@ -36,8 +36,7 @@ import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../vis_types';
 
-export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations
-  extends SavedObjectOpenSearchDashboardsServices {
+export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations extends SavedObjectOpenSearchDashboardsServices {
   visualizationTypes: TypesStart;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
@@ -56,7 +55,7 @@ export function createSavedVisLoader(
       if (source.visState) {
         try {
           typeName = JSON.parse(String(source.visState)).type;
-        } catch (e) {
+        } catch {
           /* missing typename handled below */
         }
       }

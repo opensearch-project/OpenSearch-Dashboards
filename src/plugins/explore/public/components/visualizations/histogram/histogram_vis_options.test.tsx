@@ -15,8 +15,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'x1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 
   {
@@ -24,8 +22,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 2',
     schema: VisFieldType.Numerical,
     column: 'x2',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -69,10 +65,6 @@ describe('BarVisStyleControls', () => {
   const defaultProps: HistogramVisStyleControlsProps = {
     styleOptions: {
       ...defaultHistogramChartStyles,
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,

@@ -36,7 +36,7 @@ describe('DataSourceSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it('should render normally when local cluster is not hidden', () => {
@@ -52,12 +52,19 @@ describe('DataSourceSelectable', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should render normally when local cluster is hidden', () => {
@@ -73,12 +80,19 @@ describe('DataSourceSelectable', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should filter options if configured', async () => {
@@ -97,7 +111,7 @@ describe('DataSourceSelectable', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should show popover with button click', async () => {
@@ -126,7 +140,7 @@ describe('DataSourceSelectable', () => {
 
   it('should invoke the onSelectedDataSource callback when state changes', async () => {
     const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue([{ id: 'test2', label: 'test2' }]);
     let container: any;
     await act(async () => {
       container = mount(
@@ -151,7 +165,7 @@ describe('DataSourceSelectable', () => {
       containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     });
     container.update();
-    expect(onSelectedDataSource).toBeCalledTimes(1);
+    expect(onSelectedDataSource).toHaveBeenCalledTimes(1);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
       dataSourceOptions: [
@@ -200,7 +214,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
-    expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
+    expect(onSelectedDataSource).toHaveBeenCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
     expect(utils.getDefaultDataSource).toHaveBeenCalled();
   });
@@ -265,7 +279,7 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Data source with ID "" is not available');
   });
 
   it(`should display a warning when selectedOption[0] is an empty object`, async () => {
@@ -287,7 +301,7 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Data source with ID "" is not available');
   });
   it(`should display a warning when selectedOption[0] is missing id but has a label`, async () => {
     const onSelectedDataSource = jest.fn();
@@ -307,7 +321,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Data source with ID "" is not available');
   });
   it(`should display a warning when selectedOption[0] is missing id but has a blank label`, async () => {
     const onSelectedDataSource = jest.fn();
@@ -326,7 +340,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Data source with ID "" is not available');
   });
 
   it(`should display a warning when selectedOption is an empty array`, async () => {
@@ -344,7 +358,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Data source with ID "" is not available');
   });
 
   it(`should render the selected option when selectedOption[0]'s id is found`, async () => {
@@ -400,7 +414,7 @@ describe('DataSourceSelectable', () => {
 
   it('should render nothing when no default option or activeOption', async () => {
     const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue(undefined);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue(undefined);
     let container: any;
     await act(async () => {
       container = mount(
@@ -421,7 +435,7 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
-    expect(onSelectedDataSource).toBeCalledWith([]);
+    expect(onSelectedDataSource).toHaveBeenCalledWith([]);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
       dataSourceOptions: [],
@@ -460,7 +474,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
-    expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
+    expect(onSelectedDataSource).toHaveBeenCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
   });
 
@@ -505,17 +519,17 @@ describe('DataSourceSelectable', () => {
       );
       await nextTick();
 
-      expect(toasts.add).toBeCalledWith(
+      expect(toasts.add).toHaveBeenCalledWith(
         expect.objectContaining({
           title: defaultMessage,
         })
       );
-      expect(onSelectedDataSource).toBeCalledWith([]);
+      expect(onSelectedDataSource).toHaveBeenCalledWith([]);
     }
   );
 
   it('should call dataSourceSelection selectDataSource when selecting', async () => {
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue([{ id: 'test2', label: 'test2' }]);
     const dataSourceSelectionMock = new DataSourceSelectionService();
     const componentId = 'component-id';
     const selectedOptions = [{ id: 'test2', label: 'test2' }];

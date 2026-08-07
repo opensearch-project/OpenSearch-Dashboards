@@ -263,7 +263,7 @@ describe('WorkspaceDetail', () => {
       return controls?.[2]?.run?.() ?? null;
     };
     render(WorkspaceDetailPage({ header: mockHeaderControl }));
-    expect(windowOpenSpy).toBeCalled();
+    expect(windowOpenSpy).toHaveBeenCalled();
   });
 
   it('will not render xss content', async () => {
@@ -278,7 +278,7 @@ describe('WorkspaceDetail', () => {
     expect(
       (getByTestId('workspaceForm-workspaceDetails-descriptionInputText') as HTMLInputElement).value
     ).toEqual('<script>alert("description")</script>');
-    expect(alertSpy).toBeCalledTimes(0);
+    expect(alertSpy).toHaveBeenCalledTimes(0);
     alertSpy.mockRestore();
   });
 

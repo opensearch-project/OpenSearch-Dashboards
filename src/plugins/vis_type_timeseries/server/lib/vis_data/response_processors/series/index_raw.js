@@ -30,27 +30,27 @@
 
 import { percentile } from './percentile';
 import { percentileRank } from './percentile_rank';
+import { percentileRaw } from './percentile_raw';
 
 import { seriesAgg } from './series_agg';
 import { stdDeviationBands } from './std_deviation_bands';
 import { stdDeviationSibling } from './std_deviation_sibling';
 import { stdMetricRaw } from './std_metric_raw';
 import { stdSiblingRaw } from './std_sibling_raw';
-import { timeShift } from './time_shift';
-import { dropLastBucket } from './drop_last_bucket';
-// NOTE: mathAgg is intentionally NOT imported for raw data endpoint
-// NOTE: Using stdMetricRaw and stdSiblingRaw instead of stdMetric/stdSibling
-//       to append metric IDs to series IDs for client-side processing
+// math is evaluated in the browser (process_math_series.js); timeShift and
+// dropLastBucket must run AFTER math, so they are applied client-side in
+// post_process_raw_series.js. stdMetricRaw/stdSiblingRaw append metric ids to series
+// ids for client-side math; percentileRaw emits percentile component series so math
+// can reference percentile values (e.g. params.x where x = `${metricId}[95]`).
 
 export const processorsRaw = [
   percentile,
   percentileRank,
+  percentileRaw,
   stdDeviationBands,
   stdDeviationSibling,
   stdMetricRaw,
   stdSiblingRaw,
-  // mathAgg, // EXCLUDED - client will handle math evaluation
   seriesAgg,
-  timeShift,
-  dropLastBucket,
+  // mathAgg, timeShift, dropLastBucket are applied client-side (after math)
 ];

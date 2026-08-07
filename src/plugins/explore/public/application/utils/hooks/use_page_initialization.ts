@@ -70,8 +70,24 @@ export const useInitPage = () => {
         const visualization = savedExplore.visualization;
         const uiState = savedExplore.uiState;
         if (visualization) {
-          const { chartType, params, axesMapping } = JSON.parse(visualization);
-          visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
+          const {
+            chartType,
+            params,
+            axesMapping,
+            splitField,
+            splitLayout,
+            showSplitLabel,
+            dataTransformations,
+          } = JSON.parse(visualization);
+          visualizationBuilder.setVisConfig({
+            type: chartType,
+            styles: params,
+            axesMapping,
+            splitField,
+            splitLayout,
+            showSplitLabel,
+            dataTransformations,
+          });
         }
         // Only use saved object's activeTab if there's no activeTab in URL state
         // This preserves user's tab selection from URL

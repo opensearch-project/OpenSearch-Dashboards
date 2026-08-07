@@ -43,26 +43,38 @@ const capitalizeFirstLetter = (str: string): string => {
 };
 
 const groupShortcutsByCategory = (shortcuts: ShortcutItem[]): Record<string, ShortcutItem[]> => {
-  return shortcuts.reduce((groups, shortcut) => {
-    const category = capitalizeFirstLetter(shortcut.category);
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(shortcut);
-    return groups;
-  }, {} as Record<string, ShortcutItem[]>);
+  return shortcuts.reduce(
+    (groups, shortcut) => {
+      const category = capitalizeFirstLetter(shortcut.category);
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(shortcut);
+      return groups;
+    },
+    {} as Record<string, ShortcutItem[]>
+  );
 };
 
 interface KeyboardShortcutHelpModalProps {
   trigger?: React.ReactElement;
   keyboardShortcutService?:
-    | KeyboardShortcutService
-    | { getAllShortcuts: () => ShortcutDefinition[] };
+    KeyboardShortcutService | { getAllShortcuts: () => ShortcutDefinition[] };
+  /**
+   * Whether this instance registers the global `shift+/` shortcut to open the
+   * modal. Defaults to true. Set false when another always-mounted instance
+   * already owns the registration (e.g. the management footer listener), so a
+   * second instance — like the one rendered inside the header Help menu — does
+   * not register `show_help` a second time, which the shortcut service rejects
+   * as a duplicate and would crash the surrounding menu.
+   */
+  registerShortcut?: boolean;
 }
 
 export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps> = ({
   trigger,
   keyboardShortcutService,
+  registerShortcut = true,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [shortcuts, setShortcuts] = useState<ShortcutItem[]>([]);
@@ -123,7 +135,11 @@ export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps>
     setIsModalVisible(true);
   }, [loadShortcuts]);
 
-  // Register keyboard shortcut to open modal
+  // Register the `shift+/` shortcut to open the modal. When `registerShortcut`
+  // is false, pass `undefined` so the hook no-ops (it early-returns without a
+  // service) — this avoids a duplicate `show_help` registration when a second
+  // instance is mounted (e.g. inside the header Help menu while the management
+  // footer listener already owns the registration).
   useKeyboardShortcut(
     {
       id: 'show_help',
@@ -137,7 +153,7 @@ export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps>
       keys: 'shift+/',
       execute: showModal,
     },
-    keyboardShortcutService as KeyboardShortcutService
+    (registerShortcut ? keyboardShortcutService : undefined) as KeyboardShortcutService
   );
 
   const renderSequenceKeys = useCallback((keys: string) => {

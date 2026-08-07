@@ -16,6 +16,10 @@ export { ExplorePluginSetup, ExplorePluginStart } from './types';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enabled: true,
+    sqlSupport: true,
+    queryProfiling: true,
+    pplAnalyze: true,
+    logsDrilldown: true,
   },
   schema: configSchema,
   deprecations: ({ rename, unused }) => [

@@ -102,7 +102,7 @@ dataArray.forEach(function (data, i) {
       test('should throw an error if no data is provided', function () {
         expect(function () {
           vis.render(null, mockUiState);
-        }).toThrowError();
+        }).toThrow();
       });
     });
 

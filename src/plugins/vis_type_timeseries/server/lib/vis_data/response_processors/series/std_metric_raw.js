@@ -37,16 +37,19 @@ import { METRIC_TYPES } from '../../../../../common/metric_types';
 /**
  * stdMetricRaw - Modified version of stdMetric for the raw endpoint
  *
- * This processor is identical to stdMetric except it appends the metric ID
- * to the series ID. This allows the client-side code to differentiate between
- * different metrics in the same series when evaluating math expressions.
+ * This processor is identical to stdMetric except that, when the series ends
+ * in a math metric, it emits one component series per non-math metric and
+ * appends the metric ID to the series ID. This allows the client-side code
+ * (process_math_series.js) to find the component metrics for a math series by
+ * matching series IDs against the pattern "series-id:*".
  *
- * Example:
- *   Regular stdMetric: id = "series-1"
+ * Example (math series):
  *   stdMetricRaw: id = "series-1:count" or "series-1:avg-cpu"
  *
- * This format allows client-side process_math_series.js to find component
- * metrics by searching for series IDs matching the pattern "series-id:*"
+ * For a regular (non-math) series the id is left untouched (id = split.id, e.g.
+ * "series-1" for an unsplit series or "series-1:<bucketKey>" for a term/filter
+ * split). Suffixing every series with the metric ID would break downstream
+ * colon-based split detection and produce phantom split labels.
  */
 export function stdMetricRaw(resp, panel, series, meta) {
   return (next) => (results) => {
@@ -98,8 +101,7 @@ export function stdMetricRaw(resp, panel, series, meta) {
     getSplits(resp, panel, series, meta).forEach((split) => {
       const data = split.timeseries.buckets.map(mapBucket(metric));
       results.push({
-        // MODIFIED: Append metric ID to series ID for client-side differentiation
-        id: `${split.id}:${metric.id}`,
+        id: split.id,
         label: split.label,
         labelFormatted: split.labelFormatted,
         color: split.color,

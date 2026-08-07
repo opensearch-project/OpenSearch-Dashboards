@@ -99,7 +99,7 @@ describe('migrateRawDocs', () => {
       ],
     ]);
 
-    expect(logger.error).toBeCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
   test('rejects when the transform function throws an error', async () => {

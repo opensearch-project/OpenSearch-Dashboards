@@ -41,7 +41,7 @@ test('render', () => {
       url="link_to_item"
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('props', () => {
@@ -55,7 +55,7 @@ describe('props', () => {
         iconType="logoApache"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('iconUrl', () => {
@@ -68,7 +68,7 @@ describe('props', () => {
         iconUrl="icon_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('isBeta', () => {
@@ -81,6 +81,6 @@ describe('props', () => {
         isBeta={true}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

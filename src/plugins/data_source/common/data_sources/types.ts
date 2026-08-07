@@ -61,4 +61,5 @@ export enum DataSourceEngineType {
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
   OpenSearchCrossCluster = 'OpenSearch(Cross-cluster search)',
+  AnalyticEngine = 'AnalyticEngine',
 }

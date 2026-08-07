@@ -55,13 +55,13 @@ const createEvent = ({
   defaultPrevented?: boolean;
   modifierKey?: boolean;
 }): MouseEvent<HTMLElement> => {
-  return ({
+  return {
     target,
     button,
     defaultPrevented,
     ctrlKey: modifierKey,
     preventDefault: jest.fn(),
-  } as unknown) as MouseEvent<HTMLElement>;
+  } as unknown as MouseEvent<HTMLElement>;
 };
 
 describe('createNavigateToUrlClickHandler', () => {
@@ -88,7 +88,7 @@ describe('createNavigateToUrlClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost/base-path/app/targetApp');
+    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost:5601/base-path/app/targetApp');
   });
 
   it('is triggered if a non-link target has a parent link', () => {
@@ -102,7 +102,7 @@ describe('createNavigateToUrlClickHandler', () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
-    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost/base-path/app/targetApp');
+    expect(navigateToUrl).toHaveBeenCalledWith('http://localhost:5601/base-path/app/targetApp');
   });
 
   it('is not triggered if a non-link target has no parent link', () => {

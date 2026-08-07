@@ -21,9 +21,9 @@ describe('PrometheusResourceClient', () => {
   const testTimeRange = { from: 'now-15m', to: 'now' };
 
   beforeEach(() => {
-    mockHttp = ({
+    mockHttp = {
       post: jest.fn().mockResolvedValue({ data: [] }),
-    } as unknown) as jest.Mocked<HttpSetup>;
+    } as unknown as jest.Mocked<HttpSetup>;
 
     client = new PrometheusResourceClient(mockHttp);
 

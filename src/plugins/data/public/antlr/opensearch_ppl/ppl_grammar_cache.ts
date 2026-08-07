@@ -8,133 +8,19 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'opensearch-dashboards/public';
-import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
+import { CachedGrammar, deserializeGrammarBundle } from './ppl_grammar_deserialize';
 import { TokenDictionary } from '../opensearch_sql/table';
+import { getDataSourceEngineCapabilities, UI_SETTINGS } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
-const ATN_DESERIALIZE_OPTIONS = {
-  readOnly: false,
-  verifyATN: true,
-  generateRuleBypassTransitions: true,
-};
-
-export interface CachedGrammar {
-  lexerATN: ATN;
-  parserATN: ATN;
-  vocabulary: Vocabulary;
-  lexerRuleNames: string[];
-  parserRuleNames: string[];
-  channelNames: string[];
-  modeNames: string[];
-  startRuleIndex: number;
-  pipeStartRuleIndex?: number;
-  grammarHash: string;
-  tokenDictionary: TokenDictionary;
-  ignoredTokens: number[];
-  rulesToVisit: number[];
-  runtimeSymbolicNameToTokenType: Map<string, number>;
-  runtimeRuleNameToIndex: Map<string, number>;
-}
-
-function buildSymbolicNameToTokenType(symbolicNames: Array<string | null>): Map<string, number> {
-  const map = new Map<string, number>();
-  for (let i = 1; i < symbolicNames.length; i++) {
-    const name = symbolicNames[i];
-    if (name) map.set(name, i);
-  }
-  return map;
-}
-
-function buildRuleNameToIndex(parserRuleNames: string[]): Map<string, number> {
-  const map = new Map<string, number>();
-  for (let i = 0; i < parserRuleNames.length; i++) {
-    map.set(parserRuleNames[i], i);
-  }
-  return map;
-}
-
-function isFiniteInteger(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && Number.isFinite(value);
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string');
-}
-
-function isStringOrNullArray(value: unknown): value is Array<string | null> {
-  return Array.isArray(value) && value.every((item) => item === null || typeof item === 'string');
-}
-
-function isNumberArray(value: unknown): value is number[] {
-  return (
-    Array.isArray(value) && value.every((item) => typeof item === 'number' && Number.isFinite(item))
-  );
-}
-
-function isRecordOfNumbers(value: unknown): value is Record<string, number> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.values(value).every((item) => typeof item === 'number' && Number.isFinite(item))
-  );
-}
-
-function isValidBundleShape(bundle: unknown): bundle is PPLGrammarBundle {
-  if (typeof bundle !== 'object' || bundle === null) {
-    return false;
-  }
-
-  const candidate = bundle as Partial<PPLGrammarBundle>;
-
-  if (
-    !isNumberArray(candidate.lexerSerializedATN) ||
-    !isNumberArray(candidate.parserSerializedATN) ||
-    !isStringArray(candidate.lexerRuleNames) ||
-    !isStringArray(candidate.parserRuleNames) ||
-    !isStringArray(candidate.channelNames) ||
-    !isStringArray(candidate.modeNames) ||
-    !isStringOrNullArray(candidate.literalNames) ||
-    !isStringOrNullArray(candidate.symbolicNames) ||
-    !isFiniteInteger(candidate.startRuleIndex) ||
-    typeof candidate.grammarHash !== 'string'
-  ) {
-    return false;
-  }
-
-  if (
-    candidate.startRuleIndex < 0 ||
-    candidate.startRuleIndex >= candidate.parserRuleNames.length
-  ) {
-    return false;
-  }
-
-  if (
-    candidate.pipeStartRuleIndex !== undefined &&
-    (!isFiniteInteger(candidate.pipeStartRuleIndex) ||
-      candidate.pipeStartRuleIndex < 0 ||
-      candidate.pipeStartRuleIndex >= candidate.parserRuleNames.length)
-  ) {
-    return false;
-  }
-
-  if (candidate.tokenDictionary !== undefined && !isRecordOfNumbers(candidate.tokenDictionary)) {
-    return false;
-  }
-
-  if (candidate.ignoredTokens !== undefined && !isNumberArray(candidate.ignoredTokens)) {
-    return false;
-  }
-
-  if (candidate.rulesToVisit !== undefined && !isNumberArray(candidate.rulesToVisit)) {
-    return false;
-  }
-
-  return true;
-}
+// `CachedGrammar` and the bundle-deserialization logic now live in the Node-safe
+// `ppl_grammar_deserialize` module so both this browser cache and the headless
+// CI lint API share one implementation. Re-exported here to keep existing
+// `import { CachedGrammar } from './ppl_grammar_cache'` call sites working.
+export type { CachedGrammar } from './ppl_grammar_deserialize';
 
 /**
  * Single-slot in-memory cache for PPL grammar artifacts.
@@ -149,6 +35,10 @@ class PPLGrammarCache {
     (event: { dataSourceId?: string; grammarHash: string }) => void
   > = new Set();
 
+  private versionResolvedListeners: Set<
+    (event: { dataSourceId?: string; version: string }) => void
+  > = new Set();
+
   private cachedDatasourceId: string | undefined;
   private cachedVersion: string | undefined;
   private cachedGrammar: CachedGrammar | null = null;
@@ -158,8 +48,13 @@ class PPLGrammarCache {
 
   /**
    * Returns true if version >= 3.6.0 (grammar artifact endpoint support).
+   *
+   * Engines without a runtime PPL grammar endpoint (e.g. Elasticsearch / Open Distro, whose SQL/PPL
+   * live under Open Distro and expose no `/_plugins/_ppl/_grammar`) always fall back to the bundled
+   * grammar regardless of version.
    */
-  shouldFetchFromBackend(version?: string): boolean {
+  shouldFetchFromBackend(version?: string, engineType?: string): boolean {
+    if (!getDataSourceEngineCapabilities(engineType).supportsRuntimePplGrammar) return false;
     if (!version) return false;
     const coerced = semver.coerce(version);
     return coerced ? semver.satisfies(coerced.version, '>=3.6.0') : false;
@@ -168,6 +63,16 @@ class PPLGrammarCache {
   getCachedGrammar(datasourceId?: string): CachedGrammar | null {
     if (datasourceId !== this.cachedDatasourceId) return null;
     return this.cachedGrammar;
+  }
+
+  /**
+   * Returns the resolved version string for the given datasource, or undefined
+   * if the version has not been resolved yet. This provides a synchronous fallback
+   * for contexts where `dataset.dataSource.version` is unavailable (e.g. local cluster).
+   */
+  getResolvedVersion(datasourceId?: string): string | undefined {
+    if (datasourceId !== this.cachedDatasourceId) return undefined;
+    return this.cachedVersion;
   }
 
   /**
@@ -181,10 +86,14 @@ class PPLGrammarCache {
     uiSettings: IUiSettingsClient | undefined,
     savedObjectsClient?: SavedObjectsClientContract,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): void {
     // Check feature flag - if disabled, reset cache state but keep subscribers
-    const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
+    // `?.` covers a missing client; the explicit default covers an undeclared
+    // key, which would otherwise throw rather than fall back.
+    const runtimeGrammarEnabled =
+      uiSettings?.get<boolean>(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
     if (!runtimeGrammarEnabled) {
       this.reset();
       return;
@@ -208,7 +117,13 @@ class PPLGrammarCache {
     // Already cached, in-flight, or recently failed — nothing to do.
     if (this.cachedGrammar || this.pendingFetch || this.fetchFailed) return;
 
-    const promise = this.doWarmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
+    const promise = this.doWarmUp(
+      http,
+      savedObjectsClient,
+      datasourceId,
+      datasourceVersion,
+      datasourceEngineType
+    );
     this.pendingFetch = promise;
 
     promise
@@ -233,10 +148,11 @@ class PPLGrammarCache {
     this.fetchFailedAt = 0;
   }
 
-  /** Reset all cache state AND unregister all grammar-update listeners. */
+  /** Reset all cache state AND unregister all listeners. */
   dispose(): void {
     this.reset();
     this.grammarUpdateListeners.clear();
+    this.versionResolvedListeners.clear();
   }
 
   subscribeToGrammarUpdates(
@@ -248,11 +164,21 @@ class PPLGrammarCache {
     };
   }
 
+  subscribeToVersionResolved(
+    listener: (event: { dataSourceId?: string; version: string }) => void
+  ): () => void {
+    this.versionResolvedListeners.add(listener);
+    return () => {
+      this.versionResolvedListeners.delete(listener);
+    };
+  }
+
   private async doWarmUp(
     http: HttpSetup,
     savedObjectsClient: SavedObjectsClientContract | undefined,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): Promise<CachedGrammar | null> {
     const version = await this.resolveVersion(
       http,
@@ -260,10 +186,11 @@ class PPLGrammarCache {
       datasourceId,
       datasourceVersion
     );
-    if (!this.shouldFetchFromBackend(version)) {
+    if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
-      // version becomes available (e.g. /api/status wasn't ready on page load).
+      // version becomes available (e.g. the local cluster version route wasn't
+      // ready on page load).
       return null;
     }
     const result = await this.doFetch(http, datasourceId);
@@ -294,12 +221,16 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Local cluster — read OSD server version from /api/status.
-        const response = await http.get<{ version?: { number?: string } }>('/api/status');
-        version = response?.version?.number;
+        // Local cluster — read the cluster engine version (the >=3.6.0 check is
+        // cluster-side); runtime HTTP call, not a plugin dep, to avoid a data_source_management cycle.
+        const response = await http.get<{ version?: string }>(
+          '/internal/data-source-management/localClusterVersion'
+        );
+        version = response?.version || undefined;
       }
       if (version) {
         this.cachedVersion = version;
+        this.notifyVersionResolved(datasourceId, version);
       }
       return version;
     } catch {
@@ -327,39 +258,15 @@ class PPLGrammarCache {
         clearTimeout(timeout);
       }
 
-      if (!isValidBundleShape(bundle)) {
+      // Shape validation + ATN deserialization live in the Node-safe
+      // `ppl_grammar_deserialize` module (shared with the headless CI lint API).
+      // A malformed bundle yields `null`; a corrupt-but-well-shaped ATN throws,
+      // which the enclosing try/catch turns into the silent compiled fallback —
+      // the browser's intended degrade-gracefully behavior.
+      const entry = deserializeGrammarBundle(bundle);
+      if (!entry) {
         return null;
       }
-
-      const literalNames = (bundle.literalNames || []).map((n) => (n === '' ? null : n));
-      const symbolicNames = (bundle.symbolicNames || []).map((n) => (n === '' ? null : n));
-      const vocabulary = new Vocabulary(literalNames, symbolicNames);
-
-      const lexerATN = new ATNDeserializer(ATN_DESERIALIZE_OPTIONS).deserialize(
-        bundle.lexerSerializedATN
-      );
-      const parserATN = new ATNDeserializer(ATN_DESERIALIZE_OPTIONS).deserialize(
-        bundle.parserSerializedATN
-      );
-
-      const entry: CachedGrammar = {
-        lexerATN,
-        parserATN,
-        vocabulary,
-        lexerRuleNames: bundle.lexerRuleNames,
-        parserRuleNames: bundle.parserRuleNames,
-        channelNames: bundle.channelNames,
-        modeNames: bundle.modeNames,
-        startRuleIndex: bundle.startRuleIndex,
-        pipeStartRuleIndex: bundle.pipeStartRuleIndex,
-        grammarHash: bundle.grammarHash,
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        tokenDictionary: (bundle.tokenDictionary ?? {}) as TokenDictionary,
-        ignoredTokens: bundle.ignoredTokens ?? [],
-        rulesToVisit: bundle.rulesToVisit ?? [],
-        runtimeSymbolicNameToTokenType: buildSymbolicNameToTokenType(bundle.symbolicNames),
-        runtimeRuleNameToIndex: buildRuleNameToIndex(bundle.parserRuleNames),
-      };
 
       // Only cache if the datasource hasn't changed while we were fetching.
       // A rapid ds-1 → ds-2 switch resets cachedDatasourceId; if ds-1's fetch
@@ -389,16 +296,74 @@ class PPLGrammarCache {
       }
     }
   }
+
+  private notifyVersionResolved(datasourceId: string | undefined, version: string): void {
+    for (const listener of this.versionResolvedListeners) {
+      try {
+        listener({ dataSourceId: datasourceId, version });
+      } catch {
+        // A failing listener must not prevent other listeners from being notified.
+      }
+    }
+  }
 }
 
 export const pplGrammarCache = new PPLGrammarCache();
 
+// Synchronous render-time gate. When the version is unknown it intentionally
+// returns `true` (optimistic) because the version is only knowable async, letting
+// the later `warmUp` → `resolveVersion` → `shouldFetchFromBackend` chain make the
+// real decision — which is why this and `shouldFetchFromBackend` treat an unknown
+// version oppositely (deliberate, not a bug). It's safe: if the runtime grammar
+// can't load, the runtime lint/validate paths return null and the editor falls
+// back to the compiled grammar. Do NOT change this to `false` on unknown version —
+// that breaks the local cluster.
 export function shouldUseRuntimeGrammar(
   _dataSourceId?: string,
-  dataSourceVersion?: string
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string
 ): boolean {
+  // Engines without a runtime grammar endpoint (e.g. Elasticsearch) use the bundled grammar.
+  if (!getDataSourceEngineCapabilities(dataSourceEngineType).supportsRuntimePplGrammar)
+    return false;
   if (dataSourceVersion) {
-    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion);
+    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion, dataSourceEngineType);
   }
   return true;
+}
+
+/**
+ * Derive whether a data source runs the Calcite engine.
+ *
+ * An engine that speaks Open Distro SQL/PPL (Elasticsearch) has no Calcite
+ * engine at all, so that answer is definitive. Otherwise the only proof is a
+ * successful cluster-settings reading: `measuredCalciteEnabled` is the value the
+ * route actually read, and `undefined` means it has not been read yet.
+ *
+ * The version alone is deliberately never enough to return `true`. It cannot see
+ * an administratively-disabled Calcite on a >= 3.3.0 cluster, and treating it as
+ * proof let Calcite-only rules fire on clusters that do not run Calcite. A
+ * version below 3.3.0 is still conclusive in the negative direction.
+ */
+export function deriveIsCalcite(
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string,
+  measuredCalciteEnabled?: boolean
+): boolean | undefined {
+  if (getDataSourceEngineCapabilities(dataSourceEngineType).usesOpenDistroSqlPpl) {
+    return false;
+  }
+
+  if (measuredCalciteEnabled !== undefined) {
+    return measuredCalciteEnabled;
+  }
+
+  const coerced = dataSourceVersion ? semver.coerce(dataSourceVersion) : null;
+  if (!coerced) {
+    return undefined;
+  }
+
+  // Pre-Calcite cluster: conclusive. At or above 3.3.0 the engine is on by
+  // default but may be disabled, so withhold judgement until measured.
+  return semver.gte(coerced.version, '3.3.0') ? undefined : false;
 }

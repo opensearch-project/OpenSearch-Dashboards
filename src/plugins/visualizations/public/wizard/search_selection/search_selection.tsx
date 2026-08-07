@@ -28,7 +28,13 @@
  * under the License.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -37,6 +43,7 @@ import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../..
 
 import { SavedObjectFinderUi } from '../../../../saved_objects/public';
 import { VisType } from '../../vis_types';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -47,8 +54,33 @@ interface SearchSelectionProps {
   application: ApplicationStart;
 }
 
-export class SearchSelection extends React.Component<SearchSelectionProps> {
+interface SearchSelectionState {
+  indexPatternIds: Set<string>;
+  hasAnalyticEngine: boolean;
+}
+
+export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
   private fixedPageSize: number = 8;
+
+  constructor(props: SearchSelectionProps) {
+    super(props);
+    this.state = {
+      indexPatternIds: new Set(),
+      hasAnalyticEngine: false,
+    };
+  }
+
+  async componentDidMount() {
+    const allIndexPatterns = await this.props.data.indexPatterns.getCache();
+    const indexPatternList = await this.props.data.indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
+
+    this.setState({
+      indexPatternIds: new Set(indexPatternList?.map((indexpattern) => indexpattern.id)),
+      hasAnalyticEngine: (allIndexPatterns?.length ?? 0) > (indexPatternList?.length ?? 0),
+    });
+  }
 
   public render() {
     return (
@@ -68,6 +100,22 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
+          {this.state.hasAnalyticEngine && (
+            <>
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'visualizations.newVisWizard.searchSelection.optimizedEngineNotSupported',
+                  {
+                    defaultMessage:
+                      "This visualization type supports only DSL queries. Index patterns and saved searches backed by Optimized engine (AnalyticEngine type) data sources aren't supported and are hidden from the list below.",
+                  }
+                )}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
@@ -89,6 +137,15 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 includeFields: ['kibanaSavedObjectMeta'],
+                showSavedObject: (savedSearch) => {
+                  const indexPatternRef = savedSearch.references?.find(
+                    (ref: any) => ref.type === 'index-pattern'
+                  );
+                  if (!indexPatternRef) {
+                    return true;
+                  }
+                  return this.state.indexPatternIds.has(indexPatternRef.id);
+                },
               },
               {
                 type: 'index-pattern',
@@ -99,6 +156,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Index pattern',
                   }
                 ),
+                showSavedObject: (index) => {
+                  return this.state.indexPatternIds.has(index.id);
+                },
               },
             ]}
             fixedPageSize={this.fixedPageSize}

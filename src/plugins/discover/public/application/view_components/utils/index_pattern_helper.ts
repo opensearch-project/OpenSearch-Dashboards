@@ -48,7 +48,7 @@ export const fetchSavedSearch = async (
   try {
     const savedSearch = await services.getSavedSearchById(savedSearchId);
     return savedSearch;
-  } catch (error) {
+  } catch {
     // TODO: handle redirect with Data Explorer
     redirectWhenMissing({
       history,

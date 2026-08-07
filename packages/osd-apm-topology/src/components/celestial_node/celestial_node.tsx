@@ -29,20 +29,10 @@ export const CelestialNode = ({ data, id }: NodeProps<CelestialCustomNode>) => {
     getChildrenNodes,
   } = useNodeRelationships();
 
-  const {
-    isCollapsed,
-    isCollapsable,
-    isStacked,
-    isStackable,
-    isExpanded,
-    isExpandable,
-  } = useNodeClustering();
-  const {
-    onExpandChildren,
-    onExpandSiblings,
-    onCollapseSiblings,
-    onCollapseDescendants,
-  } = useContextMenuActions(id);
+  const { isCollapsed, isCollapsable, isStacked, isStackable, isExpanded, isExpandable } =
+    useNodeClustering();
+  const { onExpandChildren, onExpandSiblings, onCollapseSiblings, onCollapseDescendants } =
+    useContextMenuActions(id);
   const count = data.isStacked
     ? getAggregateSiblingsCount(id) + 1
     : getOutgoingEdgesCount(id, Visibility.Hidden);

@@ -33,13 +33,7 @@ import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
 export type AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+  'keyword' | 'text' | 'number' | 'boolean' | 'long' | 'date' | 'float';
 
 export interface SchemaField {
   type: string;
@@ -120,7 +114,7 @@ export class Collector<T = unknown, U = T> {
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: this.type,
-      payload: (result as unknown) as U,
+      payload: result as unknown as U,
     };
   }
 }

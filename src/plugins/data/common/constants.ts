@@ -10,6 +10,7 @@
  */
 
 import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+import * as dataManifest from '../opensearch_dashboards.json';
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -119,6 +120,7 @@ export const UI_SETTINGS = {
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
   QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR: 'query:enhancements:runtimePplGrammar',
+  QUERY_ENHANCEMENTS_PPL_LINT_RULES: 'query:enhancements:pplLint:rules',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
@@ -128,3 +130,7 @@ export const UI_SETTINGS = {
   DATE_FORMAT: 'dateFormat',
   DATE_FORMAT_TIMEZONE: 'dateFormat:tz',
 } as const;
+
+export const UNSUPPORTED_ENGINE_TYPES =
+  (dataManifest as { unsupportedOSDataSourceEngineTypes?: readonly string[] })
+    .unsupportedOSDataSourceEngineTypes ?? [];

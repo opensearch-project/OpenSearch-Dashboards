@@ -31,6 +31,14 @@ const datasetId = getRandomizedDatasetId();
 
 export const runQueryTests = () => {
   describe('discover Query UI tests', () => {
+    // Suppress the one-time "Workspace management moved" footer tour: on a fresh
+    // browser it auto-opens an EuiTour popover that persists in the DOM, which
+    // trips assertions expecting no popover. Seed the dismissed flag before
+    // every page load so the tour never opens.
+    Cypress.on('window:before:load', (win) => {
+      win.localStorage.setItem('workspace.manageWorkspaceMoved.tourDismissed', 'true');
+    });
+
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
 

@@ -4,7 +4,6 @@
  */
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import * as echarts from 'echarts';
 import { debounce } from 'lodash';
 
 import { MetricChartStyle } from './metric_vis_config';
@@ -30,18 +29,11 @@ interface MetricTextData {
   backgroundGradient?: string;
 }
 
-interface MetricChartProps {
-  name: string;
-  data?: Array<Record<string, any>>;
-  styles: MetricChartStyle;
-  axisColumnMappings: MetricAxisMapping;
-  spec?: echarts.EChartsOption;
-}
-
 interface MetricChartRenderProps {
   styles: MetricChartStyle;
   axisColumnMappings: MetricAxisMapping;
   spec?: RendererSpecConfig | RendererSpecConfig[];
+  seriesName?: string;
 }
 
 // Helper functions for metric text data calculation
@@ -265,87 +257,20 @@ function calculateMetricTextData(
 export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   styles,
   axisColumnMappings,
-  spec,
+  spec: rawSpec,
+  seriesName,
 }) => {
-  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const handlerRef = useRef(
-    debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100)
+  const s = useMemo(
+    () => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined),
+    [rawSpec]
   );
+  const data = useMemo(() => s?.data ?? [], [s]);
+  const spec = s?.spec;
+  const name = s?.name ?? '';
+  const displayName = seriesName ?? name;
 
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    const handler = handlerRef.current;
-    const resizeObserver = new ResizeObserver(handler);
-    resizeObserver.observe(element);
-
-    return () => {
-      handler.cancel();
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  const itemStyle = useMemo(() => {
-    if (styles.layoutType === 'auto' || !styles.layoutType) {
-      if (containerDimensions.width > 1600) {
-        return { flexBasis: 'calc(15% - 6px)' };
-      } else if (containerDimensions.width > 1200) {
-        return { flexBasis: 'calc(20% - 6px)' };
-      } else if (containerDimensions.width > 800) {
-        return { flexBasis: 'calc(33.3% - 6px)' };
-      } else if (containerDimensions.width > 500) {
-        return { flexBasis: 'calc(50% - 6px)' };
-      } else {
-        return { flexBasis: 'calc(100% - 6px)' };
-      }
-    }
-    return { flexBasis: 0 };
-  }, [containerDimensions, styles.layoutType]);
-
-  if (!spec) {
-    return null;
-  }
-
-  const layoutClass = `layout-${styles.layoutType || 'auto'}`;
-  const containerStyle = {} as React.CSSProperties;
-  const specs = Array.isArray(spec) ? spec : [spec];
-  return (
-    <div
-      className={`multi-metric-container ${layoutClass}`}
-      style={containerStyle}
-      ref={containerRef}
-    >
-      {specs.map((s) => (
-        <div key={s.name} className="multi-metric-item" style={{ ...itemStyle }}>
-          <MetricChart
-            spec={s.spec}
-            data={s.data}
-            styles={styles}
-            name={s.name ?? ''}
-            axisColumnMappings={axisColumnMappings}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
-
-export const MetricChart: React.FC<MetricChartProps> = ({
-  data = [],
-  styles,
-  axisColumnMappings,
-  spec,
-  name,
-}) => {
   const valueColumn = axisColumnMappings[AxisRole.Value];
-  const numericField = valueColumn.column;
+  const numericField = valueColumn?.column;
 
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
@@ -361,10 +286,11 @@ export const MetricChart: React.FC<MetricChartProps> = ({
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
+    if (!numericField) return undefined;
     return calculateMetricTextData(data, styles, numericField);
   }, [data, styles, numericField]);
 
-  const title = getTitleText(styles.textMode, name);
+  const title = getTitleText(styles.textMode, displayName);
 
   // ResizeObserver to track container dimensions
   useEffect(() => {
@@ -384,6 +310,10 @@ export const MetricChart: React.FC<MetricChartProps> = ({
 
   // Calculate dynamic font sizes based on container dimensions
   const dynamicFontSizes = useMemo(() => {
+    if (!textData) {
+      return { title: 18, value: 40, change: 24 };
+    }
+
     const { width, height } = containerDimensions;
 
     // If container hasn't been measured yet, return defaults
@@ -405,7 +335,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     }
 
     // Calculate number of visible elements
-    const hasTitle = !!name;
+    const hasTitle = !!title;
     const hasValue = !!textData.numericValue;
     const hasChange = styles.showPercentage && !!textData.changeText;
     const visibleElements = [hasTitle, hasValue, hasChange].filter(Boolean).length;
@@ -489,13 +419,13 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     styles.fontSize,
     styles.percentageSize,
     styles.showPercentage,
-    name,
-    textData.numericValue,
-    textData.unitText,
-    textData.unitFirst,
-    textData.changeText,
     title,
+    textData,
   ]);
+
+  if (!s || !textData) {
+    return null;
+  }
 
   // Use calculated dynamic font sizes
   const titleFontSize = dynamicFontSizes.title;

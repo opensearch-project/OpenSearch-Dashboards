@@ -42,9 +42,8 @@ export const usePageContainerCapture = () => {
   }, [chat]);
   const screenshotFeatureEnabled = useObservable(chatScreenshotObservable$, false);
   const [isCapturing, setIsCapturing] = useState(false);
-  const resolverRef = useRef<
-    (image: PageContainerImageData | PromiseLike<PageContainerImageData>) => void
-  >();
+  const resolverRef =
+    useRef<(image: PageContainerImageData | PromiseLike<PageContainerImageData>) => void>();
   const rejecterRef = useRef<Function>();
 
   const capturePageContainer = useCallback(async () => {

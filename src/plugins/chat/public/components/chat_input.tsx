@@ -15,7 +15,6 @@ import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
-import { ConfirmationRequest } from '../services/confirmation_service';
 
 import './chat_input.scss';
 
@@ -24,8 +23,8 @@ interface ChatInputProps {
   input: string;
   isCapturing: boolean;
   isStreaming: boolean;
-  isSendingToolResult?: boolean;
-  pendingConfirmation?: ConfirmationRequest | null;
+  disabled?: boolean;
+  placeholder?: string;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
@@ -39,8 +38,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   input,
   isCapturing,
   isStreaming,
-  isSendingToolResult = false,
-  pendingConfirmation,
+  disabled = false,
+  placeholder,
   onInputChange,
   onSend,
   onStop,
@@ -109,13 +108,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <EuiTextArea
             inputRef={inputRef}
             placeholder={
-              pendingConfirmation
-                ? i18n.translate('chat.input.waitingForConfirmation', {
-                    defaultMessage: 'Waiting for confirmation...',
-                  })
-                : i18n.translate('chat.input.placeholder', {
-                    defaultMessage: 'How can I help you today?',
-                  })
+              placeholder ||
+              i18n.translate('chat.input.placeholder', {
+                defaultMessage: 'How can I help you today?',
+              })
             }
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
@@ -124,7 +120,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             fullWidth
             resize="none"
             rows={2}
-            disabled={isSendingToolResult || !!pendingConfirmation}
+            disabled={disabled}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -145,9 +141,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={
-            (!isStreaming && input.trim().length === 0) || isCapturing || isSendingToolResult
-          }
+          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing || disabled}
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}

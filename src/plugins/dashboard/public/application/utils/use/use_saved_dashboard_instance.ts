@@ -137,7 +137,7 @@ export const useSavedDashboardInstance = ({
             return handleErrorFromSavedDashboard(error);
           }
         }
-      } catch (error: any) {
+      } catch {
         handleError();
       }
     };

@@ -70,13 +70,21 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       if (payload?.dateRange) {
         queryBuilder.updateQueryEditorState({ dateRange: payload.dateRange });
       }
-      // update current query text
-      if (queryEditorState.editorMode !== EditorMode.Prompt) {
+      // update current query text only if on Query tab and not in Prompt mode
+      if (
+        queryEditorState.editorMode !== EditorMode.Prompt &&
+        queryEditorState.activeBottomPanelTab === 'QUERY_TAB'
+      ) {
         queryBuilder.updateQueryState({ query: getEditorText() });
       }
       await queryBuilder.onQueryExecutionSubmit();
     },
-    [queryBuilder, queryEditorState.editorMode, getEditorText]
+    [
+      queryBuilder,
+      queryEditorState.editorMode,
+      queryEditorState.activeBottomPanelTab,
+      getEditorText,
+    ]
   );
 
   const handleQueryCancel = useCallback(() => {

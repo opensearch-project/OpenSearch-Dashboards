@@ -546,4 +546,216 @@ describe('process_math_series - evaluateMathExpressions', () => {
       ]);
     });
   });
+
+  describe('Split by terms math series', () => {
+    // Regression test: a math metric on a series split by terms/filters. The raw
+    // endpoint returns one component series per split bucket with ids of the form
+    // `${seriesId}:${splitKey}:${metricId}`. The evaluator must group by split and
+    // emit one math series per bucket, mirroring the server-side mathAgg. Before the
+    // fix, the exact-match lookup `s.id === seriesId:metricId` found nothing for split
+    // series, collapsing the panel to a single empty series (TSVB rendered no data).
+    beforeEach(() => {
+      panel.series = [
+        {
+          id: 'series-1',
+          label: 'Temperature',
+          color: '#0000FF',
+          chart_type: 'line',
+          line_width: 1,
+          fill: '0',
+          point_size: '1',
+          stacked: 'none',
+          split_mode: 'terms',
+          terms_field: 'sensor_name.keyword',
+          metrics: [
+            { id: 'metric-a', type: 'avg', field: 'sensor_temperature' },
+            {
+              id: 'math-1',
+              type: 'math',
+              script: 'params.temp * 0.1',
+              variables: [{ name: 'temp', field: 'metric-a' }],
+            },
+          ],
+        },
+      ];
+
+      response = {
+        'panel-1': {
+          series: [
+            {
+              id: 'series-1:Sensor-A:metric-a',
+              label: 'Sensor-A',
+              data: [
+                [1000, 200],
+                [2000, 210],
+              ],
+              meta: { bucketSize: 600 },
+            },
+            {
+              id: 'series-1:Sensor-B:metric-a',
+              label: 'Sensor-B',
+              data: [
+                [1000, 150],
+                [2000, 160],
+              ],
+              meta: { bucketSize: 600 },
+            },
+          ],
+        },
+      };
+    });
+
+    test('should emit one evaluated math series per split bucket', () => {
+      const result = evaluateMathExpressions(response, panel);
+
+      expect(result['panel-1'].series).toHaveLength(2);
+
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1:Sensor-A',
+          label: 'Sensor-A',
+          data: [
+            [1000, 20], // 200 * 0.1
+            [2000, 21], // 210 * 0.1
+          ],
+        })
+      );
+
+      expect(result['panel-1'].series[1]).toEqual(
+        expect.objectContaining({
+          id: 'series-1:Sensor-B',
+          label: 'Sensor-B',
+          data: [
+            [1000, 15], // 150 * 0.1
+            [2000, 16], // 160 * 0.1
+          ],
+        })
+      );
+    });
+
+    test('should not leave any raw component series in the output', () => {
+      const result = evaluateMathExpressions(response, panel);
+
+      const ids = result['panel-1'].series.map((s) => s.id);
+      expect(ids).not.toContain('series-1:Sensor-A:metric-a');
+      expect(ids).not.toContain('series-1:Sensor-B:metric-a');
+    });
+
+    test('should default color to undefined for opensearchDashboards split mode (client maps by label)', () => {
+      // With split_color_mode "opensearchDashboards" the server returns no per-term
+      // color (getSplitColors yields []), so component series have no color and the
+      // client palette maps colors by label. This matches the server-side data flow.
+      const result = evaluateMathExpressions(response, panel);
+
+      expect(result['panel-1'].series[0].color).toBeUndefined();
+      expect(result['panel-1'].series[1].color).toBeUndefined();
+    });
+
+    test('should preserve per-split colors when the server assigns them (rainbow/gradient)', () => {
+      // For rainbow/gradient split color modes the raw endpoint sets an explicit
+      // color on each component series. Each evaluated math series should carry the
+      // color of its own split bucket, matching the server-side mathAgg output.
+      response['panel-1'].series[0].color = '#68BC00';
+      response['panel-1'].series[1].color = '#009CE0';
+
+      const result = evaluateMathExpressions(response, panel);
+
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({ id: 'series-1:Sensor-A', color: '#68BC00' })
+      );
+      expect(result['panel-1'].series[1]).toEqual(
+        expect.objectContaining({ id: 'series-1:Sensor-B', color: '#009CE0' })
+      );
+    });
+  });
+
+  describe('Percentile values as math variables', () => {
+    // A math metric whose variable references a percentile value, e.g. params.p95.
+    // The server (percentileRaw) emits component series with ids of the form
+    // `${seriesId}:${metricId}[${value}]`, matching the variable field exactly, so
+    // the client resolves them directly. Before percentileRaw + token lookup, the
+    // percentile component was never produced/matched and the series rendered empty.
+    beforeEach(() => {
+      panel.series = [
+        {
+          id: 'series-1',
+          label: 'P95 ratio',
+          color: '#FF0000',
+          chart_type: 'line',
+          line_width: 1,
+          fill: '0',
+          point_size: '0',
+          stacked: 'none',
+          metrics: [
+            { id: 'pct-1', type: 'percentile', field: 'latency', percentiles: [{ value: 95 }] },
+            {
+              id: 'math-1',
+              type: 'math',
+              script: 'params.p95 / 2',
+              variables: [{ name: 'p95', field: 'pct-1[95]' }],
+            },
+          ],
+        },
+      ];
+
+      response = {
+        'panel-1': {
+          series: [
+            {
+              id: 'series-1:pct-1[95]',
+              data: [
+                [1000, 200],
+                [2000, 400],
+              ],
+              meta: { bucketSize: 10 },
+            },
+          ],
+        },
+      };
+    });
+
+    test('should resolve a percentile-value math variable', () => {
+      const result = evaluateMathExpressions(response, panel);
+
+      expect(result['panel-1'].series).toHaveLength(1);
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'P95 ratio',
+          data: [
+            [1000, 100], // 200 / 2
+            [2000, 200], // 400 / 2
+          ],
+        })
+      );
+    });
+
+    test('should resolve percentile-value math variables split by terms', () => {
+      response = {
+        'panel-1': {
+          series: [
+            {
+              id: 'series-1:Host-A:pct-1[95]',
+              label: 'Host-A',
+              data: [[1000, 200]],
+              meta: { bucketSize: 10 },
+            },
+            {
+              id: 'series-1:Host-B:pct-1[95]',
+              label: 'Host-B',
+              data: [[1000, 80]],
+              meta: { bucketSize: 10 },
+            },
+          ],
+        },
+      };
+
+      const result = evaluateMathExpressions(response, panel);
+
+      expect(result['panel-1'].series.map((s) => [s.id, s.data])).toEqual([
+        ['series-1:Host-A', [[1000, 100]]],
+        ['series-1:Host-B', [[1000, 40]]],
+      ]);
+    });
+  });
 });

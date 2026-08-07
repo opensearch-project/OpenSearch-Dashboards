@@ -24,7 +24,8 @@ export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  legacyEsCompatEnabled: boolean = false
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
   const pplFacet = new Facet({
     client,
@@ -33,6 +34,7 @@ export const pplSearchStrategyProvider = (
     useJobs: false,
     shimResponse: true,
     requestCompression: true,
+    legacyEsCompatEnabled,
   });
 
   return {
@@ -71,6 +73,20 @@ export const pplSearchStrategyProvider = (
 
         if (highlights) {
           dataFrame.meta = { ...dataFrame.meta, highlights };
+        }
+
+        // Surface the query-profiling result (present when the request asked to profile). The
+        // backend reports which worker pool ran the query; `sql-complex-worker` means complex.
+        const threadPool = rawResponse.data.profile?.thread_pool;
+        if (threadPool) {
+          dataFrame.meta = {
+            ...dataFrame.meta,
+            // Group profiling fields under `profile` so future ones stay nested together.
+            profile: {
+              queryPool: threadPool,
+              isComplex: threadPool === 'sql-complex-worker',
+            },
+          };
         }
 
         if (usage) usage.trackSuccess(rawResponse.took);

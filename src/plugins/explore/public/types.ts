@@ -197,6 +197,10 @@ export interface ExploreServices {
   keyboardShortcut?: KeyboardShortcutStart;
 
   supportedTypes?: string[];
+  sqlSupportEnabled: boolean;
+  queryProfilingEnabled: boolean;
+  pplAnalyzeEnabled: boolean;
+  logsDrilldownEnabled: boolean;
   isDatasetManagementEnabled: boolean;
   dataImporterConfig?: DataImporterPluginSetup['config'];
   dataSourceEnabled: boolean;

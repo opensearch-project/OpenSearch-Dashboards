@@ -68,7 +68,7 @@ const mockMockErrorRenderFunction = jest.fn(
 const getHandledError = () => {
   try {
     return mockMockErrorRenderFunction.mock.calls[0][1];
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -156,7 +156,7 @@ describe('ExpressionRenderHandler', () => {
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
       expressionRenderHandler.render(false);
       await expect(promise1).resolves.toEqual(1);
-      expect(mockNotificationService.toasts.addError).toBeCalledWith(
+      expect(mockNotificationService.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'invalid data provided to the expression renderer',
         }),

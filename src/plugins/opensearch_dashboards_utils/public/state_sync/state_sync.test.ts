@@ -75,14 +75,14 @@ describe('state_sync', () => {
       start();
 
       // initial sync of state to storage is not happening
-      expect(testStateStorage.set).not.toBeCalled();
+      expect(testStateStorage.set).not.toHaveBeenCalled();
 
       container.transitions.add({
         id: 1,
         text: 'Learning transitions...',
         completed: false,
       });
-      expect(testStateStorage.set).toBeCalledWith(key, container.getState());
+      expect(testStateStorage.set).toHaveBeenCalledWith(key, container.getState());
       stop();
     });
 
@@ -120,7 +120,7 @@ describe('state_sync', () => {
       (testStateStorage.set as jest.Mock).mockClear();
 
       container.set(defaultState);
-      expect(testStateStorage.set).not.toBeCalled();
+      expect(testStateStorage.set).not.toHaveBeenCalled();
 
       stop();
     });
@@ -200,7 +200,7 @@ describe('state_sync', () => {
     beforeEach(() => {
       container.set(defaultState);
 
-      window.location.href = '/';
+      window.location.href = 'http://localhost:5601/';
       sessionStorage = new StubBrowserStorage();
       sessionStorageSyncStrategy = createSessionStorageStateStorage(sessionStorage);
       history = createBrowserHistory();

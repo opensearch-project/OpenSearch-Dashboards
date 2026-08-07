@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ResizableQueryPanelAndVisualization } from './visualization_editor_bottom_left_container';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -12,6 +11,26 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 jest.mock('../hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
 jest.mock('../hooks/use_visualization_builder', () => ({ useVisualizationBuilder: jest.fn() }));
+
+jest.mock('../../../components/data_transformations', () => {
+  const mockObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue([]),
+  };
+  const mockMapObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue(new Map()),
+  };
+  return {
+    useTransformationService: jest.fn().mockReturnValue({
+      clearPipeline: jest.fn(),
+      pipeline$: mockObs,
+      getPipeline$: () => mockObs,
+      stageSchemas$: mockMapObs,
+    }),
+    TransformPanel: () => null,
+  };
+});
 jest.mock('../../../components/query_panel/utils/use_search_context', () => ({
   useSearchContext: jest.fn().mockReturnValue({}),
 }));
@@ -44,8 +63,12 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 const mockQueryEditorState$ = { getValue: jest.fn() };
+const mockResultState$ = { subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) };
 const mockQueryBuilder = {
   queryEditorState$: mockQueryEditorState$,
+  resultState$: mockResultState$,
+  updateQueryEditorState: jest.fn(),
+  setOnDatasetChanged: jest.fn(),
 };
 
 const buildState = (options: Record<string, any>) => ({

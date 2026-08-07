@@ -54,11 +54,7 @@ describe('url overflow detection', () => {
     toasts = notificationServiceMock.createStartContract().toasts;
     uiSettings = uiSettingsServiceMock.createStartContract();
 
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    jest.spyOn(window.location, 'assign').mockImplementation(() => {});
 
     unlisten = setupUrlOverflowDetection({
       basePath,
@@ -70,7 +66,7 @@ describe('url overflow detection', () => {
 
   afterEach(() => {
     unlisten();
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('redirects to error page when URL is too long', () => {

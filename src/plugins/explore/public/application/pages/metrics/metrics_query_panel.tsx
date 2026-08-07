@@ -23,7 +23,7 @@ import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
-import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { useEditorRef, useSetEditorTextWithQuery } from '../../../application/hooks';
@@ -82,10 +82,10 @@ export const MetricsQueryPanel: React.FC = () => {
     return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
   }, [queryLanguage, services.data.query.queryString]);
 
-  const client = useMemo(() => new PrometheusClient(services, dataConnectionId), [
-    services,
-    dataConnectionId,
-  ]);
+  const client = useMemo(
+    () => new PrometheusClient(services, dataConnectionId),
+    [services, dataConnectionId]
+  );
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
@@ -229,7 +229,7 @@ export const MetricsQueryPanel: React.FC = () => {
 
       {isPromptMode ? (
         <div className="exploreQueryPanel__editorsWrapper">
-          <QueryPanelEditor />
+          <ExploreQueryPanelEditor />
           <QueryPanelGeneratedQuery />
         </div>
       ) : (

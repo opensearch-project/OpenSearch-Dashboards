@@ -56,7 +56,7 @@ export const persistReduxState = (
       },
       { replace }
     );
-  } catch (err) {
+  } catch {
     return;
   }
 };
@@ -146,7 +146,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       queryEditor: finalQueryEditorState,
       meta: finalMetaState,
     };
-  } catch (err) {
+  } catch {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
@@ -236,7 +236,7 @@ export const fetchFirstAvailableDataset = async (
               return dataset;
             }
           }
-        } catch (error) {
+        } catch {
           // Continue to next dataset if this one fails
           continue;
         }
@@ -245,7 +245,7 @@ export const fetchFirstAvailableDataset = async (
     }
 
     return undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -263,8 +263,8 @@ const resolveDataset = async (
     flavorFromAppId === ExploreFlavor.Traces
       ? CORE_SIGNAL_TYPES.TRACES
       : flavorFromAppId === ExploreFlavor.Metrics
-      ? CORE_SIGNAL_TYPES.METRICS
-      : undefined;
+        ? CORE_SIGNAL_TYPES.METRICS
+        : undefined;
 
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
@@ -295,7 +295,7 @@ const resolveDataset = async (
           return existingDataset;
         }
       }
-    } catch (error) {
+    } catch {
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
     }
@@ -438,8 +438,8 @@ export const getPreloadedLegacyState = async (services: ExploreServices): Promis
     flavorFromAppId === ExploreFlavor.Traces
       ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
       : flavorFromAppId === ExploreFlavor.Logs
-      ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
-      : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
+        ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
+        : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
 
   return {
     // Fields that exist in data_explorer + discover
@@ -486,7 +486,7 @@ const getColumnsForDataset = async (
     ];
 
     return isTracesFlavor ? tracesDefaultColumns : logsDefaultColumns;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

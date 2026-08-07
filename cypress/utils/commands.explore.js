@@ -77,11 +77,50 @@ const selectIndexWildcardMode = (indexPattern) => {
     .click();
 };
 
+cy.explore.add('showQueryEditor', () => {
+  const SETTLE_ROUNDS = 2;
+  const MAX_TOGGLES = 5;
+  const clickToggleToCode = () => {
+    // Let the current render settle before resolving the button.
+    cy.wait(500);
+    return cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+  };
+  const ensureCode = (toggles = 0, stableRounds = 0) => {
+    return cy.get('body').then(($body) => {
+      if ($body.find('[data-test-subj="pplBuilder"]').length > 0) {
+        // Builder is showing: switch to code, then re-check after it settles.
+        if (toggles >= MAX_TOGGLES) return;
+        clickToggleToCode();
+        return cy.wait(400).then(() => ensureCode(toggles + 1, 0));
+      }
+      // In code mode (or the flag is off and no builder ever renders). Re-check a
+      // few times so a late flip back to the builder is caught and re-toggled.
+      if (stableRounds >= SETTLE_ROUNDS) return;
+      return cy.wait(400).then(() => ensureCode(toggles, stableRounds + 1));
+    });
+  };
+  return cy
+    .get('[data-test-subj="pplBuilder"], [data-test-subj="exploreQueryPanelEditor"]', {
+      timeout: 30000,
+    })
+    .should('exist')
+    .then(() => ensureCode())
+    .then(() => {
+      return cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="exploreQueryPanelEditor"]').length > 0) {
+          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+        }
+      });
+    });
+});
+
 cy.explore.add('clearQueryEditor', () => {
   const clearWithRetry = (attempt = 1) => {
     cy.log(`Attempt ${attempt} to clear editor`);
 
-    return forceFocusEditor()
+    return cy.explore
+      .showQueryEditor()
+      .then(forceFocusEditor)
       .then(() => clearMonacoEditor())
       .then(() => {
         return isEditorEmpty().then((isEmpty) => {

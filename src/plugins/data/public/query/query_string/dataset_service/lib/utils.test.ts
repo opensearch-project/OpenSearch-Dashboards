@@ -25,9 +25,8 @@ const mockDataStructures: DataStructure[] = [
 ];
 
 const dataMock = dataPluginMock.createSetupContract();
-const languageServiceMock = dataMock.query.queryString.getLanguageService() as jest.Mocked<
-  LanguageServiceContract
->;
+const languageServiceMock =
+  dataMock.query.queryString.getLanguageService() as jest.Mocked<LanguageServiceContract>;
 setQueryService({ queryString: dataMock.query.queryString } as IQueryStart);
 
 languageServiceMock.getQueryEditorExtensionMap.mockReturnValue({

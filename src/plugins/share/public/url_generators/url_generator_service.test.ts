@@ -37,7 +37,7 @@ const setup = service.setup(coreMock.createSetup());
 const start = service.start(coreMock.createStart());
 
 test('Asking for a generator that does not exist throws an error', () => {
-  expect(() => start.getUrlGenerator('noexist')).toThrowError();
+  expect(() => start.getUrlGenerator('noexist')).toThrow();
 });
 
 test('Registering and retrieving a generator', async () => {
@@ -82,9 +82,7 @@ test('Registering a generator with a createUrl function that is deprecated throw
       createUrl: () => Promise.resolve('myurl'),
       isDeprecated: true,
     })
-  ).toThrowError(
-    new Error('This generator is marked as deprecated. Do not supply a createUrl fn.')
-  );
+  ).toThrow(new Error('This generator is marked as deprecated. Do not supply a createUrl fn.'));
 });
 
 test('Registering a deprecated generator with no migration function throws an error', () => {
@@ -93,7 +91,7 @@ test('Registering a deprecated generator with no migration function throws an er
       id: 'TEST_GENERATOR',
       isDeprecated: true,
     })
-  ).toThrowError(
+  ).toThrow(
     new Error(
       'If the access link generator is marked as deprecated, you must provide a migration function.'
     )
@@ -105,7 +103,7 @@ test('Registering a generator with no functions throws an error', () => {
     setup.registerUrlGenerator({
       id: 'TEST_GENERATOR',
     })
-  ).toThrowError(
+  ).toThrow(
     new Error('This generator is not marked as deprecated. Please provide a createUrl fn.')
   );
 });
@@ -117,7 +115,7 @@ test('Registering a generator with a migrate function that is not deprecated thr
       migrate: () => Promise.resolve({ id: '', state: {} }),
       isDeprecated: false,
     })
-  ).toThrowError(
+  ).toThrow(
     new Error('If you provide a migration function, you must mark this generator as deprecated')
   );
 });
@@ -129,7 +127,7 @@ test('Registering a generator with a migrate function and a createUrl fn throws 
       createUrl: () => Promise.resolve('myurl'),
       migrate: () => Promise.resolve({ id: '', state: {} }),
     })
-  ).toThrowError();
+  ).toThrow();
 });
 
 test('Generator returns migrated url', async () => {

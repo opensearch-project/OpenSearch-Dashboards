@@ -213,9 +213,9 @@ yarn osd watch --include @osd/pm --include opensearch-dashboards
 
 ## Building packages for production
 
-The production build process relies on both the Grunt setup at the root of the
-OpenSearch Dashboards project and code in `@osd/pm`. The full process is described in
-`tasks/build/packages.js`.
+The production build process is driven by the distributable build in
+`src/dev/build` (entry point `src/dev/build/build_distributables.ts`), which
+uses `@osd/pm` to build each package in dependency order.
 
 ## Targeted builds
 
