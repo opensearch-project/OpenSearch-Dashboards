@@ -149,7 +149,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       customApiSchemaRegistryPromise,
       this.logger.get('test-connection'),
       endpointDeniedIPs,
-      config.endpointAllowlistedSuffixes
+      config.endpointAllowlistedSuffixes,
+      () => this.internalSavedObjects
     );
     registerFetchDataSourceMetaDataRoute(
       router,
@@ -159,7 +160,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       customApiSchemaRegistryPromise,
       this.logger.get('fetch-data-source-metadata'),
       endpointDeniedIPs,
-      config.endpointAllowlistedSuffixes
+      config.endpointAllowlistedSuffixes,
+      () => this.internalSavedObjects
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
