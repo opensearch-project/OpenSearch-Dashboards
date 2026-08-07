@@ -17,6 +17,8 @@ describe('area_vis_config', () => {
         addLegend: true,
         legendPosition: Positions.BOTTOM,
         addTimeMarker: false,
+        areaOpacity: 30,
+        gradientMode: 'none',
         tooltipOptions: {
           mode: 'all',
         },

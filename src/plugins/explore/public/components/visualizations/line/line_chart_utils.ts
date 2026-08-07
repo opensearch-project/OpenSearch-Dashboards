@@ -86,7 +86,7 @@ export const createLineSeries =
       }
     }
 
-    const series = seriesFields?.map((item: string) => {
+    const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
       legendItems.push(createSeriesLegendItem(name, color));
@@ -103,7 +103,7 @@ export const createLineSeries =
           focus: 'self',
         },
         ...generateLineStyles(styles),
-        ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+        ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
         itemStyle: {
           color,
         },

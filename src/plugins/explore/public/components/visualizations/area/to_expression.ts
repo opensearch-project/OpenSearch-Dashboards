@@ -157,6 +157,7 @@ export const createCategoryAreaChart = (
       styles,
       categoryField,
       seriesFields: valueField,
+      addTimeMarker: false,
     }),
     assembleSpec
   )({
@@ -210,6 +211,7 @@ export const createStackedAreaChart = (
       stack: true,
       allData,
       colorField,
+      addTimeMarker: false,
     }),
     assembleSpec
   )({

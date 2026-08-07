@@ -27,6 +27,16 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
+/**
+ * - `none`: flat fill in the series color.
+ * - `opacity`: fades from the series color at the line to transparent at the baseline.
+ * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
+ */
+export type GradientMode = 'none' | 'opacity' | 'hue';
+
+// Fill opacity is stored as a percentage (0-100) to match the UI slider.
+export const DEFAULT_FILL_OPACITY = 30;
+
 // Complete area chart style controls interface
 export interface AreaChartStyleOptions {
   // Basic controls
@@ -36,6 +46,7 @@ export interface AreaChartStyleOptions {
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
+  gradientMode?: GradientMode;
   tooltipOptions?: TooltipOptions;
 
   /**
@@ -67,12 +78,14 @@ export type AreaChartStyle = Required<
 > &
   Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
 
-const defaultAreaChartStyles: AreaChartStyle = {
+export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendTitle: '',
   legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
+  areaOpacity: DEFAULT_FILL_OPACITY,
+  gradientMode: 'none',
   tooltipOptions: {
     mode: 'all',
   },

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
 import {
@@ -83,6 +83,8 @@ describe('AreaVisStyleControls', () => {
       legendPosition: Positions.RIGHT,
       legendTitle: '',
       addTimeMarker: false,
+      areaOpacity: 30,
+      gradientMode: 'none' as const,
       // Threshold options
       thresholdOptions: {
         baseColor: '#00BD6B',
@@ -301,6 +303,61 @@ describe('AreaVisStyleControls', () => {
     };
 
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
+  });
+
+  test('shows the time marker toggle when the x-axis is a date field', () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    expect(screen.getByTestId('areaAddTimeMarkerSwitch')).toBeInTheDocument();
+  });
+
+  test('hides the time marker toggle when the x-axis is not a date field', () => {
+    const props = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...defaultProps.axisColumnMappings,
+        [AxisRole.X]: [
+          {
+            id: 1,
+            name: 'Category',
+            schema: VisFieldType.Categorical,
+            column: 'category',
+          },
+        ],
+      },
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    expect(screen.queryByTestId('areaAddTimeMarkerSwitch')).not.toBeInTheDocument();
+    // The fill controls are not time-specific, so the Area panel itself remains
+    expect(screen.getByTestId('areaFillOpacityRange')).toBeInTheDocument();
+  });
+
+  test('updates addTimeMarker correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaAddTimeMarkerSwitch'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addTimeMarker: true });
+  });
+
+  test('updates areaOpacity correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    fireEvent.change(screen.getByTestId('areaFillOpacityRange'), { target: { value: '80' } });
+
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ areaOpacity: 80 });
+    });
+  });
+
+  test('updates gradientMode correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaGradientMode-hue'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ gradientMode: 'hue' });
   });
 
   test('updates showFullTimeRange correctly', async () => {

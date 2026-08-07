@@ -10,7 +10,7 @@ import {
   createStackedAreaChart,
 } from './to_expression';
 import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
-import { AreaChartStyle } from './area_vis_config';
+import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
 import { getColors } from '../theme/default_colors';
 
 describe('Area Chart to_expression', () => {
@@ -56,7 +56,8 @@ describe('Area Chart to_expression', () => {
     addLegend: true,
     legendPosition: Positions.RIGHT,
     addTimeMarker: false,
-    areaOpacity: 0.6,
+    areaOpacity: 30,
+    gradientMode: 'none',
     tooltipOptions: {
       mode: 'all',
     },
@@ -110,6 +111,115 @@ describe('Area Chart to_expression', () => {
           itemStyle: { color: palette[0] },
         })
       );
+    });
+
+    it('applies areaOpacity as a fraction of the 0-100 percentage', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, areaOpacity: 80 },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series[0].areaStyle.opacity).toBe(0.8);
+    });
+
+    it('falls back to the default fill opacity when areaOpacity is unset', () => {
+      const stylesWithoutFillOpacity = { ...mockStyles };
+      delete stylesWithoutFillOpacity.areaOpacity;
+
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        stylesWithoutFillOpacity,
+        axisColumnMappings
+      );
+
+      expect(result.spec.series[0].areaStyle.opacity).toBe(DEFAULT_FILL_OPACITY / 100);
+    });
+
+    it('uses a flat fill when gradientMode is none', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, gradientMode: 'none' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series[0].areaStyle.color).toBeUndefined();
+    });
+
+    it('fades to transparent at the baseline when gradientMode is opacity', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, gradientMode: 'opacity' },
+        axisColumnMappings
+      );
+
+      const fill = result.spec.series[0].areaStyle.color;
+      // Vertical gradient: top of the bounding box down to the baseline
+      expect(fill.x).toBe(0);
+      expect(fill.y).toBe(0);
+      expect(fill.x2).toBe(0);
+      expect(fill.y2).toBe(1);
+      expect(fill.colorStops[0].color).toBe(result.spec.series[0].itemStyle.color);
+      expect(fill.colorStops[1].color).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('fades to a lighter hue at the baseline when gradientMode is hue', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, gradientMode: 'hue' },
+        axisColumnMappings
+      );
+
+      const fill = result.spec.series[0].areaStyle.color;
+      const seriesColor = result.spec.series[0].itemStyle.color;
+      expect(fill.colorStops[0].color).toBe(seriesColor);
+      // The baseline stop is an opaque, lighter variant rather than transparent
+      expect(fill.colorStops[1].color).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(fill.colorStops[1].color).not.toBe(seriesColor);
+    });
+
+    it('does not add a time marker when addTimeMarker is disabled', () => {
+      const result = createSimpleAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
+
+      const markLineData = result.spec.series[0].markLine?.data ?? [];
+      expect(markLineData.some((d: any) => d.xAxis !== undefined)).toBe(false);
+      expect(result.spec.xAxis.max).toBeUndefined();
+    });
+
+    it('adds a dashed time marker and extends the x-axis when addTimeMarker is enabled', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, addTimeMarker: true },
+        axisColumnMappings
+      );
+
+      const timeMarker = result.spec.series[0].markLine.data.find(
+        (d: any) => d.xAxis !== undefined
+      );
+      expect(timeMarker).toBeDefined();
+      expect(timeMarker.lineStyle.type).toBe('dashed');
+      // xAxis is extended to "now" so the marker stays inside the visible range
+      expect(result.spec.xAxis.max).toBeInstanceOf(Date);
+    });
+
+    it('keeps threshold lines alongside the time marker', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        {
+          ...mockStyles,
+          addTimeMarker: true,
+          thresholdOptions: {
+            baseColor: '#00BD6B',
+            thresholds: [{ value: 15, color: '#E7664C' }],
+            thresholdStyle: ThresholdMode.Solid,
+          },
+        },
+        axisColumnMappings
+      );
+
+      const markLineData = result.spec.series[0].markLine.data;
+      expect(markLineData.some((d: any) => d.yAxis === 15)).toBe(true);
+      expect(markLineData.some((d: any) => d.xAxis !== undefined)).toBe(true);
     });
   });
 
@@ -184,6 +294,18 @@ describe('Area Chart to_expression', () => {
           target: { type: 'series', name: 'Value' },
         },
       ]);
+    });
+
+    it('ignores addTimeMarker because the x-axis is categorical', () => {
+      const result = createCategoryAreaChart(
+        mockTransformedData,
+        { ...mockStyles, addTimeMarker: true },
+        axisColumnMappings
+      );
+
+      const markLineData = result.spec.series[0].markLine?.data ?? [];
+      expect(markLineData.some((d: any) => d.xAxis !== undefined)).toBe(false);
+      expect(result.spec.xAxis.max).toBeUndefined();
     });
   });
 

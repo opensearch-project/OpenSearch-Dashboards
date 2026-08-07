@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineSeriesOption } from 'echarts';
+import * as echarts from 'echarts';
+import type { LineSeriesOption } from 'echarts';
 import { getSeriesDisplayName } from '../utils/series';
-import { AreaChartStyle } from './area_vis_config';
+import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
-import { generateThresholdLines } from '../utils/utils';
+import { composeMarkLine } from '../utils/utils';
 import { getColors } from '../theme/default_colors';
-import { DEFAULT_OPACITY } from '../constants';
 import {
   createSeriesLegendItem,
   getLegendColor,
   getLegendNameDomain,
   LegendItem,
 } from '../utils/legend';
+import { hexToRgb, rgbToHex } from '../theme/color_utils';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -38,6 +39,44 @@ export const replaceNullWithZero = (
   });
 };
 
+// How far the `hue` gradient lightens the series color toward white at the baseline.
+const HUE_GRADIENT_LIGHTEN_RATIO = 0.55;
+
+/**
+ * Lightens a hex color by blending it toward white.
+ * @param hexColor Hex color string (e.g. '#5C7FFF')
+ * @param ratio 0 = unchanged, 1 = white
+ */
+export const lightenHexColor = (hexColor: string, ratio: number): string => {
+  const { r, g, b } = hexToRgb(hexColor);
+  const blend = (channel: number) => Math.round(channel + (255 - channel) * ratio);
+  return rgbToHex(blend(r), blend(g), blend(b));
+};
+
+export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
+  const opacity = (styles.areaOpacity ?? DEFAULT_FILL_OPACITY) / 100;
+
+  const gradientMode = styles.gradientMode ?? 'none';
+
+  if (gradientMode === 'none') {
+    return { opacity };
+  }
+
+  // The gradient's far end: transparent for `opacity` mode, a lighter hue for `hue` mode.
+  const baselineColor =
+    gradientMode === 'opacity'
+      ? 'rgba(0, 0, 0, 0)'
+      : lightenHexColor(seriesColor, HUE_GRADIENT_LIGHTEN_RATIO);
+
+  return {
+    opacity,
+    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      { offset: 0, color: seriesColor },
+      { offset: 1, color: baselineColor },
+    ]),
+  };
+};
+
 /**
  * Create area series configuration for ECharts
  */
@@ -49,6 +88,7 @@ export const createAreaSeries =
     stack,
     allData,
     colorField,
+    addTimeMarker = true,
   }: {
     styles: AreaChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
@@ -56,14 +96,23 @@ export const createAreaSeries =
     stack?: boolean;
     allData?: Array<Record<string, any>>;
     colorField?: string;
+    addTimeMarker?: boolean;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
+    const { transformedData = [], axisColumnMappings, xAxisConfig } = state;
     const palette = getColors().categories;
     const newState = { ...state };
+    const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
 
     if (!Array.isArray(seriesFields)) {
       seriesFields = seriesFields(transformedData[0]);
+    }
+
+    if (usedTimeMarker) {
+      // manually extend xAxis range
+      const newXAxisConfig = { ...xAxisConfig };
+      newXAxisConfig.max = new Date();
+      newState.xAxisConfig = newXAxisConfig;
     }
 
     const allColumns = Object.values(axisColumnMappings).flat();
@@ -74,8 +123,8 @@ export const createAreaSeries =
       columns: allColumns,
     });
 
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
     const legendItems: LegendItem[] = [];
+    const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker);
     const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
@@ -87,9 +136,7 @@ export const createAreaSeries =
         showSymbol: false,
         connectNulls: true,
         stack: stack ? 'Total' : undefined,
-        areaStyle: {
-          opacity: styles.areaOpacity || DEFAULT_OPACITY,
-        },
+        areaStyle: buildAreaStyle(styles, color),
         smooth: true,
         encode: {
           x: categoryField,
@@ -101,7 +148,7 @@ export const createAreaSeries =
         itemStyle: {
           color,
         },
-        ...(index === 0 && thresholdLines),
+        ...(index === 0 && markLines),
       };
     });
 
