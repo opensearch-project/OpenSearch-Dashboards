@@ -112,4 +112,25 @@ describe('SplitContainer', () => {
     expect(global.ResizeObserver).toHaveBeenCalled();
     expect(mockObserve).toHaveBeenCalled();
   });
+
+  it('uses the default vertical item min height', () => {
+    const { container } = render(
+      <SplitContainer groups={createGroups(1)} layout="vertical" renderChart={mockRenderChart} />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '200px' });
+  });
+
+  it('uses a custom vertical item min height when provided', () => {
+    const { container } = render(
+      <SplitContainer
+        groups={createGroups(1)}
+        layout="vertical"
+        verticalItemMinHeight={60}
+        renderChart={mockRenderChart}
+      />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '60px' });
+  });
 });
