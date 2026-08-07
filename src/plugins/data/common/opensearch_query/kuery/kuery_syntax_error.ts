@@ -69,8 +69,9 @@ export class DQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        const key = expected.description ?? expected.text ?? '';
-        return grammarRuleTranslations[key] || key;
+        if (expected.type === 'end') return endOfInputText;
+        if (expected.type === 'literal') return `"${expected.text}"`;
+        return grammarRuleTranslations[expected.description || ''] || expected.description;
       });
 
       const uniqueExpectations = translatedExpectations.filter(
