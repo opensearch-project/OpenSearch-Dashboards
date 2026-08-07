@@ -16,6 +16,7 @@ export interface ExclusiveBarGaugeConfig {
   displayMode: 'gradient' | 'stack' | 'basic';
   valueDisplay: 'valueColor' | 'textColor' | 'hidden';
   showUnfilledArea: boolean;
+  orientation: 'vertical' | 'horizontal';
 }
 
 export interface BarGaugeChartStyleOptions {
@@ -41,6 +42,7 @@ export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
     showUnfilledArea: true,
+    orientation: 'vertical',
   },
   thresholdOptions: { thresholds: [], baseColor: getColors().statusGreen },
   valueCalculation: 'last',
@@ -71,7 +73,13 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
 
           const categoryField = x.schema === VisFieldType.Categorical ? x.column : y.column;
           const valueField = x.schema === VisFieldType.Numerical ? x.column : y.column;
-          const isHorizontal = x.schema === VisFieldType.Numerical;
+
+          // For orientation, only swap the label visually. Whatever the x-axis schema is, both will share the same style combo.
+          const isHorizontal =
+            (x.schema === VisFieldType.Numerical &&
+              props.styleOptions.exclusive.orientation === 'vertical') ||
+            (x.schema !== VisFieldType.Numerical &&
+              props.styleOptions.exclusive.orientation === 'horizontal');
 
           const aggregated = aggregate({
             groupBy: categoryField,
