@@ -1,0 +1,2 @@
+fix:
+- Split comma-separated values on Enter in multi-value filter input ([#12532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12532))
