@@ -14,6 +14,7 @@ import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lin
 import { Diagnostic, LintResult } from './lint/diagnostic';
 import { SerializableLintContext } from './lint/types';
 import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
+import { selectHighestSeverityTier } from './lint/severity_tiering';
 import { hasExplainRules, runExplainLint } from './lint/explain/run_explain_lint';
 import { explainCache } from './lint/explain/explain_cache';
 import { resolveExplainRanges } from './lint/explain/resolve_explain_ranges';
@@ -48,6 +49,10 @@ const LINT_DEBOUNCE_MS = 500;
 const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const lintGenerations = new Map<string, number>();
 const syntaxGenerations = new Map<string, number>();
+const syntaxValidationStates = new Map<
+  string,
+  { content: string; generation: number; hasErrors: boolean }
+>();
 // Per-model abort controller for the in-flight explain request(s). A new lint
 // pass, a dispose, or a language switch aborts the prior one so a superseded
 // `_explain` round-trip is cancelled rather than left to complete and be
@@ -64,6 +69,23 @@ const abortInFlightExplain = (modelId: string): void => {
     controller.abort();
     lintAbortControllers.delete(modelId);
   }
+};
+
+const clearLintOutput = (model: monaco.editor.IModel): void => {
+  monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+  clearModelFixes(model);
+  clearPPLLintTelemetry(model);
+};
+
+const invalidateLintForSyntaxError = (model: monaco.editor.IModel): void => {
+  lintGenerations.set(model.id, (lintGenerations.get(model.id) ?? 0) + 1);
+  const pending = lintDebounceTimers.get(model.id);
+  if (pending !== undefined) {
+    clearTimeout(pending);
+    lintDebounceTimers.delete(model.id);
+  }
+  abortInFlightExplain(model.id);
+  clearLintOutput(model);
 };
 
 // PPL worker proxy service for worker-based syntax highlighting
@@ -168,23 +190,25 @@ export const setupPPLTokenization = (languageId: string = PPL_LANGUAGE_ID) => {
 /**
  * Process syntax highlighting for PPL models
  */
-const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
+const processSyntaxHighlighting = async (
+  model: monaco.editor.IModel
+): Promise<boolean | undefined> => {
   // Only process if the model is still set to PPL language
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
     // Clear any existing PPL markers if language changed
     monaco.editor.setModelMarkers(model, OWNER, []);
     clearModelSyntaxFixes(model);
-    return;
+    syntaxValidationStates.delete(model.id);
+    return undefined;
   }
 
   // Stamp this run so a slower, earlier validation that resolves after a newer
   // one cannot clobber the newer markers. Mirrors the lint path's guard.
   const generation = (syntaxGenerations.get(model.id) ?? 0) + 1;
   syntaxGenerations.set(model.id, generation);
+  const content = model.getValue();
 
   try {
-    const content = model.getValue();
-
     // Ensure worker is set up before validation - always call setup as it has internal check
     pplWorkerProxyService.setup();
 
@@ -203,10 +227,13 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       model.getValue() !== content ||
       model.getLanguageId() !== PPL_LANGUAGE_ID
     ) {
-      return;
+      return undefined;
     }
 
-    if (validationResult.errors.length > 0) {
+    const hasErrors = validationResult.errors.length > 0;
+    syntaxValidationStates.set(model.id, { content, generation, hasErrors });
+
+    if (hasErrors) {
       // A command-typo error carries a structured `fix`; collect those into the
       // syntax-fix side table (keyed by the marker fields Monaco preserves) so
       // the code-action provider can offer a one-click lightbulb. The fix is not
@@ -273,19 +300,32 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
 
       setModelSyntaxFixes(model, syntaxFixes);
       monaco.editor.setModelMarkers(model, OWNER, markers);
+      invalidateLintForSyntaxError(model);
     } else {
       // Clear markers and any stale syntax fixes if no errors
       clearModelSyntaxFixes(model);
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
+    return hasErrors;
   } catch {
-    // Silent error handling - continue without worker-based highlighting
+    if (
+      syntaxGenerations.get(model.id) === generation &&
+      !model.isDisposed() &&
+      model.getValue() === content &&
+      model.getLanguageId() === PPL_LANGUAGE_ID
+    ) {
+      syntaxValidationStates.delete(model.id);
+      invalidateLintForSyntaxError(model);
+    }
+    return undefined;
   }
 };
 
 export const revalidatePPLModel = async (model: monaco.editor.IModel) => {
-  await processSyntaxHighlighting(model);
-  processLintHighlighting(model);
+  const hasSyntaxErrors = await processSyntaxHighlighting(model);
+  if (hasSyntaxErrors === false) {
+    processLintHighlighting(model);
+  }
 };
 
 const processLintHighlighting = (model: monaco.editor.IModel): void => {
@@ -296,13 +336,21 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
   abortInFlightExplain(model.id);
 
   if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
-    monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-    clearModelFixes(model);
-    clearPPLLintTelemetry(model);
+    clearLintOutput(model);
     return;
   }
 
   const content = model.getValue();
+  const syntaxState = syntaxValidationStates.get(model.id);
+  if (
+    !syntaxState ||
+    syntaxState.generation !== syntaxGenerations.get(model.id) ||
+    syntaxState.content !== content ||
+    syntaxState.hasErrors
+  ) {
+    clearLintOutput(model);
+    return;
+  }
 
   pplWorkerProxyService.setup();
 
@@ -340,14 +388,8 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
       // Render the static diagnostics immediately so squiggles never wait on a
       // network round-trip. The explain pass (below) re-renders with its extra
       // diagnostics merged in when it completes.
-      const staticMarkers = renderLintMarkers(model, lintResult.diagnostics);
-      reconcilePPLLintStaticTelemetry(
-        model,
-        lintResult.diagnostics.map((diagnostic, index) => ({
-          ruleId: diagnostic.ruleId,
-          markerKey: markerFixKey(staticMarkers[index]),
-        }))
-      );
+      const staticRender = renderLintMarkers(model, lintResult.diagnostics);
+      reconcileRenderedLintTelemetry(model, staticRender, lintResult.diagnostics);
       layerExplainDiagnostics(
         model,
         content,
@@ -385,11 +427,17 @@ const isLintPassStale = (
  * (Monaco's MarkerService rebuilds markers from a fixed field list and would
  * otherwise drop that custom property).
  */
+interface RenderedLintMarkers {
+  diagnostics: Diagnostic[];
+  markers: monaco.editor.IMarkerData[];
+}
+
 const renderLintMarkers = (
   model: monaco.editor.IModel,
   diagnostics: Diagnostic[]
-): monaco.editor.IMarkerData[] => {
-  const markers = diagnostics.map(diagnosticToMarker);
+): RenderedLintMarkers => {
+  const visibleDiagnostics = selectHighestSeverityTier(diagnostics);
+  const markers = visibleDiagnostics.map(diagnosticToMarker);
   const fixes = new Map<string, MarkerFix>();
   for (const marker of markers) {
     const withExtras = marker as monaco.editor.IMarkerData & {
@@ -416,7 +464,29 @@ const renderLintMarkers = (
   }
   setModelFixes(model, fixes);
   monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
-  return markers;
+  return { diagnostics: visibleDiagnostics, markers };
+};
+
+const reconcileRenderedLintTelemetry = (
+  model: monaco.editor.IModel,
+  rendered: RenderedLintMarkers,
+  staticDiagnostics: Diagnostic[]
+): void => {
+  const staticDiagnosticSet = new Set(staticDiagnostics);
+  const staticMarkers: Array<{ ruleId: string; markerKey: string }> = [];
+  const explainMarkerKeys: string[] = [];
+
+  rendered.diagnostics.forEach((diagnostic, index) => {
+    const markerKey = markerFixKey(rendered.markers[index]);
+    if (staticDiagnosticSet.has(diagnostic)) {
+      staticMarkers.push({ ruleId: diagnostic.ruleId, markerKey });
+    } else {
+      explainMarkerKeys.push(markerKey);
+    }
+  });
+
+  reconcilePPLLintStaticTelemetry(model, staticMarkers);
+  reconcilePPLLintExplainTelemetry(model, explainMarkerKeys);
 };
 
 /**
@@ -541,14 +611,11 @@ const layerExplainDiagnostics = (
 
     // Fast, and the shared first pass for Thorough: render the uniquely-sourced
     // findings immediately (fixes withheld until a probe confirms them).
-    const immediateMarkers = renderLintMarkers(model, [
+    const immediateRender = renderLintMarkers(model, [
       ...staticDiagnostics,
       ...state.immediateDiagnostics,
     ]);
-    reconcilePPLLintExplainTelemetry(
-      model,
-      immediateMarkers.slice(staticDiagnostics.length).map(markerFixKey)
-    );
+    reconcileRenderedLintTelemetry(model, immediateRender, staticDiagnostics);
 
     if (!thorough || !state.needsIsolation || isLintPassStale(model, generation, content)) {
       return;
@@ -561,11 +628,8 @@ const layerExplainDiagnostics = (
     if (isLintPassStale(model, generation, content)) {
       return;
     }
-    const isolatedMarkers = renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
-    reconcilePPLLintExplainTelemetry(
-      model,
-      isolatedMarkers.slice(staticDiagnostics.length).map(markerFixKey)
-    );
+    const isolatedRender = renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
+    reconcileRenderedLintTelemetry(model, isolatedRender, staticDiagnostics);
   };
 
   void run().catch((e) => {
@@ -610,8 +674,10 @@ const setupPPLSyntaxHighlighting = () => {
     disposables.push(
       model.onDidChangeContent(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
-          await processSyntaxHighlighting(model);
-          scheduleLintHighlighting(model);
+          const hasSyntaxErrors = await processSyntaxHighlighting(model);
+          if (hasSyntaxErrors === false) {
+            scheduleLintHighlighting(model);
+          }
         }
       })
     );
@@ -620,8 +686,10 @@ const setupPPLSyntaxHighlighting = () => {
     disposables.push(
       model.onDidChangeLanguage(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
-          await processSyntaxHighlighting(model);
-          processLintHighlighting(model);
+          const hasSyntaxErrors = await processSyntaxHighlighting(model);
+          if (hasSyntaxErrors === false) {
+            processLintHighlighting(model);
+          }
         } else {
           abortInFlightExplain(model.id);
           monaco.editor.setModelMarkers(model, OWNER, []);
@@ -629,14 +697,18 @@ const setupPPLSyntaxHighlighting = () => {
           clearModelFixes(model);
           clearModelSyntaxFixes(model);
           clearPPLLintTelemetry(model);
+          syntaxValidationStates.delete(model.id);
         }
       })
     );
 
     // Process immediately if already PPL
     if (model.getLanguageId() === PPL_LANGUAGE_ID) {
-      processSyntaxHighlighting(model);
-      processLintHighlighting(model);
+      void processSyntaxHighlighting(model).then((hasSyntaxErrors) => {
+        if (hasSyntaxErrors === false) {
+          processLintHighlighting(model);
+        }
+      });
     }
   };
 
@@ -654,6 +726,7 @@ const setupPPLSyntaxHighlighting = () => {
       abortInFlightExplain(model.id);
       lintGenerations.delete(model.id);
       syntaxGenerations.delete(model.id);
+      syntaxValidationStates.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
       clearModelFixes(model);
@@ -673,6 +746,7 @@ const setupPPLSyntaxHighlighting = () => {
     lintAbortControllers.clear();
     lintGenerations.clear();
     syntaxGenerations.clear();
+    syntaxValidationStates.clear();
     monaco.editor.getModels().forEach(clearPPLLintTelemetry);
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();

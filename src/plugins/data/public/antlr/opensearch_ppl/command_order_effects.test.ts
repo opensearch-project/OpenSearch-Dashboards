@@ -94,7 +94,11 @@ function simplifiedTree(query: string): ParserRuleContext {
   return parser.root();
 }
 
-const context: LintRunContext = { isCalcite: true, dataSourceVersion: '3.8.0' };
+const context: LintRunContext = {
+  isCalcite: true,
+  dataSourceVersion: '3.8.0',
+  overrides: { 'head-without-sort': { enabled: true } },
+};
 
 function firesHeadWithoutSort(tree: ParserRuleContext, rni: any): boolean {
   return runLint(tree, { ruleNameToIndex: rni, context }).some(

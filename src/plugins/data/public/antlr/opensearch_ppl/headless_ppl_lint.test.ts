@@ -149,13 +149,34 @@ describe('lintQueryWithBundle', () => {
   });
 
   it('remaps pipe-first diagnostic ranges back to source columns', () => {
-    // head-without-sort is an always-on info rule; a pipe-first query exercises
-    // the synthetic-prefix column remap shared with the browser path.
-    const result = lintQueryWithBundle('| head 10', grammar());
+    // Opt in to the default-off rule so this stays a range-remap test.
+    const result = lintQueryWithBundle('| head 10', grammar(), {
+      overrides: { 'head-without-sort': { enabled: true } },
+    });
     const head = result.diagnostics.find((d) => d.ruleId === 'head-without-sort');
     expect(head).toBeDefined();
     expect(head!.range.startLine).toBe(1);
     expect(head!.range.startColumn).toBe(2);
+  });
+
+  it('returns all severity tiers to headless callers', () => {
+    const result = lintQueryWithBundle(
+      'source=accounts | where missing = 1 | eval x = balance / 0 | rex field=message "level=(?<lvl>\\w+)"',
+      grammar(),
+      {
+        dataSourceVersion: '3.8.0',
+        isCalcite: true,
+        fields: new Set(['balance', 'message']),
+        typeMap: new Map([
+          ['balance', 'long'],
+          ['message', 'text'],
+        ]),
+      }
+    );
+    const byRule = new Map(result.diagnostics.map((diagnostic) => [diagnostic.ruleId, diagnostic]));
+    expect(byRule.get('field-validation')?.severity).toBe('error');
+    expect(byRule.get('division-by-zero')?.severity).toBe('warning');
+    expect(byRule.get('rex-scan-cost')?.severity).toBe('info');
   });
 
   describe('anti-vacuous surface + version forwarding', () => {

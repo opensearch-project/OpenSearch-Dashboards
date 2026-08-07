@@ -13,7 +13,10 @@ describe('dedup-consecutive-unsupported (Calcite-gated warning)', () => {
   });
   const ids = (code: string, ctx?: LintRunContext) =>
     analyzer.lint(code, ctx).diagnostics.map((d) => d.ruleId);
-  const calcite: LintRunContext = { isCalcite: true };
+  const enabled: LintRunContext = {
+    overrides: { 'dedup-consecutive-unsupported': { enabled: true } },
+  };
+  const calcite: LintRunContext = { ...enabled, isCalcite: true };
 
   it('flags consecutive=true on a Calcite source', () => {
     expect(ids('source=a | dedup 1 status consecutive=true', calcite)).toContain(
@@ -41,7 +44,7 @@ describe('dedup-consecutive-unsupported (Calcite-gated warning)', () => {
   });
 
   it('does not fire without a Calcite context', () => {
-    expect(ids('source=a | dedup 1 status consecutive=true')).not.toContain(
+    expect(ids('source=a | dedup 1 status consecutive=true', enabled)).not.toContain(
       'dedup-consecutive-unsupported'
     );
   });

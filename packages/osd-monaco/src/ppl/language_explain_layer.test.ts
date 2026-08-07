@@ -150,8 +150,8 @@ const NOT_PUSHED_PLAN = {
   },
 };
 
-// operation-not-pushed ships enabled by default; this pins it on explicitly so
-// the positive-path tests don't depend on the shipped catalog default.
+// operation-not-pushed ships disabled by default; positive-path explain tests
+// opt in explicitly.
 const ENABLE_NOT_PUSHED = { 'operation-not-pushed': { enabled: true } };
 
 // Turns both explain rules off, exercising the no-network path when the user has
@@ -199,11 +199,8 @@ describe('processLintHighlighting — explain layer', () => {
     expect(calls.length).toBe(2);
     // First render: only the static rule.
     expect(calls[0][2].map((m: any) => m.code)).toEqual(['head-without-sort']);
-    // Second render: static + explain, static first.
-    expect(calls[1][2].map((m: any) => m.code)).toEqual([
-      'head-without-sort',
-      'operation-not-pushed',
-    ]);
+    // The explain warning becomes the highest tier and hides the static info.
+    expect(calls[1][2].map((m: any) => m.code)).toEqual(['operation-not-pushed']);
     // The explain marker is NARROWED to the `where age > 30` predicate, not the
     // whole query: a single candidate resolves without any probe request.
     const explainMarker = calls[1][2].find((m: any) => m.code === 'operation-not-pushed');

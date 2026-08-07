@@ -35,6 +35,7 @@ describe('flat-object-subfield (compiled surface)', () => {
   const ctx: LintRunContext = {
     dataSourceVersion: '3.8.0',
     isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
     typeMap: new Map([
       ['attributes', 'flat_object'],
       ['attributes.http', 'keyword'],
@@ -44,6 +45,7 @@ describe('flat-object-subfield (compiled surface)', () => {
   const flatOnly: LintRunContext = {
     dataSourceVersion: '3.8.0',
     isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
     typeMap: new Map([['attributes', 'flat_object']]),
   };
 
@@ -81,7 +83,11 @@ describe('flat-object-subfield (compiled surface)', () => {
 
   // The enabling surface (Calcite >= 3.8) is present, so the ONLY reason to
   // suppress here is the absent/empty typeMap.
-  const enablingSurface: LintRunContext = { dataSourceVersion: '3.8.0', isCalcite: true };
+  const enablingSurface: LintRunContext = {
+    dataSourceVersion: '3.8.0',
+    isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
+  };
 
   it('self-suppresses when no typeMap is provided', () =>
     expect(ids('search t | fields attributes.http.method', enablingSurface)).not.toContain(

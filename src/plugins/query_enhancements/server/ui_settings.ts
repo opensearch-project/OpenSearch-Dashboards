@@ -16,24 +16,24 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   // so it has no configurable severity — it always rides the syntax error's own.
   severity?: 'error' | 'warning' | 'info';
 }> = [
-  { id: 'head-without-sort', enabled: true, severity: 'info' },
+  { id: 'head-without-sort', enabled: false, severity: 'info' },
   { id: 'division-by-zero', enabled: true, severity: 'warning' },
   { id: 'unsupported-window-function-in-eventstats', enabled: true, severity: 'error' },
   { id: 'multisearch-min-subsearch', enabled: true, severity: 'error' },
-  { id: 'disabled-join-type', enabled: true, severity: 'warning' },
-  { id: 'dedup-consecutive-unsupported', enabled: true, severity: 'warning' },
+  { id: 'disabled-join-type', enabled: false, severity: 'warning' },
+  { id: 'dedup-consecutive-unsupported', enabled: false, severity: 'warning' },
   { id: 'union-min-datasets', enabled: true, severity: 'error' },
   { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
   { id: 'field-validation', enabled: true, severity: 'error' },
   { id: 'agg-on-text', enabled: true, severity: 'warning' },
-  { id: 'flat-object-subfield', enabled: true, severity: 'error' },
+  { id: 'flat-object-subfield', enabled: false, severity: 'error' },
   { id: 'type-mismatch-numeric', enabled: true, severity: 'warning' },
   { id: 'invalid-capture-group-name', enabled: true, severity: 'error' },
-  { id: 'operation-not-pushed', enabled: true, severity: 'warning' },
-  { id: 'operation-pushed-as-script', enabled: true, severity: 'info' },
+  { id: 'operation-not-pushed', enabled: false, severity: 'warning' },
+  { id: 'operation-pushed-as-script', enabled: false, severity: 'info' },
   { id: 'enabled-false-object', enabled: true, severity: 'warning' },
-  { id: 'wildcard-source-zero-match', enabled: true, severity: 'info' },
-  { id: 'rex-scan-cost', enabled: false, severity: 'info' },
+  { id: 'wildcard-source-zero-match', enabled: true, severity: 'warning' },
+  { id: 'rex-scan-cost', enabled: true, severity: 'info' },
   { id: 'command-suggestion', enabled: true },
 ];
 
