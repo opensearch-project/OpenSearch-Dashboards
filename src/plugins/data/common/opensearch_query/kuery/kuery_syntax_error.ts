@@ -57,7 +57,9 @@ interface DQLSyntaxErrorData extends Error {
 }
 
 interface DQLSyntaxErrorExpected {
-  description: string;
+  type: string;
+  description?: string;
+  text?: string;
 }
 
 export class DQLSyntaxError extends Error {
@@ -67,7 +69,8 @@ export class DQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        return grammarRuleTranslations[expected.description] || expected.description;
+        const key = expected.description ?? expected.text ?? '';
+        return grammarRuleTranslations[key] || key;
       });
 
       const uniqueExpectations = translatedExpectations.filter(

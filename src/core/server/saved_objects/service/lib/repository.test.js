@@ -2917,10 +2917,10 @@ describe('SavedObjectsRepository', () => {
         };
 
         await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-                          [Error: DQLSyntaxError: Expected whitespace, value but "<" found.
-                          dashboard.attributes.otherField:<
-                          --------------------------------^: Bad Request]
-                      `);
+          [Error: DQLSyntaxError: Expected whitespace, {, (, value but "<" found.
+          dashboard.attributes.otherField:<
+          --------------------------------^: Bad Request]
+        `);
         expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
         expect(client.search).not.toHaveBeenCalled();
       });
