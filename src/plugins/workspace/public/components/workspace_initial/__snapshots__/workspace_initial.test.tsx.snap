@@ -73,35 +73,43 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorDownCenter"
+                    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <button
-                        class="euiButton euiButton--primary euiButton--small euiButton--fill"
-                        data-test-subj="workspace-initial-card-createWorkspace-button"
-                        type="button"
+                      <div
+                        class="euiPopover euiPopover--anchorDownCenter"
                       >
-                        <span
-                          class="euiButtonContent euiButton__content"
+                        <div
+                          class="euiPopover__anchor"
                         >
-                          <span
-                            class="euiButtonContent__icon"
-                            color="inherit"
-                            data-euiicon-type="plus"
-                          />
-                          <span
-                            class="euiButton__text"
+                          <button
+                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                            data-test-subj="workspace-initial-card-createWorkspace-button"
+                            type="button"
                           >
-                            Create Workspace
-                              
                             <span
-                              data-euiicon-type="arrowDown"
-                            />
-                          </span>
-                        </span>
-                      </button>
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="plus"
+                              />
+                              <span
+                                class="euiButton__text"
+                              >
+                                Create Workspace
+                                  
+                                <span
+                                  data-euiicon-type="arrowDown"
+                                />
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
