@@ -127,7 +127,9 @@ describe('validateRuntimePPLQuery', () => {
       const hit = result?.errors.find((e) => (e as any).code === 'UNKNOWN_COMMAND');
       expect(hit).toBeDefined();
       expect((hit as any).fix?.text).toBe('where');
-      expect(hit?.message).toContain('where');
+      expect(hit?.message).toBe(
+        "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?"
+      );
     });
 
     it("leaves ANTLR's message untouched for unrecognizable garbage", () => {

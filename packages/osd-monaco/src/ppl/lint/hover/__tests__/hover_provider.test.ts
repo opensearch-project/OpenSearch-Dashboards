@@ -78,17 +78,17 @@ function activateMarkers(markers: Marker[]): void {
 
 describe('pplLintHoverProvider', () => {
   it('returns a card for a lint marker under the cursor', () => {
-    markersByOwner[LINT_OWNER] = [makeMarker({ message: 'Dividing by zero returns null.' })];
+    const markerMessage = 'Dividing by zero returns null.';
+    markersByOwner[LINT_OWNER] = [makeMarker({ message: markerMessage })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    // The rule id is secondary metadata on the severity line, not the headline.
+    // Monaco's built-in marker hover owns the message and linked rule id; the
+    // supplemental card retains the explicit severity label.
     expect(markdownOf(hover)).toContain('⚠️ **Warning**');
-    expect(markdownOf(hover)).toContain('Rule: `division-by-zero`');
-    expect(markdownOf(hover)).toContain('Dividing by zero returns null.');
-    expect(markdownOf(hover)).toContain('**Fix** — Use the intended divisor');
-    expect(markdownOf(hover)).not.toContain('Learn more');
-    expect(markdownOf(hover)).not.toContain('**Engine behavior**');
-    expect(markdownOf(hover)).not.toContain('· Warning');
+    expect(markdownOf(hover)).not.toContain('Rule:');
+    expect(markdownOf(hover)).not.toContain(markerMessage);
+    expect(markdownOf(hover)).toContain('**Fix** — Check your divisor');
+    expect(markdownOf(hover)).toContain('[Learn more →](https://docs.example/x)');
   });
 
   it('returns null when the cursor is outside every marker range', () => {
@@ -107,8 +107,9 @@ describe('pplLintHoverProvider', () => {
 
   it('renders the quick-fix preview from the side table', () => {
     const marker = makeMarker({
-      code: { value: 'field-validation', target: monaco.Uri.parse('https://docs.example/f') },
-      message: 'Unknown field "reveneu". Did you mean "revenue"?',
+      code: 'field-validation',
+      message:
+        'Field \'reveneu\' is not defined or recognized in the current schema. Did you mean "revenue"?',
     });
     markersByOwner[LINT_OWNER] = [marker];
     const fix: MarkerFix = { title: 'Replace with "revenue"', text: 'revenue' };
@@ -116,7 +117,9 @@ describe('pplLintHoverProvider', () => {
 
     const md = markdownOf(hoverAt(1, 7));
     expect(md).toContain('**Quick fix available** — `revenue`');
+    expect(md).not.toContain(marker.message);
     expect(md).not.toContain('Closest known field');
+    expect(md).not.toContain('Learn more');
   });
 
   it('picks the innermost marker when several overlap', () => {
@@ -134,25 +137,28 @@ describe('pplLintHoverProvider', () => {
     });
     markersByOwner[LINT_OWNER] = [outer, inner];
     const md = markdownOf(hoverAt(1, 7));
-    // The innermost marker's message wins.
-    expect(md).toContain('inner');
+    // The innermost marker's supplemental guidance wins.
+    expect(md).toContain('Check your divisor');
+    expect(md).toContain('https://docs.example/d');
+    expect(md).not.toContain('https://docs.example/a');
+    expect(md).not.toContain('inner');
     expect(md).not.toContain('outer');
   });
 
-  it('still renders when code (ruleId) is absent', () => {
+  it('leaves a marker with no supplemental guidance to Monaco', () => {
     const marker = makeMarker({ code: undefined, message: 'no code here' });
     markersByOwner[LINT_OWNER] = [marker];
-    const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('no code here');
-    // No catalog entry → no Fix line, but never throws / never blank.
-    expect(md).not.toContain('**Fix**');
-    expect(md).not.toContain('Rule:');
-    expect(md).not.toContain('**Engine behavior**');
+    expect(hoverAt(1, 7)).toBeNull();
   });
 
-  it('renders a plain-string marker code as the rule id', () => {
+  it('resolves the catalog entry from a plain-string marker code', () => {
+    // The id itself is no longer printed, so assert the thing it still drives:
+    // a bare-string `code` (no doc link) must still find the catalog Fix text.
     markersByOwner[LINT_OWNER] = [makeMarker({ code: 'agg-on-text' })];
-    expect(markdownOf(hoverAt(1, 7))).toContain('Rule: `agg-on-text`');
+    const md = markdownOf(hoverAt(1, 7));
+    expect(md).toContain('**Fix** —');
+    expect(md).not.toContain('Rule:');
+    expect(md).not.toContain('Learn more');
   });
 
   describe('contributed actions', () => {
@@ -245,14 +251,12 @@ describe('pplLintHoverProvider', () => {
       expect(events).toHaveLength(0);
     });
 
-    it('emits hover_shown with an undefined rule when the marker has no code', () => {
+    it('does not emit when no supplemental card is returned', () => {
       markersByOwner[LINT_OWNER] = [makeMarker({ code: undefined })];
       activateMarkers(markersByOwner[LINT_OWNER]);
       events = [];
-      hoverAt(1, 7);
-      expect(events).toEqual([
-        { name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN, data: { rule: undefined } },
-      ]);
+      expect(hoverAt(1, 7)).toBeNull();
+      expect(events).toHaveLength(0);
     });
 
     it('deduplicates repeated hovers over the same marker within a pass', () => {

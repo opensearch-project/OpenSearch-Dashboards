@@ -9,9 +9,10 @@ import { getBundledCatalog } from '../catalog';
 
 // `rex-scan-cost` is an advisory, `info`-severity rule that flags pattern
 // extraction (`rex`/`parse`/`grok`) over a `text`-mapped source field. It ships
-// disabled by default (like the explain-backed rules), so every assertion here
-// enables it through the per-rule override, matching how the host resolves
-// uiSettings into `context.overrides`.
+// ENABLED. Most assertions still pass the rule state explicitly through the
+// per-rule override (matching how the host resolves uiSettings into
+// `context.overrides`) so each case states what it depends on rather than
+// inheriting the shipped default; the gating block below covers the default itself.
 //
 // Assertions run on the compiled (simplified-grammar) surface, matching the
 // existing analyzer_lint.test.ts / silent_failure_rules.test.ts suites. `rex`
@@ -33,8 +34,9 @@ describe('rex-scan-cost (compiled surface)', () => {
   ]);
   const fields = new Set<string>([...typeMap.keys()]);
 
-  // Enable the default-off rule the same way the host does — via a per-rule
-  // override threaded through the lint context.
+  // State the rule as enabled the same way the host does — via a per-rule override
+  // threaded through the lint context. Redundant with the shipped default now, but
+  // keeps each assertion independent of it.
   const enabled: LintRunContext = {
     fields,
     typeMap,
@@ -110,9 +112,19 @@ describe('rex-scan-cost (compiled surface)', () => {
       ).not.toContain('rex-scan-cost');
     });
 
-    it('ships disabled by default (no finding without the override)', () => {
+    it('ships enabled by default (fires without an override)', () => {
       expect(
         ids('source=logs | rex field=raw_log "GET (?<path>\\S+)"', { fields, typeMap })
+      ).toContain('rex-scan-cost');
+    });
+
+    it('can still be turned off explicitly', () => {
+      expect(
+        ids('source=logs | rex field=raw_log "GET (?<path>\\S+)"', {
+          fields,
+          typeMap,
+          overrides: { 'rex-scan-cost': { enabled: false } },
+        })
       ).not.toContain('rex-scan-cost');
     });
   });

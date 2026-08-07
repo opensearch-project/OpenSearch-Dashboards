@@ -83,6 +83,7 @@ const FLAT_QUERY = 'search t | fields attributes';
 const FLAT_TYPES: Partial<LintRunContext> = {
   ...CALCITE_ENGINE,
   typeMap: new Map([['attributes', 'flat_object']]),
+  overrides: { 'flat-object-subfield': { enabled: true } },
 };
 
 const MISMATCH_QUERY = 'search t | where age = "thirty"';
@@ -121,7 +122,12 @@ describe('local rules: product-path plumbing (catalog + registry + runLint, comp
 
     it('flat-object-subfield is suppressed when the context carries no typeMap', () => {
       // Enabling surface present, so the absent typeMap is the only suppression cause.
-      expect(ruleIds(FLAT_QUERY, CALCITE_ENGINE)).not.toContain('flat-object-subfield');
+      expect(
+        ruleIds(FLAT_QUERY, {
+          ...CALCITE_ENGINE,
+          overrides: { 'flat-object-subfield': { enabled: true } },
+        })
+      ).not.toContain('flat-object-subfield');
     });
 
     it('type-mismatch-numeric is suppressed when the context carries no typeMap', () => {

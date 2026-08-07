@@ -110,6 +110,7 @@ function simplifiedTree(query: string): ParserRuleContext {
 const context: LintRunContext = {
   isCalcite: true,
   dataSourceVersion: '3.8.0',
+  overrides: { 'flat-object-subfield': { enabled: true } },
   fields: new Set<string>(['note', 'qty', 'balance', 'attributes', 'attributes.http']),
   typeMap: new Map<string, string>([
     ['note', 'text'],

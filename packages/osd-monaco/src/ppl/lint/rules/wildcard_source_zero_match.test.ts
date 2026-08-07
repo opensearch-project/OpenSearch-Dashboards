@@ -84,6 +84,11 @@ describe('wildcard-source-zero-match', () => {
       const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
       expect(diagnostic.range.startColumn).toBeLessThan(diagnostic.range.endColumn);
     });
+
+    it('emits warning severity', () => {
+      const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
+      expect(diagnostic.severity).toBe('warning');
+    });
   });
 });
 

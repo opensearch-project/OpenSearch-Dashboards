@@ -129,6 +129,52 @@ describe('enabled-false-object', () => {
     });
   });
 
+  // A field under an `enabled: false` object is absent from `_field_caps`, so it is
+  // absent from `context.fields` too — which means field-validation would call it
+  // missing from the schema and put a second, wrong squiggle on the same reference. These
+  // assert the two rules divide the judgement: this rule owns it, field-validation
+  // stays quiet, and a genuine typo is still caught.
+  describe('does not double-flag with field-validation', () => {
+    const unknownField = (code: string, context?: LintRunContext) =>
+      analyzer.lint(code, context).diagnostics.filter((d) => d.ruleId === 'field-validation');
+
+    it('field-validation stays silent on a field under a disabled object', () => {
+      const ctx = withDisabled('session');
+      expect(diagnosticsFor('source=logs | where session.id = 1', ctx)).toHaveLength(1);
+      expect(unknownField('source=logs | where session.id = 1', ctx)).toHaveLength(0);
+    });
+
+    it('field-validation stays silent on the disabled object root itself', () => {
+      expect(unknownField('source=logs | where session = 1', withDisabled('session'))).toHaveLength(
+        0
+      );
+    });
+
+    it('still reports a genuine unknown field that is not under a disabled object', () => {
+      const found = unknownField('source=logs | where nosuchfield = 1', withDisabled('session'));
+      expect(found).toHaveLength(1);
+      expect(found[0].message).toContain('not defined or recognized in the current schema');
+    });
+
+    it('does not suppress a sibling whose name merely shares a prefix', () => {
+      // `sessionless` must not be treated as living under `session`; the
+      // `root + '.'` boundary is what prevents that.
+      const found = unknownField('source=logs | where sessionless = 1', withDisabled('session'));
+      expect(found).toHaveLength(1);
+    });
+
+    it('reports the field as unknown again when the mapping probe did not resolve', () => {
+      // No disabledObjectFields → the suppression cannot apply, so behavior falls
+      // back to what it was before this change rather than silently hiding it.
+      const found = unknownField('source=logs | where session.id = 1', {
+        dataSourceVersion: '3.7.0',
+        isCalcite: true,
+        fields: new Set(['status']),
+      });
+      expect(found).toHaveLength(1);
+    });
+  });
+
   describe('reported diagnostic', () => {
     it('reports the catalog message, not an interpolated literal', () => {
       const catalogMessage = getBundledCatalog().find((r) => r.id === RULE_ID)?.message;
