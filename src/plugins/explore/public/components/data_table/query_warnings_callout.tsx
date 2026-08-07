@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { QueryWarning } from '../../application/utils/state_management/slices';
 
 interface QueryWarningsCalloutProps {
@@ -46,9 +46,10 @@ const titleForType = (type: string): string =>
 
 /**
  * A single warning callout. The title is an explicit label for the warning type (e.g. "Partial
- * results"); the short {@link QueryWarning.message} is the always-visible summary; the longer
- * {@link QueryWarning.detail} (which can name many indices) is collapsed behind a "Show more"
- * toggle so the banner stays compact.
+ * results"); the short {@link QueryWarning.message} is the always-visible summary, followed inline
+ * by a "Show more" toggle for the longer {@link QueryWarning.detail} (which can name many indices),
+ * so the callout stays compact. Uses the {@code partial} glyph rather than the {@code alert} icon
+ * (which reads as a Danger callout) and an outlined button for the action so the CTA is legible.
  */
 const WarningCallout: React.FC<{
   warning: QueryWarning;
@@ -63,36 +64,39 @@ const WarningCallout: React.FC<{
     <EuiCallOut
       title={titleForType(warning.type)}
       color="warning"
-      iconType="alert"
+      iconType="partial"
       size="s"
       data-test-subj="queryWarningsCallout"
     >
-      {warning.message ? <p>{warning.message}</p> : null}
-      {warning.detail ? (
-        <>
-          {expanded ? <p>{warning.detail}</p> : null}
-          <EuiLink
-            onClick={() => setExpanded((prev) => !prev)}
-            data-test-subj="queryWarningsToggle"
-            aria-expanded={expanded}
-          >
-            {expanded ? showLessLabel : showMoreLabel}
-          </EuiLink>
-        </>
+      {warning.message || warning.detail ? (
+        <EuiText size="s">
+          {warning.message}
+          {warning.detail ? (
+            <>
+              {expanded ? ` ${warning.detail}` : ' '}
+              <EuiLink
+                onClick={() => setExpanded((prev) => !prev)}
+                data-test-subj="queryWarningsToggle"
+                aria-expanded={expanded}
+              >
+                {expanded ? showLessLabel : showMoreLabel}
+              </EuiLink>
+            </>
+          ) : null}
+        </EuiText>
       ) : null}
       {showRerun ? (
         <>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
+          <EuiSpacer size="xs" />
+          <EuiButton
             size="s"
-            flush="left"
             iconType="refresh"
             color="warning"
             onClick={onRerunWithoutPartialResults}
             data-test-subj="queryWarningsRerunWithoutPartial"
           >
             {rerunWithoutPartialLabel}
-          </EuiButtonEmpty>
+          </EuiButton>
         </>
       ) : null}
     </EuiCallOut>
