@@ -7,6 +7,24 @@ import { WorkspaceObject } from 'opensearch-dashboards/public';
 import moment from 'moment';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 
+export const ASSET_MIGRATION_TOUR_STORAGE_KEY = 'workspace.assetMigration.tourDismissed';
+
+export const readMigrationTourDismissed = (): boolean => {
+  try {
+    return Boolean(localStorage.getItem(ASSET_MIGRATION_TOUR_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+};
+
+export const writeMigrationTourDismissed = () => {
+  try {
+    localStorage.setItem(ASSET_MIGRATION_TOUR_STORAGE_KEY, 'true');
+  } catch {
+    // The in-memory state still hides the tour for this session.
+  }
+};
+
 export interface UpdatedWorkspaceObject extends WorkspaceObject {
   accessTimeStamp?: number;
   visitedMessage?: string;
