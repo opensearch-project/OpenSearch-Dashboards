@@ -363,13 +363,25 @@ export class QueryEnhancementsPlugin implements Plugin<
       this.currentAppId$.next(appId);
     });
 
+    // PPL lint — gated by the queryEnhancements.pplLint dynamic app config
+    // capability (disabled by default). The bridge lints against the runtime
+    // grammar, so it is only registered when the runtime grammar is enabled;
+    // otherwise the editor's worker lints against the compiled grammar.
+    //
+    // Feature-usage telemetry is forwarded through core.telemetry: the recorder
+    // auto-stamps the queryEnhancements source and no-ops in public OSS (no
+    // provider is registered there), lighting up only where one is.
     const lintEnabled = !!core.application.capabilities.queryEnhancements?.pplLint;
     const runtimeGrammarEnabled =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
+    const telemetryRecorder = core.telemetry?.getPluginRecorder();
     this.unregisterPplLintBridge = registerPplLint(lintEnabled, runtimeGrammarEnabled, {
       data,
       uiSettings: core.uiSettings,
       getAppId: () => this.currentAppId$.getValue(),
+      telemetrySink: telemetryRecorder
+        ? (event) => telemetryRecorder.recordEvent(event)
+        : undefined,
     });
 
     return {};

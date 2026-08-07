@@ -41,6 +41,7 @@ describe('PPLWorkerImpl typeMap hydration', () => {
       dataSourceVersion: '3.8.0',
       isCalcite: true,
       typeMap: { attributes: 'flat_object' },
+      overrides: { 'flat-object-subfield': { enabled: true } },
     };
     const { diagnostics } = await worker.lint('search t | fields attributes.http', context);
     expect(diagnostics.map((d) => d.ruleId)).toContain('flat-object-subfield');

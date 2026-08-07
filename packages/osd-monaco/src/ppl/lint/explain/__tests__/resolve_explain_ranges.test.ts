@@ -146,10 +146,6 @@ describe('resolveExplainRanges', () => {
     expect(
       slice(query, resolved.fix ? { ...resolved, range: resolved.fix.range! } : resolved)
     ).toBe('age - 2 > 30');
-    // Hover facts get the recovered field + literal.
-    expect(resolved.hoverFacts?.field).toBe('age');
-    expect(resolved.hoverFacts?.literal).toBe('30');
-    expect(resolved.hoverFacts?.operation).toBeUndefined();
   });
 
   it('offers the additive fix only for an integer field, never float or unknown', () => {

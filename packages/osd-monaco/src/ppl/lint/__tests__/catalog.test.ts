@@ -7,6 +7,30 @@ import semver from 'semver';
 import { getBundledCatalog, loadCatalog, validateCatalogEntry } from '../catalog';
 import { OSD_KNOWN_VERSION } from '../version_filter';
 
+const DEFAULT_ON_RULES = [
+  'agg-on-text',
+  'division-by-zero',
+  'enabled-false-object',
+  'field-validation',
+  'invalid-capture-group-name',
+  'multisearch-min-subsearch',
+  'replace-wildcard-asymmetry',
+  'rex-scan-cost',
+  'type-mismatch-numeric',
+  'union-min-datasets',
+  'unsupported-window-function-in-eventstats',
+  'wildcard-source-zero-match',
+];
+
+const DEFAULT_OFF_RULES = [
+  'dedup-consecutive-unsupported',
+  'disabled-join-type',
+  'flat-object-subfield',
+  'head-without-sort',
+  'operation-not-pushed',
+  'operation-pushed-as-script',
+];
+
 describe('catalog loading', () => {
   it('loads the bundled catalog with the expected rule ids', () => {
     const ids = getBundledCatalog().map((c) => c.id);
@@ -56,6 +80,12 @@ describe('catalog loading', () => {
       minVersion: '3.8.0',
       engine: 'calcite',
     });
+    // enabled-false-object is the same class of context-fed mapping rule
+    // (verified live on 3.7 Calcite); gate it to that surface too.
+    expect(byId.get('enabled-false-object')?.appliesTo).toEqual({
+      minVersion: '3.7.0',
+      engine: 'calcite',
+    });
   });
 
   it('keeps exactly the valid entries and drops malformed ones', () => {
@@ -66,6 +96,7 @@ describe('catalog loading', () => {
         enabled: true,
         severity: 'error',
         message: 'm',
+        howToFix: 'f',
         docUrl: 'd',
         appliesTo: {},
       },
@@ -76,6 +107,7 @@ describe('catalog loading', () => {
         enabled: true,
         severity: 'bogus',
         message: 'm',
+        howToFix: 'f',
         docUrl: 'd',
         appliesTo: {},
       },
@@ -99,10 +131,53 @@ describe('catalog loading', () => {
         enabled: true,
         severity: 'warning',
         message: 'm',
+        howToFix: 'f',
         docUrl: 'd',
         appliesTo: { minVersion: '3.4.0', engine: 'calcite' },
       })
     ).not.toBeNull();
+  });
+
+  it('rejects an otherwise valid entry without howToFix guidance', () => {
+    expect(
+      validateCatalogEntry({
+        id: 'x',
+        detector: 'x',
+        enabled: true,
+        severity: 'warning',
+        message: 'm',
+        docUrl: 'd',
+        appliesTo: {},
+      })
+    ).toBeNull();
+  });
+
+  it('ships non-empty howToFix guidance for every bundled rule', () => {
+    for (const entry of getBundledCatalog()) {
+      expect(entry.howToFix.trim()).not.toBe('');
+    }
+  });
+
+  it('ships the exact release default sets', () => {
+    const catalog = getBundledCatalog();
+    expect(
+      catalog
+        .filter((rule) => rule.enabled)
+        .map((rule) => rule.id)
+        .sort()
+    ).toEqual(DEFAULT_ON_RULES);
+    expect(
+      catalog
+        .filter((rule) => !rule.enabled)
+        .map((rule) => rule.id)
+        .sort()
+    ).toEqual(DEFAULT_OFF_RULES);
+  });
+
+  it('ships wildcard-source-zero-match as a warning', () => {
+    expect(
+      getBundledCatalog().find((rule) => rule.id === 'wildcard-source-zero-match')?.severity
+    ).toBe('warning');
   });
 
   it('rejects an invalid engine predicate', () => {
@@ -113,6 +188,7 @@ describe('catalog loading', () => {
         enabled: true,
         severity: 'warning',
         message: 'm',
+        howToFix: 'f',
         docUrl: 'd',
         appliesTo: { engine: 'spark' },
       })
@@ -126,6 +202,7 @@ describe('catalog loading', () => {
       enabled: true,
       severity: 'warning',
       message: 'm',
+      howToFix: 'f',
       docUrl: 'd',
       appliesTo: {},
       aiFixable: true,
@@ -141,6 +218,7 @@ describe('catalog loading', () => {
         enabled: true,
         severity: 'warning',
         message: 'm',
+        howToFix: 'f',
         docUrl: 'd',
         appliesTo: {},
         aiFixable: 'yes',

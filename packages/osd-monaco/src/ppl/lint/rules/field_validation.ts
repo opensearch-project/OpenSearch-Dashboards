@@ -9,7 +9,7 @@ import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
-import { fieldPathPrefix, normalizeFieldPath } from '../field_path';
+import { fieldPathPrefix, isUnderDisabledObject, normalizeFieldPath } from '../field_path';
 import {
   findAllDescendantsByRule,
   findChildByRule,
@@ -33,7 +33,7 @@ const SHAPE_DOC_URL: Record<string, string> = {
 // `source` / `index` are the fromClause keywords. The compiled-simplified
 // grammar mis-parses `source=idx` into a fieldExpression for the `source`
 // keyword (the runtime grammar parses it as an excluded fromClause), so the
-// existence pass must skip these to avoid a false "Unknown field" on every
+// existence pass must skip these to avoid a false unknown-field finding on every
 // source-first query against a sub-3.6 cluster.
 const SOURCE_KEYWORDS: ReadonlySet<string> = new Set(['source', 'index']);
 
@@ -138,6 +138,11 @@ function detectUnknownFields(
     return []; // R22.3 self-suppress
   }
 
+  // Empty when the mapping probe did not resolve. That only costs us the
+  // suppression below (a reference under a disabled object is then reported as
+  // unknown, as it was before) — it never adds a finding.
+  const disabledObjectFields = context.disabledObjectFields ?? new Set<string>();
+
   const { createdFields } = buildPipelineShape(tree, ruleNameToIndex);
   // Membership test over the two source sets rather than copying them into one
   // merged set on every keystroke. The suggestion path (cold — only runs once a
@@ -181,7 +186,7 @@ function detectUnknownFields(
       // On the compiled-simplified surface, `source=idx` / `index=idx` parses the
       // leading `source`/`index` keyword into a fieldExpression (the runtime
       // grammar instead parses it as an excluded fromClause). Skip that keyword
-      // so sub-3.6 clusters don't get a spurious "Unknown field" on every query.
+      // so sub-3.6 clusters don't get a spurious unknown-field finding on every query.
       if (skipSourceKeywords && SOURCE_KEYWORDS.has(name.toLowerCase())) {
         continue;
       }
@@ -208,6 +213,13 @@ function detectUnknownFields(
         !hasExcludedAncestor(node, excludedIndices) &&
         !isKnown(name) &&
         !isKnown(leaf) &&
+        // A field beneath an `enabled: false` object DOES exist — it is in the
+        // mapping and in `_source`, just not indexed. It is absent from
+        // `_field_caps` (and therefore from `fields`), so without this check we
+        // would call it unknown and double-flag the same reference alongside
+        // `enabled-false-object`, which reports the accurate problem: stored but
+        // not searchable. Suppress here and let that rule own the finding.
+        !isUnderDisabledObject(name, disabledObjectFields) &&
         !seen.has(name)
       ) {
         seen.add(name);
@@ -216,10 +228,9 @@ function detectUnknownFields(
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Unknown field "${name}".${suffix}`,
+          message: `Field '${name}' is not defined or recognized in the current schema.${suffix}`,
           range: rangeFromContext(node),
           docUrl: config.docUrl,
-          hoverFacts: { field: name, ...(suggestion ? { suggestion } : {}) },
           // The diagnostic range spans exactly the field reference, so the fix
           // replaces it in place (no explicit fix range needed).
           ...(suggestion
@@ -385,7 +396,6 @@ function detectFieldSlotShape(
         message: `${keyword} expects a field name here, not an expression.`,
         range: rangeFromContext(expression),
         docUrl: SHAPE_DOC_URL[commandName] ?? config.docUrl,
-        hoverFacts: { field: expression.getText() },
         ...(rhs ? { fix: { title: `Remove "field=" (use "${rhs}")`, text: rhs } } : {}),
       });
     }
@@ -420,7 +430,6 @@ function detectCompiledFieldSlotShape(
     message: `${match.keyword} expects a field name here, not an expression.`,
     range: match.range,
     docUrl: SHAPE_DOC_URL[match.commandName] ?? config.docUrl,
-    hoverFacts: { field: match.expressionText },
     ...(match.replacement
       ? {
           fix: {
@@ -453,7 +462,7 @@ function rangeContains(outer: DiagnosticRange, inner: DiagnosticRange): boolean 
  * PASS 3 — internal overlap suppression. Drop any existence finding whose range
  * is contained within a shape finding's range, so a single `grok field=body`
  * surfaces one actionable diagnostic rather than a confusing shape finding +
- * "Unknown field 'field'" pair. Shape findings are always kept.
+ * unknown-field pair. Shape findings are always kept.
  */
 function suppressContained(
   shapeDiagnostics: Diagnostic[],

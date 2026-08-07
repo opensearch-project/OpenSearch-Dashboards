@@ -5,16 +5,15 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { SplitLayout } from './visualization_builder.types';
-import { SplitGroup } from './utils/group_data_by_split';
 import { SplitChartInstance } from './split_chart_instance';
 
 import './split_container.scss';
 
 interface SplitContainerProps {
-  groups: SplitGroup[];
+  groups: string[];
   layout: SplitLayout;
   showLabel?: boolean;
-  renderChart: (groupData: Array<Record<string, any>>, groupKey: string) => React.ReactNode;
+  renderChart: (groupKey: string) => React.ReactNode;
 }
 
 /**
@@ -85,9 +84,8 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       <div ref={containerRef} className={`splitContainer ${layoutClass}`} style={containerStyle}>
         {groups.map((group, index) => (
           <SplitChartInstance
-            key={group.key}
-            label={group.key}
-            data={group.data}
+            key={group}
+            label={group}
             style={itemStyles[index]}
             showLabel={showLabel}
             scrollRoot={containerRef}

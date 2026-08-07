@@ -294,7 +294,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           selectionEnd: offset,
           language: effectiveLanguage,
           baseLanguage: currentLanguage,
-          indexPattern: currentDataView,
+          indexPattern: currentDataView ?? currentDataset,
           datasetType: currentDataset?.type,
           position,
           services: servicesWithAppName as any,

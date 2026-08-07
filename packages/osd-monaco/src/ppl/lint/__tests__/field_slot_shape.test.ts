@@ -24,7 +24,8 @@ const config: CatalogEntry = {
   detector: 'field-validation',
   enabled: true,
   severity: 'warning',
-  message: 'Reference to an unknown field.',
+  message: "Field '<field_name>' is not defined or recognized in the current schema.",
+  howToFix: 'f',
   docUrl: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/',
   appliesTo: {},
 };
@@ -175,7 +176,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     it('flags a later reference to the cast TYPE name (date), not silently allowing it', () => {
       const diags = withFields('source=t | eval y = cast(age as date) | fields date');
       expect(diags.map((d) => d.message)).toEqual([
-        expect.stringContaining('Unknown field "date"'),
+        expect.stringContaining("Field 'date' is not defined or recognized in the current schema."),
       ]);
     });
 
@@ -232,13 +233,21 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     it('flags an unknown field literally named `source`', () => {
       expect(
         withFields('source=t | where source = 5', ['age', 'status']).map((d) => d.message)
-      ).toEqual([expect.stringContaining('Unknown field "source"')]);
+      ).toEqual([
+        expect.stringContaining(
+          "Field 'source' is not defined or recognized in the current schema."
+        ),
+      ]);
     });
 
     it('flags an unknown field literally named `index`', () => {
       expect(
         withFields('source=t | where index = 5', ['age', 'status']).map((d) => d.message)
-      ).toEqual([expect.stringContaining('Unknown field "index"')]);
+      ).toEqual([
+        expect.stringContaining(
+          "Field 'index' is not defined or recognized in the current schema."
+        ),
+      ]);
     });
 
     it('does NOT flag `source` when it is a real field on the index', () => {
@@ -259,7 +268,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
   });
 
   describe('overlap suppression', () => {
-    it('does not co-emit an "Unknown field" existence finding for field=body', () => {
+    it('does not co-emit an unknown-field existence finding for field=body', () => {
       const tree = buildTree('source=t | grok field=body "x"');
       // A field set that lacks both `field` and `body` would normally make the
       // existence pass fire on each; the shape finding must swallow both.
@@ -268,7 +277,9 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
         fields: new Set<string>(['unrelated']),
       };
       const diags = fieldValidationDetector(tree, config, context, ruleNameToIndex);
-      const unknownFieldMessages = diags.filter((d) => d.message.startsWith('Unknown field'));
+      const unknownFieldMessages = diags.filter((d) =>
+        d.message.includes('not defined or recognized in the current schema')
+      );
       expect(unknownFieldMessages).toEqual([]);
       // Exactly the one shape error survives.
       expect(diags).toHaveLength(1);

@@ -28,6 +28,7 @@ export const QueryPanelEditor = (props: QueryEditorProps) => {
         ['exploreQueryPanelEditor--focused']: isFocused,
         ['exploreQueryPanelEditor--promptMode']: isPromptMode,
         ['exploreQueryPanelEditor--promptIsTyping']: promptIsTyping,
+        ['exploreQueryPanelEditor--ppl']: editorProps.languageId?.toLowerCase() === 'ppl',
       })}
       data-test-subj="exploreQueryPanelEditor"
       onClick={onEditorClick}

@@ -71,7 +71,6 @@ export const unsupportedWindowFunctionDetector: Detector = (
           message: config.message,
           range: rangeFromContext(fn.node),
           docUrl: config.docUrl,
-          hoverFacts: { windowFunction: fn.name },
         });
       }
     }

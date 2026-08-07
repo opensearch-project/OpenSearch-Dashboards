@@ -52,7 +52,6 @@ function diagnostic(query: string, outcome: ExplainOutcome): Diagnostic {
     severity: 'warning',
     message: 'slow',
     range: wholeQueryRange(query),
-    hoverFacts: { operation: operation(outcome) },
     explainTarget: { operation: operation(outcome), outcome, fields: [] },
   };
 }

@@ -109,6 +109,7 @@ interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
   timeline: Message[];
   isStreaming: boolean;
+  isValidating?: boolean;
   onResendMessage?: (message: Message) => void;
   onResendToolResult?: (params: {
     messageId: string;
@@ -299,6 +300,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   isStreaming,
+  isValidating,
   onResendMessage,
   onResendToolResult,
   onApproveConfirmation,
@@ -680,6 +682,23 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 />
               ))}
             </EuiListGroup>
+          </div>
+        )}
+
+        {isValidating && (
+          <div className="chatMessages__loadingIndicator">
+            <div className="messageRow">
+              <div className="messageRow__icon">
+                <EuiIcon type="console" size="m" color="success" />
+              </div>
+              <div className="messageRow__content">
+                <div className="chatMessages__thinkingText">
+                  {i18n.translate('chat.messages.connecting', {
+                    defaultMessage: 'Connecting...',
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

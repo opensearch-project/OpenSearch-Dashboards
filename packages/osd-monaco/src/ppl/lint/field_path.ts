@@ -96,6 +96,28 @@ export function fieldPathPrefix(raw: string): string | null {
   return stripOneQuotePair(segments[0]);
 }
 
+/**
+ * True when `path` is a disabled object itself, or any field beneath one.
+ *
+ * A disabled root may itself be dotted (`outer.inner`), which is the form
+ * `collectDisabledObjectFields` emits. The `root + '.'` boundary keeps `log` from
+ * matching an unrelated `logger.field`.
+ *
+ * Shared by the two rules that must agree on this judgement:
+ * `enabled-false-object` reports these references, and `field-validation`
+ * suppresses its own "unknown field" on them — an `enabled: false` object is
+ * absent from `_field_caps`, so field-validation would otherwise call a field
+ * that genuinely exists unknown, double-flagging the same reference.
+ */
+export function isUnderDisabledObject(path: string, disabled: ReadonlySet<string>): boolean {
+  for (const root of disabled) {
+    if (path === root || path.startsWith(root + '.')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export interface ParsedFieldPath {
   segments: string[];
   /** `segments.join('.')` — the canonical dotted lookup key. */

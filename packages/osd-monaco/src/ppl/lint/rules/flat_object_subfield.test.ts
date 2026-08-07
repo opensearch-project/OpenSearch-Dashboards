@@ -35,6 +35,7 @@ describe('flat-object-subfield (compiled surface)', () => {
   const ctx: LintRunContext = {
     dataSourceVersion: '3.8.0',
     isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
     typeMap: new Map([
       ['attributes', 'flat_object'],
       ['attributes.http', 'keyword'],
@@ -44,6 +45,7 @@ describe('flat-object-subfield (compiled surface)', () => {
   const flatOnly: LintRunContext = {
     dataSourceVersion: '3.8.0',
     isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
     typeMap: new Map([['attributes', 'flat_object']]),
   };
 
@@ -81,7 +83,11 @@ describe('flat-object-subfield (compiled surface)', () => {
 
   // The enabling surface (Calcite >= 3.8) is present, so the ONLY reason to
   // suppress here is the absent/empty typeMap.
-  const enablingSurface: LintRunContext = { dataSourceVersion: '3.8.0', isCalcite: true };
+  const enablingSurface: LintRunContext = {
+    dataSourceVersion: '3.8.0',
+    isCalcite: true,
+    overrides: { 'flat-object-subfield': { enabled: true } },
+  };
 
   it('self-suppresses when no typeMap is provided', () =>
     expect(ids('search t | fields attributes.http.method', enablingSurface)).not.toContain(
@@ -97,26 +103,16 @@ describe('flat-object-subfield (compiled surface)', () => {
     ).not.toContain('flat-object-subfield'));
 
   describe('diagnostic shape', () => {
-    it('reports hoverFacts {field, root, esType} and offers NO fix', () => {
+    it('reports an error and offers NO fix', () => {
       const diags = flatDiags('search t | fields attributes.http.method', flatOnly);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe('error');
-      expect(diags[0].hoverFacts).toEqual({
-        field: 'attributes.http.method',
-        root: 'attributes',
-        esType: 'flat_object',
-      });
       expect(diags[0].fix).toBeUndefined();
     });
 
-    it('sets root to the matched typed prefix, not the leaf, for a bare root reference', () => {
+    it('fires on a bare reference to the flat_object root', () => {
       const diags = flatDiags('search t | fields attributes', flatOnly);
       expect(diags).toHaveLength(1);
-      expect(diags[0].hoverFacts).toEqual({
-        field: 'attributes',
-        root: 'attributes',
-        esType: 'flat_object',
-      });
     });
   });
 });
@@ -133,6 +129,7 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
     enabled: true,
     severity: 'error',
     message: SENTINEL,
+    howToFix: 'f',
     docUrl: 'https://x',
     appliesTo: {},
   };
@@ -212,11 +209,6 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
 
     const diags = flatObjectSubfieldDetector(root, config, ctx, ruleNameToIndex);
     expect(diags).toHaveLength(1);
-    expect(diags[0].hoverFacts).toEqual({
-      field: 'attributes',
-      root: 'attributes',
-      esType: 'flat_object',
-    });
   });
 
   // The version filter also enforces this, but a direct invocation bypasses it.
