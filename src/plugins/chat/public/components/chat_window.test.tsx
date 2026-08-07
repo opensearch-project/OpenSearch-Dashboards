@@ -2339,4 +2339,37 @@ describe('ChatWindow', () => {
       expect(enabledInput.disabled).toBe(false);
     });
   });
+
+  describe('telemetry', () => {
+    it('should record chat_window_show event on mount', () => {
+      const mockRecorder = mockCore.telemetry.getPluginRecorder();
+
+      renderWithContext(<ChatWindow ref={React.createRef()} onClose={jest.fn()} />);
+
+      expect(mockRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_window_show',
+        data: {},
+      });
+    });
+
+    it('should record chat_window_hide event on unmount', () => {
+      const mockRecorder = mockCore.telemetry.getPluginRecorder();
+
+      const { unmount } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      // Not recorded while the window is still mounted.
+      expect(mockRecorder.recordEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'chat_window_hide' })
+      );
+
+      unmount();
+
+      expect(mockRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_window_hide',
+        data: {},
+      });
+    });
+  });
 });
