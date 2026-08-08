@@ -192,6 +192,8 @@ export class OpenSearchDashboardsMigrator {
           : undefined,
         convertToAliasScript: indexMap[index].script,
         opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig,
+        retry: this.savedObjectsConfig.retry,
+        integrity: this.savedObjectsConfig.integrity,
       });
     });
 
