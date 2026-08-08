@@ -4,26 +4,23 @@
  */
 
 /**
- * Pure renderer for the lint hover card ("view more") body. Composes the
- * detector message, static per-rule guidance (`Fix`), an optional quick-fix
- * preview into a single Markdown string. Intentionally free of any Monaco
- * import so it is trivially unit-testable; the provider does the Monaco-specific
- * marker extraction and hands plain values here.
+ * Pure renderer for lint-hover severity and supplemental guidance. Monaco's
+ * built-in marker hover already renders the diagnostic message and linked rule
+ * code; this renderer keeps the explicit severity label and adds only the next
+ * action, an optional quick-fix preview, and the documentation link.
  *
- * The detector message already identifies the problem and its consequence.
- * Keeping the card focused on that message and the next action avoids repeating
- * the same field, value, and engine outcome in several differently named
- * sections.
+ * Intentionally free of any Monaco import so it is trivially unit-testable; the
+ * provider does the Monaco-specific marker extraction and hands plain values
+ * here.
  */
 
 export type SeverityLabel = 'Error' | 'Warning' | 'Info';
 
 export interface HoverCardInput {
+  /** Explicit severity label, which Monaco's native marker text does not show. */
   severityLabel: SeverityLabel;
-  /** Stable rule id used by Advanced Settings and support reports. */
-  ruleId?: string;
-  /** The marker's short message — always shown as the card lead. */
-  message: string;
+  /** code.target — the specific doc link from the catalog. */
+  docUrl?: string;
   /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
   howToFix?: string;
   /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
@@ -35,13 +32,6 @@ const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
   Warning: '⚠️',
   Info: 'ℹ️',
 };
-
-// Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally
-// omitted because they do not affect inline text, and ! cannot form an image because [
-// is already escaped here.
-function escapeInline(text: string): string {
-  return text.replace(/([\\`*_[\]<>~|])/g, '\\$1');
-}
 
 /**
  * Render a value as inline code. When the value itself contains backticks, fence
@@ -57,36 +47,40 @@ function code(text: string): string {
   return `${fence}${pad}${text}${pad}${fence}`;
 }
 
+/** Percent-encode parentheses so they cannot close a Markdown link target. */
+function encodeLinkTarget(url: string): string {
+  return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
 /**
- * Render the full hover card to a Markdown string. The provider wraps the result
- * in `{ value, isTrusted: false }` and hands it to Monaco.
+ * Render supplemental hover sections to a Markdown string. The provider wraps
+ * non-empty output in `{ value, isTrusted: false }` and hands it to Monaco.
  */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { severityLabel, ruleId, message, howToFix, fixText } = input;
-  const lines: string[] = [];
-
-  const ruleMetadata = ruleId ? ` | Rule: ${code(ruleId)}` : '';
-  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**${ruleMetadata}`);
-
-  // Lead: the short message (always present).
-  lines.push('');
-  lines.push(escapeInline(message));
+  const { severityLabel, docUrl, howToFix, fixText } = input;
+  const sections: string[] = [];
 
   // Every known rule gives the user a concrete next action, whether or not an
   // automatic edit can be offered safely.
   if (howToFix) {
-    lines.push('');
     // Bundled repository-authored guidance intentionally retains inline-code
     // Markdown. The provider does not read execution-time overrides here and
-    // returns the complete card with isTrusted:false.
-    lines.push(`**Fix** — ${howToFix}`);
+    // returns this section with isTrusted:false.
+    sections.push(`**Fix** — ${howToFix}`);
   }
 
   // Exact replacement preview for deterministic quick fixes.
   if (fixText !== undefined) {
-    lines.push('');
-    lines.push(`**Quick fix available** — ${code(fixText)}`);
+    sections.push(`**Quick fix available** — ${code(fixText)}`);
   }
 
-  return lines.join('\n');
+  if (docUrl) {
+    sections.push(`[Learn more →](${encodeLinkTarget(docUrl)})`);
+  }
+
+  if (sections.length === 0) {
+    return '';
+  }
+
+  return [`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**`, ...sections].join('\n\n');
 }

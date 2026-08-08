@@ -26,6 +26,8 @@ import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
+import { registerDisabledPPLLintFixAction } from './components/query_panel/actions/ppl_lint_fix_action';
+import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
 
 // Mock the action
 jest.mock('./actions/ask_ai_embeddable_action');
@@ -49,6 +51,15 @@ jest.mock('./actions/ask_ai_action', () => ({
 jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
   registerDisabledPPLExecuteQueryAction: jest.fn(),
   APPLY_PPL_QUERY_TOOL_DEFINITION: { name: 'apply_ppl_query' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_action', () => ({
+  registerDisabledPPLLintFixAction: jest.fn(),
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION: { name: 'apply_ppl_lint_fix_explore' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_session', () => ({
+  clearActivePPLLintFixSession: jest.fn(),
 }));
 
 // Mock createOsdUrlTracker
@@ -580,6 +591,10 @@ describe('ExplorePlugin', () => {
       expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
         'apply_ppl_query'
       );
+      expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
+        'apply_ppl_lint_fix_explore'
+      );
+      expect(clearActivePPLLintFixSession).toHaveBeenCalled();
     });
 
     it('should not throw on stop when contextProvider was not available at start', () => {
@@ -595,14 +610,16 @@ describe('ExplorePlugin', () => {
     });
   });
 
-  describe('disabled PPL query action registration', () => {
-    // Cast the imported mocked function to jest.Mock
+  describe('disabled PPL assistant action registration', () => {
+    // Cast the imported mocked functions to jest.Mock
     const mockRegisterDisabledPPLExecuteQueryAction =
       registerDisabledPPLExecuteQueryAction as jest.Mock;
+    const mockRegisterDisabledPPLLintFixAction = registerDisabledPPLLintFixAction as jest.Mock;
 
     beforeEach(() => {
-      // Clear the mock before each test
+      // Clear the mocks before each test
       mockRegisterDisabledPPLExecuteQueryAction.mockClear();
+      mockRegisterDisabledPPLLintFixAction.mockClear();
     });
 
     it('should register disabled apply_ppl_query action when contextProvider is available', () => {
@@ -611,6 +628,9 @@ describe('ExplorePlugin', () => {
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledTimes(1);
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(
+        startDeps.contextProvider.actions.registerAssistantAction
+      );
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(
         startDeps.contextProvider.actions.registerAssistantAction
       );
     });
@@ -625,6 +645,7 @@ describe('ExplorePlugin', () => {
       plugin.start(coreStart, startDepsWithoutContextProvider);
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).not.toHaveBeenCalled();
+      expect(mockRegisterDisabledPPLLintFixAction).not.toHaveBeenCalled();
     });
 
     it('should register disabled action with the correct function reference', () => {
@@ -633,6 +654,7 @@ describe('ExplorePlugin', () => {
 
       const registerActionFn = startDeps.contextProvider?.actions?.registerAssistantAction;
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(registerActionFn);
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(registerActionFn);
     });
 
     it('should register disabled action before other start lifecycle actions', () => {

@@ -24,6 +24,29 @@ const bundledCatalog: BundledRule[] = JSON.parse(
 );
 
 const KEY = UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES;
+const DEFAULT_ON_RULES = [
+  'agg-on-text',
+  'command-suggestion',
+  'division-by-zero',
+  'enabled-false-object',
+  'field-validation',
+  'invalid-capture-group-name',
+  'multisearch-min-subsearch',
+  'replace-wildcard-asymmetry',
+  'rex-scan-cost',
+  'type-mismatch-numeric',
+  'union-min-datasets',
+  'unsupported-window-function-in-eventstats',
+  'wildcard-source-zero-match',
+];
+const DEFAULT_OFF_RULES = [
+  'dedup-consecutive-unsupported',
+  'disabled-join-type',
+  'flat-object-subfield',
+  'head-without-sort',
+  'operation-not-pushed',
+  'operation-pushed-as-script',
+];
 
 describe('query_enhancements PPL lint rules uiSetting', () => {
   describe('registration', () => {
@@ -47,6 +70,30 @@ describe('query_enhancements PPL lint rules uiSetting', () => {
           // carries no severity.
           { id: 'command-suggestion', enabled: true },
         ],
+      });
+    });
+
+    it('ships the exact 13 enabled checks and six default-off rules', () => {
+      const settings = getPplLintRuleSettings(false);
+      const { rules } = JSON.parse(settings[KEY].value as string);
+      expect(
+        rules
+          .filter((rule: { enabled: boolean }) => rule.enabled)
+          .map((rule: { id: string }) => rule.id)
+          .sort()
+      ).toEqual(DEFAULT_ON_RULES);
+      expect(
+        rules
+          .filter((rule: { enabled: boolean }) => !rule.enabled)
+          .map((rule: { id: string }) => rule.id)
+          .sort()
+      ).toEqual(DEFAULT_OFF_RULES);
+      expect(
+        rules.find((rule: { id: string }) => rule.id === 'wildcard-source-zero-match')
+      ).toEqual({
+        id: 'wildcard-source-zero-match',
+        enabled: true,
+        severity: 'warning',
       });
     });
 

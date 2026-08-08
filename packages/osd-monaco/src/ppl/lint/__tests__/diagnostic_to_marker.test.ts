@@ -71,6 +71,16 @@ describe('diagnosticToMarker', () => {
     const marker = diagnosticToMarker(makeDiagnostic({ docUrl: undefined }));
     expect(marker.code).toBe('rule');
   });
+
+  it('keeps field-validation visible but unlinked even when its catalog URL is present', () => {
+    const marker = diagnosticToMarker(
+      makeDiagnostic({
+        ruleId: 'field-validation',
+        docUrl: 'https://example.com/fields',
+      })
+    );
+    expect(marker.code).toBe('field-validation');
+  });
 });
 
 describe('ruleIdOf', () => {

@@ -14,6 +14,7 @@ import {
 const mockLintFallback = jest.fn();
 const mockSetModelMarkers = jest.fn();
 const mockGetPPLLintContext = jest.fn();
+const mockValidationResult = jest.fn();
 
 jest.mock('../monaco', () => ({
   monaco: {
@@ -21,9 +22,9 @@ jest.mock('../monaco', () => ({
       setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
       onDidCreateModel: jest.fn(),
       onWillDisposeModel: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
       getModels: () => [],
       defineTheme: jest.fn(),
-      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
     },
     languages: {
       register: jest.fn(),
@@ -61,7 +62,7 @@ jest.mock('./worker_proxy_service', () => ({
 
 // Stub validation pass to resolve clean; this test exercises only lint.
 jest.mock('./validation_provider', () => ({
-  resolvePPLValidationResult: jest.fn().mockResolvedValue({ isValid: true, errors: [] }),
+  resolvePPLValidationResult: () => mockValidationResult(),
 }));
 
 // Identity-map ruleId into marker.code so assertions can identify which pass produced them.
@@ -106,6 +107,11 @@ const flush = async (n = 12) => {
   }
 };
 
+beforeEach(() => {
+  mockValidationResult.mockReset();
+  mockValidationResult.mockResolvedValue({ isValid: true, errors: [] });
+});
+
 describe('processLintHighlighting — generation guard (stale-response drop)', () => {
   beforeEach(() => {
     mockSetModelMarkers.mockClear();
@@ -123,8 +129,10 @@ describe('processLintHighlighting — generation guard (stale-response drop)', (
     const freshPromise = new Promise<LintResult>((r) => (resolveFresh = r));
     mockLintFallback.mockReturnValueOnce(stalePromise).mockReturnValueOnce(freshPromise);
 
-    // Fire both passes, then flush so each reaches its pending fallback.
+    // Let the first clean syntax pass launch lint, then supersede that lint pass
+    // with a second clean validation while its result is still pending.
     void revalidatePPLModel(model);
+    await flush();
     void revalidatePPLModel(model);
     await flush();
     expect(mockLintFallback).toHaveBeenCalledTimes(2);
@@ -234,6 +242,15 @@ describe('processLintHighlighting — diagnostic_shown telemetry', () => {
     })),
   });
 
+  const mixedResult = (diagnostics: Array<[string, 'error' | 'warning' | 'info']>): LintResult => ({
+    diagnostics: diagnostics.map(([ruleId, severity]) => ({
+      ruleId,
+      severity,
+      message: ruleId,
+      range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+    })),
+  });
+
   it('emits diagnostic_shown once per distinct rule after markers are applied', async () => {
     const model = makeModel('t1');
     // Two findings of one rule + one of another → two events, deduped.
@@ -258,6 +275,26 @@ describe('processLintHighlighting — diagnostic_shown telemetry', () => {
     await flush();
 
     expect(events).toHaveLength(0);
+  });
+
+  it('emits telemetry only for the tier that was rendered', async () => {
+    mockLintFallback.mockResolvedValueOnce(
+      mixedResult([
+        ['field-validation', 'error'],
+        ['division-by-zero', 'warning'],
+        ['rex-scan-cost', 'info'],
+      ])
+    );
+
+    await revalidatePPLModel(makeModel('t-tier'));
+    await flush();
+
+    expect(events).toEqual([
+      {
+        name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN,
+        data: { rule: 'field-validation' },
+      },
+    ]);
   });
 
   it('emits one exposure across 60 accepted passes with the same diagnostic', async () => {
@@ -303,6 +340,7 @@ describe('processLintHighlighting — diagnostic_shown telemetry', () => {
       .mockReturnValueOnce(new Promise<LintResult>((resolve) => (resolveFresh = resolve)));
 
     void revalidatePPLModel(model);
+    await flush();
     void revalidatePPLModel(model);
     await flush();
 
@@ -313,6 +351,81 @@ describe('processLintHighlighting — diagnostic_shown telemetry', () => {
 
     expect(events).toEqual([
       { name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN, data: { rule: 'head-without-sort' } },
+    ]);
+  });
+});
+
+describe('processLintHighlighting — progressive severity and syntax gate', () => {
+  beforeEach(() => {
+    mockSetModelMarkers.mockClear();
+    mockLintFallback.mockReset();
+    mockGetPPLLintContext.mockReset();
+    mockGetPPLLintContext.mockReturnValue(undefined);
+  });
+
+  const diagnostic = (ruleId: string, severity: 'error' | 'warning' | 'info') => ({
+    ruleId,
+    severity,
+    message: ruleId,
+    range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+  });
+
+  it('reveals warnings after errors clear, then info after warnings clear', async () => {
+    mockLintFallback
+      .mockResolvedValueOnce({
+        diagnostics: [
+          diagnostic('field-validation', 'error'),
+          diagnostic('division-by-zero', 'warning'),
+          diagnostic('rex-scan-cost', 'info'),
+        ],
+      })
+      .mockResolvedValueOnce({
+        diagnostics: [
+          diagnostic('division-by-zero', 'warning'),
+          diagnostic('rex-scan-cost', 'info'),
+        ],
+      })
+      .mockResolvedValueOnce({
+        diagnostics: [diagnostic('rex-scan-cost', 'info')],
+      });
+    const model = makeModel('tier-progression');
+
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+    await revalidatePPLModel(model);
+    await flush();
+
+    expect(lintMarkerCalls().map((call) => call[2].map((marker: any) => marker.code))).toEqual([
+      ['field-validation'],
+      ['division-by-zero'],
+      ['rex-scan-cost'],
+    ]);
+  });
+
+  it('clears and skips lint for syntax errors, then resumes after a clean parse', async () => {
+    mockValidationResult
+      .mockResolvedValueOnce({
+        isValid: false,
+        errors: [{ message: 'syntax error', line: 1, column: 0, endLine: 1, endColumn: 1 }],
+      })
+      .mockResolvedValueOnce({ isValid: true, errors: [] });
+    mockLintFallback.mockResolvedValueOnce({
+      diagnostics: [diagnostic('division-by-zero', 'warning')],
+    });
+    const model = makeModel('syntax-gate');
+
+    await revalidatePPLModel(model);
+    await flush();
+    expect(mockLintFallback).not.toHaveBeenCalled();
+    expect(lintMarkerCalls().slice(-1)[0][2]).toEqual([]);
+
+    await revalidatePPLModel(model);
+    await flush();
+    expect(mockLintFallback).toHaveBeenCalledTimes(1);
+    expect(lintMarkerCalls().slice(-1)[0][2]).toEqual([
+      expect.objectContaining({ code: 'division-by-zero' }),
     ]);
   });
 });

@@ -55,6 +55,11 @@ import {
 } from '../../ppl_lint/lint_context_builder';
 import { fetchDisabledObjectFields } from '../../ppl_lint/disabled_object_fields';
 import { fetchVisibleIndices } from '../../ppl_lint/visible_indices';
+import { getAiAgentAvailableForDataSource } from '../../ppl_lint/ai_agent_availability';
+import { storePPLLintFixSession } from '../../chat_tools/ppl_lint_fix_session';
+import { PPL_LINT_FIX_DATA_HOST } from '../../chat_tools/ppl_lint_fix_tool_registration';
+import type { AskPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
+import { addPPLLintFixAssistantContext, PPLLintFixLifecycle } from './ppl_lint_fix_lifecycle';
 
 export interface QueryEditorProps {
   query: Query;
@@ -116,6 +121,19 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const languageManager = queryString.getLanguageService();
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
+  // Owns the in-flight AI lint-fix request for this editor mount: serializes
+  // chat launches, expires abandoned requests, and releases only its own
+  // request when async launch work completes out of order.
+  const pplLintFixLifecycleRef = useRef<PPLLintFixLifecycle>();
+  if (!pplLintFixLifecycleRef.current) {
+    pplLintFixLifecycleRef.current = new PPLLintFixLifecycle(
+      PPL_LINT_FIX_DATA_HOST,
+      (contextId) => {
+        services.contextProvider?.getAssistantContextStore()?.removeContextById(contextId);
+      }
+    );
+  }
+  const pplLintFixLifecycle = pplLintFixLifecycleRef.current;
   const { query } = useQueryStringManager({
     queryString,
   });
@@ -154,10 +172,90 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   };
 
-  const getLintContext = (): PPLLintContext =>
-    buildPPLLintContext(queryRef.current.dataset, lintFieldsRef.current, services);
+  function onAskAiFix(request: AskPPLLintFixRequest): void {
+    pplLintFixLifecycle.beginRequest(request.requestId);
+    const session = {
+      host: PPL_LINT_FIX_DATA_HOST,
+      request,
+      getCurrentQuery: () => inputRef.current?.getValue() ?? toUser(queryRef.current.query),
+      getCurrentQueryState: () => queryString.getQuery(),
+      getLintContext,
+    };
 
-  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+    const chat = services.chat;
+    if (!chat?.sendMessageWithWindow || !(chat.isAvailable?.() ?? true)) {
+      pplLintFixLifecycle.abandonRequest(request.requestId);
+      services.notifications.toasts.addWarning(
+        i18n.translate('data.pplLint.aiFix.chatUnavailable', {
+          defaultMessage: 'AI is not available for this PPL lint fix.',
+        })
+      );
+      return;
+    }
+
+    // Send the fix request's machine plumbing (correlation ids + tool-calling
+    // instructions) out-of-band via the assistant context store so the model
+    // receives it without it rendering as a chat bubble. The visible bubble is
+    // the short human message (request.chatMessage). Keyed by requestId.
+    const contextStore = services.contextProvider?.getAssistantContextStore?.();
+    addPPLLintFixAssistantContext(request, contextStore, PPL_LINT_FIX_DATA_HOST);
+
+    void pplLintFixLifecycle
+      .waitForChatLaunch(request.requestId, () =>
+        chat.sendMessageWithWindow!(request.chatMessage, [], { clearConversation: true })
+      )
+      .then((failure) => {
+        if (!failure) {
+          // Activate only after the fresh chat reset so an older card cannot
+          // capture this request while its previous conversation is still live.
+          if (pplLintFixLifecycle.ownsRequest(request.requestId)) {
+            storePPLLintFixSession({
+              ...session,
+              chatThreadId: chat.getThreadId(),
+              getCurrentChatThreadId: () => chat.getThreadId(),
+            });
+          }
+          return;
+        }
+        // A late failure for a replaced request still cleans that exact context,
+        // but should not warn for or disturb the newer owned request.
+        if (!failure.abandonedOwnedRequest) {
+          return;
+        }
+        services.notifications.toasts.addWarning(
+          i18n.translate('data.pplLint.aiFix.openChatError', {
+            defaultMessage: 'Could not open AI for this PPL lint fix.',
+          })
+        );
+      });
+  }
+
+  function getLintContext(): PPLLintContext {
+    const aiFixToolName = (
+      services as IDataPluginServices & {
+        pplLintFixToolName?: string;
+      }
+    ).pplLintFixToolName;
+    const chatAvailable = Boolean(
+      aiFixToolName &&
+      services.chat?.sendMessageWithWindow &&
+      (services.chat.isAvailable?.() ?? true)
+    );
+    return buildPPLLintContext(
+      queryRef.current.dataset,
+      lintFieldsRef.current,
+      services,
+      chatAvailable ? { onAskAiFix, aiFixToolName } : undefined
+    );
+  }
+
+  useEffect(
+    () => () => {
+      pplLintFixLifecycle.dispose();
+      cleanupPPLContexts(detachRefs.current);
+    },
+    [pplLintFixLifecycle]
+  );
 
   // Load index-pattern field names for the active dataset and feed them to the
   // lint context. Field-validation self-suppresses until this resolves; we push
@@ -176,7 +274,17 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         lintFieldsRef.current = {};
       } else {
         try {
-          const indexPattern = await getIndexPatterns().get(datasetId);
+          // Probe per-source AI reachability alongside the field load, only when
+          // chat is wired at all — otherwise the AI action is already hidden by
+          // the missing opener, so the probe would be a wasted call on every
+          // dataset switch. Fail-open when unprobed (undefined leaves it shown).
+          const shouldProbeAi = Boolean(services.http && (services.chat?.isAvailable?.() ?? false));
+          const [indexPattern, aiAgentAvailableForSource] = await Promise.all([
+            getIndexPatterns().get(datasetId),
+            shouldProbeAi
+              ? getAiAgentAvailableForDataSource(services.http, dataSourceId, 5000)
+              : Promise.resolve(undefined),
+          ]);
           if (cancelled || !indexPattern) {
             return;
           }
@@ -200,6 +308,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             typeMap,
             disabledObjectFields,
             visibleIndices,
+            aiAgentAvailableForSource,
           };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.

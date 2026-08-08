@@ -96,6 +96,11 @@ import {
   registerDisabledPPLExecuteQueryAction,
   APPLY_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import {
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION,
+  registerDisabledPPLLintFixAction,
+} from './components/query_panel/actions/ppl_lint_fix_action';
+import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -135,6 +140,7 @@ export class ExplorePlugin implements Plugin<
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
+  private unregisterPPLLintFixAction?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -887,9 +893,14 @@ export class ExplorePlugin implements Plugin<
       registerDisabledPPLExecuteQueryAction(
         plugins.contextProvider.actions.registerAssistantAction
       );
+      registerDisabledPPLLintFixAction(plugins.contextProvider.actions.registerAssistantAction);
       this.unregisterPPLExecuteQueryAction = () =>
         plugins.contextProvider!.actions.unregisterAssistantAction(
           APPLY_PPL_QUERY_TOOL_DEFINITION.name
+        );
+      this.unregisterPPLLintFixAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name
         );
     }
 
@@ -916,6 +927,8 @@ export class ExplorePlugin implements Plugin<
       this.editorStopUrlTracking();
     }
     this.unregisterPPLExecuteQueryAction?.();
+    this.unregisterPPLLintFixAction?.();
+    clearActivePPLLintFixSession();
   }
 
   private registerEmbeddable(
