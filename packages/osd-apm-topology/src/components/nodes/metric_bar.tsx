@@ -14,6 +14,8 @@ export interface MetricBarProps {
   color?: string;
   /** Label displayed to the right of the bar */
   label?: string;
+  /** Offset percentage (0–100) to push the bar fill to the right (Gantt-style). */
+  offset?: number;
 }
 
 /**
@@ -24,8 +26,10 @@ export const MetricBar: React.FC<MetricBarProps> = ({
   max,
   color = 'var(--osd-color-cl-blue-450)',
   label,
+  offset = 0,
 }) => {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  const offsetPct = Math.min(Math.max(offset, 0), 100);
 
   return (
     <div className="osd:flex osd:items-center osd:gap-2 osd:w-full">
@@ -35,7 +39,11 @@ export const MetricBar: React.FC<MetricBarProps> = ({
       >
         <div
           className="osd:h-full osd:rounded-full osd:transition-all osd:duration-300"
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          style={{
+            width: `${pct}%`,
+            marginLeft: `${offsetPct}%`,
+            backgroundColor: color,
+          }}
         />
       </div>
       {label && (
