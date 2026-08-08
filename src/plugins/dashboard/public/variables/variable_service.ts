@@ -27,6 +27,7 @@ import {
   VariableQueryResult,
 } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
+import { VariableUtils } from './utils';
 
 /**
  * Maximum number of options to display for a variable.
@@ -559,14 +560,13 @@ export class VariableService {
     const changedVarIndex = variables.findIndex((v) => v.name === changedVarName);
     if (changedVarIndex === -1) return;
 
-    const pattern = new RegExp(`\\$\\{${changedVarName}\\}|\\$${changedVarName}\\b`);
     // Only refresh variables that come AFTER the changed variable
     // Variables before the changed variable cannot reference it due to order constraints
     for (let i = changedVarIndex + 1; i < variables.length; i++) {
       const v = variables[i];
       if (v.type === VariableType.Query) {
         const qv = v as QueryVariable;
-        if (pattern.test(qv.query)) {
+        if (VariableUtils.containsReference(qv.query, changedVarName)) {
           this.refreshVariableOptions(qv.id);
         }
       }

@@ -58,3 +58,4 @@ export {
   LibraryNotificationAction,
   ACTION_LIBRARY_NOTIFICATION,
 } from './library_notification_action';
+export { VariableBadgeAction, VARIABLE_BADGE_ACTION } from './variable_badge_action';

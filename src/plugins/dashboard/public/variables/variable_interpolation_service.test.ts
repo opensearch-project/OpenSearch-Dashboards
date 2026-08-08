@@ -94,6 +94,14 @@ describe('VariableInterpolationService', () => {
       const svc = new VariableInterpolationService(() => [makeCustomVar({ current: undefined })]);
       expect(svc.interpolate('$service')).toBe('');
     });
+
+    it('should not have stale lastIndex across sequential interpolate calls', () => {
+      // Regression: ensure global regex doesn't cause issues with String.replace()
+      const svc = new VariableInterpolationService(() => [makeCustomVar()]);
+      expect(svc.interpolate('$service')).toBe('api');
+      expect(svc.interpolate('$service')).toBe('api');
+      expect(svc.interpolate('$service')).toBe('api');
+    });
   });
 
   describe('interpolate — PPL escaping', () => {
