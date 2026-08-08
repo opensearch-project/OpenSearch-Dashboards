@@ -1,0 +1,2 @@
+fix:
+- Preserve in-progress query editor input across auto-refresh re-renders ([#12212](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12212))
