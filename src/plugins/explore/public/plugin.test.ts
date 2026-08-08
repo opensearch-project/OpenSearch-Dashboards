@@ -50,7 +50,7 @@ jest.mock('./actions/ask_ai_action', () => ({
 // Mock registerDisabledPPLExecuteQueryAction
 jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
   registerDisabledPPLExecuteQueryAction: jest.fn(),
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION: { name: 'execute_ppl_query' },
+  APPLY_PPL_QUERY_TOOL_DEFINITION: { name: 'apply_ppl_query' },
 }));
 
 jest.mock('./components/query_panel/actions/ppl_lint_fix_action', () => ({
@@ -582,14 +582,14 @@ describe('ExplorePlugin', () => {
       expect(() => plugin.stop()).not.toThrow();
     });
 
-    it('should unregister execute_ppl_query assistant action on stop', () => {
+    it('should unregister apply_ppl_query assistant action on stop', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
       plugin.stop();
 
       expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
-        'execute_ppl_query'
+        'apply_ppl_query'
       );
       expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
         'apply_ppl_lint_fix_explore'
@@ -622,7 +622,7 @@ describe('ExplorePlugin', () => {
       mockRegisterDisabledPPLLintFixAction.mockClear();
     });
 
-    it('should register disabled execute_ppl_query action when contextProvider is available', () => {
+    it('should register disabled apply_ppl_query action when contextProvider is available', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
