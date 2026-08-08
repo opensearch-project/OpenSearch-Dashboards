@@ -1,0 +1,21 @@
+{
+  "description": "Dashboard 7.0.0: Handle empty dashboard with no panels",
+  "type": "dashboard",
+  "migrationVersion": "7.0.0",
+  "input": {
+    "id": "empty-dash",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Empty Dashboard",
+      "panelsJSON": "[]",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "references_length": 0,
+    "attributes_has": ["panelsJSON", "kibanaSavedObjectMeta"]
+  }
+}
