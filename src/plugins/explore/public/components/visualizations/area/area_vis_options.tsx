@@ -48,6 +48,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               addTimeMarker={styleOptions.addTimeMarker}
               areaOpacity={styleOptions.areaOpacity}
               gradientMode={styleOptions.gradientMode}
+              stackMode={styleOptions.stackMode}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
@@ -55,6 +56,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               onGradientModeChange={(gradientMode) =>
                 updateStyleOption('gradientMode', gradientMode)
               }
+              onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
             />
           </EuiFlexItem>
 

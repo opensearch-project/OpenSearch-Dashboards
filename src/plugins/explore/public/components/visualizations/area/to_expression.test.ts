@@ -68,6 +68,14 @@ describe('Area Chart to_expression', () => {
     },
     standardAxes: [],
     showFullTimeRange: false,
+    stackMode: 'none',
+  };
+
+  // Rows come back as a 2D array: [headers, ...rows]
+  const seriesValues = (spec: any, seriesField: string) => {
+    const [headers, ...rows] = spec.dataset.source;
+    const columnIndex = headers.indexOf(seriesField);
+    return rows.map((row: any[]) => row[columnIndex]);
   };
 
   describe('createSimpleAreaChart', () => {
@@ -221,6 +229,44 @@ describe('Area Chart to_expression', () => {
       expect(markLineData.some((d: any) => d.yAxis === 15)).toBe(true);
       expect(markLineData.some((d: any) => d.xAxis !== undefined)).toBe(true);
     });
+
+    it('does not stack series when stackMode is none', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'none' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series[0].stack).toBeUndefined();
+      expect(result.spec.yAxis.max).toBeUndefined();
+    });
+
+    it('stacks series without rescaling when stackMode is normal', () => {
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'normal' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      // Raw values are preserved and the axis stays auto-scaled
+      expect(seriesValues(result.spec, 'value')).toEqual([10, 5, 20, 15, 15, 25]);
+      expect(result.spec.yAxis.max).toBeUndefined();
+    });
+
+    it('stacks but does not normalize when stackMode is percentage', () => {
+      // Percentage normalization is intentionally not applied to the single-metric chart:
+      // a percentage across unrelated metrics on shared axes is not meaningful.
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      expect(seriesValues(result.spec, 'value')).toEqual([10, 5, 20, 15, 15, 25]);
+      expect(result.spec.yAxis.max).toBeUndefined();
+    });
   });
 
   describe('createMultiAreaChart', () => {
@@ -267,6 +313,137 @@ describe('Area Chart to_expression', () => {
       ]);
       expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
+
+    it('leaves series unstacked and keeps null gaps when stackMode is none', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-02', value: 20, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'none' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === undefined)).toBe(true);
+      // 'A' has no value at 2023-01-02, so the gap stays null instead of being zero-filled
+      expect(seriesValues(result.spec, 'A')).toEqual([10, null]);
+    });
+
+    it('stacks series and zero-fills gaps when stackMode is normal', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 10, category: 'A' },
+          { date: '2023-01-02', value: 20, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'normal' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      expect(seriesValues(result.spec, 'A')).toEqual([10, 0]);
+    });
+
+    it('normalizes each time point to sum to 100 when stackMode is percentage', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 30, category: 'A' },
+          { date: '2023-01-01', value: 10, category: 'B' },
+          { date: '2023-01-02', value: 25, category: 'A' },
+          { date: '2023-01-02', value: 25, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      expect(seriesValues(result.spec, 'A')).toEqual([75, 50]);
+      expect(seriesValues(result.spec, 'B')).toEqual([25, 50]);
+      expect(result.spec.yAxis.min).toBe(0);
+      expect(result.spec.yAxis.max).toBe(100);
+    });
+
+    it('keeps mixed-sign rows bounded by dividing by the sum of magnitudes', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 1000, category: 'A' },
+          { date: '2023-01-01', value: -999, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      // A signed total would collapse to 1 here and blow A up to 100000%.
+      // Dividing by 1000 + 999 keeps both within +/-100%.
+      expect(seriesValues(result.spec, 'A')[0]).toBeCloseTo(50.03, 2);
+      expect(seriesValues(result.spec, 'B')[0]).toBeCloseTo(-49.97, 2);
+    });
+
+    it('preserves relative magnitude across signs', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 100, category: 'A' },
+          { date: '2023-01-01', value: -30, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      // The 100:30 ratio survives, so a -30 stays visually distinct from a -999
+      expect(seriesValues(result.spec, 'A')[0]).toBeCloseTo(76.92, 2);
+      expect(seriesValues(result.spec, 'B')[0]).toBeCloseTo(-23.08, 2);
+    });
+
+    it('does not flip signs on net-negative rows', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 30, category: 'A' },
+          { date: '2023-01-01', value: -70, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      // A signed total of -40 would render the positive 30 as -75%
+      expect(seriesValues(result.spec, 'A')).toEqual([30]);
+      expect(seriesValues(result.spec, 'B')).toEqual([-70]);
+    });
+
+    it('opens the axis to -100 only when negative values are present', () => {
+      const allPositive = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 30, category: 'A' },
+          { date: '2023-01-01', value: 10, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+      expect(allPositive.spec.yAxis.min).toBe(0);
+
+      const mixed = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 30, category: 'A' },
+          { date: '2023-01-01', value: -70, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+      expect(mixed.spec.yAxis.min).toBe(-100);
+      expect(mixed.spec.yAxis.max).toBe(100);
+    });
+
+    it('does not divide by zero when a row is all zeros', () => {
+      const result = createMultiAreaChart(
+        [
+          { date: '2023-01-01', value: 0, category: 'A' },
+          { date: '2023-01-01', value: 0, category: 'B' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      expect(seriesValues(result.spec, 'A')).toEqual([0]);
+      expect(seriesValues(result.spec, 'B')).toEqual([0]);
+    });
   });
 
   describe('createCategoryAreaChart', () => {
@@ -307,6 +484,22 @@ describe('Area Chart to_expression', () => {
       expect(markLineData.some((d: any) => d.xAxis !== undefined)).toBe(false);
       expect(result.spec.xAxis.max).toBeUndefined();
     });
+
+    it('applies the stack mode to category-based areas', () => {
+      const stacked = createCategoryAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'normal' },
+        axisColumnMappings
+      );
+      expect(stacked.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+
+      const percentage = createCategoryAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+      expect(percentage.spec.yAxis.max).toBe(100);
+    });
   });
 
   describe('createStackedAreaChart', () => {
@@ -317,7 +510,11 @@ describe('Area Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with stacked series', () => {
-      const result = createStackedAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
+      const result = createStackedAreaChart(
+        mockTransformedData,
+        { ...mockStyles, stackMode: 'normal' },
+        axisColumnMappings
+      );
 
       expect(result.spec).toHaveProperty('dataset');
       expect(result.spec).toHaveProperty('series');
@@ -327,7 +524,33 @@ describe('Area Chart to_expression', () => {
       const mainSeries = result.spec.series[0];
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
-      expect(mainSeries).toHaveProperty('stack');
+      expect(mainSeries.stack).toBe('total');
+    });
+
+    it('does not stack by default', () => {
+      const result = createStackedAreaChart(mockTransformedData, mockStyles, axisColumnMappings);
+
+      expect(result.spec.series.every((s: any) => s.stack === undefined)).toBe(true);
+    });
+
+    it('normalizes each category to sum to 100 when stackMode is percentage', () => {
+      const result = createStackedAreaChart(
+        [
+          { category: 'A', value: 30, category2: 'X' },
+          { category: 'A', value: 10, category2: 'Y' },
+          { category: 'B', value: 20, category2: 'X' },
+          { category: 'B', value: 20, category2: 'Y' },
+        ],
+        { ...mockStyles, stackMode: 'percentage' },
+        axisColumnMappings
+      );
+
+      expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      expect(seriesValues(result.spec, 'X')).toEqual([75, 50]);
+      expect(seriesValues(result.spec, 'Y')).toEqual([25, 50]);
+      expect(result.spec.yAxis.min).toBe(0);
+      expect(result.spec.yAxis.max).toBe(100);
+      expect(result.spec.yAxis.axisLabel.formatter).toBe('{value}%');
     });
 
     it('uses provided full data when assigning stacked color series colors', () => {

@@ -17,10 +17,17 @@ describe('AreaExclusiveVisOptions', () => {
     addTimeMarker: false,
     areaOpacity: 30,
     gradientMode: 'none' as const,
+    stackMode: 'none' as const,
     onAddTimeMarkerChange: jest.fn(),
     onFillOpacityChange: jest.fn(),
     onGradientModeChange: jest.fn(),
+    onStackModeChange: jest.fn(),
   };
+
+  // EuiButtonGroup marks the selected option on the rendered label, not on our custom test subj
+  const isSelected = (testSubj: string) =>
+    screen.getByTestId(testSubj).classList.contains('euiButtonGroupButton-isSelected') ||
+    screen.getByTestId(testSubj).classList.contains('ouiButtonGroupButton-isSelected');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,8 +92,40 @@ describe('AreaExclusiveVisOptions', () => {
   test('marks the selected gradient mode as checked', () => {
     render(<AreaExclusiveVisOptions {...defaultProps} gradientMode="hue" />);
 
-    // EuiButtonGroup puts the option id on the underlying radio input
-    expect(screen.getByTestId('hue')).toBeChecked();
-    expect(screen.getByTestId('none')).not.toBeChecked();
+    expect(isSelected('areaGradientMode-hue')).toBe(true);
+    expect(isSelected('areaGradientMode-none')).toBe(false);
+  });
+
+  test('renders the three stack mode options', () => {
+    render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+    expect(screen.getByTestId('areaStackModeButtonGroup')).toBeInTheDocument();
+    expect(screen.getByTestId('areaStackMode-none')).toBeInTheDocument();
+    expect(screen.getByTestId('areaStackMode-normal')).toBeInTheDocument();
+    expect(screen.getByTestId('areaStackMode-percentage')).toBeInTheDocument();
+    expect(screen.getByTestId('areaStackMode-percentage')).toHaveTextContent('100%');
+  });
+
+  test('defaults the stack mode selection to none', () => {
+    render(<AreaExclusiveVisOptions {...defaultProps} stackMode={undefined} />);
+
+    expect(isSelected('areaStackMode-none')).toBe(true);
+    expect(isSelected('areaStackMode-normal')).toBe(false);
+    expect(isSelected('areaStackMode-percentage')).toBe(false);
+  });
+
+  test('calls onStackModeChange when a stack mode is selected', () => {
+    render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('areaStackMode-percentage'));
+
+    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith('percentage');
+  });
+
+  test('marks the current stack mode as selected', () => {
+    render(<AreaExclusiveVisOptions {...defaultProps} stackMode="normal" />);
+
+    expect(isSelected('areaStackMode-normal')).toBe(true);
+    expect(isSelected('areaStackMode-none')).toBe(false);
   });
 });

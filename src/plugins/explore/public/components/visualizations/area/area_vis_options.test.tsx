@@ -92,6 +92,7 @@ describe('AreaVisStyleControls', () => {
         thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
+      stackMode: 'none' as const,
       standardAxes: [
         {
           type: 'category' as const,
@@ -358,6 +359,14 @@ describe('AreaVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('areaGradientMode-hue'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ gradientMode: 'hue' });
+  });
+
+  test('updates stackMode correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaStackMode-percentage'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ stackMode: 'percentage' });
   });
 
   test('updates showFullTimeRange correctly', async () => {

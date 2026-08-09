@@ -14,7 +14,13 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
+import {
+  applyPercentageAxis,
+  createAreaSeries,
+  transformStackPercentage,
+  replaceNullWithZero,
+  resolveStackMode,
+} from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
@@ -41,11 +47,16 @@ export const createSimpleAreaChart = (
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    transform(
+      sortByTime(timeField),
+      // transformStackPercentage(styles, { fields: valueField }),
+      convertTo2DArray(allColumns)
+    ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    // applyPercentageAxis(styles),
     applyTimeRange,
     createAreaSeries({
       styles,
@@ -94,13 +105,17 @@ export const createMultiAreaChart = (
         timeUnit: TimeUnit.SECOND,
         aggregationType: AggregationType.SUM,
       }),
-      (data) => replaceNullWithZero(data, [timeField]),
+      // replaceNullWithZero only matters for stacked area; unstacked areas should keep gaps as gaps.
+      (data) =>
+        resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [timeField]),
+      transformStackPercentage(styles, { excludeFields: [timeField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -109,7 +124,6 @@ export const createMultiAreaChart = (
       styles,
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-      stack: true,
       allData,
       colorField,
     }),
@@ -147,12 +161,14 @@ export const createCategoryAreaChart = (
         field: valueField,
         aggregationType: AggregationType.SUM,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     createAreaSeries({
       styles,
       categoryField,
@@ -194,13 +210,17 @@ export const createStackedAreaChart = (
         field: valueField,
         aggregationType: AggregationType.SUM,
       }),
-      (data) => replaceNullWithZero(data, [categoryField]),
+      // replaceNullWithZero only matters for stacked area; unstacked areas should keep gaps as gaps.
+      (data) =>
+        resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [categoryField]),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -208,7 +228,6 @@ export const createStackedAreaChart = (
       styles,
       categoryField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
-      stack: true,
       allData,
       colorField,
       addTimeMarker: false,

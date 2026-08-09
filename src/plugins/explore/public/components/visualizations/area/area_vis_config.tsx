@@ -33,6 +33,7 @@ import { EchartsRender } from '../echarts_render';
  * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
  */
 export type GradientMode = 'none' | 'opacity' | 'hue';
+export type StackMode = 'none' | 'normal' | 'percentage';
 
 // Fill opacity is stored as a percentage (0-100) to match the UI slider.
 export const DEFAULT_FILL_OPACITY = 30;
@@ -68,15 +69,16 @@ export interface AreaChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
+  stackMode?: StackMode;
 }
 
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'
+    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'stackMode'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
+  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle' | 'stackMode'>;
 
 export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
@@ -89,17 +91,15 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   tooltipOptions: {
     mode: 'all',
   },
-
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-
   standardAxes: [],
-
   showFullTimeRange: false,
+  stackMode: 'none',
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

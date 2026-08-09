@@ -19,6 +19,7 @@ describe('area_vis_config', () => {
         addTimeMarker: false,
         areaOpacity: 30,
         gradientMode: 'none',
+        stackMode: 'none',
         tooltipOptions: {
           mode: 'all',
         },
