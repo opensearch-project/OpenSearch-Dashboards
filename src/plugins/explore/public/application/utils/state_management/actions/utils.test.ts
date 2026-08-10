@@ -153,6 +153,127 @@ describe('Utils - Histogram Breakdown Support', () => {
     });
   });
 
+  describe('queryHasStats', () => {
+    it('should detect stats in a simple aggregation query', () => {
+      expect(utils.queryHasStats('source=logs | stats count() by status')).toBe(true);
+    });
+
+    it('should detect stats case-insensitively', () => {
+      expect(utils.queryHasStats('source=logs | STATS count() by status')).toBe(true);
+      expect(utils.queryHasStats('source=logs | Stats count() by host')).toBe(true);
+    });
+
+    it('should detect stats with extra whitespace', () => {
+      expect(utils.queryHasStats('source=logs |   stats count()')).toBe(true);
+    });
+
+    it('should return false for queries without stats', () => {
+      expect(utils.queryHasStats('source=logs | where status = 200')).toBe(false);
+      expect(utils.queryHasStats('source=logs | head 100')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(utils.queryHasStats('')).toBe(false);
+    });
+
+    it('should not match stats inside subquery brackets', () => {
+      expect(utils.queryHasStats('source=logs | where id in [source=other | stats count()]')).toBe(
+        false
+      );
+    });
+
+    it('should detect stats in main query even with subquery', () => {
+      expect(
+        utils.queryHasStats(
+          'source=logs | where id in [source=other | head 10] | stats count() by host'
+        )
+      ).toBe(true);
+    });
+
+    it('should not match "stats" that is not preceded by a pipe', () => {
+      expect(utils.queryHasStats('source=stats_index')).toBe(false);
+    });
+
+    it('should not match stats inside single-quoted string', () => {
+      expect(utils.queryHasStats("source=logs | where message = '| stats count()'")).toBe(false);
+    });
+
+    it('should not match stats inside double-quoted string', () => {
+      expect(utils.queryHasStats('source=logs | where message = "| stats count()"')).toBe(false);
+    });
+
+    it('should detect stats after a quoted string containing stats', () => {
+      expect(
+        utils.queryHasStats("source=logs | where msg = '| stats x' | stats count() by host")
+      ).toBe(true);
+    });
+
+    it('should not match stats inside a string with doubled-quote escaping', () => {
+      expect(utils.queryHasStats("source=logs | where msg = 'it''s | stats count()'")).toBe(false);
+    });
+
+    it('should not match stats inside multiline subquery brackets', () => {
+      expect(
+        utils.queryHasStats('source=logs | where id in [\nsource=other\n| stats count() by id\n]')
+      ).toBe(false);
+    });
+
+    it('should not detect other aggregation or non-aggregation PPL commands', () => {
+      // Other aggregation-like commands (not stats)
+      expect(utils.queryHasStats('source=logs | chart count() by status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | timechart span=1h count()')).toBe(false);
+      expect(utils.queryHasStats('source=logs | top 5 status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | rare status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | eventstats count() by status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | streamstats count() by status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | patterns message')).toBe(false);
+      expect(utils.queryHasStats('source=logs | transpose')).toBe(false);
+      expect(utils.queryHasStats('source=logs | xyseries extension bytes clientip')).toBe(false);
+      expect(utils.queryHasStats('source=logs | timewrap 1d')).toBe(false);
+      expect(utils.queryHasStats('source=logs | addtotals')).toBe(false);
+      expect(utils.queryHasStats('source=logs | addcoltotals')).toBe(false);
+      // Document filtering/transformation commands
+      expect(utils.queryHasStats('source=logs | where status = 200')).toBe(false);
+      expect(utils.queryHasStats('source=logs | head 100')).toBe(false);
+      expect(utils.queryHasStats('source=logs | sort - timestamp')).toBe(false);
+      expect(utils.queryHasStats('source=logs | dedup status')).toBe(false);
+      expect(utils.queryHasStats('source=logs | fields status, host')).toBe(false);
+      expect(utils.queryHasStats('source=logs | rename status as code')).toBe(false);
+      expect(utils.queryHasStats('source=logs | eval new_field = status + 1')).toBe(false);
+      expect(utils.queryHasStats('source=logs | parse message "(?<ip>\\d+)"')).toBe(false);
+      expect(utils.queryHasStats('source=logs | grok message "%{IP:ip}"')).toBe(false);
+      expect(utils.queryHasStats('source=logs | rex field=message "(?<ip>\\d+)"')).toBe(false);
+      expect(utils.queryHasStats('source=logs | fillnull with 0')).toBe(false);
+      expect(utils.queryHasStats('source=logs | flatten nested_field')).toBe(false);
+      expect(utils.queryHasStats('source=logs | expand multi_value')).toBe(false);
+      expect(utils.queryHasStats('source=logs | trendline sma(5, bytes)')).toBe(false);
+      expect(utils.queryHasStats('source=logs | lookup accounts uid')).toBe(false);
+      expect(utils.queryHasStats('source=logs | join left=l right=r on id')).toBe(false);
+      expect(utils.queryHasStats('source=logs | regex message="error.*"')).toBe(false);
+      expect(utils.queryHasStats('source=logs | table status, host, message')).toBe(false);
+      expect(utils.queryHasStats('source=logs | mvcombine message')).toBe(false);
+      expect(utils.queryHasStats('source=logs | mvexpand multi_value')).toBe(false);
+      expect(utils.queryHasStats('source=logs | convert num(bytes)')).toBe(false);
+      expect(utils.queryHasStats('source=logs | replace "error" with "err" in message')).toBe(
+        false
+      );
+      expect(utils.queryHasStats('source=logs | reverse')).toBe(false);
+      expect(utils.queryHasStats('source=logs | spath input=json_field')).toBe(false);
+      expect(utils.queryHasStats('source=logs | ad')).toBe(false);
+      expect(utils.queryHasStats('source=logs | append [source=other]')).toBe(false);
+      expect(utils.queryHasStats('source=logs | appendcol [source=other]')).toBe(false);
+      expect(utils.queryHasStats('source=logs | appendpipe [stats count()]')).toBe(false);
+      expect(utils.queryHasStats('source=logs | bin span=1h timestamp')).toBe(false);
+      expect(utils.queryHasStats('source=logs | describe')).toBe(false);
+      expect(utils.queryHasStats('source=logs | explain')).toBe(false);
+      expect(utils.queryHasStats('source=logs | fieldformat bytes=num_format(bytes)')).toBe(false);
+      expect(utils.queryHasStats('source=logs | kmeans centroids=3')).toBe(false);
+      expect(utils.queryHasStats('source=logs | ml action=predict')).toBe(false);
+      expect(utils.queryHasStats('source=logs | nomv multi_value')).toBe(false);
+      expect(utils.queryHasStats('source=logs | search status=200')).toBe(false);
+    });
+  });
+
   describe('buildPPLHistogramQuery', () => {
     it('should return original query when aggs is missing', () => {
       const query = 'source=logs';

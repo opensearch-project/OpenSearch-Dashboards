@@ -40,12 +40,13 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery } from '../../languages';
+import { defaultPreparePplQuery, addPPLSourceClause } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
+  queryHasStats,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { ExploreFlavor } from '../../../../../common';
@@ -110,6 +111,22 @@ export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): 
   return hasBreakdown
     ? `histogram:breakdown:${defaultPrepareQueryString(query)}`
     : `histogram:${defaultPrepareQueryString(query)}`;
+};
+
+/**
+ * Prepare cache key for bucket count queries (used for aggregation queries)
+ */
+export const prepareBucketCountCacheKey = (query: Query): string => {
+  return `bucketCount:${prepareBucketCountQueryString(query)}`;
+};
+
+/**
+ * Prepare the bucket count query string by appending | stats count() to the original query.
+ * This returns a single row with the total number of aggregation buckets.
+ */
+export const prepareBucketCountQueryString = (query: Query): string => {
+  const withSource = addPPLSourceClause(query);
+  return `${withSource.query} | stats count() as bucket_count`;
 };
 
 /**
@@ -306,6 +323,26 @@ export const executeQueries = createAsyncThunk<
         interval,
       })
     );
+  }
+
+  // Execute bucket count query for aggregation queries (non-blocking)
+  // This appends | stats count() to get the true total bucket count
+  const originalQueryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'PPL' && queryHasStats(originalQueryString)) {
+    const bucketCountCacheKey = prepareBucketCountCacheKey(query);
+    const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
+    const needsBucketCountQuery =
+      !bucketCountQueryStatus ||
+      bucketCountQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+    if (needsBucketCountQuery) {
+      dispatch(
+        executeBucketCountQuery({
+          services,
+          cacheKey: bucketCountCacheKey,
+          queryString: prepareBucketCountQueryString(query),
+        })
+      );
+    }
   }
 
   // Wait only for data table query to complete (not histogram)
@@ -852,6 +889,55 @@ export const executeTabQuery = createAsyncThunk<
   );
 
   return queryBaseResult;
+});
+
+/**
+ * Execute bucket count query for aggregation queries.
+ * Appends | stats count() to get the total number of buckets without fetch_size limiting.
+ * Returns a single row with the count value.
+ *
+ * Errors are silently suppressed because this is a supplementary query — if it fails
+ * (e.g. unsupported syntax, bad field), the table and histogram should still render
+ * normally. On failure, a terminal NO_RESULTS status is dispatched so the query status
+ * doesn't get stuck at LOADING.
+ */
+export const executeBucketCountQuery = createAsyncThunk<
+  any,
+  {
+    services: ExploreServices;
+    cacheKey: string;
+    queryString: string;
+  },
+  { state: RootState }
+>('query/executeBucketCountQuery', async (params, thunkAPI) => {
+  const { dispatch } = thunkAPI;
+  const { cacheKey } = params;
+  try {
+    return await executeQueryBase(
+      {
+        ...params,
+        includeHistogram: false,
+        interval: undefined,
+        avoidDispatchingError: () => true,
+      },
+      thunkAPI
+    );
+  } catch {
+    // Silently swallow — this is a supplementary query. Dispatch a terminal status
+    // so the query doesn't stay stuck at LOADING in queryStatusMap.
+    dispatch(
+      setIndividualQueryStatus({
+        cacheKey,
+        status: {
+          status: QueryExecutionStatus.NO_RESULTS,
+          startTime: undefined,
+          elapsedMs: undefined,
+          error: undefined,
+        },
+      })
+    );
+    return undefined;
+  }
 });
 
 /**

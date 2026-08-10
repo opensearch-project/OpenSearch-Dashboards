@@ -47,6 +47,7 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
+  queryHasStats: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
