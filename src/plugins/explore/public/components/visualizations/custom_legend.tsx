@@ -57,7 +57,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     highlightedLegendTarget$.next(undefined);
   }, [highlightedLegendTarget$]);
 
-  if (legendItems.length === 0) {
+  if (legendItems.length <= 1) {
     return null;
   }
 

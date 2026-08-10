@@ -179,6 +179,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Initialize with fresh conversation on mount
     useMount(() => {
       chatService.newThread();
+
+      // Record window show telemetry
+      if (telemetryRecorder) {
+        telemetryRecorder.recordEvent({
+          name: 'chat_window_show',
+          data: {},
+        });
+      }
     });
 
     // Save conversation to history whenever timeline changes
@@ -193,6 +201,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       services.core.chat.resetThreadId();
       setPendingMessage(null);
       setAvailableDataSources([]);
+
+      // Record window hide telemetry
+      if (telemetryRecorder) {
+        telemetryRecorder.recordEvent({
+          name: 'chat_window_hide',
+          data: {},
+        });
+      }
     });
 
     // Cache data source compatibility check to avoid network call on every message
