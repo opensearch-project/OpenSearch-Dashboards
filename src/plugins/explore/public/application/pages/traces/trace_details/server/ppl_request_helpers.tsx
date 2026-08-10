@@ -105,10 +105,23 @@ export const executePPLQuery = async (
   return response;
 };
 
+/**
+ * Escape the body of a PPL double-quoted string literal.
+ *
+ * The PPL lexer rule is
+ *   DQUOTA_STRING: '"' ( '\\'. | '""' | ~('"'|'\\') )* '"'
+ * so a backslash escapes the character after it. Escaping only the quotes is
+ * therefore not enough: a value ending in `\`, or containing `\` immediately
+ * before a `"`, emits a literal that terminates early and spills the remainder
+ * into the surrounding query. Backslashes must be doubled first, then quotes.
+ */
+const escapePPLStringBody = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
 // Escape a value for use in PPL queries
 export const escapePPLValue = (value: any): string => {
   if (typeof value === 'string') {
-    return `"${value.replace(/"/g, '\\"')}"`;
+    return `"${escapePPLStringBody(value)}"`;
   } else if (typeof value === 'number') {
     return value.toString();
   } else if (typeof value === 'boolean') {
@@ -116,9 +129,20 @@ export const escapePPLValue = (value: any): string => {
   } else if (value === null || value === undefined) {
     return `"${value}"`;
   } else {
-    return `"${JSON.stringify(value).replace(/"/g, '\\"')}"`;
+    return `"${escapePPLStringBody(JSON.stringify(value))}"`;
   }
 };
+
+/**
+ * Quote a field name as a PPL backtick-delimited identifier.
+ *
+ * Mirrors {@link escapePPLValue} for the identifier position. The lexer rule is
+ *   BQUOTA_STRING: '`' ( '\\'. | '``' | ~('`'|'\\') )* '`'
+ * so both backslashes and backticks need escaping; interpolating a field name
+ * raw lets a name containing either break out of the identifier.
+ */
+export const escapePplIdentifier = (identifier: string): string =>
+  `\`${String(identifier).replace(/\\/g, '\\\\').replace(/`/g, '``')}\``;
 
 // Base PPL Service class with core functionality
 export class PPLService {
