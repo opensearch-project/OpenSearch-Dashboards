@@ -5,6 +5,7 @@
 
 import { AggregationType } from '../../types';
 import { aggregateValues } from './utils/aggregation';
+import { getDecimalPrecision, roundToPrecision } from './utils/number';
 
 interface BinConfig {
   count?: number;
@@ -136,9 +137,11 @@ export const bin =
       return [];
     }
 
+    const numericValues = validRecords.map((row) => Number(row[binField]));
+
     // Calculate min and max
-    const min = Math.min(...validRecords.map((row) => Number(row[binField])));
-    const max = Math.max(...validRecords.map((row) => Number(row[binField])));
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
 
     // Handle single value case
     if (min === max) {
@@ -161,9 +164,11 @@ export const bin =
 
     // Calculate bin step size
     let step: number;
-    if (binConfig?.size) {
+    const explicitSize = binConfig?.size;
+    const hasExplicitSize = explicitSize !== undefined && explicitSize > 0;
+    if (hasExplicitSize) {
       // Priority 1: Use explicit size (don't round - user wants exact size)
-      step = binConfig.size;
+      step = explicitSize;
     } else if (binConfig?.count) {
       // Priority 2: Calculate from count and round to nice number
       const rawStep = (max - min) / binConfig.count;
@@ -174,16 +179,24 @@ export const bin =
       step = getNiceNumber(rawStep);
     }
 
+    // Auto buckets should respect integer-valued result data. A count-like field with
+    // values 1..6 should use bucket size 1 instead of fractional buckets like 0.2.
+    if (!hasExplicitSize && step < 1 && numericValues.every(Number.isInteger)) {
+      step = 1;
+    }
+
+    const precision = getDecimalPrecision(step);
+
     // Align bin start to a nice boundary (round down to nearest multiple of step)
     // Example: min=42.2, step=5 → binStart=40 (gives bins like 40-45, 45-50, etc.)
-    const binStart = Math.floor(min / step) * step;
+    const binStart = roundToPrecision(Math.floor(min / step) * step, precision);
 
     // Generate bin ranges
     const bins: BinRange[] = [];
     let currentBinStart = binStart;
 
     while (currentBinStart <= max) {
-      const binEnd = currentBinStart + step;
+      const binEnd = roundToPrecision(currentBinStart + step, precision);
       bins.push({
         start: currentBinStart,
         end: binEnd,
@@ -195,22 +208,22 @@ export const bin =
     // Assign data points to bins
     for (const row of validRecords) {
       const binValue = Number(row[binField]);
-
-      // Find the appropriate bin using [start, end) convention
-      const binIndex = bins.findIndex((binRange) => {
+      const targetBin = bins.find((binRange) => {
         return binValue >= binRange.start && binValue < binRange.end;
       });
 
-      if (binIndex !== -1) {
-        if (valueField) {
-          const aggValue = Number(row[valueField]);
-          if (!isNaN(aggValue)) {
-            bins[binIndex].values.push(aggValue);
-          }
-        } else {
-          // For counting, just push a placeholder
-          bins[binIndex].values.push(1);
+      if (!targetBin) {
+        continue;
+      }
+
+      if (valueField) {
+        const aggValue = Number(row[valueField]);
+        if (!isNaN(aggValue)) {
+          targetBin.values.push(aggValue);
         }
+      } else {
+        // For counting, just push a placeholder
+        targetBin.values.push(1);
       }
     }
 
