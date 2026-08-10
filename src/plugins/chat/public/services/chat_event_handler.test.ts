@@ -60,6 +60,9 @@ describe('ChatEventHandler', () => {
     // Reset confirmationService to approve by default
     mockConfirmationService.requestConfirmation = jest.fn().mockResolvedValue({ approved: true });
 
+    // Reset confirmation requirement to default (no confirmation needed).
+    mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(false);
+
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
       timeline = updater(timeline);
@@ -1366,6 +1369,152 @@ describe('ChatEventHandler', () => {
 
       // Verify success duration metric was NOT recorded
       expect(mockTelemetryRecorder.recordMetric).not.toHaveBeenCalled();
+    });
+
+    // Drives a tool call to a terminal state.
+    const runToolCall = async (toolCallId: string, toolName: string, argsDelta?: string) => {
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: toolName,
+      } as ToolCallStartEvent);
+
+      if (argsDelta !== undefined) {
+        await chatEventHandlerWithTelemetry.handleEvent({
+          type: EventType.TOOL_CALL_ARGS,
+          toolCallId,
+          delta: argsDelta,
+        } as ToolCallArgsEvent);
+      }
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+    };
+
+    // Mock sendToolResult for paths that reach the send-result step.
+    const mockToolResultDispatch = (toolCallId: string) => {
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: {
+          subscribe: jest.fn().mockReturnValue({ add: jest.fn(), unsubscribe: jest.fn() }),
+        },
+        toolMessage: { id: `tool-result-${toolCallId}`, role: 'tool', content: 'r', toolCallId },
+      });
+    };
+
+    const expectToolExecuted = (data: { toolName: string; status: string; source: string }) =>
+      expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_tool_executed',
+        data,
+      });
+
+    it('should record success when a registered action resolves', async () => {
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue('tool output');
+      mockToolResultDispatch('t1');
+
+      await runToolCall('t1', 'testTool', '{"key": "value"}');
+
+      expectToolExecuted({ toolName: 'testTool', status: 'success', source: 'local' });
+    });
+
+    it('should record failure when a registered action rejects', async () => {
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockRejectedValue(new Error('Tool blew up'));
+      mockToolResultDispatch('t2');
+
+      await runToolCall('t2', 'failingTool');
+
+      expectToolExecuted({ toolName: 'failingTool', status: 'failure', source: 'local' });
+    });
+
+    it('should record error when the handler itself throws', async () => {
+      // Malformed arguments trigger JSON.parse failure before tool execution.
+      mockToolResultDispatch('t3');
+
+      await runToolCall('t3', 'crashingTool', '{invalid json');
+
+      expectToolExecuted({ toolName: 'crashingTool', status: 'error', source: 'local' });
+    });
+
+    it('should not record telemetry when a pending confirmation is cancelled', async () => {
+      mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(true);
+      mockConfirmationService.requestConfirmation = jest
+        .fn()
+        .mockResolvedValue({ cancelled: true });
+
+      await runToolCall('t4', 'cancelledTool');
+
+      expect(mockTelemetryRecorder.recordEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'chat_tool_executed' })
+      );
+    });
+
+    it('should record rejected when the user denies confirmation', async () => {
+      mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(true);
+      mockConfirmationService.requestConfirmation = jest
+        .fn()
+        .mockResolvedValue({ approved: false });
+      mockToolResultDispatch('t5');
+
+      await runToolCall('t5', 'rejectedTool');
+
+      expectToolExecuted({ toolName: 'rejectedTool', status: 'rejected', source: 'local' });
+    });
+
+    it('should defer the agent-sourced event until TOOL_CALL_RESULT arrives', async () => {
+      // No registered action → tool is agent-handled, telemetry deferred.
+      mockAssistantActionService.hasAction = jest.fn().mockReturnValue(false);
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockRejectedValue(new Error('Action not found'));
+
+      await runToolCall('t6', 'agentTool');
+
+      expect(mockTelemetryRecorder.recordEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'chat_tool_executed' })
+      );
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_RESULT,
+        toolCallId: 't6',
+        content: 'agent produced this',
+      } as ToolCallResultEvent);
+
+      expectToolExecuted({ toolName: 'agentTool', status: 'success', source: 'agent' });
+    });
+
+    it('should never call executeAction for agent tools (no await before markToolPending)', async () => {
+      // Regression: agent tools call executeAgentTool directly, so executeAction
+      // is never invoked and markToolPending runs without delay.
+      mockAssistantActionService.hasAction = jest.fn().mockReturnValue(false);
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: 'msg-telemetry-7',
+      } as TextMessageStartEvent);
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: 't7',
+        toolCallName: 'raceTool',
+      } as ToolCallStartEvent);
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId: 't7',
+      } as ToolCallEndEvent);
+
+      expect(mockAssistantActionService.executeAction).not.toHaveBeenCalled();
+
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.TOOL_CALL_RESULT,
+        toolCallId: 't7',
+        content: 'agent produced this',
+      } as ToolCallResultEvent);
+
+      expectToolExecuted({ toolName: 'raceTool', status: 'success', source: 'agent' });
     });
   });
 
