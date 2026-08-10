@@ -383,6 +383,7 @@ export class ChatEventHandler {
 
     try {
       const isAgentTool = !this.assistantActionService.hasAction(toolCall.function.name);
+
       // Parse arguments
       const args =
         toolCall.function.arguments && !isAgentTool ? JSON.parse(toolCall.function.arguments) : {};
@@ -393,13 +394,17 @@ export class ChatEventHandler {
         args,
       });
 
-      // Execute the tool and update tool execution status
-      const result = await this.toolExecutor.executeTool(
-        toolCall.function.name,
-        args,
-        toolCallId,
-        await this.chatService.getCurrentDataSourceId()
-      );
+      // Agent tools skip `executeTool` entirely — its local-action path awaits
+      // `executeAction` even when guaranteed to fail, delaying `markToolPending`
+      // and opening a race with the agent's TOOL_CALL_RESULT.
+      const result = isAgentTool
+        ? await this.toolExecutor.executeAgentTool()
+        : await this.toolExecutor.executeTool(
+            toolCall.function.name,
+            args,
+            toolCallId,
+            await this.chatService.getCurrentDataSourceId()
+          );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
       if (result.cancelled) {
@@ -416,6 +421,9 @@ export class ChatEventHandler {
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'failed',
         });
+
+        // Record rejected telemetry
+        this.recordToolExecuted(toolCall.function.name, 'rejected', 'local');
 
         // Clean up pending tool call
         this.pendingToolCalls.delete(toolCallId);
@@ -445,6 +453,13 @@ export class ChatEventHandler {
           status: 'complete',
           result: result.data,
         });
+
+        // Record tool execution telemetry
+        this.recordToolExecuted(
+          toolCall.function.name,
+          result.success ? 'success' : 'failure',
+          'local'
+        );
       }
     } catch (error: any) {
       // eslint-disable-next-line no-console
@@ -474,6 +489,9 @@ export class ChatEventHandler {
         status: 'failed',
         error: error instanceof Error ? error : new Error(error.message),
       });
+
+      // Record tool execution failure telemetry
+      this.recordToolExecuted(toolCall.function.name, 'error', 'local');
     } finally {
       // Clean up pending tool call
       this.pendingToolCalls.delete(toolCallId);
@@ -520,10 +538,37 @@ export class ChatEventHandler {
       result: resultContent,
     });
 
-    // Clear pending tool if it was an agent-only tool
+    // Record telemetry and clear pending entry. The guard prevents double-counting
+    // if a duplicate TOOL_CALL_RESULT arrives after the entry was already cleared.
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
+      const pendingTool = this.toolExecutor.getPendingTool(toolCallId);
+      this.recordToolExecuted(pendingTool?.name ?? 'unknown', 'success', 'agent');
       this.toolExecutor.clearPendingTool(toolCallId);
     }
+  }
+
+  /**
+   * Record a `chat_tool_executed` telemetry event.
+   * `source` distinguishes browser-executed actions ('local') from
+   * agent-executed tools reported via TOOL_CALL_RESULT ('agent').
+   */
+  private recordToolExecuted(
+    toolName: string,
+    status: 'success' | 'failure' | 'error' | 'rejected',
+    source: 'local' | 'agent'
+  ): void {
+    if (!this.telemetryRecorder) {
+      return;
+    }
+
+    this.telemetryRecorder.recordEvent({
+      name: 'chat_tool_executed',
+      data: {
+        toolName,
+        status,
+        source,
+      },
+    });
   }
 
   /**
