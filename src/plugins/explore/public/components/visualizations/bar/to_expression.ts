@@ -5,7 +5,7 @@
 
 import { AxisRole, VisFieldType, TimeUnit, AggregationType, VisColumn } from '../types';
 import { BarChartStyle } from './bar_vis_config';
-import { getAxisConfig } from '../utils/utils';
+import { getAxisConfig, applyPercentageAxis } from '../utils/utils';
 
 import { createBarSeries } from './bar_chart_utils';
 import {
@@ -17,7 +17,13 @@ import {
   applyTimeRange,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
-import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
+import {
+  aggregate,
+  transformStackPercentage,
+  convertTo2DArray,
+  transform,
+  pivot,
+} from '../utils/data_transformation';
 
 const getNormalizedAxisConfig = (
   axisColumnMappings:
@@ -223,12 +229,14 @@ export const createGroupedTimeBarChart = (
         // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
         aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [timeField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -302,12 +310,14 @@ export const createStackedBarSpec = (
         field: valueField,
         aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),

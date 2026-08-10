@@ -20,6 +20,9 @@ import {
   ConnectNullValuesOption,
   DisconnectValuesOption,
   DisableMode,
+  StackMode,
+  LineDashStyle,
+  LineMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -29,6 +32,11 @@ import {
   createStackedAreaChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
+import { DEFAULT_LINE_WIDTH } from '../style_panel/share/line_shared_options';
+import { DEFAULT_FILL_OPACITY } from '../style_panel/share/gradient_range';
+import { DEFAULT_POINT_SIZE } from '../style_panel/share/point_size_options';
+
+export type { LineDashStyle, LineMode };
 
 /**
  * - `none`: flat fill in the series color.
@@ -36,10 +44,6 @@ import { EchartsRender } from '../echarts_render';
  * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
  */
 export type GradientMode = 'none' | 'opacity' | 'hue';
-export type StackMode = 'none' | 'normal' | 'percentage';
-
-// Fill opacity is stored as a percentage (0-100) to match the UI slider.
-export const DEFAULT_FILL_OPACITY = 30;
 
 // Duration used when a gap threshold is switched on before the user types one.
 export const DEFAULT_GAP_THRESHOLD = '1h';
@@ -55,6 +59,14 @@ export interface AreaChartStyleOptions {
   areaOpacity?: number;
   gradientMode?: GradientMode;
   tooltipOptions?: TooltipOptions;
+
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+
+  pointSize?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -110,6 +122,12 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   tooltipOptions: {
     mode: 'all',
   },
+  lineDashStyle: 'solid',
+
+  lineMode: 'smooth',
+  lineWidth: DEFAULT_LINE_WIDTH,
+  pointSize: DEFAULT_POINT_SIZE,
+  showValues: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,

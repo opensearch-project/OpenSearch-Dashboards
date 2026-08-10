@@ -49,6 +49,11 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               areaOpacity={styleOptions.areaOpacity}
               gradientMode={styleOptions.gradientMode}
               stackMode={styleOptions.stackMode}
+              lineDashStyle={styleOptions.lineDashStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              pointSize={styleOptions.pointSize}
+              showValues={styleOptions.showValues}
               connectNullValues={styleOptions.connectNullValues}
               disconnectValues={styleOptions.disconnectValues}
               onAddTimeMarkerChange={(addTimeMarker) =>
@@ -59,6 +64,13 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
                 updateStyleOption('gradientMode', gradientMode)
               }
               onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+              onLineDashStyleChange={(lineDashStyle) =>
+                updateStyleOption('lineDashStyle', lineDashStyle)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
+              onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
               onConnectNullValuesChange={(connectNullValues) =>
                 updateStyleOption('connectNullValues', connectNullValues)
               }

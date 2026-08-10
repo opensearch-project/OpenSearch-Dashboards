@@ -23,6 +23,8 @@ describe('LineExclusiveVisOptions', () => {
     onLineModeChange: jest.fn(),
     onLineWidthChange: jest.fn(),
     onLineStyleChange: jest.fn(),
+    onPointSizeChange: jest.fn(),
+    onShowValuesChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -111,5 +113,53 @@ describe('LineExclusiveVisOptions', () => {
 
     const smoothInput = screen.getByTestId('smooth');
     expect(smoothInput).toBeChecked();
+  });
+
+  describe('point size and value label controls', () => {
+    test.each(['both', 'line'] as LineStyle[])(
+      'hides both controls when the line style is %s',
+      (lineStyle) => {
+        // Point size and value labels are only offered for the dots-only style
+        render(<LineExclusiveVisOptions {...defaultProps} lineStyle={lineStyle} />);
+
+        expect(screen.queryByTestId('linePointSizeRange')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('lineShowValuesSwitch')).not.toBeInTheDocument();
+      }
+    );
+
+    test('renders both controls when the line style is dots', () => {
+      render(<LineExclusiveVisOptions {...defaultProps} lineStyle="dots" />);
+
+      expect(screen.getByTestId('linePointSizeRange')).toBeInTheDocument();
+      expect(screen.getByTestId('lineShowValuesSwitch')).toBeInTheDocument();
+    });
+
+    test('reflects the current point size', () => {
+      render(<LineExclusiveVisOptions {...defaultProps} lineStyle="dots" pointSize={9} />);
+
+      expect(screen.getByTestId('linePointSizeRange')).toHaveValue('9');
+    });
+
+    test('calls onPointSizeChange when the slider moves', () => {
+      render(<LineExclusiveVisOptions {...defaultProps} lineStyle="dots" />);
+
+      fireEvent.change(screen.getByTestId('linePointSizeRange'), { target: { value: '11' } });
+
+      expect(defaultProps.onPointSizeChange).toHaveBeenCalledWith(11);
+    });
+
+    test('reflects the current show values state', () => {
+      render(<LineExclusiveVisOptions {...defaultProps} lineStyle="dots" showValues={true} />);
+
+      expect(screen.getByTestId('lineShowValuesSwitch')).toBeChecked();
+    });
+
+    test('calls onShowValuesChange when the switch is toggled', () => {
+      render(<LineExclusiveVisOptions {...defaultProps} lineStyle="dots" />);
+
+      fireEvent.click(screen.getByTestId('lineShowValuesSwitch'));
+
+      expect(defaultProps.onShowValuesChange).toHaveBeenCalledWith(true);
+    });
   });
 });

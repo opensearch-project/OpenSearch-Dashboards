@@ -10,7 +10,8 @@ import {
   createStackedAreaChart,
 } from './to_expression';
 import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole, DisableMode } from '../types';
-import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
+import { AreaChartStyle } from './area_vis_config';
+import { DEFAULT_FILL_OPACITY, DEFAULT_POINT_SIZE } from '../style_panel/share';
 import { getColors } from '../theme/default_colors';
 
 describe('Area Chart to_expression', () => {
@@ -69,6 +70,11 @@ describe('Area Chart to_expression', () => {
     standardAxes: [],
     showFullTimeRange: false,
     stackMode: 'none',
+    lineDashStyle: 'solid',
+    lineMode: 'smooth',
+    lineWidth: 2,
+    pointSize: 0,
+    showValues: false,
     connectNullValues: {
       connectMode: DisableMode.Never,
       threshold: '1h',
@@ -249,10 +255,10 @@ describe('Area Chart to_expression', () => {
       expect(result.spec.yAxis.max).toBeUndefined();
     });
 
-    it('stacks series without rescaling when stackMode is normal', () => {
+    it('stacks series without rescaling when stackMode is total', () => {
       const result = createSimpleAreaChart(
         mockTransformedData,
-        { ...mockStyles, stackMode: 'normal' },
+        { ...mockStyles, stackMode: 'total' },
         axisColumnMappings
       );
 
@@ -274,6 +280,161 @@ describe('Area Chart to_expression', () => {
       expect(result.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
       expect(seriesValues(result.spec, 'value')).toEqual([10, 5, 20, 15, 15, 25]);
       expect(result.spec.yAxis.max).toBeUndefined();
+    });
+
+    describe('border line style', () => {
+      const borderOf = (styles: Partial<AreaChartStyle>) =>
+        createSimpleAreaChart(mockTransformedData, { ...mockStyles, ...styles }, axisColumnMappings)
+          .spec.series[0];
+
+      it.each([
+        ['solid', 'solid'],
+        ['dashed', [5, 3]],
+        ['dotted', [2, 3]],
+      ])('maps the %s dash style onto lineStyle.type', (lineDashStyle, expected) => {
+        expect(borderOf({ lineDashStyle } as Partial<AreaChartStyle>).lineStyle.type).toEqual(
+          expected
+        );
+      });
+
+      it.each([
+        // `straight` is ECharts' own default, so it sets no flag at all
+        ['straight', { smooth: undefined, step: undefined }],
+        ['smooth', { smooth: true, step: undefined }],
+        ['stepped', { smooth: undefined, step: true }],
+      ])('maps the %s interpolation onto the series flags', (lineMode, expected) => {
+        const series = borderOf({ lineMode } as Partial<AreaChartStyle>);
+
+        expect(series.smooth).toBe(expected.smooth);
+        expect(series.step).toBe(expected.step);
+      });
+
+      it('applies the configured line width', () => {
+        expect(borderOf({ lineWidth: 7 }).lineStyle.width).toBe(7);
+      });
+
+      it('falls back to a solid, smooth, 2px border when nothing is configured', () => {
+        // A chart saved before the border was configurable rendered smooth, so an
+        // unset lineMode has to keep doing that rather than dropping to straight.
+        const { lineDashStyle, lineMode, lineWidth, ...styles } = mockStyles;
+
+        const series = createSimpleAreaChart(
+          mockTransformedData,
+          styles as AreaChartStyle,
+          axisColumnMappings
+        ).spec.series[0];
+
+        expect(series.lineStyle).toEqual({ type: 'solid', width: 2 });
+        expect(series.smooth).toBe(true);
+      });
+    });
+
+    describe('point size', () => {
+      const seriesOf = (styles: Partial<AreaChartStyle>) =>
+        createSimpleAreaChart(mockTransformedData, { ...mockStyles, ...styles }, axisColumnMappings)
+          .spec.series[0];
+
+      it('hides the symbols when the point size is 0', () => {
+        const series = seriesOf({ pointSize: 0 });
+
+        expect(series.showSymbol).toBe(false);
+        // ECharts still reserves hit area for a zero-sized symbol, so no size is set
+        expect(series.symbolSize).toBeUndefined();
+      });
+
+      it('shows the symbols at the configured size', () => {
+        const series = seriesOf({ pointSize: 8 });
+
+        expect(series.showSymbol).toBe(true);
+        expect(series.symbolSize).toBe(8);
+      });
+
+      it('falls back to the shared default when the point size is unset', () => {
+        const series = seriesOf({ pointSize: undefined });
+
+        expect(series.showSymbol).toBe(true);
+        expect(series.symbolSize).toBe(DEFAULT_POINT_SIZE);
+      });
+
+      it('keeps zero-sized symbols alive so value labels can attach to them', () => {
+        // ECharts hangs point labels off the symbol elements and skips creating them
+        // when showSymbol is false, which would drop the labels along with the points
+        const series = seriesOf({ pointSize: 0, showValues: true });
+
+        expect(series.showSymbol).toBe(true);
+        expect(series.symbolSize).toBe(0);
+      });
+    });
+
+    describe('value labels', () => {
+      const labelOf = (styles: Partial<AreaChartStyle>) =>
+        createSimpleAreaChart(mockTransformedData, { ...mockStyles, ...styles }, axisColumnMappings)
+          .spec.series[0].label;
+
+      it('is off by default and positioned above the point', () => {
+        const label = labelOf({ showValues: false });
+
+        expect(label.show).toBe(false);
+        expect(label.position).toBe('top');
+      });
+
+      it('turns the labels on when showValues is set', () => {
+        expect(labelOf({ showValues: true }).show).toBe(true);
+      });
+
+      it('is off when showValues is unset', () => {
+        expect(labelOf({ showValues: undefined }).show).toBe(false);
+      });
+
+      it('lets echarts drop colliding labels', () => {
+        const series = createSimpleAreaChart(
+          mockTransformedData,
+          { ...mockStyles, showValues: true },
+          axisColumnMappings
+        ).spec.series[0];
+
+        expect(series.labelLayout).toEqual({ hideOverlap: true });
+      });
+
+      it('rounds the formatted value to two decimals', () => {
+        const { formatter } = labelOf({ showValues: true });
+        // The dataset source is a 2D array, so echarts hands the formatter the row
+        // array plus the dimension names to look the field up by
+        const dimensionNames = ['date', 'value'];
+
+        expect(formatter({ value: ['2023-01-01', 12.3456], dimensionNames })).toBe('12.35');
+        expect(formatter({ value: ['2023-01-01', 10], dimensionNames })).toBe('10');
+      });
+
+      it('formats a missing or non-numeric value as empty', () => {
+        const { formatter } = labelOf({ showValues: true });
+        const dimensionNames = ['date', 'value'];
+
+        expect(formatter({ value: ['2023-01-01', null], dimensionNames })).toBe('');
+        expect(formatter({ value: ['2023-01-01', 10], dimensionNames: ['date', 'other'] })).toBe(
+          ''
+        );
+        expect(formatter({})).toBe('');
+      });
+
+      it('labels every row of the spec dataset it is paired with', () => {
+        // Drives the formatter off the real dataset rather than a hand-built row, so a
+        // mismatch between the encoded field and the dataset headers cannot pass
+        const { spec } = createSimpleAreaChart(
+          mockTransformedData,
+          { ...mockStyles, showValues: true },
+          axisColumnMappings
+        );
+        const [dimensionNames, ...rows] = spec.dataset.source;
+        const { formatter } = spec.series[0].label;
+
+        // Every row must produce its own value, not the empty string the formatter
+        // falls back to when it cannot resolve the field
+        expect(rows.map((value: any[]) => formatter({ value, dimensionNames }))).toEqual(
+          seriesValues(spec, 'value').map(String)
+        );
+        expect(rows.length).toBeGreaterThan(0);
+      });
     });
   });
 
@@ -337,13 +498,13 @@ describe('Area Chart to_expression', () => {
       expect(seriesValues(result.spec, 'A')).toEqual([10, null]);
     });
 
-    it('stacks series and zero-fills gaps when stackMode is normal', () => {
+    it('stacks series and zero-fills gaps when stackMode is total', () => {
       const result = createMultiAreaChart(
         [
           { date: '2023-01-01', value: 10, category: 'A' },
           { date: '2023-01-02', value: 20, category: 'B' },
         ],
-        { ...mockStyles, stackMode: 'normal' },
+        { ...mockStyles, stackMode: 'total' },
         axisColumnMappings
       );
 
@@ -577,7 +738,7 @@ describe('Area Chart to_expression', () => {
           sparseData,
           {
             ...mockStyles,
-            stackMode: 'normal',
+            stackMode: 'total',
             disconnectValues: { disableMode: DisableMode.Threshold, threshold: '10m' },
           },
           axisColumnMappings
@@ -631,17 +792,24 @@ describe('Area Chart to_expression', () => {
     it('applies the stack mode to category-based areas', () => {
       const stacked = createCategoryAreaChart(
         mockTransformedData,
-        { ...mockStyles, stackMode: 'normal' },
+        { ...mockStyles, stackMode: 'total' },
         axisColumnMappings
       );
       expect(stacked.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+    });
 
+    it('stacks but does not normalize when stackMode is percentage', () => {
+      // Like the single-metric chart, percentage normalization is intentionally not
+      // applied here: the series are unrelated metrics sharing one axis, so a
+      // percentage across them is not meaningful.
       const percentage = createCategoryAreaChart(
         mockTransformedData,
         { ...mockStyles, stackMode: 'percentage' },
         axisColumnMappings
       );
-      expect(percentage.spec.yAxis.max).toBe(100);
+
+      expect(percentage.spec.series.every((s: any) => s.stack === 'total')).toBe(true);
+      expect(percentage.spec.yAxis.max).toBeUndefined();
     });
   });
 
@@ -655,7 +823,7 @@ describe('Area Chart to_expression', () => {
     it('returns an ECharts spec with stacked series', () => {
       const result = createStackedAreaChart(
         mockTransformedData,
-        { ...mockStyles, stackMode: 'normal' },
+        { ...mockStyles, stackMode: 'total' },
         axisColumnMappings
       );
 

@@ -16,6 +16,7 @@ import {
   StandardAxes,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
+import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the child components
 jest.mock('../style_panel/legend/legend', () => ({
@@ -188,7 +189,10 @@ describe('LineVisStyleControls', () => {
   };
 
   const mockProps: LineVisStyleControlsProps = {
+    // Spread the real defaults so this literal keeps satisfying LineChartStyle as
+    // new required style props are added
     styleOptions: {
+      ...defaultLineChartStyles,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       legendTitle: '',

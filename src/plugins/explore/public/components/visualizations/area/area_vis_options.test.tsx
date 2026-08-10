@@ -6,6 +6,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
+import { defaultAreaChartStyles } from './area_vis_config';
 import {
   Positions,
   ThresholdMode,
@@ -79,7 +80,10 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
+    // Spread the real defaults so this literal keeps satisfying AreaChartStyle as
+    // new required style props are added
     styleOptions: {
+      ...defaultAreaChartStyles,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       legendTitle: '',

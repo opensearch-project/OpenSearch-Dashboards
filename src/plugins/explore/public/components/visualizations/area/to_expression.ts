@@ -5,7 +5,11 @@
 
 import { AreaChartStyle } from './area_vis_config';
 import { AxisRole, VisColumn, TimeUnit, AggregationType } from '../types';
-import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
+import {
+  getAxisConfig,
+  getColumnsFromAxisColumnMapping,
+  applyPercentageAxis,
+} from '../utils/utils';
 import {
   pipe,
   createBaseConfig,
@@ -14,13 +18,7 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import {
-  applyPercentageAxis,
-  createAreaSeries,
-  transformStackPercentage,
-  replaceNullWithZero,
-  resolveStackMode,
-} from './area_chart_utils';
+import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
@@ -29,6 +27,8 @@ import {
   aggregate,
   connectNullValues,
   disconnectValues,
+  resolveStackMode,
+  transformStackPercentage,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
 
@@ -166,14 +166,14 @@ export const createCategoryAreaChart = (
         field: valueField,
         aggregationType: AggregationType.SUM,
       }),
-      transformStackPercentage(styles, { excludeFields: [categoryField] }),
+      // transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
-    applyPercentageAxis(styles),
+    // applyPercentageAxis(styles),
     createAreaSeries({
       styles,
       categoryField,

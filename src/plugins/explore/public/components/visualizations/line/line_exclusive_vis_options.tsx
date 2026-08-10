@@ -5,10 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 
-import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { useDebouncedNumber } from '../utils/use_debounced_value';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { defaultLineChartStyles, LineMode } from './line_vis_config';
+import { defaultLineChartStyles } from './line_vis_config';
+import { InterpolationOption, LineWidthOption } from '../style_panel/share/line_shared_options';
+import { PointSizeOption } from '../style_panel/share/point_size_options';
+import { ShowValuesSwitch } from '../style_panel/share/value_label_options';
+import { LineMode } from '../types';
 
 export type LineStyle = 'both' | 'line' | 'dots';
 
@@ -17,10 +20,14 @@ interface BasicVisOptionsProps {
   lineStyle: LineStyle;
   lineMode: LineMode;
   lineWidth: number;
+  pointSize?: number;
+  showValues?: boolean;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onLineModeChange: (lineMode: LineMode) => void;
   onLineWidthChange: (lineWidth: number) => void;
   onLineStyleChange: (style: LineStyle) => void;
+  onPointSizeChange: (pointSize: number) => void;
+  onShowValuesChange: (showValues: boolean) => void;
   shouldShowTimeMarker?: boolean;
 }
 
@@ -29,28 +36,16 @@ export const LineExclusiveVisOptions = ({
   lineStyle,
   lineMode,
   lineWidth,
+  pointSize,
+  showValues = false,
   onAddTimeMarkerChange,
   onLineModeChange,
   onLineWidthChange,
   onLineStyleChange,
+  onPointSizeChange,
+  onShowValuesChange,
   shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
-  // Use debounced value for line width
-  const [localLineWidth, handleLineWidthChange] = useDebouncedNumber(
-    lineWidth,
-    (value) => onLineWidthChange(value ?? defaultLineChartStyles.lineWidth),
-    {
-      min: 1,
-      max: 10,
-    }
-  );
-
-  const lineModeOptions: Array<{ value: LineMode; text: string }> = [
-    { value: 'straight', text: 'Straight' },
-    { value: 'smooth', text: 'Smooth' },
-    { value: 'stepped', text: 'Stepped' },
-  ];
-
   return (
     <StyleAccordion
       id="lineSection"
@@ -75,18 +70,21 @@ export const LineExclusiveVisOptions = ({
               label: i18n.translate('explore.stylePanel.basic.lineWithDots', {
                 defaultMessage: 'Default',
               }),
+              'data-test-subj': 'lineStyle-both',
             },
             {
               id: 'line',
               label: i18n.translate('explore.stylePanel.basic.lineOnly', {
                 defaultMessage: 'Line only',
               }),
+              'data-test-subj': 'lineStyle-line',
             },
             {
               id: 'dots',
               label: i18n.translate('explore.stylePanel.basic.dotsOnly', {
                 defaultMessage: 'Dots only',
               }),
+              'data-test-subj': 'lineStyle-dots',
             },
           ]}
           onChange={(optionId) => {
@@ -97,52 +95,38 @@ export const LineExclusiveVisOptions = ({
           type="single"
           idSelected={lineStyle}
           buttonSize="compressed"
+          data-test-subj="lineStyleButtonGroup"
         />
       </EuiFormRow>
 
       <EuiSpacer size="s" />
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.lineMode', {
-          defaultMessage: 'Interpolation',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.basic.lineMode', {
-            defaultMessage: 'Interpolation',
-          })}
-          options={lineModeOptions.map((option) => ({
-            id: option.value,
-            label: option.text,
-            'data-test-subj': `lineMode-${option.value}`,
-          }))}
-          idSelected={lineMode}
-          onChange={(id) => onLineModeChange(id as LineMode)}
-          buttonSize="compressed"
-        />
-      </EuiFormRow>
+      {lineStyle === 'dots' && (
+        <>
+          <PointSizeOption
+            pointSize={pointSize}
+            onPointSizeChange={onPointSizeChange}
+            defaultValue={defaultLineChartStyles.pointSize}
+            testsubj="linePointSize"
+          />
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.linewidth', {
-          defaultMessage: 'Line width',
-        })}
-      >
-        <EuiRange
-          compressed
-          value={localLineWidth ?? defaultLineChartStyles.lineWidth}
-          onChange={(e) =>
-            handleLineWidthChange(e.currentTarget.value ? Number(e.currentTarget.value) : undefined)
-          }
-          min={1}
-          max={10}
-          step={1}
-          aria-label={i18n.translate('explore.stylePanel.basic.linewidth', {
-            defaultMessage: 'Line width',
-          })}
-          showLabels
-          showValue
-        />
-      </EuiFormRow>
+          <ShowValuesSwitch
+            showValues={showValues}
+            onShowValuesChange={onShowValuesChange}
+            testsubj="lineShowValues"
+          />
+
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      <InterpolationOption lineMode={lineMode} onLineModeChange={onLineModeChange} />
+
+      <LineWidthOption
+        lineWidth={lineWidth}
+        onLineWidthChange={onLineWidthChange}
+        defaultValue={defaultLineChartStyles.lineWidth}
+      />
 
       {shouldShowTimeMarker && (
         <EuiSwitch

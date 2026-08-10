@@ -8,6 +8,7 @@ import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
 import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
+import { DEFAULT_POINT_SIZE } from '../style_panel/share';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
@@ -40,6 +41,8 @@ describe('line_vis_config', () => {
       expect(defaults.lineStyle).toBe('line');
       expect(defaults.lineMode).toBe('straight');
       expect(defaults.lineWidth).toBe(2);
+      expect(defaults.pointSize).toBe(DEFAULT_POINT_SIZE);
+      expect(defaults.showValues).toBe(false);
 
       expect(defaults.tooltipOptions).toEqual({
         mode: 'all',
@@ -67,6 +70,7 @@ describe('line_vis_config', () => {
 
       const mockProps = {
         styleOptions: {
+          ...config.ui.style.defaults,
           addLegend: true,
           legendPosition: Positions.RIGHT,
           thresholdOptions: {

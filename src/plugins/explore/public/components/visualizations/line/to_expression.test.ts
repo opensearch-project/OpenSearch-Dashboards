@@ -11,7 +11,8 @@ import {
   createCategoryMultiLineChart,
 } from './to_expression';
 import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
-import { defaultLineChartStyles } from './line_vis_config';
+import { defaultLineChartStyles, LineChartStyle } from './line_vis_config';
+import { LineStyle } from './line_exclusive_vis_options';
 import { getColors } from '../theme/default_colors';
 
 describe('Line Chart to_expression', () => {
@@ -107,6 +108,66 @@ describe('Line Chart to_expression', () => {
           itemStyle: { color: palette[0] },
         })
       );
+    });
+
+    describe('point size and value labels', () => {
+      const seriesOf = (styles: Partial<LineChartStyle>) =>
+        createSimpleLineChart(mockData, { ...mockStyles, ...styles }, mockAxisMappings).spec
+          .series[0];
+
+      it.each(['both', 'line'] as LineStyle[])(
+        'leaves the symbols and labels untouched in %s mode',
+        (lineStyle) => {
+          // Both controls are dots-only, so the other styles keep ECharts' own sizing
+          const series = seriesOf({ lineStyle, pointSize: 8, showValues: true });
+
+          expect(series.symbolSize).toBeUndefined();
+          expect(series.label).toBeUndefined();
+        }
+      );
+
+      it('applies the point size in dots mode', () => {
+        const series = seriesOf({ lineStyle: 'dots', pointSize: 8 });
+
+        expect(series.showSymbol).toBe(true);
+        expect(series.symbolSize).toBe(8);
+      });
+
+      it('hides the symbols in dots mode when the point size is 0', () => {
+        const series = seriesOf({ lineStyle: 'dots', pointSize: 0 });
+
+        expect(series.showSymbol).toBe(false);
+        expect(series.symbolSize).toBeUndefined();
+      });
+
+      it('keeps zeroing the stroke width in dots mode', () => {
+        expect(seriesOf({ lineStyle: 'dots', lineWidth: 5 }).lineStyle.width).toBe(0);
+      });
+
+      it('renders value labels in dots mode when showValues is set', () => {
+        const series = seriesOf({ lineStyle: 'dots', showValues: true });
+
+        expect(series.label.show).toBe(true);
+        expect(series.label.position).toBe('top');
+        expect(series.labelLayout).toEqual({ hideOverlap: true });
+      });
+
+      it('rounds the formatted value to two decimals', () => {
+        const { formatter } = seriesOf({ lineStyle: 'dots', showValues: true }).label;
+        // The dataset source is a 2D array, so echarts hands the formatter the row
+        // array plus the dimension names to look the field up by
+        const dimensionNames = ['date', 'value'];
+
+        expect(formatter({ value: ['2023-01-01', 12.3456], dimensionNames })).toBe('12.35');
+        expect(formatter({ value: ['2023-01-01', null], dimensionNames })).toBe('');
+      });
+
+      it('keeps zero-sized symbols alive so value labels can attach to them', () => {
+        const series = seriesOf({ lineStyle: 'dots', pointSize: 0, showValues: true });
+
+        expect(series.showSymbol).toBe(true);
+        expect(series.symbolSize).toBe(0);
+      });
     });
   });
 

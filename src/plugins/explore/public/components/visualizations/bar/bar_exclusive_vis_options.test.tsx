@@ -5,6 +5,8 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
+import { StackMode } from '../types';
+import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share';
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
@@ -22,7 +24,8 @@ describe('BarExclusiveVisOptions', () => {
     showBarBorder: false,
     barBorderWidth: 1,
     barBorderColor: '#000000',
-    stackMode: 'none' as 'none' | 'total',
+    stackMode: 'none' as StackMode,
+    fillOpacity: DEFAULT_BAR_FILL_OPACITY,
     onBarSizeModeChange: jest.fn(),
     onBarWidthChange: jest.fn(),
     onBarPaddingChange: jest.fn(),
@@ -31,7 +34,14 @@ describe('BarExclusiveVisOptions', () => {
     onBarBorderColorChange: jest.fn(),
     onUseThresholdColorChange: jest.fn(),
     onStackModeChange: jest.fn(),
+    onFillOpacityChange: jest.fn(),
   };
+
+  // EuiButtonGroup marks the selection on the label rather than the input, and the
+  // class is prefixed eui- or oui- depending on which theme package is resolved.
+  const isSelected = (testSubj: string) =>
+    screen.getByTestId(testSubj).classList.contains('euiButtonGroupButton-isSelected') ||
+    screen.getByTestId(testSubj).classList.contains('ouiButtonGroupButton-isSelected');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,38 +148,53 @@ describe('BarExclusiveVisOptions', () => {
     expect(screen.getByText('Border color')).toBeInTheDocument();
   });
 
-  test('renders stack mode options correctly', () => {
+  test('renders the three stack mode options', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Check if the stack mode button group exists
-    const stackModeButtonGroup = screen.getByTestId('barStackModeButtonGroup');
-    expect(stackModeButtonGroup).toBeInTheDocument();
-
-    // Check if the "None" and "Stacked" buttons exist
-    expect(screen.getByText('None')).toBeInTheDocument();
-    expect(screen.getByText('Stacked')).toBeInTheDocument();
-
-    // Check if the stack mode label is rendered (using getAllByText to handle multiple matches)
-    expect(screen.getAllByText('Stack')).toHaveLength(2); // label and legend
+    expect(screen.getByTestId('barStackModeButtonGroup')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-none')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-total')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-percentage')).toBeInTheDocument();
   });
 
-  test('calls onStackModeChange when stack mode is changed', () => {
+  test('defaults the stack mode selection to none', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Find and click the "Stacked" button
-    const stackedButton = screen.getByText('Stacked');
-    fireEvent.click(stackedButton);
-
-    // Check if the callback was called with the correct value
-    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith('total');
+    expect(isSelected('barStackMode-none')).toBe(true);
+    expect(isSelected('barStackMode-total')).toBe(false);
+    expect(isSelected('barStackMode-percentage')).toBe(false);
   });
 
-  test('renders with stacked mode selected', () => {
-    render(<BarExclusiveVisOptions {...defaultProps} stackMode="total" />);
+  test.each([
+    ['barStackMode-total', 'total'],
+    ['barStackMode-percentage', 'percentage'],
+  ])('calls onStackModeChange when %s is selected', (testSubj, expected) => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // The "Stacked" button should be selected
-    const stackedButton = screen.getByText('Stacked');
-    expect(stackedButton.closest('label')).toHaveClass('euiButtonGroupButton-isSelected');
+    fireEvent.click(screen.getByTestId(testSubj));
+
+    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith(expected);
+  });
+
+  test('marks the current stack mode as selected', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} stackMode="percentage" />);
+
+    expect(isSelected('barStackMode-percentage')).toBe(true);
+    expect(isSelected('barStackMode-none')).toBe(false);
+  });
+
+  test('reflects the current fill opacity value', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} fillOpacity={75} />);
+
+    expect(screen.getByTestId('barFillOpacityRange')).toHaveValue('75');
+  });
+
+  test('calls onFillOpacityChange when the slider moves', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    fireEvent.change(screen.getByTestId('barFillOpacityRange'), { target: { value: '80' } });
+
+    expect(defaultProps.onFillOpacityChange).toHaveBeenCalledWith(80);
   });
 
   test('renders use threshold color switch correctly', () => {
@@ -192,12 +217,14 @@ describe('BarExclusiveVisOptions', () => {
     expect(defaultProps.onUseThresholdColorChange).toHaveBeenCalledWith(true);
   });
 
-  test('does not render stack mode options for histogram type', () => {
+  test('does not render stack mode or fill opacity options for histogram type', () => {
     render(<BarExclusiveVisOptions {...defaultProps} type="histogram" />);
 
-    // Stack mode options should not be visible for histogram
+    // Histogram has neither style option, so both controls stay bar-only
     expect(screen.queryByTestId('barStackModeButtonGroup')).not.toBeInTheDocument();
-    expect(screen.queryByText('None')).not.toBeInTheDocument();
-    expect(screen.queryByText('Stacked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barStackMode-none')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barStackMode-total')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barStackMode-percentage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barFillOpacityRange')).not.toBeInTheDocument();
   });
 });

@@ -5,6 +5,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AreaExclusiveVisOptions } from './area_exclusive_vis_options';
+import { defaultAreaChartStyles } from './area_vis_config';
 import { DisableMode } from '../types';
 
 jest.mock('../utils/use_debounced_value', () => ({
@@ -33,6 +34,11 @@ describe('AreaExclusiveVisOptions', () => {
     onFillOpacityChange: jest.fn(),
     onGradientModeChange: jest.fn(),
     onStackModeChange: jest.fn(),
+    onLineDashStyleChange: jest.fn(),
+    onLineModeChange: jest.fn(),
+    onLineWidthChange: jest.fn(),
+    onPointSizeChange: jest.fn(),
+    onShowValuesChange: jest.fn(),
     onConnectNullValuesChange: jest.fn(),
     onDisconnectValuesChange: jest.fn(),
   };
@@ -83,7 +89,9 @@ describe('AreaExclusiveVisOptions', () => {
   test('calls onFillOpacityChange when the slider moves', () => {
     render(<AreaExclusiveVisOptions {...defaultProps} />);
 
-    fireEvent.change(screen.getByRole('slider'), { target: { value: '80' } });
+    // Addressed by test subj rather than by role: the border width slider is a
+    // second `slider` on the panel, so the role query is ambiguous now.
+    fireEvent.change(screen.getByTestId('areaFillOpacityRange'), { target: { value: '80' } });
 
     expect(defaultProps.onFillOpacityChange).toHaveBeenCalledWith(80);
   });
@@ -91,7 +99,7 @@ describe('AreaExclusiveVisOptions', () => {
   test('reflects the current fill opacity value', () => {
     render(<AreaExclusiveVisOptions {...defaultProps} areaOpacity={75} />);
 
-    expect(screen.getByRole('slider')).toHaveValue('75');
+    expect(screen.getByTestId('areaFillOpacityRange')).toHaveValue('75');
   });
 
   test('calls onGradientModeChange when a gradient mode is selected', () => {
@@ -114,7 +122,7 @@ describe('AreaExclusiveVisOptions', () => {
 
     expect(screen.getByTestId('areaStackModeButtonGroup')).toBeInTheDocument();
     expect(screen.getByTestId('areaStackMode-none')).toBeInTheDocument();
-    expect(screen.getByTestId('areaStackMode-normal')).toBeInTheDocument();
+    expect(screen.getByTestId('areaStackMode-total')).toBeInTheDocument();
     expect(screen.getByTestId('areaStackMode-percentage')).toBeInTheDocument();
     expect(screen.getByTestId('areaStackMode-percentage')).toHaveTextContent('Percentage');
   });
@@ -123,7 +131,7 @@ describe('AreaExclusiveVisOptions', () => {
     render(<AreaExclusiveVisOptions {...defaultProps} stackMode={undefined} />);
 
     expect(isSelected('areaStackMode-none')).toBe(true);
-    expect(isSelected('areaStackMode-normal')).toBe(false);
+    expect(isSelected('areaStackMode-total')).toBe(false);
     expect(isSelected('areaStackMode-percentage')).toBe(false);
   });
 
@@ -136,10 +144,146 @@ describe('AreaExclusiveVisOptions', () => {
   });
 
   test('marks the current stack mode as selected', () => {
-    render(<AreaExclusiveVisOptions {...defaultProps} stackMode="normal" />);
+    render(<AreaExclusiveVisOptions {...defaultProps} stackMode="total" />);
 
-    expect(isSelected('areaStackMode-normal')).toBe(true);
+    expect(isSelected('areaStackMode-total')).toBe(true);
     expect(isSelected('areaStackMode-none')).toBe(false);
+  });
+
+  describe('border line controls', () => {
+    test('renders the dash style, interpolation, and width controls', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      expect(screen.getByTestId('lineDashStyle-solid')).toBeInTheDocument();
+      expect(screen.getByTestId('lineDashStyle-dashed')).toBeInTheDocument();
+      expect(screen.getByTestId('lineDashStyle-dotted')).toBeInTheDocument();
+
+      expect(screen.getByTestId('lineMode-straight')).toBeInTheDocument();
+      expect(screen.getByTestId('lineMode-smooth')).toBeInTheDocument();
+      expect(screen.getByTestId('lineMode-stepped')).toBeInTheDocument();
+
+      expect(screen.getByTestId('lineWidthRange')).toBeInTheDocument();
+    });
+
+    test('defaults to a solid, smooth border', () => {
+      // The border was smooth before it became configurable, so an option the
+      // user has never touched has to keep rendering that way.
+      render(
+        <AreaExclusiveVisOptions {...defaultProps} lineDashStyle={undefined} lineMode={undefined} />
+      );
+
+      expect(isSelected('lineDashStyle-solid')).toBe(true);
+      expect(isSelected('lineMode-smooth')).toBe(true);
+      expect(isSelected('lineMode-straight')).toBe(false);
+    });
+
+    test('marks the current dash style and interpolation as selected', () => {
+      render(
+        <AreaExclusiveVisOptions {...defaultProps} lineDashStyle="dotted" lineMode="stepped" />
+      );
+
+      expect(isSelected('lineDashStyle-dotted')).toBe(true);
+      expect(isSelected('lineDashStyle-solid')).toBe(false);
+      expect(isSelected('lineMode-stepped')).toBe(true);
+      expect(isSelected('lineMode-smooth')).toBe(false);
+    });
+
+    test('calls onLineDashStyleChange when a dash style is selected', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('lineDashStyle-dashed'));
+
+      expect(defaultProps.onLineDashStyleChange).toHaveBeenCalledWith('dashed');
+    });
+
+    test('calls onLineModeChange when an interpolation is selected', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('lineMode-straight'));
+
+      expect(defaultProps.onLineModeChange).toHaveBeenCalledWith('straight');
+    });
+
+    test('calls onLineWidthChange when the width slider moves', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      fireEvent.change(screen.getByTestId('lineWidthRange'), { target: { value: '6' } });
+
+      expect(defaultProps.onLineWidthChange).toHaveBeenCalledWith(6);
+    });
+
+    test('reflects the current line width', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} lineWidth={7} />);
+
+      expect(screen.getByTestId('lineWidthRange')).toHaveValue('7');
+    });
+
+    test('keeps the border controls on a non-time x-axis', () => {
+      // The stroke has nothing to do with the axis type
+      render(<AreaExclusiveVisOptions {...defaultProps} isTimeBased={false} />);
+
+      expect(screen.getByTestId('lineDashStyle-solid')).toBeInTheDocument();
+      expect(screen.getByTestId('lineMode-smooth')).toBeInTheDocument();
+      expect(screen.getByTestId('lineWidthRange')).toBeInTheDocument();
+    });
+  });
+
+  describe('point size and value label controls', () => {
+    test('renders both controls', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      expect(screen.getByTestId('areaPointSizeRange')).toBeInTheDocument();
+      expect(screen.getByTestId('areaShowValuesSwitch')).toBeInTheDocument();
+    });
+
+    test('reflects the current point size', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} pointSize={12} />);
+
+      expect(screen.getByTestId('areaPointSizeRange')).toHaveValue('12');
+    });
+
+    test('falls back to the configured default point size', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} pointSize={undefined} />);
+
+      expect(screen.getByTestId('areaPointSizeRange')).toHaveValue(
+        String(defaultAreaChartStyles.pointSize)
+      );
+    });
+
+    test('calls onPointSizeChange when the slider moves', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      fireEvent.change(screen.getByTestId('areaPointSizeRange'), { target: { value: '8' } });
+
+      expect(defaultProps.onPointSizeChange).toHaveBeenCalledWith(8);
+    });
+
+    test('defaults the show values switch to off', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} showValues={undefined} />);
+
+      expect(screen.getByTestId('areaShowValuesSwitch')).not.toBeChecked();
+    });
+
+    test('reflects the current show values state', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} showValues={true} />);
+
+      expect(screen.getByTestId('areaShowValuesSwitch')).toBeChecked();
+    });
+
+    test('calls onShowValuesChange when the switch is toggled', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('areaShowValuesSwitch'));
+
+      expect(defaultProps.onShowValuesChange).toHaveBeenCalledWith(true);
+    });
+
+    test('keeps both controls on a non-time x-axis', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} isTimeBased={false} />);
+
+      expect(screen.getByTestId('areaPointSizeRange')).toBeInTheDocument();
+      expect(screen.getByTestId('areaShowValuesSwitch')).toBeInTheDocument();
+    });
   });
 
   describe('connect / disconnect controls', () => {

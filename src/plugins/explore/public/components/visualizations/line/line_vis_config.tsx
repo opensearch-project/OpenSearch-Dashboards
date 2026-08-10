@@ -16,6 +16,7 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  LineMode,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
@@ -28,8 +29,7 @@ import {
   createCategoryMultiLineChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
-
-export type LineMode = 'straight' | 'smooth' | 'stepped';
+import { DEFAULT_POINT_SIZE } from '../style_panel/share/point_size_options';
 
 // Complete line chart style controls interface
 export interface LineChartStyleOptions {
@@ -42,6 +42,9 @@ export interface LineChartStyleOptions {
   lineStyle?: LineStyle;
   lineMode?: LineMode;
   lineWidth?: number;
+  pointSize?: number;
+  // Renders each data point's value
+  showValues?: boolean;
   tooltipOptions?: TooltipOptions;
 
   /**
@@ -79,6 +82,8 @@ export const defaultLineChartStyles: LineChartStyle = {
   lineStyle: 'line',
   lineMode: 'straight',
   lineWidth: 2,
+  pointSize: DEFAULT_POINT_SIZE,
+  showValues: false,
   tooltipOptions: {
     mode: 'all',
   },

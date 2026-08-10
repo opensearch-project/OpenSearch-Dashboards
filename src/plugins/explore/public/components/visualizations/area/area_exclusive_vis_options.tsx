@@ -5,30 +5,51 @@
 
 import { i18n } from '@osd/i18n';
 
-import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { DebouncedFieldText } from '../style_panel/utils';
-import { useDebouncedNumber } from '../utils/use_debounced_value';
+import { defaultAreaChartStyles, GradientMode } from './area_vis_config';
 import {
-  defaultAreaChartStyles,
-  GradientMode,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
   StackMode,
-  DEFAULT_FILL_OPACITY,
-  DEFAULT_GAP_THRESHOLD,
-} from './area_vis_config';
-import { ConnectNullValuesOption, DisconnectValuesOption, DisableMode } from '../types';
+  LineDashStyle,
+  LineMode,
+} from '../types';
+import {
+  DEFAULT_LINE_WIDTH,
+  InterpolationOption,
+  LineDashStyleOption,
+  LineWidthOption,
+  ConnectionGroup,
+  PointSizeOption,
+  ShowValuesSwitch,
+} from '../style_panel/share/index';
+import { GradientRange } from '../style_panel/share/gradient_range';
+
+import { StackModeButtonGroup } from '../style_panel/stack_mode/stack_mode_button_group';
 
 interface AreaExclusiveVisOptionsProps {
   addTimeMarker: boolean;
   areaOpacity: number | undefined;
   gradientMode: GradientMode;
   stackMode?: StackMode;
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+  pointSize?: number;
+  showValues?: boolean;
   connectNullValues?: ConnectNullValuesOption;
   disconnectValues?: DisconnectValuesOption;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onFillOpacityChange: (areaOpacity: number) => void;
   onGradientModeChange: (gradientMode: GradientMode) => void;
   onStackModeChange: (stackMode: StackMode) => void;
+  onLineDashStyleChange: (lineDashStyle: LineDashStyle) => void;
+  onLineModeChange: (lineMode: LineMode) => void;
+  onLineWidthChange: (lineWidth: number) => void;
+  onPointSizeChange: (pointSize: number) => void;
+  onShowValuesChange: (showValues: boolean) => void;
   onConnectNullValuesChange: (connectNullValues: ConnectNullValuesOption) => void;
   onDisconnectValuesChange: (disconnectValues: DisconnectValuesOption) => void;
   isTimeBased?: boolean;
@@ -39,82 +60,28 @@ export const AreaExclusiveVisOptions = ({
   areaOpacity,
   gradientMode,
   stackMode = 'none',
+  lineDashStyle = 'solid',
+  lineMode = 'smooth',
+  lineWidth,
+  pointSize,
+  showValues = false,
   connectNullValues,
   disconnectValues,
   onAddTimeMarkerChange,
   onFillOpacityChange,
   onGradientModeChange,
   onStackModeChange,
+  onLineDashStyleChange,
+  onLineModeChange,
+  onLineWidthChange,
+  onPointSizeChange,
+  onShowValuesChange,
   onConnectNullValuesChange,
   onDisconnectValuesChange,
   isTimeBased = true,
 }: AreaExclusiveVisOptionsProps) => {
-  const [localFillOpacity, handleFillOpacityChange] = useDebouncedNumber(
-    areaOpacity,
-    (value) =>
-      onFillOpacityChange(value ?? defaultAreaChartStyles?.areaOpacity ?? DEFAULT_FILL_OPACITY),
-    { min: 0, max: 100 }
-  );
-
-  const stackModeOptions: Array<{ id: StackMode; label: string }> = [
-    {
-      id: 'none',
-      label: i18n.translate('explore.stylePanel.area.stackModeNone', {
-        defaultMessage: 'None',
-      }),
-    },
-    {
-      id: 'normal',
-      label: i18n.translate('explore.stylePanel.area.stackModeNormal', {
-        defaultMessage: 'Stack',
-      }),
-    },
-    {
-      id: 'percentage',
-      label: i18n.translate('explore.stylePanel.area.stackModePercentage', {
-        defaultMessage: 'Percentage',
-      }),
-    },
-  ];
-
   const connectMode = connectNullValues?.connectMode ?? DisableMode.Never;
   const disconnectMode = disconnectValues?.disableMode ?? DisableMode.Never;
-
-  const connectNullValuesOptions = [
-    {
-      id: DisableMode.Never,
-      label: i18n.translate('explore.stylePanel.area.connectNullValues.never', {
-        defaultMessage: 'Never',
-      }),
-    },
-    {
-      id: DisableMode.Always,
-      label: i18n.translate('explore.stylePanel.area.connectNullValues.always', {
-        defaultMessage: 'Always',
-      }),
-    },
-    {
-      id: DisableMode.Threshold,
-      label: i18n.translate('explore.stylePanel.area.connectNullValues.threshold', {
-        defaultMessage: 'Threshold',
-      }),
-    },
-  ];
-
-  const disconnectValuesOptions = [
-    {
-      id: DisableMode.Never,
-      label: i18n.translate('explore.stylePanel.area.disconnectValues.never', {
-        defaultMessage: 'Never',
-      }),
-    },
-    {
-      id: DisableMode.Threshold,
-      label: i18n.translate('explore.stylePanel.area.disconnectValues.threshold', {
-        defaultMessage: 'Threshold',
-      }),
-    },
-  ];
 
   const gradientModeOptions: Array<{ id: GradientMode; label: string }> = [
     {
@@ -145,53 +112,12 @@ export const AreaExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.area.stackMode', {
-          defaultMessage: 'Stack',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.area.stackMode', {
-            defaultMessage: 'Stack',
-          })}
-          options={stackModeOptions.map((option) => ({
-            id: option.id,
-            label: option.label,
-            'data-test-subj': `areaStackMode-${option.id}`,
-          }))}
-          idSelected={stackMode}
-          onChange={(id) => onStackModeChange(id as StackMode)}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="areaStackModeButtonGroup"
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.area.areaOpacity', {
-          defaultMessage: 'Fill opacity',
-        })}
-      >
-        <EuiRange
-          compressed
-          min={0}
-          max={100}
-          step={1}
-          value={localFillOpacity ?? DEFAULT_FILL_OPACITY}
-          onChange={(e) =>
-            handleFillOpacityChange(
-              e.currentTarget.value ? Number(e.currentTarget.value) : undefined
-            )
-          }
-          aria-label={i18n.translate('explore.stylePanel.area.areaOpacity', {
-            defaultMessage: 'Fill opacity',
-          })}
-          showLabels
-          showValue
-          data-test-subj="areaFillOpacityRange"
-        />
-      </EuiFormRow>
-
+      <StackModeButtonGroup
+        stackMode={stackMode}
+        onStackModeChange={onStackModeChange}
+        testsubj="areaStackMode"
+      />
+      <GradientRange fillOpacity={areaOpacity} onOpacityChange={onFillOpacityChange} />
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.area.gradientMode', {
           defaultMessage: 'Gradient mode',
@@ -212,105 +138,39 @@ export const AreaExclusiveVisOptions = ({
           isFullWidth
         />
       </EuiFormRow>
-
+      <LineDashStyleOption
+        lineDashStyle={lineDashStyle}
+        onLineDashStyleChange={onLineDashStyleChange}
+        isFullWidth
+      />
+      <InterpolationOption lineMode={lineMode} onLineModeChange={onLineModeChange} isFullWidth />
+      <LineWidthOption
+        lineWidth={lineWidth}
+        onLineWidthChange={onLineWidthChange}
+        defaultValue={defaultAreaChartStyles.lineWidth ?? DEFAULT_LINE_WIDTH}
+      />
+      <PointSizeOption
+        pointSize={pointSize}
+        onPointSizeChange={onPointSizeChange}
+        defaultValue={defaultAreaChartStyles.pointSize}
+        testsubj="areaPointSize"
+      />
+      <ShowValuesSwitch
+        showValues={showValues}
+        onShowValuesChange={onShowValuesChange}
+        testsubj="areaShowValues"
+      />
+      <EuiSpacer size="s" />
       {isTimeBased && (
         <>
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.area.disconnectValues', {
-              defaultMessage: 'Disconnect values',
-            })}
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('explore.stylePanel.area.disconnectValues.options', {
-                defaultMessage: 'Disconnect values options',
-              })}
-              isDisabled={connectMode !== DisableMode.Never}
-              options={disconnectValuesOptions.map((option) => ({
-                ...option,
-                'data-test-subj': `areaDisconnectValues-${option.id}`,
-              }))}
-              idSelected={disconnectMode}
-              onChange={(id) =>
-                onDisconnectValuesChange({
-                  threshold: disconnectValues?.threshold ?? DEFAULT_GAP_THRESHOLD,
-                  disableMode: id as DisableMode,
-                })
-              }
-              buttonSize="compressed"
-              isFullWidth
-              data-test-subj="areaDisconnectValuesButtonGroup"
-            />
-          </EuiFormRow>
-          {disconnectMode === DisableMode.Threshold && (
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.area.disconnectValues.thresholdLabel', {
-                defaultMessage: 'Disconnect threshold',
-              })}
-              helpText={i18n.translate('explore.stylePanel.area.disconnectValues.thresholdHelp', {
-                defaultMessage: 'Break the area when points sit further apart than this.',
-              })}
-            >
-              <DebouncedFieldText
-                value={disconnectValues?.threshold ?? DEFAULT_GAP_THRESHOLD}
-                onChange={(threshold) =>
-                  onDisconnectValuesChange({
-                    disableMode: disconnectMode,
-                    threshold,
-                  })
-                }
-                placeholder={DEFAULT_GAP_THRESHOLD}
-                data-test-subj="areaDisconnectValuesThreshold"
-              />
-            </EuiFormRow>
-          )}
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.area.connectNullValues', {
-              defaultMessage: 'Connect null values',
-            })}
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('explore.stylePanel.area.connectNullValues.options', {
-                defaultMessage: 'Connect null values options',
-              })}
-              isDisabled={disconnectMode !== DisableMode.Never}
-              options={connectNullValuesOptions.map((option) => ({
-                ...option,
-                'data-test-subj': `areaConnectNullValues-${option.id}`,
-              }))}
-              idSelected={connectMode}
-              onChange={(id) =>
-                onConnectNullValuesChange({
-                  threshold: connectNullValues?.threshold ?? DEFAULT_GAP_THRESHOLD,
-                  connectMode: id as DisableMode,
-                })
-              }
-              buttonSize="compressed"
-              isFullWidth
-              data-test-subj="areaConnectNullValuesButtonGroup"
-            />
-          </EuiFormRow>
-          {connectMode === DisableMode.Threshold && (
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.area.connectNullValues.thresholdLabel', {
-                defaultMessage: 'Connect threshold',
-              })}
-              helpText={i18n.translate('explore.stylePanel.area.connectNullValues.thresholdHelp', {
-                defaultMessage: 'Bridge gaps shorter than this, e.g. 5m or 1h.',
-              })}
-            >
-              <DebouncedFieldText
-                value={connectNullValues?.threshold ?? DEFAULT_GAP_THRESHOLD}
-                onChange={(threshold) =>
-                  onConnectNullValuesChange({
-                    connectMode,
-                    threshold,
-                  })
-                }
-                placeholder={DEFAULT_GAP_THRESHOLD}
-                data-test-subj="areaConnectNullValuesThreshold"
-              />
-            </EuiFormRow>
-          )}
+          <ConnectionGroup
+            disconnectMode={disconnectMode}
+            connectMode={connectMode}
+            disconnectValues={disconnectValues}
+            connectNullValues={connectNullValues}
+            onConnectNullValuesChange={onConnectNullValuesChange}
+            onDisconnectValuesChange={onDisconnectValuesChange}
+          />
           <EuiSpacer size="s" />
           <EuiSwitch
             compressed

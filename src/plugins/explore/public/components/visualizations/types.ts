@@ -297,3 +297,9 @@ export interface RendererSpecConfig {
   name?: string;
   data: Array<Record<string, any>>;
 }
+
+export type StackMode = 'none' | 'total' | 'percentage';
+
+export type LineMode = 'straight' | 'smooth' | 'stepped';
+
+export type LineDashStyle = 'solid' | 'dashed' | 'dotted';

@@ -20,3 +20,5 @@ export { normalizeEmptyValue } from './utils/normalization';
 export { map, pick } from './common';
 
 export * from './connection';
+
+export * from './normalize_percentage';
