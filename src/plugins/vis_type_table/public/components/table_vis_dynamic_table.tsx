@@ -409,7 +409,7 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
       }
     };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formattedColumns, rows, columnWidths.length, colWidthKey]);
 
   // Filter bucket function
