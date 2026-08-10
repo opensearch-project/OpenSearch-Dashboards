@@ -44,11 +44,13 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         <>
           <EuiFlexItem grow={false}>
             <AreaExclusiveVisOptions
-              shouldShowTimeMarker={shouldShowTimeMarker}
+              isTimeBased={shouldShowTimeMarker}
               addTimeMarker={styleOptions.addTimeMarker}
               areaOpacity={styleOptions.areaOpacity}
               gradientMode={styleOptions.gradientMode}
               stackMode={styleOptions.stackMode}
+              connectNullValues={styleOptions.connectNullValues}
+              disconnectValues={styleOptions.disconnectValues}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
@@ -57,6 +59,12 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
                 updateStyleOption('gradientMode', gradientMode)
               }
               onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+              onConnectNullValuesChange={(connectNullValues) =>
+                updateStyleOption('connectNullValues', connectNullValues)
+              }
+              onDisconnectValuesChange={(disconnectValues) =>
+                updateStyleOption('disconnectValues', disconnectValues)
+              }
             />
           </EuiFlexItem>
 

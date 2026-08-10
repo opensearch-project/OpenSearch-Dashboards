@@ -17,8 +17,7 @@ const addThresholdTime = (currentTime: string, threshold: string): number | unde
   if (isNaN(date.getTime())) {
     return undefined;
   }
-
-  const match = threshold.match(/^(\d+)([hms])$/);
+  const match = threshold?.trim().match(/^(\d+(?:\.\d+)?)\s*(s|m|h)$/i);
   if (!match) {
     return undefined;
   }

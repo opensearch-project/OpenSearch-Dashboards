@@ -9,7 +9,7 @@ import {
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
-import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
+import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole, DisableMode } from '../types';
 import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
 import { getColors } from '../theme/default_colors';
 
@@ -69,6 +69,14 @@ describe('Area Chart to_expression', () => {
     standardAxes: [],
     showFullTimeRange: false,
     stackMode: 'none',
+    connectNullValues: {
+      connectMode: DisableMode.Never,
+      threshold: '1h',
+    },
+    disconnectValues: {
+      disableMode: DisableMode.Never,
+      threshold: '1h',
+    },
   };
 
   // Rows come back as a 2D array: [headers, ...rows]
@@ -443,6 +451,141 @@ describe('Area Chart to_expression', () => {
 
       expect(seriesValues(result.spec, 'A')).toEqual([0]);
       expect(seriesValues(result.spec, 'B')).toEqual([0]);
+    });
+
+    describe('connect null values', () => {
+      // 'A' reports at :00 and :30 but is missing at :10; 'B' covers every point,
+      // so the pivot leaves a single-row null gap in 'A'.
+      const gapData = [
+        { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+        { date: '2023-01-01T00:00:00Z', value: 1, category: 'B' },
+        { date: '2023-01-01T00:10:00Z', value: 2, category: 'B' },
+        { date: '2023-01-01T00:30:00Z', value: 30, category: 'A' },
+        { date: '2023-01-01T00:30:00Z', value: 3, category: 'B' },
+      ];
+
+      it('leaves gaps as breaks by default', () => {
+        const result = createMultiAreaChart(gapData, mockStyles, axisColumnMappings);
+
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+
+      it('turns on connectNulls when the mode is always', () => {
+        const result = createMultiAreaChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Always, threshold: '1h' },
+          },
+          axisColumnMappings
+        );
+
+        expect(result.spec.series.every((s: any) => s.connectNulls === true)).toBe(true);
+        // ECharts bridges it at render time, so the null stays in the dataset
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+
+      it('interpolates gaps shorter than the threshold', () => {
+        const result = createMultiAreaChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '1h' },
+          },
+          axisColumnMappings
+        );
+
+        // The 30m gap fits under 1h, so :10 lands 1/3 of the way from 10 to 30
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+        const values = seriesValues(result.spec, 'A');
+        expect(values[0]).toBe(10);
+        expect(values[1]).toBeCloseTo(16.6667, 4);
+        expect(values[2]).toBe(30);
+      });
+
+      it('leaves gaps longer than the threshold as breaks', () => {
+        const result = createMultiAreaChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '5m' },
+          },
+          axisColumnMappings
+        );
+
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+
+      it('ignores an unparseable threshold instead of reshaping the data', () => {
+        const result = createMultiAreaChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '5' },
+          },
+          axisColumnMappings
+        );
+
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+    });
+
+    describe('disconnect values', () => {
+      // Two valid points 1h apart, with no nulls between them.
+      const sparseData = [
+        { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+        { date: '2023-01-01T01:00:00Z', value: 30, category: 'A' },
+      ];
+
+      it('keeps everything connected by default', () => {
+        const result = createMultiAreaChart(sparseData, mockStyles, axisColumnMappings);
+
+        expect(seriesValues(result.spec, 'A')).toEqual([10, 30]);
+      });
+
+      it('inserts a break when the gap exceeds the threshold', () => {
+        const result = createMultiAreaChart(
+          sparseData,
+          {
+            ...mockStyles,
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '10m' },
+          },
+          axisColumnMappings
+        );
+
+        // A null row lands 10m past the first point, splitting the area in two
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+      });
+
+      it('leaves gaps within the threshold untouched', () => {
+        const result = createMultiAreaChart(
+          sparseData,
+          {
+            ...mockStyles,
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '2h' },
+          },
+          axisColumnMappings
+        );
+
+        expect(seriesValues(result.spec, 'A')).toEqual([10, 30]);
+      });
+
+      it('keeps the break visible in a stacked area', () => {
+        const result = createMultiAreaChart(
+          sparseData,
+          {
+            ...mockStyles,
+            stackMode: 'normal',
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '10m' },
+          },
+          axisColumnMappings
+        );
+
+        // The break is inserted after replaceNullWithZero, so it survives as a null
+        expect(seriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
     });
   });
 

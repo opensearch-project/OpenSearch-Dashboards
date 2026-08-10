@@ -17,6 +17,9 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -37,6 +40,9 @@ export type StackMode = 'none' | 'normal' | 'percentage';
 
 // Fill opacity is stored as a percentage (0-100) to match the UI slider.
 export const DEFAULT_FILL_OPACITY = 30;
+
+// Duration used when a gap threshold is switched on before the user types one.
+export const DEFAULT_GAP_THRESHOLD = '1h';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleOptions {
@@ -70,15 +76,28 @@ export interface AreaChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
   stackMode?: StackMode;
+
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
 }
 
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'stackMode'
+    | 'areaOpacity'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'stackMode'
+    | 'connectNullValues'
+    | 'disconnectValues'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle' | 'stackMode'>;
+  Pick<
+    AreaChartStyleOptions,
+    'areaOpacity' | 'legendTitle' | 'stackMode' | 'connectNullValues' | 'disconnectValues'
+  >;
 
 export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
@@ -100,6 +119,14 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   standardAxes: [],
   showFullTimeRange: false,
   stackMode: 'none',
+  connectNullValues: {
+    connectMode: DisableMode.Always,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
+  disconnectValues: {
+    disableMode: DisableMode.Never,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

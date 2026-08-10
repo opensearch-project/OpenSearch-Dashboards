@@ -27,6 +27,8 @@ import {
   sortByTime,
   pivot,
   aggregate,
+  connectNullValues,
+  disconnectValues,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
 
@@ -49,14 +51,14 @@ export const createSimpleAreaChart = (
   const result = pipe(
     transform(
       sortByTime(timeField),
-      // transformStackPercentage(styles, { fields: valueField }),
+      connectNullValues(styles, { timeField, seriesFields: valueField }),
+      disconnectValues(styles, { timeField, seriesFields: valueField }),
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
-    // applyPercentageAxis(styles),
     applyTimeRange,
     createAreaSeries({
       styles,
@@ -105,9 +107,12 @@ export const createMultiAreaChart = (
         timeUnit: TimeUnit.SECOND,
         aggregationType: AggregationType.SUM,
       }),
+      // TODO Bridge short null runs first
+      connectNullValues(styles, { timeField }),
       // replaceNullWithZero only matters for stacked area; unstacked areas should keep gaps as gaps.
       (data) =>
         resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [timeField]),
+      disconnectValues(styles, { timeField }),
       transformStackPercentage(styles, { excludeFields: [timeField] }),
       convertTo2DArray()
     ),

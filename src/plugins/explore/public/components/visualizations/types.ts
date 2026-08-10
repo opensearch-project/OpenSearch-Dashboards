@@ -278,6 +278,8 @@ export interface ValueMappingOptions {
 export enum DisableMode {
   Never = 'never',
   Threshold = 'threshold',
+  // only for connecting null values
+  Always = 'always',
 }
 
 export interface DisconnectValuesOption {

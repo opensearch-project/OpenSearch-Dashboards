@@ -13,6 +13,7 @@ import {
   TooltipOptions,
   AxisRole,
   AxisColumnMappings,
+  DisableMode,
 } from '../types';
 
 // Mock child components
@@ -132,6 +133,14 @@ describe('AreaVisStyleControls', () => {
         },
       ],
       showFullTimeRange: false,
+      connectNullValues: {
+        connectMode: DisableMode.Never,
+        threshold: '1h',
+      },
+      disconnectValues: {
+        disableMode: DisableMode.Never,
+        threshold: '1h',
+      },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {

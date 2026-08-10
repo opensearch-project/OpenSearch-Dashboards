@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createAreaConfig } from './area_vis_config';
-import { Positions, ThresholdMode } from '../types';
+import { Positions, ThresholdMode, DisableMode } from '../types';
 import { AreaVisStyleControls } from './area_vis_options';
 
 describe('area_vis_config', () => {
@@ -22,6 +22,14 @@ describe('area_vis_config', () => {
         stackMode: 'none',
         tooltipOptions: {
           mode: 'all',
+        },
+        connectNullValues: {
+          connectMode: DisableMode.Always,
+          threshold: '1h',
+        },
+        disconnectValues: {
+          disableMode: DisableMode.Never,
+          threshold: '1h',
         },
       });
 

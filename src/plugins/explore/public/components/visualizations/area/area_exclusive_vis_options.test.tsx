@@ -5,11 +5,14 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AreaExclusiveVisOptions } from './area_exclusive_vis_options';
+import { DisableMode } from '../types';
 
 jest.mock('../utils/use_debounced_value', () => ({
   useDebouncedNumber: jest.fn((value, onChange) => {
     return [value, (newValue: string) => onChange(parseFloat(newValue))];
   }),
+  // Used by the threshold text inputs via DebouncedFieldText
+  useDebouncedValue: jest.fn((value, onChange) => [value, onChange]),
 }));
 
 describe('AreaExclusiveVisOptions', () => {
@@ -18,10 +21,20 @@ describe('AreaExclusiveVisOptions', () => {
     areaOpacity: 30,
     gradientMode: 'none' as const,
     stackMode: 'none' as const,
+    connectNullValues: {
+      connectMode: DisableMode.Never,
+      threshold: '1h',
+    },
+    disconnectValues: {
+      disableMode: DisableMode.Never,
+      threshold: '1h',
+    },
     onAddTimeMarkerChange: jest.fn(),
     onFillOpacityChange: jest.fn(),
     onGradientModeChange: jest.fn(),
     onStackModeChange: jest.fn(),
+    onConnectNullValuesChange: jest.fn(),
+    onDisconnectValuesChange: jest.fn(),
   };
 
   // EuiButtonGroup marks the selected option on the rendered label, not on our custom test subj
@@ -45,7 +58,7 @@ describe('AreaExclusiveVisOptions', () => {
   });
 
   test('hides only the time marker switch when shouldShowTimeMarker is false', () => {
-    render(<AreaExclusiveVisOptions {...defaultProps} shouldShowTimeMarker={false} />);
+    render(<AreaExclusiveVisOptions {...defaultProps} isTimeBased={false} />);
 
     expect(screen.queryByTestId('areaAddTimeMarkerSwitch')).not.toBeInTheDocument();
     // Fill controls are independent of the x-axis type, so they stay
@@ -103,7 +116,7 @@ describe('AreaExclusiveVisOptions', () => {
     expect(screen.getByTestId('areaStackMode-none')).toBeInTheDocument();
     expect(screen.getByTestId('areaStackMode-normal')).toBeInTheDocument();
     expect(screen.getByTestId('areaStackMode-percentage')).toBeInTheDocument();
-    expect(screen.getByTestId('areaStackMode-percentage')).toHaveTextContent('100%');
+    expect(screen.getByTestId('areaStackMode-percentage')).toHaveTextContent('Percentage');
   });
 
   test('defaults the stack mode selection to none', () => {
@@ -127,5 +140,130 @@ describe('AreaExclusiveVisOptions', () => {
 
     expect(isSelected('areaStackMode-normal')).toBe(true);
     expect(isSelected('areaStackMode-none')).toBe(false);
+  });
+
+  describe('connect / disconnect controls', () => {
+    test('renders both button groups with their options', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      expect(screen.getByTestId('areaConnectNullValuesButtonGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('areaConnectNullValues-never')).toBeInTheDocument();
+      expect(screen.getByTestId('areaConnectNullValues-always')).toBeInTheDocument();
+      expect(screen.getByTestId('areaConnectNullValues-threshold')).toBeInTheDocument();
+
+      expect(screen.getByTestId('areaDisconnectValuesButtonGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('areaDisconnectValues-never')).toBeInTheDocument();
+      expect(screen.getByTestId('areaDisconnectValues-threshold')).toBeInTheDocument();
+    });
+
+    test('defaults both modes to never', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          connectNullValues={undefined}
+          disconnectValues={undefined}
+        />
+      );
+
+      expect(isSelected('areaConnectNullValues-never')).toBe(true);
+      expect(isSelected('areaDisconnectValues-never')).toBe(true);
+    });
+
+    test('hides both threshold inputs while neither mode uses a threshold', () => {
+      render(<AreaExclusiveVisOptions {...defaultProps} />);
+
+      expect(screen.queryByTestId('areaConnectNullValuesThreshold')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('areaDisconnectValuesThreshold')).not.toBeInTheDocument();
+    });
+
+    test('calls onConnectNullValuesChange and keeps the existing threshold', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          connectNullValues={{ connectMode: DisableMode.Never, threshold: '30m' }}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('areaConnectNullValues-always'));
+
+      expect(defaultProps.onConnectNullValuesChange).toHaveBeenCalledWith({
+        connectMode: DisableMode.Always,
+        threshold: '30m',
+      });
+    });
+
+    test('calls onDisconnectValuesChange and keeps the existing threshold', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          disconnectValues={{ disableMode: DisableMode.Never, threshold: '2h' }}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('areaDisconnectValues-threshold'));
+
+      expect(defaultProps.onDisconnectValuesChange).toHaveBeenCalledWith({
+        disableMode: DisableMode.Threshold,
+        threshold: '2h',
+      });
+    });
+
+    test('reveals the connect threshold input in threshold mode', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          connectNullValues={{ connectMode: DisableMode.Threshold, threshold: '5m' }}
+        />
+      );
+
+      expect(screen.getByTestId('areaConnectNullValuesThreshold')).toHaveValue('5m');
+      expect(screen.queryByTestId('areaDisconnectValuesThreshold')).not.toBeInTheDocument();
+    });
+
+    test('reveals the disconnect threshold input in threshold mode', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          disconnectValues={{ disableMode: DisableMode.Threshold, threshold: '15m' }}
+        />
+      );
+
+      expect(screen.getByTestId('areaDisconnectValuesThreshold')).toHaveValue('15m');
+    });
+
+    test('disables the disconnect group while connecting is active', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          connectNullValues={{ connectMode: DisableMode.Always, threshold: '1h' }}
+        />
+      );
+
+      // EuiButtonGroup disables the whole group through its fieldset
+      expect(screen.getByTestId('areaDisconnectValuesButtonGroup')).toBeDisabled();
+      expect(screen.getByTestId('areaConnectNullValuesButtonGroup')).not.toBeDisabled();
+    });
+
+    test('disables the connect group while disconnecting is active', () => {
+      render(
+        <AreaExclusiveVisOptions
+          {...defaultProps}
+          disconnectValues={{ disableMode: DisableMode.Threshold, threshold: '1h' }}
+        />
+      );
+
+      expect(screen.getByTestId('areaConnectNullValuesButtonGroup')).toBeDisabled();
+      expect(screen.getByTestId('areaDisconnectValuesButtonGroup')).not.toBeDisabled();
+    });
+
+    test('hides both groups on a non-time x-axis', () => {
+      // Gaps are measured in time, so neither control means anything on a category axis
+      render(<AreaExclusiveVisOptions {...defaultProps} isTimeBased={false} />);
+
+      expect(screen.queryByTestId('areaConnectNullValuesButtonGroup')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('areaDisconnectValuesButtonGroup')).not.toBeInTheDocument();
+      // The fill controls are axis-independent, so they stay
+      expect(screen.getByTestId('areaFillOpacityRange')).toBeInTheDocument();
+    });
   });
 });

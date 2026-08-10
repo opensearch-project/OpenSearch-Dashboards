@@ -141,9 +141,12 @@ export const StateTimeLineExclusiveVisOptions = ({
           label={i18n.translate(
             'explore.stylePanel.texclusive.disconnectValues.disableMode.threshold',
             {
-              defaultMessage: 'Threshold',
+              defaultMessage: 'Disconnect threshold',
             }
           )}
+          helpText={i18n.translate('explore.stylePanel.area.disconnectValues.thresholdHelp', {
+            defaultMessage: 'Break the area when points sit further apart than this.',
+          })}
         >
           <DebouncedFieldText
             icon="arrowRight"
@@ -192,9 +195,12 @@ export const StateTimeLineExclusiveVisOptions = ({
           label={i18n.translate(
             'explore.stylePanel.texclusive.connectValues.connectMode.threshold',
             {
-              defaultMessage: 'Threshold',
+              defaultMessage: 'Connect threshold',
             }
           )}
+          helpText={i18n.translate('explore.stylePanel.area.connectNullValues.thresholdHelp', {
+            defaultMessage: 'Bridge gaps shorter than this, e.g. 5m or 1h.',
+          })}
         >
           <DebouncedFieldText
             icon="arrowLeft"

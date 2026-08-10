@@ -7,6 +7,7 @@ import * as echarts from 'echarts';
 import type { LineSeriesOption } from 'echarts';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle, DEFAULT_FILL_OPACITY, StackMode } from './area_vis_config';
+import { DisableMode } from '../types';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getColors } from '../theme/default_colors';
@@ -17,6 +18,7 @@ import {
   LegendItem,
 } from '../utils/legend';
 import { hexToRgb, rgbToHex } from '../theme/color_utils';
+import { resolveConnectMode } from '../utils/data_transformation';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -72,6 +74,12 @@ export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
     ]),
   };
 };
+
+/**
+ * ECharts connectNulls only maps always mode.
+ */
+export const buildConnectNulls = (styles: AreaChartStyle): boolean =>
+  resolveConnectMode(styles) === DisableMode.Always;
 
 // ECharts groups series that share this id into a single stack.
 export const AREA_STACK_ID = 'total';
@@ -194,6 +202,7 @@ export const createAreaSeries =
     const legendItems: LegendItem[] = [];
     const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker);
     const stackConfig = buildStackConfig(styles);
+    const connectNulls = buildConnectNulls(styles);
     const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
@@ -203,7 +212,7 @@ export const createAreaSeries =
         name,
         type: 'line',
         showSymbol: false,
-        connectNulls: true,
+        connectNulls,
         ...stackConfig,
         areaStyle: buildAreaStyle(styles, color),
         smooth: true,
