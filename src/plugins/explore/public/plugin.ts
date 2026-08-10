@@ -94,7 +94,7 @@ import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 import {
   registerDisabledPPLExecuteQueryAction,
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+  APPLY_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
 import {
   APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION,
@@ -887,8 +887,8 @@ export class ExplorePlugin implements Plugin<
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
-    // Register disabled execute_ppl_query action as placeholder
-    // These will be overridden when query panel mounts and restored when it unmounts
+    // Register disabled apply_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
     if (plugins.contextProvider) {
       registerDisabledPPLExecuteQueryAction(
         plugins.contextProvider.actions.registerAssistantAction
@@ -896,7 +896,7 @@ export class ExplorePlugin implements Plugin<
       registerDisabledPPLLintFixAction(plugins.contextProvider.actions.registerAssistantAction);
       this.unregisterPPLExecuteQueryAction = () =>
         plugins.contextProvider!.actions.unregisterAssistantAction(
-          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
+          APPLY_PPL_QUERY_TOOL_DEFINITION.name
         );
       this.unregisterPPLLintFixAction = () =>
         plugins.contextProvider!.actions.unregisterAssistantAction(
