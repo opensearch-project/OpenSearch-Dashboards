@@ -50,6 +50,8 @@ const defaultStyleOptions: TableChartStyle = {
 };
 
 const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
+const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
 
 export const CommonVisualizationRender = ({
   visualizationData,
@@ -66,6 +68,11 @@ export const CommonVisualizationRender = ({
   ).current;
   const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
   const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
+  const horizontalSplitMinWidth = COMPACT_HORIZONTAL_SPLIT_CHART_TYPES.includes(
+    visConfig?.type ?? ''
+  )
+    ? COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH
+    : undefined;
 
   useEffect(() => {
     if (!supportsCustomLegend) {
@@ -188,6 +195,7 @@ export const CommonVisualizationRender = ({
               layout={visConfig.splitLayout ?? 'auto'}
               showLabel={visConfig.showSplitLabel}
               verticalItemMinHeight={visConfig.type === 'metric' ? 60 : undefined}
+              horizontalItemMinWidth={horizontalSplitMinWidth}
               renderChart={(groupKey) => (
                 <ChartRender
                   data={{ ...visualizationData }}
