@@ -21,7 +21,7 @@
     "comment-stripper": "^0.0.4",
     "sass-embedded": "1.93.3",
     "sass-loader": "16.0.5",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.23",
     "sinon": "^7.4.2"
   }
 }
