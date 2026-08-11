@@ -100,7 +100,7 @@ const PatternsContainerContent = ({
     [originalQuery, selectedPatternsField, usingRegexPatterns, redirectToLogsWithQuery]
   );
 
-  const logsTotal = histogramResults?.hits.total || 0;
+  const histogramTotal = histogramResults?.hits.total || 0;
 
   // SQL patterns come back as unaliased columns ([pattern, COUNT(*), MIN(sample)] by
   // position) rather than the PPL field names, and the sample is a scalar rather than
@@ -120,12 +120,15 @@ const PatternsContainerContent = ({
         let sample;
 
         if (isSqlPatterns) {
-          const patternKey = schema[0]?.name ?? 'pattern';
-          const countKey = schema[1]?.name ?? 'COUNT(*)';
-          const sampleKey = schema[2]?.name ?? 'MIN(sample)';
-          pattern = source[patternKey];
-          count = source[countKey];
-          sample = source[sampleKey];
+          // Columns are read by position. The engine returns each unaliased
+          // column's `name` as the raw SELECT-list text, and OSD keys `_source`
+          // by that name (aliases are returned separately and dropped), so the
+          // schema is the only reliable way to address them.
+          const [patternCol, countCol, sampleCol] = schema;
+          if (!patternCol?.name || !countCol?.name || !sampleCol?.name) return null;
+          pattern = source[patternCol.name];
+          count = source[countCol.name];
+          sample = source[sampleCol.name];
         } else {
           pattern = source[PATTERNS_FIELD];
           count = source[COUNT_FIELD];
@@ -133,11 +136,27 @@ const PatternsContainerContent = ({
           sample = Array.isArray(source[SAMPLE_FIELD]) ? source[SAMPLE_FIELD][0] : undefined;
         }
 
+        // Note for SQL: the empty-pattern group (documents whose patterns field
+        // is missing) has pattern === '' and sample === '', which survive this
+        // check -- only null/undefined are dropped. The outer IFNULL on MIN
+        // guarantees the sample is never null, so that group is not lost.
         if (pattern == null || count == null || sample == null) return null;
         return { pattern, count, sample };
       })
       .filter(Boolean) as Array<{ pattern: string; count: number; sample: string }>;
   }, [patternResults, isSqlPatterns]);
+
+  // Denominator for the event ratio. PPL reads the total from the histogram
+  // query, but the histogram is not issued for SQL (see the language guard in
+  // `executeQueries`), so that total is always 0 and every ratio would come out
+  // Infinity -- rendering the whole column as '—'. The pattern rows already sum
+  // to the population the ratio is *about*, so use that for SQL. This keeps the
+  // column meaningful without depending on SQL histogram support landing first.
+  const logsTotal = useMemo(
+    () =>
+      isSqlPatterns ? patternRows.reduce((sum, row) => sum + (row.count || 0), 0) : histogramTotal,
+    [isSqlPatterns, patternRows, histogramTotal]
+  );
 
   const items: PatternItem[] = useMemo(
     () =>
@@ -147,8 +166,14 @@ const PatternsContainerContent = ({
         ratio: row.count / logsTotal,
         count: row.count,
         sample: row.sample,
-        // SQL uses the simple (regex) method, whose punctuation-only anchors make the
-        // token highlighter mis-align — same reason PPL's usingRegexPatterns path skips it.
+        // Highlighting is skipped for the simple pattern method, in SQL exactly
+        // as in PPL's usingRegexPatterns path -- SQL only has the simple method.
+        // It is not that the highlighter mis-aligns: it aligns correctly and
+        // reproduces the sample byte-for-byte. The problem is density. Simple
+        // patterns replace every alphanumeric run, so the same log line comes
+        // back as ~25 alternating fragments instead of brain's ~6 contiguous
+        // ones, at the same ~66% coverage -- the highlight stops distinguishing
+        // anything and reads as noise.
         highlightedSample:
           isSqlPatterns || usingRegexPatterns
             ? undefined

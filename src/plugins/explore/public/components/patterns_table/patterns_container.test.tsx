@@ -8,6 +8,7 @@ import { render, screen } from '@testing-library/react';
 import { PatternsContainer } from './patterns_container';
 import { mockPatternItems } from './utils/patterns_table.stubs';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { highlightLogUsingPattern } from './utils/utils';
 
 jest.mock('./patterns_table', () => ({
   PatternsTable: (props: any) => (
@@ -57,48 +58,32 @@ jest.mock('../tabs/action_bar/patterns_settings/patterns_settings_popover_conten
   PatternsSettingsPopoverContent: () => <div data-test-subj="mocked-patterns-settings" />,
 }));
 
-jest.mock('react-redux', () => ({
-  useSelector: jest.fn((selector) => {
-    if (selector.toString().includes('selectQuery')) {
-      return { query: 'test query', language: 'PPL' };
-    }
-    if (selector.toString().includes('selectResults')) {
-      return {
-        'default-query': {
-          hits: {
-            hits: mockPatternItems.map((item) => ({
-              _source: {
-                // using string literals instead of constants to avoid jest errors
-                sample_logs: [item.sample],
-                pattern_count: item.count,
-                patterns_field: 'test pattern',
-              },
-            })),
-            total: 2096,
-          },
-        },
-      };
-    }
-    if (selector.toString().includes('state.ui.activeTabId')) {
-      return 'patterns';
-    }
-    if (
-      selector.toString().includes('selectPatternsField') ||
-      selector.toString().includes('patternsField')
-    ) {
-      return 'message';
-    }
-    if (
-      selector.toString().includes('selectUsingRegexPatterns') ||
-      selector.toString().includes('usingRegexPatterns')
-    ) {
-      return false;
-    }
-    return {};
-  }),
-  useDispatch: jest.fn(() => jest.fn()),
-  connect: jest.fn(() => (Component: React.ComponentType<any>) => Component),
-}));
+// Mutable so a test can switch the active language; the `mock` prefix is what lets
+// the hoisted jest.mock factory below close over it.
+let mockLanguage = 'PPL';
+
+// Selectors are reselect `createSelector` results, so their source text carries no
+// identifying name -- matching on `selector.toString()` never fires and every
+// useSelector call falls through. Dispatch on function identity instead.
+jest.mock('react-redux', () => {
+  const selectors = jest.requireActual('../../application/utils/state_management/selectors');
+  return {
+    useSelector: jest.fn((selector) => {
+      if (selector === selectors.selectQuery) {
+        return { query: 'test query', language: mockLanguage };
+      }
+      if (selector === selectors.selectPatternsField) {
+        return 'message';
+      }
+      if (selector === selectors.selectUsingRegexPatterns) {
+        return false;
+      }
+      return {};
+    }),
+    useDispatch: jest.fn(() => jest.fn()),
+    connect: jest.fn(() => (Component: React.ComponentType<any>) => Component),
+  };
+});
 
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
@@ -253,5 +238,112 @@ describe('PatternsContainer', () => {
 
     expect(items[1].pattern).toBe('Debian GNU/Linux');
     expect(items[1].count).toBe(18);
+  });
+
+  describe('SQL', () => {
+    // The engine returns each unaliased column's name as the raw SELECT-list text, and
+    // OSD keys `_source` by that name, so these keys are deliberately ugly.
+    const PATTERN_COL = "REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>')";
+    const COUNT_COL = 'COUNT(*)';
+    const SAMPLE_COL = "IFNULL(MIN(sample), '')";
+
+    const sqlResults = (
+      rows: Array<[string, number, string]>,
+      schema = [{ name: PATTERN_COL }, { name: COUNT_COL }, { name: SAMPLE_COL }]
+    ) => ({
+      results: {
+        fieldSchema: schema,
+        hits: {
+          hits: rows.map(([pattern, count, sample]) => ({
+            _source: { [PATTERN_COL]: pattern, [COUNT_COL]: count, [SAMPLE_COL]: sample },
+          })),
+          total: rows.length,
+        },
+      },
+      status: { status: QueryExecutionStatus.READY },
+    });
+
+    const renderSqlItems = (results: any) => {
+      mockUseTabResults.mockReturnValueOnce(results);
+      const { getByTestId } = render(<PatternsContainer />);
+      return JSON.parse(getByTestId('mocked-patterns-table').getAttribute('data-items') || '[]');
+    };
+
+    beforeEach(() => {
+      mockLanguage = 'SQL';
+    });
+
+    afterEach(() => {
+      mockLanguage = 'PPL';
+    });
+
+    it('addresses the columns by position rather than by PPL field name', () => {
+      const items = renderSqlItems(
+        sqlResults([
+          ['<*> <*>', 30, 'Calculated quote'],
+          ['<*> <*> <*>', 10, 'Ad service starting.'],
+        ])
+      );
+
+      expect(items).toHaveLength(2);
+      expect(items[0].pattern).toBe('<*> <*>');
+      expect(items[0].count).toBe(30);
+      expect(items[0].sample).toBe('Calculated quote');
+    });
+
+    it('keeps the empty-pattern group, whose pattern and sample are both empty strings', () => {
+      // Documents missing the patterns field aggregate into this group via IFNULL.
+      // Only null/undefined should be dropped, never ''.
+      const items = renderSqlItems(
+        sqlResults([
+          ['<*> <*>', 30, 'Calculated quote'],
+          ['', 3, ''],
+        ])
+      );
+
+      expect(items).toHaveLength(2);
+      expect(items[1]).toMatchObject({ pattern: '', count: 3, sample: '' });
+    });
+
+    it('reports an unexpected schema rather than rendering a blank table', () => {
+      // Rows came back but the schema is short, so no row can be addressed. The
+      // container distinguishes this from "no results" and says so.
+      mockUseTabResults.mockReturnValueOnce(
+        sqlResults([['<*> <*>', 30, 'Calculated quote']], [{ name: PATTERN_COL }]) as any
+      );
+
+      render(<PatternsContainer />);
+
+      expect(screen.getByText('Expected schema not found')).toBeInTheDocument();
+      expect(screen.queryByTestId('mocked-patterns-table')).not.toBeInTheDocument();
+    });
+
+    // The histogram query is language-gated off for SQL, so its total is 0 and every
+    // ratio would come out Infinity, rendering the column as '—' on every row.
+    it('derives the ratio denominator from the pattern counts, not the histogram total', () => {
+      const items = renderSqlItems(
+        sqlResults([
+          ['<*> <*>', 30, 'Calculated quote'],
+          ['<*> <*> <*>', 10, 'Ad service starting.'],
+        ])
+      );
+
+      // 30 + 10 = 40, not the mocked histogram total of 2096.
+      expect(items[0].ratio).toBeCloseTo(30 / 40);
+      expect(items[1].ratio).toBeCloseTo(10 / 40);
+    });
+
+    it('leaves the sample unhighlighted, as PPL does on its own simple-pattern path', () => {
+      const items = renderSqlItems(sqlResults([['<*> <*>', 30, 'Calculated quote']]));
+
+      expect(items[0].highlightedSample).toBeUndefined();
+      expect(highlightLogUsingPattern).not.toHaveBeenCalled();
+    });
+  });
+
+  it('still highlights the sample for PPL brain patterns', () => {
+    render(<PatternsContainer />);
+
+    expect(highlightLogUsingPattern).toHaveBeenCalled();
   });
 });

@@ -141,6 +141,18 @@ export const registerBuiltInTabs = (
         const state = services.store.getState();
 
         /**
+         * The BRAIN fallback below is PPL-only: it retries with `regexPatternQuery`,
+         * which emits PPL pipe syntax. SQL has no brain method and never produces
+         * this error, but the handler is language-agnostic -- so a SQL 400 whose
+         * details happened to match the prefix would dispatch a PPL query against
+         * the SQL endpoint under a cache key the tab never reads, leaving it stuck
+         * on a stale status. Bail out early for SQL and let the normal error show.
+         */
+        if (state.query.language === 'SQL') {
+          return false;
+        }
+
+        /**
          * The below conditional is checking for the error returned when attempting to use a BRAIN
          * query on an older version of the querying engine. If this error appears, an attempt is made
          * to switch over to a patterns query which works on older versions of the querying engine.

@@ -11,6 +11,7 @@ import {
   createExcludeSearchPatternQuery,
   createSearchPatternQuery,
   escapeSqlValue,
+  escapeSqlIdentifier,
   findDefaultPatternsField,
   highlightLogUsingPattern,
   isValidFiniteNumber,
@@ -219,13 +220,84 @@ describe('utils', () => {
       it('coerces non-string values to string', () => {
         expect(escapeSqlValue(123 as any)).toBe("'123'");
       });
+
+      // SQUOTA_STRING honors backslash escapes as well as '' doubling, so a
+      // backslash before a quote would otherwise end the literal early. These
+      // values are reachable from indexed content (Windows paths, stack traces).
+      it('escapes a backslash that precedes a quote', () => {
+        expect(escapeSqlValue("path\\'s")).toBe("'path\\\\''s'");
+      });
+
+      it('escapes a trailing backslash', () => {
+        expect(escapeSqlValue('a\\')).toBe("'a\\\\'");
+      });
+
+      it('escapes backslashes before doubling quotes, not after', () => {
+        // Wrong order would emit 'a\'' — the \' is consumed as an escaped quote.
+        expect(escapeSqlValue("a\\'")).toBe("'a\\\\'''");
+      });
+    });
+
+    describe('escapeSqlIdentifier', () => {
+      it('wraps a field name in backticks', () => {
+        expect(escapeSqlIdentifier('message')).toBe('`message`');
+      });
+
+      it('leaves dotted and hyphenated field names intact', () => {
+        expect(escapeSqlIdentifier('http.request-id')).toBe('`http.request-id`');
+      });
+
+      it('doubles embedded backticks', () => {
+        expect(escapeSqlIdentifier('we`ird')).toBe('`we``ird`');
+      });
+
+      it('neutralizes a field name that would otherwise close the identifier', () => {
+        // patternsField is restored verbatim from the _a URL parameter.
+        expect(escapeSqlIdentifier('a`, (SELECT 1) x FROM y -- ')).toBe(
+          '`a``, (SELECT 1) x FROM y -- `'
+        );
+      });
+    });
+
+    describe('NULL handling', () => {
+      // Grouping by a nullable key fails the whole request with HTTP 500
+      // "[BUG] Unreachable, Comparing with NULL or MISSING is undefined", so a
+      // single document missing the field breaks the tab on real log indices.
+      it('guards the patterns field with IFNULL in the grouping expression', () => {
+        expect(sqlPatternQuery(queryBase, patternsField)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
+
+      // IFNULL(field,'') on a text field keeps OpenSearchTextType while '' does
+      // not, so MIN over a group holding both a missing and an empty-string
+      // document throws "compare expected value have same type" (HTTP 400).
+      it('projects the sample raw and guards the aggregate instead', () => {
+        const q = sqlPatternQuery(queryBase, patternsField);
+        expect(q).toContain('`message` AS sample');
+        expect(q).toContain("IFNULL(MIN(sample), '')");
+        expect(q).not.toContain('MIN(IFNULL(');
+      });
+
+      it('guards the patterns field with IFNULL in the filter-for query', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
+
+      it('guards the patterns field with IFNULL in the filter-out query', () => {
+        expect(sqlExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
     });
 
     describe('sqlPatternQuery', () => {
       it('builds a REPLACE-based GROUP BY query with unaliased aggregates', () => {
         expect(sqlPatternQuery(queryBase, patternsField)).toBe(
-          'SELECT pattern, COUNT(*), MIN(sample) ' +
-            "FROM (SELECT REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') AS pattern, `message` AS sample " +
+          "SELECT pattern, COUNT(*), IFNULL(MIN(sample), '') " +
+            "FROM (SELECT REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') AS pattern, " +
+            '`message` AS sample ' +
             'FROM (SELECT * FROM my_index) sub_inner) sub ' +
             'GROUP BY pattern ORDER BY COUNT(*) DESC'
         );
@@ -235,7 +307,7 @@ describe('utils', () => {
     describe('sqlUpdateSearchPatternQuery', () => {
       it('builds a filter-for query using = on the REPLACE expression', () => {
         expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
-          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
         );
       });
 
@@ -249,7 +321,7 @@ describe('utils', () => {
     describe('sqlExcludeSearchPatternQuery', () => {
       it('builds a filter-out query using <> on the REPLACE expression', () => {
         expect(sqlExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
-          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
         );
       });
     });
@@ -258,7 +330,7 @@ describe('utils', () => {
       it('produces the SQL filter-for query when language is SQL', () => {
         const query = { query: queryBase, language: 'SQL' };
         expect(createSearchPatternQuery(query, patternsField, false, patternString)).toBe(
-          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
         );
       });
 
@@ -274,7 +346,7 @@ describe('utils', () => {
       it('produces the SQL filter-out query when language is SQL', () => {
         const query = { query: queryBase, language: 'SQL' };
         expect(createExcludeSearchPatternQuery(query, patternsField, false, patternString)).toBe(
-          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
         );
       });
     });
@@ -560,6 +632,37 @@ describe('utils', () => {
       expect(setPatternsField).toHaveBeenCalledWith('field2');
       expect(services.store.dispatch).toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
+    });
+
+    it('should recognize the mapping types SQL reports instead of `string`', () => {
+      resultsCache.set('default-query', {
+        fieldSchema: [
+          { name: 'serviceName', type: 'keyword' },
+          { name: 'body', type: 'text' },
+          { name: 'time', type: 'timestamp' },
+        ],
+        hits: {
+          hits: [
+            {
+              _source: {
+                serviceName: 'cartService',
+                body: 'GetCartAsync called with userId=abc123',
+                time: '2026-08-10T00:00:00Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const state = { query: { language: 'SQL' }, results: {} } as any;
+      mockGetState.mockReturnValue(state);
+      const services = {
+        store: { dispatch: jest.fn(), getState: mockGetState },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      expect(findDefaultPatternsField(services)).toBe('body');
+      expect(setPatternsField).toHaveBeenCalledWith('body');
     });
 
     it('should handle non-string values in _source correctly', () => {
