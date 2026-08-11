@@ -20,12 +20,11 @@ import {
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
   selectQueryString,
-  selectSavedSearch,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
-import { ModeToggleButton } from './ppl_builder/mode_toggle_button';
+import { ModeButtonGroup } from './ppl_builder/mode_button_group';
 import { LogsBuilderMode } from './logs_query_panel_mode';
 import '../../../components/query_panel/query_panel.scss';
 
@@ -69,7 +68,6 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const isLoading = queryIsLoading || promptToQueryIsLoading;
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
-  const savedSearch = useSelector(selectSavedSearch);
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
@@ -83,13 +81,10 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   // buildPPL re-emits it, so it round-trips without being an editable field.
   const initialParse = useMemo(() => parsePPL(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A query loaded from a saved object opens in code, switchable to Builder later.
-  // In builder-only mode there is no code editing, so representable queries always
-  // open in Builder and code is only the read-only fallback for unrepresentable ones.
-  const loadedFromSaved = !!savedSearch;
-  const [mode, setMode] = useState<LogsBuilderMode>(() =>
-    initialParse.canBuild && (builderOnlyMode || !loadedFromSaved) ? 'builder' : 'code'
-  );
+  // Always open in Code; Builder is opt-in via the mode toggle. Builder-only mode
+  // is the exception: the effect below forces a representable query into Builder
+  // once the (async) workspace setting resolves.
+  const [mode, setMode] = useState<LogsBuilderMode>('code');
 
   // Seed handed to PPLBuilder on (re)mount; only re-seeded deliberately (external
   // change, mode toggle), not per keystroke, so builder edits don't re-render.
@@ -127,31 +122,16 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   modeRef.current = mode;
 
   // Reflect external query changes (dataset switch, saved-query load, AI, clear)
-  // into the builder. We never auto-flip Code -> Builder on a normal run; we only
-  // force Code when a Builder query becomes unrepresentable, and return to Builder
-  // on a cleared/fresh query.
+  // into the builder. We never auto-flip Code -> Builder; while in Builder we
+  // reseed it, or force Code when the new query becomes unrepresentable.
   useEffect(() => {
     if (reduxQuery === lastDispatchedRef.current) return;
     lastDispatchedRef.current = reduxQuery;
     builderQueryRef.current = reduxQuery;
     setLiveCodeText(reduxQuery);
 
-    const parsed = parsePPL(reduxQuery);
-    const isEmptyBuilder =
-      parsed.canBuild &&
-      parsed.state.searchExpression.trim() === '' &&
-      parsed.state.aggregations.length === 0 &&
-      parsed.state.filters.length === 0 &&
-      !parsed.state.sort;
-
-    if (isEmptyBuilder) {
-      // A cleared / fresh query returns to Builder.
-      reseedBuilder(parsed.state);
-      setMode('builder');
-      return;
-    }
-
     if (modeRef.current === 'builder') {
+      const parsed = parsePPL(reduxQuery);
       if (parsed.canBuild) {
         reseedBuilder(parsed.state);
       } else {
@@ -281,17 +261,14 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
     </div>
   );
 
-  const switchToCode = useCallback(() => handleModeChange('code'), [handleModeChange]);
-  const switchToBuilder = useCallback(() => handleModeChange('builder'), [handleModeChange]);
-
   // builderOnlyMode resolves asynchronously (workspace-scoped setting read), so the
   // mode initializer above runs before it's known. Once it's on, a representable
   // query must open in the builder.
   useEffect(() => {
     if (builderOnlyMode && mode === 'code' && canSwitchToBuilder) {
-      switchToBuilder();
+      handleModeChange('builder');
     }
-  }, [builderOnlyMode, mode, canSwitchToBuilder, switchToBuilder]);
+  }, [builderOnlyMode, mode, canSwitchToBuilder, handleModeChange]);
 
   // Cmd/Ctrl+Enter runs the current draft. The execution layer
   // (`addPPLSourceClause`) supplies the source clause when the query lacks one.
@@ -333,19 +310,18 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
               key={builderKey}
               initialState={builderState}
               onQueryChange={onBuilderChange}
-              onSwitchToCode={builderOnlyMode ? undefined : switchToCode}
               onRun={handleRun}
             />
           ) : (
             editors
           )}
         </EuiFlexItem>
-        {!showBuilder && !isPromptMode && !builderOnlyMode && (
+        {!isPromptMode && !builderOnlyMode && (
           <EuiFlexItem grow={false}>
-            <ModeToggleButton
-              isCode
-              onToggle={switchToBuilder}
-              disabled={builderDisabled}
+            <ModeButtonGroup
+              mode={mode}
+              onChange={handleModeChange}
+              builderDisabled={builderDisabled}
               tooltip={modeToggleTooltip}
             />
           </EuiFlexItem>

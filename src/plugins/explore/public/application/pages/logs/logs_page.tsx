@@ -165,7 +165,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                   />
                 )
               }
-              tallDefault={queryBuilderEnabled}
+              builderActive={queryBuilderEnabled && !isBuilderCodeMode}
             >
               {isAnalyzeAvailable && isOpen && (isAnalyzeLoading || analyzeResult) ? (
                 isAnalyzeLoading ? (

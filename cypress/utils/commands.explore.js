@@ -83,7 +83,7 @@ cy.explore.add('showQueryEditor', () => {
   const clickToggleToCode = () => {
     // Let the current render settle before resolving the button.
     cy.wait(500);
-    return cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+    return cy.getElementByTestId('pplBuilderModeToggle-code').click();
   };
   const ensureCode = (toggles = 0, stableRounds = 0) => {
     return cy.get('body').then(($body) => {

@@ -17,6 +17,11 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   &__page-body {
+    // Without this, `min-height: auto` lets the resizable panels' intrinsic
+    // content height win and the whole layout grows past the viewport — the
+    // query panel's percentage share then resolves against that inflated height.
+    min-height: 0;
+
     // Empty wrapper adds padding when controls are portaled to the header, so
     // hide it. In embed mode (`?embed=true`) the controls render inline here,
     // so keep it visible.
