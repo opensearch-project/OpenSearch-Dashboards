@@ -187,6 +187,7 @@ export const CommonVisualizationRender = ({
               groups={groups}
               layout={visConfig.splitLayout ?? 'auto'}
               showLabel={visConfig.showSplitLabel}
+              verticalItemMinHeight={visConfig.type === 'metric' ? 60 : undefined}
               renderChart={(groupKey) => (
                 <ChartRender
                   data={{ ...visualizationData }}

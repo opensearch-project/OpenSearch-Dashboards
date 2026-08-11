@@ -14,6 +14,9 @@ import {
   PPL_LINT_TELEMETRY_EVENTS,
   shouldEmitQuickfixOffered,
 } from './telemetry';
+import { getPPLLintContext } from '../lint_bridge';
+import { AI_FIX_COMMAND_ID } from './ai_fix/ai_fix_command_id';
+import { getModelAiFixMetadata } from './ai_fix/ai_fix_registry';
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -35,6 +38,18 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
   ): monaco.languages.ProviderResult<monaco.languages.CodeActionList> {
     const actions: monaco.languages.CodeAction[] = [];
 
+    // The AI quick-fix is offered only when AI features are on, the host has
+    // wired the AI chat opener/apply-tool flow, and the AI agent is reachable for
+    // the selected data source (a per-cluster check: the fix executes against the
+    // selected source's ML Commons agent, so a cluster without it must not offer
+    // the action). `aiAgentAvailableForSource` is fail-open — only an explicit
+    // `false` suppresses, so an unresolved probe never hides a working button.
+    const lintCtx = getPPLLintContext(model);
+    const aiFixAvailable =
+      lintCtx?.enableAIFeatures !== false &&
+      lintCtx?.aiAgentAvailableForSource !== false &&
+      !!lintCtx?.onAskAiFix;
+
     for (const marker of context.markers) {
       const key = markerFixKey(marker);
       let fix: MarkerFix | undefined;
@@ -49,7 +64,7 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
 
       // Contributed actions (e.g. AI-assisted fix) run even without a deterministic
       // fix and read only catalog metadata, so no rule module is imported here.
-      if (marker.source === LINT_MARKER_SOURCE) {
+      if (isLintMarker) {
         const ruleId = ruleIdOf(marker);
         const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
         const contributed = collectPPLDiagnosticActions({
@@ -69,6 +84,79 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
               title: action.title,
               arguments: action.args,
             },
+          });
+        }
+      }
+
+      // Deterministic-first, AI-as-fallback: ANY lint marker with no deterministic
+      // fix gets an "✨ Ask AI to fix" action that dispatches a command (async LLM
+      // round-trip after the click), distinct from the synchronous edit-carrying
+      // quick-fixes below. The trigger is purely "this marker has no template fix"
+      // — no per-rule allowlist — because whether a fix exists is decided per
+      // marker, not per rule: e.g. field-validation ships a fix only when a near
+      // field is found; the no-fix instances of that rule should still offer AI.
+      // Never on the syntax channel; never when a deterministic fix already
+      // exists. A rule can also opt a specific diagnostic out via
+      // `Diagnostic.aiFix.eligible === false` (read from the side table here).
+      const aiFixMetadata = getModelAiFixMetadata(model, key);
+      if (isLintMarker && !fix && aiFixAvailable && aiFixMetadata?.eligible !== false) {
+        const ruleId = ruleIdOf(marker);
+        const markerRange = {
+          startLineNumber: marker.startLineNumber,
+          startColumn: marker.startColumn,
+          endLineNumber: marker.endLineNumber,
+          endColumn: marker.endColumn,
+        };
+        // The explain-backed rules ride their attributed operation/outcome on the
+        // same AI side table. The host re-verifies a candidate fix against
+        // `_explain` using `outcome`, and `verifyPerformanceFixOutcome` fails OPEN
+        // on a missing value — so this must stay populated for
+        // `operation-not-pushed` / `operation-pushed-as-script` or those two rules
+        // would silently apply unverified fixes.
+        const operation = aiFixMetadata?.operation;
+        const outcome = aiFixMetadata?.outcome;
+        actions.push({
+          title: '✨ Ask AI to fix this',
+          diagnostics: [marker],
+          kind: 'quickfix',
+          isAI: true,
+          command: {
+            id: AI_FIX_COMMAND_ID,
+            title: 'Ask AI to fix this',
+            arguments: [
+              {
+                modelUri: model.uri.toString(),
+                ruleId,
+                message: marker.message,
+                operation,
+                outcome,
+                targetText: model.getValueInRange(markerRange),
+                targetRange: {
+                  startOffset: model.getOffsetAt({
+                    lineNumber: markerRange.startLineNumber,
+                    column: markerRange.startColumn,
+                  }),
+                  endOffset: model.getOffsetAt({
+                    lineNumber: markerRange.endLineNumber,
+                    column: markerRange.endColumn,
+                  }),
+                },
+                fixInstructions: aiFixMetadata?.instructions,
+              },
+            ],
+          },
+        } as monaco.languages.CodeAction);
+
+        // Count the AI offer on the same event as a deterministic one. The
+        // deterministic emission below sits after the `if (!fix) continue` guard,
+        // and the AI action exists only when there is no deterministic fix — so
+        // without this, every AI offer is missing from the metric that answers
+        // "is anyone using PPL lint?". The two paths are mutually exclusive, and
+        // the dedup is per marker fingerprint, so neither suppresses the other.
+        if (shouldEmitQuickfixOffered(model, key)) {
+          emitPPLLintTelemetry({
+            name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED,
+            data: { rule: ruleId },
           });
         }
       }
