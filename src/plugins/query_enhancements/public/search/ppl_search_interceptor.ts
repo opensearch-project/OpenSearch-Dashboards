@@ -78,7 +78,42 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+      switchMap((query) => {
+        const aggConfig = this.getAggConfig(searchRequest, query);
+
+        // Append default descending sort on time field to match legacy Discover behavior.
+        // Applied here (after getAggConfig) so the histogram aggregation uses the unsorted query.
+        // Mask subqueries [...] to avoid false-positive command detection inside them.
+        const masked = (query.query as string)
+          .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+          .toLowerCase();
+
+        const hasFieldsProjection =
+          (masked.includes('| fields ') || masked.includes('|fields ')) &&
+          !/\|\s*fields\s+\*/.test(masked);
+
+        const needsSort =
+          query.dataset?.timeFieldName &&
+          !masked.includes('| sort ') &&
+          !masked.includes('|sort ') &&
+          !masked.includes('| stats ') &&
+          !masked.includes('|stats ') &&
+          !hasFieldsProjection &&
+          !masked.includes('| head ') &&
+          !masked.includes('|head ') &&
+          !masked.includes('| rare ') &&
+          !masked.includes('|rare ') &&
+          !masked.includes('| top ') &&
+          !masked.includes('|top ') &&
+          !masked.includes('| rename ') &&
+          !masked.includes('|rename ');
+
+        const sortedQuery = needsSort
+          ? { ...query, query: `${query.query} | sort - \`${query.dataset!.timeFieldName}\`` }
+          : query;
+
+        return fetch(context, sortedQuery, aggConfig);
+      })
     );
   }
 
