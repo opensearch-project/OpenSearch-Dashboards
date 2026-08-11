@@ -26,12 +26,9 @@ describe('compareValueSuggestions', () => {
   });
 
   it('ignores a leading quote from the typed value', () => {
-    expect(['staging', 'preprod', 'production', 'prod'].sort(compareValueSuggestions('"pro'))).toEqual([
-      'prod',
-      'production',
-      'preprod',
-      'staging',
-    ]);
+    expect(
+      ['staging', 'preprod', 'production', 'prod'].sort(compareValueSuggestions('"pro'))
+    ).toEqual(['prod', 'production', 'preprod', 'staging']);
   });
 
   it('matches case-insensitively', () => {
