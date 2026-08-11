@@ -38,6 +38,20 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
+const DEFAULT_SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
+  `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+const canAppendDefaultSort = (queryString: string): boolean => {
+  const masked = queryString
+    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
+
+  return !SORT_BLOCKING_COMMAND_REGEX.test(masked);
+};
+
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
 
@@ -78,7 +92,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+      switchMap((query) =>
+        fetch(context, this.appendDefaultSort(query), this.getAggConfig(searchRequest, query))
+      )
     );
   }
 
@@ -171,39 +187,29 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
         : queryWithFilters;
 
-    // Append default descending sort on time field to match legacy Discover behavior.
-    // Skip if the user has customized the query beyond source + where.
-    const queryLower = finalQuery.toLowerCase();
+    return {
+      ...query,
+      query: finalQuery,
+    };
+  }
 
-    // `| fields *` is equivalent to selecting all fields and should not block sorting.
-    // Only skip sort for `| fields` with specific field projections (e.g. `| fields a, b`).
-    const hasFieldsProjection =
-      (queryLower.includes('| fields ') || queryLower.includes('|fields ')) &&
-      !queryLower.match(/\|\s*fields\s+\*/);
-
-    const needsSort =
-      dataset?.timeFieldName &&
-      !queryLower.includes('| sort ') &&
-      !queryLower.includes('|sort ') &&
-      !queryLower.includes('| stats ') &&
-      !queryLower.includes('|stats ') &&
-      !hasFieldsProjection &&
-      !queryLower.includes('| head ') &&
-      !queryLower.includes('|head ') &&
-      !queryLower.includes('| rare ') &&
-      !queryLower.includes('|rare ') &&
-      !queryLower.includes('| top ') &&
-      !queryLower.includes('|top ') &&
-      !queryLower.includes('| rename ') &&
-      !queryLower.includes('|rename ');
-
-    const sortedQuery = needsSort
-      ? `${finalQuery} | sort - \`${dataset.timeFieldName}\``
-      : finalQuery;
+  /**
+   * Appends a default descending sort on the time field to match legacy Discover behavior,
+   * unless the query already sorts, aggregates, or limits results.
+   * Applied only to the results query, not to the histogram aggregation query.
+   */
+  private appendDefaultSort(query: Query): Query {
+    if (
+      !isPPLSearchQuery(query) ||
+      !query.dataset?.timeFieldName ||
+      !canAppendDefaultSort(query.query)
+    ) {
+      return query;
+    }
 
     return {
       ...query,
-      query: sortedQuery,
+      query: `${query.query} | sort - \`${query.dataset.timeFieldName}\``,
     };
   }
 
