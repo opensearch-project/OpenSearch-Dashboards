@@ -13,6 +13,7 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { QueryPanelGeneratedQuery } from './query_panel_generated_query';
 import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from './actions/ppl_lint_fix_action';
 import { useSetEditorTextWithQuery } from '../../application/hooks';
 import './query_panel.scss';
 
@@ -32,6 +33,7 @@ const QueryPanel = ({ analyzeIsOpen, onToggleAnalyze, hasAnalyzeResult }: QueryP
 
   // Register the PPL execute query action for assistant integration
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+  usePPLLintFixAction(setEditorTextWithQuery);
 
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">

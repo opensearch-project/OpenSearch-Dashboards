@@ -221,6 +221,19 @@ export const convertTimelineToMessageRows = (
     });
   };
 
+  // Helper: Add tool calls as individual rows ABOVE the assistant message that
+  // was just pushed. Custom-renderer tools (e.g. the PPL lint-fix approve/reject
+  // card) read better at the top of the turn than buried under the model's
+  // explanatory text, so we splice their rows in front of the current message.
+  const addIndividualToolCallsBeforeCurrentMessage = (toolCalls?: ToolCall[]) => {
+    if (!toolCalls?.length) return;
+    const insertAt = Math.max(0, result.length - 1); // before the just-pushed message
+    const rows = toolCalls.map(
+      (tc) => ({ role: 'toolCall', toolCall: toTimelineToolCall(tc) }) as const
+    );
+    result.splice(insertAt, 0, ...rows);
+  };
+
   // Helper: Add tool calls as a group
   const addToolCallGroup = (toolCalls: ToolCall[]) => {
     if (!toolCalls.length) return;
@@ -244,15 +257,21 @@ export const convertTimelineToMessageRows = (
     // No tool calls to process
     if (!toolCalls?.length) continue;
 
-    // If any tool is running, show individually and continue processing
+    // If any tool is running, show individually and continue processing.
+    // Custom-renderer tools render above the message text (see helper); others stay below.
     if (hasRunningTool(toolCalls)) {
-      addIndividualToolCalls(toolCalls);
+      if (hasCustomRendererTool(toolCalls)) {
+        addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      } else {
+        addIndividualToolCalls(toolCalls);
+      }
       continue;
     }
 
-    // If any tool has custom renderer, show individually (don't group)
+    // If any tool has custom renderer, show individually (don't group) and above
+    // the assistant text so the action card sits at the top of the turn.
     if (hasCustomRendererTool(toolCalls)) {
-      addIndividualToolCalls(toolCalls);
+      addIndividualToolCallsBeforeCurrentMessage(toolCalls);
       continue;
     }
 

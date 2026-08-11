@@ -19,6 +19,7 @@ describe('Chat Proxy Routes', () => {
   let mockFetch: jest.MockedFunction<typeof fetch>;
   let mockLogger: any;
   let mockCapabilitiesResolver: jest.Mock;
+  let lastHandlerContext: any;
 
   const testSetup = async (
     agUiUrl?: string,
@@ -26,7 +27,8 @@ describe('Chat Proxy Routes', () => {
     mlCommonsAgentId?: string,
     forwardCredentials?: boolean
   ) => {
-    const { server: testServer, httpSetup } = await setupServer();
+    const { server: testServer, httpSetup, handlerContext } = await setupServer();
+    lastHandlerContext = handlerContext;
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
@@ -841,6 +843,142 @@ describe('Chat Proxy Routes', () => {
         body: validSearchRequest,
         dataSourceId: 'ds-123',
       });
+    });
+  });
+
+  describe('GET /api/chat/agent_available', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reports available on the external AG-UI path without probing a cluster', async () => {
+      // AG-UI takes precedence in the proxy, so the ML router is never consulted:
+      // the adapter is the authority, we report available and never probe.
+      const getRouterSpy = jest.spyOn(MLAgentRouterFactory, 'getRouter');
+
+      const httpSetup = await testSetup('http://test-agui:3000');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available?dataSourceId=ds-1')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'ag-ui' });
+      expect(transport).not.toHaveBeenCalled();
+      expect(getRouterSpy).not.toHaveBeenCalled();
+    });
+
+    it('reports unavailable when neither ML router nor AG-UI is configured', async () => {
+      jest.spyOn(MLAgentRouterFactory, 'getRouter').mockReturnValue(undefined);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(); // no agUiUrl
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'not-configured' });
+    });
+
+    it('reports available on the Oasis path without probing the selected cluster', async () => {
+      mockCapabilitiesResolver.mockResolvedValue({
+        oasis: {
+          enabled: true,
+        },
+        investigation: {
+          agenticFeaturesEnabled: true,
+        },
+      });
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available?dataSourceId=ds-1')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'oasis' });
+      expect(transport).not.toHaveBeenCalled();
+    });
+
+    it('probes the selected cluster for the agent when the ML router is active', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockResolvedValue({ statusCode: 200, body: {} });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true });
+      expect(transport).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_plugins/_ml/agents/test-agent-id',
+      });
+    });
+
+    it('reports unavailable when the agent is missing on the cluster (404)', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockRejectedValue({ statusCode: 404, message: 'not found' });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'agent-missing' });
+    });
+
+    it('fails open (available) on a transient probe error (5xx)', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockRejectedValue({ statusCode: 503, message: 'unavailable' });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'probe-error' });
+    });
+
+    it('reports unavailable when the ML router is active but no agent id is configured', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, undefined);
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'no-agent-configured' });
     });
   });
 });

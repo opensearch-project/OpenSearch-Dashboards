@@ -53,6 +53,20 @@ describe('CustomLegend', () => {
     expect(getByTestId('customLegendItem-seriesC')).toBeInTheDocument();
   });
 
+  it('does not render when there is only one legend item', () => {
+    legend$.next({ default: [legendItems[0]] });
+
+    const { queryByTestId } = render(
+      <CustomLegend
+        legend$={legend$}
+        legendSelected$={legendSelected$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
+      />
+    );
+
+    expect(queryByTestId('customLegend')).not.toBeInTheDocument();
+  });
+
   it('displays series names as labels', () => {
     const { getByTestId } = render(
       <CustomLegend

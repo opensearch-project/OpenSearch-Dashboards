@@ -11,7 +11,6 @@ import {
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { CachedGrammar, deserializeGrammarBundle } from './ppl_grammar_deserialize';
-import { TokenDictionary } from '../opensearch_sql/table';
 import { getDataSourceEngineCapabilities, UI_SETTINGS } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
