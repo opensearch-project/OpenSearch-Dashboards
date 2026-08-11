@@ -49,7 +49,9 @@ const canAppendDefaultSort = (queryString: string): boolean => {
     .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
     .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
 
-  return !SORT_BLOCKING_COMMAND_REGEX.test(masked);
+  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
+
+  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
 };
 
 export class PPLSearchInterceptor extends SearchInterceptor {
@@ -195,7 +197,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
   /**
    * Appends a default descending sort on the time field to match legacy Discover behavior,
-   * unless the query already sorts, aggregates, or limits results.
+   * unless the query already sorts, aggregates, projects specific fields, or limits results.
    * Applied only to the results query, not to the histogram aggregation query.
    */
   private appendDefaultSort(query: Query): Query {

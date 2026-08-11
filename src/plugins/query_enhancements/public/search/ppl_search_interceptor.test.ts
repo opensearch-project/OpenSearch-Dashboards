@@ -1091,6 +1091,7 @@ describe('PPLSearchInterceptor', () => {
       'source=test_index | rare age',
       'source=test_index | top age',
       'source=test_index | rename age as years',
+      'source=test_index | fields age, name',
       'source=test_index |stats count()',
       'source=test_index |   sort   age',
     ])('does not append a sort when the query already customizes it: %s', (query) => {
@@ -1104,23 +1105,19 @@ describe('PPLSearchInterceptor', () => {
     });
 
     it.each([
-      'source=test_index | fields age, name',
       'source=test_index | where message = "a | top of stack"',
       "source=test_index | where msg = 'took first | head spot'",
       'source=test_index | where id in [source=other | stats count()]',
       'source=test_index | where topic = "x"',
-    ])(
-      'appends a sort even with a field projection or keywords in literals/subqueries: %s',
-      (query) => {
-        const result = (pplSearchInterceptor as any).appendDefaultSort({
-          language: 'PPL',
-          query,
-          dataset: datasetWithTime,
-        });
+    ])('appends a sort when command keywords only appear in literals/subqueries: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
 
-        expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
-      }
-    );
+      expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
+    });
 
     it('does not append a sort when the dataset has no time field', () => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
