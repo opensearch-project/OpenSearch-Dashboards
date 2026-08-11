@@ -388,6 +388,7 @@ export class DiscoverPlugin implements Plugin<
     plugins.dataExplorer.registerView<DiscoverState>({
       id: PLUGIN_ID,
       title: 'Discover',
+      activeNavLinkId: PLUGIN_ID,
       defaultPath: '#/',
       appExtentions: {
         savedObject: {

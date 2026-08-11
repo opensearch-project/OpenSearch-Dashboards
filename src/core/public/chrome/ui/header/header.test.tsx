@@ -57,6 +57,7 @@ function mockProps() {
     http,
     application,
     opensearchDashboardsVersion: '1.0.0',
+    activeNavLinkId$: new BehaviorSubject<string | undefined>(undefined),
     appTitle$: new BehaviorSubject('test'),
     badge$: new BehaviorSubject(undefined),
     breadcrumbs$: new BehaviorSubject([]),
@@ -203,6 +204,21 @@ describe('Header', () => {
 
     expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
   });
+
+  it.each([
+    [false, 'CollapsibleNav'],
+    [true, 'CollapsibleNavGroupEnabled'],
+  ])(
+    'passes the resolved active nav link id (nav groups enabled: %s)',
+    (navGroupEnabled, navName) => {
+      const activeNavLinkId$ = new BehaviorSubject<string | undefined>('discover');
+      const props = { ...mockProps(), activeNavLinkId$, navGroupEnabled };
+
+      const component = mountWithIntl(<Header {...props} />);
+
+      expect(component.find(navName).prop('appId$')).toBe(activeNavLinkId$);
+    }
+  );
 
   it('toggles primary navigation menu when clicked', () => {
     const branding = {

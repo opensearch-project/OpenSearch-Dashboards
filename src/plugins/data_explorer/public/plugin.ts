@@ -91,10 +91,16 @@ export class DataExplorerPlugin implements Plugin<
       navLinkStatus: AppNavLinkStatus.hidden,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       mount: async (params: AppMountParameters) => {
-        // Load application bundle
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const viewRegistry = viewService.start();
+        const initialViewId = params.history.location.pathname.split('/').filter(Boolean)[0];
+        const initialView = initialViewId ? viewRegistry.get(initialViewId) : undefined;
+
+        coreStart.chrome.setActiveNavLink(initialView?.activeNavLinkId, PLUGIN_ID);
+
+        // Load application bundle after setting the initial active nav link.
         const { renderApp } = await import('./application');
 
-        const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
 
         // make sure the index pattern list is up to date
@@ -111,7 +117,7 @@ export class DataExplorerPlugin implements Plugin<
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
-          viewRegistry: viewService.start(),
+          viewRegistry,
         };
 
         // Get start services as specified in opensearch_dashboards.json

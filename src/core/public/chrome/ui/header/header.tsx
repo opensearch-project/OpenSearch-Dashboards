@@ -99,6 +99,7 @@ export interface HeaderProps {
   http: HttpStart;
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
+  activeNavLinkId$: Observable<string | undefined>;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -732,7 +733,7 @@ export function Header({
 
         {navGroupEnabled ? (
           <CollapsibleNavGroupEnabled
-            appId$={application.currentAppId$}
+            appId$={observables.activeNavLinkId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
             navLinks$={observables.navLinks$}
@@ -764,7 +765,7 @@ export function Header({
           />
         ) : (
           <CollapsibleNav
-            appId$={application.currentAppId$}
+            appId$={observables.activeNavLinkId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
             isLocked={isLocked}

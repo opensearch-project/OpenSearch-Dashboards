@@ -16,8 +16,8 @@ describe('isActiveNavLink', () => {
     expect(isActiveNavLink('data-explorer', 'data-explorer')).toBe(true);
   });
 
-  it('should return true if the appId is "data-explorer" and linkId is "discover"', () => {
-    expect(isActiveNavLink('data-explorer', 'discover')).toBe(true);
+  it('should return false when the active nav link id and link id do not match', () => {
+    expect(isActiveNavLink('data-explorer', 'discover')).toBe(false);
   });
 
   it('should return true if the appId is "explore" and linkId is "explore"', () => {
@@ -58,10 +58,7 @@ describe('createEuiListItem', () => {
     expect(listItem).toHaveProperty('href', mockProps.link.href);
     expect(listItem).toHaveProperty('data-test-subj', mockProps.dataTestSubj);
     expect(listItem).toHaveProperty('onClick');
-    expect(listItem).toHaveProperty(
-      'isActive',
-      isActiveNavLink(mockProps.appId, mockProps.link.id)
-    );
+    expect(listItem).toHaveProperty('isActive', true);
     expect(listItem).toHaveProperty('isDisabled', mockProps.link.disabled);
   });
 });

@@ -42,12 +42,16 @@ describe('TypeService', () => {
   });
 
   describe('#start', () => {
-    test('should return registered view if it exists', () => {
+    test('should return registered view with optional active nav link metadata', () => {
       const { registerView } = service.setup();
-      registerView(createViewDefinition({ id: 'view-1' }));
+      registerView(createViewDefinition({ id: 'view-1', activeNavLinkId: 'view-1-nav' }));
+      registerView(createViewDefinition({ id: 'view-2' }));
 
       const { get } = service.start();
-      expect(get('view-1')).toEqual(expect.objectContaining({ id: 'view-1' }));
+      expect(get('view-1')).toEqual(
+        expect.objectContaining({ id: 'view-1', activeNavLinkId: 'view-1-nav' })
+      );
+      expect(get('view-2')?.activeNavLinkId).toBeUndefined();
       expect(get('view-something')).toBeUndefined();
     });
 
