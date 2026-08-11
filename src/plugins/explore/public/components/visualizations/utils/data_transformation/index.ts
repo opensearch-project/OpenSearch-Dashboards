@@ -19,6 +19,9 @@ export { normalizeEmptyValue } from './utils/normalization';
 
 export { map, pick } from './common';
 
+export { groupSeries, groupSeriesDatasets } from './group_series';
+export type { SeriesGroup } from './group_series';
+
 export * from './connection';
 
 export * from './normalize_percentage';

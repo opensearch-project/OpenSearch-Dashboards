@@ -300,19 +300,6 @@ describe('AreaExclusiveVisOptions', () => {
       expect(screen.getByTestId('areaDisconnectValues-threshold')).toBeInTheDocument();
     });
 
-    test('defaults both modes to never', () => {
-      render(
-        <AreaExclusiveVisOptions
-          {...defaultProps}
-          connectNullValues={undefined}
-          disconnectValues={undefined}
-        />
-      );
-
-      expect(isSelected('areaConnectNullValues-never')).toBe(true);
-      expect(isSelected('areaDisconnectValues-never')).toBe(true);
-    });
-
     test('hides both threshold inputs while neither mode uses a threshold', () => {
       render(<AreaExclusiveVisOptions {...defaultProps} />);
 

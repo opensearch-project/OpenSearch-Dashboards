@@ -17,6 +17,9 @@ import {
   ThresholdOptions,
   StandardAxes,
   LineMode,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
@@ -30,6 +33,7 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 import { DEFAULT_POINT_SIZE } from '../style_panel/share/point_size_options';
+import { DEFAULT_GAP_THRESHOLD } from '../style_panel/share/connection_group';
 
 // Complete line chart style controls interface
 export interface LineChartStyleOptions {
@@ -66,12 +70,23 @@ export interface LineChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   showFullTimeRange?: boolean;
+
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
 }
 
 export type LineChartStyle = Required<
-  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'>
+  Omit<
+    LineChartStyleOptions,
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'connectNullValues'
+    | 'disconnectValues'
+  >
 > &
-  Pick<LineChartStyleOptions, 'legendTitle'>;
+  Pick<LineChartStyleOptions, 'legendTitle' | 'connectNullValues' | 'disconnectValues'>;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
@@ -98,6 +113,15 @@ export const defaultLineChartStyles: LineChartStyle = {
   standardAxes: [],
 
   showFullTimeRange: false,
+
+  connectNullValues: {
+    connectMode: DisableMode.Always,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
+  disconnectValues: {
+    disableMode: DisableMode.Never,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({

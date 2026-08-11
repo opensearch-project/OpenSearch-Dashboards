@@ -5,6 +5,8 @@
 
 import { BarSeriesOption, LineSeriesOption } from 'echarts';
 import { LineChartStyle } from './line_vis_config';
+import { DisableMode } from '../types';
+import { resolveConnectMode, groupSeries } from '../utils/data_transformation';
 import { getLineInterpolation } from '../style_panel/share/line_shared_options';
 import { getPointSymbol } from '../style_panel/share/point_size_options';
 import { buildValueLabel } from '../style_panel/share/value_label_options';
@@ -40,6 +42,85 @@ const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   };
 };
 
+export const buildConnectNulls = (styles: LineChartStyle): boolean =>
+  resolveConnectMode(styles) === DisableMode.Always;
+
+/**
+ * Build one series per group, each bound to its own dataset.
+ */
+export const createGroupedLineSeries =
+  <T extends BaseChartStyle>({
+    styles,
+    categoryField,
+    valueField,
+    addTimeMarker = true,
+    allData,
+    colorField,
+  }: {
+    styles: LineChartStyle;
+    categoryField: string;
+    valueField: string;
+    addTimeMarker?: boolean;
+    allData?: Array<Record<string, any>>;
+    colorField?: string;
+  }): PipelineFn<T> =>
+  (state) => {
+    const { xAxisConfig, axisColumnMappings, data = [] } = state;
+
+    const palette = getColors().categories;
+    const newState = { ...state };
+    const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
+
+    const allColumns = Object.values(axisColumnMappings).flat();
+
+    const allValues = colorField
+      ? groupSeries(data, { groupField: colorField, valueField }).map(({ name }) => name)
+      : [];
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: allValues,
+      columns: allColumns,
+    });
+    const legendItems: LegendItem[] = [];
+    const connectNulls = buildConnectNulls(styles);
+
+    if (usedTimeMarker) {
+      const newXAxisConfig = { ...xAxisConfig };
+      newXAxisConfig.max = new Date();
+      newState.xAxisConfig = newXAxisConfig;
+    }
+
+    const series = allValues.map((name, index) => {
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
+
+      return {
+        name,
+        type: 'line',
+        connectNulls,
+        datasetIndex: index,
+        encode: {
+          x: categoryField,
+          y: valueField,
+        },
+        emphasis: {
+          focus: 'self',
+        },
+        ...generateLineStyles(styles, valueField),
+        ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
+        itemStyle: {
+          color,
+        },
+      };
+    });
+
+    newState.series = series as LineSeriesOption[];
+    newState.legendItems = legendItems;
+
+    return newState;
+  };
+
 export const createLineSeries =
   <T extends BaseChartStyle>({
     styles,
@@ -74,6 +155,7 @@ export const createLineSeries =
       columns: allColumns,
     });
     const legendItems: LegendItem[] = [];
+    const connectNulls = buildConnectNulls(styles);
 
     if (usedTimeMarker) {
       {
@@ -92,7 +174,7 @@ export const createLineSeries =
       return {
         name,
         type: 'line',
-        connectNulls: true,
+        connectNulls,
         encode: {
           x: categoryField,
           y: item,

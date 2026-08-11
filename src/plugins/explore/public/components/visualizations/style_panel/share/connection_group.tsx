@@ -54,6 +54,7 @@ interface Props {
   disconnectValues?: DisconnectValuesOption;
   onConnectNullValuesChange: (connectNullValues: ConnectNullValuesOption) => void;
   onDisconnectValuesChange: (disconnectValues: DisconnectValuesOption) => void;
+  testsubj?: string;
 }
 
 export const ConnectionGroup = ({
@@ -63,6 +64,7 @@ export const ConnectionGroup = ({
   connectNullValues,
   onDisconnectValuesChange,
   onConnectNullValuesChange,
+  testsubj = 'area',
 }: Props) => {
   return (
     <>
@@ -79,7 +81,7 @@ export const ConnectionGroup = ({
           isDisabled={connectMode !== DisableMode.Never}
           options={disconnectValuesOptions.map((option) => ({
             ...option,
-            'data-test-subj': `areaDisconnectValues-${option.id}`,
+            'data-test-subj': `${testsubj}DisconnectValues-${option.id}`,
           }))}
           idSelected={disconnectMode}
           onChange={(id) =>
@@ -90,7 +92,7 @@ export const ConnectionGroup = ({
           }
           buttonSize="compressed"
           isFullWidth
-          data-test-subj="areaDisconnectValuesButtonGroup"
+          data-test-subj={`${testsubj}DisconnectValuesButtonGroup`}
         />
       </EuiFormRow>
       {disconnectMode === DisableMode.Threshold && (
@@ -111,7 +113,7 @@ export const ConnectionGroup = ({
               })
             }
             placeholder={DEFAULT_GAP_THRESHOLD}
-            data-test-subj="areaDisconnectValuesThreshold"
+            data-test-subj={`${testsubj}DisconnectValuesThreshold`}
           />
         </EuiFormRow>
       )}
@@ -127,7 +129,7 @@ export const ConnectionGroup = ({
           isDisabled={disconnectMode !== DisableMode.Never}
           options={connectNullValuesOptions.map((option) => ({
             ...option,
-            'data-test-subj': `areaConnectNullValues-${option.id}`,
+            'data-test-subj': `${testsubj}ConnectNullValues-${option.id}`,
           }))}
           idSelected={connectMode}
           onChange={(id) =>
@@ -138,7 +140,7 @@ export const ConnectionGroup = ({
           }
           buttonSize="compressed"
           isFullWidth
-          data-test-subj="areaConnectNullValuesButtonGroup"
+          data-test-subj={`${testsubj}ConnectNullValuesButtonGroup`}
         />
       </EuiFormRow>
       {connectMode === DisableMode.Threshold && (
@@ -159,7 +161,7 @@ export const ConnectionGroup = ({
               })
             }
             placeholder={DEFAULT_GAP_THRESHOLD}
-            data-test-subj="areaConnectNullValuesThreshold"
+            data-test-subj={`${testsubj}ConnectNullValuesThreshold`}
           />
         </EuiFormRow>
       )}

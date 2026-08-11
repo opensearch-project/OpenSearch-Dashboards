@@ -5,7 +5,7 @@
 
 import { LineChartStyle } from './line_vis_config';
 import { AxisRole, VisColumn } from '../types';
-import { createLineSeries, createLineBarSeries } from './line_chart_utils';
+import { createLineSeries, createLineBarSeries, createGroupedLineSeries } from './line_chart_utils';
 import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
 import {
   pipe,
@@ -20,6 +20,9 @@ import {
   pivot,
   sortByTime,
   flatten,
+  connectNullValues,
+  disconnectValues,
+  groupSeriesDatasets,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
 
@@ -40,7 +43,12 @@ export const createSimpleLineChart = (
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    transform(
+      sortByTime(timeField),
+      connectNullValues(styles, { timeField, seriesFields: valueField }),
+      disconnectValues(styles, { timeField, seriesFields: valueField }),
+      convertTo2DArray(allColumns)
+    ),
     createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
     applyTimeRange,
@@ -129,23 +137,25 @@ export const createMultiLineChart = (
   const result = pipe(
     transform(
       sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-      }),
-      flatten(),
-      convertTo2DArray()
+      groupSeriesDatasets({
+        groupField: colorField,
+        valueField,
+        timeField,
+        perSeries: (rows: Array<Record<string, any>>) =>
+          disconnectValues(styles, { timeField, seriesFields: [valueField] })(
+            connectNullValues(styles, { timeField, seriesFields: [valueField] })(rows)
+          ),
+      })
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
-    createLineSeries({
+    createGroupedLineSeries({
       styles,
       categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      valueField,
       allData,
       colorField,
     }),

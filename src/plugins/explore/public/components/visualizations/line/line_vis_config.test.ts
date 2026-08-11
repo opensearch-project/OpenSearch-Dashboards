@@ -6,9 +6,9 @@
 import React from 'react';
 import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
+import { GridOptions, ThresholdMode, Positions, TooltipOptions, DisableMode } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
-import { DEFAULT_POINT_SIZE } from '../style_panel/share';
+import { DEFAULT_POINT_SIZE, DEFAULT_GAP_THRESHOLD } from '../style_panel/share';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
@@ -52,6 +52,16 @@ describe('line_vis_config', () => {
         baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdMode.Off,
+      });
+
+      // `always` keeps the pre-existing hardcoded connectNulls behavior
+      expect(defaults.connectNullValues).toEqual({
+        connectMode: DisableMode.Always,
+        threshold: DEFAULT_GAP_THRESHOLD,
+      });
+      expect(defaults.disconnectValues).toEqual({
+        disableMode: DisableMode.Never,
+        threshold: DEFAULT_GAP_THRESHOLD,
       });
     });
 

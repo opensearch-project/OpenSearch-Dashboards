@@ -10,7 +10,7 @@ import {
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
-import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
+import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole, DisableMode } from '../types';
 import { defaultLineChartStyles, LineChartStyle } from './line_vis_config';
 import { LineStyle } from './line_exclusive_vis_options';
 import { getColors } from '../theme/default_colors';
@@ -67,6 +67,22 @@ describe('Line Chart to_expression', () => {
       thresholdStyle: ThresholdMode.Off,
     },
     showFullTimeRange: false,
+  };
+
+  // Rows come back as a 2D array: [headers, ...rows]
+  const seriesValues = (spec: any, seriesField: string) => {
+    const [headers, ...rows] = spec.dataset.source;
+    const columnIndex = headers.indexOf(seriesField);
+    return rows.map((row: any[]) => row[columnIndex]);
+  };
+
+  // Multi-series charts give every series its own dataset, so the values for one
+  // series are read out of the dataset its `datasetIndex` points at.
+  const groupedSeriesValues = (spec: any, seriesName: string) => {
+    const series = spec.series.find((s: any) => s.name === seriesName);
+    const [headers, ...rows] = spec.dataset[series.datasetIndex].source;
+    const columnIndex = headers.indexOf(series.encode.y);
+    return rows.map((row: any[]) => row[columnIndex]);
   };
 
   describe('createSimpleLineChart', () => {
@@ -169,6 +185,54 @@ describe('Line Chart to_expression', () => {
         expect(series.symbolSize).toBe(0);
       });
     });
+
+    describe('connect / disconnect values', () => {
+      // A single metric with one missing reading 30m into the series
+      const gapData = [
+        { date: '2023-01-01T00:00:00Z', value: 10 },
+        { date: '2023-01-01T00:10:00Z', value: null },
+        { date: '2023-01-01T00:30:00Z', value: 30 },
+      ];
+
+      it('bridges the gap at render time by default', () => {
+        const result = createSimpleLineChart(gapData, mockStyles, mockAxisMappings);
+
+        expect(result.spec.series[0].connectNulls).toBe(true);
+        expect(seriesValues(result.spec, 'value')).toEqual([10, null, 30]);
+      });
+
+      it('interpolates gaps shorter than the threshold', () => {
+        const result = createSimpleLineChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '1h' },
+          },
+          mockAxisMappings
+        );
+
+        expect(result.spec.series[0].connectNulls).toBe(false);
+        const values = seriesValues(result.spec, 'value');
+        expect(values[1]).toBeCloseTo(16.6667, 4);
+      });
+
+      it('inserts a break when two points sit further apart than the threshold', () => {
+        const result = createSimpleLineChart(
+          [
+            { date: '2023-01-01T00:00:00Z', value: 10 },
+            { date: '2023-01-01T01:00:00Z', value: 30 },
+          ],
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '10m' },
+          },
+          mockAxisMappings
+        );
+
+        expect(seriesValues(result.spec, 'value')).toEqual([10, null, 30]);
+      });
+    });
   });
 
   describe('createLineBarChart', () => {
@@ -264,6 +328,212 @@ describe('Line Chart to_expression', () => {
         }),
       ]);
       expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+    });
+
+    describe('per-series datasets', () => {
+      const interleavedData = [
+        { date: '2023-01-01T00:00:00Z', value: 1, category: 'A' },
+        { date: '2023-01-01T00:04:00Z', value: 10, category: 'B' },
+        { date: '2023-01-01T00:09:00Z', value: 2, category: 'A' },
+        { date: '2023-01-01T00:10:00Z', value: 20, category: 'B' },
+      ];
+
+      it('gives every series its own dataset', () => {
+        const result = createMultiLineChart(interleavedData, mockStyles, mockAxisMappings);
+
+        expect(result.spec.dataset).toHaveLength(2);
+        expect(result.spec.series.map((s: any) => s.datasetIndex)).toEqual([0, 1]);
+      });
+
+      it('keeps each series on its own timeline instead of a shared x column', () => {
+        // A reports at :00/:09 and B at :04/:10. The pivoted pipeline put both on one
+        // x column, so each series went null at the other's timestamps and rendered
+        // as disconnected points. Now neither series carries the other's timestamps.
+        const result = createMultiLineChart(interleavedData, mockStyles, mockAxisMappings);
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([1, 2]);
+        expect(groupedSeriesValues(result.spec, 'B')).toEqual([10, 20]);
+      });
+
+      it('does not let one series sampling beat break another', () => {
+        // Every gap here is under 30m, so nothing may be broken even though the
+        // interleaved rows sit closer together than either series' own spacing.
+        const result = createMultiLineChart(
+          interleavedData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '30m' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([1, 2]);
+        expect(groupedSeriesValues(result.spec, 'B')).toEqual([10, 20]);
+      });
+    });
+
+    describe('connect null values', () => {
+      // 'A' reports at :00 and :30 with an explicit missing reading at :10
+      const gapData = [
+        { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+        { date: '2023-01-01T00:10:00Z', value: null, category: 'A' },
+        { date: '2023-01-01T00:30:00Z', value: 30, category: 'A' },
+      ];
+
+      it('bridges gaps at render time by default', () => {
+        // The default is `always`, which is what line series did before this was configurable
+        const result = createMultiLineChart(gapData, mockStyles, mockAxisMappings);
+
+        expect(result.spec.series.every((s: any) => s.connectNulls === true)).toBe(true);
+      });
+
+      it('leaves gaps as breaks when the mode is never', () => {
+        const result = createMultiLineChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+          },
+          mockAxisMappings
+        );
+
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+      });
+
+      it('keeps a null inside a series as a break rather than dropping the row', () => {
+        // The null is what renders the break, so grouping must not splice the row out
+        // and connect straight across the hole
+        const result = createMultiLineChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+
+      it('interpolates a gap shorter than the threshold within one series', () => {
+        const result = createMultiLineChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '1h' },
+          },
+          mockAxisMappings
+        );
+
+        // The 30m span fits under 1h, so :10 lands a third of the way from 10 to 30
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+        const values = groupedSeriesValues(result.spec, 'A');
+        expect(values[0]).toBe(10);
+        expect(values[1]).toBeCloseTo(16.6667, 4);
+        expect(values[2]).toBe(30);
+      });
+
+      it('leaves a gap longer than the threshold as a break', () => {
+        const result = createMultiLineChart(
+          gapData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Threshold, threshold: '5m' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+      });
+
+      it('does not let one series null bridge into another series', () => {
+        // 'B' has the null; 'A' is fully sampled and must be untouched
+        const result = createMultiLineChart(
+          [
+            { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+            { date: '2023-01-01T00:00:00Z', value: 1, category: 'B' },
+            { date: '2023-01-01T00:10:00Z', value: 20, category: 'A' },
+            { date: '2023-01-01T00:10:00Z', value: null, category: 'B' },
+            { date: '2023-01-01T00:20:00Z', value: 30, category: 'A' },
+            { date: '2023-01-01T00:20:00Z', value: 3, category: 'B' },
+          ],
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, 20, 30]);
+        expect(groupedSeriesValues(result.spec, 'B')).toEqual([1, null, 3]);
+      });
+    });
+
+    describe('disconnect values', () => {
+      // Two valid points 1h apart, with no nulls between them.
+      const sparseData = [
+        { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+        { date: '2023-01-01T01:00:00Z', value: 30, category: 'A' },
+      ];
+
+      it('keeps everything connected by default', () => {
+        const result = createMultiLineChart(sparseData, mockStyles, mockAxisMappings);
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, 30]);
+      });
+
+      it('inserts a break when the gap exceeds the threshold', () => {
+        const result = createMultiLineChart(
+          sparseData,
+          {
+            ...mockStyles,
+            // Connecting has to be off for the inserted null to survive rendering
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '10m' },
+          },
+          mockAxisMappings
+        );
+
+        // A null row lands 10m past the first point, splitting the line in two
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+        expect(result.spec.series.every((s: any) => s.connectNulls === false)).toBe(true);
+      });
+
+      it('leaves gaps within the threshold untouched', () => {
+        const result = createMultiLineChart(
+          sparseData,
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '2h' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, 30]);
+      });
+
+      it('breaks only the series whose own gap is oversized', () => {
+        // 'A' has a 1h gap while 'B' samples every 10m, so only 'A' may break
+        const result = createMultiLineChart(
+          [
+            { date: '2023-01-01T00:00:00Z', value: 10, category: 'A' },
+            { date: '2023-01-01T00:10:00Z', value: 1, category: 'B' },
+            { date: '2023-01-01T00:20:00Z', value: 2, category: 'B' },
+            { date: '2023-01-01T01:00:00Z', value: 30, category: 'A' },
+          ],
+          {
+            ...mockStyles,
+            connectNullValues: { connectMode: DisableMode.Never, threshold: '1h' },
+            disconnectValues: { disableMode: DisableMode.Threshold, threshold: '30m' },
+          },
+          mockAxisMappings
+        );
+
+        expect(groupedSeriesValues(result.spec, 'A')).toEqual([10, null, 30]);
+        expect(groupedSeriesValues(result.spec, 'B')).toEqual([1, 2]);
+      });
     });
   });
 

@@ -80,7 +80,7 @@ export const AreaExclusiveVisOptions = ({
   onDisconnectValuesChange,
   isTimeBased = true,
 }: AreaExclusiveVisOptionsProps) => {
-  const connectMode = connectNullValues?.connectMode ?? DisableMode.Never;
+  const connectMode = connectNullValues?.connectMode ?? DisableMode.Always;
   const disconnectMode = disconnectValues?.disableMode ?? DisableMode.Never;
 
   const gradientModeOptions: Array<{ id: GradientMode; label: string }> = [

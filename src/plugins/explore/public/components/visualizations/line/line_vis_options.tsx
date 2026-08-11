@@ -57,6 +57,8 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               lineWidth={styleOptions.lineWidth}
               pointSize={styleOptions.pointSize}
               showValues={styleOptions.showValues}
+              connectNullValues={styleOptions.connectNullValues}
+              disconnectValues={styleOptions.disconnectValues}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
@@ -65,6 +67,12 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
               onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
               onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
+              onConnectNullValuesChange={(connectNullValues) =>
+                updateStyleOption('connectNullValues', connectNullValues)
+              }
+              onDisconnectValuesChange={(disconnectValues) =>
+                updateStyleOption('disconnectValues', disconnectValues)
+              }
             />
           </EuiFlexItem>
 

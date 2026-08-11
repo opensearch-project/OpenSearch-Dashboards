@@ -11,7 +11,8 @@ import { defaultLineChartStyles } from './line_vis_config';
 import { InterpolationOption, LineWidthOption } from '../style_panel/share/line_shared_options';
 import { PointSizeOption } from '../style_panel/share/point_size_options';
 import { ShowValuesSwitch } from '../style_panel/share/value_label_options';
-import { LineMode } from '../types';
+import { ConnectionGroup } from '../style_panel/share/connection_group';
+import { LineMode, ConnectNullValuesOption, DisconnectValuesOption, DisableMode } from '../types';
 
 export type LineStyle = 'both' | 'line' | 'dots';
 
@@ -22,12 +23,16 @@ interface BasicVisOptionsProps {
   lineWidth: number;
   pointSize?: number;
   showValues?: boolean;
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onLineModeChange: (lineMode: LineMode) => void;
   onLineWidthChange: (lineWidth: number) => void;
   onLineStyleChange: (style: LineStyle) => void;
   onPointSizeChange: (pointSize: number) => void;
   onShowValuesChange: (showValues: boolean) => void;
+  onConnectNullValuesChange: (connectNullValues: ConnectNullValuesOption) => void;
+  onDisconnectValuesChange: (disconnectValues: DisconnectValuesOption) => void;
   shouldShowTimeMarker?: boolean;
 }
 
@@ -38,14 +43,21 @@ export const LineExclusiveVisOptions = ({
   lineWidth,
   pointSize,
   showValues = false,
+  connectNullValues,
+  disconnectValues,
   onAddTimeMarkerChange,
   onLineModeChange,
   onLineWidthChange,
   onLineStyleChange,
   onPointSizeChange,
   onShowValuesChange,
+  onConnectNullValuesChange,
+  onDisconnectValuesChange,
   shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
+  const connectMode = connectNullValues?.connectMode ?? DisableMode.Always;
+  const disconnectMode = disconnectValues?.disableMode ?? DisableMode.Never;
+
   return (
     <StyleAccordion
       id="lineSection"
@@ -129,14 +141,28 @@ export const LineExclusiveVisOptions = ({
       />
 
       {shouldShowTimeMarker && (
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
-            defaultMessage: 'Show current time marker',
-          })}
-          checked={addTimeMarker}
-          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-        />
+        <>
+          <ConnectionGroup
+            connectMode={connectMode}
+            disconnectMode={disconnectMode}
+            connectNullValues={connectNullValues}
+            disconnectValues={disconnectValues}
+            onConnectNullValuesChange={onConnectNullValuesChange}
+            onDisconnectValuesChange={onDisconnectValuesChange}
+            testsubj="line"
+          />
+
+          <EuiSpacer size="s" />
+
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
+              defaultMessage: 'Show current time marker',
+            })}
+            checked={addTimeMarker}
+            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+          />
+        </>
       )}
       <EuiSpacer size="s" />
     </StyleAccordion>
