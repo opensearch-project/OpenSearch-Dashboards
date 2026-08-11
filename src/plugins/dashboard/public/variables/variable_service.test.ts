@@ -4,7 +4,14 @@
  */
 
 import { VariableService } from './variable_service';
-import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
+import {
+  Variable,
+  VariableType,
+  VariableSortOrder,
+  CustomVariable,
+  QueryVariable,
+  TextVariable,
+} from './types';
 import { VariableInterpolationService } from './variable_interpolation_service';
 
 jest.mock('./variable_query_utils', () => ({
@@ -22,10 +29,10 @@ function makeQueryResult(
 ) {
   return values.length > 0
     ? {
-        rows: values.map((value) => ({ [field]: value })),
-        fields: [field],
-        fieldTypes: { [field]: optionType },
-      }
+      rows: values.map((value) => ({ [field]: value })),
+      fields: [field],
+      fieldTypes: { [field]: optionType },
+    }
     : { rows: [], fields: [], fieldTypes: {} };
 }
 
@@ -59,6 +66,16 @@ function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVari
     type: VariableType.Custom,
     current: ['dev'],
     customOptions: ['dev', 'staging', 'prod'],
+    ...overrides,
+  };
+}
+
+function makeTextVariable(overrides: Partial<TextVariable> = {}): TextVariable {
+  return {
+    id: 'text-1',
+    name: 'keyword',
+    type: VariableType.Text,
+    current: undefined,
     ...overrides,
   };
 }
@@ -1612,6 +1629,254 @@ describe('VariableService', () => {
         } as any)
       ).resolves.toBeUndefined();
       expect(throwingSink).toHaveBeenCalled();
+    });
+  });
+
+  describe('allowCustomValue — Custom reconcile', () => {
+    it('drops off-list values when allowCustomValue is off (default)', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', current: ['off-list'] })],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('also drops off-list values when allowCustomValue is on (matches Grafana)', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('keeps only the listed values from a mixed multi-select selection', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            multi: true,
+            current: ['dev', 'off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('falls back to the first option when no selected value survives', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list-a'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    // This is the guarantee that actually makes the feature work: a value committed
+    // from the variable bar is never reconciled away.
+    it('never prunes an off-list value committed via updateVariableValue', () => {
+      const { service } = createService([
+        makeCustomVariable({ id: 'v1', name: 'v1', allowCustomValue: true }),
+      ]);
+
+      service.updateVariableValue('v1', ['typed-off-list']);
+
+      expect(getCurrentValues(service).v1).toEqual(['typed-off-list']);
+    });
+
+    it('keeps an off-list value across unrelated variable edits', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      // Only the label changed — the option list is untouched, so no reconcile runs.
+      await service.updateVariable('v1', { label: 'New Label' } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['off-list']);
+    });
+
+    it('persists allowCustomValue when adding a variable', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'env',
+        type: VariableType.Custom,
+        customOptions: ['dev'],
+        allowCustomValue: true,
+      } as Omit<Variable, 'id'>);
+
+      expect(service.getVariables()[0].allowCustomValue).toBe(true);
+    });
+
+    it('keeps allowCustomValue across a type switch', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', allowCustomValue: true })],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', {
+        type: VariableType.Query,
+        query: 'source=logs | fields env',
+        language: 'PPL',
+      } as Partial<Variable>);
+
+      expect(service.getVariables()[0].allowCustomValue).toBe(true);
+    });
+
+    it('never prunes Query variable values on refresh, regardless of the flag', async () => {
+      mockExecuteVariableQuery.mockResolvedValueOnce(makeQueryResult(['a', 'b']));
+      const { service } = createService([
+        makeQueryVariable({ id: 'q1', name: 'q1', current: ['off-list'] }),
+      ]);
+
+      await service.refreshVariableOptions('q1');
+
+      expect(getCurrentValues(service).q1).toEqual(['off-list']);
+    });
+  });
+
+  describe('Text variables', () => {
+    it('should use the initial value supplied to addVariable as current', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'keyword',
+        type: VariableType.Text,
+        current: ['hello'],
+      } as Omit<TextVariable, 'id' | 'current'> & { current?: string[] });
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual(['hello']);
+    });
+
+    it('should leave current undefined when no initial value is provided', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'keyword',
+        type: VariableType.Text,
+      } as Omit<TextVariable, 'id' | 'current'>);
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual([]);
+    });
+
+    it('should have no options and never enter loading/error state', () => {
+      const { service } = createService([makeTextVariable({ current: ['abc'] })]);
+      const vars = service.getVariablesWithState();
+      expect(vars[0].options).toEqual([]);
+      expect(vars[0].loading).toBeFalsy();
+      expect(vars[0].error).toBeFalsy();
+    });
+
+    it('should update current value via updateVariableValue', () => {
+      const { service } = createService([makeTextVariable({ current: ['saved'] })]);
+      service.updateVariableValue('text-1', ['typed-value']);
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual(['typed-value']);
+    });
+
+    it('should not be included in refreshAllVariableOptions / refreshTimeFilteredVariableOptions', async () => {
+      const { service } = createService([
+        makeTextVariable(),
+        makeQueryVariable({ id: 'query-1', name: 'service' }),
+      ]);
+
+      await service.refreshAllVariableOptions();
+      // Only the query variable should have triggered a fetch; Text has no query path.
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('should apply the editor-supplied current when switching an existing variable to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1' })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', {
+        type: VariableType.Text,
+        current: ['seeded'],
+      } as Partial<Variable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['seeded']);
+    });
+
+    it('should carry over the existing value when switching to Text without an explicit current', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', current: ['dev'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['dev']);
+    });
+
+    it('should apply a new current when the editor saves a new value', async () => {
+      const { service } = createService(
+        [makeTextVariable({ id: 'v1', name: 'v1', current: ['old'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { current: ['new'] } as Partial<TextVariable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['new']);
+    });
+
+    it('should leave current untouched when updateVariable does not change it', async () => {
+      const { service } = createService(
+        [makeTextVariable({ id: 'v1', name: 'v1', current: ['live-value'] })],
+        'dashboard-1'
+      );
+
+      // e.g. only the label changed — current should be left exactly as-is.
+      await service.updateVariable('v1', { label: 'New Label' } as Partial<TextVariable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['live-value']);
+    });
+
+    it('should interpolate a Text variable value as a plain escaped string', () => {
+      const { service } = createService([makeTextVariable({ current: ["o'brien"] })]);
+      const interpolation = new (jest.requireActual(
+        './variable_interpolation_service'
+      ).VariableInterpolationService)(() => service.getVariablesWithState());
+
+      const result = interpolation.interpolate('source=logs | where msg = $keyword', 'PPL');
+      expect(result).toBe("source=logs | where msg = o''brien");
     });
   });
 });

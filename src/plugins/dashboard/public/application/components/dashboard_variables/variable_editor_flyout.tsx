@@ -80,6 +80,28 @@ const variableTypeOptions = [
       </>
     ),
   },
+  {
+    value: VariableType.Text,
+    inputDisplay: i18n.translate('dashboard.variableEditor.typeText', {
+      defaultMessage: 'Text',
+    }),
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('dashboard.variableEditor.typeText', {
+            defaultMessage: 'Text',
+          })}
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p className="ouiTextColor--subdued">
+            {i18n.translate('dashboard.variableEditor.typeText.description', {
+              defaultMessage: 'A free-form text input with no option list',
+            })}
+          </p>
+        </EuiText>
+      </>
+    ),
+  },
 ];
 
 interface CustomOptionRow {
@@ -121,6 +143,9 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   );
   const [multi, setMulti] = useState(existingVariable?.multi || false);
   const [includeAll, setIncludeAll] = useState(existingVariable?.includeAll || false);
+  const [allowCustomValue, setAllowCustomValue] = useState(
+    existingVariable?.allowCustomValue || false
+  );
   const [sort, setSort] = useState<VariableSortOrder>(
     existingVariable?.sort || VariableSortOrder.Disabled
   );
@@ -138,11 +163,14 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [labelField, setLabelField] = useState(
     existingVariable?.type === VariableType.Query ? (existingVariable.labelField ?? '') : ''
   );
+  const [textValue, setTextValue] = useState(
+    existingVariable?.type === VariableType.Text ? (existingVariable.current?.[0] ?? '') : ''
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // When editing an existing variable, assume preview is valid (user already saved it before)
-  // For new variables, require preview before saving
+  // For new variables, require preview before saving (Query type only — Text/Custom have no preview step)
   const [isPreviewValid, setIsPreviewValid] = useState(
     Boolean(existingVariable && existingVariable.type === VariableType.Query)
   );
@@ -311,9 +339,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       label: label.trim() || undefined,
       description: description.trim() || undefined,
       type,
-      multi,
-      includeAll,
-      sort,
+      ...(type !== VariableType.Text && { multi, includeAll, sort, allowCustomValue }),
     };
 
     if (type === VariableType.Query) {
@@ -337,6 +363,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
           };
         }),
       });
+    } else if (type === VariableType.Text) {
+      Object.assign(variableConfig, {
+        current: textValue.trim() ? [textValue.trim()] : undefined,
+      });
     }
 
     await onSave(variableConfig);
@@ -355,8 +385,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     customValues,
     multi,
     includeAll,
+    allowCustomValue,
     sort,
     regex,
+    textValue,
     onSave,
     validateForm,
   ]);
@@ -478,7 +510,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onChange={(t) => {
                 setType(t);
                 setError(null);
-                setIsPreviewValid(false);
+                setIsPreviewValid(t !== VariableType.Query);
               }}
               data-test-subj="variableEditorType"
               compressed
@@ -635,90 +667,123 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               )}
             </>
           )}
-        </EuiFlexItem>
 
-        <EuiHorizontalRule margin="none" />
-
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate('dashboard.variableEditor.sortLabel', {
-              defaultMessage: 'Sort',
-            })}
-            helpText={i18n.translate('dashboard.variableEditor.sortLabelHelp', {
-              defaultMessage: 'How options are sorted in the dropdown',
-            })}
-          >
-            <EuiSuperSelect
-              options={[
-                {
-                  value: VariableSortOrder.Disabled,
-                  inputDisplay: i18n.translate('dashboard.variableEditor.sortDisabled', {
-                    defaultMessage: 'Disabled',
-                  }),
-                },
-                {
-                  value: VariableSortOrder.AlphabeticalAsc,
-                  inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaAsc', {
-                    defaultMessage: 'Alphabetical (asc)',
-                  }),
-                },
-                {
-                  value: VariableSortOrder.AlphabeticalDesc,
-                  inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaDesc', {
-                    defaultMessage: 'Alphabetical (desc)',
-                  }),
-                },
-                {
-                  value: VariableSortOrder.NumericalAsc,
-                  inputDisplay: i18n.translate('dashboard.variableEditor.sortNumAsc', {
-                    defaultMessage: 'Numerical (asc)',
-                  }),
-                },
-                {
-                  value: VariableSortOrder.NumericalDesc,
-                  inputDisplay: i18n.translate('dashboard.variableEditor.sortNumDesc', {
-                    defaultMessage: 'Numerical (desc)',
-                  }),
-                },
-              ]}
-              valueOfSelected={sort}
-              onChange={(v) => setSort(v)}
-              data-test-subj="variableEditorSort"
-              compressed
-            />
-          </EuiFormRow>
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('dashboard.variableEditor.multiLabel', {
-                defaultMessage: 'Allow multiple selections',
+          {type === VariableType.Text && (
+            <EuiFormRow
+              label={i18n.translate('dashboard.variableEditor.textValueLabel', {
+                defaultMessage: 'Value',
               })}
-              checked={multi}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setMulti(checked);
-                if (!checked) {
-                  setIncludeAll(false);
-                }
-              }}
-              data-test-subj="variableEditorMulti"
-              compressed
-            />
-          </EuiFormRow>
-
-          {multi && (
-            <EuiFormRow>
-              <EuiSwitch
-                label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
-                  defaultMessage: 'Include All option',
-                })}
-                checked={includeAll}
-                onChange={(e) => setIncludeAll(e.target.checked)}
-                data-test-subj="variableEditorIncludeAll"
+              helpText={i18n.translate('dashboard.variableEditor.textValueHelp', {
+                defaultMessage: 'Free-form text value for this variable',
+              })}
+            >
+              <EuiFieldText
+                value={textValue}
+                onChange={(e) => setTextValue(e.target.value)}
+                data-test-subj="variableEditorTextValue"
                 compressed
               />
             </EuiFormRow>
           )}
         </EuiFlexItem>
+
+        {type !== VariableType.Text && (
+          <>
+            <EuiHorizontalRule margin="none" />
+
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('dashboard.variableEditor.sortLabel', {
+                  defaultMessage: 'Sort',
+                })}
+                helpText={i18n.translate('dashboard.variableEditor.sortLabelHelp', {
+                  defaultMessage: 'How options are sorted in the dropdown',
+                })}
+              >
+                <EuiSuperSelect
+                  options={[
+                    {
+                      value: VariableSortOrder.Disabled,
+                      inputDisplay: i18n.translate('dashboard.variableEditor.sortDisabled', {
+                        defaultMessage: 'Disabled',
+                      }),
+                    },
+                    {
+                      value: VariableSortOrder.AlphabeticalAsc,
+                      inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaAsc', {
+                        defaultMessage: 'Alphabetical (asc)',
+                      }),
+                    },
+                    {
+                      value: VariableSortOrder.AlphabeticalDesc,
+                      inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaDesc', {
+                        defaultMessage: 'Alphabetical (desc)',
+                      }),
+                    },
+                    {
+                      value: VariableSortOrder.NumericalAsc,
+                      inputDisplay: i18n.translate('dashboard.variableEditor.sortNumAsc', {
+                        defaultMessage: 'Numerical (asc)',
+                      }),
+                    },
+                    {
+                      value: VariableSortOrder.NumericalDesc,
+                      inputDisplay: i18n.translate('dashboard.variableEditor.sortNumDesc', {
+                        defaultMessage: 'Numerical (desc)',
+                      }),
+                    },
+                  ]}
+                  valueOfSelected={sort}
+                  onChange={(v) => setSort(v)}
+                  data-test-subj="variableEditorSort"
+                  compressed
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  label={i18n.translate('dashboard.variableEditor.allowCustomValueLabel', {
+                    defaultMessage: 'Allow custom values',
+                  })}
+                  checked={allowCustomValue}
+                  onChange={(e) => setAllowCustomValue(e.target.checked)}
+                  data-test-subj="variableEditorAllowCustomValue"
+                  compressed
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  label={i18n.translate('dashboard.variableEditor.multiLabel', {
+                    defaultMessage: 'Allow multiple selections',
+                  })}
+                  checked={multi}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setMulti(checked);
+                    if (!checked) {
+                      setIncludeAll(false);
+                    }
+                  }}
+                  data-test-subj="variableEditorMulti"
+                  compressed
+                />
+              </EuiFormRow>
+
+              {multi && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
+                      defaultMessage: 'Include All option',
+                    })}
+                    checked={includeAll}
+                    onChange={(e) => setIncludeAll(e.target.checked)}
+                    data-test-subj="variableEditorIncludeAll"
+                    compressed
+                  />
+                </EuiFormRow>
+              )}
+            </EuiFlexItem>
+          </>
+        )}
         <EuiHorizontalRule margin="none" />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween">

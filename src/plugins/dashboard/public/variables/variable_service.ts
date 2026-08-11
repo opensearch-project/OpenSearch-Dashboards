@@ -15,6 +15,7 @@ import {
   VariableSortOrder,
   QueryVariable,
   CustomVariable,
+  TextVariable,
   VariableState,
   VariableWithState,
   VariableOption,
@@ -183,15 +184,18 @@ export class VariableService {
   /**
    * Add a new variable.
    */
-  public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
+  public async addVariable(variable: Omit<Variable, 'id'>): Promise<void> {
     const id = this.generateId();
     const newVariable = this.buildVariable(id, variable);
 
     // Initialize runtime state
     const initialRuntimeState = this.deriveRuntimeState(newVariable);
-    const current =
-      initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
-    newVariable.current = current;
+    if (newVariable.type === VariableType.Text) {
+      newVariable.current = variable.current;
+    } else {
+      newVariable.current =
+        initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
+    }
 
     const updatedVariables = [...this.getVariables(), newVariable];
 
@@ -234,8 +238,12 @@ export class VariableService {
         loading: false,
         error: undefined,
       };
-      updatedVariable.current =
-        newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      if (updatedVariable.type === VariableType.Text) {
+        updatedVariable.current = (updates as Partial<Variable>).current ?? existing.current;
+      } else {
+        updatedVariable.current =
+          newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      }
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -564,6 +572,7 @@ export class VariableService {
       current: undefined,
       multi: input.multi,
       includeAll: input.includeAll,
+      allowCustomValue: input.allowCustomValue,
       hide: input.hide,
       description: input.description,
       sort: input.sort,
@@ -591,6 +600,12 @@ export class VariableService {
           type: VariableType.Custom,
           customOptions: this.normalizeCustomOptions(v.customOptions),
         } as CustomVariable;
+      }
+      case VariableType.Text: {
+        return {
+          ...base,
+          type: VariableType.Text,
+        } as TextVariable;
       }
       default:
         return base as Variable;
