@@ -103,11 +103,15 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.wait(2000);
 
-        cy.getElementByTestId('tableDocViewRow-category').within(() => {
-          cy.getElementByTestId('addInclusiveFilterButton').click();
-        });
+        cy.getElementByTestId('tableDocViewRow-category-value')
+          .invoke('text')
+          .then((categoryValue) => {
+            cy.getElementByTestId('tableDocViewRow-category').within(() => {
+              cy.getElementByTestId('addInclusiveFilterButton').click();
+            });
 
-        verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
+            verifyMonacoEditorContent(`| WHERE \`category\` = '${categoryValue.trim()}' `);
+          });
       });
 
       it(`filter out actions in expanded table for ${config.testName}`, () => {
@@ -124,11 +128,15 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.wait(2000);
 
-        cy.getElementByTestId('tableDocViewRow-category').within(() => {
-          cy.getElementByTestId('removeInclusiveFilterButton').click();
-        });
+        cy.getElementByTestId('tableDocViewRow-category-value')
+          .invoke('text')
+          .then((categoryValue) => {
+            cy.getElementByTestId('tableDocViewRow-category').within(() => {
+              cy.getElementByTestId('removeInclusiveFilterButton').click();
+            });
 
-        verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
+            verifyMonacoEditorContent(`| WHERE \`category\` != '${categoryValue.trim()}' `);
+          });
       });
     });
   });
