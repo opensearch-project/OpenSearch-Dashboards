@@ -36,6 +36,19 @@ const customVariable = (overrides: Partial<Variable> = {}): Variable =>
     ...overrides,
   }) as Variable;
 
+const queryVariable = (overrides: Partial<Variable> = {}): Variable =>
+  ({
+    id: 'query-1',
+    name: 'service',
+    type: VariableType.Query,
+    current: ['api'],
+    query: '| fields service',
+    language: 'PPL',
+    dataset: { id: 'ds-1', title: 'logs', type: 'INDEX_PATTERN' },
+    valueField: 'service',
+    ...overrides,
+  }) as Variable;
+
 function mountEditor(existingVariable?: Variable) {
   const onSave = jest.fn().mockResolvedValue(undefined);
   const onClose = jest.fn();
@@ -230,5 +243,27 @@ describe('VariableEditorFlyout — allowCustomValue', () => {
     await clickSave(component);
 
     expect(onSave.mock.calls[0][0]).not.toHaveProperty('allowCustomValue');
+  });
+
+  // The toggle sits in the `type !== Text` block, so Query gets it as well as
+  // Custom. Covered explicitly because the two types take different save paths.
+  it('renders the Allow custom values switch for Query variables', () => {
+    const { component } = mountEditor(queryVariable());
+
+    expect(findTestSubject(component, 'variableEditorAllowCustomValue').length).toBe(1);
+  });
+
+  it('reflects and saves allowCustomValue for Query variables', async () => {
+    const { component, onSave } = mountEditor(queryVariable({ allowCustomValue: true }));
+
+    expect(
+      findTestSubject(component, 'variableEditorAllowCustomValue').props()['aria-checked']
+    ).toBe(true);
+
+    await clickSave(component);
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ type: VariableType.Query, allowCustomValue: true })
+    );
   });
 });

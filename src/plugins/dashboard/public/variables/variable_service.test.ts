@@ -29,10 +29,10 @@ function makeQueryResult(
 ) {
   return values.length > 0
     ? {
-      rows: values.map((value) => ({ [field]: value })),
-      fields: [field],
-      fieldTypes: { [field]: optionType },
-    }
+        rows: values.map((value) => ({ [field]: value })),
+        fields: [field],
+        fieldTypes: { [field]: optionType },
+      }
     : { rows: [], fields: [], fieldTypes: {} };
 }
 
@@ -1834,15 +1834,72 @@ describe('VariableService', () => {
       expect(values.v1).toEqual(['seeded']);
     });
 
-    it('should carry over the existing value when switching to Text without an explicit current', async () => {
+    it('should clear the value when switching to Text without an explicit current', async () => {
+      // A selection over an option list is meaningless as a Text value, and the
+      // editor's Value field is empty on a type switch — so the result must be empty
+      // too, otherwise the saved value would not match what the user saw.
       const { service } = createService(
         [makeCustomVariable({ id: 'v1', name: 'v1', current: ['dev'] })],
         'dashboard-1'
       );
       await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
 
-      const values = getCurrentValues(service);
-      expect(values.v1).toEqual(['dev']);
+      expect(service.getVariables()[0].current).toBeUndefined();
+    });
+
+    it('should clear a multi-select selection when switching to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', multi: true, current: ['dev', 'prod'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      expect(service.getVariables()[0].current).toBeUndefined();
+    });
+
+    it('should truncate an explicitly supplied multi-value current when switching to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', multi: true })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', {
+        type: VariableType.Text,
+        current: ['a', 'b'],
+      } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['a']);
+    });
+
+    it('should drop option-shaping fields when switching to Text', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            label: 'My label',
+            description: 'My description',
+            hide: true,
+            multi: true,
+            includeAll: true,
+            allowCustomValue: true,
+            sort: VariableSortOrder.AlphabeticalAsc,
+          }),
+        ],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      const updated = service.getVariables()[0];
+      // Everything that only makes sense for an option list is gone...
+      expect(updated).not.toHaveProperty('multi');
+      expect(updated).not.toHaveProperty('includeAll');
+      expect(updated).not.toHaveProperty('allowCustomValue');
+      expect(updated).not.toHaveProperty('sort');
+      expect(updated).not.toHaveProperty('customOptions');
+      // ...while the type-agnostic fields survive.
+      expect(updated.label).toBe('My label');
+      expect(updated.description).toBe('My description');
+      expect(updated.hide).toBe(true);
     });
 
     it('should apply a new current when the editor saves a new value', async () => {

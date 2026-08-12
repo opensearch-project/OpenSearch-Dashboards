@@ -157,7 +157,9 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
 
   const commitCustomValue = useCallback(() => {
     if (!pendingCustomValue) return;
-    const next = variable.multi ? [...selectedValues, pendingCustomValue] : [pendingCustomValue];
+    const next = variable.multi
+      ? Array.from(new Set([...selectedValues, pendingCustomValue]))
+      : [pendingCustomValue];
     onValuesChange(variable.id, next);
     // Keep the search term: the value now renders as a checked row that still
     // matches it, which is the only confirmation this popover can show.

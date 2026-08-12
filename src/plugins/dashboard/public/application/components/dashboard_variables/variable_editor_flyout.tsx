@@ -334,7 +334,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     if (!validateForm()) return;
 
     setIsSaving(true);
-    const variableConfig: Omit<Variable, 'id' | 'current'> = {
+    const variableConfig: Omit<Variable, 'id'> = {
       name: name.trim(),
       label: label.trim() || undefined,
       description: description.trim() || undefined,
