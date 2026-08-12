@@ -106,6 +106,7 @@ export const FieldMenu: React.FC<FieldMenuProps> = (props) => {
     <SearchPopoverMenu
       options={menuOptions}
       checkable
+      rankByQuery
       keepOpenOnSelect={props.multi}
       autoOpen={autoOpen}
       allowCreate={{

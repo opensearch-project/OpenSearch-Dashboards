@@ -28,12 +28,14 @@ interface QueryPanelWidgetsProps {
   analyzeIsOpen?: boolean;
   onToggleAnalyze?: () => void;
   hasAnalyzeResult?: boolean;
+  hideAskAI?: boolean;
 }
 
 export const QueryPanelWidgets = ({
   analyzeIsOpen,
   onToggleAnalyze,
   hasAnalyzeResult,
+  hideAskAI,
 }: QueryPanelWidgetsProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryPanelActionsRegistry } = services;
@@ -48,7 +50,7 @@ export const QueryPanelWidgets = ({
     <div className="exploreQueryPanelWidgets">
       {/* Left Section */}
       <div className="exploreQueryPanelWidgets__left">
-        <LanguageToggle />
+        <LanguageToggle hideAI={hideAskAI} />
         {!isMetrics && <DatasetSelectWidget />}
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <RecentQueriesButton />
@@ -78,7 +80,7 @@ export const QueryPanelWidgets = ({
             <div className="exploreQueryPanelWidgets__verticalSeparator" />
           </>
         )}
-        <AskAIButton />
+        {!hideAskAI && <AskAIButton />}
       </div>
     </div>
   );
