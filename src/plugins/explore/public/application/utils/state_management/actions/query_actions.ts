@@ -812,6 +812,18 @@ export const executeTabQuery = createAsyncThunk<
   const { services } = params;
   const { getState } = thunkAPI;
 
+  // A tab whose `prepareQuery` cannot yet build a query returns an empty string
+  // (see the patterns tab in `register_tabs`). Executing that would send an empty
+  // query to the backend and cache the response under an empty key, so skip it and
+  // leave the tab uninitialized until the tab can produce a real query.
+  //
+  // Gated on cacheKey alone: most callers pass the same value for both, but the
+  // BRAIN retry in `register_tabs` deliberately passes a queryString that differs
+  // from its cacheKey, and that path should keep running.
+  if (!params.cacheKey) {
+    return;
+  }
+
   /**
    * below activeTabCustomQueryErrorHandler logic to be removed when datasets
    * contain information about query engine versions

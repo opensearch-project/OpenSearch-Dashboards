@@ -1786,6 +1786,33 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    // A tab whose prepareQuery cannot yet build a query returns '' -- see the patterns
+    // tab, whose field is derived from logs results that are gone after a page reload.
+    it('does not run anything when the cache key is empty', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: '',
+        queryString: '',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+      expect(setResults).not.toHaveBeenCalled();
+    });
+
+    // The BRAIN retry in register_tabs deliberately passes a queryString that
+    // differs from its cacheKey, so the guard must not key off queryString.
+    it('still runs when only the query string differs from the cache key', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: 'some-key',
+        queryString: 'source=logs',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+    });
+
     it('should handle missing services gracefully', async () => {
       const params = {
         services: undefined as any,
