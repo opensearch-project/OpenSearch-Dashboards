@@ -63,6 +63,8 @@ export const ExploreTabs = () => {
       const activeTab = services.tabRegistry.getTab(tabId);
       const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
       const newTabCacheKey = prepareQuery(query);
+      // An empty key means the tab cannot build a query yet.
+      if (!newTabCacheKey) return;
 
       const needsExecution = !results[newTabCacheKey];
 

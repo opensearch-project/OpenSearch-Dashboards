@@ -11,6 +11,7 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_PATTERNS_TAB_ID,
 } from '../../common';
 import { ExploreServices } from '../types';
 
@@ -211,5 +212,77 @@ describe('registerBuiltInTabs - SQL Language Restrictions', () => {
       const sqlTabs = getSqlEnabledTabsForFlavor(ExploreFlavor.Metrics);
       expect(sqlTabs.length).toBe(0);
     });
+  });
+});
+
+describe('registerBuiltInTabs - patterns prepareQuery when the patterns field is unknown', () => {
+  // Reproduces the post-refresh state: `resultsCache` is in-memory only, so after a
+  // page reload the logs tab has no cached results and `findDefaultPatternsField`
+  // throws. `state.tab.patterns.patternsField` is likewise empty because it is not
+  // persisted to the URL.
+  const registerPatternsTab = () => {
+    const tabRegistry = new TabRegistryService();
+    const services = {
+      uiSettings: {
+        get: jest.fn((key: string) => key === 'explore:experimental'),
+      },
+      store: {
+        getState: jest.fn().mockReturnValue({
+          tab: { patterns: { patternsField: '', usingRegexPatterns: false } },
+          query: { language: 'PPL' },
+        }),
+        dispatch: jest.fn(),
+      },
+      // No logs results cached => findDefaultPatternsField throws.
+      tabRegistry,
+    } as unknown as ExploreServices;
+    registerBuiltInTabs(tabRegistry, services, ExploreFlavor.Logs);
+    return tabRegistry.getTab(EXPLORE_PATTERNS_TAB_ID)!;
+  };
+
+  it('does not fall back to executing the raw user query', () => {
+    const patternsTab = registerPatternsTab();
+    const userQuery = { query: 'source = my_index', language: 'PPL' } as any;
+
+    const prepared = patternsTab.prepareQuery!(userQuery);
+
+    // Returning the user's own query makes the patterns tab execute a plain search
+    // under its own cache key; the container then reads raw documents through the
+    // patterns column mapping, and the fixed PPL field names match nothing.
+    expect(prepared).not.toBe('source = my_index');
+  });
+
+  // The other throw in findDefaultPatternsField: logs hits are present but none of
+  // the fields is string-typed. Same catch, so the tab reports itself unbuildable
+  // and ErrorGuard renders the field picker instead of a blank panel.
+  it('produces no query when logs results exist but hold no string field', () => {
+    const tabRegistry = new TabRegistryService();
+    const services = {
+      uiSettings: { get: jest.fn((key: string) => key === 'explore:experimental') },
+      store: {
+        getState: jest.fn().mockReturnValue({
+          tab: { patterns: { patternsField: '', usingRegexPatterns: false } },
+          query: { language: 'PPL' },
+        }),
+        dispatch: jest.fn(),
+      },
+      tabRegistry,
+    } as unknown as ExploreServices;
+    registerBuiltInTabs(tabRegistry, services, ExploreFlavor.Logs);
+    const patternsTab = tabRegistry.getTab(EXPLORE_PATTERNS_TAB_ID)!;
+
+    expect(patternsTab.prepareQuery!({ query: 'source = my_index', language: 'PPL' } as any)).toBe(
+      ''
+    );
+  });
+
+  it('produces no query at all rather than a wrong one', () => {
+    const patternsTab = registerPatternsTab();
+    const prepared = patternsTab.prepareQuery!({
+      query: 'source = my_index',
+      language: 'PPL',
+    } as any);
+
+    expect(prepared).toBe('');
   });
 });
