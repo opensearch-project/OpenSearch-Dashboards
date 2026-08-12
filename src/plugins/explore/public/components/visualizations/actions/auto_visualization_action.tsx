@@ -554,15 +554,18 @@ function openVisualizationEditor(core: CoreStart, editorPath: string) {
   }
 }
 
-function checkTimeRangeArgsUsable(args: AutoVisualizationArgs): void {
+export function checkTimeRangeArgsUsable(args: {
+  from?: string;
+  to?: string;
+  timeFieldName?: string;
+}): void {
   if (!args.from || !args.to) return;
 
   if (!args.timeFieldName) {
     throw new Error(
-      'A time range (from/to) cannot be applied without timeFieldName, so it would be ' +
-        'ignored. Either call the index mapping tool to look up the time field of ' +
-        `"${args.indexName}" and pass it as timeFieldName, or omit from/to if this index ` +
-        'has no time field.'
+      'A time range (from/to) cannot be applied without timeFieldName, so it would be ignored. ' +
+        'Either call the index mapping tool to look up the time field and pass it as ' +
+        'timeFieldName, or omit from/to if this index has no time field.'
     );
   }
 }

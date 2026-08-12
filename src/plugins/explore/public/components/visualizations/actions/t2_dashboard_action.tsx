@@ -27,6 +27,7 @@ import {
   getAbsoluteTimeRange,
   ChartPreview,
   PreparedQuery,
+  checkTimeRangeArgsUsable,
 } from './auto_visualization_action';
 import { TextToDashboardMeta } from './utils';
 import { getDashboardVersion } from '../../../application/legacy/discover/opensearch_dashboards_services';
@@ -48,6 +49,9 @@ interface TextToDashboardArgs {
   timeRange?: TimeRange;
   datasourceId?: string;
   datasourceTitle?: string;
+  // the time range the llm passed
+  from?: string;
+  to?: string;
 }
 
 export interface GeneratedVis {
@@ -361,9 +365,18 @@ export function registerT2DashboardAction(
     ...TextToDashboardMeta,
     useCustomRenderer: true,
     handler: async (args: TextToDashboardArgs): Promise<TextToDashboardResult> => {
-      const resolvedTimeRange = getAbsoluteTimeRange(data, args.timeRange);
+      const resolvedTimeRange = getAbsoluteTimeRange(data, args);
+
       const visualizations: GeneratedVis[] = args.visualizations.map((vis) => {
         try {
+          // The time range is dashboard-level but timeFieldName is per index, so the shared
+          // range has to be checked against each spec.
+          checkTimeRangeArgsUsable({
+            from: args.from,
+            to: args.to,
+            timeFieldName: vis.timeFieldName,
+          });
+
           const { visConfig, query: preparedQuery } = buildVisConfig({
             ...vis,
             datasourceId: args.datasourceId,

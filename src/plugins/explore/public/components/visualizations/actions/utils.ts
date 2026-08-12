@@ -110,16 +110,6 @@ const VIS_SPEC_PROPERTIES = {
       'Get this from the index mapping. ' +
       'Required whenever you pass from/to - a time range without it is rejected.',
   },
-  from: {
-    type: 'string',
-    description:
-      'Start time for the time range (e.g., "now-1h", "now-7d", "2024-01-01"). Must be date math or an ISO 8601 timestamp. If provided along with to, the time range will be updated.',
-  },
-  to: {
-    type: 'string',
-    description:
-      'End time for the time range (e.g., "now", "2024-01-31"). If provided along with from, the time range will be updated.',
-  },
   transformations: {
     type: 'array',
     description:
@@ -160,6 +150,38 @@ const VIS_SPEC_PROPERTIES = {
 
 const VIS_SPEC_REQUIRED = ['query', 'indexName', 'columns'];
 
+/**
+ * Build the `from`/`to` schema properties for one tool.
+ */
+const buildTimeRangeProperties = (scope: 'visualization' | 'dashboard') => {
+  const placement =
+    scope === 'dashboard'
+      ? 'Pass this at the top level, NOT inside the visualizations array — one range applies ' +
+        'to every panel. '
+      : '';
+
+  return {
+    from: {
+      type: 'string',
+      description:
+        `${placement}Start of the time range. STRONGLY PREFER OpenSearch date math ` +
+        '("now-7d", "now-1h", "now/d") over absolute timestamps: you do not ' +
+        'have access to the current date, so any absolute date you compute ' +
+        'yourself will be wrong. Map relative phrasing directly — ' +
+        '"last 7 days" -> "now-7d", "past hour" -> "now-1h", ' +
+        '"yesterday" -> "now-1d/d". Use an ISO 8601 timestamp ONLY when the ' +
+        'user states an explicit calendar date. Must be provided together with `to`.',
+    },
+    to: {
+      type: 'string',
+      description:
+        `${placement}End of the time range. Use "now" for any query about the recent past ` +
+        '(this is the common case). Use an ISO 8601 timestamp only when the user ' +
+        'states an explicit end date. Must be provided together with `from`.',
+    },
+  };
+};
+
 export const AutoVisMeta = {
   name: AUTO_VISUALIZATION_TOOL_NAME,
   description:
@@ -178,7 +200,10 @@ export const AutoVisMeta = {
 
   parameters: {
     type: 'object',
-    properties: VIS_SPEC_PROPERTIES,
+    properties: {
+      ...VIS_SPEC_PROPERTIES,
+      ...buildTimeRangeProperties('visualization'),
+    },
     required: VIS_SPEC_REQUIRED,
   },
 };
@@ -222,9 +247,12 @@ export const TextToDashboardMeta = {
     '1. Call the index mapping tool to get timeFieldName for each relevant index.\n' +
     '2. Call pplQueryTool for each query to obtain the column schema.\n' +
     '3. Call this tool with all visualization columns in a single call.\n' +
-    '5. Each query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
-    '6. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
-    '7. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
+    '4. Each query must NOT contain time filters — use the top-level from/to parameters to ' +
+    'specify the one time range shared by every panel, and pass the same from/to you passed ' +
+    'to pplQueryTool. Do NOT put from/to inside the visualizations array.\n' +
+    '5. from, to and timeFieldName go together: passing a time range without timeFieldName on ' +
+    'a spec is rejected for that spec.\n' +
+    '6. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
     'decide which transformation types fit, call get_transformation_schema with all needed ' +
     'type ids at once, then pass the filled-in transformations array on each spec.' +
     CHART_AND_TRANSFORMATION_GUIDE,
@@ -235,8 +263,9 @@ export const TextToDashboardMeta = {
         type: 'array',
         description:
           'Array of visualization specs. Each spec produces one chart panel on the dashboard. ' +
-          'Minimum 1 item. Each item has the same fields as auto_create_visualization, plus ' +
-          'an optional title, timeRange, datasourceId and datasourceTitle.',
+          'Minimum 1 item. Each item has the same fields as auto_create_visualization except ' +
+          'from/to (those are top-level, since the dashboard has one shared time range), plus ' +
+          'a required title.',
         minItems: 1,
         items: {
           type: 'object',
@@ -250,6 +279,7 @@ export const TextToDashboardMeta = {
           required: [...VIS_SPEC_REQUIRED, 'title'],
         },
       },
+      ...buildTimeRangeProperties('dashboard'),
     },
     required: ['visualizations'],
   },

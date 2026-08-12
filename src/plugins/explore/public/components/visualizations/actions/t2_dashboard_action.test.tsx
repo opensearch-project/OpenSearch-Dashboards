@@ -10,10 +10,12 @@ import { registerT2DashboardAction } from './t2_dashboard_action';
 
 const mockBuildVisConfig = jest.fn();
 const mockGetAbsoluteTimeRange = jest.fn();
+const mockCheckTimeRangeArgsUsable = jest.fn();
 
 jest.mock('./auto_visualization_action', () => ({
   buildVisConfig: (...args: any[]) => mockBuildVisConfig(...args),
   getAbsoluteTimeRange: (...args: any[]) => mockGetAbsoluteTimeRange(...args),
+  checkTimeRangeArgsUsable: (...args: any[]) => mockCheckTimeRangeArgsUsable(...args),
   ChartPreview: () => <div data-test-subj="chartPreview" />,
 }));
 
@@ -114,6 +116,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGetDashboardVersion.mockReturnValue({ version: '3.0.0' });
   mockGetAbsoluteTimeRange.mockReturnValue(undefined);
+  // clearAllMocks wipes recorded calls but keeps implementations, so reset the
+  // validator to a no-op or a test that makes it throw would leak into later ones.
+  mockCheckTimeRangeArgsUsable.mockImplementation(() => undefined);
   mockBuildVisConfig.mockImplementation((args: any) => ({
     success: true,
     visConfig: {
@@ -180,6 +185,49 @@ describe('handler', () => {
     });
     expect(result.visualizations[0].transformations).toBe(transformations);
     expect(mockBuildVisConfig).toHaveBeenCalledWith(expect.objectContaining({ transformations }));
+  });
+
+  it('checks the dashboard-level time range against every spec timeFieldName', async () => {
+    await runHandler({
+      visualizations: [
+        { ...visSpec('With Time Field'), timeFieldName: 'timestamp' },
+        visSpec('No Time Field'),
+      ],
+      from: 'now-7d',
+      to: 'now',
+    });
+
+    // The range lives at the top level, so each spec is checked against the shared value.
+    expect(mockCheckTimeRangeArgsUsable).toHaveBeenCalledTimes(2);
+    expect(mockCheckTimeRangeArgsUsable).toHaveBeenNthCalledWith(1, {
+      from: 'now-7d',
+      to: 'now',
+      timeFieldName: 'timestamp',
+    });
+    expect(mockCheckTimeRangeArgsUsable).toHaveBeenNthCalledWith(2, {
+      from: 'now-7d',
+      to: 'now',
+      timeFieldName: undefined,
+    });
+  });
+
+  it('degrades only the spec whose time field is missing', async () => {
+    mockCheckTimeRangeArgsUsable.mockImplementation(({ timeFieldName }: any) => {
+      if (!timeFieldName) throw new Error('cannot be applied without timeFieldName');
+    });
+
+    const result = await runHandler({
+      visualizations: [
+        { ...visSpec('Has Time Field'), timeFieldName: 'timestamp' },
+        visSpec('Missing Time Field'),
+      ],
+      from: 'now-7d',
+      to: 'now',
+    });
+
+    expect(result.visualizations[0].error).toBeUndefined();
+    expect(result.visualizations[1].error).toContain('without timeFieldName');
+    expect(result.visualizations[1].visConfig).toBeUndefined();
   });
 
   it('isolates a failing spec as an error entry and still resolves the others', async () => {
