@@ -99,6 +99,7 @@ const createStartContractMock = () => {
       registerSearchCommand: jest.fn(),
     },
     setAppTitle: jest.fn(),
+    setActiveNavLink: jest.fn(),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn(),
     setHeaderVariant: jest.fn(),

@@ -36,10 +36,17 @@ describe('DiscoverPlugin', () => {
     const setupMock = coreMock.createSetup();
     const initializerContext = coreMock.createPluginInitializerContext();
     const pluginInstance = new DiscoverPlugin(initializerContext);
+    const setupDeps = getSetupDeps();
     expect(() =>
       // @ts-expect-error TS2345 TODO(ts-error): fixme
-      pluginInstance.setup(setupMock, getSetupDeps())
+      pluginInstance.setup(setupMock, setupDeps)
     ).not.toThrow();
+    expect(setupDeps.dataExplorer.registerView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'discover',
+        activeNavLinkId: 'discover',
+      })
+    );
     expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledTimes(5);
   });
 

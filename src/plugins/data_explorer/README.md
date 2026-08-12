@@ -51,6 +51,7 @@ For an application to be registered as a view within Data Explorer, it needs to 
 interface ViewDefinition<T = any> {
   readonly id: string;
   readonly title: string;
+  readonly activeNavLinkId?: string;
   readonly ui?: {
     defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>);
     slice: Slice<T>;
@@ -70,6 +71,9 @@ interface ViewDefinition<T = any> {
   readonly shouldShow?: (state: any) => boolean;
 }
 ```
+
+`activeNavLinkId` identifies the navigation link marked as active while the view is selected. If
+it is omitted, Data Explorer's host navigation link is used.
 
 ---
 

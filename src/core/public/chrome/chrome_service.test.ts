@@ -218,6 +218,64 @@ describe('start', () => {
       // Verify that the Header component renders without errors
       expect(headerComponent).toBeDefined();
     });
+
+    it('updates, clears, and resets the active nav link id and completes on stop', async () => {
+      const service = new ChromeService();
+      const startDeps = defaultStartDeps([new FakeApp('data-explorer'), new FakeApp('dashboard')]);
+      service.setup({
+        uiSettings: startDeps.uiSettings,
+        injectedMetadata: startDeps.injectedMetadata,
+      });
+      const chrome = await service.start(startDeps);
+      const header = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      const activeNavLinkId$ = header.prop('activeNavLinkId$') as Rx.Observable<string | undefined>;
+      const emissions = activeNavLinkId$.pipe(toArray()).toPromise();
+
+      startDeps.application.navigateToApp('data-explorer');
+      chrome.setActiveNavLink('discover', 'data-explorer');
+      chrome.setActiveNavLink('view-b', 'data-explorer');
+      chrome.setActiveNavLink(undefined, 'data-explorer');
+      startDeps.application.navigateToApp('dashboard');
+      service.stop();
+
+      await expect(emissions).resolves.toEqual([
+        undefined,
+        'data-explorer',
+        'discover',
+        'view-b',
+        'data-explorer',
+        'dashboard',
+      ]);
+    });
+
+    it('ignores late active nav link writes and clears from the previous application', async () => {
+      const service = new ChromeService();
+      const startDeps = defaultStartDeps([new FakeApp('data-explorer'), new FakeApp('dashboard')]);
+      service.setup({
+        uiSettings: startDeps.uiSettings,
+        injectedMetadata: startDeps.injectedMetadata,
+      });
+      const chrome = await service.start(startDeps);
+      const header = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      const activeNavLinkId$ = header.prop('activeNavLinkId$') as Rx.Observable<string | undefined>;
+      const emissions = activeNavLinkId$.pipe(toArray()).toPromise();
+
+      startDeps.application.navigateToApp('data-explorer');
+      chrome.setActiveNavLink('discover', 'data-explorer');
+      startDeps.application.navigateToApp('dashboard');
+      chrome.setActiveNavLink('dashboard-detail', 'dashboard');
+      chrome.setActiveNavLink('discover', 'data-explorer');
+      chrome.setActiveNavLink(undefined, 'data-explorer');
+      service.stop();
+
+      await expect(emissions).resolves.toEqual([
+        undefined,
+        'data-explorer',
+        'discover',
+        'dashboard',
+        'dashboard-detail',
+      ]);
+    });
   });
 
   describe('visibility', () => {

@@ -23,6 +23,7 @@ export type ViewProps = AppMountParameters;
 export interface ViewDefinition<T = any> {
   readonly id: string;
   readonly title: string;
+  readonly activeNavLinkId?: string;
   readonly ui?: {
     defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>);
     slice: Slice<T>;

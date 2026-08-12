@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { PLUGIN_ID } from '../../../common';
 import { DataExplorerServices } from '../../types';
 import { useTypedDispatch, useTypedSelector } from '../state_management';
 import { setView } from '../state_management/metadata_slice';
@@ -13,7 +14,7 @@ import { setView } from '../state_management/metadata_slice';
 export const useView = () => {
   const viewId = useTypedSelector((state) => state.metadata.view);
   const {
-    services: { viewRegistry },
+    services: { chrome, viewRegistry },
   } = useOpenSearchDashboards<DataExplorerServices>();
   const dispatch = useTypedDispatch();
   const { appId } = useParams<{ appId: string }>();
@@ -22,14 +23,17 @@ export const useView = () => {
     if (!viewId) return undefined;
     return viewRegistry.get(viewId);
   }, [viewId, viewRegistry]);
+  const routeView = useMemo(() => viewRegistry.get(appId), [appId, viewRegistry]);
+
+  useLayoutEffect(() => {
+    chrome.setActiveNavLink(routeView?.activeNavLinkId, PLUGIN_ID);
+  }, [chrome, routeView]);
 
   useEffect(() => {
-    const currentView = viewRegistry.get(appId);
+    if (!routeView) return;
 
-    if (!currentView) return;
-
-    dispatch(setView(currentView?.id));
-  }, [appId, dispatch, viewRegistry]);
+    dispatch(setView(routeView.id));
+  }, [dispatch, routeView]);
 
   return { view, viewRegistry };
 };

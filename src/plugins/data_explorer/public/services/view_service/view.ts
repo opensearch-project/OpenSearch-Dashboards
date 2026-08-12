@@ -9,6 +9,7 @@ type IView = ViewDefinition;
 export class View implements IView {
   public readonly id: string;
   public readonly title: string;
+  public readonly activeNavLinkId: IView['activeNavLinkId'];
   public readonly ui: IView['ui'];
   public readonly defaultPath: string;
   public readonly appExtentions: IView['appExtentions'];
@@ -20,6 +21,7 @@ export class View implements IView {
   constructor(options: ViewDefinition) {
     this.id = options.id;
     this.title = options.title;
+    this.activeNavLinkId = options.activeNavLinkId;
     this.ui = options.ui;
     this.defaultPath = options.defaultPath;
     this.appExtentions = options.appExtentions;

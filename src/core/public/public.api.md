@@ -354,6 +354,7 @@ export interface ChromeStart {
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
     removeApplicationClass(className: string): void;
+    setActiveNavLink(navLinkId: string | undefined, expectedAppId: string): void;
     setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;

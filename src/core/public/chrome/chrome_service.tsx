@@ -42,7 +42,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
@@ -283,6 +283,7 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const sidecarConfig$ = overlays.sidecar.getSidecarConfig$();
+    const activeNavLinkId$ = new BehaviorSubject<string | undefined>(undefined);
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -299,12 +300,14 @@ export class ChromeService {
 
     const globalSearch = this.globalSearch.start();
 
-    // Track the current app id synchronously so the nav-popover navigateToApp
-    // wrapper (below) can tell same-app from cross-app navigation.
+    // Track the current app id synchronously so active nav link writes can be scoped to their
+    // owning app and the nav-popover navigateToApp wrapper (below) can tell same-app from
+    // cross-app navigation.
     let currentAppId: string | undefined;
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe((appId) => {
       currentAppId = appId;
+      activeNavLinkId$.next(appId);
       helpExtension$.next(undefined);
       breadcrumbs$.next([]);
       badge$.next(undefined);
@@ -441,6 +444,7 @@ export class ChromeService {
           http={http}
           loadingCount$={http.getLoadingCount$()}
           application={application}
+          activeNavLinkId$={activeNavLinkId$.pipe(distinctUntilChanged(), takeUntil(this.stop$))}
           appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
@@ -488,6 +492,11 @@ export class ChromeService {
       ),
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
+
+      setActiveNavLink: (navLinkId: string | undefined, expectedAppId: string) => {
+        if (currentAppId !== expectedAppId) return;
+        activeNavLinkId$.next(navLinkId ?? expectedAppId);
+      },
 
       getIsVisible$: () => this.isVisible$,
 
@@ -638,6 +647,14 @@ export interface ChromeStart {
    * of mounting applications.
    */
   setAppTitle(appTitle: string): void;
+
+  /**
+   * Overrides the nav link shown as active while `expectedAppId` is the current application.
+   * Pass `undefined` to restore that application's own nav link.
+   * Calls from applications that are no longer current are ignored.
+   * The override is reset automatically whenever the current application changes.
+   */
+  setActiveNavLink(navLinkId: string | undefined, expectedAppId: string): void;
 
   /**
    * Get an observable of the current visibility state of the chrome.
