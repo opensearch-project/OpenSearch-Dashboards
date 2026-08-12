@@ -40,6 +40,8 @@ const methods = [
   'cat.templates',
   'clearScroll',
   'count',
+  'get',
+  'index',
   'indices.create',
   'indices.delete',
   'indices.deleteTemplate',
@@ -63,6 +65,8 @@ export interface MigrationOpenSearchClient {
   };
   clearScroll: OpenSearchClient['clearScroll'];
   count: OpenSearchClient['count'];
+  get: OpenSearchClient['get'];
+  index: OpenSearchClient['index'];
   indices: {
     create: OpenSearchClient['indices']['create'];
     delete: OpenSearchClient['indices']['delete'];
