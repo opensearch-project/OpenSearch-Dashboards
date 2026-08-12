@@ -1,0 +1,2 @@
+feat:
+- Surface PPL partial-result warnings in Explore with an opt-in setting and a "Partial results" banner ([#12481](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12481))

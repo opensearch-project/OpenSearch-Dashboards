@@ -13,7 +13,10 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
 
-const hasStatsOrTable = (q: string) => /\|\s*(stats|table)\b/i.test(q);
+// stats/table/top/rare all produce aggregated (non-document) output that belongs on the Statistics
+// tab. top/rare are included so they are classified consistently with stats (and stripped from the
+// Logs/histogram queries by stripStatsFromQuery).
+const hasAggregation = (q: string) => /\|\s*(stats|table|top|rare)\b/i.test(q);
 const hasChartOrTimechart = (q: string) => /\|\s*(chart|timechart)\b/i.test(q);
 
 /**
@@ -22,11 +25,11 @@ const hasChartOrTimechart = (q: string) => /\|\s*(chart|timechart)\b/i.test(q);
  *
  * Decision matrix:
  *
- * | Current Tab ↓ \ Query →  | stats/table    | chart/timechart  | No command      |
- * |--------------------------|----------------|------------------|-----------------|
- * | Logs (default)           | → Statistic    | → Visualization  | → Logs (stay)   |
- * | Statistic                | → Statistic    | → Statistic      | → Logs          |
- * | Visualization            | → Visualization| → Visualization  | → Visualization |
+ * | Current Tab ↓ \ Query →  | stats/table/top/rare | chart/timechart  | No command      |
+ * |--------------------------|----------------------|------------------|-----------------|
+ * | Logs (default)           | → Statistic          | → Visualization  | → Logs (stay)   |
+ * | Statistic                | → Statistic          | → Statistic      | → Logs          |
+ * | Visualization            | → Visualization      | → Visualization  | → Visualization |
  */
 export const detectAndSetOptimalTab = createAsyncThunk<
   void,
@@ -41,7 +44,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
 
   switch (currentTab) {
     case EXPLORE_LOGS_TAB_ID:
-      if (hasStatsOrTable(queryString)) {
+      if (hasAggregation(queryString)) {
         targetTab = EXPLORE_STATISTICS_TAB_ID;
       } else if (hasChartOrTimechart(queryString)) {
         targetTab = EXPLORE_VISUALIZATION_TAB_ID;
@@ -51,7 +54,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
       break;
 
     case EXPLORE_STATISTICS_TAB_ID:
-      if (hasStatsOrTable(queryString) || hasChartOrTimechart(queryString)) {
+      if (hasAggregation(queryString) || hasChartOrTimechart(queryString)) {
         targetTab = EXPLORE_STATISTICS_TAB_ID;
       } else {
         targetTab = EXPLORE_LOGS_TAB_ID;

@@ -137,4 +137,43 @@ describe('stripStatsFromQuery', () => {
       query: 'source=logs\n| where level="error"\n| eval x=1',
     });
   });
+
+  it('should remove top pipe (and everything after it)', () => {
+    const queryWithTop: Query = {
+      query: 'source=logs | where level="error" | top 10 host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithTop);
+    expect(result).toEqual({
+      ...queryWithTop,
+      query: 'source=logs | where level="error"',
+    });
+  });
+
+  it('should remove rare pipe (and everything after it)', () => {
+    const queryWithRare: Query = {
+      query: 'source=logs | rare 5 host | sort host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithRare);
+    expect(result).toEqual({
+      ...queryWithRare,
+      query: 'source=logs',
+    });
+  });
+
+  it('should not strip a field or command that merely starts with an aggregation name', () => {
+    const queryWithTopicField: Query = {
+      query: 'source=logs | where topic="checkout"',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithTopicField);
+    expect(result).toEqual({
+      ...queryWithTopicField,
+      query: 'source=logs | where topic="checkout"',
+    });
+  });
 });
