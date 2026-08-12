@@ -8,6 +8,11 @@
   min-height: 0;
   gap: $ouiSizeXS;
 
+  &__queryPanelWrapper {
+    flex: 0 0 var(--explore-query-panel-height);
+    height: var(--explore-query-panel-height) !important;
+  }
+
   &__queryPanel {
     overflow: visible;
     display: flex;
@@ -47,6 +52,11 @@
       >.euiFlexItem {
         align-self: stretch;
         min-height: 0;
+
+        // Monaco sizes itself with an inline pixel width; without this the item
+        // can't shrink below it, so narrowing the window pushes the mode toggle
+        // off-screen instead of shrinking the editor.
+        min-width: 0;
       }
 
       // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
@@ -97,5 +107,11 @@
       display: flex;
       flex-direction: column;
     }
+  }
+
+  &__contentPanelWrapper {
+    flex: 1 1 0;
+    height: auto !important;
+    min-height: 0;
   }
 }

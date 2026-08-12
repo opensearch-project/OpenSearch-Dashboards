@@ -32,7 +32,7 @@ const normalizeMonacoText = (str) =>
     .trim();
 
 const expectGeneratedQueryToContain = (clause) => {
-  cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+  cy.getElementByTestId('pplBuilderModeToggle-code').click();
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')
     .find('.view-line')
@@ -42,7 +42,7 @@ const expectGeneratedQueryToContain = (clause) => {
         .join(' ');
       expect(normalizeMonacoText(text)).to.include(normalizeMonacoText(clause));
     });
-  cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+  cy.getElementByTestId('pplBuilderModeToggle-builder').should('not.be.disabled').click();
   cy.getElementByTestId('pplBuilder').should('be.visible');
 };
 
@@ -72,10 +72,12 @@ const pplQueryBuilderTestSuite = () => {
       cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
       cy.explore.setTopNavDate(START_TIME, END_TIME);
 
-      // "New" resets the Redux query asynchronously, remounting the builder empty;
-      // wait so a late remount doesn't discard the test's added element.
+      // "New" resets the Redux query asynchronously; wait so a late remount
+      // doesn't discard the test's added element. The panel opens in Code mode,
+      // so switch into the builder for the builder-focused tests below.
       cy.getElementByTestId('discoverNewButton').click();
       cy.wait(2000);
+      cy.getElementByTestId('pplBuilderModeToggle-builder').should('not.be.disabled').click();
       cy.getElementByTestId('pplBuilder').should('be.visible');
     });
 
@@ -90,11 +92,11 @@ const pplQueryBuilderTestSuite = () => {
       cy.getElementByTestId('pplBuilder').should('be.visible');
       cy.getElementByTestId('exploreQueryPanelEditor').should('not.exist');
 
-      cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+      cy.getElementByTestId('pplBuilderModeToggle-code').click();
       cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
       cy.getElementByTestId('pplBuilder').should('not.exist');
 
-      cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+      cy.getElementByTestId('pplBuilderModeToggle-builder').should('not.be.disabled').click();
       cy.getElementByTestId('pplBuilder').should('be.visible');
       cy.getElementByTestId('exploreQueryPanelEditor').should('not.exist');
     });

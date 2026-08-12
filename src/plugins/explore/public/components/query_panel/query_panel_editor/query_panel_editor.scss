@@ -28,6 +28,30 @@ $pplLintHoverZIndex: 10001;
     margin-bottom: -1px; // prevent layout shifting due to increase in border width;
   }
 
+  &--readOnly {
+    cursor: not-allowed;
+    background-color: $ouiColorLightestShade;
+    border-style: dashed;
+
+    // Monaco paints its own opaque background layers over the wrapper, so tint
+    // them directly to make the read-only (disabled) state visible. Text stays
+    // legible; the cursor signals non-interactivity across the whole surface.
+    .monaco-editor,
+    .monaco-editor-background,
+    .monaco-editor .margin,
+    .monaco-editor .inputarea,
+    .monaco-editor textarea {
+      background-color: $ouiColorLightestShade !important;
+      cursor: not-allowed !important;
+    }
+
+    &.exploreQueryPanelEditor--focused {
+      border-bottom-width: 1px;
+      border-bottom-color: $ouiBorderColor;
+      margin-bottom: 0;
+    }
+  }
+
   &__placeholder {
     position: absolute;
     left: 29px; // hard-code to match where the text is in editor
