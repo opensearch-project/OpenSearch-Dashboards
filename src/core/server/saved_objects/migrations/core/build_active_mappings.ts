@@ -42,6 +42,22 @@ import {
   SavedObjectsTypeMappingDefinitions,
 } from './../../mappings';
 
+/** Which root fields saved object indices carry beyond the ones the type registry defines. */
+export interface ConditionalFieldFlags {
+  readonly permissionsEnabled: boolean;
+  readonly workspacesEnabled: boolean;
+}
+
+let conditionalFieldFlags: ConditionalFieldFlags = {
+  permissionsEnabled: false,
+  workspacesEnabled: false,
+};
+
+/** Records the flags for callers that cannot supply the raw configuration. Called once, at setup. */
+export function setConditionalFieldFlags(flags: ConditionalFieldFlags) {
+  conditionalFieldFlags = flags;
+}
+
 /**
  * Creates an index mapping with the core properties required by saved object
  * indices, as well as the specified additional properties.
@@ -55,8 +71,17 @@ export function buildActiveMappings(
   const mapping = defaultMapping();
 
   let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
-  // if permission control for saved objects is enabled, the permissions field should be added to the mapping
-  if (opensearchDashboardsRawConfig?.get('savedObjects.permission.enabled')) {
+
+  // A supplied configuration is authoritative. An absent one means the caller has no access to it,
+  // not that the features are off.
+  const permissionsEnabled = opensearchDashboardsRawConfig
+    ? !!opensearchDashboardsRawConfig.get('savedObjects.permission.enabled')
+    : conditionalFieldFlags.permissionsEnabled;
+  const workspacesEnabled = opensearchDashboardsRawConfig
+    ? !!opensearchDashboardsRawConfig.get('workspace.enabled')
+    : conditionalFieldFlags.workspacesEnabled;
+
+  if (permissionsEnabled) {
     const principals: SavedObjectsFieldMapping = {
       properties: {
         users: {
@@ -79,7 +104,7 @@ export function buildActiveMappings(
     });
   }
 
-  if (opensearchDashboardsRawConfig?.get('workspace.enabled')) {
+  if (workspacesEnabled) {
     mergedProperties = validateAndMerge(mapping.properties, {
       workspaces: {
         type: 'keyword',
