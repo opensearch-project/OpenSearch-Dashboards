@@ -1063,6 +1063,106 @@ describe('PPLSearchInterceptor', () => {
     });
   });
 
+  describe('appendDefaultSort', () => {
+    const datasetWithTime = { type: 'DEFAULT', timeFieldName: '@timestamp' };
+
+    beforeEach(() => {
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
+    });
+
+    it('appends a descending time sort for a plain search query', () => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query: 'source=test_index | fields *',
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe('source=test_index | fields * | sort - `@timestamp`');
+    });
+
+    it.each([
+      'source=test_index | sort age',
+      'source=test_index | stats count()',
+      'source=test_index | head 10',
+      'source=test_index | rare age',
+      'source=test_index | top age',
+      'source=test_index | rename age as years',
+      'source=test_index | fields age, name',
+      'source=test_index |stats count()',
+      'source=test_index |   sort   age',
+    ])('does not append a sort when the query already customizes it: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe(query);
+    });
+
+    it.each([
+      'source=test_index | where message = "a | top of stack"',
+      "source=test_index | where msg = 'took first | head spot'",
+      'source=test_index | where id in [source=other | stats count()]',
+      'source=test_index | where topic = "x"',
+    ])('appends a sort when command keywords only appear in literals/subqueries: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
+    });
+
+    it('does not append a sort when the dataset has no time field', () => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT' },
+      });
+
+      expect(result.query).toBe('source=test_index');
+    });
+
+    it('does not append a sort for non-search queries', () => {
+      mockIsPPLSearchQuery.mockReturnValue(false);
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query: 'describe test_index',
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe('describe test_index');
+    });
+
+    it('does not leak the default sort into the histogram aggregation query', () => {
+      const request: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            aggs: { '1': { date_histogram: { field: '@timestamp', fixed_interval: '1h' } } },
+          },
+        },
+      };
+      const baseQuery = {
+        language: 'PPL',
+        query: 'source=test_index | fields *',
+        dataset: datasetWithTime,
+      };
+
+      const aggConfig = (pplSearchInterceptor as any).getAggConfig(request, baseQuery);
+
+      expect(aggConfig.qs['1']).not.toContain('sort');
+      expect(aggConfig.qs['1']).toBe(
+        'source=test_index | fields * | stats count() by span(@timestamp, 1h)'
+      );
+    });
+  });
+
   describe('getAggConfig', () => {
     const mockRequest: IOpenSearchDashboardsSearchRequest = {
       params: {
