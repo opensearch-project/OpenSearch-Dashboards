@@ -404,10 +404,14 @@ export const executeQueries = createAsyncThunk<
     activeTabCacheKey = activeTabPrepareQuery(query);
   }
 
-  // Check what needs execution
+  // Check what needs execution. An empty key means that tab's `prepareQuery`
+  // cannot build a query yet, so there is nothing to run.
   const needsVisualizationTabQuery =
-    visualizationTabCacheKey !== defaultCacheKey && !results[visualizationTabCacheKey];
+    !!visualizationTabCacheKey &&
+    visualizationTabCacheKey !== defaultCacheKey &&
+    !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
+    !!activeTabCacheKey &&
     activeTabCacheKey !== visualizationTabCacheKey &&
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];

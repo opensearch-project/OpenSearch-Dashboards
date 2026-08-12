@@ -1798,6 +1798,15 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(mockSearchSource.fetch).not.toHaveBeenCalled();
       expect(setResults).not.toHaveBeenCalled();
+      // The tab must stay uninitialized rather than stuck on a spinner.
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            status: expect.objectContaining({ status: QueryExecutionStatus.LOADING }),
+          }),
+        })
+      );
     });
 
     // The BRAIN retry in register_tabs deliberately passes a queryString that

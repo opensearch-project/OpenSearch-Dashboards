@@ -11,6 +11,7 @@ import { EuiErrorBoundary, EuiFlexGroup, EuiIcon, EuiTitle } from '@elastic/eui'
 import { ErrorCodeBlock } from './error_code_block';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 import { useTabError } from '../../../application/utils/hooks/use_tab_error';
+import { useCannotBuildTabQuery } from '../../../application/utils/hooks/use_cannot_build_tab_query';
 import { EXPLORE_PATTERNS_TAB_ID } from '../../../../common';
 import { PatternsErrorGuard } from './patterns_error_guard';
 
@@ -31,14 +32,19 @@ export interface ErrorGuardProps {
 
 export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Element | null => {
   const error = useTabError(registryTab);
+  const cannotBuildQuery = useCannotBuildTabQuery(registryTab);
+
+  // No cache key means no recorded error to key off, so the patterns tab would
+  // otherwise lose the empty state that lets the user pick a field.
+  if (registryTab.id === EXPLORE_PATTERNS_TAB_ID && (error != null || cannotBuildQuery)) {
+    return <PatternsErrorGuard registryTab={registryTab} />;
+  }
 
   if (error == null) {
     return <EuiErrorBoundary>{children}</EuiErrorBoundary>;
   }
 
-  return registryTab.id === EXPLORE_PATTERNS_TAB_ID ? (
-    <PatternsErrorGuard registryTab={registryTab} />
-  ) : (
+  return (
     <EuiErrorBoundary>
       <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorGuard">
         <EuiIcon type="alert" size="xl" color="red" />

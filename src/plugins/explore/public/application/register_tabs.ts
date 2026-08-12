@@ -115,16 +115,11 @@ export const registerBuiltInTabs = (
           try {
             patternsField = findDefaultPatternsField(services);
           } catch {
-            // The patterns field is derived from the logs tab's cached results, which
-            // live in memory only -- after a page reload there are none, and
-            // `patternsField` is not persisted to the URL either, so this is the normal
-            // state on every refresh until the logs query has run once.
-            //
-            // Returning the user's own query here would make the patterns tab execute a
-            // plain search under its own cache key; the container then reads raw
-            // documents through the patterns column mapping and renders nonsense.
-            // Return no query instead: `executeTabQuery` skips empty cache keys, so the
-            // tab simply stays uninitialized until the field can be resolved.
+            // The field comes from the logs tab's in-memory results, so this is the
+            // normal state after every reload until the logs query has run once.
+            // Returning the user's own query would make `Tabs.onTabClick` run a plain
+            // search under the patterns cache key and render it through the patterns
+            // column mapping. Return no query instead.
             return '';
           }
         }

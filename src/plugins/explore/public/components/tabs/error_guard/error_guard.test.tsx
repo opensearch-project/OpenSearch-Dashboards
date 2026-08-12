@@ -6,13 +6,23 @@
 import { render, screen } from '@testing-library/react';
 import { ErrorGuard } from './error_guard';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
+import { EXPLORE_PATTERNS_TAB_ID } from '../../../../common';
 
 // Mock the useTabError hook
 jest.mock('../../../application/utils/hooks/use_tab_error', () => ({
   useTabError: jest.fn(),
 }));
 
+jest.mock('../../../application/utils/hooks/use_cannot_build_tab_query', () => ({
+  useCannotBuildTabQuery: jest.fn(() => false),
+}));
+
+jest.mock('./patterns_error_guard', () => ({
+  PatternsErrorGuard: () => <div>patterns empty state</div>,
+}));
+
 import { useTabError } from '../../../application/utils/hooks/use_tab_error';
+import { useCannotBuildTabQuery } from '../../../application/utils/hooks/use_cannot_build_tab_query';
 
 const mockUseTabError = useTabError as jest.MockedFunction<typeof useTabError>;
 
@@ -40,6 +50,20 @@ describe('ErrorGuard', () => {
 
     expect(screen.getByText('Child Content')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('renders the patterns empty state when the tab cannot build a query', () => {
+    mockUseTabError.mockReturnValue(undefined);
+    (useCannotBuildTabQuery as jest.Mock).mockReturnValue(true);
+
+    render(
+      <ErrorGuard registryTab={{ ...mockTabDefinition, id: EXPLORE_PATTERNS_TAB_ID }}>
+        <div>child</div>
+      </ErrorGuard>
+    );
+
+    expect(screen.getByText('patterns empty state')).toBeInTheDocument();
+    expect(screen.queryByText('child')).not.toBeInTheDocument();
   });
 
   it('renders error panel when there is an error', () => {
