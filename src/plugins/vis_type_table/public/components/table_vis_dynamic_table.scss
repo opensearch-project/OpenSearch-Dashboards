@@ -31,6 +31,24 @@
     opacity: 1 !important;
   }
 
+  &__resizeHandle {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    bottom: 0;
+    width: 7px;
+    cursor: col-resize;
+    background-color: $euiColorLightestShade;
+    z-index: 2;
+    border-right: 2px solid $euiColorLightestShade;
+
+    &:hover,
+    &:active {
+      border-right-color: $euiColorPrimary;
+      background-color: $euiColorLightestShade;
+    }
+  }
+
   &__actionButton {
     margin-left: $euiSizeXS;
     opacity: 0;
@@ -84,7 +102,7 @@
   th {
     cursor: pointer;
     border-bottom: $euiBorderThin;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     transition: background-color $euiAnimSpeedFast;
     text-align: left;

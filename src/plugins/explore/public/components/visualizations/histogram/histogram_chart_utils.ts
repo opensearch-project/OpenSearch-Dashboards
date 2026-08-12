@@ -9,6 +9,7 @@ import { getSeriesDisplayName } from '../utils/series';
 import { generateThresholdLines, getValueColorByThreshold } from '../utils/utils';
 import { HistogramChartStyle } from './histogram_vis_config';
 import { getColors } from '../theme/default_colors';
+import { getDecimalPrecision, roundToPrecision } from '../utils/data_transformation';
 
 interface Options {
   styles: HistogramChartStyle;
@@ -16,6 +17,16 @@ interface Options {
   binEndField: string;
   seriesFields: string[] | ((headers?: string[]) => string[]);
 }
+
+export const formatHistogramBucketValue = (value: unknown, bucketPrecision: number): string => {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return String(value);
+  }
+
+  return roundToPrecision(numericValue, bucketPrecision).toString();
+};
 
 export const createHistogramSeries =
   <T extends BaseChartStyle>(options: Options): PipelineFn<T> =>
@@ -40,7 +51,17 @@ export const createHistogramSeries =
     const binEndIndex = headers.indexOf(binEndField);
     const firstRow = transformedData[1];
     const lastRow = transformedData[transformedData.length - 1];
-    const bucketSize = firstRow[binEndIndex] - firstRow[binStartIndex];
+    // Use the stored bucket boundary values to decide label precision. Computing
+    // precision from the derived interval can introduce binary floating-point
+    // artifacts, for example 1.2 - 1 -> 0.19999999999999996.
+    const bucketPrecision = Math.max(
+      getDecimalPrecision(Number(firstRow[binStartIndex])),
+      getDecimalPrecision(Number(firstRow[binEndIndex]))
+    );
+    const bucketSize = roundToPrecision(
+      firstRow[binEndIndex] - firstRow[binStartIndex],
+      bucketPrecision
+    );
     const min = firstRow[binStartIndex];
     const max = lastRow[binEndIndex];
 
@@ -109,9 +130,19 @@ export const createHistogramSeries =
         if (!Array.isArray(params) && Array.isArray(params.value)) {
           const dimensionNames = params.dimensionNames ?? [];
           const bucketStart =
-            format.encodeHTML(String(params.value[dimensionNames.indexOf(binStartField)])) ?? '-';
+            format.encodeHTML(
+              formatHistogramBucketValue(
+                params.value[dimensionNames.indexOf(binStartField)],
+                bucketPrecision
+              )
+            ) ?? '-';
           const bucketEnd =
-            format.encodeHTML(String(params.value[dimensionNames.indexOf(binEndField)])) ?? '-';
+            format.encodeHTML(
+              formatHistogramBucketValue(
+                params.value[dimensionNames.indexOf(binEndField)],
+                bucketPrecision
+              )
+            ) ?? '-';
           const value =
             format.encodeHTML(
               String(params.value[dimensionNames.indexOf(params.seriesId ?? '')])
@@ -140,6 +171,10 @@ export const createHistogramSeries =
       xAxisConfig.min = min;
       xAxisConfig.max = max;
       xAxisConfig.interval = bucketSize;
+      xAxisConfig.axisLabel = {
+        ...xAxisConfig.axisLabel,
+        formatter: (value: unknown) => formatHistogramBucketValue(value, bucketPrecision),
+      };
       newState.xAxisConfig = xAxisConfig;
     }
 
