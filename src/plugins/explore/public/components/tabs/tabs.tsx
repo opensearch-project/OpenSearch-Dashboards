@@ -97,11 +97,19 @@ export const ExploreTabs = () => {
       if (isMetricsExploreTab && metricsPageMode === 'query') {
         return false;
       }
+
+      // A tab renders only for the languages it declares. Tabs declaring none
+      // are language-agnostic, matching the language toggle's own
+      // `supportedLanguages?.length` guard.
+      const supportsActiveLanguage =
+        !query?.language ||
+        !registryTab.supportedLanguages?.length ||
+        registryTab.supportedLanguages.includes(query.language);
+      if (!supportsActiveLanguage) {
+        return false;
+      }
+
       if (isPatternsTab || isFieldStatsTab) {
-        // Hide patterns and field statistics tabs for SQL queries
-        if (query?.language === 'SQL') {
-          return false;
-        }
         return registeredFlavor && isDefaultDataset;
       }
       return registeredFlavor;
