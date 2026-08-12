@@ -38,3 +38,9 @@ export interface DataSourceConnection {
   description?: string;
   relatedConnections?: DataSourceConnection[];
 }
+
+export interface WorkspaceAssociateResult {
+  id: string;
+  type: string;
+  error?: string;
+}
