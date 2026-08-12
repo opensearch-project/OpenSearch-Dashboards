@@ -12,13 +12,16 @@ import {
 } from '../../../application/utils/state_management/selectors';
 import './resizable_query_container.scss';
 
+// editor line (~18px) + editor padding/border (~22px)
+const QUERY_PANEL_EDITOR_LINE_PX = 42;
 // Pixel height needed for the query panel to show one line:
-// widgets bar (~30px) + editor line (~18px) + editor padding/border (~22px)
-const QUERY_PANEL_SINGLE_LINE_PX = 72;
+// One-row widgets bar (estimated ~30px) + editor line, used until the bar is measured.
+const QUERY_PANEL_SINGLE_LINE_PX = 30 + QUERY_PANEL_EDITOR_LINE_PX;
 const QUERY_PANEL_MIN_SIZE = '3%';
 const QUERY_PANEL_MIN_PCT = 3;
 const QUERY_PANEL_MAX_PCT = 72;
 const GENERATED_QUERY_SELECTOR = '.exploreQueryPanelGeneratedQuery';
+const WIDGETS_ROW_SELECTOR = '.exploreQueryPanel__widgetsRow';
 const BUILDER_SELECTOR = '.plqBuilder';
 const RESIZABLE_CONTAINER_SELECTOR = '.exploreResizableQueryContainer';
 const QUERY_PANEL_HEIGHT_PROPERTY = '--explore-query-panel-height';
@@ -125,13 +128,35 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
     return () => clearTimeout(timer);
   }, []);
 
+  // Outside the builder, keep the default panel height at the dynamically
+  // measured widgets bar height plus one editor line.
+  useLayoutEffect(() => {
+    if (builderActive || !innerRef.current) return;
+    const widgetsEl = innerRef.current.querySelector<HTMLElement>(WIDGETS_ROW_SELECTOR);
+    if (!widgetsEl) return;
+
+    const measureAndApply = () => {
+      if (userResizedRef.current) return;
+      const widgetsPx = Math.max(widgetsEl.scrollHeight, widgetsEl.getBoundingClientRect().height);
+      if (widgetsPx < 1) return;
+      const naturalPx = Math.ceil(widgetsPx + QUERY_PANEL_EDITOR_LINE_PX);
+      if (Math.abs(naturalPx - userBasePxRef.current) < 1) return;
+      userBasePxRef.current = naturalPx;
+      applyPanelHeight(userBasePxRef.current + barPxRef.current);
+    };
+
+    measureAndApply();
+    const observer = new ResizeObserver(measureAndApply);
+    observer.observe(widgetsEl);
+    return () => observer.disconnect();
+  }, [builderActive, applyPanelHeight]);
+
   // Open the panel at the builder's natural height as its default, then keep it
   // matched to the builder's measured height (its rows wrap at narrow widths, so
   // a fixed target would clip them). Once the user drags the resizer, they take
   // over: the panel stays where they put it, including smaller than the builder.
   useLayoutEffect(() => {
     if (!builderActive || !innerRef.current) return;
-    userResizedRef.current = false;
     const inner = innerRef.current;
     const builderEl = inner.querySelector<HTMLElement>(BUILDER_SELECTOR);
     if (!builderEl) return;

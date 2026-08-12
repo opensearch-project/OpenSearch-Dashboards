@@ -323,6 +323,102 @@ describe('ResizableQueryContainer', () => {
     });
   });
 
+  describe('widgets bar sizing', () => {
+    const panelWithWidgets = (
+      <div data-test-subj="query-panel">
+        <div className="exploreQueryPanel__widgetsRow">Widgets</div>
+      </div>
+    );
+
+    const queryPanelSize = () =>
+      parseFloat(
+        (
+          document.querySelector('.exploreResizableQueryContainer') as HTMLElement
+        ).style.getPropertyValue('--explore-query-panel-height')
+      );
+
+    it('grows the default panel height when the widgets bar wraps to more rows', () => {
+      render(
+        <ResizableQueryContainer queryPanel={panelWithWidgets}>{content}</ResizableQueryContainer>
+      );
+      const widgetsEl = document.querySelector('.exploreQueryPanel__widgetsRow') as HTMLElement;
+      Object.defineProperty(widgetsEl, 'scrollHeight', { value: 54, configurable: true });
+
+      act(() => {
+        resizeObserverCallbacks.forEach((callback) =>
+          callback([] as ResizeObserverEntry[], {} as ResizeObserver)
+        );
+      });
+
+      // 54px widgets bar + 42px editor line.
+      expect(queryPanelSize()).toBe(96);
+    });
+
+    it('keeps the dragged height after switching to the builder and back', () => {
+      const panelWithBuilder = (
+        <div data-test-subj="query-panel">
+          <div className="exploreQueryPanel__widgetsRow">Widgets</div>
+          <div className="plqBuilder">Builder</div>
+        </div>
+      );
+      const { rerender } = render(
+        <ResizableQueryContainer queryPanel={panelWithBuilder}>{content}</ResizableQueryContainer>
+      );
+
+      const containerEl = document.querySelector('.exploreResizableQueryContainer') as HTMLElement;
+      const queryPanelWrapper = document.querySelector(
+        '.exploreResizableQueryContainer__queryPanelWrapper'
+      ) as HTMLElement;
+      const contentPanel = document.querySelector(
+        '.exploreResizableQueryContainer__contentPanelWrapper'
+      ) as HTMLElement;
+      const rect = (height: number) =>
+        ({
+          width: 1000,
+          height,
+          top: 0,
+          right: 1000,
+          bottom: height,
+          left: 0,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        }) as DOMRect;
+      jest.spyOn(containerEl, 'getBoundingClientRect').mockReturnValue(rect(800));
+      jest.spyOn(queryPanelWrapper, 'getBoundingClientRect').mockReturnValue(rect(300));
+      jest.spyOn(contentPanel, 'getBoundingClientRect').mockReturnValue(rect(500));
+      const builderEl = document.querySelector('.plqBuilder') as HTMLElement;
+      Object.defineProperty(builderEl, 'scrollHeight', { value: 400, configurable: true });
+
+      // User drags the resizer in code mode to a custom height.
+      act(() => {
+        resizeObserverCallbacks.forEach((callback) =>
+          callback([] as ResizeObserverEntry[], {} as ResizeObserver)
+        );
+      });
+      fireEvent.keyDown(
+        document.querySelector('.exploreResizableQueryContainer__resizeHandle') as HTMLElement,
+        { key: 'ArrowDown' }
+      );
+      const dragged = queryPanelSize();
+
+      act(() => {
+        rerender(
+          <ResizableQueryContainer queryPanel={panelWithBuilder} builderActive>
+            {content}
+          </ResizableQueryContainer>
+        );
+      });
+      act(() => {
+        rerender(
+          <ResizableQueryContainer queryPanel={panelWithBuilder}>{content}</ResizableQueryContainer>
+        );
+      });
+
+      expect(queryPanelSize()).toBe(dragged);
+    });
+  });
+
   describe('prompt mode', () => {
     beforeEach(() => {
       mockUseSelector.mockImplementation((selector: any) => {
