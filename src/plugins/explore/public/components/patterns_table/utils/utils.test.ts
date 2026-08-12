@@ -10,11 +10,15 @@ import {
   brainUpdateSearchPatternQuery,
   createExcludeSearchPatternQuery,
   createSearchPatternQuery,
+  escapeSqlValue,
   findDefaultPatternsField,
   highlightLogUsingPattern,
   isValidFiniteNumber,
   regexExcludeSearchPatternQuery,
   regexUpdateSearchPatternQuery,
+  sqlExcludeSearchPatternQuery,
+  sqlPatternQuery,
+  sqlUpdateSearchPatternQuery,
 } from './utils';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import * as queryActions from '../../../application/utils/state_management/actions/query_actions';
@@ -194,6 +198,85 @@ describe('utils', () => {
       expect(result).toBe(
         'my raw query | patterns `message` | where patterns_field != "Error <*>"'
       );
+    });
+  });
+
+  describe('SQL pattern queries', () => {
+    const queryBase = 'SELECT * FROM my_index';
+    const patternsField = 'message';
+    const patternString = '<*> /<*>/<*>';
+
+    describe('escapeSqlValue', () => {
+      it('wraps a value in single quotes', () => {
+        expect(escapeSqlValue('api')).toBe("'api'");
+      });
+
+      it('doubles embedded single quotes', () => {
+        expect(escapeSqlValue("o'brien")).toBe("'o''brien'");
+        expect(escapeSqlValue("''")).toBe("''''''");
+      });
+
+      it('coerces non-string values to string', () => {
+        expect(escapeSqlValue(123 as any)).toBe("'123'");
+      });
+    });
+
+    describe('sqlPatternQuery', () => {
+      it('builds a REPLACE-based GROUP BY query with unaliased aggregates', () => {
+        expect(sqlPatternQuery(queryBase, patternsField)).toBe(
+          'SELECT pattern, COUNT(*), MIN(sample) ' +
+            "FROM (SELECT REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') AS pattern, `message` AS sample " +
+            'FROM (SELECT * FROM my_index) sub_inner) sub ' +
+            'GROUP BY pattern ORDER BY COUNT(*) DESC'
+        );
+      });
+    });
+
+    describe('sqlUpdateSearchPatternQuery', () => {
+      it('builds a filter-for query using = on the REPLACE expression', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+        );
+      });
+
+      it('escapes single quotes in the pattern string', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, "o'brien")).toContain(
+          "= 'o''brien'"
+        );
+      });
+    });
+
+    describe('sqlExcludeSearchPatternQuery', () => {
+      it('builds a filter-out query using <> on the REPLACE expression', () => {
+        expect(sqlExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+        );
+      });
+    });
+
+    describe('createSearchPatternQuery (SQL branch)', () => {
+      it('produces the SQL filter-for query when language is SQL', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        expect(createSearchPatternQuery(query, patternsField, false, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+        );
+      });
+
+      it('ignores usingRegexPatterns for SQL (only the simple method exists)', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        const withRegex = createSearchPatternQuery(query, patternsField, true, patternString);
+        const withoutRegex = createSearchPatternQuery(query, patternsField, false, patternString);
+        expect(withRegex).toBe(withoutRegex);
+      });
+    });
+
+    describe('createExcludeSearchPatternQuery (SQL branch)', () => {
+      it('produces the SQL filter-out query when language is SQL', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        expect(createExcludeSearchPatternQuery(query, patternsField, false, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(`message`, '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+        );
+      });
     });
   });
 

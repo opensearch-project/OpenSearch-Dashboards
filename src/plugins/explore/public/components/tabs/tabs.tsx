@@ -96,8 +96,9 @@ export const ExploreTabs = () => {
         return false;
       }
       if (isPatternsTab || isFieldStatsTab) {
-        // Hide patterns and field statistics tabs for SQL queries
-        if (query?.language === 'SQL') {
+        // Field statistics is not yet supported for SQL; patterns is (via REPLACE-based
+        // pattern extraction), so only field statistics stays hidden for SQL.
+        if (isFieldStatsTab && query?.language === 'SQL') {
           return false;
         }
         return registeredFlavor && isDefaultDataset;
