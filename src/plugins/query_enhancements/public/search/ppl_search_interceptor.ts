@@ -38,6 +38,22 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
+const DEFAULT_SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
+  `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+const canAppendDefaultSort = (queryString: string): boolean => {
+  const masked = queryString
+    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
+
+  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
+
+  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
+};
+
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
 
@@ -78,7 +94,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+      switchMap((query) =>
+        fetch(context, this.appendDefaultSort(query), this.getAggConfig(searchRequest, query))
+      )
     );
   }
 
@@ -174,6 +192,26 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return {
       ...query,
       query: finalQuery,
+    };
+  }
+
+  /**
+   * Appends a default descending sort on the time field to match legacy Discover behavior,
+   * unless the query already sorts, aggregates, projects specific fields, or limits results.
+   * Applied only to the results query, not to the histogram aggregation query.
+   */
+  private appendDefaultSort(query: Query): Query {
+    if (
+      !isPPLSearchQuery(query) ||
+      !query.dataset?.timeFieldName ||
+      !canAppendDefaultSort(query.query)
+    ) {
+      return query;
+    }
+
+    return {
+      ...query,
+      query: `${query.query} | sort - \`${query.dataset.timeFieldName}\``,
     };
   }
 
