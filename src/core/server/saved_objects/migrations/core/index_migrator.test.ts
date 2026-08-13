@@ -71,15 +71,7 @@ describe('IndexMigrator', () => {
     const { client } = testOpts;
 
     testOpts.mappingProperties = { foo: { type: 'long' } as any };
-    const rawConfig = configMock.create();
-    rawConfig.get.mockImplementation((path) => {
-      if (path === 'savedObjects.permission.enabled') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    testOpts.opensearchDashboardsRawConfig = rawConfig;
+    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: false });
 
     withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
@@ -158,15 +150,7 @@ describe('IndexMigrator', () => {
     const { client } = testOpts;
 
     testOpts.mappingProperties = { foo: { type: 'long' } as any };
-    const rawConfig = configMock.create();
-    rawConfig.get.mockImplementation((path) => {
-      if (path === 'workspace.enabled') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    testOpts.opensearchDashboardsRawConfig = rawConfig;
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: true });
 
     withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 

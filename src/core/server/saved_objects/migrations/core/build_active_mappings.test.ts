@@ -34,7 +34,6 @@ import {
   diffMappings,
   setConditionalFieldFlags,
 } from './build_active_mappings';
-import { configMock } from '../../../config/mocks';
 
 describe('buildActiveMappings', () => {
   // The flags are process-wide, so a test that records them would change every mapping built after.
@@ -47,22 +46,8 @@ describe('buildActiveMappings', () => {
     expect(mappings.dynamic).toEqual('strict');
   });
 
-  test('maps the conditional fields from the recorded flags when no configuration is supplied', () => {
-    // Reproduces the multi-tenancy callers, which have no access to the raw configuration.
-    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: true });
-
+  test('omits the conditional fields unless the recorded flags enable them', () => {
     const mappings = buildActiveMappings({});
-
-    expect(mappings.properties).toHaveProperty('permissions');
-    expect(mappings.properties).toHaveProperty('workspaces');
-  });
-
-  test('prefers a supplied configuration over the recorded flags', () => {
-    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: true });
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(false);
-
-    const mappings = buildActiveMappings({}, rawConfig);
 
     expect(mappings.properties).not.toHaveProperty('permissions');
     expect(mappings.properties).not.toHaveProperty('workspaces');
@@ -124,15 +109,13 @@ describe('buildActiveMappings', () => {
   });
 
   test('permissions field is added when permission control flag is enabled', () => {
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(true);
-    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.permissions');
+    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: false });
+    expect(buildActiveMappings({})).toHaveProperty('properties.permissions');
   });
 
   test('workspaces field is added when workspace feature flag is enabled', () => {
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(true);
-    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.workspaces');
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: true });
+    expect(buildActiveMappings({})).toHaveProperty('properties.workspaces');
   });
 });
 

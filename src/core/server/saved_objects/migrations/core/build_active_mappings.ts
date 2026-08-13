@@ -34,7 +34,6 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import { Config } from '@osd/config';
 import {
   IndexMapping,
   SavedObjectsFieldMapping,
@@ -53,7 +52,7 @@ let conditionalFieldFlags: ConditionalFieldFlags = {
   workspacesEnabled: false,
 };
 
-/** Records the flags for callers that cannot supply the raw configuration. Called once, at setup. */
+/** Records the conditional-field decision. Called once, during core setup. */
 export function setConditionalFieldFlags(flags: ConditionalFieldFlags) {
   conditionalFieldFlags = flags;
 }
@@ -65,23 +64,13 @@ export function setConditionalFieldFlags(flags: ConditionalFieldFlags) {
  * @param typeDefinitions - the type definitions to build mapping from.
  */
 export function buildActiveMappings(
-  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
-  opensearchDashboardsRawConfig?: Config
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ): IndexMapping {
   const mapping = defaultMapping();
 
   let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
-  // A supplied configuration is authoritative. An absent one means the caller has no access to it,
-  // not that the features are off.
-  const permissionsEnabled = opensearchDashboardsRawConfig
-    ? !!opensearchDashboardsRawConfig.get('savedObjects.permission.enabled')
-    : conditionalFieldFlags.permissionsEnabled;
-  const workspacesEnabled = opensearchDashboardsRawConfig
-    ? !!opensearchDashboardsRawConfig.get('workspace.enabled')
-    : conditionalFieldFlags.workspacesEnabled;
-
-  if (permissionsEnabled) {
+  if (conditionalFieldFlags.permissionsEnabled) {
     const principals: SavedObjectsFieldMapping = {
       properties: {
         users: {
@@ -104,7 +93,7 @@ export function buildActiveMappings(
     });
   }
 
-  if (workspacesEnabled) {
+  if (conditionalFieldFlags.workspacesEnabled) {
     mergedProperties = validateAndMerge(mapping.properties, {
       workspaces: {
         type: 'keyword',
