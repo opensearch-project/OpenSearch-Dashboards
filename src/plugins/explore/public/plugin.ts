@@ -76,7 +76,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
-import { ExploreEmbeddableFactory } from './embeddable';
+import { ExploreEmbeddableFactory, PanelDataService } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
@@ -902,6 +902,11 @@ export class ExplorePlugin implements Plugin<
         plugins.contextProvider!.actions.unregisterAssistantAction(
           APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name
         );
+      const { registerAssistantAction, unregisterAssistantAction } =
+        plugins.contextProvider.actions;
+
+      // Inject contextProvider action helpers into PanelDataService
+      PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
     }
 
     const savedExploreLoader = createSavedExploreLoader({
@@ -929,6 +934,8 @@ export class ExplorePlugin implements Plugin<
     this.unregisterPPLExecuteQueryAction?.();
     this.unregisterPPLLintFixAction?.();
     clearActivePPLLintFixSession();
+    // cleanup shared panel-data store + fetch_panel_data tool.
+    PanelDataService.getInstance().reset();
   }
 
   private registerEmbeddable(
