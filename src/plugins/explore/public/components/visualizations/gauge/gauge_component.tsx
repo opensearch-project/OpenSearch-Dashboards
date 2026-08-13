@@ -46,20 +46,17 @@ const constrainFontSizeByWidth = ({
 export const GaugeChartRender: React.FC<GaugeChartRenderProps> = ({ spec, text, seriesName }) => {
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const handlerRef = useRef(
-    debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100)
-  );
 
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
 
-    const handler = handlerRef.current;
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
     const resizeObserver = new ResizeObserver(handler);
     resizeObserver.observe(element);
 
