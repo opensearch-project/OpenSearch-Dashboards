@@ -7,8 +7,8 @@ import { i18n } from '@osd/i18n';
 import semver from 'semver';
 import qs from 'query-string';
 import rison from 'rison-node';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -76,7 +76,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
-import { ExploreEmbeddableFactory } from './embeddable';
+import { ExploreEmbeddableFactory, PanelDataService } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
@@ -101,6 +101,11 @@ import {
   registerDisabledPPLLintFixAction,
 } from './components/query_panel/actions/ppl_lint_fix_action';
 import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
+
+import {
+  registerAutoVisualizationAction,
+  AUTO_VISUALIZATION_TOOL_NAME,
+} from './components/visualizations/actions/auto_visualization_action';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -141,6 +146,8 @@ export class ExplorePlugin implements Plugin<
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
   private unregisterPPLLintFixAction?: () => void;
+  private unregisterVisualizationTools?: () => void;
+  private visualizationToolsWorkspaceSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -902,6 +909,33 @@ export class ExplorePlugin implements Plugin<
         plugins.contextProvider!.actions.unregisterAssistantAction(
           APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name
         );
+      const { registerAssistantAction, unregisterAssistantAction } =
+        plugins.contextProvider.actions;
+
+      // The tool will only be registered in an explore-enabled workspace as it depends on vis editor
+      this.visualizationToolsWorkspaceSubscription = this.getIsExploreEnabledWorkspace$(
+        core
+      ).subscribe((isExploreEnabledWorkspace) => {
+        if (isExploreEnabledWorkspace) {
+          registerAutoVisualizationAction(
+            registerAssistantAction,
+            core,
+            plugins.data,
+            plugins.contextProvider
+          );
+        } else {
+          // Leaving the workspace must take the tool back out of availableTools
+          unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+        }
+      });
+
+      this.unregisterVisualizationTools = () => {
+        this.visualizationToolsWorkspaceSubscription?.unsubscribe();
+        unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+      };
+
+      // Inject contextProvider action helpers into PanelDataService
+      PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
     }
 
     const savedExploreLoader = createSavedExploreLoader({
@@ -929,6 +963,9 @@ export class ExplorePlugin implements Plugin<
     this.unregisterPPLExecuteQueryAction?.();
     this.unregisterPPLLintFixAction?.();
     clearActivePPLLintFixSession();
+    this.unregisterVisualizationTools?.();
+    // cleanup shared panel-data store + fetch_panel_data tool.
+    PanelDataService.getInstance().reset();
   }
 
   private registerEmbeddable(
@@ -1098,16 +1135,33 @@ export class ExplorePlugin implements Plugin<
     }
   }
 
-  private async getIsExploreEnabledWorkspace(core: CoreStart) {
-    const features = await core.workspaces.currentWorkspace$
-      .pipe(take(1))
-      .toPromise()
-      .then((workspace) => workspace?.features);
+  private isExploreEnabledWorkspaceFeatures(features?: string[]) {
     return (
       (features &&
         (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
           isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
+    );
+  }
+
+  private async getIsExploreEnabledWorkspace(core: CoreStart) {
+    const features = await core.workspaces.currentWorkspace$
+      .pipe(take(1))
+      .toPromise()
+      .then((workspace) => workspace?.features);
+    return this.isExploreEnabledWorkspaceFeatures(features);
+  }
+
+  /**
+   * Emits on every workspace switch, unlike `getIsExploreEnabledWorkspace`, which reads
+   * `currentWorkspace$` once. Use this for anything that has to be torn down again when
+   * the user leaves the workspace; the one-shot read is fine for app mounts, which are
+   * re-run per navigation anyway.
+   */
+  private getIsExploreEnabledWorkspace$(core: CoreStart): Observable<boolean> {
+    return core.workspaces.currentWorkspace$.pipe(
+      map((workspace) => this.isExploreEnabledWorkspaceFeatures(workspace?.features)),
+      distinctUntilChanged()
     );
   }
 }

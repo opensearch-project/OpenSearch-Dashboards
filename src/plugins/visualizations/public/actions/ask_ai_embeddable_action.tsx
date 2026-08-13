@@ -170,23 +170,23 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
 
       // Send visualization screenshot to chat
       if (this.core.chat) {
-        // Create a message with the visualization image following AG-UI protocol
-        const imageMessage = {
-          role: 'user' as const,
-          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          content: [
+        await this.core.chat.sendMessageWithWindow(
+          [
             {
-              type: 'binary' as const,
-              mimeType: 'image/jpeg',
-              data: visualizationBase64,
+              type: 'image',
+              source: {
+                type: 'data',
+                value: visualizationBase64,
+                mimeType: 'image/jpeg',
+              },
+            },
+
+            {
+              type: 'text',
+              text: 'Give me a summary for the selected visualization',
             },
           ],
-        };
-
-        // sendMessageWithWindow will open the chat window and send the message
-        await this.core.chat.sendMessageWithWindow(
-          'Give me a summary for the selected visualization',
-          [imageMessage]
+          []
         );
       }
     } catch (error) {
