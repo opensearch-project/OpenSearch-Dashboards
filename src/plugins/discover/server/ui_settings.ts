@@ -76,11 +76,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     value: 2000,
     description: i18n.translate('discover.advancedSettings.aggregationSampleSizeText', {
-      defaultMessage:
-        'The maximum number of rows returned for an aggregating query (e.g. stats). These rows ' +
-        'are aggregation buckets rather than documents, so this is kept separate from the ' +
-        'document sample size above. The effective limit is still capped by the ' +
-        'plugins.query.size_limit cluster setting.',
+      defaultMessage: 'The number of rows to show for an aggregating query, such as stats',
     }),
     category: ['discover'],
     schema: schema.number(),
