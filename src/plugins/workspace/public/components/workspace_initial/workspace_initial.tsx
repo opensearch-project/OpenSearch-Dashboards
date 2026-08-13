@@ -18,6 +18,9 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiToolTip,
+  EuiTourStep,
   EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -34,9 +37,12 @@ import {
   WorkspaceRecency,
   WorkspaceRoleFilter,
   buildWorkspaceFilterCriteria,
+  readMigrationTourDismissed,
+  writeMigrationTourDismissed,
 } from './utils';
 import { WorkspaceUseCaseFlyout } from '../workspace_form';
 import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
+import { AssetMigrationModal, useUnassignedAssets } from '../asset_migration';
 
 export interface WorkspaceInitialProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -44,7 +50,7 @@ export interface WorkspaceInitialProps {
 
 export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps) => {
   const {
-    services: { application, chrome, workspaces, http, docLinks },
+    services: { application, chrome, workspaces, http, docLinks, savedObjects },
   } = useOpenSearchDashboards<CoreStart>();
   const isDashboardAdmin = !!application.capabilities.dashboards?.isDashboardAdmin;
   const availableUseCases = registeredUseCases$
@@ -86,6 +92,83 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
     );
   });
   const [isCreateWorkspacePopoverOpen, setIsCreateWorkspacePopoverOpen] = useState(false);
+
+  // Only a dashboard admin can migrate global assets to workspace.
+  const [isMigrationModalVisible, setIsMigrationModalVisible] = useState(false);
+  const unassignedAssets = useUnassignedAssets(http, savedObjects.client, isDashboardAdmin);
+  const hasUnassignedAssets = unassignedAssets.total > 0;
+
+  const [isMigrationTourDismissed, setIsMigrationTourDismissed] = useState(
+    readMigrationTourDismissed
+  );
+  const dismissMigrationTour = useCallback(() => {
+    writeMigrationTourDismissed();
+    setIsMigrationTourDismissed(true);
+  }, []);
+  const openMigrationModal = useCallback(() => {
+    dismissMigrationTour();
+    setIsMigrationModalVisible(true);
+  }, [dismissMigrationTour]);
+
+  const migrateAssetsButton = (
+    <EuiTourStep
+      content={
+        <EuiText size="s">
+          <p style={{ maxWidth: 260 }}>
+            {i18n.translate('workspace.initial.migrateAssets.tour.content', {
+              defaultMessage:
+                'These assets were created before workspaces existed, so they are hidden from every workspace view. Move them into a workspace to make them visible again.',
+            })}
+          </p>
+        </EuiText>
+      }
+      isStepOpen={!isMigrationTourDismissed}
+      minWidth={260}
+      onFinish={dismissMigrationTour}
+      step={1}
+      stepsTotal={1}
+      anchorPosition="downCenter"
+      ownFocus={false}
+      subtitle={i18n.translate('workspace.initial.migrateAssets.tour.subtitle', {
+        defaultMessage: "What's new",
+      })}
+      title={i18n.translate('workspace.initial.migrateAssets.tour.title', {
+        defaultMessage: 'You have assets outside any workspace',
+      })}
+    >
+      <EuiSmallButton
+        iconType="importAction"
+        data-test-subj="workspace-initial-migrateAssets-button"
+        onClick={openMigrationModal}
+      >
+        {i18n.translate('workspace.initial.migrateAssets.button', {
+          defaultMessage: 'Migrate existing assets ({total})',
+          values: { total: unassignedAssets.total },
+        })}
+      </EuiSmallButton>
+    </EuiTourStep>
+  );
+
+  /**
+   * Surfaced in place of the button when the lookup failed, because staying silent is
+   * indistinguishable from "nothing to migrate" -- exactly the false conclusion this flow exists to
+   * prevent. The reason goes in a tooltip and the label retries.
+   */
+  const migrateAssetsError = (
+    <EuiToolTip content={unassignedAssets.error}>
+      <EuiSmallButtonEmpty
+        color="danger"
+        iconType="alert"
+        isLoading={unassignedAssets.loading}
+        onClick={unassignedAssets.refresh}
+        data-test-subj="workspace-initial-migrateAssets-error"
+      >
+        {i18n.translate('workspace.initial.migrateAssets.error', {
+          defaultMessage: 'Retry checking for unmigrated assets',
+        })}
+      </EuiSmallButtonEmpty>
+    </EuiToolTip>
+  );
   const mountUserAccountRef = useRef<HTMLDivElement>(null);
   const mountSettingRef = useRef<HTMLDivElement>(null);
   const mountDevToolsRef = useRef<HTMLDivElement>(null);
@@ -199,7 +282,19 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
               })}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{isDashboardAdmin && createWorkspacePopover}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isDashboardAdmin && (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                {!!unassignedAssets.error && (
+                  <EuiFlexItem grow={false}>{migrateAssetsError}</EuiFlexItem>
+                )}
+                {hasUnassignedAssets && (
+                  <EuiFlexItem grow={false}>{migrateAssetsButton}</EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>{createWorkspacePopover}</EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {workspaceList.length > 0 && (
@@ -300,6 +395,18 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           availableUseCases={availableUseCases}
           onClose={handleFlyoutClose}
           defaultExpandUseCase={defaultExpandedUseCaseId}
+        />
+      )}
+      {isMigrationModalVisible && (
+        <AssetMigrationModal
+          migratableTypes={unassignedAssets.types}
+          existingWorkspaceNames={workspaceList.map((workspace) => workspace.name)}
+          onClose={(result) => {
+            setIsMigrationModalVisible(false);
+            if (result?.migratedAssets) {
+              unassignedAssets.refresh();
+            }
+          }}
         />
       )}
     </EuiPage>

@@ -115,7 +115,12 @@ export const registerBuiltInTabs = (
           try {
             patternsField = findDefaultPatternsField(services);
           } catch {
-            return preparedQuery.query;
+            // The field comes from the logs tab's in-memory results, so this is the
+            // normal state after every reload until the logs query has run once.
+            // Returning the user's own query would make `Tabs.onTabClick` run a plain
+            // search under the patterns cache key and render it through the patterns
+            // column mapping. Return no query instead.
+            return '';
           }
         }
 

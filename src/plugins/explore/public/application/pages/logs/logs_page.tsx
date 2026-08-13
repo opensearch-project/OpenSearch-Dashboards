@@ -38,6 +38,7 @@ import {
 import { setActiveTab } from '../../utils/state_management/slices';
 import { selectDataset } from '../../utils/state_management/selectors';
 import { LogsQueryPanel } from './logs_query_panel';
+import { useBuilderOnlyMode } from './use_builder_only_mode';
 
 /**
  * Main application component for the Explore plugin
@@ -104,6 +105,9 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
   const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
 
+  // Workspace-level setting: when on, the logs editor allows only the visual builder.
+  const builderOnlyMode = useBuilderOnlyMode(queryBuilderEnabled);
+
   // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
   const dataset = useSelector(selectDataset);
 
@@ -151,6 +155,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                     onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
                     hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
                     onModeChange={setIsBuilderCodeMode}
+                    builderOnlyMode={builderOnlyMode}
                   />
                 ) : (
                   <QueryPanel
@@ -160,7 +165,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                   />
                 )
               }
-              tallDefault={queryBuilderEnabled}
+              builderActive={queryBuilderEnabled && !isBuilderCodeMode}
             >
               {isAnalyzeAvailable && isOpen && (isAnalyzeLoading || analyzeResult) ? (
                 isAnalyzeLoading ? (

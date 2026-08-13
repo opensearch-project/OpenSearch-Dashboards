@@ -24,9 +24,8 @@ $expandedHeaderWidth: $headerWidth * 2;
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  right: var(--eui-overlay-offset-right, 0);
   z-index: $ouiZHeader - 1; // lower than flyouts
-  width: 100%;
   min-height: var(--global-banner-height);
 }
 

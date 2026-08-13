@@ -23,6 +23,7 @@ import {
   IRequestDetail,
   WorkspaceAttributeWithPermission,
 } from './types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { workspace } from './saved_objects';
 import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } from './utils';
 import {
@@ -446,17 +447,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     workspaceId: string,
     objects: Array<{ id: string; type: string }>
-  ): Promise<IResponse<Array<{ id: string; error?: string }>>> {
+  ): Promise<IResponse<WorkspaceAssociateResult[]>> {
     const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
     const promises = objects.map(async (obj) => {
       try {
         await savedObjectClient.addToWorkspaces(obj.type, obj.id, [workspaceId]);
-        return {
-          id: obj.id,
-        };
+        return { id: obj.id, type: obj.type };
       } catch (e) {
         return {
           id: obj.id,
+          type: obj.type,
           error: this.formatError(e),
         };
       }

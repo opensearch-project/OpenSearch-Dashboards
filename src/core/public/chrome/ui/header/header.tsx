@@ -723,7 +723,7 @@ export function Header({
 
   return (
     <>
-      <HeaderBanner globalBanner={globalBanner} style={sidecarPaddingStyle} />
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}

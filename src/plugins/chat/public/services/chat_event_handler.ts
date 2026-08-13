@@ -403,7 +403,7 @@ export class ChatEventHandler {
             toolCall.function.name,
             args,
             toolCallId,
-            await this.chatService.getCurrentDataSourceId()
+            await this.chatService.getCurrentDataSourceInfo()
           );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
@@ -873,8 +873,25 @@ export class ChatEventHandler {
    * Simply sets the timeline to the saved messages
    */
   private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
-    // Set timeline to snapshot messages
-    this.onTimelineUpdate(() => event.messages || []);
+    // agent backends may serialize a user message's `InputContent[]` to str
+    // restore multimodal user messages
+    this.onTimelineUpdate((prev) => {
+      const snapshot = event.messages || [];
+
+      const localArrayContent = new Map<string, unknown>();
+      for (const message of prev) {
+        if (message.role === 'user' && Array.isArray(message.content)) {
+          localArrayContent.set(message.id, message.content);
+        }
+      }
+      if (localArrayContent.size === 0) return snapshot;
+
+      return snapshot.map((message) => {
+        if (message.role !== 'user' || typeof message.content !== 'string') return message;
+        const content = localArrayContent.get(message.id);
+        return content ? ({ ...message, content } as Message) : message;
+      });
+    });
 
     // Reset streaming state
     this.onStreamingStateChange(false);

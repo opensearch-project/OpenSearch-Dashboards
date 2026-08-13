@@ -404,10 +404,14 @@ export const executeQueries = createAsyncThunk<
     activeTabCacheKey = activeTabPrepareQuery(query);
   }
 
-  // Check what needs execution
+  // Check what needs execution. An empty key means that tab's `prepareQuery`
+  // cannot build a query yet, so there is nothing to run.
   const needsVisualizationTabQuery =
-    visualizationTabCacheKey !== defaultCacheKey && !results[visualizationTabCacheKey];
+    !!visualizationTabCacheKey &&
+    visualizationTabCacheKey !== defaultCacheKey &&
+    !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
+    !!activeTabCacheKey &&
     activeTabCacheKey !== visualizationTabCacheKey &&
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
@@ -811,6 +815,18 @@ export const executeTabQuery = createAsyncThunk<
 >('query/executeTabQuery', async (params, thunkAPI) => {
   const { services } = params;
   const { getState } = thunkAPI;
+
+  // A tab whose `prepareQuery` cannot yet build a query returns an empty string
+  // (see the patterns tab in `register_tabs`). Executing that would send an empty
+  // query to the backend and cache the response under an empty key, so skip it and
+  // leave the tab uninitialized until the tab can produce a real query.
+  //
+  // Gated on cacheKey alone: most callers pass the same value for both, but the
+  // BRAIN retry in `register_tabs` deliberately passes a queryString that differs
+  // from its cacheKey, and that path should keep running.
+  if (!params.cacheKey) {
+    return;
+  }
 
   /**
    * below activeTabCustomQueryErrorHandler logic to be removed when datasets

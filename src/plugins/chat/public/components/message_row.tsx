@@ -10,6 +10,7 @@ import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
 import type { Message, AssistantMessage } from '../../common/types';
 import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
+import { getImageSrc } from '../utils/user_message_input';
 import { ShareModal } from './share_modal';
 import './message_row.scss';
 
@@ -71,28 +72,30 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     if (Array.isArray(content)) {
       return (
         <>
-          {content.map((block: any, index: number) => {
-            // Render binary content (images)
-            if (block.type === 'binary' && block.data) {
-              return (
-                <img
-                  key={index}
-                  src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
-                  alt={block.filename || 'Visualization'}
-                  style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
-                />
-              );
-            }
-            // Render text content as markdown
-            if (block.type === 'text' && block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            // Handle plain text blocks (for backward compatibility)
-            if (block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            return null;
-          })}
+          {content
+            .filter((block: any) => !block.name)
+            .map((block: any, index: number) => {
+              const imageSrc = getImageSrc(block);
+              if (imageSrc) {
+                return (
+                  <img
+                    key={index}
+                    src={imageSrc}
+                    alt={block.filename || 'Visualization'}
+                    style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+                  />
+                );
+              }
+              // Render text content as markdown
+              if (block.type === 'text' && block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              // Handle plain text blocks (for backward compatibility)
+              if (block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              return null;
+            })}
         </>
       );
     }

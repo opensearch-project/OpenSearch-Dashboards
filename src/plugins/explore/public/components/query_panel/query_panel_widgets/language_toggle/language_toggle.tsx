@@ -26,7 +26,11 @@ const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle
   defaultMessage: 'AI',
 });
 
-export const LanguageToggle = () => {
+interface LanguageToggleProps {
+  hideAI?: boolean;
+}
+
+export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
@@ -174,7 +178,7 @@ export const LanguageToggle = () => {
       );
     }
 
-    if (promptModeIsAvailable) {
+    if (promptModeIsAvailable && !hideAI) {
       output.push(
         <EuiContextMenuItem
           key="ai"
@@ -193,6 +197,7 @@ export const LanguageToggle = () => {
     onItemClick,
     onLanguageClick,
     promptModeIsAvailable,
+    hideAI,
     supportedLanguages,
     language,
     languageService,
