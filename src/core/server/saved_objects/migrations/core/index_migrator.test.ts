@@ -37,6 +37,7 @@ import { IndexMigrator } from './index_migrator';
 import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { configMock } from '../../../config/mocks';
+import { setConditionalFieldFlags } from './build_active_mappings';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
@@ -61,19 +62,16 @@ describe('IndexMigrator', () => {
     };
   });
 
+  // The flags are process-wide, so a test that records them would change every mapping built after.
+  afterEach(() =>
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: false })
+  );
+
   test('creates the index when permission control for saved objects is enabled', async () => {
     const { client } = testOpts;
 
     testOpts.mappingProperties = { foo: { type: 'long' } as any };
-    const rawConfig = configMock.create();
-    rawConfig.get.mockImplementation((path) => {
-      if (path === 'savedObjects.permission.enabled') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    testOpts.opensearchDashboardsRawConfig = rawConfig;
+    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: false });
 
     withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
@@ -152,15 +150,7 @@ describe('IndexMigrator', () => {
     const { client } = testOpts;
 
     testOpts.mappingProperties = { foo: { type: 'long' } as any };
-    const rawConfig = configMock.create();
-    rawConfig.get.mockImplementation((path) => {
-      if (path === 'workspace.enabled') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    testOpts.opensearchDashboardsRawConfig = rawConfig;
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: true });
 
     withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
 
@@ -206,6 +196,27 @@ describe('IndexMigrator', () => {
       },
       index: '.kibana_1',
     });
+  });
+
+  test('creates the index with the conditional fields recorded by core when no configuration is supplied', async () => {
+    // Reproduces the multi-tenancy tenant index path, which constructs an IndexMigrator without the
+    // raw configuration.
+    const { client } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'long' } as any };
+    testOpts.opensearchDashboardsRawConfig = undefined;
+    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: true });
+
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    const { mappings } = (client.indices.create as jest.Mock).mock.calls[0][0].body;
+    expect(mappings.properties).toHaveProperty('workspaces');
+    expect(mappings.properties).toHaveProperty('permissions');
+    // The hashes are what diffMappings compares, so they decide whether a migration is detected.
+    expect(mappings._meta.migrationMappingPropertyHashes).toHaveProperty('workspaces');
+    expect(mappings._meta.migrationMappingPropertyHashes).toHaveProperty('permissions');
   });
 
   test('creates the index if it does not exist', async () => {
