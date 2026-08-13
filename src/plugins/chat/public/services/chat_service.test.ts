@@ -1494,7 +1494,19 @@ describe('ChatService', () => {
     });
   });
 
-  describe('extractDataSourceIdFromPageContext', () => {
+  describe('getDataSourceFromPageContext', () => {
+    // Helper to stub the global context store and invoke the current method.
+    const extractDataSourceId = (contexts: any[]) => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue(contexts),
+      };
+      return (chatService as any).getDataSourceFromPageContext();
+    };
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+    });
+
     it('should extract data source ID from valid page context', () => {
       const contexts = [
         {
@@ -1515,7 +1527,7 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBe('correct-data-source-id');
     });
 
@@ -1531,7 +1543,7 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBe('investigation-data-source');
     });
 
@@ -1551,7 +1563,8 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      // const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBeUndefined();
     });
 
@@ -1564,7 +1577,7 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBeUndefined();
     });
 
@@ -1577,7 +1590,7 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBeUndefined();
     });
 
@@ -1590,7 +1603,7 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBeUndefined();
     });
 
@@ -1614,12 +1627,12 @@ describe('ChatService', () => {
         },
       ];
 
-      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      const result = extractDataSourceId(contexts);
       expect(result).toBe('first-id'); // Should return first valid page context
     });
 
     it('should handle empty contexts array', () => {
-      const result = (chatService as any).extractDataSourceIdFromPageContext([]);
+      const result = extractDataSourceId([]);
       expect(result).toBeUndefined();
     });
   });
@@ -2333,6 +2346,31 @@ describe('ChatService', () => {
 
       expect(result.content).toBe('spaced');
       expect(result.rawMessage).toBe('spaced');
+    });
+
+    it('should pass multimodal content arrays through untouched', () => {
+      const content = [
+        { type: 'binary' as const, mimeType: 'image/png', data: 'abc123' },
+        { type: 'text' as const, text: 'describe this chart' },
+      ];
+
+      const result = chatService.getUserMessage(content);
+
+      expect(result).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'user',
+        content,
+      });
+      expect(result.rawMessage).toBeUndefined();
+    });
+
+    it('should keep an explicit rawMessage alongside array content', () => {
+      const content = [{ type: 'text' as const, text: '/vis output' }];
+
+      const result = chatService.getUserMessage(content, '/vis');
+
+      expect(result.content).toEqual(content);
+      expect(result.rawMessage).toBe('/vis');
     });
   });
 });
