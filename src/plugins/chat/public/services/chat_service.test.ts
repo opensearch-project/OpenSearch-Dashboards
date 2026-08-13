@@ -2335,4 +2335,18 @@ describe('ChatService', () => {
       expect(result.rawMessage).toBe('spaced');
     });
   });
+
+  describe('shouldAutoFocusInput', () => {
+    it('should default to false', () => {
+      expect(chatService.getShouldAutoFocusInput()).toBe(false);
+    });
+
+    it('should reflect the value set via setShouldAutoFocusInput', () => {
+      chatService.setShouldAutoFocusInput(true);
+      expect(chatService.getShouldAutoFocusInput()).toBe(true);
+
+      chatService.setShouldAutoFocusInput(false);
+      expect(chatService.getShouldAutoFocusInput()).toBe(false);
+    });
+  });
 });

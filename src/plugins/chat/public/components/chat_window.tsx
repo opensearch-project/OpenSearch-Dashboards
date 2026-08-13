@@ -883,6 +883,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               onKeyDown={handleKeyDown}
               includeScreenShotEnabled={screenshotFeatureEnabled}
               onCaptureScreenshot={handleCaptureScreenshot}
+              ownFocus={chatService?.getShouldAutoFocusInput?.() ?? false}
             />
           </ChatSessionErrorBoundary>
         )}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
@@ -51,6 +51,16 @@ export class ChatService {
   private coreChatService?: ChatServiceStart;
   private workspaces?: WorkspacesStart;
   private savedObjectsClient?: SavedObjectsClientContract;
+
+  // Chat-UI-scoped, non-persisted signal: whether the chat input should
+  // auto-focus when the ChatWindow next mounts. Driven by the plugin
+  // (see plugin.ts#setupChatbotWindowState) so that explicit opens (header
+  // "Ask AI" button, workspace quick-start, sendMessageWithWindow) focus the
+  // input, while bootstrap auto-open (restoring persisted window state)
+  // does not steal focus on page load. Deliberately lives in the chat
+  // plugin rather than core.public.chat — it is a UI concern, not part of
+  // core's window-lifecycle contract.
+  private shouldAutoFocusInput$ = new BehaviorSubject<boolean>(false);
 
   // ChatWindow instance for delegating sendMessage calls to proper timeline management
   private chatWindowInstance: ChatWindowInstance | null = null;
@@ -173,6 +183,23 @@ export class ChatService {
     const paddingSize = this.coreChatService.getWindowState().paddingSize;
     // Fallback to default if undefined
     return paddingSize ?? 400;
+  }
+
+  /**
+   * Whether the chat input should auto-focus when the window mounts.
+   * See `shouldAutoFocusInput$` for the full rationale.
+   */
+  public getShouldAutoFocusInput(): boolean {
+    return this.shouldAutoFocusInput$.getValue();
+  }
+
+  /**
+   * Set the auto-focus-on-mount signal. Called by the plugin's window-open/
+   * close wiring (see plugin.ts#setupChatbotWindowState) — not intended to
+   * be called directly by UI components.
+   */
+  public setShouldAutoFocusInput(value: boolean): void {
+    this.shouldAutoFocusInput$.next(value);
   }
 
   // ChatWindow instance management for proper timeline handling

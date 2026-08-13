@@ -31,6 +31,10 @@ interface ChatInputProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   includeScreenShotEnabled: boolean;
   onCaptureScreenshot: () => void;
+  // Whether the input should auto-focus on mount. Callers should only pass
+  // true when the window was opened by an explicit user/agent action (not
+  // on bootstrap auto-open, to avoid stealing focus from the page on load).
+  ownFocus?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -46,6 +50,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onKeyDown,
   includeScreenShotEnabled,
   onCaptureScreenshot,
+  ownFocus = false,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -116,7 +121,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            autoFocus={true}
+            // Only auto-focus when the window was opened by an explicit user/
+            // agent action. Bootstrap auto-open (restoring persisted window
+            // state) passes ownFocus=false, so we don't steal focus on page
+            // load. Caller (ChatWindow) computes this from the chat
+            // plugin's ChatService — see ChatService#getShouldAutoFocusInput.
+            autoFocus={ownFocus}
             fullWidth
             resize="none"
             rows={2}
