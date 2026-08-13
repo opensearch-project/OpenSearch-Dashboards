@@ -332,6 +332,7 @@ describe('VisualizationRender', () => {
     expect(mockSplitContainer.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         showLabel: true,
+        verticalItemMinHeight: 60,
       })
     );
 
@@ -341,6 +342,31 @@ describe('VisualizationRender', () => {
         renderContext: expect.objectContaining({
           seriesName: 'value1',
         }),
+      })
+    );
+  });
+
+  it('does not use compact split panel height for non-metric charts', () => {
+    const splitConfig: RenderChartConfig = {
+      type: 'bar',
+      styles: {
+        ...defaultBarChartStyles,
+      },
+      axesMapping: { x: 'field1', y: 'count' },
+      splitField: 'field1',
+    };
+
+    render(
+      <CommonVisualizationRender
+        visualizationData={mockVisData}
+        visConfig={splitConfig}
+        showRawTable={false}
+      />
+    );
+
+    expect(mockSplitContainer.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        verticalItemMinHeight: undefined,
       })
     );
   });

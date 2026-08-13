@@ -42,6 +42,12 @@ import {
   reconcilePPLLintExplainTelemetry,
   reconcilePPLLintStaticTelemetry,
 } from './lint/telemetry';
+import { registerAiFixCommand } from './lint/ai_fix/ai_fix_command';
+import {
+  AiFixMarkerMetadata,
+  clearModelAiFixMetadata,
+  setModelAiFixMetadata,
+} from './lint/ai_fix/ai_fix_registry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -75,6 +81,7 @@ const clearLintOutput = (model: monaco.editor.IModel): void => {
   monaco.editor.setModelMarkers(model, LINT_OWNER, []);
   clearModelFixes(model);
   clearPPLLintTelemetry(model);
+  clearModelAiFixMetadata(model);
 };
 
 const invalidateLintForSyntaxError = (model: monaco.editor.IModel): void => {
@@ -439,9 +446,11 @@ const renderLintMarkers = (
   const visibleDiagnostics = selectHighestSeverityTier(diagnostics);
   const markers = visibleDiagnostics.map(diagnosticToMarker);
   const fixes = new Map<string, MarkerFix>();
+  const aiFixMetadata = new Map<string, AiFixMarkerMetadata>();
   for (const marker of markers) {
     const withExtras = marker as monaco.editor.IMarkerData & {
       fix?: MarkerFix;
+      aiFix?: AiFixMarkerMetadata;
     };
     const key = markerFixKey(marker);
     if (withExtras.fix) {
@@ -461,8 +470,13 @@ const renderLintMarkers = (
       fixes.set(key, withExtras.fix);
       delete withExtras.fix;
     }
+    if (withExtras.aiFix) {
+      aiFixMetadata.set(key, withExtras.aiFix);
+      delete withExtras.aiFix;
+    }
   }
   setModelFixes(model, fixes);
+  setModelAiFixMetadata(model, aiFixMetadata);
   monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
   return { diagnostics: visibleDiagnostics, markers };
 };
@@ -698,6 +712,7 @@ const setupPPLSyntaxHighlighting = () => {
           clearModelSyntaxFixes(model);
           clearPPLLintTelemetry(model);
           syntaxValidationStates.delete(model.id);
+          clearModelAiFixMetadata(model);
         }
       })
     );
@@ -732,6 +747,7 @@ const setupPPLSyntaxHighlighting = () => {
       clearModelFixes(model);
       clearModelSyntaxFixes(model);
       clearPPLLintTelemetry(model);
+      clearModelAiFixMetadata(model);
     })
   );
 
@@ -784,6 +800,11 @@ export const registerPPLLanguage = () => {
     pplLintCodeActionProvider
   );
 
+  // Register the AI ("Ask AI to fix") quick-fix command the provider's isAI
+  // action dispatches. The handler packages the request for the host-owned chat
+  // and confirmation/apply flow.
+  const aiFixCommandDisposable = registerAiFixCommand();
+
   const hoverDisposable = monaco.languages.registerHoverProvider(
     PPL_LANGUAGE_ID,
     pplLintHoverProvider
@@ -807,6 +828,7 @@ export const registerPPLLanguage = () => {
     dispose: () => {
       disposeSyntaxHighlighting();
       codeActionDisposable.dispose();
+      aiFixCommandDisposable.dispose();
       hoverDisposable.dispose();
       quickfixCommandDisposable.dispose();
     },

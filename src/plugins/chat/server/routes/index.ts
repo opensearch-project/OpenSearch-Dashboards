@@ -12,6 +12,7 @@ import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
   Capabilities,
+  OpenSearchClient,
 } from '../../../../core/server';
 import { getPrincipalsFromRequest } from '../../../../core/server/utils';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
@@ -378,6 +379,98 @@ export function defineRoutes(
             message: error instanceof Error ? error.message : 'Unknown error occurred',
           },
         });
+      }
+    }
+  );
+
+  // Report whether the AI agent is actually reachable for a given data source.
+  // This mirrors the /api/chat/proxy path selection so a client can hide AI
+  // actions that would fail at runtime, rather than offering a button that
+  // errors on click:
+  //   - AG-UI endpoint configured: it takes precedence in the proxy, the adapter
+  //     is the authority on reachability, and we cannot cheaply probe it per data
+  //     source — so report available and let the runtime error path handle an
+  //     adapter rejection.
+  //   - Oasis router active: Oasis is the authority on agent reachability, so
+  //     report available without probing the selected cluster for a local
+  //     agent that the proxy does not use.
+  //   - ML Commons router active: the fix runs `/_plugins/_ml/agents/{id}/_execute`
+  //     on the SELECTED cluster, so availability == that agent existing there.
+  //     We do a cheap GET on the agent against getClient(dataSourceId).
+  //   - Neither configured: unavailable, matching the proxy's 503.
+  // The route always answers 200 with { available }. On any probe error it
+  // reports available:true (fail-open) so a slow or unexpected failure never
+  // hides a button that today's checks would still show; only a definitive
+  // "agent missing on this cluster" returns available:false.
+  router.get(
+    {
+      path: '/api/chat/agent_available',
+      validate: {
+        query: schema.maybe(
+          schema.object({
+            dataSourceId: schema.maybe(schema.string()),
+          })
+        ),
+      },
+    },
+    async (context, request, response) => {
+      const dataSourceId = request.query?.dataSourceId;
+      try {
+        // Match the proxy's precedence: when an AG-UI endpoint is configured it
+        // always handles the request, so ML Commons agent presence is irrelevant.
+        if (agUiUrl) {
+          return response.ok({ body: { available: true, reason: 'ag-ui' } });
+        }
+
+        const capabilitiesResolver = getCapabilitiesResolver?.();
+        const capabilities = capabilitiesResolver ? await capabilitiesResolver(request) : undefined;
+        MLAgentRouterRegistry.initialize(capabilities, observabilityAgentId);
+        const mlRouter = MLAgentRouterFactory.getRouter();
+
+        if (capabilities?.oasis?.enabled && mlRouter) {
+          return response.ok({ body: { available: true, reason: 'oasis' } });
+        }
+
+        if (mlRouter) {
+          // ML Commons path: without a configured agent id there is nothing to
+          // execute against (the proxy's forward() returns 503 in this case).
+          if (!mlCommonsAgentId) {
+            return response.ok({ body: { available: false, reason: 'no-agent-configured' } });
+          }
+          const dsContext = context as RequestHandlerContext & {
+            dataSource?: {
+              opensearch: { getClient: (id: string) => Promise<OpenSearchClient> };
+            };
+          };
+          const client =
+            dataSourceId && dsContext.dataSource
+              ? await dsContext.dataSource.opensearch.getClient(dataSourceId)
+              : context.core.opensearch.client.asCurrentUser;
+          // A 2xx means the agent exists on the selected cluster; a 404/403/etc
+          // throws and is treated as "not reachable" below.
+          await client.transport.request({
+            method: 'GET',
+            path: `/_plugins/_ml/agents/${mlCommonsAgentId}`,
+          });
+          return response.ok({ body: { available: true } });
+        }
+
+        return response.ok({ body: { available: false, reason: 'not-configured' } });
+      } catch (error) {
+        const statusCode =
+          (error as { statusCode?: number })?.statusCode ??
+          (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+        // A definitive 404 (agent absent) or 403 (caller cannot use it) on the
+        // selected cluster → hide the AI action rather than offer a dead button.
+        // Any other failure (network, 5xx, timeout) is treated as transient and
+        // fails open: better to keep the button than hide it on a blip, since the
+        // runtime error path still surfaces a real failure honestly.
+        if (statusCode === 404 || statusCode === 403) {
+          logger.debug(`agent_available: agent unreachable (HTTP ${statusCode})`);
+          return response.ok({ body: { available: false, reason: 'agent-missing' } });
+        }
+        logger.debug(`agent_available probe error for dataSourceId=${dataSourceId}: ${error}`);
+        return response.ok({ body: { available: true, reason: 'probe-error' } });
       }
     }
   );

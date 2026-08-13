@@ -68,6 +68,8 @@ import { registerRoutes } from './routes';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+// Not via the barrel: this records process-wide state, and the barrel is what plugins deep-import.
+import { setConditionalFieldFlags } from './migrations/core/build_active_mappings';
 import { Config } from '../config';
 import { SqliteSavedObjectsRepository } from './storage/sqlite_repository';
 /**
@@ -357,6 +359,15 @@ export class SavedObjectsService implements CoreService<
       .pipe(first())
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+
+    // Recorded before any plugin runs, for callers that build mappings without the raw
+    // configuration. Permission control comes from the validated config -- the same source
+    // `getPermissionControlEnabled` reports -- so the two cannot drift. Workspaces belongs to the
+    // workspace plugin and has no validated counterpart here.
+    setConditionalFieldFlags({
+      permissionsEnabled: this.config.permission.enabled,
+      workspacesEnabled: !!this.opensearchDashboardsRawConfig.get('workspace.enabled'),
+    });
 
     // Wire up SQLite backend via the existing repository factory provider hook
     if (this.config.storage.backend === 'sqlite') {

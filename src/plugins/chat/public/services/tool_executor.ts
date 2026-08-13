@@ -45,7 +45,8 @@ export class ToolExecutor {
     toolName: string,
     toolArgs: any,
     toolCallId: string,
-    datasourceId?: string
+    datasourceInfo?: { id: string; title?: string },
+    timeRange?: { from: string; to: string }
   ): Promise<ToolResult> {
     try {
       // Check if this tool requires confirmation
@@ -84,7 +85,14 @@ export class ToolExecutor {
       }
 
       // Include datasourceId in toolArgs if provided
-      const enrichedToolArgs = datasourceId ? { ...toolArgs, datasourceId } : toolArgs;
+
+      let enrichedToolArgs = datasourceInfo
+        ? { ...toolArgs, datasourceId: datasourceInfo.id, datasourceTitle: datasourceInfo.title }
+        : toolArgs;
+      // Include the current page time range
+      if (timeRange) {
+        enrichedToolArgs = { ...enrichedToolArgs, timeRange };
+      }
 
       // First, check if this is a registered assistant action
       const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);
@@ -93,7 +101,7 @@ export class ToolExecutor {
       }
 
       // Otherwise, handle as agent-only tool
-      return await this.executeAgentTool(toolName, enrichedToolArgs);
+      return await this.executeAgentTool();
     } catch (error: any) {
       return {
         success: false,
@@ -141,9 +149,13 @@ export class ToolExecutor {
   }
 
   /**
-   * Execute agent-only tools that report results back via AG-UI events
+   * Execute agent-only tools that report results back via AG-UI events.
+   *
+   * Public so `ChatEventHandler` can bypass `executeTool`'s local-action path
+   * (which awaits `executeAction` even when doomed to fail) and call this directly.
+   * No parameters needed — the agent already has the tool name/args.
    */
-  private async executeAgentTool(_toolName: string, _toolArgs: any): Promise<ToolResult> {
+  async executeAgentTool(): Promise<ToolResult> {
     // Any tool that reaches here is assumed to be handled by the agent
     // The agent will send the results back via TOOL_CALL_RESULT events
     return {

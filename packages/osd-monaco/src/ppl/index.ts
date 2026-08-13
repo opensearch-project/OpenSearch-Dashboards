@@ -32,6 +32,7 @@ export {
   setPPLLintEnabled,
 } from './lint_bridge';
 export type {
+  AskPPLLintFixRequest,
   PPLLintContext,
   PPLLintBridge,
   PPLLintBridgeRequest,
@@ -40,6 +41,15 @@ export type {
 } from './lint_bridge';
 export { registerPPLLintTelemetry } from './lint/telemetry';
 export type { PPLLintTelemetryEvent } from './lint/telemetry';
+export {
+  DEFAULT_PPL_LINT_FIX_TOOL_NAME,
+  buildChatFixContext,
+  buildChatFixMessage,
+  hashPPLLintFixSource,
+} from './lint/ai_fix/build_chat_fix_message';
+export { validatePPLLintFixCandidate } from './lint/ai_fix/validate_candidate_fix';
+export type { ValidateCandidateResult } from './lint/ai_fix/validate_candidate_fix';
+export { analyzeCompiledPPLLint, validateCompiledPPLLintQueries } from './compiled_worker_api';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';
 export { runLint } from './lint/lint_runner';

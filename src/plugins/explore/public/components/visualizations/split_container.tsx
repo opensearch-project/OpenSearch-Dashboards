@@ -13,6 +13,7 @@ interface SplitContainerProps {
   groups: string[];
   layout: SplitLayout;
   showLabel?: boolean;
+  verticalItemMinHeight?: number;
   renderChart: (groupKey: string) => React.ReactNode;
 }
 
@@ -31,6 +32,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
   groups,
   layout,
   showLabel = false,
+  verticalItemMinHeight = 200,
   renderChart,
 }) => {
   const [columns, setColumns] = useState(1);
@@ -63,7 +65,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       return groups.map(() => ({ flex: 1, minWidth: 300 }));
     }
     if (layout === 'vertical') {
-      return groups.map(() => ({ flex: 1, minHeight: 200 }));
+      return groups.map(() => ({ flex: 1, minHeight: verticalItemMinHeight }));
     }
     const span = SUB_COLUMNS / columns;
     const itemsInLastRow = groups.length % columns || columns;
@@ -75,7 +77,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       }
       return { gridColumn: `span ${span}` };
     });
-  }, [layout, columns, groups]);
+  }, [layout, columns, groups, verticalItemMinHeight]);
 
   const layoutClass = `splitContainer--${layout || 'auto'}`;
 

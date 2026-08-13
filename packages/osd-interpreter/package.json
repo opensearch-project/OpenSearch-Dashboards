@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "interpreter:peg": "pegjs src/common/lib/grammar.peg",
+    "interpreter:peg": "peggy src/common/lib/grammar.peg",
     "build": "../../scripts/use_node scripts/build",
     "osd:bootstrap": "../../scripts/use_node scripts/build --dev",
     "osd:watch": "../../scripts/use_node scripts/build --dev --watch"
@@ -24,7 +24,7 @@
     "css-loader": "^5.2.7",
     "del": "^6.1.1",
     "getopts": "^2.2.5",
-    "pegjs": "0.10.0",
+    "peggy": "^4.2.0",
     "sass-loader": "16.0.5",
     "style-loader": "^1.1.3",
     "supports-color": "^7.0.0",
