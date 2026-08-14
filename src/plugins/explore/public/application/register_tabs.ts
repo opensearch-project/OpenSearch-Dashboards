@@ -13,7 +13,6 @@ import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_
 import { ExploreServices } from '../types';
 import {
   ExploreFlavor,
-  EXPLORE_DEFAULT_LANGUAGE,
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
@@ -28,6 +27,7 @@ import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
+  sqlPatternQuery,
 } from '../components/patterns_table/utils/utils';
 import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
@@ -84,10 +84,7 @@ export const registerBuiltInTabs = (
       flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
       order: 10,
       // SQL is only supported for Logs flavor, not Traces
-      supportedLanguages:
-        registryFlavor === ExploreFlavor.Logs
-          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-          : [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: registryFlavor === ExploreFlavor.Logs ? ['PPL', 'SQL'] : ['PPL'],
       component: LogsTab,
     };
     tabRegistry.registerTab(logsTabDefinition);
@@ -102,7 +99,7 @@ export const registerBuiltInTabs = (
       }),
       flavor: [ExploreFlavor.Logs],
       order: 15,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: ['PPL', 'SQL'],
 
       prepareQuery: (query) => {
         const state = services.store.getState();
@@ -124,6 +121,12 @@ export const registerBuiltInTabs = (
           }
         }
 
+        // SQL only supports the simple/regex method (REPLACE-based); the PPL
+        // `patterns` command and its brain method are not available in SQL.
+        if (query.language === 'SQL') {
+          return sqlPatternQuery(preparedQuery.query, patternsField);
+        }
+
         if (state.tab.patterns.usingRegexPatterns)
           return regexPatternQuery(preparedQuery.query, patternsField);
 
@@ -132,6 +135,18 @@ export const registerBuiltInTabs = (
 
       handleQueryError: (error, cacheKey) => {
         const state = services.store.getState();
+
+        /**
+         * The BRAIN fallback below is PPL-only: it retries with `regexPatternQuery`,
+         * which emits PPL pipe syntax. SQL has no brain method and never produces
+         * this error, but the handler is language-agnostic -- so a SQL 400 whose
+         * details happened to match the prefix would dispatch a PPL query against
+         * the SQL endpoint under a cache key the tab never reads, leaving it stuck
+         * on a stale status. Bail out early for SQL and let the normal error show.
+         */
+        if (state.query.language === 'SQL') {
+          return false;
+        }
 
         /**
          * The below conditional is checking for the error returned when attempting to use a BRAIN
@@ -198,10 +213,10 @@ export const registerBuiltInTabs = (
     // SQL only for Logs, PROMQL for Metrics, PPL only for Traces
     supportedLanguages:
       registryFlavor === ExploreFlavor.Metrics
-        ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
+        ? ['PPL', 'PROMQL']
         : registryFlavor === ExploreFlavor.Logs
-          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-          : [EXPLORE_DEFAULT_LANGUAGE],
+          ? ['PPL', 'SQL']
+          : ['PPL'],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -219,10 +234,7 @@ export const registerBuiltInTabs = (
     }),
     flavor: [ExploreFlavor.Logs],
     order: 17,
-    supportedLanguages:
-      registryFlavor === ExploreFlavor.Logs
-        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-        : [EXPLORE_DEFAULT_LANGUAGE],
+    supportedLanguages: registryFlavor === ExploreFlavor.Logs ? ['PPL', 'SQL'] : ['PPL'],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -242,7 +254,7 @@ export const registerBuiltInTabs = (
       }),
       flavor: [ExploreFlavor.Logs],
       order: 25,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: ['PPL'],
       component: FieldStatsTab,
     });
   }
