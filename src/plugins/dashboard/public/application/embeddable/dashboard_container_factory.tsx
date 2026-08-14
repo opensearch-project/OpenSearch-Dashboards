@@ -57,6 +57,7 @@ interface StartServices {
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
   data?: DataPublicPluginStart;
+  telemetry?: CoreStart['telemetry'];
 }
 
 export type DashboardContainerFactory = EmbeddableFactory<

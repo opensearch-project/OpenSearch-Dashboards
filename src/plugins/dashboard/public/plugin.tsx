@@ -289,6 +289,7 @@ export class DashboardPlugin implements Plugin<
         ExitFullScreenButton,
         uiActions: deps.uiActions,
         data: deps.data,
+        telemetry: coreStart.telemetry,
       };
     };
 
