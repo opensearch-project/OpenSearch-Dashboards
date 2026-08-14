@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
@@ -37,22 +37,27 @@ interface ChatInputProps {
   ownFocus?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
-  layoutMode,
-  input,
-  isCapturing,
-  isStreaming,
-  disabled = false,
-  placeholder,
-  onInputChange,
-  onSend,
-  onStop,
-  onKeyDown,
-  includeScreenShotEnabled,
-  onCaptureScreenshot,
-  ownFocus = false,
-}) => {
+export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(function (
+  {
+    layoutMode,
+    input,
+    isCapturing,
+    isStreaming,
+    disabled = false,
+    placeholder,
+    onInputChange,
+    onSend,
+    onStop,
+    onKeyDown,
+    includeScreenShotEnabled,
+    onCaptureScreenshot,
+    ownFocus = false,
+  },
+  ref
+) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => inputRef.current!);
 
   const {
     services: {
@@ -161,4 +166,4 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       </div>
     </div>
   );
-};
+});
