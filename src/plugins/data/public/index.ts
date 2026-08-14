@@ -530,6 +530,7 @@ export {
   useCancelButtonTiming,
   PPLAnalyzePanel,
   runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
 } from './ui';
 
 /**

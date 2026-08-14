@@ -6,6 +6,11 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, Logger } from 'opensearch-dashboards/server';
 import { API, URI } from '../../common';
+import { queryEndsWithHead } from '../../common/utils';
+
+// The Discover UI sample-size setting caps how many rows the query fetches. We reuse
+// it for analyze so profiling scans the same row budget as a normal query run.
+const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 
 export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
   router.post(
@@ -15,22 +20,36 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
         body: schema.object({
           query: schema.string(),
           dataSourceId: schema.maybe(schema.nullable(schema.string())),
+          queryId: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const { query, dataSourceId } = request.body;
+      const { query, dataSourceId, queryId } = request.body;
       try {
         const client = dataSourceId
           ? await context.dataSource.opensearch.getClient(dataSourceId)
           : context.core.opensearch.client.asCurrentUser;
 
+        // Cap the scanned rows at the Discover sample size, mirroring a normal PPL run
+        // (see ppl_search_strategy.ts). Sent as the `?fetch_size=` query param, which
+        // the backend pushes down into the scan. Skipped when the query already ends
+        // with an explicit `head` so a user-written limit still wins.
+        const hasHead = queryEndsWithHead(query);
+        const fetchSize = hasHead
+          ? undefined
+          : await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+
         const result = await client.transport.request({
           method: 'POST',
           path: URI.PPL,
+          querystring: fetchSize ? { fetch_size: fetchSize } : undefined,
           body: {
             query,
             analyze: true,
+            // Forwarded so the spawned task carries `queryId=<uuid>` in its
+            // description, letting the PPL cancel route find and cancel it.
+            ...(queryId && { queryId }),
           },
         });
 

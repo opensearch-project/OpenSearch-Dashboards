@@ -6,7 +6,14 @@
 import '../explore_page.scss';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiErrorBoundary, EuiLoadingSpinner, EuiPage, EuiPageBody, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiErrorBoundary,
+  EuiLoadingSpinner,
+  EuiPage,
+  EuiPageBody,
+  EuiText,
+} from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -19,6 +26,7 @@ import {
   PPLAnalyzePanel,
   getPPLAnalyzeResult$,
   runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
   setPPLAnalyzeOpen,
 } from '../../../../../data/public';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -99,7 +107,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   const [analyzeResult, setAnalyzeResult] = useState(() => getPPLAnalyzeResult$().getValue());
   useEffect(() => {
     const sub = getPPLAnalyzeResult$().subscribe(setAnalyzeResult);
-    return () => sub.unsubscribe();
+    return () => {
+      sub.unsubscribe();
+      // Cancel any in-flight analysis when leaving the page.
+      cancelPPLAnalyze();
+    };
   }, []);
   const queryState = useSelector((state: RootState) => state.query);
 
@@ -133,6 +145,8 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       setIsOpen(true);
       setPPLAnalyzeOpen(true);
     } else {
+      // Closing the panel abandons any in-flight analysis — cancel it server-side.
+      cancelPPLAnalyze();
       setIsOpen(false);
       setPPLAnalyzeOpen(false);
     }
@@ -183,12 +197,26 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                     <EuiText size="s" color="subdued">
                       Running query analysis…
                     </EuiText>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="danger"
+                      iconType="cross"
+                      onClick={() => {
+                        cancelPPLAnalyze();
+                        setIsOpen(false);
+                        setPPLAnalyzeOpen(false);
+                      }}
+                      data-test-subj="analyzeCancelButton"
+                    >
+                      Cancel
+                    </EuiButtonEmpty>
                   </div>
                 ) : (
                   <div style={{ overflowY: 'auto', height: '100%' }}>
                     <PPLAnalyzePanel
                       analyzeResult={analyzeResult!}
                       onClose={() => {
+                        cancelPPLAnalyze();
                         setIsOpen(false);
                         setPPLAnalyzeOpen(false);
                       }}

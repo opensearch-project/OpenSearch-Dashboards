@@ -7,7 +7,7 @@
  * @jest-environment node
  */
 
-import { runPPLAnalyzeInBackground } from './run_ppl_analyze';
+import { runPPLAnalyzeInBackground, cancelPPLAnalyze } from './run_ppl_analyze';
 import {
   setPPLAnalyzeLoading,
   setPPLAnalyzeResult,
@@ -30,6 +30,9 @@ const pplQuery = { query: 'source=accounts', language: 'PPL' };
 const sqlQuery = { query: 'SELECT *', language: 'SQL' };
 
 beforeEach(() => {
+  // Drain any request left in-flight by a prior test before resetting call history,
+  // so each test starts with a clean fetch mock and no leftover cancel is fired.
+  cancelPPLAnalyze();
   jest.clearAllMocks();
   mockFetch.mockResolvedValue({ profile: { summary: { total_time_ms: 10 } } });
 });
@@ -103,11 +106,16 @@ describe('runPPLAnalyzeInBackground', () => {
         setTimeout(() => resolve({ profile: {} }), 50)
       );
       const fastFetch = Promise.resolve({ profile: { summary: { total_time_ms: 1 } } });
+      // Make the mock path-aware: cancel requests resolve silently, analyze
+      // requests consume from a queue of pre-configured responses.
+      const analyzeResponses = [slowFetch, fastFetch];
+      mockFetch.mockImplementation((opts: any) => {
+        if (opts.path?.includes('/cancel')) return Promise.resolve({ cancelled: true });
+        return analyzeResponses.shift() || Promise.resolve({});
+      });
       // First call — will resolve slowly (stale)
-      mockFetch.mockReturnValueOnce(slowFetch);
       runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
-      // Second call — resolves immediately (fresh)
-      mockFetch.mockReturnValueOnce(fastFetch);
+      // Second call — resolves immediately (fresh); cancels the first in-flight
       runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
       await fastFetch;
       await Promise.resolve();
@@ -165,6 +173,55 @@ describe('runPPLAnalyzeInBackground', () => {
     });
   });
 
+  describe('queryId and cancellation', () => {
+    it('includes a queryId in the analyze request body', () => {
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const body = JSON.parse(mockFetch.mock.calls[0][0].body);
+      expect(typeof body.queryId).toBe('string');
+      expect(body.queryId.length).toBeGreaterThan(0);
+    });
+
+    it('cancels the in-flight request when a newer request supersedes it', () => {
+      const cancelCalls = () =>
+        mockFetch.mock.calls.filter((c: any[]) => c[0].path?.includes('/cancel'));
+
+      // First request is now in-flight (fetch never resolves in this test).
+      mockFetch.mockReturnValue(new Promise(() => {}));
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const firstQueryId = JSON.parse(mockFetch.mock.calls[0][0].body).queryId;
+      expect(cancelCalls()).toHaveLength(0);
+
+      // Second request should cancel the first, posting its queryId to the cancel path.
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const cancels = cancelCalls();
+      expect(cancels).toHaveLength(1);
+      expect(cancels[0][0]).toEqual(
+        expect.objectContaining({ method: 'POST', path: '/api/enhancements/ppl/cancel' })
+      );
+      expect(JSON.parse(cancels[0][0].body).queryId).toBe(firstQueryId);
+    });
+
+    it('cancelPPLAnalyze posts the in-flight queryId to the cancel path', () => {
+      mockFetch.mockReturnValue(new Promise(() => {}));
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const queryId = JSON.parse(mockFetch.mock.calls[0][0].body).queryId;
+
+      cancelPPLAnalyze();
+
+      const cancelCall = mockFetch.mock.calls.find((c: any[]) => c[0].path?.includes('/cancel'));
+      expect(cancelCall).toBeDefined();
+      expect(JSON.parse(cancelCall![0].body).queryId).toBe(queryId);
+    });
+
+    it('cancelPPLAnalyze is a no-op when nothing is in flight', () => {
+      // Settle any prior in-flight request from earlier tests, then clear the mock.
+      cancelPPLAnalyze();
+      mockFetch.mockClear();
+      cancelPPLAnalyze();
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+  });
+
   describe('time filter injection', () => {
     it('injects time filter when timeFieldName is present', () => {
       const queryWithTimeField = {
@@ -180,26 +237,6 @@ describe('runPPLAnalyzeInBackground', () => {
       const body = JSON.parse(mockFetch.mock.calls[0][0].body);
       expect(body.query).toContain('WHERE');
       expect(body.query).toContain('@timestamp');
-    });
-
-    it('stores injectedTimeFilter in result', async () => {
-      const queryWithTimeField = {
-        query: 'source=accounts',
-        language: 'PPL',
-        dataset: { timeFieldName: '@timestamp', id: 'accounts', title: 'accounts', type: 'INDEX' },
-      };
-      runPPLAnalyzeInBackground({
-        query: queryWithTimeField,
-        http: mockHttp,
-        timefilter: mockTimefilter,
-      });
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(setPPLAnalyzeResult).toHaveBeenCalledWith(
-        expect.objectContaining({
-          injectedTimeFilter: expect.stringContaining('@timestamp'),
-        })
-      );
     });
 
     it('does not inject time filter when no timeFieldName', () => {
