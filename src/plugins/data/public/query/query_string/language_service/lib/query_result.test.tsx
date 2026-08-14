@@ -4,8 +4,16 @@
  */
 
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { BehaviorSubject } from 'rxjs';
 import { QueryResult } from './query_result';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+
+jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn(() => ({ services: {} })),
+}));
+
+const useOpenSearchDashboardsMock = useOpenSearchDashboards as jest.Mock;
 
 enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -201,5 +209,91 @@ describe('Query Result', () => {
     await waitFor(() => {
       expect(screen.getByText('{"reason":"error message","status":400}')).toBeInTheDocument();
     });
+  });
+});
+
+describe('QueryResult - Ask AI for help', () => {
+  afterEach(() => {
+    useOpenSearchDashboardsMock.mockReturnValue({ services: {} });
+    jest.clearAllMocks();
+  });
+
+  const setServices = ({
+    appId = 'data-explorer',
+    chatAvailable = true,
+    sendMessageWithWindow = jest.fn().mockResolvedValue(undefined),
+  }: {
+    appId?: string;
+    chatAvailable?: boolean;
+    sendMessageWithWindow?: jest.Mock;
+  } = {}) => {
+    const services = {
+      application: { currentAppId$: new BehaviorSubject<string | undefined>(appId) },
+      chat: {
+        isAvailable: () => chatAvailable,
+        sendMessageWithWindow,
+      },
+    };
+    useOpenSearchDashboardsMock.mockReturnValue({ services });
+    return services;
+  };
+
+  const errorStatus = (resultsCount?: number) => ({
+    queryStatus: {
+      status: ResultStatus.ERROR,
+      resultsCount,
+      body: {
+        error: {
+          message: {
+            error: { reason: 'boom reason', details: 'boom details', type: 'search_phase' },
+            status: 400,
+          },
+        },
+      },
+    },
+  });
+
+  it('renders the button in Discover when errored with retained results and chat available', () => {
+    setServices();
+    render(<QueryResult {...errorStatus(5)} />);
+    expect(screen.getByTestId('discoverQueryErrorAskAiForHelp')).toBeInTheDocument();
+  });
+
+  it('does not render the button when there are no retained results', () => {
+    setServices();
+    render(<QueryResult {...errorStatus(0)} />);
+    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+  });
+
+  it('does not render the button when resultsCount is undefined', () => {
+    setServices();
+    render(<QueryResult {...errorStatus(undefined)} />);
+    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+  });
+
+  it('does not render the button outside classic Discover', () => {
+    setServices({ appId: 'explore/logs' });
+    render(<QueryResult {...errorStatus(5)} />);
+    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+  });
+
+  it('does not render the button when chat is unavailable', () => {
+    setServices({ chatAvailable: false });
+    render(<QueryResult {...errorStatus(5)} />);
+    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+  });
+
+  it('sends the error escalation message to chat on click', () => {
+    const sendMessageWithWindow = jest.fn().mockResolvedValue(undefined);
+    setServices({ sendMessageWithWindow });
+    render(<QueryResult {...errorStatus(5)} />);
+
+    fireEvent.click(screen.getByTestId('discoverQueryErrorAskAiForHelp'));
+
+    expect(sendMessageWithWindow).toHaveBeenCalledTimes(1);
+    const [message, attachments] = sendMessageWithWindow.mock.calls[0];
+    // `details` wins over `reason` in the extraction precedence.
+    expect(message).toContain('boom details');
+    expect(attachments).toEqual([]);
   });
 });

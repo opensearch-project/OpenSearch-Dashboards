@@ -192,6 +192,7 @@ export function createSearchBar({ core, storage, data, contextProvider }: Statef
           <TimeRangeToolRegistration
             timefilter={data.query.timefilter.timefilter}
             useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+            enabled={(query?.language || '').toUpperCase() !== 'SQL'}
           />
         )}
         <SearchBar
