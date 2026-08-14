@@ -32,11 +32,17 @@ describe('PanelDataService', () => {
     it('returns the same instance across calls', () => {
       expect(PanelDataService.getInstance()).toBe(PanelDataService.getInstance());
     });
+
+    it('returns null when init() has not been called', () => {
+      (PanelDataService as any).instance = null;
+
+      expect(PanelDataService.getInstance()).toBeNull();
+    });
   });
 
   describe('setPanelData', () => {
     it('registers the shared tool lazily on the first publish', () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       expect(registerAction).not.toHaveBeenCalled();
 
       service.setPanelData('panel-1', { rows: [], panelTitle: 'Panel 1' });
@@ -46,7 +52,7 @@ describe('PanelDataService', () => {
     });
 
     it('registers the tool only once across multiple publishes', () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [], panelTitle: 'Panel 1' });
       service.setPanelData('panel-2', { rows: [], panelTitle: 'Panel 2' });
       service.setPanelData('panel-1', { rows: [{ a: 1 }], panelTitle: 'Panel 1' });
@@ -57,7 +63,7 @@ describe('PanelDataService', () => {
 
   describe('fetch_panel_data handler', () => {
     it('returns the formatted rows for a known panel', async () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', {
         rows: [{ _source: { host: 'a' } }, { fields: { host: 'b' } }, { host: 'c' }],
         panelTitle: 'Hosts',
@@ -76,7 +82,7 @@ describe('PanelDataService', () => {
     });
 
     it('returns a not-loaded failure for an unknown panel', async () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [], panelTitle: 'Panel 1' });
 
       const result = await getRegisteredAction().handler({ savedObjectId: 'missing' });
@@ -86,7 +92,7 @@ describe('PanelDataService', () => {
     });
 
     it('reflects the latest rows after an overwrite', async () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [{ v: 1 }], panelTitle: 'Panel 1' });
       service.setPanelData('panel-1', { rows: [{ v: 2 }, { v: 3 }], panelTitle: 'Panel 1' });
 
@@ -99,7 +105,7 @@ describe('PanelDataService', () => {
 
   describe('removePanelData', () => {
     it('drops the panel data so the handler reports it as unavailable', async () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [{ v: 1 }], panelTitle: 'Panel 1' });
 
       service.removePanelData('panel-1');
@@ -109,7 +115,7 @@ describe('PanelDataService', () => {
     });
 
     it('leaves the shared tool registered even after the last panel is removed', () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [], panelTitle: 'Panel 1' });
 
       service.removePanelData('panel-1');
@@ -121,7 +127,7 @@ describe('PanelDataService', () => {
 
   describe('reset', () => {
     it('clears all data and unregisters the tool', async () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [{ v: 1 }], panelTitle: 'Panel 1' });
       service.setPanelData('panel-2', { rows: [{ v: 2 }], panelTitle: 'Panel 2' });
 
@@ -135,7 +141,7 @@ describe('PanelDataService', () => {
     });
 
     it('is a no-op unregister when nothing was ever registered', () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
 
       service.reset();
 
@@ -143,7 +149,7 @@ describe('PanelDataService', () => {
     });
 
     it('re-registers on the next publish after reset', () => {
-      const service = PanelDataService.getInstance();
+      const service = PanelDataService.getInstance()!;
       service.setPanelData('panel-1', { rows: [], panelTitle: 'Panel 1' });
       service.reset();
       registerAction.mockClear();

@@ -30,10 +30,10 @@ jest.mock('./explore_embeddable_component', () => ({
   ExploreEmbeddableComponent: jest.fn(() => null),
 }));
 
-// Mock the PanelDataService singleton. The real getInstance() throws unless
-// PanelDataService.init() was called during plugin setup, which never happens
-// in this unit test — so fetch()/destroy() would blow up. Return a stub whose
-// setPanelData/removePanelData are no-ops.
+// Mock the PanelDataService singleton so fetch()/destroy() interactions with the
+// shared panel-data store can be asserted directly, without depending on whether
+// PanelDataService.init() was called (getInstance() now safely returns null when
+// uninitialized, e.g. when contextProvider is disabled).
 jest.mock('./panel_data_service', () => {
   const mockPanelDataInstance = {
     setPanelData: jest.fn(),
@@ -297,6 +297,14 @@ describe('ExploreEmbeddable', () => {
     embeddable.render(mockNode);
     embeddable.destroy();
     expect(mockUnmount).toHaveBeenCalled();
+  });
+
+  test('destroy does not throw when PanelDataService is uninitialized (contextProvider disabled)', () => {
+    const { PanelDataService } = jest.requireMock('./panel_data_service');
+    PanelDataService.getInstance.mockReturnValueOnce(null);
+
+    embeddable.render(mockNode);
+    expect(() => embeddable.destroy()).not.toThrow();
   });
 
   test('updates input correctly', () => {

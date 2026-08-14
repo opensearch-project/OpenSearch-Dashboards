@@ -966,7 +966,7 @@ export class ExplorePlugin implements Plugin<
     clearActivePPLLintFixSession();
     this.unregisterVisualizationTools?.();
     // cleanup shared panel-data store + fetch_panel_data tool.
-    PanelDataService.getInstance().reset();
+    PanelDataService.getInstance()?.reset();
   }
 
   private registerEmbeddable(

@@ -661,7 +661,7 @@ export class ExploreEmbeddable
     // Update shared panel data store so the global fetch_panel_data tool returns fresh data
     const savedExploreId = this.savedExplore.id;
     if (savedExploreId) {
-      PanelDataService.getInstance().setPanelData(savedExploreId, {
+      PanelDataService.getInstance()?.setPanelData(savedExploreId, {
         rows: transformedRows,
         panelTitle: this.panelTitle || this.savedExplore.title,
       });
@@ -735,7 +735,7 @@ export class ExploreEmbeddable
     }
 
     if (this.savedExplore.id) {
-      PanelDataService.getInstance().removePanelData(this.savedExplore.id);
+      PanelDataService.getInstance()?.removePanelData(this.savedExplore.id);
     }
 
     if (this.abortController) {
