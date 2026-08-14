@@ -9,7 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/
 import { useAssistantAction } from '../../../context_provider/public';
 import { ChatService } from '../services/chat_service';
 
-export const SWITCH_DATA_SOURCE_TOOL_NAME = 'switch_data_source';
+import { SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 
 interface SwitchDataSourceArgs {
   dataSourceId: string;
@@ -35,7 +35,10 @@ const SwitchDataSourceCard: React.FC<{
     parsedResult = result as SwitchDataSourceResult;
   } else if (typeof result === 'string') {
     try {
-      parsedResult = JSON.parse(result);
+      const parsed = JSON.parse(result);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        parsedResult = parsed as SwitchDataSourceResult;
+      }
     } catch {
       // skip
     }
@@ -48,7 +51,7 @@ const SwitchDataSourceCard: React.FC<{
 
   if (status === 'running') {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0' }}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0', height: 24 }}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="database" size="s" color="subdued" />
         </EuiFlexItem>
@@ -71,7 +74,7 @@ const SwitchDataSourceCard: React.FC<{
         defaultMessage: 'Failed to switch data source',
       });
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0' }}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0', height: 24 }}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="s" color="danger" />
         </EuiFlexItem>
@@ -85,7 +88,12 @@ const SwitchDataSourceCard: React.FC<{
   }
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0' }} wrap={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      style={{ padding: '2px 0', height: 24 }}
+      wrap={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon type="database" size="s" color="primary" />
       </EuiFlexItem>
@@ -119,8 +127,8 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
       '(IndexMappingTool, SearchIndexTool, PPLQueryTool, auto_create_visualization, etc.). ' +
       'You MUST call this tool BEFORE any data query tool whenever the target data source ' +
       'differs from the currently active one. ' +
-      'After calling this tool, pass the same dataSourceId as datasourceId in ' +
-      'auto_create_visualization or other query tools. ' +
+      'Once switched, the other tools pick up the new data source automatically — ' +
+      'you do not need to pass a data source id to them. ' +
       'The available data sources and the currently active one are listed in the ' +
       'available_data_sources context — check that context to identify the correct id ' +
       'before switching.',
@@ -131,8 +139,10 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           type: 'string',
           description:
             'The ID of the data source to switch to. ' +
-            'Get this from the page context (e.g. dataset.dataSource.id) or from ' +
-            'information provided by the user about which data source to use.',
+            'It MUST be one of the ids listed in the available_data_sources context, or a ' +
+            'data source id given by the user. It may also come from the page context ' +
+            '— but note that a dataset/index pattern id ' +
+            '(dataset.id) is NOT a data source id and will be rejected.',
         },
         reason: {
           type: 'string',
@@ -160,13 +170,29 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
+        // Validate before writing to ChatService
+        const { valid, dataSource, availableDataSources } = await chatService.validateDataSourceId(
+          args.dataSourceId
+        );
+
+        if (!valid) {
+          return {
+            success: false,
+            message: i18n.translate('chat.switchDataSource.error.unknownId', {
+              defaultMessage:
+                'Unknown dataSourceId "{id}". Valid data source ids are: {ids}. ' +
+                'Note that a dataset or index pattern id is not a data source id.',
+              values: {
+                id: args.dataSourceId,
+                ids: availableDataSources.map((ds) => ds.id).join(', '),
+              },
+            }),
+          };
+        }
+
         chatService.setLLMDataSourceId(args.dataSourceId);
 
-        // Look up the title from the authoritative available DS list to ensure
-        // the displayed label always matches the actual target.
-        const availableDs = await chatService.getAvailableDataSources();
-        const resolvedTitle =
-          availableDs.find((ds) => ds.id === args.dataSourceId)?.title ?? args.datasourceTitle;
+        const resolvedTitle = dataSource?.title ?? args.datasourceTitle;
 
         return {
           success: true,
