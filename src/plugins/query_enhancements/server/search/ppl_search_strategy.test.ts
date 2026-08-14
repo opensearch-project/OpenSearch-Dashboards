@@ -321,7 +321,6 @@ describe('pplSearchStrategyProvider', () => {
     ['timechart', 'source = table | timechart span=1h count() by extension'],
     ['top', 'source = table | top 5 extension'],
     ['rare', 'source = table | rare extension'],
-    ['eventstats', 'source = table | eventstats avg(bytes) by extension'],
   ])(
     'should send the aggregation sample size for an aggregating query (%s)',
     async (_name, pplQuery) => {

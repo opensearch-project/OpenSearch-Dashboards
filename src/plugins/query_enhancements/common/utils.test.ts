@@ -264,7 +264,6 @@ describe('isPPLAggregationQuery', () => {
   it.each([
     'source=t | stats count()',
     'source=t | stats count() by span(`@timestamp`, 1h), extension',
-    'source=t | eventstats avg(bytes) by extension',
     'source=t | timechart span=1h count() by extension',
     'source=t | chart count() over extension',
     'source=t | top 5 extension',
@@ -272,8 +271,6 @@ describe('isPPLAggregationQuery', () => {
     'source=t | transpose',
     'source=t | xyseries extension bytes clientip',
     'source=t | timewrap 1d',
-    'source=t | addtotals',
-    'source=t | addcoltotals',
     'source=t | patterns message mode=aggregation',
     // Listed unconditionally — the default mode is a cluster setting, so the query text alone
     // cannot tell us whether this aggregates.
@@ -289,6 +286,10 @@ describe('isPPLAggregationQuery', () => {
     'source=t | sort name ASC | head 100',
     'source=t | eval x = bytes * 2',
     'source=t | dedup extension',
+    // Row-preserving: append fields or a summary row, ~one row per document, not bucket-producing.
+    'source=t | eventstats avg(bytes) by extension',
+    'source=t | addtotals',
+    'source=t | addcoltotals',
   ])('should not detect non-aggregating query: %s', (query) => {
     expect(isPPLAggregationQuery(query)).toBe(false);
   });
