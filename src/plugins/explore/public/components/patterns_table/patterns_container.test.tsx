@@ -241,9 +241,10 @@ describe('PatternsContainer', () => {
   });
 
   describe('SQL', () => {
-    // The engine returns each unaliased column's name as the raw SELECT-list text, and
-    // OSD keys `_source` by that name, so these keys are deliberately ugly.
-    const PATTERN_COL = "REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>')";
+    // The names the engine actually returns for `sqlPatternQuery`, verified on both
+    // the V2 and analytics-engine paths: the aliased column comes back under its
+    // alias, the unaliased ones under their raw SELECT-list text.
+    const PATTERN_COL = 'pattern';
     const COUNT_COL = 'COUNT(*)';
     const SAMPLE_COL = "IFNULL(MIN(sample), '')";
 
@@ -345,5 +346,28 @@ describe('PatternsContainer', () => {
     render(<PatternsContainer />);
 
     expect(highlightLogUsingPattern).toHaveBeenCalled();
+  });
+
+  // The schema callout is a SQL-only diagnostic. PPL drops rows whose sample or
+  // count is null, and when that leaves nothing it renders nothing -- saying the
+  // schema was unexpected would be both new and wrong, since the schema is fine.
+  it('renders nothing for PPL when every row is dropped', () => {
+    mockUseTabResults.mockReturnValueOnce({
+      results: {
+        hits: {
+          hits: [
+            { _source: { patterns_field: 'Linux', pattern_count: 20, sample_logs: null } },
+            { _source: { patterns_field: 'Debian', pattern_count: 18, sample_logs: [] } },
+          ],
+          total: 2,
+        },
+      },
+      status: { status: QueryExecutionStatus.READY },
+    } as any);
+
+    render(<PatternsContainer />);
+
+    expect(screen.queryByText('Expected schema not found')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mocked-patterns-table')).not.toBeInTheDocument();
   });
 });

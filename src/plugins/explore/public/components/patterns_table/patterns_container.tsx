@@ -217,10 +217,10 @@ const PatternsContainerContent = ({
   }
 
   if (!patternRows.length) {
-    // If rows came back but none matched the expected pattern columns, the response schema
-    // is unexpected; otherwise there is simply nothing to display.
+    // SQL addresses the columns through the response schema, so rows arriving with
+    // no usable schema is worth reporting. PPL keeps returning nothing, as before.
     const rawHits = patternResults?.hits?.hits || [];
-    if (rawHits.length > 0) {
+    if (isSqlPatterns && rawHits.length > 0) {
       const title = i18n.translate('explore.patterns.schemaUnexpected', {
         defaultMessage: 'Expected schema not found',
       });
