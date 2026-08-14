@@ -75,6 +75,9 @@ export class ChatService {
   // Data source explicitly selected by user in this session
   private cachedDataSourceId?: string;
 
+  // Data source explicitly selected by the LLM via switch_data_source tool.
+  private llmSelectedDataSourceId?: string;
+
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
 
@@ -259,7 +262,7 @@ export class ChatService {
   public async sendMessageWithWindow(
     content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -274,6 +277,12 @@ export class ChatService {
     // Reset chat window UI to a fresh chat panel
     if (options?.clearConversation) {
       chatWindowInstance.startNewChat();
+    }
+
+    // Apply the caller-supplied data source AFTER newThread/startNewChat so it
+    // isn't cleared by those calls (both reset llmSelectedDataSourceId).
+    if (options?.dataSourceId) {
+      this.setLLMDataSourceId(options.dataSourceId);
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -380,13 +389,34 @@ export class ChatService {
 
   /**
    * Get the current data source ID from all resolution sources.
+   *
+   * Priority (highest to lowest):
+   *   1. llmSelectedDataSourceId  — explicitly set by the LLM via switch_data_source tool
+   *   2. getDataSourceFromPageContext() — data source inferred from the current page/panel context
+   *   3. cachedDataSourceId       — set by the user via the data source selector in the chat UI
+   *   4. getWorkspaceAwareDataSourceId() — workspace default
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return (
+    const ds =
+      this.llmSelectedDataSourceId ||
       this.getDataSourceFromPageContext() ||
       this.cachedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId())
-    );
+      (await this.getWorkspaceAwareDataSourceId());
+
+    return ds;
+  }
+
+  /**
+   * Explicitly set the data source selected by the LLM (via the switch_data_source tool).
+   * This overrides the page-context data source so the LLM can switch data sources
+   * mid-conversation across multiple dashboard panels.
+   */
+  public setLLMDataSourceId(id: string): void {
+    this.llmSelectedDataSourceId = id;
+  }
+
+  public clearLLMDataSourceId(): void {
+    this.llmSelectedDataSourceId = undefined;
   }
 
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
@@ -441,6 +471,32 @@ export class ChatService {
       description: ctx.description,
       value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
     }));
+
+    // When multiple data sources exist, inject the available DS list so the LLM
+    // can call switch_data_source to switch between data source in one session
+    // Will skip this for single-DS workspaces to avoid unnecessary noise.
+    const availableDataSources = await this.getAvailableDataSources();
+    if (availableDataSources.length > 1) {
+      const dsListText = availableDataSources
+        .map((ds) => `  - id: "${ds.id}", title: "${ds.title}"`)
+        .join('\n');
+      const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
+      const activeDsLabel = activeDatasource
+        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
+        : (dataSourceId ?? 'not set');
+      context.push({
+        description: 'available_data_sources',
+        value: [
+          `Available data sources in this workspace:`,
+          dsListText,
+          `Currently active data source: ${activeDsLabel}`,
+          `IMPORTANT: Before querying any index or creating any visualization on a different`,
+          `data source, you MUST first call the switch_data_source tool with the target`,
+          `dataSourceId.`,
+        ].join('\n'),
+      });
+    }
+
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -840,6 +896,9 @@ export class ChatService {
     // Clear data source selection and cache for new session
     this.cachedDataSourceId = undefined;
     this.cachedAvailableDataSources = undefined;
+
+    // Clear the LLM-selected data source
+    this.llmSelectedDataSourceId = undefined;
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();

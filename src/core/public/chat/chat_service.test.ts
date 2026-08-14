@@ -23,6 +23,7 @@ describe('ChatService', () => {
         observable: null,
         userMessage: { id: '1', role: 'user', content: 'test' },
       }),
+      setActiveDataSource: jest.fn(),
     };
   });
 

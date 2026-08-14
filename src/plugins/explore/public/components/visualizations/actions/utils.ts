@@ -46,6 +46,21 @@ const VIS_SPEC_PROPERTIES = {
     type: 'string',
     description: 'The index/dataset name to query',
   },
+  datasourceId: {
+    type: 'string',
+    description:
+      'REQUIRED when there are multiple data sources in the workspace. ' +
+      'The id of the data source that owns the index. ' +
+      'Get this from the available_data_sources context (not from the page context). ' +
+      'If you need to target a data source different from the currently active one, ' +
+      'call switch_data_source first, then pass the same id here.',
+  },
+  datasourceTitle: {
+    type: 'string',
+    description:
+      'The human-readable title of the data source. ' +
+      'Get this from the available_data_sources context alongside datasourceId.',
+  },
   potentialChartType: {
     type: 'string',
     description:
@@ -127,12 +142,16 @@ export const AutoVisMeta = {
     'execute the query itself — it resolves the axes mapping from the provided columns, renders a ' +
     'chart preview, and provides an editor link.' +
     '\n\nWORKFLOW (follow in order):' +
-    '\n1. timeFieldName is MANDATORY for time-based queries: If the user request ' +
+    '\n1. DATA SOURCE: If the workspace has multiple data sources (check available_data_sources ' +
+    'context), identify the correct datasourceId for the target index. If it differs from the ' +
+    'currently active data source, call switch_data_source first, then pass the same id as ' +
+    'datasourceId here.' +
+    '\n2. timeFieldName is MANDATORY for time-based queries: If the user request ' +
     'involves any time concept (e.g. "last 7 days", "trends", "over time", "history", ' +
     'time ranges, or time-series analysis), you MUST call the index mapping tool to get the timeFieldName \n' +
-    '\n2. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
-    '\n3. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
-    '\n4. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
+    '\n3. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
+    '\n4. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
+    '\n5. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
     CHART_GUIDE,
 
   parameters: {
