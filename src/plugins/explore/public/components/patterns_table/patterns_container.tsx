@@ -15,6 +15,7 @@ import {
   createExcludeSearchPatternQuery,
   createSearchPatternQuery,
   highlightLogUsingPattern,
+  isValidFiniteNumber,
 } from './utils/utils';
 import {
   selectPatternsField,
@@ -149,14 +150,24 @@ const PatternsContainerContent = ({
   // Denominator for the event ratio. PPL reads the total from the histogram
   // query, but the histogram is not issued for SQL (see the language guard in
   // `executeQueries`), so that total is always 0 and every ratio would come out
-  // Infinity -- rendering the whole column as '—'. The pattern rows already sum
-  // to the population the ratio is *about*, so use that for SQL. This keeps the
-  // column meaningful without depending on SQL histogram support landing first.
-  const logsTotal = useMemo(
-    () =>
-      isSqlPatterns ? patternRows.reduce((sum, row) => sum + (row.count || 0), 0) : histogramTotal,
-    [isSqlPatterns, patternRows, histogramTotal]
-  );
+  // Infinity -- rendering the whole column as '—'.
+  //
+  // The SQL query carries the count of matched documents in a fourth column
+  // (MAX(doc_total)). Summing the returned counts instead would be wrong when the
+  // engine caps the response at `plugins.query.size_limit`: the groups that came
+  // back would be normalized to 100% and every ratio overstated. Falls back to the
+  // sum when the column is absent, so a response predating this shape still renders.
+  const logsTotal = useMemo(() => {
+    if (!isSqlPatterns) return histogramTotal;
+
+    const totalColumn = ((patternResults as any)?.fieldSchema || [])[3];
+    const reportedTotal = totalColumn?.name
+      ? patternResults?.hits?.hits?.[0]?._source?.[totalColumn.name]
+      : undefined;
+    if (isValidFiniteNumber(reportedTotal) && reportedTotal > 0) return reportedTotal;
+
+    return patternRows.reduce((sum, row) => sum + (row.count || 0), 0);
+  }, [isSqlPatterns, patternResults, patternRows, histogramTotal]);
 
   const items: PatternItem[] = useMemo(
     () =>

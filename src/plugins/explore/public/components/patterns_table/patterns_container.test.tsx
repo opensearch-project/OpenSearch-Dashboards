@@ -247,16 +247,35 @@ describe('PatternsContainer', () => {
     const PATTERN_COL = 'pattern';
     const COUNT_COL = 'COUNT(*)';
     const SAMPLE_COL = "IFNULL(MIN(sample), '')";
+    const TOTAL_COL = 'MAX(doc_total)';
 
+    const FULL_SCHEMA = [
+      { name: PATTERN_COL },
+      { name: COUNT_COL },
+      { name: SAMPLE_COL },
+      { name: TOTAL_COL },
+    ];
+
+    /**
+     * @param rows [pattern, count, sample] triples
+     * @param docTotal value of the matched-document column, omitted to model a
+     *                 response that predates that column
+     */
     const sqlResults = (
       rows: Array<[string, number, string]>,
-      schema = [{ name: PATTERN_COL }, { name: COUNT_COL }, { name: SAMPLE_COL }]
+      docTotal?: number,
+      schema = docTotal === undefined ? FULL_SCHEMA.slice(0, 3) : FULL_SCHEMA
     ) => ({
       results: {
         fieldSchema: schema,
         hits: {
           hits: rows.map(([pattern, count, sample]) => ({
-            _source: { [PATTERN_COL]: pattern, [COUNT_COL]: count, [SAMPLE_COL]: sample },
+            _source: {
+              [PATTERN_COL]: pattern,
+              [COUNT_COL]: count,
+              [SAMPLE_COL]: sample,
+              ...(docTotal === undefined ? {} : { [TOTAL_COL]: docTotal }),
+            },
           })),
           total: rows.length,
         },
@@ -310,7 +329,7 @@ describe('PatternsContainer', () => {
       // Rows came back but the schema is short, so no row can be addressed. The
       // container distinguishes this from "no results" and says so.
       mockUseTabResults.mockReturnValueOnce(
-        sqlResults([['<*> <*>', 30, 'Calculated quote']], [{ name: PATTERN_COL }]) as any
+        sqlResults([['<*> <*>', 30, 'Calculated quote']], undefined, [{ name: PATTERN_COL }]) as any
       );
 
       render(<PatternsContainer />);
@@ -321,7 +340,41 @@ describe('PatternsContainer', () => {
 
     // The histogram query is language-gated off for SQL, so its total is 0 and every
     // ratio would come out Infinity, rendering the column as '—' on every row.
-    it('derives the ratio denominator from the pattern counts, not the histogram total', () => {
+    it('takes the ratio denominator from the matched-document column', () => {
+      const items = renderSqlItems(
+        sqlResults(
+          [
+            ['<*> <*>', 30, 'Calculated quote'],
+            ['<*> <*> <*>', 10, 'Ad service starting.'],
+          ],
+          40
+        )
+      );
+
+      // 40 from the column, not the mocked histogram total of 2096.
+      expect(items[0].ratio).toBeCloseTo(30 / 40);
+      expect(items[1].ratio).toBeCloseTo(10 / 40);
+    });
+
+    // The engine caps the response at plugins.query.size_limit, so the returned
+    // groups can be a subset of the result. Summing their counts would normalize
+    // that subset to 100% and overstate every ratio.
+    it('does not renormalize to the returned groups when the response was truncated', () => {
+      const items = renderSqlItems(
+        sqlResults(
+          [
+            ['<*> <*>', 30, 'Calculated quote'],
+            ['<*> <*> <*>', 10, 'Ad service starting.'],
+          ],
+          1000
+        )
+      );
+
+      expect(items[0].ratio).toBeCloseTo(30 / 1000);
+      expect(items[0].ratio).not.toBeCloseTo(30 / 40);
+    });
+
+    it('falls back to the sum of counts when the column is absent', () => {
       const items = renderSqlItems(
         sqlResults([
           ['<*> <*>', 30, 'Calculated quote'],
@@ -329,9 +382,7 @@ describe('PatternsContainer', () => {
         ])
       );
 
-      // 30 + 10 = 40, not the mocked histogram total of 2096.
       expect(items[0].ratio).toBeCloseTo(30 / 40);
-      expect(items[1].ratio).toBeCloseTo(10 / 40);
     });
 
     it('leaves the sample unhighlighted, as PPL does on its own simple-pattern path', () => {

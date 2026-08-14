@@ -78,6 +78,14 @@ const sqlPatternExpression = (patternsField: string) =>
   `REPLACE(IFNULL(${escapeSqlIdentifier(patternsField)}, ''), ` +
   `'${SQL_PATTERN_TOKEN_REGEX}', '${SQL_PATTERN_PLACEHOLDER}')`;
 
+/**
+ * The editor accepts a trailing statement terminator, but a subquery cannot carry
+ * one: `FROM (SELECT * FROM idx;) sub` makes the engine read `idx;` as the index
+ * name and fail with IndexNotFoundException. Only trailing terminators are removed,
+ * so a `;` inside a string literal is left alone.
+ */
+export const asSqlSubquery = (queryBase: string) => String(queryBase).replace(/[\s;]+$/, '');
+
 export const sqlPatternQuery = (queryBase: string, patternsField: string) => {
   const field = escapeSqlIdentifier(patternsField);
   // The sample column is projected RAW and the null-guard is applied to the
@@ -86,10 +94,19 @@ export const sqlPatternQuery = (queryBase: string, patternsField: string) => {
   // containing both a missing document and an empty-string document throws
   // "compare expected value have same type" (HTTP 400). Guarding the aggregate
   // instead of its input avoids mixing the two types inside the comparison.
+  //
+  // MAX(doc_total) carries the number of documents the user's query matched.
+  // The engine caps the response at `plugins.query.size_limit` (10,000 by
+  // default), so on a high-cardinality field the returned groups are only part
+  // of the result -- summing their counts would normalize that subset to 100%
+  // and overstate every ratio. COUNT(*) OVER () is evaluated on the inner
+  // relation, before grouping and before the cap, so it survives truncation and
+  // also reveals it: the returned counts sum to less than this total.
   return (
-    `SELECT pattern, COUNT(*), IFNULL(MIN(sample), '') ` +
+    `SELECT pattern, COUNT(*), IFNULL(MIN(sample), ''), MAX(doc_total) ` +
     `FROM (SELECT ${sqlPatternExpression(patternsField)} AS pattern, ` +
-    `${field} AS sample FROM (${queryBase}) sub_inner) sub ` +
+    `${field} AS sample, COUNT(*) OVER () AS doc_total ` +
+    `FROM (${asSqlSubquery(queryBase)}) sub_inner) sub ` +
     `GROUP BY pattern ORDER BY COUNT(*) DESC`
   );
 };
@@ -166,7 +183,7 @@ export const sqlUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `SELECT * FROM (${queryBase}) sub WHERE ${sqlPatternExpression(
+  return `SELECT * FROM (${asSqlSubquery(queryBase)}) sub WHERE ${sqlPatternExpression(
     patternsField
   )} = ${escapeSqlValue(patternString)}`;
 };
@@ -177,7 +194,7 @@ export const sqlExcludeSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `SELECT * FROM (${queryBase}) sub WHERE ${sqlPatternExpression(
+  return `SELECT * FROM (${asSqlSubquery(queryBase)}) sub WHERE ${sqlPatternExpression(
     patternsField
   )} <> ${escapeSqlValue(patternString)}`;
 };

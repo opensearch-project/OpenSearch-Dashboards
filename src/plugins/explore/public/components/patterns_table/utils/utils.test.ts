@@ -295,11 +295,55 @@ describe('utils', () => {
     describe('sqlPatternQuery', () => {
       it('builds a REPLACE-based GROUP BY query with unaliased aggregates', () => {
         expect(sqlPatternQuery(queryBase, patternsField)).toBe(
-          "SELECT pattern, COUNT(*), IFNULL(MIN(sample), '') " +
+          "SELECT pattern, COUNT(*), IFNULL(MIN(sample), ''), MAX(doc_total) " +
             "FROM (SELECT REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') AS pattern, " +
-            '`message` AS sample ' +
+            '`message` AS sample, COUNT(*) OVER () AS doc_total ' +
             'FROM (SELECT * FROM my_index) sub_inner) sub ' +
             'GROUP BY pattern ORDER BY COUNT(*) DESC'
+        );
+      });
+
+      // The engine caps the response at plugins.query.size_limit, so the returned
+      // groups can be a subset. COUNT(*) OVER () is evaluated on the inner relation,
+      // before grouping and before the cap, so the ratio denominator survives it.
+      it('carries the matched-document count in its own column', () => {
+        const query = sqlPatternQuery(queryBase, patternsField);
+
+        expect(query).toContain('COUNT(*) OVER () AS doc_total');
+        expect(query).toContain('MAX(doc_total)');
+      });
+    });
+
+    // `FROM (SELECT ...;) sub` makes the engine read the terminator as part of the
+    // index name and fail with IndexNotFoundException.
+    describe('trailing statement terminator', () => {
+      const terminated = 'SELECT * FROM my_index;';
+
+      it('is dropped before the query is embedded as a subquery', () => {
+        expect(sqlPatternQuery(terminated, patternsField)).toContain(
+          'FROM (SELECT * FROM my_index) sub_inner'
+        );
+        expect(sqlPatternQuery(terminated, patternsField)).not.toContain('my_index;');
+      });
+
+      it('is dropped for the filter-for and filter-out queries too', () => {
+        expect(sqlUpdateSearchPatternQuery(terminated, patternsField, patternString)).toContain(
+          'FROM (SELECT * FROM my_index) sub'
+        );
+        expect(sqlExcludeSearchPatternQuery(terminated, patternsField, patternString)).toContain(
+          'FROM (SELECT * FROM my_index) sub'
+        );
+      });
+
+      it('tolerates whitespace and repeats around the terminator', () => {
+        expect(sqlPatternQuery('SELECT * FROM my_index ; ; ', patternsField)).toContain(
+          'FROM (SELECT * FROM my_index) sub_inner'
+        );
+      });
+
+      it('leaves a terminator inside a string literal alone', () => {
+        expect(sqlPatternQuery("SELECT * FROM my_index WHERE a = 'x;y';", patternsField)).toContain(
+          "FROM (SELECT * FROM my_index WHERE a = 'x;y') sub_inner"
         );
       });
     });
