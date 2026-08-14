@@ -553,6 +553,7 @@ export function registerAutoVisualizationAction(
     handler: async (args: AutoVisualizationArgs) => {
       try {
         checkTimeRangeArgsUsable(args);
+
         const { visConfig, query, resolvedChartType, resolvedAxesMapping } = buildVisConfig(args);
         const resolvedTimeRange = getAbsoluteTimeRange(data, args);
         const { originatingApp, dashboardId } = getCurrentDashboardContext(contextProvider);

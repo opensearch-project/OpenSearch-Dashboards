@@ -12,6 +12,9 @@ interface PanelDataEntry {
   panelTitle: string;
 }
 
+/** Maximum rows returned by fetch_panel_data to keep the agent payload under limits. */
+const MAX_ROWS = 20;
+
 type RegisterAction = (action: AssistantAction<any>) => void;
 type UnregisterAction = (id: string) => void;
 
@@ -68,6 +71,7 @@ export class PanelDataService {
       name: FETCH_PANEL_DATA_TOOL_NAME,
       description:
         'Retrieves the underlying data rows from a dashboard panel by its saved object ID. ' +
+        `Returns up to ${MAX_ROWS} sample rows. For aggregations, counts, or full-dataset analysis use a PPL query instead. ` +
         'IMPORTANT: Do NOT call this tool for general questions like "summarize this", "what does this show", or "explain the chart" — ' +
         'use the screenshot and visualization context already provided in the conversation for those. ' +
         'ONLY call this tool when the user explicitly asks for specific data that requires exact values. ',
@@ -90,13 +94,19 @@ export class PanelDataService {
           };
         }
 
-        const formattedRows = entry.rows.map((hit: any) => hit._source || hit.fields || hit);
+        const allRows = entry.rows.map((hit: any) => hit._source || hit.fields || hit);
+        const truncated = allRows.length > MAX_ROWS;
+        const formattedRows = truncated ? allRows.slice(0, MAX_ROWS) : allRows;
         return {
           success: true,
           panelTitle: entry.panelTitle,
           savedObjectId: args.savedObjectId,
-          rowCount: formattedRows.length,
+          rowCount: allRows.length,
           rows: formattedRows,
+          ...(truncated && {
+            truncated: true,
+            note: `Showing first ${MAX_ROWS} of ${allRows.length} rows. Use a PPL query for aggregations or filtered results.`,
+          }),
         };
       },
     });
