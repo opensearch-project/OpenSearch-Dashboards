@@ -40,6 +40,8 @@ export interface ContextProviderStart {
   actions: {
     registerAssistantAction: (action: AssistantAction) => void;
     unregisterAssistantAction: (id: string) => void;
+    suppressDefaultPageContext: () => void;
+    unsuppressDefaultPageContext: () => void;
   };
   hooks: {
     usePageContext: (options?: any) => string;
