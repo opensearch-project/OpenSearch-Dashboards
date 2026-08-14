@@ -310,7 +310,11 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" className="eui-xScroll">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          gutterSize="m"
+          className="eui-xScroll workspace-initial__use-case-cards"
+        >
           {useCaseCards}
         </EuiFlexGroup>
       </EuiFlexItem>

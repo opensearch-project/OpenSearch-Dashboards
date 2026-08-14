@@ -19,3 +19,12 @@
   padding-right: 48px;
   width: 100%;
 }
+
+// Keep the use case cards horizontally scrollable but hide the scrollbar
+.workspace-initial__use-case-cards {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
