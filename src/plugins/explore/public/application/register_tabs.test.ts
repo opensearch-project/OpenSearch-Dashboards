@@ -214,6 +214,55 @@ describe('registerBuiltInTabs - SQL Language Restrictions', () => {
       expect(sqlTabs.length).toBe(0);
     });
   });
+
+  // What a tab can render is not the same question as which language a session
+  // opens in. Spelling PPL as EXPLORE_DEFAULT_LANGUAGE conflated the two.
+  describe('independence from the default language', () => {
+    const registerWithDefaultLanguage = (defaultLanguage: string) => {
+      let tabs: Array<{ id: string; supportedLanguages: string[] }> = [];
+      jest.isolateModules(() => {
+        jest.doMock('../../common', () => ({
+          ...jest.requireActual('../../common'),
+          EXPLORE_DEFAULT_LANGUAGE: defaultLanguage,
+        }));
+        /* eslint-disable @typescript-eslint/no-var-requires */
+        const tabs_ = require('./register_tabs');
+        const registry_ = require('../services/tab_registry/tab_registry_service');
+        /* eslint-enable @typescript-eslint/no-var-requires */
+        const register = tabs_.registerBuiltInTabs;
+        const registry = new registry_.TabRegistryService();
+        register(registry, createMockServices(true) as ExploreServices, ExploreFlavor.Logs);
+        tabs = registry.getAllTabs();
+      });
+      return tabs;
+    };
+
+    it('keeps PPL on every tab even when the default language is SQL', () => {
+      const tabs = registerWithDefaultLanguage('SQL');
+
+      expect(tabs.length).toBeGreaterThan(0);
+      tabs.forEach((tab) => {
+        expect(tab.supportedLanguages).toContain('PPL');
+      });
+    });
+
+    it('never repeats a language within one tab', () => {
+      const tabs = registerWithDefaultLanguage('SQL');
+
+      tabs.forEach((tab) => {
+        expect(tab.supportedLanguages).toEqual(Array.from(new Set(tab.supportedLanguages)));
+      });
+    });
+
+    it('declares the same languages whatever the default is', () => {
+      const asPpl = registerWithDefaultLanguage('PPL');
+      const asSql = registerWithDefaultLanguage('SQL');
+
+      expect(asSql.map((tab) => [tab.id, tab.supportedLanguages])).toEqual(
+        asPpl.map((tab) => [tab.id, tab.supportedLanguages])
+      );
+    });
+  });
 });
 
 describe('registerBuiltInTabs - patterns tab under SQL', () => {

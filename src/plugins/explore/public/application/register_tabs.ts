@@ -13,7 +13,6 @@ import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_
 import { ExploreServices } from '../types';
 import {
   ExploreFlavor,
-  EXPLORE_DEFAULT_LANGUAGE,
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
@@ -85,10 +84,7 @@ export const registerBuiltInTabs = (
       flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
       order: 10,
       // SQL is only supported for Logs flavor, not Traces
-      supportedLanguages:
-        registryFlavor === ExploreFlavor.Logs
-          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-          : [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: registryFlavor === ExploreFlavor.Logs ? ['PPL', 'SQL'] : ['PPL'],
       component: LogsTab,
     };
     tabRegistry.registerTab(logsTabDefinition);
@@ -103,7 +99,7 @@ export const registerBuiltInTabs = (
       }),
       flavor: [ExploreFlavor.Logs],
       order: 15,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
+      supportedLanguages: ['PPL', 'SQL'],
 
       prepareQuery: (query) => {
         const state = services.store.getState();
@@ -217,10 +213,10 @@ export const registerBuiltInTabs = (
     // SQL only for Logs, PROMQL for Metrics, PPL only for Traces
     supportedLanguages:
       registryFlavor === ExploreFlavor.Metrics
-        ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
+        ? ['PPL', 'PROMQL']
         : registryFlavor === ExploreFlavor.Logs
-          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-          : [EXPLORE_DEFAULT_LANGUAGE],
+          ? ['PPL', 'SQL']
+          : ['PPL'],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -238,10 +234,7 @@ export const registerBuiltInTabs = (
     }),
     flavor: [ExploreFlavor.Logs],
     order: 17,
-    supportedLanguages:
-      registryFlavor === ExploreFlavor.Logs
-        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-        : [EXPLORE_DEFAULT_LANGUAGE],
+    supportedLanguages: registryFlavor === ExploreFlavor.Logs ? ['PPL', 'SQL'] : ['PPL'],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -261,7 +254,7 @@ export const registerBuiltInTabs = (
       }),
       flavor: [ExploreFlavor.Logs],
       order: 25,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: ['PPL'],
       component: FieldStatsTab,
     });
   }
