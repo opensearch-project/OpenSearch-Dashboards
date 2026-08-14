@@ -6,9 +6,41 @@
 import { i18n } from '@osd/i18n';
 
 import './_recent_query.scss';
-import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiText,
+  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../types';
+
+const DISCOVER_APP_ID = 'data-explorer';
+
+const ASK_AI_ERROR_MESSAGE =
+  'My query on this page failed to run with the following error: "{error}". Please review my query, fix it, and run the corrected query on the page so I can see the results.';
+
+function extractErrorForAssistant(errorBody: any): string {
+  if (errorBody?.shortMessage) {
+    return errorBody.shortMessage;
+  }
+  const message = errorBody?.message;
+  const inner = errorBody?.attributes?.error || message?.error;
+  return (
+    (typeof inner === 'string'
+      ? inner
+      : inner?.root_cause?.[0]?.reason || inner?.details || inner?.reason) ||
+    (typeof message === 'string' ? message : undefined) ||
+    errorBody?.error ||
+    'Query execution failed'
+  );
+}
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -38,6 +70,7 @@ export interface QueryStatus {
   };
   elapsedMs?: number;
   startTime?: number;
+  resultsCount?: number;
 }
 
 // This is the time in milliseconds that the query will wait before showing the loading spinner
@@ -113,6 +146,22 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     return `Unknown Error: ${String(message)}`;
   }, [props.queryStatus.body?.error]);
 
+  const { services } = useOpenSearchDashboards<IDataPluginServices>();
+  const currentAppId = useObservable(
+    services?.application?.currentAppId$ ?? of(undefined),
+    undefined
+  );
+  const showAskAiForHelp =
+    currentAppId === DISCOVER_APP_ID &&
+    (services?.chat?.isAvailable?.() ?? false) &&
+    (props.queryStatus.resultsCount ?? 0) > 0;
+
+  const onAskAiForHelp = () => {
+    const error = extractErrorForAssistant(props.queryStatus.body?.error);
+    const message = ASK_AI_ERROR_MESSAGE.replace('{error}', error);
+    services?.chat?.sendMessageWithWindow?.(message, []).catch(() => {});
+  };
+
   if (props.queryStatus.status === ResultStatus.LOADING) {
     const time = Math.floor(elapsedTime / 1000);
     const loadingText =
@@ -179,52 +228,76 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   }
 
   return (
-    <EuiPopover
-      button={
-        <EuiButtonEmpty
-          iconSide="left"
-          iconType={'alert'}
-          size="xs"
-          onClick={onButtonClick}
-          data-test-subj="queryResultErrorBtn"
-          className="editor__footerItem"
-          color="danger"
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              iconSide="left"
+              iconType={'alert'}
+              size="xs"
+              onClick={onButtonClick}
+              data-test-subj="queryResultErrorBtn"
+              className="editor__footerItem"
+              color="danger"
+            >
+              <EuiText
+                size="xs"
+                color="danger"
+                className="editor__footerItem"
+                data-test-subj="editorFooterItem"
+              >
+                {i18n.translate('data.query.languageService.queryResults.error', {
+                  defaultMessage: `Error`,
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setPopover(false)}
+          panelPaddingSize="s"
+          anchorPosition={'downRight'}
+          data-test-subj="queryResultError"
         >
-          <EuiText
-            size="xs"
-            color="danger"
-            className="editor__footerItem"
-            data-test-subj="editorFooterItem"
+          <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
+          <div
+            style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
+            className="eui-textBreakWord"
+            data-test-subj="textBreakWord"
           >
-            {i18n.translate('data.query.languageService.queryResults.error', {
-              defaultMessage: `Error`,
-            })}
-          </EuiText>
-        </EuiButtonEmpty>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopover(false)}
-      panelPaddingSize="s"
-      anchorPosition={'downRight'}
-      data-test-subj="queryResultError"
-    >
-      <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
-      <div
-        style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
-        className="eui-textBreakWord"
-        data-test-subj="textBreakWord"
-      >
-        <EuiText size="s">
-          <p>
-            <strong>
-              {i18n.translate('data.query.languageService.queryResults.message', {
-                defaultMessage: `Message:`,
+            <EuiText size="s">
+              <p>
+                <strong>
+                  {i18n.translate('data.query.languageService.queryResults.message', {
+                    defaultMessage: `Message:`,
+                  })}
+                </strong>{' '}
+                {displayErrorMessage}
+              </p>
+            </EuiText>
+          </div>
+        </EuiPopover>
+      </EuiFlexItem>
+      {showAskAiForHelp && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconSide="left"
+            iconType={'generate'}
+            size="xs"
+            flush="left"
+            style={{ marginLeft: 8 }}
+            onClick={onAskAiForHelp}
+            data-test-subj="discoverQueryErrorAskAiForHelp"
+            className="editor__footerItem"
+          >
+            <EuiText size="xs" className="editor__footerItem" data-test-subj="editorFooterItem">
+              {i18n.translate('data.query.languageService.queryResults.askAI', {
+                defaultMessage: `Ask AI for help`,
               })}
-            </strong>{' '}
-            {displayErrorMessage}
-          </p>
-        </EuiText>
-      </div>
-    </EuiPopover>
+            </EuiText>
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 }
