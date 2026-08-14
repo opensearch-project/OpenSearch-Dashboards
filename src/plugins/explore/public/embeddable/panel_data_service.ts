@@ -37,12 +37,12 @@ export class PanelDataService {
     PanelDataService.instance.unregisterAction = unregisterAction;
   }
 
-  static getInstance(): PanelDataService {
-    if (!PanelDataService.instance) {
-      throw new Error(
-        'PanelDataService has not been initialized. Call PanelDataService.init() first.'
-      );
-    }
+  /**
+   * Returns the singleton instance, or null if init() has not been called
+   * (e.g. the contextProvider plugin is disabled). Callers must handle the
+   * null case instead of assuming the service is always available.
+   */
+  static getInstance(): PanelDataService | null {
     return PanelDataService.instance;
   }
 

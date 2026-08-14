@@ -11,6 +11,7 @@ import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
+import { extractQueryError } from '../utils/format_error';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
@@ -132,6 +133,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
           optionalRef,
         }}
         showSaveQuery={showSaveQuery}
+        resultsCount={rows?.length ?? 0}
       />
 
       {indexPattern ? (
@@ -142,6 +144,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               query={data.query.queryString.getQuery()}
               savedQuery={data.query.savedQueries}
               timeFieldName={timeField}
+              getQueryError={() => data$.getValue().actualError}
             />
           )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (
@@ -149,7 +152,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
           )}
           {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
           {fetchState.status === ResultStatus.ERROR && !rows?.length && (
-            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+            <DiscoverUninitialized
+              onRefresh={() => refetch$.next()}
+              getQueryError={() => extractQueryError(data$.getValue().queryStatus?.body?.error)}
+            />
           )}
           {(fetchState.status === ResultStatus.READY ||
             (fetchState.status === ResultStatus.LOADING && !!rows?.length) ||

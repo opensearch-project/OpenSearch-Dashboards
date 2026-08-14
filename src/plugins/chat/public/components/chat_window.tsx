@@ -79,6 +79,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const [isLoading, setIsLoading] = useState(false);
     const handleSendRef = useRef<typeof handleSend>();
     const currentSubscriptionRef = useRef<any>(null);
+    const chatInputRef = useRef<HTMLTextAreaElement>(null);
     const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
     const { screenshotFeatureEnabled, isCapturing, capturePageContainer } =
       usePageContainerCapture();
@@ -799,7 +800,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               onResendToolResult={handleResendToolResult}
               onApproveConfirmation={handleApproveConfirmation}
               onRejectConfirmation={handleRejectConfirmation}
-              onFillInput={setInput}
+              onFillInput={(content) => {
+                setInput(content);
+                chatInputRef.current?.focus();
+                telemetryRecorder?.recordEvent({ name: 'suggestion_click', data: {} });
+              }}
               inputValue={input}
               onRemoveInput={(content: string) =>
                 setInput((prev) => prev.replace(content, '').trim())
@@ -859,6 +864,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             )}
 
             <ChatInput
+              ref={chatInputRef}
               layoutMode={layoutMode}
               input={input}
               isCapturing={isCapturing}

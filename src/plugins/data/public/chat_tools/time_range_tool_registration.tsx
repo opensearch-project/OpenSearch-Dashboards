@@ -9,14 +9,17 @@ import { TimefilterContract } from '../query/timefilter';
 interface TimeRangeToolRegistrationProps {
   timefilter: TimefilterContract;
   useAssistantAction?: (config: any) => void;
+  enabled?: boolean;
 }
 
 export const TimeRangeToolRegistration: React.FC<TimeRangeToolRegistrationProps> = ({
   timefilter,
   useAssistantAction,
+  enabled = true,
 }) => {
   const useAssistantActionHook = useAssistantAction || (() => {});
   useAssistantActionHook({
+    enabled,
     name: 'update_time_range',
     description:
       'Updates the global time range filter. Use this tool once when the user requests to change, update, or set the time range (e.g., "last week", "last 24 hours", "today"). Do not call this tool multiple times for the same request or after the time range has already been updated.',
