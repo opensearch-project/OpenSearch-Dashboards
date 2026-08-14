@@ -6,7 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
-import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
+import { TOOL_EXECUTION_ERROR_PREFIX, SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -917,6 +917,27 @@ export class ChatEventHandler {
    * tool call/result pair and re-applies the selected data source on ChatService.
    */
   private restoreLLMDataSourceFromSnapshot(messages: Message[]): void {
+    const restoredId = this.findLastSwitchedDataSourceId(messages);
+
+    if (!restoredId) return;
+
+    this.chatService
+      .validateDataSourceId(restoredId)
+      .then(({ valid }) => {
+        if (valid) {
+          this.chatService.setLLMDataSourceId(restoredId);
+        }
+      })
+      .catch(() => {
+        // keep the currently resolved data source
+      });
+  }
+
+  /**
+   * Find the data source id of the most recent successful `switch_data_source` tool result
+   * in a message history. Returns undefined when the conversation never switched.
+   */
+  private findLastSwitchedDataSourceId(messages: Message[]): string | undefined {
     // 1. build toolCallId → toolName index from assistant messages
     const toolCallIdToName = new Map<string, string>();
     for (const msg of messages) {
@@ -939,7 +960,8 @@ export class ChatEventHandler {
       if (!toolCallId) continue;
 
       const toolName = toolCallIdToName.get(toolCallId);
-      if (toolName !== 'switch_data_source') continue;
+      // if (toolName !== 'switch_data_source') continue;
+      if (toolName !== SWITCH_DATA_SOURCE_TOOL_NAME) continue;
 
       // Parse the tool result content
       const content = msg.content as string | undefined;
@@ -948,13 +970,14 @@ export class ChatEventHandler {
       try {
         const result = JSON.parse(content);
         if (result?.success && result?.dataSourceId) {
-          this.chatService.setLLMDataSourceId(result.dataSourceId);
-          return;
+          return result.dataSourceId as string;
         }
       } catch {
         // skip
       }
     }
+
+    return undefined;
   }
 
   /**

@@ -46,21 +46,6 @@ const VIS_SPEC_PROPERTIES = {
     type: 'string',
     description: 'The index/dataset name to query',
   },
-  datasourceId: {
-    type: 'string',
-    description:
-      'REQUIRED when there are multiple data sources in the workspace. ' +
-      'The id of the data source that owns the index. ' +
-      'Get this from the available_data_sources context (not from the page context). ' +
-      'If you need to target a data source different from the currently active one, ' +
-      'call switch_data_source first, then pass the same id here.',
-  },
-  datasourceTitle: {
-    type: 'string',
-    description:
-      'The human-readable title of the data source. ' +
-      'Get this from the available_data_sources context alongside datasourceId.',
-  },
   potentialChartType: {
     type: 'string',
     description:
@@ -143,9 +128,9 @@ export const AutoVisMeta = {
     'chart preview, and provides an editor link.' +
     '\n\nWORKFLOW (follow in order):' +
     '\n1. DATA SOURCE: If the workspace has multiple data sources (check available_data_sources ' +
-    'context), identify the correct datasourceId for the target index. If it differs from the ' +
-    'currently active data source, call switch_data_source first, then pass the same id as ' +
-    'datasourceId here.' +
+    'context) and the target index lives on a data source other than the currently active one, ' +
+    'call switch_data_source FIRST. This tool then automatically targets the active data source — ' +
+    'you do not pass any data source parameter here.' +
     '\n2. timeFieldName is MANDATORY for time-based queries: If the user request ' +
     'involves any time concept (e.g. "last 7 days", "trends", "over time", "history", ' +
     'time ranges, or time-series analysis), you MUST call the index mapping tool to get the timeFieldName \n' +

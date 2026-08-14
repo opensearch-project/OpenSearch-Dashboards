@@ -601,6 +601,24 @@ describe('ChatService', () => {
       ); // dataSourceId is undefined when no uiSettings provided
     });
 
+    // Regression: the continuation run used to resolve only the workspace/global
+    // default data source, so a switch_data_source performed by the LLM was dropped
+    // as soon as a tool result was sent back.
+    it('should keep the LLM-selected data source on the continuation run', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot('tool-call-123'));
+
+      chatService.setLLMDataSourceId('llm-selected-ds');
+
+      await chatService.sendToolResult('tool-call-123', { success: true }, []);
+
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(expect.any(Object), 'llm-selected-ds');
+    });
+
     it('should handle string results directly', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -2171,6 +2189,83 @@ describe('ChatService', () => {
       const result = await service.getAvailableDataSources();
 
       expect(result).toEqual([]);
+    });
+
+    it('should bypass the cache when forceRefresh is true', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      await service.getAvailableDataSources();
+      await service.getAvailableDataSources(true);
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('validateDataSourceId', () => {
+    let mockSavedObjectsClient: any;
+
+    const buildClient = (ids: string[]) => ({
+      find: jest.fn().mockResolvedValue({
+        savedObjects: ids.map((id) => ({
+          id,
+          attributes: { title: `title-${id}`, dataSourceEngineType: 'OpenSearch' },
+        })),
+      }),
+    });
+
+    beforeEach(() => {
+      mockSavedObjectsClient = buildClient(['ds-1', 'ds-2']);
+    });
+
+    const buildService = (client: any = mockSavedObjectsClient) =>
+      new (ChatService as any)(mockUiSettings, mockCoreChatService, undefined, client);
+
+    it('should accept a known data source id and return its info', async () => {
+      const result = await buildService().validateDataSourceId('ds-1');
+
+      expect(result.valid).toBe(true);
+      expect(result.dataSource).toEqual({ id: 'ds-1', title: 'title-ds-1' });
+    });
+
+    it('should reject an unknown id and report the valid ids', async () => {
+      const result = await buildService().validateDataSourceId('not-a-data-source');
+
+      expect(result.valid).toBe(false);
+      expect(result.dataSource).toBeUndefined();
+      expect(result.availableDataSources.map((ds: any) => ds.id)).toEqual(['ds-1', 'ds-2']);
+    });
+
+    it('should refresh the cached list once before rejecting an id', async () => {
+      const service = buildService();
+      // Warm the cache, then have the client report a newly created data source.
+      await service.getAvailableDataSources();
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [
+          { id: 'ds-1', attributes: { title: 'title-ds-1' } },
+          { id: 'ds-2', attributes: { title: 'title-ds-2' } },
+          { id: 'ds-new', attributes: { title: 'Freshly created' } },
+        ],
+      });
+
+      const result = await service.validateDataSourceId('ds-new');
+
+      expect(result.valid).toBe(true);
+      expect(result.dataSource).toEqual({ id: 'ds-new', title: 'Freshly created' });
+    });
+
+    it('should fail open when the data source list cannot be resolved', async () => {
+      // An empty list also means "no savedObjectsClient" or "find() threw" — validation
+      // must not make switching impossible in that case.
+      const serviceWithoutClient = new (ChatService as any)(mockUiSettings, mockCoreChatService);
+      const result = await serviceWithoutClient.validateDataSourceId('anything');
+
+      expect(result.valid).toBe(true);
+      expect(result.availableDataSources).toEqual([]);
     });
   });
 

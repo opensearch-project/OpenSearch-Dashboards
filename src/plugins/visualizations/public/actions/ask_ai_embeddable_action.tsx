@@ -171,16 +171,7 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
       // Send visualization screenshot to chat
       if (this.core.chat) {
         const panelDataSourceId =
-          query?.dataset?.dataSource?.id ??
-          // Fallback: index pattern id is formatted as "<hash>_<dataSourceId>_<indexPatternId>".
-          // Split on '_' and take the second segment (UUID format) when the direct field is absent.
-          (() => {
-            const ipId = visEmbeddable.vis.data.indexPattern?.id ?? '';
-            const parts = ipId.split('_');
-            // A UUID has 32 hex chars + 4 dashes = 36 chars
-            const uuidLike = parts.find((p) => p.length === 36 && p.includes('-'));
-            return uuidLike ?? undefined;
-          })();
+          query?.dataset?.dataSource?.id ?? visEmbeddable.vis.data.indexPattern?.dataSourceRef?.id;
 
         if (panelDataSourceId) {
           this.core.chat.setActiveDataSource(panelDataSourceId);

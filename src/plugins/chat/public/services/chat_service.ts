@@ -419,6 +419,30 @@ export class ChatService {
     this.llmSelectedDataSourceId = undefined;
   }
 
+  /**
+   * Check a data source id against the available data source list.
+   */
+  public async validateDataSourceId(id: string): Promise<{
+    valid: boolean;
+    dataSource?: DataSourceInfo;
+    availableDataSources: DataSourceInfo[];
+  }> {
+    let available = await this.getAvailableDataSources();
+    let dataSource = available.find((ds) => ds.id === id);
+
+    // A data source created after the cache warmed would be rejected — refresh once.
+    if (!dataSource && available.length > 0) {
+      available = await this.getAvailableDataSources(true);
+      dataSource = available.find((ds) => ds.id === id);
+    }
+
+    if (available.length === 0) {
+      return { valid: true, availableDataSources: available };
+    }
+
+    return { valid: !!dataSource, dataSource, availableDataSources: available };
+  }
+
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
     const id = await this.getCurrentDataSourceId();
     if (!id) return undefined;
@@ -480,14 +504,20 @@ export class ChatService {
       const dsListText = availableDataSources
         .map((ds) => `  - id: "${ds.id}", title: "${ds.title}"`)
         .join('\n');
+      // The active data source is whatever getCurrentDataSourceId() resolved — it may come
+      // from a previous switch, the page context, the chat data source selector or the
+      // workspace/global default.
       const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
+
       const activeDsLabel = activeDatasource
         ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
-        : (dataSourceId ?? 'not set');
+        : dataSourceId
+          ? `id: ${dataSourceId} (not one of the data sources listed above)`
+          : `the local cluster (no data source id)`;
       context.push({
         description: 'available_data_sources',
         value: [
-          `Available data sources in this workspace:`,
+          `Available data sources:`,
           dsListText,
           `Currently active data source: ${activeDsLabel}`,
           `IMPORTANT: Before querying any index or creating any visualization on a different`,
@@ -727,8 +757,9 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+    // try LLM-selected data source first, getCurrentDataSourceId still falls back
+    // to getWorkspaceAwareDataSourceId
+    const dataSourceId = await this.getCurrentDataSourceId();
 
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
@@ -1094,8 +1125,10 @@ export class ChatService {
   /**
    * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
    */
-  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
-    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+  public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
+    // The cache lives until newThread(), so a data source created mid-session is invisible
+    // to it. forceRefresh lets validateDataSourceId() re-check before rejecting an id.
+    if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 
     try {

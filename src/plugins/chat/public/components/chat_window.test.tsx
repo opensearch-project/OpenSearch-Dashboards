@@ -28,6 +28,8 @@ jest.mock('../../../context_provider/public', () => {
     AssistantActionService: {
       getInstance: jest.fn(() => assistantActionsInstance),
     },
+    // Actions registered via this hook (e.g. switch_data_source) are no-ops in these tests
+    useAssistantAction: jest.fn(),
   };
 });
 
@@ -91,6 +93,8 @@ describe('ChatWindow', () => {
         .fn()
         .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
       setDataSourceId: jest.fn(),
+      setLLMDataSourceId: jest.fn(),
+      clearLLMDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,
