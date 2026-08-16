@@ -17,6 +17,7 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  StackMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -26,6 +27,13 @@ import {
   createStackedAreaChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
+
+/**
+ * - `none`: flat fill in the series color.
+ * - `opacity`: fades from the series color at the line to transparent at the baseline.
+ * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
+ */
+export type GradientMode = 'none' | 'opacity' | 'hue';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleOptions {
@@ -57,17 +65,18 @@ export interface AreaChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
+  stackMode?: StackMode;
 }
 
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'
+    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'stackMode'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
+  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle' | 'stackMode'>;
 
-const defaultAreaChartStyles: AreaChartStyle = {
+export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendTitle: '',
@@ -87,6 +96,7 @@ const defaultAreaChartStyles: AreaChartStyle = {
   standardAxes: [],
 
   showFullTimeRange: true,
+  stackMode: 'none',
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

@@ -16,6 +16,10 @@ import {
   getLegendNameDomain,
   LegendItem,
 } from '../utils/legend';
+import { resolveStackMode } from '../utils/data_transformation';
+
+export const buildStackConfig = (styles: AreaChartStyle) =>
+  resolveStackMode(styles) === 'none' ? {} : { stack: 'total' };
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -46,14 +50,12 @@ export const createAreaSeries =
     styles,
     seriesFields,
     categoryField,
-    stack,
     allData,
     colorField,
   }: {
     styles: AreaChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
     categoryField: string;
-    stack?: boolean;
     allData?: Array<Record<string, any>>;
     colorField?: string;
   }): PipelineFn<T> =>
@@ -76,6 +78,7 @@ export const createAreaSeries =
 
     const thresholdLines = generateThresholdLines(styles.thresholdOptions);
     const legendItems: LegendItem[] = [];
+    const stackConfig = buildStackConfig(styles);
     const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
@@ -84,9 +87,9 @@ export const createAreaSeries =
       return {
         name,
         type: 'line',
+        ...stackConfig,
         showSymbol: false,
         connectNulls: true,
-        stack: stack ? 'Total' : undefined,
         areaStyle: {
           opacity: styles.areaOpacity || DEFAULT_OPACITY,
         },

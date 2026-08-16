@@ -19,3 +19,4 @@ export { normalizeEmptyValue } from './utils/normalization';
 export { getDecimalPrecision, roundToPrecision } from './utils/number';
 
 export { map, pick } from './common';
+export * from './normalize_percentage';

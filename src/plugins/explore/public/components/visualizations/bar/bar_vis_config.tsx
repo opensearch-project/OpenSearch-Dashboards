@@ -18,6 +18,7 @@ import {
   BucketOptions,
   TimeUnit,
   ThresholdOptions,
+  StackMode,
 } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
@@ -30,6 +31,7 @@ import {
   createTimeBarChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
+import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share/gradient_range';
 
 export interface BarChartStyleOptions {
   // Basic controls
@@ -46,7 +48,9 @@ export interface BarChartStyleOptions {
   showBarBorder?: boolean;
   barBorderWidth?: number;
   barBorderColor?: string;
-  stackMode?: 'none' | 'total';
+  stackMode?: StackMode;
+  barRadius?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -62,12 +66,28 @@ export interface BarChartStyleOptions {
 
   useThresholdColor?: boolean;
   showFullTimeRange?: boolean;
+  fillOpacity?: number;
 }
 
 export type BarChartStyle = Required<
-  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle' | 'stackMode'>
+  Omit<
+    BarChartStyleOptions,
+    | 'legendShape'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'stackMode'
+    | 'barRadius'
+    | 'showValues'
+    | 'fillOpacity'
+  >
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'stackMode'>;
+  Pick<
+    BarChartStyleOptions,
+    'legendShape' | 'legendTitle' | 'stackMode' | 'barRadius' | 'showValues' | 'fillOpacity'
+  >;
+
+export const MIN_BAR_RADIUS = 0;
+export const MAX_BAR_RADIUS = 20;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
@@ -99,6 +119,12 @@ export const defaultBarChartStyles: BarChartStyle = {
     bucketTimeUnit: TimeUnit.AUTO,
   },
   showFullTimeRange: true,
+
+  stackMode: 'none',
+  barRadius: MIN_BAR_RADIUS,
+  showValues: false,
+
+  fillOpacity: DEFAULT_BAR_FILL_OPACITY,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

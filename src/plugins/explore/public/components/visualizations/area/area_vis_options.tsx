@@ -13,6 +13,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { AreaExclusiveVisOptions } from './area_exclusive_vis_options';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyle>;
 
@@ -44,6 +45,13 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <AreaExclusiveVisOptions
+              stackMode={styleOptions.stackMode}
+              onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}

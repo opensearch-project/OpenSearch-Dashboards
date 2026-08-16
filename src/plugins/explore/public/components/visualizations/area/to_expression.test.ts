@@ -67,6 +67,7 @@ describe('Area Chart to_expression', () => {
     },
     standardAxes: [],
     showFullTimeRange: true,
+    stackMode: 'total',
   };
 
   describe('createSimpleAreaChart', () => {
