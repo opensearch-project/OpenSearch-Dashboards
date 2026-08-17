@@ -117,6 +117,7 @@ export interface DashboardContainerOptions {
   data?: DataPublicPluginStart;
   initialVariables?: Variable[];
   savedObjects?: CoreStart['savedObjects'];
+  telemetry?: CoreStart['telemetry'];
 }
 
 export type DashboardReactContextValue =
@@ -157,7 +158,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.variableService = new VariableService(
       options.data,
       initialInput.id,
-      options.savedObjects?.client
+      options.savedObjects?.client,
+      (event) => options.telemetry?.getPluginRecorder().recordEvent(event)
     );
 
     this.variableService.initialize(initialInput.variables);

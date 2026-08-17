@@ -1173,9 +1173,8 @@ describe('ChatWindow', () => {
         () => new Promise((resolve) => (resolveDataSource = resolve))
       );
 
-      const { getByRole } = renderWithContext(
-        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
-      );
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       const input = getByRole('textbox');
       fireEvent.change(input, { target: { value: 'first message' } });
@@ -1185,9 +1184,18 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      // Try to send again while first is validating — input is disabled so
-      // a programmatic send via ref or racing keydown should be guarded
       expect(mockChatService.getUserMessage).toHaveBeenCalledTimes(1);
+
+      // Attempt a second send while the first is still validating. The input
+      // is disabled so keyDown can't reach the handler; a programmatic send
+      // via the component ref exercises the isValidatingRef guard directly.
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'second message' });
+      });
+
+      // Guard should prevent the second send
+      expect(mockChatService.getUserMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
 
       // Resolve validation
       await act(async () => {

@@ -29,7 +29,7 @@
  */
 
 import { NameList } from 'elasticsearch';
-import { Filter, IDataFrame, DataView, IndexPattern, Query } from '../..';
+import { Filter, IDataFrame, DataView, IndexPattern, Query, TimeRange } from '../..';
 import { SearchSource } from './search_source';
 
 /**
@@ -106,6 +106,12 @@ export interface SearchSourceFields {
   df?: IDataFrame;
   skipTimeFilter?: boolean;
   skipFilters?: boolean;
+  /**
+   * An explicit time range for languages that inject a time filter
+   * into the query. When set, it overrides the global timefilter, letting a
+   * caller pin the query to a fixed (absolute) window.
+   */
+  timeRange?: TimeRange;
 }
 
 export interface SearchSourceOptions {

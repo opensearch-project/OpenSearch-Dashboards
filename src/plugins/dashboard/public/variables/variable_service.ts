@@ -35,6 +35,14 @@ import { IVariableInterpolationService } from './variable_interpolation_service'
 const MAX_DISPLAY_OPTIONS = 100;
 
 /**
+ * Minimal telemetry sink so this service can report feature usage without
+ * depending on core. Mirrors the pattern used by the query_enhancements plugin.
+ * Callers wire this to core.telemetry's plugin recorder; when omitted, all
+ * reporting is skipped.
+ */
+export type VariableTelemetrySink = (event: { name: string; data: Record<string, any> }) => void;
+
+/**
  * VariableService — a self-contained feature for managing dashboard variables.
  */
 export class VariableService {
@@ -46,20 +54,37 @@ export class VariableService {
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
+  private telemetrySink?: VariableTelemetrySink;
 
   /**
    * @param dataPlugin - Data plugin for executing queries
    * @param dashboardId - Dashboard ID for auto-saving (optional)
    * @param savedObjectsClient - Client for saving to dashboard saved object
+   * @param telemetrySink - Optional sink for feature-usage telemetry
    */
   constructor(
     dataPlugin?: DataPublicPluginStart,
     dashboardId?: string,
-    savedObjectsClient?: SavedObjectsClientContract
+    savedObjectsClient?: SavedObjectsClientContract,
+    telemetrySink?: VariableTelemetrySink
   ) {
     this.dataPlugin = dataPlugin;
     this.dashboardId = dashboardId;
     this.savedObjectsClient = savedObjectsClient;
+    this.telemetrySink = telemetrySink;
+  }
+
+  /**
+   * Report a telemetry event. Never throws -- telemetry must not break the
+   * feature it measures.
+   */
+  private recordTelemetry(name: string, data: Record<string, any> = {}): void {
+    try {
+      this.telemetrySink?.({ name, data });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[VariableService] Failed to record telemetry:', e);
+    }
   }
 
   public setInterpolationService(service: IVariableInterpolationService): void {
@@ -82,6 +107,14 @@ export class VariableService {
    */
   public initialize(initialVariables: Variable[] = []): void {
     this.variables$.next(initialVariables);
+
+    // Telemetry: reported once per dashboard load that carries variables.
+    if (initialVariables.length > 0) {
+      this.recordTelemetry('variables_loaded', {
+        count: initialVariables.length,
+        types: Array.from(new Set(initialVariables.map((v) => v.type))),
+      });
+    }
   }
 
   /**
@@ -161,7 +194,17 @@ export class VariableService {
     newVariable.current = current;
 
     const updatedVariables = [...this.getVariables(), newVariable];
-    await this.saveVariables(updatedVariables);
+
+    try {
+      await this.saveVariables(updatedVariables);
+    } catch (error) {
+      this.recordTelemetry('variable_create_failed', {
+        type: newVariable.type,
+        errorType: (error as Error)?.name ?? 'Unknown',
+      });
+      throw error;
+    }
+    this.recordTelemetry('variable_create_succeeded', { type: newVariable.type });
     this.updateRuntimeState(id, initialRuntimeState);
 
     if (newVariable.type === VariableType.Query) {
@@ -242,7 +285,17 @@ export class VariableService {
 
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = updatedVariable;
-    await this.saveVariables(updatedVariables);
+
+    try {
+      await this.saveVariables(updatedVariables);
+    } catch (error) {
+      this.recordTelemetry('variable_update_failed', {
+        type: updatedVariable.type,
+        errorType: (error as Error)?.name ?? 'Unknown',
+      });
+      throw error;
+    }
+    this.recordTelemetry('variable_update_succeeded', { type: updatedVariable.type });
 
     // Update runtime state only after successful save
     if (newRuntimeState) {
@@ -258,9 +311,11 @@ export class VariableService {
   }
 
   public async removeVariable(id: string): Promise<void> {
+    const removed = this.getVariables().find((v) => v.id === id);
     const updatedVariables = this.getVariables().filter((v) => v.id !== id);
     this.refreshControllers.get(id)?.abort();
     await this.saveVariables(updatedVariables);
+    this.recordTelemetry('variable_deleted', { type: removed?.type ?? 'unknown' });
 
     this.refreshControllers.delete(id);
     this.runtimeState.delete(id);
@@ -297,6 +352,8 @@ export class VariableService {
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = { ...variable, current: value } as Variable;
     this.variables$.next(updatedVariables);
+    // Telemetry: record variable change.
+    this.recordTelemetry('variable_value_changed', { type: variable.type });
 
     this.refreshDependentVariables(variable.name);
   }
@@ -352,6 +409,11 @@ export class VariableService {
       if (error?.name === 'AbortError') {
         return;
       }
+      this.recordTelemetry('variable_query_failed', {
+        type: queryVariable.type,
+        language: queryVariable.language ?? 'unknown',
+        errorType: error?.name ?? 'Unknown',
+      });
       this.updateRuntimeState(id, {
         loading: false,
         error: error.message || 'Failed to fetch options',
