@@ -92,7 +92,7 @@ export const defaultLineChartStyles: LineChartStyle = {
 
   standardAxes: [],
 
-  showFullTimeRange: false,
+  showFullTimeRange: true,
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({

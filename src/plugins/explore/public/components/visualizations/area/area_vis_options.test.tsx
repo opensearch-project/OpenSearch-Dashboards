@@ -128,7 +128,7 @@ describe('AreaVisStyleControls', () => {
           axisRole: AxisRole.Y,
         },
       ],
-      showFullTimeRange: false,
+      showFullTimeRange: true,
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -309,7 +309,7 @@ describe('AreaVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('showFullTimeRangeSwitch'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      showFullTimeRange: true, // Default is false, so toggling sets it to true
+      showFullTimeRange: false, // Default is true, so toggling sets it to false
     });
   });
 });

@@ -65,7 +65,7 @@ describe('Line Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Off,
     },
-    showFullTimeRange: false,
+    showFullTimeRange: true,
   };
 
   describe('createSimpleLineChart', () => {
