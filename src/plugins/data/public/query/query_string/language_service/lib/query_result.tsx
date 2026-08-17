@@ -20,27 +20,9 @@ import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../../../types';
+import { extractQueryError, ASK_AI_ERROR_MESSAGE } from '../../../../../common';
 
 const DISCOVER_APP_ID = 'data-explorer';
-
-const ASK_AI_ERROR_MESSAGE =
-  'My query on this page failed to run with the following error: "{error}". Please review my query, fix it, and run the corrected query on the page so I can see the results.';
-
-function extractErrorForAssistant(errorBody: any): string {
-  if (errorBody?.shortMessage) {
-    return errorBody.shortMessage;
-  }
-  const message = errorBody?.message;
-  const inner = errorBody?.attributes?.error || message?.error;
-  return (
-    (typeof inner === 'string'
-      ? inner
-      : inner?.root_cause?.[0]?.reason || inner?.details || inner?.reason) ||
-    (typeof message === 'string' ? message : undefined) ||
-    errorBody?.error ||
-    'Query execution failed'
-  );
-}
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -157,7 +139,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     (props.queryStatus.resultsCount ?? 0) > 0;
 
   const onAskAiForHelp = () => {
-    const error = extractErrorForAssistant(props.queryStatus.body?.error);
+    const error = extractQueryError(props.queryStatus.body?.error);
     const message = ASK_AI_ERROR_MESSAGE.replace('{error}', error);
     services?.chat?.sendMessageWithWindow?.(message, []).catch(() => {});
   };
