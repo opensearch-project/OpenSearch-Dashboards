@@ -27,6 +27,7 @@ import {
   getPPLAnalyzeResult$,
   runPPLAnalyzeInBackground,
   cancelPPLAnalyze,
+  clearPPLAnalyzeResult,
   setPPLAnalyzeOpen,
 } from '../../../../../data/public';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -109,8 +110,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     const sub = getPPLAnalyzeResult$().subscribe(setAnalyzeResult);
     return () => {
       sub.unsubscribe();
-      // Cancel any in-flight analysis when leaving the page.
+      // Cancel any in-flight analysis and clear the stored result when leaving the
+      // page, so a stale result can't reappear on the next mount.
       cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
     };
   }, []);
   const queryState = useSelector((state: RootState) => state.query);
@@ -145,8 +148,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       setIsOpen(true);
       setPPLAnalyzeOpen(true);
     } else {
-      // Closing the panel abandons any in-flight analysis — cancel it server-side.
+      // Closing the panel abandons any in-flight analysis — cancel it server-side
+      // and clear the stored result so it doesn't flash back on reopen.
       cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
       setIsOpen(false);
       setPPLAnalyzeOpen(false);
     }
@@ -203,6 +208,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                       iconType="cross"
                       onClick={() => {
                         cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
                         setIsOpen(false);
                         setPPLAnalyzeOpen(false);
                       }}
@@ -217,6 +223,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                       analyzeResult={analyzeResult!}
                       onClose={() => {
                         cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
                         setIsOpen(false);
                         setPPLAnalyzeOpen(false);
                       }}

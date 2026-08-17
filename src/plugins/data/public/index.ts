@@ -581,6 +581,7 @@ export {
   setPPLAnalyzeResult,
   setPPLAnalyzeLoading,
   setPPLAnalyzeOpen,
+  clearPPLAnalyzeResult,
   isPPLAnalyzeOpen,
   PPLAnalyzeResult,
 } from './query';

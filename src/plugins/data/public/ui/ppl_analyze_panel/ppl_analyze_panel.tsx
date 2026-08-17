@@ -17,7 +17,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { PPLAnalyzeResult, PPLAnalyzePlanNode } from '../../query/ppl_analyze_state';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import {
+  PPLAnalyzeResult,
+  PPLAnalyzePlanNode,
+  PPLAnalyzeRecommendation,
+} from '../../query/ppl_analyze_state';
 
 // Theme-reactive colors that resolve to light/dark values automatically.
 const { euiColorEmptyShade, euiColorLightShade, euiColorMediumShade } = euiThemeVars;
@@ -41,10 +47,18 @@ const OPERATOR_COLORS = {
 };
 
 const PHASE_DESCRIPTIONS: Record<string, string> = {
-  analyze: 'Parsing and validating the query syntax and semantics.',
-  optimize: 'Determining the most efficient execution plan and push-down strategy.',
-  execute: 'Running the query against OpenSearch and processing results.',
-  format: 'Formatting the final result set for output.',
+  analyze: i18n.translate('data.pplAnalyze.phaseDescription.analyze', {
+    defaultMessage: 'Parsing and validating the query syntax and semantics.',
+  }),
+  optimize: i18n.translate('data.pplAnalyze.phaseDescription.optimize', {
+    defaultMessage: 'Determining the most efficient execution plan and push-down strategy.',
+  }),
+  execute: i18n.translate('data.pplAnalyze.phaseDescription.execute', {
+    defaultMessage: 'Running the query against OpenSearch and processing results.',
+  }),
+  format: i18n.translate('data.pplAnalyze.phaseDescription.format', {
+    defaultMessage: 'Formatting the final result set for output.',
+  }),
 };
 
 function TimingBar({
@@ -60,7 +74,13 @@ function TimingBar({
   return (
     <div>
       <EuiText size="s">
-        <strong>Query completed in {totalTimeMs.toFixed(1)}ms</strong>
+        <strong>
+          <FormattedMessage
+            id="data.pplAnalyze.timingBar.queryCompleted"
+            defaultMessage="Query completed in {time}ms"
+            values={{ time: totalTimeMs.toFixed(1) }}
+          />
+        </strong>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
@@ -82,7 +102,15 @@ function TimingBar({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    {name.charAt(0).toUpperCase() + name.slice(1)} {timeMs.toFixed(1)}ms ({pct}%)
+                    <FormattedMessage
+                      id="data.pplAnalyze.timingBar.phaseLegend"
+                      defaultMessage="{phase} {time}ms ({pct}%)"
+                      values={{
+                        phase: name.charAt(0).toUpperCase() + name.slice(1),
+                        time: timeMs.toFixed(1),
+                        pct,
+                      }}
+                    />
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -97,7 +125,11 @@ function TimingBar({
           if (pct === 0) return null;
           const displayPct = Math.max(pct, 0.5);
           const label = name.charAt(0).toUpperCase() + name.slice(1);
-          const description = PHASE_DESCRIPTIONS[name] || 'No details available.';
+          const description =
+            PHASE_DESCRIPTIONS[name] ||
+            i18n.translate('data.pplAnalyze.phaseDescription.fallback', {
+              defaultMessage: 'No details available.',
+            });
           return (
             <div key={name} style={{ width: `${displayPct}%`, height: 20 }}>
               <EuiToolTip
@@ -289,12 +321,19 @@ function PhysicalPlanSection({
   return (
     <div>
       <EuiTitle size="s">
-        <h3>Execution Phase Profiling</h3>
+        <h3>
+          <FormattedMessage
+            id="data.pplAnalyze.executionProfiling.title"
+            defaultMessage="Execution Phase Profiling"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        Stages below are the physical-plan operators reported by the profiler (not PPL commands).
-        Each row&apos;s bar shows the time spent in that operator alone. Click a stage for details.
+        <FormattedMessage
+          id="data.pplAnalyze.executionProfiling.description"
+          defaultMessage="Stages below are the physical-plan operators reported by the profiler (not PPL commands). Each row's bar shows the time spent in that operator alone. Click a stage for details."
+        />
       </EuiText>
       <EuiSpacer size="m" />
       <div
@@ -314,7 +353,9 @@ function PhysicalPlanSection({
               padding: '6px 12px',
             }}
           >
-            <span style={{ fontSize: 10, color: euiColorMediumShade }}>STAGE</span>
+            <span style={{ fontSize: 10, color: euiColorMediumShade }}>
+              {i18n.translate('data.pplAnalyze.column.stage', { defaultMessage: 'STAGE' })}
+            </span>
           </div>
           <div
             style={{
@@ -326,7 +367,11 @@ function PhysicalPlanSection({
               paddingBottom: 6,
             }}
           >
-            {['TIME', 'ROWS IN', 'ROWS OUT'].map((h) => (
+            {[
+              i18n.translate('data.pplAnalyze.column.time', { defaultMessage: 'TIME' }),
+              i18n.translate('data.pplAnalyze.column.rowsIn', { defaultMessage: 'ROWS IN' }),
+              i18n.translate('data.pplAnalyze.column.rowsOut', { defaultMessage: 'ROWS OUT' }),
+            ].map((h) => (
               <span
                 key={h}
                 style={{
@@ -454,7 +499,9 @@ function PhysicalPlanSection({
                         fontSize: 12,
                         color: OPERATOR_COLORS.bottleneck,
                       }}
-                      title="Bottleneck"
+                      title={i18n.translate('data.pplAnalyze.bottleneckTooltip', {
+                        defaultMessage: 'Bottleneck',
+                      })}
                     >
                       ⚠
                     </span>
@@ -574,7 +621,10 @@ function PhysicalPlanSection({
                   <EuiFlexGroup gutterSize="l" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        OPERATOR
+                        <FormattedMessage
+                          id="data.pplAnalyze.detail.operator"
+                          defaultMessage="OPERATOR"
+                        />
                       </EuiText>
                       <EuiText size="s">
                         <strong>{n.node}</strong>
@@ -582,7 +632,7 @@ function PhysicalPlanSection({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        TIME
+                        <FormattedMessage id="data.pplAnalyze.column.time" defaultMessage="TIME" />
                       </EuiText>
                       <EuiText size="s">
                         <strong>{formatMs(n.selfTimeMs)}</strong>
@@ -590,7 +640,10 @@ function PhysicalPlanSection({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        ROWS IN
+                        <FormattedMessage
+                          id="data.pplAnalyze.column.rowsIn"
+                          defaultMessage="ROWS IN"
+                        />
                       </EuiText>
                       <EuiText size="s">
                         <strong>{n.rowsIn?.toLocaleString() ?? '—'}</strong>
@@ -598,7 +651,10 @@ function PhysicalPlanSection({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        ROWS OUT
+                        <FormattedMessage
+                          id="data.pplAnalyze.column.rowsOut"
+                          defaultMessage="ROWS OUT"
+                        />
                       </EuiText>
                       <EuiText size="s">
                         <strong>{n.rows?.toLocaleString() ?? '—'}</strong>
@@ -606,13 +662,18 @@ function PhysicalPlanSection({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        SOURCE NODES
+                        <FormattedMessage
+                          id="data.pplAnalyze.detail.sourceNodes"
+                          defaultMessage="SOURCE NODES"
+                        />
                       </EuiText>
                       <EuiText size="s">
                         <strong>
                           {n.childNames.length > 0
                             ? n.childNames.map(displayNodeName).join(', ')
-                            : 'None'}
+                            : i18n.translate('data.pplAnalyze.detail.noSourceNodes', {
+                                defaultMessage: 'None',
+                              })}
                         </strong>
                       </EuiText>
                     </EuiFlexItem>
@@ -632,14 +693,36 @@ function PhysicalPlanSection({
           }}
         >
           <EuiText size="xs">
-            Total Execution Phase: <strong>{formatMs(executePhaseMs)}</strong>
+            <FormattedMessage
+              id="data.pplAnalyze.summary.totalExecutionPhase"
+              defaultMessage="Total Execution Phase: {time}"
+              values={{ time: <strong>{formatMs(executePhaseMs)}</strong> }}
+            />
           </EuiText>
           <EuiText size="xs">
-            Operators: <strong>{nodes.length}</strong>
+            <FormattedMessage
+              id="data.pplAnalyze.summary.operators"
+              defaultMessage="Operators: {count}"
+              values={{ count: <strong>{nodes.length}</strong> }}
+            />
           </EuiText>
           {plan.rows !== undefined && (
             <EuiText size="xs">
-              Result: <strong>{plan.rows?.toLocaleString()} rows</strong>
+              <FormattedMessage
+                id="data.pplAnalyze.summary.result"
+                defaultMessage="Result: {rows}"
+                values={{
+                  rows: (
+                    <strong>
+                      <FormattedMessage
+                        id="data.pplAnalyze.summary.resultRows"
+                        defaultMessage="{count} rows"
+                        values={{ count: plan.rows?.toLocaleString() }}
+                      />
+                    </strong>
+                  ),
+                }}
+              />
             </EuiText>
           )}
         </div>
@@ -654,9 +737,23 @@ const SEVERITY_COLORS: Record<string, string> = {
   INFO: '#7DE2D1',
 };
 
-function parseRecommendationMessage(message: string): React.ReactNode {
+function parseRecommendationMessage(message: unknown): React.ReactNode {
+  // The backend has shipped recommendations as both objects and bare strings, so
+  // `message` isn't guaranteed to be a string. Coerce non-strings rather than
+  // calling String.prototype.split on something that lacks it (which would throw).
+  if (typeof message !== 'string') return message == null ? null : String(message);
   const parts = message.split(/\*([^*]+)\*/g);
   return parts.map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+}
+
+// A recommendation may arrive as a structured object or as a bare string (the
+// backend's `recommendations` contract has been both). Coerce to the object shape
+// the UI expects so every downstream field read is safe. Anything that isn't a
+// usable object or string is dropped.
+function normalizeRecommendation(rec: unknown): PPLAnalyzeRecommendation | null {
+  if (typeof rec === 'string') return { message: rec };
+  if (rec && typeof rec === 'object') return rec as PPLAnalyzeRecommendation;
+  return null;
 }
 
 // Fraction of the execute phase below which a node isn't worth surfacing a
@@ -674,11 +771,16 @@ const SEVERITY_RANK: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2
 // Recs with no `affected_node` (phase-level advice) or an unmatched name pass
 // through the share filter — we can't judge their weight, so we don't drop them.
 function filterRecommendations(
-  recs: any[] | undefined,
+  recs: Array<PPLAnalyzeRecommendation | string> | undefined,
   nodes: FlatPlanNode[],
   executePhaseMs: number
-): any[] {
+): PPLAnalyzeRecommendation[] {
   if (!recs || recs.length === 0) return [];
+  // Coerce mixed string/object input to a uniform object shape up front, dropping
+  // anything unusable, so the rest of the pipeline reads fields safely.
+  const normalized = recs
+    .map(normalizeRecommendation)
+    .filter((rec): rec is PPLAnalyzeRecommendation => rec !== null);
   const selfTimeByNode = new Map<string, number>();
   nodes.forEach((n) => {
     // Multiple plan nodes can share a raw name (e.g. two IndexScans on a join);
@@ -686,30 +788,42 @@ function filterRecommendations(
     selfTimeByNode.set(n.node, (selfTimeByNode.get(n.node) || 0) + n.selfTimeMs);
   });
   const minSelfMs = executePhaseMs * MIN_NODE_EXECUTE_SHARE;
-  const kept = recs.filter((rec) => {
-    if (!rec?.affected_node) return true;
+  const kept = normalized.filter((rec) => {
+    if (!rec.affected_node) return true;
     const selfMs = selfTimeByNode.get(rec.affected_node);
     if (selfMs === undefined) return true;
     return selfMs >= minSelfMs;
   });
   const ranked = [...kept].sort((a, b) => {
-    const sa = SEVERITY_RANK[(a.serverity || a.severity || 'INFO').toUpperCase()] ?? 2;
-    const sb = SEVERITY_RANK[(b.serverity || b.severity || 'INFO').toUpperCase()] ?? 2;
+    const sa = SEVERITY_RANK[((a as any).serverity || a.severity || 'INFO').toUpperCase()] ?? 2;
+    const sb = SEVERITY_RANK[((b as any).serverity || b.severity || 'INFO').toUpperCase()] ?? 2;
     return sa - sb;
   });
   return ranked.slice(0, MAX_RECOMMENDATIONS);
 }
 
-function RecommendationsSection({ recommendations }: { recommendations: any[] }) {
+function RecommendationsSection({
+  recommendations,
+}: {
+  recommendations: PPLAnalyzeRecommendation[];
+}) {
   return (
     <div>
       <EuiTitle size="xxs">
-        <h4>RECOMMENDATIONS</h4>
+        <h4>
+          <FormattedMessage
+            id="data.pplAnalyze.recommendations.title"
+            defaultMessage="RECOMMENDATIONS"
+          />
+        </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       {!recommendations || recommendations.length === 0 ? (
         <EuiText size="s" color="subdued">
-          No recommendations for this query.
+          <FormattedMessage
+            id="data.pplAnalyze.recommendations.empty"
+            defaultMessage="No recommendations for this query."
+          />
         </EuiText>
       ) : (
         recommendations.map((rec: any, idx: number) => {
@@ -741,7 +855,11 @@ function RecommendationsSection({ recommendations }: { recommendations: any[] })
                   <>
                     <EuiSpacer size="xs" />
                     <EuiText size="xs" color="subdued">
-                      Affects: {rec.affected_node}
+                      <FormattedMessage
+                        id="data.pplAnalyze.recommendations.affects"
+                        defaultMessage="Affects: {node}"
+                        values={{ node: rec.affected_node }}
+                      />
                     </EuiText>
                   </>
                 )}
@@ -823,7 +941,10 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
                 onClick={onClose}
                 data-test-subj="analyzeCloseButton"
               >
-                Return to query results
+                <FormattedMessage
+                  id="data.pplAnalyze.returnToResults"
+                  defaultMessage="Return to query results"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -841,26 +962,36 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
         </EuiCallOut>
       ) : !hasProfile ? (
         <EuiCallOut
-          title="Query Profiling Unavailable - Error"
+          title={i18n.translate('data.pplAnalyze.profileUnavailable.title', {
+            defaultMessage: 'Query Profiling Unavailable - Error',
+          })}
           iconType="iInCircle"
           color="danger"
           data-test-subj="analyzeProfileUnavailable"
         >
           <EuiText size="s">
-            There was an error retrieving your query analysis from the backend. Typically, this is
-            the result of an outdated version of the backend that does not support analyzing
-            queries.
+            <FormattedMessage
+              id="data.pplAnalyze.profileUnavailable.body"
+              defaultMessage="There was an error retrieving your query analysis from the backend. Typically, this is the result of an outdated version of the backend that does not support analyzing queries."
+            />
           </EuiText>
         </EuiCallOut>
       ) : (
         <>
           {possibleCacheHit && (
             <>
-              <EuiCallOut title="Possible cache hit detected" iconType="iInCircle" color="primary">
+              <EuiCallOut
+                title={i18n.translate('data.pplAnalyze.cacheHit.title', {
+                  defaultMessage: 'Possible cache hit detected',
+                })}
+                iconType="iInCircle"
+                color="primary"
+              >
                 <EuiText size="s">
-                  This query may have been previously cached, which can produce a much faster
-                  execution phase time than normal. Cache hits can make profiling results
-                  inaccurate. This behavior can be toggled in Settings.
+                  <FormattedMessage
+                    id="data.pplAnalyze.cacheHit.body"
+                    defaultMessage="This query may have been previously cached, which can produce a much faster execution phase time than normal. Cache hits can make profiling results inaccurate. This behavior can be toggled in Settings."
+                  />
                 </EuiText>
               </EuiCallOut>
               <EuiSpacer size="m" />
@@ -876,14 +1007,17 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
                 <PhysicalPlanSection plan={planTree!} executePhaseMs={executePhaseMs} />
               ) : (
                 <EuiCallOut
-                  title="Execution Phase Profiling unavailable"
+                  title={i18n.translate('data.pplAnalyze.executionUnavailable.title', {
+                    defaultMessage: 'Execution Phase Profiling unavailable',
+                  })}
                   iconType="iInCircle"
                   color="warning"
                 >
                   <EuiText size="s">
-                    The per-stage execution breakdown is unavailable because the query profile did
-                    not include a physical plan. The phase timing bar above reflects the full query
-                    profile.
+                    <FormattedMessage
+                      id="data.pplAnalyze.executionUnavailable.body"
+                      defaultMessage="The per-stage execution breakdown is unavailable because the query profile did not include a physical plan. The phase timing bar above reflects the full query profile."
+                    />
                   </EuiText>
                 </EuiCallOut>
               )}

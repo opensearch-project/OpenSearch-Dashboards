@@ -237,6 +237,34 @@ describe('PPLAnalyzePanel', () => {
       render(<PPLAnalyzePanel analyzeResult={result} />);
       expect(screen.queryByText('RECOMMENDATIONS')).not.toBeInTheDocument();
     });
+
+    it('renders string recommendations without throwing (backend List<String> shape)', () => {
+      // The backend may return recommendations as bare strings rather than objects;
+      // the panel must coerce them instead of calling String.split on a missing field.
+      const result = {
+        ...mockAnalyzeResult,
+        response: {
+          ...mockAnalyzeResult.response,
+          recommendations: ['Consider adding a filter to reduce scanned rows.'],
+        },
+      };
+      expect(() => render(<PPLAnalyzePanel analyzeResult={result} />)).not.toThrow();
+      expect(
+        screen.getByText('Consider adding a filter to reduce scanned rows.')
+      ).toBeInTheDocument();
+    });
+
+    it('ignores malformed recommendation entries (null / number)', () => {
+      const result = {
+        ...mockAnalyzeResult,
+        response: {
+          ...mockAnalyzeResult.response,
+          recommendations: [null, 42, { message: 'A valid one' }] as any,
+        },
+      };
+      expect(() => render(<PPLAnalyzePanel analyzeResult={result} />)).not.toThrow();
+      expect(screen.getByText('A valid one')).toBeInTheDocument();
+    });
   });
 
   describe('recommendations filtering', () => {

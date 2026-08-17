@@ -5,7 +5,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-/** A single optimization recommendation returned by the backend. */
+/**
+ * A single optimization recommendation returned by the backend. The backend's
+ * contract for `recommendations` has changed over time (it currently declares a
+ * `List<String>`), so a recommendation may arrive either as this object or as a
+ * bare string. Consumers must normalize before reading fields — see
+ * `normalizeRecommendation` in the panel.
+ */
 export interface PPLAnalyzeRecommendation {
   rule?: string;
   severity?: string;
@@ -42,7 +48,9 @@ export interface PPLAnalyzeProfile {
  */
 export interface PPLAnalyzeResponse {
   profile?: PPLAnalyzeProfile;
-  recommendations?: PPLAnalyzeRecommendation[];
+  // May be objects or bare strings depending on the backend version; normalize
+  // before use rather than assuming the object shape.
+  recommendations?: Array<PPLAnalyzeRecommendation | string>;
   possibleCacheHit?: boolean;
   // Error shape (populated when the backend returns a 4xx/5xx or an error body).
   statusCode?: number;
@@ -76,4 +84,14 @@ export const setPPLAnalyzeLoading = (loading: boolean) => {
 
 export const setPPLAnalyzeOpen = (open: boolean) => {
   analyzeOpen$.next(open);
+};
+
+/**
+ * Clears any displayed analyze result and resets loading. Call when the panel is
+ * closed or the page unmounts so a stale result from a previous query doesn't
+ * reappear the next time the panel opens.
+ */
+export const clearPPLAnalyzeResult = () => {
+  analyzeResult$.next(null);
+  analyzeLoading$.next(false);
 };

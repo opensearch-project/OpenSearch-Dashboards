@@ -7,6 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter, Logger } from 'opensearch-dashboards/server';
 import { API, URI } from '../../common';
 import { queryEndsWithHead } from '../../common/utils';
+import { coerceStatusCode, DATASOURCE_UNAVAILABLE_MESSAGE, resolveOpenSearchClient } from '.';
 
 // The Discover UI sample-size setting caps how many rows the query fetches. We reuse
 // it for analyze so profiling scans the same row budget as a normal query run.
@@ -18,7 +19,10 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
       path: API.PPL_ANALYZE,
       validate: {
         body: schema.object({
-          query: schema.string(),
+          // maxLength is belt-and-suspenders: OSD's server.maxPayload (1 MiB default)
+          // already bounds the body. 64 KB is 2-4x the largest realistic interactive
+          // PPL pipeline, and makes the cap explicit + independent of global config.
+          query: schema.string({ minLength: 1, maxLength: 65536 }),
           dataSourceId: schema.maybe(schema.nullable(schema.string())),
           queryId: schema.maybe(schema.string()),
         }),
@@ -27,9 +31,10 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
     async (context, request, response) => {
       const { query, dataSourceId, queryId } = request.body;
       try {
-        const client = dataSourceId
-          ? await context.dataSource.opensearch.getClient(dataSourceId)
-          : context.core.opensearch.client.asCurrentUser;
+        const client = await resolveOpenSearchClient(context, dataSourceId ?? undefined);
+        if (!client) {
+          return response.custom({ statusCode: 400, body: DATASOURCE_UNAVAILABLE_MESSAGE });
+        }
 
         // Cap the scanned rows at the Discover sample size, mirroring a normal PPL run
         // (see ppl_search_strategy.ts). Sent as the `?fetch_size=` query param, which
@@ -59,7 +64,6 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
         logger.error(`PPL analyze failed: ${error.message}`);
         const errorBody = error.body || error.meta?.body;
         logger.error(`PPL analyze error detail: ${JSON.stringify(errorBody)}`);
-        const statusCode = error.statusCode || error.meta?.statusCode || 500;
         let parsedBody: any = errorBody;
         if (typeof errorBody === 'string') {
           try {
@@ -71,7 +75,7 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
         }
         const detail = parsedBody?.error || error.message || 'PPL analyze request failed';
         return response.custom({
-          statusCode: statusCode === 500 ? 503 : statusCode,
+          statusCode: coerceStatusCode(error.statusCode ?? error.meta?.statusCode),
           body: JSON.stringify(detail),
         });
       }

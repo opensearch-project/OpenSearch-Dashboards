@@ -140,6 +140,20 @@ describe('registerPPLAnalyzeRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({ body: { profile: {} } });
   });
 
+  it('returns 400 when a dataSourceId is given but the data source plugin is unavailable', async () => {
+    const transportRequest = jest.fn();
+    const context = createContext(transportRequest);
+    // Simulate the data source plugin being disabled/absent.
+    context.dataSource = {};
+    const req = { body: { query: 'source=accounts', dataSourceId: 'ds-1' } } as any;
+    const res = createResponse();
+
+    await handler(context, req, res);
+
+    expect(transportRequest).not.toHaveBeenCalled();
+    expect(res.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
+  });
+
   it('unwraps result.body into the response', async () => {
     const transportRequest = jest.fn().mockResolvedValue({ body: { profile: { plan: {} } } });
     const context = createContext(transportRequest);

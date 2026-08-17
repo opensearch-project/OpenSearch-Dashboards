@@ -5,6 +5,7 @@
 
 import dateMath from '@elastic/datemath';
 import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@osd/i18n';
 import { HttpStart } from '../../../../../core/public';
 import { Query } from '../../index';
 import { TimefilterContract } from '../../query';
@@ -126,8 +127,16 @@ export function runPPLAnalyzeInBackground({
       // result so the panel can surface the error; fall back to a synthetic body
       // when no structured payload is available (e.g. a network failure).
       const response = err?.body ?? {
-        error: err?.response?.statusText || 'Request failed',
-        message: err?.message || 'The analyze request could not be completed.',
+        error:
+          err?.response?.statusText ||
+          i18n.translate('data.pplAnalyze.error.requestFailed', {
+            defaultMessage: 'Request failed',
+          }),
+        message:
+          err?.message ||
+          i18n.translate('data.pplAnalyze.error.couldNotComplete', {
+            defaultMessage: 'The analyze request could not be completed.',
+          }),
         statusCode: err?.response?.status,
       };
       setPPLAnalyzeResult({
