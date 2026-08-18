@@ -33,7 +33,7 @@ import { IVariableInterpolationService } from '../../../variables/variable_inter
 
 export interface VariableEditorFlyoutProps {
   onClose: () => void;
-  onSave: (variable: Omit<Variable, 'id' | 'current'>) => Promise<void>;
+  onSave: (variable: Omit<Variable, 'id'>) => Promise<void>;
   existingVariable?: Variable;
   existingVariables?: Variable[];
   interpolationService?: IVariableInterpolationService;
@@ -510,7 +510,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onChange={(t) => {
                 setType(t);
                 setError(null);
-                setIsPreviewValid(t !== VariableType.Query);
+                setIsPreviewValid(false);
               }}
               data-test-subj="variableEditorType"
               compressed
