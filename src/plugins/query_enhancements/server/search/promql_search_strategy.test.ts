@@ -224,6 +224,49 @@ describe('promqlSearchStrategy', () => {
       });
     });
 
+    it('should name series from a legendFormat template when provided', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'localhost:9090', job: 'prometheus' },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+              legendFormat: '{{job}}-{{instance}}',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values[0]).toBe('prometheus-localhost:9090');
+    });
+
     it('should create instant schema with all label keys', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',

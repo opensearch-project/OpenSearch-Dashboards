@@ -25,15 +25,17 @@ describe('formatStepSeconds', () => {
 describe('MetricsQueryOptions', () => {
   const setup = (overrides = {}) => {
     const onStepSettingsChange = jest.fn();
+    const onLegendFormatChange = jest.fn();
     render(
       <MetricsQueryOptions
         resolvedStepLabel="30s"
         minStepInvalid={false}
         onStepSettingsChange={onStepSettingsChange}
+        onLegendFormatChange={onLegendFormatChange}
         {...overrides}
       />
     );
-    return { onStepSettingsChange };
+    return { onStepSettingsChange, onLegendFormatChange };
   };
 
   it('emits an integer maxDataPoints and preserves minStep', () => {
@@ -77,5 +79,29 @@ describe('MetricsQueryOptions', () => {
     fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
     expect(screen.getByTestId('metricsStepMinStepInput')).toBeInTheDocument();
     expect(screen.getByTestId('metricsStepMaxDataPointsInput')).toBeInTheDocument();
+  });
+
+  it('shows the current legend format in the field', () => {
+    setup({ legendFormat: '{{instance}}' });
+    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    expect(screen.getByTestId('metricsLegendFormatInput')).toHaveValue('{{instance}}');
+  });
+
+  it('emits the entered legend template', () => {
+    const { onLegendFormatChange } = setup();
+    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    fireEvent.change(screen.getByTestId('metricsLegendFormatInput'), {
+      target: { value: '{{job}}-{{instance}}' },
+    });
+    expect(onLegendFormatChange).toHaveBeenCalledWith('{{job}}-{{instance}}');
+  });
+
+  it('emits undefined when the legend field is emptied', () => {
+    const { onLegendFormatChange } = setup({ legendFormat: '{{instance}}' });
+    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    fireEvent.change(screen.getByTestId('metricsLegendFormatInput'), {
+      target: { value: '' },
+    });
+    expect(onLegendFormatChange).toHaveBeenCalledWith(undefined);
   });
 });

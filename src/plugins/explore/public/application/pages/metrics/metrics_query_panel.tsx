@@ -40,16 +40,9 @@ import { setIsQueryEditorDirty } from '../../../application/utils/state_manageme
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
 import { RootState } from '../../../application/utils/state_management/store';
-import { getQueryLabel, Query } from '../../../../../data/common';
-import { PromQLQueryOptions } from '../../utils/languages';
+import { getQueryLabel } from '../../../../../data/common';
 import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
-import {
-  calculateStep,
-  parseMinStepSeconds,
-  DEFAULT_RESOLUTION,
-  MIN_STEP_INTERVAL,
-} from './explore/services/query_generator';
 import '../../../components/query_panel/query_panel.scss';
 
 import {
@@ -60,11 +53,9 @@ import {
   joinRows,
   createPromQLSuggestionProvider,
   MetricsQueryOptions,
-  MetricsStepSettingsValue,
   formatStepSeconds,
+  useMetricsQuerySettings,
 } from './query_panel';
-
-type MetricsQuery = Query & PromQLQueryOptions;
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -130,54 +121,14 @@ export const MetricsQueryPanel: React.FC = () => {
     [setEditorText, dispatch, queryString]
   );
 
-  const [stepSettings, setStepSettings] = useState<MetricsStepSettingsValue>(() => {
-    const q = queryString.getQuery() as MetricsQuery;
-    return { maxDataPoints: q.maxDataPoints, minStep: q.minStep };
-  });
-
-  // Recompute the displayed resolved step whenever the active time range changes.
-  const [timeTick, setTimeTick] = useState(0);
-  useEffect(() => {
-    const { timefilter } = services.data.query.timefilter;
-    const sub = timefilter.getTimeUpdate$().subscribe(() => setTimeTick((t) => t + 1));
-    return () => sub.unsubscribe();
-  }, [services.data.query.timefilter]);
-
-  const minStepSec = useMemo(() => {
-    if (!stepSettings.minStep) return undefined;
-    const parsed = parseMinStepSeconds(stepSettings.minStep);
-    return parsed && parsed > 0 ? parsed : undefined;
-  }, [stepSettings.minStep]);
-
-  const minStepInvalid = !!stepSettings.minStep && minStepSec === undefined;
-
-  const resolvedStepSec = useMemo(() => {
-    const { timefilter } = services.data.query.timefilter;
-    const bounds = timefilter.getBounds();
-    const min = bounds?.min?.valueOf();
-    const max = bounds?.max?.valueOf();
-    if (min === undefined || max === undefined || max <= min) return null;
-    const resolution =
-      stepSettings.maxDataPoints && stepSettings.maxDataPoints > 0
-        ? stepSettings.maxDataPoints
-        : DEFAULT_RESOLUTION;
-    return calculateStep(max - min, resolution, minStepSec ?? MIN_STEP_INTERVAL);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepSettings.maxDataPoints, minStepSec, timeTick, services.data.query.timefilter]);
-
-  const onStepSettingsChange = useCallback(
-    (next: MetricsStepSettingsValue) => {
-      setStepSettings(next);
-      const currentQuery = queryString.getQuery();
-      queryString.setQuery({
-        ...currentQuery,
-        maxDataPoints: next.maxDataPoints,
-        minStep: next.minStep,
-      } as MetricsQuery);
-      dispatch(setIsQueryEditorDirty(true));
-    },
-    [queryString, dispatch]
-  );
+  const {
+    stepSettings,
+    legendFormat,
+    minStepInvalid,
+    resolvedStepSec,
+    onStepSettingsChange,
+    onLegendFormatChange,
+  } = useMetricsQuerySettings(services);
 
   const updateRow = useCallback(
     (rowId: string, updates: Partial<QueryRow>) => {
@@ -347,9 +298,11 @@ export const MetricsQueryPanel: React.FC = () => {
               <MetricsQueryOptions
                 maxDataPoints={stepSettings.maxDataPoints}
                 minStep={stepSettings.minStep}
+                legendFormat={legendFormat}
                 minStepInvalid={minStepInvalid}
                 resolvedStepLabel={formatStepSeconds(resolvedStepSec)}
                 onStepSettingsChange={onStepSettingsChange}
+                onLegendFormatChange={onLegendFormatChange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

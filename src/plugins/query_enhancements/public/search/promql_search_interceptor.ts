@@ -32,10 +32,6 @@ interface Bounds {
   max?: { valueOf(): number };
 }
 
-// Resolves the effective query_range step (seconds), time range, and scrape
-// interval for the active time range, mirroring the server's step derivation.
-// Used both to override the server step and to interpolate interval macros.
-// Returns undefined when the bounds are missing or empty.
 export function resolvePromQLMacroContext(
   query: PromQLQuery,
   bounds: Bounds
@@ -56,10 +52,6 @@ export function resolvePromQLMacroContext(
   };
 }
 
-// Resolves the panel-configured max-data-points / min-step into an absolute
-// query_range step (seconds) for the active time range. Returns undefined when
-// the panel hasn't configured either knob, so the server falls back to its own
-// step derivation.
 export function resolveStepOptions(
   query: PromQLQuery,
   bounds: Bounds
@@ -82,7 +74,7 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const timefilter = this.queryService.timefilter.timefilter;
-    const queryState = this.queryService.queryString.getQuery();
+    const queryState: PromQLQuery = this.queryService.queryString.getQuery();
     const bounds = timefilter.getBounds();
     const macroContext = resolvePromQLMacroContext(queryState, bounds);
     const stepOptions = resolveStepOptions(queryState, bounds);
@@ -98,9 +90,13 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
     };
 
     // Extract the query from the request if available, otherwise fall back to global query service
-    let query = queryState;
+    let query: PromQLQuery = queryState;
     if (request.params?.body?.query?.queries && request.params.body.query.queries.length > 0) {
       query = request.params.body.query.queries[0];
+    }
+
+    if (queryState.legendFormat !== undefined) {
+      query = { ...query, legendFormat: queryState.legendFormat };
     }
 
     if (macroContext && typeof query.query === 'string') {

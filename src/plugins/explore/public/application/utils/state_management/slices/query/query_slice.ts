@@ -47,9 +47,22 @@ const querySlice = createSlice({
         meta: { addToHistory: true },
       }),
     },
+    setMetricsQuerySettings: (
+      state,
+      action: PayloadAction<Pick<QueryState, 'maxDataPoints' | 'minStep' | 'legendFormat'>>
+    ) => {
+      state.maxDataPoints = action.payload.maxDataPoints;
+      state.minStep = action.payload.minStep;
+      state.legendFormat = action.payload.legendFormat;
+    },
   },
 });
 
-export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory } = querySlice.actions;
+export const {
+  setQueryState,
+  setQueryWithHistory,
+  setQueryStringWithHistory,
+  setMetricsQuerySettings,
+} = querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();

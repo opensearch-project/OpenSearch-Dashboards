@@ -22,9 +22,11 @@ export interface MetricsStepSettingsValue {
 }
 
 export interface MetricsQueryOptionsProps extends MetricsStepSettingsValue {
+  legendFormat?: string;
   resolvedStepLabel: string;
   minStepInvalid: boolean;
   onStepSettingsChange: (next: MetricsStepSettingsValue) => void;
+  onLegendFormatChange: (next?: string) => void;
 }
 
 export function formatStepSeconds(stepSec: number | null): string {
@@ -49,9 +51,11 @@ export function formatStepSeconds(stepSec: number | null): string {
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
   minStep,
+  legendFormat,
   resolvedStepLabel,
   minStepInvalid,
   onStepSettingsChange,
+  onLegendFormatChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -114,6 +118,29 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
 
         <EuiSpacer size="m" />
         <EuiFormRow
+          label={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatLabel', {
+            defaultMessage: 'Series name',
+          })}
+          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatHelp', {
+            defaultMessage:
+              'Name each series from its labels, e.g. {example}. Leave empty to show the full label set.',
+            values: { example: '{{label}}' },
+          })}
+        >
+          <EuiFieldText
+            compressed
+            placeholder="{{label}}"
+            value={legendFormat ?? ''}
+            onChange={(e) => {
+              const raw = e.target.value;
+              onLegendFormatChange(raw === '' ? undefined : raw);
+            }}
+            data-test-subj="metricsLegendFormatInput"
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
+        <EuiFormRow
           label={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsLabel', {
             defaultMessage: 'Max data points',
           })}
@@ -141,6 +168,19 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             data-test-subj="metricsStepMaxDataPointsInput"
           />
         </EuiFormRow>
+
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('explore.metricsQueryPanel.queryOptions.legendSyntaxNote', {
+            defaultMessage:
+              'Reference a label with {brace}, and combine them, e.g. {combo}. Use {name} for the metric name.',
+            values: {
+              brace: '{{label}}',
+              combo: '{{label1}}-{{label2}}',
+              name: '{{__name__}}',
+            },
+          })}
+        </EuiText>
 
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">

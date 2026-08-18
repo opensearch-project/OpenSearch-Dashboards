@@ -7,6 +7,7 @@ import {
   setQueryState,
   setQueryWithHistory,
   setQueryStringWithHistory,
+  setMetricsQuerySettings,
   queryReducer,
   QueryState,
   queryInitialState,
@@ -193,6 +194,47 @@ describe('querySlice reducers', () => {
       expect(action.type).toBe('query/setQueryStringWithHistory');
       expect(action.payload).toBe(queryString);
       expect(action.meta).toEqual({ addToHistory: true });
+    });
+  });
+
+  describe('setMetricsQuerySettings', () => {
+    const existingState: QueryState = {
+      query: 'up',
+      language: 'PROMQL',
+      dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
+    };
+
+    it('updates the PromQL step and legend fields without touching query, language, or dataset', () => {
+      const state = queryReducer(
+        existingState,
+        setMetricsQuerySettings({ maxDataPoints: 500, minStep: '1m', legendFormat: '{{instance}}' })
+      );
+      expect(state.maxDataPoints).toBe(500);
+      expect(state.minStep).toBe('1m');
+      expect(state.legendFormat).toBe('{{instance}}');
+      expect(state.query).toBe('up');
+      expect(state.language).toBe('PROMQL');
+      expect(state.dataset).toEqual(existingState.dataset);
+    });
+
+    it('clears the fields when set to undefined', () => {
+      const withSettings: QueryState = {
+        ...existingState,
+        maxDataPoints: 500,
+        minStep: '1m',
+        legendFormat: '{{instance}}',
+      };
+      const state = queryReducer(
+        withSettings,
+        setMetricsQuerySettings({
+          maxDataPoints: undefined,
+          minStep: undefined,
+          legendFormat: undefined,
+        })
+      );
+      expect(state.maxDataPoints).toBeUndefined();
+      expect(state.minStep).toBeUndefined();
+      expect(state.legendFormat).toBeUndefined();
     });
   });
 });

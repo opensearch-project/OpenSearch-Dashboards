@@ -13,16 +13,20 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   ParsedQuery,
-  Query,
   splitMultiQueries,
 } from '../../../data/common';
+import {
+  calculateStep,
+  DEFAULT_RESOLUTION,
+  interpolateLegendFormat,
+  PromQLQuery,
+} from '../../common';
 import {
   MetricResult,
   prometheusManager,
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
-import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
 function normalizeResult(
   resultType: string | undefined,
@@ -75,7 +79,7 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
-        const { dataset, query, language }: Query = requestBody.query;
+        const { dataset, query, language, legendFormat }: PromQLQuery = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
         const requestOptions = requestBody.options as
@@ -130,7 +134,7 @@ export const promqlSearchStrategyProvider = (
           throw new Error(queryResults[0].error);
         }
 
-        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery);
+        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery, legendFormat);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -259,8 +263,10 @@ function formatMetricLabels(metric: Record<string, string>): string {
 function createDataFrame(
   queryResults: LabeledQueryResult[],
   datasetId: string,
-  isSingleQuery: boolean
+  isSingleQuery: boolean,
+  legendFormat?: string
 ): IDataFrame {
+  const legendTemplate = legendFormat?.trim() ? legendFormat : undefined;
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
   let totalSeriesCount = 0;
@@ -314,7 +320,11 @@ function createDataFrame(
       delete labelsWithoutName.__name__;
 
       const formattedLabels = formatMetricLabels(metricResult.metric);
-      const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
+      const templatedName = legendTemplate
+        ? interpolateLegendFormat(legendTemplate, metricResult.metric).trim()
+        : '';
+      const baseName = templatedName || formattedLabels;
+      const seriesName = isSingleQuery ? baseName : `${result.label}: ${baseName}`;
       // TODO: remove escaping if not using vega
       // Escape brackets in series name to prevent Vega's splitAccessPath from
       // interpreting them as array index notation when used as field names

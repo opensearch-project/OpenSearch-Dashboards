@@ -6,13 +6,10 @@
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { PollQueryResultsParams, Query, TimeRange } from '../../data/common';
 
-// A Query carrying the PromQL-only panel settings. These ride in the request
-// body's `query` object; other languages leave them unset.
 export interface PromQLQuery extends Query {
-  // Target max data points per series (resolution used to derive the step).
   maxDataPoints?: number;
-  // Lower bound on the auto-derived step, as a duration string (e.g. "15s", "1m").
   minStep?: string;
+  legendFormat?: string;
 }
 
 export interface QueryAggConfig {

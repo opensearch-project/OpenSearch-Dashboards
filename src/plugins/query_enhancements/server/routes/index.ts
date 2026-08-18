@@ -110,6 +110,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               profile: schema.maybe(schema.boolean()),
               maxDataPoints: schema.maybe(schema.number()),
               minStep: schema.maybe(schema.string()),
+              legendFormat: schema.maybe(schema.string()),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             pollQueryResultsParams: schema.maybe(
