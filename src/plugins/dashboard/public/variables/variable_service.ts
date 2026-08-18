@@ -15,6 +15,7 @@ import {
   VariableSortOrder,
   QueryVariable,
   CustomVariable,
+  TextVariable,
   VariableState,
   VariableWithState,
   VariableOption,
@@ -183,15 +184,18 @@ export class VariableService {
   /**
    * Add a new variable.
    */
-  public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
+  public async addVariable(variable: Omit<Variable, 'id'>): Promise<void> {
     const id = this.generateId();
     const newVariable = this.buildVariable(id, variable);
 
     // Initialize runtime state
     const initialRuntimeState = this.deriveRuntimeState(newVariable);
-    const current =
-      initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
-    newVariable.current = current;
+    if (newVariable.type === VariableType.Text) {
+      newVariable.current = variable.current;
+    } else {
+      newVariable.current =
+        initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
+    }
 
     const updatedVariables = [...this.getVariables(), newVariable];
 
@@ -234,8 +238,13 @@ export class VariableService {
         loading: false,
         error: undefined,
       };
-      updatedVariable.current =
-        newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      if (updatedVariable.type === VariableType.Text) {
+        const next = updates.current;
+        updatedVariable.current = next && next.length > 0 ? [next[0]] : undefined;
+      } else {
+        updatedVariable.current =
+          newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      }
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -556,16 +565,20 @@ export class VariableService {
   }
 
   private buildVariable(id: string, input: Omit<Variable, 'id' | 'current'>): Variable {
-    const base: Omit<Variable, 'type'> & { type: VariableType } = {
+    const base = {
       id,
       name: input.name,
       label: input.label,
       type: input.type,
       current: undefined,
-      multi: input.multi,
-      includeAll: input.includeAll,
       hide: input.hide,
       description: input.description,
+    };
+
+    const optionMeta = {
+      multi: input.multi,
+      includeAll: input.includeAll,
+      allowCustomValue: input.allowCustomValue,
       sort: input.sort,
     };
 
@@ -574,6 +587,7 @@ export class VariableService {
         const v = input as Omit<QueryVariable, 'id' | 'current'>;
         return {
           ...base,
+          ...optionMeta,
           type: VariableType.Query,
           query: v.query ?? '',
           language: v.language,
@@ -588,12 +602,19 @@ export class VariableService {
         const v = input as Omit<CustomVariable, 'id' | 'current'>;
         return {
           ...base,
+          ...optionMeta,
           type: VariableType.Custom,
           customOptions: this.normalizeCustomOptions(v.customOptions),
         } as CustomVariable;
       }
+      case VariableType.Text: {
+        return {
+          ...base,
+          type: VariableType.Text,
+        } as TextVariable;
+      }
       default:
-        return base as Variable;
+        return { ...base, ...optionMeta } as Variable;
     }
   }
 

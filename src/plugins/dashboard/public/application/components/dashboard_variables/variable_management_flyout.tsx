@@ -41,6 +41,7 @@ export interface VariableManagementFlyoutProps {
 const variableTypeLabels: Record<VariableType, string> = {
   [VariableType.Query]: 'Query',
   [VariableType.Custom]: 'Custom',
+  [VariableType.Text]: 'Text',
 };
 
 export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> = ({
