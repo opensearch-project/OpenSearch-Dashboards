@@ -26,7 +26,7 @@ describe('unsupported-window-function-in-eventstats (compiled surface)', () => {
       .lint('source=logs | eventstats rank() as r by status', { dataSourceVersion: '3.8.0' })
       .diagnostics.find((d) => d.ruleId === 'unsupported-window-function-in-eventstats');
     expect(diagnostic?.message).toBe(
-      'This window function is not supported in eventstats/streamstats. Only row_number is supported.'
+      'This window function cannot be used within `eventstats` or `streamstats`.'
     );
   });
 

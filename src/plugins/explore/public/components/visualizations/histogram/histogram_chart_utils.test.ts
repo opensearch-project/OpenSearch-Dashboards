@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createHistogramSeries } from './histogram_chart_utils';
+import { createHistogramSeries, formatHistogramBucketValue } from './histogram_chart_utils';
 import { defaultHistogramChartStyles } from './histogram_vis_config';
 import { ThresholdMode } from '../types';
 
@@ -24,6 +24,22 @@ jest.mock('../utils/utils', () => ({
   generateThresholdLines: jest.fn(() => ({})),
   getValueColorByThreshold: jest.fn(() => '#00BFB3'),
 }));
+
+describe('formatHistogramBucketValue', () => {
+  it.each([
+    [1, 0, '1'],
+    [1.7999999999999998, 1, '1.8'],
+    [2.0000000000000004, 1, '2'],
+    [1.4999999999999998, 2, '1.5'],
+    [-1.7999999999999998, 1, '-1.8'],
+    [1234567890123, 0, '1234567890123'],
+    [1000000000000.2, 1, '1000000000000.2'],
+    ['not available', 0, 'not available'],
+    [undefined, 0, 'undefined'],
+  ])('formats %p with bucket precision %p as %p', (value, bucketPrecision, expected) => {
+    expect(formatHistogramBucketValue(value, bucketPrecision)).toBe(expected);
+  });
+});
 
 describe('createHistogramSeries', () => {
   const mockStyles = {
@@ -249,6 +265,78 @@ describe('createHistogramSeries', () => {
         : result.baseConfig!.tooltip;
       expect(tooltip!.show).toBe(false);
     });
+
+    it('should format floating-point bucket values cleanly in tooltip', () => {
+      const options = {
+        styles: {
+          ...mockStyles,
+          tooltipOptions: { mode: 'all' as const },
+        },
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [1.8, 2, 5],
+        ],
+        axisColumnMappings: {},
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+      const tooltip = Array.isArray(result.baseConfig!.tooltip)
+        ? result.baseConfig!.tooltip[0]
+        : result.baseConfig!.tooltip;
+
+      expect(
+        (tooltip!.formatter as Function)({
+          dimensionNames: ['start', 'end', 'count'],
+          seriesId: 'count',
+          seriesName: 'count',
+          value: [1.7999999999999998, 2.0000000000000004, 5],
+        })
+      ).toContain('1.8 - 2');
+    });
+
+    it('should not round tooltip metric values as bucket boundaries', () => {
+      const options = {
+        styles: {
+          ...mockStyles,
+          tooltipOptions: { mode: 'all' as const },
+        },
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [0, 1, 1234567890123],
+        ],
+        axisColumnMappings: {},
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+      const tooltip = Array.isArray(result.baseConfig!.tooltip)
+        ? result.baseConfig!.tooltip[0]
+        : result.baseConfig!.tooltip;
+
+      expect(
+        (tooltip!.formatter as Function)({
+          dimensionNames: ['start', 'end', 'count'],
+          seriesId: 'count',
+          seriesName: 'count',
+          value: [0, 1, 1234567890123],
+        })
+      ).toContain('<b>1234567890123</b>');
+    });
   });
 
   describe('series encoding', () => {
@@ -310,6 +398,114 @@ describe('createHistogramSeries', () => {
       expect(result.xAxisConfig.interval).toBe(10);
       expect(result.xAxisConfig.type).toBe('value');
       expect(result.xAxisConfig.name).toBe('X Axis');
+    });
+
+    it('should format floating-point x-axis labels cleanly', () => {
+      const options = {
+        styles: mockStyles,
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [1, 1.2, 5],
+          [1.7999999999999998, 2, 8],
+        ],
+        axisColumnMappings: {},
+        xAxisConfig: {
+          type: 'value' as const,
+        },
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+
+      expect(result.xAxisConfig.interval).toBe(0.2);
+      expect(result.xAxisConfig.axisLabel.formatter(1.7999999999999998)).toBe('1.8');
+    });
+
+    it('should not format decimal interval artifacts as intentional precision', () => {
+      const options = {
+        styles: mockStyles,
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [1, 1.2, 5],
+          [2, 2.2, 8],
+        ],
+        axisColumnMappings: {},
+        xAxisConfig: {
+          type: 'value' as const,
+        },
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+
+      expect(result.xAxisConfig.interval).toBe(0.2);
+      expect(result.xAxisConfig.axisLabel.formatter(1.2000000000000002)).toBe('1.2');
+    });
+
+    it('should preserve large integer x-axis labels', () => {
+      const options = {
+        styles: mockStyles,
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [1234567890123, 1234567890124, 5],
+        ],
+        axisColumnMappings: {},
+        xAxisConfig: {
+          type: 'value' as const,
+        },
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+
+      expect(result.xAxisConfig.axisLabel.formatter(1234567890123)).toBe('1234567890123');
+    });
+
+    it('should preserve large decimal x-axis labels at bucket precision', () => {
+      const options = {
+        styles: mockStyles,
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [1000000000000, 1000000000000.2, 5],
+        ],
+        axisColumnMappings: {},
+        xAxisConfig: {
+          type: 'value' as const,
+        },
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+
+      expect(result.xAxisConfig.axisLabel.formatter(1000000000000.2)).toBe('1000000000000.2');
     });
 
     it('should not create xAxisConfig when it does not already exist', () => {

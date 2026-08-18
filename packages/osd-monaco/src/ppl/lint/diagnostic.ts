@@ -43,6 +43,17 @@ export interface DiagnosticAttribution {
   relatedRanges?: DiagnosticRange[];
 }
 
+// Per-instance AI-fix policy a detector attaches to a diagnostic. Absence
+// preserves the generic behavior (AI offered for any marker with no
+// deterministic fix); an explicit `eligible: false` hides AI for this
+// diagnostic only.
+export interface DiagnosticAiFix {
+  // Whether this specific diagnostic instance has a validated automatic path.
+  eligible: boolean;
+  // Rule-specific constraints appended to the model's hidden fix context.
+  instructions?: string;
+}
+
 export interface Diagnostic {
   ruleId: string;
   severity: LintSeverity;
@@ -51,6 +62,9 @@ export interface Diagnostic {
   docUrl?: string;
   // Optional deterministic quick-fix. Absent for rules with no safe rewrite.
   fix?: DiagnosticFix;
+  // Optional per-instance AI policy. Absence preserves the generic no-template
+  // fallback; an explicit false hides AI for this diagnostic only.
+  aiFix?: DiagnosticAiFix;
   // Source attribution retained inside Dashboards only; set by the explain
   // range resolver once a whole-query finding is narrowed to one command.
   attribution?: DiagnosticAttribution;

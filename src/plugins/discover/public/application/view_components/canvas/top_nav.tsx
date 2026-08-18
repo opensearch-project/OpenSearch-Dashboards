@@ -36,9 +36,15 @@ export interface TopNavProps {
   };
   showSaveQuery: boolean;
   isEnhancementsEnabled?: boolean;
+  resultsCount?: number;
 }
 
-export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
+export const TopNav = ({
+  opts,
+  showSaveQuery,
+  isEnhancementsEnabled,
+  resultsCount,
+}: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
@@ -189,7 +195,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
-        queryStatus={queryStatus}
+        queryStatus={{ ...queryStatus, resultsCount }}
         showQueryBar={!!opts?.optionalRef?.datasetSelectorRef}
       />
     </>

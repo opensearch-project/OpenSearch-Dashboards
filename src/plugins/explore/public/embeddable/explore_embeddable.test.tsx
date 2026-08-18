@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
@@ -27,10 +27,25 @@ jest.mock('react-dom/client', () => ({
 
 // Mock the ExploreEmbeddableComponent
 jest.mock('./explore_embeddable_component', () => ({
-  ExploreEmbeddableComponent: jest.fn(() => (
-    <div data-test-subj="mockExploreEmbeddableComponent" />
-  )),
+  ExploreEmbeddableComponent: jest.fn(() => null),
 }));
+
+// Mock the PanelDataService singleton so fetch()/destroy() interactions with the
+// shared panel-data store can be asserted directly, without depending on whether
+// PanelDataService.init() was called (getInstance() now safely returns null when
+// uninitialized, e.g. when contextProvider is disabled).
+jest.mock('./panel_data_service', () => {
+  const mockPanelDataInstance = {
+    setPanelData: jest.fn(),
+    removePanelData: jest.fn(),
+  };
+  return {
+    PanelDataService: {
+      getInstance: jest.fn(() => mockPanelDataInstance),
+      init: jest.fn(),
+    },
+  };
+});
 
 // Mock the services
 jest.mock('../application/legacy/discover/opensearch_dashboards_services', () => {
@@ -282,6 +297,14 @@ describe('ExploreEmbeddable', () => {
     embeddable.render(mockNode);
     embeddable.destroy();
     expect(mockUnmount).toHaveBeenCalled();
+  });
+
+  test('destroy does not throw when PanelDataService is uninitialized (contextProvider disabled)', () => {
+    const { PanelDataService } = jest.requireMock('./panel_data_service');
+    PanelDataService.getInstance.mockReturnValueOnce(null);
+
+    embeddable.render(mockNode);
+    expect(() => embeddable.destroy()).not.toThrow();
   });
 
   test('updates input correctly', () => {

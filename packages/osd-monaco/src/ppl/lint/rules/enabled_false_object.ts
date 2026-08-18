@@ -7,15 +7,7 @@ import { Diagnostic } from '../diagnostic';
 import { Detector } from '../types';
 import { collectDottedPathNodes } from '../rule_index';
 import { rangeFromContext } from '../range_utils';
-
-function isUnderDisabledObject(path: string, disabled: ReadonlySet<string>): boolean {
-  for (const root of disabled) {
-    if (path === root || path.startsWith(root + '.')) {
-      return true;
-    }
-  }
-  return false;
-}
+import { isUnderDisabledObject } from '../field_path';
 
 // Engine ground truth (verified live on OpenSearch 3.7): a field inside an object
 // mapped `enabled: false` is not indexed. A reference to it returns null with

@@ -79,6 +79,8 @@ export const runDashboardVariableTests = () => {
         ['use-case-observability']
       );
       createAndSaveDashboard();
+      // Dashboard switches to view mode after save, enter edit mode
+      enterEditMode();
     });
 
     after(() => {
@@ -87,8 +89,6 @@ export const runDashboardVariableTests = () => {
 
     describe('Create custom variable', () => {
       it('should create a custom variable with multiple options', () => {
-        // Dashboard switches to view mode after save, enter edit mode
-        enterEditMode();
         openVariableEditor();
 
         // Fill in variable name first before changing type

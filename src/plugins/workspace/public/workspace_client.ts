@@ -18,6 +18,7 @@ import {
   PermissionModeId,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 import { MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
 
@@ -395,7 +396,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       savedObjects,
       workspaceId,
     };
-    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+    const result = await this.safeFetch<WorkspaceAssociateResult[]>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });

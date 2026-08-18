@@ -44,24 +44,19 @@ jest.mock('../../../../../data/public', () => ({
 jest.mock('./ppl_builder', () => ({
   ...jest.requireActual('./ppl_builder/parse_ppl'),
   ...jest.requireActual('./ppl_builder/types'),
-  // The stub surfaces the `initialState` it mounted with and exposes buttons to
-  // switch to code and to push a builder edit whose state carries partial work
-  // buildPPL can't serialize (a fieldless metric).
+  // The stub surfaces the `initialState` it mounted with and exposes a button to
+  // push a builder edit whose state carries partial work buildPPL can't serialize
+  // (a fieldless metric).
   PPLBuilder: ({
     initialState,
-    onSwitchToCode,
     onQueryChange,
   }: {
     initialState?: any;
-    onSwitchToCode?: () => void;
     onQueryChange?: (query: string, state: any) => void;
   }) => (
     <div data-test-subj="ppl-builder-stub">
       Builder
       <span data-test-subj="stub-initial-state">{JSON.stringify(initialState)}</span>
-      <button type="button" data-test-subj="stub-switch-to-code" onClick={onSwitchToCode}>
-        code
-      </button>
       <button
         type="button"
         data-test-subj="stub-add-partial-metric"
@@ -167,14 +162,16 @@ describe('LogsQueryPanel', () => {
     mockGetQuery.mockReturnValue({ query: '', language: 'PPL', dataset: { id: '1' } as any });
   });
 
-  it('defaults a fresh query to builder mode', () => {
+  it('defaults a fresh query to code mode', () => {
     renderPanel('');
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
   });
 
-  it('opens a parseable query in builder mode', () => {
+  it('opens a parseable query in code mode', () => {
     renderPanel('source = logs service="web-store"');
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+    expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
   });
 
   it('opens an unparseable query in code mode', () => {
@@ -183,39 +180,35 @@ describe('LogsQueryPanel', () => {
     expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
   });
 
-  it('opens a saved-loaded query in code mode even when parseable', () => {
-    renderPanel('source = logs service="web-store"', 'saved-id');
+  it('can switch to Builder from Code for a representable query and back', () => {
+    renderPanel('source = logs service="web-store"');
+    expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
+    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
+    expect(screen.queryByTestId('code-editor-stub')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
     expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
   });
 
-  it('can switch back to Builder from Code for a representable query', () => {
-    renderPanel('source = logs service="web-store"');
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('stub-switch-to-code'));
-    expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
-    expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
-    expect(screen.queryByTestId('code-editor-stub')).not.toBeInTheDocument();
-  });
-
-  it('disables the Builder toggle for an unrepresentable query in Code mode', () => {
+  it('disables the Builder option for an unrepresentable query in Code mode', () => {
     renderPanel('source = logs | sort field');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    expect(screen.getByTestId('pplBuilderModeToggle')).toBeDisabled();
+    expect(screen.getByTestId('pplBuilderModeToggle-builder')).toBeDisabled();
   });
 
   it('preserves partial builder work across a Code round-trip when the code is unedited', () => {
     renderPanel('service="web-store"');
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
     expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
 
     // Toggle to Code and back WITHOUT editing the code.
-    fireEvent.click(screen.getByTestId('stub-switch-to-code'));
-    fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
     // The preserved state is restored verbatim; a re-parse would drop the metric.
     const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
@@ -224,13 +217,14 @@ describe('LogsQueryPanel', () => {
 
   it('preserves partial work when Monaco returns the same query with a trailing newline / CRLF', () => {
     renderPanel('service="web-store"');
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
-    fireEvent.click(screen.getByTestId('stub-switch-to-code'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // A trailing newline / CRLF from Monaco must NOT count as an edit: the
     // preserved snapshot should still be restored rather than lossily re-parsed.
     mockEditorText.current = 'service="web-store"\r\n';
-    fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
     const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
@@ -238,13 +232,14 @@ describe('LogsQueryPanel', () => {
 
   it('re-parses (dropping partial work) when the code was edited before switching back', () => {
     renderPanel('service="web-store"');
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
-    fireEvent.click(screen.getByTestId('stub-switch-to-code'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
 
     // Edited code no longer matches the builder's output, so it is authoritative:
     // the preserved snapshot is dropped in favor of re-parsing.
     mockEditorText.current = 'service="web-store" | stats count()';
-    fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
 
     const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: expect.any(String), fn: 'count' }]);
@@ -253,35 +248,27 @@ describe('LogsQueryPanel', () => {
   describe('analyze mode gating', () => {
     const noop = () => {};
 
-    it('reports code mode via onModeChange when opening an unparseable query', () => {
+    it('reports code mode via onModeChange when opening a query', () => {
       const onModeChange = jest.fn();
-      // An unparseable query opens in code mode.
+      // Every query now opens in code mode.
       renderPanel('source = logs | sort field', undefined, { onModeChange });
       expect(onModeChange).toHaveBeenLastCalledWith(true);
-    });
-
-    it('reports visual (non-code) mode via onModeChange when opening in builder', () => {
-      const onModeChange = jest.fn();
-      // A fresh query opens in builder mode.
-      renderPanel('', undefined, { onModeChange });
-      expect(onModeChange).toHaveBeenLastCalledWith(false);
     });
 
     it('reports the mode change when toggling between code and builder', () => {
       const onModeChange = jest.fn();
       renderPanel('source = logs service="web-store"', undefined, { onModeChange });
-      // Opens in builder mode.
-      expect(onModeChange).toHaveBeenLastCalledWith(false);
-
-      fireEvent.click(screen.getByTestId('stub-switch-to-code'));
+      // Opens in code mode.
       expect(onModeChange).toHaveBeenLastCalledWith(true);
 
-      fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
       expect(onModeChange).toHaveBeenLastCalledWith(false);
+
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
+      expect(onModeChange).toHaveBeenLastCalledWith(true);
     });
 
     it('passes analyze props to the widgets in code mode', () => {
-      // Unparseable query -> code mode.
       renderPanel('source = logs | sort field', undefined, {
         analyzeIsOpen: false,
         onToggleAnalyze: noop,
@@ -291,12 +278,13 @@ describe('LogsQueryPanel', () => {
     });
 
     it('does not pass analyze props to the widgets in visual builder mode', () => {
-      // Fresh query -> builder mode, so analyze props are gated to undefined.
-      renderPanel('', undefined, {
+      renderPanel('source = logs service="web-store"', undefined, {
         analyzeIsOpen: false,
         onToggleAnalyze: noop,
         hasAnalyzeResult: false,
       });
+      // Switch into the visual builder, where analyze props are gated to undefined.
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
       expect(screen.queryByTestId('widgets-analyze-enabled')).not.toBeInTheDocument();
     });
   });

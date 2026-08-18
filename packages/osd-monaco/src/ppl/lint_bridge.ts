@@ -6,7 +6,7 @@
 import { monaco } from '../monaco';
 import type { PPLValidationContext } from './validation_provider';
 import type { LintResult } from './lint/diagnostic';
-import type { BundleRuleOverrides, LintPayloadContext } from './lint/types';
+import type { BundleRuleOverrides, LintPayloadContext, LintRunContext } from './lint/types';
 
 export interface PPLLintHttpClient {
   post: (
@@ -49,6 +49,68 @@ export type PrepareExplainQuery = (raw: string) => {
 export interface PPLLintContext extends PPLValidationContext, LintPayloadContext {
   http?: PPLLintHttpClient;
   prepareExplainQuery?: PrepareExplainQuery;
+  /**
+   * The active dataset's title, forwarded with chat-based lint-fix requests so
+   * the chat message can name the dataset. Set from `dataset.title` by the host.
+   */
+  datasetTitle?: string;
+  /**
+   * The global `enableAIFeatures` uiSetting. When false the AI quick-fix action
+   * is hidden entirely, matching every other Query-Assist surface.
+   */
+  enableAIFeatures?: boolean;
+  /**
+   * Whether the AI lint-fix agent is actually reachable for the SELECTED data
+   * source. `enableAIFeatures` and the chat opener are deployment-global, but the
+   * fix executes against the selected cluster's ML Commons agent — so a cluster
+   * without that agent must not offer the action. `false` hides the AI quick-fix;
+   * `undefined` (probe not yet resolved, or host that does not probe) leaves it
+   * shown, so this can only ever suppress a button, never reveal one the other
+   * checks would hide. Resolved asynchronously by the host per data source.
+   */
+  aiAgentAvailableForSource?: boolean;
+  /**
+   * Host-supplied opener for the AI chat-based lint fix flow. The leaf package
+   * cannot import core/chat, so it builds a plain request payload and lets the
+   * host open chat plus register the apply tool.
+   */
+  onAskAiFix?: (request: AskPPLLintFixRequest) => void;
+  /**
+   * Assistant action name the host registered for applying a PPL lint fix.
+   * Hosts may use distinct names because assistant actions are globally keyed.
+   */
+  aiFixToolName?: string;
+}
+
+/** Plain-data request the Monaco command sends to a host chat opener. */
+export interface AskPPLLintFixRequest {
+  requestId: string;
+  sourceQueryHash: string;
+  toolName: string;
+  modelUri: string;
+  query: string;
+  diagnostic: {
+    message: string;
+    ruleId?: string;
+    operation?: 'filter' | 'aggregation' | 'sort';
+    outcome?: string;
+    targetText?: string;
+    targetRange?: { startOffset: number; endOffset: number };
+    relatedTexts?: string[];
+    fixInstructions?: string;
+  };
+  datasetTitle?: string;
+  dataSourceId?: string;
+  /** Short, human-facing chat bubble shown to the user (rule + offending query). */
+  chatMessage: string;
+  /**
+   * Out-of-band context for the model: correlation ids + tool-calling
+   * instructions. The host pushes this into the assistant context store so the
+   * model receives it while the chat UI renders nothing for it. Keeps the
+   * machine plumbing out of the visible transcript.
+   */
+  chatContext?: string;
+  lintContext?: LintRunContext;
 }
 
 export interface PPLLintBridgeRequest {

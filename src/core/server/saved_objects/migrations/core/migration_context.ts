@@ -143,10 +143,7 @@ function createDestContext(
   opensearchDashboardsRawConfig?: Config
 ): Index.FullIndexInfo {
   const targetMappings = deleteTypeMappingsFields(
-    disableUnknownTypeMappingFields(
-      buildActiveMappings(typeMappingDefinitions, opensearchDashboardsRawConfig),
-      source.mappings
-    ),
+    disableUnknownTypeMappingFields(buildActiveMappings(typeMappingDefinitions), source.mappings),
     opensearchDashboardsRawConfig
   );
 

@@ -38,15 +38,18 @@ function createService(initialVariables: Variable[] = [], dashboardId?: string) 
     get: jest.fn().mockResolvedValue({ attributes: {} }),
   };
 
+  const telemetrySink = jest.fn();
+
   const service = new VariableService(
     {} as any, // dataPlugin
     dashboardId,
-    mockSavedObjectsClient as any
+    mockSavedObjectsClient as any,
+    telemetrySink
   );
 
   service.initialize(initialVariables);
 
-  return { service, mockSavedObjectsClient };
+  return { service, mockSavedObjectsClient, telemetrySink };
 }
 
 function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVariable {
@@ -1413,6 +1416,202 @@ describe('VariableService', () => {
       expect(vars[0].options.length).toBe(100);
       expect(vars[0].options[0].value).toBe('option-050');
       expect(vars[0].options[99].value).toBe('option-149');
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should not report anything when no telemetry sink is provided', async () => {
+      // Sink is optional -- consumers like the explore plugin construct the
+      // service without one and must not break.
+      const service = new VariableService({} as any, 'dash-1', {
+        update: jest.fn().mockResolvedValue({}),
+      } as any);
+      service.initialize([makeCustomVariable()]);
+
+      await expect(
+        service.addVariable({
+          name: 'new_var',
+          type: VariableType.Custom,
+          customOptions: ['a'],
+        } as any)
+      ).resolves.toBeUndefined();
+    });
+
+    describe('variables_loaded', () => {
+      it('should report count and distinct types on initialize', () => {
+        const { telemetrySink } = createService([
+          makeCustomVariable({ id: 'c1', name: 'env' }),
+          makeCustomVariable({ id: 'c2', name: 'region' }),
+          makeQueryVariable({ id: 'q1', name: 'service' }),
+        ]);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variables_loaded',
+          data: { count: 3, types: [VariableType.Custom, VariableType.Query] },
+        });
+      });
+
+      it('should not report when the dashboard has no variables', () => {
+        const { telemetrySink } = createService([]);
+
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variables_loaded' })
+        );
+      });
+    });
+
+    describe('create', () => {
+      it('should report variable_create_succeeded with the type', async () => {
+        const { service, telemetrySink } = createService([], 'dash-1');
+
+        await service.addVariable({
+          name: 'env',
+          type: VariableType.Custom,
+          customOptions: ['dev'],
+        } as any);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_create_succeeded',
+          data: { type: VariableType.Custom },
+        });
+      });
+
+      it('should report variable_create_failed and rethrow when persistence fails', async () => {
+        const { service, mockSavedObjectsClient, telemetrySink } = createService([], 'dash-1');
+        mockSavedObjectsClient.update.mockRejectedValue(new TypeError('boom'));
+
+        await expect(
+          service.addVariable({
+            name: 'env',
+            type: VariableType.Custom,
+            customOptions: ['dev'],
+          } as any)
+        ).rejects.toThrow('boom');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_create_failed',
+          data: { type: VariableType.Custom, errorType: 'TypeError' },
+        });
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variable_create_succeeded' })
+        );
+      });
+    });
+
+    describe('update', () => {
+      it('should report variable_update_succeeded with the resolved type', async () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        // A partial update carrying no `type` must still report the real type.
+        await service.updateVariable('custom-1', { name: 'renamed' });
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_update_succeeded',
+          data: { type: VariableType.Custom },
+        });
+      });
+
+      it('should report variable_update_failed and rethrow when persistence fails', async () => {
+        const { service, mockSavedObjectsClient, telemetrySink } = createService(
+          [makeCustomVariable()],
+          'dash-1'
+        );
+        mockSavedObjectsClient.update.mockRejectedValue(new Error('nope'));
+
+        await expect(service.updateVariable('custom-1', { name: 'renamed' })).rejects.toThrow(
+          'nope'
+        );
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_update_failed',
+          data: { type: VariableType.Custom, errorType: 'Error' },
+        });
+      });
+    });
+
+    describe('delete', () => {
+      it('should report variable_deleted with the removed variable type', async () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        await service.removeVariable('custom-1');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_deleted',
+          data: { type: VariableType.Custom },
+        });
+      });
+    });
+
+    describe('value change', () => {
+      it('should report variable_value_changed', () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        service.updateVariableValue('custom-1', ['prod']);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_value_changed',
+          data: { type: VariableType.Custom },
+        });
+      });
+    });
+
+    describe('variable_query_failed', () => {
+      // Isolate the mock queue so a leftover *Once implementation from an
+      // earlier test cannot shadow the rejection under test, and restore the
+      // module-level default afterwards.
+      beforeEach(() => {
+        mockExecuteVariableQuery.mockReset();
+      });
+      afterEach(() => {
+        mockExecuteVariableQuery.mockResolvedValue(makeQueryResult([]));
+      });
+
+      it('should report the failure with language and error type', async () => {
+        const { service, telemetrySink } = createService([makeQueryVariable()], 'dash-1');
+        mockExecuteVariableQuery.mockRejectedValueOnce(new TypeError('bad query'));
+
+        await service.refreshVariableOptions('query-1');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_query_failed',
+          data: { type: VariableType.Query, language: 'PPL', errorType: 'TypeError' },
+        });
+      });
+
+      it('should not report aborted refreshes', async () => {
+        const { service, telemetrySink } = createService([makeQueryVariable()], 'dash-1');
+        const abortError = new Error('aborted');
+        abortError.name = 'AbortError';
+        mockExecuteVariableQuery.mockRejectedValueOnce(abortError);
+
+        await service.refreshVariableOptions('query-1');
+
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variable_query_failed' })
+        );
+      });
+    });
+
+    it('should not break the feature when the sink throws', async () => {
+      const throwingSink = jest.fn(() => {
+        throw new Error('sink exploded');
+      });
+      const service = new VariableService(
+        {} as any,
+        'dash-1',
+        { update: jest.fn().mockResolvedValue({}) } as any,
+        throwingSink
+      );
+      service.initialize([]);
+
+      await expect(
+        service.addVariable({
+          name: 'env',
+          type: VariableType.Custom,
+          customOptions: ['dev'],
+        } as any)
+      ).resolves.toBeUndefined();
+      expect(throwingSink).toHaveBeenCalled();
     });
   });
 });

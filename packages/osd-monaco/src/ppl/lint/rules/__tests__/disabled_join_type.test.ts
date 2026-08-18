@@ -14,10 +14,19 @@ describe('disabled-join-type (compiled surface, option form)', () => {
   beforeEach(() => {
     analyzer = new PPLLanguageAnalyzer();
   });
+  const withRuleEnabled = (ctx?: LintRunContext): LintRunContext => ({
+    ...ctx,
+    overrides: {
+      ...ctx?.overrides,
+      'disabled-join-type': { enabled: true },
+    },
+  });
   const ids = (code: string, ctx?: LintRunContext) =>
-    analyzer.lint(code, ctx).diagnostics.map((d) => d.ruleId);
+    analyzer.lint(code, withRuleEnabled(ctx)).diagnostics.map((d) => d.ruleId);
   const joinDiags = (code: string, ctx?: LintRunContext) =>
-    analyzer.lint(code, ctx).diagnostics.filter((d) => d.ruleId === 'disabled-join-type');
+    analyzer
+      .lint(code, withRuleEnabled(ctx))
+      .diagnostics.filter((d) => d.ruleId === 'disabled-join-type');
 
   it('flags type=cross', () => {
     expect(ids('source=a | join type=cross b on a.id=b.id')).toContain('disabled-join-type');
