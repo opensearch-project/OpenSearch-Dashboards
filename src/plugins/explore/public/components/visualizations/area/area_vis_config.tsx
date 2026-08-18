@@ -18,6 +18,8 @@ import {
   ThresholdOptions,
   StandardAxes,
   StackMode,
+  LineDashStyle,
+  LineMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -28,6 +30,7 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
+export const DEFAULT_FILL_OPACITY = 30;
 /**
  * - `none`: flat fill in the series color.
  * - `opacity`: fades from the series color at the line to transparent at the baseline.
@@ -44,7 +47,16 @@ export interface AreaChartStyleOptions {
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
+  gradientMode?: GradientMode;
   tooltipOptions?: TooltipOptions;
+
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+
+  pointSize?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -71,10 +83,16 @@ export interface AreaChartStyleOptions {
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'stackMode'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'lineWidth'
+    | 'pointSize'
+    | 'areaOpacity'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle' | 'stackMode'>;
+  Pick<AreaChartStyleOptions, 'legendTitle' | 'lineWidth' | 'pointSize' | 'areaOpacity'>;
 
 export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
@@ -82,10 +100,15 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   legendTitle: '',
   legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
+  gradientMode: 'none',
   tooltipOptions: {
     mode: 'all',
   },
+  lineDashStyle: 'solid',
 
+  lineMode: 'smooth',
+
+  showValues: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
@@ -96,7 +119,7 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   standardAxes: [],
 
   showFullTimeRange: true,
-  stackMode: 'none',
+  stackMode: 'total',
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

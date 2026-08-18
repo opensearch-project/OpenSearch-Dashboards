@@ -7,19 +7,18 @@ import { i18n } from '@osd/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { DebouncedFieldRange } from '../utils';
 
-export const DEFAULT_FILL_OPACITY = 30;
-export const DEFAULT_BAR_FILL_OPACITY = 70;
-
 export interface Props {
+  defaultOpacity: number;
   fillOpacity?: number;
   onOpacityChange: (fillOpacity: number) => void;
   testsubj?: string;
 }
 
-export const GradientRange = ({
+export const OpacityRange = ({
+  defaultOpacity,
   fillOpacity,
   onOpacityChange,
-  testsubj = 'areaFillOpacity',
+  testsubj = 'fillOpacityRange',
 }: Props) => {
   const label = i18n.translate('explore.stylePanel.area.areaOpacity', {
     defaultMessage: 'Fill opacity',
@@ -29,13 +28,13 @@ export const GradientRange = ({
     <EuiFormRow label={label}>
       <DebouncedFieldRange
         value={fillOpacity}
-        onChange={(value) => onOpacityChange(value ?? DEFAULT_FILL_OPACITY)}
+        onChange={(value) => onOpacityChange(value ?? defaultOpacity)}
         min={0}
         max={100}
-        defaultValue={DEFAULT_FILL_OPACITY}
+        defaultValue={defaultOpacity}
         step={1}
         aria-label={label}
-        data-test-subj={`${testsubj}Range`}
+        data-test-subj={testsubj}
       />
     </EuiFormRow>
   );

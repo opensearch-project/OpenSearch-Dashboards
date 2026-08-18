@@ -6,7 +6,7 @@
 import { BarSeriesOption } from 'echarts';
 import { TimeUnit } from '../types';
 import { formatSeriesValueLabel, generateThresholdLines } from '../utils/utils';
-import { BarChartStyle } from './bar_vis_config';
+import { BarChartStyle, DEFAULT_BAR_FILL_OPACITY } from './bar_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { getColors } from '../theme/default_colors';
@@ -17,7 +17,6 @@ import {
   LegendItem,
 } from '../utils/legend';
 import { resolveStackMode } from '../utils/data_transformation';
-import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share/gradient_range';
 
 export const buildStackConfig = (styles: BarChartStyle) =>
   'stackMode' in styles && resolveStackMode(styles) === 'none' ? {} : { stack: 'total' };

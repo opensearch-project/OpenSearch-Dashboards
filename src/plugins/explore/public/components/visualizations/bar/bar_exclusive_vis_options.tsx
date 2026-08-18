@@ -16,10 +16,14 @@ import {
 } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber, DebouncedFieldRange } from '../style_panel/utils';
-import { defaultBarChartStyles, MIN_BAR_RADIUS, MAX_BAR_RADIUS } from './bar_vis_config';
-import { StackModeButtonGroup } from '../style_panel/share/index';
+import {
+  defaultBarChartStyles,
+  MIN_BAR_RADIUS,
+  MAX_BAR_RADIUS,
+  DEFAULT_BAR_FILL_OPACITY,
+} from './bar_vis_config';
+import { StackModeButtonGroup, OpacityRange } from '../style_panel/share/index';
 import { StackMode } from '../types';
-import { GradientRange } from '../style_panel/share/gradient_range';
 
 /**
  * Bar width conversion utilities.
@@ -73,8 +77,8 @@ export const BarExclusiveVisOptions = ({
   barBorderColor,
   useThresholdColor,
   stackMode = 'none',
-  fillOpacity,
-  barRadius,
+  fillOpacity = DEFAULT_BAR_FILL_OPACITY,
+  barRadius = MIN_BAR_RADIUS,
   showValues,
   onBarSizeModeChange,
   onBarWidthChange,
@@ -180,7 +184,8 @@ export const BarExclusiveVisOptions = ({
             onStackModeChange={onStackModeChange}
             testsubj="barStackMode"
           />
-          <GradientRange
+          <OpacityRange
+            defaultOpacity={DEFAULT_BAR_FILL_OPACITY}
             fillOpacity={fillOpacity}
             onOpacityChange={onFillOpacityChange}
             testsubj="barFillOpacity"
@@ -209,9 +214,7 @@ export const BarExclusiveVisOptions = ({
               data-test-subj="barRadiusRange"
             />
           </EuiFormRow>
-
           <EuiSpacer size="s" />
-
           <EuiFormRow>
             <EuiSwitch
               compressed
@@ -223,6 +226,7 @@ export const BarExclusiveVisOptions = ({
               data-test-subj="barShowValuesSwitch"
             />
           </EuiFormRow>
+          <EuiSpacer size="s" />
         </>
       )}
       <EuiFormRow>

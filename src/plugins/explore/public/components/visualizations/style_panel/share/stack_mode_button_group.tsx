@@ -38,12 +38,12 @@ export const StackModeButtonGroup = ({
 }) => {
   return (
     <EuiFormRow
-      label={i18n.translate('explore.stylePanel.area.stackMode', {
+      label={i18n.translate('explore.stylePanel.stackMode', {
         defaultMessage: 'Stack',
       })}
     >
       <EuiButtonGroup
-        legend={i18n.translate('explore.stylePanel.area.stackMode', {
+        legend={i18n.translate('explore.stylePanel.stackMode', {
           defaultMessage: 'Stack',
         })}
         options={stackModeOptions.map((option) => ({

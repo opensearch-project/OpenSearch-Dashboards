@@ -6,11 +6,11 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
+import { AreaChartStyle, AreaChartStyleOptions, DEFAULT_FILL_OPACITY } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxisRole } from '../types';
+import { AxisRole, VisFieldType } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { AreaExclusiveVisOptions } from './area_exclusive_vis_options';
@@ -40,6 +40,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
+  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.[0]?.schema === VisFieldType.Date;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -47,8 +48,31 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         <>
           <EuiFlexItem grow={false}>
             <AreaExclusiveVisOptions
+              isTimeBased={shouldShowTimeMarker}
+              addTimeMarker={styleOptions.addTimeMarker}
+              areaOpacity={styleOptions.areaOpacity ?? DEFAULT_FILL_OPACITY}
+              gradientMode={styleOptions.gradientMode}
               stackMode={styleOptions.stackMode}
+              lineDashStyle={styleOptions.lineDashStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              pointSize={styleOptions.pointSize}
+              showValues={styleOptions.showValues}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onFillOpacityChange={(areaOpacity) => updateStyleOption('areaOpacity', areaOpacity)}
+              onGradientModeChange={(gradientMode) =>
+                updateStyleOption('gradientMode', gradientMode)
+              }
               onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+              onLineDashStyleChange={(lineDashStyle) =>
+                updateStyleOption('lineDashStyle', lineDashStyle)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
+              onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
             />
           </EuiFlexItem>
 

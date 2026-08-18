@@ -63,12 +63,18 @@ export interface LineChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   showFullTimeRange?: boolean;
+  pointSize?: number;
+  // Renders each data point's value
+  showValues?: boolean;
 }
 
 export type LineChartStyle = Required<
-  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'>
+  Omit<
+    LineChartStyleOptions,
+    'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'pointSize'
+  >
 > &
-  Pick<LineChartStyleOptions, 'legendTitle'>;
+  Pick<LineChartStyleOptions, 'legendTitle' | 'pointSize'>;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
@@ -93,6 +99,7 @@ export const defaultLineChartStyles: LineChartStyle = {
   standardAxes: [],
 
   showFullTimeRange: true,
+  showValues: false,
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({

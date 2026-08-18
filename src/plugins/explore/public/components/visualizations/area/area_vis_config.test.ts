@@ -7,6 +7,7 @@ import React from 'react';
 import { createAreaConfig } from './area_vis_config';
 import { Positions, ThresholdMode } from '../types';
 import { AreaVisStyleControls } from './area_vis_options';
+import { DEFAULT_POINT_SIZE } from '../style_panel/share';
 
 describe('area_vis_config', () => {
   const defaultAreaChartStyles = createAreaConfig().ui.style.defaults;
@@ -17,6 +18,9 @@ describe('area_vis_config', () => {
         addLegend: true,
         legendPosition: Positions.BOTTOM,
         addTimeMarker: false,
+        gradientMode: 'none',
+        stackMode: 'total',
+        showValues: false,
         tooltipOptions: {
           mode: 'all',
         },

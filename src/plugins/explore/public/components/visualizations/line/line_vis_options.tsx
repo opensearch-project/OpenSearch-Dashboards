@@ -55,12 +55,16 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               lineStyle={styleOptions.lineStyle}
               lineMode={styleOptions.lineMode}
               lineWidth={styleOptions.lineWidth}
+              pointSize={styleOptions.pointSize}
+              showValues={styleOptions.showValues}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
               onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
               onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
               onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+              onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
+              onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
             />
           </EuiFlexItem>
 

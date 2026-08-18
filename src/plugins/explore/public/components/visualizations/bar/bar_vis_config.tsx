@@ -31,7 +31,8 @@ import {
   createTimeBarChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
-import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share/gradient_range';
+
+export const DEFAULT_BAR_FILL_OPACITY = 100;
 
 export interface BarChartStyleOptions {
   // Basic controls
@@ -72,19 +73,10 @@ export interface BarChartStyleOptions {
 export type BarChartStyle = Required<
   Omit<
     BarChartStyleOptions,
-    | 'legendShape'
-    | 'thresholdLines'
-    | 'legendTitle'
-    | 'stackMode'
-    | 'barRadius'
-    | 'showValues'
-    | 'fillOpacity'
+    'legendShape' | 'thresholdLines' | 'legendTitle' | 'barRadius' | 'fillOpacity'
   >
 > &
-  Pick<
-    BarChartStyleOptions,
-    'legendShape' | 'legendTitle' | 'stackMode' | 'barRadius' | 'showValues' | 'fillOpacity'
-  >;
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'barRadius' | 'fillOpacity'>;
 
 export const MIN_BAR_RADIUS = 0;
 export const MAX_BAR_RADIUS = 20;
@@ -119,12 +111,8 @@ export const defaultBarChartStyles: BarChartStyle = {
     bucketTimeUnit: TimeUnit.AUTO,
   },
   showFullTimeRange: true,
-
   stackMode: 'none',
-  barRadius: MIN_BAR_RADIUS,
   showValues: false,
-
-  fillOpacity: DEFAULT_BAR_FILL_OPACITY,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

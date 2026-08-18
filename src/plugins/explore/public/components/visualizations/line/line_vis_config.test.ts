@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createLineConfig } from './line_vis_config';
+import { createLineConfig, defaultLineChartStyles } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
 import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
@@ -67,6 +67,7 @@ describe('line_vis_config', () => {
 
       const mockProps = {
         styleOptions: {
+          ...defaultLineChartStyles,
           addLegend: true,
           legendPosition: Positions.RIGHT,
           thresholdOptions: {
