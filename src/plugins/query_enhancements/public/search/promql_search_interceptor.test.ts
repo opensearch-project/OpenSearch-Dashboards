@@ -3,196 +3,91 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { of } from 'rxjs';
-import { CoreStart } from '../../../../core/public';
-import { coreMock } from '../../../../core/public/mocks';
-import {
-  IOpenSearchDashboardsSearchRequest,
-  ISearchOptions,
-  SearchInterceptorDeps,
-} from '../../../data/public';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { SEARCH_STRATEGY } from '../../common';
-import * as fetchModule from '../../common/utils';
-import { PromQLSearchInterceptor } from './promql_search_interceptor';
+import moment from 'moment';
+import { resolvePromQLMacroContext, resolveStepOptions } from './promql_search_interceptor';
+import { ASSUMED_SCRAPE_INTERVAL, calculateStep, DEFAULT_RESOLUTION } from '../../common';
 
-jest.mock('../../common/utils', () => ({
-  ...jest.requireActual('../../common/utils'),
-  fetch: jest.fn(),
-}));
+const bounds = (fromMs: number, toMs: number) => ({
+  min: moment(fromMs),
+  max: moment(toMs),
+});
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+// 24h range
+const START = 0;
+const END = 24 * 60 * 60 * 1000;
 
-describe('PromQLSearchInterceptor', () => {
-  let promqlSearchInterceptor: PromQLSearchInterceptor;
-  let mockCoreStart: CoreStart;
-  let mockDeps: SearchInterceptorDeps;
-  let mockDataService: ReturnType<typeof dataPluginMock.createStartContract>;
-
-  const mockFetch = fetchModule.fetch as jest.MockedFunction<typeof fetchModule.fetch>;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    mockCoreStart = coreMock.createStart();
-    mockDataService = dataPluginMock.createStartContract(true);
-
-    const mockStartServices = Promise.resolve([
-      mockCoreStart,
-      { data: mockDataService },
-      jest.fn(),
-    ] as const) as SearchInterceptorDeps['startServices'];
-
-    mockDeps = {
-      toasts: mockCoreStart.notifications.toasts,
-      startServices: mockStartServices,
-      uiSettings: mockCoreStart.uiSettings,
-      http: mockCoreStart.http,
-    };
-
-    promqlSearchInterceptor = new PromQLSearchInterceptor(mockDeps);
+describe('resolveStepOptions', () => {
+  it('returns undefined when neither maxDataPoints nor minStep is set', () => {
+    expect(
+      resolveStepOptions({ query: 'up', language: 'PROMQL' }, bounds(START, END))
+    ).toBeUndefined();
   });
 
-  describe('constructor', () => {
-    it('should initialize with dependencies', () => {
-      expect(promqlSearchInterceptor).toBeInstanceOf(PromQLSearchInterceptor);
-    });
+  it('returns undefined when bounds are missing or non-positive', () => {
+    expect(
+      resolveStepOptions({ query: 'up', language: 'PROMQL', maxDataPoints: 100 }, {})
+    ).toBeUndefined();
+    expect(
+      resolveStepOptions(
+        { query: 'up', language: 'PROMQL', maxDataPoints: 100 },
+        bounds(END, START)
+      )
+    ).toBeUndefined();
+  });
 
-    it('should set query service after start services resolve', async () => {
-      const newInterceptor = new PromQLSearchInterceptor(mockDeps);
-      await flushPromises();
+  it('honors maxDataPoints as the resolution', () => {
+    const result = resolveStepOptions(
+      { query: 'up', language: 'PROMQL', maxDataPoints: 100 },
+      bounds(START, END)
+    );
+    expect(result).toEqual({ step: calculateStep(END - START, 100, 15) });
+  });
 
-      expect((newInterceptor as any).queryService).toBe(mockDataService.query);
+  it('parses minStep duration strings into a seconds floor', () => {
+    const result = resolveStepOptions(
+      { query: 'up', language: 'PROMQL', minStep: '5m' },
+      bounds(START, END)
+    );
+    expect(result).toEqual({ step: calculateStep(END - START, DEFAULT_RESOLUTION, 300) });
+  });
+
+  it('falls back to defaults for invalid minStep and non-positive maxDataPoints', () => {
+    const result = resolveStepOptions(
+      { query: 'up', language: 'PROMQL', minStep: 'not-a-duration', maxDataPoints: 0 },
+      bounds(START, END)
+    );
+    expect(result).toEqual({ step: calculateStep(END - START, DEFAULT_RESOLUTION, 15) });
+  });
+});
+
+describe('resolvePromQLMacroContext', () => {
+  it('returns undefined when bounds are missing or non-positive', () => {
+    expect(resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, {})).toBeUndefined();
+    expect(
+      resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, bounds(END, START))
+    ).toBeUndefined();
+  });
+
+  it('derives step and range with default resolution and assumed scrape interval', () => {
+    expect(
+      resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, bounds(START, END))
+    ).toEqual({
+      stepSec: calculateStep(END - START, DEFAULT_RESOLUTION, 15),
+      rangeMs: END - START,
+      scrapeSec: ASSUMED_SCRAPE_INTERVAL,
     });
   });
 
-  describe('search', () => {
-    const mockRequest: IOpenSearchDashboardsSearchRequest = {
-      params: {
-        body: {
-          query: {
-            queries: [
-              {
-                language: 'PROMQL',
-                query: 'up',
-                dataset: {
-                  type: 'PROMETHEUS',
-                  id: 'prom-conn',
-                },
-              },
-            ],
-          },
-        },
-      },
-    };
-
-    const mockOptions: ISearchOptions = {
-      abortSignal: new AbortController().signal,
-    };
-
-    beforeEach(() => {
-      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue({
-        language: 'PROMQL',
-        query: 'up',
-        dataset: {
-          type: 'PROMETHEUS',
-          id: 'prom-conn',
-        },
-      });
-
-      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-        from: '2023-01-01T00:00:00Z',
-        to: '2023-01-02T00:00:00Z',
-      });
-
-      mockFetch.mockReturnValue(of({ data: 'mock response' }));
-    });
-
-    it('should call fetch with correct context', () => {
-      promqlSearchInterceptor.search(mockRequest, mockOptions);
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          http: mockCoreStart.http,
-          path: `/api/enhancements/search/${SEARCH_STRATEGY.PROMQL}`,
-          signal: mockOptions.abortSignal,
-          body: expect.objectContaining({
-            timeRange: {
-              from: '2023-01-01T00:00:00Z',
-              to: '2023-01-02T00:00:00Z',
-            },
-          }),
-        }),
-        expect.any(Object)
-      );
-    });
-
-    it('should use query from request params if available', () => {
-      const requestWithQuery: IOpenSearchDashboardsSearchRequest = {
-        params: {
-          body: {
-            query: {
-              queries: [
-                {
-                  language: 'PROMQL',
-                  query: 'node_cpu_seconds_total',
-                  dataset: {
-                    type: 'PROMETHEUS',
-                    id: 'prom-conn',
-                  },
-                },
-              ],
-            },
-          },
-        },
-      };
-
-      promqlSearchInterceptor.search(requestWithQuery, mockOptions);
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          language: 'PROMQL',
-          query: 'node_cpu_seconds_total',
-          dataset: {
-            type: 'PROMETHEUS',
-            id: 'prom-conn',
-          },
-        })
-      );
-    });
-
-    it('should fall back to global query service when no query in request', () => {
-      const requestWithoutQuery: IOpenSearchDashboardsSearchRequest = {
-        params: {
-          body: {
-            query: {
-              queries: [],
-            },
-          },
-        },
-      };
-
-      promqlSearchInterceptor.search(requestWithoutQuery, mockOptions);
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          language: 'PROMQL',
-          query: 'up',
-        })
-      );
-    });
-
-    it('should return observable from fetch', () => {
-      const expectedResponse = { data: 'mock response' };
-      mockFetch.mockReturnValue(of(expectedResponse));
-
-      const result = promqlSearchInterceptor.search(mockRequest, mockOptions);
-
-      result.subscribe((response) => {
-        expect(response).toEqual(expectedResponse);
-      });
+  it('uses a valid min step as both the step floor and the scrape interval', () => {
+    expect(
+      resolvePromQLMacroContext(
+        { query: 'up', language: 'PROMQL', minStep: '1m' },
+        bounds(START, END)
+      )
+    ).toEqual({
+      stepSec: calculateStep(END - START, DEFAULT_RESOLUTION, 60),
+      rangeMs: END - START,
+      scrapeSec: 60,
     });
   });
 });

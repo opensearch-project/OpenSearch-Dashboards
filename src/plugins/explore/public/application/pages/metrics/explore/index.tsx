@@ -9,8 +9,10 @@ import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { Query } from '../../../../../../data/common';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
+import { PromQLQueryOptions } from '../../../utils/languages';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
 import { clearLastExecutedData } from '../../../utils/state_management/slices';
@@ -31,7 +33,8 @@ import {
 import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
-import { MetricQueryGenerator, calculateStep } from './services/query_generator';
+import { MetricQueryGenerator } from './services/query_generator';
+import { calculateStep, parseStepIntervalSeconds } from '../prom_step';
 import { ExplorationLevel, ExplorationState } from './types';
 
 export const MetricsExploreTab = () => {
@@ -69,7 +72,12 @@ export const MetricsExploreTab = () => {
     if (!timefilter) return 60;
     const bounds = timefilter.getBounds();
     if (!bounds?.min || !bounds?.max) return 60;
-    return calculateStep(bounds.max.valueOf() - bounds.min.valueOf());
+    const query = services.data.query.queryString.getQuery() as Query & PromQLQueryOptions;
+    const resolution =
+      query.maxDataPoints && query.maxDataPoints > 0 ? query.maxDataPoints : undefined;
+    const parsedMinStep = query.minStep ? parseStepIntervalSeconds(query.minStep) : undefined;
+    const minStepSec = parsedMinStep && parsedMinStep > 0 ? parsedMinStep : undefined;
+    return calculateStep(bounds.max.valueOf() - bounds.min.valueOf(), resolution, minStepSec);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
 
