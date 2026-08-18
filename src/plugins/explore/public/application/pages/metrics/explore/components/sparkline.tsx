@@ -223,7 +223,18 @@ export const SparklineChart: React.FC<ChartProps> = ({
     }
 
     return baseOption;
-  }, [hasData, parsed, allSeries, isDarkMode, yMin, yMax, getColor, onTimeRangeChange]);
+  }, [
+    hasData,
+    parsed,
+    allSeries,
+    isDarkMode,
+    yMin,
+    yMax,
+    getColor,
+    onTimeRangeChange,
+    timeFrom,
+    timeTo,
+  ]);
 
   // Init / dispose
   useEffect(() => {
