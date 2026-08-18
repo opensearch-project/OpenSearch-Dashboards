@@ -70,6 +70,10 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
       }
     });
 
+    if (vis.getUiState() !== uiState) {
+      vis.setUiState(uiState);
+    }
+
     const listenOnChange = params ? params.listenOnChange : false;
     // Use flushSync to ensure synchronous rendering like React 17's render()
     // This is necessary because D3 charts measure DOM dimensions immediately
