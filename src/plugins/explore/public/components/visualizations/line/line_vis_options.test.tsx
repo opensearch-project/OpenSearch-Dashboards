@@ -14,8 +14,8 @@ import {
   AxisRole,
   AxisColumnMappings,
   StandardAxes,
+  LineStyle,
 } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
 import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the child components

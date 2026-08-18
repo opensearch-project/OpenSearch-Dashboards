@@ -27,11 +27,12 @@ export const OpacityRange = ({
   return (
     <EuiFormRow label={label}>
       <DebouncedFieldRange
-        value={fillOpacity}
-        onChange={(value) => onOpacityChange(value ?? defaultOpacity)}
+        // Value is stored as a 0-1 fraction but shown on a 0-100 scale
+        value={(fillOpacity ?? defaultOpacity) * 100}
+        onChange={(value) => onOpacityChange((value ?? defaultOpacity * 100) / 100)}
         min={0}
         max={100}
-        defaultValue={defaultOpacity}
+        defaultValue={defaultOpacity * 100}
         step={1}
         aria-label={label}
         data-test-subj={testsubj}

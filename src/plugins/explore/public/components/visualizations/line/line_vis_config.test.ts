@@ -6,8 +6,7 @@
 import React from 'react';
 import { createLineConfig, defaultLineChartStyles } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
+import { GridOptions, ThresholdMode, Positions, TooltipOptions, LineStyle } from '../types';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),

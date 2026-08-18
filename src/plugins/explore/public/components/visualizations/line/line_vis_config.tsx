@@ -16,8 +16,9 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  LineDashStyle,
+  LineStyle,
 } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -40,6 +41,8 @@ export interface LineChartStyleOptions {
   addTimeMarker?: boolean;
 
   lineStyle?: LineStyle;
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
   lineMode?: LineMode;
   lineWidth?: number;
   tooltipOptions?: TooltipOptions;
@@ -100,6 +103,7 @@ export const defaultLineChartStyles: LineChartStyle = {
 
   showFullTimeRange: true,
   showValues: false,
+  lineDashStyle: 'solid',
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({

@@ -8,18 +8,8 @@ import { i18n } from '@osd/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { GradientMode, DEFAULT_FILL_OPACITY } from './area_vis_config';
-import { StackMode, LineDashStyle, LineMode } from '../types';
-import {
-  DEFAULT_LINE_WIDTH,
-  InterpolationOption,
-  LineDashStyleOption,
-  LineWidthOption,
-  PointSizeOption,
-  ShowValuesSwitch,
-  StackModeButtonGroup,
-  OpacityRange,
-  DEFAULT_POINT_SIZE,
-} from '../style_panel/share/index';
+import { StackMode, LineDashStyle, LineMode, LineStyle } from '../types';
+import { LineSharePanel, StackModeButtonGroup, OpacityRange } from '../style_panel/share/index';
 
 interface AreaExclusiveVisOptionsProps {
   addTimeMarker: boolean;
@@ -31,6 +21,7 @@ interface AreaExclusiveVisOptionsProps {
   lineWidth?: number;
   pointSize?: number;
   showValues?: boolean;
+  lineStyle?: LineStyle;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
   onFillOpacityChange: (areaOpacity: number) => void;
   onGradientModeChange: (gradientMode: GradientMode) => void;
@@ -40,18 +31,20 @@ interface AreaExclusiveVisOptionsProps {
   onLineWidthChange: (lineWidth: number) => void;
   onPointSizeChange: (pointSize: number) => void;
   onShowValuesChange: (showValues: boolean) => void;
+  onLineStyleChange: (style: LineStyle) => void;
   isTimeBased?: boolean;
 }
 
 export const AreaExclusiveVisOptions = ({
   addTimeMarker,
-  areaOpacity,
+  areaOpacity = DEFAULT_FILL_OPACITY,
   gradientMode,
   stackMode = 'none',
   lineDashStyle = 'solid',
   lineMode = 'smooth',
   lineWidth,
   pointSize,
+  lineStyle,
   showValues = false,
 
   onAddTimeMarkerChange,
@@ -63,6 +56,7 @@ export const AreaExclusiveVisOptions = ({
   onLineWidthChange,
   onPointSizeChange,
   onShowValuesChange,
+  onLineStyleChange,
 
   isTimeBased = true,
 }: AreaExclusiveVisOptionsProps) => {
@@ -126,27 +120,21 @@ export const AreaExclusiveVisOptions = ({
           isFullWidth
         />
       </EuiFormRow>
-      <LineDashStyleOption
+      <LineSharePanel
+        lineStyle={lineStyle}
         lineDashStyle={lineDashStyle}
-        onLineDashStyleChange={onLineDashStyleChange}
-        isFullWidth
-      />
-      <InterpolationOption lineMode={lineMode} onLineModeChange={onLineModeChange} isFullWidth />
-      <LineWidthOption
+        lineMode={lineMode}
         lineWidth={lineWidth}
-        onLineWidthChange={onLineWidthChange}
-        defaultValue={DEFAULT_LINE_WIDTH}
-      />
-      <PointSizeOption
         pointSize={pointSize}
-        onPointSizeChange={onPointSizeChange}
-        defaultValue={DEFAULT_POINT_SIZE}
-        testsubj="areaPointSize"
-      />
-      <ShowValuesSwitch
         showValues={showValues}
+        onLineDashStyleChange={onLineDashStyleChange}
+        onLineModeChange={onLineModeChange}
+        onLineWidthChange={onLineWidthChange}
+        onPointSizeChange={onPointSizeChange}
         onShowValuesChange={onShowValuesChange}
-        testsubj="areaShowValues"
+        onLineStyleChange={onLineStyleChange}
+        isFullWidth
+        testSubj="area"
       />
 
       {isTimeBased && (

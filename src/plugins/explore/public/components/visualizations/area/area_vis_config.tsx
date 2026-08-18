@@ -20,6 +20,7 @@ import {
   StackMode,
   LineDashStyle,
   LineMode,
+  LineStyle,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -30,7 +31,7 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
-export const DEFAULT_FILL_OPACITY = 30;
+export const DEFAULT_FILL_OPACITY = 0.5;
 /**
  * - `none`: flat fill in the series color.
  * - `opacity`: fades from the series color at the line to transparent at the baseline.
@@ -78,6 +79,7 @@ export interface AreaChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
   stackMode?: StackMode;
+  lineStyle?: LineStyle;
 }
 
 export type AreaChartStyle = Required<
@@ -120,6 +122,7 @@ export const defaultAreaChartStyles: AreaChartStyle = {
 
   showFullTimeRange: true,
   stackMode: 'total',
+  lineStyle: 'line',
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

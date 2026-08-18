@@ -59,7 +59,7 @@ export const lightenHexColor = (hexColor: string, ratio: number): string => {
 };
 
 export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
-  const opacity = (styles.areaOpacity ?? DEFAULT_FILL_OPACITY) / 100;
+  const opacity = styles.areaOpacity ?? DEFAULT_FILL_OPACITY;
 
   const gradientMode = styles.gradientMode ?? 'none';
 
@@ -83,7 +83,7 @@ export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
 };
 
 export const buildBorderLineStyle = (styles: AreaChartStyle) => ({
-  width: styles.lineWidth ?? DEFAULT_LINE_WIDTH,
+  width: styles.lineStyle === 'dots' ? 0 : (styles.lineWidth ?? DEFAULT_LINE_WIDTH),
   type: getLineDashType(styles.lineDashStyle),
 });
 
@@ -152,7 +152,10 @@ export const createAreaSeries =
         name,
         type: 'line',
         ...pointSymbol,
+        ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
         ...buildValueLabel(styles.showValues, item),
+        // TODO remove it for connection/disconnection
+        connectNulls: true,
         ...stackConfig,
         areaStyle: buildAreaStyle(styles, color),
         lineStyle: borderLineStyle,

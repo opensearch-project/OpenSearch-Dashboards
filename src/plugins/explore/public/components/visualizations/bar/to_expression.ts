@@ -310,9 +310,7 @@ export const createDoubleNumericalBarChart = (
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
-  const categoryFieldName = axisColumnMappings[AxisRole.X].name;
   const seriesFields = axisColumnMappings[AxisRole.Y].map((col) => col.column);
-  const seriesFieldNames = axisColumnMappings[AxisRole.Y].map((col) => col.name);
 
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
   const result = pipe(

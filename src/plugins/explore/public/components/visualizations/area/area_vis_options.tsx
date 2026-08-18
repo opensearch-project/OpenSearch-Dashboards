@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AreaChartStyle, AreaChartStyleOptions, DEFAULT_FILL_OPACITY } from './area_vis_config';
+import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
@@ -50,7 +50,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
             <AreaExclusiveVisOptions
               isTimeBased={shouldShowTimeMarker}
               addTimeMarker={styleOptions.addTimeMarker}
-              areaOpacity={styleOptions.areaOpacity ?? DEFAULT_FILL_OPACITY}
+              areaOpacity={styleOptions.areaOpacity}
               gradientMode={styleOptions.gradientMode}
               stackMode={styleOptions.stackMode}
               lineDashStyle={styleOptions.lineDashStyle}
@@ -58,6 +58,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               lineWidth={styleOptions.lineWidth}
               pointSize={styleOptions.pointSize}
               showValues={styleOptions.showValues}
+              lineStyle={styleOptions.lineStyle}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
@@ -73,6 +74,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
               onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
               onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
+              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
             />
           </EuiFlexItem>
 

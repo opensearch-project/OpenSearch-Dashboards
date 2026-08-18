@@ -34,6 +34,7 @@ describe('BarExclusiveVisOptions', () => {
     onStackModeChange: jest.fn(),
     onBarRadiusChange: jest.fn(),
     onShowValuesChange: jest.fn(),
+    onFillOpacityChange: jest.fn(),
   };
 
   // EuiButtonGroup marks the selection on the label rather than the input
@@ -90,6 +91,22 @@ describe('BarExclusiveVisOptions', () => {
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarWidthChange).toHaveBeenCalledWith(0.8);
+  });
+
+  test('calls onFillOpacityChange with a 0-1 fraction when the 0-100 slider changes', () => {
+    const onFillOpacityChange = jest.fn();
+    render(
+      <BarExclusiveVisOptions
+        {...defaultProps}
+        fillOpacity={0.5}
+        onFillOpacityChange={onFillOpacityChange}
+      />
+    );
+
+    // Slider is shown on a 0-100 scale but the value is stored as a 0-1 fraction.
+    fireEvent.change(screen.getByTestId('barFillOpacity'), { target: { value: '80' } });
+
+    expect(onFillOpacityChange).toHaveBeenCalledWith(0.8);
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {

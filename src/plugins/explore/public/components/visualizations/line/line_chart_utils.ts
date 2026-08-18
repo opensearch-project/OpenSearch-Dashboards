@@ -5,7 +5,7 @@
 
 import { BarSeriesOption, LineSeriesOption } from 'echarts';
 import { LineChartStyle } from './line_vis_config';
-import { getLineInterpolation } from '../style_panel/share/line_shared_options';
+import { getLineInterpolation, getLineDashType } from '../style_panel/share/line_shared_options';
 import { getPointSymbol } from '../style_panel/share/point_size_options';
 import { buildValueLabel } from '../style_panel/share/value_label_options';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -23,18 +23,13 @@ const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
   // Point size and value labels are only offered in dots mode
   // other modes keep drawing their symbols at the size ECharts picks and stay unlabelled
-  const dotsOnlyOptions =
-    styles.lineStyle === 'dots'
-      ? {
-          ...getPointSymbol(styles.pointSize, styles.showValues),
-          ...(valueField ? buildValueLabel(styles.showValues, valueField) : {}),
-        }
-      : {};
   return {
+    ...getPointSymbol(styles.pointSize, styles.showValues),
     ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
-    ...dotsOnlyOptions,
+    ...(valueField ? buildValueLabel(styles.showValues, valueField) : {}),
     lineStyle: {
       width: lineWidth,
+      type: getLineDashType(styles.lineDashStyle),
     },
     ...getLineInterpolation(styles.lineMode),
   };

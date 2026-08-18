@@ -5,24 +5,16 @@
 
 import { i18n } from '@osd/i18n';
 
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
-import { DEFAULT_POINT_SIZE } from '../style_panel/share';
-import {
-  DEFAULT_LINE_WIDTH,
-  InterpolationOption,
-  LineWidthOption,
-} from '../style_panel/share/line_shared_options';
-import { PointSizeOption } from '../style_panel/share/point_size_options';
-import { ShowValuesSwitch } from '../style_panel/share/value_label_options';
-import { LineMode } from '../types';
-
-export type LineStyle = 'both' | 'line' | 'dots';
+import { LineSharePanel } from '../style_panel/share/line_shared_options';
+import { LineMode, LineDashStyle, LineStyle } from '../types';
 
 interface BasicVisOptionsProps {
   addTimeMarker: boolean;
   lineStyle: LineStyle;
+  lineDashStyle?: LineDashStyle;
   lineMode: LineMode;
   lineWidth: number;
   pointSize?: number;
@@ -32,6 +24,7 @@ interface BasicVisOptionsProps {
   onLineModeChange: (lineMode: LineMode) => void;
   onLineWidthChange: (lineWidth: number) => void;
   onLineStyleChange: (style: LineStyle) => void;
+  onLineDashStyleChange: (lineDashStyle: LineDashStyle) => void;
   onPointSizeChange: (pointSize: number) => void;
   onShowValuesChange: (showValues: boolean) => void;
   shouldShowTimeMarker?: boolean;
@@ -42,13 +35,15 @@ export const LineExclusiveVisOptions = ({
   lineStyle,
   lineMode,
   lineWidth,
-  pointSize = DEFAULT_POINT_SIZE,
+  pointSize,
+  lineDashStyle,
   showValues = false,
   onAddTimeMarkerChange,
   onLineModeChange,
   onLineWidthChange,
   onLineStyleChange,
   onPointSizeChange,
+  onLineDashStyleChange,
   onShowValuesChange,
   shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
@@ -61,90 +56,32 @@ export const LineExclusiveVisOptions = ({
       initialIsOpen={true}
       data-test-subj="lineVisStyleAccordion"
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.linestyle', {
-          defaultMessage: 'Style',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.basic.linestyle', {
-            defaultMessage: 'Style',
-          })}
-          options={[
-            {
-              id: 'both',
-              label: i18n.translate('explore.stylePanel.basic.lineWithDots', {
-                defaultMessage: 'Default',
-              }),
-              'data-test-subj': 'lineStyle-both',
-            },
-            {
-              id: 'line',
-              label: i18n.translate('explore.stylePanel.basic.lineOnly', {
-                defaultMessage: 'Line only',
-              }),
-              'data-test-subj': 'lineStyle-line',
-            },
-            {
-              id: 'dots',
-              label: i18n.translate('explore.stylePanel.basic.dotsOnly', {
-                defaultMessage: 'Dots only',
-              }),
-              'data-test-subj': 'lineStyle-dots',
-            },
-          ]}
-          onChange={(optionId) => {
-            if (optionId === 'both' || optionId === 'line' || optionId === 'dots') {
-              onLineStyleChange(optionId as LineStyle);
-            }
-          }}
-          type="single"
-          idSelected={lineStyle}
-          buttonSize="compressed"
-          data-test-subj="lineStyleButtonGroup"
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-
-      {lineStyle === 'dots' && (
-        <>
-          <PointSizeOption
-            pointSize={pointSize}
-            onPointSizeChange={onPointSizeChange}
-            defaultValue={DEFAULT_POINT_SIZE}
-            testsubj="linePointSize"
-          />
-
-          <ShowValuesSwitch
-            showValues={showValues}
-            onShowValuesChange={onShowValuesChange}
-            testsubj="lineShowValues"
-          />
-
-          <EuiSpacer size="s" />
-        </>
-      )}
-
-      <InterpolationOption lineMode={lineMode} onLineModeChange={onLineModeChange} />
-
-      <LineWidthOption
+      <LineSharePanel
+        lineStyle={lineStyle}
+        lineDashStyle={lineDashStyle}
+        lineMode={lineMode}
         lineWidth={lineWidth}
+        pointSize={pointSize}
+        showValues={showValues}
+        onLineStyleChange={onLineStyleChange}
+        onLineDashStyleChange={onLineDashStyleChange}
+        onLineModeChange={onLineModeChange}
         onLineWidthChange={onLineWidthChange}
-        defaultValue={DEFAULT_LINE_WIDTH}
+        // Point size and show values only apply when dots are drawn.
+        onPointSizeChange={onPointSizeChange}
+        onShowValuesChange={onShowValuesChange}
+        testSubj="lineChartSharePanel"
       />
-
+      <EuiSpacer size="s" />
       {shouldShowTimeMarker && (
-        <>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
-              defaultMessage: 'Show current time marker',
-            })}
-            checked={addTimeMarker}
-            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-          />
-        </>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
+            defaultMessage: 'Show current time marker',
+          })}
+          checked={addTimeMarker}
+          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+        />
       )}
       <EuiSpacer size="s" />
     </StyleAccordion>

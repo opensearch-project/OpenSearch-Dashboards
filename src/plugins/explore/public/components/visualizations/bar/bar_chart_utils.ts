@@ -22,7 +22,7 @@ export const buildStackConfig = (styles: BarChartStyle) =>
   'stackMode' in styles && resolveStackMode(styles) === 'none' ? {} : { stack: 'total' };
 
 export const buildFillOpacity = (styles: BarChartStyle) =>
-  'fillOpacity' in styles ? (styles.fillOpacity ?? DEFAULT_BAR_FILL_OPACITY) / 100 : undefined;
+  'fillOpacity' in styles ? (styles.fillOpacity ?? DEFAULT_BAR_FILL_OPACITY) : undefined;
 
 export const buildBarRadius = ({
   barRadius,

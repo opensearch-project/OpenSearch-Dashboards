@@ -32,7 +32,7 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
-export const DEFAULT_BAR_FILL_OPACITY = 100;
+export const DEFAULT_BAR_FILL_OPACITY = 1;
 
 export interface BarChartStyleOptions {
   // Basic controls

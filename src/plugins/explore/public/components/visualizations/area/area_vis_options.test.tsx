@@ -88,7 +88,7 @@ describe('AreaVisStyleControls', () => {
       legendPosition: Positions.RIGHT,
       legendTitle: '',
       addTimeMarker: false,
-      areaOpacity: 30,
+      areaOpacity: 0.3,
       gradientMode: 'none' as const,
       // Threshold options
       thresholdOptions: {
@@ -354,7 +354,8 @@ describe('AreaVisStyleControls', () => {
     fireEvent.change(screen.getByTestId('areaFillOpacityRange'), { target: { value: '80' } });
 
     await waitFor(() => {
-      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ areaOpacity: 80 });
+      // Slider shows 0-100 but the value is stored as a 0-1 fraction.
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ areaOpacity: 0.8 });
     });
   });
 

@@ -6,7 +6,9 @@
 import { i18n } from '@osd/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiRange } from '@elastic/eui';
 import { useDebouncedNumber } from '../../utils/use_debounced_value';
-import { LineMode, LineDashStyle } from '../../types';
+import { LineMode, LineDashStyle, LineStyle } from '../../types';
+import { PointSizeOption } from './point_size_options';
+import { ShowValuesSwitch } from './value_label_options';
 
 export const DEFAULT_LINE_WIDTH = 2;
 export const MIN_LINE_WIDTH = 1;
@@ -42,17 +44,68 @@ const lineDashStyleOptions: Array<{ value: LineDashStyle; text: string }> = [
   },
 ];
 
+const lineStyleOptions: Array<{ id: LineStyle; label: string; ['data-test-subj']: string }> = [
+  {
+    id: 'both',
+    label: i18n.translate('explore.stylePanel.basic.lineWithDots', {
+      defaultMessage: 'Default',
+    }),
+    'data-test-subj': 'lineStyle-both',
+  },
+  {
+    id: 'line',
+    label: i18n.translate('explore.stylePanel.basic.lineOnly', {
+      defaultMessage: 'Line only',
+    }),
+    'data-test-subj': 'lineStyle-line',
+  },
+  {
+    id: 'dots',
+    label: i18n.translate('explore.stylePanel.basic.dotsOnly', {
+      defaultMessage: 'Dots only',
+    }),
+    'data-test-subj': 'lineStyle-dots',
+  },
+];
+
+interface LineStyleOptionProps {
+  lineStyle?: LineStyle;
+  onLineStyleChange: (lineStyle: LineStyle) => void;
+}
+
+export const LineStyleOption = ({ lineStyle, onLineStyleChange }: LineStyleOptionProps) => {
+  const label = i18n.translate('explore.stylePanel.basic.linestyle', {
+    defaultMessage: 'Line Style',
+  });
+
+  return (
+    <EuiFormRow label={label}>
+      <EuiButtonGroup
+        isFullWidth={true}
+        legend={i18n.translate('explore.stylePanel.basic.linestyleLegend', {
+          defaultMessage: 'Line Style',
+        })}
+        options={lineStyleOptions}
+        onChange={(optionId) => {
+          if (optionId === 'both' || optionId === 'line' || optionId === 'dots') {
+            onLineStyleChange(optionId as LineStyle);
+          }
+        }}
+        type="single"
+        idSelected={lineStyle ?? ''}
+        buttonSize="compressed"
+        data-test-subj="lineStyleButtonGroup"
+      />
+    </EuiFormRow>
+  );
+};
+
 interface InterpolationOptionProps {
   lineMode: LineMode;
   onLineModeChange: (lineMode: LineMode) => void;
-  isFullWidth?: boolean;
 }
 
-export const InterpolationOption = ({
-  lineMode,
-  onLineModeChange,
-  isFullWidth,
-}: InterpolationOptionProps) => {
+export const InterpolationOption = ({ lineMode, onLineModeChange }: InterpolationOptionProps) => {
   const label = i18n.translate('explore.stylePanel.basic.lineMode', {
     defaultMessage: 'Interpolation',
   });
@@ -69,7 +122,7 @@ export const InterpolationOption = ({
         idSelected={lineMode}
         onChange={(id) => onLineModeChange(id as LineMode)}
         buttonSize="compressed"
-        isFullWidth={isFullWidth}
+        isFullWidth={true}
         data-test-subj="lineModeButtonGroup"
       />
     </EuiFormRow>
@@ -85,10 +138,9 @@ interface LineDashStyleOptionProps {
 export const LineDashStyleOption = ({
   lineDashStyle,
   onLineDashStyleChange,
-  isFullWidth,
 }: LineDashStyleOptionProps) => {
   const label = i18n.translate('explore.stylePanel.basic.lineDashStyle', {
-    defaultMessage: 'Line style',
+    defaultMessage: 'Line Dash style',
   });
 
   return (
@@ -103,7 +155,7 @@ export const LineDashStyleOption = ({
         idSelected={lineDashStyle}
         onChange={(id) => onLineDashStyleChange(id as LineDashStyle)}
         buttonSize="compressed"
-        isFullWidth={isFullWidth}
+        isFullWidth={true}
         data-test-subj="lineDashStyleButtonGroup"
       />
     </EuiFormRow>
@@ -182,3 +234,86 @@ export const getLineDashType = (lineDashStyle?: LineDashStyle): 'solid' | number
       return 'solid';
   }
 };
+
+interface LineSharePanelProps {
+  lineStyle?: LineStyle;
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+
+  pointSize?: number;
+  showValues?: boolean;
+
+  onLineStyleChange?: (style: LineStyle) => void;
+  onLineDashStyleChange?: (lineDashStyle: LineDashStyle) => void;
+  onLineModeChange?: (lineMode: LineMode) => void;
+  onLineWidthChange?: (lineWidth: number) => void;
+  onPointSizeChange?: (pointSize: number) => void;
+  onShowValuesChange?: (showValues: boolean) => void;
+
+  isFullWidth?: boolean;
+  testSubj?: string;
+}
+
+/**
+ * Shared line configuration panel
+ * includes:
+ * 1. lineDashStyle
+ * 2. lineWidth
+ * 3. lineMode
+ * 4. pointSize
+ * 5. showValues
+ * 6. lineStyle
+ *
+ */
+export const LineSharePanel = ({
+  lineStyle,
+  lineDashStyle = 'solid',
+  lineMode = 'smooth',
+  lineWidth,
+  pointSize,
+  showValues,
+  onLineStyleChange,
+  onLineDashStyleChange,
+  onLineModeChange,
+  onLineWidthChange,
+  onPointSizeChange,
+  onShowValuesChange,
+  testSubj = 'lineSharePanel',
+}: LineSharePanelProps) => (
+  <>
+    {onLineStyleChange && (
+      <LineStyleOption lineStyle={lineStyle} onLineStyleChange={onLineStyleChange} />
+    )}
+    {lineStyle !== 'dots' && (
+      <>
+        {onLineDashStyleChange && (
+          <LineDashStyleOption
+            lineDashStyle={lineDashStyle}
+            onLineDashStyleChange={onLineDashStyleChange}
+          />
+        )}
+        {onLineModeChange && (
+          <InterpolationOption lineMode={lineMode} onLineModeChange={onLineModeChange} />
+        )}
+        {onLineWidthChange && (
+          <LineWidthOption lineWidth={lineWidth} onLineWidthChange={onLineWidthChange} />
+        )}
+      </>
+    )}
+    {onPointSizeChange && lineStyle !== 'line' && (
+      <PointSizeOption
+        pointSize={pointSize}
+        onPointSizeChange={onPointSizeChange}
+        testsubj={`${testSubj}PointSize`}
+      />
+    )}
+    {onShowValuesChange && (
+      <ShowValuesSwitch
+        showValues={showValues}
+        onShowValuesChange={onShowValuesChange}
+        testsubj={`${testSubj}ShowValues`}
+      />
+    )}
+  </>
+);
