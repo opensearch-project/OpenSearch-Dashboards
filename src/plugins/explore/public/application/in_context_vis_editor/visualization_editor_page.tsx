@@ -97,6 +97,8 @@ export const VisualizationEditorPage = ({
       if (savedVisConfig) {
         visualizationBuilderForEditor.setVisConfig({
           type: savedVisConfig.chartType,
+          title: savedVisConfig.title,
+          description: savedVisConfig.description,
           styles: savedVisConfig.params,
           axesMapping: savedVisConfig.axesMapping,
           splitField: savedVisConfig.splitField,

@@ -36,11 +36,13 @@ interface SaveVisModalProps {
   onConfirm: (props: OnSaveProps) => Promise<void>;
   onCancel: () => void;
   savedExploreId: string | undefined;
+  initialTitle?: string;
   showComplexQueryWarning?: boolean;
 }
 
 export const SaveVisModal: React.FC<SaveVisModalProps> = ({
   savedExploreId,
+  initialTitle,
   onConfirm,
   onCancel,
   showComplexQueryWarning,
@@ -51,7 +53,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
 
   const { savedExplore } = useSavedExplore(savedExploreId);
 
-  const [title, setTitle] = useState<string>(savedExplore?.title ?? '');
+  const [title, setTitle] = useState<string>(initialTitle ?? '');
 
   const enableButton = title !== '';
 
@@ -137,7 +139,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
               })}
             >
               <DebouncedFieldText
-                value={savedExplore?.title ?? ''}
+                value={title}
                 placeholder="Enter save search name"
                 onChange={(text: string) => {
                   setIsTitleDuplicate(false);

@@ -25,6 +25,8 @@ export interface SplitConfig {
 
 export interface ChartConfig extends SplitConfig {
   type: ChartType;
+  title?: string;
+  description?: string;
   styles?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
   dataTransformations?: UrlTransformationState[];

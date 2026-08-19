@@ -87,7 +87,11 @@ const mockSavedExplore = {
 
 const buildVisualizationBuilder = () => ({
   visualizationBuilderForEditor: {
-    visConfig$: { value: { type: 'bar', styles: {}, axesMapping: { x: 'field' } } },
+    visConfig$: new BehaviorSubject({
+      type: 'bar',
+      styles: {},
+      axesMapping: { x: 'field' },
+    }),
     isVisDirty$: new BehaviorSubject(false),
     getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
   },
