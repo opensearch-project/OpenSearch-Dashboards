@@ -991,12 +991,19 @@ describe('ExploreEmbeddable', () => {
       );
 
       expect(emb.getDescription()).toBe('Logs for initial');
+      const outputListener = jest.fn();
+      const outputSubscription = emb.getOutput$().subscribe(outputListener);
+      outputListener.mockClear();
 
       environment = 'production';
       parent.variables$.next([{ id: 'env', value: 'production' }]);
 
       expect(emb.getDescription()).toBe('Logs for production');
+      expect(outputListener).toHaveBeenCalledWith(
+        expect.objectContaining({ description: 'Logs for production' })
+      );
 
+      outputSubscription.unsubscribe();
       emb.destroy();
       parent.destroy();
     });

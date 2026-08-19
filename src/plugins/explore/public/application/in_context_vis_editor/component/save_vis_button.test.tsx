@@ -13,6 +13,7 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ChartConfig } from '../../../components/visualizations/visualization_builder.types';
 
 jest.mock('../hooks/use_query_builder_state', () => ({
   useQueryBuilderState: jest.fn(),
@@ -82,16 +83,19 @@ const buildServices = () => ({
 const mockSavedExplore = {
   id: 'explore-1',
   title: 'My Explore',
+  visualization: '',
   save: jest.fn().mockResolvedValue('explore-1'),
 };
 
-const buildVisualizationBuilder = () => ({
+const buildVisualizationBuilder = (
+  visConfig: ChartConfig = {
+    type: 'bar',
+    styles: {},
+    axesMapping: { x: 'field' },
+  }
+) => ({
   visualizationBuilderForEditor: {
-    visConfig$: new BehaviorSubject({
-      type: 'bar',
-      styles: {},
-      axesMapping: { x: 'field' },
-    }),
+    visConfig$: new BehaviorSubject(visConfig),
     isVisDirty$: new BehaviorSubject(false),
     getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
   },
@@ -152,9 +156,22 @@ describe('SaveVisButton', () => {
     });
   });
 
-  it('saves directly without modal for existing explore when dirty', async () => {
+  it('serializes panel settings when saving an existing visualization', async () => {
+    const savedExplore = {
+      ...mockSavedExplore,
+      save: jest.fn().mockResolvedValue('explore-1'),
+    };
     (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
-    (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: mockSavedExplore });
+    (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore });
+    (useVisualizationBuilder as jest.Mock).mockReturnValue(
+      buildVisualizationBuilder({
+        type: 'bar',
+        styles: {},
+        axesMapping: { x: 'field' },
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
     (useQueryBuilderState as jest.Mock).mockReturnValue({
       queryEditorState: {
         isQueryEditorDirty: true,
@@ -168,8 +185,14 @@ describe('SaveVisButton', () => {
     fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
 
     await waitFor(() => {
-      expect(mockSavedExplore.save).toHaveBeenCalled();
+      expect(savedExplore.save).toHaveBeenCalled();
     });
+    expect(JSON.parse(savedExplore.visualization)).toEqual(
+      expect.objectContaining({
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
   });
 
   it('discards and navigates to originatingApp when originatingApp is set', () => {

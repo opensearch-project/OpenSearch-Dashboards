@@ -640,6 +640,20 @@ describe('VisualizationBuilder', () => {
     expect(builder.visConfig$.value?.type).toBe('heatmap');
   });
 
+  test('should preserve panel settings when chart type changes', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({
+      type: 'bar',
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+
+    builder.setCurrentChartType('line');
+
+    expect(builder.visConfig$.value?.title).toBe('Panel title');
+    expect(builder.visConfig$.value?.description).toBe('Panel description');
+  });
+
   test('should reset vis state', () => {
     const builder = new VisualizationBuilder({});
     builder.setVisConfig({
