@@ -6,6 +6,7 @@
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { Threshold } from '../types';
+import { resolveThresholds } from '../utils/utils';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { DEFAULT_GREY, getColors } from '../theme/default_colors';
 import { getUnitById } from '../style_panel/unit/collection';
@@ -77,13 +78,20 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     const max = styles.max ?? Math.max(maxNumber, 0);
     const invalid = min >= max;
 
+    const effectiveMin = invalid ? 0 : min;
+    const effectiveMax = invalid ? 100 : max;
+
     return {
-      minBase: invalid ? 0 : min,
-      maxBase: invalid ? 100 : max,
+      minBase: effectiveMin,
+      maxBase: effectiveMax,
       isInvalid: invalid,
       baseColor: styles.thresholdOptions.baseColor ?? getColors().statusGreen,
       selectedUnit: getUnitById(styles.unitId),
-      rawThresholds: styles.thresholdOptions.thresholds ?? [],
+      rawThresholds: resolveThresholds(
+        styles.thresholdOptions.thresholds,
+        styles.thresholdOptions.thresholdMode,
+        { min: effectiveMin, max: effectiveMax }
+      ),
     };
   }, [data, styles]);
 

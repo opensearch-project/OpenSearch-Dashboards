@@ -15,6 +15,7 @@ import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { EchartsRender } from '../echarts_render';
 import { darkenHexColor, getContrastTextColor, normalizeHexColor } from '../utils/color';
 import { constrainFontSizeByWidth } from './metric_utils';
+import { resolveThresholds } from '../utils/utils';
 
 import './metric_component.scss';
 
@@ -158,7 +159,15 @@ function calculateMetricTextData(
   const selectedUnit = getUnitById(styles?.unitId);
 
   // Determine threshold-based color
-  const thresholds = styles.thresholdOptions?.thresholds ?? [];
+  const finiteValues = numericalValues.map((v) => Number(v)).filter((n) => Number.isFinite(n));
+  const metricRange = finiteValues.length
+    ? { min: Math.min(...finiteValues), max: Math.max(...finiteValues) }
+    : undefined;
+  const thresholds = resolveThresholds(
+    styles.thresholdOptions?.thresholds,
+    styles.thresholdOptions?.thresholdMode,
+    metricRange
+  );
   const baseColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
   const thresholdColor = getThresholdColor(calculatedValue, thresholds, baseColor);
 

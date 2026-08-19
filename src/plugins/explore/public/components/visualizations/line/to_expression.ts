@@ -13,6 +13,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   applyTimeRange,
+  buildDataRange,
 } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
@@ -44,6 +45,9 @@ export const createSimpleLineChart = (
     createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
     applyTimeRange,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+    }),
     createLineSeries({
       styles,
       categoryField: timeField,
@@ -93,6 +97,9 @@ export const createLineBarChart = (
     }),
     buildAxisConfigs,
     applyTimeRange,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+    }),
     createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
     assembleSpec
   )({
@@ -142,6 +149,9 @@ export const createMultiLineChart = (
     }),
     buildAxisConfigs,
     applyTimeRange,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+    }),
     createLineSeries({
       styles,
       categoryField: timeField,
@@ -182,6 +192,9 @@ export const createCategoryLineChart = (
       legend: { show: false },
     }),
     buildAxisConfigs,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+    }),
     createLineSeries({
       styles,
       categoryField,
@@ -229,6 +242,9 @@ export const createCategoryMultiLineChart = (
       legend: { show: false },
     }),
     buildAxisConfigs,
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
+    }),
     createLineSeries({
       styles,
       categoryField: cateField,

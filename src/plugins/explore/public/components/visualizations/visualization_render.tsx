@@ -49,7 +49,15 @@ const defaultStyleOptions: TableChartStyle = {
   globalAlignment: 'left',
 };
 
-const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+const CUSTOM_LEGEND_CHART_TYPES = [
+  'area',
+  'line',
+  'bar',
+  'pie',
+  'scatter',
+  'state_timeline',
+  'heatmap',
+];
 
 export const CommonVisualizationRender = ({
   visualizationData,
@@ -66,6 +74,7 @@ export const CommonVisualizationRender = ({
   ).current;
   const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
   const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
+  const supportShowOneLegend = ['heatmap', 'state_timeline'].includes(visConfig?.type ?? '');
 
   useEffect(() => {
     if (!supportsCustomLegend) {
@@ -163,6 +172,7 @@ export const CommonVisualizationRender = ({
         legendSelected$={legendSelected$}
         highlightedLegendTarget$={highlightedLegendTarget$}
         position={legendPosition}
+        supportShowOneLegend={supportShowOneLegend}
       />
     );
 
