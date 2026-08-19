@@ -54,6 +54,7 @@ const defaultStyleOptions: TableChartStyle = {
 const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
 const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
 const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
+const SUPPORT_ONE_LEGEND = ['heatmap', 'state_timeline'];
 
 export const CommonVisualizationRender = ({
   visualizationData,
@@ -76,6 +77,7 @@ export const CommonVisualizationRender = ({
   )
     ? COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH
     : undefined;
+  const supportShowOneLegend = SUPPORT_ONE_LEGEND.includes(visConfig?.type ?? '');
 
   useEffect(() => {
     if (!supportsCustomLegend) {
@@ -173,6 +175,7 @@ export const CommonVisualizationRender = ({
         legendSelected$={legendSelected$}
         highlightedLegendTarget$={highlightedLegendTarget$}
         position={legendPosition}
+        supportShowOneLegend={supportShowOneLegend}
       />
     );
 

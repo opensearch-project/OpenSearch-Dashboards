@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiColorPicker,
 } from '@elastic/eui';
-import { Threshold } from '../../types';
+import { Threshold, ThresholdValueMode } from '../../types';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { getColors } from '../../theme/default_colors';
 import { DebouncedFieldNumber } from '../utils';
@@ -22,8 +22,9 @@ import { DebouncedFieldNumber } from '../utils';
 export interface RangeProps {
   id: number;
   value: Threshold;
-  onChange: (id: number, value: Threshold) => void;
-  onDelete: (id: number) => void;
+  onChange: (index: number, value: Threshold) => void;
+  onDelete: (index: number) => void;
+  isPercentage?: boolean;
 }
 
 const colors = getColors();
@@ -35,7 +36,7 @@ const THRESHOLD_COLORS = [
   colors.statusBlue,
 ];
 
-export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) => {
+export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete, isPercentage }) => {
   const [color, setDebouncedColor] = useDebouncedValue<string>(
     value.color,
     (val) => onChange(id, { ...value, color: val }),
@@ -70,6 +71,7 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
           defaultValue={0}
           onChange={(val) => onChange(id, { ...value, value: val ?? 0 })}
           placeholder="Value"
+          prepend={isPercentage ? '%' : undefined}
           data-test-subj={`exploreVisThresholdValue-${id}`}
         />
       </EuiFlexItem>
@@ -93,6 +95,7 @@ export interface ThresholdCustomValuesProps {
   onThresholdValuesChange: (ranges: Threshold[]) => void;
   baseColor: string;
   onBaseColorChange: (color: string) => void;
+  thresholdMode?: ThresholdValueMode;
 }
 
 interface ThresholdRange {
@@ -105,12 +108,14 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   onThresholdValuesChange,
   baseColor,
   onBaseColorChange,
+  thresholdMode,
 }) => {
   const initialThresholds = thresholds || [];
   const nextIdRef = useRef(initialThresholds.length);
   const [ranges, setRanges] = useState<ThresholdRange[]>(() =>
     initialThresholds.map((threshold, id) => ({ id, threshold }))
   );
+  const isPercentage = thresholdMode === 'percentage';
 
   const debouncedSortTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -146,8 +151,9 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 
   const handleAddRange = useCallback(() => {
     const curRangeLength = ranges.length;
+    const step = isPercentage ? 10 : 100;
     const newDefaultValue =
-      curRangeLength > 0 ? Number(ranges[curRangeLength - 1].threshold.value) + 100 : 0;
+      curRangeLength > 0 ? Number(ranges[curRangeLength - 1].threshold.value) + step : 0;
     const newRange = {
       id: nextIdRef.current++,
       threshold: { value: newDefaultValue, color: getNextColor(curRangeLength + 1) },
@@ -156,7 +162,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
     const updated = [...ranges, newRange];
     setRanges(updated);
     onThresholdValuesChange(updated.map((range) => range.threshold));
-  }, [ranges, onThresholdValuesChange]);
+  }, [ranges, onThresholdValuesChange, isPercentage]);
 
   const getNextColor = (rangesLength: number): string => {
     const index = rangesLength % THRESHOLD_COLORS.length;
@@ -231,6 +237,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
             value={range.threshold}
             onChange={handleRangeChange}
             onDelete={handleDeleteRange}
+            isPercentage={isPercentage}
           />
         );
       })}

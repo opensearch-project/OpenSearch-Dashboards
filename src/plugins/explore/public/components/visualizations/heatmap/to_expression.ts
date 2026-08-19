@@ -14,6 +14,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  buildDataRange,
 } from '../utils/echarts_spec';
 import { convertTo2DArray, aggregateByGroups, transform } from '../utils/data_transformation';
 
@@ -45,6 +46,7 @@ export const createRegularHeatmap = (
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
+    buildDataRange({ seriesFields: [colorCol.column] }),
     buildVisMap({
       seriesFields: (headers) =>
         (headers ?? []).filter((h) => h !== yCol.column && h !== xCol.column),
@@ -63,5 +65,5 @@ export const createRegularHeatmap = (
     axisColumnMappings,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

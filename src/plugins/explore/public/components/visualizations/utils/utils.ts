@@ -16,6 +16,8 @@ import {
   ThresholdOptions,
   ThresholdMode,
   StackMode,
+  ThresholdValueMode,
+  DataRange,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 import { BaseChartStyle, PipelineFn } from './echarts_spec';
@@ -242,17 +244,131 @@ const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
   return style;
 };
 
-const generateThresholdSteps = (thresholds: Threshold[] | undefined) => {
+/**
+ * Compute the [min, max] of the series data, used to resolve percentage
+ * thresholds into absolute value.
+ *
+ *
+ * Stack mode:
+ *   - not stacked: range comes from individual series values (per-series min/max).
+ *   - stacked:     range comes from multi-series sum.
+ *
+ */
+export const computeDataRange = (
+  data: any[] | undefined,
+  fields: string[],
+  stacked = false
+): DataRange | undefined => {
+  if (!Array.isArray(data) || data.length < 2 || !Array.isArray(data[0])) {
+    return undefined;
+  }
+
+  const toFinite = (v: unknown): number | undefined => {
+    const n = typeof v === 'number' ? v : Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
+  const header = data[0] as string[];
+  const [, ...rows] = data;
+
+  const colIndexes = fields.map((f) => header.indexOf(f)).filter((i) => i >= 0);
+
+  if (colIndexes.length === 0) return undefined;
+
+  let min = Infinity;
+  let max = -Infinity;
+
+  let stackMin = Infinity;
+  let stackMax = -Infinity;
+
+  for (const row of rows) {
+    if (stacked && colIndexes.length > 1) {
+      let sum = 0;
+      let hasSum = false;
+      for (const index of colIndexes) {
+        const value = toFinite(row[index]);
+        if (value !== undefined) {
+          sum += value;
+          hasSum = true;
+        }
+      }
+      if (hasSum) {
+        if (sum < stackMin) stackMin = sum;
+        if (sum > stackMax) stackMax = sum;
+      }
+    }
+    for (const index of colIndexes) {
+      const value = toFinite(row[index]);
+      if (value !== undefined) {
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
+    }
+  }
+
+  if (min === Infinity || max === -Infinity) return undefined;
+  // min/max are for individual series values — used to color stacked-bar segments by their own value.
+  // stackMin/stackMax are the multi-series stacked totals — used to position a markLine for stack chart
+  return stacked && stackMin !== Infinity && stackMax !== -Infinity
+    ? { min, max, stackMin, stackMax }
+    : { min, max };
+};
+
+/**
+ * Resolve one percentage threshold's value into an absolute value.
+ */
+export const resolveThresholdValue = (
+  value: number,
+  mode: ThresholdValueMode | undefined,
+  range: DataRange | undefined
+): number => {
+  if (mode !== 'percentage' || !range) return value;
+  return range.min + (value / 100) * (range.max - range.min);
+};
+
+export const resolveThresholds = (
+  thresholds: Threshold[] | undefined,
+  mode: ThresholdValueMode | undefined,
+  range: DataRange | undefined
+): Threshold[] =>
+  (thresholds ?? []).map((t) => ({
+    ...t,
+    value: resolveThresholdValue(t.value, mode, range),
+  }));
+
+const generateThresholdSteps = (
+  thresholds: Threshold[] | undefined,
+  mode?: ThresholdValueMode,
+  range?: DataRange,
+  valueAxis: 'x' | 'y' = 'y'
+) => {
+  const axisKey = valueAxis === 'x' ? 'xAxis' : 'yAxis';
+  const lineRange =
+    range && range.stackMin !== undefined && range.stackMax !== undefined
+      ? { min: Math.min(range.stackMin, range.min), max: Math.max(range.stackMax, range.max) }
+      : range;
   return thresholds?.map((t) => ({
-    yAxis: t.value,
+    // in percentage mode, transform to absolute value
+    [axisKey]: resolveThresholdValue(t.value, mode, lineRange),
     itemStyle: { color: t.color },
+    //  for markline label
+    thresholdValue: t.value,
   }));
 };
 
-export const generateThresholdLines = (thresholdOptions: ThresholdOptions) => {
+export const generateThresholdLines = (
+  thresholdOptions: ThresholdOptions,
+  dataRange?: DataRange,
+  valueAxis: 'x' | 'y' = 'y'
+) => {
   if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
 
-  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds);
+  const ThresholdSteps = generateThresholdSteps(
+    thresholdOptions.thresholds,
+    thresholdOptions.thresholdMode,
+    dataRange,
+    valueAxis
+  );
 
   return {
     markLine: {
@@ -263,13 +379,26 @@ export const generateThresholdLines = (thresholdOptions: ThresholdOptions) => {
         width: 1,
         type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
       },
+      label: {
+        position: 'insideEndTop',
+        formatter: (params: any) => {
+          const raw = params?.data?.thresholdValue ?? params.value;
+          return thresholdOptions.thresholdMode === 'percentage' ? `${raw} %` : raw;
+        },
+        align: 'right',
+      },
       data: ThresholdSteps,
     },
   };
 };
 
 // return a combined markline with threshold lines and time marker
-export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+export const composeMarkLine = (
+  thresholdOptions: ThresholdOptions,
+  addTimeMarker: boolean,
+  dataRange?: DataRange,
+  valueAxis: 'x' | 'y' = 'y'
+) => {
   const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
 
   if (!hasThresholds && !addTimeMarker) return {};
@@ -277,7 +406,13 @@ export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarke
   const data = [];
 
   if (hasThresholds) {
-    const thresholdSteps = generateThresholdSteps(thresholdOptions?.thresholds) ?? [];
+    const thresholdSteps =
+      generateThresholdSteps(
+        thresholdOptions?.thresholds,
+        thresholdOptions?.thresholdMode,
+        dataRange,
+        valueAxis
+      ) ?? [];
     data.push(...thresholdSteps);
   }
 
@@ -298,6 +433,14 @@ export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarke
         width: 2,
         type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
       },
+      label: {
+        position: 'insideEndTop',
+        formatter: (params: any) => {
+          const raw = params?.data?.thresholdValue ?? params.value;
+          return thresholdOptions.thresholdMode === 'percentage' ? `${raw} %` : raw;
+        },
+        align: 'right',
+      },
       data,
     },
   };
@@ -309,7 +452,7 @@ export const getValueColorByThreshold = (value: number, thresholdOptions: Thresh
   let curr = -Infinity;
 
   for (const threshold of thresholds) {
-    if (value > curr && value > threshold.value) {
+    if (value > curr && value >= threshold.value) {
       color = threshold.color;
       curr = threshold.value;
     }

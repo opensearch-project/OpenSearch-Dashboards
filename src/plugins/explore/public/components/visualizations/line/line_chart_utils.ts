@@ -62,7 +62,13 @@ export const createLineSeries =
     colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { xAxisConfig, transformedData = [], axisColumnMappings, seriesDisplayNames } = state;
+    const {
+      xAxisConfig,
+      transformedData = [],
+      axisColumnMappings,
+      seriesDisplayNames,
+      dataRange,
+    } = state;
     const palette = getColors().categories;
     const newState = { ...state };
     const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
@@ -108,7 +114,8 @@ export const createLineSeries =
           focus: 'self',
         },
         ...generateLineStyles(styles, item),
-        ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
+        ...(index === 0 &&
+          composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker, dataRange)),
         itemStyle: {
           color,
         },
@@ -134,7 +141,7 @@ export const createLineBarSeries =
     categoryField: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { xAxisConfig, axisColumnMappings } = state;
+    const { xAxisConfig, axisColumnMappings, dataRange } = state;
     const newState = { ...state };
     const palette = getColors().categories;
     const allColumns = Object.values(axisColumnMappings).flat();
@@ -167,7 +174,7 @@ export const createLineBarSeries =
             color,
           },
           ...generateLineStyles(styles, field),
-          ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+          ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker, dataRange),
           yAxisIndex: 0,
           encode: {
             x: categoryField,

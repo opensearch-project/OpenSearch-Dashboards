@@ -19,6 +19,7 @@ import {
   buildVisMap,
   applyTimeRange,
   addTooltipFormatter,
+  buildDataRange,
 } from '../utils/echarts_spec';
 import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
@@ -67,6 +68,11 @@ export const createSimpleAreaChart = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     applyTimeRange,
     createAreaSeries({
       styles,
@@ -126,6 +132,11 @@ export const createMultiAreaChart = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     applyTimeRange,
     addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildVisMap({
@@ -183,6 +194,11 @@ export const createCategoryAreaChart = (
     buildAxisConfigs,
     applyPercentageAxis(styles),
     addTooltipFormatter(axisDisplayNameTooltipFormatter),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     createAreaSeries({
       styles,
       categoryField,
@@ -236,8 +252,10 @@ export const createStackedAreaChart = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
-    buildVisMap({
+    buildDataRange({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
     }),
     createAreaSeries({
       styles,
