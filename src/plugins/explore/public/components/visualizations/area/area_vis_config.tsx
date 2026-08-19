@@ -86,7 +86,7 @@ const defaultAreaChartStyles: AreaChartStyle = {
 
   standardAxes: [],
 
-  showFullTimeRange: false,
+  showFullTimeRange: true,
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

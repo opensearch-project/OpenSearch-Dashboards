@@ -98,7 +98,7 @@ export const defaultBarChartStyles: BarChartStyle = {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
   },
-  showFullTimeRange: false,
+  showFullTimeRange: true,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

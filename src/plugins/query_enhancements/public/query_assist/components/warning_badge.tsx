@@ -15,13 +15,18 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../data/public';
 import { AgentError } from '../utils';
+import { AskT2pplErrorButton } from './ask_t2ppl_error_button';
 
 interface WarningBadgeProps {
   error: AgentError | undefined;
+  question?: string;
 }
 
 export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
+  const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
@@ -38,6 +43,8 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
   const {
     error: { error, status },
   } = props.error;
+
+  const chatAvailable = services.chat?.isAvailable?.() ?? false;
 
   return (
     <div className="queryAssist__popoverWrapper">
@@ -124,19 +131,36 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
                 </dd>
               </>
             )}
-            <EuiLink onClick={() => setShowMore(!showMore)} data-test-subj="queryAssistErrorMore">
-              {showMore ? (
-                <FormattedMessage
-                  id="queryEnhancements.queryAssist.error.viewLess"
-                  defaultMessage="View Less"
-                />
-              ) : (
-                <FormattedMessage
-                  id="queryEnhancements.queryAssist.error.viewMore"
-                  defaultMessage="View More"
-                />
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  onClick={() => setShowMore(!showMore)}
+                  data-test-subj="queryAssistErrorMore"
+                >
+                  {showMore ? (
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.viewLess"
+                      defaultMessage="View Less"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.viewMore"
+                      defaultMessage="View More"
+                    />
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+              {chatAvailable && (
+                <EuiFlexItem grow={false}>
+                  <AskT2pplErrorButton
+                    chatService={services.chat}
+                    error={props.error}
+                    question={props.question}
+                    testSource="queryAssistGenerationErrorBadgeAskAiForHelp"
+                  />
+                </EuiFlexItem>
               )}
-            </EuiLink>
+            </EuiFlexGroup>
           </dl>
         </EuiText>
       </EuiPopover>

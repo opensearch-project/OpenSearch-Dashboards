@@ -16,13 +16,13 @@ import React, {
 import { useUnmount, useMount } from 'react-use';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
-import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ConfirmationRequest } from '../services/confirmation_service';
 import { type Event as ChatEvent } from '../../common/events';
-import type { Message, SystemMessage, UserMessage } from '../../common/types';
+import type { InputContent, Message, SystemMessage, UserMessage } from '../../common/types';
 import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
@@ -38,11 +38,16 @@ import type { SavedConversation } from '../services/conversation_history_service
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
 import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
+
+import { flattenContentText } from '../utils/user_message_input';
 import './chat_window.scss';
 
 export interface ChatWindowInstance {
   startNewChat: () => void;
-  sendMessage: (options: { content: string; messages?: Message[] }) => Promise<unknown>;
+  sendMessage: (options: {
+    content: string | InputContent[];
+    messages?: Message[];
+  }) => Promise<unknown>;
 }
 
 interface ChatWindowProps {
@@ -74,6 +79,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const [isLoading, setIsLoading] = useState(false);
     const handleSendRef = useRef<typeof handleSend>();
     const currentSubscriptionRef = useRef<any>(null);
+    const chatInputRef = useRef<HTMLTextAreaElement>(null);
     const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
     const { screenshotFeatureEnabled, isCapturing, capturePageContainer } =
       usePageContainerCapture();
@@ -113,9 +119,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     const timelineRef = React.useRef<Message[]>(timeline);
 
-    React.useEffect(() => {
-      timelineRef.current = timeline;
-    }, [timeline]);
+    // Wrap setTimeline so timelineRef updates synchronously within the updater, before React renders.
+    const setTimelineSynced = useCallback(
+      (updater: Message[] | ((prev: Message[]) => Message[])) => {
+        setTimeline((prev) => {
+          const next = typeof updater === 'function' ? updater(prev) : updater;
+          timelineRef.current = next;
+          return next;
+        });
+      },
+      []
+    );
 
     // Subscribe to pending confirmations
     useEffect(() => {
@@ -146,13 +160,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           confirmationService,
           telemetryRecorder,
           callbacks: {
-            onTimelineUpdate: setTimeline,
+            onTimelineUpdate: setTimelineSynced,
             onStreamingStateChange: setIsStreaming,
             onStartResponse: setStartResponse,
             getTimeline: () => timelineRef.current,
           },
         }),
-      [service, chatService, confirmationService, telemetryRecorder]
+      [service, chatService, confirmationService, telemetryRecorder, setTimelineSynced]
     );
 
     // Subscribe to tool updates from the service
@@ -243,7 +257,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setIsStreaming(true);
         setStartResponse(false);
 
-        const content = userMessage.content as string;
+        const content = flattenContentText(userMessage.content);
 
         try {
           const { observable } = await chatService.sendMessage(content, messages, userMessage);
@@ -318,10 +332,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           };
           if (pendingUserMessage) {
             // User message already in timeline (data source selection flow) — append response
-            setTimeline((prev) => [...prev, responseMsg]);
+            setTimelineSynced((prev) => [...prev, responseMsg]);
           } else {
             const userMsg = chatService.getUserMessage(messageContent);
-            setTimeline((prev) => [...prev, userMsg, responseMsg]);
+            setTimelineSynced((prev) => [...prev, userMsg, responseMsg]);
           }
           setScreenshotData(undefined);
           return true;
@@ -330,18 +344,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
           if (pendingUserMessage) {
             // Replace the pending user message (by id) with the resolved command message
-            setTimeline((prev) =>
+            setTimelineSynced((prev) =>
               prev.map((msg) => (msg.id === pendingUserMessage.id ? userMsg : msg))
             );
           } else {
-            setTimeline((prev) => [...prev, userMsg]);
+            setTimelineSynced((prev) => [...prev, userMsg]);
           }
           subscribeToMessageStream(messagesToSend, userMsg);
           return true;
         }
         return true;
       },
-      [chatService, subscribeToMessageStream]
+      [chatService, subscribeToMessageStream, setTimelineSynced]
     );
 
     // Handler for when user selects a data source from the prompt
@@ -388,7 +402,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               defaultMessage: 'The current data source does not support AI features.',
             }),
           };
-          setTimeline((prev) => [...prev, systemMsg]);
+          setTimelineSynced((prev) => [...prev, systemMsg]);
           return { valid: false, reason: 'unsupported' };
         }
 
@@ -415,38 +429,47 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                 'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
             }),
           };
-          setTimeline((prev) => [...prev, infoMsg]);
+          setTimelineSynced((prev) => [...prev, infoMsg]);
           return { valid: false, reason: 'no_data_sources' };
         }
 
         return { valid: true };
       },
-      [chatService, isUnsupportedDataSource]
+      [chatService, setTimelineSynced, isUnsupportedDataSource]
     );
 
-    const handleSend = async (options?: { input?: string; messages?: Message[] }) => {
-      const messageContent = options?.input ?? input.trim();
+    const handleSend = async (options?: {
+      input?: string | InputContent[];
+      messages?: Message[];
+    }) => {
+      let messageContent: string | InputContent[] = options?.input ?? input.trim();
+
+      const isEmpty = Array.isArray(messageContent) ? messageContent.length === 0 : !messageContent;
       // Use ref for immediate check since React 18 batches state updates
-      if (!messageContent || isStreamingRef.current || isValidatingRef.current || hasPendingResend)
-        return;
+      if (isEmpty || isStreamingRef.current || isValidatingRef.current || hasPendingResend) return;
 
       // Prepare additional messages for sending (but don't add to timeline yet)
-      let additionalMessages = options?.messages ?? [];
-
+      const additionalMessages = options?.messages ?? [];
       // Only add screenshot data if messages not provided
-      if (!options?.messages && screenshotData) {
-        additionalMessages = [
+      if (!options?.input && typeof messageContent === 'string' && screenshotData) {
+        messageContent = [
+          // {
+          //   type: 'image',
+          //   source: {
+          //     type: 'data',
+          //     value: screenshotData.base64,
+          //     mimeType: screenshotData.mimeType,
+          //   },
+          // },
+
+          // binary is deprecated
+          // change to image when strands is introduced.
           {
-            role: 'user' as const,
-            id: chatService.generateMessageId(),
-            content: [
-              {
-                type: 'binary' as const,
-                mimeType: screenshotData.mimeType,
-                data: screenshotData.base64,
-              },
-            ],
+            type: 'binary' as const,
+            mimeType: screenshotData.mimeType,
+            data: screenshotData.base64,
           },
+          { type: 'text' as const, text: messageContent },
         ];
       }
 
@@ -454,7 +477,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Show user message immediately (optimistic rendering)
       const userMsg = chatService.getUserMessage(messageContent);
-      setTimeline((prev) => [...prev, userMsg]);
+      setTimelineSynced((prev) => [...prev, userMsg]);
 
       // Merge additional messages with current timeline for sending
       const messagesToSend = [...timeline, ...additionalMessages];
@@ -469,10 +492,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         // Check if this is a slash command — pass userMsg so executeSlashCommand
         // can replace it (by id) with the resolved command message.
-        const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
-        if (handled) return;
+        if (typeof messageContent === 'string') {
+          const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
+          if (handled) return;
+        }
 
-        // Normal message flow — user message already in timeline, just stream
+        // Normal message flow — the content can be multimodal
         return subscribeToMessageStream(messagesToSend, userMsg);
       } finally {
         isValidatingRef.current = false;
@@ -502,21 +527,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         if (messageIndex === -1) return;
 
-        let textContent = typeof message.content === 'string' ? message.content : '';
-        const additionalMessages: Message[] = [];
-
-        if (Array.isArray(message.content)) {
-          const lastMessageContent = message.content[message.content.length - 1];
-          if (lastMessageContent.type === 'text') {
-            textContent = lastMessageContent.text;
-            additionalMessages.push({
-              ...message,
-              content: message.content.slice(0, message.content.length - 1),
-            });
-          }
-        }
-
-        if (textContent === '') {
+        const content = message.content;
+        const isEmpty = Array.isArray(content) ? content.length === 0 : !content;
+        if (isEmpty) {
           return;
         }
 
@@ -527,11 +540,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setInput('');
 
         // Add user message back and stream
-        const userMsg = chatService.getUserMessage(textContent);
-        setTimeline([...truncatedTimeline, userMsg]);
-        subscribeToMessageStream([...truncatedTimeline, ...additionalMessages], userMsg);
+        const userMsg = chatService.getUserMessage(content);
+        setTimelineSynced([...truncatedTimeline, userMsg]);
+        subscribeToMessageStream(truncatedTimeline, userMsg);
       },
-      [timeline, subscribeToMessageStream, setInput, chatService]
+      [timeline, subscribeToMessageStream, setInput, setTimelineSynced, chatService]
     );
 
     const handleResendToolResult = useCallback(
@@ -547,10 +560,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         // Avoid concurrent resends while streaming or already sending a tool result
         if (isStreamingRef.current || hasActiveToolCallsRef.current) return;
         // Remove the error message from timeline
-        setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
+        setTimelineSynced((prev) => prev.filter((msg) => msg.id !== messageId));
         await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
       },
-      [eventHandler, setTimeline]
+      [eventHandler, setTimelineSynced]
     );
 
     // Helper function to stop streaming and clean up subscriptions
@@ -582,7 +595,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       eventHandler.clearState();
 
       chatService.newThread();
-      setTimeline([]);
+      setTimelineSynced([]);
       setCurrentRunId(null);
       setPendingConfirmation(null);
       setPendingMessage(null);
@@ -591,7 +604,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsValidating(false);
       confirmationService.cleanAll();
       setShowHistory(false);
-    }, [chatService, confirmationService, eventHandler, stopStreaming]);
+    }, [chatService, confirmationService, eventHandler, stopStreaming, setTimelineSynced]);
 
     const handleStop = useCallback(() => {
       stopStreaming();
@@ -787,7 +800,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               onResendToolResult={handleResendToolResult}
               onApproveConfirmation={handleApproveConfirmation}
               onRejectConfirmation={handleRejectConfirmation}
-              onFillInput={setInput}
+              onFillInput={(content) => {
+                setInput(content);
+                chatInputRef.current?.focus();
+                telemetryRecorder?.recordEvent({ name: 'suggestion_click', data: {} });
+              }}
               inputValue={input}
               onRemoveInput={(content: string) =>
                 setInput((prev) => prev.replace(content, '').trim())
@@ -847,6 +864,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             )}
 
             <ChatInput
+              ref={chatInputRef}
               layoutMode={layoutMode}
               input={input}
               isCapturing={isCapturing}
@@ -883,6 +901,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               onKeyDown={handleKeyDown}
               includeScreenShotEnabled={screenshotFeatureEnabled}
               onCaptureScreenshot={handleCaptureScreenshot}
+              ownFocus={chatService?.getShouldAutoFocusInput?.() ?? false}
             />
           </ChatSessionErrorBoundary>
         )}

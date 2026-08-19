@@ -52,6 +52,7 @@ interface ErrorToastProps {
   toastMessage: string;
   openModal: OverlayStart['openModal'];
   i18nContext: () => I18nStart['Context'];
+  extraAction?: React.ReactNode;
 }
 
 interface RequestError extends Error {
@@ -127,6 +128,7 @@ export function ErrorToast({
   toastMessage,
   openModal,
   i18nContext,
+  extraAction,
 }: ErrorToastProps) {
   return (
     <React.Fragment>
@@ -142,6 +144,7 @@ export function ErrorToast({
             defaultMessage="See the full error"
           />
         </EuiButton>
+        {extraAction}
       </div>
     </React.Fragment>
   );

@@ -31,6 +31,86 @@ export const brainPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
+/**
+ * SQL equivalent of the simple (regex) pattern query.
+ *
+ * OpenSearch SQL has no REGEXP_REPLACE token at any version -- it is a syntax
+ * error -- so REPLACE is the only option. It works because the V2 engine
+ * implements REPLACE with Java's `String.replaceAll`
+ * (sql: core/.../expression/text/TextFunctions.java), which treats `from_str`
+ * as a regex. That reproduces PPL's Calcite simple-patterns output exactly:
+ * both emit REGEXP_REPLACE(field, '[a-zA-Z0-9]+', '<*>').
+ *
+ * Caveat, deliberately recorded: this behavior is undocumented and contradicts
+ * `docs/user/dql/functions.rst`, which describes REPLACE as literal substring
+ * replacement, and no SQL-side integration test pins it. See the tracking issue
+ * linked from the PR before relying on it more widely.
+ *
+ * Columns are left unaliased and read back by position as
+ * [pattern, COUNT(*), MIN(sample)]. The engine does return aliases, but OSD
+ * drops them: `getFields` keys `_source` by column *name*
+ * (src/plugins/data/common/data_frames/utils.ts), so an aliased column would
+ * arrive under the raw expression text. Positional access is safe here because
+ * the response schema and datarows are built in one pass from the same
+ * projection, so schema order == SELECT-list order.
+ *
+ * The sample uses MIN(field) (a deterministic real log line) in place of PPL's
+ * take(field, 1). NOTE: MIN on a keyword field is rejected when the aggregation
+ * pushes down ("Field [x] of type [keyword] is not supported for aggregation
+ * [min]"); it works here only because the derived table blocks pushdown. Do not
+ * "optimize" the subquery nesting away.
+ */
+export const SQL_PATTERN_TOKEN_REGEX = '[a-zA-Z0-9]+';
+export const SQL_PATTERN_PLACEHOLDER = '<*>';
+
+/**
+ * The pattern-bearing expression, with a NULL guard.
+ *
+ * Grouping by a nullable key makes the V2 engine fail the whole request with
+ * HTTP 500 "[BUG] Unreachable, Comparing with NULL or MISSING is undefined" --
+ * so a single document missing the patterns field breaks the tab, which is the
+ * common case on real log indices. IFNULL collapses those documents into an
+ * empty-pattern group, matching what Calcite-PPL does via
+ * CASE(SEARCH(field, Sarg['';NULL AS TRUE]), '', REGEXP_REPLACE(...)), so the
+ * counts reconcile with the PPL tab rather than silently differing.
+ */
+const sqlPatternExpression = (patternsField: string) =>
+  `REPLACE(IFNULL(${escapeSqlIdentifier(patternsField)}, ''), ` +
+  `'${SQL_PATTERN_TOKEN_REGEX}', '${SQL_PATTERN_PLACEHOLDER}')`;
+
+/**
+ * The editor accepts a trailing statement terminator, but a subquery cannot carry
+ * one: `FROM (SELECT * FROM idx;) sub` makes the engine read `idx;` as the index
+ * name and fail with IndexNotFoundException. Only trailing terminators are removed,
+ * so a `;` inside a string literal is left alone.
+ */
+export const asSqlSubquery = (queryBase: string) => String(queryBase).replace(/[\s;]+$/, '');
+
+export const sqlPatternQuery = (queryBase: string, patternsField: string) => {
+  const field = escapeSqlIdentifier(patternsField);
+  // The sample column is projected RAW and the null-guard is applied to the
+  // aggregate instead. IFNULL(field, '') on a `text` field returns a value that
+  // keeps OpenSearchTextType while the '' literal does not, so MIN over a group
+  // containing both a missing document and an empty-string document throws
+  // "compare expected value have same type" (HTTP 400). Guarding the aggregate
+  // instead of its input avoids mixing the two types inside the comparison.
+  //
+  // MAX(doc_total) carries the number of documents the user's query matched.
+  // The engine caps the response at `plugins.query.size_limit` (10,000 by
+  // default), so on a high-cardinality field the returned groups are only part
+  // of the result -- summing their counts would normalize that subset to 100%
+  // and overstate every ratio. COUNT(*) OVER () is evaluated on the inner
+  // relation, before grouping and before the cap, so it survives truncation and
+  // also reveals it: the returned counts sum to less than this total.
+  return (
+    `SELECT pattern, COUNT(*), IFNULL(MIN(sample), ''), MAX(doc_total) ` +
+    `FROM (SELECT ${sqlPatternExpression(patternsField)} AS pattern, ` +
+    `${field} AS sample, COUNT(*) OVER () AS doc_total ` +
+    `FROM (${asSqlSubquery(queryBase)}) sub_inner) sub ` +
+    `GROUP BY pattern ORDER BY COUNT(*) DESC`
+  );
+};
+
 export const regexUpdateSearchPatternQuery = (
   queryBase: string,
   patternsField: string,
@@ -71,6 +151,54 @@ export const brainExcludeSearchPatternQuery = (
   )}`;
 };
 
+/**
+ * Wrap a value as a single-quoted SQL string literal.
+ *
+ * The lexer rule is
+ *   SQUOTA_STRING: '\'' ( '\\'. | '\'\'' | ~('\''|'\\') )* '\''
+ * so it honors both `''` and backslash escapes. Doubling the quotes alone is
+ * therefore not enough: a value containing `\` immediately before a `'` (or a
+ * trailing `\`) terminates the literal early and spills into the statement.
+ * Backslashes must be escaped first, then quotes.
+ *
+ * This is reachable from indexed document content -- Windows paths, escaped
+ * JSON and stack traces all produce patterns containing `\'`.
+ */
+export const escapeSqlValue = (value: string) =>
+  `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "''")}'`;
+
+/**
+ * Quote a field name as a backtick-delimited SQL identifier.
+ *
+ * BQUOTA_STRING has the same backslash rule plus '``' doubling. patternsField
+ * is restored verbatim from the `_a` URL parameter, so interpolating it raw
+ * lets a crafted field name close the identifier and append arbitrary SQL.
+ */
+export const escapeSqlIdentifier = (identifier: string) =>
+  `\`${String(identifier).replace(/\\/g, '\\\\').replace(/`/g, '``')}\``;
+
+// SQL filter-for: keep only rows whose simple pattern matches patternString.
+export const sqlUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `SELECT * FROM (${asSqlSubquery(queryBase)}) sub WHERE ${sqlPatternExpression(
+    patternsField
+  )} = ${escapeSqlValue(patternString)}`;
+};
+
+// SQL filter-out: exclude rows whose simple pattern matches patternString.
+export const sqlExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `SELECT * FROM (${asSqlSubquery(queryBase)}) sub WHERE ${sqlPatternExpression(
+    patternsField
+  )} <> ${escapeSqlValue(patternString)}`;
+};
+
 export const createSearchPatternQuery = (
   query: Query,
   patternsField: string,
@@ -78,6 +206,9 @@ export const createSearchPatternQuery = (
   patternString: string
 ) => {
   const queryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'SQL') {
+    return sqlUpdateSearchPatternQuery(queryString, patternsField, patternString);
+  }
   return usingRegexPatterns
     ? regexUpdateSearchPatternQuery(queryString, patternsField, patternString)
     : brainUpdateSearchPatternQuery(queryString, patternsField, patternString);
@@ -90,6 +221,9 @@ export const createExcludeSearchPatternQuery = (
   patternString: string
 ) => {
   const queryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'SQL') {
+    return sqlExcludeSearchPatternQuery(queryString, patternsField, patternString);
+  }
   return usingRegexPatterns
     ? regexExcludeSearchPatternQuery(queryString, patternsField, patternString)
     : brainExcludeSearchPatternQuery(queryString, patternsField, patternString);
@@ -109,6 +243,15 @@ export const createSearchPatternQueryWithSlice = (
 
   const preparedQuery = prepareQueryForLanguage(query);
   const sortClause = timeField ? ` | sort - ${timeField}` : '';
+
+  if (query.language === 'SQL') {
+    const sqlSort = timeField ? ` ORDER BY ${escapeSqlIdentifier(timeField)} DESC` : '';
+    return `${sqlUpdateSearchPatternQuery(
+      preparedQuery.query,
+      patternsField,
+      patternString
+    )}${sqlSort} LIMIT ${pageSize} OFFSET ${pageOffset}`;
+  }
 
   return usingRegexPatterns
     ? `${regexUpdateSearchPatternQuery(
@@ -249,6 +392,10 @@ export const highlightLogUsingPattern = (
   }
 };
 
+// `fieldSchema` carries the backend's own type names. PPL and the analytics engine
+// report `string`; SQL on the V2 engine reports the OpenSearch mapping type instead.
+const STRING_FIELD_TYPES = ['string', 'text', 'keyword'];
+
 /**
  * Selects the most likely patterns field by finding the string field with the longest value.
  * This function identifies the field most suitable for pattern analysis by comparing the length
@@ -279,7 +426,7 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   // Get fields
   const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {
-    return field.type === 'string';
+    return STRING_FIELD_TYPES.includes(field.type as string);
   });
 
   if (!logResults?.hits?.hits?.[0]) {

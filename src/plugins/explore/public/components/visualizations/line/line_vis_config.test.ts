@@ -81,7 +81,7 @@ describe('line_vis_config', () => {
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
           standardAxes: [],
-          showFullTimeRange: false,
+          showFullTimeRange: true,
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],
