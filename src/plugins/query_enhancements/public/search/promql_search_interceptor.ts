@@ -54,10 +54,10 @@ export function resolvePromQLMacroContext(
 
 export function resolveStepOptions(
   query: PromQLQuery,
-  bounds: Bounds
+  bounds: Bounds,
+  ctx: PromQLMacroContext | undefined = resolvePromQLMacroContext(query, bounds)
 ): { step: number } | undefined {
   if (query.maxDataPoints === undefined && query.minStep === undefined) return undefined;
-  const ctx = resolvePromQLMacroContext(query, bounds);
   return ctx ? { step: ctx.stepSec } : undefined;
 }
 
@@ -77,7 +77,7 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
     const queryState: PromQLQuery = this.queryService.queryString.getQuery();
     const bounds = timefilter.getBounds();
     const macroContext = resolvePromQLMacroContext(queryState, bounds);
-    const stepOptions = resolveStepOptions(queryState, bounds);
+    const stepOptions = resolveStepOptions(queryState, bounds, macroContext);
 
     const context: EnhancedFetchContext = {
       http: this.deps.http,

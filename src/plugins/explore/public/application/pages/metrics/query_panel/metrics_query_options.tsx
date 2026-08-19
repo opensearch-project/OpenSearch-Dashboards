@@ -91,8 +91,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
               'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
           })}
           helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelp', {
-            defaultMessage:
-              'Lower bound on the step. Align to your metric publication interval (e.g. 60s) to avoid repeated values.',
+            defaultMessage: 'Lower bound on the step. Match your scrape interval.',
           })}
         >
           <EuiFieldText
@@ -111,7 +110,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued" data-test-subj="metricsStepResolved">
           {i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedStep', {
-            defaultMessage: 'Resolved step for the current time range: {step}',
+            defaultMessage: 'Step for current range: {step}',
             values: { step: resolvedStepLabel },
           })}
         </EuiText>
@@ -122,9 +121,8 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             defaultMessage: 'Series name',
           })}
           helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatHelp', {
-            defaultMessage:
-              'Name each series from its labels, e.g. {example}. Leave empty to show the full label set.',
-            values: { example: '{{label}}' },
+            defaultMessage: 'Name series from labels, e.g. {example} or {combo}.',
+            values: { example: '{{label}}', combo: '{{label1}}-{{label2}}' },
           })}
         >
           <EuiFieldText
@@ -145,9 +143,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             defaultMessage: 'Max data points',
           })}
           helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsHelp', {
-            defaultMessage:
-              'Caps points per series so long time ranges stay under payload limits. Leave empty for auto ({defaultResolution}).',
-            values: { defaultResolution: 1440 },
+            defaultMessage: 'Max points per series.',
           })}
         >
           <EuiFieldNumber
@@ -168,35 +164,6 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             data-test-subj="metricsStepMaxDataPointsInput"
           />
         </EuiFormRow>
-
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('explore.metricsQueryPanel.queryOptions.legendSyntaxNote', {
-            defaultMessage:
-              'Reference a label with {brace}, and combine them, e.g. {combo}. Use {name} for the metric name.',
-            values: {
-              brace: '{{label}}',
-              combo: '{{label1}}-{{label2}}',
-              name: '{{__name__}}',
-            },
-          })}
-        </EuiText>
-
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('explore.metricsQueryPanel.queryOptions.macrosNote', {
-            defaultMessage:
-              'Use $__rate_interval inside rate() and $__interval elsewhere to size range windows to the resolved step, so series do not gap when the time range widens.',
-          })}
-        </EuiText>
-
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('explore.metricsQueryPanel.queryOptions.stepVsBucketNote', {
-            defaultMessage:
-              'The step controls the resolution Prometheus computes on the server. It is not the same as the legacy visualization "Bucket interval", which re-buckets points after they are returned.',
-          })}
-        </EuiText>
       </EuiForm>
     </EuiPopover>
   );
