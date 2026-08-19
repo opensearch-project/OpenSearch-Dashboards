@@ -106,6 +106,7 @@ const syncAxisPointerByValue = (
     ({ axisDim, value }) => (axisDim === 'x' || axisDim === 'y') && value != null
   );
   if (!axisInfo) {
+    hideSharedCrosshair(group, source);
     return;
   }
 
