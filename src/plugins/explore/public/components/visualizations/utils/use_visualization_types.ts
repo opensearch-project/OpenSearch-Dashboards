@@ -86,6 +86,7 @@ export interface StyleControlsProps<T extends ChartStyles> {
 
 export interface VisualizationRenderContext {
   seriesName?: string;
+  crosshairGroup?: string;
 }
 
 export interface VisRenderProps<T extends ChartType> {

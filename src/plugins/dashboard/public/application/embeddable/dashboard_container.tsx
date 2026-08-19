@@ -79,6 +79,7 @@ export interface DashboardContainerInput extends ContainerInput {
   refreshConfig?: RefreshInterval;
   expandedPanelId?: string;
   useMargins: boolean;
+  useSharedCrosshair?: boolean;
   title: string;
   description?: string;
   isEmbeddedExternally?: boolean;
@@ -101,6 +102,7 @@ export interface InheritedChildInput extends IndexSignature {
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
+  useSharedCrosshair?: boolean;
   id: string;
 }
 
@@ -371,10 +373,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      useSharedCrosshair,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
+      useSharedCrosshair,
       query,
       timeRange,
       refreshConfig,

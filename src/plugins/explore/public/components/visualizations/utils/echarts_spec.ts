@@ -77,6 +77,8 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   timeRange?: { from: string; to: string };
 }
 
+export type AxisType = 'category' | 'value' | 'time';
+
 /**
  * State object that flows through the pipeline
  */
@@ -123,7 +125,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | Axis[] | undefined): AxisType {
   const effectiveAxis = Array.isArray(axis) ? axis[0] : axis;
   if (!effectiveAxis) return 'value';
 
@@ -161,7 +163,7 @@ export const createBaseConfig =
         confine: true, // for x direction
         show: styles.tooltipOptions?.mode !== 'hidden',
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
-        axisPointer: { type: 'shadow' as const },
+        axisPointer: { type: 'line' as const },
         ...(hasUnit && {
           valueFormatter: (value: unknown) =>
             typeof value === 'number'
@@ -209,10 +211,10 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     isValueAxis: boolean = false,
     addSplitLineStyle: boolean = false
   ) => {
-    const axisStyling = applyAxisStyling({ axisStyle, addSplitLineStyle });
-    const type = getAxisType(axis);
+    const axisType = getAxisType(axis);
+    const axisStyling = applyAxisStyling({ axisType, axisStyle, addSplitLineStyle });
     return {
-      type,
+      type: axisType,
       ...axisStyling,
       nameGap: 8,
       ...(isValueAxis &&
@@ -285,17 +287,22 @@ const POSITION_MAP = {
 };
 
 export const applyAxisStyling = ({
+  axisType,
   axisStyle,
   addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
   addSplitLineStyle?: boolean;
+  axisType?: AxisType;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
     axisLine: { show: true },
+    axisPointer: {
+      snap: axisType === 'time' ? false : true,
+    },
   };
 
   // Apply axis visibility

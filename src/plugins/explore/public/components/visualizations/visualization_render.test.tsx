@@ -12,6 +12,7 @@ import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
 import { defaultMetricChartStyles } from './metric/metric_vis_config';
+import { defaultLineChartStyles } from './line/line_vis_config';
 import { ChartType } from './utils/use_visualization_types';
 
 const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
@@ -187,6 +188,29 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
   });
 
+  it('passes the crosshair group through the visualization render context', () => {
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        crosshairGroup="dashboard-123"
+      />
+    );
+
+    expect(mockRender).toHaveBeenCalledWith(
+      expect.objectContaining({
+        renderContext: expect.objectContaining({
+          crosshairGroup: 'dashboard-123',
+        }),
+      })
+    );
+  });
+
   it('renders empty state when there is no selection mapping', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>({
@@ -270,6 +294,68 @@ describe('VisualizationRender', () => {
     ]);
     expect(splitRender.mock.calls[0][0].allData).toBe(mockSplitVisData.transformedData);
     expect(splitRender.mock.calls[1][0].allData).toBe(mockSplitVisData.transformedData);
+  });
+
+  it('does not mutate split data when shared crosshair is enabled', () => {
+    const splitRender = jest.fn(() => <div data-test-subj="splitChart">Split Chart</div>);
+    mockFindRuleByAxesMapping.mockReturnValue({
+      render: splitRender,
+    });
+
+    const splitTimeData: VisData = {
+      transformedData: [
+        { timestamp: '2026-08-12T08:00:00.000Z', os: 'linux', count: 1 },
+        { timestamp: '2026-08-12T09:00:00.000Z', os: 'windows', count: 2 },
+      ],
+      numericalColumns: [
+        {
+          id: 1,
+          name: 'count',
+          schema: VisFieldType.Numerical,
+          column: 'count',
+        },
+      ],
+      categoricalColumns: [
+        {
+          id: 2,
+          name: 'os',
+          schema: VisFieldType.Categorical,
+          column: 'os',
+        },
+      ],
+      dateColumns: [
+        {
+          id: 3,
+          name: 'timestamp',
+          schema: VisFieldType.Date,
+          column: 'timestamp',
+        },
+      ],
+      unknownColumns: [],
+    };
+    const splitConfig: RenderChartConfig = {
+      type: 'line',
+      styles: defaultLineChartStyles,
+      axesMapping: { x: 'timestamp', y: 'count' },
+      splitField: 'os',
+    };
+
+    render(
+      <CommonVisualizationRender
+        visualizationData={splitTimeData}
+        visConfig={splitConfig}
+        showRawTable={false}
+        crosshairGroup="dashboard-123"
+      />
+    );
+
+    expect(splitRender).toHaveBeenCalledTimes(2);
+    expect(splitRender.mock.calls[0][0].data).toEqual([
+      { timestamp: '2026-08-12T08:00:00.000Z', os: 'linux', count: 1 },
+    ]);
+    expect(splitRender.mock.calls[1][0].data).toEqual([
+      { timestamp: '2026-08-12T09:00:00.000Z', os: 'windows', count: 2 },
+    ]);
   });
 
   it('returns null when data has no columns', () => {
