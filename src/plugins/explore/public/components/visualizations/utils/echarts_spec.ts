@@ -75,6 +75,8 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   timeRange?: { from: string; to: string };
 }
 
+export type AxisType = 'category' | 'value' | 'time';
+
 /**
  * State object that flows through the pipeline
  */
@@ -121,7 +123,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | Axis[] | undefined): AxisType {
   const effectiveAxis = Array.isArray(axis) ? axis[0] : axis;
   if (!effectiveAxis) return 'value';
 
@@ -157,7 +159,7 @@ export const createBaseConfig =
         confine: true, // for x direction
         show: styles.tooltipOptions?.mode !== 'hidden',
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
-        axisPointer: { type: 'shadow' as const },
+        axisPointer: { type: 'line' as const },
       },
       legend: {
         show: false,
@@ -188,9 +190,10 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     axisStyle: StandardAxes | undefined,
     addSplitLineStyle: boolean = false
   ) => {
+    const axisType = getAxisType(axis);
     return {
-      type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
+      type: axisType,
+      ...applyAxisStyling({ axisType, axisStyle, addSplitLineStyle }),
       nameGap: 8,
     };
   };
@@ -245,17 +248,22 @@ const POSITION_MAP = {
 };
 
 export const applyAxisStyling = ({
+  axisType,
   axisStyle,
   addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
   addSplitLineStyle?: boolean;
+  axisType?: AxisType;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
     axisLine: { show: true },
+    axisPointer: {
+      snap: axisType === 'time' ? false : true,
+    },
   };
 
   // Apply axis visibility

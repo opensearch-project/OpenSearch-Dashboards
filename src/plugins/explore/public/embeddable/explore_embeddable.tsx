@@ -132,6 +132,13 @@ const getVisualizationMetadata = (visualization?: string): VisualizationMetadata
   }
 };
 
+const UNSAVED_DASHBOARD_CROSSHAIR_GROUP = 'dashboard-unsaved';
+
+export const getCrosshairGroup = (
+  useSharedCrosshair: boolean | undefined,
+  containerId: string | undefined
+) => (useSharedCrosshair ? containerId || UNSAVED_DASHBOARD_CROSSHAIR_GROUP : undefined);
+
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
   implements IEmbeddable<ExploreInput, ExploreOutput>
@@ -681,6 +688,10 @@ export class ExploreEmbeddable
               showRawTable={false}
               timeRange={searchContext.timeRange}
               onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+              crosshairGroup={getCrosshairGroup(
+                this.input.useSharedCrosshair,
+                this.parent?.getInput().id
+              )}
             />
           );
           this.searchProps.chartRender = chartRender;

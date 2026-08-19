@@ -15,6 +15,7 @@ export const dashboardAppStateStub: DashboardAppState = {
   options: {
     hidePanelTitles: false,
     useMargins: true,
+    useSharedCrosshair: false,
   },
   query: { query: '', language: 'kuery' },
   filters: [],
