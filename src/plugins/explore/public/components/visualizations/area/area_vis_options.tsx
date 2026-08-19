@@ -10,20 +10,17 @@ import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxisRole } from '../types';
+import { AxisRole, VisFieldType } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { AreaExclusiveVisOptions } from './area_exclusive_vis_options';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyle>;
 
 export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
-  numericalColumns = [],
-  categoricalColumns = [],
-  dateColumns = [],
   axisColumnMappings,
-  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof AreaChartStyleOptions>(
     key: K,
@@ -35,6 +32,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   const hasColorMapping =
     !!axisColumnMappings?.[AxisRole.COLOR] && axisColumnMappings?.[AxisRole.COLOR].length > 0;
   const shouldShowLegend = hasColorMapping;
+  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.[0]?.schema === VisFieldType.Date;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -44,6 +42,44 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <AreaExclusiveVisOptions
+              isTimeBased={shouldShowTimeMarker}
+              addTimeMarker={styleOptions.addTimeMarker}
+              areaOpacity={styleOptions.areaOpacity}
+              gradientMode={styleOptions.gradientMode}
+              stackMode={styleOptions.stackMode}
+              lineDashStyle={styleOptions.lineDashStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              pointSize={styleOptions.pointSize}
+              showValues={styleOptions.showValues}
+              connectNullValues={styleOptions.connectNullValues}
+              disconnectValues={styleOptions.disconnectValues}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onFillOpacityChange={(areaOpacity) => updateStyleOption('areaOpacity', areaOpacity)}
+              onGradientModeChange={(gradientMode) =>
+                updateStyleOption('gradientMode', gradientMode)
+              }
+              onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+              onLineDashStyleChange={(lineDashStyle) =>
+                updateStyleOption('lineDashStyle', lineDashStyle)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
+              onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
+              onConnectNullValuesChange={(connectNullValues) =>
+                updateStyleOption('connectNullValues', connectNullValues)
+              }
+              onDisconnectValuesChange={(disconnectValues) =>
+                updateStyleOption('disconnectValues', disconnectValues)
+              }
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}

@@ -16,6 +16,14 @@ import {
   getLegendNameDomain,
   LegendItem,
 } from '../utils/legend';
+import { resolveStackMode } from '../utils/data_transformation';
+import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share';
+
+export const buildStackConfig = (styles: BarChartStyle) =>
+  'stackMode' in styles && resolveStackMode(styles) === 'none' ? {} : { stack: 'total' };
+
+export const buildFillOpacity = (styles: BarChartStyle) =>
+  'fillOpacity' in styles ? (styles.fillOpacity ?? DEFAULT_BAR_FILL_OPACITY) / 100 : undefined;
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -96,7 +104,8 @@ export const createBarSeries =
     if (styles.barSizeMode === 'manual') {
       barWidth = `${(styles.barWidth || 0.7) * 100}%`;
     }
-
+    const stackConfig = buildStackConfig(styles);
+    const fillOpacity = buildFillOpacity(styles);
     const series = seriesFields.map((seriesField, index) => {
       const name = getSeriesDisplayName(seriesField, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
@@ -115,13 +124,14 @@ export const createBarSeries =
         ...(index === 0 && thresholdLines),
         itemStyle: {
           color,
+          opacity: fillOpacity,
           ...(styles?.showBarBorder && {
             borderWidth: styles.barBorderWidth,
             borderColor: styles.barBorderColor,
           }),
         },
         // Apply stack configuration based on stackMode
-        ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
+        ...stackConfig,
       };
 
       return seriesConfig as BarSeriesOption;

@@ -17,6 +17,12 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
+  StackMode,
+  LineDashStyle,
+  LineMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -26,6 +32,21 @@ import {
   createStackedAreaChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
+import { DEFAULT_LINE_WIDTH } from '../style_panel/share/line_shared_options';
+import { DEFAULT_FILL_OPACITY } from '../style_panel/share/gradient_range';
+import { DEFAULT_POINT_SIZE } from '../style_panel/share/point_size_options';
+
+export type { LineDashStyle, LineMode };
+
+/**
+ * - `none`: flat fill in the series color.
+ * - `opacity`: fades from the series color at the line to transparent at the baseline.
+ * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
+ */
+export type GradientMode = 'none' | 'opacity' | 'hue';
+
+// Duration used when a gap threshold is switched on before the user types one.
+export const DEFAULT_GAP_THRESHOLD = '1h';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleOptions {
@@ -36,7 +57,16 @@ export interface AreaChartStyleOptions {
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
+  gradientMode?: GradientMode;
   tooltipOptions?: TooltipOptions;
+
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+
+  pointSize?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -57,36 +87,64 @@ export interface AreaChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
+  stackMode?: StackMode;
+
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
 }
 
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'
+    | 'areaOpacity'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'stackMode'
+    | 'connectNullValues'
+    | 'disconnectValues'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
+  Pick<
+    AreaChartStyleOptions,
+    'areaOpacity' | 'legendTitle' | 'stackMode' | 'connectNullValues' | 'disconnectValues'
+  >;
 
-const defaultAreaChartStyles: AreaChartStyle = {
+export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendTitle: '',
   legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
+  areaOpacity: DEFAULT_FILL_OPACITY,
+  gradientMode: 'none',
   tooltipOptions: {
     mode: 'all',
   },
+  lineDashStyle: 'solid',
 
+  lineMode: 'smooth',
+  lineWidth: DEFAULT_LINE_WIDTH,
+  pointSize: DEFAULT_POINT_SIZE,
+  showValues: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-
   standardAxes: [],
-
   showFullTimeRange: false,
+  stackMode: 'none',
+  connectNullValues: {
+    connectMode: DisableMode.Always,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
+  disconnectValues: {
+    disableMode: DisableMode.Never,
+    threshold: DEFAULT_GAP_THRESHOLD,
+  },
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

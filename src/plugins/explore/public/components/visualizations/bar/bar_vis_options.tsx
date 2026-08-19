@@ -66,6 +66,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               barBorderColor={styleOptions.barBorderColor}
               useThresholdColor={styleOptions?.useThresholdColor}
               stackMode={styleOptions.stackMode}
+              fillOpacity={styleOptions.fillOpacity}
               onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
@@ -82,6 +83,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
               onStackModeChange={(stackMode) => updateStyleOption('stackMode', stackMode)}
+              onFillOpacityChange={(fillOpacity) => updateStyleOption('fillOpacity', fillOpacity)}
               shouldDisableUseThresholdColor={hasColorMapping}
             />
           </EuiFlexItem>

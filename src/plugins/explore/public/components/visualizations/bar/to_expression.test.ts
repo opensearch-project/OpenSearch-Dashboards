@@ -13,6 +13,7 @@ import {
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { VisColumn, VisFieldType, AxisRole, ThresholdMode, AggregationType } from '../types';
 import { getColors } from '../theme/default_colors';
+import { DEFAULT_BAR_FILL_OPACITY } from '../style_panel/share';
 
 describe('bar to_expression', () => {
   const mockNumericalColumn: VisColumn = {
@@ -89,6 +90,26 @@ describe('bar to_expression', () => {
       const seriesWithMarkLine = spec.series.find((s: any) => s.markLine);
       expect(seriesWithMarkLine).toBeDefined();
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
+    });
+
+    describe('fill opacity', () => {
+      const opacityOf = (styles: Partial<BarChartStyle>) =>
+        createBarSpec(
+          mockData,
+          { ...defaultBarChartStyles, ...styles },
+          {
+            [AxisRole.X]: mockCategoricalColumn,
+            [AxisRole.Y]: [mockNumericalColumn],
+          }
+        ).spec.series[0].itemStyle.opacity;
+
+      test('applies fillOpacity as a fraction of the 0-100 percentage', () => {
+        expect(opacityOf({ fillOpacity: 80 })).toBe(0.8);
+      });
+
+      test('falls back to the default fill opacity when fillOpacity is unset', () => {
+        expect(opacityOf({ fillOpacity: undefined })).toBe(DEFAULT_BAR_FILL_OPACITY / 100);
+      });
     });
   });
 

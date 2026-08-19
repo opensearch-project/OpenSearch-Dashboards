@@ -14,8 +14,11 @@ import {
   AxisConfig,
   ThresholdOptions,
   ThresholdMode,
+  StackMode,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
+import { BaseChartStyle, PipelineFn } from './echarts_spec';
+import { resolveStackMode } from './data_transformation';
 
 export const applyAxisStyling = ({
   axis,
@@ -311,3 +314,34 @@ export const getValueColorByThreshold = (value: number, thresholdOptions: Thresh
   }
   return color;
 };
+
+/**
+ * apply percentage range to axis and labels it with `%` when stacking to 100%
+ */
+export const applyPercentageAxis =
+  <T extends BaseChartStyle>(styles: { stackMode?: StackMode | undefined }): PipelineFn<T> =>
+  (state) => {
+    if (resolveStackMode(styles) !== 'percentage') return state;
+
+    const { transformedData = [] } = state;
+    const [, ...rows] = transformedData;
+
+    const hasNegativeValue = rows.some((row: any[]) =>
+      row.some((data) => typeof data === 'number' && data < 0)
+    );
+
+    const toPercentageAxis = (axisConfig: any) => ({
+      ...axisConfig,
+      min: hasNegativeValue ? -100 : 0,
+      max: 100,
+      axisLabel: { ...axisConfig?.axisLabel, formatter: '{value}%' },
+    });
+
+    const { yAxisConfig } = state;
+    return {
+      ...state,
+      yAxisConfig: Array.isArray(yAxisConfig)
+        ? yAxisConfig.map(toPercentageAxis)
+        : toPercentageAxis(yAxisConfig),
+    };
+  };
