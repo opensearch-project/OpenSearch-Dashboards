@@ -34,7 +34,7 @@ import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
-import { calculateStep, parseStepIntervalSeconds } from '../prom_step';
+import { calculateStep } from '../prom_step';
 import { ExplorationLevel, ExplorationState } from './types';
 
 export const MetricsExploreTab = () => {
@@ -75,9 +75,7 @@ export const MetricsExploreTab = () => {
     const query = services.data.query.queryString.getQuery() as Query & PromQLQueryOptions;
     const resolution =
       query.maxDataPoints && query.maxDataPoints > 0 ? query.maxDataPoints : undefined;
-    const parsedMinStep = query.minStep ? parseStepIntervalSeconds(query.minStep) : undefined;
-    const minStepSec = parsedMinStep && parsedMinStep > 0 ? parsedMinStep : undefined;
-    return calculateStep(bounds.max.valueOf() - bounds.min.valueOf(), resolution, minStepSec);
+    return calculateStep(bounds.max.valueOf() - bounds.min.valueOf(), resolution);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
 

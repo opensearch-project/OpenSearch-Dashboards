@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldNumber,
   EuiFieldText,
   EuiForm,
@@ -15,18 +16,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { PerQueryOptions } from '../../../utils/languages';
+import { parseStepIntervalSeconds } from '../prom_step';
 
-export interface MetricsStepSettingsValue {
+export interface MetricsQueryOptionsProps {
   maxDataPoints?: number;
-  minStep?: string;
+  onMaxDataPointsChange: (next?: number) => void;
 }
 
-export interface MetricsQueryOptionsProps extends MetricsStepSettingsValue {
+export interface RowQueryOptionsProps {
+  minStep?: string;
   legendFormat?: string;
   resolvedStepLabel: string;
-  minStepInvalid: boolean;
-  onStepSettingsChange: (next: MetricsStepSettingsValue) => void;
-  onLegendFormatChange: (next?: string) => void;
+  onChange: (next: PerQueryOptions) => void;
 }
 
 export function formatStepSeconds(stepSec: number | null): string {
@@ -50,12 +52,7 @@ export function formatStepSeconds(stepSec: number | null): string {
 
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
-  minStep,
-  legendFormat,
-  resolvedStepLabel,
-  minStepInvalid,
-  onStepSettingsChange,
-  onLegendFormatChange,
+  onMaxDataPointsChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -82,6 +79,87 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
     >
       <EuiForm style={{ maxWidth: 320 }}>
         <EuiFormRow
+          label={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsLabel', {
+            defaultMessage: 'Max data points',
+          })}
+          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsHelp', {
+            defaultMessage: 'Max points per series.',
+          })}
+        >
+          <EuiFieldNumber
+            compressed
+            min={1}
+            placeholder={i18n.translate(
+              'explore.metricsQueryPanel.queryOptions.maxDataPointsPlaceholder',
+              { defaultMessage: 'auto' }
+            )}
+            value={maxDataPoints ?? ''}
+            onChange={(e) => {
+              const raw = e.target.value;
+              onMaxDataPointsChange(raw === '' ? undefined : Math.floor(Number(raw)));
+            }}
+            data-test-subj="metricsStepMaxDataPointsInput"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiPopover>
+  );
+};
+
+export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
+  minStep,
+  legendFormat,
+  resolvedStepLabel,
+  onChange,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const minStepInvalid = !!minStep && parseStepIntervalSeconds(minStep) === undefined;
+
+  const button = (
+    <EuiButtonIcon
+      iconType="gear"
+      color="text"
+      size="s"
+      onClick={() => setIsOpen((open) => !open)}
+      aria-label={i18n.translate('explore.metricsQueryPanel.queryOptions.rowButtonLabel', {
+        defaultMessage: 'Query options',
+      })}
+      data-test-subj="metricsRowQueryOptionsButton"
+    />
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downRight"
+      data-test-subj="metricsRowQueryOptionsPopover"
+    >
+      <EuiForm style={{ maxWidth: 320 }}>
+        <EuiFormRow
+          label={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatLabel', {
+            defaultMessage: 'Series name',
+          })}
+          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatHelp', {
+            defaultMessage: 'Name series from labels, e.g. {example} or {combo}.',
+            values: { example: '{{label}}', combo: '{{label1}}-{{label2}}' },
+          })}
+        >
+          <EuiFieldText
+            compressed
+            placeholder="{{label}}"
+            value={legendFormat ?? ''}
+            onChange={(e) => {
+              const raw = e.target.value;
+              onChange({ minStep, legendFormat: raw === '' ? undefined : raw });
+            }}
+            data-test-subj="metricsLegendFormatInput"
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
+        <EuiFormRow
           label={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepLabel', {
             defaultMessage: 'Min step',
           })}
@@ -101,7 +179,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             value={minStep ?? ''}
             onChange={(e) => {
               const raw = e.target.value.trim();
-              onStepSettingsChange({ maxDataPoints, minStep: raw === '' ? undefined : raw });
+              onChange({ minStep: raw === '' ? undefined : raw, legendFormat });
             }}
             data-test-subj="metricsStepMinStepInput"
           />
@@ -114,56 +192,6 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             values: { step: resolvedStepLabel },
           })}
         </EuiText>
-
-        <EuiSpacer size="m" />
-        <EuiFormRow
-          label={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatLabel', {
-            defaultMessage: 'Series name',
-          })}
-          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.legendFormatHelp', {
-            defaultMessage: 'Name series from labels, e.g. {example} or {combo}.',
-            values: { example: '{{label}}', combo: '{{label1}}-{{label2}}' },
-          })}
-        >
-          <EuiFieldText
-            compressed
-            placeholder="{{label}}"
-            value={legendFormat ?? ''}
-            onChange={(e) => {
-              const raw = e.target.value;
-              onLegendFormatChange(raw === '' ? undefined : raw);
-            }}
-            data-test-subj="metricsLegendFormatInput"
-          />
-        </EuiFormRow>
-
-        <EuiSpacer size="m" />
-        <EuiFormRow
-          label={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsLabel', {
-            defaultMessage: 'Max data points',
-          })}
-          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsHelp', {
-            defaultMessage: 'Max points per series.',
-          })}
-        >
-          <EuiFieldNumber
-            compressed
-            min={1}
-            placeholder={i18n.translate(
-              'explore.metricsQueryPanel.queryOptions.maxDataPointsPlaceholder',
-              { defaultMessage: 'auto' }
-            )}
-            value={maxDataPoints ?? ''}
-            onChange={(e) => {
-              const raw = e.target.value;
-              onStepSettingsChange({
-                maxDataPoints: raw === '' ? undefined : Math.floor(Number(raw)),
-                minStep,
-              });
-            }}
-            data-test-subj="metricsStepMaxDataPointsInput"
-          />
-        </EuiFormRow>
       </EuiForm>
     </EuiPopover>
   );

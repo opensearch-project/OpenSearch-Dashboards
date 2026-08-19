@@ -5,10 +5,14 @@
 
 import { Query } from '../../../../../data/common';
 
-export interface PromQLQueryOptions {
-  maxDataPoints?: number;
+export interface PerQueryOptions {
   minStep?: string;
   legendFormat?: string;
+}
+
+export interface PromQLQueryOptions {
+  maxDataPoints?: number;
+  perQueryOptions?: PerQueryOptions[];
 }
 
 export type QueryWithQueryAsString = Omit<Query, 'query'> & {

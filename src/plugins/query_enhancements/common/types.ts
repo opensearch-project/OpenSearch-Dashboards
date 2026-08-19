@@ -6,10 +6,14 @@
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { PollQueryResultsParams, Query, TimeRange } from '../../data/common';
 
-export interface PromQLQuery extends Query {
-  maxDataPoints?: number;
+export interface PerQueryOptions {
   minStep?: string;
   legendFormat?: string;
+}
+
+export interface PromQLQuery extends Query {
+  maxDataPoints?: number;
+  perQueryOptions?: PerQueryOptions[];
 }
 
 export interface QueryAggConfig {

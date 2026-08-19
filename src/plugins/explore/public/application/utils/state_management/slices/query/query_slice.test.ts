@@ -204,37 +204,44 @@ describe('querySlice reducers', () => {
       dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
     };
 
-    it('updates the PromQL step and legend fields without touching query, language, or dataset', () => {
+    it('updates the panel resolution and per-query options without touching query, language, or dataset', () => {
       const state = queryReducer(
         existingState,
-        setMetricsQuerySettings({ maxDataPoints: 500, minStep: '1m', legendFormat: '{{instance}}' })
+        setMetricsQuerySettings({
+          maxDataPoints: 500,
+          perQueryOptions: [{ minStep: '1m', legendFormat: '{{instance}}' }],
+        })
       );
       expect(state.maxDataPoints).toBe(500);
-      expect(state.minStep).toBe('1m');
-      expect(state.legendFormat).toBe('{{instance}}');
+      expect(state.perQueryOptions).toEqual([{ minStep: '1m', legendFormat: '{{instance}}' }]);
       expect(state.query).toBe('up');
       expect(state.language).toBe('PROMQL');
       expect(state.dataset).toEqual(existingState.dataset);
+    });
+
+    it('merges only the provided keys', () => {
+      const withSettings: QueryState = {
+        ...existingState,
+        maxDataPoints: 500,
+        perQueryOptions: [{ minStep: '1m' }],
+      };
+      const state = queryReducer(withSettings, setMetricsQuerySettings({ maxDataPoints: 200 }));
+      expect(state.maxDataPoints).toBe(200);
+      expect(state.perQueryOptions).toEqual([{ minStep: '1m' }]);
     });
 
     it('clears the fields when set to undefined', () => {
       const withSettings: QueryState = {
         ...existingState,
         maxDataPoints: 500,
-        minStep: '1m',
-        legendFormat: '{{instance}}',
+        perQueryOptions: [{ minStep: '1m', legendFormat: '{{instance}}' }],
       };
       const state = queryReducer(
         withSettings,
-        setMetricsQuerySettings({
-          maxDataPoints: undefined,
-          minStep: undefined,
-          legendFormat: undefined,
-        })
+        setMetricsQuerySettings({ maxDataPoints: undefined, perQueryOptions: undefined })
       );
       expect(state.maxDataPoints).toBeUndefined();
-      expect(state.minStep).toBeUndefined();
-      expect(state.legendFormat).toBeUndefined();
+      expect(state.perQueryOptions).toBeUndefined();
     });
   });
 });

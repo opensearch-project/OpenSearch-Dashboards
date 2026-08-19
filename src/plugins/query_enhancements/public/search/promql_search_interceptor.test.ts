@@ -3,91 +3,101 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment';
-import { resolvePromQLMacroContext, resolveStepOptions } from './promql_search_interceptor';
-import { ASSUMED_SCRAPE_INTERVAL, calculateStep, DEFAULT_RESOLUTION } from '../../common';
+import { of } from 'rxjs';
+import { setImmediate } from 'timers';
+import { BehaviorSubject } from 'rxjs';
+import { CoreStart } from '../../../../core/public';
+import { coreMock } from '../../../../core/public/mocks';
+import {
+  IOpenSearchDashboardsSearchRequest,
+  ISearchOptions,
+  SearchInterceptorDeps,
+} from '../../../data/public';
+import { dataPluginMock } from '../../../data/public/mocks';
+import * as fetchModule from '../../common/utils';
+import { PromQLSearchInterceptor } from './promql_search_interceptor';
 
-const bounds = (fromMs: number, toMs: number) => ({
-  min: moment(fromMs),
-  max: moment(toMs),
-});
+jest.mock('../../common/utils', () => ({
+  ...jest.requireActual('../../common/utils'),
+  fetch: jest.fn(),
+}));
 
-// 24h range
-const START = 0;
-const END = 24 * 60 * 60 * 1000;
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
-describe('resolveStepOptions', () => {
-  it('returns undefined when neither maxDataPoints nor minStep is set', () => {
-    expect(
-      resolveStepOptions({ query: 'up', language: 'PROMQL' }, bounds(START, END))
-    ).toBeUndefined();
+describe('PromQLSearchInterceptor', () => {
+  let interceptor: PromQLSearchInterceptor;
+  let mockCoreStart: CoreStart;
+  let mockDeps: SearchInterceptorDeps;
+  let mockDataService: ReturnType<typeof dataPluginMock.createStartContract>;
+  let getQuery: jest.Mock;
+
+  const mockFetch = fetchModule.fetch as jest.MockedFunction<typeof fetchModule.fetch>;
+
+  const options = { abortSignal: undefined } as unknown as ISearchOptions;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    mockFetch.mockReturnValue(of({}) as any);
+
+    mockCoreStart = coreMock.createStart();
+    mockDataService = dataPluginMock.createStartContract(true);
+    mockCoreStart.application = {
+      ...mockCoreStart.application,
+      currentAppId$: new BehaviorSubject('dashboards'),
+    };
+
+    getQuery = jest.fn(() => ({
+      query: 'up',
+      language: 'PROMQL',
+      maxDataPoints: 500,
+      perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
+    }));
+    mockDataService.query.queryString.getQuery = getQuery;
+    mockDataService.query.timefilter.timefilter.getTime = jest.fn(() => ({
+      from: 'now-1h',
+      to: 'now',
+    }));
+
+    const mockStartServices = Promise.resolve([
+      mockCoreStart,
+      { data: mockDataService },
+      jest.fn(),
+    ] as const) as SearchInterceptorDeps['startServices'];
+
+    mockDeps = {
+      toasts: mockCoreStart.notifications.toasts,
+      startServices: mockStartServices,
+      uiSettings: mockCoreStart.uiSettings,
+      http: mockCoreStart.http,
+    };
+
+    interceptor = new PromQLSearchInterceptor(mockDeps);
+    await flushPromises();
   });
 
-  it('returns undefined when bounds are missing or non-positive', () => {
-    expect(
-      resolveStepOptions({ query: 'up', language: 'PROMQL', maxDataPoints: 100 }, {})
-    ).toBeUndefined();
-    expect(
-      resolveStepOptions(
-        { query: 'up', language: 'PROMQL', maxDataPoints: 100 },
-        bounds(END, START)
-      )
-    ).toBeUndefined();
-  });
+  it('forwards panel resolution and per-query options and the current time range', () => {
+    interceptor.search({} as IOpenSearchDashboardsSearchRequest, options);
 
-  it('honors maxDataPoints as the resolution', () => {
-    const result = resolveStepOptions(
-      { query: 'up', language: 'PROMQL', maxDataPoints: 100 },
-      bounds(START, END)
-    );
-    expect(result).toEqual({ step: calculateStep(END - START, 100, 15) });
-  });
-
-  it('parses minStep duration strings into a seconds floor', () => {
-    const result = resolveStepOptions(
-      { query: 'up', language: 'PROMQL', minStep: '5m' },
-      bounds(START, END)
-    );
-    expect(result).toEqual({ step: calculateStep(END - START, DEFAULT_RESOLUTION, 300) });
-  });
-
-  it('falls back to defaults for invalid minStep and non-positive maxDataPoints', () => {
-    const result = resolveStepOptions(
-      { query: 'up', language: 'PROMQL', minStep: 'not-a-duration', maxDataPoints: 0 },
-      bounds(START, END)
-    );
-    expect(result).toEqual({ step: calculateStep(END - START, DEFAULT_RESOLUTION, 15) });
-  });
-});
-
-describe('resolvePromQLMacroContext', () => {
-  it('returns undefined when bounds are missing or non-positive', () => {
-    expect(resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, {})).toBeUndefined();
-    expect(
-      resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, bounds(END, START))
-    ).toBeUndefined();
-  });
-
-  it('derives step and range with default resolution and assumed scrape interval', () => {
-    expect(
-      resolvePromQLMacroContext({ query: 'up', language: 'PROMQL' }, bounds(START, END))
-    ).toEqual({
-      stepSec: calculateStep(END - START, DEFAULT_RESOLUTION, 15),
-      rangeMs: END - START,
-      scrapeSec: ASSUMED_SCRAPE_INTERVAL,
+    const [context, query] = mockFetch.mock.calls[0];
+    expect(query).toMatchObject({
+      query: 'up',
+      maxDataPoints: 500,
+      perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
     });
+    expect(context.body?.timeRange).toEqual({ from: 'now-1h', to: 'now' });
   });
 
-  it('uses a valid min step as both the step floor and the scrape interval', () => {
-    expect(
-      resolvePromQLMacroContext(
-        { query: 'up', language: 'PROMQL', minStep: '1m' },
-        bounds(START, END)
-      )
-    ).toEqual({
-      stepSec: calculateStep(END - START, DEFAULT_RESOLUTION, 60),
-      rangeMs: END - START,
-      scrapeSec: 60,
-    });
+  it('drops per-query options when executing a different query than the global state', () => {
+    const request = {
+      params: {
+        body: { query: { queries: [{ query: 'rate(x[5m])', language: 'PROMQL' }] } },
+      },
+    } as unknown as IOpenSearchDashboardsSearchRequest;
+
+    interceptor.search(request, options);
+
+    const [, query] = mockFetch.mock.calls[0];
+    expect(query).toMatchObject({ query: 'rate(x[5m])', maxDataPoints: 500 });
+    expect((query as any).perQueryOptions).toBeUndefined();
   });
 });

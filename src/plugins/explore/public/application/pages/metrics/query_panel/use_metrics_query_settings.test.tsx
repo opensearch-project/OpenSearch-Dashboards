@@ -30,8 +30,6 @@ describe('useMetricsQuerySettings', () => {
     query: 'up',
     language: 'PROMQL',
     maxDataPoints: 500,
-    minStep: '1m',
-    legendFormat: '{{job}}',
   };
 
   beforeEach(() => {
@@ -69,51 +67,35 @@ describe('useMetricsQuerySettings', () => {
     });
   };
 
-  it('seeds step settings and legend format from the active query', () => {
+  it('seeds max data points from the active query', () => {
     const { result } = render();
-    expect(result.current.stepSettings).toEqual({ maxDataPoints: 500, minStep: '1m' });
-    expect(result.current.legendFormat).toBe('{{job}}');
+    expect(result.current.maxDataPoints).toBe(500);
   });
 
-  it('resolves the step for the current bounds', () => {
+  it('resolves the step for the current bounds using the panel resolution', () => {
     const { result } = render();
-    expect(result.current.resolvedStepSec).toBe(200);
-    expect(result.current.minStepInvalid).toBe(false);
+    expect(result.current.getResolvedStepSec(undefined)).toBe(200);
   });
 
-  it('flags an invalid min step', () => {
-    getQuery.mockReturnValue({ ...initialQuery, minStep: 'nonsense' });
+  it('floors the resolved step by a per-row min step', () => {
     const { result } = render();
-    expect(result.current.minStepInvalid).toBe(true);
+    expect(result.current.getResolvedStepSec('5m')).toBe(300);
   });
 
   it('returns a null resolved step when bounds are empty', () => {
     mockServices.data.query.timefilter.timefilter.getBounds.mockReturnValue({});
     const { result } = render();
-    expect(result.current.resolvedStepSec).toBeNull();
+    expect(result.current.getResolvedStepSec(undefined)).toBeNull();
   });
 
-  it('persists step changes to the query and marks the editor dirty', () => {
+  it('persists max data points changes to the query and marks the editor dirty', () => {
     const { result } = render();
     act(() => {
-      result.current.onStepSettingsChange({ maxDataPoints: 200, minStep: '30s' });
+      result.current.onMaxDataPointsChange(200);
     });
-    expect(setQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ maxDataPoints: 200, minStep: '30s' })
-    );
+    expect(setQuery).toHaveBeenCalledWith(expect.objectContaining({ maxDataPoints: 200 }));
     expect(mockDispatch).toHaveBeenCalledTimes(2);
-    expect(result.current.stepSettings).toEqual({ maxDataPoints: 200, minStep: '30s' });
-  });
-
-  it('persists legend format changes to the query', () => {
-    const { result } = render();
-    act(() => {
-      result.current.onLegendFormatChange('{{instance}}');
-    });
-    expect(setQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ legendFormat: '{{instance}}' })
-    );
-    expect(result.current.legendFormat).toBe('{{instance}}');
+    expect(result.current.maxDataPoints).toBe(200);
   });
 
   it('recomputes the resolved step when the time range updates', () => {
@@ -121,10 +103,10 @@ describe('useMetricsQuerySettings', () => {
       .mockReturnValueOnce({ min: { valueOf: () => 0 }, max: { valueOf: () => 86400000 } })
       .mockReturnValue({ min: { valueOf: () => 0 }, max: { valueOf: () => 3600000 } });
     const { result } = render();
-    expect(result.current.resolvedStepSec).toBe(200);
+    expect(result.current.getResolvedStepSec('1m')).toBe(200);
     act(() => {
       timeUpdate$.next();
     });
-    expect(result.current.resolvedStepSec).toBe(60);
+    expect(result.current.getResolvedStepSec('1m')).toBe(60);
   });
 });

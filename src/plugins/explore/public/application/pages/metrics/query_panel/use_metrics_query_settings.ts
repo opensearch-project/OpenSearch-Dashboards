@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   calculateStep,
@@ -16,30 +16,21 @@ import { ExploreServices } from '../../../../types';
 import { PromQLQueryOptions } from '../../../utils/languages';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { setMetricsQuerySettings } from '../../../../application/utils/state_management/slices/query/query_slice';
-import { MetricsStepSettingsValue } from './metrics_query_options';
 
 type MetricsQuery = Query & PromQLQueryOptions;
 
 export interface MetricsQuerySettings {
-  stepSettings: MetricsStepSettingsValue;
-  legendFormat?: string;
-  minStepInvalid: boolean;
-  resolvedStepSec: number | null;
-  onStepSettingsChange: (next: MetricsStepSettingsValue) => void;
-  onLegendFormatChange: (next?: string) => void;
+  maxDataPoints?: number;
+  onMaxDataPointsChange: (next?: number) => void;
+  getResolvedStepSec: (minStep?: string) => number | null;
 }
 
 export function useMetricsQuerySettings(services: ExploreServices): MetricsQuerySettings {
   const dispatch = useDispatch();
   const { queryString } = services.data.query;
 
-  const [stepSettings, setStepSettings] = useState<MetricsStepSettingsValue>(() => {
-    const q = queryString.getQuery() as MetricsQuery;
-    return { maxDataPoints: q.maxDataPoints, minStep: q.minStep };
-  });
-
-  const [legendFormat, setLegendFormat] = useState<string | undefined>(
-    () => (queryString.getQuery() as MetricsQuery).legendFormat
+  const [maxDataPoints, setMaxDataPoints] = useState<number | undefined>(
+    () => (queryString.getQuery() as MetricsQuery).maxDataPoints
   );
 
   const [timeTick, setTimeTick] = useState(0);
@@ -49,72 +40,36 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
     return () => sub.unsubscribe();
   }, [services.data.query.timefilter]);
 
-  const minStepSec = useMemo(() => {
-    if (!stepSettings.minStep) return undefined;
-    const parsed = parseStepIntervalSeconds(stepSettings.minStep);
-    return parsed && parsed > 0 ? parsed : undefined;
-  }, [stepSettings.minStep]);
-
-  const minStepInvalid = !!stepSettings.minStep && minStepSec === undefined;
-
-  const resolvedStepSec = useMemo(() => {
-    const { timefilter } = services.data.query.timefilter;
-    const bounds = timefilter.getBounds();
-    const min = bounds?.min?.valueOf();
-    const max = bounds?.max?.valueOf();
-    if (min === undefined || max === undefined || max <= min) return null;
-    const resolution =
-      stepSettings.maxDataPoints && stepSettings.maxDataPoints > 0
-        ? stepSettings.maxDataPoints
-        : DEFAULT_RESOLUTION;
-    return calculateStep(max - min, resolution, minStepSec ?? MIN_STEP_INTERVAL);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepSettings.maxDataPoints, minStepSec, timeTick, services.data.query.timefilter]);
-
-  const onStepSettingsChange = useCallback(
-    (next: MetricsStepSettingsValue) => {
-      setStepSettings(next);
-      const currentQuery = queryString.getQuery();
-      queryString.setQuery({
-        ...currentQuery,
-        maxDataPoints: next.maxDataPoints,
-        minStep: next.minStep,
-      } as MetricsQuery);
-      dispatch(
-        setMetricsQuerySettings({
-          maxDataPoints: next.maxDataPoints,
-          minStep: next.minStep,
-          legendFormat,
-        })
-      );
-      dispatch(setIsQueryEditorDirty(true));
+  const getResolvedStepSec = useCallback(
+    (minStep?: string) => {
+      const { timefilter } = services.data.query.timefilter;
+      const bounds = timefilter.getBounds();
+      const min = bounds?.min?.valueOf();
+      const max = bounds?.max?.valueOf();
+      if (min === undefined || max === undefined || max <= min) return null;
+      const parsed = minStep ? parseStepIntervalSeconds(minStep) : undefined;
+      const minStepSec = parsed && parsed > 0 ? parsed : undefined;
+      const resolution = maxDataPoints && maxDataPoints > 0 ? maxDataPoints : DEFAULT_RESOLUTION;
+      return calculateStep(max - min, resolution, minStepSec ?? MIN_STEP_INTERVAL);
     },
-    [queryString, dispatch, legendFormat]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [maxDataPoints, timeTick, services.data.query.timefilter]
   );
 
-  const onLegendFormatChange = useCallback(
-    (next?: string) => {
-      setLegendFormat(next);
+  const onMaxDataPointsChange = useCallback(
+    (next?: number) => {
+      setMaxDataPoints(next);
       const currentQuery = queryString.getQuery();
-      queryString.setQuery({ ...currentQuery, legendFormat: next } as MetricsQuery);
-      dispatch(
-        setMetricsQuerySettings({
-          maxDataPoints: stepSettings.maxDataPoints,
-          minStep: stepSettings.minStep,
-          legendFormat: next,
-        })
-      );
+      queryString.setQuery({ ...currentQuery, maxDataPoints: next } as MetricsQuery);
+      dispatch(setMetricsQuerySettings({ maxDataPoints: next }));
       dispatch(setIsQueryEditorDirty(true));
     },
-    [queryString, dispatch, stepSettings.maxDataPoints, stepSettings.minStep]
+    [queryString, dispatch]
   );
 
   return {
-    stepSettings,
-    legendFormat,
-    minStepInvalid,
-    resolvedStepSec,
-    onStepSettingsChange,
-    onLegendFormatChange,
+    maxDataPoints,
+    onMaxDataPointsChange,
+    getResolvedStepSec,
   };
 }

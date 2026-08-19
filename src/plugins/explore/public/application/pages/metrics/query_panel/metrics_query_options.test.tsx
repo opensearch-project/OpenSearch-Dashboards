@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MetricsQueryOptions, formatStepSeconds } from './metrics_query_options';
+import { MetricsQueryOptions, RowQueryOptions, formatStepSeconds } from './metrics_query_options';
 
 describe('formatStepSeconds', () => {
   it('formats compact durations', () => {
@@ -24,84 +24,80 @@ describe('formatStepSeconds', () => {
 
 describe('MetricsQueryOptions', () => {
   const setup = (overrides = {}) => {
-    const onStepSettingsChange = jest.fn();
-    const onLegendFormatChange = jest.fn();
-    render(
-      <MetricsQueryOptions
-        resolvedStepLabel="30s"
-        minStepInvalid={false}
-        onStepSettingsChange={onStepSettingsChange}
-        onLegendFormatChange={onLegendFormatChange}
-        {...overrides}
-      />
-    );
-    return { onStepSettingsChange, onLegendFormatChange };
+    const onMaxDataPointsChange = jest.fn();
+    render(<MetricsQueryOptions onMaxDataPointsChange={onMaxDataPointsChange} {...overrides} />);
+    return { onMaxDataPointsChange };
   };
 
-  it('emits an integer maxDataPoints and preserves minStep', () => {
-    const { onStepSettingsChange } = setup({ minStep: '1m' });
+  it('emits an integer maxDataPoints', () => {
+    const { onMaxDataPointsChange } = setup();
     fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsStepMaxDataPointsInput'), {
       target: { value: '500' },
     });
-    expect(onStepSettingsChange).toHaveBeenCalledWith({ maxDataPoints: 500, minStep: '1m' });
+    expect(onMaxDataPointsChange).toHaveBeenCalledWith(500);
   });
 
   it('clears maxDataPoints when the field is emptied', () => {
-    const { onStepSettingsChange } = setup({ maxDataPoints: 500 });
+    const { onMaxDataPointsChange } = setup({ maxDataPoints: 500 });
     fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsStepMaxDataPointsInput'), {
       target: { value: '' },
     });
-    expect(onStepSettingsChange).toHaveBeenCalledWith({
-      maxDataPoints: undefined,
-      minStep: undefined,
-    });
+    expect(onMaxDataPointsChange).toHaveBeenCalledWith(undefined);
+  });
+});
+
+describe('RowQueryOptions', () => {
+  const setup = (overrides = {}) => {
+    const onChange = jest.fn();
+    render(<RowQueryOptions resolvedStepLabel="30s" onChange={onChange} {...overrides} />);
+    return { onChange };
+  };
+
+  it('shows legend and min step fields', () => {
+    setup();
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
+    expect(screen.getByTestId('metricsLegendFormatInput')).toBeInTheDocument();
+    expect(screen.getByTestId('metricsStepMinStepInput')).toBeInTheDocument();
   });
 
-  it('emits a trimmed minStep string', () => {
-    const { onStepSettingsChange } = setup();
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+  it('emits a trimmed minStep string alongside the current legend', () => {
+    const { onChange } = setup({ legendFormat: '{{job}}' });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsStepMinStepInput'), {
       target: { value: ' 60s ' },
     });
-    expect(onStepSettingsChange).toHaveBeenCalledWith({ maxDataPoints: undefined, minStep: '60s' });
+    expect(onChange).toHaveBeenCalledWith({ minStep: '60s', legendFormat: '{{job}}' });
   });
 
-  it('shows a validation error when the min step is invalid', () => {
-    setup({ minStep: 'bad', minStepInvalid: true });
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+  it('flags an invalid min step', () => {
+    setup({ minStep: 'bad' });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
     expect(screen.getByText(/Enter a duration with a unit/)).toBeInTheDocument();
-  });
-
-  it('shows min step and max data points fields', () => {
-    setup();
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
-    expect(screen.getByTestId('metricsStepMinStepInput')).toBeInTheDocument();
-    expect(screen.getByTestId('metricsStepMaxDataPointsInput')).toBeInTheDocument();
   });
 
   it('shows the current legend format in the field', () => {
     setup({ legendFormat: '{{instance}}' });
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
     expect(screen.getByTestId('metricsLegendFormatInput')).toHaveValue('{{instance}}');
   });
 
-  it('emits the entered legend template', () => {
-    const { onLegendFormatChange } = setup();
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+  it('emits the entered legend template alongside the current min step', () => {
+    const { onChange } = setup({ minStep: '1m' });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsLegendFormatInput'), {
       target: { value: '{{job}}-{{instance}}' },
     });
-    expect(onLegendFormatChange).toHaveBeenCalledWith('{{job}}-{{instance}}');
+    expect(onChange).toHaveBeenCalledWith({ minStep: '1m', legendFormat: '{{job}}-{{instance}}' });
   });
 
   it('emits undefined when the legend field is emptied', () => {
-    const { onLegendFormatChange } = setup({ legendFormat: '{{instance}}' });
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    const { onChange } = setup({ legendFormat: '{{instance}}' });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsLegendFormatInput'), {
       target: { value: '' },
     });
-    expect(onLegendFormatChange).toHaveBeenCalledWith(undefined);
+    expect(onChange).toHaveBeenCalledWith({ minStep: undefined, legendFormat: undefined });
   });
 });
