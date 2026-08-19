@@ -203,7 +203,7 @@ describe('LineVisStyleControls', () => {
       },
       tooltipOptions: defaultTooltipOptions,
       standardAxes: [defaultCategoryAxis, defaultValueAxis],
-      showFullTimeRange: false,
+      showFullTimeRange: true,
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],
