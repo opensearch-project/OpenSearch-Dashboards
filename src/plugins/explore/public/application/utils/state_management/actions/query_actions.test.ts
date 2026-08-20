@@ -1701,6 +1701,49 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         );
       });
 
+      it.each([
+        ['3.9.0', true],
+        ['3.10.2', true],
+        ['3.8.0', false],
+        ['2.19.1', false],
+        [undefined, true],
+        ['not-a-version', true],
+      ])('data source version %s -> histogram built: %s', async (version, built) => {
+        useSQLWithBreakdown();
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        // The engine and version are read off the dataset convertToDataset returns, not off state.
+        (mockServices.data.dataViews.convertToDataset as jest.Mock).mockReturnValue({
+          id: 'test',
+          type: 'INDEX_PATTERN',
+          dataSource: { type: 'OpenSearch', engineType: 'OpenSearch', version },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+        mockSearchSource.fetch.mockResolvedValue(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledTimes(built ? 1 : 0);
+      });
+
       it('drops the breakdown when the top-N pass fails', async () => {
         useSQLWithBreakdown();
         mockSearchSource.fetch

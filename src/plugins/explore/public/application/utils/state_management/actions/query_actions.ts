@@ -6,6 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import semver from 'semver';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   IBucketDateHistogramAggConfig,
@@ -550,13 +551,29 @@ const executeQueryBase = async (
     // building it for those engines and run the plain query instead (the histogram chart just won't
     // populate).
     const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
-    const supportsPplSpan = getDataSourceEngineCapabilities(datasetEngineType).supportsPplSpan;
+    const engineCapabilities = getDataSourceEngineCapabilities(datasetEngineType);
+    const supportsPplSpan = engineCapabilities.supportsPplSpan;
+    // The bucket functions the SQL histogram is built on only exist from a certain version. Fail
+    // open the way isLanguageSupportedForDataset does: an unparseable or absent version counts as
+    // supported, so only a version we can read and that is below the minimum turns the chart off.
+    const minBucketVersion = engineCapabilities.minSqlBucketFunctionVersion;
+    const coercedVersion = semver.coerce(dataset?.dataSource?.version);
+    const supportsSqlBucketFunctions =
+      engineCapabilities.supportsSqlBucketFunctions &&
+      (!minBucketVersion ||
+        !coercedVersion ||
+        semver.satisfies(coercedVersion.version, `>=${minBucketVersion}`));
 
     let effectiveQuery = queryString;
     let effectiveHistogramConfig = histogramConfig;
     if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
-    } else if (query.language === 'SQL' && histogramConfig && isHistogramQuery) {
+    } else if (
+      query.language === 'SQL' &&
+      histogramConfig &&
+      isHistogramQuery &&
+      supportsSqlBucketFunctions
+    ) {
       let sqlHistogramConfig = histogramConfig;
       let breakdownValues: Array<string | number> | undefined;
       // Pass 1 finds the top-N breakdown values; pass 2 buckets by them.
