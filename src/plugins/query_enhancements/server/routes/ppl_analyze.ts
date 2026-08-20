@@ -24,7 +24,8 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
           // PPL pipeline, and makes the cap explicit + independent of global config.
           query: schema.string({ minLength: 1, maxLength: 65536 }),
           dataSourceId: schema.maybe(schema.nullable(schema.string())),
-          queryId: schema.maybe(schema.string()),
+          // queryId is a client-generated UUID (36 chars); 128 is ample headroom.
+          queryId: schema.maybe(schema.string({ maxLength: 128 })),
         }),
       },
     },

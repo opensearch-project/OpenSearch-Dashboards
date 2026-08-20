@@ -26,6 +26,7 @@ const mockTimefilter = {
   getTime: () => ({ from: 'now-15m', to: 'now' }),
 } as any;
 
+const ANALYZE_PATH = '/api/enhancements/ppl/analyze';
 const pplQuery = { query: 'source=accounts', language: 'PPL' };
 const sqlQuery = { query: 'SELECT *', language: 'SQL' };
 
@@ -219,6 +220,52 @@ describe('runPPLAnalyzeInBackground', () => {
       mockFetch.mockClear();
       cancelPPLAnalyze();
       expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('passes an abort signal to the analyze fetch', () => {
+      mockFetch.mockReturnValue(new Promise(() => {}));
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const analyzeCall = mockFetch.mock.calls.find((c: any[]) => c[0].path === ANALYZE_PATH);
+      expect(analyzeCall![0].signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('aborts the in-flight fetch when cancelled', () => {
+      mockFetch.mockReturnValue(new Promise(() => {}));
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      const signal = mockFetch.mock.calls.find((c: any[]) => c[0].path === ANALYZE_PATH)![0].signal;
+      expect(signal.aborted).toBe(false);
+
+      cancelPPLAnalyze();
+      expect(signal.aborted).toBe(true);
+    });
+
+    it('does not commit a result when the fetch resolves after cancellation', async () => {
+      // A response that resolves only after we have already cancelled must not
+      // repopulate the panel (would defeat clearPPLAnalyzeResult on close).
+      let resolveFetch: (v: any) => void = () => {};
+      mockFetch.mockReturnValue(
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        })
+      );
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+
+      cancelPPLAnalyze();
+      resolveFetch({ profile: { summary: { total_time_ms: 9 } } });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(setPPLAnalyzeResult).not.toHaveBeenCalled();
+    });
+
+    it('does not commit an error result when the fetch rejects with AbortError', async () => {
+      const abortErr = Object.assign(new Error('aborted'), { name: 'AbortError' });
+      mockFetch.mockRejectedValue(abortErr);
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(setPPLAnalyzeResult).not.toHaveBeenCalled();
     });
   });
 

@@ -40,12 +40,6 @@ const PHASE_COLORS: Record<string, string> = {
   format: '#D6BF57',
 };
 
-const OPERATOR_COLORS = {
-  pushedDown: '#7DE2D1',
-  inMemory: '#FFCE7A',
-  bottleneck: '#FF6666',
-};
-
 const PHASE_DESCRIPTIONS: Record<string, string> = {
   analyze: i18n.translate('data.pplAnalyze.phaseDescription.analyze', {
     defaultMessage: 'Parsing and validating the query syntax and semantics.',
@@ -199,8 +193,13 @@ function formatMs(ms: number): string {
 // Measure rendered text width with a shared canvas — no DOM node, no reflow. Falls
 // back to a rough per-character estimate when canvas is unavailable (e.g. in jsdom).
 let measureCtx: CanvasRenderingContext2D | null = null;
+// Track whether we've already tried to create the context: getContext('2d') can
+// return null, so a `measureCtx === null` guard alone would re-allocate a canvas on
+// every call. This latches the attempt so we only create one canvas, ever.
+let measureCtxAttempted = false;
 function measureTextWidth(text: string, font: string): number {
-  if (measureCtx === null && typeof document !== 'undefined') {
+  if (!measureCtxAttempted && typeof document !== 'undefined') {
+    measureCtxAttempted = true;
     measureCtx = document.createElement('canvas').getContext('2d');
   }
   if (measureCtx) {
@@ -295,23 +294,25 @@ function PhysicalPlanSection({
     return () => observer.disconnect();
   }, []);
 
-  const nodes = flattenPlan(plan);
-  // Scale the timeline to the sum of self-times rather than the root's reported
-  // time_ms — the root isn't guaranteed to have the largest inclusive time, so
-  // summing the self-times is the only value the bars are certain to tile into.
-  const totalTimeMs = nodes.reduce((sum, n) => sum + n.selfTimeMs, 0);
-  const maxSelfTimeMs = Math.max(...nodes.map((n) => n.selfTimeMs), 0);
-  const bottleneckIdx = nodes.findIndex((n) => n.selfTimeMs === maxSelfTimeMs);
-
-  // Lay the self-time slices end-to-end so each bar starts where the previous
-  // one ended. Self-times sum to the total, so the bars tile the full timeline
-  // instead of every bar starting at 0.
-  let cursor = 0;
-  const nodeStarts: number[] = [];
-  nodes.forEach((n) => {
-    nodeStarts.push(cursor);
-    cursor += n.selfTimeMs;
-  });
+  // Flatten the plan and derive the layout geometry once per plan, not on every
+  // hover/expand re-render.
+  const { nodes, totalTimeMs, nodeStarts } = React.useMemo(() => {
+    const flat = flattenPlan(plan);
+    // Scale the timeline to the sum of self-times rather than the root's reported
+    // time_ms — the root isn't guaranteed to have the largest inclusive time, so
+    // summing the self-times is the only value the bars are certain to tile into.
+    const total = flat.reduce((sum, n) => sum + n.selfTimeMs, 0);
+    // Lay the self-time slices end-to-end so each bar starts where the previous
+    // one ended. Self-times sum to the total, so the bars tile the full timeline
+    // instead of every bar starting at 0.
+    let cursor = 0;
+    const starts: number[] = [];
+    flat.forEach((n) => {
+      starts.push(cursor);
+      cursor += n.selfTimeMs;
+    });
+    return { nodes: flat, totalTimeMs: total, nodeStarts: starts };
+  }, [plan]);
 
   const tickInterval = totalTimeMs > 0 ? totalTimeMs / (TICK_COUNT - 1) : 1;
   const ticks = Array.from({ length: TICK_COUNT }, (_, i) => i * tickInterval);
@@ -418,7 +419,6 @@ function PhysicalPlanSection({
         </div>
         {/* Node rows */}
         {nodes.map((n, idx) => {
-          const isBottleneck = idx === bottleneckIdx && n.selfTimeMs > 0;
           const isExpanded = expandedIdx === idx;
           const isHovered = hoveredIdx === idx;
           const startPct = totalTimeMs > 0 ? (nodeStarts[idx] / totalTimeMs) * 100 : 0;
@@ -492,20 +492,6 @@ function PhysicalPlanSection({
                   >
                     <strong>{displayNodeName(n.node)}</strong>
                   </EuiText>
-                  {isBottleneck && (
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        fontSize: 12,
-                        color: OPERATOR_COLORS.bottleneck,
-                      }}
-                      title={i18n.translate('data.pplAnalyze.bottleneckTooltip', {
-                        defaultMessage: 'Bottleneck',
-                      })}
-                    >
-                      ⚠
-                    </span>
-                  )}
                 </div>
                 {/* Stats column */}
                 <div
@@ -763,13 +749,15 @@ const MIN_NODE_EXECUTE_SHARE = 0.05;
 const MAX_RECOMMENDATIONS = 3;
 const SEVERITY_RANK: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 };
 
-// Filter incoming recommendations to the ones worth showing:
+// Filter and order the recommendations worth showing:
 //  1. drop any whose `affected_node` maps to a plan node using less than
 //     MIN_NODE_EXECUTE_SHARE of the execute phase (small operators aren't the
 //     right thing to tell customers to optimize),
-//  2. keep at most MAX_RECOMMENDATIONS, preferring higher severities.
+//  2. order by severity so the most important ones come first.
 // Recs with no `affected_node` (phase-level advice) or an unmatched name pass
 // through the share filter — we can't judge their weight, so we don't drop them.
+// The display cap (MAX_RECOMMENDATIONS) is applied in the component so the full
+// list stays available behind a "show all" affordance.
 function filterRecommendations(
   recs: Array<PPLAnalyzeRecommendation | string> | undefined,
   nodes: FlatPlanNode[],
@@ -794,12 +782,11 @@ function filterRecommendations(
     if (selfMs === undefined) return true;
     return selfMs >= minSelfMs;
   });
-  const ranked = [...kept].sort((a, b) => {
-    const sa = SEVERITY_RANK[((a as any).serverity || a.severity || 'INFO').toUpperCase()] ?? 2;
-    const sb = SEVERITY_RANK[((b as any).serverity || b.severity || 'INFO').toUpperCase()] ?? 2;
+  return [...kept].sort((a, b) => {
+    const sa = SEVERITY_RANK[(a.severity || 'INFO').toUpperCase()] ?? 2;
+    const sb = SEVERITY_RANK[(b.severity || 'INFO').toUpperCase()] ?? 2;
     return sa - sb;
   });
-  return ranked.slice(0, MAX_RECOMMENDATIONS);
 }
 
 function RecommendationsSection({
@@ -807,6 +794,11 @@ function RecommendationsSection({
 }: {
   recommendations: PPLAnalyzeRecommendation[];
 }) {
+  const [showAll, setShowAll] = useState(false);
+  // Cap the list by default; the rest stay reachable via the "show all" toggle so
+  // nothing is silently hidden.
+  const isCapped = recommendations.length > MAX_RECOMMENDATIONS;
+  const visible = showAll ? recommendations : recommendations.slice(0, MAX_RECOMMENDATIONS);
   return (
     <div>
       <EuiTitle size="xxs">
@@ -826,8 +818,8 @@ function RecommendationsSection({
           />
         </EuiText>
       ) : (
-        recommendations.map((rec: any, idx: number) => {
-          const severity = (rec.serverity || rec.severity || 'INFO').toUpperCase();
+        visible.map((rec: PPLAnalyzeRecommendation, idx: number) => {
+          const severity = (rec.severity || 'INFO').toUpperCase();
           const color = SEVERITY_COLORS[severity] || SEVERITY_COLORS.INFO;
           return (
             <React.Fragment key={idx}>
@@ -872,10 +864,27 @@ function RecommendationsSection({
                   </>
                 )}
               </EuiPanel>
-              {idx < recommendations.length - 1 && <EuiSpacer size="s" />}
+              {idx < visible.length - 1 && <EuiSpacer size="s" />}
             </React.Fragment>
           );
         })
+      )}
+      {isCapped && !showAll && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            onClick={() => setShowAll(true)}
+            data-test-subj="analyzeShowAllRecommendations"
+          >
+            <FormattedMessage
+              id="data.pplAnalyze.recommendations.showAll"
+              defaultMessage="Showing {shown} of {total} — Show all"
+              values={{ shown: MAX_RECOMMENDATIONS, total: recommendations.length }}
+            />
+          </EuiButtonEmpty>
+        </>
       )}
     </div>
   );
@@ -914,7 +923,6 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
   // (profile.plan).
   const planTree = response.profile?.plan;
   const hasPlanTree = !!planTree;
-  const possibleCacheHit = !!response.possibleCacheHit;
   const executePhaseMs = response.profile?.phases?.execute?.time_ms || 0;
   // Drop recs on tiny operators and cap to the most critical few. Recomputes only
   // when the plan or execute-phase timing changes, not on hover/expand state.
@@ -978,25 +986,6 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
         </EuiCallOut>
       ) : (
         <>
-          {possibleCacheHit && (
-            <>
-              <EuiCallOut
-                title={i18n.translate('data.pplAnalyze.cacheHit.title', {
-                  defaultMessage: 'Possible cache hit detected',
-                })}
-                iconType="iInCircle"
-                color="primary"
-              >
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="data.pplAnalyze.cacheHit.body"
-                    defaultMessage="This query may have been previously cached, which can produce a much faster execution phase time than normal. Cache hits can make profiling results inaccurate. This behavior can be toggled in Settings."
-                  />
-                </EuiText>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          )}
           {response.profile?.phases && (
             <TimingBar phases={response.profile.phases} totalTimeMs={totalTimeMs} />
           )}

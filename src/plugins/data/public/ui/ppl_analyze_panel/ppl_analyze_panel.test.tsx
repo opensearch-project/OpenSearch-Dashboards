@@ -34,7 +34,7 @@ const mockAnalyzeResult = {
     },
     recommendations: [
       {
-        serverity: 'INFO',
+        severity: 'INFO',
         rule: 'Bottleneck stage',
         message: '73% of time is in the *SearchFrom, WhereCommand* stage',
         affected_node: 'source=accounts | where age < 30',
@@ -327,7 +327,7 @@ describe('PPLAnalyzePanel', () => {
       expect(screen.getByText('Phase-level rule')).toBeInTheDocument();
     });
 
-    it('shows at most three recommendations, most critical first', () => {
+    it('shows at most three recommendations by default, most critical first', () => {
       const result = buildResult([
         { severity: 'INFO', rule: 'Info one', message: 'i1' },
         { severity: 'CRITICAL', rule: 'Crit one', message: 'c1' },
@@ -335,11 +335,39 @@ describe('PPLAnalyzePanel', () => {
         { severity: 'WARNING', rule: 'Warn one', message: 'w1' },
       ]);
       render(<PPLAnalyzePanel analyzeResult={result} />);
-      // Top 3 by severity: CRITICAL, WARNING, then the first INFO; the second INFO drops.
+      // Top 3 by severity: CRITICAL, WARNING, then the first INFO; the second INFO
+      // is hidden behind the show-all toggle, not rendered initially.
       expect(screen.getByText('Crit one')).toBeInTheDocument();
       expect(screen.getByText('Warn one')).toBeInTheDocument();
       expect(screen.getByText('Info one')).toBeInTheDocument();
       expect(screen.queryByText('Info two')).not.toBeInTheDocument();
+    });
+
+    it('shows a "show all" toggle that reveals the remaining recommendations', () => {
+      const result = buildResult([
+        { severity: 'INFO', rule: 'Info one', message: 'i1' },
+        { severity: 'CRITICAL', rule: 'Crit one', message: 'c1' },
+        { severity: 'INFO', rule: 'Info two', message: 'i2' },
+        { severity: 'WARNING', rule: 'Warn one', message: 'w1' },
+      ]);
+      render(<PPLAnalyzePanel analyzeResult={result} />);
+      const toggle = screen.getByTestId('analyzeShowAllRecommendations');
+      expect(toggle).toHaveTextContent('Showing 3 of 4');
+      expect(screen.queryByText('Info two')).not.toBeInTheDocument();
+
+      fireEvent.click(toggle);
+      expect(screen.getByText('Info two')).toBeInTheDocument();
+      // Once expanded, the toggle is gone.
+      expect(screen.queryByTestId('analyzeShowAllRecommendations')).not.toBeInTheDocument();
+    });
+
+    it('does not show the toggle when three or fewer recommendations survive', () => {
+      const result = buildResult([
+        { severity: 'CRITICAL', rule: 'Crit one', message: 'c1' },
+        { severity: 'WARNING', rule: 'Warn one', message: 'w1' },
+      ]);
+      render(<PPLAnalyzePanel analyzeResult={result} />);
+      expect(screen.queryByTestId('analyzeShowAllRecommendations')).not.toBeInTheDocument();
     });
 
     it('hides the section when every recommendation is filtered out', () => {
@@ -353,22 +381,6 @@ describe('PPLAnalyzePanel', () => {
       ]);
       render(<PPLAnalyzePanel analyzeResult={result} />);
       expect(screen.queryByText('RECOMMENDATIONS')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('cache hit detection', () => {
-    it('does not show cache callout when possibleCacheHit is false', () => {
-      render(<PPLAnalyzePanel analyzeResult={mockAnalyzeResult} />);
-      expect(screen.queryByText('Possible cache hit detected')).not.toBeInTheDocument();
-    });
-
-    it('shows cache callout when possibleCacheHit is true', () => {
-      const result = {
-        ...mockAnalyzeResult,
-        response: { ...mockAnalyzeResult.response, possibleCacheHit: true },
-      };
-      render(<PPLAnalyzePanel analyzeResult={result} />);
-      expect(screen.getByText('Possible cache hit detected')).toBeInTheDocument();
     });
   });
 

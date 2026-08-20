@@ -26,17 +26,31 @@ let latestRequestId = 0;
 // Tracks the currently in-flight analyze request so it can be cancelled when a
 // newer request supersedes it or the user closes the panel. Cleared once the
 // request settles.
-let inFlight: { queryId: string; dataSourceId?: string; http: HttpStart } | null = null;
+let inFlight: {
+  queryId: string;
+  dataSourceId?: string;
+  http: HttpStart;
+  controller: AbortController;
+} | null = null;
 
 /**
- * Cancels the in-flight analyze request (if any) by asking the backend to cancel
- * the OpenSearch task tagged with our queryId. Best-effort: failures are swallowed
- * since the request may have already completed server-side.
+ * Cancels the in-flight analyze request (if any):
+ *  - aborts the browser fetch so the abandoned response never arrives,
+ *  - bumps latestRequestId so that even if the fetch had already resolved, the
+ *    pending .then/.catch guard discards it instead of repopulating a panel the
+ *    user cancelled,
+ *  - asks the backend to cancel the OpenSearch task tagged with our queryId.
+ * The backend cancel is best-effort: failures are swallowed since the request may
+ * have already completed server-side.
  */
 export function cancelPPLAnalyze() {
   const pending = inFlight;
   if (!pending) return;
   inFlight = null;
+  // Invalidate the in-flight request so a late-arriving (already-buffered) response
+  // can't slip past the requestId guard — abort alone is best-effort on timing.
+  latestRequestId++;
+  pending.controller.abort();
   pending.http
     .fetch({
       method: 'POST',
@@ -98,12 +112,14 @@ export function runPPLAnalyzeInBackground({
   const requestId = ++latestRequestId;
   const queryId = uuidv4();
   const dataSourceId = query.dataset?.dataSource?.id;
-  inFlight = { queryId, dataSourceId, http };
+  const controller = new AbortController();
+  inFlight = { queryId, dataSourceId, http, controller };
   setPPLAnalyzeLoading(true);
   http
     .fetch({
       method: 'POST',
       path: ANALYZE_PATH,
+      signal: controller.signal,
       body: JSON.stringify({
         query: queryString,
         dataSourceId,
@@ -120,7 +136,9 @@ export function runPPLAnalyzeInBackground({
       });
     })
     .catch((err) => {
-      if (requestId !== latestRequestId) return;
+      // Ignore responses from superseded/cancelled requests, and the AbortError
+      // raised when cancelPPLAnalyze() aborts this fetch — neither should surface.
+      if (requestId !== latestRequestId || err?.name === 'AbortError') return;
       inFlight = null;
       // A non-2xx response rejects with an HttpFetchError whose `body` holds the
       // parsed error payload ({ statusCode, error, message }). Commit that as the

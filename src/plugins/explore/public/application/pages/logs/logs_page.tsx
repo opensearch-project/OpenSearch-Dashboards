@@ -17,6 +17,7 @@ import {
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { RootState } from '../../utils/state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -200,7 +201,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                   >
                     <EuiLoadingSpinner size="xl" />
                     <EuiText size="s" color="subdued">
-                      Running query analysis…
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.running"
+                        defaultMessage="Running query analysis…"
+                      />
                     </EuiText>
                     <EuiButtonEmpty
                       size="s"
@@ -214,7 +218,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                       }}
                       data-test-subj="analyzeCancelButton"
                     >
-                      Cancel
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.cancel"
+                        defaultMessage="Cancel"
+                      />
                     </EuiButtonEmpty>
                   </div>
                 ) : (

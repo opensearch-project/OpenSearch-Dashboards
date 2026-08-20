@@ -51,7 +51,6 @@ export interface PPLAnalyzeResponse {
   // May be objects or bare strings depending on the backend version; normalize
   // before use rather than assuming the object shape.
   recommendations?: Array<PPLAnalyzeRecommendation | string>;
-  possibleCacheHit?: boolean;
   // Error shape (populated when the backend returns a 4xx/5xx or an error body).
   statusCode?: number;
   error?: string;
@@ -69,7 +68,6 @@ const analyzeOpen$ = new BehaviorSubject<boolean>(false);
 
 export const getPPLAnalyzeResult$ = () => analyzeResult$;
 export const getPPLAnalyzeLoading$ = () => analyzeLoading$;
-export const getPPLAnalyzeOpen$ = () => analyzeOpen$;
 
 export const isPPLAnalyzeOpen = () => analyzeOpen$.getValue();
 

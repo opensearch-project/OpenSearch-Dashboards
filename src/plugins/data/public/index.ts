@@ -577,7 +577,6 @@ export {
   validateTimeRange,
   getPPLAnalyzeResult$,
   getPPLAnalyzeLoading$,
-  getPPLAnalyzeOpen$,
   setPPLAnalyzeResult,
   setPPLAnalyzeLoading,
   setPPLAnalyzeOpen,
