@@ -5,6 +5,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
+import { StackMode } from '../types';
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
@@ -22,7 +23,7 @@ describe('BarExclusiveVisOptions', () => {
     showBarBorder: false,
     barBorderWidth: 1,
     barBorderColor: '#000000',
-    stackMode: 'none' as 'none' | 'total',
+    stackMode: 'none' as StackMode,
     onBarSizeModeChange: jest.fn(),
     onBarWidthChange: jest.fn(),
     onBarPaddingChange: jest.fn(),
@@ -31,7 +32,15 @@ describe('BarExclusiveVisOptions', () => {
     onBarBorderColorChange: jest.fn(),
     onUseThresholdColorChange: jest.fn(),
     onStackModeChange: jest.fn(),
+    onBarRadiusChange: jest.fn(),
+    onShowValuesChange: jest.fn(),
+    onFillOpacityChange: jest.fn(),
   };
+
+  // EuiButtonGroup marks the selection on the label rather than the input
+  const isSelected = (testSubj: string) =>
+    screen.getByTestId(testSubj).classList.contains('euiButtonGroupButton-isSelected') ||
+    screen.getByTestId(testSubj).classList.contains('ouiButtonGroupButton-isSelected');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,6 +91,22 @@ describe('BarExclusiveVisOptions', () => {
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarWidthChange).toHaveBeenCalledWith(0.8);
+  });
+
+  test('calls onFillOpacityChange with a 0-1 fraction when the 0-100 slider changes', () => {
+    const onFillOpacityChange = jest.fn();
+    render(
+      <BarExclusiveVisOptions
+        {...defaultProps}
+        fillOpacity={0.5}
+        onFillOpacityChange={onFillOpacityChange}
+      />
+    );
+
+    // Slider is shown on a 0-100 scale but the value is stored as a 0-1 fraction.
+    fireEvent.change(screen.getByTestId('barFillOpacity'), { target: { value: '80' } });
+
+    expect(onFillOpacityChange).toHaveBeenCalledWith(0.8);
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
@@ -138,38 +163,39 @@ describe('BarExclusiveVisOptions', () => {
     expect(screen.getByText('Border color')).toBeInTheDocument();
   });
 
-  test('renders stack mode options correctly', () => {
+  test('renders the three stack mode options', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Check if the stack mode button group exists
-    const stackModeButtonGroup = screen.getByTestId('barStackModeButtonGroup');
-    expect(stackModeButtonGroup).toBeInTheDocument();
-
-    // Check if the "None" and "Stacked" buttons exist
-    expect(screen.getByText('None')).toBeInTheDocument();
-    expect(screen.getByText('Stacked')).toBeInTheDocument();
-
-    // Check if the stack mode label is rendered (using getAllByText to handle multiple matches)
-    expect(screen.getAllByText('Stack')).toHaveLength(2); // label and legend
+    expect(screen.getByTestId('barStackModeButtonGroup')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-none')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-total')).toBeInTheDocument();
+    expect(screen.getByTestId('barStackMode-percentage')).toBeInTheDocument();
   });
 
-  test('calls onStackModeChange when stack mode is changed', () => {
+  test('defaults the stack mode selection to none', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Find and click the "Stacked" button
-    const stackedButton = screen.getByText('Stacked');
-    fireEvent.click(stackedButton);
-
-    // Check if the callback was called with the correct value
-    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith('total');
+    expect(isSelected('barStackMode-none')).toBe(true);
+    expect(isSelected('barStackMode-total')).toBe(false);
+    expect(isSelected('barStackMode-percentage')).toBe(false);
   });
 
-  test('renders with stacked mode selected', () => {
-    render(<BarExclusiveVisOptions {...defaultProps} stackMode="total" />);
+  test.each([
+    ['barStackMode-total', 'total'],
+    ['barStackMode-percentage', 'percentage'],
+  ])('calls onStackModeChange when %s is selected', (testSubj, expected) => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // The "Stacked" button should be selected
-    const stackedButton = screen.getByText('Stacked');
-    expect(stackedButton.closest('label')).toHaveClass('euiButtonGroupButton-isSelected');
+    fireEvent.click(screen.getByTestId(testSubj));
+
+    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith(expected);
+  });
+
+  test('marks the current stack mode as selected', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} stackMode="percentage" />);
+
+    expect(isSelected('barStackMode-percentage')).toBe(true);
+    expect(isSelected('barStackMode-none')).toBe(false);
   });
 
   test('renders use threshold color switch correctly', () => {
@@ -199,5 +225,50 @@ describe('BarExclusiveVisOptions', () => {
     expect(screen.queryByTestId('barStackModeButtonGroup')).not.toBeInTheDocument();
     expect(screen.queryByText('None')).not.toBeInTheDocument();
     expect(screen.queryByText('Stacked')).not.toBeInTheDocument();
+  });
+
+  test('renders the bar radius slider with the current value', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} barRadius={8} />);
+
+    expect(screen.getByText('Radius')).toBeInTheDocument();
+    expect(screen.getByTestId('barRadiusRange')).toHaveValue('8');
+  });
+
+  test('defaults the bar radius to sharp corners', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    expect(screen.getByTestId('barRadiusRange')).toHaveValue('0');
+  });
+
+  test('calls onBarRadiusChange when the radius is changed', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    fireEvent.change(screen.getByTestId('barRadiusRange'), { target: { value: '12' } });
+
+    expect(defaultProps.onBarRadiusChange).toHaveBeenCalledWith(12);
+  });
+
+  test('renders the show values switch unchecked by default', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    const showValuesSwitch = screen.getByTestId('barShowValuesSwitch');
+    expect(showValuesSwitch).toBeInTheDocument();
+    expect(showValuesSwitch).not.toBeChecked();
+    expect(screen.getByText('Show values')).toBeInTheDocument();
+  });
+
+  test('calls onShowValuesChange when show values is toggled', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('barShowValuesSwitch'));
+
+    expect(defaultProps.onShowValuesChange).toHaveBeenCalledWith(true);
+  });
+
+  test('does not render radius or show values for histogram type', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} type="histogram" />);
+
+    expect(screen.queryByTestId('barRadiusRange')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barShowValuesSwitch')).not.toBeInTheDocument();
   });
 });
