@@ -87,10 +87,11 @@ export const runCreateVisTests = () => {
       // Open thresholds setting
       cy.get('[aria-controls="thresholdSection"]').click();
       // Change threshold mode from default 'Off' to enable threshold functionality
+      cy.get('.visStylePanelOuter').scrollTo('bottom');
+      // The accordion's overflow clips the select at its lower edge according to Cypress.
       cy.getElementByTestId('thresholdModeSelect')
-        .scrollIntoView()
-        .should('be.visible')
-        .select('Solid lines');
+        .select('Solid lines', { force: true })
+        .should('have.value', 'solid');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('.exploreVisContainer canvas').then((canvas) => {
