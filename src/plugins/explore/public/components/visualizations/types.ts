@@ -278,6 +278,8 @@ export interface ValueMappingOptions {
 export enum DisableMode {
   Never = 'never',
   Threshold = 'threshold',
+  // only for connecting null values
+  Always = 'always',
 }
 
 export interface DisconnectValuesOption {
@@ -295,3 +297,10 @@ export interface RendererSpecConfig {
   name?: string;
   data: Array<Record<string, any>>;
 }
+
+export type StackMode = 'none' | 'total' | 'percentage';
+
+export type LineMode = 'straight' | 'smooth' | 'stepped';
+
+export type LineDashStyle = 'solid' | 'dashed' | 'dotted';
+export type LineStyle = 'both' | 'line' | 'dots';
