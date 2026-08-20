@@ -66,6 +66,7 @@
 
   .embPanel__titleText {
     @include euiTextTruncate;
+
     padding-right: $euiSizeS;
   }
 
