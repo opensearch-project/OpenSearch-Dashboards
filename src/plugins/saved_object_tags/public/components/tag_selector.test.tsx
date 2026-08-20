@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiBadge, EuiComboBox } from '@elastic/eui';
 import { SavedObjectAnnotationService } from '../../../../core/public';
 import { TagSelector } from './tag_selector';
 
@@ -38,6 +38,12 @@ describe('TagSelector', () => {
     expect(comboBox.prop('options')).toEqual([
       { label: 'Production', key: 'tag-1', value: 'tag-1', color: '#54B399' },
     ]);
+
+    const renderedOption = mount(
+      <>{comboBox.prop('renderOption')!(comboBox.prop('options')![0], 'prod', '')}</>
+    );
+    expect(renderedOption.find(EuiBadge).prop('color')).toBe('#54B399');
+    expect(renderedOption.text()).toBe('Production');
 
     comboBox.prop('onChange')!([{ label: 'Production', value: 'tag-1' }]);
     expect(onChange).toHaveBeenCalledWith('tag-1');

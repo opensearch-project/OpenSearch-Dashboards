@@ -5,7 +5,14 @@
 
 import React from 'react';
 import { act } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiColorPicker, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiColorPicker,
+  EuiComboBox,
+  EuiFieldText,
+} from '@elastic/eui';
 import { mount } from 'enzyme';
 import { SavedObjectAnnotationService } from '../../../../core/public';
 import { TagAssignmentModal } from './tag_assignment_modal';
@@ -30,7 +37,7 @@ describe('TagAssignmentModal', () => {
   it('loads current assignments and saves added and removed tags', async () => {
     const annotationService = createAnnotationService();
     annotationService.findAnnotations.mockResolvedValue([
-      { id: 'tag-1', type: 'tag', name: 'Production' },
+      { id: 'tag-1', type: 'tag', name: 'Production', payload: { color: '#54B399' } },
       { id: 'tag-2', type: 'tag', name: 'Executive' },
     ]);
     annotationService.getAnnotationsForObject.mockResolvedValue([
@@ -56,6 +63,12 @@ describe('TagAssignmentModal', () => {
     expect(comboBox.prop('selectedOptions')).toEqual([
       expect.objectContaining({ label: 'Production', value: 'tag-1' }),
     ]);
+
+    const renderedOption = mount(
+      <>{comboBox.prop('renderOption')!(comboBox.prop('options')![0], '', '')}</>
+    );
+    expect(renderedOption.find(EuiBadge).prop('color')).toBe('#54B399');
+    expect(renderedOption.text()).toBe('Production');
 
     act(() => {
       comboBox.prop('onChange')!([{ label: 'Executive', value: 'tag-2' }]);

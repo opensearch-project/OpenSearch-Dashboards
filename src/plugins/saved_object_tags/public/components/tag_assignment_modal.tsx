@@ -24,6 +24,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectAnnotation, SavedObjectAnnotationService } from '../../../../core/public';
 import { TAG_ANNOTATION_TYPE } from '../../common';
 import { TagAssignmentModalProps } from '../types';
+import { renderTagOption } from './tag_option';
 
 interface Props extends TagAssignmentModalProps {
   annotationService: SavedObjectAnnotationService;
@@ -186,6 +187,7 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
             isLoading={isLoading}
             options={options}
             selectedOptions={selectedOptions}
+            renderOption={renderTagOption}
             placeholder={i18n.translate('savedObjectTags.tagAssignmentModal.tagsPlaceholder', {
               defaultMessage: 'Select tags',
             })}

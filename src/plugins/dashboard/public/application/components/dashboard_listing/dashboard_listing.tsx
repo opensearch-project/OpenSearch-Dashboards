@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import {
   useOpenSearchDashboards,
   TableListView,
@@ -47,7 +47,7 @@ export const DashboardListing = () => {
   const [selectedTagId, setSelectedTagId] = useState<string>();
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
-  const { TagSelector } = savedObjectTags.ui;
+  const { TagList, TagSelector } = savedObjectTags.ui;
   const { setAppRightControls } = application;
 
   useEffect(() => {
@@ -101,8 +101,33 @@ export const DashboardListing = () => {
   const hideWriteControls = dashboardConfig.getHideWriteControls();
 
   const tableColumns = useMemo(
-    () => getTableColumns(application, history, uiSettings),
-    [application, history, uiSettings]
+    () => [
+      ...getTableColumns(application, history, uiSettings),
+      {
+        field: 'id',
+        name: i18n.translate('dashboard.listing.table.tagsColumnName', {
+          defaultMessage: 'Tags',
+        }),
+        sortable: false,
+        ['data-test-subj']: 'dashboard-tags',
+        render: (
+          id: string,
+          record: {
+            savedObjectType: string;
+          }
+        ) => (
+          <TagList
+            target={{
+              objectType: record.savedObjectType,
+              objectId: id,
+            }}
+            loadingContent={<EuiLoadingSpinner size="s" />}
+            emptyContent="-"
+          />
+        ),
+      },
+    ],
+    [application, history, uiSettings, TagList]
   );
 
   const createItem = useCallback(() => {
@@ -126,6 +151,7 @@ export const DashboardListing = () => {
       id: obj.id,
       appId: provider.appId,
       type: provider.savedObjectsName,
+      savedObjectType: obj.type,
       ...obj.attributes,
       updated_at: obj.updated_at,
       viewUrl: provider.viewUrlPathFn(obj),

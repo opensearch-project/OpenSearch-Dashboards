@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectAnnotation, SavedObjectAnnotationService } from '../../../../core/public';
 import { TAG_ANNOTATION_TYPE } from '../../common';
 import { TagSelectorProps } from '../types';
+import { renderTagOption } from './tag_option';
 
 interface Props extends TagSelectorProps {
   annotationService: SavedObjectAnnotationService;
@@ -76,6 +77,7 @@ export const TagSelector = ({ annotationService, selectedTagId, onChange }: Prop
       options={options}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
+      renderOption={renderTagOption}
       isClearable
       isLoading={isLoading}
       fullWidth
