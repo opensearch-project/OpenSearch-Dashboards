@@ -84,5 +84,19 @@ export {
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+export { SavedObjectAnnotationsSetup, SavedObjectAnnotationTypeRegistration } from './annotations';
+export {
+  AddSavedObjectAnnotationToObjectInput,
+  CreateSavedObjectAnnotationInput,
+  DeleteSavedObjectAnnotationInput,
+  FindSavedObjectAnnotationsOptions,
+  GetSavedObjectAnnotationsForObjectInput,
+  RemoveSavedObjectAnnotationFromObjectInput,
+  SavedObjectAnnotation,
+  SavedObjectAnnotationService,
+  SavedObjectAnnotationTarget,
+  SAVED_OBJECT_ANNOTATION_TYPE,
+  UpdateSavedObjectAnnotationInput,
+} from '../../types';
 
 export { Permissions, ACL, Principals, PrincipalType } from './permission_control/acl';

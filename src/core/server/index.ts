@@ -84,6 +84,7 @@ import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logg
 import { CoreUsageDataStart } from './core_usage_data';
 import { SecurityServiceSetup } from './security/types';
 import { CrossCompatibilityServiceStart } from './cross_compatibility/types';
+import { SavedObjectAnnotationService } from '../types';
 
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
@@ -374,10 +375,21 @@ export {
 } from './metrics';
 
 export {
+  AddSavedObjectAnnotationToObjectInput,
   AppCategory,
+  CreateSavedObjectAnnotationInput,
+  DeleteSavedObjectAnnotationInput,
+  FindSavedObjectAnnotationsOptions,
+  GetSavedObjectAnnotationsForObjectInput,
   WorkspaceAttribute,
   WorkspaceCreateResult,
   PermissionModeId,
+  RemoveSavedObjectAnnotationFromObjectInput,
+  SavedObjectAnnotation,
+  SavedObjectAnnotationService,
+  SavedObjectAnnotationTarget,
+  SAVED_OBJECT_ANNOTATION_TYPE,
+  UpdateSavedObjectAnnotationInput,
   WorkspaceFindOptions,
   WorkspacePermissionMode,
 } from '../types';
@@ -438,6 +450,7 @@ export interface RequestHandlerContext {
   core: {
     savedObjects: {
       client: SavedObjectsClientContract;
+      annotations: SavedObjectAnnotationService;
       typeRegistry: ISavedObjectTypeRegistry;
     };
     opensearch: {

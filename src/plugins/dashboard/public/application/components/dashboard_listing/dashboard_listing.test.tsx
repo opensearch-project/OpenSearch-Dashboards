@@ -38,6 +38,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 import { mount } from 'enzyme';
+import { act } from 'react';
 
 import { DashboardListing } from './dashboard_listing';
 import { createDashboardServicesMock } from '../../utils/mocks';
@@ -74,6 +75,60 @@ function wrapDashboardListingInContext(mockServices: any) {
     </I18nProvider>
   );
 }
+
+describe('dashboard tag filtering', () => {
+  it('adds the selected tag as a saved object reference filter', async () => {
+    const mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          type: 'dashboard',
+          id: 'dashboard-1',
+          attributes: {
+            title: 'Dashboard',
+            description: '',
+            version: 1,
+            timeRestore: false,
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+    });
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
+    mockServices.navigation = {
+      ui: {
+        HeaderControl: () => null,
+      },
+    };
+    mockServices.savedObjectTags.ui.TagSelector = ({ onChange }: any) => (
+      <button data-test-subj="selectProductionTag" onClick={() => onChange('tag-production')} />
+    );
+
+    let component: ReturnType<typeof mount>;
+    await act(async () => {
+      component = mount(wrapDashboardListingInContext(mockServices));
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    await act(async () => {
+      component.find('[data-test-subj="selectProductionTag"]').simulate('click');
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    expect(mockServices.savedObjectsClient.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        hasReference: {
+          type: 'saved-object-annotation',
+          id: 'tag-production',
+        },
+      })
+    );
+  });
+});
 
 // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7488
 // skipping because not sure why it even needs to keep state seems like it isn't being used

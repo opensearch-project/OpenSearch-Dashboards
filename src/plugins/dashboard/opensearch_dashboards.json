@@ -9,7 +9,8 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects"
+    "savedObjects",
+    "savedObjectTags"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
   "server": true,

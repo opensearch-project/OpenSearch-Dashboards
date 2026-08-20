@@ -177,6 +177,41 @@ describe('#savedObjects', () => {
     });
   });
 
+  describe('#annotations', () => {
+    test('returns the results of coreStart.savedObjects.annotations.getClient', () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const annotations = context.savedObjects.annotations;
+      expect(annotations).toBe(coreStart.savedObjects.annotations.getClient.mock.results[0].value);
+    });
+
+    test('lazily created', () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      expect(coreStart.savedObjects.annotations.getClient).not.toHaveBeenCalled();
+      const annotations = context.savedObjects.annotations;
+      expect(coreStart.savedObjects.annotations.getClient).toHaveBeenCalledWith(request);
+      expect(annotations).toBeDefined();
+    });
+
+    test('only creates one instance', () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const annotations1 = context.savedObjects.annotations;
+      const annotations2 = context.savedObjects.annotations;
+      expect(coreStart.savedObjects.annotations.getClient).toHaveBeenCalledTimes(1);
+      const mockResult = coreStart.savedObjects.annotations.getClient.mock.results[0].value;
+      expect(annotations1).toBe(mockResult);
+      expect(annotations2).toBe(mockResult);
+    });
+  });
+
   describe('#typeRegistry', () => {
     test('returns the results of coreStart.savedObjects.getTypeRegistry', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest();

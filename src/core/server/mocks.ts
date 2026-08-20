@@ -239,6 +239,15 @@ function createCoreRequestHandlerContextMock() {
   return {
     savedObjects: {
       client: savedObjectsClientMock.create(),
+      annotations: {
+        createAnnotation: jest.fn(),
+        updateAnnotation: jest.fn(),
+        deleteAnnotation: jest.fn(),
+        findAnnotations: jest.fn(),
+        addAnnotationToObject: jest.fn(),
+        removeAnnotationFromObject: jest.fn(),
+        getAnnotationsForObject: jest.fn(),
+      },
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     opensearch: {

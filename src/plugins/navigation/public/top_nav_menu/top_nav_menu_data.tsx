@@ -30,6 +30,7 @@
 
 import { EuiButtonProps, EuiButtonIconProps } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { ReactNode } from 'react';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 export type TopNavMenuClickAction = (targetElement: HTMLElement) => void;
@@ -44,7 +45,7 @@ export interface TopNavMenuLegacyData {
   testId?: string;
   className?: string;
   disableButton?: boolean | (() => boolean);
-  tooltip?: string | (() => string | undefined);
+  tooltip?: ReactNode | (() => ReactNode);
   ariaLabel?: string;
   emphasize?: boolean;
   iconType?: EuiIconType;
@@ -62,7 +63,7 @@ interface TopNavMenuCommonData {
   testId?: string;
   className?: string;
   disabled?: boolean | (() => boolean);
-  tooltip?: string | (() => string | undefined);
+  tooltip?: ReactNode | (() => ReactNode);
 }
 
 export type TopNavMenuButtonData = TopNavMenuCommonData &
@@ -87,7 +88,7 @@ export type TopNavMenuIconData = TopNavMenuCommonData &
       ariaLabel: string;
       run?: TopNavMenuClickAction;
       href?: string;
-      tooltip: string | (() => string | undefined);
+      tooltip: ReactNode | (() => ReactNode);
       controlType: 'icon';
     },
     'href' | 'run'

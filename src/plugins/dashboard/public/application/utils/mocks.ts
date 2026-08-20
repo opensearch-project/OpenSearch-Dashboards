@@ -47,5 +47,12 @@ export const createDashboardServicesMock = () => {
         getListingLimit: jest.fn(),
       },
     },
+    savedObjectTags: {
+      ui: {
+        TagSelector: () => null,
+        TagList: () => null,
+        TagAssignmentModal: () => null,
+      },
+    },
   } as unknown as jest.Mocked<DashboardServices>;
 };

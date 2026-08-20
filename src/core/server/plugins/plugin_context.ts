@@ -203,6 +203,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     savedObjects: {
+      annotations: deps.savedObjects.annotations,
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
@@ -267,6 +268,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getServerInfo: deps.http.getServerInfo,
     },
     savedObjects: {
+      annotations: deps.savedObjects.annotations,
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,

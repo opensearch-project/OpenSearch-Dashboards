@@ -18,6 +18,11 @@
   min-width: 0;
 }
 
+.dshTagSelector {
+  width: 240px;
+  max-width: 100%;
+}
+
 // --- Variable Editor/Manage Panel Container ---
 #variablePanelContent {
   &:empty {

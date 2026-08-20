@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { ReactNode } from 'react';
 import { ViewMode } from '../../../../../../embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../../../types';
@@ -47,17 +48,24 @@ import {
 export function getTopNavLegacyConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  tagsTooltip?: ReactNode
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
       return hideWriteControls
         ? [
             getLegacyFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            ...(actions[TopNavIds.TAGS]
+              ? [getLegacyTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)]
+              : []),
             getLegacyShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
             getLegacyFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            ...(actions[TopNavIds.TAGS]
+              ? [getLegacyTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)]
+              : []),
             getLegacyShareConfig(actions[TopNavIds.SHARE]),
             getLegacyCloneConfig(actions[TopNavIds.CLONE]),
             getLegacyEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
@@ -69,6 +77,9 @@ export function getTopNavLegacyConfig(
         getLegacyAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getLegacyViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getLegacySaveConfig(actions[TopNavIds.SAVE]),
+        ...(actions[TopNavIds.TAGS]
+          ? [getLegacyTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)]
+          : []),
         getLegacyCreateNewConfig(actions[TopNavIds.VISUALIZE]),
       ];
     default:
@@ -125,6 +136,22 @@ function getLegacySaveConfig(action: NavAction) {
       defaultMessage: 'Save your dashboard',
     }),
     testId: 'dashboardSaveMenuItem',
+    run: action,
+  };
+}
+
+function getLegacyTagsConfig(action: NavAction, tooltip?: ReactNode) {
+  return {
+    id: 'tags',
+    iconType: 'tag',
+    label: i18n.translate('dashboard.topNav.tagsButtonAriaLabel', {
+      defaultMessage: 'tags',
+    }),
+    description: i18n.translate('dashboard.topNav.tagsConfigDescription', {
+      defaultMessage: 'Manage dashboard tags',
+    }),
+    tooltip,
+    testId: 'dashboardTagsMenuItem',
     run: action,
   };
 }
@@ -238,14 +265,23 @@ function getLegacyOptionsConfig(action: NavAction) {
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  tagsTooltip?: ReactNode
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
       return hideWriteControls
-        ? [getShareConfig(actions[TopNavIds.SHARE])]
+        ? [
+            ...(actions[TopNavIds.TAGS]
+              ? [getTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)]
+              : []),
+            getShareConfig(actions[TopNavIds.SHARE]),
+          ]
         : [
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE], false),
+            ...(actions[TopNavIds.TAGS]
+              ? [getTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)]
+              : []),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getShareConfig(actions[TopNavIds.SHARE]),
           ];
@@ -253,6 +289,7 @@ export function getTopNavConfig(
       return [
         getEditConfig(actions[TopNavIds.EXIT_EDIT_MODE], true),
         getSaveConfig(actions[TopNavIds.SAVE]),
+        ...(actions[TopNavIds.TAGS] ? [getTagsConfig(actions[TopNavIds.TAGS], tagsTooltip)] : []),
         getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
         getShareConfig(actions[TopNavIds.SHARE]),
@@ -312,6 +349,23 @@ function getSaveConfig(action: NavAction): TopNavMenuIconData {
     testId: 'dashboardSaveMenuItem',
     run: action,
     iconType: 'save',
+    controlType: 'icon',
+  };
+}
+
+function getTagsConfig(action: NavAction, tooltip?: ReactNode): TopNavMenuIconData {
+  return {
+    tooltip:
+      tooltip ??
+      i18n.translate('dashboard.topNav.tagsButtonTooltip', {
+        defaultMessage: 'Tags',
+      }),
+    ariaLabel: i18n.translate('dashboard.topNav.tagsButtonAriaLabel', {
+      defaultMessage: 'Manage dashboard tags',
+    }),
+    testId: 'dashboardTagsMenuItem',
+    run: action,
+    iconType: 'tag',
     controlType: 'icon',
   };
 }

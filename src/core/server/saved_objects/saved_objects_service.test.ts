@@ -52,6 +52,12 @@ import { NodesVersionCompatibility } from '../opensearch/version_check/ensure_op
 import { SavedObjectsRepository } from './service/lib/repository';
 import { SavedObjectRepositoryFactoryProvider } from './service/lib/scoped_client_provider';
 import { ServiceStatusLevels } from '../status';
+import {
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+  annotationReferencePreservationWrapper,
+  savedObjectAnnotationType,
+} from './annotations';
 
 jest.mock('./service/lib/repository');
 
@@ -152,7 +158,12 @@ describe('SavedObjectsService', () => {
 
         await soService.start(createStartDeps());
 
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(3);
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+          annotationReferencePreservationWrapper
+        );
         expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
           1,
           'A',
@@ -180,7 +191,10 @@ describe('SavedObjectsService', () => {
         };
         setup.registerType(type);
 
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(2);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(
+          savedObjectAnnotationType
+        );
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
@@ -343,6 +357,15 @@ describe('SavedObjectsService', () => {
         });
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`registerType\` after service startup."`
+      );
+
+      expect(() => {
+        setup.annotations.registerAnnotationType({
+          type: 'tag',
+          supportedObjectTypes: ['dashboard'],
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`registerAnnotationType\` after service startup."`
       );
 
       const customRpository: SavedObjectRepositoryFactoryProvider = () =>

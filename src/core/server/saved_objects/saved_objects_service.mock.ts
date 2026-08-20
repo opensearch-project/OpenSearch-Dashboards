@@ -50,6 +50,9 @@ type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
   const startContrat: jest.Mocked<SavedObjectsServiceStart> = {
+    annotations: {
+      getClient: jest.fn(),
+    },
     getScopedClient: jest.fn(),
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
@@ -58,6 +61,15 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+  startContrat.annotations.getClient.mockReturnValue({
+    createAnnotation: jest.fn(),
+    updateAnnotation: jest.fn(),
+    deleteAnnotation: jest.fn(),
+    findAnnotations: jest.fn(),
+    addAnnotationToObject: jest.fn(),
+    removeAnnotationFromObject: jest.fn(),
+    getAnnotationsForObject: jest.fn(),
+  });
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
@@ -74,6 +86,9 @@ const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObject
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
+    annotations: {
+      registerAnnotationType: jest.fn(),
+    },
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),

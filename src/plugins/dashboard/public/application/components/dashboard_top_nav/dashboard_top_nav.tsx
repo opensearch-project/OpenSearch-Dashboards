@@ -7,7 +7,10 @@ import { memo, useState, useEffect, useCallback } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig, getTopNavRightConfig, getTopNavLegacyConfig } from './top_nav';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
 import { getNavActions } from '../../utils/get_nav_actions';
@@ -17,6 +20,7 @@ import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navi
 import { TopNavIds } from './top_nav';
 import { ViewMode, isErrorEmbeddable, openAddPanelFlyout } from '../../../../../embeddable/public';
 import { getSavedObjectFinder } from '../../../../../saved_objects/public';
+import { DashboardTagListTooltip } from './dashboard_tag_list_tooltip';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -54,9 +58,11 @@ const TopNav = ({
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [topRightControls, setTopRightControls] = useState<TopNavControlData[]>([]);
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
+  const [tagRefreshKey, setTagRefreshKey] = useState(0);
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
+  const { TagAssignmentModal, TagList } = services.savedObjectTags.ui;
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
 
@@ -83,6 +89,29 @@ const TopNav = ({
       keyboardNavActions[TopNavIds.SAVE]();
     }
   }, [keyboardNavActions]);
+
+  const handleTagsChange = useCallback(() => {
+    setTagRefreshKey((refreshKey) => refreshKey + 1);
+  }, []);
+
+  const openTagAssignmentModal = useCallback(() => {
+    if (!dashboardIdFromUrl) {
+      return;
+    }
+
+    const modal = services.overlays.openModal(
+      toMountPoint(
+        <TagAssignmentModal
+          target={{
+            objectType: 'dashboard',
+            objectId: dashboardIdFromUrl,
+          }}
+          onChange={handleTagsChange}
+          onClose={() => modal.close()}
+        />
+      )
+    );
+  }, [TagAssignmentModal, dashboardIdFromUrl, handleTagsChange, services.overlays]);
 
   const handleAddPanel = useCallback(() => {
     // directly open the add panel flyout
@@ -217,17 +246,32 @@ const TopNav = ({
         dashboardIdFromUrl,
         currentContainer
       );
+      if (dashboardIdFromUrl) {
+        navActions[TopNavIds.TAGS] = openTagAssignmentModal;
+      }
+      const tagsTooltip = dashboardIdFromUrl ? (
+        <DashboardTagListTooltip
+          TagList={TagList}
+          target={{
+            objectType: 'dashboard',
+            objectId: dashboardIdFromUrl,
+          }}
+          refreshKey={tagRefreshKey}
+        />
+      ) : undefined;
       setTopNavMenu(
         showActionsInGroup
           ? getTopNavConfig(
               currentAppState?.viewMode,
               navActions,
-              dashboardConfig.getHideWriteControls()
+              dashboardConfig.getHideWriteControls(),
+              tagsTooltip
             )
           : getTopNavLegacyConfig(
               currentAppState?.viewMode,
               navActions,
-              dashboardConfig.getHideWriteControls()
+              dashboardConfig.getHideWriteControls(),
+              tagsTooltip
             )
       );
       setTopRightControls(
@@ -245,6 +289,9 @@ const TopNav = ({
     dashboard,
     dashboardIdFromUrl,
     showActionsInGroup,
+    openTagAssignmentModal,
+    TagList,
+    tagRefreshKey,
   ]);
 
   useEffect(() => {

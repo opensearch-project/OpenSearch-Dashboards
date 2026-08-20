@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   useOpenSearchDashboards,
   TableListView,
@@ -35,6 +36,7 @@ export const DashboardListing = () => {
       data: { query },
       osdUrlStateStorage,
       navigation,
+      savedObjectTags,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
@@ -42,8 +44,10 @@ export const DashboardListing = () => {
   const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
   const initialFiltersFromURL = queryParameters.get('filter');
   const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
+  const [selectedTagId, setSelectedTagId] = useState<string>();
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
+  const { TagSelector } = savedObjectTags.ui;
   const { setAppRightControls } = application;
 
   useEffect(() => {
@@ -138,6 +142,12 @@ export const DashboardListing = () => {
       page: 1,
       searchFields: ['title^3', 'type', 'description'],
       defaultSearchOperator: 'AND',
+      ...(selectedTagId && {
+        hasReference: {
+          type: 'saved-object-annotation',
+          id: selectedTagId,
+        },
+      }),
     });
     const list = res.savedObjects?.map(mapListAttributesToDashboardProvider) || [];
 
@@ -237,6 +247,18 @@ export const DashboardListing = () => {
         })}
         toastNotifications={notifications.toasts}
         showUpdatedUx={showUpdatedUx}
+        refreshKey={selectedTagId}
+        hasActiveFilters={Boolean(selectedTagId)}
+        tableFilters={
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false} className="dshTagSelector">
+                <TagSelector selectedTagId={selectedTagId} onChange={setSelectedTagId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        }
       />
     </>
   );

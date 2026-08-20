@@ -283,6 +283,7 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },
       savedObjects: {
+        annotations: setupDeps.core.savedObjects.annotations,
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
