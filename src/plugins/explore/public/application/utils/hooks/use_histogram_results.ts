@@ -17,9 +17,7 @@ export const useHistogramResults = () => {
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
 
   const cacheKey = useMemo(() => {
-    // When a breakdown field is selected the histogram result is stored under
-    // the breakdown cache key, so read that one (otherwise the total hits count
-    // comes back empty for breakdown histograms).
+    // A breakdown histogram is stored under the breakdown cache key.
     return prepareHistogramCacheKey(query, !!breakdownField);
   }, [query, breakdownField]);
 

@@ -559,9 +559,7 @@ const executeQueryBase = async (
     } else if (query.language === 'SQL' && histogramConfig && isHistogramQuery) {
       let sqlHistogramConfig = histogramConfig;
       let breakdownValues: Array<string | number> | undefined;
-      // Two-pass breakdown: pass 1 finds the top-N breakdown values at query
-      // time (matching PPL's `timechart limit=4`), pass 2 restricts the
-      // histogram to them.
+      // Pass 1 finds the top-N breakdown values; pass 2 buckets by them.
       if (histogramConfig.breakdownField) {
         try {
           const topBreakdownQuery = buildSQLTopBreakdownQuery(queryString, histogramConfig);
@@ -580,9 +578,8 @@ const executeQueryBase = async (
         } catch (e) {
           breakdownValues = undefined;
         }
-        // Without the top-N list the breakdown expression is the bare field, so
-        // every distinct value becomes its own series. Render a plain histogram
-        // instead — bounded, and still the same counts in total.
+        // Without the top-N list every distinct value becomes its own series,
+        // so fall back to a plain histogram rather than an unbounded one.
         if (!breakdownValues || breakdownValues.length === 0) {
           breakdownValues = undefined;
           sqlHistogramConfig = { ...histogramConfig, breakdownField: undefined };
@@ -666,9 +663,8 @@ const executeQueryBase = async (
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
-    // Histogram results carry their count in hits.total, but the paths that
-    // return the raw response untouched (unrecognised schema) never set it, so
-    // fall back to the row count rather than reporting NO_RESULTS.
+    // The paths that return the raw response untouched never set hits.total,
+    // so fall back to the row count rather than reporting NO_RESULTS.
     const hasResults = isHistogramQuery
       ? (rawResultsWithMeta.hits?.total || 0) > 0 ||
         (rawResultsWithMeta.hits?.hits?.length || 0) > 0

@@ -126,22 +126,11 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
   }
 };
 
-/**
- * Build the SQL expression that buckets the time field for a histogram.
- *
- * Uses the `date_histogram()` bucket function, which lowers to a span the
- * engine buckets natively rather than a per-row expression. It takes the
- * standard interval expression (e.g. `30m`, `12h`, `30d`, `1M`, `1y`) and
- * renders each bucket key as `'YYYY-MM-DD HH:mm:ss'`.
- *
- * It must be used as a subquery-aliased GROUP BY key — grouping directly on
- * `date_histogram(...)` over a base table cannot resolve the field.
- */
+/** Bucket expression for the time field. Only valid aliased inside a derived table. */
 const intervalToSQLBucket = (interval: string, timeFieldName: string): { expr: string } => {
   const field = `\`${timeFieldName}\``;
   const match = interval.match(/^(\d+)\s*([smhdwMy])$/);
-  // Normalize to a clean interval expression (strip any whitespace); fall back
-  // to per-second bucketing for an unparseable interval.
+  // Fall back to per-second bucketing for an unparseable interval.
   const normalized = match ? `${match[1]}${match[2]}` : '1s';
 
   return { expr: `date_histogram('field'=${field}, 'interval'='${normalized}')` };
@@ -155,28 +144,16 @@ const parseSQLBucketToMs = (bucket: string): number => {
   return Date.UTC(y, (mo || 1) - 1, d || 1, hh || 0, mi || 0, ss || 0);
 };
 
-/**
- * Max number of breakdown series rendered, matching PPL's `timechart limit=4`.
- */
+/** Matches PPL's `timechart limit=4`. */
 const HISTOGRAM_BREAKDOWN_SERIES_LIMIT = 4;
 
-/**
- * Label for the catch-all series aggregating values beyond the top-N, matching
- * PPL `timechart`'s default `otherstr`.
- */
+/** PPL `timechart`'s default `otherstr`. */
 const HISTOGRAM_OTHER_LABEL = 'OTHER';
 
-/**
- * Label for the series of NULL breakdown values, matching PPL `timechart`'s
- * default `nullstr`.
- */
+/** PPL `timechart`'s default `nullstr`. */
 const HISTOGRAM_NULL_LABEL = 'NULL';
 
-/**
- * Escape a breakdown value for a SQL IN-list. Numbers pass through unquoted;
- * everything else is rendered as a single-quoted string literal with internal
- * single quotes doubled.
- */
+/** Render a breakdown value for a SQL IN-list. */
 const toSQLLiteral = (value: string | number): string => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return String(value);
@@ -184,14 +161,7 @@ const toSQLLiteral = (value: string | number): string => {
   return `'${String(value).replace(/'/g, "''")}'`;
 };
 
-/**
- * Pass 1 of the two-pass breakdown histogram: find the top-N breakdown values
- * by total count. This mirrors PPL's `timechart ... limit=N`, which limits the
- * number of series at query time. The histogram (pass 2) is then restricted to
- * these values via `buildSQLHistogramQuery(..., breakdownValues)`.
- *
- * Returns the input `query` unchanged when no breakdown field is set.
- */
+/** Pass 1 of the breakdown histogram: the top-N values, which pass 2 then buckets by. */
 export const buildSQLTopBreakdownQuery = (
   query: string,
   histogramConfig: HistogramConfig,
@@ -201,8 +171,7 @@ export const buildSQLTopBreakdownQuery = (
   if (!breakdownField) {
     return query;
   }
-  // ORDER BY COUNT(*) (the expression, not an alias) — the engine does not
-  // honor aliases on aggregates reliably.
+  // Order by the expression, not an alias — aliases on aggregates are unreliable here.
   return (
     `SELECT breakdown, COUNT(*) ` +
     `FROM (SELECT \`${breakdownField}\` AS breakdown FROM (${query}) sub_inner) sub ` +
@@ -222,30 +191,15 @@ export const buildSQLHistogramQuery = (
   }
   const { expr } = intervalToSQLBucket(finalInterval, timeFieldName);
 
-  // Wrap the user query as a subquery and bucket over it. A trailing LIMIT is
-  // intentionally preserved (not stripped): PPL's histogram appends
-  // `| stats count() by span(...)` to the full query including any `| head N`,
-  // so it aggregates over the limited set. Keeping LIMIT here mirrors that
-  // behavior for SQL.
+  // A trailing LIMIT is left in place, so the histogram aggregates over the
+  // same rows the user asked for, as PPL does with `| head N`.
   //
-  // Compute the bucket in an inner subquery and GROUP BY its alias. Direct
-  // `GROUP BY <expression>` is not supported on this engine build, but
-  // `GROUP BY <alias>` from a subquery is (and flattens + pushes down).
-  // NOTE: do NOT alias COUNT(*). On the analytics engine the plan row type
-  // records the alias but datafusion names the physical column `COUNT(*)`,
-  // and the mismatch throws at execution. Leaving it unaliased keeps both
-  // sides as `COUNT(*)`; the result parser picks the non-bucket column by
-  // position, so the column name doesn't matter.
-
-  // Breakdown: project the breakdown field as a second grouping column and
-  // group by both subquery aliases. When `breakdownValues` is provided (pass 2
-  // of the two-pass flow), values are bucketed to match PPL's `timechart`:
-  //   - NULLs become a 'NULL' series,
-  //   - the top-N values keep their own series,
-  //   - everything else folds into an 'OTHER' series.
-  // Relabeling (rather than filtering with IN) keeps the long tail counted.
-  // Safe because the breakdown selector only offers string fields, so all CASE
-  // branches are strings.
+  // COUNT(*) is deliberately not aliased: the analytics engine records the
+  // alias in the plan but names the physical column `COUNT(*)`, and the
+  // mismatch throws. The result parser reads it by position.
+  //
+  // Relabelling the breakdown rather than filtering with IN keeps the long
+  // tail counted in an OTHER series, matching `timechart`.
   if (breakdownField) {
     const field = `\`${breakdownField}\``;
     const breakdownExpr =
@@ -295,9 +249,7 @@ export const processRawResultsForHistogram = (
     }
     const bucketName = fieldSchema[bucketIdx].name!;
 
-    // Breakdown: columns are [time_bucket, breakdown, COUNT(*)]. Build a
-    // per-breakdown-value series, mirroring the PPL breakdown branch so the
-    // chart renders multiple series identically.
+    // Columns are [time_bucket, breakdown, COUNT(*)].
     if (breakdownField) {
       const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === 'breakdown');
       if (breakdownIdx === -1) {
