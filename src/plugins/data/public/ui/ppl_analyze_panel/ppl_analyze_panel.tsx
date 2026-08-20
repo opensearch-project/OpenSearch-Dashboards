@@ -40,6 +40,13 @@ const PHASE_COLORS: Record<string, string> = {
   format: '#D6BF57',
 };
 
+// Display name for the synthetic trailing stage that accounts for execute-phase time
+// spent outside the operators (e.g. composing the result set).
+const OVERHEAD_NODE = i18n.translate('data.pplAnalyze.overheadStageName', {
+  defaultMessage: 'Result composition',
+});
+const OVERHEAD_BAR_COLOR = '#98A2B3';
+
 const PHASE_DESCRIPTIONS: Record<string, string> = {
   analyze: i18n.translate('data.pplAnalyze.phaseDescription.analyze', {
     defaultMessage: 'Parsing and validating the query syntax and semantics.',
@@ -225,44 +232,63 @@ function displayNodeName(node: string): string {
 }
 
 // A physical-plan node flattened for tabular display. `selfTimeMs` is the node's
-// own time excluding children, used for the waterfall bar so the bars sum to the
-// total rather than double-counting nested inclusive times.
+// own time excluding children (the bar width); `startMs` is where its bar begins on
+// the timeline — the max of its children's inclusive times, since a node can only
+// begin once its slowest child has finished (0 for leaves). `concurrentWith` holds
+// the full names of the node's siblings (nodes sharing a parent), which run
+// concurrently with it.
 interface FlatPlanNode {
   node: string;
   depth: number;
   inclusiveTimeMs: number;
   selfTimeMs: number;
+  startMs: number;
   rows?: number;
   rowsIn?: number;
   childNames: string[];
+  concurrentWith: string[];
+  // Marks the synthetic trailing row that accounts for execute-phase time not
+  // attributed to any operator (e.g. composing the result set). Rendered grey.
+  isOverhead?: boolean;
 }
 
 // Flatten the nested physical plan into a post-order list (children before their
 // parent). Physical plans execute bottom-up — leaf scans run first, the root last
 // — so post-order puts rows in execution order top-to-bottom. Each node's reported
-// time_ms is inclusive of its children, and children are pipelined rather than run
-// sequentially, so self-time = time_ms - max(child time_ms) — the parent can only
-// start after its slowest child (clamped at 0 to absorb rounding). rowsIn is the sum
-// of direct children's rows.
+// time_ms is inclusive of its children, so its bar starts at max(child time_ms) —
+// when its slowest child finished — and its width (self-time) is time_ms minus that
+// start (clamped at 0 to absorb rounding). Sibling bars overlap in real time; that
+// is expected and rendered as-is. rowsIn is the sum of direct children's rows.
 function flattenPlan(root: PPLAnalyzePlanNode): FlatPlanNode[] {
   const out: FlatPlanNode[] = [];
-  const walk = (node: PPLAnalyzePlanNode, depth: number) => {
+  // `siblingNames` is the full (undecorated) names of every node sharing this node's
+  // parent (excluding itself) — those operators overlap in time with this one.
+  const walk = (node: PPLAnalyzePlanNode, depth: number, siblingNames: string[]) => {
     const children = node.children || [];
-    children.forEach((c) => walk(c, depth + 1));
-    const childTime = children.reduce((max, c) => Math.max(max, c.time_ms || 0), 0);
+    const childNames = children.map((c) => c.node);
+    children.forEach((c, i) =>
+      walk(
+        c,
+        depth + 1,
+        childNames.filter((_, j) => j !== i)
+      )
+    );
+    const startMs = children.reduce((max, c) => Math.max(max, c.time_ms || 0), 0);
     const inclusiveTimeMs = node.time_ms || 0;
     const childRows = children.reduce((sum, c) => sum + (c.rows || 0), 0);
     out.push({
       node: node.node,
       depth,
       inclusiveTimeMs,
-      selfTimeMs: Math.max(inclusiveTimeMs - childTime, 0),
+      selfTimeMs: Math.max(inclusiveTimeMs - startMs, 0),
+      startMs,
       rows: node.rows,
       rowsIn: children.length > 0 ? childRows : undefined,
       childNames: children.map((c) => c.node),
+      concurrentWith: siblingNames,
     });
   };
-  walk(root, 0);
+  walk(root, 0, []);
   return out;
 }
 
@@ -294,27 +320,39 @@ function PhysicalPlanSection({
     return () => observer.disconnect();
   }, []);
 
-  // Flatten the plan and derive the layout geometry once per plan, not on every
-  // hover/expand re-render.
-  const { nodes, totalTimeMs, nodeStarts } = React.useMemo(() => {
+  // Flatten the plan, then append a synthetic "overhead" row for execute-phase time
+  // not attributed to any operator (result-set composition, etc.). It spans from the
+  // end of operator work (the root's inclusive time) to the end of the execute phase.
+  // Memoized per plan/phase, not per hover/expand re-render.
+  const nodes = React.useMemo(() => {
     const flat = flattenPlan(plan);
-    // Scale the timeline to the sum of self-times rather than the root's reported
-    // time_ms — the root isn't guaranteed to have the largest inclusive time, so
-    // summing the self-times is the only value the bars are certain to tile into.
-    const total = flat.reduce((sum, n) => sum + n.selfTimeMs, 0);
-    // Lay the self-time slices end-to-end so each bar starts where the previous
-    // one ended. Self-times sum to the total, so the bars tile the full timeline
-    // instead of every bar starting at 0.
-    let cursor = 0;
-    const starts: number[] = [];
-    flat.forEach((n) => {
-      starts.push(cursor);
-      cursor += n.selfTimeMs;
-    });
-    return { nodes: flat, totalTimeMs: total, nodeStarts: starts };
-  }, [plan]);
+    const operatorEndMs = flat.reduce((max, n) => Math.max(max, n.startMs + n.selfTimeMs), 0);
+    const overheadMs = executePhaseMs - operatorEndMs;
+    // Only surface it when it's a meaningful slice (avoids a sliver from rounding).
+    if (overheadMs > 0.05) {
+      flat.push({
+        node: OVERHEAD_NODE,
+        depth: 0,
+        inclusiveTimeMs: overheadMs,
+        selfTimeMs: overheadMs,
+        startMs: operatorEndMs,
+        rows: undefined,
+        rowsIn: undefined,
+        childNames: [],
+        concurrentWith: [],
+        isOverhead: true,
+      });
+    }
+    return flat;
+  }, [plan, executePhaseMs]);
 
-  const tickInterval = totalTimeMs > 0 ? totalTimeMs / (TICK_COUNT - 1) : 1;
+  // The whole waterfall — axis ticks, bar start offsets, bar widths, and the label
+  // percentage — is scaled to the execute phase, so every number shares one
+  // denominator. Each bar starts at its slowest child's inclusive time (0 for
+  // leaves), so sibling bars may overlap and bars stop short of the right edge
+  // where operator time doesn't fill the whole execute phase.
+  const scaleMs = executePhaseMs;
+  const tickInterval = scaleMs > 0 ? scaleMs / (TICK_COUNT - 1) : 1;
   const ticks = Array.from({ length: TICK_COUNT }, (_, i) => i * tickInterval);
 
   const barColor = PHASE_COLORS.execute;
@@ -333,7 +371,7 @@ function PhysicalPlanSection({
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="data.pplAnalyze.executionProfiling.description"
-          defaultMessage="Stages below are the physical-plan operators reported by the profiler (not PPL commands). Each row's bar shows the time spent in that operator alone. Click a stage for details."
+          defaultMessage="Each stage is a physical-plan operator produced by the query optimizer, which may not correspond directly to the commands in your PPL query. A stage's bar is positioned on the execution timeline and sized by the time attributed to that operator; operators whose bars overlap ran concurrently. Select a stage to view more information."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -396,14 +434,14 @@ function PhysicalPlanSection({
               borderLeft: `1px solid ${euiColorLightShade}`,
             }}
           >
-            {totalTimeMs > 0 &&
+            {scaleMs > 0 &&
               ticks.map((t, i) =>
                 i === 0 || i === ticks.length - 1 ? null : (
                   <span
                     key={i}
                     style={{
                       position: 'absolute',
-                      left: `${(t / totalTimeMs) * 100}%`,
+                      left: `${(t / scaleMs) * 100}%`,
                       transform: 'translateX(-50%)',
                       fontSize: 10,
                       color: euiColorMediumShade,
@@ -421,17 +459,25 @@ function PhysicalPlanSection({
         {nodes.map((n, idx) => {
           const isExpanded = expandedIdx === idx;
           const isHovered = hoveredIdx === idx;
-          const startPct = totalTimeMs > 0 ? (nodeStarts[idx] / totalTimeMs) * 100 : 0;
-          const widthPct = totalTimeMs > 0 ? (n.selfTimeMs / totalTimeMs) * 100 : 0;
-          const rowBg = isHovered || isExpanded ? `${barColor}28` : 'transparent';
-          // Bar widths tile the plan-tree timeline (totalTimeMs) so there is no trailing
-          // gap, but the label shows the operator's share of the execute phase.
-          const sharePct = executePhaseMs > 0 ? (n.selfTimeMs / executePhaseMs) * 100 : 0;
+          // Everything is scaled to the execute phase: start offset, width, and the
+          // label percentage all share one denominator, so a bar's width matches the
+          // percentage it prints.
+          const startPct = scaleMs > 0 ? (n.startMs / scaleMs) * 100 : 0;
+          const widthPct = scaleMs > 0 ? (n.selfTimeMs / scaleMs) * 100 : 0;
+          // The synthetic overhead row is greyed to distinguish it from real operators.
+          const rowBarColor = n.isOverhead ? OVERHEAD_BAR_COLOR : barColor;
+          const rowBg = isHovered || isExpanded ? `${rowBarColor}28` : 'transparent';
 
+          // Concurrent operators (those with siblings) overlap in time, so their
+          // widths don't add up to a meaningful share of the timeline — omit the
+          // percentage for them and show only the duration.
+          const isConcurrent = n.concurrentWith.length > 0;
+          const label = isConcurrent
+            ? formatMs(n.selfTimeMs)
+            : `${formatMs(n.selfTimeMs)} (${widthPct.toFixed(0)}%)`;
           // Decide inside vs. outside by measuring the label against the bar's actual
           // pixel width instead of a fixed percentage. Until the track width is known
           // (first paint / no ResizeObserver) keep every label outside so nothing clips.
-          const label = `${formatMs(n.selfTimeMs)} (${sharePct.toFixed(0)}%)`;
           const barPx = (Math.max(widthPct, 0.5) / 100) * barTrackWidth;
           const labelPx = measureTextWidth(label, BAR_LABEL_FONT);
           const labelFitsInside =
@@ -531,13 +577,13 @@ function PhysicalPlanSection({
                     borderLeft: `1px solid ${euiColorLightShade}`,
                   }}
                 >
-                  {totalTimeMs > 0 &&
+                  {scaleMs > 0 &&
                     ticks.slice(1, -1).map((t, i) => (
                       <div
                         key={i}
                         style={{
                           position: 'absolute',
-                          left: `${(t / totalTimeMs) * 100}%`,
+                          left: `${(t / scaleMs) * 100}%`,
                           top: 0,
                           bottom: 0,
                           width: 1,
@@ -553,7 +599,7 @@ function PhysicalPlanSection({
                       transform: 'translateY(-50%)',
                       width: `${Math.max(widthPct, 0.5)}%`,
                       height: 20,
-                      backgroundColor: barColor,
+                      backgroundColor: rowBarColor,
                       borderRadius: 3,
                       display: 'flex',
                       alignItems: 'center',
@@ -596,7 +642,34 @@ function PhysicalPlanSection({
                 </div>
               </div>
               {/* Expanded detail */}
-              {isExpanded && (
+              {isExpanded && n.isOverhead && (
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    borderTop: `1px solid ${euiColorLightShade}`,
+                    backgroundColor: euiColorEmptyShade,
+                  }}
+                >
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="data.pplAnalyze.detail.overheadTime"
+                      defaultMessage="OVERHEAD TIME"
+                    />
+                  </EuiText>
+                  <EuiText size="s">
+                    <strong>{formatMs(n.selfTimeMs)}</strong>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="data.pplAnalyze.detail.overheadExplanation"
+                      defaultMessage="The execute phase ({execute}) is longer than the time spent in the plan's operators. This stage accounts for the difference — work done during execution but outside any operator, such as composing the individual operator outputs into the final result set. It is expected and generally small."
+                      values={{ execute: formatMs(executePhaseMs) }}
+                    />
+                  </EuiText>
+                </div>
+              )}
+              {isExpanded && !n.isOverhead && (
                 <div
                   style={{
                     padding: '12px 16px',
@@ -664,6 +737,21 @@ function PhysicalPlanSection({
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                  {n.concurrentWith.length > 0 && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="data.pplAnalyze.detail.concurrent"
+                          defaultMessage="Ran concurrently with {count, plural, one {# other operation} other {# other operations}} ({operations})"
+                          values={{
+                            count: n.concurrentWith.length,
+                            operations: n.concurrentWith.join(', '),
+                          }}
+                        />
+                      </EuiText>
+                    </>
+                  )}
                 </div>
               )}
             </React.Fragment>
@@ -689,7 +777,7 @@ function PhysicalPlanSection({
             <FormattedMessage
               id="data.pplAnalyze.summary.operators"
               defaultMessage="Operators: {count}"
-              values={{ count: <strong>{nodes.length}</strong> }}
+              values={{ count: <strong>{nodes.filter((n) => !n.isOverhead).length}</strong> }}
             />
           </EuiText>
           {plan.rows !== undefined && (

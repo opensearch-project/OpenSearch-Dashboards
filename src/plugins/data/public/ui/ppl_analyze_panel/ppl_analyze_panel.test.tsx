@@ -202,6 +202,57 @@ describe('PPLAnalyzePanel', () => {
       render(<PPLAnalyzePanel analyzeResult={result} />);
       expect(screen.getByText('Execution Phase Profiling unavailable')).toBeInTheDocument();
     });
+
+    it('notes concurrent operations when expanding a node with siblings', () => {
+      render(<PPLAnalyzePanel analyzeResult={complexResult} />);
+      // First post-order row is one of the two sibling index scans (they run
+      // concurrently under the merge join).
+      fireEvent.click(screen.getAllByRole('button')[0]);
+      expect(
+        screen.getByText(/Ran concurrently with 1 other operation \(CalciteEnumerableIndexScan\)/)
+      ).toBeInTheDocument();
+    });
+
+    it('does not note concurrency for a node without siblings', () => {
+      render(<PPLAnalyzePanel analyzeResult={complexResult} />);
+      // The EnumerableCalc (second-to-last row, above the overhead row) has no
+      // siblings; expanding it shows no concurrency note.
+      const rows = screen.getAllByRole('button');
+      fireEvent.click(rows[rows.length - 2]);
+      expect(screen.queryByText(/Ran concurrently with/)).not.toBeInTheDocument();
+    });
+
+    it('renders a trailing overhead stage for execute time outside the operators', () => {
+      // execute 259.53ms vs root inclusive 258.0ms -> ~1.53ms of overhead.
+      render(<PPLAnalyzePanel analyzeResult={complexResult} />);
+      expect(screen.getByText('Result composition')).toBeInTheDocument();
+      // The synthetic stage is excluded from the operator count: the plan has 4 real
+      // operators (Calc, MergeJoin, 2 index scans), not 5.
+      expect(screen.getByText(/Operators:/i).closest('div')).toHaveTextContent('Operators: 4');
+    });
+
+    it('explains the overhead stage when expanded, with dashed row counts', () => {
+      render(<PPLAnalyzePanel analyzeResult={complexResult} />);
+      // The overhead stage is the last row.
+      const rows = screen.getAllByRole('button');
+      fireEvent.click(rows[rows.length - 1]);
+      expect(screen.getByText('OVERHEAD TIME')).toBeInTheDocument();
+      expect(screen.getByText(/outside any operator/)).toBeInTheDocument();
+    });
+
+    it('omits the overhead stage when execute time equals operator time', () => {
+      const noOverhead = {
+        ...complexResult,
+        response: {
+          profile: {
+            ...complexResult.response.profile,
+            phases: { ...complexResult.response.profile.phases, execute: { time_ms: 258.0 } },
+          },
+        },
+      };
+      render(<PPLAnalyzePanel analyzeResult={noOverhead} />);
+      expect(screen.queryByText('Result composition')).not.toBeInTheDocument();
+    });
   });
 
   describe('recommendations', () => {
