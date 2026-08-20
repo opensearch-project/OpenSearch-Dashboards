@@ -47,7 +47,7 @@ interface StubState {
   resetUiStateChanges: CallableReset;
 }
 
-const proto = (VisualizeEmbeddable.prototype as unknown) as {
+const proto = VisualizeEmbeddable.prototype as unknown as {
   transferCustomizationsToUiState: CallableTransfer;
   resetUiStateChanges: CallableReset;
 };
