@@ -80,6 +80,13 @@ export interface AreaChartStyleOptions {
   showFullTimeRange?: boolean;
   stackMode?: StackMode;
   lineStyle?: LineStyle;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
 export type AreaChartStyle = Required<
@@ -92,9 +99,25 @@ export type AreaChartStyle = Required<
     | 'lineWidth'
     | 'pointSize'
     | 'areaOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<AreaChartStyleOptions, 'legendTitle' | 'lineWidth' | 'pointSize' | 'areaOpacity'>;
+  Pick<
+    AreaChartStyleOptions,
+    | 'legendTitle'
+    | 'lineWidth'
+    | 'pointSize'
+    | 'areaOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >;
 
 export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls

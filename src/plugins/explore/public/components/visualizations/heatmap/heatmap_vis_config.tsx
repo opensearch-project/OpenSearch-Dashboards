@@ -64,10 +64,17 @@ export interface HeatmapChartStyleOptions {
 
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
 }
 
-export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
-  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
+export type HeatmapChartStyle = Required<
+  Omit<HeatmapChartStyleOptions, 'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals'>
+> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   // Basic controls

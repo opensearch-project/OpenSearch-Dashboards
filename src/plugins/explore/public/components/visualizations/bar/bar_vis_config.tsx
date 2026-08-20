@@ -68,15 +68,42 @@ export interface BarChartStyleOptions {
   useThresholdColor?: boolean;
   showFullTimeRange?: boolean;
   fillOpacity?: number;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
 export type BarChartStyle = Required<
   Omit<
     BarChartStyleOptions,
-    'legendShape' | 'thresholdLines' | 'legendTitle' | 'barRadius' | 'fillOpacity'
+    | 'legendShape'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'barRadius' | 'fillOpacity'>;
+  Pick<
+    BarChartStyleOptions,
+    | 'legendShape'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >;
 
 export const MIN_BAR_RADIUS = 0;
 export const MAX_BAR_RADIUS = 20;

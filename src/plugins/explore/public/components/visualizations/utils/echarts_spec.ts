@@ -29,6 +29,7 @@ import {
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { LegendItem } from './legend';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
 /**
  * Base style interface that all chart styles should extend
@@ -47,6 +48,13 @@ export interface BaseChartStyle {
   addLegend?: boolean;
   legendPosition?: Positions;
   showFullTimeRange?: boolean;
+  // standard options in cartesian charts
+  decimals?: number;
+  unitId?: string;
+  // Free-text suffix appended after the unit ("/sec" glues, "meter" gets a space).
+  unitSuffix?: string;
+  min?: number;
+  max?: number;
 }
 
 interface Axis {
@@ -150,6 +158,8 @@ export const createBaseConfig =
   (state: EChartsSpecState<T>): EChartsSpecState<T> => {
     const { styles, axisConfig } = state;
 
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+
     const baseConfig = {
       tooltip: {
         extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
@@ -158,6 +168,12 @@ export const createBaseConfig =
         show: styles.tooltipOptions?.mode !== 'hidden',
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
         axisPointer: { type: 'shadow' as const },
+        ...(hasUnit && {
+          valueFormatter: (value: unknown) =>
+            typeof value === 'number'
+              ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
+              : String(value ?? ''),
+        }),
       },
       legend: {
         show: false,
@@ -183,15 +199,38 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 
   const hasY2 = axisColumnMappings.y2 !== undefined;
 
+  const { styles } = state;
+  const hasUnit = !!styles.unitId || styles.decimals != null || !!styles?.unitSuffix;
+
+  // when both x and y are numerical, prefer Y
+  const yIsValueAxis = getAxisType(axisColumnMappings.y) === 'value';
+  const xIsValueAxis = getAxisType(axisColumnMappings.x) === 'value' && !yIsValueAxis;
+
+  const isMinMaxInValid = styles.min != null && styles.max != null && styles.min >= styles.max;
+
   const getConfig = (
     axis: Axis | Axis[] | undefined,
     axisStyle: StandardAxes | undefined,
+    isValueAxis: boolean = false,
     addSplitLineStyle: boolean = false
   ) => {
+    const axisStyling = applyAxisStyling({ axisStyle, addSplitLineStyle });
+    const type = getAxisType(axis);
     return {
-      type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
+      type,
+      ...axisStyling,
       nameGap: 8,
+      ...(isValueAxis &&
+        hasUnit && {
+          axisLabel: {
+            ...axisStyling.axisLabel,
+            formatter: (value: number) =>
+              formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix),
+          },
+        }),
+      // if min and max are not valid, ignore
+      ...(isValueAxis && !isMinMaxInValid && { min: styles.min }),
+      ...(isValueAxis && !isMinMaxInValid && { max: styles.max }),
     };
   };
 
@@ -199,11 +238,17 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  const xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle);
-  let yAxisConfig: any = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle);
+  const xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle, xIsValueAxis);
+  let yAxisConfig: any = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle, yIsValueAxis);
 
   if (hasY2) {
-    const y2AxisConfig = getConfig(axisColumnMappings.y2, axisConfig.y2AxisStyle, true);
+    const y2IsValueAxis = getAxisType(axisColumnMappings.y2) === 'value';
+    const y2AxisConfig = getConfig(
+      axisColumnMappings.y2,
+      axisConfig.y2AxisStyle,
+      y2IsValueAxis,
+      true
+    );
     yAxisConfig = [yAxisConfig, y2AxisConfig];
   }
 
@@ -269,9 +314,10 @@ export const applyAxisStyling = ({
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
       ...(addSplitLineStyle && {
+        // only for y2
         lineStyle: {
           type: 'dotted',
-          opacity: DEFAULT_OPACITY / 2,
+          opacity: (DEFAULT_OPACITY * 100) / 2,
         },
       }),
     };

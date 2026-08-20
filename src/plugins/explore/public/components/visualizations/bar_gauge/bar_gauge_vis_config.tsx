@@ -26,12 +26,14 @@ export interface BarGaugeChartStyleOptions {
   min?: number;
   max?: number;
   unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
 }
 
 export type BarGaugeChartStyle = Required<
-  Omit<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId'>
+  Omit<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals'>
 > &
-  Pick<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
+  Pick<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
   tooltipOptions: {

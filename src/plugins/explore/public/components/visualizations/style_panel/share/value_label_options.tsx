@@ -5,6 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiSwitch } from '@elastic/eui';
+import { formatUnitValue } from '../unit/collection';
+import { formatSeriesValueLabel } from '../../utils/utils';
 
 interface ShowValuesSwitchProps {
   showValues?: boolean;
@@ -35,19 +37,30 @@ export const ShowValuesSwitch = ({
 /**
  * Builds the ECharts label config that prints each data point's value.
  */
-export const buildValueLabel = (showValues: boolean | undefined, valueField: string) => ({
-  label: {
-    show: showValues ?? false,
-    position: 'top' as const,
-    formatter: (params: { value?: unknown; dimensionNames?: string[] }) => {
-      if (!Array.isArray(params.value)) {
-        return '';
-      }
-      const valueIndex = params.dimensionNames?.indexOf(valueField) ?? -1;
-      const value = valueIndex >= 0 ? params.value[valueIndex] : undefined;
-      // TODO apply unit
-      return typeof value === 'number' ? String(Math.round(value * 100) / 100) : '';
+export const buildValueLabel = (
+  showValues: boolean | undefined,
+  valueField?: string,
+  decimals?: number,
+  unitId?: string,
+  unitSuffix?: string,
+  isPercentage = false
+) => {
+  if (!showValues || !valueField) return {};
+  return {
+    label: {
+      show: showValues ?? false,
+      position: 'top' as const,
+      formatter: (params: { value?: unknown; dimensionNames?: string[] }) => {
+        if (!Array.isArray(params.value)) {
+          return '';
+        }
+        const valueIndex = params.dimensionNames?.indexOf(valueField) ?? -1;
+        const value = valueIndex >= 0 ? params.value[valueIndex] : undefined;
+        // stack:Percentage won't consider unit display
+        if (isPercentage) return formatSeriesValueLabel(value, true, decimals);
+        return formatUnitValue(value, unitId, decimals, unitSuffix);
+      },
     },
-  },
-  labelLayout: { hideOverlap: true },
-});
+    labelLayout: { hideOverlap: true },
+  };
+};

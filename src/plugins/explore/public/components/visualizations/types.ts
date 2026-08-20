@@ -249,7 +249,7 @@ export interface UnitItem {
   id: string;
   name: string;
   symbol?: string;
-  display?: (value: number, symbol?: string) => UnitDisplay;
+  display?: (value: number, symbol?: string, decimals?: number) => UnitDisplay;
   fontScale?: number;
 }
 

@@ -10,7 +10,8 @@ import { MetricChartStyle } from './metric_vis_config';
 import { AxisRole, RendererSpecConfig } from '../types';
 import { MetricAxisMapping } from './to_expression';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, appendUnitSuffix } from '../style_panel/unit/collection';
+import { formatDecimal } from '../utils/data_transformation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { EchartsRender } from '../echarts_render';
 import { darkenHexColor, getContrastTextColor, normalizeHexColor } from '../utils/color';
@@ -206,7 +207,11 @@ function calculateMetricTextData(
     if (isValidNumber && calculatedValue !== undefined) {
       // Format the numeric value
       if (selectedUnit?.display) {
-        const unitDisplay = selectedUnit.display(calculatedValue, selectedUnit.symbol);
+        const unitDisplay = selectedUnit.display(
+          calculatedValue,
+          selectedUnit.symbol,
+          styles.decimals
+        );
 
         // Check if we have segments to extract value and unit separately
         if (unitDisplay.segments) {
@@ -231,10 +236,11 @@ function calculateMetricTextData(
         }
       } else {
         // Simple formatting without custom display
-        valueText = `${Math.round(calculatedValue * 100) / 100}`;
+        valueText = formatDecimal(calculatedValue, styles.decimals);
         unitText = selectedUnit?.symbol || '';
         unitFirst = false;
       }
+      unitText = appendUnitSuffix(unitText, styles.unitSuffix);
     } else {
       valueText = '-';
       unitText = '';

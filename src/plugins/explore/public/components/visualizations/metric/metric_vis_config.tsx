@@ -46,6 +46,8 @@ export interface MetricChartStyleOptions {
    */
   customRanges?: RangeValue[];
   unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
   thresholdOptions?: ThresholdOptions;
   min?: number;
   max?: number;
@@ -62,6 +64,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'colorSchema'
     | 'customRanges'
     | 'useColor'
@@ -78,6 +82,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'min'
     | 'max'
     | 'layoutType'

@@ -27,3 +27,9 @@ export const roundToPrecision = (value: number, precision: number): number => {
   const factor = Math.pow(10, precision);
   return Number((Math.round(value * factor) / factor).toFixed(precision));
 };
+
+/**
+ * Formats a number for display, auto(default) is 2
+ */
+export const formatDecimal = (value: number, decimals?: number): string =>
+  decimals == null ? String(roundToPrecision(value, 2)) : value.toFixed(decimals);

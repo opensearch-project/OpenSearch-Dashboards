@@ -10,6 +10,7 @@ import { generateThresholdLines, getValueColorByThreshold } from '../utils/utils
 import { HistogramChartStyle } from './histogram_vis_config';
 import { getColors } from '../theme/default_colors';
 import { getDecimalPrecision, roundToPrecision } from '../utils/data_transformation';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
 interface Options {
   styles: HistogramChartStyle;
@@ -18,14 +19,23 @@ interface Options {
   seriesFields: string[] | ((headers?: string[]) => string[]);
 }
 
-export const formatHistogramBucketValue = (value: unknown, bucketPrecision: number): string => {
+// Histogram applies unit on bucket value
+export const formatHistogramBucketValue = (
+  value: unknown,
+  bucketPrecision: number,
+  unit?: { unitId?: string; decimals?: number; unitSuffix?: string }
+): string => {
   const numericValue = Number(value);
 
   if (!Number.isFinite(numericValue)) {
     return String(value);
   }
 
-  return roundToPrecision(numericValue, bucketPrecision).toString();
+  const rounded = roundToPrecision(numericValue, bucketPrecision);
+  if (unit && (unit.unitId || unit.decimals != null || unit.unitSuffix)) {
+    return formatUnitValue(rounded, unit.unitId, unit.decimals, unit.unitSuffix);
+  }
+  return rounded.toString();
 };
 
 export const createHistogramSeries =
@@ -76,6 +86,7 @@ export const createHistogramSeries =
         type: 'custom',
         id: seriesField,
         name,
+        clip: true,
         encode: {
           x: binStartField,
           y: seriesField,
@@ -133,14 +144,16 @@ export const createHistogramSeries =
             format.encodeHTML(
               formatHistogramBucketValue(
                 params.value[dimensionNames.indexOf(binStartField)],
-                bucketPrecision
+                bucketPrecision,
+                styles
               )
             ) ?? '-';
           const bucketEnd =
             format.encodeHTML(
               formatHistogramBucketValue(
                 params.value[dimensionNames.indexOf(binEndField)],
-                bucketPrecision
+                bucketPrecision,
+                styles
               )
             ) ?? '-';
           const value =
@@ -168,14 +181,28 @@ export const createHistogramSeries =
     // Histogram axis config
     if (newState.xAxisConfig) {
       const xAxisConfig = { ...newState.xAxisConfig };
-      xAxisConfig.min = min;
-      xAxisConfig.max = max;
+
+      const isMinMaxInValid = styles.min != null && styles.max != null && styles.min >= styles.max;
+      xAxisConfig.min = (isMinMaxInValid ? undefined : styles.min) ?? min;
+      xAxisConfig.max = (isMinMaxInValid ? undefined : styles.max) ?? max;
       xAxisConfig.interval = bucketSize;
       xAxisConfig.axisLabel = {
         ...xAxisConfig.axisLabel,
-        formatter: (value: unknown) => formatHistogramBucketValue(value, bucketPrecision),
+        formatter: (value: unknown) => formatHistogramBucketValue(value, bucketPrecision, styles),
       };
       newState.xAxisConfig = xAxisConfig;
+    }
+
+    // The Y axis is the bucket count, not the measured field.
+    // Delete any unit formatter or value label
+    if (newState.yAxisConfig && !Array.isArray(newState.yAxisConfig)) {
+      const yAxisConfig = { ...newState.yAxisConfig };
+      if (yAxisConfig.axisLabel?.formatter) {
+        yAxisConfig.axisLabel = { ...yAxisConfig.axisLabel, formatter: undefined };
+      }
+      delete yAxisConfig.min;
+      delete yAxisConfig.max;
+      newState.yAxisConfig = yAxisConfig;
     }
 
     return newState;

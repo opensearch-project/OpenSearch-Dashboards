@@ -88,7 +88,7 @@ describe('bar_chart_utils', () => {
         headers: ['category', 'count'],
       }) as any;
 
-      expect(label.formatter({ value: ['a', 23.456] })).toBe('23.46%');
+      expect(label.formatter({ value: ['a', 0.23456] })).toBe('23.46%');
     });
   });
 });

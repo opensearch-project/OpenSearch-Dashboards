@@ -33,6 +33,11 @@ jest.mock('./bar_gauge_item', () => ({
 
 jest.mock('../style_panel/unit/collection', () => ({
   getUnitById: jest.fn(() => undefined),
+  appendUnitSuffix: jest.fn((text: string | number, suffix?: string) => {
+    const base = String(text);
+    if (!suffix) return base;
+    return suffix.startsWith('/') ? `${base}${suffix}` : `${base} ${suffix}`;
+  }),
 }));
 
 const defaultStyles = defaultBarGaugeChartStyles;

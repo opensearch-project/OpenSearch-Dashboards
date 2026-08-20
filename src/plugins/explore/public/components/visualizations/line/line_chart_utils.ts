@@ -25,8 +25,18 @@ const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   // other modes keep drawing their symbols at the size ECharts picks and stay unlabelled
   return {
     ...getPointSymbol(styles.pointSize, styles.showValues),
-    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
-    ...(valueField ? buildValueLabel(styles.showValues, valueField) : {}),
+    ...(styles.lineStyle === 'line'
+      ? styles.showValues
+        ? { showSymbol: true, symbolSize: 0 }
+        : { showSymbol: false }
+      : {}),
+    ...buildValueLabel(
+      styles.showValues,
+      valueField,
+      styles.decimals,
+      styles.unitId,
+      styles.unitSuffix
+    ),
     lineStyle: {
       width: lineWidth,
       type: getLineDashType(styles.lineDashStyle),

@@ -28,14 +28,19 @@ export interface GaugeChartStyleOptions {
   thresholds?: Threshold[];
   valueCalculation?: CalculationMethod;
   unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
 }
 
 export type GaugeChartStyle = Required<
-  Omit<GaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'baseColor' | 'thresholds'>
+  Omit<
+    GaugeChartStyleOptions,
+    'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals' | 'baseColor' | 'thresholds'
+  >
 > &
-  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
+  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultGaugeChartStyles: GaugeChartStyle = {
   showTitle: true,

@@ -44,10 +44,25 @@ export interface ScatterChartStyleOptions {
 
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
-export type ScatterChartStyle = Required<Omit<ScatterChartStyleOptions, 'legendTitle'>> &
-  Pick<ScatterChartStyleOptions, 'legendTitle'>;
+export type ScatterChartStyle = Required<
+  Omit<
+    ScatterChartStyleOptions,
+    'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >
+> &
+  Pick<
+    ScatterChartStyleOptions,
+    'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >;
 
 export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls

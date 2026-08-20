@@ -42,9 +42,19 @@ export interface HistogramChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
-export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+export type HistogramChartStyle = Required<
+  Omit<HistogramChartStyleOptions, 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'>
+> &
+  Pick<HistogramChartStyleOptions, 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'>;
 
 export const defaultHistogramChartStyles: HistogramChartStyle = {
   tooltipOptions: {

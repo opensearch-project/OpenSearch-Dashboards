@@ -6,6 +6,7 @@
 import { BarSeriesOption } from 'echarts';
 import { TimeUnit } from '../types';
 import { formatSeriesValueLabel, generateThresholdLines } from '../utils/utils';
+import { formatUnitValue } from '../style_panel/unit/collection';
 import { BarChartStyle, DEFAULT_BAR_FILL_OPACITY } from './bar_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
@@ -68,7 +69,9 @@ export const buildValueLabel = ({
       formatter: (params: any) => {
         const value =
           Array.isArray(params.value) && valueIndex >= 0 ? params.value[valueIndex] : params.value;
-        return formatSeriesValueLabel(value, isPercentage);
+        // Percentage stack will keep the % label; otherwise apply unit.
+        if (isPercentage) return formatSeriesValueLabel(value, true, styles.decimals);
+        return formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix);
       },
     },
     labelLayout: buildValueLabelLayout(isStacked),

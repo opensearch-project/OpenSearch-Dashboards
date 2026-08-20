@@ -69,15 +69,34 @@ export interface LineChartStyleOptions {
   pointSize?: number;
   // Renders each data point's value
   showValues?: boolean;
+
+  // Standard options
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
 export type LineChartStyle = Required<
   Omit<
     LineChartStyleOptions,
-    'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'pointSize'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'pointSize'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<LineChartStyleOptions, 'legendTitle' | 'pointSize'>;
+  Pick<
+    LineChartStyleOptions,
+    'legendTitle' | 'pointSize' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
