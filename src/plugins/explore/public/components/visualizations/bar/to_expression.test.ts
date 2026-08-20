@@ -90,6 +90,42 @@ describe('bar to_expression', () => {
       expect(seriesWithMarkLine).toBeDefined();
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });
+
+    test('leaves bars sharp and unlabeled by default', () => {
+      const { spec } = createBarSpec(mockData, defaultBarChartStyles, {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
+      });
+
+      expect(spec.series[0].itemStyle.borderRadius).toBeUndefined();
+      expect(spec.series[0].label).toBeUndefined();
+    });
+
+    test('rounds the top corners of vertical bars when barRadius is set', () => {
+      const { spec } = createBarSpec(
+        mockData,
+        { ...defaultBarChartStyles, barRadius: 6 },
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: [mockNumericalColumn],
+        }
+      );
+
+      expect(spec.series[0].itemStyle.borderRadius).toEqual([6, 6, 0, 0]);
+    });
+
+    test('rounds the right corners of horizontal bars when barRadius is set', () => {
+      const { spec } = createBarSpec(
+        mockData,
+        { ...defaultBarChartStyles, barRadius: 6 },
+        {
+          [AxisRole.X]: [mockNumericalColumn],
+          [AxisRole.Y]: mockCategoricalColumn,
+        }
+      );
+
+      expect(spec.series[0].itemStyle.borderRadius).toEqual([0, 6, 6, 0]);
+    });
   });
 
   describe('createStackedBarSpec', () => {
@@ -154,6 +190,53 @@ describe('bar to_expression', () => {
         }),
       ]);
       expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
+    });
+
+    test('only rounds the topmost segment of a stack', () => {
+      const { spec } = createStackedBarSpec(
+        mockData,
+        { ...defaultBarChartStyles, barRadius: 6, stackMode: 'total' },
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+          [AxisRole.COLOR]: mockCategoricalColumn2,
+        }
+      );
+
+      const radii = spec.series.map((s: any) => s.itemStyle.borderRadius);
+      expect(radii).toEqual([undefined, undefined, [6, 6, 0, 0]]);
+    });
+
+    test('labels every segment and drops overlapping labels when stacked', () => {
+      const { spec } = createStackedBarSpec(
+        mockData,
+        { ...defaultBarChartStyles, showValues: true, stackMode: 'total' },
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+          [AxisRole.COLOR]: mockCategoricalColumn2,
+        }
+      );
+
+      spec.series.forEach((s: any) => {
+        expect(s.label).toEqual(expect.objectContaining({ show: true, position: 'inside' }));
+        expect(s.labelLayout).toEqual({ hideOverlap: true });
+      });
+    });
+
+    test('labels percentage stacked segments with a percent unit', () => {
+      const { spec } = createStackedBarSpec(
+        mockData,
+        { ...defaultBarChartStyles, showValues: true, stackMode: 'percentage' },
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+          [AxisRole.COLOR]: mockCategoricalColumn2,
+        }
+      );
+
+      // The first segment of the first row is normalized to 100% of that row
+      expect(spec.series[0].label.formatter({ value: ['A', 100, null, null] })).toBe('100%');
     });
   });
 

@@ -17,6 +17,10 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  StackMode,
+  LineDashStyle,
+  LineMode,
+  LineStyle,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -27,6 +31,14 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
+export const DEFAULT_FILL_OPACITY = 0.5;
+/**
+ * - `none`: flat fill in the series color.
+ * - `opacity`: fades from the series color at the line to transparent at the baseline.
+ * - `hue`: transitions from the series color at the line to a lighter variant at the baseline.
+ */
+export type GradientMode = 'none' | 'opacity' | 'hue';
+
 // Complete area chart style controls interface
 export interface AreaChartStyleOptions {
   // Basic controls
@@ -36,7 +48,16 @@ export interface AreaChartStyleOptions {
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
+  gradientMode?: GradientMode;
   tooltipOptions?: TooltipOptions;
+
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+
+  pointSize?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -57,26 +78,39 @@ export interface AreaChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
+  stackMode?: StackMode;
+  lineStyle?: LineStyle;
 }
 
 export type AreaChartStyle = Required<
   Omit<
     AreaChartStyleOptions,
-    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'lineWidth'
+    | 'pointSize'
+    | 'areaOpacity'
   >
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
+  Pick<AreaChartStyleOptions, 'legendTitle' | 'lineWidth' | 'pointSize' | 'areaOpacity'>;
 
-const defaultAreaChartStyles: AreaChartStyle = {
+export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendTitle: '',
   legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
+  gradientMode: 'none',
   tooltipOptions: {
     mode: 'all',
   },
+  lineDashStyle: 'solid',
 
+  lineMode: 'smooth',
+
+  showValues: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
@@ -86,7 +120,9 @@ const defaultAreaChartStyles: AreaChartStyle = {
 
   standardAxes: [],
 
-  showFullTimeRange: false,
+  showFullTimeRange: true,
+  stackMode: 'total',
+  lineStyle: 'line',
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

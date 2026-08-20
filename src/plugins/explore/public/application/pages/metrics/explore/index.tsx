@@ -73,6 +73,17 @@ export const MetricsExploreTab = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
 
+  // Absolute time bounds (epoch ms) for anchoring sparkline x-axis to the full
+  // time picker range. Recomputed alongside stepSec on every refresh.
+  const timeBounds = useMemo(() => {
+    const timefilter = services.data?.query?.timefilter?.timefilter;
+    if (!timefilter) return undefined;
+    const bounds = timefilter.getBounds();
+    if (!bounds?.min || !bounds?.max) return undefined;
+    return { min: bounds.min.valueOf(), max: bounds.max.valueOf() };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
+
   // Sync local state → Redux (for URL persistence)
   const prevStateRef = useRef(state);
   useEffect(() => {
@@ -211,6 +222,7 @@ export const MetricsExploreTab = () => {
         executePromQL,
         refreshCounter,
         onTimeRangeChange: handleTimeRangeChange,
+        timeBounds,
       }}
     >
       <CursorContext.Provider value={cursorBus}>

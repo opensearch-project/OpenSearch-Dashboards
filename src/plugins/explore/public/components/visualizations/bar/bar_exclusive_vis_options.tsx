@@ -15,8 +15,15 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { DebouncedFieldNumber } from '../style_panel/utils';
-import { defaultBarChartStyles } from './bar_vis_config';
+import { DebouncedFieldNumber, DebouncedFieldRange } from '../style_panel/utils';
+import {
+  defaultBarChartStyles,
+  MIN_BAR_RADIUS,
+  MAX_BAR_RADIUS,
+  DEFAULT_BAR_FILL_OPACITY,
+} from './bar_vis_config';
+import { StackModeButtonGroup, OpacityRange } from '../style_panel/share/index';
+import { StackMode } from '../types';
 
 /**
  * Bar width conversion utilities.
@@ -42,7 +49,10 @@ interface BarExclusiveVisOptionsProps {
   barBorderWidth: number;
   barBorderColor: string;
   useThresholdColor?: boolean;
-  stackMode?: 'none' | 'total';
+  stackMode?: StackMode;
+  fillOpacity?: number;
+  barRadius?: number;
+  showValues?: boolean;
   onBarSizeModeChange: (barSizeMode: 'auto' | 'manual') => void;
   onBarWidthChange: (barWidth: number) => void;
   onBarPaddingChange: (barPadding: number) => void;
@@ -50,8 +60,11 @@ interface BarExclusiveVisOptionsProps {
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
-  onStackModeChange: (stackMode: 'none' | 'total') => void;
-  shouldDisableUseThresholdColor?: boolean;
+  onStackModeChange: (stackMode: StackMode) => void;
+  onBarRadiusChange?: (barRadius: number) => void;
+  onShowValuesChange?: (showValues: boolean) => void;
+  onFillOpacityChange: (fillOpacity: number) => void;
+  hasColorMapping?: boolean;
 }
 
 export const BarExclusiveVisOptions = ({
@@ -64,6 +77,9 @@ export const BarExclusiveVisOptions = ({
   barBorderColor,
   useThresholdColor,
   stackMode = 'none',
+  fillOpacity = DEFAULT_BAR_FILL_OPACITY,
+  barRadius = MIN_BAR_RADIUS,
+  showValues,
   onBarSizeModeChange,
   onBarWidthChange,
   onBarPaddingChange,
@@ -72,7 +88,10 @@ export const BarExclusiveVisOptions = ({
   onBarBorderColorChange,
   onUseThresholdColorChange,
   onStackModeChange,
-  shouldDisableUseThresholdColor = false,
+  onFillOpacityChange,
+  onBarRadiusChange,
+  onShowValuesChange,
+  hasColorMapping = false,
 }: BarExclusiveVisOptionsProps) => {
   const sizeModeOptions = [
     {
@@ -85,21 +104,6 @@ export const BarExclusiveVisOptions = ({
       id: 'manual',
       label: i18n.translate('explore.stylePanel.bar.sizeModeManual', {
         defaultMessage: 'Manual',
-      }),
-    },
-  ];
-
-  const stackModeOptions = [
-    {
-      id: 'none',
-      label: i18n.translate('explore.stylePanel.bar.stackModeNone', {
-        defaultMessage: 'None',
-      }),
-    },
-    {
-      id: 'total',
-      label: i18n.translate('explore.stylePanel.bar.stackModeStacked', {
-        defaultMessage: 'Stacked',
       }),
     },
   ];
@@ -174,27 +178,57 @@ export const BarExclusiveVisOptions = ({
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
       {type === 'bar' && (
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.bar.stackMode', {
-            defaultMessage: 'Stack',
-          })}
-        >
-          <EuiButtonGroup
-            legend={i18n.translate('explore.stylePanel.bar.stackMode', {
-              defaultMessage: 'Stack',
-            })}
-            options={stackModeOptions}
-            idSelected={stackMode}
-            onChange={(id) => onStackModeChange(id as 'none' | 'total')}
-            buttonSize="compressed"
-            isFullWidth
-            data-test-subj="barStackModeButtonGroup"
+        <>
+          <StackModeButtonGroup
+            stackMode={stackMode}
+            onStackModeChange={onStackModeChange}
+            testsubj="barStackMode"
           />
-        </EuiFormRow>
+          <OpacityRange
+            defaultOpacity={DEFAULT_BAR_FILL_OPACITY}
+            fillOpacity={fillOpacity}
+            onOpacityChange={onFillOpacityChange}
+            testsubj="barFillOpacity"
+          />
+        </>
       )}
 
       {renderManualSizeOptions(type)}
-
+      {type === 'bar' && (
+        <>
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.bar.barRadius', {
+              defaultMessage: 'Radius',
+            })}
+            helpText={i18n.translate('explore.stylePanel.bar.barRadiusHelp', {
+              defaultMessage: 'Corner rounding in pixels',
+            })}
+          >
+            <DebouncedFieldRange
+              value={barRadius}
+              onChange={(value) => onBarRadiusChange?.(value ?? MIN_BAR_RADIUS)}
+              min={MIN_BAR_RADIUS}
+              max={MAX_BAR_RADIUS}
+              defaultValue={MIN_BAR_RADIUS}
+              step={1}
+              data-test-subj="barRadiusRange"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+          <EuiFormRow>
+            <EuiSwitch
+              compressed
+              label={i18n.translate('explore.stylePanel.bar.showValues', {
+                defaultMessage: 'Show values',
+              })}
+              checked={showValues ?? false}
+              onChange={(e) => onShowValuesChange?.(e.target.checked)}
+              data-test-subj="barShowValuesSwitch"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFormRow>
         <EuiSwitch
           compressed
@@ -206,9 +240,7 @@ export const BarExclusiveVisOptions = ({
           onChange={(e) => onUseThresholdColorChange(e.target.checked)}
         />
       </EuiFormRow>
-
       <EuiSpacer size="s" />
-
       <EuiSwitch
         compressed
         label={i18n.translate('explore.stylePanel.bar.barBorder', {
@@ -218,7 +250,6 @@ export const BarExclusiveVisOptions = ({
         onChange={(e) => onShowBarBorderChange(e.target.checked)}
         data-test-subj="barBorderSwitch"
       />
-
       {showBarBorder && (
         <>
           <EuiSpacer size="s" />
