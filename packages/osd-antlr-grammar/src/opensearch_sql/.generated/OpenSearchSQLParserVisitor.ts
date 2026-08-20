@@ -99,7 +99,7 @@ import { ComplexDateTimePartContext } from "./OpenSearchSQLParser.js";
 import { DatetimePartContext } from "./OpenSearchSQLParser.js";
 import { HighlightFunctionContext } from "./OpenSearchSQLParser.js";
 import { BucketFunctionContext } from "./OpenSearchSQLParser.js";
-import { BucketArgContext } from "./OpenSearchSQLParser.js";
+import { IntervalArgNameContext } from "./OpenSearchSQLParser.js";
 import { PositionFunctionContext } from "./OpenSearchSQLParser.js";
 import { MatchQueryAltSyntaxFunctionContext } from "./OpenSearchSQLParser.js";
 import { ScalarFunctionNameContext } from "./OpenSearchSQLParser.js";
@@ -142,7 +142,6 @@ import { RelevanceArgContext } from "./OpenSearchSQLParser.js";
 import { HighlightArgContext } from "./OpenSearchSQLParser.js";
 import { RelevanceArgNameContext } from "./OpenSearchSQLParser.js";
 import { HighlightArgNameContext } from "./OpenSearchSQLParser.js";
-import { BucketArgNameContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldAndWeightContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldWeightContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldContext } from "./OpenSearchSQLParser.js";
@@ -789,11 +788,11 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitBucketFunction?: (ctx: BucketFunctionContext) => Result;
     /**
-     * Visit a parse tree produced by `OpenSearchSQLParser.bucketArg`.
+     * Visit a parse tree produced by `OpenSearchSQLParser.intervalArgName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitBucketArg?: (ctx: BucketArgContext) => Result;
+    visitIntervalArgName?: (ctx: IntervalArgNameContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.positionFunction`.
      * @param ctx the parse tree
@@ -1052,12 +1051,6 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitHighlightArgName?: (ctx: HighlightArgNameContext) => Result;
-    /**
-     * Visit a parse tree produced by `OpenSearchSQLParser.bucketArgName`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitBucketArgName?: (ctx: BucketArgNameContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.relevanceFieldAndWeight`.
      * @param ctx the parse tree

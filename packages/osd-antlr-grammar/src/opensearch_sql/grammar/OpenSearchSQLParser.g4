@@ -403,11 +403,14 @@ highlightFunction
    ;
 
 bucketFunction
-   : bucketFunctionName LR_BRACKET bucketArg (COMMA bucketArg)* RR_BRACKET
+   : bucketFunctionName LR_BRACKET FIELD EQUAL_SYMBOL field = bucketArgValue COMMA
+     intervalArgName EQUAL_SYMBOL interval = constant RR_BRACKET
    ;
 
-bucketArg
-   : bucketArgName EQUAL_SYMBOL bucketArgValue
+intervalArgName
+   : INTERVAL
+   | FIXED_INTERVAL
+   | CALENDAR_INTERVAL
    ;
 
 positionFunction
@@ -775,14 +778,6 @@ highlightArgName
    | HIGHLIGHT_PRE_TAGS
    ;
 
-bucketArgName
-   : stringLiteral
-   | ident
-   | INTERVAL
-   | ORDER
-   | TIME_ZONE
-   ;
-
 relevanceFieldAndWeight
    : field = relevanceField
    | field = relevanceField weight = relevanceFieldWeight
@@ -862,6 +857,8 @@ ident
 keywordsCanBeId
    : FULL
    | FIELD
+   | FIXED_INTERVAL
+   | CALENDAR_INTERVAL
    | D
    | T
    | TS // OD SQL and ODBC special

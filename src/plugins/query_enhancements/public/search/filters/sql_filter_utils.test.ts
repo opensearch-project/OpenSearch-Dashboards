@@ -100,11 +100,11 @@ describe('SQLFilterUtils', () => {
 
     it('injects the time filter into the innermost table of a date_histogram() histogram query', () => {
       const result = SQLFilterUtils.insertWhereClause(
-        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram('field'=`@timestamp`, 'interval'='1h') AS time_bucket FROM (SELECT * FROM logs) sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket",
+        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket FROM (SELECT * FROM logs) sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket",
         where
       );
       expect(result).toBe(
-        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram('field'=`@timestamp`, 'interval'='1h') AS time_bucket FROM (SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket"
+        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket FROM (SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket"
       );
     });
 

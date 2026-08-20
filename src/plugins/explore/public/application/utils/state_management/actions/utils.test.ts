@@ -266,7 +266,7 @@ describe('Utils - Histogram Breakdown Support', () => {
 
       expect(result).toBe(
         'SELECT time_bucket, COUNT(*) ' +
-          "FROM (SELECT date_histogram('field'=`@timestamp`, 'interval'='1h') AS time_bucket FROM (SELECT * FROM logs) sub_inner) sub " +
+          "FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket FROM (SELECT * FROM logs) sub_inner) sub " +
           'GROUP BY time_bucket ORDER BY time_bucket'
       );
     });
@@ -277,7 +277,7 @@ describe('Utils - Histogram Breakdown Support', () => {
         finalInterval: '5m',
       });
       const result = utils.buildSQLHistogramQuery('SELECT * FROM logs', config);
-      expect(result).toContain("date_histogram('field'=`@timestamp`, 'interval'='5m')");
+      expect(result).toContain("date_histogram(field=`@timestamp`, interval='5m')");
     });
 
     it('passes a calendar month interval through to date_histogram', () => {
@@ -286,7 +286,7 @@ describe('Utils - Histogram Breakdown Support', () => {
         finalInterval: '1M',
       });
       const result = utils.buildSQLHistogramQuery('SELECT * FROM logs', config);
-      expect(result).toContain("date_histogram('field'=`@timestamp`, 'interval'='1M')");
+      expect(result).toContain("date_histogram(field=`@timestamp`, interval='1M')");
     });
 
     it('passes a calendar year interval through to date_histogram', () => {
@@ -295,7 +295,7 @@ describe('Utils - Histogram Breakdown Support', () => {
         finalInterval: '1y',
       });
       const result = utils.buildSQLHistogramQuery('SELECT * FROM logs', config);
-      expect(result).toContain("date_histogram('field'=`@timestamp`, 'interval'='1y')");
+      expect(result).toContain("date_histogram(field=`@timestamp`, interval='1y')");
     });
 
     it('preserves a trailing LIMIT', () => {
@@ -316,7 +316,7 @@ describe('Utils - Histogram Breakdown Support', () => {
       const result = utils.buildSQLHistogramQuery('SELECT * FROM logs', config);
       expect(result).toBe(
         'SELECT time_bucket, breakdown, COUNT(*) ' +
-          "FROM (SELECT date_histogram('field'=`@timestamp`, 'interval'='1h') AS time_bucket, `status` AS breakdown FROM (SELECT * FROM logs) sub_inner) sub " +
+          "FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket, `status` AS breakdown FROM (SELECT * FROM logs) sub_inner) sub " +
           'GROUP BY time_bucket, breakdown ORDER BY time_bucket'
       );
     });

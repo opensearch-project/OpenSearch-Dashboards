@@ -133,7 +133,7 @@ const intervalToSQLBucket = (interval: string, timeFieldName: string): { expr: s
   // Fall back to per-second bucketing for an unparseable interval.
   const normalized = match ? `${match[1]}${match[2]}` : '1s';
 
-  return { expr: `date_histogram('field'=${field}, 'interval'='${normalized}')` };
+  return { expr: `date_histogram(field=${field}, interval='${normalized}')` };
 };
 
 /** Parse a bucket key ("2026-05-01 14:30:00", UTC) back to epoch milliseconds. */
