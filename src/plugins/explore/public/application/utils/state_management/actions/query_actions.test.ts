@@ -27,6 +27,8 @@ jest.mock('moment-timezone', () => {
 
 jest.mock('./utils', () => ({
   buildPPLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLTopBreakdownQuery: jest.fn((queryString) => queryString),
   processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
   createHistogramConfigWithInterval: jest.fn(() => ({
     histogramConfigs: {
@@ -1626,6 +1628,93 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(result.payload).toBeUndefined();
       expect(mockServices.data.search.showError).not.toHaveBeenCalled();
+    });
+
+    describe('SQL breakdown two-pass flow', () => {
+      const utilsMock = jest.requireMock('./utils');
+      const histogramRows = { hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 };
+
+      const useSQLWithBreakdown = () => {
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: 'status', queryStatusMap: {} },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+          breakdownField: 'status',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+      };
+
+      const runHistogram = () =>
+        executeHistogramQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'SELECT * FROM logs',
+          interval: '5m',
+        })(mockDispatch, mockGetState, undefined);
+
+      it('keeps the breakdown when the top-N pass returns values', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({
+            hits: { hits: [{ _source: { breakdown: 'ok' } }], total: 1 },
+          })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: 'status' }),
+          ['ok']
+        );
+      });
+
+      // Without a top-N list the breakdown expression is the bare field, which
+      // would emit one series per distinct value.
+      it('drops the breakdown when the top-N pass comes back empty', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({ hits: { hits: [], total: 0 } })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
+
+      it('drops the breakdown when the top-N pass fails', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockRejectedValueOnce(new Error('pass 1 exploded'))
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
     });
   });
 

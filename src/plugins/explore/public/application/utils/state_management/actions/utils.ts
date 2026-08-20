@@ -126,10 +126,153 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
   }
 };
 
+/**
+ * Build the SQL expression that buckets the time field for a histogram.
+ *
+ * Uses the `date_histogram()` bucket function, which lowers to a span the
+ * engine buckets natively rather than a per-row expression. It takes the
+ * standard interval expression (e.g. `30m`, `12h`, `30d`, `1M`, `1y`) and
+ * renders each bucket key as `'YYYY-MM-DD HH:mm:ss'`.
+ *
+ * It must be used as a subquery-aliased GROUP BY key — grouping directly on
+ * `date_histogram(...)` over a base table cannot resolve the field.
+ */
+const intervalToSQLBucket = (interval: string, timeFieldName: string): { expr: string } => {
+  const field = `\`${timeFieldName}\``;
+  const match = interval.match(/^(\d+)\s*([smhdwMy])$/);
+  // Normalize to a clean interval expression (strip any whitespace); fall back
+  // to per-second bucketing for an unparseable interval.
+  const normalized = match ? `${match[1]}${match[2]}` : '1s';
+
+  return { expr: `date_histogram('field'=${field}, 'interval'='${normalized}')` };
+};
+
+/** Parse a bucket key ("2026-05-01 14:30:00", UTC) back to epoch milliseconds. */
+const parseSQLBucketToMs = (bucket: string): number => {
+  const [datePart, timePart = '00:00:00'] = bucket.split(' ');
+  const [y, mo, d] = datePart.split('-').map(Number);
+  const [hh, mi, ss] = timePart.split(':').map(Number);
+  return Date.UTC(y, (mo || 1) - 1, d || 1, hh || 0, mi || 0, ss || 0);
+};
+
+/**
+ * Max number of breakdown series rendered, matching PPL's `timechart limit=4`.
+ */
+const HISTOGRAM_BREAKDOWN_SERIES_LIMIT = 4;
+
+/**
+ * Label for the catch-all series aggregating values beyond the top-N, matching
+ * PPL `timechart`'s default `otherstr`.
+ */
+const HISTOGRAM_OTHER_LABEL = 'OTHER';
+
+/**
+ * Label for the series of NULL breakdown values, matching PPL `timechart`'s
+ * default `nullstr`.
+ */
+const HISTOGRAM_NULL_LABEL = 'NULL';
+
+/**
+ * Escape a breakdown value for a SQL IN-list. Numbers pass through unquoted;
+ * everything else is rendered as a single-quoted string literal with internal
+ * single quotes doubled.
+ */
+const toSQLLiteral = (value: string | number): string => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  return `'${String(value).replace(/'/g, "''")}'`;
+};
+
+/**
+ * Pass 1 of the two-pass breakdown histogram: find the top-N breakdown values
+ * by total count. This mirrors PPL's `timechart ... limit=N`, which limits the
+ * number of series at query time. The histogram (pass 2) is then restricted to
+ * these values via `buildSQLHistogramQuery(..., breakdownValues)`.
+ *
+ * Returns the input `query` unchanged when no breakdown field is set.
+ */
+export const buildSQLTopBreakdownQuery = (
+  query: string,
+  histogramConfig: HistogramConfig,
+  limit: number = HISTOGRAM_BREAKDOWN_SERIES_LIMIT
+): string => {
+  const { breakdownField } = histogramConfig;
+  if (!breakdownField) {
+    return query;
+  }
+  // ORDER BY COUNT(*) (the expression, not an alias) — the engine does not
+  // honor aliases on aggregates reliably.
+  return (
+    `SELECT breakdown, COUNT(*) ` +
+    `FROM (SELECT \`${breakdownField}\` AS breakdown FROM (${query}) sub_inner) sub ` +
+    `GROUP BY breakdown ORDER BY COUNT(*) DESC LIMIT ${limit}`
+  );
+};
+
+export const buildSQLHistogramQuery = (
+  query: string,
+  histogramConfig: HistogramConfig,
+  breakdownValues?: Array<string | number>
+): string => {
+  const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
+
+  if (!aggs || !timeFieldName || !finalInterval) {
+    return query;
+  }
+  const { expr } = intervalToSQLBucket(finalInterval, timeFieldName);
+
+  // Wrap the user query as a subquery and bucket over it. A trailing LIMIT is
+  // intentionally preserved (not stripped): PPL's histogram appends
+  // `| stats count() by span(...)` to the full query including any `| head N`,
+  // so it aggregates over the limited set. Keeping LIMIT here mirrors that
+  // behavior for SQL.
+  //
+  // Compute the bucket in an inner subquery and GROUP BY its alias. Direct
+  // `GROUP BY <expression>` is not supported on this engine build, but
+  // `GROUP BY <alias>` from a subquery is (and flattens + pushes down).
+  // NOTE: do NOT alias COUNT(*). On the analytics engine the plan row type
+  // records the alias but datafusion names the physical column `COUNT(*)`,
+  // and the mismatch throws at execution. Leaving it unaliased keeps both
+  // sides as `COUNT(*)`; the result parser picks the non-bucket column by
+  // position, so the column name doesn't matter.
+
+  // Breakdown: project the breakdown field as a second grouping column and
+  // group by both subquery aliases. When `breakdownValues` is provided (pass 2
+  // of the two-pass flow), values are bucketed to match PPL's `timechart`:
+  //   - NULLs become a 'NULL' series,
+  //   - the top-N values keep their own series,
+  //   - everything else folds into an 'OTHER' series.
+  // Relabeling (rather than filtering with IN) keeps the long tail counted.
+  // Safe because the breakdown selector only offers string fields, so all CASE
+  // branches are strings.
+  if (breakdownField) {
+    const field = `\`${breakdownField}\``;
+    const breakdownExpr =
+      breakdownValues && breakdownValues.length > 0
+        ? `CASE WHEN ${field} IS NULL THEN '${HISTOGRAM_NULL_LABEL}' ` +
+          `WHEN ${field} IN (${breakdownValues.map(toSQLLiteral).join(', ')}) THEN ${field} ` +
+          `ELSE '${HISTOGRAM_OTHER_LABEL}' END`
+        : field;
+    return (
+      `SELECT time_bucket, breakdown, COUNT(*) ` +
+      `FROM (SELECT ${expr} AS time_bucket, ${breakdownExpr} AS breakdown FROM (${query}) sub_inner) sub ` +
+      `GROUP BY time_bucket, breakdown ORDER BY time_bucket`
+    );
+  }
+
+  return (
+    `SELECT time_bucket, COUNT(*) ` +
+    `FROM (SELECT ${expr} AS time_bucket FROM (${query}) sub_inner) sub ` +
+    `GROUP BY time_bucket ORDER BY time_bucket`
+  );
+};
+
 export const processRawResultsForHistogram = (
   queryString: string,
   rawResults: ISearchResult,
-  histogramConfig: HistogramConfig
+  histogramConfig: HistogramConfig,
+  isSQLHistogram: boolean = false
 ) => {
   const { aggs, breakdownField } = histogramConfig;
 
@@ -137,6 +280,118 @@ export const processRawResultsForHistogram = (
     return rawResults;
   }
 
+  if (isSQLHistogram) {
+    // Handle SQL histogram results
+    const responseAggs: any = {};
+    const fieldSchema = rawResults.fieldSchema;
+
+    if (!fieldSchema || fieldSchema.length < 2) {
+      return rawResults;
+    }
+
+    const bucketIdx = fieldSchema.findIndex((col: any) => col.name === 'time_bucket');
+    if (bucketIdx === -1) {
+      return rawResults;
+    }
+    const bucketName = fieldSchema[bucketIdx].name!;
+
+    // Breakdown: columns are [time_bucket, breakdown, COUNT(*)]. Build a
+    // per-breakdown-value series, mirroring the PPL breakdown branch so the
+    // chart renders multiple series identically.
+    if (breakdownField) {
+      const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === 'breakdown');
+      if (breakdownIdx === -1) {
+        return rawResults;
+      }
+      // The count is whichever column isn't the bucket or the breakdown.
+      const breakdownCountIdx = fieldSchema.findIndex(
+        (_col: any, idx: number) => idx !== bucketIdx && idx !== breakdownIdx
+      );
+      if (breakdownCountIdx === -1) {
+        return rawResults;
+      }
+      const breakdownName = fieldSchema[breakdownIdx].name!;
+      const breakdownCountName = fieldSchema[breakdownCountIdx].name!;
+
+      const seriesMap = new Map<string, Array<[number, number]>>();
+      let breakdownTotalHits = 0;
+      rawResults.hits.hits.forEach((hit) => {
+        const source = hit._source as Record<string, unknown>;
+        const timestamp = parseSQLBucketToMs(String(source[bucketName]));
+        const breakdownValue = String(source[breakdownName]);
+        const count = Number(source[breakdownCountName]) || 0;
+
+        breakdownTotalHits += count;
+
+        if (!seriesMap.has(breakdownValue)) {
+          seriesMap.set(breakdownValue, []);
+        }
+        seriesMap.get(breakdownValue)!.push([timestamp, count]);
+      });
+
+      const series = Array.from(seriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
+        breakdownValue,
+        dataPoints,
+      }));
+
+      return {
+        ...rawResults,
+        hits: {
+          ...rawResults.hits,
+          total: breakdownTotalHits,
+        },
+        breakdownSeries: {
+          breakdownField,
+          series,
+        },
+      };
+    }
+
+    // Single series: the query returns two columns (bucket + count). Treat the
+    // non-bucket column as the count so we're resilient to how the engine
+    // names the aggregate (doc_count / COUNT(*) / etc.).
+    const countIdx = bucketIdx === 0 ? 1 : 0;
+    const countName = fieldSchema[countIdx].name!;
+
+    // Create aggregation response in expected format
+    let totalHits = 0;
+    Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
+      const aggTypeKeys = Object.keys(value);
+      if (aggTypeKeys.length === 0) return;
+
+      const aggTypeKey = aggTypeKeys[0];
+      if (aggTypeKey === 'date_histogram') {
+        const buckets = rawResults.hits.hits.map((hit) => {
+          const source = hit._source as Record<string, unknown>;
+          const count = Number(source[countName]) || 0;
+          const timeBucket = parseSQLBucketToMs(String(source[bucketName]));
+
+          totalHits += count;
+
+          return {
+            key_as_string: new Date(timeBucket).toISOString(),
+            key: timeBucket,
+            doc_count: count,
+          };
+        });
+
+        responseAggs[key] = { buckets };
+      }
+    });
+
+    const tempResult: ISearchResult = {
+      ...rawResults,
+      aggregations: responseAggs,
+      hits: {
+        ...rawResults.hits,
+        total: totalHits,
+      },
+    };
+
+    return tempResult;
+  }
+
+  // Original PPL histogram processing
   const aggsConfig: any = {};
 
   Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {

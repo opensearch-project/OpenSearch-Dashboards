@@ -14,10 +14,14 @@ import { resultsCache } from '../state_management/slices';
  */
 export const useHistogramResults = () => {
   const query = useSelector((state: RootState) => state.query);
+  const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
 
   const cacheKey = useMemo(() => {
-    return prepareHistogramCacheKey(query);
-  }, [query]);
+    // When a breakdown field is selected the histogram result is stored under
+    // the breakdown cache key, so read that one (otherwise the total hits count
+    // comes back empty for breakdown histograms).
+    return prepareHistogramCacheKey(query, !!breakdownField);
+  }, [query, breakdownField]);
 
   const metadata = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
 

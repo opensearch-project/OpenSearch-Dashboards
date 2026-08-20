@@ -87,6 +87,7 @@ import { HighlightFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { PositionFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { ExtractFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { GetFormatFunctionCallContext } from "./OpenSearchSQLParser.js";
+import { BucketFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { TimestampFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { TimestampFunctionContext } from "./OpenSearchSQLParser.js";
 import { TimestampFunctionNameContext } from "./OpenSearchSQLParser.js";
@@ -97,9 +98,12 @@ import { SimpleDateTimePartContext } from "./OpenSearchSQLParser.js";
 import { ComplexDateTimePartContext } from "./OpenSearchSQLParser.js";
 import { DatetimePartContext } from "./OpenSearchSQLParser.js";
 import { HighlightFunctionContext } from "./OpenSearchSQLParser.js";
+import { BucketFunctionContext } from "./OpenSearchSQLParser.js";
+import { BucketArgContext } from "./OpenSearchSQLParser.js";
 import { PositionFunctionContext } from "./OpenSearchSQLParser.js";
 import { MatchQueryAltSyntaxFunctionContext } from "./OpenSearchSQLParser.js";
 import { ScalarFunctionNameContext } from "./OpenSearchSQLParser.js";
+import { BucketFunctionNameContext } from "./OpenSearchSQLParser.js";
 import { CaseFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { DataTypeFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFunctionContext } from "./OpenSearchSQLParser.js";
@@ -138,12 +142,14 @@ import { RelevanceArgContext } from "./OpenSearchSQLParser.js";
 import { HighlightArgContext } from "./OpenSearchSQLParser.js";
 import { RelevanceArgNameContext } from "./OpenSearchSQLParser.js";
 import { HighlightArgNameContext } from "./OpenSearchSQLParser.js";
+import { BucketArgNameContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldAndWeightContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldWeightContext } from "./OpenSearchSQLParser.js";
 import { RelevanceFieldContext } from "./OpenSearchSQLParser.js";
 import { RelevanceQueryContext } from "./OpenSearchSQLParser.js";
 import { RelevanceArgValueContext } from "./OpenSearchSQLParser.js";
 import { HighlightArgValueContext } from "./OpenSearchSQLParser.js";
+import { BucketArgValueContext } from "./OpenSearchSQLParser.js";
 import { AlternateMultiMatchArgNameContext } from "./OpenSearchSQLParser.js";
 import { AlternateMultiMatchQueryContext } from "./OpenSearchSQLParser.js";
 import { AlternateMultiMatchFieldContext } from "./OpenSearchSQLParser.js";
@@ -709,6 +715,13 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitGetFormatFunctionCall?: (ctx: GetFormatFunctionCallContext) => Result;
     /**
+     * Visit a parse tree produced by the `bucketFunctionCall`
+     * labeled alternative in `OpenSearchSQLParser.functionCall`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketFunctionCall?: (ctx: BucketFunctionCallContext) => Result;
+    /**
      * Visit a parse tree produced by the `timestampFunctionCall`
      * labeled alternative in `OpenSearchSQLParser.functionCall`.
      * @param ctx the parse tree
@@ -770,6 +783,18 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitHighlightFunction?: (ctx: HighlightFunctionContext) => Result;
     /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.bucketFunction`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketFunction?: (ctx: BucketFunctionContext) => Result;
+    /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.bucketArg`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketArg?: (ctx: BucketArgContext) => Result;
+    /**
      * Visit a parse tree produced by `OpenSearchSQLParser.positionFunction`.
      * @param ctx the parse tree
      * @return the visitor result
@@ -787,6 +812,12 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitScalarFunctionName?: (ctx: ScalarFunctionNameContext) => Result;
+    /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.bucketFunctionName`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketFunctionName?: (ctx: BucketFunctionNameContext) => Result;
     /**
      * Visit a parse tree produced by the `caseFunctionCall`
      * labeled alternative in `OpenSearchSQLParser.specificFunction`.
@@ -1022,6 +1053,12 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitHighlightArgName?: (ctx: HighlightArgNameContext) => Result;
     /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.bucketArgName`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketArgName?: (ctx: BucketArgNameContext) => Result;
+    /**
      * Visit a parse tree produced by `OpenSearchSQLParser.relevanceFieldAndWeight`.
      * @param ctx the parse tree
      * @return the visitor result
@@ -1057,6 +1094,12 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitHighlightArgValue?: (ctx: HighlightArgValueContext) => Result;
+    /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.bucketArgValue`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitBucketArgValue?: (ctx: BucketArgValueContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.alternateMultiMatchArgName`.
      * @param ctx the parse tree
