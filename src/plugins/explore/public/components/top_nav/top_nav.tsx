@@ -9,7 +9,7 @@ import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
-import { useSyncQueryStateWithUrl } from '../../../../data/public';
+import { useSyncQueryStateWithUrl, runPPLAnalyzeInBackground } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -163,8 +163,19 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         editorRef.current?.getValue() ?? String(queryString.getQuery().query || '');
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
+
+      // Refresh the analyze panel (if open) with the freshly-executed query text.
+      // Sourced from the editor rather than the query bar's own state so it stays
+      // in sync with what actually ran.
+      const currentQuery = queryString.getQuery();
+      runPPLAnalyzeInBackground({
+        query: { ...currentQuery, query: editorText },
+        http: services.http,
+        timefilter: timefilter.timefilter,
+        onlyIfOpen: true,
+      });
     },
-    [dispatch, services, editorRef, queryString]
+    [dispatch, services, editorRef, queryString, timefilter]
   );
 
   const handleQueryCancel = useCallback(() => {

@@ -39,6 +39,7 @@ import {
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+import { fetchAllWorkspaces } from '../services';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -510,9 +511,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       }
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       const permittedWorkspaceIds = (
-        await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
-          type: WORKSPACE_TYPE,
-          perPage: 999,
+        await fetchAllWorkspaces(this.getWorkspaceTypeEnabledClient(wrapperOptions.request), {
           ACLSearchParams: {
             principals,
             permissionModes: [
@@ -525,7 +524,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           // or workspaces can not be found because workspace object do not have `workspaces` field.
           workspaces: null,
         })
-      ).saved_objects.map((item) => item.id);
+      ).map((item) => item.id);
 
       // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
       // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.

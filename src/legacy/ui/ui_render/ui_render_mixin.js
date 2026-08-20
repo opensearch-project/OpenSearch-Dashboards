@@ -337,7 +337,8 @@ export function uiRenderMixin(osdServer, server, config) {
 
       const modifications = cspModificationsDynamicConfig?.modifications;
       if (modifications && modifications.length > 0) {
-        cspHeader = applyCspModifications(http.csp.rules, modifications);
+        // Apply to the built header so the per-request nonce is preserved.
+        cspHeader = applyCspModifications(cspHeader.split('; '), modifications);
       }
     } catch {
       // Fall back to default CSP header on error

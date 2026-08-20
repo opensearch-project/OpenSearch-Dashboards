@@ -10,6 +10,7 @@ import type { Event } from './events';
 export interface TextInputContent {
   type: 'text';
   text: string;
+  name?: string;
 }
 
 interface BinaryInputContent {
@@ -19,9 +20,29 @@ interface BinaryInputContent {
   url?: string;
   data?: string;
   filename?: string;
+  name?: string;
 }
 
-type InputContent = TextInputContent | BinaryInputContent;
+interface InputContentDataSource {
+  type: 'data';
+  value: string;
+  mimeType: string;
+}
+
+interface InputContentUrlSource {
+  type: 'url';
+  value: string;
+  mimeType?: string;
+}
+
+type InputContentSource = InputContentDataSource | InputContentUrlSource;
+
+interface ImageInputContent {
+  type: 'image';
+  source: InputContentSource;
+  metadata?: Record<string, unknown>;
+}
+export type InputContent = TextInputContent | BinaryInputContent | ImageInputContent;
 
 /**
  * Function call interface
@@ -167,7 +188,7 @@ export interface ChatServiceInterface {
     messages: Message[]
   ): Promise<{ observable: any; userMessage: UserMessage }>;
   sendMessageWithWindow(
-    content: string,
+    content: string | InputContent[],
     messages: Message[],
     options?: { clearConversation?: boolean }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
@@ -185,7 +206,7 @@ export interface ChatImplementationFunctions {
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (
-    content: string,
+    content: string | InputContent[],
     messages: Message[],
     options?: { clearConversation?: boolean }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;

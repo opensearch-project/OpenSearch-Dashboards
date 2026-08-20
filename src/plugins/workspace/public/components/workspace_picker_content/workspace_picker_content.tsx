@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import moment from 'moment';
 import {
@@ -36,8 +36,28 @@ const getValidWorkspaceColor = (color?: string) =>
 
 interface UpdatedWorkspaceObject extends WorkspaceObject {
   accessTimeStamp?: number;
-  accessTimeDescription?: string;
 }
+
+/**
+ * The "Viewed 2 hours ago" / "Not visited recently" label for a row.
+ *
+ * Derived at render time rather than precomputed for the whole list:
+ * `moment().fromNow()` is comparatively expensive and only the handful of
+ * recently-visited workspaces (the recent log is capped at 10) produce a real
+ * timestamp, so precomputing it for every workspace cost one moment call per
+ * workspace on every `workspaceList$` emission.
+ */
+const getAccessTimeDescription = (accessTimeStamp?: number) =>
+  accessTimeStamp
+    ? i18n.translate('workspace.picker.accessTime.description', {
+        defaultMessage: 'Viewed {timeLabel}',
+        values: {
+          timeLabel: moment(accessTimeStamp).fromNow(),
+        },
+      })
+    : i18n.translate('workspace.picker.accessTime.not.visited', {
+        defaultMessage: 'Not visited recently',
+      });
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -73,23 +93,13 @@ export const WorkspacePickerContent = ({
 
   const updatedRecentWorkspaceList: UpdatedWorkspaceObject[] = useMemo(() => {
     const recentWorkspaces = recentWorkspaceManager.getRecentWorkspaces();
-    const updatedList = workspaceList.map((workspace) => {
-      const recentWorkspace = recentWorkspaces.find((recent) => recent.id === workspace.id);
-      return {
-        ...workspace,
-        accessTimeStamp: recentWorkspace?.timestamp,
-        accessTimeDescription: recentWorkspace
-          ? i18n.translate('workspace.picker.accessTime.description', {
-              defaultMessage: 'Viewed {timeLabel}',
-              values: {
-                timeLabel: moment(recentWorkspace.timestamp).fromNow(),
-              },
-            })
-          : i18n.translate('workspace.picker.accessTime.not.visited', {
-              defaultMessage: 'Not visited recently',
-            }),
-      };
-    });
+    // Index the recent entries by id: the previous `find` per workspace made this
+    // O(workspaces x recents), which is needless work on large workspace lists.
+    const timestampById = new Map(recentWorkspaces.map((recent) => [recent.id, recent.timestamp]));
+    const updatedList = workspaceList.map((workspace) => ({
+      ...workspace,
+      accessTimeStamp: timestampById.get(workspace.id),
+    }));
 
     return updatedList.sort(sortByRecentVisitedAndAlphabetical);
   }, [workspaceList]);
@@ -161,13 +171,17 @@ export const WorkspacePickerContent = ({
         coreStart.http
       );
 
+      const accessTimeDescription = getAccessTimeDescription(workspace.accessTimeStamp);
+
       return (
-        <>
+        // The key belongs on the outermost element returned into the array — it
+        // was previously set on the inner list item, leaving every array child
+        // unkeyed and forcing React into positional reconciliation.
+        <Fragment key={workspace.id}>
           <EuiHorizontalRule size="full" margin="none" />
           <EuiListGroupItem
             // using inline style to make sure that the list item will be expanded，className="eui-fullWidth" is not working, need to set minWidth
             style={{ width: '100%', minWidth: '0' }}
-            key={workspace.id}
             size="s"
             data-test-subj={`workspace-menu-item-${workspace.id}`}
             icon={
@@ -194,7 +208,7 @@ export const WorkspacePickerContent = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
                         <EuiText size="s" color="subdued">
-                          <small> {workspace.accessTimeDescription}</small>
+                          <small> {accessTimeDescription}</small>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -219,7 +233,7 @@ export const WorkspacePickerContent = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s" color="subdued">
-                      <small> {workspace.accessTimeDescription}</small>
+                      <small> {accessTimeDescription}</small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -230,7 +244,7 @@ export const WorkspacePickerContent = ({
               window.location.assign(useCaseURL);
             }}
           />
-        </>
+        </Fragment>
       );
     });
     return listItems;

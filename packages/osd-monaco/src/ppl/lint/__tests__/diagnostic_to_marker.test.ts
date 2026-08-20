@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '../../../monaco';
-import { diagnosticToMarker, LINT_MARKER_SOURCE } from '../diagnostic_to_marker';
+import { diagnosticToMarker, LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
 import { Diagnostic } from '../diagnostic';
 
 function makeDiagnostic(overrides: Partial<Diagnostic> = {}): Diagnostic {
@@ -70,5 +70,39 @@ describe('diagnosticToMarker', () => {
     // ruleId must reach hover provider even without a doc link.
     const marker = diagnosticToMarker(makeDiagnostic({ docUrl: undefined }));
     expect(marker.code).toBe('rule');
+  });
+
+  it('keeps field-validation visible but unlinked even when its catalog URL is present', () => {
+    const marker = diagnosticToMarker(
+      makeDiagnostic({
+        ruleId: 'field-validation',
+        docUrl: 'https://example.com/fields',
+      })
+    );
+    expect(marker.code).toBe('field-validation');
+  });
+});
+
+describe('ruleIdOf', () => {
+  // Round-trips against diagnosticToMarker, which is the point of sharing one
+  // decoder: the providers must read `code` back exactly as it was written.
+  it('reads the rule id back from the plain-string code form', () => {
+    expect(ruleIdOf(diagnosticToMarker(makeDiagnostic({ docUrl: undefined })))).toBe('rule');
+  });
+
+  it('reads the rule id back from the { value, target } code form', () => {
+    expect(
+      ruleIdOf(diagnosticToMarker(makeDiagnostic({ docUrl: 'https://example.com/docs' })))
+    ).toBe('rule');
+  });
+
+  it('returns undefined for a marker with no code', () => {
+    expect(ruleIdOf({ code: undefined })).toBeUndefined();
+  });
+
+  it('returns undefined when code is an object without a string value', () => {
+    expect(
+      ruleIdOf({ code: { target: 'x' } as unknown as monaco.editor.IMarkerData['code'] })
+    ).toBeUndefined();
   });
 });

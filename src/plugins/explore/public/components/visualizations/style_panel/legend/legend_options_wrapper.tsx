@@ -11,20 +11,17 @@ interface LegendStyleOptions {
   addLegend?: boolean;
   legendPosition?: Positions;
   legendTitle?: string;
-  legendTitleForSize?: string;
 }
 
 interface LegendOptionsWrapperProps<T extends LegendStyleOptions> {
   styleOptions: T;
   updateStyleOption: <K extends keyof T>(key: K, value: T[K]) => void;
-  hasSizeLegend?: boolean;
   shouldShow: boolean;
 }
 
 export const LegendOptionsWrapper = <T extends LegendStyleOptions>({
   styleOptions,
   updateStyleOption,
-  hasSizeLegend = false,
   shouldShow,
 }: LegendOptionsWrapperProps<T>) => {
   if (!shouldShow) {
@@ -35,10 +32,8 @@ export const LegendOptionsWrapper = <T extends LegendStyleOptions>({
     show: styleOptions.addLegend ?? true,
     position: styleOptions.legendPosition || Positions.RIGHT,
     title: styleOptions.legendTitle,
-    ...(hasSizeLegend && { titleForSize: styleOptions.legendTitleForSize }),
   };
 
-  // const handleLegendOptionsChange = (updatedLegendOptions: any) => {
   const handleLegendOptionsChange = (updatedLegendOptions: Partial<LegendOptions>) => {
     if (updatedLegendOptions.show !== undefined) {
       updateStyleOption('addLegend', updatedLegendOptions.show);
@@ -49,9 +44,6 @@ export const LegendOptionsWrapper = <T extends LegendStyleOptions>({
     if (updatedLegendOptions.title !== undefined) {
       updateStyleOption('legendTitle', updatedLegendOptions.title);
     }
-    if (hasSizeLegend && updatedLegendOptions.titleForSize !== undefined) {
-      updateStyleOption('legendTitleForSize', updatedLegendOptions.titleForSize);
-    }
   };
 
   return (
@@ -59,7 +51,6 @@ export const LegendOptionsWrapper = <T extends LegendStyleOptions>({
       <LegendOptionsPanel
         legendOptions={legendOptions}
         onLegendOptionsChange={handleLegendOptionsChange}
-        hasSizeLegend={hasSizeLegend}
       />
     </EuiFlexItem>
   );

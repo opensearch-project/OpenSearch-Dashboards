@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import {
+  ASSET_MIGRATION_TOUR_STORAGE_KEY,
   WorkspaceFilterCriteria,
   buildWorkspaceFilterCriteria,
   filterWorkspaces,
@@ -13,7 +14,9 @@ import {
   getWorkspaceRole,
   getWorkspacesWithRecentMessage,
   isWorkspaceFilterActive,
+  readMigrationTourDismissed,
   sortByRecentVisitedAndAlphabetical,
+  writeMigrationTourDismissed,
 } from './utils';
 
 describe('getWorkspacesWithRecentMessage', () => {
@@ -219,5 +222,39 @@ describe('filterWorkspaces', () => {
     expect(
       filterWorkspaces(list, { searchQuery: 'payments', roles: ['readonly'], recency: 'all' })
     ).toEqual([]);
+  });
+});
+
+describe('asset migration tour flag', () => {
+  const KEY = ASSET_MIGRATION_TOUR_STORAGE_KEY;
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it('should report not dismissed when the flag is absent', () => {
+    expect(readMigrationTourDismissed()).toBe(false);
+  });
+
+  it('should report dismissed once the flag is written', () => {
+    writeMigrationTourDismissed();
+    expect(localStorage.getItem(KEY)).toBe('true');
+    expect(readMigrationTourDismissed()).toBe(true);
+  });
+
+  it('should fall back to not dismissed when reading storage throws', () => {
+    jest.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError');
+    });
+    expect(() => readMigrationTourDismissed()).not.toThrow();
+    expect(readMigrationTourDismissed()).toBe(false);
+  });
+
+  it('should swallow a write failure so dismissing the tour never breaks the page', () => {
+    jest.spyOn(window.localStorage.__proto__, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError');
+    });
+    expect(() => writeMigrationTourDismissed()).not.toThrow();
   });
 });

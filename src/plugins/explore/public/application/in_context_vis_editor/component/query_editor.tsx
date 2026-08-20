@@ -3,38 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import classNames from 'classnames';
-import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
-import { useQueryPanelEditor } from '../hooks/use_query_panel_editor';
-import '../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
+import { QueryPanelEditor as InnerQueryEditor } from '../../../components/query_panel/';
+import { useQueryPanelEditorProps } from '../hooks/use_query_panel_editor_props';
 
 export const QueryPanelEditor = () => {
-  const {
-    isFocused,
-    isPromptMode,
-    onEditorClick,
-    placeholder,
-    promptIsTyping,
-    showPlaceholder,
-    ...editorProps
-  } = useQueryPanelEditor();
+  const props = useQueryPanelEditorProps();
 
-  return (
-    // Suppressing below as this should only happen for click events.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div
-      className={classNames('exploreQueryPanelEditor', {
-        ['exploreQueryPanelEditor--focused']: isFocused,
-        ['exploreQueryPanelEditor--promptMode']: isPromptMode,
-        ['exploreQueryPanelEditor--promptIsTyping']: promptIsTyping,
-      })}
-      data-test-subj="exploreQueryPanelEditor"
-      onClick={onEditorClick}
-    >
-      <CodeEditor {...editorProps} />
-      {showPlaceholder ? (
-        <div className={`exploreQueryPanelEditor__placeholder`}>{placeholder}</div>
-      ) : null}
-    </div>
-  );
+  return <InnerQueryEditor {...props} />;
 };

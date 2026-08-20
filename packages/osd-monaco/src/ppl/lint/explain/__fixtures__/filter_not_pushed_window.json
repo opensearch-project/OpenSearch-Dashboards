@@ -1,0 +1,6 @@
+{
+  "calcite": {
+    "logical": "LogicalSystemLimit(fetch=[10000], type=[QUERY_SIZE_LIMIT])\n  LogicalProject(balance=[$3])\n    LogicalFilter(condition=[>($3, $17)])\n      LogicalProject(account_number=[$0], firstname=[$1], address=[$2], balance=[$3], gender=[$4], city=[$5], employer=[$6], state=[$7], age=[$8], email=[$9], lastname=[$10], _id=[$11], _index=[$12], _score=[$13], _maxscore=[$14], _sort=[$15], _routing=[$16], ab=[/(SUM($3) OVER (), CAST(COUNT($3) OVER ()):DOUBLE NOT NULL)])\n        CalciteLogicalIndexScan(table=[[OpenSearch, accounts]])\n",
+    "physical": "EnumerableLimit(fetch=[10000])\n  EnumerableCalc(expr#0..2=[{inputs}], expr#3=[CAST($t2):DOUBLE NOT NULL], expr#4=[/($t1, $t3)], expr#5=[>($t0, $t4)], balance=[$t0], $condition=[$t5])\n    EnumerableWindow(window#0=[window(aggs [$SUM0($0), COUNT($0)])])\n      CalciteEnumerableIndexScan(table=[[OpenSearch, accounts]], PushDownContext=[[PROJECT->[balance]], OpenSearchRequestBuilder(sourceBuilder={\"from\":0,\"timeout\":\"1m\",\"_source\":{\"includes\":[\"balance\"]}}, requestedTotalSize=2147483647, pageSize=null, startFrom=0)])\n"
+  }
+}

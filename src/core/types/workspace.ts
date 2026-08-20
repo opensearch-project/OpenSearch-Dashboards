@@ -37,7 +37,12 @@ export enum WorkspacePermissionMode {
 
 export interface WorkspaceFindOptions {
   page?: number;
-  perPage?: number;
+  /**
+   * The page size for the `_list` API. A number pages as usual; the special
+   * `'maximum_workspaces'` sentinel (see `MAXIMUM_WORKSPACES_PER_PAGE` in the workspace
+   * plugin constants) tells the server to page by `workspace.maximum_workspaces`.
+   */
+  perPage?: number | 'maximum_workspaces';
   search?: string;
   searchFields?: string[];
   sortField?: string;

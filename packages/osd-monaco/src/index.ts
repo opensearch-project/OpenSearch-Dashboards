@@ -49,15 +49,26 @@ export {
   getBundledCatalog,
   createRuntimeRuleNameToIndex,
   buildCommandSuggestion,
+  registerPPLLintTelemetry,
+  buildChatFixContext,
+  buildChatFixMessage,
+  hashPPLLintFixSource,
+  validatePPLLintFixCandidate,
+  DEFAULT_PPL_LINT_FIX_TOOL_NAME,
+  analyzeCompiledPPLLint,
+  validateCompiledPPLLintQueries,
 } from './ppl';
 export type {
   PPLValidationContext,
   PPLValidationProvider,
   PPLValidationProviderRequest,
   PPLValidationResult,
+  AskPPLLintFixRequest,
   PPLLintContext,
   PPLLintBridge,
   PPLLintBridgeRequest,
+  PrepareExplainQuery,
+  ValidateCandidateResult,
   Diagnostic,
   DiagnosticRange,
   LintResult,
@@ -66,6 +77,7 @@ export type {
   CatalogEntry,
   LintRunContext,
   CommandSuggestion,
+  PPLLintTelemetryEvent,
 } from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */

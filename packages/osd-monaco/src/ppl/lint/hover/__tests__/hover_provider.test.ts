@@ -4,14 +4,17 @@
  */
 
 import { monaco } from '../../../../monaco';
-import { LINT_MARKER_SOURCE } from '../../diagnostic_to_marker';
-import {
-  markerFixKey,
-  setModelHoverFacts,
-  clearModelHoverFacts,
-  HoverFacts,
-} from '../hover_registry';
+import { LINT_MARKER_SOURCE, ruleIdOf } from '../../diagnostic_to_marker';
+import { markerFixKey, setModelFixes, clearModelFixes, MarkerFix } from '../../fix_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
+import { registerPPLDiagnosticActionContributor } from '../../diagnostic_action';
+import {
+  PPLLintTelemetryEvent,
+  PPL_LINT_TELEMETRY_EVENTS,
+  clearPPLLintTelemetry,
+  reconcilePPLLintStaticTelemetry,
+  registerPPLLintTelemetry,
+} from '../../telemetry';
 
 type Marker = monaco.editor.IMarker;
 
@@ -45,7 +48,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   jest.restoreAllMocks();
-  clearModelHoverFacts(model);
+  clearModelFixes(model);
 });
 
 function hoverAt(line: number, column: number) {
@@ -63,13 +66,29 @@ function markdownOf(hover: monaco.languages.Hover | null): string {
   return first.value;
 }
 
+function activateMarkers(markers: Marker[]): void {
+  reconcilePPLLintStaticTelemetry(
+    model,
+    markers.map((marker) => ({
+      ruleId: ruleIdOf(marker) ?? '',
+      markerKey: markerFixKey(marker),
+    }))
+  );
+}
+
 describe('pplLintHoverProvider', () => {
   it('returns a card for a lint marker under the cursor', () => {
-    markersByOwner[LINT_OWNER] = [makeMarker()];
+    const markerMessage = 'Dividing by zero returns null.';
+    markersByOwner[LINT_OWNER] = [makeMarker({ message: markerMessage })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    expect(markdownOf(hover)).toContain('**division-by-zero** · Warning');
-    expect(markdownOf(hover)).toContain('**Engine behavior** —');
+    // Monaco's built-in marker hover owns the message and linked rule id; the
+    // supplemental card retains the explicit severity label.
+    expect(markdownOf(hover)).toContain('⚠️ **Warning**');
+    expect(markdownOf(hover)).not.toContain('Rule:');
+    expect(markdownOf(hover)).not.toContain(markerMessage);
+    expect(markdownOf(hover)).toContain('**Fix** — Check your divisor');
+    expect(markdownOf(hover)).toContain('[Learn more →](https://docs.example/x)');
   });
 
   it('returns null when the cursor is outside every marker range', () => {
@@ -86,17 +105,21 @@ describe('pplLintHoverProvider', () => {
     expect(hoverAt(1, 7)).toBeNull();
   });
 
-  it('includes per-instance facts from the side table', () => {
+  it('renders the quick-fix preview from the side table', () => {
     const marker = makeMarker({
-      code: { value: 'field-validation', target: monaco.Uri.parse('https://docs.example/f') },
-      message: 'Unknown field "reveneu". Did you mean "revenue"?',
+      code: 'field-validation',
+      message:
+        'Field \'reveneu\' is not defined or recognized in the current schema. Did you mean "revenue"?',
     });
     markersByOwner[LINT_OWNER] = [marker];
-    const facts: HoverFacts = { field: 'reveneu', suggestion: 'revenue' };
-    setModelHoverFacts(model, new Map([[markerFixKey(marker), facts]]));
+    const fix: MarkerFix = { title: 'Replace with "revenue"', text: 'revenue' };
+    setModelFixes(model, new Map([[markerFixKey(marker), fix]]));
 
     const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('Closest known field: `revenue`');
+    expect(md).toContain('**Quick fix available** — `revenue`');
+    expect(md).not.toContain(marker.message);
+    expect(md).not.toContain('Closest known field');
+    expect(md).not.toContain('Learn more');
   });
 
   it('picks the innermost marker when several overlap', () => {
@@ -114,16 +137,161 @@ describe('pplLintHoverProvider', () => {
     });
     markersByOwner[LINT_OWNER] = [outer, inner];
     const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('**division-by-zero**');
-    expect(md).not.toContain('**agg-on-text**');
+    // The innermost marker's supplemental guidance wins.
+    expect(md).toContain('Check your divisor');
+    expect(md).toContain('https://docs.example/d');
+    expect(md).not.toContain('https://docs.example/a');
+    expect(md).not.toContain('inner');
+    expect(md).not.toContain('outer');
   });
 
-  it('still renders when code (ruleId) is absent, using a fallback id', () => {
+  it('leaves a marker with no supplemental guidance to Monaco', () => {
     const marker = makeMarker({ code: undefined, message: 'no code here' });
     markersByOwner[LINT_OWNER] = [marker];
+    expect(hoverAt(1, 7)).toBeNull();
+  });
+
+  it('resolves the catalog entry from a plain-string marker code', () => {
+    // The id itself is no longer printed, so assert the thing it still drives:
+    // a bare-string `code` (no doc link) must still find the catalog Fix text.
+    markersByOwner[LINT_OWNER] = [makeMarker({ code: 'agg-on-text' })];
     const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('no code here');
-    // No static content, no doc link — but never throws / never blank.
-    expect(md).not.toContain('**Engine behavior**');
+    expect(md).toContain('**Fix** —');
+    expect(md).not.toContain('Rule:');
+    expect(md).not.toContain('Learn more');
+  });
+
+  describe('contributed actions', () => {
+    it('appends contributed actions as a separate trusted command-link block', () => {
+      const dispose = registerPPLDiagnosticActionContributor((c) => [
+        { title: 'Ask Olly to fix', commandId: 'ppl.aiFix', args: [c.ruleId] },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const hover = hoverAt(1, 7);
+        expect(hover).not.toBeNull();
+        // Main card stays untrusted; the action block is a second, trusted part.
+        expect((hover!.contents[0] as monaco.IMarkdownString).isTrusted).toBe(false);
+        const actionPart = hover!.contents[1] as monaco.IMarkdownString;
+        expect(actionPart.isTrusted).toBe(true);
+        expect(actionPart.value).toContain('Ask Olly to fix');
+        expect(actionPart.value).toContain('command:ppl.aiFix');
+      } finally {
+        dispose();
+      }
+    });
+
+    it('adds no extra content part when nothing is contributed', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      const hover = hoverAt(1, 7);
+      expect(hover!.contents).toHaveLength(1);
+    });
+
+    it('escapes a contributor title so it cannot inject markdown into the trusted block', () => {
+      // A title that tries to close the link early and open its own command link.
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: '](command:evil?[]) [x', commandId: 'ppl.aiFix' },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const actionPart = hoverAt(1, 7)!.contents[1] as monaco.IMarkdownString;
+        expect(actionPart.isTrusted).toBe(true);
+        // The declared link is the only real one. The injected `evil` text
+        // survives only as escaped, inert link text: no link-forming `](command:`
+        // sequence points at it, so markdown never renders it as a command link.
+        expect(actionPart.value).toContain('](command:ppl.aiFix');
+        expect(actionPart.value).not.toContain('](command:evil');
+      } finally {
+        dispose();
+      }
+    });
+
+    it('drops an action whose commandId is not a plain identifier', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'sneaky', commandId: 'ppl.aiFix?evil=1) [x](command:evil' },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const hover = hoverAt(1, 7);
+        // The sole action was rejected, so no trusted action block is added.
+        expect(hover!.contents).toHaveLength(1);
+      } finally {
+        dispose();
+      }
+    });
+  });
+
+  describe('telemetry', () => {
+    let events: PPLLintTelemetryEvent[];
+    beforeEach(() => {
+      events = [];
+      clearPPLLintTelemetry(model);
+      registerPPLLintTelemetry((event) => events.push(event));
+    });
+    afterEach(() => {
+      registerPPLLintTelemetry(undefined);
+      clearPPLLintTelemetry(model);
+    });
+
+    it('emits hover_shown with the rule id when a card is returned', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      hoverAt(1, 7);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN, data: { rule: 'division-by-zero' } },
+      ]);
+    });
+
+    it('does not emit when no lint marker is under the cursor', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker({ startColumn: 5, endColumn: 8 })];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      hoverAt(1, 20);
+      expect(events).toHaveLength(0);
+    });
+
+    it('does not emit when no supplemental card is returned', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker({ code: undefined })];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      expect(hoverAt(1, 7)).toBeNull();
+      expect(events).toHaveLength(0);
+    });
+
+    it('deduplicates repeated hovers over the same marker within a pass', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      // Monaco re-invokes provideHover per hover anchor (character position);
+      // three hovers over the same marker must count as one.
+      hoverAt(1, 6);
+      hoverAt(1, 7);
+      hoverAt(1, 8);
+      expect(events).toHaveLength(1);
+    });
+
+    it('does not count an unchanged marker again on a new accepted pass', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      hoverAt(1, 7);
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      hoverAt(1, 7);
+      expect(events).toHaveLength(1);
+    });
+
+    it('counts the hover again after the marker disappears and returns', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      events = [];
+      hoverAt(1, 7);
+      activateMarkers([]);
+      activateMarkers(markersByOwner[LINT_OWNER]);
+      hoverAt(1, 7);
+      expect(
+        events.filter((event) => event.name === PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN)
+      ).toHaveLength(2);
+    });
   });
 });

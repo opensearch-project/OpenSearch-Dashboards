@@ -478,20 +478,70 @@ describe('Workspace server plugin', () => {
         success: true,
         result: {
           total: 2,
-          per_page: 100,
+          per_page: 1,
           page: 1,
-          workspaces: [
-            { id: 'defaultWorkspace', name: 'default-workspace' },
-            { id: 'workspace-2', name: 'workspace-2' },
-          ],
+          workspaces: [{ id: 'workspace-2', name: 'workspace-2' }],
         },
+      });
+      // The default workspace is resolved by id, so it is honored even though it is
+      // not part of the workspace list page fetched above.
+      jest.spyOn(client, 'get').mockResolvedValue({
+        success: true,
+        result: { id: 'defaultWorkspace', name: 'default-workspace' },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(client.get).toHaveBeenCalledWith({ request }, 'defaultWorkspace');
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: '/mock-server-basepath/w/defaultWorkspace/app/workspace_navigation',
+        },
+      });
+    });
+
+    it('with / request path and an inaccessible default workspace', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockImplementation((key) => {
+                if (key === 'defaultWorkspace') {
+                  return Promise.resolve('defaultWorkspace');
+                }
+              }),
+            }),
+          },
+        },
+        {},
+        {},
+      ]);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: {
+          total: 2,
+          per_page: 1,
+          page: 1,
+          workspaces: [{ id: 'workspace-2', name: 'workspace-2' }],
+        },
+      });
+      jest.spyOn(client, 'get').mockResolvedValue({
+        success: false,
+        error: 'Not found',
       });
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toHaveBeenCalledWith({
         headers: {
-          location: '/mock-server-basepath/w/defaultWorkspace/app/workspace_navigation',
+          location: '/mock-server-basepath/app/home',
         },
       });
     });

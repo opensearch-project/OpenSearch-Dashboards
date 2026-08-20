@@ -10,6 +10,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { pplGrammarCache } from './ppl_grammar_cache';
 import { calciteSettingsCache } from '../../ppl_lint/calcite_settings_cache';
+import { getDataSourceEngineCapabilities } from '../../../common';
 
 interface QueryLike {
   language?: string;
@@ -35,16 +36,21 @@ type SettingsCacheLike = Pick<typeof calciteSettingsCache, 'warmUp'>;
  * The grammar cache handles feature flag checking, datasource switching
  * (auto-clears when the datasource ID changes), and version gating (>= 3.6),
  * so this handler only needs to gate on language/dataset presence and forward.
+ * Grammar warm-up is not a lint feature — autocomplete and runtime validation
+ * need it too — so it runs regardless of `lintEnabled`.
  *
- * The settings cache is not gated on the runtime-grammar flag because compiled
- * lint can emit `disabled-join-type` warnings that depend on `allJoinTypesAllowed`.
+ * Calcite settings are consumed only by lint, so they warm only when lint is
+ * enabled. They are still independent of the runtime-grammar flag, because
+ * compiled-surface lint emits `disabled-join-type` warnings that depend on
+ * `allJoinTypesAllowed`.
  */
 export function createPplGrammarWarmupHandler(
   http: HttpSetup,
   uiSettings: IUiSettingsClient,
   savedObjectsClient: SavedObjectsClientContract,
   grammarCache: GrammarCacheLike = pplGrammarCache,
-  settingsCache: SettingsCacheLike = calciteSettingsCache
+  settingsCache: SettingsCacheLike = calciteSettingsCache,
+  lintEnabled: boolean = true
 ) {
   return (query: QueryLike) => {
     const language = (query?.language ?? '').toUpperCase();
@@ -71,8 +77,15 @@ export function createPplGrammarWarmupHandler(
       datasourceEngineType
     );
 
-    // Warm the Calcite settings cache alongside. This is independent of the
-    // runtime grammar flag because compiled-surface rules also use settings.
-    settingsCache.warmUp(http, datasourceId);
+    // Warm the Calcite settings cache alongside, but only for lint — it is the
+    // sole consumer, and an engine that speaks Open Distro SQL/PPL has no
+    // Calcite settings to read. Independent of the runtime grammar flag, because
+    // compiled-surface rules use settings too.
+    if (
+      lintEnabled &&
+      !getDataSourceEngineCapabilities(datasourceEngineType).usesOpenDistroSqlPpl
+    ) {
+      settingsCache.warmUp(http, datasourceId);
+    }
   };
 }

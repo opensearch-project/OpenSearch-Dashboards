@@ -23,9 +23,10 @@ import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
-import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
@@ -67,6 +68,7 @@ export const MetricsQueryPanel: React.FC = () => {
   const setEditorText = useSetEditorText();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+  usePPLLintFixAction(setEditorTextWithQuery);
 
   const handleRun = useCallback(() => {
     const editorText =
@@ -229,7 +231,7 @@ export const MetricsQueryPanel: React.FC = () => {
 
       {isPromptMode ? (
         <div className="exploreQueryPanel__editorsWrapper">
-          <QueryPanelEditor />
+          <ExploreQueryPanelEditor />
           <QueryPanelGeneratedQuery />
         </div>
       ) : (

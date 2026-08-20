@@ -9,6 +9,7 @@
 export enum VariableType {
   Query = 'query',
   Custom = 'custom',
+  Text = 'text',
 }
 
 /**
@@ -31,6 +32,8 @@ export interface VariableMeta {
   includeAll?: boolean;
   /** Hide variable from UI */
   hide?: boolean;
+  /** Allow adding custom values */
+  allowCustomValue?: boolean;
   /** Description */
   description?: string;
   /** Sort order for options */
@@ -86,16 +89,20 @@ export interface QueryVariable extends VariableMeta, VariableQueryParams {
   valueField?: string;
   /** Optional field used as the option display label. */
   labelField?: string;
-  /** Regex filter — only options matching this pattern are shown */
+  /** Regex filter/extractor — matching options are shown and capture groups can extract values */
   regex?: string;
   /** Whether to refresh options based on time range changes (default: false) */
   useTimeFilter?: boolean;
 }
 
+export interface TextVariable extends VariableMeta {
+  type: VariableType.Text;
+}
+
 /**
  * Union of all persisted variable types.
  */
-export type Variable = CustomVariable | QueryVariable;
+export type Variable = CustomVariable | QueryVariable | TextVariable;
 
 /**
  * Option value type for query variables

@@ -14,6 +14,15 @@ import {
   setModelFixes,
   setModelSyntaxFixes,
 } from '../fix_registry';
+import { registerPPLDiagnosticActionContributor } from '../diagnostic_action';
+import {
+  PPLLintTelemetryEvent,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  clearPPLLintTelemetry,
+  reconcilePPLLintStaticTelemetry,
+  registerPPLLintTelemetry,
+} from '../telemetry';
 
 type LintMarker = monaco.editor.IMarkerData;
 
@@ -41,6 +50,21 @@ function seedFix(marker: LintMarker, fix: MarkerFix) {
   const fixes = new Map<string, MarkerFix>();
   fixes.set(markerFixKey(marker), fix);
   setModelFixes(model, fixes);
+}
+
+function activateMarkers(markers: LintMarker[]): void {
+  reconcilePPLLintStaticTelemetry(
+    model,
+    markers.map((marker) => ({
+      ruleId:
+        typeof marker.code === 'string'
+          ? marker.code
+          : marker.code && typeof marker.code === 'object'
+            ? marker.code.value
+            : '',
+      markerKey: markerFixKey(marker),
+    }))
+  );
 }
 
 function provide(markers: LintMarker[]) {
@@ -145,6 +169,70 @@ describe('pplLintCodeActionProvider', () => {
     expect(provide([m2]).map((a) => a.title)).toEqual(['fix-2']);
   });
 
+  describe('contributed actions (diagnostic-action registry)', () => {
+    // A marker whose `code` is a real catalog rule id, so the provider can look
+    // up the entry and pass catalog metadata to contributors.
+    const ruleMarker = (overrides: Partial<LintMarker> = {}): LintMarker =>
+      makeMarker({ code: 'field-validation', ...overrides });
+
+    it('offers a contributed action on a lint marker even with no deterministic fix', () => {
+      const dispose = registerPPLDiagnosticActionContributor((c) => [
+        { title: `AI: ${c.ruleId}`, commandId: 'ppl.aiFix', args: [c.ruleId] },
+      ]);
+      try {
+        const actions = provide([ruleMarker()]);
+        expect(actions).toHaveLength(1);
+        expect(actions[0].title).toBe('AI: field-validation');
+        expect(actions[0].kind).toBe('quickfix');
+        expect(actions[0].command?.id).toBe('ppl.aiFix');
+        expect(actions[0].command?.arguments).toEqual(['field-validation']);
+      } finally {
+        dispose();
+      }
+    });
+
+    it('passes catalog aiFixable/needsExplain metadata to the contributor', () => {
+      let seen: { aiFixable?: boolean; needsExplain?: boolean } | undefined;
+      const dispose = registerPPLDiagnosticActionContributor((c) => {
+        seen = { aiFixable: c.aiFixable, needsExplain: c.needsExplain };
+        return [];
+      });
+      try {
+        provide([ruleMarker()]);
+        // field-validation is not aiFixable and not needsExplain in the F0 catalog.
+        expect(seen).toEqual({ aiFixable: undefined, needsExplain: undefined });
+      } finally {
+        dispose();
+      }
+    });
+
+    it('does not offer contributed actions on a non-lint (syntax) marker', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'should not appear', commandId: 'x' },
+      ]);
+      try {
+        expect(provide([makeMarker({ source: SYNTAX_MARKER_SOURCE })])).toHaveLength(0);
+      } finally {
+        dispose();
+      }
+    });
+
+    it('emits both a deterministic fix and a contributed action for the same marker', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'AI fix', commandId: 'ppl.aiFix' },
+      ]);
+      try {
+        const marker = ruleMarker();
+        seedFix(marker, { title: 'Deterministic fix', text: 'foo' });
+        const titles = provide([marker]).map((a) => a.title);
+        expect(titles).toContain('Deterministic fix');
+        expect(titles).toContain('AI fix');
+      } finally {
+        dispose();
+      }
+    });
+  });
+
   describe('syntax-error channel (command-typo quick-fix)', () => {
     afterEach(() => clearModelSyntaxFixes(model));
 
@@ -158,7 +246,9 @@ describe('pplLintCodeActionProvider', () => {
     }
 
     it('offers a quick-fix for a syntax marker with a registered syntax fix', () => {
-      const marker = syntaxMarker({ message: 'Unknown command "wherre". Did you mean "where"?' });
+      const marker = syntaxMarker({
+        message: "Unrecognized or misspelled command 'wherre'. Did you mean 'where'?",
+      });
       seedSyntaxFix(marker, { title: 'Replace with "where"', text: 'where' });
       const actions = provide([marker]);
       expect(actions).toHaveLength(1);
@@ -177,6 +267,104 @@ describe('pplLintCodeActionProvider', () => {
 
     it('produces no action for a syntax marker without a registered fix', () => {
       expect(provide([syntaxMarker()])).toHaveLength(0);
+    });
+  });
+
+  describe('telemetry', () => {
+    let events: PPLLintTelemetryEvent[];
+    beforeEach(() => {
+      events = [];
+      clearPPLLintTelemetry(model);
+      registerPPLLintTelemetry((event) => events.push(event));
+    });
+    afterEach(() => {
+      registerPPLLintTelemetry(undefined);
+      clearModelSyntaxFixes(model);
+      clearPPLLintTelemetry(model);
+    });
+
+    it('emits quickfix_offered and attaches the click command for a lint fix', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'Replace with "1"', text: '1' });
+      activateMarkers([marker]);
+      events = [];
+      const actions = provide([marker]);
+
+      expect(actions).toHaveLength(1);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED, data: { rule: 'division-by-zero' } },
+      ]);
+      // The action carries a command so a click can be recorded; Monaco applies
+      // the edit first, then runs the command.
+      expect(actions[0].command).toEqual({
+        id: PPL_LINT_QUICKFIX_COMMAND_ID,
+        title: 'Replace with "1"',
+        arguments: [{ rule: 'division-by-zero' }],
+      });
+    });
+
+    it('reads the rule id from the object-form code as well', () => {
+      const marker = makeMarker({
+        code: { value: 'agg-on-text', target: monaco.Uri.parse('https://docs.example/a') },
+      });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      activateMarkers([marker]);
+      events = [];
+      provide([marker]);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED, data: { rule: 'agg-on-text' } },
+      ]);
+    });
+
+    it('does not emit or attach a command for a syntax-channel fix', () => {
+      const marker = makeMarker({ source: SYNTAX_MARKER_SOURCE });
+      const fixes = new Map<string, MarkerFix>();
+      fixes.set(markerFixKey(marker), { title: 'Replace with "where"', text: 'where' });
+      setModelSyntaxFixes(model, fixes);
+
+      const actions = provide([marker]);
+      expect(actions).toHaveLength(1);
+      expect(actions[0].command).toBeUndefined();
+      expect(events).toHaveLength(0);
+    });
+
+    it('emits quickfix_offered once per marker across repeated provider calls in a pass', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      activateMarkers([marker]);
+      events = [];
+      // Monaco auto-fires provideCodeActions on every cursor move; three calls
+      // for the same fix must count as one offer, while still returning the
+      // action every time so the fix stays available.
+      expect(provide([marker])).toHaveLength(1);
+      expect(provide([marker])).toHaveLength(1);
+      expect(provide([marker])).toHaveLength(1);
+      expect(events).toHaveLength(1);
+    });
+
+    it('does not count quickfix_offered again for an unchanged accepted marker set', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      activateMarkers([marker]);
+      events = [];
+      provide([marker]);
+      activateMarkers([marker]);
+      provide([marker]);
+      expect(events).toHaveLength(1);
+    });
+
+    it('counts quickfix_offered again after a marker is removed and returns', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      activateMarkers([marker]);
+      events = [];
+      provide([marker]);
+      activateMarkers([]);
+      activateMarkers([marker]);
+      provide([marker]);
+      expect(
+        events.filter((event) => event.name === PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED)
+      ).toHaveLength(2);
     });
   });
 });

@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
+import { defaultAreaChartStyles } from './area_vis_config';
 import {
   Positions,
   ThresholdMode,
@@ -13,6 +14,7 @@ import {
   TooltipOptions,
   AxisRole,
   AxisColumnMappings,
+  DisableMode,
 } from '../types';
 
 // Mock child components
@@ -78,11 +80,16 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
+    // Spread the real defaults so this literal keeps satisfying AreaChartStyle as
+    // new required style props are added
     styleOptions: {
+      ...defaultAreaChartStyles,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       legendTitle: '',
       addTimeMarker: false,
+      areaOpacity: 0.3,
+      gradientMode: 'none' as const,
       // Threshold options
       thresholdOptions: {
         baseColor: '#00BD6B',
@@ -90,6 +97,7 @@ describe('AreaVisStyleControls', () => {
         thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
+      stackMode: 'none' as const,
       standardAxes: [
         {
           type: 'category' as const,
@@ -128,7 +136,7 @@ describe('AreaVisStyleControls', () => {
           axisRole: AxisRole.Y,
         },
       ],
-      showFullTimeRange: false,
+      showFullTimeRange: true,
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -303,13 +311,77 @@ describe('AreaVisStyleControls', () => {
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
   });
 
+  test('shows the time marker toggle when the x-axis is a date field', () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    expect(screen.getByTestId('areaAddTimeMarkerSwitch')).toBeInTheDocument();
+  });
+
+  test('hides the time marker toggle when the x-axis is not a date field', () => {
+    const props = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...defaultProps.axisColumnMappings,
+        [AxisRole.X]: [
+          {
+            id: 1,
+            name: 'Category',
+            schema: VisFieldType.Categorical,
+            column: 'category',
+          },
+        ],
+      },
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    expect(screen.queryByTestId('areaAddTimeMarkerSwitch')).not.toBeInTheDocument();
+    // The fill controls are not time-specific, so the Area panel itself remains
+    expect(screen.getByTestId('areaFillOpacityRange')).toBeInTheDocument();
+  });
+
+  test('updates addTimeMarker correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaAddTimeMarkerSwitch'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addTimeMarker: true });
+  });
+
+  test('updates areaOpacity correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    fireEvent.change(screen.getByTestId('areaFillOpacityRange'), { target: { value: '80' } });
+
+    await waitFor(() => {
+      // Slider shows 0-100 but the value is stored as a 0-1 fraction.
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ areaOpacity: 0.8 });
+    });
+  });
+
+  test('updates gradientMode correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaGradientMode-hue'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ gradientMode: 'hue' });
+  });
+
+  test('updates stackMode correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('areaStackMode-percentage'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ stackMode: 'percentage' });
+  });
+
   test('updates showFullTimeRange correctly', async () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
     await userEvent.click(screen.getByTestId('showFullTimeRangeSwitch'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      showFullTimeRange: true, // Default is false, so toggling sets it to true
+      showFullTimeRange: false, // Default is true, so toggling sets it to false
     });
   });
 });

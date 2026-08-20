@@ -18,6 +18,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enabled: true,
     sqlSupport: true,
     queryProfiling: true,
+    pplAnalyze: true,
     logsDrilldown: true,
   },
   schema: configSchema,

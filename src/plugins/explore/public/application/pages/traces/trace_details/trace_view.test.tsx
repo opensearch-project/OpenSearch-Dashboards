@@ -50,7 +50,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: () => ({
-    hash: '#?traceId=test-trace-id&dataset={"id":"test-dataset-id","title":"test-index-*","type":"INDEX_PATTERN","timeFieldName":"endTime"}',
+    hash: '#?traceId=test-trace-id&dataset={"id":"test-dataset-id","title":"test-index-*","type":"INDEX_PATTERN","timeFieldName":"startTime"}',
   }),
 }));
 

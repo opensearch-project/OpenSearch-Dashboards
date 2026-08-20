@@ -8,6 +8,14 @@ import { HttpSetup } from '../../../../core/public';
 export interface CalciteSettings {
   calciteEnabled: boolean;
   allJoinTypesAllowed: boolean;
+  /**
+   * Whether `calciteEnabled` was read from the cluster. The route fails open, so
+   * a failed read still reports `calciteEnabled: true`; only a `true` here means
+   * the value is a measurement rather than the engine default. Optional so a
+   * newer client still accepts a response from an older server, which is treated
+   * as unmeasured.
+   */
+  calciteMeasured?: boolean;
 }
 
 const CALCITE_SETTINGS_ENDPOINT = '/api/enhancements/ppl/calcite_settings';

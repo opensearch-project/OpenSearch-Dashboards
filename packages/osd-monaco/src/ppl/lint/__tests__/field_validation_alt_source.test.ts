@@ -58,7 +58,9 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
         fieldDiags(
           'search accounts | join left=l right=r on l.id = r.id departments | where nope = 1'
         )
-      ).toEqual([expect.stringContaining('Unknown field "nope"')]);
+      ).toEqual([
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema."),
+      ]);
     });
 
     it('STILL flags a dotted ref whose prefix is not a declared alias', () => {
@@ -66,7 +68,11 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
         fieldDiags(
           'search accounts | join left=l right=r on l.id = r.id departments | where x.response = 200'
         )
-      ).toEqual([expect.stringContaining('Unknown field "x.response"')]);
+      ).toEqual([
+        expect.stringContaining(
+          "Field 'x.response' is not defined or recognized in the current schema."
+        ),
+      ]);
     });
 
     it('does NOT register a join TABLE alias as a created field', () => {
@@ -74,7 +80,7 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
       // outer `accounts` source. It must not enter the known-field set, so a
       // downstream reference to a *field* `d` is still flagged.
       expect(fieldDiags('search accounts | join departments AS d | where d > 1')).toEqual([
-        expect.stringContaining('Unknown field "d"'),
+        expect.stringContaining("Field 'd' is not defined or recognized in the current schema."),
       ]);
     });
   });
@@ -105,7 +111,9 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
       // bare reference on the outer `accounts` source must still fire — proving
       // the prune is scoped to the alternate-source subtree, not global.
       expect(fieldDiags('search accounts | where really_unknown = 1')).toEqual([
-        expect.stringContaining('Unknown field "really_unknown"'),
+        expect.stringContaining(
+          "Field 'really_unknown' is not defined or recognized in the current schema."
+        ),
       ]);
     });
 
@@ -115,7 +123,9 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
       // must still be flagged — the creation must be scoped to its subtree.
       expect(
         fieldDiags('search accounts | append [search dept | eval foo = age] | where foo > 1')
-      ).toEqual([expect.stringContaining('Unknown field "foo"')]);
+      ).toEqual([
+        expect.stringContaining("Field 'foo' is not defined or recognized in the current schema."),
+      ]);
     });
 
     it('still treats a top-level eval field as known downstream', () => {
@@ -132,7 +142,9 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('STILL flags a backtick-quoted unknown field', () => {
       expect(fieldDiags('search accounts | where `bogus` > 30')).toEqual([
-        expect.stringContaining('Unknown field "bogus"'),
+        expect.stringContaining(
+          "Field 'bogus' is not defined or recognized in the current schema."
+        ),
       ]);
     });
   });
@@ -179,13 +191,15 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('STILL flags a genuine typo alongside a backtick-created field', () => {
       expect(fieldDiags('source=t | eval `total` = age * 2 | where totalz > 0')).toEqual([
-        expect.stringContaining('Unknown field "totalz"'),
+        expect.stringContaining(
+          "Field 'totalz' is not defined or recognized in the current schema."
+        ),
       ]);
     });
 
     it('suggests the normalized created name, not the backtick-quoted form', () => {
       expect(fieldDiags('search accounts | stats count() as `cnt` | where cntx > 0')).toEqual([
-        'Unknown field "cntx". Did you mean "cnt"?',
+        'Field \'cntx\' is not defined or recognized in the current schema. Did you mean "cnt"?',
       ]);
     });
   });
@@ -193,7 +207,7 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
   // The compiled-simplified grammar mis-parses `source=idx` / `index=idx` into a
   // fieldExpression for the leading `source`/`index` keyword (the runtime grammar
   // parses it as an excluded fromClause). Without a guard this fires a spurious
-  // "Unknown field" on EVERY source-first query against a sub-3.6 cluster — the
+  // unknown-field finding on EVERY source-first query against a sub-3.6 cluster — the
   // dominant case in the editor's compiled-fallback path.
   describe('source-first keyword is not flagged on the compiled surface', () => {
     it('does NOT flag the `source` keyword in `source=accounts`', () => {
@@ -210,7 +224,7 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('STILL flags a genuinely unknown field on a source-first query', () => {
       expect(fieldDiags('source=accounts | where nope = 1')).toEqual([
-        expect.stringContaining('Unknown field "nope"'),
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema."),
       ]);
     });
   });
@@ -234,13 +248,17 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('flags an unknown field in an eval RHS, not the eval target', () => {
       expect(scopeDiags('source=t | eval x = nonexistent + 1')).toEqual([
-        expect.stringContaining('Unknown field "nonexistent"'),
+        expect.stringContaining(
+          "Field 'nonexistent' is not defined or recognized in the current schema."
+        ),
       ]);
     });
 
     it('flags an unknown field in an eval RHS division', () => {
       expect(scopeDiags('source=t | eval ratio = respose / total')).toEqual([
-        expect.stringContaining('Unknown field "respose"'),
+        expect.stringContaining(
+          "Field 'respose' is not defined or recognized in the current schema."
+        ),
       ]);
     });
 
@@ -268,7 +286,7 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('suggests the exact-but-for-case field, not a distance-1 neighbor', () => {
       expect(caseDiags('search accounts | where AGE > 30')).toEqual([
-        'Unknown field "AGE". Did you mean "age"?',
+        'Field \'AGE\' is not defined or recognized in the current schema. Did you mean "age"?',
       ]);
     });
   });
@@ -329,12 +347,14 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
     it('STILL flags an unknown grok SOURCE field', () => {
       expect(
         fieldDiags('search accounts | grok nope "%{NUMBER:duration}" | where duration > 5')
-      ).toEqual([expect.stringContaining('Unknown field "nope"')]);
+      ).toEqual([
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema."),
+      ]);
     });
 
     it('STILL flags an unknown parse SOURCE field', () => {
       expect(fieldDiags('search accounts | parse nope "(?<x>\\\\w+)" | where x = "y"')).toEqual([
-        expect.stringContaining('Unknown field "nope"'),
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema."),
       ]);
     });
 
@@ -343,12 +363,18 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
       // never creates it, so `bogus` should still be caught.
       expect(
         fieldDiags('search accounts | parse name "(?<user_id>\\\\d+)" | where bogus = 1')
-      ).toEqual([expect.stringContaining('Unknown field "bogus"')]);
+      ).toEqual([
+        expect.stringContaining(
+          "Field 'bogus' is not defined or recognized in the current schema."
+        ),
+      ]);
     });
 
     it('grok with no captures (%{SYNTAX} without colon) registers nothing', () => {
       expect(fieldDiags('search accounts | grok status "%{NUMBER}" | where bogus > 5')).toEqual([
-        expect.stringContaining('Unknown field "bogus"'),
+        expect.stringContaining(
+          "Field 'bogus' is not defined or recognized in the current schema."
+        ),
       ]);
     });
   });
@@ -403,14 +429,18 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
 
     it('STILL flags an unknown spath INPUT (source) field', () => {
       expect(fieldDiags('search accounts | spath input=nope output=parsed')).toEqual([
-        expect.stringContaining('Unknown field "nope"'),
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema."),
       ]);
     });
 
     it('STILL flags unrelated unknown fields after extraction', () => {
       expect(
         fieldDiags('search accounts | grok status "%{NUMBER:duration}" | where bogus > 5')
-      ).toEqual([expect.stringContaining('Unknown field "bogus"')]);
+      ).toEqual([
+        expect.stringContaining(
+          "Field 'bogus' is not defined or recognized in the current schema."
+        ),
+      ]);
     });
   });
 
@@ -426,7 +456,9 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
         fieldDiags(
           'search accounts | append [search logs | grok status "%{NUMBER:dur}"] | where dur > 1'
         )
-      ).toEqual([expect.stringContaining('Unknown field "dur"')]);
+      ).toEqual([
+        expect.stringContaining("Field 'dur' is not defined or recognized in the current schema."),
+      ]);
     });
 
     it('an outer-pipeline extraction still resolves normally', () => {

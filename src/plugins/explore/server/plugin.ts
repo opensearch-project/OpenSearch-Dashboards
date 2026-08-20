@@ -60,8 +60,8 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
           },
         };
       } catch (error) {
-        this.logger.error('Failed to load explore dynamic config, using defaults', error);
-        // Keep defaults from provider (false for both flags)
+        this.logger.debug('Failed to load explore dynamic config, using defaults');
+        // Keep defaults from provider (false for all flags)
         return capabilities;
       }
     });

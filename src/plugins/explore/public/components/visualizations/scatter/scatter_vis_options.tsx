@@ -74,8 +74,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <LegendOptionsWrapper
             styleOptions={styleOptions}
             updateStyleOption={updateStyleOption}
-            shouldShow={hasColorMapping}
-            hasSizeLegend={hasSizeMapping}
+            shouldShow={hasColorMapping || hasSizeMapping}
           />
 
           <EuiFlexItem grow={false}>

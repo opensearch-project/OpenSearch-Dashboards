@@ -164,11 +164,40 @@ export const CURRENT_USER_PLACEHOLDER = '%me%';
 export const MAX_WORKSPACE_NAME_LENGTH = 40;
 export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
 
+/**
+ * The page size used to fetch the full workspace list when
+ * `workspace.maximum_workspaces` is not configured.
+ */
+export const DEFAULT_WORKSPACE_LIST_PER_PAGE = 999;
+
+/**
+ * A sentinel value for the `_list` API `perPage` parameter. When passed, the server
+ * resolves the page size to `workspace.maximum_workspaces` (via the dynamic config
+ * service, falling back to {@link DEFAULT_WORKSPACE_LIST_PER_PAGE}) so that every
+ * workspace a user is allowed to create can also be listed. Any other numeric value
+ * pages as usual, keeping the default API behavior unchanged.
+ */
+export const MAXIMUM_WORKSPACES_PER_PAGE = 'maximum_workspaces' as const;
+
+/**
+ * The page size used when exhaustively fetching every workspace on the server side (see
+ * the workspace collection fetcher). A large but bounded value keeps each request cheap
+ * while still walking every page.
+ */
+export const WORKSPACE_FETCH_ALL_PER_PAGE = 1000;
+
 export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
 export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
+
+/**
+ * The namespace the workspace plugin config is stored under in the dynamic config
+ * service. It matches the plugin id, which is how the config path is derived when a
+ * plugin manifest does not declare an explicit `configPath`.
+ */
+export const WORKSPACE_PLUGIN_CONFIG_PATH = 'workspace';
 
 // Workspace will handle both data source and data connection type saved object.
 export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [

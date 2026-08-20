@@ -359,6 +359,53 @@ describe('ppl_grammar_warmup', () => {
 
       expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
     });
+
+    it('does not warm settings when lint is disabled, but still warms the grammar', () => {
+      // The settings response is read only by lint, so with lint off the request
+      // is pure waste. Grammar warm-up also serves autocomplete and runtime
+      // validation, so it must keep running.
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache,
+        false
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+      expect(grammarCache.warmUp).toHaveBeenCalled();
+    });
+
+    it('does not warm settings for an engine with no Calcite settings to read', () => {
+      // Elasticsearch speaks Open Distro SQL/PPL, so the request cannot succeed.
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache,
+        true
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: {
+          dataSource: { id: 'ds-es', version: '7.10.2', engineType: 'Elasticsearch' },
+        },
+      });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+    });
   });
 
   it('should handle SNAPSHOT versions from dataset', () => {

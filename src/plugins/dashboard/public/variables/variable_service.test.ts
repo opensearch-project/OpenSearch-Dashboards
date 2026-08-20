@@ -4,7 +4,14 @@
  */
 
 import { VariableService } from './variable_service';
-import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
+import {
+  Variable,
+  VariableType,
+  VariableSortOrder,
+  CustomVariable,
+  QueryVariable,
+  TextVariable,
+} from './types';
 import { VariableInterpolationService } from './variable_interpolation_service';
 
 jest.mock('./variable_query_utils', () => ({
@@ -38,15 +45,18 @@ function createService(initialVariables: Variable[] = [], dashboardId?: string) 
     get: jest.fn().mockResolvedValue({ attributes: {} }),
   };
 
+  const telemetrySink = jest.fn();
+
   const service = new VariableService(
     {} as any, // dataPlugin
     dashboardId,
-    mockSavedObjectsClient as any
+    mockSavedObjectsClient as any,
+    telemetrySink
   );
 
   service.initialize(initialVariables);
 
-  return { service, mockSavedObjectsClient };
+  return { service, mockSavedObjectsClient, telemetrySink };
 }
 
 function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVariable {
@@ -56,6 +66,16 @@ function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVari
     type: VariableType.Custom,
     current: ['dev'],
     customOptions: ['dev', 'staging', 'prod'],
+    ...overrides,
+  };
+}
+
+function makeTextVariable(overrides: Partial<TextVariable> = {}): TextVariable {
+  return {
+    id: 'text-1',
+    name: 'keyword',
+    type: VariableType.Text,
+    current: undefined,
     ...overrides,
   };
 }
@@ -711,6 +731,29 @@ describe('VariableService', () => {
 
       const withState = service.getVariablesWithState();
       expect(withState[0].options).toEqual([{ value: 'prod-api', label: 'Staging label' }]);
+    });
+
+    it('should extract query option values and labels with regex capture groups', async () => {
+      mockExecuteVariableQuery.mockResolvedValue({
+        rows: [{ service: 'env=prod,label=Production' }, { service: 'env=dev,label=Development' }],
+        fields: ['service'],
+        fieldTypes: { service: 'string' },
+      });
+      const { service } = createService([
+        makeQueryVariable({
+          current: undefined,
+          regex: '^env=(?<value>[^,]+),label=(?<label>.+)$',
+        }),
+      ]);
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual([
+        { value: 'prod', label: 'Production' },
+        { value: 'dev', label: 'Development' },
+      ]);
+      expect(service.getVariables()[0].current).toEqual(['prod']);
     });
 
     it('should set error state on fetch failure', async () => {
@@ -1390,6 +1433,507 @@ describe('VariableService', () => {
       expect(vars[0].options.length).toBe(100);
       expect(vars[0].options[0].value).toBe('option-050');
       expect(vars[0].options[99].value).toBe('option-149');
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should not report anything when no telemetry sink is provided', async () => {
+      // Sink is optional -- consumers like the explore plugin construct the
+      // service without one and must not break.
+      const service = new VariableService({} as any, 'dash-1', {
+        update: jest.fn().mockResolvedValue({}),
+      } as any);
+      service.initialize([makeCustomVariable()]);
+
+      await expect(
+        service.addVariable({
+          name: 'new_var',
+          type: VariableType.Custom,
+          customOptions: ['a'],
+        } as any)
+      ).resolves.toBeUndefined();
+    });
+
+    describe('variables_loaded', () => {
+      it('should report count and distinct types on initialize', () => {
+        const { telemetrySink } = createService([
+          makeCustomVariable({ id: 'c1', name: 'env' }),
+          makeCustomVariable({ id: 'c2', name: 'region' }),
+          makeQueryVariable({ id: 'q1', name: 'service' }),
+        ]);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variables_loaded',
+          data: { count: 3, types: [VariableType.Custom, VariableType.Query] },
+        });
+      });
+
+      it('should not report when the dashboard has no variables', () => {
+        const { telemetrySink } = createService([]);
+
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variables_loaded' })
+        );
+      });
+    });
+
+    describe('create', () => {
+      it('should report variable_create_succeeded with the type', async () => {
+        const { service, telemetrySink } = createService([], 'dash-1');
+
+        await service.addVariable({
+          name: 'env',
+          type: VariableType.Custom,
+          customOptions: ['dev'],
+        } as any);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_create_succeeded',
+          data: { type: VariableType.Custom },
+        });
+      });
+
+      it('should report variable_create_failed and rethrow when persistence fails', async () => {
+        const { service, mockSavedObjectsClient, telemetrySink } = createService([], 'dash-1');
+        mockSavedObjectsClient.update.mockRejectedValue(new TypeError('boom'));
+
+        await expect(
+          service.addVariable({
+            name: 'env',
+            type: VariableType.Custom,
+            customOptions: ['dev'],
+          } as any)
+        ).rejects.toThrow('boom');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_create_failed',
+          data: { type: VariableType.Custom, errorType: 'TypeError' },
+        });
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variable_create_succeeded' })
+        );
+      });
+    });
+
+    describe('update', () => {
+      it('should report variable_update_succeeded with the resolved type', async () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        // A partial update carrying no `type` must still report the real type.
+        await service.updateVariable('custom-1', { name: 'renamed' });
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_update_succeeded',
+          data: { type: VariableType.Custom },
+        });
+      });
+
+      it('should report variable_update_failed and rethrow when persistence fails', async () => {
+        const { service, mockSavedObjectsClient, telemetrySink } = createService(
+          [makeCustomVariable()],
+          'dash-1'
+        );
+        mockSavedObjectsClient.update.mockRejectedValue(new Error('nope'));
+
+        await expect(service.updateVariable('custom-1', { name: 'renamed' })).rejects.toThrow(
+          'nope'
+        );
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_update_failed',
+          data: { type: VariableType.Custom, errorType: 'Error' },
+        });
+      });
+    });
+
+    describe('delete', () => {
+      it('should report variable_deleted with the removed variable type', async () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        await service.removeVariable('custom-1');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_deleted',
+          data: { type: VariableType.Custom },
+        });
+      });
+    });
+
+    describe('value change', () => {
+      it('should report variable_value_changed', () => {
+        const { service, telemetrySink } = createService([makeCustomVariable()], 'dash-1');
+
+        service.updateVariableValue('custom-1', ['prod']);
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_value_changed',
+          data: { type: VariableType.Custom },
+        });
+      });
+    });
+
+    describe('variable_query_failed', () => {
+      // Isolate the mock queue so a leftover *Once implementation from an
+      // earlier test cannot shadow the rejection under test, and restore the
+      // module-level default afterwards.
+      beforeEach(() => {
+        mockExecuteVariableQuery.mockReset();
+      });
+      afterEach(() => {
+        mockExecuteVariableQuery.mockResolvedValue(makeQueryResult([]));
+      });
+
+      it('should report the failure with language and error type', async () => {
+        const { service, telemetrySink } = createService([makeQueryVariable()], 'dash-1');
+        mockExecuteVariableQuery.mockRejectedValueOnce(new TypeError('bad query'));
+
+        await service.refreshVariableOptions('query-1');
+
+        expect(telemetrySink).toHaveBeenCalledWith({
+          name: 'variable_query_failed',
+          data: { type: VariableType.Query, language: 'PPL', errorType: 'TypeError' },
+        });
+      });
+
+      it('should not report aborted refreshes', async () => {
+        const { service, telemetrySink } = createService([makeQueryVariable()], 'dash-1');
+        const abortError = new Error('aborted');
+        abortError.name = 'AbortError';
+        mockExecuteVariableQuery.mockRejectedValueOnce(abortError);
+
+        await service.refreshVariableOptions('query-1');
+
+        expect(telemetrySink).not.toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'variable_query_failed' })
+        );
+      });
+    });
+
+    it('should not break the feature when the sink throws', async () => {
+      const throwingSink = jest.fn(() => {
+        throw new Error('sink exploded');
+      });
+      const service = new VariableService(
+        {} as any,
+        'dash-1',
+        { update: jest.fn().mockResolvedValue({}) } as any,
+        throwingSink
+      );
+      service.initialize([]);
+
+      await expect(
+        service.addVariable({
+          name: 'env',
+          type: VariableType.Custom,
+          customOptions: ['dev'],
+        } as any)
+      ).resolves.toBeUndefined();
+      expect(throwingSink).toHaveBeenCalled();
+    });
+  });
+
+  describe('allowCustomValue — Custom reconcile', () => {
+    it('drops off-list values when allowCustomValue is off (default)', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', current: ['off-list'] })],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('also drops off-list values when allowCustomValue is on (matches Grafana)', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('keeps only the listed values from a mixed multi-select selection', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            multi: true,
+            current: ['dev', 'off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev', 'prod'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    it('falls back to the first option when no selected value survives', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list-a'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', { customOptions: ['dev'] } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['dev']);
+    });
+
+    // This is the guarantee that actually makes the feature work: a value committed
+    // from the variable bar is never reconciled away.
+    it('never prunes an off-list value committed via updateVariableValue', () => {
+      const { service } = createService([
+        makeCustomVariable({ id: 'v1', name: 'v1', allowCustomValue: true }),
+      ]);
+
+      service.updateVariableValue('v1', ['typed-off-list']);
+
+      expect(getCurrentValues(service).v1).toEqual(['typed-off-list']);
+    });
+
+    it('keeps an off-list value across unrelated variable edits', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            current: ['off-list'],
+            allowCustomValue: true,
+          }),
+        ],
+        'dashboard-1'
+      );
+
+      // Only the label changed — the option list is untouched, so no reconcile runs.
+      await service.updateVariable('v1', { label: 'New Label' } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['off-list']);
+    });
+
+    it('persists allowCustomValue when adding a variable', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'env',
+        type: VariableType.Custom,
+        customOptions: ['dev'],
+        allowCustomValue: true,
+      } as Omit<Variable, 'id'>);
+
+      expect(service.getVariables()[0].allowCustomValue).toBe(true);
+    });
+
+    it('keeps allowCustomValue across a type switch', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', allowCustomValue: true })],
+        'dashboard-1'
+      );
+
+      await service.updateVariable('v1', {
+        type: VariableType.Query,
+        query: 'source=logs | fields env',
+        language: 'PPL',
+      } as Partial<Variable>);
+
+      expect(service.getVariables()[0].allowCustomValue).toBe(true);
+    });
+
+    it('never prunes Query variable values on refresh, regardless of the flag', async () => {
+      mockExecuteVariableQuery.mockResolvedValueOnce(makeQueryResult(['a', 'b']));
+      const { service } = createService([
+        makeQueryVariable({ id: 'q1', name: 'q1', current: ['off-list'] }),
+      ]);
+
+      await service.refreshVariableOptions('q1');
+
+      expect(getCurrentValues(service).q1).toEqual(['off-list']);
+    });
+  });
+
+  describe('Text variables', () => {
+    it('should use the initial value supplied to addVariable as current', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'keyword',
+        type: VariableType.Text,
+        current: ['hello'],
+      } as Omit<TextVariable, 'id' | 'current'> & { current?: string[] });
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual(['hello']);
+    });
+
+    it('should leave current undefined when no initial value is provided', async () => {
+      const { service } = createService([], 'dashboard-1');
+      await service.addVariable({
+        name: 'keyword',
+        type: VariableType.Text,
+      } as Omit<TextVariable, 'id' | 'current'>);
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual([]);
+    });
+
+    it('should have no options and never enter loading/error state', () => {
+      const { service } = createService([makeTextVariable({ current: ['abc'] })]);
+      const vars = service.getVariablesWithState();
+      expect(vars[0].options).toEqual([]);
+      expect(vars[0].loading).toBeFalsy();
+      expect(vars[0].error).toBeFalsy();
+    });
+
+    it('should update current value via updateVariableValue', () => {
+      const { service } = createService([makeTextVariable({ current: ['saved'] })]);
+      service.updateVariableValue('text-1', ['typed-value']);
+
+      const values = getCurrentValues(service);
+      expect(values.keyword).toEqual(['typed-value']);
+    });
+
+    it('should not be included in refreshAllVariableOptions / refreshTimeFilteredVariableOptions', async () => {
+      const { service } = createService([
+        makeTextVariable(),
+        makeQueryVariable({ id: 'query-1', name: 'service' }),
+      ]);
+
+      await service.refreshAllVariableOptions();
+      // Only the query variable should have triggered a fetch; Text has no query path.
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('should apply the editor-supplied current when switching an existing variable to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1' })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', {
+        type: VariableType.Text,
+        current: ['seeded'],
+      } as Partial<Variable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['seeded']);
+    });
+
+    it('should clear the value when switching to Text without an explicit current', async () => {
+      // A selection over an option list is meaningless as a Text value, and the
+      // editor's Value field is empty on a type switch — so the result must be empty
+      // too, otherwise the saved value would not match what the user saw.
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', current: ['dev'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      expect(service.getVariables()[0].current).toBeUndefined();
+    });
+
+    it('should clear a multi-select selection when switching to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', multi: true, current: ['dev', 'prod'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      expect(service.getVariables()[0].current).toBeUndefined();
+    });
+
+    it('should truncate an explicitly supplied multi-value current when switching to Text', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ id: 'v1', name: 'v1', multi: true })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', {
+        type: VariableType.Text,
+        current: ['a', 'b'],
+      } as Partial<Variable>);
+
+      expect(getCurrentValues(service).v1).toEqual(['a']);
+    });
+
+    it('should drop option-shaping fields when switching to Text', async () => {
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            id: 'v1',
+            name: 'v1',
+            label: 'My label',
+            description: 'My description',
+            hide: true,
+            multi: true,
+            includeAll: true,
+            allowCustomValue: true,
+            sort: VariableSortOrder.AlphabeticalAsc,
+          }),
+        ],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { type: VariableType.Text } as Partial<Variable>);
+
+      const updated = service.getVariables()[0];
+      // Everything that only makes sense for an option list is gone...
+      expect(updated).not.toHaveProperty('multi');
+      expect(updated).not.toHaveProperty('includeAll');
+      expect(updated).not.toHaveProperty('allowCustomValue');
+      expect(updated).not.toHaveProperty('sort');
+      expect(updated).not.toHaveProperty('customOptions');
+      // ...while the type-agnostic fields survive.
+      expect(updated.label).toBe('My label');
+      expect(updated.description).toBe('My description');
+      expect(updated.hide).toBe(true);
+    });
+
+    it('should apply a new current when the editor saves a new value', async () => {
+      const { service } = createService(
+        [makeTextVariable({ id: 'v1', name: 'v1', current: ['old'] })],
+        'dashboard-1'
+      );
+      await service.updateVariable('v1', { current: ['new'] } as Partial<TextVariable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['new']);
+    });
+
+    it('should leave current untouched when updateVariable does not change it', async () => {
+      const { service } = createService(
+        [makeTextVariable({ id: 'v1', name: 'v1', current: ['live-value'] })],
+        'dashboard-1'
+      );
+
+      // e.g. only the label changed — current should be left exactly as-is.
+      await service.updateVariable('v1', { label: 'New Label' } as Partial<TextVariable>);
+
+      const values = getCurrentValues(service);
+      expect(values.v1).toEqual(['live-value']);
+    });
+
+    it('should interpolate a Text variable value as a plain escaped string', () => {
+      const { service } = createService([makeTextVariable({ current: ["o'brien"] })]);
+      const interpolation = new (jest.requireActual(
+        './variable_interpolation_service'
+      ).VariableInterpolationService)(() => service.getVariablesWithState());
+
+      const result = interpolation.interpolate('source=logs | where msg = $keyword', 'PPL');
+      expect(result).toBe("source=logs | where msg = o''brien");
     });
   });
 });

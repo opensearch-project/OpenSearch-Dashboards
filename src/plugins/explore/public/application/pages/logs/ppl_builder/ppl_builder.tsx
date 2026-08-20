@@ -18,7 +18,6 @@ import { SortRow } from './sort_row';
 import { GroupByRow } from './group_by_row';
 import { WhereRow } from './where_row';
 import { AddMetricMenu } from './add_metric_menu';
-import { ModeToggleButton } from './mode_toggle_button';
 import { useFieldData } from './use_field_data';
 import { useDatasetContext } from '../../../context';
 import { ControlGroup, GhostAddButton } from '../../../components/query_builder';
@@ -26,18 +25,12 @@ import { ControlGroup, GhostAddButton } from '../../../components/query_builder'
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
   onQueryChange: (query: string, state: PPLBuilderState) => void;
-  onSwitchToCode?: () => void;
   onRun?: () => void;
 }
 
 const CHART_BAR_TARGET = 15;
 
-export const PPLBuilder: React.FC<PPLBuilderProps> = ({
-  initialState,
-  onQueryChange,
-  onSwitchToCode,
-  onRun,
-}) => {
+export const PPLBuilder: React.FC<PPLBuilderProps> = ({ initialState, onQueryChange, onRun }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const [state, dispatch] = useReducer(
@@ -153,7 +146,6 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
             onRun={onRun}
           />
         </div>
-        {onSwitchToCode && <ModeToggleButton isCode={false} onToggle={onSwitchToCode} />}
       </div>
 
       <div className="plqRow plqRow--builder">

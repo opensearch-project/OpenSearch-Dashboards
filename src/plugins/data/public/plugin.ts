@@ -318,17 +318,26 @@ export class DataPublicPlugin implements Plugin<
     //
     // The handler is subscribed unconditionally: the grammar cache self-gates on
     // query:enhancements:runtimePplGrammar internally (resetting and skipping the
-    // network fetch when disabled), while the Calcite settings cache must warm
-    // regardless of that flag because the compiled-surface `disabled-join-type`
-    // rule reads `allJoinTypesAllowed` to suppress warnings. Only the runtime
+    // network fetch when disabled), and grammar warm-up also serves autocomplete
+    // and runtime validation, so it must not depend on lint. Only the runtime
     // validation provider stays behind the flag.
     const isRuntimePplGrammarEnabled =
-      uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
+      uiSettings.get<boolean>(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
+
+    // Calcite settings are read only by lint, so skip that request entirely when
+    // lint is off. Read from capabilities rather than the global lint flag: data
+    // starts before queryEnhancements, which is what sets that flag, but core
+    // resolves capabilities before any plugin starts. An absent key (the plugin
+    // is disabled) correctly reads as false.
+    const isPplLintEnabled = application.capabilities?.queryEnhancements?.pplLint === true;
 
     const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(
       http,
       uiSettings,
-      savedObjects.client
+      savedObjects.client,
+      undefined,
+      undefined,
+      isPplLintEnabled
     );
     maybeWarmUpPplGrammar(query.queryString.getQuery());
     this.pplGrammarWarmupSubscription = query.queryString

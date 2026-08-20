@@ -5,7 +5,12 @@
 
 import { AreaChartStyle } from './area_vis_config';
 import { AxisRole, VisColumn, TimeUnit, AggregationType } from '../types';
-import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
+import {
+  getAxisConfig,
+  getColumnsFromAxisColumnMapping,
+  applyPercentageAxis,
+  getNormalizedAxisConfig,
+} from '../utils/utils';
 import {
   pipe,
   createBaseConfig,
@@ -13,7 +18,6 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
-  collectLegend,
 } from '../utils/echarts_spec';
 import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
@@ -22,8 +26,10 @@ import {
   sortByTime,
   pivot,
   aggregate,
+  resolveStackMode,
+  transformStackPercentage,
 } from '../utils/data_transformation';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -32,30 +38,39 @@ export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  timeRange?: { from: string; to: string }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
-  const timeField = axisColumnMappings[AxisRole.X].column;
-  const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
-
+  const { categoryField: timeField, seriesFields } = getNormalizedAxisConfig(axisColumnMappings);
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    transform(
+      sortByTime(timeField),
+      // Percentage stacking needs one row per timestamp or rows sharing a timestamp each normalize to 100% on their own
+      // and then get stacked on top of each other
+      resolveStackMode(styles) === 'percentage'
+        ? aggregate({
+            groupBy: timeField,
+            field: seriesFields,
+            aggregationType: AggregationType.SUM,
+          })
+        : (data) => data,
+      transformStackPercentage(styles, { excludeFields: [timeField] }),
+      convertTo2DArray(allColumns)
+    ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
     createAreaSeries({
       styles,
       categoryField: timeField,
-      seriesFields: valueField,
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -65,7 +80,7 @@ export const createSimpleAreaChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -80,8 +95,8 @@ export const createMultiAreaChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const timeField = axisColumnMappings[AxisRole.X].column;
@@ -98,13 +113,16 @@ export const createMultiAreaChart = (
         timeUnit: TimeUnit.SECOND,
         aggregationType: AggregationType.SUM,
       }),
-      (data) => replaceNullWithZero(data, [timeField]),
+      (data) =>
+        resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [timeField]),
+      transformStackPercentage(styles, { excludeFields: [timeField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -113,9 +131,9 @@ export const createMultiAreaChart = (
       styles,
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-      stack: true,
+      allData,
+      colorField,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -125,7 +143,7 @@ export const createMultiAreaChart = (
     timeRange,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 /**
@@ -134,14 +152,12 @@ export const createMultiAreaChart = (
 export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
-  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
@@ -152,18 +168,20 @@ export const createCategoryAreaChart = (
         field: valueField,
         aggregationType: AggregationType.SUM,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     createAreaSeries({
       styles,
       categoryField,
       seriesFields: valueField,
+      addTimeMarker: false,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -172,7 +190,7 @@ export const createCategoryAreaChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
 
 export const createStackedAreaChart = (
@@ -183,8 +201,8 @@ export const createStackedAreaChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
-): any => {
+  allData?: Array<Record<string, any>>
+): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
@@ -199,13 +217,17 @@ export const createStackedAreaChart = (
         field: valueField,
         aggregationType: AggregationType.SUM,
       }),
-      (data) => replaceNullWithZero(data, [categoryField]),
+      // replaceNullWithZero only matters for stacked area; unstacked areas should keep gaps as gaps.
+      (data) =>
+        resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [categoryField]),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -213,9 +235,10 @@ export const createStackedAreaChart = (
       styles,
       categoryField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
-      stack: true,
+      allData,
+      colorField,
+      addTimeMarker: false,
     }),
-    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -224,5 +247,5 @@ export const createStackedAreaChart = (
     axisColumnMappings: axisColumnMappings ?? {},
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

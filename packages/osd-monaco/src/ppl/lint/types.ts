@@ -19,13 +19,28 @@ export interface CatalogEntry {
   enabled: boolean;
   severity: LintSeverity;
   message: string;
+  /** Repository-authored presentation metadata rendered as the hover card's `Fix` line. */
+  howToFix: string;
   docUrl: string;
   appliesTo: AppliesTo;
   runtimeOnly?: boolean;
   needsContext?: boolean;
   needsExplain?: boolean;
+  aiFixable?: boolean;
+  /**
+   * The rule reads the active dataset's field metadata (`fields`/`typeMap`), so
+   * its findings are only meaningful when the query's top-level source is the
+   * dataset those types came from. The runner suppresses the rule on a proven
+   * source mismatch (see `sourceConflictsWithDataset`).
+   */
+  sourceScoped?: boolean;
 }
 
+/**
+ * Broad execution override API used by the lint engine and headless callers.
+ * Runtime PPL grammar bundles do not carry these catalog fields; the Dashboards
+ * settings adapter intentionally emits only enabled/severity overrides.
+ */
 export type BundleRuleOverrides = Record<string, Partial<CatalogEntry>>;
 
 export interface LintPayloadContext {
@@ -36,11 +51,21 @@ export interface LintPayloadContext {
   visibleIndices?: string[];
   settings?: { allJoinTypesAllowed?: boolean };
   overrides?: BundleRuleOverrides;
+  /** Set only when the loaded metadata's dataset/source/type match the active dataset, so `fields`/`typeMap` are known non-stale for this source. */
+  selectedSourcePattern?: string;
+  /** Data source engine classification, so a Calcite-only rule can reject an Elasticsearch-compatible source. */
+  engineType?: string;
   // Whether the command-typo suggestion (a syntax-channel UX layer, not a lint
   // rule) is enabled. Undefined means enabled; only `false` turns it off. Carried
   // on the lint context because the syntax marker builder reads it alongside the
   // lint config, though it does not affect any tree-walking lint rule.
   commandSuggestionEnabled?: boolean;
+  // How the explain layer resolves a whole-query finding that has several
+  // candidate commands for the flagged operation. `'fast'` narrows only when
+  // exactly one candidate matches and drops ambiguous findings; `'thorough'`
+  // (the default when unset) fires bounded control/treatment `_explain` probes
+  // to pin the culprit. A global behavior, not per-rule.
+  explainMode?: 'fast' | 'thorough';
 }
 
 export interface LintRunContext extends LintPayloadContext {
@@ -55,6 +80,8 @@ export interface LintRunContext extends LintPayloadContext {
   sourceText?: string;
   grammarSurface?: 'compiled-simplified' | 'runtime-bundle';
   grammarHash?: string;
+  /** Whether the query is pipe-first (`| where ...`), derived once by the runner so rules needn't re-derive it. */
+  isPipeFirst?: boolean;
 }
 
 /**
@@ -72,6 +99,8 @@ export interface SerializableLintContext {
   overrides?: BundleRuleOverrides;
   dataSourceId?: string;
   dataSourceVersion?: string;
+  selectedSourcePattern?: string;
+  engineType?: string;
 }
 
 export type Detector = (

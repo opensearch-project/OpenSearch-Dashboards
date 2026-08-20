@@ -18,7 +18,9 @@ import {
   PermissionModeId,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -106,18 +108,21 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Fetch latest list of workspaces and update workspaceList$ to notify subscriptions
    */
   private async updateWorkspaceList(): Promise<void> {
+    // Request the `maximum_workspaces` page size so the server pages by
+    // `workspace.maximum_workspaces`, ensuring every workspace a user is allowed to
+    // create can also be listed.
     const result = await this.list({
-      perPage: 999,
+      perPage: MAXIMUM_WORKSPACES_PER_PAGE,
     });
 
     if (result?.success) {
       const [resultWithWritePermission, resultWithOwnerPermission] = await Promise.all([
         this.list({
-          perPage: 999,
+          perPage: MAXIMUM_WORKSPACES_PER_PAGE,
           permissionModes: [WorkspacePermissionMode.LibraryWrite],
         }),
         this.list({
-          perPage: 999,
+          perPage: MAXIMUM_WORKSPACES_PER_PAGE,
           permissionModes: [WorkspacePermissionMode.Write],
         }),
       ]);
@@ -391,7 +396,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       savedObjects,
       workspaceId,
     };
-    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+    const result = await this.safeFetch<WorkspaceAssociateResult[]>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });

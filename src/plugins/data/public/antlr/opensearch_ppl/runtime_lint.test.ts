@@ -76,7 +76,10 @@ describe('lintRuntimePPLQuery', () => {
 
     const result = await lintRuntimePPLQuery({
       content: 'source=logs | head 10',
-      context: { useRuntimeGrammar: true },
+      context: {
+        useRuntimeGrammar: true,
+        overrides: { 'head-without-sort': { enabled: true } },
+      },
       model: {} as any,
     });
 
@@ -90,7 +93,10 @@ describe('lintRuntimePPLQuery', () => {
 
       const pipeFirst = await lintRuntimePPLQuery({
         content: '| head 10',
-        context: { useRuntimeGrammar: true },
+        context: {
+          useRuntimeGrammar: true,
+          overrides: { 'head-without-sort': { enabled: true } },
+        },
         model: {} as any,
       });
       const head = pipeFirst!.diagnostics.find((d) => d.ruleId === 'head-without-sort');
@@ -105,7 +111,10 @@ describe('lintRuntimePPLQuery', () => {
 
       const regular = await lintRuntimePPLQuery({
         content: 'source=logs | head 10',
-        context: { useRuntimeGrammar: true },
+        context: {
+          useRuntimeGrammar: true,
+          overrides: { 'head-without-sort': { enabled: true } },
+        },
         model: {} as any,
       });
       const head = regular!.diagnostics.find((d) => d.ruleId === 'head-without-sort');
@@ -122,11 +131,19 @@ describe('lintRuntimePPLQuery', () => {
       ['attributes', 'flat_object'],
     ]);
     const fields = new Set<string>([...typeMap.keys(), 'raw']);
+    // flat-object-subfield is gated to Calcite >= 3.8; the agg/type warnings apply
+    // from 3.7. Declare a Calcite 3.8 surface so all three fire on this path.
     const runtimeContext = {
       useRuntimeGrammar: true,
+      dataSourceVersion: '3.8.0',
+      isCalcite: true,
       fields,
       typeMap,
       disabledObjectFields: new Set(['raw']),
+      overrides: {
+        'flat-object-subfield': { enabled: true },
+        'head-without-sort': { enabled: true },
+      },
     };
 
     const runtimeIds = async (content: string): Promise<string[]> => {
@@ -156,6 +173,34 @@ describe('lintRuntimePPLQuery', () => {
         'head-without-sort'
       );
     });
+
+    // PR A type-aware rules must fire on the runtime surface too — they read the
+    // forwarded typeMap the same way the compiled path does.
+    it('flags agg-on-text on a text field via the forwarded typeMap', async () => {
+      expect(await runtimeIds('source=accounts | stats avg(firstname)')).toContain('agg-on-text');
+    });
+
+    it('does not flag agg-on-text on a numeric field', async () => {
+      expect(await runtimeIds('source=accounts | stats avg(balance)')).not.toContain('agg-on-text');
+    });
+
+    it('flags type-mismatch-numeric on a numeric-field vs non-numeric string', async () => {
+      expect(await runtimeIds('source=accounts | where age = "thirty"')).toContain(
+        'type-mismatch-numeric'
+      );
+    });
+
+    it('does not flag type-mismatch-numeric on a coercible quoted number', async () => {
+      expect(await runtimeIds('source=accounts | where age = "32"')).not.toContain(
+        'type-mismatch-numeric'
+      );
+    });
+
+    it('flags flat-object-subfield on a flat_object reference', async () => {
+      expect(await runtimeIds('source=accounts | fields attributes.http')).toContain(
+        'flat-object-subfield'
+      );
+    });
   });
 
   // Lint is best-effort: a query the runtime grammar cannot fully parse still
@@ -170,7 +215,11 @@ describe('lintRuntimePPLQuery', () => {
       jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
       const result = await lintRuntimePPLQuery({
         content,
-        context: { useRuntimeGrammar: true, fields } as any,
+        context: {
+          useRuntimeGrammar: true,
+          fields,
+          overrides: { 'head-without-sort': { enabled: true } },
+        } as any,
         model: {} as any,
       });
       return result;
@@ -180,7 +229,7 @@ describe('lintRuntimePPLQuery', () => {
       const result = await runtimeDiags('source=accounts | where nope > 1 | boguscmd foo');
       expect(result).not.toBeNull();
       expect(result!.diagnostics.map((d) => d.message)).toContainEqual(
-        expect.stringContaining('Unknown field "nope"')
+        expect.stringContaining("Field 'nope' is not defined or recognized in the current schema.")
       );
     });
 

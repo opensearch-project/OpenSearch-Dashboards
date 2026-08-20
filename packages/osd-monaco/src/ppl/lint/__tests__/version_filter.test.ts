@@ -13,6 +13,7 @@ function makeRule(overrides: Partial<CatalogEntry>): CatalogEntry {
     enabled: true,
     severity: 'error',
     message: 'm',
+    howToFix: 'f',
     docUrl: 'd',
     appliesTo: {},
     ...overrides,
@@ -80,9 +81,28 @@ describe('version_filter appliesTo', () => {
   });
 
   describe('undefined version policy', () => {
-    it('runs a minVersion-only no-engine rule', () => {
+    it('suppresses an error-severity minVersion rule when the version is unknown', () => {
+      // The floor cannot be shown to be met, so a red squiggle would be a guess.
       const rule = makeRule({ appliesTo: { minVersion: '3.4.0' } });
+      expect(appliesTo(rule, undefined, undefined)).toBe(false);
+    });
+
+    it('still runs a warning-severity minVersion rule when the version is unknown', () => {
+      const rule = makeRule({ severity: 'warning', appliesTo: { minVersion: '3.4.0' } });
       expect(appliesTo(rule, undefined, undefined)).toBe(true);
+    });
+
+    it('runs a version-agnostic rule at every severity', () => {
+      expect(appliesTo(makeRule({ appliesTo: {} }), undefined, undefined)).toBe(true);
+      expect(appliesTo(makeRule({ severity: 'info', appliesTo: {} }), undefined, undefined)).toBe(
+        true
+      );
+    });
+
+    it('ignores a floor semver cannot read, matching the known-version path', () => {
+      const rule = makeRule({ appliesTo: { minVersion: 'main' } });
+      expect(appliesTo(rule, undefined, undefined)).toBe(true);
+      expect(appliesTo(rule, '3.8.0', undefined)).toBe(true);
     });
 
     it('self-suppresses an open-ended maxVersion rule past the horizon', () => {
@@ -95,9 +115,39 @@ describe('version_filter appliesTo', () => {
       expect(appliesTo(rule, undefined, undefined)).toBe(false);
     });
 
-    it('runs a calcite warning rule', () => {
+    it('suppresses a calcite rule unless the engine is measured as calcite', () => {
+      // Version-string quality says nothing about which engine runs, so an
+      // unknown version must not become a licence to assume Calcite.
       const rule = makeRule({ severity: 'warning', appliesTo: { engine: 'calcite' } });
-      expect(appliesTo(rule, undefined, undefined)).toBe(true);
+      expect(appliesTo(rule, undefined, undefined)).toBe(false);
+      expect(appliesTo(rule, undefined, false)).toBe(false);
+      expect(appliesTo(rule, undefined, true)).toBe(true);
+    });
+
+    it('treats a blank version the same as an absent one', () => {
+      const rule = makeRule({ severity: 'warning', appliesTo: { engine: 'calcite' } });
+      expect(appliesTo(rule, '', false)).toBe(false);
+      expect(appliesTo(rule, '   ', false)).toBe(false);
+      expect(appliesTo(rule, '', true)).toBe(true);
+    });
+
+    it('honours a known-false engine on an unparseable version too', () => {
+      // Regression: the unparseable path used to recurse into a branch that
+      // ignored isCalcite, so 'main' leaked what '2.19.0' suppressed.
+      const rule = makeRule({ severity: 'warning', appliesTo: { engine: 'calcite' } });
+      expect(appliesTo(rule, '2.19.0', false)).toBe(false);
+      expect(appliesTo(rule, 'main', false)).toBe(false);
+      expect(appliesTo(rule, 'not-a-version', false)).toBe(false);
+    });
+
+    it('decides from the catalog severity, not a user-overridden one', () => {
+      // runLint merges per-rule overrides before calling appliesTo, so the
+      // rule's own severity can be user-edited. Suppression must not be.
+      const downgraded = makeRule({ severity: 'warning', appliesTo: { minVersion: '3.4.0' } });
+      expect(appliesTo(downgraded, undefined, undefined, OSD_KNOWN_VERSION, 'error')).toBe(false);
+
+      const raised = makeRule({ severity: 'error', appliesTo: { minVersion: '3.4.0' } });
+      expect(appliesTo(raised, undefined, undefined, OSD_KNOWN_VERSION, 'warning')).toBe(true);
     });
   });
 });

@@ -55,6 +55,26 @@ describe('fix_registry', () => {
       expect(markerFixKey({ ...base, startLineNumber: 2, endLineNumber: 2 })).not.toBe(key);
       expect(markerFixKey({ ...base, message: 'other' })).not.toBe(key);
     });
+
+    it('differs by rule id so same-position, same-message rules do not collide', () => {
+      const base = {
+        startLineNumber: 1,
+        startColumn: 5,
+        endLineNumber: 1,
+        endColumn: 10,
+        message: 'msg',
+      };
+      // A string code and a doc-link code (`{ value, target }`) both fold their
+      // rule id into the key, so two rules on the same span stay distinct.
+      const stringCodeKey = markerFixKey({ ...base, code: 'rule-a' });
+      const linkCodeKey = markerFixKey({ ...base, code: { value: 'rule-b' } });
+      expect(stringCodeKey).not.toBe(linkCodeKey);
+      expect(stringCodeKey).not.toBe(markerFixKey(base));
+      // Same rule id via either shape yields the same key contribution.
+      expect(markerFixKey({ ...base, code: 'rule-a' })).toBe(
+        markerFixKey({ ...base, code: { value: 'rule-a' } })
+      );
+    });
   });
 
   it('stores and retrieves a fix by key', () => {

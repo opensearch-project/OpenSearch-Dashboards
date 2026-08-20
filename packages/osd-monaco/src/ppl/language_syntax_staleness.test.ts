@@ -15,6 +15,7 @@ jest.mock('../monaco', () => ({
       setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
       onDidCreateModel: jest.fn(),
       onWillDisposeModel: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
       getModels: () => [],
       defineTheme: jest.fn(),
     },

@@ -9,32 +9,10 @@ import {
   buildPipelineShape,
   collectAlternateSourceSubtrees,
   isInsideAltSource,
+  ORDER_ESTABLISHING_COMMANDS,
+  ORDER_PRESERVING_COMMANDS,
 } from '../pipeline_shape';
 import { rangeFromContext } from '../range_utils';
-
-// eventstats is intentionally excluded — its by-clause window loses sort order.
-const ORDER_PRESERVING_COMMANDS = new Set([
-  'evalCommand',
-  'whereCommand',
-  'fieldsCommand',
-  'tableCommand',
-  'headCommand',
-  'parseCommand',
-  'grokCommand',
-  'rexCommand',
-  'spathCommand',
-  'fillnullCommand',
-  'expandCommand',
-  'flattenCommand',
-  'patternsCommand',
-  'renameCommand',
-  'regexCommand',
-  'reverseCommand',
-  'appendcolCommand',
-  'dedupCommand',
-  'streamstatsCommand',
-  'binCommand',
-]);
 
 export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNameToIndex) => {
   const diagnostics: Diagnostic[] = [];
@@ -42,12 +20,15 @@ export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNa
 
   const altRoots = collectAlternateSourceSubtrees(tree, ruleNameToIndex);
 
+  // Ordering comes from the shared command classification in pipeline_shape, so
+  // a newly supported command is classified once for every consumer rather than
+  // silently defaulting to order-preserving here.
   let sawSort = false;
   for (const stage of stages) {
     if (isInsideAltSource(stage.node, altRoots, true)) {
       continue;
     }
-    if (stage.command === 'sortCommand') {
+    if (ORDER_ESTABLISHING_COMMANDS.has(stage.command)) {
       sawSort = true;
       continue;
     }

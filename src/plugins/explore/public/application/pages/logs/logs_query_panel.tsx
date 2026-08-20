@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
-import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
@@ -20,12 +20,11 @@ import {
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
   selectQueryString,
-  selectSavedSearch,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
-import { ModeToggleButton } from './ppl_builder/mode_toggle_button';
+import { ModeButtonGroup } from './ppl_builder/mode_button_group';
 import { LogsBuilderMode } from './logs_query_panel_mode';
 import '../../../components/query_panel/query_panel.scss';
 
@@ -42,7 +41,26 @@ const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim()
  * `useTabResults`), so mutating it per keystroke re-keys results and blanks the
  * table/histogram until the next run.
  */
-export const LogsQueryPanel: React.FC = () => {
+interface LogsQueryPanelProps {
+  analyzeIsOpen?: boolean;
+  onToggleAnalyze?: () => void;
+  hasAnalyzeResult?: boolean;
+  // Reports the live editor mode up so the page can gate the analyze panel:
+  // analyze is only available in code mode, not the visual builder.
+  onModeChange?: (isCode: boolean) => void;
+  // Workspace setting: allow only the visual builder. Code is used solely as a
+  // read-only fallback for queries the builder can't represent; the Code/Builder
+  // toggle and AI generation are hidden.
+  builderOnlyMode?: boolean;
+}
+
+export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
+  analyzeIsOpen,
+  onToggleAnalyze,
+  hasAnalyzeResult,
+  onModeChange,
+  builderOnlyMode = false,
+}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const queryIsLoading = useSelector(selectIsLoading);
@@ -50,7 +68,6 @@ export const LogsQueryPanel: React.FC = () => {
   const isLoading = queryIsLoading || promptToQueryIsLoading;
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
-  const savedSearch = useSelector(selectSavedSearch);
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
@@ -64,11 +81,10 @@ export const LogsQueryPanel: React.FC = () => {
   // buildPPL re-emits it, so it round-trips without being an editable field.
   const initialParse = useMemo(() => parsePPL(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A query loaded from a saved object opens in code, switchable to Builder later.
-  const loadedFromSaved = !!savedSearch;
-  const [mode, setMode] = useState<LogsBuilderMode>(() =>
-    !loadedFromSaved && initialParse.canBuild ? 'builder' : 'code'
-  );
+  // Always open in Code; Builder is opt-in via the mode toggle. Builder-only mode
+  // is the exception: the effect below forces a representable query into Builder
+  // once the (async) workspace setting resolves.
+  const [mode, setMode] = useState<LogsBuilderMode>('code');
 
   // Seed handed to PPLBuilder on (re)mount; only re-seeded deliberately (external
   // change, mode toggle), not per keystroke, so builder edits don't re-render.
@@ -106,31 +122,16 @@ export const LogsQueryPanel: React.FC = () => {
   modeRef.current = mode;
 
   // Reflect external query changes (dataset switch, saved-query load, AI, clear)
-  // into the builder. We never auto-flip Code -> Builder on a normal run; we only
-  // force Code when a Builder query becomes unrepresentable, and return to Builder
-  // on a cleared/fresh query.
+  // into the builder. We never auto-flip Code -> Builder; while in Builder we
+  // reseed it, or force Code when the new query becomes unrepresentable.
   useEffect(() => {
     if (reduxQuery === lastDispatchedRef.current) return;
     lastDispatchedRef.current = reduxQuery;
     builderQueryRef.current = reduxQuery;
     setLiveCodeText(reduxQuery);
 
-    const parsed = parsePPL(reduxQuery);
-    const isEmptyBuilder =
-      parsed.canBuild &&
-      parsed.state.searchExpression.trim() === '' &&
-      parsed.state.aggregations.length === 0 &&
-      parsed.state.filters.length === 0 &&
-      !parsed.state.sort;
-
-    if (isEmptyBuilder) {
-      // A cleared / fresh query returns to Builder.
-      reseedBuilder(parsed.state);
-      setMode('builder');
-      return;
-    }
-
     if (modeRef.current === 'builder') {
+      const parsed = parsePPL(reduxQuery);
       if (parsed.canBuild) {
         reseedBuilder(parsed.state);
       } else {
@@ -234,15 +235,40 @@ export const LogsQueryPanel: React.FC = () => {
 
   const showBuilder = mode === 'builder' && !isPromptMode;
 
+  // Analyze is only available on the code editor, not the visual builder. Report
+  // the live editor mode up so the page can show/hide the analyze panel to match.
+  const isCodeMode = !showBuilder;
+  useEffect(() => {
+    onModeChange?.(isCodeMode);
+  }, [isCodeMode, onModeChange]);
+
+  // In builder-only mode, code is only ever the read-only fallback for a query
+  // the builder can't represent, so the editor is never editable.
   const editors = (
     <div className="exploreQueryPanel__editorsWrapper">
-      <QueryPanelEditor />
+      <ExploreQueryPanelEditor
+        readOnly={builderOnlyMode}
+        readOnlyTooltip={
+          builderOnlyMode
+            ? i18n.translate('explore.logsQueryPanel.readOnlyCodeTooltip', {
+                defaultMessage:
+                  'This query cannot be shown in the query builder and is read-only. Start a new query to edit.',
+              })
+            : undefined
+        }
+      />
       <QueryPanelGeneratedQuery />
     </div>
   );
 
-  const switchToCode = useCallback(() => handleModeChange('code'), [handleModeChange]);
-  const switchToBuilder = useCallback(() => handleModeChange('builder'), [handleModeChange]);
+  // builderOnlyMode resolves asynchronously (workspace-scoped setting read), so the
+  // mode initializer above runs before it's known. Once it's on, a representable
+  // query must open in the builder.
+  useEffect(() => {
+    if (builderOnlyMode && mode === 'code' && canSwitchToBuilder) {
+      handleModeChange('builder');
+    }
+  }, [builderOnlyMode, mode, canSwitchToBuilder, handleModeChange]);
 
   // Cmd/Ctrl+Enter runs the current draft. The execution layer
   // (`addPPLSourceClause`) supplies the source clause when the query lacks one.
@@ -260,7 +286,12 @@ export const LogsQueryPanel: React.FC = () => {
         responsive={false}
       >
         <EuiFlexItem>
-          <QueryPanelWidgets />
+          <QueryPanelWidgets
+            analyzeIsOpen={isCodeMode ? analyzeIsOpen : undefined}
+            onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
+            hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
+            hideAskAI={builderOnlyMode}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -279,19 +310,18 @@ export const LogsQueryPanel: React.FC = () => {
               key={builderKey}
               initialState={builderState}
               onQueryChange={onBuilderChange}
-              onSwitchToCode={switchToCode}
               onRun={handleRun}
             />
           ) : (
             editors
           )}
         </EuiFlexItem>
-        {!showBuilder && !isPromptMode && (
+        {!isPromptMode && !builderOnlyMode && (
           <EuiFlexItem grow={false}>
-            <ModeToggleButton
-              isCode
-              onToggle={switchToBuilder}
-              disabled={builderDisabled}
+            <ModeButtonGroup
+              mode={mode}
+              onChange={handleModeChange}
+              builderDisabled={builderDisabled}
               tooltip={modeToggleTooltip}
             />
           </EuiFlexItem>

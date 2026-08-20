@@ -1,12 +1,12 @@
 {
-  "_comment": "Pinned per-rule doc-link metadata for the shipping catalog. doc_links.test.ts (offline, always-on) asserts catalog<->snapshot parity, no legacy URL, and URL-shape/specificity invariants. quality: exact|close|weak|gap. gap rules are listed in expectedUnpublished and point at a page root until upstream publishes the page.",
+  "_comment": "Pinned per-rule doc-link metadata for the shipping catalog. doc_links.test.ts (offline, always-on) asserts catalog<->snapshot parity, no legacy URL, and URL-shape/specificity invariants. quality: exact|close|weak|gap. gap rules are listed in expectedUnpublished and point at a page root until upstream publishes the section named by futureDocUrl. Every anchor here was verified against the live docs site (2026-08-03): the page is real (not a soft-404) and the id= exists in its HTML.",
   "expectedUnpublished": [],
   "rules": {
     "head-without-sort": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/#example-3-retrieving-the-first-n-results-after-an-offset-m",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
-      "anchor": "",
-      "quality": "weak"
+      "anchor": "example-3-retrieving-the-first-n-results-after-an-offset-m",
+      "quality": "close"
     },
     "division-by-zero": {
       "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
@@ -15,46 +15,100 @@
       "quality": "close"
     },
     "unsupported-window-function-in-eventstats": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/#aggregation-functions",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
-      "anchor": "",
-      "quality": "weak"
+      "anchor": "aggregation-functions",
+      "quality": "close"
     },
     "multisearch-min-subsearch": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/#syntax",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
-      "anchor": "",
-      "quality": "weak"
+      "anchor": "syntax",
+      "quality": "close"
     },
     "disabled-join-type": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/#limitations",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
-      "anchor": "",
-      "quality": "weak"
+      "anchor": "limitations",
+      "quality": "exact"
     },
     "dedup-consecutive-unsupported": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/#example-4-deduplicating-consecutive-documents",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
-      "anchor": "",
-      "quality": "weak"
+      "anchor": "example-4-deduplicating-consecutive-documents",
+      "quality": "exact"
     },
     "union-min-datasets": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
-      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
-      "anchor": "",
-      "quality": "weak"
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/index/#ppl-commands",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/index/",
+      "anchor": "ppl-commands",
+      "quality": "close"
     },
     "replace-wildcard-asymmetry": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/#parameters",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+      "anchor": "parameters",
+      "quality": "close"
+    },
+    "field-validation": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/#parameters",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+      "anchor": "parameters",
+      "quality": "close"
+    },
+    "agg-on-text": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/#limitations",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+      "anchor": "limitations",
+      "quality": "exact"
+    },
+    "flat-object-subfield": {
+      "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/",
+      "page": "https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/",
       "anchor": "",
       "quality": "weak"
     },
-    "field-validation": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
-      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
-      "anchor": "",
-      "quality": "weak"
+    "type-mismatch-numeric": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#basic-predicate-operators",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/",
+      "anchor": "basic-predicate-operators",
+      "quality": "close"
+    },
+    "invalid-capture-group-name": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "parameters",
+      "quality": "exact"
+    },
+    "operation-not-pushed": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "anchor": "performance",
+      "quality": "close"
+    },
+    "operation-pushed-as-script": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "anchor": "performance",
+      "quality": "close"
+    },
+    "enabled-false-object": {
+      "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
+      "page": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/",
+      "anchor": "disabling-object-fields",
+      "quality": "exact"
+    },
+    "wildcard-source-zero-match": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/#example-6-using-wildcards",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
+      "anchor": "example-6-using-wildcards",
+      "quality": "exact"
+    },
+    "rex-scan-cost": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#example-3-replacing-text-using-sed-mode",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "example-3-replacing-text-using-sed-mode",
+      "quality": "exact"
     }
   }
 }

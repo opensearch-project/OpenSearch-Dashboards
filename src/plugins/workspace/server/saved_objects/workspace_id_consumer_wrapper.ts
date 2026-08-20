@@ -22,6 +22,7 @@ import {
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../../common/constants';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -38,6 +39,7 @@ const generateSavedObjectsForbiddenError = () =>
 
 export class WorkspaceIdConsumerWrapper {
   private readonly logger: Logger;
+
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
     options?: T
@@ -91,7 +93,7 @@ export class WorkspaceIdConsumerWrapper {
             request: wrapperOptions.request,
           },
           {
-            perPage: 9999,
+            perPage: MAXIMUM_WORKSPACES_PER_PAGE,
           }
         );
         if (workspaceList.success) {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
@@ -31,23 +31,33 @@ interface ChatInputProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   includeScreenShotEnabled: boolean;
   onCaptureScreenshot: () => void;
+  // Whether the input should auto-focus on mount. Callers should only pass
+  // true when the window was opened by an explicit user/agent action (not
+  // on bootstrap auto-open, to avoid stealing focus from the page on load).
+  ownFocus?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
-  layoutMode,
-  input,
-  isCapturing,
-  isStreaming,
-  disabled = false,
-  placeholder,
-  onInputChange,
-  onSend,
-  onStop,
-  onKeyDown,
-  includeScreenShotEnabled,
-  onCaptureScreenshot,
-}) => {
+export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(function (
+  {
+    layoutMode,
+    input,
+    isCapturing,
+    isStreaming,
+    disabled = false,
+    placeholder,
+    onInputChange,
+    onSend,
+    onStop,
+    onKeyDown,
+    includeScreenShotEnabled,
+    onCaptureScreenshot,
+    ownFocus = false,
+  },
+  ref
+) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => inputRef.current!);
 
   const {
     services: {
@@ -116,7 +126,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            autoFocus={true}
+            // Only auto-focus when the window was opened by an explicit user/
+            // agent action. Bootstrap auto-open (restoring persisted window
+            // state) passes ownFocus=false, so we don't steal focus on page
+            // load. Caller (ChatWindow) computes this from the chat
+            // plugin's ChatService — see ChatService#getShouldAutoFocusInput.
+            autoFocus={ownFocus}
             fullWidth
             resize="none"
             rows={2}
@@ -151,4 +166,4 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       </div>
     </div>
   );
-};
+});

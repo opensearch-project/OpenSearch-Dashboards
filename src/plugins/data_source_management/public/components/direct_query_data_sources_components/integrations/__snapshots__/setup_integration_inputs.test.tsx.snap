@@ -2475,7 +2475,7 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
             onChange={[Function]}
             value="workflow1"
           >
-            <_EuiSplitPanelOuter
+            <EuiSplitPanelOuter
               className="euiCheckableCard euiCheckableCard-isChecked"
               direction="row"
               hasBorder={true}
@@ -2568,7 +2568,7 @@ exports[`Integration Setup Inputs Renders the workflows inputs 1`] = `
                   </_EuiSplitPanelInner>
                 </div>
               </EuiPanel>
-            </_EuiSplitPanelOuter>
+            </EuiSplitPanelOuter>
           </EuiCheckableCard>
         </SetupWorkflowSelector>
       </div>

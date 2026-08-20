@@ -56,6 +56,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatMountService?: ChatMountService;
   private paddingSizeSubscription?: Subscription;
   private windowStateChangeSubscription?: Subscription;
+  private autoFocusWindowOpenSubscription?: () => void;
+  private autoFocusWindowCloseSubscription?: () => void;
   private coreSetup?: CoreSetup;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -78,9 +80,30 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       // eslint-disable-next-line no-empty
     } catch {}
 
+    // Chat-input auto-focus wiring (UI concern, kept local to this plugin —
+    // see ChatService#shouldAutoFocusInput$ for the rationale). `onWindowOpen`
+    // fires synchronously off the underlying BehaviorSubject, so bracketing
+    // both bootstrap branches below (restore, and first-visit default open)
+    // with `isBootstrapping` lets us tell them apart from every other
+    // (explicit) open: the header "Ask AI" button, workspace quick-start, and
+    // sendMessageWithWindow all go through `core.chat.openWindow()`, never
+    // through this bootstrap path.
+    let isBootstrapping = false;
+    this.autoFocusWindowOpenSubscription = chat.onWindowOpen(() => {
+      this.chatService?.setShouldAutoFocusInput(!isBootstrapping);
+    });
+    this.autoFocusWindowCloseSubscription = chat.onWindowClose(() => {
+      this.chatService?.setShouldAutoFocusInput(false);
+    });
+
+    isBootstrapping = true;
     if (isValidChatWindowState(storeState)) {
       chat.setWindowState(storeState);
+    } else {
+      // First visit or no stored state — open chat by default
+      chat.setWindowState({ isWindowOpen: true });
     }
+    isBootstrapping = false;
 
     this.paddingSizeSubscription = overlays.sidecar
       .getSidecarConfig$()
@@ -237,6 +260,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.chatMountService?.stop();
     this.paddingSizeSubscription?.unsubscribe();
     this.windowStateChangeSubscription?.unsubscribe();
+    this.autoFocusWindowOpenSubscription?.();
+    this.autoFocusWindowCloseSubscription?.();
     this.chatService?.destroy();
     this.confirmationService.cleanAll();
   }

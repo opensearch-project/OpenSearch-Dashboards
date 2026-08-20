@@ -10,7 +10,10 @@ describe('unsupported-window-function-in-eventstats (compiled surface)', () => {
   beforeEach(() => {
     analyzer = new PPLLanguageAnalyzer();
   });
-  const ids = (code: string) => analyzer.lint(code).diagnostics.map((d) => d.ruleId);
+  // The rule is error severity with a 3.4.0 floor, so the version must be known:
+  // an unknown version cannot prove the floor is met and self-suppresses.
+  const ids = (code: string) =>
+    analyzer.lint(code, { dataSourceVersion: '3.8.0' }).diagnostics.map((d) => d.ruleId);
 
   it('flags rank as a window function', () => {
     expect(ids('source=logs | eventstats rank() as r by status')).toContain(
@@ -18,14 +21,13 @@ describe('unsupported-window-function-in-eventstats (compiled surface)', () => {
     );
   });
 
-  it('reports the catalog message (not a hardcoded literal) and carries the fn in hoverFacts', () => {
+  it('reports the catalog message (not a hardcoded literal)', () => {
     const diagnostic = analyzer
-      .lint('source=logs | eventstats rank() as r by status')
+      .lint('source=logs | eventstats rank() as r by status', { dataSourceVersion: '3.8.0' })
       .diagnostics.find((d) => d.ruleId === 'unsupported-window-function-in-eventstats');
     expect(diagnostic?.message).toBe(
-      'This window function is not supported in eventstats/streamstats — only row_number is available.'
+      'This window function cannot be used within `eventstats` or `streamstats`.'
     );
-    expect(diagnostic?.hoverFacts).toEqual({ windowFunction: 'rank' });
   });
 
   it('does not flag row_number', () => {

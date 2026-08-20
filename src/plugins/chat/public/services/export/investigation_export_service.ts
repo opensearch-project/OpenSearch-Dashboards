@@ -11,6 +11,7 @@ import type {
 } from '../../../common/types';
 import { TOOL_EXECUTION_ERROR_PREFIX } from '../../../common';
 import { stripInlineSuggestions } from '../../../common/parse_inline_suggestions';
+import { resolveImageContent } from '../../utils/user_message_input';
 import { ChatExportData, ChatExportOptions, ChatTraceStep, QuestionImage } from './types';
 import { generatePDFReport } from './pdf_template';
 import { generateMarkdownReport } from './markdown_template';
@@ -107,11 +108,11 @@ export function findPrecedingQuestion(
           .filter((c): c is TextInputContent => c.type === 'text')
           .map((c) => c.text)
           .join(' ');
-        const binaryContent = msg.content.find((c) => c.type === 'binary' && 'data' in c);
-        const image =
-          binaryContent && binaryContent.type === 'binary' && binaryContent.data
-            ? { base64: binaryContent.data, mimeType: binaryContent.mimeType || 'image/png' }
-            : undefined;
+
+        const imageContent = msg.content.map(resolveImageContent).find((c) => c?.base64);
+        const image = imageContent?.base64
+          ? { base64: imageContent.base64, mimeType: imageContent.mimeType }
+          : undefined;
         return { text, image };
       }
       return { text: '' };

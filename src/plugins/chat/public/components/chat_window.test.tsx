@@ -1074,6 +1074,188 @@ describe('ChatWindow', () => {
     });
   });
 
+  describe('optimistic user message rendering', () => {
+    it('should show user message immediately before data source validation completes', async () => {
+      // Make getCurrentDataSourceId take time to resolve
+      let resolveDataSource: (value: string) => void;
+      mockChatService.getCurrentDataSourceId.mockImplementation(
+        () => new Promise((resolve) => (resolveDataSource = resolve))
+      );
+
+      const { getByRole, getAllByText } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello world' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      // User message should appear immediately, even before validation resolves
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Text appears in both message bubble and conversation title header
+      expect(getAllByText('hello world').length).toBeGreaterThanOrEqual(1);
+
+      // Now resolve validation
+      await act(async () => {
+        resolveDataSource!('mock-ds-id');
+        await new Promise((r) => setTimeout(r, 0));
+      });
+    });
+
+    it('should show Connecting indicator while validating data source', async () => {
+      let resolveDataSource: (value: string | undefined) => void;
+      mockChatService.getCurrentDataSourceId.mockImplementation(
+        () => new Promise((resolve) => (resolveDataSource = resolve))
+      );
+
+      const { getByRole, getByText, queryByText } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test message' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should show "Connecting..." while validating
+      expect(getByText('Connecting...')).toBeTruthy();
+
+      // Resolve validation
+      await act(async () => {
+        resolveDataSource!('mock-ds-id');
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // "Connecting..." should disappear after validation completes
+      expect(queryByText('Connecting...')).toBeNull();
+    });
+
+    it('should disable input while validating', async () => {
+      let resolveDataSource: (value: string | undefined) => void;
+      mockChatService.getCurrentDataSourceId.mockImplementation(
+        () => new Promise((resolve) => (resolveDataSource = resolve))
+      );
+
+      const { getByRole } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Input should be disabled during validation
+      expect(input).toBeDisabled();
+
+      // Resolve validation
+      await act(async () => {
+        resolveDataSource!('mock-ds-id');
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Input should be re-enabled after validation
+      expect(input).not.toBeDisabled();
+    });
+
+    it('should prevent double-send while validating', async () => {
+      let resolveDataSource: (value: string | undefined) => void;
+      mockChatService.getCurrentDataSourceId.mockImplementation(
+        () => new Promise((resolve) => (resolveDataSource = resolve))
+      );
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'first message' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.getUserMessage).toHaveBeenCalledTimes(1);
+
+      // Attempt a second send while the first is still validating. The input
+      // is disabled so keyDown can't reach the handler; a programmatic send
+      // via the component ref exercises the isValidatingRef guard directly.
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'second message' });
+      });
+
+      // Guard should prevent the second send
+      expect(mockChatService.getUserMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+
+      // Resolve validation
+      await act(async () => {
+        resolveDataSource!('mock-ds-id');
+        await new Promise((r) => setTimeout(r, 0));
+      });
+    });
+
+    it('should show user message then error when data source is unsupported', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
+      mockChatService.getAvailableDataSources.mockResolvedValue([]);
+      mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
+        attributes: { dataSourceEngineType: 'AnalyticEngine' },
+      });
+
+      const { getByRole, getAllByText, getByText } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // User message should be visible (appears in message + header title)
+      expect(getAllByText('hello').length).toBeGreaterThanOrEqual(1);
+      // Error message should appear below
+      expect(getByText('The current data source does not support AI features.')).toBeTruthy();
+      // Should not send to agent
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should show user message then data source selector when DS is invalid', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+      ]);
+
+      const { getByRole, getAllByText, getByText } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'my question' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // User message should be visible immediately (message + header title)
+      expect(getAllByText('my question').length).toBeGreaterThanOrEqual(1);
+      // DS selector should appear below
+      expect(getByText('Source One')).toBeTruthy();
+    });
+  });
+
   describe('error handling', () => {
     it('should handle sendMessage promise rejection', async () => {
       const ref = React.createRef<ChatWindowInstance>();
@@ -2163,6 +2345,39 @@ describe('ChatWindow', () => {
       // Input should be re-enabled with default placeholder
       const enabledInput = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
       expect(enabledInput.disabled).toBe(false);
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should record chat_window_show event on mount', () => {
+      const mockRecorder = mockCore.telemetry.getPluginRecorder();
+
+      renderWithContext(<ChatWindow ref={React.createRef()} onClose={jest.fn()} />);
+
+      expect(mockRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_window_show',
+        data: {},
+      });
+    });
+
+    it('should record chat_window_hide event on unmount', () => {
+      const mockRecorder = mockCore.telemetry.getPluginRecorder();
+
+      const { unmount } = renderWithContext(
+        <ChatWindow ref={React.createRef()} onClose={jest.fn()} />
+      );
+
+      // Not recorded while the window is still mounted.
+      expect(mockRecorder.recordEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'chat_window_hide' })
+      );
+
+      unmount();
+
+      expect(mockRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_window_hide',
+        data: {},
+      });
     });
   });
 });

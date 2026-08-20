@@ -4,7 +4,8 @@
  */
 
 import { monaco } from '../../monaco';
-import { Diagnostic, DiagnosticHoverFacts, DiagnosticRange, LintSeverity } from './diagnostic';
+import { Diagnostic, DiagnosticRange, LintSeverity } from './diagnostic';
+import type { AiFixMarkerMetadata } from './ai_fix/ai_fix_registry';
 
 interface MonacoRange {
   startLineNumber: number;
@@ -30,6 +31,22 @@ export const LINT_MARKER_SOURCE = 'ppl-lint';
 // code-action provider recognize the syntax channel and offer command-typo
 // quick-fixes there, without disturbing the lint channel (`ppl-lint`).
 export const SYNTAX_MARKER_SOURCE = 'ppl-syntax';
+
+/**
+ * Read a marker's rule id back out of `code`, which `diagnosticToMarker` writes
+ * either as a bare string or as a `{ value, target }` pair when the rule has a
+ * doc link. Exported so the code-action and hover providers decode it the same
+ * way as it was encoded, rather than each keeping its own copy.
+ */
+export function ruleIdOf(marker: Pick<monaco.editor.IMarkerData, 'code'>): string | undefined {
+  const { code } = marker;
+  if (typeof code === 'string') {
+    return code;
+  }
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
+}
 
 function toMarkerSeverity(severity: LintSeverity): monaco.MarkerSeverity {
   switch (severity) {
@@ -59,9 +76,10 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
   };
 
   if (diagnostic.ruleId) {
-    marker.code = diagnostic.docUrl
-      ? { value: diagnostic.ruleId, target: monaco.Uri.parse(diagnostic.docUrl) }
-      : diagnostic.ruleId;
+    marker.code =
+      diagnostic.ruleId !== 'field-validation' && diagnostic.docUrl
+        ? { value: diagnostic.ruleId, target: monaco.Uri.parse(diagnostic.docUrl) }
+        : diagnostic.ruleId;
   }
 
   // Attach the quick-fix payload the code-action provider reads off the marker.
@@ -81,12 +99,25 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
     };
   }
 
-  if (diagnostic.hoverFacts) {
-    (
-      marker as monaco.editor.IMarkerData & {
-        hoverFacts?: DiagnosticHoverFacts;
-      }
-    ).hoverFacts = diagnostic.hoverFacts;
+  // Per-instance AI policy plus, for the explain-backed rules, the attributed
+  // operation/outcome. Both ride the marker the same way as `fix`; language.ts
+  // moves them into the AI side table before calling setModelMarkers.
+  //
+  // The explain attribution is the AI host's input for re-verifying a candidate
+  // fix against `_explain`. Read the closed `ExplainOutcome` straight off
+  // `explainTarget` rather than reconstructing it from the rule ID: the union's
+  // members are literally `<operation>:<suffix>`, so this is the same value with
+  // the rule-ID coupling removed.
+  if (diagnostic.aiFix || diagnostic.explainTarget) {
+    (marker as monaco.editor.IMarkerData & { aiFix?: AiFixMarkerMetadata }).aiFix = {
+      ...(diagnostic.aiFix ?? {}),
+      ...(diagnostic.explainTarget
+        ? {
+            operation: diagnostic.explainTarget.operation,
+            outcome: diagnostic.explainTarget.outcome,
+          }
+        : {}),
+    };
   }
 
   return marker;

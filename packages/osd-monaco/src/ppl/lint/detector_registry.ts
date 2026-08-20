@@ -13,6 +13,13 @@ import { dedupConsecutiveUnsupportedDetector } from './rules/dedup_consecutive_u
 import { unionMinDatasetsDetector } from './rules/union_min_datasets';
 import { replaceWildcardAsymmetryDetector } from './rules/replace_wildcard_asymmetry';
 import { fieldValidationDetector } from './rules/field_validation';
+import { aggOnTextDetector } from './rules/agg_on_text';
+import { flatObjectSubfieldDetector } from './rules/flat_object_subfield';
+import { typeMismatchNumericDetector } from './rules/type_mismatch_numeric';
+import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
+import { enabledFalseObjectDetector } from './rules/enabled_false_object';
+import { wildcardSourceZeroMatchDetector } from './rules/wildcard_source_zero_match';
+import { rexScanCostDetector } from './rules/rex_scan_cost';
 
 const registry = new Map<string, Detector>();
 
@@ -39,6 +46,13 @@ export function registerBuiltInDetectors(): void {
   registerDetector('union-min-datasets', unionMinDatasetsDetector);
   registerDetector('replace-wildcard-asymmetry', replaceWildcardAsymmetryDetector);
   registerDetector('field-validation', fieldValidationDetector);
+  registerDetector('agg-on-text', aggOnTextDetector);
+  registerDetector('flat-object-subfield', flatObjectSubfieldDetector);
+  registerDetector('type-mismatch-numeric', typeMismatchNumericDetector);
+  registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
+  registerDetector('enabled-false-object', enabledFalseObjectDetector);
+  registerDetector('wildcard-source-zero-match', wildcardSourceZeroMatchDetector);
+  registerDetector('rex-scan-cost', rexScanCostDetector);
 }
 
 registerBuiltInDetectors();

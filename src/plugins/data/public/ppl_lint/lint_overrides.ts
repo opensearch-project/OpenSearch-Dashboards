@@ -9,15 +9,85 @@ import { UI_SETTINGS } from '../../common';
 
 const SEV_RANK: Record<LintSeverity, number> = { info: 0, warning: 1, error: 2 };
 
+/** Own-property test (not `in`) so inherited names like `toString` are rejected. */
+function isLintSeverity(value: string): value is LintSeverity {
+  return Object.prototype.hasOwnProperty.call(SEV_RANK, value);
+}
+
 /** Per-rule severity floors. Users may disable these but may not downgrade below the floor. */
 const MIN_SEVERITY: Record<string, LintSeverity> = {
   'division-by-zero': 'warning',
+  'agg-on-text': 'warning',
+  'type-mismatch-numeric': 'warning',
 };
 
 interface StoredRule {
   id: string;
   enabled?: boolean;
   severity?: LintSeverity;
+}
+
+export type ExplainMode = 'fast' | 'thorough';
+
+/**
+ * Mode used when the setting is unset, malformed, or in the legacy array shape.
+ * Must match the registered default in query_enhancements/server/ui_settings.ts:
+ * "thorough" issues up to four extra probe requests per pause, which is more
+ * network than a first release should take by default.
+ */
+const DEFAULT_EXPLAIN_MODE: ExplainMode = 'fast';
+
+interface NormalizedRulesSetting {
+  mode: ExplainMode;
+  rules: StoredRule[];
+}
+
+/**
+ * Read the PPL lint rules uiSetting into a stable `{ mode, rules }` shape,
+ * accepting both the current object form and the legacy top-level array.
+ *
+ * The setting shipped as a bare array before the fast/thorough mode was added.
+ * An install that persisted that array must keep working, so a stored array is
+ * treated as `{ mode: DEFAULT_EXPLAIN_MODE, rules: <array> }`. Anything
+ * unrecognized (unset, or a corrupt value reachable via the raw uiSettings API)
+ * yields an empty rule list at the same default, so callers fall back to catalog
+ * defaults.
+ *
+ * `isDeclared` guards the read rather than a `get()` default: the key is
+ * registered `type: 'json'`, so a default is substituted for the registered value
+ * and then JSON-parsed — passing `{}` would throw on every deployment where the
+ * key IS registered and the user has not customised it. Without the guard, an
+ * undeclared key (queryEnhancements disabled while explore is not) throws and
+ * breaks the query editor's mount even with lint off.
+ */
+export function readRulesSetting(uiSettings: IUiSettingsClient): NormalizedRulesSetting {
+  const stored = uiSettings.isDeclared(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    ? uiSettings.get<unknown>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    : undefined;
+  if (Array.isArray(stored)) {
+    return { mode: DEFAULT_EXPLAIN_MODE, rules: stored as StoredRule[] };
+  }
+  if (
+    stored &&
+    typeof stored === 'object' &&
+    Array.isArray((stored as { rules?: unknown }).rules)
+  ) {
+    const rawMode = (stored as { mode?: unknown }).mode;
+    return {
+      mode: rawMode === 'thorough' ? 'thorough' : 'fast',
+      rules: (stored as { rules: StoredRule[] }).rules,
+    };
+  }
+  return { mode: DEFAULT_EXPLAIN_MODE, rules: [] };
+}
+
+/**
+ * Read the explain resolution mode from the PPL lint rules uiSetting. Defaults
+ * to {@link DEFAULT_EXPLAIN_MODE} when unset or malformed, and for the legacy
+ * array shape.
+ */
+export function readExplainMode(uiSettings: IUiSettingsClient): ExplainMode {
+  return readRulesSetting(uiSettings).mode;
 }
 
 /**
@@ -27,13 +97,7 @@ interface StoredRule {
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};
 
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
-  if (!Array.isArray(stored)) {
-    return overrides;
-  }
+  const { rules: stored } = readRulesSetting(uiSettings);
 
   const storedById = new Map(stored.filter((r) => r && r.id).map((r) => [r.id, r]));
 
@@ -43,6 +107,9 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
       continue;
     }
 
+    // Advanced Settings controls execution only. Presentation fields such as
+    // message/howToFix/docUrl are deliberately ignored even if raw JSON injects
+    // them into the stored object.
     const patch: Partial<CatalogEntry> = {};
 
     if (typeof rule.enabled === 'boolean' && rule.enabled !== entry.enabled) {
@@ -52,7 +119,7 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
     // Ignore severities that aren't real levels (reachable via the raw uiSettings
     // API): an unknown value makes SEV_RANK[...] undefined, so the floor comparison
     // is false and the junk value would slip past the MIN_SEVERITY clamp.
-    if (rule.severity && rule.severity in SEV_RANK) {
+    if (rule.severity && isLintSeverity(rule.severity)) {
       const floor = MIN_SEVERITY[entry.id];
       const effective = floor && SEV_RANK[rule.severity] < SEV_RANK[floor] ? floor : rule.severity;
       if (effective !== entry.severity) {
@@ -82,13 +149,7 @@ export const COMMAND_SUGGESTION_RULE_ID = 'command-suggestion';
  * preserving the pre-toggle behavior; only an explicit `enabled: false` turns it off.
  */
 export function isCommandSuggestionEnabled(uiSettings: IUiSettingsClient): boolean {
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
-  if (!Array.isArray(stored)) {
-    return true;
-  }
-  const entry = stored.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
+  const { rules } = readRulesSetting(uiSettings);
+  const entry = rules.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
   return entry?.enabled !== false;
 }

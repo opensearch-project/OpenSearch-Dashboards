@@ -8,6 +8,8 @@ import { LintSeverity } from './diagnostic';
 import rawCatalog from './rules_catalog.json';
 
 // TRACKING (opensearch-project/sql#4549): set maxVersion once that issue ships.
+// This validator owns OSD's repository-bundled presentation catalog. Runtime
+// grammar bundles contain parser/autocomplete data, not lint catalog entries.
 
 const VALID_SEVERITIES: ReadonlySet<string> = new Set<LintSeverity>(['error', 'warning', 'info']);
 
@@ -40,13 +42,20 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     typeof candidate.severity !== 'string' ||
     !VALID_SEVERITIES.has(candidate.severity) ||
     typeof candidate.message !== 'string' ||
+    !isNonEmptyString(candidate.howToFix) ||
     typeof candidate.docUrl !== 'string' ||
     !isValidAppliesTo(candidate.appliesTo)
   ) {
     return null;
   }
 
-  for (const key of ['runtimeOnly', 'needsContext', 'needsExplain'] as const) {
+  for (const key of [
+    'runtimeOnly',
+    'needsContext',
+    'needsExplain',
+    'aiFixable',
+    'sourceScoped',
+  ] as const) {
     if (candidate[key] !== undefined && typeof candidate[key] !== 'boolean') return null;
   }
 
@@ -56,11 +65,14 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     enabled: candidate.enabled,
     severity: candidate.severity as LintSeverity,
     message: candidate.message,
+    howToFix: candidate.howToFix,
     docUrl: candidate.docUrl,
     appliesTo: candidate.appliesTo as AppliesTo,
     runtimeOnly: candidate.runtimeOnly as boolean | undefined,
     needsContext: candidate.needsContext as boolean | undefined,
     needsExplain: candidate.needsExplain as boolean | undefined,
+    aiFixable: candidate.aiFixable as boolean | undefined,
+    sourceScoped: candidate.sourceScoped as boolean | undefined,
   };
 }
 
@@ -94,4 +106,14 @@ export function getBundledCatalog(): CatalogEntry[] {
     bundledCatalog = loadCatalog(source);
   }
   return bundledCatalog;
+}
+
+let bundledCatalogById: Map<string, CatalogEntry> | undefined;
+
+/** Lets marker providers read catalog metadata without importing a rule module. */
+export function getCatalogEntryById(ruleId: string): CatalogEntry | undefined {
+  if (!bundledCatalogById) {
+    bundledCatalogById = new Map(getBundledCatalog().map((entry) => [entry.id, entry]));
+  }
+  return bundledCatalogById.get(ruleId);
 }

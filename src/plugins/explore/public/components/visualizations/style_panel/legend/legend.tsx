@@ -8,26 +8,22 @@ import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
-import { DebouncedFieldText } from '../utils';
 
 export interface LegendOptions {
   show: boolean;
   position: Positions;
   title?: string;
-  titleForSize?: string;
 }
 
 export interface LegendOptionsProps {
   legendOptions: LegendOptions;
   onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
-  hasSizeLegend?: boolean;
   initialIsOpen?: boolean;
 }
 
 export const LegendOptionsPanel = ({
   legendOptions,
   onLegendOptionsChange,
-  hasSizeLegend = false,
   initialIsOpen = false,
 }: LegendOptionsProps) => {
   if (!legendOptions || !onLegendOptionsChange) {
@@ -96,23 +92,6 @@ export const LegendOptionsPanel = ({
               data-test-subj="legendPositionSelect"
             />
           </EuiFormRow>
-          <EuiSpacer size="s" />
-          {hasSizeLegend && (
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.legend.titleForSize', {
-                defaultMessage: 'Size legend title',
-              })}
-            >
-              <DebouncedFieldText
-                value={legendOptions.titleForSize || ''}
-                onChange={(value: string) => onLegendOptionsChange({ titleForSize: value })}
-                data-test-subj="legendTitleForSizeInput"
-                placeholder={i18n.translate('explore.stylePanel.legend.titleForSize.placeholder', {
-                  defaultMessage: 'Size legend name',
-                })}
-              />
-            </EuiFormRow>
-          )}
         </>
       )}
     </StyleAccordion>

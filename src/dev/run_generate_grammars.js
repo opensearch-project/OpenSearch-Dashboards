@@ -30,7 +30,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const peg = require('pegjs');
+const peg = require('peggy');
 
 const REPO_ROOT = path.resolve(__dirname, '../..');
 
@@ -70,17 +70,8 @@ const GRAMMARS = [
   },
 ];
 
-// PEG.js exposes different entry points across versions:
-//   0.9.x — `buildParser(source, opts)`
-//   0.10.x — `generate(source, opts)`
-// Supporting both lets this script survive a future pegjs bump without
-// silently breaking. Note `buildParser` in 0.9 relies on `this` context,
-// so we invoke via the module (not a detached reference).
 function compile(grammarSource, options) {
-  if (typeof peg.generate === 'function') {
-    return peg.generate(grammarSource, options);
-  }
-  return peg.buildParser(grammarSource, options);
+  return peg.generate(grammarSource, options);
 }
 
 function wrap(parserSource) {
@@ -102,7 +93,7 @@ function generateOne(grammar) {
   console.log(`  ${grammar.name}: ${grammar.src} -> ${grammar.dest}`);
 }
 
-console.log('Generating PEG parsers...');
+console.log('Generating Peggy parsers...');
 for (const grammar of GRAMMARS) {
   generateOne(grammar);
 }

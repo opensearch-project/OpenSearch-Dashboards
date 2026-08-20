@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPosition, getOsdSidecarPaddingStyle, getSidecarLeftNavStyle } from './helper';
+import {
+  getPosition,
+  getOsdSidecarPaddingStyle,
+  getSidecarLeftNavStyle,
+  applyOverlayOffsetCssVars,
+} from './helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 describe('sidecar helper', () => {
@@ -91,6 +96,69 @@ describe('sidecar helper', () => {
 
     test('return empty object when config is undefined', () => {
       expect(getSidecarLeftNavStyle(undefined)).toEqual({});
+    });
+  });
+
+  describe('applyOverlayOffsetCssVars', () => {
+    const props: ISidecarConfig = {
+      paddingSize: 460,
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+      isHidden: false,
+    };
+
+    const readVar = (name: string) => document.documentElement.style.getPropertyValue(name);
+
+    afterEach(() => {
+      document.documentElement.style.removeProperty('--oui-overlay-offset-right');
+      document.documentElement.style.removeProperty('--oui-overlay-offset-left');
+      document.documentElement.style.removeProperty('--eui-overlay-offset-right');
+      document.documentElement.style.removeProperty('--eui-overlay-offset-left');
+    });
+
+    test('writes the right offset (both oui and eui prefixes) when docked right', () => {
+      applyOverlayOffsetCssVars({ ...props, dockedMode: SIDECAR_DOCKED_MODE.RIGHT });
+      expect(readVar('--oui-overlay-offset-right')).toBe('460px');
+      expect(readVar('--eui-overlay-offset-right')).toBe('460px');
+      expect(readVar('--oui-overlay-offset-left')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-left')).toBe('0px');
+    });
+
+    test('writes the left offset (both oui and eui prefixes) when docked left', () => {
+      applyOverlayOffsetCssVars({ ...props, dockedMode: SIDECAR_DOCKED_MODE.LEFT });
+      expect(readVar('--oui-overlay-offset-left')).toBe('460px');
+      expect(readVar('--eui-overlay-offset-left')).toBe('460px');
+      expect(readVar('--oui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-right')).toBe('0px');
+    });
+
+    test('resets all offsets to 0px when the sidecar is closed (config undefined)', () => {
+      // Simulate the open -> close sequence the service drives: first a docked
+      // config, then cleanupDom() emitting undefined on sidecarConfig$.
+      applyOverlayOffsetCssVars({ ...props, dockedMode: SIDECAR_DOCKED_MODE.RIGHT });
+      expect(readVar('--eui-overlay-offset-right')).toBe('460px');
+
+      applyOverlayOffsetCssVars(undefined);
+      expect(readVar('--oui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--oui-overlay-offset-left')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-left')).toBe('0px');
+    });
+
+    test('resets all offsets to 0px when the sidecar is hidden', () => {
+      applyOverlayOffsetCssVars({ ...props, dockedMode: SIDECAR_DOCKED_MODE.RIGHT });
+      expect(readVar('--eui-overlay-offset-right')).toBe('460px');
+
+      applyOverlayOffsetCssVars({ ...props, isHidden: true });
+      expect(readVar('--oui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-right')).toBe('0px');
+    });
+
+    test('reserves no offset in takeover mode', () => {
+      applyOverlayOffsetCssVars({ ...props, dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER });
+      expect(readVar('--oui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-right')).toBe('0px');
+      expect(readVar('--oui-overlay-offset-left')).toBe('0px');
+      expect(readVar('--eui-overlay-offset-left')).toBe('0px');
     });
   });
 });
