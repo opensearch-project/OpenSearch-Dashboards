@@ -87,7 +87,10 @@ export const runCreateVisTests = () => {
       // Open thresholds setting
       cy.get('[aria-controls="thresholdSection"]').click();
       // Change threshold mode from default 'Off' to enable threshold functionality
-      cy.getElementByTestId('thresholdModeSelect').should('be.visible').select('Solid lines');
+      cy.getElementByTestId('thresholdModeSelect')
+        .scrollIntoView()
+        .should('be.visible')
+        .select('Solid lines');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('.exploreVisContainer canvas').then((canvas) => {
