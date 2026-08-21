@@ -466,6 +466,51 @@ describe('detectTraceData', () => {
     expect(result.tracePattern).toBe('otel-v1-apm-span*');
     expect(result.dataSourceId).toBe('datasource-b');
   });
+
+  it('attributes id-encoded remote trace patterns to their data source, not local cluster', async () => {
+    const remoteDataSourceId = '12345678-1234-1234-1234-123456789012';
+    // A traces pattern on a remote data source whose id is encoded in the saved-object
+    // id (<dataSourceId>_<...> where the data source id is a UUID prefix), NO references.
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: `${remoteDataSourceId}_span-pattern`,
+          attributes: { signalType: 'traces' },
+          references: [],
+        },
+      ],
+      total: 1,
+    } as any);
+
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+      if (pattern === 'otel-v1-apm-span*') {
+        return [
+          { name: 'spanId', type: 'string' },
+          { name: 'traceId', type: 'string' },
+          { name: 'endTime', type: 'date' },
+        ] as any;
+      }
+      throw new Error('No matching indices');
+    });
+
+    // For the remote data source the existing trace dataset is recognized -> skip detection
+    const remoteResult = await detectTraceData(
+      mockSavedObjectsClient,
+      mockIndexPatternsService,
+      remoteDataSourceId
+    );
+    expect(remoteResult.tracesDetected).toBe(false);
+    expect(mockIndexPatternsService.getFieldsForWildcard).not.toHaveBeenCalled();
+
+    // For the local cluster that remote pattern must NOT count -> detection proceeds
+    const localResult = await detectTraceData(
+      mockSavedObjectsClient,
+      mockIndexPatternsService,
+      undefined
+    );
+    expect(localResult.tracesDetected).toBe(true);
+  });
 });
 
 describe('detectTraceDataAcrossDataSources', () => {

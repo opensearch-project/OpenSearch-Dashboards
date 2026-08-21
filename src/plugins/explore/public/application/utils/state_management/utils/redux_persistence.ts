@@ -32,6 +32,7 @@ import {
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
+import { getIndexPatternSignalTypes } from '../../../../utils/get_index_pattern_signal_types';
 
 /**
  * Persists Redux state to URL
@@ -211,21 +212,16 @@ export const fetchFirstAvailableDataset = async (
 
     // Filter by SignalType compatibility.
     if (fetchedDatasets.length > 0) {
-      // Resolve every dataset's signalType in a SINGLE saved-objects find rather than
-      // fetching each DataView individually. The previous per-dataset `dataViews.get`
-      // loop caused an N+1 on page load: one index-pattern `_bulk_get` per pattern, each
-      // also resolving its data-source via the uncached `getDataSource` (the same data
-      // source fetched dozens of times). The find projects only `signalType`, so it is
-      // cheap regardless of workspace size.
+      // Resolve every dataset's signalType in a SINGLE projected find (see
+      // getIndexPatternSignalTypes) rather than fetching each DataView individually.
+      // The previous per-dataset `dataViews.get` loop caused an N+1 on page load: one
+      // index-pattern `_bulk_get` per pattern, each also resolving its data-source via
+      // the uncached `getDataSource` (the same data source fetched dozens of times).
       const signalTypeById = new Map<string, string | undefined>();
       try {
-        const signalTypeResp = await services.savedObjects.client.find<{ signalType?: string }>({
-          type: 'index-pattern',
-          fields: ['signalType'],
-          perPage: 10000,
-        });
-        signalTypeResp.savedObjects.forEach((obj) => {
-          signalTypeById.set(obj.id, obj.attributes?.signalType);
+        const signalTypes = await getIndexPatternSignalTypes(services.savedObjects.client);
+        signalTypes.forEach((pattern) => {
+          signalTypeById.set(pattern.id, pattern.signalType);
         });
       } catch {
         // If the lookup fails, fall back to whatever signalType the datasets carry.

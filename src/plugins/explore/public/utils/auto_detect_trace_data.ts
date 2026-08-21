@@ -6,6 +6,28 @@
 import { SavedObjectsClientContract } from 'src/core/public';
 import { isValidTimeField, pickTimeField, TRACE_TIME_FIELD_CANDIDATES } from '../../../data/common';
 import { IndexPatternsContract } from '../../../data/public';
+import {
+  getIndexPatternSignalTypes,
+  IndexPatternSignalType,
+} from './get_index_pattern_signal_types';
+
+const TRACES_SIGNAL_TYPE = 'traces';
+
+/**
+ * Build the set of data source ids that already have at least one trace dataset,
+ * from a precomputed list of index-pattern signal types.
+ */
+const collectTraceDataSourceIds = (
+  signalTypes: IndexPatternSignalType[]
+): Set<string | undefined> => {
+  const traceDataSourceIds = new Set<string | undefined>();
+  signalTypes.forEach((pattern) => {
+    if (pattern.signalType === TRACES_SIGNAL_TYPE) {
+      traceDataSourceIds.add(pattern.dataSourceId);
+    }
+  });
+  return traceDataSourceIds;
+};
 
 export interface DetectionResult {
   tracesDetected: boolean;
@@ -42,32 +64,24 @@ export async function detectTraceData(
   };
 
   // 1. Skip auto-detection if a trace dataset already exists for this datasource.
-  //    Resolve this via a single signalType-projected find rather than fetching
-  //    every index pattern individually via get(id): the per-pattern loop caused
-  //    an N+1 of _bulk_get calls on page load, each also triggering an uncached
-  //    data-source lookup. Callers scanning multiple datasources should pass
-  //    `hasExistingTraceDataset` (computed once) to avoid repeating the find.
+  //    Resolve this via a single projected find (see getIndexPatternSignalTypes)
+  //    rather than fetching every index pattern individually via get(id): the
+  //    per-pattern loop caused an N+1 of _bulk_get calls on page load, each also
+  //    triggering an uncached data-source lookup. Callers scanning multiple
+  //    datasources should pass `hasExistingTraceDataset` (computed once) to avoid
+  //    repeating the find.
   let traceDatasetAlreadyExists = hasExistingTraceDataset;
   if (traceDatasetAlreadyExists === undefined) {
     try {
-      const indexPatternsResp = await savedObjectsClient.find<{ signalType?: string }>({
-        type: 'index-pattern',
-        fields: ['signalType'],
-        perPage: 10000,
-      });
-
-      traceDatasetAlreadyExists = indexPatternsResp.savedObjects.some((obj) => {
-        if (obj.attributes?.signalType !== 'traces') {
-          return false;
-        }
-        // Only consider patterns that belong to the target datasource (references
-        // are always returned by find, independent of the fields projection).
-        const patternDataSourceId = (obj.references || []).find(
-          (ref) => ref.type === 'data-source'
-        )?.id;
-        // Match when ids are equal, or both undefined (local cluster).
-        return patternDataSourceId === dataSourceId;
-      });
+      const signalTypes = await getIndexPatternSignalTypes(savedObjectsClient);
+      // A pattern belongs to this datasource when its resolved data source id matches
+      // (both undefined means the local cluster). getIndexPatternSignalTypes resolves
+      // the id from references AND id-encoded formats, so remote patterns are not
+      // misattributed to the local cluster.
+      traceDatasetAlreadyExists = signalTypes.some(
+        (pattern) =>
+          pattern.signalType === TRACES_SIGNAL_TYPE && pattern.dataSourceId === dataSourceId
+      );
     } catch {
       // If loading fails, continue with detection
       traceDatasetAlreadyExists = false;
@@ -143,27 +157,23 @@ export async function detectTraceData(
  */
 export async function detectTraceDataAcrossDataSources(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: IndexPatternsContract,
+  // Optional precomputed index-pattern signal types. Callers that already fetched the
+  // list (e.g. TraceAutoDetectCallout, to decide whether to render) should pass it so
+  // we don't issue a duplicate find for the same data.
+  precomputedSignalTypes?: IndexPatternSignalType[]
 ): Promise<DetectionResult[]> {
   const results: DetectionResult[] = [];
 
   // Determine, in a single find, which datasources already have a trace dataset so
   // each per-datasource detection below can skip its own lookup (avoids an N+1 of
-  // finds). References are always returned by find, independent of the projection.
+  // finds). Reuse the caller's list when provided.
   const traceDataSourceIds = new Set<string | undefined>();
   let signalTypeLookupSucceeded = true;
   try {
-    const indexPatternsResp = await savedObjectsClient.find<{ signalType?: string }>({
-      type: 'index-pattern',
-      fields: ['signalType'],
-      perPage: 10000,
-    });
-    indexPatternsResp.savedObjects.forEach((obj) => {
-      if (obj.attributes?.signalType === 'traces') {
-        const dsId = (obj.references || []).find((ref) => ref.type === 'data-source')?.id;
-        traceDataSourceIds.add(dsId);
-      }
-    });
+    const signalTypes =
+      precomputedSignalTypes ?? (await getIndexPatternSignalTypes(savedObjectsClient));
+    collectTraceDataSourceIds(signalTypes).forEach((dsId) => traceDataSourceIds.add(dsId));
   } catch {
     // If the lookup fails, fall back to per-datasource detection (pass undefined so
     // each detectTraceData resolves the check itself).
