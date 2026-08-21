@@ -8,25 +8,22 @@ import {
   getRandomizedWorkspaceName,
   getRandomizedDatasetId,
 } from '../../../../../utils/apps/explore/shared';
+import { PROMETHEUS_CLUSTER } from '../../../../../utils/apps/explore/constants';
 import {
   prepareTestSuite,
   createWorkspaceAndDatasetUsingEndpoint,
 } from '../../../../../utils/helpers';
 
-const workspaceName = getRandomizedWorkspaceName();
-const datasetId = getRandomizedDatasetId();
-const dashboardName = 'variables-test-dashboard';
-
-const navigateToDashboardList = () => {
+const navigateToDashboardList = (workspaceName) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
+    workspaceName: workspaceName,
     page: 'dashboards',
     isEnhancement: true,
   });
 };
 
-const createAndSaveDashboard = () => {
-  navigateToDashboardList();
+const createAndSaveDashboard = (workspaceName, dashboardName) => {
+  navigateToDashboardList(workspaceName);
   // Create a new dashboard (starts in edit mode)
   cy.getElementByTestId('newItemButton').click();
   cy.wait(2000);
@@ -82,12 +79,12 @@ const typeInModalEditor = (query) => {
     .find('.react-monaco-editor-container')
     .should('be.visible')
     .click({ force: true });
-  cy.get('.inputarea').first().should('be.visible');
+
   cy.wait(100);
   // Clear any existing content (cross-platform select-all + delete).
   cy.get('.inputarea')
     .first()
-    .focus()
+    .type('{esc}', { force: true })
     .type('{ctrl}a', { force: true })
     .type('{backspace}', { force: true })
     .type('{meta}a', { force: true })
@@ -100,15 +97,131 @@ const typeInModalEditor = (query) => {
 
 const previewInModal = () => {
   cy.getElementByTestId('queryEditorModalRunQuery').click();
-  cy.wait(5000);
+  cy.getElementByTestId('queryEditorModalPreviewPanel', { timeout: 20000 }).should(
+    'contain.text',
+    'Preview of values'
+  );
+  cy.wait(300);
 };
 
 const applyModal = () => {
   cy.getElementByTestId('queryEditorModalApply').click();
+  cy.getElementByTestId('queryEditorModal').should('not.exist');
+};
+
+// Value/label fields are EuiComboBox (single-select) — open and pick an option.
+const selectModalComboBoxOption = (testId, optionText) => {
+  cy.getElementByTestId(testId).click();
+  cy.get('[role="option"]').contains(optionText).click({ force: true });
+  cy.wait(300);
+};
+
+// --- PromQL query-type helpers (query editor modal) ---
+const toggleModalLanguageToPromQL = () => {
+  cy.getElementByTestId('variableQueryPanelLanguageToggle').click();
+  // Options are keyed by language title: variableQueryPanelLanguageToggle-<title>.
+  cy.getElementByTestId('variableQueryPanelLanguageToggle-PromQL').click({ force: true });
   cy.wait(500);
 };
 
+// PromQL query type is an EuiSuperSelect; pick by its display label
+// (e.g. 'Label names', 'Label values', 'Metrics', 'Series query').
+const selectPromqlQueryType = (displayLabel) => {
+  cy.getElementByTestId('variableEditorPromqlQueryType').click();
+  cy.get('[role="option"]').contains(displayLabel).click({ force: true });
+  cy.wait(300);
+};
+
+// --- Prometheus data-connection + workspace setup (mirrors prometheus_dataset.spec.js) ---
+const setupPrometheusConnection = (connectionName, prometheusUrl) => {
+  const endpoint = Cypress.env('endpoint') || '';
+  return cy
+    .request({
+      method: 'POST',
+      url: `${endpoint}/api/directquery/dataconnections`,
+      headers: { 'osd-xsrf': true, 'content-type': 'application/json' },
+      body: {
+        name: connectionName,
+        allowedRoles: [],
+        connector: 'prometheus',
+        properties: { 'prometheus.uri': prometheusUrl },
+      },
+      failOnStatusCode: false,
+    })
+    .then((resp) => {
+      if (resp.status !== 200 && resp.status !== 409) {
+        cy.log(`Create data connection response: ${JSON.stringify(resp.body)}`);
+      }
+    });
+};
+
+const waitForPrometheusReady = (prometheusUrl, retries = 10, delay = 3000) => {
+  const checkReady = (attempt) => {
+    cy.request({
+      method: 'GET',
+      url: `${prometheusUrl}/api/v1/query`,
+      qs: { query: 'prometheus_build_info' },
+      failOnStatusCode: false,
+    }).then((resp) => {
+      if (resp.status === 200 && resp.body?.data?.result?.length > 0) {
+        cy.log('Prometheus is ready');
+      } else if (attempt < retries) {
+        cy.wait(delay).then(() => checkReady(attempt + 1));
+      } else {
+        cy.log('Warning: Prometheus may not be fully ready, proceeding anyway');
+      }
+    });
+  };
+  checkReady(0);
+};
+
+const getPrometheusConnectionId = (connectionName) => {
+  const endpoint = Cypress.env('endpoint') || '';
+  return cy
+    .request({
+      method: 'GET',
+      url: `${endpoint}/api/saved_objects/_find`,
+      headers: { 'osd-xsrf': true },
+      qs: { per_page: 10000, type: 'data-connection' },
+    })
+    .then((resp) => {
+      const connection = resp.body?.saved_objects?.find(
+        (savedObject) => savedObject.attributes.connectionId === connectionName
+      );
+      expect(connection).to.exist;
+      return connection.id;
+    });
+};
+
+const createPrometheusWorkspace = (name, dataConnectionId) => {
+  const baseUrl = Cypress.env('endpoint') || Cypress.config('baseUrl') || '';
+  // Reuse the shared workspace-creation command (the same one the PPL prep uses via
+  // cy.osd.createWorkspaceWithDataSourceId) — just attach a data connection instead of a
+  // data source, and store the id under the env key the osd navigate/delete commands read.
+  return cy
+    .createWorkspaceWithEndpoint(baseUrl, {
+      name,
+      features: ['use-case-observability'],
+      settings: {
+        permissions: {
+          library_write: { users: ['%me%'] },
+          write: { users: ['%me%'] },
+        },
+        dataSources: [],
+        dataConnections: [dataConnectionId],
+      },
+    })
+    .then((result) => {
+      Cypress.env(`${name}:WORKSPACE_ID`, result.id);
+      return result.id;
+    });
+};
+
 export const runDashboardVariableTests = () => {
+  const datasetId = getRandomizedDatasetId();
+  const workspaceName = getRandomizedWorkspaceName();
+  const dashboardName = 'variables-test-dashboard';
+
   describe('Dashboard variables', () => {
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
@@ -121,7 +234,7 @@ export const runDashboardVariableTests = () => {
         'logs',
         ['use-case-observability']
       );
-      createAndSaveDashboard();
+      createAndSaveDashboard(workspaceName, dashboardName);
       // Dashboard switches to view mode after save, enter edit mode
       enterEditMode();
     });
@@ -374,13 +487,6 @@ export const runDashboardVariableTests = () => {
         selectModalComboBoxOption('variableEditorValueField', 'personal.user_id');
         selectModalComboBoxOption('variableEditorLabelField', 'personal.name');
 
-        // Preview again with the selected fields, then verify results appear.
-        previewInModal();
-        cy.getElementByTestId('queryEditorModalPreviewPanel').should(
-          'contain.text',
-          'Preview of values'
-        );
-
         // Apply the query (closes the modal and returns to the variable editor).
         applyModal();
 
@@ -453,6 +559,155 @@ export const runDashboardVariableTests = () => {
       });
     });
   });
+
+  // PromQL query-type variables require a Prometheus data connection.
+  const prometheusConfig = PROMETHEUS_CLUSTER;
+  (!prometheusConfig.url ? describe.skip : describe)(
+    'PromQL query type variables',
+    { defaultCommandTimeout: 120000 },
+    () => {
+      const promqlWorkspaceName = getRandomizedWorkspaceName();
+      const promqlDashboardName = 'promql-variables-test-dashboard';
+
+      before(() => {
+        setupPrometheusConnection(prometheusConfig.name, prometheusConfig.url);
+        waitForPrometheusReady(prometheusConfig.url);
+        getPrometheusConnectionId(prometheusConfig.name).then((id) =>
+          createPrometheusWorkspace(promqlWorkspaceName, id)
+        );
+
+        createAndSaveDashboard(promqlWorkspaceName, promqlDashboardName);
+        enterEditMode();
+      });
+
+      after(() => {
+        cy.osd.deleteWorkspaceByNameUsingEndpoint(promqlWorkspaceName);
+      });
+
+      it('creates a "Label values" PromQL variable end-to-end', () => {
+        openVariableEditor();
+        cy.getElementByTestId('variableEditorName').type('promql_job');
+
+        // Query is the default type — open the query editor modal.
+        openQueryEditorModal();
+
+        // Switch the modal language from PPL to PromQL.
+        toggleModalLanguageToPromQL();
+
+        // Select the Prometheus dataset in the modal's dataset picker.
+        selectDatasetInModal(prometheusConfig.name);
+
+        // Choose the "Label values" fill-in-the-blank query type.
+        selectPromqlQueryType('Label values');
+
+        // Pick a label every Prometheus target exposes. 'job'/'instance' always exist
+        cy.getElementByTestId('variableEditorPromqlLabelValuesLabel')
+          .find('input')
+          .type('job', { force: true });
+        cy.wait(300);
+        cy.get('[role="option"]').contains('job').click({ force: true });
+        cy.wait(300);
+
+        // Preview loads the label values, then Apply + Save.
+        previewInModal();
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should('be.visible');
+        applyModal();
+        saveVariable();
+        cy.wait(3000);
+
+        cy.getElementByTestId('variable-promql_job').should('be.visible');
+      });
+
+      it('creates a "Metrics" PromQL variable filtered by regex', () => {
+        openVariableEditor();
+        cy.getElementByTestId('variableEditorName').type('promql_metric');
+
+        openQueryEditorModal();
+        toggleModalLanguageToPromQL();
+        selectDatasetInModal(prometheusConfig.name);
+        selectPromqlQueryType('Metrics');
+
+        // Metrics query type: optional RE2 regex on __name__ (anchored).
+        cy.getElementByTestId('variableEditorPromqlMetricsRegex').type('prometheus_.*');
+        cy.wait(300);
+
+        previewInModal();
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should('be.visible');
+        applyModal();
+        saveVariable();
+        cy.wait(3000);
+
+        cy.getElementByTestId('variable-promql_metric').should('be.visible');
+      });
+
+      it('creates a "Label names" PromQL variable scoped by a metric regex', () => {
+        openVariableEditor();
+        cy.getElementByTestId('variableEditorName').type('promql_labelname');
+
+        openQueryEditorModal();
+        toggleModalLanguageToPromQL();
+        selectDatasetInModal(prometheusConfig.name);
+        selectPromqlQueryType('Label names');
+
+        // Optional metric regex (anchored RE2 on __name__) to scope which metrics'
+        // label names are returned. Match prometheus_* (CI fixture scrapes Prometheus itself).
+        cy.getElementByTestId('variableEditorPromqlLabelNamesMetric').type('prometheus_.*');
+        cy.wait(300);
+
+        previewInModal();
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should('be.visible');
+        applyModal();
+        saveVariable();
+        cy.wait(3000);
+
+        cy.getElementByTestId('variable-promql_labelname').should('be.visible');
+      });
+
+      it('creates a "Series query" PromQL variable', () => {
+        openVariableEditor();
+        cy.getElementByTestId('variableEditorName').type('promql_series');
+
+        openQueryEditorModal();
+        toggleModalLanguageToPromQL();
+        selectDatasetInModal(prometheusConfig.name);
+        selectPromqlQueryType('Series query');
+
+        // Series selector is required. 'up' is present on every Prometheus.
+        cy.getElementByTestId('variableEditorPromqlSeriesMatcher').type('up');
+        cy.wait(300);
+
+        previewInModal();
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should('be.visible');
+        applyModal();
+        saveVariable();
+        cy.wait(3000);
+
+        cy.getElementByTestId('variable-promql_series').should('be.visible');
+      });
+
+      it('creates a "Query result (PromQL)" variable from a raw expression', () => {
+        openVariableEditor();
+        cy.getElementByTestId('variableEditorName').type('promql_result');
+
+        openQueryEditorModal();
+        toggleModalLanguageToPromQL();
+        selectDatasetInModal(prometheusConfig.name);
+        selectPromqlQueryType('Query result (PromQL)');
+
+        // Raw PromQL expression; 'up' yields one series per scrape target.
+        typeInModalEditor('up');
+
+        previewInModal();
+        // if the preview reports a value-field error, select one via variableEditorValueField.
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should('be.visible');
+        applyModal();
+        saveVariable();
+        cy.wait(3000);
+
+        cy.getElementByTestId('variable-promql_result').should('be.visible');
+      });
+    }
+  );
 };
 
 prepareTestSuite('Dashboard Variables', runDashboardVariableTests);

@@ -192,7 +192,7 @@ function seriesLabelSetToString(series: Record<string, string>): string {
   const labelPairs = Object.entries(series)
     .filter(([key]) => key !== '__name__')
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${key}="${value}"`);
+    .map(([key, value]) => `${key}="${escapeSelectorValue(value)}"`);
 
   if (labelPairs.length === 0) {
     return name ?? '';
