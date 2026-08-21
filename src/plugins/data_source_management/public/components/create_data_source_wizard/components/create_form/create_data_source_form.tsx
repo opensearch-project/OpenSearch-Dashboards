@@ -48,6 +48,7 @@ import {
   isValidUrl,
 } from '../../../utils';
 import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
+import { JwtAuthDescription } from '../../../jwt_auth_description';
 
 export interface CreateDataSourceProps {
   useNewUX: boolean;
@@ -309,8 +310,8 @@ export class CreateDataSourceForm extends React.Component<
     if (this.isFormValid()) {
       const formValues: DataSourceAttributes = this.getFormValues();
 
-      /* Remove credentials object for NoAuth */
-      if (this.state.auth.type === AuthType.NoAuth) {
+      /* Remove credentials object for NoAuth and JWT */
+      if (this.state.auth.type === AuthType.NoAuth || this.state.auth.type === AuthType.JWT) {
         delete formValues.auth.credentials;
       }
       /* Submit */
@@ -329,7 +330,7 @@ export class CreateDataSourceForm extends React.Component<
     let credentials = this.state.auth.credentials;
     const authType = this.state.auth.type;
 
-    if (authType === AuthType.NoAuth) {
+    if (authType === AuthType.NoAuth || authType === AuthType.JWT) {
       credentials = {};
     } else if (authType === AuthType.UsernamePasswordType) {
       credentials = {
@@ -415,6 +416,8 @@ export class CreateDataSourceForm extends React.Component<
     switch (type) {
       case AuthType.NoAuth:
         return null;
+      case AuthType.JWT:
+        return <JwtAuthDescription />;
       case AuthType.UsernamePasswordType:
         return (
           <>

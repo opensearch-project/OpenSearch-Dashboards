@@ -36,6 +36,38 @@ Note that if any of the encryption keyring configuration values change (wrapping
 **What are the best practices for generating a secure wrapping key?**  
 WrappingKey is an array of 32 random numbers. Read [more](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator) about best practices for generating a secure wrapping key.
 
+4. Individual authentication methods can be turned on and off. `NoAuthentication`, `UsernamePassword`, and `AWSSigV4` are enabled by default; `JWT` is not:
+
+```yml
+data_source.authTypes:
+  NoAuthentication:
+    enabled: true
+  UsernamePassword:
+    enabled: true
+  AWSSigV4:
+    enabled: true
+  JWT:
+    enabled: false
+```
+
+### JWT passthrough authentication
+
+The `JWT` auth type forwards the `authorization` header of the incoming request to the data source cluster, so the data source evaluates the signed-in user's own roles rather than a shared service account's. Nothing is stored on the saved object; the token is read from each request and applied only to the per-request child client.
+
+This is intended for deployments where Dashboards itself authenticates users with a bearer token (for example the security plugin's OpenID Connect or JWT auth), which is also the source of the token forwarded to the default cluster via `opensearch.requestHeadersWhitelist`.
+
+`JWT.enabled` defaults to `false`: enabling it means the user's bearer token is sent to whichever endpoints operators register as data sources, so it must be an explicit decision.
+
+#### Cluster-side prerequisites
+
+- The data source cluster's security plugin needs a `jwt` or `openid` authentication domain in its `config.yml` that trusts the same token issuer and signing key as the Dashboards login flow.
+- Any `required_audience` must accept the token's `aud` claim. The token is minted for the OIDC client of the cluster Dashboards signs in against, so unless the data source cluster shares that client ID or is configured to accept it, every request is rejected.
+- The user's roles and backend role mappings must exist on the data source cluster, since that is where authorization is evaluated.
+
+#### Test Connection
+
+The Test Connection button sends the current user's token, so it verifies that specific user can reach the cluster. It confirms connectivity and issuer trust; it does not confirm that any other user's token will be accepted or that their permissions are correct.
+
 ## Public
 
 The public plugin is used to enable and disable the features related to multi data source available in other plugins. e.g. data_source_management, index_pattern_management

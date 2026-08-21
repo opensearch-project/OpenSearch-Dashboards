@@ -4,7 +4,11 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
@@ -423,6 +427,163 @@ describe('configureClient', () => {
         region: sigV4AuthContent.region,
         service: 'aoss',
       },
+    });
+  });
+
+  describe('auth.type == jwt', () => {
+    const AUTHORIZATION = 'Bearer user-a-token';
+
+    /* JWT is opt-in, so every test here needs it explicitly enabled. */
+    const jwtEnabledConfig = () =>
+      ({
+        ...config,
+        authTypes: { JWT: { enabled: true } },
+      }) as DataSourcePluginConfigType;
+
+    const mockJwtDataSource = () => {
+      savedObjectsMock.get.mockReset().mockResolvedValue({
+        id: DATA_SOURCE_ID,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...dataSourceAttr,
+          auth: {
+            type: AuthType.JWT,
+            credentials: undefined,
+          },
+        },
+        references: [],
+      });
+    };
+
+    const requestWithToken = (authorization: string = AUTHORIZATION) =>
+      httpServerMock.createOpenSearchDashboardsRequest({ headers: { authorization } });
+
+    beforeEach(() => {
+      mockJwtDataSource();
+      parseClientOptionsMock.mockReturnValue(clientOptions);
+    });
+
+    test("forwards the incoming request's authorization header on the child client", async () => {
+      const client = await configureClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        clientPoolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(client).toBe(dsClient.child.mock.results[0].value);
+      expect(dsClient.child).toHaveBeenCalledWith({
+        headers: { authorization: AUTHORIZATION },
+      });
+    });
+
+    test('does not decrypt anything, since nothing is stored', async () => {
+      const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt');
+
+      await configureClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        clientPoolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(decodeAndDecryptSpy).not.toHaveBeenCalled();
+    });
+
+    test('pools a credential-free root client keyed on the bare endpoint', async () => {
+      const addClientToPool = jest.fn();
+
+      await configureClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        { getClientFromPool: jest.fn(), addClientToPool },
+        jwtEnabledConfig(),
+        logger
+      );
+
+      // The token must never be baked into the pooled root client or its cache key, which
+      // are shared across users.
+      expect(ClientMock).toHaveBeenCalledTimes(1);
+      expect(ClientMock).toHaveBeenCalledWith(clientOptions);
+      expect(addClientToPool).toHaveBeenCalledWith(dataSourceAttr.endpoint, AuthType.JWT, dsClient);
+    });
+
+    test('reuses one root client across users but gives each their own token', async () => {
+      const openSearchClientPool = new OpenSearchClientPool(logger);
+      const poolSetup = openSearchClientPool.setup(config);
+
+      await configureClient(
+        { ...dataSourceClientParams, request: requestWithToken('Bearer user-a-token') },
+        poolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+      await configureClient(
+        { ...dataSourceClientParams, request: requestWithToken('Bearer user-b-token') },
+        poolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(ClientMock).toHaveBeenCalledTimes(1);
+      expect(dsClient.child).toHaveBeenNthCalledWith(1, {
+        headers: { authorization: 'Bearer user-a-token' },
+      });
+      expect(dsClient.child).toHaveBeenNthCalledWith(2, {
+        headers: { authorization: 'Bearer user-b-token' },
+      });
+    });
+
+    test('throws when the request carries no authorization header', async () => {
+      // A local pool setup, since the shared one accumulates calls across the whole suite.
+      const addClientToPool = jest.fn();
+
+      await expect(
+        configureClient(
+          {
+            ...dataSourceClientParams,
+            request: httpServerMock.createOpenSearchDashboardsRequest(),
+          },
+          { getClientFromPool: jest.fn(), addClientToPool },
+          jwtEnabledConfig(),
+          logger
+        )
+      ).rejects.toThrow(/requires an 'authorization' header/);
+
+      // Fail fast: no unauthenticated request is issued and no client is pooled.
+      expect(addClientToPool).not.toHaveBeenCalled();
+    });
+
+    test('throws when the authorization header is blank', async () => {
+      await expect(
+        configureClient(
+          { ...dataSourceClientParams, request: requestWithToken('   ') },
+          clientPoolSetup,
+          jwtEnabledConfig(),
+          logger
+        )
+      ).rejects.toThrow(/requires an 'authorization' header/);
+    });
+
+    test('throws when there is no request at all', async () => {
+      await expect(
+        configureClient(dataSourceClientParams, clientPoolSetup, jwtEnabledConfig(), logger)
+      ).rejects.toThrow(/requires an 'authorization' header/);
+    });
+
+    test('throws when the jwt auth type is disabled, neutralising already-saved data sources', async () => {
+      await expect(
+        configureClient(
+          { ...dataSourceClientParams, request: requestWithToken() },
+          clientPoolSetup,
+          {
+            ...config,
+            authTypes: { JWT: { enabled: false } },
+          } as DataSourcePluginConfigType,
+          logger
+        )
+      ).rejects.toThrow(/is disabled/);
+
+      expect(ClientMock).not.toHaveBeenCalled();
     });
   });
 

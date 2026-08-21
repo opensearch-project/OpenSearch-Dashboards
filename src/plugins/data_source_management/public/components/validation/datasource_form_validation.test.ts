@@ -231,4 +231,43 @@ describe('DataSourceManagement: Form Validation', () => {
       expect(result).toBe(true);
     });
   });
+
+  describe('validate create/edit datasource for JWT auth type', () => {
+    const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    const form = (): CreateDataSourceState | EditDataSourceState => ({
+      formErrorsByField: { ...defaultValidation },
+      title: 'test jwt auth type',
+      description: '',
+      endpoint: 'https://test.com',
+      auth: {
+        type: AuthType.JWT,
+        credentials: undefined,
+      },
+    });
+
+    test('should NOT fail validation with no credentials, since the token comes from the request', () => {
+      const result = performDataSourceFormValidation(form(), [], '', authenticationMethodRegistry);
+      expect(result).toBe(true);
+    });
+
+    test('should still fail validation when title is empty', () => {
+      const result = performDataSourceFormValidation(
+        { ...form(), title: '' },
+        [],
+        '',
+        authenticationMethodRegistry
+      );
+      expect(result).toBe(false);
+    });
+
+    test('should still fail validation when endpoint is not valid', () => {
+      const result = performDataSourceFormValidation(
+        { ...form(), endpoint: 'not-a-url' },
+        [],
+        '',
+        authenticationMethodRegistry
+      );
+      expect(result).toBe(false);
+    });
+  });
 });

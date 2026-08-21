@@ -34,6 +34,17 @@ describe('AuthenticationMethodRegistry', () => {
     ).toEqual(['typeA', 'typeB', 'typeC']);
   });
 
+  it.each(['no_auth', 'username_password', 'sigv4', 'jwt'])(
+    'throws when trying to register the built-in auth type %s',
+    (name) => {
+      expect(() => {
+        registry.registerAuthenticationMethod(createAuthenticationMethod({ name }));
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Must not be no_auth or username_password or sigv4 or jwt for registered auth types"`
+      );
+    }
+  );
+
   it('throws when trying to register the same authentication method twice', () => {
     registry.registerAuthenticationMethod(createAuthenticationMethod({ name: 'typeA' }));
     registry.registerAuthenticationMethod(createAuthenticationMethod({ name: 'typeB' }));
