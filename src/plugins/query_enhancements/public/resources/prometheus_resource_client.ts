@@ -75,11 +75,16 @@ export class PrometheusResourceClient extends BaseResourceClient {
     );
   }
 
-  getMetrics(dataConnectionId: string, meta?: Record<string, unknown>, timeRange?: TimeRange) {
+  getMetrics(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    timeRange?: TimeRange,
+    metric?: string
+  ) {
     return this.get<string[]>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.METRICS,
-      undefined,
+      metric,
       this.toContent(meta, timeRange)
     );
   }

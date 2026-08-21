@@ -80,6 +80,41 @@ export interface CustomVariable extends VariableMeta {
   customOptions: VariableOption[];
 }
 
+export interface PromQLLabelMatcher {
+  label: string;
+  operator: '=' | '!=' | '=~' | '!~';
+  value: string;
+}
+
+export type PromQLVariableQueryType =
+  | {
+      kind: 'labelNames';
+      /** Optional regular expression to scope the returned label names to matching metric names. */
+      metricRegex?: string;
+    }
+  | {
+      kind: 'labelValues';
+      /** Label whose values should be returned. */
+      label: string;
+      /** Optional metric to scope the returned label values to. */
+      metric?: string;
+      /** Optional additional label filters */
+      matchers?: PromQLLabelMatcher[];
+    }
+  | {
+      kind: 'metrics';
+      /** Optional regular expression to filter metric names. */
+      metricRegex?: string;
+    }
+  | {
+      kind: 'series';
+      /** Series selector/matcher. */
+      matcher: string;
+    }
+  | {
+      kind: 'queryResult';
+    };
+
 /**
  * Query type variable — options fetched from a query
  */
@@ -93,6 +128,8 @@ export interface QueryVariable extends VariableMeta, VariableQueryParams {
   regex?: string;
   /** Whether to refresh options based on time range changes (default: false) */
   useTimeFilter?: boolean;
+  /** PromQL query type */
+  promqlQueryType?: PromQLVariableQueryType;
 }
 
 export interface TextVariable extends VariableMeta {

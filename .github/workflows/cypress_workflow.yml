@@ -464,7 +464,7 @@ jobs:
         shell: bash
 
       - name: Start Prometheus
-        if: matrix.group == '2Observability'
+        if: matrix.group == '2Observability' || matrix.group == 'Dashboards'
         run: |
           PROM_VERSION="3.8.1"
           curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
@@ -503,6 +503,11 @@ jobs:
           start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+        env:
+          # Only the Dashboards group starts Prometheus (see "Start Prometheus"); wiring
+          # this enables the PromQL query-type variable tests. Other groups get an empty
+          # value, so their specs that read PROMETHEUS auto-skip.
+          PROMETHEUS_CONNECTION_URL: ${{ matrix.group == 'Dashboards' && 'http://localhost:9090' || '' }}
 
       - name: Run OSD Cypress observability tests (traces)
         if: matrix.test_location == 'source' && matrix.config == 'observability' && matrix.group == '1Observability'
