@@ -30,6 +30,7 @@ interface Props {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 interface CommonProps {
@@ -39,6 +40,7 @@ interface CommonProps {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -58,6 +60,7 @@ export const CommonVisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: CommonProps) => {
   const { from, to } = inputTimeRange || {};
   const legendSelected$ = useRef(new BehaviorSubject<Record<string, boolean>>({})).current;
@@ -195,6 +198,7 @@ export const CommonVisualizationRender = ({
                   config={visConfig}
                   renderContext={{
                     seriesName: groupKey,
+                    crosshairGroup,
                   }}
                   onLegend={(legend) => onLegend(groupKey, legend, groups)}
                   timeRange={timeRange}
@@ -227,6 +231,7 @@ export const CommonVisualizationRender = ({
           <ChartRender
             data={visualizationData}
             config={visConfig}
+            renderContext={{ crosshairGroup }}
             onLegend={(legend) => onLegend('__default__', legend, ['__default__'])}
             timeRange={timeRange}
             onSelectTimeRange={onSelectTimeRange}
@@ -249,6 +254,7 @@ export const VisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
@@ -261,6 +267,7 @@ export const VisualizationRender = ({
       timeRange={inputTimeRange}
       onSelectTimeRange={onSelectTimeRange}
       onStyleChange={onStyleChange}
+      crosshairGroup={crosshairGroup}
     />
   );
 };

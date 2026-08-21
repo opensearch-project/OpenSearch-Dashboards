@@ -5,9 +5,16 @@
 
 import React from 'react';
 import { createAreaConfig } from './area_vis_config';
-import { Positions, ThresholdMode } from '../types';
+import { AxisRole, Positions, ThresholdMode, VisFieldType } from '../types';
 import { AreaVisStyleControls } from './area_vis_options';
 import { DEFAULT_POINT_SIZE } from '../style_panel/share';
+
+jest.mock('./to_expression', () => ({
+  createSimpleAreaChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createMultiAreaChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createCategoryAreaChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createStackedAreaChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+}));
 
 describe('area_vis_config', () => {
   const defaultAreaChartStyles = createAreaConfig().ui.style.defaults;
@@ -52,6 +59,31 @@ describe('area_vis_config', () => {
 
       expect(typeof config.getRules).toBe('function');
       expect(Array.isArray(config.getRules())).toBe(true);
+    });
+
+    test('should only pass the shared crosshair group to rules with a date x-axis', () => {
+      const config = createAreaConfig();
+      const crosshairGroup = 'dashboard';
+
+      config.getRules().forEach((rule) => {
+        const rendered = rule.render({
+          data: [],
+          allData: [],
+          styleOptions: config.ui.style.defaults,
+          axisColumnMappings: {
+            x: [{}],
+            y: [{}],
+            color: [{}],
+          },
+          timeRange: { from: 'now-1h', to: 'now' },
+          renderContext: { crosshairGroup },
+        } as any) as React.ReactElement<{ group?: string }>;
+        const hasDateXAxis = rule.mappings.some(
+          (mapping) => mapping[AxisRole.X]?.type === VisFieldType.Date
+        );
+
+        expect(rendered.props.group).toBe(hasDateXAxis ? crosshairGroup : undefined);
+      });
     });
 
     test('render function should create an AreaVisStyleControls component', () => {

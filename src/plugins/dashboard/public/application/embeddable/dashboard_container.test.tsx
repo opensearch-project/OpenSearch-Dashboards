@@ -76,6 +76,29 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
+class TestDashboardContainer extends DashboardContainer {
+  public getInheritedInputForTest(id: string) {
+    return this.getInheritedInput(id);
+  }
+}
+
+test('DashboardContainer inherits the shared crosshair setting', () => {
+  const disabledContainer = new TestDashboardContainer(
+    getSampleDashboardInput({ id: 'dashboard-123', useSharedCrosshair: false }),
+    options
+  );
+  const enabledContainer = new TestDashboardContainer(
+    getSampleDashboardInput({ id: 'dashboard-123', useSharedCrosshair: true }),
+    options
+  );
+
+  expect(disabledContainer.getInheritedInputForTest('panel-1').useSharedCrosshair).toBe(false);
+  expect(enabledContainer.getInheritedInputForTest('panel-1').useSharedCrosshair).toBe(true);
+
+  disabledContainer.destroy();
+  enabledContainer.destroy();
+});
+
 test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
