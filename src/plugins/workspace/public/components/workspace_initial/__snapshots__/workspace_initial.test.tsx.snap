@@ -119,7 +119,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll"
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll workspace-initial__use-case-cards"
               >
                 <div
                   class="euiFlexItem"
@@ -811,7 +811,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll"
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScroll workspace-initial__use-case-cards"
               >
                 <div
                   class="euiFlexItem"
