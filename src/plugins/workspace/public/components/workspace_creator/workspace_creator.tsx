@@ -26,6 +26,7 @@ import {
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
 import {
@@ -172,10 +173,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                 // Set workspace context for saved objects client
                 savedObjects.client.setCurrentWorkspace(newWorkspaceId);
 
-                // Get selected data sources (OpenSearch connections only)
-                const dataSourceConnections = (selectedDataSourceConnections ?? []).filter(
+                const selectedOpenSearchConnections = (selectedDataSourceConnections ?? []).filter(
                   ({ connectionType }) =>
                     connectionType === DataSourceConnectionType.OpenSearchConnection
+                );
+                const failedDataSourceIds = new Set(
+                  (result.result.failedAssociations ?? [])
+                    .filter(({ type }) => type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+                    .map(({ id }) => id)
+                );
+                const dataSourceConnections = selectedOpenSearchConnections.filter(
+                  ({ id }) => !failedDataSourceIds.has(id)
                 );
 
                 // Create mapping from dataSourceId to name
@@ -183,11 +191,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                   dataSourceConnections.map(({ id, name }) => [id, name])
                 );
 
-                // If no data sources selected, check local cluster
+                // Check the local cluster only when no OpenSearch data source was selected.
                 const dataSourcesToCheck =
-                  dataSourceConnections.length > 0
-                    ? dataSourceConnections.map(({ id }) => id)
-                    : [undefined]; // undefined means local cluster
+                  selectedOpenSearchConnections.length === 0
+                    ? [undefined]
+                    : dataSourceConnections.map(({ id }) => id);
 
                 let datasetsCreatedCount = 0;
 
