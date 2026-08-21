@@ -32,7 +32,7 @@ export const normalizeToPercentage =
         if (newRow[field] === null || newRow[field] === undefined || !Number.isFinite(value)) {
           return;
         }
-        newRow[field] = total === 0 ? 0 : (value / total) * 100;
+        newRow[field] = total === 0 ? 0 : value / total;
       });
       return newRow;
     });

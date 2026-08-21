@@ -235,8 +235,10 @@ describe('bar to_expression', () => {
         }
       );
 
-      // The first segment of the first row is normalized to 100% of that row
-      expect(spec.series[0].label.formatter({ value: ['A', 100, null, null] })).toBe('100%');
+      const dimensionNames = spec.dataset.source[0];
+      expect(spec.series[0].label.formatter({ value: ['A', 1, null, null], dimensionNames })).toBe(
+        '100%'
+      );
     });
   });
 

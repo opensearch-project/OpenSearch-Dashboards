@@ -152,8 +152,20 @@ export const createAreaSeries =
         name,
         type: 'line',
         ...pointSymbol,
-        ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
-        ...buildValueLabel(styles.showValues, item),
+        ...(styles.lineStyle === 'line'
+          ? styles.showValues
+            ? { showSymbol: true, symbolSize: 0 }
+            : { showSymbol: false }
+          : {}),
+        ...buildValueLabel({
+          showValues: styles.showValues,
+          valueField: item,
+          decimals: styles.decimals,
+          unitId: styles.unitId,
+          unitSuffix: styles.unitSuffix,
+          isPercentage: resolveStackMode(styles) === 'percentage',
+          isStack: resolveStackMode(styles) !== 'none',
+        }),
         // TODO remove it for connection/disconnection
         connectNulls: true,
         ...stackConfig,

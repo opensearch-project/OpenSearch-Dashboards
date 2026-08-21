@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 import { BaseChartStyle, PipelineFn } from './echarts_spec';
-import { resolveStackMode } from './data_transformation';
+import { resolveStackMode, formatDecimal } from './data_transformation';
 
 export const applyAxisStyling = ({
   axis,
@@ -337,9 +337,13 @@ export const applyPercentageAxis =
 
     const toPercentageAxis = (axisConfig: any) => ({
       ...axisConfig,
-      min: hasNegativeValue ? -100 : 0,
-      max: 100,
-      axisLabel: { ...axisConfig?.axisLabel, formatter: '{value}%' },
+      // Respect a user-set min/max
+      min: axisConfig?.min ?? (hasNegativeValue ? -1 : 0),
+      max: axisConfig?.max ?? 1,
+      axisLabel: {
+        ...axisConfig?.axisLabel,
+        formatter: (value: unknown) => formatSeriesValueLabel(value, true),
+      },
     });
 
     // multi y series
@@ -367,17 +371,23 @@ export const applyPercentageAxis =
 /**
  * Format a series value for display as a label drawn on a mark (e.g. on a bar).
  */
-export const formatSeriesValueLabel = (value: unknown, isPercentage = false): string => {
+export const formatSeriesValueLabel = (
+  value: unknown,
+  isPercentage = false,
+  decimals?: number
+): string => {
   if (value === null || value === undefined || value === '') return '';
 
   const numericValue = Number(value);
   // Non numeric values are shown as-is rather than as `NaN`
   if (!Number.isFinite(numericValue)) return String(value);
 
-  // TODO apply unit decimals
-  const trimmed = Math.round(numericValue * Math.pow(10, 2)) / Math.pow(10, 2);
+  const valueWithDecimals = formatDecimal(
+    isPercentage ? numericValue * 100 : numericValue,
+    decimals
+  );
 
-  return isPercentage ? `${trimmed}%` : String(trimmed);
+  return isPercentage ? `${valueWithDecimals}%` : valueWithDecimals;
 };
 
 export const getNormalizedAxisConfig = (
