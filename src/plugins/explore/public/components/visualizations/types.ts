@@ -67,6 +67,14 @@ export interface TooltipOptions {
   mode: 'all' | 'hidden';
 }
 
+export interface StandardOptions {
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
+}
+
 // Styling: Grid configuration
 export interface GridOptions {
   xLines: boolean;

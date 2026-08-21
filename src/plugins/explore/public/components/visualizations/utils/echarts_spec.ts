@@ -25,6 +25,7 @@ import {
   ThresholdOptions,
   AxisRole,
   VisColumn,
+  StandardOptions,
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
@@ -34,7 +35,7 @@ import { formatUnitValue } from '../style_panel/unit/collection';
 /**
  * Base style interface that all chart styles should extend
  */
-export interface BaseChartStyle {
+export interface BaseChartStyle extends StandardOptions {
   tooltipOptions?: {
     mode: string;
   };
@@ -48,13 +49,6 @@ export interface BaseChartStyle {
   addLegend?: boolean;
   legendPosition?: Positions;
   showFullTimeRange?: boolean;
-  // standard options in cartesian charts
-  decimals?: number;
-  unitId?: string;
-  // Free-text suffix appended after the unit ("/sec" glues, "meter" gets a space).
-  unitSuffix?: string;
-  min?: number;
-  max?: number;
 }
 
 interface Axis {
@@ -206,6 +200,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const yIsValueAxis = getAxisType(axisColumnMappings.y) === 'value';
   const xIsValueAxis = getAxisType(axisColumnMappings.x) === 'value' && !yIsValueAxis;
 
+  // TODO apply data range
   const isMinMaxInValid = styles.min != null && styles.max != null && styles.min >= styles.max;
 
   const getConfig = (
@@ -317,7 +312,7 @@ export const applyAxisStyling = ({
         // only for y2
         lineStyle: {
           type: 'dotted',
-          opacity: (DEFAULT_OPACITY * 100) / 2,
+          opacity: DEFAULT_OPACITY,
         },
       }),
     };

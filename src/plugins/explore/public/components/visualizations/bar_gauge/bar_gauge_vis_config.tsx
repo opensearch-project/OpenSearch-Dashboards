@@ -6,7 +6,13 @@
 import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
-import { AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
+import {
+  AxisRole,
+  VisFieldType,
+  ThresholdOptions,
+  TooltipOptions,
+  StandardOptions,
+} from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { BarGaugeRender } from './bar_gauge_render';
@@ -18,16 +24,11 @@ export interface ExclusiveBarGaugeConfig {
   showUnfilledArea: boolean;
 }
 
-export interface BarGaugeChartStyleOptions {
+export interface BarGaugeChartStyleOptions extends StandardOptions {
   tooltipOptions?: TooltipOptions;
   exclusive?: ExclusiveBarGaugeConfig;
   thresholdOptions?: ThresholdOptions;
   valueCalculation?: CalculationMethod;
-  min?: number;
-  max?: number;
-  unitId?: string;
-  unitSuffix?: string;
-  decimals?: number;
 }
 
 export type BarGaugeChartStyle = Required<

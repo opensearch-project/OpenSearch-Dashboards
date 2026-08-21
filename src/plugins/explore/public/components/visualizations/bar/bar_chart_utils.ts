@@ -5,8 +5,7 @@
 
 import { BarSeriesOption } from 'echarts';
 import { TimeUnit } from '../types';
-import { formatSeriesValueLabel, generateThresholdLines } from '../utils/utils';
-import { formatUnitValue } from '../style_panel/unit/collection';
+import { generateThresholdLines } from '../utils/utils';
 import { BarChartStyle, DEFAULT_BAR_FILL_OPACITY } from './bar_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
@@ -17,6 +16,7 @@ import {
   getLegendNameDomain,
   LegendItem,
 } from '../utils/legend';
+import { buildValueLabel } from '../style_panel/share/value_label_options';
 import { resolveStackMode } from '../utils/data_transformation';
 
 export const buildStackConfig = (styles: BarChartStyle) =>
@@ -42,40 +42,6 @@ export const buildBarRadius = ({
   const radius = seriesEncode === 'x' ? [0, barRadius, barRadius, 0] : [barRadius, barRadius, 0, 0];
 
   return { borderRadius: radius };
-};
-
-export const buildValueLabelLayout = (isStacked: boolean) =>
-  isStacked ? { hideOverlap: true } : {};
-
-export const buildValueLabel = ({
-  styles,
-  seriesField,
-  headers,
-}: {
-  styles: BarChartStyle;
-  seriesField: string;
-  headers?: string[];
-}) => {
-  if (!styles.showValues) return {};
-
-  const isPercentage = resolveStackMode(styles) === 'percentage';
-  const isStacked = resolveStackMode(styles) !== 'none';
-  const valueIndex = headers?.indexOf(seriesField) ?? -1;
-
-  return {
-    label: {
-      show: true,
-      position: 'inside' as const,
-      formatter: (params: any) => {
-        const value =
-          Array.isArray(params.value) && valueIndex >= 0 ? params.value[valueIndex] : params.value;
-        // Percentage stack will keep the % label; otherwise apply unit.
-        if (isPercentage) return formatSeriesValueLabel(value, true, styles.decimals);
-        return formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix);
-      },
-    },
-    labelLayout: buildValueLabelLayout(isStacked),
-  };
 };
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
@@ -162,7 +128,6 @@ export const createBarSeries =
     const isStacked = 'stack' in stackConfig;
     // Series are stacked in order, so assume the last one sits on top of the stack
     const topSegmentIndex = seriesFields.length - 1;
-    const headers: string[] | undefined = transformedData[0];
 
     const series = seriesFields.map((seriesField, index) => {
       const name = getSeriesDisplayName(seriesField, allColumns);
@@ -197,9 +162,14 @@ export const createBarSeries =
         },
         // apply value labels based on showValues
         ...buildValueLabel({
-          styles,
-          seriesField,
-          headers,
+          showValues: styles.showValues,
+          valueField: seriesField,
+          decimals: styles.decimals,
+          unitId: styles.unitId,
+          unitSuffix: styles.unitSuffix,
+          isPercentage: resolveStackMode(styles) === 'percentage',
+          isStack: resolveStackMode(styles) !== 'none',
+          chartType: 'bar',
         }),
         // Apply stack configuration based on stackMode
         ...stackConfig,

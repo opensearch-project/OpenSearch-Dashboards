@@ -235,7 +235,10 @@ describe('bar to_expression', () => {
         }
       );
 
-      expect(spec.series[0].label.formatter({ value: ['A', 1, null, null] })).toBe('100%');
+      const dimensionNames = spec.dataset.source[0];
+      expect(spec.series[0].label.formatter({ value: ['A', 1, null, null], dimensionNames })).toBe(
+        '100%'
+      );
     });
   });
 

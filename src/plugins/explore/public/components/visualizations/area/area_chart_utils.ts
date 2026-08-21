@@ -157,14 +157,15 @@ export const createAreaSeries =
             ? { showSymbol: true, symbolSize: 0 }
             : { showSymbol: false }
           : {}),
-        ...buildValueLabel(
-          styles.showValues,
-          item,
-          styles.decimals,
-          styles.unitId,
-          styles.unitSuffix,
-          resolveStackMode(styles) === 'percentage'
-        ),
+        ...buildValueLabel({
+          showValues: styles.showValues,
+          valueField: item,
+          decimals: styles.decimals,
+          unitId: styles.unitId,
+          unitSuffix: styles.unitSuffix,
+          isPercentage: resolveStackMode(styles) === 'percentage',
+          isStack: resolveStackMode(styles) !== 'none',
+        }),
         // TODO remove it for connection/disconnection
         connectNulls: true,
         ...stackConfig,

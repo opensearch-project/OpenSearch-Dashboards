@@ -101,6 +101,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               barBorderWidth={styleOptions.barBorderWidth}
               barBorderColor={styleOptions.barBorderColor}
               useThresholdColor={styleOptions?.useThresholdColor}
+              showValues={styleOptions?.showValue}
               onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
@@ -116,6 +117,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               onUseThresholdColorChange={(useThresholdColor) =>
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
+              onShowValuesChange={(showValue) => updateStyleOption('showValue', showValue)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

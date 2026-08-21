@@ -23,6 +23,7 @@ interface MetricTextData {
   numericValue: string;
   unitText: string;
   unitFirst: boolean; // True if unit should be displayed before value (e.g., currency)
+  unitSuffix: string;
   fillColor: string;
   changeText: string;
   changeColor: string;
@@ -202,6 +203,7 @@ function calculateMetricTextData(
   let valueText = '';
   let unitText = '';
   let unitFirst = false;
+  let unitSuffix = '';
 
   if (showValue) {
     if (isValidNumber && calculatedValue !== undefined) {
@@ -240,7 +242,9 @@ function calculateMetricTextData(
         unitText = selectedUnit?.symbol || '';
         unitFirst = false;
       }
-      unitText = appendUnitSuffix(unitText, styles.unitSuffix);
+      if (styles?.unitSuffix) {
+        unitSuffix = styles?.unitSuffix;
+      }
     } else {
       valueText = '-';
       unitText = '';
@@ -257,6 +261,7 @@ function calculateMetricTextData(
     changeColor,
     backgroundColor,
     backgroundGradient,
+    unitSuffix,
   };
 }
 
@@ -381,10 +386,11 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     }
 
     // Build the full text string for each element
-    const fullValueText = textData.unitFirst
+    let fullValueText = textData.unitFirst
       ? `${textData.unitText}${textData.numericValue}`
       : `${textData.numericValue}${textData.unitText}`;
 
+    fullValueText = appendUnitSuffix(fullValueText, styles.unitSuffix);
     const titleText = title || '';
     const changeText = textData.changeText || '';
 
@@ -427,6 +433,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     styles.showPercentage,
     title,
     textData,
+    styles.unitSuffix,
   ]);
 
   if (!s || !textData) {
@@ -504,6 +511,19 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
               }}
             >
               {textData.unitText}
+            </span>
+          )}
+
+          {textData.unitSuffix && (
+            <span
+              className="metric-unit-suffix"
+              style={{
+                fontSize: valueFontSize * 0.45,
+                color: textData.fillColor,
+                marginLeft: textData.unitSuffix.startsWith('/') ? '0' : '0.2em',
+              }}
+            >
+              {textData.unitSuffix}
             </span>
           )}
         </div>

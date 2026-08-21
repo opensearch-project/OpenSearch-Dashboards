@@ -15,6 +15,7 @@ import {
   AggregationType,
   BucketOptions,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
@@ -22,7 +23,7 @@ import { getColors } from '../theme/default_colors';
 import { createNumericalHistogramChart, createSingleHistogramChart } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
-export interface HistogramChartStyleOptions {
+export interface HistogramChartStyleOptions extends StandardOptions {
   // Basic controls
   tooltipOptions?: TooltipOptions;
 
@@ -42,13 +43,7 @@ export interface HistogramChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
-
-  // Standard options
-  unitId?: string;
-  unitSuffix?: string;
-  decimals?: number;
-  min?: number;
-  max?: number;
+  showValue?: boolean;
 }
 
 export type HistogramChartStyle = Required<
@@ -87,6 +82,7 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   bucket: {
     aggregationType: AggregationType.SUM,
   },
+  showValue: false,
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({

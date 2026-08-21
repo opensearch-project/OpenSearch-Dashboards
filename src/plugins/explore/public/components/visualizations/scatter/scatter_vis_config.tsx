@@ -15,6 +15,7 @@ import {
   VisFieldType,
   ThresholdMode,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -30,7 +31,7 @@ export interface ExclusiveScatterConfig {
   filled: boolean;
 }
 // Complete line chart style controls interface
-export interface ScatterChartStyleOptions {
+export interface ScatterChartStyleOptions extends StandardOptions {
   // Basic controls
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
@@ -44,13 +45,6 @@ export interface ScatterChartStyleOptions {
 
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
-
-  // Standard options
-  unitId?: string;
-  unitSuffix?: string;
-  decimals?: number;
-  min?: number;
-  max?: number;
 }
 
 export type ScatterChartStyle = Required<

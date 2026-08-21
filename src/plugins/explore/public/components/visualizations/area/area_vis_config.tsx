@@ -21,6 +21,7 @@ import {
   LineDashStyle,
   LineMode,
   LineStyle,
+  StandardOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -40,7 +41,7 @@ export const DEFAULT_FILL_OPACITY = 0.5;
 export type GradientMode = 'none' | 'opacity' | 'hue';
 
 // Complete area chart style controls interface
-export interface AreaChartStyleOptions {
+export interface AreaChartStyleOptions extends StandardOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
@@ -80,13 +81,6 @@ export interface AreaChartStyleOptions {
   showFullTimeRange?: boolean;
   stackMode?: StackMode;
   lineStyle?: LineStyle;
-
-  // Standard options
-  unitId?: string;
-  unitSuffix?: string;
-  decimals?: number;
-  min?: number;
-  max?: number;
 }
 
 export type AreaChartStyle = Required<

@@ -13,6 +13,7 @@ import {
   VisFieldType,
   PercentageColor,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
@@ -24,7 +25,7 @@ export type LayoutType = 'horizontal' | 'vertical' | 'auto';
 export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
 export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
-export interface MetricChartStyleOptions {
+export interface MetricChartStyleOptions extends StandardOptions {
   showTitle?: boolean;
   title?: string;
   fontSize?: number;
@@ -45,12 +46,7 @@ export interface MetricChartStyleOptions {
    * @deprecated - use global thresholdOptions instead
    */
   customRanges?: RangeValue[];
-  unitId?: string;
-  unitSuffix?: string;
-  decimals?: number;
   thresholdOptions?: ThresholdOptions;
-  min?: number;
-  max?: number;
   useThresholdColor?: boolean;
   layoutType?: LayoutType;
   textMode?: TextMode;
