@@ -156,12 +156,13 @@ describe(`Workspace routes`, () => {
       );
     });
 
-    it('creates a workspace with a 20-character custom id', async () => {
+    it('creates a workspace with a 36-character custom id', async () => {
+      const customId = 'a'.repeat(36);
       await supertest(httpSetup.server.listener)
         .post(WORKSPACES_API_BASE_URL)
         .send({
           attributes: {
-            id: 'abcdef1234abcdef1234',
+            id: customId,
             name: 'Observability',
             features: ['use-case-observability'],
           },
@@ -169,7 +170,7 @@ describe(`Workspace routes`, () => {
         .expect(200);
       expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
         expect.any(Object),
-        expect.objectContaining({ id: 'abcdef1234abcdef1234' })
+        expect.objectContaining({ id: customId })
       );
     });
 
@@ -189,23 +190,6 @@ describe(`Workspace routes`, () => {
       );
     });
 
-    it('creates a workspace with a UUID as custom id', async () => {
-      await supertest(httpSetup.server.listener)
-        .post(WORKSPACES_API_BASE_URL)
-        .send({
-          attributes: {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Observability',
-            features: ['use-case-observability'],
-          },
-        })
-        .expect(200);
-      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ id: '550e8400-e29b-41d4-a716-446655440000' })
-      );
-    });
-
     it('returns 400 when id is shorter than 6 characters', async () => {
       const result = await supertest(httpSetup.server.listener)
         .post(WORKSPACES_API_BASE_URL)
@@ -217,21 +201,21 @@ describe(`Workspace routes`, () => {
           },
         })
         .expect(400);
-      expect(result.body.message).toContain('must be a UUID or 6–20 characters');
+      expect(result.body.message).toContain('must be 6–36 characters');
     });
 
-    it('returns 400 when id is longer than 20 characters', async () => {
+    it('returns 400 when id is longer than 36 characters', async () => {
       const result = await supertest(httpSetup.server.listener)
         .post(WORKSPACES_API_BASE_URL)
         .send({
           attributes: {
-            id: 'abcdef1234abcdef12345',
+            id: 'a'.repeat(37),
             name: 'Observability',
             features: ['use-case-observability'],
           },
         })
         .expect(400);
-      expect(result.body.message).toContain('must be a UUID or 6–20 characters');
+      expect(result.body.message).toContain('must be 6–36 characters');
     });
 
     it('returns 400 when id contains invalid characters', async () => {
@@ -246,7 +230,7 @@ describe(`Workspace routes`, () => {
         })
         .expect(400);
       expect(result.body.message).toContain(
-        'must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.'
+        'must be 6–36 characters using only letters, numbers, underscores, and hyphens.'
       );
     });
   });

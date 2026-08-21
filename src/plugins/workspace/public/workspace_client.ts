@@ -9,6 +9,7 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
@@ -208,7 +209,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;

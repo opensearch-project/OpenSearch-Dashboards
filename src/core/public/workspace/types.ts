@@ -6,6 +6,7 @@
 import {
   SavedObjectPermissions,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
   WorkspaceAttributeWithPermission,
   WorkspaceFindOptions,
 } from '../../types';
@@ -100,7 +101,7 @@ export interface IWorkspaceClient {
    * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;

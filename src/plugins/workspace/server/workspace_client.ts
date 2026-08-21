@@ -121,9 +121,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       dataConnections?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
+    const { permissions, dataSources, dataConnections, id: requestedId, ...attributes } = payload;
     try {
-      const { permissions, dataSources, dataConnections, id: payloadId, ...attributes } = payload;
-      const id = payloadId || generateRandomId(WORKSPACE_ID_SIZE);
+      const id = requestedId || generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const clientWithoutPermission = this.getScopedClientWithoutPermission(requestDetail);
       const existingWorkspaceRes = await clientWithoutPermission?.find({
@@ -133,18 +133,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       });
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
-      }
-
-      if (payloadId) {
-        try {
-          await clientWithoutPermission?.get(WORKSPACE_TYPE, payloadId);
-          throw new Error(DUPLICATE_WORKSPACE_ID_ERROR);
-        } catch (e: unknown) {
-          if (e instanceof Error && e.message === DUPLICATE_WORKSPACE_ID_ERROR) {
-            throw e;
-          }
-          // get() throws when the workspace does not exist — that is the expected path
-        }
       }
 
       const maximumWorkspaces = await this.configService
@@ -166,6 +154,22 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       }
 
+      let result;
+      try {
+        result = await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
+          id,
+          permissions,
+        });
+      } catch (e: unknown) {
+        if (requestedId && SavedObjectsErrorHelpers.isConflictError(e as Error)) {
+          return {
+            success: false,
+            error: DUPLICATE_WORKSPACE_ID_ERROR,
+          };
+        }
+        throw e;
+      }
+
       const promises = [];
 
       if (dataSources) {
@@ -182,14 +186,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       }
       await Promise.all(promises);
 
-      const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
-        WORKSPACE_TYPE,
-        attributes,
-        {
-          id,
-          permissions,
-        }
-      );
       if (dataSources && this.uiSettings && client) {
         const rawState = getWorkspaceState(requestDetail.request);
         // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.

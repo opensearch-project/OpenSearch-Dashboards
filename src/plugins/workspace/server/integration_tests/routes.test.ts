@@ -104,6 +104,64 @@ describe('workspace service api integration test', () => {
       expect(resultWithId.body.success).toEqual(true);
       expect(resultWithId.body.result.id).toEqual(customId);
     });
+
+    it('supports CRUD operations and duplicate detection with a custom id', async () => {
+      const customId = 'custom1';
+      const createResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'custom_id_ws' },
+        })
+        .expect(200);
+
+      expect(createResult.body).toEqual({
+        success: true,
+        result: { id: customId },
+      });
+
+      const duplicateResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'another_name' },
+        })
+        .expect(200);
+
+      expect(duplicateResult.body).toEqual({
+        success: false,
+        error: 'workspace id has already been used, try with a different id',
+      });
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${customId}`)
+        .send({
+          attributes: {
+            name: 'updated_custom_id_ws',
+          },
+        })
+        .expect(200);
+
+      const getResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getResult.body.success).toBe(true);
+      expect(getResult.body.result).toEqual(
+        expect.objectContaining({
+          id: customId,
+          name: 'updated_custom_id_ws',
+        })
+      );
+
+      await osdTestServer.request.delete(root, `/api/workspaces/${customId}`).expect(200);
+
+      const getDeletedResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getDeletedResult.body).toEqual({
+        success: false,
+        error: 'workspace not found',
+      });
+    });
+
     it('create with empty/blank name', async () => {
       let result = await osdTestServer.request
         .post(root, `/api/workspaces`)

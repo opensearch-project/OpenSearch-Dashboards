@@ -23,6 +23,10 @@ export interface WorkspaceAttribute {
   lastUpdatedTime?: string;
 }
 
+export type WorkspaceCreateAttributes = Omit<WorkspaceAttribute, 'id'> & {
+  id?: WorkspaceAttribute['id'];
+};
+
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;

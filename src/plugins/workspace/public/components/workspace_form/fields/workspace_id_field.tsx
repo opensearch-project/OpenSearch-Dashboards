@@ -28,25 +28,11 @@ export const WorkspaceIdField = ({ value, error, onChange }: WorkspaceIdFieldPro
   );
 
   const tooltipContent = (
-    <div>
-      <p>
-        {i18n.translate('workspace.form.workspaceDetails.id.tooltip.intro', {
-          defaultMessage: 'Optional. Must be one of:',
-        })}
-      </p>
-      <ul style={{ paddingLeft: 16, margin: '4px 0 0' }}>
-        <li>
-          {i18n.translate('workspace.form.workspaceDetails.id.tooltip.uuid', {
-            defaultMessage: 'A UUID',
-          })}
-        </li>
-        <li>
-          {i18n.translate('workspace.form.workspaceDetails.id.tooltip.short', {
-            defaultMessage: '6–20 chars: letters, numbers, _ or -',
-          })}
-        </li>
-      </ul>
-    </div>
+    <p>
+      {i18n.translate('workspace.form.workspaceDetails.id.tooltip', {
+        defaultMessage: 'Optional. Use 6–36 letters, numbers, underscores, or hyphens.',
+      })}
+    </p>
   );
 
   const label = (

@@ -26,7 +26,7 @@ import {
   WorkspaceUserPermissionSetting,
 } from './types';
 import { DataSourceConnection } from '../../../common/types';
-import { validateWorkspaceColor } from '../../../common/utils';
+import { validateWorkspaceColor, validateWorkspaceId } from '../../../common/utils';
 import { PermissionModeId } from '../../../../../core/public';
 
 export const isValidFormTextInput = (input?: string) => {
@@ -240,14 +240,12 @@ export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>)
     };
   }
   if (customId) {
-    const isShortId = /^[a-zA-Z0-9_-]{6,20}$/.test(customId);
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customId);
-    if (!isShortId && !isUuid) {
+    if (!validateWorkspaceId(customId)) {
       formErrors.customId = {
         code: WorkspaceFormErrorCode.InvalidWorkspaceId,
         message: i18n.translate('workspace.form.detail.id.invalid', {
           defaultMessage:
-            'ID is invalid. Must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.',
+            'ID is invalid. Must be 6–36 characters using only letters, numbers, underscores, and hyphens.',
         }),
       };
     }

@@ -23,6 +23,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
 import {
   validateWorkspaceColor,
+  validateWorkspaceId,
   getInvalidWorkspacePermissionsError,
   normalizeWorkspacePermissions,
 } from '../../common/utils';
@@ -110,12 +111,8 @@ const createWorkspaceAttributesSchema = schema.object({
   id: schema.maybe(
     schema.string({
       validate(value) {
-        const isCustomId = /^[a-zA-Z0-9_-]{6,20}$/.test(value);
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          value
-        );
-        if (!isCustomId && !isUuid) {
-          return 'must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.';
+        if (!validateWorkspaceId(value)) {
+          return 'must be 6–36 characters using only letters, numbers, underscores, and hyphens.';
         }
       },
     })
