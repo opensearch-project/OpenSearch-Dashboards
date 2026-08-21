@@ -4,6 +4,8 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@osd/i18n';
 import { HttpStart } from '../../../../../core/public';
 import { Query } from '../../index';
 import { TimefilterContract } from '../../query';
@@ -13,10 +15,55 @@ import {
   isPPLAnalyzeOpen,
 } from '../../query/ppl_analyze_state';
 
+const ANALYZE_PATH = '/api/enhancements/ppl/analyze';
+const CANCEL_PATH = '/api/enhancements/ppl/cancel';
+
 // Monotonically increasing counter used to discard out-of-order responses.
 // Each call captures the current value; only the response matching the latest
 // call is committed to analyzeResult$.
 let latestRequestId = 0;
+
+// Tracks the currently in-flight analyze request so it can be cancelled when a
+// newer request supersedes it or the user closes the panel. Cleared once the
+// request settles.
+let inFlight: {
+  queryId: string;
+  dataSourceId?: string;
+  http: HttpStart;
+  controller: AbortController;
+} | null = null;
+
+/**
+ * Cancels the in-flight analyze request (if any):
+ *  - aborts the browser fetch so the abandoned response never arrives,
+ *  - bumps latestRequestId so that even if the fetch had already resolved, the
+ *    pending .then/.catch guard discards it instead of repopulating a panel the
+ *    user cancelled,
+ *  - asks the backend to cancel the OpenSearch task tagged with our queryId.
+ * The backend cancel is best-effort: failures are swallowed since the request may
+ * have already completed server-side.
+ */
+export function cancelPPLAnalyze() {
+  const pending = inFlight;
+  if (!pending) return;
+  inFlight = null;
+  // Invalidate the in-flight request so a late-arriving (already-buffered) response
+  // can't slip past the requestId guard — abort alone is best-effort on timing.
+  latestRequestId++;
+  pending.controller.abort();
+  pending.http
+    .fetch({
+      method: 'POST',
+      path: CANCEL_PATH,
+      body: JSON.stringify({
+        queryId: pending.queryId,
+        dataSourceId: pending.dataSourceId,
+      }),
+    })
+    .catch(() => {
+      // Task may have already finished or never started — nothing to clean up.
+    });
+}
 
 export function runPPLAnalyzeInBackground({
   query,
@@ -33,7 +80,6 @@ export function runPPLAnalyzeInBackground({
   if (onlyIfOpen && !isPPLAnalyzeOpen()) return;
 
   let queryString = query.query as string;
-  let injectedTimeFilter: string | undefined;
   const timeFieldName = query.dataset?.timeFieldName;
 
   // Only inject a time filter for search queries (source=... or search source=...).
@@ -52,48 +98,68 @@ export function runPPLAnalyzeInBackground({
       const toStr = toMoment.utc().format('YYYY-MM-DD HH:mm:ss.SSS');
       // Escape backticks in the field name to prevent PPL injection via identifier quoting
       const safeFieldName = timeFieldName.replace(/`/g, '``');
-      injectedTimeFilter = `WHERE \`${safeFieldName}\` >= '${fromStr}' AND \`${safeFieldName}\` <= '${toStr}'`;
+      const timeFilter = `WHERE \`${safeFieldName}\` >= '${fromStr}' AND \`${safeFieldName}\` <= '${toStr}'`;
       const commands = queryString.split('|');
-      commands.splice(1, 0, ` ${injectedTimeFilter} `);
+      commands.splice(1, 0, ` ${timeFilter} `);
       queryString = commands.map((cmd) => cmd.trim()).join(' | ');
     }
   }
 
+  // A newer request supersedes any in-flight one — cancel it server-side so we
+  // don't leave an orphaned OpenSearch task running.
+  cancelPPLAnalyze();
+
   const requestId = ++latestRequestId;
+  const queryId = uuidv4();
+  const dataSourceId = query.dataset?.dataSource?.id;
+  const controller = new AbortController();
+  inFlight = { queryId, dataSourceId, http, controller };
   setPPLAnalyzeLoading(true);
   http
     .fetch({
       method: 'POST',
-      path: '/api/enhancements/ppl/analyze',
+      path: ANALYZE_PATH,
+      signal: controller.signal,
       body: JSON.stringify({
         query: queryString,
-        dataSourceId: query.dataset?.dataSource?.id,
+        dataSourceId,
+        queryId,
       }),
     })
     .then((result) => {
       // Discard stale responses from superseded requests
       if (requestId !== latestRequestId) return;
+      inFlight = null;
       setPPLAnalyzeResult({
         query: query.query as string,
         response: result,
-        injectedTimeFilter,
       });
     })
     .catch((err) => {
-      if (requestId !== latestRequestId) return;
+      // Ignore responses from superseded/cancelled requests, and the AbortError
+      // raised when cancelPPLAnalyze() aborts this fetch — neither should surface.
+      if (requestId !== latestRequestId || err?.name === 'AbortError') return;
+      inFlight = null;
       // A non-2xx response rejects with an HttpFetchError whose `body` holds the
       // parsed error payload ({ statusCode, error, message }). Commit that as the
       // result so the panel can surface the error; fall back to a synthetic body
       // when no structured payload is available (e.g. a network failure).
       const response = err?.body ?? {
-        error: err?.response?.statusText || 'Request failed',
-        message: err?.message || 'The analyze request could not be completed.',
+        error:
+          err?.response?.statusText ||
+          i18n.translate('data.pplAnalyze.error.requestFailed', {
+            defaultMessage: 'Request failed',
+          }),
+        message:
+          err?.message ||
+          i18n.translate('data.pplAnalyze.error.couldNotComplete', {
+            defaultMessage: 'The analyze request could not be completed.',
+          }),
         statusCode: err?.response?.status,
       };
       setPPLAnalyzeResult({
         query: query.query as string,
         response,
-        injectedTimeFilter,
       });
     });
 }

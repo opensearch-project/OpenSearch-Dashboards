@@ -4,7 +4,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -380,6 +380,21 @@ describe('LogsPage', () => {
 
       expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
       expect(screen.queryByText('Running query analysis…')).not.toBeInTheDocument();
+    });
+
+    it('renders a Cancel button while loading that closes the analyze panel', () => {
+      setupServices({ pplAnalyzeEnabled: true, logsQueryBuilderEnabled: false });
+      mockAnalyzeState.isOpen = true;
+      mockAnalyzeState.isLoading = true;
+
+      renderPage();
+
+      const cancelButton = screen.getByTestId('analyzeCancelButton');
+      expect(cancelButton).toBeInTheDocument();
+
+      fireEvent.click(cancelButton);
+      // Cancelling closes the panel (also cancels/clears the in-flight analysis).
+      expect(mockAnalyzeState.setIsOpen).toHaveBeenCalledWith(false);
     });
   });
 
