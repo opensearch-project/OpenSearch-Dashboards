@@ -40,6 +40,7 @@ import { CoreStart } from '../../../../core/public';
 import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 
 import { flattenContentText } from '../utils/user_message_input';
+import { useSwitchDataSourceAction } from '../actions/switch_data_source_action';
 import './chat_window.scss';
 
 export interface ChatWindowInstance {
@@ -68,6 +69,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const { chatService, confirmationService } = useChatContext();
     const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
     const toasts = services.core?.notifications?.toasts;
+
+    // Register the switch_data_source tool so the LLM can change the active data source mid-conversation
+    useSwitchDataSourceAction(chatService);
     const [timeline, setTimeline] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
@@ -674,6 +678,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         stopStreaming();
         setPendingMessage(null);
         setAvailableDataSources([]);
+
+        // Clear LLM-selected data source.
+        // restoreLLMDataSourceFromSnapshot will re-apply the correct value if this
+        // conversation contains a switch_data_source tool call.
+        chatService.clearLLMDataSourceId();
 
         // Abort any ongoing conversation loading
         if (conversationLoadAbortControllerRef.current) {

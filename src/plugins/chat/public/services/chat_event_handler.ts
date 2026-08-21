@@ -6,7 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
-import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
+import { TOOL_EXECUTION_ERROR_PREFIX, SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -902,8 +902,82 @@ export class ChatEventHandler {
       });
     });
 
+    // Restore the LLM-selected data source from the conversation history.
+    // get the last successful switch_data_source result and re-apply it as session ds
+    this.restoreLLMDataSourceFromSnapshot(event.messages || []);
+
     // Reset streaming state
     this.onStreamingStateChange(false);
+  }
+
+  /**
+   * Restore the LLM-selected data source from a snapshot.
+   *
+   * Scans the message history for the most recent successful `switch_data_source`
+   * tool call/result pair and re-applies the selected data source on ChatService.
+   */
+  private restoreLLMDataSourceFromSnapshot(messages: Message[]): void {
+    const restoredId = this.findLastSwitchedDataSourceId(messages);
+
+    if (!restoredId) return;
+
+    this.chatService
+      .validateDataSourceId(restoredId)
+      .then(({ valid }) => {
+        if (valid) {
+          this.chatService.setLLMDataSourceId(restoredId);
+        }
+      })
+      .catch(() => {
+        // keep the currently resolved data source
+      });
+  }
+
+  /**
+   * Find the data source id of the most recent successful `switch_data_source` tool result
+   * in a message history. Returns undefined when the conversation never switched.
+   */
+  private findLastSwitchedDataSourceId(messages: Message[]): string | undefined {
+    // 1. build toolCallId → toolName index from assistant messages
+    const toolCallIdToName = new Map<string, string>();
+    for (const msg of messages) {
+      if (msg.role !== 'assistant') continue;
+      const toolCalls = msg.toolCalls;
+      if (!Array.isArray(toolCalls)) continue;
+      for (const call of toolCalls) {
+        if (call?.id && call?.function?.name) {
+          toolCallIdToName.set(call.id, call.function.name);
+        }
+      }
+    }
+
+    // 2. walk backwards through tool messages to find the last switch_data_source result
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role !== 'tool') continue;
+
+      const toolCallId = msg.toolCallId as string | undefined;
+      if (!toolCallId) continue;
+
+      const toolName = toolCallIdToName.get(toolCallId);
+      // if (toolName !== 'switch_data_source') continue;
+      if (toolName !== SWITCH_DATA_SOURCE_TOOL_NAME) continue;
+
+      // Parse the tool result content
+      const content = msg.content as string | undefined;
+      if (!content) continue;
+
+      try {
+        const result = JSON.parse(content);
+        if (result?.success && result?.dataSourceId) {
+          return result.dataSourceId as string;
+        }
+      } catch {
+        // skip
+      }
+    }
+
+    return undefined;
   }
 
   /**

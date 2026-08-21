@@ -35,6 +35,8 @@ const mockAssistantActionService = {
 
 const mockChatService = {
   sendToolResult: jest.fn(),
+  setLLMDataSourceId: jest.fn(),
+  validateDataSourceId: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
   getCurrentDataSourceInfo: jest.fn().mockResolvedValue(undefined),
   getCurrentTimeRange: jest.fn().mockReturnValue(undefined),
@@ -957,6 +959,84 @@ describe('ChatEventHandler', () => {
 
       expect(timeline).toEqual([]);
       expect(mockOnStreamingStateChange).toHaveBeenCalledWith(false);
+    });
+
+    describe('switch_data_source restoration', () => {
+      // A snapshot that switched the data source: assistant tool call + tool result pair.
+      const buildSwitchSnapshot = (dataSourceId: string): Message[] =>
+        [
+          { id: 'msg-1', role: 'user', content: 'Use the other cluster' },
+          {
+            id: 'msg-2',
+            role: 'assistant',
+            content: '',
+            toolCalls: [
+              {
+                id: 'call-1',
+                type: 'function',
+                function: {
+                  name: 'switch_data_source',
+                  arguments: JSON.stringify({ dataSourceId }),
+                },
+              },
+            ],
+          },
+          {
+            id: 'msg-3',
+            role: 'tool',
+            toolCallId: 'call-1',
+            content: JSON.stringify({ success: true, dataSourceId }),
+          },
+        ] as unknown as Message[];
+
+      // Validation is intentionally fire-and-forget, so let the microtask queue drain.
+      const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+      it('should re-apply a data source that still exists', async () => {
+        mockChatService.validateDataSourceId = jest
+          .fn()
+          .mockResolvedValue({ valid: true, availableDataSources: [] });
+
+        await chatEventHandler.handleEvent({
+          type: EventType.MESSAGES_SNAPSHOT,
+          messages: buildSwitchSnapshot('ds-a'),
+          timestamp: Date.now(),
+        });
+        await flush();
+
+        expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('ds-a');
+        expect(mockChatService.setLLMDataSourceId).toHaveBeenCalledWith('ds-a');
+      });
+
+      it('should not re-apply a data source that no longer exists', async () => {
+        mockChatService.validateDataSourceId = jest
+          .fn()
+          .mockResolvedValue({ valid: false, availableDataSources: [{ id: 'ds-b', title: 'B' }] });
+
+        await chatEventHandler.handleEvent({
+          type: EventType.MESSAGES_SNAPSHOT,
+          messages: buildSwitchSnapshot('deleted-ds'),
+          timestamp: Date.now(),
+        });
+        await flush();
+
+        expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('deleted-ds');
+        expect(mockChatService.setLLMDataSourceId).not.toHaveBeenCalled();
+      });
+
+      it('should not touch the data source when the conversation never switched', async () => {
+        mockChatService.validateDataSourceId = jest.fn();
+
+        await chatEventHandler.handleEvent({
+          type: EventType.MESSAGES_SNAPSHOT,
+          messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }],
+          timestamp: Date.now(),
+        });
+        await flush();
+
+        expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
+        expect(mockChatService.setLLMDataSourceId).not.toHaveBeenCalled();
+      });
     });
 
     it('should handle messages with tool calls', async () => {

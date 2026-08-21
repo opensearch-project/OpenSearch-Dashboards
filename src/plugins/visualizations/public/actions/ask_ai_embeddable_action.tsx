@@ -170,6 +170,13 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
 
       // Send visualization screenshot to chat
       if (this.core.chat) {
+        const panelDataSourceId =
+          query?.dataset?.dataSource?.id ?? visEmbeddable.vis.data.indexPattern?.dataSourceRef?.id;
+
+        if (panelDataSourceId) {
+          this.core.chat.setActiveDataSource(panelDataSourceId);
+        }
+
         await this.core.chat.sendMessageWithWindow(
           [
             // TODO adapt type image when strands is introduced
