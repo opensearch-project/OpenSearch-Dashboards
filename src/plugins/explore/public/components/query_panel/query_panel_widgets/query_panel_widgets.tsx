@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useSelector } from 'react-redux';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
@@ -75,7 +76,10 @@ export const QueryPanelWidgets = ({
               data-test-subj="exploreAnalyzeButton"
               iconType="inspect"
             >
-              Inspect Query
+              <FormattedMessage
+                id="explore.queryPanel.inspectQueryButton"
+                defaultMessage="Inspect Query"
+              />
             </EuiButtonEmpty>
             <div className="exploreQueryPanelWidgets__verticalSeparator" />
           </>

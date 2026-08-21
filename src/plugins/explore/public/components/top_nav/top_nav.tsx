@@ -9,7 +9,11 @@ import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
-import { useSyncQueryStateWithUrl, runPPLAnalyzeInBackground } from '../../../../data/public';
+import {
+  useSyncQueryStateWithUrl,
+  runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
+} from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -180,6 +184,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const handleQueryCancel = useCallback(() => {
     abortAllActiveQueries();
+    // Also cancel any in-flight PPL analyze request tied to this query.
+    cancelPPLAnalyze();
     dispatch(setHasUserInitiatedQuery(false));
     // Clear all cached results to ensure refresh works properly after cancel
     dispatch(clearResults());
