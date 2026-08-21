@@ -55,6 +55,7 @@ import { MatchedItem, Tag } from '../../../../types';
 interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
+  onIndexClick?: (indexName: string) => void;
 }
 
 interface IndicesListState {
@@ -183,14 +184,18 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   render() {
-    const { indices, query, ...rest } = this.props;
+    const { indices, query, onIndexClick, ...rest } = this.props;
 
     const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
-        <EuiTableRow key={key}>
+        <EuiTableRow
+          key={key}
+          onClick={onIndexClick ? () => onIndexClick(index.name) : undefined}
+          style={onIndexClick ? { cursor: 'pointer' } : undefined}
+        >
           <EuiTableRowCell>
             {this.highlightIndexName(index.name, queryWithoutWildcard)}
           </EuiTableRowCell>
