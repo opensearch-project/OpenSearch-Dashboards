@@ -21,6 +21,7 @@ import {
   LineDashStyle,
   LineMode,
   LineStyle,
+  StandardOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -40,7 +41,7 @@ export const DEFAULT_FILL_OPACITY = 0.5;
 export type GradientMode = 'none' | 'opacity' | 'hue';
 
 // Complete area chart style controls interface
-export interface AreaChartStyleOptions {
+export interface AreaChartStyleOptions extends StandardOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
@@ -92,9 +93,25 @@ export type AreaChartStyle = Required<
     | 'lineWidth'
     | 'pointSize'
     | 'areaOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<AreaChartStyleOptions, 'legendTitle' | 'lineWidth' | 'pointSize' | 'areaOpacity'>;
+  Pick<
+    AreaChartStyleOptions,
+    | 'legendTitle'
+    | 'lineWidth'
+    | 'pointSize'
+    | 'areaOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >;
 
 export const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls

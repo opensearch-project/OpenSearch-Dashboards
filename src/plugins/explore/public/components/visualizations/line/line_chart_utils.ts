@@ -25,8 +25,18 @@ const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   // other modes keep drawing their symbols at the size ECharts picks and stay unlabelled
   return {
     ...getPointSymbol(styles.pointSize, styles.showValues),
-    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
-    ...(valueField ? buildValueLabel(styles.showValues, valueField) : {}),
+    ...(styles.lineStyle === 'line'
+      ? styles.showValues
+        ? { showSymbol: true, symbolSize: 0 }
+        : { showSymbol: false }
+      : {}),
+    ...buildValueLabel({
+      showValues: styles.showValues,
+      valueField,
+      decimals: styles.decimals,
+      unitId: styles.unitId,
+      unitSuffix: styles.unitSuffix,
+    }),
     lineStyle: {
       width: lineWidth,
       type: getLineDashType(styles.lineDashStyle),
@@ -180,6 +190,16 @@ export const createLineBarSeries =
             x: categoryField,
             y: field,
           },
+          ...buildValueLabel({
+            showValues: styles.showValues,
+            valueField: field,
+            decimals: styles.decimals,
+            unitId: styles.unitId,
+            unitSuffix: styles.unitSuffix,
+            // force the value label to be positioned inside the bar
+            isStack: true,
+            chartType: 'bar',
+          }),
           emphasis: {
             focus: 'self',
           },

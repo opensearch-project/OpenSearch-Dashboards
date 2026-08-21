@@ -8,7 +8,8 @@ import { debounce } from 'lodash';
 import { Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { DEFAULT_GREY, getColors } from '../theme/default_colors';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, appendUnitSuffix } from '../style_panel/unit/collection';
+import { formatDecimal } from '../utils/data_transformation';
 import { BarGaugeItem, BarGaugeItemData } from './bar_gauge_item';
 import './bar_gauge_component.scss';
 
@@ -90,14 +91,14 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
   const formatValue = useCallback(
     (value: number | null): string => {
       if (value === null) return '-';
-      if (selectedUnit?.display) {
-        return String(selectedUnit.display(value, selectedUnit.symbol).label);
-      }
-      return `${Math.round(value * 100) / 100}${
-        selectedUnit?.symbol ? ` ${selectedUnit.symbol}` : ''
-      }`;
+      const base = selectedUnit?.display
+        ? String(selectedUnit.display(value, selectedUnit.symbol, styles.decimals).label)
+        : `${formatDecimal(value, styles.decimals)}${
+            selectedUnit?.symbol ? ` ${selectedUnit.symbol}` : ''
+          }`;
+      return appendUnitSuffix(base, styles.unitSuffix);
     },
-    [selectedUnit]
+    [selectedUnit, styles.decimals, styles.unitSuffix]
   );
 
   const getFontColor = useCallback(

@@ -48,7 +48,7 @@ const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
 export const SaveVisButton = () => {
   const { queryEditorState, datasetView, resultState } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
-  const visConfig = visualizationBuilder.visConfig$.value;
+  const visConfig = useObservable(visualizationBuilder.visConfig$);
   const transformationService = visualizationBuilder.getTransformationService();
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -138,7 +138,8 @@ export const SaveVisButton = () => {
       savedExploreToSave.title = newTitle;
       savedExploreToSave.type = undefined; // save explores created in in-context editor don't have flavor
       savedExploreToSave.visualization = JSON.stringify({
-        title: '',
+        title: visConfig?.title,
+        description: visConfig?.description,
         chartType: visConfig?.type ?? 'line',
         params: visConfig?.styles ?? {},
         axesMapping,
@@ -272,6 +273,7 @@ export const SaveVisButton = () => {
       {showModal && (
         <SaveVisModal
           savedExploreId={exploreId}
+          initialTitle={visConfig?.title}
           onCancel={() => setShowModal(false)}
           onConfirm={handleSave}
           showComplexQueryWarning={resultState?.profile?.isComplex ?? false}
