@@ -81,6 +81,16 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
   };
 };
 
+// Compare Query objects by their meaningful fields only,
+// ignoring structural differences like missing optional keys
+// (e.g., payload.query has `dataset: undefined` but currentQuery
+// doesn't have the `dataset` key at all — which should be equal).
+export const isEqualQuery = (a: Query | undefined, b: Query | undefined): boolean => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.query === b.query && a.language === b.language;
+};
+
 // Respond to user changing the query string or time settings
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
@@ -94,7 +104,7 @@ const defaultOnQuerySubmit = (
   return (payload: { dateRange: TimeRange; query?: Query }) => {
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
-      !_.isEqual(payload.query, currentQuery);
+      !isEqualQuery(payload.query, currentQuery);
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
