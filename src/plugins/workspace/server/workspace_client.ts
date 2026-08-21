@@ -104,6 +104,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       return WORKSPACE_NOT_FOUND_ERROR;
     }
 
+    return this.getErrorMessage(error);
+  }
+
+  private getErrorMessage(error: Error | any): string {
     return error.message || error.error || 'Error';
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
@@ -170,23 +174,40 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         throw e;
       }
 
-      const promises = [];
-
-      if (dataSources) {
-        for (const dataSourceId of dataSources) {
-          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
+      const associations = [
+        ...(dataSources ?? []).map((dataSourceId) => ({
+          id: dataSourceId,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        })),
+        ...(dataConnections ?? []).map((connectionId) => ({
+          id: connectionId,
+          type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        })),
+      ];
+      const associationResults = await Promise.allSettled(
+        associations.map(({ id: objectId, type }) => client.addToWorkspaces(type, objectId, [id]))
+      );
+      const failedAssociations = associationResults.flatMap((associationResult, index) => {
+        if (associationResult.status === 'fulfilled') {
+          return [];
         }
-      }
-      if (dataConnections) {
-        for (const connectionId of dataConnections) {
-          promises.push(
-            client.addToWorkspaces(DATA_CONNECTION_SAVED_OBJECT_TYPE, connectionId, [id])
-          );
-        }
-      }
-      await Promise.all(promises);
 
-      if (dataSources && this.uiSettings && client) {
+        const association = associations[index];
+        const error = this.getErrorMessage(associationResult.reason);
+        this.logger.warn(
+          `Failed to associate ${association.type} [${association.id}] with workspace [${id}]: ${error}`
+        );
+        return [{ ...association, error }];
+      });
+      const associatedDataSources = associationResults.flatMap((associationResult, index) => {
+        const association = associations[index];
+        return associationResult.status === 'fulfilled' &&
+          association.type === DATA_SOURCE_SAVED_OBJECT_TYPE
+          ? [association.id]
+          : [];
+      });
+
+      if (associatedDataSources.length > 0 && this.uiSettings && client) {
         const rawState = getWorkspaceState(requestDetail.request);
         // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.
         updateWorkspaceState(requestDetail.request, {
@@ -195,7 +216,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         try {
-          await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
+          await checkAndSetDefaultDataSource(uiSettingsClient, associatedDataSources, false);
         } catch {
           this.logger.error('Set default data source error');
         } finally {
@@ -210,6 +231,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         success: true,
         result: {
           id: result.id,
+          ...(failedAssociations.length > 0 ? { failedAssociations } : {}),
         },
       };
     } catch (e: unknown) {

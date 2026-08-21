@@ -162,6 +162,39 @@ describe('workspace service api integration test', () => {
       });
     });
 
+    it('creates the workspace and reports failed data source associations', async () => {
+      const customId = 'partial-association';
+      const missingDataSourceId = 'missing-data-source';
+      const createResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'partial_association_ws' },
+          settings: {
+            dataSources: [missingDataSourceId],
+          },
+        })
+        .expect(200);
+
+      expect(createResult.body).toEqual({
+        success: true,
+        result: {
+          id: customId,
+          failedAssociations: [
+            {
+              id: missingDataSourceId,
+              type: 'data-source',
+              error: expect.stringContaining(`data-source/${missingDataSourceId}`),
+            },
+          ],
+        },
+      });
+
+      const getResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getResult.body.success).toBe(true);
+    });
+
     it('create with empty/blank name', async () => {
       let result = await osdTestServer.request
         .post(root, `/api/workspaces`)

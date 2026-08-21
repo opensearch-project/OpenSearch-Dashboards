@@ -27,6 +27,16 @@ export type WorkspaceCreateAttributes = Omit<WorkspaceAttribute, 'id'> & {
   id?: WorkspaceAttribute['id'];
 };
 
+export interface WorkspaceAssociationFailure {
+  id: string;
+  type: string;
+  error: string;
+}
+
+export interface WorkspaceCreateResult extends Pick<WorkspaceAttribute, 'id'> {
+  failedAssociations?: WorkspaceAssociationFailure[];
+}
+
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;

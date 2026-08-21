@@ -4,13 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiCompressedFieldText,
-  EuiCompressedFormRow,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiCompressedFieldText, EuiCompressedFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface WorkspaceIdFieldProps {
@@ -35,27 +29,26 @@ export const WorkspaceIdField = ({ value, error, onChange }: WorkspaceIdFieldPro
     </p>
   );
 
-  const label = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        {i18n.translate('workspace.form.workspaceDetails.id.label', {
-          defaultMessage: 'Workspace ID',
-        })}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+  const label = i18n.translate('workspace.form.workspaceDetails.id.label', {
+    defaultMessage: 'Workspace ID',
+  });
+
+  return (
+    <EuiCompressedFormRow
+      label={label}
+      labelAppend={
         <EuiIconTip
           type="questionInCircle"
           color="subdued"
           content={tooltipContent}
           position="right"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  return (
-    <EuiCompressedFormRow label={label} isInvalid={!!error} error={error}>
+      }
+      isInvalid={!!error}
+      error={error}
+    >
       <EuiCompressedFieldText
+        aria-label={label}
         value={value ?? ''}
         onChange={handleChange}
         isInvalid={!!error}

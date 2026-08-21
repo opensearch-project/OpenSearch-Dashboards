@@ -141,6 +141,7 @@ export {
   StringValidationRegexString,
   WorkspaceAttribute,
   WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   ChromeNavGroup,
   NavGroupType,
   NavGroupStatus,

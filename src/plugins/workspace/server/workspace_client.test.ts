@@ -377,10 +377,11 @@ describe('#WorkspaceClient', () => {
     });
   });
 
-  it('create# should not report an association conflict as a duplicate workspace id', async () => {
+  it('create# should report failed associations without failing workspace creation', async () => {
     const client = new WorkspaceClient(coreSetup, logger);
     await client.setup(coreSetup);
     client?.setSavedObjects(savedObjects);
+    client?.setUiSettings(uiSettings);
 
     find.mockReset();
     find.mockResolvedValueOnce({ total: 0 });
@@ -389,20 +390,41 @@ describe('#WorkspaceClient', () => {
       attributes: { name: mockWorkspaceName },
     });
     addToWorkspaces.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1')
+      SavedObjectsErrorHelpers.createGenericNotFoundError(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1')
     );
+    addToWorkspaces.mockResolvedValueOnce(undefined);
 
     const result = await client.create(mockRequestDetail, {
       id: 'custom1',
       name: mockWorkspaceName,
       permissions: {},
-      dataSources: ['id1'],
+      dataSources: ['id1', 'id2'],
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).not.toBe('workspace id has already been used, try with a different id');
-    }
+    expect(addToWorkspaces).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({
+      success: true,
+      result: {
+        id: 'custom1',
+        failedAssociations: [
+          {
+            id: 'id1',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            error: expect.stringContaining(DATA_SOURCE_SAVED_OBJECT_TYPE),
+          },
+        ],
+      },
+    });
+    expect(mockCheckAndSetDefaultDataSource).toHaveBeenCalledWith(
+      uiSettings.asScopedToClient(savedObjectClient),
+      ['id2'],
+      false
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Failed to associate ${DATA_SOURCE_SAVED_OBJECT_TYPE} [id1] with workspace [custom1]`
+      )
+    );
   });
 
   it('create# should proceed normally if no workspace with the provided custom id exists', async () => {

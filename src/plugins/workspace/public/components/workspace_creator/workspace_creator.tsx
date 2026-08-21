@@ -143,10 +143,20 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           }
         );
         if (result?.success) {
+          const failedAssociationCount = result.result.failedAssociations?.length ?? 0;
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
               defaultMessage: 'Create workspace successfully',
             }),
+            ...(failedAssociationCount > 0
+              ? {
+                  text: i18n.translate('workspace.create.associationFailed', {
+                    defaultMessage:
+                      '{failedAssociationCount, plural, one {# selected data source or connection was not associated.} other {# selected data sources or connections were not associated.}} You can add them later from workspace settings.',
+                    values: { failedAssociationCount },
+                  }),
+                }
+              : {}),
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;

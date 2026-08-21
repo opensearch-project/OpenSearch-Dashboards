@@ -283,11 +283,12 @@ describe('WorkspaceCreator', () => {
   });
 
   it('creates a workspace with a custom id', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByRole } = render(<WorkspaceCreator />);
 
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
     });
+    expect(getByRole('textbox', { name: 'Workspace ID' })).toBeInTheDocument();
     fireEvent.input(getByTestId('workspaceForm-workspaceDetails-nameInputText'), {
       target: { value: 'test workspace name' },
     });
@@ -327,6 +328,40 @@ describe('WorkspaceCreator', () => {
       )
     ).toBeInTheDocument();
     expect(workspaceClientCreate).not.toHaveBeenCalled();
+  });
+
+  it('shows association failures in the workspace creation success toast', async () => {
+    workspaceClientCreate.mockReturnValueOnce({
+      result: {
+        id: 'successResult',
+        failedAssociations: [
+          {
+            id: 'id1',
+            type: 'data-source',
+            error: 'association failed',
+          },
+        ],
+      },
+      success: true,
+    });
+    const { getByTestId } = render(<WorkspaceCreator />);
+
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-nameInputText'), {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalledWith({
+        title: 'Create workspace successfully',
+        text: '1 selected data source or connection was not associated. You can add them later from workspace settings.',
+      });
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
 
   it('should show danger toasts after create workspace failed', async () => {
