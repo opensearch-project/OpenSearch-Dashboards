@@ -65,6 +65,49 @@ const saveVariable = () => {
   cy.wait(1000);
 };
 
+// --- Query editor modal helpers (query variables now edit through a modal) ---
+const openQueryEditorModal = () => {
+  cy.getElementByTestId('variableQueryPanelOpenEditor').click();
+  cy.getElementByTestId('queryEditorModal').should('be.visible');
+};
+
+const selectDatasetInModal = (datasetName) => {
+  cy.getElementByTestId('datasetSelectButton').click();
+  cy.get('[role="option"]').contains(datasetName).click({ force: true });
+  cy.wait(1000);
+};
+
+const typeInModalEditor = (query) => {
+  cy.getElementByTestId('queryEditorModalEditor')
+    .find('.react-monaco-editor-container')
+    .should('be.visible')
+    .click({ force: true });
+  cy.get('.inputarea').first().should('be.visible');
+  cy.wait(100);
+  // Clear any existing content (cross-platform select-all + delete).
+  cy.get('.inputarea')
+    .first()
+    .focus()
+    .type('{ctrl}a', { force: true })
+    .type('{backspace}', { force: true })
+    .type('{meta}a', { force: true })
+    .type('{backspace}', { force: true });
+  cy.get('.inputarea')
+    .first()
+    .type(query, { force: true, delay: 30, parseSpecialCharSequences: false });
+  cy.wait(300);
+};
+
+const previewInModal = () => {
+  cy.getElementByTestId('queryEditorModalRunQuery').click();
+  cy.wait(5000);
+};
+
+const applyModal = () => {
+  cy.getElementByTestId('queryEditorModalApply').click();
+  cy.wait(500);
+};
+
 export const runDashboardVariableTests = () => {
   describe('Dashboard variables', () => {
     before(() => {
