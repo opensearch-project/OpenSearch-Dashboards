@@ -141,13 +141,12 @@ function getValueType(value: unknown): VariableOptionType | undefined {
  *   }
  * }
  */
-export function parseResponseToQueryResult(response: any, language?: string): VariableQueryResult {
+export function parseResponseToQueryResult(response: any): VariableQueryResult {
   const rows: Array<Record<string, unknown>> = [];
   const fields: string[] = [];
   const fieldsSet = new Set<string>();
   const fieldTypes: Record<string, VariableOptionType> = {};
-  const hits =
-    language?.toUpperCase() === 'PROMQL' ? response?.instantHits?.hits : response?.hits?.hits;
+  const hits = response?.hits?.hits;
 
   if (!Array.isArray(hits)) {
     return { rows, fields, fieldTypes };
@@ -269,7 +268,7 @@ export async function executeVariableQuery(
   }
 
   const response = await searchSource.fetch({ abortSignal: signal });
-  return parseResponseToQueryResult(response, params.language);
+  return parseResponseToQueryResult(response);
 }
 
 function getNonEmptyCapture(value: unknown): string | undefined {
