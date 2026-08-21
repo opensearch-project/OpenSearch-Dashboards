@@ -11,7 +11,7 @@ import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
-import { extractQueryError } from '../utils/format_error';
+import { extractQueryError } from '../../../../../data/common';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';

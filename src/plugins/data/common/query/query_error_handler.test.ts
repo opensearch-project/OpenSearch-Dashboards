@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { extractQueryError } from './format_error';
+import { extractQueryError } from './query_error_handler';
 
 describe('extractQueryError', () => {
   it('prefers shortMessage above everything else', () => {
