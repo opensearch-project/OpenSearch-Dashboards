@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { Unit, UnitDisplay, UnitItem } from '../../types';
+import { formatDecimal } from '../../utils/data_transformation/utils/number';
 
 export const dataUnits = [
   { symbol: 'b', value: 1 }, // 1 bit
@@ -48,25 +49,25 @@ export const lengthUnits = [
   { symbol: 'mi', value: 1609.344 }, // 1 mile = 1609.344 meters
 ];
 
-export const shortNumber = (num: number) => {
+export const shortNumber = (num: number, decimals?: number) => {
   const units = ['', 'K', 'M', 'B', 'T', 'Q'];
   let unitIndex = 0;
   let n = num;
 
-  while (n >= 1000 && unitIndex < units.length - 1) {
+  while (Math.abs(n) >= 1000 && unitIndex < units.length - 1) {
     n /= 1000;
     unitIndex++;
   }
 
-  return `${Math.round(n * 100) / 100} ${units[unitIndex]}`;
+  return `${formatDecimal(n, decimals)} ${units[unitIndex]}`;
 };
 
-export const currencyFormat = (num: number, symbol?: string): UnitDisplay => {
+export const currencyFormat = (num: number, symbol?: string, decimals?: number): UnitDisplay => {
   return {
-    label: `${symbol ? symbol : ''} ${Math.round(num * 100) / 100}`,
+    label: `${symbol ? symbol : ''} ${formatDecimal(num, decimals)}`,
     segments: [
       { type: 'unit', value: symbol || '' },
-      { type: 'value', value: Math.round(num * 100) / 100 },
+      { type: 'value', value: formatDecimal(num, decimals) },
     ],
   };
 };
@@ -74,23 +75,24 @@ export const currencyFormat = (num: number, symbol?: string): UnitDisplay => {
 export const computing = (
   num: number,
   units: Array<{ symbol: string; value: number }>,
-  symbol?: string
+  symbol?: string,
+  decimals?: number
 ): UnitDisplay => {
   // target the base unit symbol
   const startUnit = symbol && units.find((u) => u.symbol === symbol);
-  if (!symbol || !startUnit) return { label: `${Math.round(num * 100) / 100}` };
+  if (!symbol || !startUnit) return { label: formatDecimal(num, decimals) };
 
   const finalNum = num * startUnit.value;
   let i = units.findIndex((u) => u.symbol === symbol);
 
-  while (i < units.length - 1 && finalNum >= units[i + 1].value) {
+  while (i < units.length - 1 && Math.abs(finalNum) >= units[i + 1].value) {
     i++;
   }
   const displayNum = finalNum / units[i].value;
   return {
-    label: `${Math.round(displayNum * 100) / 100} ${units[i].symbol}`,
+    label: `${formatDecimal(displayNum, decimals)} ${units[i].symbol}`,
     segments: [
-      { type: 'value', value: Math.round(displayNum * 100) / 100 },
+      { type: 'value', value: formatDecimal(displayNum, decimals) },
       { type: 'unit', value: units[i].symbol },
     ],
   };
@@ -143,11 +145,12 @@ export const UnitsCollection: Record<string, Unit> = {
       {
         id: 'short',
         name: i18n.translate('explore.stylePanel.unit.short', { defaultMessage: 'Short' }),
-        display: (val: number) => ({ label: shortNumber(val) }),
+        display: (val: number, sy?: string, decimals?: number) => ({
+          label: shortNumber(val, decimals),
+        }),
       },
     ],
   },
-
   acceleration: {
     name: i18n.translate('explore.stylePanel.unit.acceleration', {
       defaultMessage: 'Acceleration',
@@ -257,19 +260,19 @@ export const UnitsCollection: Record<string, Unit> = {
         id: 'dollars',
         name: i18n.translate('explore.stylePanel.unit.dollars', { defaultMessage: 'Dollars ($)' }),
         symbol: '$',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
       {
         id: 'pounds',
         name: i18n.translate('explore.stylePanel.unit.pounds', { defaultMessage: 'Pounds (£)' }),
         symbol: '£',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
       {
         id: 'euro',
         name: i18n.translate('explore.stylePanel.unit.euro', { defaultMessage: 'Euros (€)' }),
         symbol: '€',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
       {
         id: 'yuan',
@@ -277,19 +280,19 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'Chinese Yuan (¥)',
         }),
         symbol: '¥',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
       {
         id: 'yen',
         name: i18n.translate('explore.stylePanel.unit.yen', { defaultMessage: 'Yen (¥)' }),
         symbol: '¥',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
       {
         id: 'rubles',
         name: i18n.translate('explore.stylePanel.unit.rubles', { defaultMessage: 'Rubles (₽)' }),
         symbol: '₽',
-        display: (val, sy) => currencyFormat(val, sy),
+        display: (val, sy, decimals) => currencyFormat(val, sy, decimals),
       },
     ],
   },
@@ -324,13 +327,13 @@ export const UnitsCollection: Record<string, Unit> = {
         id: 'bits',
         name: i18n.translate('explore.stylePanel.unit.bits', { defaultMessage: 'bits(b)' }),
         symbol: 'b',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'bytes',
         name: i18n.translate('explore.stylePanel.unit.bytes', { defaultMessage: 'bytes(B)' }),
         symbol: 'B',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'kilobytes',
@@ -338,7 +341,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'kilobytes(kB)',
         }),
         symbol: 'kB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'kibibytes',
@@ -346,7 +349,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'kibibytes(KiB)',
         }),
         symbol: 'KiB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'megabytes',
@@ -354,7 +357,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'megabytes(MB)',
         }),
         symbol: 'MB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'mebibytes',
@@ -362,7 +365,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'mebibytes(MiB)',
         }),
         symbol: 'MiB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'gigabytes',
@@ -370,7 +373,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'gigabytes(GB)',
         }),
         symbol: 'GB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'gibibytes',
@@ -378,7 +381,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'gibibytes(GiB)',
         }),
         symbol: 'GiB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'terabytes',
@@ -386,7 +389,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'terabytes(TB)',
         }),
         symbol: 'TB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'tebibytes',
@@ -394,7 +397,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'tebibytes(TiB)',
         }),
         symbol: 'TiB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'petabytes',
@@ -402,7 +405,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'petabytes(PB)',
         }),
         symbol: 'PB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
       {
         id: 'pebibytes',
@@ -410,7 +413,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'pebibytes(PiB)',
         }),
         symbol: 'PiB',
-        display: (val, sy) => computing(val, dataUnits, sy),
+        display: (val, sy, decimals) => computing(val, dataUnits, sy, decimals),
       },
     ],
   },
@@ -422,43 +425,43 @@ export const UnitsCollection: Record<string, Unit> = {
         id: 'year',
         name: i18n.translate('explore.stylePanel.unit.year', { defaultMessage: 'Year' }),
         symbol: 'years',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'month',
         name: i18n.translate('explore.stylePanel.unit.month', { defaultMessage: 'Month' }),
         symbol: 'months',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'week',
         name: i18n.translate('explore.stylePanel.unit.week', { defaultMessage: 'Week' }),
         symbol: 'weeks',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'day',
         name: i18n.translate('explore.stylePanel.unit.day', { defaultMessage: 'Day' }),
         symbol: 'days',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'hour',
         name: i18n.translate('explore.stylePanel.unit.hour', { defaultMessage: 'Hour' }),
         symbol: 'hours',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'minute',
         name: i18n.translate('explore.stylePanel.unit.minute', { defaultMessage: 'Minute' }),
         symbol: 'minutes',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'second',
         name: i18n.translate('explore.stylePanel.unit.second', { defaultMessage: 'Second' }),
         symbol: 'seconds',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
       {
         id: 'millisecond',
@@ -466,7 +469,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'Millisecond',
         }),
         symbol: 'milliseconds',
-        display: (val, sy) => computing(val, timeUnits, sy),
+        display: (val, sy, decimals) => computing(val, timeUnits, sy, decimals),
       },
     ],
   },
@@ -501,13 +504,13 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'milligram (mg)',
         }),
         symbol: 'mg',
-        display: (val, sy) => computing(val, massUnits, sy),
+        display: (val, sy, decimals) => computing(val, massUnits, sy, decimals),
       },
       {
         id: 'gram',
         name: i18n.translate('explore.stylePanel.unit.gram', { defaultMessage: 'gram (g)' }),
         symbol: 'g',
-        display: (val, sy) => computing(val, massUnits, sy),
+        display: (val, sy, decimals) => computing(val, massUnits, sy, decimals),
       },
       {
         id: 'kilogram',
@@ -515,7 +518,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'kilogram (kg)',
         }),
         symbol: 'kg',
-        display: (val, sy) => computing(val, massUnits, sy),
+        display: (val, sy, decimals) => computing(val, massUnits, sy, decimals),
       },
       {
         id: 'metric',
@@ -523,7 +526,7 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'metric ton (t)',
         }),
         symbol: 't',
-        display: (val, sy) => computing(val, massUnits, sy),
+        display: (val, sy, decimals) => computing(val, massUnits, sy, decimals),
       },
     ],
   },
@@ -536,25 +539,25 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'millimeter (mm)',
         }),
         symbol: 'mm',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
       {
         id: 'inch',
         name: i18n.translate('explore.stylePanel.unit.inch', { defaultMessage: 'inch (in)' }),
         symbol: 'in',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
       {
         id: 'feet',
         name: i18n.translate('explore.stylePanel.unit.feet', { defaultMessage: 'feet (ft)' }),
         symbol: 'ft',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
       {
         id: 'meter',
         name: i18n.translate('explore.stylePanel.unit.meter', { defaultMessage: 'meter (m)' }),
         symbol: 'm',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
       {
         id: 'kilometer',
@@ -562,13 +565,13 @@ export const UnitsCollection: Record<string, Unit> = {
           defaultMessage: 'kilometer (km)',
         }),
         symbol: 'km',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
       {
         id: 'mile',
         name: i18n.translate('explore.stylePanel.unit.mile', { defaultMessage: 'mile (mi)' }),
         symbol: 'mi',
-        display: (val, sy) => computing(val, lengthUnits, sy),
+        display: (val, sy, decimals) => computing(val, lengthUnits, sy, decimals),
       },
     ],
   },
@@ -588,17 +591,46 @@ Object.values(UnitsCollection).forEach((category) => {
 // get unit by ID
 export const getUnitById = (id?: string) => (id ? UnitsLookup[id] : undefined);
 
+/**
+ * Appends a user-defined unit suffix
+ * A rate-style suffix ("/sec") appends directly (100 b/sec)
+ * anything else gets a separating space (100 meter)
+ */
+export const appendUnitSuffix = (text: string | number, suffix?: string): string => {
+  const base = String(text);
+  if (!suffix) return base;
+  return suffix.startsWith('/') ? `${base}${suffix}` : `${base} ${suffix}`;
+};
+
 export function showDisplayValue(
   isValidNumber: boolean,
   selectedUnit: UnitItem | undefined,
-  calculatedValue: number | undefined
+  calculatedValue: number | undefined,
+  decimals?: number,
+  suffix?: string
 ) {
-  const displayValue =
-    isValidNumber && calculatedValue
-      ? selectedUnit && selectedUnit?.display
-        ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol).label
-        : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
-      : '-';
+  if (!isValidNumber || calculatedValue == null) return '-';
+  const base =
+    selectedUnit && selectedUnit?.display
+      ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol, decimals).label
+      : `${formatDecimal(calculatedValue, decimals)} ${selectedUnit?.symbol ?? ''}`;
 
-  return displayValue;
+  return appendUnitSuffix(base, suffix);
 }
+
+/**
+ * Formats a numeric value into unit + decimals + optional suffix
+ */
+export const formatUnitValue = (
+  value: number,
+  unitId?: string,
+  decimals?: number,
+  suffix?: string
+): string => {
+  if (!Number.isFinite(value)) return String(value);
+  const unit = getUnitById(unitId);
+  const base = unit?.display
+    ? String(unit.display(value, unit.symbol, decimals).label)
+    : `${formatDecimal(value, decimals)}${unit?.symbol ? ` ${unit.symbol}` : ''}`;
+  return appendUnitSuffix(base, suffix);
+};

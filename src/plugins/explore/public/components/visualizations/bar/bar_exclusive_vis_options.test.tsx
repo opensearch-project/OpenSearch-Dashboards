@@ -265,10 +265,8 @@ describe('BarExclusiveVisOptions', () => {
     expect(defaultProps.onShowValuesChange).toHaveBeenCalledWith(true);
   });
 
-  test('does not render radius or show values for histogram type', () => {
+  test('should show values for histogram type', () => {
     render(<BarExclusiveVisOptions {...defaultProps} type="histogram" />);
-
-    expect(screen.queryByTestId('barRadiusRange')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('barShowValuesSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barShowValuesSwitch')).toBeInTheDocument();
   });
 });

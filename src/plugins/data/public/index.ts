@@ -530,6 +530,7 @@ export {
   useCancelButtonTiming,
   PPLAnalyzePanel,
   runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
 } from './ui';
 
 /**
@@ -576,10 +577,10 @@ export {
   validateTimeRange,
   getPPLAnalyzeResult$,
   getPPLAnalyzeLoading$,
-  getPPLAnalyzeOpen$,
   setPPLAnalyzeResult,
   setPPLAnalyzeLoading,
   setPPLAnalyzeOpen,
+  clearPPLAnalyzeResult,
   isPPLAnalyzeOpen,
   PPLAnalyzeResult,
 } from './query';

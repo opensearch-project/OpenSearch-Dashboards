@@ -17,6 +17,7 @@ import { visualizationRegistry } from './visualization_registry';
 import { SplitConfig, VisData } from './visualization_builder.types';
 import { getAxisConfigByColumnMapping } from './utils/axis';
 import { AxesSelectPanel } from './style_panel/axes/axes_selector';
+import { PanelSettingsAccordion } from './panel_settings_accordion';
 
 interface StylePanelProps<T> {
   data$: Observable<VisData | undefined>;
@@ -25,6 +26,7 @@ interface StylePanelProps<T> {
   onChartTypeChange: (type: ChartType) => void;
   onAxesMappingChange: (mappings: AxisFieldNameMappings) => void;
   onSplitConfigChange: (config: Partial<SplitConfig>) => void;
+  onPanelSettingsChange: (settings: { title?: string; description?: string }) => void;
   className?: string;
 }
 
@@ -35,6 +37,7 @@ export const StylePanelRender = <T extends ChartType>({
   onChartTypeChange,
   onAxesMappingChange,
   onSplitConfigChange,
+  onPanelSettingsChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
@@ -97,6 +100,11 @@ export const StylePanelRender = <T extends ChartType>({
         currentMapping={axisColumnMappings}
         updateVisualization={updateVisualization}
         chartType={chartConfig.type}
+      />
+      <PanelSettingsAccordion
+        title={chartConfig.title}
+        description={chartConfig.description}
+        onChange={onPanelSettingsChange}
       />
       {chartConfig?.type !== 'table' && (
         <SplitSettingsAccordion

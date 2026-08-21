@@ -6,10 +6,18 @@
 import '../explore_page.scss';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiErrorBoundary, EuiLoadingSpinner, EuiPage, EuiPageBody, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiErrorBoundary,
+  EuiLoadingSpinner,
+  EuiPage,
+  EuiPageBody,
+  EuiText,
+} from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { RootState } from '../../utils/state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -19,6 +27,8 @@ import {
   PPLAnalyzePanel,
   getPPLAnalyzeResult$,
   runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
+  clearPPLAnalyzeResult,
   setPPLAnalyzeOpen,
 } from '../../../../../data/public';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -99,7 +109,13 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   const [analyzeResult, setAnalyzeResult] = useState(() => getPPLAnalyzeResult$().getValue());
   useEffect(() => {
     const sub = getPPLAnalyzeResult$().subscribe(setAnalyzeResult);
-    return () => sub.unsubscribe();
+    return () => {
+      sub.unsubscribe();
+      // Cancel any in-flight analysis and clear the stored result when leaving the
+      // page, so a stale result can't reappear on the next mount.
+      cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
+    };
   }, []);
   const queryState = useSelector((state: RootState) => state.query);
 
@@ -133,6 +149,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       setIsOpen(true);
       setPPLAnalyzeOpen(true);
     } else {
+      // Closing the panel abandons any in-flight analysis — cancel it server-side
+      // and clear the stored result so it doesn't flash back on reopen.
+      cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
       setIsOpen(false);
       setPPLAnalyzeOpen(false);
     }
@@ -181,14 +201,36 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                   >
                     <EuiLoadingSpinner size="xl" />
                     <EuiText size="s" color="subdued">
-                      Running query analysis…
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.running"
+                        defaultMessage="Running query analysis…"
+                      />
                     </EuiText>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="danger"
+                      iconType="cross"
+                      onClick={() => {
+                        cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
+                        setIsOpen(false);
+                        setPPLAnalyzeOpen(false);
+                      }}
+                      data-test-subj="analyzeCancelButton"
+                    >
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.cancel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
                   </div>
                 ) : (
                   <div style={{ overflowY: 'auto', height: '100%' }}>
                     <PPLAnalyzePanel
                       analyzeResult={analyzeResult!}
                       onClose={() => {
+                        cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
                         setIsOpen(false);
                         setPPLAnalyzeOpen(false);
                       }}

@@ -162,7 +162,11 @@ describe('VisualizationEditorPage', () => {
       isLoading: false,
       error: undefined,
       savedQueryState: undefined,
-      savedVisConfig: { chartType: 'bar' },
+      savedVisConfig: {
+        chartType: 'bar',
+        title: 'Panel title',
+        description: 'Panel description',
+      },
     });
 
     renderPage();
@@ -170,6 +174,8 @@ describe('VisualizationEditorPage', () => {
     await waitFor(() => {
       expect(mockVisualizationBuilder.setVisConfig).toHaveBeenCalledWith({
         type: 'bar',
+        title: 'Panel title',
+        description: 'Panel description',
       });
     });
   });

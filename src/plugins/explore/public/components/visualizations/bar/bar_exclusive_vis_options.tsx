@@ -192,7 +192,6 @@ export const BarExclusiveVisOptions = ({
           />
         </>
       )}
-
       {renderManualSizeOptions(type)}
       {type === 'bar' && (
         <>
@@ -215,20 +214,20 @@ export const BarExclusiveVisOptions = ({
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
-          <EuiFormRow>
-            <EuiSwitch
-              compressed
-              label={i18n.translate('explore.stylePanel.bar.showValues', {
-                defaultMessage: 'Show values',
-              })}
-              checked={showValues ?? false}
-              onChange={(e) => onShowValuesChange?.(e.target.checked)}
-              data-test-subj="barShowValuesSwitch"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
         </>
       )}
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.stylePanel.bar.showValues', {
+            defaultMessage: 'Show values',
+          })}
+          checked={showValues ?? false}
+          onChange={(e) => onShowValuesChange?.(e.target.checked)}
+          data-test-subj="barShowValuesSwitch"
+        />
+      </EuiFormRow>
+      <EuiSpacer size="s" />
       <EuiFormRow>
         <EuiSwitch
           compressed

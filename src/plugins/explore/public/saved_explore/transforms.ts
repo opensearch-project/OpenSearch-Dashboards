@@ -23,6 +23,8 @@ export interface ExploreState {
 }
 
 interface VisState {
+  title?: string;
+  description?: string;
   chartType?: ChartType;
   styleOptions?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
@@ -43,9 +45,8 @@ export const saveStateToSavedObject = (
   // Serialize the state into the saved object
   obj.type = flavorId;
   obj.visualization = JSON.stringify({
-    // TODO: Add title to saved object
-    // Visualization has an independent title?
-    title: '',
+    title: visState?.title ?? '',
+    description: visState?.description,
     chartType: visState?.chartType ?? 'line',
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,

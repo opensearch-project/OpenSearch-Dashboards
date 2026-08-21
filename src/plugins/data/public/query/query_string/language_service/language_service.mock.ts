@@ -16,10 +16,6 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     search: {} as any,
     getQueryString: jest.fn(),
     editor: createEditor(SingleLineInput, SingleLineInput, [], DQLBody),
-    fields: {
-      filterable: true,
-      visualizable: true,
-    },
     showDocLinks: true,
     editorSupportedAppNames: ['discover'],
   };
@@ -30,10 +26,6 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     search: {} as any,
     getQueryString: jest.fn(),
     editor: createEditor(SingleLineInput, SingleLineInput, [], DQLBody),
-    fields: {
-      filterable: true,
-      visualizable: true,
-    },
     showDocLinks: true,
     editorSupportedAppNames: ['discover'],
   };
