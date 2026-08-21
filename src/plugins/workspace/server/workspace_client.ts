@@ -99,16 +99,33 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       permissions: savedObject.permissions,
     };
   }
-  private formatError(error: Error | any): string {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+  private formatError(error: unknown): string {
+    if (
+      SavedObjectsErrorHelpers.isSavedObjectsClientError(error) &&
+      SavedObjectsErrorHelpers.isNotFoundError(error)
+    ) {
       return WORKSPACE_NOT_FOUND_ERROR;
     }
 
     return this.getErrorMessage(error);
   }
 
-  private getErrorMessage(error: Error | any): string {
-    return error.message || error.error || 'Error';
+  private getErrorMessage(error: unknown): string {
+    if (typeof error !== 'object' || error === null) {
+      return 'Error';
+    }
+
+    const { message, error: errorMessage } = error as {
+      message?: unknown;
+      error?: unknown;
+    };
+    if (typeof message === 'string' && message) {
+      return message;
+    }
+    if (typeof errorMessage === 'string' && errorMessage) {
+      return errorMessage;
+    }
+    return 'Error';
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
@@ -165,7 +182,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           permissions,
         });
       } catch (e: unknown) {
-        if (requestedId && SavedObjectsErrorHelpers.isConflictError(e as Error)) {
+        if (
+          requestedId &&
+          SavedObjectsErrorHelpers.isSavedObjectsClientError(e) &&
+          SavedObjectsErrorHelpers.isConflictError(e)
+        ) {
           return {
             success: false,
             error: DUPLICATE_WORKSPACE_ID_ERROR,
