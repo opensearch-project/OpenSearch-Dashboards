@@ -108,6 +108,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       undefined,
       tabDefinition,
       {
+        title: chartConfig?.title,
+        description: chartConfig?.description,
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
@@ -239,6 +241,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       {showAddToDashboardModal && (
         <AddToDashboardModal
           savedExploreId={savedExploreIdFromUrl}
+          initialTitle={chartConfig?.title}
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}

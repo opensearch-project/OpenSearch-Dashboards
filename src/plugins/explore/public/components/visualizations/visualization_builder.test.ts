@@ -609,6 +609,21 @@ describe('VisualizationBuilder', () => {
     });
   });
 
+  test('should update panel settings and mark the visualization dirty', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({ type: 'table' });
+
+    builder.updatePanelSettings({ title: 'Panel title' });
+    builder.updatePanelSettings({ description: 'Panel description' });
+
+    expect(builder.visConfig$.value).toEqual({
+      type: 'table',
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+    expect(builder.isVisDirty$.value).toBe(true);
+  });
+
   test('should set axes mapping', () => {
     const builder = new VisualizationBuilder({});
     // initial vis config
@@ -623,6 +638,20 @@ describe('VisualizationBuilder', () => {
     expect(builder.visConfig$.value?.type).toBe(undefined);
     builder.setCurrentChartType('heatmap');
     expect(builder.visConfig$.value?.type).toBe('heatmap');
+  });
+
+  test('should preserve panel settings when chart type changes', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({
+      type: 'bar',
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+
+    builder.setCurrentChartType('line');
+
+    expect(builder.visConfig$.value?.title).toBe('Panel title');
+    expect(builder.visConfig$.value?.description).toBe('Panel description');
   });
 
   test('should reset vis state', () => {
@@ -687,6 +716,21 @@ describe('VisualizationBuilder', () => {
       expect(builder.visConfig$.value?.splitField).toBe('category');
       expect(builder.visConfig$.value?.splitLayout).toBe('horizontal');
       expect(builder.visConfig$.value?.showSplitLabel).toBe(true);
+    });
+
+    test('should preserve panel settings', () => {
+      const builder = new VisualizationBuilder({});
+      builder.visConfig$.next({
+        type: 'bar',
+        title: 'Panel title',
+        description: 'Panel description',
+      });
+
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, false);
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.title).toBe('Panel title');
+      expect(builder.visConfig$.value?.description).toBe('Panel description');
     });
 
     test('should preserve styles when preserveStyles is true', () => {

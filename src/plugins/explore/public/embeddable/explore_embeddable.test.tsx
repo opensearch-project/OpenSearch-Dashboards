@@ -277,6 +277,43 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.type).toBe(EXPLORE_EMBEDDABLE_TYPE);
   });
 
+  test('uses visualization metadata for the default panel title and description', () => {
+    const services = createMockServices();
+    const metadataContainer = createTestContainer('metadata-embeddable');
+    const metadataEmbeddable = new ExploreEmbeddable(
+      {
+        savedExplore: {
+          ...mockSavedExplore,
+          visualization: JSON.stringify({
+            chartType: 'bar',
+            title: 'Visualization title',
+            description: 'Visualization description',
+          }),
+        },
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: services.filterManager,
+        services,
+        editApp: 'explore/logs',
+      },
+      { ...mockInput, id: 'metadata-embeddable' },
+      mockExecuteTriggerActions,
+      metadataContainer
+    );
+
+    expect(metadataEmbeddable.getTitle()).toBe('Visualization title');
+    expect(metadataEmbeddable.getDescription()).toBe('Visualization description');
+
+    metadataEmbeddable.destroy();
+    metadataContainer.destroy();
+  });
+
+  test('falls back to the saved object title when visualization title is empty', () => {
+    expect(embeddable.getTitle()).toBe('Test Explore');
+  });
+
   test('should have return inspector adaptors', () => {
     expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
     expect(embeddable.getInspectorAdapters().data).toBeDefined();
@@ -721,7 +758,7 @@ describe('ExploreEmbeddable', () => {
     expect(adaptLegacyDataSpy).toHaveBeenCalled();
   });
 
-  describe('variable interpolation in panel title', () => {
+  describe('variable interpolation in panel metadata', () => {
     test('interpolates input.title when it contains variables', () => {
       const mockInterpolation: Partial<IVariableInterpolationService> = {
         hasVariables: jest.fn((str: string) => str.includes('$')),
@@ -760,7 +797,7 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
 
       expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Sales for $region');
       expect(emb.getOutput().title).toBe('Sales for Region-A');
@@ -796,7 +833,7 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
 
       expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Logs for $env');
       expect(emb.getOutput().title).toBe('Logs for prod');
@@ -832,8 +869,47 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
       expect(mockInterpolation.interpolate).not.toHaveBeenCalled();
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('interpolates visualization description when it contains variables', () => {
+      const mockInterpolation: Partial<IVariableInterpolationService> = {
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn((str: string) => str.replace('$env', 'production')),
+        getCurrentValues: jest.fn().mockReturnValue({}),
+        getVariables: jest.fn().mockReturnValue([]),
+      };
+      const parent = createTestContainer('description-var-emb', {}, mockInterpolation);
+      const mockServices = createMockServices();
+
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: {
+            ...mockSavedExplore,
+            visualization: JSON.stringify({
+              chartType: 'bar',
+              description: 'Logs for $env',
+            }),
+          },
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'description-var-emb' },
+        mockExecuteTriggerActions,
+        parent
+      );
+
+      expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Logs for $env');
+      expect(emb.getDescription()).toBe('Logs for production');
 
       emb.destroy();
       parent.destroy();
@@ -879,6 +955,57 @@ describe('ExploreEmbeddable', () => {
         });
 
       parent.variables$.next([{ id: 'env', value: 'production' }]);
+    });
+
+    test('re-interpolates description when variables$ emits new values', () => {
+      let environment = 'initial';
+      const mockInterpolation: Partial<IVariableInterpolationService> = {
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn((str: string) => str.replace('$env', environment)),
+        getCurrentValues: jest.fn().mockReturnValue({}),
+        getVariables: jest.fn().mockReturnValue([]),
+      };
+      const parent = createTestContainer('reactive-description-emb', {}, mockInterpolation);
+      const mockServices = createMockServices();
+
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: {
+            ...mockSavedExplore,
+            visualization: JSON.stringify({
+              chartType: 'bar',
+              description: 'Logs for $env',
+            }),
+          },
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'reactive-description-emb' },
+        mockExecuteTriggerActions,
+        parent
+      );
+
+      expect(emb.getDescription()).toBe('Logs for initial');
+      const outputListener = jest.fn();
+      const outputSubscription = emb.getOutput$().subscribe(outputListener);
+      outputListener.mockClear();
+
+      environment = 'production';
+      parent.variables$.next([{ id: 'env', value: 'production' }]);
+
+      expect(emb.getDescription()).toBe('Logs for production');
+      expect(outputListener).toHaveBeenCalledWith(
+        expect.objectContaining({ description: 'Logs for production' })
+      );
+
+      outputSubscription.unsubscribe();
+      emb.destroy();
+      parent.destroy();
     });
   });
 

@@ -22,6 +22,7 @@ export interface ExploreInput extends EmbeddableInput {
 }
 
 export interface ExploreOutput extends EmbeddableOutput {
+  description?: string;
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   editable: boolean;
