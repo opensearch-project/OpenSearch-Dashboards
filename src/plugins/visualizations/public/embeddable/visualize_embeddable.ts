@@ -271,7 +271,16 @@ export class VisualizeEmbeddable
 
   private resetUiStateChanges() {
     Object.keys(this.vis.uiState.getChanges()).forEach((key) => {
+      const before = this.vis.uiState.get(key);
       this.vis.uiState.reset(key);
+      // PersistedState.reset() restores a key to its saved default, but it cannot
+      // clear a top-level key that has no saved default (its cleanPath is a no-op
+      // for top-level keys). When there is nothing to restore, reset() leaves the
+      // dashboard override in place, so explicitly null the key out to fall back
+      // to the saved/auto defaults (mirrors the previous clearAllKeys behavior).
+      if (_.isEqual(before, this.vis.uiState.get(key))) {
+        this.vis.uiState.set(key, null);
+      }
     });
   }
 
