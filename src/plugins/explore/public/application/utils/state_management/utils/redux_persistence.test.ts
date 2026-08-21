@@ -76,6 +76,11 @@ describe('redux_persistence', () => {
           ),
         },
       },
+      savedObjects: {
+        client: {
+          find: jest.fn().mockResolvedValue({ savedObjects: [] }),
+        },
+      },
       uiSettings: {
         get: jest.fn((key) => {
           if (key === DEFAULT_COLUMNS_SETTING) return ['_source'];
@@ -513,6 +518,13 @@ describe('redux_persistence', () => {
             get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES })),
           },
         },
+        savedObjects: {
+          client: {
+            find: jest.fn().mockResolvedValue({
+              savedObjects: [{ id: 'test', attributes: { signalType: CORE_SIGNAL_TYPES.TRACES } }],
+            }),
+          },
+        },
       } as any;
 
       (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
@@ -534,6 +546,13 @@ describe('redux_persistence', () => {
           ...mockServices.data,
           dataViews: {
             get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS })),
+          },
+        },
+        savedObjects: {
+          client: {
+            find: jest.fn().mockResolvedValue({
+              savedObjects: [{ id: 'test', attributes: { signalType: CORE_SIGNAL_TYPES.LOGS } }],
+            }),
           },
         },
       } as any;
@@ -559,6 +578,13 @@ describe('redux_persistence', () => {
             get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS })),
           },
         },
+        savedObjects: {
+          client: {
+            find: jest.fn().mockResolvedValue({
+              savedObjects: [{ id: 'test', attributes: { signalType: CORE_SIGNAL_TYPES.LOGS } }],
+            }),
+          },
+        },
       } as any;
 
       (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
@@ -580,6 +606,13 @@ describe('redux_persistence', () => {
           ...mockServices.data,
           dataViews: {
             get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES })),
+          },
+        },
+        savedObjects: {
+          client: {
+            find: jest.fn().mockResolvedValue({
+              savedObjects: [{ id: 'test', attributes: { signalType: CORE_SIGNAL_TYPES.TRACES } }],
+            }),
           },
         },
       } as any;
@@ -777,12 +810,11 @@ describe('redux_persistence', () => {
         })),
       });
 
-      // Mock dataViews.get for the fetched traces dataset
-      (tracesServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
-        if (id === 'traces-dataset') {
-          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
-        }
-        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+      // Signal types are now resolved via a single find; the fetched traces dataset is TRACES.
+      (tracesServices.savedObjects.client.find as jest.Mock).mockResolvedValue({
+        savedObjects: [
+          { id: 'traces-dataset', attributes: { signalType: CORE_SIGNAL_TYPES.TRACES } },
+        ],
       });
 
       const result = await loadReduxState(tracesServices);
@@ -820,9 +852,9 @@ describe('redux_persistence', () => {
         .mockReturnValueOnce(mockQueryState)
         .mockReturnValueOnce(null);
 
-      // Mock dataViews.get for the fetched logs dataset
-      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
-        signalType: CORE_SIGNAL_TYPES.LOGS,
+      // Signal types are now resolved via a single find; the fetched logs dataset is LOGS.
+      (logsServices.savedObjects.client.find as jest.Mock).mockResolvedValue({
+        savedObjects: [{ id: 'logs-dataset', attributes: { signalType: CORE_SIGNAL_TYPES.LOGS } }],
       });
 
       // Mock dataset service to return a logs dataset

@@ -20,6 +20,10 @@ import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/pu
 import { CORE_SIGNAL_TYPES } from '../../../data/common';
 import { ExploreServices } from '../types';
 import { detectTraceDataAcrossDataSources, DetectionResult } from '../utils/auto_detect_trace_data';
+import {
+  getIndexPatternSignalTypes,
+  IndexPatternSignalType,
+} from '../utils/get_index_pattern_signal_types';
 import { createAutoDetectedDatasets } from '../utils/create_auto_datasets';
 import { DiscoverNoIndexPatterns } from '../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 
@@ -37,40 +41,24 @@ export const TraceAutoDetectCallout: React.FC = () => {
 
     // Run detection
     const runDetection = async () => {
-      // Always check if there are existing trace datasets first
-      // This prevents unnecessary wildcard queries when datasets already exist
+      // Fetch the index-pattern signal types once and reuse the result for both the
+      // "already has a trace dataset?" short-circuit and detection below, so we don't
+      // issue the same find twice. The helper projects to signalType and paginates,
+      // replacing the previous per-pattern get(id) N+1 (which also repeatedly resolved
+      // the same uncached data source) on page load.
+      let signalTypes: IndexPatternSignalType[] | undefined;
       try {
-        const allIndexPatterns = await services.indexPatterns.getIds();
+        signalTypes = await getIndexPatternSignalTypes(services.savedObjects.client);
         if (!isMounted) return;
 
-        let hasTraceDatasets = false;
-
-        for (const id of allIndexPatterns) {
-          if (!isMounted) return;
-          try {
-            const indexPattern = await services.indexPatterns.get(id);
-            if (!isMounted) return;
-
-            if (indexPattern.signalType === CORE_SIGNAL_TYPES.TRACES) {
-              hasTraceDatasets = true;
-              break;
-            }
-          } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-              return;
-            }
-            continue;
-          }
-        }
-
-        if (!isMounted) return;
+        const hasTraceDatasets = signalTypes.some(
+          (pattern) => pattern.signalType === CORE_SIGNAL_TYPES.TRACES
+        );
 
         // If trace datasets exist, skip detection entirely
         if (hasTraceDatasets) {
-          if (isMounted) {
-            setIsDismissed(true);
-            setIsDetecting(false);
-          }
+          setIsDismissed(true);
+          setIsDetecting(false);
           return;
         }
 
@@ -84,14 +72,16 @@ export const TraceAutoDetectCallout: React.FC = () => {
         if (error instanceof Error && error.name === 'AbortError') {
           return;
         }
-        // If check fails, still try detection
+        // If check fails, still try detection (it will fetch the list itself).
       }
 
-      // Only run detection if no trace datasets exist
+      // Only run detection if no trace datasets exist. Pass the list we already
+      // fetched so detection doesn't repeat the find.
       try {
         const results = await detectTraceDataAcrossDataSources(
           services.savedObjects.client,
-          services.indexPatterns
+          services.indexPatterns,
+          signalTypes
         );
 
         if (!isMounted) return;

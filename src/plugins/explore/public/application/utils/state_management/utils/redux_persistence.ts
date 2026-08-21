@@ -32,6 +32,7 @@ import {
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
+import { getIndexPatternSignalTypes } from '../../../../utils/get_index_pattern_signal_types';
 
 /**
  * Persists Redux state to URL
@@ -209,36 +210,42 @@ export const fetchFirstAvailableDataset = async (
         typeConfig.toDataset([pattern])
       ) ?? [];
 
-    // Filter by SignalType compatibility
+    // Filter by SignalType compatibility.
     if (fetchedDatasets.length > 0) {
+      // Resolve every dataset's signalType in a SINGLE projected find (see
+      // getIndexPatternSignalTypes) rather than fetching each DataView individually.
+      // The previous per-dataset `dataViews.get` loop caused an N+1 on page load: one
+      // index-pattern `_bulk_get` per pattern, each also resolving its data-source via
+      // the uncached `getDataSource` (the same data source fetched dozens of times).
+      const signalTypeById = new Map<string, string | undefined>();
+      try {
+        const signalTypes = await getIndexPatternSignalTypes(services.savedObjects.client);
+        signalTypes.forEach((pattern) => {
+          signalTypeById.set(pattern.id, pattern.signalType);
+        });
+      } catch {
+        // If the lookup fails, fall back to whatever signalType the datasets carry.
+      }
+
       for (const dataset of fetchedDatasets) {
-        try {
-          const dataView = await services.data?.dataViews?.get(
-            dataset.id,
-            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-          );
+        // Prefer the saved-object signalType; fall back to the dataset's own signalType
+        // (e.g. Prometheus datasets set it directly and are not index-pattern saved objects).
+        const effectiveSignalType = signalTypeById.get(dataset.id) ?? dataset.signalType;
 
-          // Get effective signal type from dataView or dataset (for Prometheus which sets signalType directly)
-          const effectiveSignalType = dataView?.signalType || dataset.signalType;
-
-          // If requiredSignalType is specified, dataset must match it
-          if (requiredSignalType) {
-            if (effectiveSignalType === requiredSignalType) {
-              return dataset;
-            }
-          } else {
-            // If requiredSignalType is not specified (i.e., Logs flavor),
-            // dataset should not have signalType equal to Traces or Metrics
-            if (
-              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
-            ) {
-              return dataset;
-            }
+        // If requiredSignalType is specified, dataset must match it
+        if (requiredSignalType) {
+          if (effectiveSignalType === requiredSignalType) {
+            return dataset;
           }
-        } catch {
-          // Continue to next dataset if this one fails
-          continue;
+        } else {
+          // If requiredSignalType is not specified (i.e., Logs flavor),
+          // dataset should not have signalType equal to Traces or Metrics
+          if (
+            effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+            effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+          ) {
+            return dataset;
+          }
         }
       }
       return undefined; // No compatible dataset found
