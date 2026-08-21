@@ -6,6 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import semver from 'semver';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   IBucketDateHistogramAggConfig,
@@ -44,6 +45,8 @@ import { defaultPreparePplQuery, addPPLSourceClause } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
+  buildSQLHistogramQuery,
+  buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
   queryHasStats,
@@ -295,7 +298,6 @@ export const executeQueries = createAsyncThunk<
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
   const needsHistogramQuery =
     query.language !== 'PROMQL' &&
-    query.language !== 'SQL' && // Disable histograms for SQL
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
@@ -586,11 +588,59 @@ const executeQueryBase = async (
     // building it for those engines and run the plain query instead (the histogram chart just won't
     // populate).
     const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
-    const supportsPplSpan = getDataSourceEngineCapabilities(datasetEngineType).supportsPplSpan;
+    const engineCapabilities = getDataSourceEngineCapabilities(datasetEngineType);
+    const supportsPplSpan = engineCapabilities.supportsPplSpan;
+    // The bucket functions the SQL histogram is built on only exist from a certain version. Fail
+    // open the way isLanguageSupportedForDataset does: an unparseable or absent version counts as
+    // supported, so only a version we can read and that is below the minimum turns the chart off.
+    const minBucketVersion = engineCapabilities.minSqlBucketFunctionVersion;
+    const coercedVersion = semver.coerce(dataset?.dataSource?.version);
+    const supportsSqlBucketFunctions =
+      engineCapabilities.supportsSqlBucketFunctions &&
+      (!minBucketVersion ||
+        !coercedVersion ||
+        semver.satisfies(coercedVersion.version, `>=${minBucketVersion}`));
 
     let effectiveQuery = queryString;
+    let effectiveHistogramConfig = histogramConfig;
     if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
+    } else if (
+      query.language === 'SQL' &&
+      histogramConfig &&
+      isHistogramQuery &&
+      supportsSqlBucketFunctions
+    ) {
+      let sqlHistogramConfig = histogramConfig;
+      let breakdownValues: Array<string | number> | undefined;
+      // Pass 1 finds the top-N breakdown values; pass 2 buckets by them.
+      if (histogramConfig.breakdownField) {
+        try {
+          const topBreakdownQuery = buildSQLTopBreakdownQuery(queryString, histogramConfig);
+          const topBreakdownSource = await createSearchSourceWithQuery(
+            { ...query, dataset, query: topBreakdownQuery },
+            dataView,
+            services,
+            false
+          );
+          const topBreakdownResults = await topBreakdownSource.fetch({
+            abortSignal: abortController.signal,
+          });
+          breakdownValues = (topBreakdownResults.hits?.hits || [])
+            .map((hit: any) => hit._source?.breakdown)
+            .filter((value: any) => value !== undefined && value !== null);
+        } catch (e) {
+          breakdownValues = undefined;
+        }
+        // Without the top-N list every distinct value becomes its own series,
+        // so fall back to a plain histogram rather than an unbounded one.
+        if (!breakdownValues || breakdownValues.length === 0) {
+          breakdownValues = undefined;
+          sqlHistogramConfig = { ...histogramConfig, breakdownField: undefined };
+        }
+      }
+      effectiveHistogramConfig = sqlHistogramConfig;
+      effectiveQuery = buildSQLHistogramQuery(queryString, sqlHistogramConfig, breakdownValues);
     }
 
     const preparedQueryObject = {
@@ -656,24 +706,29 @@ const executeQueryBase = async (
       profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
-    if (isHistogramQuery && histogramConfig) {
+    if (isHistogramQuery && effectiveHistogramConfig) {
       rawResultsWithMeta = processRawResultsForHistogram(
-        queryString,
+        effectiveQuery,
         rawResultsWithMeta,
-        histogramConfig
+        effectiveHistogramConfig,
+        query.language === 'SQL'
       );
     }
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
+    // The paths that return the raw response untouched never set hits.total,
+    // so fall back to the row count rather than reporting NO_RESULTS.
+    const hasResults = isHistogramQuery
+      ? (rawResultsWithMeta.hits?.total || 0) > 0 ||
+        (rawResultsWithMeta.hits?.hits?.length || 0) > 0
+      : (rawResults.hits?.hits?.length || 0) > 0;
+
     dispatch(
       setIndividualQueryStatus({
         cacheKey,
         status: {
-          status:
-            rawResults.hits?.hits?.length > 0
-              ? QueryExecutionStatus.READY
-              : QueryExecutionStatus.NO_RESULTS,
+          status: hasResults ? QueryExecutionStatus.READY : QueryExecutionStatus.NO_RESULTS,
           startTime: queryStartTime,
           elapsedMs: inspectorRequest.getTime()!,
           error: undefined,
