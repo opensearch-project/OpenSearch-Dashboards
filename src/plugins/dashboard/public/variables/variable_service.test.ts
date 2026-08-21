@@ -19,8 +19,15 @@ jest.mock('./variable_query_utils', () => ({
   executeVariableQuery: jest.fn(),
 }));
 
+jest.mock('./promql_variable_query_utils', () => ({
+  ...jest.requireActual('./promql_variable_query_utils'),
+  executePromQLResourceQuery: jest.fn(),
+}));
+
 import { executeVariableQuery } from './variable_query_utils';
+import { executePromQLResourceQuery } from './promql_variable_query_utils';
 const mockExecuteVariableQuery = executeVariableQuery as jest.Mock;
+const mockExecutePromQLResourceQuery = executePromQLResourceQuery as jest.Mock;
 
 function makeQueryResult(
   values: unknown[],
@@ -39,7 +46,11 @@ function makeQueryResult(
 // Set default mock to return an empty query result
 mockExecuteVariableQuery.mockResolvedValue(makeQueryResult([]));
 
-function createService(initialVariables: Variable[] = [], dashboardId?: string) {
+function createService(
+  initialVariables: Variable[] = [],
+  dashboardId?: string,
+  dataPlugin: any = {}
+) {
   const mockSavedObjectsClient = {
     update: jest.fn().mockResolvedValue({}),
     get: jest.fn().mockResolvedValue({ attributes: {} }),
@@ -48,7 +59,7 @@ function createService(initialVariables: Variable[] = [], dashboardId?: string) 
   const telemetrySink = jest.fn();
 
   const service = new VariableService(
-    {} as any, // dataPlugin
+    dataPlugin === null ? undefined : dataPlugin,
     dashboardId,
     mockSavedObjectsClient as any,
     telemetrySink
@@ -57,6 +68,19 @@ function createService(initialVariables: Variable[] = [], dashboardId?: string) 
   service.initialize(initialVariables);
 
   return { service, mockSavedObjectsClient, telemetrySink };
+}
+
+/** Minimal dataPlugin stub exposing the timefilter path read by the PromQL branch. */
+function makeDataPluginStub(getTime: () => any = () => ({ from: 'now-15m', to: 'now' })) {
+  return {
+    query: {
+      timefilter: {
+        timefilter: {
+          getTime: jest.fn(getTime),
+        },
+      },
+    },
+  };
 }
 
 function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVariable {
@@ -237,6 +261,31 @@ describe('VariableService', () => {
         { value: 'web' },
         { value: 'worker' },
       ]);
+    });
+
+    it('should persist promqlQueryType when adding a PromQL fill-in-blank variable (regression)', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['node', 'job']);
+      const { service } = createService([], 'dashboard-123', makeDataPluginStub());
+
+      await service.addVariable({
+        name: 'instance',
+        type: VariableType.Query,
+        query: '',
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        promqlQueryType: { kind: 'labelValues', label: 'instance' },
+      } as any);
+
+      const saved = service.getVariables()[0] as QueryVariable;
+      // buildVariable previously whitelisted fields and silently dropped
+      // promqlQueryType — this asserts it round-trips through addVariable.
+      expect(saved.promqlQueryType).toEqual({ kind: 'labelValues', label: 'instance' });
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        'ds-1',
+        { kind: 'labelValues', label: 'instance' },
+        undefined
+      );
     });
   });
 
@@ -431,6 +480,34 @@ describe('VariableService', () => {
         { value: 'svc-1', label: 'API service' },
       ]);
     });
+
+    it('should refresh options when promqlQueryType changes (shouldRefreshQueryOptions trigger)', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['job']);
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'labelNames' },
+          }),
+        ],
+        'dashboard-123',
+        makeDataPluginStub()
+      );
+
+      // Only promqlQueryType changes — no other trigger field (query/language/dataset/etc.) is touched.
+      await service.updateVariable('query-1', {
+        promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+      });
+
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        'ds-1',
+        { kind: 'metrics', metricRegex: 'node_.*' },
+        undefined
+      );
+    });
   });
 
   describe('updateVariable — type switch', () => {
@@ -468,6 +545,27 @@ describe('VariableService', () => {
       expect(updated.type).toBe(VariableType.Query);
       expect((updated as any).customOptions).toBeUndefined();
       expect(mockExecuteVariableQuery).toHaveBeenCalled();
+    });
+
+    it('should persist promqlQueryType when switching from Custom to a PromQL Query variable (regression)', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['up']);
+      const { service } = createService(
+        [makeCustomVariable()],
+        'dashboard-123',
+        makeDataPluginStub()
+      );
+
+      await service.updateVariable('custom-1', {
+        type: VariableType.Query,
+        query: '',
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+      } as any);
+
+      const updated = service.getVariables()[0] as QueryVariable;
+      expect(updated.promqlQueryType).toEqual({ kind: 'metrics', metricRegex: 'node_.*' });
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalled();
     });
   });
 
@@ -808,6 +906,172 @@ describe('VariableService', () => {
     });
   });
 
+  describe('refreshVariableOptions — PromQL fill-in-blank', () => {
+    it('should call executePromQLResourceQuery (not executeVariableQuery) for labelNames', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['instance', 'job', 'node']);
+      const dataPlugin = makeDataPluginStub();
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            current: undefined,
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'labelNames' },
+          }),
+        ],
+        undefined,
+        dataPlugin
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        dataPlugin,
+        'ds-1',
+        { kind: 'labelNames' },
+        undefined // useTimeFilter defaults to false — no time range passed
+      );
+      expect(mockExecuteVariableQuery).not.toHaveBeenCalled();
+
+      const withState = service.getVariablesWithState();
+      expect(getOptionValues(withState[0].options)).toEqual(['instance', 'job', 'node']);
+      expect(withState[0].optionType).toBe('string');
+      expect(withState[0].loading).toBe(false);
+    });
+
+    it('should pass the resolved time range when useTimeFilter is enabled', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['up']);
+      const timeRange = { from: 'now-1h', to: 'now' };
+      const dataPlugin = makeDataPluginStub(() => timeRange);
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+            useTimeFilter: true,
+          }),
+        ],
+        undefined,
+        dataPlugin
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(dataPlugin.query.timefilter.timefilter.getTime).toHaveBeenCalledTimes(1);
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        dataPlugin,
+        'ds-1',
+        { kind: 'metrics', metricRegex: 'node_.*' },
+        timeRange
+      );
+    });
+
+    it('should apply regex filtering to PromQL fill-in-blank results', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['prod-api', 'staging-api', 'prod-web']);
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            current: undefined,
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'labelValues', label: 'instance' },
+            regex: '^prod',
+          }),
+        ],
+        undefined,
+        makeDataPluginStub()
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(getOptionValues(withState[0].options)).toEqual(['prod-api', 'prod-web']);
+    });
+
+    it('should treat kind "queryResult" as the regular free-text query path, not PromQL fill-in-blank', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-1']));
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'queryResult' },
+            query: 'up',
+          }),
+        ],
+        undefined,
+        makeDataPluginStub()
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
+    });
+
+    it('should treat non-PROMQL languages as the regular free-text query path even with promqlQueryType set', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-1']));
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PPL',
+            promqlQueryType: { kind: 'labelNames' } as any,
+          }),
+        ],
+        undefined,
+        makeDataPluginStub()
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
+    });
+
+    it('should set error state when PromQL resource query fails', async () => {
+      mockExecutePromQLResourceQuery.mockRejectedValue(new Error('resource endpoint 403'));
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'series', matcher: 'up' },
+          }),
+        ],
+        undefined,
+        makeDataPluginStub()
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].loading).toBe(false);
+      expect(withState[0].error).toBe('resource endpoint 403');
+    });
+
+    it('should throw and record an error when dataPlugin is not initialized', async () => {
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            promqlQueryType: { kind: 'labelNames' },
+          }),
+        ],
+        undefined,
+        null // explicitly no dataPlugin
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].error).toBe('VariableService not initialized with dataPlugin');
+      expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
+    });
+  });
+
   describe('destroy', () => {
     it('should clear runtime state and abort pending requests', () => {
       const { service } = createService([makeCustomVariable()]);
@@ -851,6 +1115,53 @@ describe('VariableService', () => {
         expect.anything(),
         false
       );
+    });
+
+    it('should interpolate ${var} references inside promqlQueryType fields before the resource query', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['pod-a', 'pod-b']);
+      const source = makeCustomVariable({ id: 'source-1', name: 'promsource', current: ['node'] });
+      const promqlVar = makeQueryVariable({
+        id: 'query-1',
+        name: 'instance',
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        promqlQueryType: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
+      });
+      const { service } = createService([source, promqlVar], undefined, makeDataPluginStub());
+      service.setInterpolationService({
+        hasVariables: (q: string) => /\$\{\w+\}|\$\w+/.test(q),
+        interpolate: (q: string) =>
+          q.replace(/\$\{promsource\}/g, 'node').replace(/\$promsource\b/g, 'node'),
+        getCurrentValues: () => ({ promsource: 'node' }),
+        getVariables: () => [{ name: 'promsource', value: 'node' }],
+      });
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        'ds-1',
+        { kind: 'labelValues', label: 'instance', metric: 'node' },
+        undefined
+      );
+    });
+
+    it('should refresh a dependent PromQL fill-in-blank variable when the referenced variable changes', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['node']);
+      const source = makeCustomVariable({ id: 'source-1', name: 'promsource', current: ['node'] });
+      const promqlVar = makeQueryVariable({
+        id: 'query-1',
+        name: 'instance',
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        promqlQueryType: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
+      });
+      const { service } = createService([source, promqlVar], undefined, makeDataPluginStub());
+
+      mockExecutePromQLResourceQuery.mockClear();
+      service.updateVariableValue('source-1', ['different-source']);
+
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
     });
   });
 

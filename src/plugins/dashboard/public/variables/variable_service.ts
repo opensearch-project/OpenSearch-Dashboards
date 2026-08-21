@@ -19,7 +19,9 @@ import {
   VariableState,
   VariableWithState,
   VariableOption,
+  VariableOptionType,
   NormalizedVariableOption,
+  PromQLVariableQueryType,
 } from './types';
 import {
   buildVariableOptionsFromQueryResult,
@@ -27,6 +29,12 @@ import {
   applyRegexToVariableOptions,
   VariableQueryResult,
 } from './variable_query_utils';
+import {
+  executePromQLResourceQuery,
+  buildPromQLVariableOptions,
+  interpolatePromqlQueryType,
+  collectPromqlQueryTypeTextFields,
+} from './promql_variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
 /**
@@ -382,15 +390,63 @@ export class VariableService {
     this.updateRuntimeState(id, { loading: true, error: undefined });
 
     try {
-      const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
-      const builtResult = buildVariableOptionsFromQueryResult(result, {
-        valueField: queryVariable.valueField,
-        labelField: queryVariable.labelField,
-      });
+      const promqlQueryType = queryVariable.promqlQueryType;
+      const isPromqlFillInBlank =
+        queryVariable.language?.toUpperCase() === 'PROMQL' &&
+        promqlQueryType !== undefined &&
+        promqlQueryType.kind !== 'queryResult';
 
-      let options = builtResult.options;
-      if (queryVariable.regex) {
-        options = applyRegexToVariableOptions(options, queryVariable.regex);
+      let options: NormalizedVariableOption[];
+      let optionType: VariableOptionType | undefined;
+
+      if (isPromqlFillInBlank && promqlQueryType) {
+        if (!this.dataPlugin) {
+          throw new Error('VariableService not initialized with dataPlugin');
+        }
+
+        const timeRange = queryVariable.useTimeFilter
+          ? this.dataPlugin.query.timefilter.timefilter.getTime()
+          : undefined;
+
+        // Resolve ${var} references in Label/Metric/Metric regex/Series matcher/
+        // label filter values before sending them to the resource endpoint —
+        // mirrors the same interpolation step `variable.query` goes through below.
+        // Declared type widened to the full union explicitly: `promqlQueryType`
+        // is narrowed to a specific `kind` at this point in the control flow, but
+        // interpolatePromqlQueryType returns the full PromQLVariableQueryType.
+        let resolvedQueryType: PromQLVariableQueryType = promqlQueryType;
+        if (this.interpolationService) {
+          resolvedQueryType = interpolatePromqlQueryType(promqlQueryType, (value) =>
+            this.interpolationService!.hasVariables(value)
+              ? this.interpolationService!.interpolate(
+                  value,
+                  queryVariable.language,
+                  queryVariable.name
+                )
+              : value
+          );
+        }
+
+        const values = await executePromQLResourceQuery(
+          this.dataPlugin,
+          queryVariable.dataset?.id,
+          resolvedQueryType,
+          timeRange
+        );
+        options = buildPromQLVariableOptions(values, queryVariable.regex);
+        optionType = 'string';
+      } else {
+        const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+        const builtResult = buildVariableOptionsFromQueryResult(result, {
+          valueField: queryVariable.valueField,
+          labelField: queryVariable.labelField,
+        });
+
+        options = builtResult.options;
+        if (queryVariable.regex) {
+          options = applyRegexToVariableOptions(options, queryVariable.regex);
+        }
+        optionType = builtResult.optionType;
       }
 
       // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
@@ -403,7 +459,7 @@ export class VariableService {
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
-        optionType: builtResult.optionType,
+        optionType,
         loading: false,
         error: undefined,
       });
@@ -596,6 +652,7 @@ export class VariableService {
           labelField: v.labelField,
           regex: v.regex,
           useTimeFilter: v.useTimeFilter ?? false,
+          promqlQueryType: v.promqlQueryType,
         } as QueryVariable;
       }
       case VariableType.Custom: {
@@ -649,7 +706,13 @@ export class VariableService {
       const v = variables[i];
       if (v.type === VariableType.Query) {
         const qv = v as QueryVariable;
-        if (pattern.test(qv.query)) {
+        const referencesChangedVar =
+          pattern.test(qv.query) ||
+          (qv.promqlQueryType !== undefined &&
+            collectPromqlQueryTypeTextFields(qv.promqlQueryType).some((field) =>
+              pattern.test(field)
+            ));
+        if (referencesChangedVar) {
           this.refreshVariableOptions(qv.id);
         }
       }
@@ -665,6 +728,7 @@ export class VariableService {
       'labelField',
       'regex',
       'useTimeFilter',
+      'promqlQueryType',
     ].some((key) => updates[key as keyof QueryVariable] !== undefined);
   }
 
