@@ -96,8 +96,40 @@ describe('Header logo', () => {
       expect(props.navigateToApp).toHaveBeenCalledWith('home');
     });
 
-    // ToDo: Add tests for onClick
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4692
-    it.todo('performs all the complications');
+    it('reloads the page when the target URL matches the current URL and has a hash', () => {
+      // jsdom 26: spy on location.reload rather than replacing the location object.
+      const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+
+      const props = {
+        ...mockProps(),
+        href: `${document.location.href}#section`,
+        forceNavigation$: new BehaviorSubject(true),
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
+      component.find('.logoContainer img').simulate('click');
+
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+      expect(props.navigateToApp).not.toHaveBeenCalled();
+
+      reloadSpy.mockRestore();
+    });
+
+    it('does not reload or navigate to the app when the target URL matches the current URL without a hash', () => {
+      // jsdom 26: spy on location.reload rather than replacing the location object.
+      const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+
+      const props = {
+        ...mockProps(),
+        href: document.location.href,
+        forceNavigation$: new BehaviorSubject(true),
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
+      component.find('.logoContainer img').simulate('click');
+
+      expect(reloadSpy).not.toHaveBeenCalled();
+      expect(props.navigateToApp).not.toHaveBeenCalled();
+
+      reloadSpy.mockRestore();
+    });
   });
 });
