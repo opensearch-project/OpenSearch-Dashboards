@@ -19,7 +19,7 @@ import {
   LineDashStyle,
   LineStyle,
 } from '../types';
-import { TooltipOptions } from '../types';
+import { TooltipOptions, StandardOptions } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
   createSimpleLineChart,
@@ -33,7 +33,7 @@ import { EchartsRender } from '../echarts_render';
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
-export interface LineChartStyleOptions {
+export interface LineChartStyleOptions extends StandardOptions {
   addLegend?: boolean;
   legendPosition?: Positions;
   // @deprecated - removed this once migrated to echarts
@@ -74,10 +74,22 @@ export interface LineChartStyleOptions {
 export type LineChartStyle = Required<
   Omit<
     LineChartStyleOptions,
-    'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes' | 'pointSize'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'pointSize'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<LineChartStyleOptions, 'legendTitle' | 'pointSize'>;
+  Pick<
+    LineChartStyleOptions,
+    'legendTitle' | 'pointSize' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,

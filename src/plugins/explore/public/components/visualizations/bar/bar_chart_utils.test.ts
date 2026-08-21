@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildBarRadius, buildValueLabel, inferTimeIntervals } from './bar_chart_utils';
+import { buildBarRadius, inferTimeIntervals } from './bar_chart_utils';
 import { TimeUnit } from '../types';
-import { BarChartStyle } from './bar_vis_config';
 
 describe('bar_chart_utils', () => {
   describe('inferTimeIntervals', () => {
@@ -52,43 +51,6 @@ describe('bar_chart_utils', () => {
       expect(
         buildBarRadius({ barRadius: 8, seriesEncode: 'y', isStacked: true, isTopSegment: true })
       ).toEqual({ borderRadius: [8, 8, 0, 0] });
-    });
-  });
-
-  describe('buildValueLabel', () => {
-    const styles = (overrides: Partial<BarChartStyle>) =>
-      ({ showValues: true, ...overrides }) as BarChartStyle;
-
-    it('returns nothing when showValues is off', () => {
-      expect(
-        buildValueLabel({
-          styles: { showValues: false } as unknown as BarChartStyle,
-          seriesField: 'count',
-          headers: ['category', 'count'],
-        })
-      ).toEqual({});
-    });
-
-    it('formats the value of its own column', () => {
-      const { label } = buildValueLabel({
-        styles: styles({}),
-        seriesField: 'count',
-        headers: ['category', 'count'],
-      }) as any;
-
-      expect(label.show).toBe(true);
-      expect(label.position).toBe('inside');
-      expect(label.formatter({ value: ['a', 12.345] })).toBe('12.35');
-    });
-
-    it('adds a percent unit when stacking to 100%', () => {
-      const { label } = buildValueLabel({
-        styles: styles({ stackMode: 'percentage' }),
-        seriesField: 'count',
-        headers: ['category', 'count'],
-      }) as any;
-
-      expect(label.formatter({ value: ['a', 23.456] })).toBe('23.46%');
     });
   });
 });

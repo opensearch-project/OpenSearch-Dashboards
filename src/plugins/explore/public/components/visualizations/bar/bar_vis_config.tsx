@@ -19,6 +19,7 @@ import {
   TimeUnit,
   ThresholdOptions,
   StackMode,
+  StandardOptions,
 } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
@@ -34,7 +35,7 @@ import { EchartsRender } from '../echarts_render';
 
 export const DEFAULT_BAR_FILL_OPACITY = 1;
 
-export interface BarChartStyleOptions {
+export interface BarChartStyleOptions extends StandardOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
@@ -73,10 +74,30 @@ export interface BarChartStyleOptions {
 export type BarChartStyle = Required<
   Omit<
     BarChartStyleOptions,
-    'legendShape' | 'thresholdLines' | 'legendTitle' | 'barRadius' | 'fillOpacity'
+    | 'legendShape'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
   >
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'barRadius' | 'fillOpacity'>;
+  Pick<
+    BarChartStyleOptions,
+    | 'legendShape'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >;
 
 export const MIN_BAR_RADIUS = 0;
 export const MAX_BAR_RADIUS = 20;
