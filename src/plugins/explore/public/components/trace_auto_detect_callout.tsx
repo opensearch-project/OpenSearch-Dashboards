@@ -38,39 +38,29 @@ export const TraceAutoDetectCallout: React.FC = () => {
     // Run detection
     const runDetection = async () => {
       // Always check if there are existing trace datasets first
-      // This prevents unnecessary wildcard queries when datasets already exist
+      // This prevents unnecessary wildcard queries when datasets already exist.
+      // Use a single saved-objects find with a signalType projection instead of
+      // fetching every index pattern individually via get(id): the per-pattern
+      // loop produced an N+1 of _bulk_get calls (and repeated uncached
+      // data-source lookups) on page load.
       try {
-        const allIndexPatterns = await services.indexPatterns.getIds();
+        const indexPatternsResp = await services.savedObjects.client.find<{
+          signalType?: string;
+        }>({
+          type: 'index-pattern',
+          fields: ['signalType'],
+          perPage: 10000,
+        });
         if (!isMounted) return;
 
-        let hasTraceDatasets = false;
-
-        for (const id of allIndexPatterns) {
-          if (!isMounted) return;
-          try {
-            const indexPattern = await services.indexPatterns.get(id);
-            if (!isMounted) return;
-
-            if (indexPattern.signalType === CORE_SIGNAL_TYPES.TRACES) {
-              hasTraceDatasets = true;
-              break;
-            }
-          } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-              return;
-            }
-            continue;
-          }
-        }
-
-        if (!isMounted) return;
+        const hasTraceDatasets = indexPatternsResp.savedObjects.some(
+          (obj) => obj.attributes?.signalType === CORE_SIGNAL_TYPES.TRACES
+        );
 
         // If trace datasets exist, skip detection entirely
         if (hasTraceDatasets) {
-          if (isMounted) {
-            setIsDismissed(true);
-            setIsDetecting(false);
-          }
+          setIsDismissed(true);
+          setIsDetecting(false);
           return;
         }
 

@@ -12,8 +12,10 @@ describe('detectTraceData', () => {
   let mockIndexPatternsService: jest.Mocked<IndexPatternsContract>;
 
   beforeEach(() => {
-    // Create mock saved objects client
-    mockSavedObjectsClient = {} as jest.Mocked<SavedObjectsClientContract>;
+    // Create mock saved objects client (find backs the existing-trace-dataset check)
+    mockSavedObjectsClient = {
+      find: jest.fn().mockResolvedValue({ savedObjects: [] }),
+    } as any;
 
     // Create mock index patterns service
     mockIndexPatternsService = {
@@ -28,10 +30,10 @@ describe('detectTraceData', () => {
   });
 
   it('should return empty result when trace datasets already exist', async () => {
-    mockIndexPatternsService.getIds.mockResolvedValue(['existing-trace-id']);
-    mockIndexPatternsService.get.mockResolvedValue({
-      id: 'existing-trace-id',
-      signalType: 'traces',
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        { id: 'existing-trace-id', attributes: { signalType: 'traces' }, references: [] },
+      ],
     } as any);
 
     const result = await detectTraceData(mockSavedObjectsClient, mockIndexPatternsService);
@@ -45,8 +47,10 @@ describe('detectTraceData', () => {
       logTimeField: null,
       dataSourceId: undefined,
     });
-    expect(mockIndexPatternsService.getIds).toHaveBeenCalled();
-    expect(mockIndexPatternsService.get).toHaveBeenCalledWith('existing-trace-id');
+    // Existence check is a single find, not a per-pattern get loop
+    expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'index-pattern', fields: ['signalType'] })
+    );
     // Should not check for wildcard patterns since trace datasets exist
     expect(mockIndexPatternsService.getFieldsForWildcard).not.toHaveBeenCalled();
   });
@@ -300,7 +304,7 @@ describe('detectTraceData', () => {
   });
 
   it('should handle errors when checking existing index patterns', async () => {
-    mockIndexPatternsService.getIds.mockRejectedValue(new Error('Failed to get IDs'));
+    mockSavedObjectsClient.find.mockRejectedValue(new Error('Failed to load index patterns'));
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
@@ -320,20 +324,13 @@ describe('detectTraceData', () => {
     expect(result.tracePattern).toBe('otel-v1-apm-span*');
   });
 
-  it('should skip index patterns that fail to load', async () => {
-    mockIndexPatternsService.getIds.mockResolvedValue(['id-1', 'id-2', 'id-3']);
-    mockIndexPatternsService.get.mockImplementation(async (id) => {
-      if (id === 'id-1') {
-        throw new Error('Failed to load');
-      }
-      if (id === 'id-2') {
-        return { id: 'id-2', signalType: 'logs' } as any;
-      }
-      if (id === 'id-3') {
-        return { id: 'id-3', signalType: 'metrics' } as any;
-      }
-      return {} as any;
-    });
+  it('should continue detection when only non-trace datasets exist', async () => {
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        { id: 'id-2', attributes: { signalType: 'logs' }, references: [] },
+        { id: 'id-3', attributes: { signalType: 'metrics' }, references: [] },
+      ],
+    } as any);
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
@@ -350,7 +347,6 @@ describe('detectTraceData', () => {
 
     // Should continue with detection since no trace signalType was found
     expect(result.tracesDetected).toBe(true);
-    expect(mockIndexPatternsService.get).toHaveBeenCalledTimes(3);
   });
 
   it('should handle traces with extra fields beyond the required ones', async () => {
@@ -402,16 +398,12 @@ describe('detectTraceData', () => {
   });
 
   it('should return empty result when existing datasets have different signalType', async () => {
-    mockIndexPatternsService.getIds.mockResolvedValue(['logs-id', 'metrics-id']);
-    mockIndexPatternsService.get.mockImplementation(async (id) => {
-      if (id === 'logs-id') {
-        return { id: 'logs-id', signalType: 'logs' } as any;
-      }
-      if (id === 'metrics-id') {
-        return { id: 'metrics-id', signalType: 'metrics' } as any;
-      }
-      return {} as any;
-    });
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        { id: 'logs-id', attributes: { signalType: 'logs' }, references: [] },
+        { id: 'metrics-id', attributes: { signalType: 'metrics' }, references: [] },
+      ],
+    } as any);
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
@@ -440,17 +432,15 @@ describe('detectTraceData', () => {
 
   it('should not skip detection when trace dataset exists in different datasource', async () => {
     // Setup: datasource A has trace datasets, but we're checking datasource B
-    mockIndexPatternsService.getIds.mockResolvedValue(['trace-from-datasource-a']);
-    mockIndexPatternsService.get.mockImplementation(async (id) => {
-      if (id === 'trace-from-datasource-a') {
-        return {
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
           id: 'trace-from-datasource-a',
-          signalType: 'traces',
-          dataSourceRef: { id: 'datasource-a', type: 'data-source' },
-        } as any;
-      }
-      return {} as any;
-    });
+          attributes: { signalType: 'traces' },
+          references: [{ id: 'datasource-a', type: 'data-source', name: 'dataSource' }],
+        },
+      ],
+    } as any);
 
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {

@@ -25,7 +25,11 @@ export interface DetectionResult {
 export async function detectTraceData(
   savedObjectsClient: SavedObjectsClientContract,
   indexPatternsService: IndexPatternsContract,
-  dataSourceId?: string
+  dataSourceId?: string,
+  // When a caller scans many datasources at once, it can compute whether this
+  // datasource already has a trace dataset a single time and pass it in, so this
+  // function does not repeat the lookup per datasource.
+  hasExistingTraceDataset?: boolean
 ): Promise<DetectionResult> {
   const result: DetectionResult = {
     tracesDetected: false,
@@ -37,33 +41,42 @@ export async function detectTraceData(
     dataSourceId,
   };
 
-  // 1. Check if trace datasets already exist
-  try {
-    // Get all index patterns and filter by signalType
-    const allIndexPatterns = await indexPatternsService.getIds();
+  // 1. Skip auto-detection if a trace dataset already exists for this datasource.
+  //    Resolve this via a single signalType-projected find rather than fetching
+  //    every index pattern individually via get(id): the per-pattern loop caused
+  //    an N+1 of _bulk_get calls on page load, each also triggering an uncached
+  //    data-source lookup. Callers scanning multiple datasources should pass
+  //    `hasExistingTraceDataset` (computed once) to avoid repeating the find.
+  let traceDatasetAlreadyExists = hasExistingTraceDataset;
+  if (traceDatasetAlreadyExists === undefined) {
+    try {
+      const indexPatternsResp = await savedObjectsClient.find<{ signalType?: string }>({
+        type: 'index-pattern',
+        fields: ['signalType'],
+        perPage: 10000,
+      });
 
-    // Check each index pattern for signalType === 'traces'
-    for (const id of allIndexPatterns) {
-      try {
-        const indexPattern = await indexPatternsService.get(id);
-        // Only check patterns from the target datasource
-        if (
-          indexPattern.dataSourceRef?.id !== dataSourceId &&
-          (indexPattern.dataSourceRef?.id || dataSourceId)
-        ) {
-          continue;
+      traceDatasetAlreadyExists = indexPatternsResp.savedObjects.some((obj) => {
+        if (obj.attributes?.signalType !== 'traces') {
+          return false;
         }
-        if (indexPattern.signalType === 'traces') {
-          // Already have trace datasets, no need to auto-detect
-          return result;
-        }
-      } catch (getError: any) {
-        // Skip if can't load this pattern (might be deleted/stale reference)
-        continue;
-      }
+        // Only consider patterns that belong to the target datasource (references
+        // are always returned by find, independent of the fields projection).
+        const patternDataSourceId = (obj.references || []).find(
+          (ref) => ref.type === 'data-source'
+        )?.id;
+        // Match when ids are equal, or both undefined (local cluster).
+        return patternDataSourceId === dataSourceId;
+      });
+    } catch {
+      // If loading fails, continue with detection
+      traceDatasetAlreadyExists = false;
     }
-  } catch {
-    // If loading fails, continue with detection
+  }
+
+  if (traceDatasetAlreadyExists) {
+    // Already have trace datasets for this datasource, no need to auto-detect
+    return result;
   }
 
   // 2. Check for conventional trace indices: otel-v1-apm-span*
@@ -134,6 +147,29 @@ export async function detectTraceDataAcrossDataSources(
 ): Promise<DetectionResult[]> {
   const results: DetectionResult[] = [];
 
+  // Determine, in a single find, which datasources already have a trace dataset so
+  // each per-datasource detection below can skip its own lookup (avoids an N+1 of
+  // finds). References are always returned by find, independent of the projection.
+  const traceDataSourceIds = new Set<string | undefined>();
+  let signalTypeLookupSucceeded = true;
+  try {
+    const indexPatternsResp = await savedObjectsClient.find<{ signalType?: string }>({
+      type: 'index-pattern',
+      fields: ['signalType'],
+      perPage: 10000,
+    });
+    indexPatternsResp.savedObjects.forEach((obj) => {
+      if (obj.attributes?.signalType === 'traces') {
+        const dsId = (obj.references || []).find((ref) => ref.type === 'data-source')?.id;
+        traceDataSourceIds.add(dsId);
+      }
+    });
+  } catch {
+    // If the lookup fails, fall back to per-datasource detection (pass undefined so
+    // each detectTraceData resolves the check itself).
+    signalTypeLookupSucceeded = false;
+  }
+
   // 1. Fetch all data sources
   try {
     const dataSourcesResp = await savedObjectsClient.find<any>({
@@ -147,7 +183,8 @@ export async function detectTraceDataAcrossDataSources(
         const detection = await detectTraceData(
           savedObjectsClient,
           indexPatternsService,
-          dataSource.id
+          dataSource.id,
+          signalTypeLookupSucceeded ? traceDataSourceIds.has(dataSource.id) : undefined
         );
 
         // If traces or logs detected, include datasource info and add to results
@@ -176,7 +213,8 @@ export async function detectTraceDataAcrossDataSources(
       const localDetection = await detectTraceData(
         savedObjectsClient,
         indexPatternsService,
-        undefined
+        undefined,
+        signalTypeLookupSucceeded ? traceDataSourceIds.has(undefined) : undefined
       );
 
       if (localDetection.tracesDetected || localDetection.logsDetected) {
