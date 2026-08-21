@@ -60,18 +60,31 @@ export interface PanelHeaderProps {
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
-  return badges.map((badge) => (
-    <EuiBadge
-      key={badge.id}
-      className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
-      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
-      // @ts-expect-error TS2322 TODO(ts-error): fixme
-      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
-    >
-      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
-    </EuiBadge>
-  ));
+  return badges.map((badge) => {
+    const context = { embeddable, trigger: panelBadgeTrigger };
+
+    // If badge has a custom MenuItem component, use it
+    if (badge.MenuItem) {
+      return React.createElement(uiToReactComponent(badge.MenuItem), {
+        key: badge.id,
+        context,
+      });
+    }
+
+    // Otherwise use default EuiBadge rendering
+    return (
+      <EuiBadge
+        key={badge.id}
+        className="embPanel__headerBadge"
+        iconType={badge.getIconType(context)}
+        onClick={() => badge.execute(context)}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        onClickAriaLabel={badge.getDisplayName(context)}
+      >
+        {badge.getDisplayName(context)}
+      </EuiBadge>
+    );
+  });
 }
 
 function renderNotifications(
