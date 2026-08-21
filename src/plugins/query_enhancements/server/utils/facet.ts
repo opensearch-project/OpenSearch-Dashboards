@@ -96,7 +96,7 @@ export class Facet {
       // shape when `format=jdbc` is sent; `/_plugins/_sql` defaults to JDBC so this was previously
       // a no-op there.
       const format = request.body?.query?.format ?? request.body?.format;
-      const { lang, fetchSize, queryId } = request.body;
+      const { lang, fetchSize, queryId, includeMetadata } = request.body;
       const compressionHeaders = this.getCompressionHeaders();
       const { highlight } = request.body;
       const params = {
@@ -111,6 +111,7 @@ export class Facet {
           ...(highlight && { highlight }),
           ...(queryId && { queryId }),
           ...(query.profile && { profile: true }),
+          ...(includeMetadata && { include_metadata: true }),
         },
         ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),

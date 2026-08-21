@@ -63,6 +63,13 @@ export const pplSearchStrategyProvider = (
           request.body = { ...request.body, fetchSize };
         }
 
+        // Request metadata fields (_id, _index, _score, _sort) for non-aggregation queries so
+        // that document-level features like "View surrounding documents" can use the _id.
+        // Aggregation results are buckets, not documents, so metadata is not applicable.
+        if (!aggregates && !request.body.includeMetadata) {
+          request.body = { ...request.body, includeMetadata: true };
+        }
+
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);
