@@ -315,51 +315,39 @@ export const runDashboardVariableTests = () => {
         openVariableEditor();
         cy.getElementByTestId('variableEditorName').type('user');
 
-        // Type is already "Query" by default - select the test dataset
-        cy.getElementByTestId('datasetSelectButton').click();
-        cy.get('[role="option"]').contains(INDEX_WITH_TIME_1).click({ force: true });
-        cy.wait(1000);
+        // Query is the default type — open the query editor modal.
+        openQueryEditorModal();
 
-        // Type PPL query in the Monaco editor to get user_id and name fields
-        cy.getElementByTestId('variableQueryPanelEditor')
-          .find('.view-line')
-          .first()
-          .click({ force: true });
-        cy.wait(200);
-        // Select all existing text and replace with our query
-        cy.focused().type('{selectall}');
-        cy.focused().type(
-          `SOURCE = ${INDEX_WITH_TIME_1} | fields personal.name, personal.user_id`,
-          { parseSpecialCharSequences: false }
+        // Select the test dataset (default language is PPL).
+        selectDatasetInModal(INDEX_WITH_TIME_1);
+
+        // Type a PPL query in the modal's Monaco editor.
+        typeInModalEditor(`SOURCE = ${INDEX_WITH_TIME_1} | fields personal.name, personal.user_id`);
+
+        // Preview to load available fields.
+        previewInModal();
+
+        // Value/label fields are EuiComboBox now (not native <select>).
+        selectModalComboBoxOption('variableEditorValueField', 'personal.user_id');
+        selectModalComboBoxOption('variableEditorLabelField', 'personal.name');
+
+        // Preview again with the selected fields, then verify results appear.
+        previewInModal();
+        cy.getElementByTestId('queryEditorModalPreviewPanel').should(
+          'contain.text',
+          'Preview of values'
         );
-        cy.wait(500);
 
-        // Click Preview to load available fields
-        cy.getElementByTestId('variableQueryPanelRunQuery').click();
-        cy.wait(5000);
+        // Apply the query (closes the modal and returns to the variable editor).
+        applyModal();
 
-        // Select "personal.user_id" as value field (stored value)
-        cy.getElementByTestId('variableEditorValueField').select('personal.user_id');
-        cy.wait(500);
-
-        // Select "personal.name" as label field (display label)
-        cy.getElementByTestId('variableEditorLabelField').select('personal.name');
-        cy.wait(500);
-
-        // Click Preview again to update with selected fields
-        cy.getElementByTestId('variableQueryPanelRunQuery').click();
-        cy.wait(5000);
-
-        // Verify preview shows values
-        cy.getElementByTestId('variableEditorPanel').should('contain.text', 'Preview of values');
-
-        // Save the variable
+        // Save the variable.
         saveVariable();
 
-        // Wait for query execution to load options
+        // Wait for query execution to load options.
         cy.wait(5000);
 
-        // Verify variable appears in the bar
+        // Verify variable appears in the bar.
         cy.getElementByTestId('variable-user').should('be.visible');
       });
 
