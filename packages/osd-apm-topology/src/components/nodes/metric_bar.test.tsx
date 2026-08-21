@@ -36,6 +36,19 @@ describe('MetricBar', () => {
     const labelSpans = container.querySelectorAll('.osd\\:text-right');
     expect(labelSpans).toHaveLength(0);
   });
+
+  it('applies marginLeft when offset is provided', () => {
+    const { container } = render(<MetricBar value={50} max={100} offset={25} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.marginLeft).toBe('25%');
+    expect(fillBar.style.width).toBe('50%');
+  });
+
+  it('defaults offset to 0 when not provided', () => {
+    const { container } = render(<MetricBar value={50} max={100} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.marginLeft).toBe('0%');
+  });
 });
 
 describe('MetricBarGroup', () => {
