@@ -107,13 +107,14 @@ export const getPreloadedQueryState = async (
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || 'PPL',
+      language: minimalDataset.language || languageType || 'PPL',
     });
 
     // override the initial query to be an empty string
     return {
       ...initialQueryByDataset,
-      query: '',
+      // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
+      ...(languageType !== SupportLanguageType.sql ? { query: '' } : {}),
       // Ensure we use the minimal dataset
       dataset: minimalDataset,
     };
