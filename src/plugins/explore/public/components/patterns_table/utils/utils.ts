@@ -20,15 +20,18 @@ import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import { resultsCache } from '../../../application/utils/state_management/slices';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
-import { escapePPLValue } from '../../../application/pages/traces/trace_details/server/ppl_request_helpers';
+import {
+  escapePPLValue,
+  escapePplIdentifier,
+} from '../../../application/pages/traces/trace_details/server/ppl_request_helpers';
 
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
-  return `${queryBase} | patterns \`${patternsField}\` | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} | stats count() as ${COUNT_FIELD}, take(${escapePplIdentifier(patternsField)}, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
 export const brainPatternQuery = (queryBase: string, patternsField: string) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} method=brain mode=label | stats count() as ${COUNT_FIELD}, take(${escapePplIdentifier(patternsField)}, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
 /**
@@ -116,7 +119,7 @@ export const regexUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = ${escapePPLValue(
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} | where patterns_field = ${escapePPLValue(
     patternString
   )}`;
 };
@@ -126,7 +129,7 @@ export const brainUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = ${escapePPLValue(
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} method=brain mode=label | where patterns_field = ${escapePPLValue(
     patternString
   )}`;
 };
@@ -136,7 +139,7 @@ export const regexExcludeSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field != ${escapePPLValue(
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} | where patterns_field != ${escapePPLValue(
     patternString
   )}`;
 };
@@ -146,7 +149,7 @@ export const brainExcludeSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field != ${escapePPLValue(
+  return `${queryBase} | patterns ${escapePplIdentifier(patternsField)} method=brain mode=label | where patterns_field != ${escapePPLValue(
     patternString
   )}`;
 };
@@ -261,7 +264,7 @@ export const createSearchPatternQueryWithSlice = (
       )}${sortClause} | head ${pageSize} from ${pageOffset}`
     : `${
         preparedQuery.query
-      } | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field${
+      } | patterns ${escapePplIdentifier(patternsField)} method=brain mode=label | fields patterns_field${
         timeField ? `, ${timeField}` : ''
       }, ${patternsField} | where patterns_field = ${escapePPLValue(
         patternString
