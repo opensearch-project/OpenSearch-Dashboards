@@ -23,6 +23,7 @@ jest.mock('../utils/series', () => ({
 jest.mock('../utils/utils', () => ({
   generateThresholdLines: jest.fn(() => ({})),
   getValueColorByThreshold: jest.fn(() => '#00BFB3'),
+  resolveThresholds: jest.fn((thresholds) => thresholds ?? []),
 }));
 
 describe('formatHistogramBucketValue', () => {

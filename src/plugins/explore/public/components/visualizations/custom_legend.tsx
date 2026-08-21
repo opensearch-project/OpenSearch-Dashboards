@@ -16,6 +16,7 @@ interface CustomLegendProps {
   legendSelected$: BehaviorSubject<Record<string, boolean>>;
   highlightedLegendTarget$: BehaviorSubject<LegendTarget | undefined>;
   position?: Positions;
+  supportShowOneLegend?: boolean;
 }
 
 export const CustomLegend: React.FC<CustomLegendProps> = ({
@@ -23,6 +24,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   legendSelected$,
   highlightedLegendTarget$,
   position = Positions.BOTTOM,
+  supportShowOneLegend = false,
 }) => {
   const legendMap = useObservable(legend$);
   const legendItems = useMemo(() => {
@@ -57,7 +59,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     highlightedLegendTarget$.next(undefined);
   }, [highlightedLegendTarget$]);
 
-  if (legendItems.length <= 1) {
+  if (legendItems.length <= 1 && !supportShowOneLegend) {
     return null;
   }
 

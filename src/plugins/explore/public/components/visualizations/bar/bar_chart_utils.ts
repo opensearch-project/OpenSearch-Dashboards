@@ -131,7 +131,7 @@ export const createBarSeries =
     } = options;
     let seriesFields = options.seriesFields;
 
-    const { axisColumnMappings, transformedData = [] } = state;
+    const { axisColumnMappings, transformedData = [], dataRange } = state;
     const palette = getColors().categories;
     const newState = { ...state };
 
@@ -148,7 +148,11 @@ export const createBarSeries =
     });
     const legendItems: LegendItem[] = [];
 
-    const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
+    const thresholdLines = generateThresholdLines(
+      options.styles?.thresholdOptions,
+      dataRange,
+      seriesEncode
+    );
 
     let barWidth: string | undefined;
     if (styles.barSizeMode === 'manual') {

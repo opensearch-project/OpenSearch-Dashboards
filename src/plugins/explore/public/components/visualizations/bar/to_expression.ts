@@ -15,6 +15,7 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  buildDataRange,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
 import {
@@ -53,6 +54,11 @@ export const createBarSpec = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -90,7 +96,6 @@ export const createTimeBarChart = (
     categoryField: timeField,
     categoryEncode,
     seriesFields,
-    seriesFieldNames,
     seriesEncode,
   } = getNormalizedAxisConfig(axisColumnMappings);
 
@@ -114,8 +119,13 @@ export const createTimeBarChart = (
       legend: { show: false },
     }),
     buildAxisConfigs,
-    applyPercentageAxis(styles),
     applyTimeRange,
+    applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields,
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
@@ -196,8 +206,14 @@ export const createGroupedTimeBarChart = (
       legend: { show: false },
     }),
     buildAxisConfigs,
-    applyPercentageAxis(styles),
     applyTimeRange,
+    applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
+
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
@@ -278,6 +294,11 @@ export const createStackedBarSpec = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -328,6 +349,11 @@ export const createDoubleNumericalBarChart = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
+    buildDataRange({
+      seriesFields,
+      stacked: 'stackMode' in styles && styles.stackMode !== 'none',
+      fromBase: true,
+    }),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
