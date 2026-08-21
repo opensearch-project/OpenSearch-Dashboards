@@ -189,6 +189,28 @@ describe('validateWorkspaceForm', () => {
       message: 'Name is invalid. Enter a valid name.',
     });
   });
+  it('should return error if custom id is invalid', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        customId: 'invalid id',
+        features: ['use-case-observability'],
+      }).customId
+    ).toEqual({
+      code: WorkspaceFormErrorCode.InvalidWorkspaceId,
+      message:
+        'ID is invalid. Must be 6–36 characters using only letters, numbers, underscores, and hyphens.',
+    });
+  });
+  it('should accept a valid custom id', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        customId: 'custom1',
+        features: ['use-case-observability'],
+      }).customId
+    ).toBeUndefined();
+  });
   it('should return error if color is invalid', () => {
     expect(validateWorkspaceForm({ color: 'QWERTY' }).color).toEqual({
       code: WorkspaceFormErrorCode.InvalidColor,

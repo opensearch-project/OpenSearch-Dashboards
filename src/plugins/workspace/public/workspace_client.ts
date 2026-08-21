@@ -9,6 +9,8 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
@@ -205,19 +207,19 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Create a workspace
    *
    * @param attributes
-   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
+   * @returns {Promise<IResponse<WorkspaceCreateResult>>} result of the workspace creation
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
       dataConnections?: string[];
     }
-  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
+  ): Promise<IResponse<WorkspaceCreateResult>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
+    const result = await this.safeFetch<WorkspaceCreateResult>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
