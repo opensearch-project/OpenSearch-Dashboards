@@ -26,7 +26,40 @@ banner.iconType: "iInCircle" # Any valid EUI icon type
 banner.isVisible: true # Whether the banner is initially visible
 banner.useMarkdown: true # Whether to render content as markdown
 banner.size: "m" # Options: s (small), m (medium)
+
+# External configuration
+# Set the external link to fetch banner configuration from
+# If provided, the banner will try to fetch configuration from this URL
+# If the fetch fails, it will fall back to the settings above
+# banner.externalLink: "https://example.com/banner-config.json"
 ```
+
+### External Configuration
+
+You can configure the banner to fetch its configuration from an external JSON endpoint. This is useful for centrally managing banner content across multiple OpenSearch Dashboards instances.
+
+The external JSON file should have the following structure:
+
+```json
+{
+  "content": "Important announcement or notification",
+  "color": "primary",
+  "iconType": "iInCircle",
+  "isVisible": true,
+  "useMarkdown": true,
+  "size": "m"
+}
+```
+
+All fields are optional. Any fields not provided will fall back to the local configuration in `opensearch_dashboards.yml`.
+
+Field descriptions:
+- `content`: The text content of the banner (supports markdown if useMarkdown is true)
+- `color`: The color theme of the banner (options: "primary", "success", "warning")
+- `iconType`: Any valid OUI icon type
+- `isVisible`: Boolean indicating whether the banner should be displayed
+- `useMarkdown`: Boolean indicating whether to render content as markdown
+- `size`: The size of the banner (options: "s" for small, "m" for medium)
 
 ## Usage
 
