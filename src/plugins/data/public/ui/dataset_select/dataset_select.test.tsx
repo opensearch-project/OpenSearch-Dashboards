@@ -7,7 +7,13 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
-import { CORE_SIGNAL_TYPES, DataStorage, DEFAULT_DATA } from '../../../common';
+import {
+  CORE_SIGNAL_TYPES,
+  DataStorage,
+  DataStructure,
+  DATA_STRUCTURE_META_TYPES,
+  DEFAULT_DATA,
+} from '../../../common';
 import { dataPluginMock } from '../../mocks';
 import { queryServiceMock } from '../../query/mocks';
 import { getQueryService } from '../../services';
@@ -19,39 +25,99 @@ jest.mock('../../services', () => ({
   getQueryService: jest.fn(),
 }));
 
+const INDEX_PATTERN = DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+
+interface ChildOverrides {
+  id: string;
+  title: string;
+  displayName?: string;
+  description?: string;
+  timeFieldName?: string;
+  signalType?: string;
+  dataSource?: { id: string; title: string };
+}
+
+// Build an index-pattern DataStructure with lightweight CUSTOM meta, matching what the
+// INDEX_PATTERN type config's fetch() returns (title/displayName/timeFieldName/signalType/
+// description carried in meta; data source in parent) — i.e. no heavy field list.
+const makeChild = (over: ChildOverrides): DataStructure => ({
+  id: over.id,
+  title: over.title,
+  type: INDEX_PATTERN,
+  meta: {
+    type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+    timeFieldName: over.timeFieldName,
+    displayName: over.displayName,
+    signalType: over.signalType,
+    description: over.description,
+  },
+  ...(over.dataSource
+    ? {
+        parent: {
+          id: over.dataSource.id,
+          title: over.dataSource.title,
+          type: 'DATA_SOURCE',
+          meta: { type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      }
+    : {}),
+});
+
+const indexPatternToDataset = (path: DataStructure[]) => {
+  const child = path[path.length - 1];
+  const meta = (child.meta ?? {}) as {
+    timeFieldName?: string;
+    displayName?: string;
+    signalType?: string;
+  };
+  return {
+    id: child.id,
+    title: child.title,
+    type: INDEX_PATTERN,
+    timeFieldName: meta.timeFieldName,
+    displayName: meta.displayName,
+    signalType: meta.signalType,
+    ...(child.parent
+      ? { dataSource: { id: child.parent.id, title: child.parent.title, type: child.parent.type } }
+      : {}),
+  };
+};
+
+const makeIndexPatternType = (
+  children: DataStructure[],
+  metaOverride: Record<string, unknown> = {}
+) => ({
+  id: 'index-pattern',
+  title: 'Index Pattern',
+  meta: { icon: { type: 'database' }, supportedAppNames: undefined, ...metaOverride },
+  fetch: jest.fn().mockResolvedValue({ children }),
+  toDataset: jest.fn(indexPatternToDataset),
+});
+
+const makeDatasetService = (typeConfig: ReturnType<typeof makeIndexPatternType>) => ({
+  getType: jest.fn().mockReturnValue(typeConfig),
+  cacheDataset: jest.fn(),
+  isDatasetAllowed: jest.fn().mockReturnValue(true),
+});
+
 describe('DatasetSelect', () => {
   const mockOnSelect = jest.fn();
   const mockQuery = {
     dataset: {
       id: 'index-pattern-id',
       title: 'Test Index Pattern',
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      type: INDEX_PATTERN,
     },
   };
 
-  // Use the proper mock utilities
-  const mockCore = coreMock.createStart();
-  const mockDataStartContract = dataPluginMock.createStartContract();
-  const mockQueryService = queryServiceMock.createSetupContract();
-
-  // Setup query service
-  mockQueryService.queryString.getQuery = jest.fn().mockReturnValue(mockQuery);
-  mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-    getType: jest.fn().mockReturnValue({
-      id: 'index-pattern',
-      title: 'Index Pattern',
-      meta: {
-        icon: {
-          type: 'database',
-        },
-        supportedAppNames: undefined, // undefined means supported by all apps
-      },
-    }),
-    cacheDataset: jest.fn(),
-    isDatasetAllowed: jest.fn().mockReturnValue(true),
+  const defaultChild = makeChild({
+    id: 'index-pattern-id',
+    title: 'Test Index Pattern',
+    displayName: 'Test Index Pattern Display Name',
+    description: 'Test Index Pattern Description',
+    timeFieldName: '@timestamp',
   });
 
-  // Setup dataViews service
   const mockDataViewData = {
     id: 'index-pattern-id',
     title: 'Test Index Pattern',
@@ -60,36 +126,20 @@ describe('DatasetSelect', () => {
     timeFieldName: '@timestamp',
   };
 
+  const mockCore = coreMock.createStart();
+  const mockDataStartContract = dataPluginMock.createStartContract();
+  const mockQueryService = queryServiceMock.createSetupContract();
+
+  // Only lazily-invoked methods remain used by the component: getDefault (default dataset),
+  // get (fallback enrichment for a selected dataset not in the list), convertToDataset and
+  // clearCache (advanced-selector save path). Reset per-test to avoid cross-test leakage.
   const mockDataViews = {
-    getIds: jest.fn().mockImplementation((refreshFields) => {
-      return Promise.resolve(['index-pattern-id']);
-    }),
-    get: jest.fn().mockImplementation((id) => {
-      return Promise.resolve({
-        ...mockDataViewData,
-        id,
-      });
-    }),
-    getMultiple: jest.fn().mockImplementation((ids) => {
-      return Promise.resolve(
-        ids.map((id: string) => ({
-          ...mockDataViewData,
-          id,
-        }))
-      );
-    }),
-    getDefault: jest.fn().mockResolvedValue(mockDataViewData),
-    convertToDataset: jest.fn().mockImplementation((dataView) => {
-      return Promise.resolve({
-        id: dataView.id,
-        title: dataView.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      });
-    }),
+    get: jest.fn(),
+    getDefault: jest.fn(),
+    convertToDataset: jest.fn(),
     clearCache: jest.fn(),
   };
 
-  // Create services for the component
   const mockServices: IDataPluginServices = {
     appName: 'testApp',
     uiSettings: mockCore.uiSettings,
@@ -123,36 +173,57 @@ describe('DatasetSelect', () => {
     );
   };
 
+  // Wait for the initial dataset fetch to finish (button leaves the loading/disabled state)
+  // before opening the popover, otherwise the click lands on a disabled button.
+  const openPopover = async () => {
+    await waitFor(() =>
+      expect(screen.getByTestId('datasetSelectButton')).not.toHaveClass('euiButtonEmpty-isDisabled')
+    );
+    fireEvent.click(screen.getByTestId('datasetSelectButton'));
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     (getQueryService as jest.Mock).mockReturnValue(mockQueryService);
+
+    // Reset to a single default index pattern selected via the query.
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue(mockQuery);
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([defaultChild])));
+
+    mockDataViews.get = jest.fn((id: string) => Promise.resolve({ ...mockDataViewData, id }));
+    mockDataViews.getDefault = jest.fn().mockResolvedValue(mockDataViewData);
+    mockDataViews.convertToDataset = jest.fn((dataView: any) =>
+      Promise.resolve({ id: dataView.id, title: dataView.title, type: INDEX_PATTERN })
+    );
+    mockDataViews.clearCache = jest.fn();
   });
 
   it('renders the DatasetSelect component', async () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
-
-    expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
   });
 
   it('shows the selected dataset title', async () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getMultiple).toHaveBeenCalled();
+      expect(screen.getByText('Test Index Pattern Display Name')).toBeInTheDocument();
     });
-
-    expect(screen.getByText('Test Index Pattern Display Name')).toBeInTheDocument();
   });
 
   it('opens the popover when clicked', async () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
 
     const button = screen.getByTestId('datasetSelectButton');
@@ -163,44 +234,11 @@ describe('DatasetSelect', () => {
     });
   });
 
-  it.skip('selects a dataset when option is clicked', async () => {
-    renderWithContext();
-
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
-
-    const button = screen.getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('datasetSelectSelectable')).toBeInTheDocument();
-    });
-
-    // Find the option using findByTestId which waits for the element
-    const datasetOption = await screen.findByTestId(
-      'datasetSelectOption-Test Index Pattern',
-      {},
-      { timeout: 5000 }
-    );
-    expect(datasetOption).toBeInTheDocument();
-    fireEvent.click(datasetOption);
-
-    await waitFor(() => {
-      expect(mockOnSelect).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'index-pattern-id',
-          title: 'Test Index Pattern',
-        })
-      );
-    });
-  });
-
   it('opens advanced selector when create dataset button is clicked', async () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
 
     const button = screen.getByTestId('datasetSelectButton');
@@ -229,192 +267,66 @@ describe('DatasetSelect', () => {
   });
 
   it('filters datasets by supportedAppNames', async () => {
-    // Create a dataset type that only supports 'otherApp'
-    const mockGetTypeRestricted = jest.fn().mockReturnValue({
-      id: 'restricted-type',
-      title: 'Restricted Type',
-      meta: {
-        icon: { type: 'database' },
-        supportedAppNames: ['otherApp'], // Does not include 'testApp'
-      },
-    });
-
-    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-      getType: mockGetTypeRestricted,
-      cacheDataset: jest.fn(),
-      isDatasetAllowed: jest.fn().mockReturnValue(true),
-    });
-
-    // Mock a dataset with the restricted type
-    mockDataViews.getIds = jest.fn().mockResolvedValue(['restricted-id']);
-    mockDataViews.get = jest.fn().mockResolvedValue({
+    const restrictedChild = makeChild({
       id: 'restricted-id',
       title: 'Restricted Dataset',
       displayName: 'Restricted Dataset',
-      type: 'restricted-type',
     });
-    mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
-      id: 'restricted-id',
-      title: 'Restricted Dataset',
-      type: 'restricted-type',
-    });
+    // Type only supports 'otherApp', not the current 'testApp'.
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(
+        makeDatasetService(
+          makeIndexPatternType([restrictedChild], { supportedAppNames: ['otherApp'] })
+        )
+      );
 
     renderWithContext();
 
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
+    await openPopover();
 
-    // The dataset should be filtered out since it doesn't support 'testApp'
-    const button = screen.getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-
-    // The restricted dataset should not appear in the list
     expect(screen.queryByText('Restricted Dataset')).not.toBeInTheDocument();
   });
 
   it('includes datasets when supportedAppNames is undefined', async () => {
-    // Dataset type with undefined supportedAppNames (supports all apps)
-    const mockGetTypeAll = jest.fn().mockReturnValue({
-      id: 'all-apps-type',
-      title: 'All Apps Type',
-      meta: {
-        icon: { type: 'database' },
-        supportedAppNames: undefined,
-      },
-    });
-
-    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-      getType: mockGetTypeAll,
-      cacheDataset: jest.fn(),
-      isDatasetAllowed: jest.fn().mockReturnValue(true),
-    });
-
-    mockDataViews.getIds = jest.fn().mockResolvedValue(['all-apps-id']);
-    mockDataViews.getMultiple = jest.fn().mockResolvedValue([
-      {
-        id: 'all-apps-id',
-        title: 'all-apps-dataset',
-        displayName: 'All Apps Dataset',
-        type: 'all-apps-type',
-      },
-    ]);
-    mockDataViews.get = jest.fn().mockResolvedValue({
+    const allAppsChild = makeChild({
       id: 'all-apps-id',
       title: 'all-apps-dataset',
       displayName: 'All Apps Dataset',
-      type: 'all-apps-type',
     });
-    mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
-      id: 'all-apps-id',
-      title: 'all-apps-dataset',
-      type: 'all-apps-type',
-    });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([allAppsChild])));
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-      dataset: {
-        id: 'all-apps-id',
-        title: 'all-apps-dataset',
-        type: 'all-apps-type',
-      },
+      dataset: { id: 'all-apps-id', title: 'all-apps-dataset', type: INDEX_PATTERN },
     });
 
     renderWithContext();
 
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-      expect(mockDataViews.getMultiple).toHaveBeenCalled();
-    });
+    await openPopover();
 
-    const button = screen.getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-
-    // The dataset should appear since supportedAppNames is undefined (checking by display name)
-    const allAppsElements = screen.getAllByText('All Apps Dataset');
-    expect(allAppsElements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('All Apps Dataset').length).toBeGreaterThan(0);
   });
 
   it('filters datasets by METRICS signal type', async () => {
-    const mockGetTypeMetrics = jest.fn().mockReturnValue({
-      id: 'metrics-type',
-      title: 'Metrics Type',
-      meta: {
-        icon: { type: 'database' },
-        supportedAppNames: undefined,
-      },
-    });
-
-    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-      getType: mockGetTypeMetrics,
-      cacheDataset: jest.fn(),
-      isDatasetAllowed: jest.fn().mockReturnValue(true),
-    });
-
-    // Create two datasets: one with metrics signal type, one with logs
-    mockDataViews.getIds = jest.fn().mockResolvedValue(['metrics-id', 'logs-id']);
-    mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
-      return Promise.resolve(
-        ids.map((id: string) => {
-          if (id === 'metrics-id') {
-            return {
-              id: 'metrics-id',
-              title: 'metrics-dataset',
-              displayName: 'Metrics Dataset',
-              signalType: CORE_SIGNAL_TYPES.METRICS,
-            };
-          }
-          return {
-            id: 'logs-id',
-            title: 'logs-dataset',
-            displayName: 'Logs Dataset',
-            signalType: CORE_SIGNAL_TYPES.LOGS,
-          };
-        })
-      );
-    });
-    mockDataViews.get = jest.fn().mockImplementation((id) => {
-      if (id === 'metrics-id') {
-        return Promise.resolve({
-          id: 'metrics-id',
-          title: 'metrics-dataset',
-          displayName: 'Metrics Dataset',
-          signalType: CORE_SIGNAL_TYPES.METRICS,
-        });
-      }
-      return Promise.resolve({
-        id: 'logs-id',
-        title: 'logs-dataset',
-        displayName: 'Logs Dataset',
-        signalType: CORE_SIGNAL_TYPES.LOGS,
-      });
-    });
-    mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-      return Promise.resolve({
-        id: dataView.id,
-        title: dataView.title,
-        type: 'metrics-type',
-        signalType: dataView.signalType,
-      });
-    });
-    mockDataViews.getDefault = jest.fn().mockResolvedValue({
+    const metricsChild = makeChild({
       id: 'metrics-id',
       title: 'metrics-dataset',
       displayName: 'Metrics Dataset',
       signalType: CORE_SIGNAL_TYPES.METRICS,
     });
+    const logsChild = makeChild({
+      id: 'logs-id',
+      title: 'logs-dataset',
+      displayName: 'Logs Dataset',
+      signalType: CORE_SIGNAL_TYPES.LOGS,
+    });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([metricsChild, logsChild])));
+    mockDataViews.getDefault = jest.fn().mockResolvedValue({ id: 'metrics-id' });
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-      dataset: {
-        id: 'metrics-id',
-        title: 'metrics-dataset',
-        type: 'metrics-type',
-      },
+      dataset: { id: 'metrics-id', title: 'metrics-dataset', type: INDEX_PATTERN },
     });
 
     renderWithContext({
@@ -422,101 +334,44 @@ describe('DatasetSelect', () => {
       signalType: CORE_SIGNAL_TYPES.METRICS,
     });
 
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
+    await openPopover();
 
-    const button = screen.getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-
-    const metricsElements = screen.queryAllByText('Metrics Dataset');
-    expect(metricsElements.length).toBeGreaterThan(0);
-
+    expect(screen.queryAllByText('Metrics Dataset').length).toBeGreaterThan(0);
     expect(screen.queryByText('Logs Dataset')).not.toBeInTheDocument();
   });
 
   it('ignores incompatible dataset changes and preserves selection', async () => {
-    // Setup: Start with a trace dataset selected on traces page
     const traceDataset = {
       id: 'trace-id',
       title: 'trace-dataset',
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      type: INDEX_PATTERN,
       signalType: CORE_SIGNAL_TYPES.TRACES,
     };
-
     const logDataset = {
       id: 'log-id',
       title: 'log-dataset',
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      type: INDEX_PATTERN,
       signalType: CORE_SIGNAL_TYPES.LOGS,
     };
 
-    // Mock getIds to return both datasets
-    mockDataViews.getIds = jest.fn().mockResolvedValue(['trace-id', 'log-id']);
-
-    // Mock getMultiple to return the correct datasets based on IDs
-    mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
-      return Promise.resolve(
-        ids
-          .map((id: string) => {
-            if (id === 'trace-id') {
-              return {
-                id: 'trace-id',
-                title: 'trace-dataset',
-                displayName: 'Trace Dataset',
-                signalType: CORE_SIGNAL_TYPES.TRACES,
-              };
-            } else if (id === 'log-id') {
-              return {
-                id: 'log-id',
-                title: 'log-dataset',
-                displayName: 'Log Dataset',
-                signalType: CORE_SIGNAL_TYPES.LOGS,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean)
-      );
+    // Only the trace dataset is in the list; the log dataset arrives via a query change and is
+    // resolved through the lazy get() fallback.
+    const traceChild = makeChild({
+      id: 'trace-id',
+      title: 'trace-dataset',
+      displayName: 'Trace Dataset',
+      signalType: CORE_SIGNAL_TYPES.TRACES,
     });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([traceChild])));
+    mockDataViews.get = jest.fn((id: string) =>
+      id === 'log-id'
+        ? Promise.resolve({ ...logDataset, displayName: 'Log Dataset' })
+        : Promise.resolve({ ...traceDataset, displayName: 'Trace Dataset' })
+    );
 
-    // Mock get for fallback cases
-    mockDataViews.get = jest.fn().mockImplementation((id) => {
-      if (id === 'trace-id') {
-        return Promise.resolve({
-          id: 'trace-id',
-          title: 'trace-dataset',
-          displayName: 'Trace Dataset',
-          signalType: CORE_SIGNAL_TYPES.TRACES,
-        });
-      } else if (id === 'log-id') {
-        return Promise.resolve({
-          id: 'log-id',
-          title: 'log-dataset',
-          displayName: 'Log Dataset',
-          signalType: CORE_SIGNAL_TYPES.LOGS,
-        });
-      }
-      return Promise.resolve(null);
-    });
-
-    mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-      return Promise.resolve({
-        id: dataView.id,
-        title: dataView.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        signalType: dataView.signalType,
-      });
-    });
-
-    // Start with trace dataset selected
-    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-      dataset: traceDataset,
-    });
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: traceDataset });
 
     const { rerender } = renderWithContext({
       ...defaultProps,
@@ -524,16 +379,12 @@ describe('DatasetSelect', () => {
     });
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
       expect(screen.getByText('Trace Dataset')).toBeInTheDocument();
     });
 
-    // Simulate flyout changing query to log dataset (e.g., querying related logs)
-    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-      dataset: logDataset,
-    });
+    // Simulate a flyout changing the query to a log dataset (querying related logs).
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: logDataset });
 
-    // Force re-render to trigger the effect
     rerender(
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={mockServices}>
@@ -542,13 +393,11 @@ describe('DatasetSelect', () => {
       </I18nProvider>
     );
 
-    // Wait a bit for effects to run
     await waitFor(() => {
       expect(mockDataViews.get).toHaveBeenCalledWith('log-id', false);
     });
 
-    // The UI should still show the trace dataset, not the incompatible log dataset
-    // It should NOT clear the selection or show "Select dataset"
+    // Should keep the trace dataset, not switch to the incompatible log dataset.
     expect(screen.getByText('Trace Dataset')).toBeInTheDocument();
     expect(screen.queryByText('Log Dataset')).not.toBeInTheDocument();
     expect(screen.queryByText('Select dataset')).not.toBeInTheDocument();
@@ -556,45 +405,18 @@ describe('DatasetSelect', () => {
 
   it('handles errors when fetching datasets gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    const localMockDataViews = {
-      ...mockDataViews,
-      getIds: jest.fn().mockRejectedValue(new Error('Failed to fetch')),
-    };
 
-    const localMockQueryService = {
-      ...mockQueryService,
-      queryString: {
-        ...mockQueryService.queryString,
-        getQuery: jest.fn().mockReturnValue({ dataset: null, language: 'kuery' }),
-      },
-    };
+    const failingType = makeIndexPatternType([]);
+    failingType.fetch = jest.fn().mockRejectedValue(new Error('Failed to fetch'));
+    mockQueryService.queryString.getQuery = jest
+      .fn()
+      .mockReturnValue({ dataset: null, language: 'kuery' });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(failingType));
 
-    const localServices = {
-      ...mockServices,
-      data: {
-        ...mockServices.data,
-        dataViews: localMockDataViews,
-        query: localMockQueryService,
-      },
-    };
+    renderWithContext();
 
-    render(
-      <I18nProvider>
-        <OpenSearchDashboardsContextProvider services={localServices}>
-          <DatasetSelect {...defaultProps} />
-        </OpenSearchDashboardsContextProvider>
-      </I18nProvider>
-    );
-
-    // Wait for getIds to be called and error handling to complete
-    await waitFor(
-      () => {
-        expect(localMockDataViews.getIds).toHaveBeenCalled();
-      },
-      { timeout: 3000 }
-    );
-
-    // Wait for loading to complete after error
     await waitFor(
       () => {
         const button = screen.getByTestId('datasetSelectButton');
@@ -603,7 +425,6 @@ describe('DatasetSelect', () => {
       { timeout: 3000 }
     );
 
-    // Component should render without crashing and show "Select dataset" text
     expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     expect(screen.getByText('Select dataset')).toBeInTheDocument();
 
@@ -612,7 +433,6 @@ describe('DatasetSelect', () => {
 
   it('shows loading state initially', () => {
     renderWithContext();
-    // Check for disabled state which indicates loading
     const button = screen.getByTestId('datasetSelectButton');
     expect(button).toHaveClass('euiButtonEmpty-isDisabled');
   });
@@ -632,118 +452,26 @@ describe('DatasetSelect', () => {
     const { getByTestId } = renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-      expect(mockDataViews.getMultiple).toHaveBeenCalled();
+      expect(getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
-
-    // Verify dataset was loaded and component rendered
-    expect(getByTestId('datasetSelectButton')).toBeInTheDocument();
   });
 
   it('renders dataset with data source information', async () => {
-    const localMockDataViews = {
-      ...mockDataViews,
-      get: jest.fn().mockResolvedValue({
-        ...mockDataViewData,
-        dataSourceRef: {
-          id: 'ds-id',
-          type: 'data-source',
-        },
-      }),
-      convertToDataset: jest.fn().mockResolvedValue({
-        id: mockDataViewData.id,
-        title: mockDataViewData.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        dataSource: {
-          id: 'ds-id',
-          title: 'Test Data Source',
-          type: 'data-source',
-        },
-      }),
-    };
-
-    const localServices = {
-      ...mockServices,
-      data: {
-        ...mockServices.data,
-        dataViews: localMockDataViews,
-      },
-    };
-
-    render(
-      <I18nProvider>
-        <OpenSearchDashboardsContextProvider services={localServices}>
-          <DatasetSelect {...defaultProps} />
-        </OpenSearchDashboardsContextProvider>
-      </I18nProvider>
-    );
-
-    await waitFor(() => {
-      expect(localMockDataViews.getIds).toHaveBeenCalled();
-      expect(localMockDataViews.convertToDataset).toHaveBeenCalled();
+    const child = makeChild({
+      id: 'index-pattern-id',
+      title: 'Test Index Pattern',
+      displayName: 'Test Index Pattern Display Name',
+      timeFieldName: '@timestamp',
+      dataSource: { id: 'ds-id', title: 'Test Data Source' },
     });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([child])));
 
-    // Verify component rendered with data source
-    expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
-  });
-
-  it('opens dataset selector popover', async () => {
-    const { getByTestId } = renderWithContext();
+    renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
-
-    const button = getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-
-    // Verify the selectable component is visible
-    expect(screen.getByTestId('datasetSelectSelectable')).toBeInTheDocument();
-  });
-
-  it('handles empty datasets list', async () => {
-    const localMockDataViews = {
-      ...mockDataViews,
-      getIds: jest.fn().mockResolvedValue([]),
-    };
-
-    const localQueryService = {
-      ...mockQueryService,
-      queryString: {
-        ...mockQueryService.queryString,
-        getQuery: jest.fn().mockReturnValue({ dataset: null }),
-      },
-    };
-
-    const localMockDataViewsWithDefault = {
-      ...localMockDataViews,
-      getDefault: jest.fn().mockResolvedValue(null),
-    };
-
-    (getQueryService as jest.Mock).mockReturnValue(localQueryService);
-
-    const localServices = {
-      ...mockServices,
-      data: {
-        ...mockServices.data,
-        dataViews: localMockDataViewsWithDefault,
-      },
-    };
-
-    render(
-      <I18nProvider>
-        <OpenSearchDashboardsContextProvider services={localServices}>
-          <DatasetSelect {...defaultProps} />
-        </OpenSearchDashboardsContextProvider>
-      </I18nProvider>
-    );
-
-    await waitFor(() => {
-      expect(localMockDataViewsWithDefault.getIds).toHaveBeenCalled();
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
 
     const button = screen.getByTestId('datasetSelectButton');
@@ -753,15 +481,46 @@ describe('DatasetSelect', () => {
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
 
-    // Should not crash with empty list
-    expect(button).toBeInTheDocument();
+    // The data source title appears in the row subtitle.
+    expect(screen.getAllByText(/Test Data Source/).length).toBeGreaterThan(0);
+  });
+
+  it('opens dataset selector popover', async () => {
+    const { getByTestId } = renderWithContext();
+
+    await waitFor(() => {
+      expect(getByTestId('datasetSelectButton')).toBeInTheDocument();
+    });
+
+    const button = getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('datasetSelectSelectable')).toBeInTheDocument();
+  });
+
+  it('handles empty datasets list', async () => {
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(makeIndexPatternType([])));
+    mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+    renderWithContext();
+
+    await openPopover();
+
+    expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
   });
 
   it('searches datasets by title', async () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
     });
 
     const button = screen.getByTestId('datasetSelectButton');
@@ -776,49 +535,44 @@ describe('DatasetSelect', () => {
     expect(screen.getByPlaceholderText('Search')).toHaveValue('Test');
   });
 
-  it('closes popover after dataset selection', async () => {
-    mockDataViews.getIds = jest.fn().mockResolvedValue(['index-pattern-id', 'new-id']);
-    mockDataViews.get = jest.fn().mockImplementation((id) => {
-      if (id === 'new-id') {
-        return Promise.resolve({
-          id: 'new-id',
-          title: 'New Dataset',
-          displayName: 'New Dataset',
-        });
-      }
-      return Promise.resolve(mockDataViewData);
+  it('closes the popover when the trigger is clicked again', async () => {
+    renderWithContext();
+
+    await openPopover();
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+
+    // Toggling the trigger closes the popover (the path a selection also takes via closePopover).
+    fireEvent.click(screen.getByTestId('datasetSelectButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument();
     });
+  });
+
+  it('handles a dataset that carries a description', async () => {
+    const child = makeChild({
+      id: 'described-id',
+      title: 'described-dataset',
+      displayName: 'Described Dataset',
+      description: 'A dataset with a description',
+      timeFieldName: '@timestamp',
+    });
+    const type = makeIndexPatternType([child]);
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+      dataset: { id: 'described-id', title: 'described-dataset', type: INDEX_PATTERN },
+    });
+    mockQueryService.queryString.getDatasetService = jest
+      .fn()
+      .mockReturnValue(makeDatasetService(type));
 
     renderWithContext();
 
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
+    await openPopover();
 
-    const button = screen.getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-
-    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-  });
-
-  it('handles dataset with description', async () => {
-    const { getByTestId } = renderWithContext();
-
-    await waitFor(() => {
-      expect(mockDataViews.getIds).toHaveBeenCalled();
-    });
-
-    const button = getByTestId('datasetSelectButton');
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      // Just verify the popover opened successfully
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
+    // Description is read from child meta and threaded onto the dataset without breaking the list;
+    // the selected dataset renders by its display name.
+    expect(type.toDataset).toHaveBeenCalled();
+    expect(screen.getAllByText('Described Dataset').length).toBeGreaterThan(0);
   });
 
   describe('footer content', () => {
@@ -828,22 +582,11 @@ describe('DatasetSelect', () => {
         signalType: CORE_SIGNAL_TYPES.METRICS,
       });
 
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-      });
+      await openPopover();
 
-      const button = screen.getByTestId('datasetSelectButton');
-      fireEvent.click(button);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-      });
-
-      // Should show "Manage data sources" button for metrics
       expect(screen.getByTestId('datasetSelectorAssociateDataSourcesButton')).toBeInTheDocument();
       expect(screen.getByText('Manage data sources')).toBeInTheDocument();
 
-      // Should NOT show default footer buttons
       expect(screen.queryByTestId('datasetSelectorAdvancedButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('datasetSelectViewDatasetsButton')).not.toBeInTheDocument();
     });
@@ -854,22 +597,11 @@ describe('DatasetSelect', () => {
         signalType: null,
       });
 
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-      });
+      await openPopover();
 
-      const button = screen.getByTestId('datasetSelectButton');
-      fireEvent.click(button);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-      });
-
-      // Should show default footer buttons when signalType is null
       expect(screen.getByTestId('datasetSelectorAdvancedButton')).toBeInTheDocument();
       expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
 
-      // Should NOT show metrics footer button
       expect(
         screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
       ).not.toBeInTheDocument();
@@ -877,224 +609,77 @@ describe('DatasetSelect', () => {
   });
 
   describe('showNonTimeFieldDatasets filtering', () => {
+    const withTimeChild = makeChild({
+      id: 'with-time-id',
+      title: 'with-time-dataset',
+      displayName: 'Dataset With Time Field',
+      timeFieldName: '@timestamp',
+    });
+    const withoutTimeChild = makeChild({
+      id: 'no-time-id',
+      title: 'no-time-dataset',
+      displayName: 'Dataset Without Time Field',
+    });
+
     it('filters out datasets without time fields when showNonTimeFieldDatasets is false', async () => {
-      // Create datasets - one with time field, one without
-      const datasetWithTimeField = {
-        id: 'with-time-id',
-        title: 'with-time-dataset',
-        displayName: 'Dataset With Time Field',
-        timeFieldName: '@timestamp',
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      };
-
-      const datasetWithoutTimeField = {
-        id: 'no-time-id',
-        title: 'no-time-dataset',
-        displayName: 'Dataset Without Time Field',
-        timeFieldName: undefined,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      };
-
-      // Setup mocks to ensure proper dataset filtering
-      const mockGetType = jest.fn().mockReturnValue({
-        id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        title: 'Index Pattern',
-        meta: {
-          icon: { type: 'database' },
-          supportedAppNames: undefined, // undefined means supported by all apps
-        },
-      });
-
-      mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-        getType: mockGetType,
-        cacheDataset: jest.fn(),
-        isDatasetAllowed: jest.fn().mockReturnValue(true),
-      });
-
-      mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);
-      mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
-        return Promise.resolve(
-          ids.map((id: string) => {
-            if (id === 'with-time-id') {
-              return datasetWithTimeField;
-            }
-            return datasetWithoutTimeField;
-          })
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      // Time-less dataset listed first; if the filter drops it, the auto-selected default
+      // becomes the time-based one instead.
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(
+          makeDatasetService(makeIndexPatternType([withoutTimeChild, withTimeChild]))
         );
-      });
-      mockDataViews.get = jest.fn().mockImplementation((id) => {
-        if (id === 'with-time-id') {
-          return Promise.resolve(datasetWithTimeField);
-        }
-        return Promise.resolve(datasetWithoutTimeField);
-      });
-      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-        return Promise.resolve({
-          id: dataView.id,
-          title: dataView.title,
-          type: dataView.type,
-          timeFieldName: dataView.timeFieldName,
-          displayName: dataView.displayName,
-        });
-      });
-      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-        dataset: null, // No dataset selected initially
-      });
       mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
       renderWithContext({
         ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
         showNonTimeFieldDatasets: false,
       });
 
-      // Wait for all async operations to complete
       await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-        expect(mockDataViews.convertToDataset).toHaveBeenCalledTimes(2);
+        expect(mockOnSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'with-time-id' }));
       });
-
-      // Verify that only the dataset with time field was processed
-      // Since we can't easily check the filtered results in the DOM due to virtualization,
-      // we can verify the mocks were called correctly and check that the filtering logic worked
-      expect(mockGetType).toHaveBeenCalled();
-      expect(mockDataViews.getMultiple).toHaveBeenCalledWith(['with-time-id', 'no-time-id']);
-
-      // The test passes if the component renders without error and the filtering logic is applied
-      const button = screen.getByTestId('datasetSelectButton');
-      expect(button).toBeInTheDocument();
     });
 
     it('includes datasets without time fields when showNonTimeFieldDatasets is true', async () => {
-      // Create datasets - one with time field, one without
-      const datasetWithTimeField = {
-        id: 'with-time-id',
-        title: 'with-time-dataset',
-        displayName: 'Dataset With Time Field',
-        timeFieldName: '@timestamp',
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      };
-
-      const datasetWithoutTimeField = {
-        id: 'no-time-id',
-        title: 'no-time-dataset',
-        displayName: 'Dataset Without Time Field',
-        timeFieldName: undefined,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      };
-
-      // Setup mocks to ensure proper dataset filtering
-      const mockGetType = jest.fn().mockReturnValue({
-        id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        title: 'Index Pattern',
-        meta: {
-          icon: { type: 'database' },
-          supportedAppNames: undefined, // undefined means supported by all apps
-        },
-      });
-
-      mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
-        getType: mockGetType,
-        cacheDataset: jest.fn(),
-        isDatasetAllowed: jest.fn().mockReturnValue(true),
-      });
-
-      mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);
-      mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
-        return Promise.resolve(
-          ids.map((id: string) => {
-            if (id === 'with-time-id') {
-              return datasetWithTimeField;
-            }
-            return datasetWithoutTimeField;
-          })
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      // Time-less dataset listed first and retained, so it stays the auto-selected default.
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(
+          makeDatasetService(makeIndexPatternType([withoutTimeChild, withTimeChild]))
         );
-      });
-      mockDataViews.get = jest.fn().mockImplementation((id) => {
-        if (id === 'with-time-id') {
-          return Promise.resolve(datasetWithTimeField);
-        }
-        return Promise.resolve(datasetWithoutTimeField);
-      });
-      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-        return Promise.resolve({
-          id: dataView.id,
-          title: dataView.title,
-          type: dataView.type,
-          timeFieldName: dataView.timeFieldName,
-          displayName: dataView.displayName,
-        });
-      });
-      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-        dataset: null, // No dataset selected initially
-      });
       mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
       renderWithContext({
         ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
         showNonTimeFieldDatasets: true,
       });
 
-      // Wait for all async operations to complete
       await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-        expect(mockDataViews.convertToDataset).toHaveBeenCalledTimes(2);
+        expect(mockOnSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'no-time-id' }));
       });
-
-      // Verify that both datasets were processed
-      expect(mockGetType).toHaveBeenCalled();
-      expect(mockDataViews.getMultiple).toHaveBeenCalledWith(['with-time-id', 'no-time-id']);
-
-      // The test passes if the component renders without error and both datasets are included
-      const button = screen.getByTestId('datasetSelectButton');
-      expect(button).toBeInTheDocument();
     });
 
     it('defaults showNonTimeFieldDatasets to true when not specified', async () => {
-      // Create dataset without time field
-      const datasetWithoutTimeField = {
-        id: 'no-time-id',
-        title: 'no-time-dataset',
-        displayName: 'Dataset Without Time Field',
-        timeFieldName: undefined,
-      };
-
-      mockDataViews.getIds = jest.fn().mockResolvedValue(['no-time-id']);
-      mockDataViews.getMultiple = jest.fn().mockResolvedValue([datasetWithoutTimeField]);
-      mockDataViews.get = jest.fn().mockResolvedValue(datasetWithoutTimeField);
-      mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
-        id: 'no-time-id',
-        title: 'no-time-dataset',
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        timeFieldName: undefined,
-      });
       mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
-        dataset: {
-          id: 'no-time-id',
-          title: 'no-time-dataset',
-          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        },
+        dataset: { id: 'no-time-id', title: 'no-time-dataset', type: INDEX_PATTERN },
       });
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(makeDatasetService(makeIndexPatternType([withoutTimeChild])));
 
-      // Don't specify showNonTimeFieldDatasets - should default to true
       renderWithContext({
         onSelect: mockOnSelect,
         signalType: null,
       });
 
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-      });
+      await openPopover();
 
-      const button = screen.getByTestId('datasetSelectButton');
-      fireEvent.click(button);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-      });
-
-      // Dataset without time field should be visible (default is true)
-      const withoutTimeElements = screen.queryAllByText('Dataset Without Time Field');
-      expect(withoutTimeElements.length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Dataset Without Time Field').length).toBeGreaterThan(0);
     });
   });
 
@@ -1102,131 +687,12 @@ describe('DatasetSelect', () => {
     it('opens ViewDatasetsModal when "View datasets" button is clicked', async () => {
       renderWithContext();
 
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-      });
+      await openPopover();
 
-      const button = screen.getByTestId('datasetSelectButton');
-      fireEvent.click(button);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-      });
-
-      // Click "View datasets" button to open the modal
       const viewDatasetsButton = screen.getByTestId('datasetSelectViewDatasetsButton');
       fireEvent.click(viewDatasetsButton);
 
-      // Verify that the modal was opened
       expect(mockCore.overlays.openModal).toHaveBeenCalled();
-    });
-  });
-
-  describe('Dataset ID deduplication', () => {
-    it('deduplicates dataset IDs before fetching to prevent duplicate error notifications', async () => {
-      // Mock getIds to return duplicate IDs
-      mockDataViews.getIds = jest
-        .fn()
-        .mockResolvedValue(['duplicate-id', 'duplicate-id', 'unique-id']);
-
-      // Mock getMultiple to track what IDs are actually fetched
-      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
-        return Promise.resolve(
-          ids.map((id: string) => ({
-            id,
-            title: `Dataset ${id}`,
-            displayName: `Dataset ${id}`,
-            timeFieldName: '@timestamp',
-          }))
-        );
-      });
-      mockDataViews.getMultiple = getMultipleSpy;
-
-      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-        return Promise.resolve({
-          id: dataView.id,
-          title: dataView.title,
-          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        });
-      });
-
-      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
-
-      renderWithContext();
-
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-        expect(getMultipleSpy).toHaveBeenCalled();
-      });
-
-      // Verify that getMultiple was called with deduplicated IDs
-      // Should only have 2 unique IDs instead of 3
-      const calledIds = getMultipleSpy.mock.calls[0][0];
-      expect(calledIds).toHaveLength(2);
-      expect(calledIds).toContain('duplicate-id');
-      expect(calledIds).toContain('unique-id');
-
-      // Verify no duplicate IDs were passed
-      const uniqueIds = [...new Set(calledIds)];
-      expect(calledIds.length).toBe(uniqueIds.length);
-    });
-
-    it('handles empty array from getIds', async () => {
-      mockDataViews.getIds = jest.fn().mockResolvedValue([]);
-      mockDataViews.getMultiple = jest.fn().mockResolvedValue([]);
-      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
-
-      renderWithContext();
-
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-      });
-
-      // Should not call getMultiple with empty array
-      expect(mockDataViews.getMultiple).toHaveBeenCalledWith([]);
-      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
-    });
-
-    it('handles all duplicate IDs correctly', async () => {
-      // All IDs are the same
-      mockDataViews.getIds = jest.fn().mockResolvedValue(['same-id', 'same-id', 'same-id']);
-
-      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
-        return Promise.resolve(
-          ids.map((id: string) => ({
-            id,
-            title: 'Same Dataset',
-            displayName: 'Same Dataset',
-            timeFieldName: '@timestamp',
-          }))
-        );
-      });
-      mockDataViews.getMultiple = getMultipleSpy;
-
-      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
-        return Promise.resolve({
-          id: dataView.id,
-          title: dataView.title,
-          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-        });
-      });
-
-      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
-
-      renderWithContext();
-
-      await waitFor(() => {
-        expect(mockDataViews.getIds).toHaveBeenCalled();
-        expect(getMultipleSpy).toHaveBeenCalled();
-      });
-
-      // Should only fetch once for the single unique ID
-      const calledIds = getMultipleSpy.mock.calls[0][0];
-      expect(calledIds).toHaveLength(1);
-      expect(calledIds[0]).toBe('same-id');
     });
   });
 });

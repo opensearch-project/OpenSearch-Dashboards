@@ -38,8 +38,13 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       id: pattern.id,
       title: pattern.title,
       ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      // Dataset type from the saved object's `type` attribute (e.g. a rollup index pattern),
+      // defaulting to INDEX_PATTERN. Preserves downstream type-config routing for
+      // non-standard index patterns rather than flattening every dataset to INDEX_PATTERN.
+      type: patternMeta?.datasetType || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
+      // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
+      ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
@@ -106,7 +111,15 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'displayName', 'timeFieldName', 'references'],
+    fields: [
+      'title',
+      'displayName',
+      'timeFieldName',
+      'references',
+      'signalType',
+      'description',
+      'type',
+    ],
     search: `*`,
     searchFields: ['title', 'displayName'],
     perPage: 10000,
@@ -182,6 +195,11 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
+        signalType: savedObject.attributes.signalType,
+        description: savedObject.attributes.description,
+        // Saved-object `type` attribute (distinct from the CUSTOM meta discriminator above),
+        // carried so toDataset can preserve a non-INDEX_PATTERN dataset type.
+        datasetType: savedObject.attributes.type,
       },
     };
 
