@@ -95,6 +95,7 @@ export class DashboardContainerFactoryDefinition implements EmbeddableFactoryDef
       isEmbeddedExternally: false,
       isFullScreenMode: false,
       useMargins: true,
+      useSharedCrosshair: false,
     };
   }
 

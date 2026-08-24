@@ -5,7 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { ExploreEmbeddable } from './explore_embeddable';
+import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
@@ -45,6 +45,20 @@ jest.mock('./panel_data_service', () => {
       init: jest.fn(),
     },
   };
+});
+
+describe('getCrosshairGroup', () => {
+  it('returns no group when shared crosshair is disabled', () => {
+    expect(getCrosshairGroup(false, 'dashboard-123')).toBeUndefined();
+  });
+
+  it('uses the container id when shared crosshair is enabled', () => {
+    expect(getCrosshairGroup(true, 'dashboard-123')).toBe('dashboard-123');
+  });
+
+  it('uses the static id for an unsaved dashboard', () => {
+    expect(getCrosshairGroup(true, '')).toBe('dashboard-unsaved');
+  });
 });
 
 // Mock the services

@@ -235,6 +235,10 @@ export const getNavActions = (
       onHidePanelTitlesChange: (isChecked: boolean) => {
         stateContainer.transitions.setOption('hidePanelTitles', isChecked);
       },
+      useSharedCrosshair: appState.options.useSharedCrosshair ?? false,
+      onUseSharedCrosshairChange: (isChecked: boolean) => {
+        stateContainer.transitions.setOption('useSharedCrosshair', isChecked);
+      },
     });
   };
 
@@ -371,6 +375,7 @@ export const getNavActions = (
       newStateContainer.options = {
         hidePanelTitles: dashboard.options.hidePanelTitles,
         useMargins: dashboard.options.useMargins,
+        useSharedCrosshair: dashboard.options.useSharedCrosshair,
       };
       newStateContainer.timeRestore = dashboard.timeRestore;
       stateContainer.transitions.setDashboard(newStateContainer);
