@@ -48,20 +48,18 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   // Mark the selected service with a badge instead of driving the package's
   // selectedNodeId (which fits/zooms the camera onto that single node, chopping
   // the rest of the graph and fighting manual zoom). This keeps the map fit to
-  // all nodes while still showing which service is selected.
+  // all nodes while still showing which service is selected. A service that
+  // already has an error badge keeps it (errors take priority over selection).
   const displayMap = useMemo(() => {
     if (!selectedService) return map;
     return {
       root: {
         edges: map.root.edges,
         nodes: map.root.nodes.map((node) =>
-          node.id === selectedService
+          node.id === selectedService && node.data.typeBadge === false
             ? {
                 ...node,
-                data: {
-                  ...node.data,
-                  typeBadge: { label: 'Selected', color: '#0268BC', textColor: '#FFFFFF' },
-                },
+                data: { ...node.data, typeBadge: { label: 'Selected', color: '#0268BC' } },
               }
             : node
         ),

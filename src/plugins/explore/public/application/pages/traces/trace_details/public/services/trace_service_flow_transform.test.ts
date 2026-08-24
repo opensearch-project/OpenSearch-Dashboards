@@ -40,7 +40,7 @@ describe('spansToServiceFlow', () => {
     expect(cart.data.subtitle).toContain('2 spans');
   });
 
-  it('records error spans in errors4xx and sets breached health', () => {
+  it('records error spans in errors4xx and shows a red "N errors" badge (not SLI breach)', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
       hit({ spanId: 'b', serviceName: 'cart', status: { code: 0 } }),
@@ -49,12 +49,20 @@ describe('spansToServiceFlow', () => {
     const cart = spansToServiceFlow(hits).map.root.nodes.find((n) => n.id === 'cart')!;
     expect(cart.data.metrics.errors4xx).toBe(1);
     expect(cart.data.metrics.faults5xx).toBe(0);
-    expect(cart.data.health).toEqual({ status: 'breached', breached: 1, recovered: 0, total: 2 });
+    // No health -> no red-breach border override and no "SLI breach" label.
+    expect((cart.data as any).health).toBeUndefined();
+    expect(cart.data.typeBadge).toEqual({ label: '1 error', color: '#BD271E' });
   });
 
-  it('leaves health undefined when there are no errors', () => {
-    const cart = spansToServiceFlow([hit({ spanId: 'a', serviceName: 'cart' })]).map.root.nodes[0];
-    expect(cart.data.health).toBeUndefined();
+  it('pluralizes the error badge and leaves error-free services badge-less', () => {
+    const multi = spansToServiceFlow([
+      hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
+      hit({ spanId: 'b', serviceName: 'cart', status: { code: 2 } }),
+    ]).map.root.nodes[0];
+    expect(multi.data.typeBadge).toEqual({ label: '2 errors', color: '#BD271E' });
+
+    const clean = spansToServiceFlow([hit({ spanId: 'a', serviceName: 'cart' })]).map.root.nodes[0];
+    expect(clean.data.typeBadge).toBe(false);
   });
 
   it('builds deduped cross-service edges with call counts, skipping self-calls', () => {

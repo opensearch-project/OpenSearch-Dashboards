@@ -30,13 +30,15 @@ export interface ServiceFlowNode {
     subtitle?: string;
     color?: string;
     metrics: { requests: number; faults5xx: number; errors4xx: number };
-    health?: { status: string; breached: number; recovered: number; total: number };
     typeBadge: false | { label: string; color: string; textColor?: string };
     actionButton: false;
     showDonut: false;
     keyAttributes: Record<string, string>;
   };
 }
+
+// EUI danger — used for the "N errors" badge (matches OSD's error red).
+const ERROR_COLOR = '#BD271E';
 
 /** A directed service-to-service edge for @osd/apm-topology's celestial edge. */
 export interface ServiceFlowEdge {
@@ -151,15 +153,18 @@ export const spansToServiceFlow = (
         id: service,
         title: service,
         subtitle: `${formatDuration(totalMs)} · ${requests} span${requests === 1 ? '' : 's'}`,
+        // Border/glow uses the service's Gantt legend color (from colorMap).
         color: colorMap[service],
-        // Per-trace RED analog: requests = span count, errors4xx = error spans.
+        // Per-trace RED analog: requests = span count, errors4xx = error spans
+        // (drives the card's built-in error-rate bar).
         metrics: { requests, faults5xx: 0, errors4xx: errors },
-        // Error spans -> Datadog-style red border + SLI badge on the service card.
-        health:
+        // Show errors as a red "N errors" badge rather than celestial's SLO
+        // "SLI breach" state, so the true breached state stays free for real SLO
+        // checks and the border keeps the service (Gantt) color.
+        typeBadge:
           errors > 0
-            ? { status: 'breached', breached: errors, recovered: 0, total: requests }
-            : undefined,
-        typeBadge: false,
+            ? { label: `${errors} error${errors === 1 ? '' : 's'}`, color: ERROR_COLOR }
+            : false,
         actionButton: false,
         showDonut: false,
         keyAttributes: {},
