@@ -23,16 +23,18 @@ export const OpacityRange = ({
   const label = i18n.translate('explore.stylePanel.area.areaOpacity', {
     defaultMessage: 'Fill opacity',
   });
+  const defaultOpacityPercent = Math.round(defaultOpacity * 100);
+  const opacityPercent = Math.round((fillOpacity ?? defaultOpacity) * 100);
 
   return (
     <EuiFormRow label={label}>
       <DebouncedFieldRange
         // Value is stored as a 0-1 fraction but shown on a 0-100 scale
-        value={(fillOpacity ?? defaultOpacity) * 100}
-        onChange={(value) => onOpacityChange((value ?? defaultOpacity * 100) / 100)}
+        value={opacityPercent}
+        onChange={(value) => onOpacityChange((value ?? defaultOpacityPercent) / 100)}
         min={0}
         max={100}
-        defaultValue={defaultOpacity * 100}
+        defaultValue={defaultOpacityPercent}
         step={1}
         aria-label={label}
         data-test-subj={testsubj}
