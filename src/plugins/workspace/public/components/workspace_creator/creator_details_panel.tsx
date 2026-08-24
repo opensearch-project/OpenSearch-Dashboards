@@ -20,6 +20,7 @@ import { i18n } from '@osd/i18n';
 import {
   WorkspaceDescriptionField,
   WorkspaceNameField,
+  WorkspaceIdField,
   WorkspaceFormErrors,
 } from '../workspace_form';
 import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
@@ -27,20 +28,24 @@ import { generateRightSidebarScrollProps, RightSidebarScrollField } from './util
 interface CreatorDetailsPanelProps {
   color?: string;
   name?: string;
+  customId?: string;
   description?: string;
-  formErrors?: Pick<WorkspaceFormErrors, 'name' | 'color'>;
+  formErrors?: Pick<WorkspaceFormErrors, 'name' | 'color' | 'customId'>;
   onColorChange: (text: string, output: EuiColorPickerOutput) => void;
   onNameChange: (name: string) => void;
+  onCustomIdChange: (id: string) => void;
   onDescriptionChange: (description: string) => void;
 }
 
 export const CreatorDetailsPanel = ({
   color,
   name,
+  customId,
   description,
   formErrors,
   onColorChange,
   onNameChange,
+  onCustomIdChange,
   onDescriptionChange,
 }: CreatorDetailsPanelProps) => {
   return (
@@ -123,6 +128,24 @@ export const CreatorDetailsPanel = ({
         }
       >
         <WorkspaceDescriptionField value={description} onChange={onDescriptionChange} />
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            {i18n.translate('workspace.creator.details.panel.fields.id.title', {
+              defaultMessage: 'Custom Workspace ID',
+            })}
+          </h4>
+        }
+        description={i18n.translate('workspace.creator.details.panel.fields.id.description', {
+          defaultMessage: 'Optionally set a custom ID. Leave blank to auto-generate.',
+        })}
+      >
+        <WorkspaceIdField
+          value={customId}
+          onChange={onCustomIdChange}
+          error={formErrors?.customId?.message}
+        />
       </EuiDescribedFormGroup>
     </EuiPanel>
   );
