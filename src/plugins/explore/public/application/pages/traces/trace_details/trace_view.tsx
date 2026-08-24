@@ -31,7 +31,7 @@ import {
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
-import { ServiceMap } from './public/services/service_map';
+import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
   NoMatchMessage,
   getServiceInfo,
@@ -45,7 +45,7 @@ import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
-import { isSpanError } from './public/traces/ppl_resolve_helpers';
+import { isSpanError, resolveServiceNameFromSpan } from './public/traces/ppl_resolve_helpers';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 
@@ -373,6 +373,17 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
 
+  // Trace map node click -> select that service's first span in the shared state.
+  const handleServiceSelect = (serviceName?: string) => {
+    if (!serviceName) return;
+    const span = transformedHits.find(
+      (hit) => (resolveServiceNameFromSpan(hit) || hit.serviceName) === serviceName
+    );
+    if (span) {
+      handleSpanSelect(span.spanId);
+    }
+  };
+
   // Force re-render of visualizations when container size changes
   const forceVisualizationResize = useCallback(() => {
     setVisualizationKey((prev) => prev + 1);
@@ -583,12 +594,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
                         {activeTab === TraceDetailTab.SERVICE_MAP && (
                           <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-                            <ServiceMap
+                            <TraceServiceFlow
                               hits={transformedHits}
                               colorMap={colorMap}
-                              paddingSize="none"
-                              hasShadow={false}
                               selectedSpanId={spanId}
+                              onSelectService={handleServiceSelect}
                             />
                           </div>
                         )}

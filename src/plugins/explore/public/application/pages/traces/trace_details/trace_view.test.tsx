@@ -152,9 +152,9 @@ jest.mock('./public/top_nav_buttons', () => ({
   ),
 }));
 
-jest.mock('./public/services/service_map', () => ({
-  ServiceMap: ({ hits }: any) => (
-    <div data-testid="service-map">
+jest.mock('./public/services/trace_service_flow', () => ({
+  TraceServiceFlow: ({ hits }: any) => (
+    <div data-testid="trace-service-flow">
       <span data-testid="service-hits-count">{hits?.length || 0}</span>
     </div>
   ),
@@ -889,6 +889,8 @@ describe('TraceDetails', () => {
     if (serviceMapButton) fireEvent.click(serviceMapButton);
 
     expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
+    // Trace map tab renders the CelestialMap-based service flow.
+    expect(document.querySelector('[data-testid="trace-service-flow"]')).toBeInTheDocument();
   });
 
   it('handles state subscription changes', async () => {
