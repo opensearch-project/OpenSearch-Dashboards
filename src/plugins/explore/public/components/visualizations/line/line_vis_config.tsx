@@ -147,6 +147,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -181,6 +182,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -214,6 +216,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -247,6 +250,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}

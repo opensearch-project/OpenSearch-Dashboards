@@ -14,6 +14,7 @@ export interface ExploreInput extends EmbeddableInput {
   query?: QueryState;
   filters?: Filter[];
   hidePanelTitles?: boolean;
+  useSharedCrosshair?: boolean;
   columns?: string[];
   sort?: SortOrder[];
   // attributes and references are used to create embeddables without storing saved object

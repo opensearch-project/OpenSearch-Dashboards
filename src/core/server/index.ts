@@ -376,6 +376,7 @@ export {
 export {
   AppCategory,
   WorkspaceAttribute,
+  WorkspaceCreateResult,
   PermissionModeId,
   WorkspaceFindOptions,
   WorkspacePermissionMode,

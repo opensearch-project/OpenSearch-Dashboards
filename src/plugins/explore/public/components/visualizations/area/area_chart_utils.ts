@@ -5,6 +5,7 @@
 
 import * as echarts from 'echarts';
 import type { LineSeriesOption } from 'echarts';
+import { darkMode } from '@osd/ui-shared-deps/theme';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
 
@@ -58,6 +59,9 @@ export const lightenHexColor = (hexColor: string, ratio: number): string => {
   return rgbToHex(blend(r), blend(g), blend(b));
 };
 
+export const getOpacityGradientBaselineColor = () =>
+  darkMode ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)';
+
 export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
   const opacity = styles.areaOpacity ?? DEFAULT_FILL_OPACITY;
 
@@ -70,7 +74,7 @@ export const buildAreaStyle = (styles: AreaChartStyle, seriesColor: string) => {
   // The gradient's far end: transparent for `opacity` mode, a lighter hue for `hue` mode.
   const baselineColor =
     gradientMode === 'opacity'
-      ? 'rgba(0, 0, 0, 0)'
+      ? getOpacityGradientBaselineColor()
       : lightenHexColor(seriesColor, HUE_GRADIENT_LIGHTEN_RATIO);
 
   return {

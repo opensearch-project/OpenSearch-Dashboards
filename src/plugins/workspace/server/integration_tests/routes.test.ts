@@ -73,13 +73,15 @@ describe('workspace service api integration test', () => {
     afterEach(async () => clearWorkspaces(root, osd));
 
     it('create', async () => {
+      // invalid id format should be rejected
       await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: testWorkspace,
+          attributes: { ...testWorkspace, id: 'invalid id!' },
         })
         .expect(400);
 
+      // no id — server assigns one
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
@@ -89,7 +91,110 @@ describe('workspace service api integration test', () => {
 
       expect(result.body.success).toEqual(true);
       expect(typeof result.body.result.id).toBe('string');
+
+      // custom valid id — accepted and used
+      const customId = 'my-ws-01';
+      const resultWithId: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'custom_id_ws' },
+        })
+        .expect(200);
+
+      expect(resultWithId.body.success).toEqual(true);
+      expect(resultWithId.body.result.id).toEqual(customId);
     });
+
+    it('supports CRUD operations and duplicate detection with a custom id', async () => {
+      const customId = 'custom1';
+      const createResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'custom_id_ws' },
+        })
+        .expect(200);
+
+      expect(createResult.body).toEqual({
+        success: true,
+        result: { id: customId },
+      });
+
+      const duplicateResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'another_name' },
+        })
+        .expect(200);
+
+      expect(duplicateResult.body).toEqual({
+        success: false,
+        error: 'workspace id has already been used, try with a different id',
+      });
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${customId}`)
+        .send({
+          attributes: {
+            name: 'updated_custom_id_ws',
+          },
+        })
+        .expect(200);
+
+      const getResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getResult.body.success).toBe(true);
+      expect(getResult.body.result).toEqual(
+        expect.objectContaining({
+          id: customId,
+          name: 'updated_custom_id_ws',
+        })
+      );
+
+      await osdTestServer.request.delete(root, `/api/workspaces/${customId}`).expect(200);
+
+      const getDeletedResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getDeletedResult.body).toEqual({
+        success: false,
+        error: 'workspace not found',
+      });
+    });
+
+    it('creates the workspace and reports failed data source associations', async () => {
+      const customId = 'partial-association';
+      const missingDataSourceId = 'missing-data-source';
+      const createResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'partial_association_ws' },
+          settings: {
+            dataSources: [missingDataSourceId],
+          },
+        })
+        .expect(200);
+
+      expect(createResult.body).toEqual({
+        success: true,
+        result: {
+          id: customId,
+          failedAssociations: [
+            {
+              id: missingDataSourceId,
+              type: 'data-source',
+              error: expect.stringContaining(`data-source/${missingDataSourceId}`),
+            },
+          ],
+        },
+      });
+
+      const getResult: any = await osdTestServer.request
+        .get(root, `/api/workspaces/${customId}`)
+        .expect(200);
+      expect(getResult.body.success).toBe(true);
+    });
+
     it('create with empty/blank name', async () => {
       let result = await osdTestServer.request
         .post(root, `/api/workspaces`)

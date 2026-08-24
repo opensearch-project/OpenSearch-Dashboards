@@ -60,6 +60,7 @@ export enum SupportLanguageType {
   ppl = 'PPL',
   promQL = 'PROMQL',
   ai = 'AI',
+  sql = 'SQL',
 }
 
 export interface QueryState {

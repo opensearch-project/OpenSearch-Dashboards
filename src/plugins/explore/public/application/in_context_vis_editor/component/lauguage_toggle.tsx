@@ -13,6 +13,8 @@ import { EditorMode } from '../../utils/state_management/types';
 import { SupportLanguageType } from '../query_builder/query_builder';
 import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../types';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
   defaultMessage: 'AI',
@@ -26,6 +28,10 @@ const pplOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.pp
   defaultMessage: 'PPL',
 });
 
+const sqlOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.sqlOption', {
+  defaultMessage: 'OpenSearch SQL',
+});
+
 const getLanguageDisplayLabel = (languageType: SupportLanguageType): string => {
   switch (languageType) {
     case SupportLanguageType.promQL:
@@ -34,12 +40,15 @@ const getLanguageDisplayLabel = (languageType: SupportLanguageType): string => {
       return pplOptionText;
     case SupportLanguageType.ai:
       return promptOptionText;
+    case SupportLanguageType.sql:
+      return sqlOptionText;
     default:
       return languageType;
   }
 };
 
 export const LanguageToggle = () => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { focusEditor, switchEditorMode } = useEditorOperations();
   const { queryBuilder, queryEditorState } = useQueryBuilderState();
@@ -80,8 +89,10 @@ export const LanguageToggle = () => {
 
         if (option === promQLOptionText) {
           languageType = SupportLanguageType.promQL;
-        } else {
+        } else if (option === pplOptionText) {
           languageType = SupportLanguageType.ppl;
+        } else {
+          languageType = SupportLanguageType.sql;
         }
 
         clearEditor();
@@ -116,6 +127,19 @@ export const LanguageToggle = () => {
       </EuiContextMenuItem>,
     ];
 
+    if (services.sqlSupportEnabled) {
+      output.push(
+        <EuiContextMenuItem
+          key={sqlOptionText}
+          onClick={() => onLanguageItemClick(sqlOptionText)}
+          disabled={!isPromptMode && language === 'SQL'}
+          data-test-subj={`queryPanelFooterLanguageToggle-${sqlOptionText}`}
+        >
+          {sqlOptionText}
+        </EuiContextMenuItem>
+      );
+    }
+
     // whether to display AI needs to check dataset first
     if (promptModeIsAvailable) {
       output.push(
@@ -131,7 +155,13 @@ export const LanguageToggle = () => {
     }
 
     return output;
-  }, [onLanguageItemClick, isPromptMode, language, promptModeIsAvailable]);
+  }, [
+    onLanguageItemClick,
+    isPromptMode,
+    language,
+    promptModeIsAvailable,
+    services.sqlSupportEnabled,
+  ]);
 
   return (
     // This div is needed to allow for the gradient styling

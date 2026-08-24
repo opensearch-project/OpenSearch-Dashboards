@@ -219,6 +219,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -282,6 +283,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -348,6 +350,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
