@@ -54,7 +54,12 @@ export const SpanCell = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedSpanId, item?.spanId, disableInteractions]);
 
-  const cellContent = renderSpanCellValue({ item, columnId }, traceTimeRange, colorMap);
+  const cellContent = renderSpanCellValue(
+    { item, columnId },
+    traceTimeRange,
+    colorMap,
+    props.selectedSpanId
+  );
 
   return disableInteractions || !item ? (
     cellContent
@@ -71,7 +76,8 @@ export const SpanCell = ({
 export const renderSpanCellValue = (
   { columnId, item }: { item: Span; columnId: string },
   traceTimeRange?: TraceTimeRange,
-  colorMap?: Record<string, string>
+  colorMap?: Record<string, string>,
+  selectedSpanId?: string
 ): any => {
   if (!item) return '-';
 
@@ -101,7 +107,12 @@ export const renderSpanCellValue = (
       return resolveServiceNameFromSpan(item) || value || '-';
     case 'timeline':
       return traceTimeRange ? (
-        <TimelineWaterfallBar span={item} traceTimeRange={traceTimeRange} colorMap={colorMap} />
+        <TimelineWaterfallBar
+          span={item}
+          traceTimeRange={traceTimeRange}
+          colorMap={colorMap}
+          isSelected={!!selectedSpanId && item.spanId === selectedSpanId}
+        />
       ) : null;
     default:
       return value || '-';

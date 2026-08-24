@@ -1,0 +1,20 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTimelineWaterfallBar__bar {
+  border-radius: 3px;
+  min-width: 3px;
+  opacity: 0.9;
+  transition: opacity 0.1s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &--selected {
+    box-shadow: 0 0 0 2px $euiColorEmptyShade, 0 0 0 3px $euiColorPrimary;
+    opacity: 1;
+  }
+}

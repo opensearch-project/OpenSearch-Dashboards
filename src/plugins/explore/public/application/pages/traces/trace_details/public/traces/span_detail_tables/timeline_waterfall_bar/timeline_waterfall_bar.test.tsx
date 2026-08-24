@@ -93,6 +93,26 @@ describe('TimelineWaterfallBar', () => {
     expect(barElement).toHaveStyle({ width: '16%' });
   });
 
+  it('should apply the selected modifier class when isSelected is true', () => {
+    const { getByTestId } = render(
+      <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} isSelected />
+    );
+
+    const barElement = getByTestId('timeline-bar');
+    expect(barElement).toHaveClass('exploreTimelineWaterfallBar__bar');
+    expect(barElement).toHaveClass('exploreTimelineWaterfallBar__bar--selected');
+  });
+
+  it('should not apply the selected modifier class by default', () => {
+    const { getByTestId } = render(
+      <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />
+    );
+
+    const barElement = getByTestId('timeline-bar');
+    expect(barElement).toHaveClass('exploreTimelineWaterfallBar__bar');
+    expect(barElement).not.toHaveClass('exploreTimelineWaterfallBar__bar--selected');
+  });
+
   it('should render tooltip with correct Duration, Start, and End values on hover', async () => {
     const { getByTestId } = render(
       <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />

@@ -5,15 +5,18 @@
 
 import React from 'react';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import classNames from 'classnames';
 import { Span } from '../types';
 import { TraceTimeRange } from '../../../utils/span_timerange_utils';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';
+import './timeline_waterfall_bar.scss';
 
 export interface TimelineWaterfallBarProps {
   span: Span;
   traceTimeRange: TraceTimeRange;
   colorMap?: Record<string, string>;
   paddingPercent?: number;
+  isSelected?: boolean;
 }
 
 export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
@@ -21,6 +24,7 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
   traceTimeRange,
   colorMap,
   paddingPercent = 2,
+  isSelected = false,
 }) => {
   const timelineBarColor = useTimelineBarColor(span, colorMap);
   const {
@@ -40,6 +44,9 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
       />
       <EuiFlexItem
         grow={false}
+        className={classNames('exploreTimelineWaterfallBar__bar', {
+          'exploreTimelineWaterfallBar__bar--selected': isSelected,
+        })}
         style={{
           width: `${Math.min(
             timelineBarWidthPercent,
