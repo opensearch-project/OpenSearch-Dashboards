@@ -108,7 +108,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType', 'description'],
     search: `*`,
     searchFields: ['title', 'displayName'],
     perPage: 10000,
@@ -185,6 +185,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
         signalType: savedObject.attributes.signalType,
+        description: savedObject.attributes.description,
       },
     };
 

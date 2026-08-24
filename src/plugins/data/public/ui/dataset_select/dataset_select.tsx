@@ -431,30 +431,34 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     setDatasets([]);
 
     try {
-      const datasetIds = await dataViews.getIds(true);
-      // Deduplicate IDs to prevent duplicate fetches and error notifications
-      const uniqueDatasetIds = [...new Set(datasetIds)];
       const fetchedDatasets: DetailedDataset[] = [];
 
-      // Fetch all DataViews in parallel using bulkGet optimization
-      const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
-
-      // Convert all DataViews to datasets in parallel
-      const datasetPromises = dataViewsArray.map(async (dataView) => {
-        const dataset = await dataViews.convertToDataset(dataView);
-        return {
-          ...dataset,
-          description: dataView.description,
-          displayName: dataView.displayName,
-          signalType: dataView.signalType,
+      // Index patterns: fetch lightweight metadata (title, time field, data source, signal type,
+      // description) through the type config instead of materializing a full DataView per pattern.
+      // The heavy field list is not needed to render the list and is fetched lazily when a dataset
+      // is actually selected, so this scales to workspaces with many index patterns.
+      const indexPatternType = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+      if (indexPatternType?.fetch) {
+        const indexPatternRoot: DataStructure = {
+          id: indexPatternType.id,
+          title: indexPatternType.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         };
-      });
+        const result = await indexPatternType.fetch(services, [indexPatternRoot]);
+        result.children?.forEach((child) => {
+          const dataset = indexPatternType.toDataset([indexPatternRoot, child]);
+          const childMeta = (child.meta ?? {}) as { displayName?: string; description?: string };
+          fetchedDatasets.push({
+            ...dataset,
+            displayName: childMeta.displayName || child.title,
+            description: childMeta.description,
+            signalType: dataset.signalType,
+          });
+        });
+      }
 
-      const convertedDatasets = await Promise.all(datasetPromises);
-      fetchedDatasets.push(...convertedDatasets);
-
-      // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
-      // These types have their own fetch mechanism via the type config
+      // Other dataset types that do not use data views (e.g., PROMETHEUS) have their own fetch
+      // mechanism via the type config.
       await Promise.all(
         supportedTypes?.map(async (type) => {
           if ([DEFAULT_DATA.SET_TYPES.INDEX_PATTERN, DEFAULT_DATA.SET_TYPES.INDEX].includes(type))
