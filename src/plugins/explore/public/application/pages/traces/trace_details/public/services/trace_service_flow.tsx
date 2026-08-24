@@ -71,18 +71,26 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
 
   // The package fits the graph once, one tick after layout, clamped to zoom
   // 0.6-1.0 and never re-fits on resize. In a flyout/resizable panel the
-  // container is often mis-sized at that moment, chopping nodes. Remounting on a
-  // settled width change forces a fresh fitView against the real size.
+  // container is often mis-sized at that moment, chopping/mis-centering nodes.
+  // Remounting on a settled size change (width OR height — the flyout uses a
+  // vertical split) forces a fresh fitView against the real size.
   const containerRef = useRef<HTMLDivElement>(null);
   const [fitKey, setFitKey] = useState(0);
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
-    let lastWidth = el.getBoundingClientRect().width;
+    const rect = el.getBoundingClientRect();
+    let lastWidth = rect.width;
+    let lastHeight = rect.height;
     const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width ?? 0;
-      if (width > 0 && Math.abs(width - lastWidth) > 8) {
+      const { width, height } = entries[0]?.contentRect ?? { width: 0, height: 0 };
+      if (
+        width > 0 &&
+        height > 0 &&
+        (Math.abs(width - lastWidth) > 8 || Math.abs(height - lastHeight) > 8)
+      ) {
         lastWidth = width;
+        lastHeight = height;
         setFitKey((key) => key + 1);
       }
     });

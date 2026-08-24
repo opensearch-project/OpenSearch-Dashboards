@@ -589,7 +589,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       {/* Tab content */}
                       <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
                         {activeTab === TraceDetailTab.SERVICE_MAP && (
-                          <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              // Bounded height in the flyout (vertical split) so the graph
+                              // stays compact and fully visible; full height on the page.
+                              height: isFlyout ? 500 : 'calc(100vh - 200px)',
+                              overflow: 'hidden',
+                            }}
+                          >
                             <TraceServiceFlow
                               hits={transformedHits}
                               colorMap={colorMap}
