@@ -17,4 +17,9 @@
     box-shadow: 0 0 0 2px $euiColorEmptyShade, 0 0 0 3px $euiColorPrimary;
     opacity: 1;
   }
+
+  // Span falls outside the brushed time window: dim it but keep the row/tree intact.
+  &--outside {
+    opacity: 0.2;
+  }
 }

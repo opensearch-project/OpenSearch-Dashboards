@@ -26,6 +26,7 @@ export const SpanCell = ({
   setCellProps,
   traceTimeRange,
   colorMap,
+  visibleRange,
 }: {
   rowIndex: number;
   columnId: string;
@@ -36,6 +37,7 @@ export const SpanCell = ({
   setCellProps?: (props: any) => void;
   traceTimeRange?: TraceTimeRange;
   colorMap?: Record<string, string>;
+  visibleRange?: TraceTimeRange;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
@@ -58,7 +60,8 @@ export const SpanCell = ({
     { item, columnId },
     traceTimeRange,
     colorMap,
-    props.selectedSpanId
+    props.selectedSpanId,
+    visibleRange
   );
 
   return disableInteractions || !item ? (
@@ -77,7 +80,8 @@ export const renderSpanCellValue = (
   { columnId, item }: { item: Span; columnId: string },
   traceTimeRange?: TraceTimeRange,
   colorMap?: Record<string, string>,
-  selectedSpanId?: string
+  selectedSpanId?: string,
+  visibleRange?: TraceTimeRange
 ): any => {
   if (!item) return '-';
 
@@ -112,6 +116,7 @@ export const renderSpanCellValue = (
           traceTimeRange={traceTimeRange}
           colorMap={colorMap}
           isSelected={!!selectedSpanId && item.spanId === selectedSpanId}
+          visibleRange={visibleRange}
         />
       ) : null;
     default:

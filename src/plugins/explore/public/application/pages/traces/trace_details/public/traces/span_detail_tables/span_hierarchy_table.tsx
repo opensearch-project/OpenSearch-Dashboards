@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
-import { calculateTraceTimeRange } from '../../utils/span_timerange_utils';
+import { calculateTraceTimeRange, TraceTimeRange } from '../../utils/span_timerange_utils';
 import { Span, SpanTableProps } from './types';
 import { HierarchySpanCell } from './hierarchy_span_cell';
 import { SpanCell } from './span_cell';
@@ -26,14 +26,23 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
+  // Visible time window driven by the timeline brush (undefined = full range).
+  const [visibleRange, setVisibleRange] = useState<TraceTimeRange | undefined>(undefined);
 
   const traceTimeRange = useMemo(() => calculateTraceTimeRange(allSpans), [allSpans]);
+
+  const handleVisibleRangeChange = useCallback(
+    (range: TraceTimeRange | null) => setVisibleRange(range ?? undefined),
+    []
+  );
 
   useEffect(() => {
     if (!props.payloadData) return;
     try {
       const hits = parseHits(props.payloadData);
       setAllSpans(hits);
+      // New trace payload: reset any prior zoom window.
+      setVisibleRange(undefined);
       const filteredSpans = applySpanFilters(hits, props.filters);
       setSpans(filteredSpans);
 
@@ -102,8 +111,12 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
   const columns = useMemo(
-    () => getSpanHierarchyTableColumns(traceTimeRange, availableWidth),
-    [traceTimeRange, availableWidth]
+    () =>
+      getSpanHierarchyTableColumns(traceTimeRange, availableWidth, {
+        visibleRange,
+        brush: { spans: allSpans, colorMap, onChange: handleVisibleRangeChange },
+      }),
+    [traceTimeRange, availableWidth, visibleRange, allSpans, colorMap, handleVisibleRangeChange]
   );
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
@@ -131,10 +144,11 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           setCellProps={setCellProps}
           traceTimeRange={traceTimeRange}
           colorMap={colorMap}
+          visibleRange={visibleRange}
         />
       );
     },
-    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap]
+    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap, visibleRange]
   );
 
   const toolbarButtons = useMemo(() => {

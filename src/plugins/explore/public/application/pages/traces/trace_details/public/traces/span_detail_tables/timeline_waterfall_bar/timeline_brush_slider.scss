@@ -1,0 +1,87 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTimelineBrush {
+  position: relative;
+  width: 100%;
+
+  &__track {
+    position: absolute;
+    top: 0;
+    height: 22px;
+    background-color: $euiColorLightestShade;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  &__overview {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    right: 0;
+  }
+
+  &__overviewBar {
+    position: absolute;
+    top: 25%;
+    height: 50%;
+    min-width: 1px;
+    border-radius: 1px;
+    opacity: 0.5;
+  }
+
+  &__window {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-width: 4px;
+    cursor: grab;
+    background-color: transparentize($euiColorPrimary, 0.85);
+    border-left: 1px solid $euiColorPrimary;
+    border-right: 1px solid $euiColorPrimary;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--zoomed {
+      background-color: transparentize($euiColorPrimary, 0.8);
+    }
+  }
+
+  &__handle {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 6px;
+    cursor: ew-resize;
+    background-color: $euiColorPrimary;
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &--left {
+      left: -3px;
+    }
+
+    &--right {
+      right: -3px;
+    }
+  }
+
+  &__reset {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// Leave room for the brush strip beneath the ruler.
+.exploreTimelineBrush + * {
+  margin-top: 24px;
+}

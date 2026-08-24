@@ -17,6 +17,8 @@ export interface TimelineWaterfallBarProps {
   colorMap?: Record<string, string>;
   paddingPercent?: number;
   isSelected?: boolean;
+  /** Visible time window driven by the timeline brush (zoom). */
+  visibleRange?: TraceTimeRange;
 }
 
 export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
@@ -25,6 +27,7 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
   colorMap,
   paddingPercent = 2,
   isSelected = false,
+  visibleRange,
 }) => {
   const timelineBarColor = useTimelineBarColor(span, colorMap);
   const {
@@ -33,7 +36,8 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
     durationMs,
     relativeStart,
     relativeEnd,
-  } = useTimelineBarRange(span, traceTimeRange, paddingPercent);
+    isOutsideWindow,
+  } = useTimelineBarRange(span, traceTimeRange, paddingPercent, visibleRange);
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -46,6 +50,7 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
         grow={false}
         className={classNames('exploreTimelineWaterfallBar__bar', {
           'exploreTimelineWaterfallBar__bar--selected': isSelected,
+          'exploreTimelineWaterfallBar__bar--outside': isOutsideWindow,
         })}
         style={{
           width: `${Math.min(
