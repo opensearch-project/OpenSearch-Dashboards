@@ -95,4 +95,18 @@ describe('getIndexPatternSignalTypes', () => {
     expect(result).toEqual([]);
     expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
+
+  it('returns the patterns already read when a later page lookup fails', async () => {
+    mockSavedObjectsClient.find
+      .mockResolvedValueOnce({
+        savedObjects: [{ id: 'p1', attributes: { signalType: 'logs' }, references: [] }],
+        total: 2,
+      } as any)
+      .mockRejectedValueOnce(new Error('lookup failed'));
+
+    const result = await getIndexPatternSignalTypes(mockSavedObjectsClient);
+
+    expect(result.map((r) => r.id)).toEqual(['p1']);
+    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+  });
 });

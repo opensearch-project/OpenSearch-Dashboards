@@ -42,10 +42,8 @@ export const TraceAutoDetectCallout: React.FC = () => {
     // Run detection
     const runDetection = async () => {
       // Fetch the index-pattern signal types once and reuse the result for both the
-      // "already has a trace dataset?" short-circuit and detection below, so we don't
-      // issue the same find twice. The helper projects to signalType and paginates,
-      // replacing the previous per-pattern get(id) N+1 (which also repeatedly resolved
-      // the same uncached data source) on page load.
+      // "already has a trace dataset?" short-circuit and detection below, so the same
+      // find is not issued twice.
       let signalTypes: IndexPatternSignalType[] | undefined;
       try {
         signalTypes = await getIndexPatternSignalTypes(services.savedObjects.client);

@@ -17,7 +17,7 @@ const TRACES_SIGNAL_TYPE = 'traces';
  * Build the set of data source ids that already have at least one trace dataset,
  * from a precomputed list of index-pattern signal types.
  */
-const collectTraceDataSourceIds = (
+export const collectTraceDataSourceIds = (
   signalTypes: IndexPatternSignalType[]
 ): Set<string | undefined> => {
   const traceDataSourceIds = new Set<string | undefined>();
@@ -64,12 +64,9 @@ export async function detectTraceData(
   };
 
   // 1. Skip auto-detection if a trace dataset already exists for this datasource.
-  //    Resolve this via a single projected find (see getIndexPatternSignalTypes)
-  //    rather than fetching every index pattern individually via get(id): the
-  //    per-pattern loop caused an N+1 of _bulk_get calls on page load, each also
-  //    triggering an uncached data-source lookup. Callers scanning multiple
-  //    datasources should pass `hasExistingTraceDataset` (computed once) to avoid
-  //    repeating the find.
+  //    Resolve this via a single projected find (see getIndexPatternSignalTypes).
+  //    Callers scanning multiple datasources should pass `hasExistingTraceDataset`
+  //    (computed once) so the lookup is not repeated per datasource.
   let traceDatasetAlreadyExists = hasExistingTraceDataset;
   if (traceDatasetAlreadyExists === undefined) {
     try {

@@ -18,21 +18,18 @@ export interface IndexPatternSignalType {
   dataSourceId?: string;
 }
 
-// Index patterns can carry a large `attributes.fields` mapping blob, so we always
-// project to `signalType` only — the server honors the projection, keeping each
-// response in the KB range instead of the full (potentially multi-MB) documents.
-// A high page size keeps the number of round-trips low for typical workspaces while
-// pagination below guarantees correctness when a workspace exceeds a single page.
+// Index patterns can carry a large `attributes.fields` mapping blob, so responses are
+// projected to `signalType` only, keeping each response in the KB range instead of the
+// full (potentially multi-MB) documents. A high page size resolves typical workspaces in
+// a single round-trip; the pagination below preserves correctness for larger ones.
 const PER_PAGE = 10000;
 
 /**
  * Fetch every index pattern's signal type in a single paginated, projected query.
  *
- * This replaces the previous per-pattern `indexPatterns.get(id)` loops on page load,
- * which produced an N+1 of `_bulk_get` calls (one per pattern) and repeatedly resolved
- * the same data source via the uncached `getDataSource`. Callers should fetch this once
- * and derive whatever they need (e.g. a `Map<id, signalType>` or a `Set<dataSourceId>`
- * of datasources that already have a trace dataset).
+ * Returns one entry per index pattern with its `signalType` and resolved `dataSourceId`.
+ * Callers derive whatever they need from the list (e.g. a `Map<id, signalType>` or a
+ * `Set<dataSourceId>` of datasources that already have a trace dataset).
  */
 export const getIndexPatternSignalTypes = async (
   savedObjectsClient: SavedObjectsClientContract
@@ -41,16 +38,26 @@ export const getIndexPatternSignalTypes = async (
   let page = 1;
   let total = Infinity;
 
-  // Paginate until every index pattern has been read, so correctness does not depend
-  // on a single-page cap. `total` bounds the loop; the empty-page guard defends against
-  // a backend that omits or misreports `total`.
+  // Paginate until every index pattern has been read. `total` bounds the loop and the
+  // empty-page guard defends against a backend that omits or misreports `total`.
+  // A stable sort keeps page boundaries deterministic so patterns are neither skipped
+  // nor duplicated across pages.
   while (collected.length < total) {
-    const response = await savedObjectsClient.find<{ signalType?: string }>({
-      type: 'index-pattern',
-      fields: ['signalType'],
-      perPage: PER_PAGE,
-      page,
-    });
+    let response;
+    try {
+      response = await savedObjectsClient.find<{ signalType?: string }>({
+        type: 'index-pattern',
+        fields: ['signalType'],
+        perPage: PER_PAGE,
+        page,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      });
+    } catch {
+      // On a failed page, return the patterns already read rather than discarding them:
+      // a partial signal-type map is still usable and safer than losing everything.
+      break;
+    }
 
     response.savedObjects.forEach((savedObject) => {
       collected.push({

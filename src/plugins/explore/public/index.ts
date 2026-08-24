@@ -24,8 +24,13 @@ export { ExplorePluginSetup, ExplorePluginStart, ExploreServices } from './types
 export {
   detectTraceData,
   detectTraceDataAcrossDataSources,
+  collectTraceDataSourceIds,
   DetectionResult,
 } from './utils/auto_detect_trace_data';
+export {
+  getIndexPatternSignalTypes,
+  IndexPatternSignalType,
+} from './utils/get_index_pattern_signal_types';
 export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create_auto_datasets';
 
 // Visualization system for use by other plugins

@@ -134,6 +134,40 @@ describe('indexPatternTypeConfig', () => {
       });
     });
 
+    test('populates signalType from CUSTOM meta when present', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: {
+            timeFieldName: '@timestamp',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            signalType: 'traces',
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.signalType).toBe('traces');
+    });
+
+    test('omits signalType when CUSTOM meta has none', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.signalType).toBeUndefined();
+    });
+
     test('leaves dataSource undefined when pattern has no parent', () => {
       const mockPath: DataStructure[] = [
         {
@@ -262,7 +296,7 @@ describe('indexPatternTypeConfig', () => {
 
       expect(client.find).toHaveBeenCalledWith({
         type: 'index-pattern',
-        fields: ['title', 'displayName', 'timeFieldName', 'references'],
+        fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
         search: '*',
         searchFields: ['title', 'displayName'],
         perPage: 10000,
@@ -288,6 +322,36 @@ describe('indexPatternTypeConfig', () => {
             dataSourceVersion: undefined,
           },
         },
+      });
+    });
+
+    test('carries signalType from index-pattern attributes into CUSTOM meta', async () => {
+      const client = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'trace-pattern',
+              type: 'index-pattern',
+              attributes: {
+                title: 'otel-v1-apm-span*',
+                timeFieldName: 'startTime',
+                signalType: 'traces',
+              },
+              references: [],
+            },
+          ],
+        }),
+        bulkGet: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      } as unknown as SavedObjectsClientContract;
+
+      // @ts-expect-error - Partial mock for testing
+      const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
+
+      expect(result.children![0].meta).toEqual({
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        timeFieldName: 'startTime',
+        displayName: undefined,
+        signalType: 'traces',
       });
     });
 
