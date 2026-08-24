@@ -8,62 +8,90 @@ import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transfo
 const hit = (over: Partial<ServiceFlowHit> & { spanId: string }): ServiceFlowHit => ({
   parentSpanId: '',
   serviceName: 'frontend',
+  durationInNanos: 1_000_000, // 1ms
   ...over,
 });
 
 describe('spansToServiceFlow', () => {
   it('returns an empty map for no hits', () => {
-    expect(spansToServiceFlow([])).toEqual({ root: { nodes: [], edges: [] } });
+    expect(spansToServiceFlow([])).toEqual({
+      map: { root: { nodes: [], edges: [] } },
+      entrySpanByService: {},
+    });
   });
 
-  it('creates one node per service with request counts and applies the color map', () => {
+  it('creates one serviceCard node per service with request counts and color', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }),
       hit({ spanId: 'c', parentSpanId: 'b', serviceName: 'cart' }),
     ];
 
-    const { root } = spansToServiceFlow(hits, { frontend: '#111', cart: '#222' });
+    const { map } = spansToServiceFlow(hits, { frontend: '#111', cart: '#222' });
+    const { nodes } = map.root;
 
-    expect(root.nodes).toHaveLength(2);
-    const frontend = root.nodes.find((n) => n.id === 'frontend')!;
-    const cart = root.nodes.find((n) => n.id === 'cart')!;
-    expect(frontend.type).toBe('serviceCircle');
+    expect(nodes).toHaveLength(2);
+    const frontend = nodes.find((n) => n.id === 'frontend')!;
+    const cart = nodes.find((n) => n.id === 'cart')!;
+    expect(frontend.type).toBe('serviceCard');
     expect(frontend.data.color).toBe('#111');
     expect(frontend.data.metrics.requests).toBe(1);
     expect(cart.data.metrics.requests).toBe(2);
-    expect(cart.data.color).toBe('#222');
+    expect(cart.data.subtitle).toContain('2 spans');
   });
 
-  it('counts error spans (status.code === 2) as faults', () => {
+  it('records error spans in errors4xx and sets breached health', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
       hit({ spanId: 'b', serviceName: 'cart', status: { code: 0 } }),
     ];
 
-    const { root } = spansToServiceFlow(hits);
-    const cart = root.nodes.find((n) => n.id === 'cart')!;
-    expect(cart.data.metrics.requests).toBe(2);
-    expect(cart.data.metrics.faults5xx).toBe(1);
-    expect(cart.data.metrics.errors4xx).toBe(0);
+    const cart = spansToServiceFlow(hits).map.root.nodes.find((n) => n.id === 'cart')!;
+    expect(cart.data.metrics.errors4xx).toBe(1);
+    expect(cart.data.metrics.faults5xx).toBe(0);
+    expect(cart.data.health).toEqual({ status: 'breached', breached: 1, recovered: 0, total: 2 });
   });
 
-  it('builds deduped cross-service edges and skips self-calls', () => {
+  it('leaves health undefined when there are no errors', () => {
+    const cart = spansToServiceFlow([hit({ spanId: 'a', serviceName: 'cart' })]).map.root.nodes[0];
+    expect(cart.data.health).toBeUndefined();
+  });
+
+  it('builds deduped cross-service edges with call counts, skipping self-calls', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }), // frontend -> cart
-      hit({ spanId: 'c', parentSpanId: 'a', serviceName: 'cart' }), // duplicate frontend -> cart
+      hit({ spanId: 'c', parentSpanId: 'a', serviceName: 'cart' }), // frontend -> cart again
       hit({ spanId: 'd', parentSpanId: 'b', serviceName: 'cart' }), // cart -> cart (self, skipped)
       hit({ spanId: 'e', parentSpanId: 'b', serviceName: 'payment' }), // cart -> payment
     ];
 
-    const { root } = spansToServiceFlow(hits);
-    const edgeKeys = root.edges.map((e) => e.id).sort();
-    expect(edgeKeys).toEqual(['cart->payment', 'frontend->cart']);
-    root.edges.forEach((e) => {
-      expect(e.type).toBe('celestialEdge');
-      expect(e.data.style.animationType).toBe('flow');
-      expect(e.data.style.marker).toBe('arrowClosed');
-    });
+    const { edges } = spansToServiceFlow(hits).map.root;
+    const byId = Object.fromEntries(edges.map((e) => [e.id, e]));
+    expect(Object.keys(byId).sort()).toEqual(['cart->payment', 'frontend->cart']);
+    expect(byId['frontend->cart'].data.style.label).toBe('2 calls');
+    expect(byId['cart->payment'].data.style.label).toBe('1 call');
+    expect(byId['frontend->cart'].data.style.animationType).toBe('flow');
+  });
+
+  it('marks an edge red when a call span errored', () => {
+    const hits: ServiceFlowHit[] = [
+      hit({ spanId: 'a', serviceName: 'frontend' }),
+      hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart', status: { code: 2 } }),
+    ];
+    const edge = spansToServiceFlow(hits).map.root.edges[0];
+    expect(edge.data.style.color).toContain('error');
+  });
+
+  it('resolves each service entry span (span receiving the cross-service call)', () => {
+    const hits: ServiceFlowHit[] = [
+      hit({ spanId: 'root', serviceName: 'frontend' }),
+      hit({ spanId: 'cartEntry', parentSpanId: 'root', serviceName: 'cart' }),
+      hit({ spanId: 'cartChild', parentSpanId: 'cartEntry', serviceName: 'cart' }),
+    ];
+    const { entrySpanByService } = spansToServiceFlow(hits);
+    expect(entrySpanByService.frontend).toBe('root');
+    // cart's entry is the span whose parent (frontend) is a different service.
+    expect(entrySpanByService.cart).toBe('cartEntry');
   });
 });

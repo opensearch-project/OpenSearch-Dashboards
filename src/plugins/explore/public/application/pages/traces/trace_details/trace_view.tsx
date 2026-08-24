@@ -45,7 +45,7 @@ import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
-import { isSpanError, resolveServiceNameFromSpan } from './public/traces/ppl_resolve_helpers';
+import { isSpanError } from './public/traces/ppl_resolve_helpers';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 
@@ -373,14 +373,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
 
-  // Trace map node click -> select that service's first span in the shared state.
-  const handleServiceSelect = (serviceName?: string) => {
-    if (!serviceName) return;
-    const span = transformedHits.find(
-      (hit) => (resolveServiceNameFromSpan(hit) || hit.serviceName) === serviceName
-    );
-    if (span) {
-      handleSpanSelect(span.spanId);
+  // Trace map node click resolves to a service's entry span; select it if present.
+  const handleTraceMapSpanSelect = (mapSpanId?: string) => {
+    if (mapSpanId) {
+      handleSpanSelect(mapSpanId);
     }
   };
 
@@ -598,7 +594,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               hits={transformedHits}
                               colorMap={colorMap}
                               selectedSpanId={spanId}
-                              onSelectService={handleServiceSelect}
+                              onSelectSpan={handleTraceMapSpanSelect}
                             />
                           </div>
                         )}

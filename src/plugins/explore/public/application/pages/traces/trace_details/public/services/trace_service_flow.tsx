@@ -3,38 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 // @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
-import { CelestialMap, ServiceCircleNode } from '@osd/apm-topology';
+import { CelestialMap, ServiceCardNode } from '@osd/apm-topology';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
 import './trace_service_flow.scss';
 
-const NODE_TYPES = { serviceCircle: ServiceCircleNode };
+const NODE_TYPES = { serviceCard: ServiceCardNode };
 
 export interface TraceServiceFlowProps {
   hits: ServiceFlowHit[];
   colorMap?: Record<string, string>;
   selectedSpanId?: string;
-  /** Called with the clicked service name (or undefined when cleared). */
-  onSelectService?: (serviceName?: string) => void;
+  /** Called with the entry span of the clicked service (undefined when unresolved). */
+  onSelectSpan?: (spanId?: string) => void;
 }
 
 /**
  * "Trace map" tab content: a per-trace service topology rendered with
- * @osd/apm-topology's CelestialMap + ServiceCircleNode. Nodes are the services
- * in this trace; edges are the service-to-service call flow derived from the
- * span parent/child relationships.
+ * @osd/apm-topology's CelestialMap + ServiceCardNode. Nodes are the services in
+ * the trace with per-trace RED metrics; edges are the service-to-service call
+ * flow. Clicking a service selects its entry span in the shared trace state.
  */
 export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   hits,
   colorMap = {},
   selectedSpanId,
-  onSelectService,
+  onSelectSpan,
 }) => {
-  const mapData = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
+  const { map, entrySpanByService } = useMemo(
+    () => spansToServiceFlow(hits, colorMap),
+    [hits, colorMap]
+  );
 
   const selectedService = useMemo(() => {
     if (!selectedSpanId || !hits || hits.length === 0) return undefined;
@@ -42,7 +45,52 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
     return span ? resolveServiceNameFromSpan(span) || span.serviceName : undefined;
   }, [selectedSpanId, hits]);
 
-  if (mapData.root.nodes.length === 0) {
+  // Mark the selected service with a badge instead of driving the package's
+  // selectedNodeId (which fits/zooms the camera onto that single node, chopping
+  // the rest of the graph and fighting manual zoom). This keeps the map fit to
+  // all nodes while still showing which service is selected.
+  const displayMap = useMemo(() => {
+    if (!selectedService) return map;
+    return {
+      root: {
+        edges: map.root.edges,
+        nodes: map.root.nodes.map((node) =>
+          node.id === selectedService
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  typeBadge: { label: 'Selected', color: '#0268BC', textColor: '#FFFFFF' },
+                },
+              }
+            : node
+        ),
+      },
+    };
+  }, [map, selectedService]);
+
+  // The package fits the graph once, one tick after layout, clamped to zoom
+  // 0.6-1.0 and never re-fits on resize. In a flyout/resizable panel the
+  // container is often mis-sized at that moment, chopping nodes. Remounting on a
+  // settled width change forces a fresh fitView against the real size.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [fitKey, setFitKey] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    let lastWidth = el.getBoundingClientRect().width;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      if (width > 0 && Math.abs(width - lastWidth) > 8) {
+        lastWidth = width;
+        setFitKey((key) => key + 1);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  if (map.root.nodes.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="graphApp"
@@ -66,17 +114,23 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   }
 
   return (
-    <div className="exploreTraceServiceFlow__container" data-test-subj="traceServiceFlow">
+    <div
+      className="exploreTraceServiceFlow__container"
+      data-test-subj="traceServiceFlow"
+      ref={containerRef}
+    >
       <CelestialMap
-        map={mapData}
+        key={fitKey}
+        map={displayMap}
         nodeTypes={NODE_TYPES}
-        layoutOptions={{ direction: 'LR', rankSeparation: 180, nodeSeparation: 120 }}
+        layoutOptions={{ direction: 'LR', rankSeparation: 160, nodeSeparation: 60 }}
         legend={false}
+        breadcrumbs={[]}
         showMinimap
         topN={Infinity}
-        selectedNodeId={selectedService}
-        onNodeClickZoom="zoomToNode"
-        onDashboardClick={(node?: { id?: string }) => onSelectService?.(node?.id)}
+        onDashboardClick={(node?: { id?: string }) =>
+          onSelectSpan?.(node?.id ? entrySpanByService[node.id] : undefined)
+        }
       />
     </div>
   );
