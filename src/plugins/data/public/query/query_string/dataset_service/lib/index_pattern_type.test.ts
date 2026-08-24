@@ -296,14 +296,7 @@ describe('indexPatternTypeConfig', () => {
 
       expect(client.find).toHaveBeenCalledWith({
         type: 'index-pattern',
-        fields: [
-          'title',
-          'displayName',
-          'timeFieldName',
-          'references',
-          'signalType',
-          'description',
-        ],
+        fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
         search: '*',
         searchFields: ['title', 'displayName'],
         perPage: 10000,
