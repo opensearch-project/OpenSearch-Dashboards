@@ -37,10 +37,11 @@ describe('spansToServiceFlow', () => {
     expect(frontend.data.color).toBe('#111');
     expect(frontend.data.metrics.requests).toBe(1);
     expect(cart.data.metrics.requests).toBe(2);
-    expect(cart.data.subtitle).toContain('2 spans');
+    // Subtitle is duration only (count shown once via the card's Req line).
+    expect(cart.data.subtitle).not.toContain('span');
   });
 
-  it('records error spans in errors4xx and shows a red "N errors" badge (not SLI breach)', () => {
+  it('flags error services with a red border (health.breached) + "N errors" badge, no SLI breach label', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
       hit({ spanId: 'b', serviceName: 'cart', status: { code: 0 } }),
@@ -49,8 +50,10 @@ describe('spansToServiceFlow', () => {
     const cart = spansToServiceFlow(hits).map.root.nodes.find((n) => n.id === 'cart')!;
     expect(cart.data.metrics.errors4xx).toBe(1);
     expect(cart.data.metrics.faults5xx).toBe(0);
-    // No health -> no red-breach border override and no "SLI breach" label.
-    expect((cart.data as any).health).toBeUndefined();
+    // health.breached drives the red border/tint; status is NOT 'breached' so the
+    // package suppresses the "SLI breach" indicator.
+    expect(cart.data.health).toEqual({ status: 'error', breached: 1, recovered: 0, total: 2 });
+    expect(cart.data.health!.status).not.toBe('breached');
     expect(cart.data.typeBadge).toEqual({ label: '1 error', color: '#BD271E' });
   });
 
@@ -63,6 +66,7 @@ describe('spansToServiceFlow', () => {
 
     const clean = spansToServiceFlow([hit({ spanId: 'a', serviceName: 'cart' })]).map.root.nodes[0];
     expect(clean.data.typeBadge).toBe(false);
+    expect(clean.data.health).toBeUndefined();
   });
 
   it('builds deduped cross-service edges with call counts, skipping self-calls', () => {

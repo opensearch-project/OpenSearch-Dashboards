@@ -30,6 +30,10 @@ export interface ServiceFlowNode {
     subtitle?: string;
     color?: string;
     metrics: { requests: number; faults5xx: number; errors4xx: number };
+    // A non-'breached'/'recovered' status keeps celestial's red border+tint
+    // (health.breached) WITHOUT its "SLI breach" label, which stays reserved
+    // for real SLO checks.
+    health?: { status: string; breached: number; recovered: number; total: number };
     typeBadge: false | { label: string; color: string; textColor?: string };
     actionButton: false;
     showDonut: false;
@@ -152,15 +156,20 @@ export const spansToServiceFlow = (
       data: {
         id: service,
         title: service,
-        subtitle: `${formatDuration(totalMs)} · ${requests} span${requests === 1 ? '' : 's'}`,
-        // Border/glow uses the service's Gantt legend color (from colorMap).
+        // Duration only — the span count is shown once via the card's "Req" line.
+        subtitle: formatDuration(totalMs),
+        // Healthy services use the service's Gantt legend color for the border.
         color: colorMap[service],
-        // Per-trace RED analog: requests = span count, errors4xx = error spans
-        // (drives the card's built-in error-rate bar).
+        // requests = span count (also the error-rate bar denominator);
+        // errors4xx = error spans.
         metrics: { requests, faults5xx: 0, errors4xx: errors },
-        // Show errors as a red "N errors" badge rather than celestial's SLO
-        // "SLI breach" state, so the true breached state stays free for real SLO
-        // checks and the border keeps the service (Gantt) color.
+        // Error services get a consistent red border + tint via health.breached,
+        // but a non-'breached' status suppresses the "SLI breach" label.
+        health:
+          errors > 0
+            ? { status: 'error', breached: errors, recovered: 0, total: requests }
+            : undefined,
+        // Red "N errors" badge with the count.
         typeBadge:
           errors > 0
             ? { label: `${errors} error${errors === 1 ? '' : 's'}`, color: ERROR_COLOR }

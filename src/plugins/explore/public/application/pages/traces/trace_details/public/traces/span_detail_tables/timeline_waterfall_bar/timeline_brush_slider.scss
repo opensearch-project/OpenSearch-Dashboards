@@ -7,11 +7,16 @@
   position: relative;
   width: 100%;
 
+  // Reserve space for the absolutely-positioned track (otherwise the wrapper
+  // collapses to 0 height and the slider is invisible).
+  height: 26px;
+
   &__track {
     position: absolute;
     top: 0;
     height: 22px;
     background-color: $euiColorLightestShade;
+    border: 1px solid $euiColorLightShade;
     border-radius: 3px;
     overflow: hidden;
   }
