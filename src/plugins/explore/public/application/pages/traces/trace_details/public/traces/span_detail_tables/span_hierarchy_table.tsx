@@ -298,18 +298,18 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     >
       {/* span wrapper so the tooltip still shows while the button is disabled */}
       <span>
-        <EuiButtonIcon
+        <EuiButtonEmpty
           size="xs"
           color="text"
-          display="empty"
           iconType="editorUndo"
           isDisabled={!visibleRange}
           onClick={() => setVisibleRange(undefined)}
-          aria-label={i18n.translate('explore.spanDetailTable.resetZoom.label', {
+          data-test-subj="timelineResetZoom"
+        >
+          {i18n.translate('explore.spanDetailTable.resetZoom.label', {
             defaultMessage: 'Reset zoom',
           })}
-          data-test-subj="timelineResetZoom"
-        />
+        </EuiButtonEmpty>
       </span>
     </EuiToolTip>,
     <ServiceLegendButton

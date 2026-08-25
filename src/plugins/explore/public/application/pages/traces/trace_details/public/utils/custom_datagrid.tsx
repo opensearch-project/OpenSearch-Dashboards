@@ -10,6 +10,8 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPopover,
@@ -202,10 +204,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           defaultMessage: 'Full screen',
         });
 
-    // One row: full screen, density, the caller's buttons (expand/collapse),
-    // then any secondary controls (e.g. reset zoom, legend). Rendered inline in
-    // the grid's native controls bar — no separate overlaid toolbar.
-    return [
+    const fullScreenControl = (
       <EuiToolTip key="fullScreen" content={fullScreenLabel}>
         <EuiButtonIcon
           size="xs"
@@ -216,12 +215,46 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           aria-label={fullScreenLabel}
           data-test-subj="fullScreenButton"
         />
-      </EuiToolTip>,
-      <DensityControl key="density" density={density} onChange={setDensity} />,
-      ...toolbarButtons,
-      ...secondaryToolbar,
-    ];
+      </EuiToolTip>
+    );
+    const densityControl = <DensityControl key="density" density={density} onChange={setDensity} />;
+
+    // No caller-provided controls (e.g. the flat span-list table): just the
+    // view controls, left-aligned like EUI's native toolbar.
+    if (toolbarButtons.length === 0 && secondaryToolbar.length === 0) {
+      return [fullScreenControl, densityControl];
+    }
+
+    // Unified single row: the caller's action buttons as a connected cluster on
+    // the LEFT, and the view/meta controls (full screen, density, + secondary
+    // controls like reset zoom / legend) on the RIGHT.
+    return (
+      <EuiFlexGroup
+        className="exploreCustomDataGrid__toolbarRow"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+      >
+        {toolbarButtons.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <div className="exploreCustomDataGrid__actionCluster">{toolbarButtons}</div>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {[fullScreenControl, densityControl, ...secondaryToolbar].map((control, i) => (
+              <EuiFlexItem grow={false} key={i}>
+                {control}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }, [isFullScreen, density, toolbarButtons, secondaryToolbar]);
+
+  const hasUnifiedToolbar = toolbarButtons.length > 0 || secondaryToolbar.length > 0;
 
   const gridStyle = useMemo(
     () => ({
@@ -243,6 +276,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
             isFullScreen
               ? 'exploreCustomDataGrid__fullWrapper'
               : 'exploreCustomDataGrid__normalWrapper',
+            hasUnifiedToolbar ? 'exploreCustomDataGrid--unifiedToolbar' : '',
           ]
             .filter(Boolean)
             .join(' ')}
