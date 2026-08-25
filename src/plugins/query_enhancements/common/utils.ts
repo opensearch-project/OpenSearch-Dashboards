@@ -88,7 +88,6 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     timeRange: context.body?.timeRange,
     ...(highlight && { highlight }),
     ...(context.body?.queryId && { queryId: context.body.queryId }),
-    ...(context.body?.options && { options: context.body.options }),
   });
 
   return from(

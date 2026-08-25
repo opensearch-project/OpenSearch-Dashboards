@@ -149,7 +149,6 @@ export const convertResult = ({
     (searchResponse as any).truncation = data.meta.truncation;
   }
 
-  // Pass through the step each Prometheus query segment resolved to
   if (data.meta?.stepResolution) {
     (searchResponse as any).stepResolution = data.meta.stepResolution;
   }

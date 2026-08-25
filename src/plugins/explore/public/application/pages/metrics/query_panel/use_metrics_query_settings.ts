@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { resolveStep, ResolvedStep } from '../prom_step';
+import { resolveStep, ResolvedStep } from '../../../../../../query_enhancements/common/prom_step';
 import { Query } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { PromQLQueryOptions } from '../../../utils/languages';

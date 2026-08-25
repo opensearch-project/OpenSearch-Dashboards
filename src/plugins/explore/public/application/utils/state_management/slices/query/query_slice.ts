@@ -52,17 +52,7 @@ const querySlice = createSlice({
       action: PayloadAction<
         Partial<Pick<QueryState, 'maxDataPoints' | 'perQueryOptions' | 'defaultMinStep'>>
       >
-    ) => {
-      if ('maxDataPoints' in action.payload) {
-        state.maxDataPoints = action.payload.maxDataPoints;
-      }
-      if ('perQueryOptions' in action.payload) {
-        state.perQueryOptions = action.payload.perQueryOptions;
-      }
-      if ('defaultMinStep' in action.payload) {
-        state.defaultMinStep = action.payload.defaultMinStep;
-      }
-    },
+    ) => Object.assign(state, action.payload),
   },
 });
 

@@ -17,7 +17,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { PerQueryOptions } from '../../../utils/languages';
-import { parseStepIntervalSeconds } from '../prom_step';
+import {
+  formatPromDuration,
+  parseStepIntervalSeconds,
+} from '../../../../../../query_enhancements/common/prom_step';
 
 export interface RowStepReadout {
   stepLabel: string;
@@ -48,22 +51,13 @@ export function formatStepSeconds(stepSec: number | null | undefined): string {
   if (stepSec === null || stepSec === undefined || !Number.isFinite(stepSec) || stepSec <= 0) {
     return '—';
   }
-  const units: Array<[number, string]> = [
-    [3600, 'h'],
-    [60, 'm'],
-    [1, 's'],
-  ];
-  let remaining = Math.round(stepSec);
-  const parts: string[] = [];
-  for (const [size, suffix] of units) {
-    const value = Math.floor(remaining / size);
-    if (value > 0) {
-      parts.push(`${value}${suffix}`);
-      remaining -= value * size;
-    }
-  }
-  return parts.join(' ') || '0s';
+  return formatPromDuration(stepSec);
 }
+
+const minStepError = () =>
+  i18n.translate('explore.metricsQueryPanel.queryOptions.minStepError', {
+    defaultMessage: 'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
+  });
 
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
@@ -74,8 +68,8 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   resolvedMaxDataPoints,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // Half-typed durations ("15") are invalid, so committing every valid value
-  // costs at most a couple of writes and survives closing the popover.
+  // Half-typed durations ("15") never reach the query state, so the field needs
+  // its own value to stay editable.
   const [draftDefaultMinStep, setDraftDefaultMinStep] = useState<string | undefined>(undefined);
   const editingDefaultMinStep = draftDefaultMinStep ?? defaultMinStep ?? '';
   const defaultMinStepInvalid =
@@ -154,10 +148,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             defaultMessage: 'Default min step',
           })}
           isInvalid={defaultMinStepInvalid}
-          error={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepError', {
-            defaultMessage:
-              'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
-          })}
+          error={minStepError()}
           helpText={
             connectionName
               ? i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepHelp', {
@@ -247,10 +238,7 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
             defaultMessage: 'Min step',
           })}
           isInvalid={minStepInvalid}
-          error={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepError', {
-            defaultMessage:
-              'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
-          })}
+          error={minStepError()}
           helpText={
             inheritedMinStep
               ? i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelpInherited', {

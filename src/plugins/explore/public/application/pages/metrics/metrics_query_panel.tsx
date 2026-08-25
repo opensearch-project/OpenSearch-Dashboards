@@ -7,6 +7,7 @@ import './metrics_query_panel.scss';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { isEqual } from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiButtonEmpty,
@@ -46,7 +47,7 @@ import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
 import '../../../components/query_panel/query_panel.scss';
 
-import { PerQueryOptions, PromQLQueryOptions } from '../../utils/languages';
+import { PerQueryOptions } from '../../utils/languages';
 import {
   QueryRowComponent,
   QueryRow,
@@ -122,13 +123,10 @@ export const MetricsQueryPanel: React.FC = () => {
   const syncEditorText = useCallback(
     (updatedRows: QueryRow[]) => {
       const { query: combined, perQueryOptions } = serializeRows(updatedRows);
-      const currentQuery = queryString.getQuery();
-      queryString.setQuery({
-        ...currentQuery,
-        query: combined,
-        perQueryOptions,
-      } as Query & PromQLQueryOptions);
-      dispatch(setMetricsQuerySettings({ perQueryOptions }));
+      queryString.setQuery({ query: combined, perQueryOptions } as Partial<Query>);
+      if (!isEqual(perQueryOptions, perQueryOptionsRef.current)) {
+        dispatch(setMetricsQuerySettings({ perQueryOptions }));
+      }
       dispatch(setIsQueryEditorDirty(true));
       if (combined === lastDispatchedRef.current) return;
       lastDispatchedRef.current = combined;

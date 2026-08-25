@@ -63,26 +63,25 @@ export function createPromQLSuggestionProvider(
           wordUntil.endColumn
         );
 
-        // Monaco's word detection stops at "$", so build a range that spans the
-        // "$__…" token and offer the interval macros whenever one is being typed.
-        const lineContent = model.getLineContent(position.lineNumber);
-        let macroStartCol = position.column;
-        while (macroStartCol > 1 && /[$_a-zA-Z]/.test(lineContent[macroStartCol - 2])) {
-          macroStartCol--;
-        }
-        const macroPrefix = lineContent.substring(macroStartCol - 1, position.column - 1);
-        const macroSuggestions = macroPrefix.startsWith('$')
+        // Monaco's word detection stops at "$", so the macro token needs its own range.
+        const macroToken = /\$[_a-zA-Z]*$/.exec(
+          model.getLineContent(position.lineNumber).slice(0, position.column - 1)
+        );
+        const macroRange =
+          macroToken &&
+          new monaco.Range(
+            position.lineNumber,
+            position.column - macroToken[0].length,
+            position.lineNumber,
+            position.column
+          );
+        const macroSuggestions = macroRange
           ? PROMQL_MACROS.map((m) => ({
               label: m.label,
               kind: monaco.languages.CompletionItemKind.Variable,
               insertText: m.label,
               filterText: m.label,
-              range: new monaco.Range(
-                position.lineNumber,
-                macroStartCol,
-                position.lineNumber,
-                position.column
-              ),
+              range: macroRange,
               detail: m.detail,
               sortText: '0',
               documentation: '',

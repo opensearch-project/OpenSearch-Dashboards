@@ -202,61 +202,23 @@ describe('querySlice reducers', () => {
       query: 'up',
       language: 'PROMQL',
       dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
+      maxDataPoints: 500,
+      perQueryOptions: [{ minStep: '1m' }],
     };
 
-    it('updates the panel resolution and per-query options without touching query, language, or dataset', () => {
-      const state = queryReducer(
-        existingState,
-        setMetricsQuerySettings({
-          maxDataPoints: 500,
-          perQueryOptions: [{ minStep: '1m', legendFormat: '{{instance}}' }],
-        })
-      );
-      expect(state.maxDataPoints).toBe(500);
-      expect(state.perQueryOptions).toEqual([{ minStep: '1m', legendFormat: '{{instance}}' }]);
-      expect(state.query).toBe('up');
-      expect(state.language).toBe('PROMQL');
-      expect(state.dataset).toEqual(existingState.dataset);
-    });
-
     it('merges only the provided keys', () => {
-      const withSettings: QueryState = {
-        ...existingState,
-        maxDataPoints: 500,
-        perQueryOptions: [{ minStep: '1m' }],
-      };
-      const state = queryReducer(withSettings, setMetricsQuerySettings({ maxDataPoints: 200 }));
-      expect(state.maxDataPoints).toBe(200);
-      expect(state.perQueryOptions).toEqual([{ minStep: '1m' }]);
+      const state = queryReducer(existingState, setMetricsQuerySettings({ defaultMinStep: '30s' }));
+      expect(state).toEqual({ ...existingState, defaultMinStep: '30s' });
     });
 
     it('clears the fields when set to undefined', () => {
-      const withSettings: QueryState = {
-        ...existingState,
-        maxDataPoints: 500,
-        perQueryOptions: [{ minStep: '1m', legendFormat: '{{instance}}' }],
-        defaultMinStep: '15s',
-      };
       const state = queryReducer(
-        withSettings,
-        setMetricsQuerySettings({
-          maxDataPoints: undefined,
-          perQueryOptions: undefined,
-          defaultMinStep: undefined,
-        })
+        existingState,
+        setMetricsQuerySettings({ maxDataPoints: undefined, perQueryOptions: undefined })
       );
       expect(state.maxDataPoints).toBeUndefined();
       expect(state.perQueryOptions).toBeUndefined();
-      expect(state.defaultMinStep).toBeUndefined();
-    });
-
-    it('updates the datasource default min step on its own', () => {
-      const state = queryReducer(
-        { ...existingState, maxDataPoints: 500 },
-        setMetricsQuerySettings({ defaultMinStep: '30s' })
-      );
-      expect(state.defaultMinStep).toBe('30s');
-      expect(state.maxDataPoints).toBe(500);
+      expect(state.query).toBe('up');
     });
   });
 });

@@ -11,8 +11,8 @@ describe('formatStepSeconds', () => {
   it('formats compact durations', () => {
     expect(formatStepSeconds(15)).toBe('15s');
     expect(formatStepSeconds(60)).toBe('1m');
-    expect(formatStepSeconds(90)).toBe('1m 30s');
-    expect(formatStepSeconds(3661)).toBe('1h 1m 1s');
+    expect(formatStepSeconds(90)).toBe('1m30s');
+    expect(formatStepSeconds(3661)).toBe('1h1m1s');
   });
 
   it('renders a placeholder for missing or invalid steps', () => {
