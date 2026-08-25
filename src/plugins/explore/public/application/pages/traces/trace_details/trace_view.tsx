@@ -618,65 +618,69 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               </EuiPanel>
             </div>
 
-            {/* Filter bar: "+ Add filter" (dataset fields) + active-filter badges */}
-            <div className="exploreTraceView__filtersContainer">
-              <EuiPanel paddingSize="s">
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                      <EuiFlexItem grow={false}>
-                        <SpanAttributeFilter
-                          fields={datasetFields}
-                          spans={unfilteredHits}
-                          onAddFilter={addSpanFilter}
-                        />
-                      </EuiFlexItem>
-                      {spanFilters.length > 0 && (
+            {/* Filter bar: "+ Add filter" (dataset fields) + active-filter badges.
+                Span filters scope the span-based tabs only — hide the bar on the
+                Related logs tab, which isn't filtered by span attributes. */}
+            {activeTab !== TraceDetailTab.LOGS && (
+              <div className="exploreTraceView__filtersContainer">
+                <EuiPanel paddingSize="s">
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
                         <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            {i18n.translate('explore.traceView.filters.activeFilters', {
-                              defaultMessage: 'Active filters:',
-                            })}
-                          </EuiText>
+                          <SpanAttributeFilter
+                            fields={datasetFields}
+                            spans={unfilteredHits}
+                            onAddFilter={addSpanFilter}
+                          />
                         </EuiFlexItem>
-                      )}
-                      {spanFilters.map((filter, index) => (
-                        <EuiFlexItem grow={false} key={`filter-${index}`}>
-                          <EuiBadge
-                            color="primary"
-                            iconType="cross"
-                            iconSide="right"
-                            iconOnClick={() => removeFilter(filter)}
-                            iconOnClickAriaLabel={i18n.translate(
-                              'explore.traceView.filters.removeFilter',
-                              {
-                                defaultMessage: 'Remove filter',
-                              }
-                            )}
-                            data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                          >
-                            {getFilterDisplayText(filter)}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  {spanFilters.length > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        onClick={clearAllFilters}
-                        data-test-subj="clear-all-filters-button"
-                      >
-                        {i18n.translate('explore.traceView.filters.clearAll', {
-                          defaultMessage: 'Clear all',
-                        })}
-                      </EuiButtonEmpty>
+                        {spanFilters.length > 0 && (
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s" color="subdued">
+                              {i18n.translate('explore.traceView.filters.activeFilters', {
+                                defaultMessage: 'Active filters:',
+                              })}
+                            </EuiText>
+                          </EuiFlexItem>
+                        )}
+                        {spanFilters.map((filter, index) => (
+                          <EuiFlexItem grow={false} key={`filter-${index}`}>
+                            <EuiBadge
+                              color="primary"
+                              iconType="cross"
+                              iconSide="right"
+                              iconOnClick={() => removeFilter(filter)}
+                              iconOnClickAriaLabel={i18n.translate(
+                                'explore.traceView.filters.removeFilter',
+                                {
+                                  defaultMessage: 'Remove filter',
+                                }
+                              )}
+                              data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
+                            >
+                              {getFilterDisplayText(filter)}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPanel>
-            </div>
+                    {spanFilters.length > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          onClick={clearAllFilters}
+                          data-test-subj="clear-all-filters-button"
+                        >
+                          {i18n.translate('explore.traceView.filters.clearAll', {
+                            defaultMessage: 'Clear all',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </div>
+            )}
 
             {/* Resizable container underneath filter badges */}
             <EuiResizableContainer
