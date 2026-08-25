@@ -11,6 +11,7 @@ import {
   MIN_STEP_INTERVAL,
   parseStepIntervalSeconds,
   rateIntervalSeconds,
+  resolveStep,
 } from './prom_step';
 
 describe('calculateStep', () => {
@@ -95,6 +96,53 @@ describe('rateIntervalSeconds', () => {
 
   it('grows with the step once it exceeds three scrape intervals', () => {
     expect(rateIntervalSeconds(300, 60)).toBe(360);
+  });
+});
+
+describe('resolveStep', () => {
+  const ONE_HOUR = 3600000;
+
+  it('assumes a 60s scrape interval when no min step is configured', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR })).toEqual({
+      stepSec: 15,
+      scrapeSec: 60,
+      rateIntervalSec: 240,
+    });
+  });
+
+  it('treats the min step as the scrape interval and as the step floor', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, minStep: '5m' })).toEqual({
+      stepSec: 300,
+      scrapeSec: 300,
+      rateIntervalSec: 1200,
+    });
+  });
+
+  it('scales the step down to the requested resolution', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, resolution: 20 }).stepSec).toBe(200);
+  });
+
+  it('ignores a resolution finer than the step floor', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, resolution: 5000 }).stepSec).toBe(MIN_STEP_INTERVAL);
+  });
+
+  it('ignores unparseable and non-positive min steps', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, minStep: 'banana' }).stepSec).toBe(15);
+    expect(resolveStep({ rangeMs: ONE_HOUR, minStep: '0s' }).scrapeSec).toBe(60);
+  });
+
+  it('honors an explicit step override, still sizing the rate window from it', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, minStep: '15s', stepOverrideSec: 60 })).toEqual({
+      stepSec: 60,
+      scrapeSec: 15,
+      rateIntervalSec: 75,
+    });
+  });
+
+  it('falls back to the default resolution for a non-positive resolution', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, resolution: 0 }).stepSec).toBe(
+      calculateStep(ONE_HOUR, DEFAULT_RESOLUTION)
+    );
   });
 });
 

@@ -5,33 +5,46 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-  calculateStep,
-  parseStepIntervalSeconds,
-  DEFAULT_RESOLUTION,
-  MIN_STEP_INTERVAL,
-} from '../prom_step';
+import { resolveStep, ResolvedStep } from '../prom_step';
 import { Query } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { PromQLQueryOptions } from '../../../utils/languages';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { setMetricsQuerySettings } from '../../../../application/utils/state_management/slices/query/query_slice';
+import { useDatasourceDefaultMinStep } from './use_datasource_default_min_step';
 
 type MetricsQuery = Query & PromQLQueryOptions;
 
 export interface MetricsQuerySettings {
   maxDataPoints?: number;
   onMaxDataPointsChange: (next?: number) => void;
-  getResolvedStepSec: (minStep?: string) => number | null;
+  defaultMinStep?: string;
+  onDefaultMinStepChange: (next?: string) => void;
+  getResolvedStep: (minStep?: string) => ResolvedStep | null;
 }
 
-export function useMetricsQuerySettings(services: ExploreServices): MetricsQuerySettings {
+export function useMetricsQuerySettings(
+  services: ExploreServices,
+  connectionId: string
+): MetricsQuerySettings {
   const dispatch = useDispatch();
   const { queryString } = services.data.query;
 
   const [maxDataPoints, setMaxDataPoints] = useState<number | undefined>(
     () => (queryString.getQuery() as MetricsQuery).maxDataPoints
   );
+
+  const { defaultMinStep, onDefaultMinStepChange: persistDefaultMinStep } =
+    useDatasourceDefaultMinStep(services, connectionId);
+
+  // The datasource default is loaded asynchronously and edited outside the query
+  // state, so mirror it onto the query the interceptor forwards to the server.
+  useEffect(() => {
+    const currentQuery = queryString.getQuery() as MetricsQuery;
+    if (currentQuery.defaultMinStep === defaultMinStep) return;
+    queryString.setQuery({ ...currentQuery, defaultMinStep } as MetricsQuery);
+    dispatch(setMetricsQuerySettings({ defaultMinStep }));
+  }, [defaultMinStep, queryString, dispatch]);
 
   const [timeTick, setTimeTick] = useState(0);
   useEffect(() => {
@@ -40,20 +53,21 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
     return () => sub.unsubscribe();
   }, [services.data.query.timefilter]);
 
-  const getResolvedStepSec = useCallback(
+  const getResolvedStep = useCallback(
     (minStep?: string) => {
       const { timefilter } = services.data.query.timefilter;
       const bounds = timefilter.getBounds();
       const min = bounds?.min?.valueOf();
       const max = bounds?.max?.valueOf();
       if (min === undefined || max === undefined || max <= min) return null;
-      const parsed = minStep ? parseStepIntervalSeconds(minStep) : undefined;
-      const minStepSec = parsed && parsed > 0 ? parsed : undefined;
-      const resolution = maxDataPoints && maxDataPoints > 0 ? maxDataPoints : DEFAULT_RESOLUTION;
-      return calculateStep(max - min, resolution, minStepSec ?? MIN_STEP_INTERVAL);
+      return resolveStep({
+        rangeMs: max - min,
+        resolution: maxDataPoints,
+        minStep: minStep ?? defaultMinStep,
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [maxDataPoints, timeTick, services.data.query.timefilter]
+    [maxDataPoints, defaultMinStep, timeTick, services.data.query.timefilter]
   );
 
   const onMaxDataPointsChange = useCallback(
@@ -67,9 +81,19 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
     [queryString, dispatch]
   );
 
+  const onDefaultMinStepChange = useCallback(
+    (next?: string) => {
+      persistDefaultMinStep(next);
+      dispatch(setIsQueryEditorDirty(true));
+    },
+    [persistDefaultMinStep, dispatch]
+  );
+
   return {
     maxDataPoints,
     onMaxDataPointsChange,
-    getResolvedStepSec,
+    defaultMinStep,
+    onDefaultMinStepChange,
+    getResolvedStep,
   };
 }

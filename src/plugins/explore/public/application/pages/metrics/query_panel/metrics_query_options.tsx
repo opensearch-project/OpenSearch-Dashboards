@@ -19,20 +19,35 @@ import {
 import { PerQueryOptions } from '../../../utils/languages';
 import { parseStepIntervalSeconds } from '../prom_step';
 
+export interface RowStepReadout {
+  stepLabel: string;
+  rateIntervalLabel: string;
+  /** False when no run has produced this step yet, so the labels are estimates. */
+  isFromLastRun: boolean;
+}
+
 export interface MetricsQueryOptionsProps {
   maxDataPoints?: number;
   onMaxDataPointsChange: (next?: number) => void;
+  defaultMinStep?: string;
+  onDefaultMinStepChange: (next?: string) => void;
+  connectionName?: string;
+  /** Resolution the last run used, shown as the placeholder when left on auto. */
+  resolvedMaxDataPoints?: number;
 }
 
-export interface RowQueryOptionsProps {
+export interface RowQueryOptionsProps extends RowStepReadout {
   minStep?: string;
   legendFormat?: string;
-  resolvedStepLabel: string;
+  /** Datasource-level default applied when this row leaves Min step empty. */
+  inheritedMinStep?: string;
   onChange: (next: PerQueryOptions) => void;
 }
 
-export function formatStepSeconds(stepSec: number | null): string {
-  if (stepSec === null || !Number.isFinite(stepSec) || stepSec <= 0) return '—';
+export function formatStepSeconds(stepSec: number | null | undefined): string {
+  if (stepSec === null || stepSec === undefined || !Number.isFinite(stepSec) || stepSec <= 0) {
+    return '—';
+  }
   const units: Array<[number, string]> = [
     [3600, 'h'],
     [60, 'm'],
@@ -53,8 +68,26 @@ export function formatStepSeconds(stepSec: number | null): string {
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
   onMaxDataPointsChange,
+  defaultMinStep,
+  onDefaultMinStepChange,
+  connectionName,
+  resolvedMaxDataPoints,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  // Half-typed durations ("15") are invalid, so committing every valid value
+  // costs at most a couple of writes and survives closing the popover.
+  const [draftDefaultMinStep, setDraftDefaultMinStep] = useState<string | undefined>(undefined);
+  const editingDefaultMinStep = draftDefaultMinStep ?? defaultMinStep ?? '';
+  const defaultMinStepInvalid =
+    !!editingDefaultMinStep && parseStepIntervalSeconds(editingDefaultMinStep) === undefined;
+
+  const onDefaultMinStepInput = (raw: string) => {
+    setDraftDefaultMinStep(raw);
+    const trimmed = raw.trim();
+    const next = trimmed === '' ? undefined : trimmed;
+    if (next !== undefined && parseStepIntervalSeconds(next) === undefined) return;
+    if (next !== defaultMinStep) onDefaultMinStepChange(next);
+  };
 
   const button = (
     <EuiButtonEmpty
@@ -74,6 +107,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="s"
       anchorPosition="downLeft"
       data-test-subj="metricsQueryOptionsPopover"
     >
@@ -83,22 +117,67 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             defaultMessage: 'Max data points',
           })}
           helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsHelp', {
-            defaultMessage: 'Max points per series.',
+            defaultMessage: 'Max points per series. Shared by every query.',
           })}
         >
           <EuiFieldNumber
             compressed
             min={1}
-            placeholder={i18n.translate(
-              'explore.metricsQueryPanel.queryOptions.maxDataPointsPlaceholder',
-              { defaultMessage: 'auto' }
-            )}
+            placeholder={
+              resolvedMaxDataPoints
+                ? i18n.translate(
+                    'explore.metricsQueryPanel.queryOptions.maxDataPointsResolvedPlaceholder',
+                    {
+                      defaultMessage: 'auto = {resolved}',
+                      values: { resolved: resolvedMaxDataPoints },
+                    }
+                  )
+                : i18n.translate(
+                    'explore.metricsQueryPanel.queryOptions.maxDataPointsPlaceholder',
+                    {
+                      defaultMessage: 'auto',
+                    }
+                  )
+            }
             value={maxDataPoints ?? ''}
             onChange={(e) => {
               const raw = e.target.value;
               onMaxDataPointsChange(raw === '' ? undefined : Math.floor(Number(raw)));
             }}
             data-test-subj="metricsStepMaxDataPointsInput"
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepLabel', {
+            defaultMessage: 'Default min step',
+          })}
+          isInvalid={defaultMinStepInvalid}
+          error={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepError', {
+            defaultMessage:
+              'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
+          })}
+          helpText={
+            connectionName
+              ? i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepHelp', {
+                  defaultMessage:
+                    'Saved on {connection}. Match its scrape interval; rows with their own Min step override it.',
+                  values: { connection: connectionName },
+                })
+              : i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepHelpNoName', {
+                  defaultMessage:
+                    'Applies to every query on this data source; rows with their own Min step override it.',
+                })
+          }
+        >
+          <EuiFieldText
+            compressed
+            isInvalid={defaultMinStepInvalid}
+            placeholder="15s"
+            value={editingDefaultMinStep}
+            onChange={(e) => onDefaultMinStepInput(e.target.value)}
+            data-test-subj="metricsDefaultMinStepInput"
           />
         </EuiFormRow>
       </EuiForm>
@@ -109,7 +188,10 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
 export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
   minStep,
   legendFormat,
-  resolvedStepLabel,
+  inheritedMinStep,
+  stepLabel,
+  rateIntervalLabel,
+  isFromLastRun,
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -133,6 +215,7 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="s"
       anchorPosition="downRight"
       data-test-subj="metricsRowQueryOptionsPopover"
     >
@@ -158,7 +241,7 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
           />
         </EuiFormRow>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiFormRow
           label={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepLabel', {
             defaultMessage: 'Min step',
@@ -168,14 +251,21 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
             defaultMessage:
               'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
           })}
-          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelp', {
-            defaultMessage: 'Lower bound on the step. Match your scrape interval.',
-          })}
+          helpText={
+            inheritedMinStep
+              ? i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelpInherited', {
+                  defaultMessage: 'Lower bound on the step. Empty inherits {inherited}.',
+                  values: { inherited: inheritedMinStep },
+                })
+              : i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelp', {
+                  defaultMessage: 'Lower bound on the step. Match your scrape interval.',
+                })
+          }
         >
           <EuiFieldText
             compressed
             isInvalid={minStepInvalid}
-            placeholder="15s"
+            placeholder={inheritedMinStep ?? '15s'}
             value={minStep ?? ''}
             onChange={(e) => {
               const raw = e.target.value.trim();
@@ -187,10 +277,25 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
 
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued" data-test-subj="metricsStepResolved">
-          {i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedStep', {
-            defaultMessage: 'Step for current range: {step}',
-            values: { step: resolvedStepLabel },
-          })}
+          <p>
+            {i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedStep', {
+              defaultMessage: 'Step: {step} ($__interval)',
+              values: { step: stepLabel },
+            })}
+            <br />
+            {i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedRateInterval', {
+              defaultMessage: 'Rate window: {window} ($__rate_interval)',
+              values: { window: rateIntervalLabel },
+            })}
+            <br />
+            {isFromLastRun
+              ? i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedFromLastRun', {
+                  defaultMessage: 'From the last run of this query.',
+                })
+              : i18n.translate('explore.metricsQueryPanel.queryOptions.resolvedEstimate', {
+                  defaultMessage: 'Estimated; run the query to confirm.',
+                })}
+          </p>
         </EuiText>
       </EuiForm>
     </EuiPopover>

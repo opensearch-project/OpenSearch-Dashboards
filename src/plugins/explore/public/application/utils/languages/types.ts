@@ -13,6 +13,7 @@ export interface PerQueryOptions {
 export interface PromQLQueryOptions {
   maxDataPoints?: number;
   perQueryOptions?: PerQueryOptions[];
+  defaultMinStep?: string;
 }
 
 export type QueryWithQueryAsString = Omit<Query, 'query'> & {

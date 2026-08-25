@@ -14,6 +14,20 @@ export interface PerQueryOptions {
 export interface PromQLQuery extends Query {
   maxDataPoints?: number;
   perQueryOptions?: PerQueryOptions[];
+  defaultMinStep?: string;
+}
+
+/**
+ * Step actually used for each query segment, reported back so the editor can
+ * display what ran instead of re-deriving it.
+ */
+export interface PromQLStepResolution {
+  maxDataPoints: number;
+  queries: Array<{
+    label: string;
+    stepSec: number;
+    rateIntervalSec: number;
+  }>;
 }
 
 export interface QueryAggConfig {

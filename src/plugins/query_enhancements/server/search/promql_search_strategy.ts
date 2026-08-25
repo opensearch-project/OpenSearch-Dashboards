@@ -15,14 +15,12 @@ import {
   splitMultiQueries,
 } from '../../../data/common';
 import {
-  ASSUMED_SCRAPE_INTERVAL,
-  calculateStep,
   DEFAULT_RESOLUTION,
   interpolateLegendFormat,
   interpolatePromQLMacros,
-  MIN_STEP_INTERVAL,
-  parseStepIntervalSeconds,
   PromQLQuery,
+  PromQLStepResolution,
+  resolveStep,
 } from '../../common';
 import {
   MetricResult,
@@ -83,8 +81,14 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
-        const { dataset, query, language, maxDataPoints, perQueryOptions }: PromQLQuery =
-          requestBody.query;
+        const {
+          dataset,
+          query,
+          language,
+          maxDataPoints,
+          perQueryOptions,
+          defaultMinStep,
+        }: PromQLQuery = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
         const requestOptions = requestBody.options as
@@ -123,19 +127,18 @@ export const promqlSearchStrategyProvider = (
 
         const plans: QueryPlan[] = parsedQueries.map((parsed, i) => {
           const opt = perQueryOptions?.[i];
-          const parsedMinStep = opt?.minStep ? parseStepIntervalSeconds(opt.minStep) : undefined;
-          const minStepSec = parsedMinStep && parsedMinStep > 0 ? parsedMinStep : undefined;
-          const stepSec =
-            requestOptions?.step ??
-            calculateStep(rangeMs, resolution, minStepSec ?? MIN_STEP_INTERVAL);
+          const { stepSec, scrapeSec, rateIntervalSec } = resolveStep({
+            rangeMs,
+            resolution,
+            minStep: opt?.minStep ?? defaultMinStep,
+            stepOverrideSec: requestOptions?.step,
+          });
           return {
             label: parsed.label,
-            query: interpolatePromQLMacros(parsed.query, {
-              stepSec,
-              rangeMs,
-              scrapeSec: minStepSec ?? ASSUMED_SCRAPE_INTERVAL,
-            }),
+            query: interpolatePromQLMacros(parsed.query, { stepSec, rangeMs, scrapeSec }),
             step: stepSec.toString(),
+            stepSec,
+            rateIntervalSec,
             legendFormat: opt?.legendFormat,
           };
         });
@@ -154,7 +157,18 @@ export const promqlSearchStrategyProvider = (
           throw new Error(queryResults[0].error);
         }
 
-        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery);
+        const stepResolution: PromQLStepResolution | undefined = isInstantQuery
+          ? undefined
+          : {
+              maxDataPoints: resolution,
+              queries: plans.map(({ label, stepSec, rateIntervalSec }) => ({
+                label,
+                stepSec,
+                rateIntervalSec,
+              })),
+            };
+
+        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery, stepResolution);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -178,6 +192,8 @@ interface QueryPlan {
   label: string;
   query: string;
   step: string;
+  stepSec: number;
+  rateIntervalSec: number;
   legendFormat?: string;
 }
 
@@ -293,7 +309,8 @@ function formatMetricLabels(metric: Record<string, string>): string {
 function createDataFrame(
   queryResults: LabeledQueryResult[],
   datasetId: string,
-  isSingleQuery: boolean
+  isSingleQuery: boolean,
+  stepResolution?: PromQLStepResolution
 ): IDataFrame {
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
@@ -454,6 +471,10 @@ function createDataFrame(
       rows: allInstantRows,
     },
   };
+
+  if (stepResolution) {
+    meta.stepResolution = stepResolution;
+  }
 
   const tableTruncated = totalSeriesCount > MAX_SERIES_TABLE;
   if (tableTruncated || totalSeriesCount > 0) {

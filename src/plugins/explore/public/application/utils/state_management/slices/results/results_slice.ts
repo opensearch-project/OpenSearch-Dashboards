@@ -37,6 +37,10 @@ export interface IPrometheusSearchResult extends ISearchResult {
     totalSeriesCount: number;
     displayedSeriesCount: number;
   };
+  stepResolution?: {
+    maxDataPoints: number;
+    queries: Array<{ label: string; stepSec: number; rateIntervalSec: number }>;
+  };
 }
 
 export interface ResultMetadata {

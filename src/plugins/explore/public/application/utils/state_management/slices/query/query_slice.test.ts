@@ -235,13 +235,28 @@ describe('querySlice reducers', () => {
         ...existingState,
         maxDataPoints: 500,
         perQueryOptions: [{ minStep: '1m', legendFormat: '{{instance}}' }],
+        defaultMinStep: '15s',
       };
       const state = queryReducer(
         withSettings,
-        setMetricsQuerySettings({ maxDataPoints: undefined, perQueryOptions: undefined })
+        setMetricsQuerySettings({
+          maxDataPoints: undefined,
+          perQueryOptions: undefined,
+          defaultMinStep: undefined,
+        })
       );
       expect(state.maxDataPoints).toBeUndefined();
       expect(state.perQueryOptions).toBeUndefined();
+      expect(state.defaultMinStep).toBeUndefined();
+    });
+
+    it('updates the datasource default min step on its own', () => {
+      const state = queryReducer(
+        { ...existingState, maxDataPoints: 500 },
+        setMetricsQuerySettings({ defaultMinStep: '30s' })
+      );
+      expect(state.defaultMinStep).toBe('30s');
+      expect(state.maxDataPoints).toBe(500);
     });
   });
 });

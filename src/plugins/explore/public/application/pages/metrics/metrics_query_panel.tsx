@@ -52,12 +52,15 @@ import {
   QueryRow,
   RowMode,
   initRows,
+  joinRows,
   serializeRows,
   createPromQLSuggestionProvider,
   MetricsQueryOptions,
   formatStepSeconds,
+  useExecutedStepResolution,
   useMetricsQuerySettings,
 } from './query_panel';
+import type { RowStepReadout } from './query_panel';
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -134,8 +137,31 @@ export const MetricsQueryPanel: React.FC = () => {
     [setEditorText, dispatch, queryString]
   );
 
-  const { maxDataPoints, onMaxDataPointsChange, getResolvedStepSec } =
-    useMetricsQuerySettings(services);
+  const {
+    maxDataPoints,
+    onMaxDataPointsChange,
+    defaultMinStep,
+    onDefaultMinStepChange,
+    getResolvedStep,
+  } = useMetricsQuerySettings(services, dataConnectionId);
+
+  // Server-reported steps only line up with the rows by position, so trust them
+  // only while the rows still serialize to the query that produced them.
+  const executedSteps = useExecutedStepResolution();
+  const executedStepsMatchRows = !!executedSteps && executedSteps.query === joinRows(rows);
+
+  const stepReadoutFor = useCallback(
+    (label: string, minStep?: string): RowStepReadout => {
+      const executed = executedStepsMatchRows ? executedSteps?.byLabel[label] : undefined;
+      const resolved = executed ?? getResolvedStep(minStep);
+      return {
+        stepLabel: formatStepSeconds(resolved?.stepSec),
+        rateIntervalLabel: formatStepSeconds(resolved?.rateIntervalSec),
+        isFromLastRun: !!executed,
+      };
+    },
+    [executedSteps, executedStepsMatchRows, getResolvedStep]
+  );
 
   const updateRow = useCallback(
     (rowId: string, updates: Partial<QueryRow>) => {
@@ -289,7 +315,8 @@ export const MetricsQueryPanel: React.FC = () => {
                       canRemove={rows.length > 1}
                       isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
-                      resolvedStepLabel={formatStepSeconds(getResolvedStepSec(row.minStep))}
+                      stepReadout={stepReadoutFor(getQueryLabel(idx), row.minStep)}
+                      inheritedMinStep={defaultMinStep}
                     />
                   )}
                 </EuiDraggable>
@@ -314,6 +341,10 @@ export const MetricsQueryPanel: React.FC = () => {
               <MetricsQueryOptions
                 maxDataPoints={maxDataPoints}
                 onMaxDataPointsChange={onMaxDataPointsChange}
+                defaultMinStep={defaultMinStep}
+                onDefaultMinStepChange={onDefaultMinStepChange}
+                connectionName={dataConnectionId}
+                resolvedMaxDataPoints={executedSteps?.maxDataPoints}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

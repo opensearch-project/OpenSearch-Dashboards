@@ -42,6 +42,7 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
     query = {
       ...query,
       maxDataPoints: queryState.maxDataPoints,
+      defaultMinStep: queryState.defaultMinStep,
       perQueryOptions,
     };
 

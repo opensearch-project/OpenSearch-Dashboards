@@ -26,7 +26,7 @@ import { PrometheusClient } from '../explore/services/prometheus_client';
 import { PromQLBuilder, parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
 import { QueryRow, RowMode, modeButtons } from './row_state';
-import { RowQueryOptions } from './metrics_query_options';
+import { RowQueryOptions, RowStepReadout } from './metrics_query_options';
 import { PerQueryOptions } from '../../../utils/languages';
 
 import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
@@ -51,7 +51,8 @@ export interface QueryRowProps {
   canRemove: boolean;
   isDragging: boolean;
   dragHandleProps: DragHandleProps;
-  resolvedStepLabel: string;
+  stepReadout: RowStepReadout;
+  inheritedMinStep?: string;
 }
 
 export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
@@ -69,7 +70,8 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     canRemove,
     isDragging,
     dragHandleProps,
-    resolvedStepLabel,
+    stepReadout,
+    inheritedMinStep,
   }) => {
     const [showCodeConfirm, setShowCodeConfirm] = useState(false);
 
@@ -250,7 +252,8 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
               <RowQueryOptions
                 minStep={row.minStep}
                 legendFormat={row.legendFormat}
-                resolvedStepLabel={resolvedStepLabel}
+                inheritedMinStep={inheritedMinStep}
+                {...stepReadout}
                 onChange={(options) => onOptionsChange(row.id, options)}
               />
               {canRemove && (

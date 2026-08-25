@@ -1157,6 +1157,99 @@ describe('promqlSearchStrategy', () => {
       const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
       expect(callArgs.body.query).toBe('rate(x[4m])');
     });
+
+    it('falls back to the datasource default min step for rows without one', async () => {
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(seriesResponse(100))
+        .mockResolvedValueOnce(seriesResponse(200));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'metric_a; metric_b',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+              defaultMinStep: '2m',
+              perQueryOptions: [{ minStep: '5m' }, {}],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callA = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      const callB = (prometheusManager.query as jest.Mock).mock.calls[1][2];
+      expect(callA.body.options.step).toBe('300');
+      expect(callB.body.options.step).toBe('120');
+    });
+
+    it('reports the step and rate window each query resolved to', async () => {
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(seriesResponse(100))
+        .mockResolvedValueOnce(seriesResponse(200));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'metric_a; metric_b',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+              maxDataPoints: 100,
+              perQueryOptions: [{ minStep: '5m' }, {}],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toEqual({
+        maxDataPoints: 100,
+        queries: [
+          { label: 'A', stepSec: 300, rateIntervalSec: 1200 },
+          { label: 'B', stepSec: 50, rateIntervalSec: 240 },
+        ],
+      });
+    });
+
+    it('defaults the reported resolution when max data points is unset', async () => {
+      mockPrometheusManagerQuery(seriesResponse(100));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'metric_a', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toEqual({
+        maxDataPoints: 1440,
+        queries: [{ label: 'A', stepSec: 15, rateIntervalSec: 240 }],
+      });
+    });
   });
 
   describe('instant query support', () => {
@@ -1179,7 +1272,7 @@ describe('promqlSearchStrategy', () => {
 
       mockPrometheusManagerQuery(mockResponse);
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
-      await strategy.search(
+      const result = await strategy.search(
         emptyRequestHandlerContext,
         {
           body: {
@@ -1203,6 +1296,9 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.options.start).toBeUndefined();
       expect(callArgs.body.options.end).toBeUndefined();
       expect(callArgs.body.options.step).toBeUndefined();
+      // No step is sent, so there is nothing to report.
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toBeUndefined();
     });
 
     it('should handle instant query response with singular value field', async () => {

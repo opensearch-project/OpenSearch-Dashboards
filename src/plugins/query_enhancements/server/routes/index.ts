@@ -109,6 +109,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               format: schema.string(),
               profile: schema.maybe(schema.boolean()),
               maxDataPoints: schema.maybe(schema.number()),
+              defaultMinStep: schema.maybe(schema.string()),
               perQueryOptions: schema.maybe(
                 schema.arrayOf(
                   schema.object({

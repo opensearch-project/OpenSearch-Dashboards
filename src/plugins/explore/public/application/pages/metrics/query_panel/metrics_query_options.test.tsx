@@ -17,6 +17,7 @@ describe('formatStepSeconds', () => {
 
   it('renders a placeholder for missing or invalid steps', () => {
     expect(formatStepSeconds(null)).toBe('—');
+    expect(formatStepSeconds(undefined)).toBe('—');
     expect(formatStepSeconds(0)).toBe('—');
     expect(formatStepSeconds(NaN)).toBe('—');
   });
@@ -25,13 +26,20 @@ describe('formatStepSeconds', () => {
 describe('MetricsQueryOptions', () => {
   const setup = (overrides = {}) => {
     const onMaxDataPointsChange = jest.fn();
-    render(<MetricsQueryOptions onMaxDataPointsChange={onMaxDataPointsChange} {...overrides} />);
-    return { onMaxDataPointsChange };
+    const onDefaultMinStepChange = jest.fn();
+    render(
+      <MetricsQueryOptions
+        onMaxDataPointsChange={onMaxDataPointsChange}
+        onDefaultMinStepChange={onDefaultMinStepChange}
+        {...overrides}
+      />
+    );
+    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
+    return { onMaxDataPointsChange, onDefaultMinStepChange };
   };
 
   it('emits an integer maxDataPoints', () => {
     const { onMaxDataPointsChange } = setup();
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsStepMaxDataPointsInput'), {
       target: { value: '500' },
     });
@@ -40,18 +48,76 @@ describe('MetricsQueryOptions', () => {
 
   it('clears maxDataPoints when the field is emptied', () => {
     const { onMaxDataPointsChange } = setup({ maxDataPoints: 500 });
-    fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
     fireEvent.change(screen.getByTestId('metricsStepMaxDataPointsInput'), {
       target: { value: '' },
     });
     expect(onMaxDataPointsChange).toHaveBeenCalledWith(undefined);
+  });
+
+  it('shows the resolution the last run used as the auto placeholder', () => {
+    setup({ resolvedMaxDataPoints: 1440 });
+    expect(screen.getByTestId('metricsStepMaxDataPointsInput')).toHaveAttribute(
+      'placeholder',
+      'auto = 1440'
+    );
+  });
+
+  it('emits the datasource default min step once it parses', () => {
+    const { onDefaultMinStepChange } = setup();
+    const input = screen.getByTestId('metricsDefaultMinStepInput');
+    fireEvent.change(input, { target: { value: ' 30s ' } });
+    expect(onDefaultMinStepChange).toHaveBeenCalledWith('30s');
+  });
+
+  it('clears the datasource default when the field is emptied', () => {
+    const { onDefaultMinStepChange } = setup({ defaultMinStep: '30s' });
+    fireEvent.change(screen.getByTestId('metricsDefaultMinStepInput'), { target: { value: '' } });
+    expect(onDefaultMinStepChange).toHaveBeenCalledWith(undefined);
+  });
+
+  it('does not persist a half-typed datasource default', () => {
+    const { onDefaultMinStepChange } = setup();
+    const input = screen.getByTestId('metricsDefaultMinStepInput');
+    fireEvent.change(input, { target: { value: '30' } });
+    expect(onDefaultMinStepChange).not.toHaveBeenCalled();
+    fireEvent.change(input, { target: { value: '30s' } });
+    expect(onDefaultMinStepChange).toHaveBeenCalledWith('30s');
+  });
+
+  it('flags an invalid datasource default without persisting it', () => {
+    const { onDefaultMinStepChange } = setup();
+    fireEvent.change(screen.getByTestId('metricsDefaultMinStepInput'), {
+      target: { value: 'banana' },
+    });
+    expect(screen.getByText(/Enter a duration with a unit/)).toBeInTheDocument();
+    expect(onDefaultMinStepChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps the typed text visible while it is still invalid', () => {
+    setup();
+    const input = screen.getByTestId('metricsDefaultMinStepInput');
+    fireEvent.change(input, { target: { value: '30' } });
+    expect(input).toHaveValue('30');
+  });
+
+  it('names the connection the default is saved on', () => {
+    setup({ connectionName: 'local' });
+    expect(screen.getByText(/Saved on local/)).toBeInTheDocument();
   });
 });
 
 describe('RowQueryOptions', () => {
   const setup = (overrides = {}) => {
     const onChange = jest.fn();
-    render(<RowQueryOptions resolvedStepLabel="30s" onChange={onChange} {...overrides} />);
+    render(
+      <RowQueryOptions
+        stepLabel="30s"
+        rateIntervalLabel="4m"
+        isFromLastRun
+        onChange={onChange}
+        {...overrides}
+      />
+    );
     return { onChange };
   };
 
@@ -99,5 +165,29 @@ describe('RowQueryOptions', () => {
       target: { value: '' },
     });
     expect(onChange).toHaveBeenCalledWith({ minStep: undefined, legendFormat: undefined });
+  });
+
+  it('shows the inherited datasource default as the min step placeholder', () => {
+    setup({ inheritedMinStep: '30s' });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
+    expect(screen.getByTestId('metricsStepMinStepInput')).toHaveAttribute('placeholder', '30s');
+    expect(screen.getByText(/Empty inherits 30s/)).toBeInTheDocument();
+  });
+
+  it('reports the resolved step and rate window from the last run', () => {
+    setup();
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
+    const readout = screen.getByTestId('metricsStepResolved');
+    expect(readout).toHaveTextContent('Step: 30s ($__interval)');
+    expect(readout).toHaveTextContent('Rate window: 4m ($__rate_interval)');
+    expect(readout).toHaveTextContent('From the last run of this query.');
+  });
+
+  it('marks the readout as an estimate before the query has run', () => {
+    setup({ isFromLastRun: false });
+    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
+    expect(screen.getByTestId('metricsStepResolved')).toHaveTextContent(
+      'Estimated; run the query to confirm.'
+    );
   });
 });
