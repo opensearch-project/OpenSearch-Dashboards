@@ -64,8 +64,12 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
         values: { buttonText },
       })}
       compressed={true}
-      color="primary"
-      fill={needsUpdate}
+      // The button is always filled, so the "unapplied changes" signal has to live in the
+      // colour instead — which is OUI's own convention for this control.
+      color={needsUpdate ? 'success' : 'primary'}
+      // Not filled when disabled: filled + disabled renders a solid grey block that reads
+      // as an enabled control.
+      fill={!isDisabled}
     >
       {buttonText}
     </EuiSuperUpdateButton>

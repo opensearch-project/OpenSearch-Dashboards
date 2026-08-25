@@ -34,6 +34,21 @@ export const BaseQuery = {
 export const TestQueries = ['bytes_transferred >', 'bytes_transferred < 8000'];
 
 /**
+ * Recent queries live in the "Recent queries" tab of the saved queries "Open query" flyout — the
+ * standalone footer button was retired so that saved *searches* and saved *queries* stop competing
+ * for the same spot in the footer.
+ */
+export const openRecentQueriesTab = () => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
+  cy.getElementByTestId('saved-query-management-open-button').click({ force: true });
+  cy.getElementByTestId('openQueryFlyoutRecentQueriesTab').click({ force: true });
+};
+
+export const closeRecentQueriesTab = () => {
+  cy.getElementByTestId('euiFlyoutCloseButton').click({ force: true });
+};
+
+/**
  * The configurations needed for recent queries tests
  * @typedef {Object} RecentQueriesFilteringTestConfig
  * @property {string} dataset - the dataset name to use

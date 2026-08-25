@@ -18,6 +18,7 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
   EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiTablePagination,
   EuiTitle,
   Pager,
@@ -26,6 +27,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from 'opensearch-dashboards/public';
+import { Query, RecentQueriesTable, TimeRange } from '../..';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { getQueryService } from '../../services';
@@ -36,6 +38,16 @@ export interface OpenSavedQueryFlyoutProps {
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
+  /**
+   * Opt-in (observability: explore / agent_traces). When provided, a "Recent queries" tab is added
+   * so query history lives alongside saved queries instead of behind its own toolbar button —
+   * users kept reaching for one when they meant the other.
+   *
+   * Tab visibility is derived from this callback's presence: a Recent tab whose Run does nothing
+   * would be worse than no tab, and callers that omit it (legacy Discover, dashboards) get exactly
+   * today's flyout.
+   */
+  onRecentQueryRun?: (query: Query, timeRange?: TimeRange) => void;
 }
 
 interface SavedQuerySearchableItem {
@@ -49,6 +61,7 @@ interface SavedQuerySearchableItem {
 
 enum OPEN_QUERY_TAB_ID {
   SAVED_QUERIES = 'saved-queries',
+  RECENT_QUERIES = 'recent-queries',
   QUERY_TEMPLATES = 'query-templates',
 }
 
@@ -58,6 +71,7 @@ export function OpenSavedQueryFlyout({
   onClose,
   onQueryOpen,
   handleQueryDelete,
+  onRecentQueryRun,
 }: OpenSavedQueryFlyoutProps) {
   const [selectedTabId, setSelectedTabId] = useState<OPEN_QUERY_TAB_ID>(
     OPEN_QUERY_TAB_ID.SAVED_QUERIES
@@ -77,6 +91,12 @@ export function OpenSavedQueryFlyout({
   const queryStringManager = getQueryService().queryString;
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
+    // The Recent tab reads from query history in memory, so there is nothing to fetch — and
+    // clobbering `savedQueries` here would make the Saved queries tab flicker on the way back.
+    if (currentTabIdRef.current === OPEN_QUERY_TAB_ID.RECENT_QUERIES) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const query = queryStringManager.getQuery();
@@ -271,13 +291,37 @@ export function OpenSavedQueryFlyout({
     </>
   );
 
-  const tabs = [
+  const tabs: EuiTabbedContentTab[] = [
     {
       id: OPEN_QUERY_TAB_ID.SAVED_QUERIES,
       name: 'Saved queries',
       content: flyoutBodyContent,
     },
   ];
+
+  if (onRecentQueryRun) {
+    tabs.push({
+      id: OPEN_QUERY_TAB_ID.RECENT_QUERIES,
+      name: i18n.translate('data.openSavedQueryFlyout.recentQueriesTabName', {
+        defaultMessage: 'Recent queries',
+      }),
+      'data-test-subj': 'openQueryFlyoutRecentQueriesTab',
+      content: (
+        <>
+          <EuiSpacer />
+          {/* `isVisible` is unconditional because EuiTabbedContent only mounts the selected tab. */}
+          <RecentQueriesTable
+            isVisible
+            queryString={queryStringManager}
+            onClickRecentQuery={(recentQuery, timeRange) => {
+              onRecentQueryRun(recentQuery, timeRange);
+              onClose();
+            }}
+          />
+        </>
+      ),
+    });
+  }
 
   if (hasTemplateQueries) {
     tabs.push({
@@ -342,17 +386,21 @@ export function OpenSavedQueryFlyout({
               Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={!selectedQuery}
-              fill
-              onClick={onQueryAction}
-              data-testid="open-query-action-button"
-              data-test-subj="open-query-action-button"
-            >
-              {selectedTabId === OPEN_QUERY_TAB_ID.SAVED_QUERIES ? 'Open' : 'Copy'} query
-            </EuiButton>
-          </EuiFlexItem>
+          {/* Recent rows carry their own Run and Copy actions, and there is nothing here for the
+              footer's Open/Copy button to act on. */}
+          {selectedTabId !== OPEN_QUERY_TAB_ID.RECENT_QUERIES && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                disabled={!selectedQuery}
+                fill
+                onClick={onQueryAction}
+                data-testid="open-query-action-button"
+                data-test-subj="open-query-action-button"
+              >
+                {selectedTabId === OPEN_QUERY_TAB_ID.SAVED_QUERIES ? 'Open' : 'Copy'} query
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

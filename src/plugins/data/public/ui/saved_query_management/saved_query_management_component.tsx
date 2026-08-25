@@ -71,6 +71,8 @@ interface Props {
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   saveQueryIsDisabled?: boolean;
   textSize?: React.ComponentProps<typeof EuiText>['size'];
+  /** Opt-in; see `OpenSavedQueryFlyoutProps.onRecentQueryRun`. Only reaches the new-UI flyout. */
+  onRecentQueryRun?: OpenSavedQueryFlyoutProps['onRecentQueryRun'];
 }
 
 export function SavedQueryManagementComponent({
@@ -86,6 +88,7 @@ export function SavedQueryManagementComponent({
   saveQuery,
   saveQueryIsDisabled,
   textSize = 's',
+  onRecentQueryRun,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -267,6 +270,7 @@ export function SavedQueryManagementComponent({
                     onClose={() => openSavedQueryFlyout?.close().then()}
                     onQueryOpen={onLoad}
                     handleQueryDelete={handleDelete}
+                    onRecentQueryRun={onRecentQueryRun}
                   />
                 )
               );

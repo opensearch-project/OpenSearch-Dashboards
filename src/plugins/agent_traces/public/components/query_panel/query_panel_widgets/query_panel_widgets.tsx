@@ -5,7 +5,7 @@
 
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
-import { RecentQueriesButton } from './recent_queries_button';
+import { SavedSearchesButton } from './saved_searches_button';
 import { LanguageToggle } from './language_toggle';
 import { QueryPanelActions } from './query_panel_actions';
 import { AgentTracesServices } from '../../../types';
@@ -25,7 +25,7 @@ export const QueryPanelWidgets = () => {
         <LanguageToggle />
         <DatasetSelectWidget />
         <div className="agentTracesQueryPanelWidgets__verticalSeparator" />
-        <RecentQueriesButton />
+        <SavedSearchesButton />
         <div className="agentTracesQueryPanelWidgets__verticalSeparator" />
         <SaveQueryButton />
         {!queryPanelActionsRegistry.isEmpty() ? (

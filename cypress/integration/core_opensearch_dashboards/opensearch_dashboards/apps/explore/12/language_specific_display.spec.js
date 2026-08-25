@@ -17,6 +17,10 @@ import {
 } from '../../../../../../utils/apps/explore/shared';
 import { generateDisplayTestConfiguration } from '../../../../../../utils/apps/explore/language_specific_display';
 import {
+  openRecentQueriesTab,
+  closeRecentQueriesTab,
+} from '../../../../../../utils/apps/explore/recent_queries';
+import {
   prepareTestSuite,
   createWorkspaceAndDatasetUsingEndpoint,
 } from '../../../../../../utils/helpers';
@@ -66,9 +70,9 @@ export const runDisplayTests = () => {
           cy.explore.showQueryEditor();
           cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
           cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
-          cy.getElementByTestId('exploreRecentQueriesButton').click();
+          openRecentQueriesTab();
           cy.getElementByTestId('recentQueryTable').should('be.visible');
-          cy.getElementByTestId('exploreRecentQueriesButton').click();
+          closeRecentQueriesTab();
         }
 
         // testing the datepicker

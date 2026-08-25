@@ -40,6 +40,20 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     gap: $euiSizeXS;
   }
 
+  // Stable wrapper that is always rendered and measured (ResizeObserver) so the narrow
+  // treatment tracks this view's own container width, not the window.
+  &__bottomRoot {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    > .euiResizableContainer {
+      gap: $euiSizeXS;
+    }
+  }
+
   &__bottom-panel {
     flex: 1;
     min-height: 0;
@@ -48,6 +62,64 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     .resizable-panel-right {
       overflow-x: hidden;
     }
+  }
+
+  // Narrow view only: fields render as an overlay flyout opened from a slim rail, so the
+  // results canvas fills the row. The flyout is anchored *inside* this container (which
+  // begins right under the query bar), so it opens under the query bar and only over the
+  // results — not over the query bar / top nav like a viewport flyout would.
+  &__bottom-panel--narrow {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+
+    .explore-layout__canvas {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__fieldsRail {
+    flex: 0 0 auto;
+  }
+
+  &__fieldsFlyoutMask {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    // Same wash OUI's own `.ouiOverlayMask` applies (see oui
+    // `components/overlay_mask/_overlay_mask.scss`), so this container-scoped mask is
+    // indistinguishable from the full-window one a real flyout would draw. Reproduced rather
+    // than reused because `EuiOverlayMask` portals to `document.body` and would cover the
+    // whole window instead of just the canvas.
+    $fieldsFlyoutMaskColor: $ouiColorEmptyShade;
+
+    @if lightness($ouiTextColor) > 50 {
+      $fieldsFlyoutMaskColor: $ouiColorLightShade;
+    }
+
+    background: transparentize($fieldsFlyoutMaskColor, 0.2);
+  }
+
+  &__fieldsFlyout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 320px;
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+  }
+
+  &__fieldsFlyoutBody {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .globalQueryBar {

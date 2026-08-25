@@ -337,6 +337,45 @@ describe('TopNavMenu', () => {
         expect(component.find('.globalDatePicker').exists()).toBeTruthy();
       });
     });
+
+    // The grouped layout is rendered through a MountPointPortal into `portalTarget`, which is
+    // outside the enzyme tree — so these assert against the real DOM node.
+    const mountGrouped = async (extraProps = {}) => {
+      mountWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          config={menuItems}
+          showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
+          groupActions={true}
+          setMenuMountPoint={setMountPoint}
+          {...extraProps}
+        />
+      );
+
+      act(() => {
+        mountPoint(portalTarget);
+      });
+
+      await refresh();
+    };
+
+    it('does not add the actionsBeforeDatePicker modifier by default', async () => {
+      await mountGrouped();
+
+      expect(portalTarget.querySelector('.osdTopNavMenuGroup')).not.toBeNull();
+      // Legacy apps (discover / dashboard / visualize) must keep today's layout.
+      expect(portalTarget.querySelector('.osdTopNavMenuGroup--actionsBeforeDatePicker')).toBeNull();
+    });
+
+    it('adds the actionsBeforeDatePicker modifier when opted in', async () => {
+      await mountGrouped({ groupedActionsBeforeDatePicker: true });
+
+      expect(
+        portalTarget.querySelector('.osdTopNavMenuGroup--actionsBeforeDatePicker')
+      ).not.toBeNull();
+      // The modifier is purely presentational — the date picker slot must still render.
+      expect(portalTarget.querySelector('.globalDatePicker')).not.toBeNull();
+    });
   });
 
   describe('customSubmitButton', () => {

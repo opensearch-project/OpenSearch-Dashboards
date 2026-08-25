@@ -37,6 +37,10 @@ const SEARCH_DEBOUNCE_MS = 300;
 // the last selection for the tab session. URL `_a` still wins when present (shareable/bookmarkable).
 const DATA_SOURCE_STORAGE_KEY = 'logsDrilldown.dataSource';
 
+// OUI's update button is hollow by default; the observability views render it filled. Hoisted so
+// the picker's `useMemo` isn't invalidated by a fresh object literal on every render.
+const UPDATE_BUTTON_PROPS = { fill: true };
+
 type Props = {
   services: ExploreServices;
 } & Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
@@ -231,6 +235,9 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
         onTimeChange={onTimeChange}
         onRefresh={onRefresh}
         showUpdateButton
+        // Filled to match the other observability views. No `color` override: OUI's internal
+        // button already switches success/primary off its own dirty state.
+        updateButtonProps={UPDATE_BUTTON_PROPS}
       />
     ),
     [time.from, time.to, onTimeChange, onRefresh]

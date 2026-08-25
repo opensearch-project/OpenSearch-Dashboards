@@ -4,10 +4,6 @@
  */
 @import "../../shared";
 
-.agentTracesRecentQueriesButton {
+.agentTracesSavedSearchesButton {
   @include agentTracesQueryPanelButton;
-
-  &__popover {
-    max-width: 800px;
-  }
 }

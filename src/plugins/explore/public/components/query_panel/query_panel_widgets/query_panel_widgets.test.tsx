@@ -37,8 +37,8 @@ jest.mock('./save_query', () => ({
   SaveQueryButton: () => <div data-test-subj="save-query-button">Save Query</div>,
 }));
 
-jest.mock('./recent_queries_button', () => ({
-  RecentQueriesButton: () => <div data-test-subj="recent-queries-button">Recent Queries</div>,
+jest.mock('./saved_searches_button', () => ({
+  SavedSearchesButton: () => <div data-test-subj="saved-searches-button">Saved Searches</div>,
 }));
 
 jest.mock('./language_toggle', () => ({
@@ -132,7 +132,7 @@ describe('QueryPanelWidgets', () => {
       // Check left section components
       expect(screen.getByTestId('language-toggle')).toBeInTheDocument();
       expect(screen.getByTestId('dataset-select-widget')).toBeInTheDocument();
-      expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
+      expect(screen.getByTestId('saved-searches-button')).toBeInTheDocument();
       expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
 
       // Check separators exist
@@ -190,7 +190,7 @@ describe('QueryPanelWidgets', () => {
       expect(testSubjects).toEqual([
         'language-toggle',
         'dataset-select-widget',
-        'recent-queries-button',
+        'saved-searches-button',
         'save-query-button',
         'query-panel-actions',
       ]);

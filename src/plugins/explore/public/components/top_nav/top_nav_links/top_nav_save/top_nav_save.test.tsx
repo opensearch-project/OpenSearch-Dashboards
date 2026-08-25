@@ -79,8 +79,9 @@ describe('top_nav_save', () => {
 
   describe('saveTopNavData', () => {
     it('has correct configuration', () => {
-      expect(saveTopNavData.tooltip).toBeDefined();
-      expect(saveTopNavData.ariaLabel).toBeDefined();
+      expect(saveTopNavData.tooltip).toBe('Save search');
+      // Tooltip and aria-label are deliberately the same string.
+      expect(saveTopNavData.ariaLabel).toBe(saveTopNavData.tooltip);
       expect(saveTopNavData.testId).toBe('discoverSaveButton');
       expect(saveTopNavData.iconType).toBe('save');
       expect(saveTopNavData.controlType).toBe('icon');

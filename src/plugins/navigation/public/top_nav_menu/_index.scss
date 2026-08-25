@@ -21,6 +21,68 @@
   }
 }
 
+// Opt-in via TopNavMenu's `groupedActionsBeforeDatePicker` prop (explore / agent_traces only).
+// The DOM order is already [screenTitle][osdTopNavMenu][globalDatePicker]; the icons only *look*
+// stranded next to the title because `.globalDatePicker` is an EuiFlexItem with `flex-grow: 1`
+// that absorbs all the free space. So we move the free space in front of the icons instead.
+.osdTopNavMenuGroup--actionsBeforeDatePicker {
+  > .osdTopNavMenu {
+    margin-left: auto;
+  }
+
+  > .globalDatePicker {
+    // Without this the picker keeps eating the free space and `margin-left: auto` above is inert.
+    // Safe because the picker has an intrinsic width: it renders with `showUpdateButton={false}`
+    // (OUI fixes the wrapper width) and `_query_editor.scss` already pins
+    // `.osdQueryEditor__datePickerWrapper { flex-grow: 0 }` from `m` up. Note that
+    // `_global_filter_group.scss` also right-aligns this item's text from `m` up — inert while
+    // grow is 0, but it would fight `margin-left: auto` if grow ever came back.
+    flex-grow: 0;
+  }
+
+  // Narrow: the screen title keeps row 1 with the breadcrumbs and the chrome, while the action
+  // icons + date picker + Refresh drop to row 2. `m` (768-991px) is included because the
+  // embedded-canvas target width is 940px. Window breakpoints are correct here: the chrome header
+  // sits outside `.dscCanvas` so container queries can't reach it, and its width *is* the window
+  // width minus the side nav.
+  @include euiBreakpoint("xs", "s", "m") {
+    flex-wrap: wrap;
+
+    > .osdTopNavMenuScreenTitle {
+      // `!important` beats `.osdTopNavMenuGroup > .euiFlexItem { flex-basis: auto !important }`.
+      flex-basis: 100% !important;
+    }
+
+    // Row 2 starts flush left.
+    > .osdTopNavMenu {
+      margin-left: 0;
+    }
+  }
+}
+
+// Companion to the wrap above. `renderApplicationHeader()` puts the recents button, the
+// breadcrumbs and the action menu in one nowrap, centre-aligned `EuiHeaderSection`; once the
+// action menu is two rows tall that centring drops the recents button and breadcrumbs into the
+// gap *between* the rows, aligned with neither. Top-align them instead, and give them the height
+// of a single action row so they still read as centred on row 1 next to the screen title.
+// `:has()` keeps this to the two opted-in observability apps — legacy callers of TopNavMenu never
+// render the modifier class, so their header is untouched. (`:has()` is already used further down
+// this file.)
+@include euiBreakpoint("xs", "s", "m") {
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiHeaderSection:has(.osdTopNavMenuGroup--actionsBeforeDatePicker) {
+    align-items: flex-start;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    > .euiHeaderSectionItem:not(.headerAppActionMenuSection),
+    > .euiFlexItem {
+      min-height: $euiSizeXL;
+      align-items: center;
+    }
+  }
+}
+
 .osdTopNavMenuGroupedActions {
   background-color: $euiPageBackgroundColor;
 

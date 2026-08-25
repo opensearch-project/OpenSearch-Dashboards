@@ -9,9 +9,11 @@ import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
 import {
+  Query,
   SavedQueryManagementComponent,
   SavedQueryMeta,
   SavedQuery,
+  TimeRange,
 } from '../../../../../../data/public';
 import {
   selectQuery,
@@ -34,7 +36,7 @@ import './save_query.scss';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
-  const { timeFilter } = useTimeFilter();
+  const { timeFilter, handleTimeChange } = useTimeFilter();
   const query = useSelector(selectQuery);
   const getEditorText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
@@ -66,8 +68,24 @@ export const SaveQueryButton = () => {
     }
   }, [currentSavedQueryId, savedQueryService, dispatch]);
 
-  const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
+  const onButtonClick = useCallback(() => setIsPopoverOpen((open) => !open), []);
   const closePopover = () => setIsPopoverOpen(false);
+
+  // Inherited from the retired Recent queries button, which is now the "Recent queries" tab of this
+  // popover's Open query flyout. The key still opens the popover; recents are one flyout deeper.
+  const { keyboardShortcut } = services;
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'saved_queries',
+    pluginId: 'agentTraces',
+    name: i18n.translate('agentTraces.keyboardShortcut.savedQueries.name', {
+      defaultMessage: 'Saved queries',
+    }),
+    category: i18n.translate('agentTraces.keyboardShortcut.category.search', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'shift+q',
+    execute: onButtonClick,
+  });
 
   const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNew?: boolean) => {
     try {
@@ -158,6 +176,27 @@ export const SaveQueryButton = () => {
     [dispatch, services, setEditorTextWithQuery, timeFilter]
   );
 
+  const handleRunRecentQuery = useCallback(
+    (selectedQuery: Query, timeRange?: TimeRange) => {
+      const updatedQuery = typeof selectedQuery.query === 'string' ? selectedQuery.query : '';
+      setIsPopoverOpen(false);
+      // NOTE: `timeRange` is currently always undefined — query_history.ts persists the field as
+      // `dateRange` while RecentQueriesTable reads `timeRange`. Left threaded so the fix stays a
+      // one-liner; fixing either side here would change legacy Discover, which shares that table.
+      if (timeRange) {
+        handleTimeChange({
+          start: timeRange.from,
+          end: timeRange.to,
+          isInvalid: false,
+          isQuickSelection: true,
+        });
+      }
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
+      dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
+    },
+    [dispatch, handleTimeChange, services, setEditorTextWithQuery]
+  );
+
   const handleClearSavedQuery = useCallback(() => {
     dispatch(setSavedQuery(undefined));
     setIsPopoverOpen(false);
@@ -194,6 +233,7 @@ export const SaveQueryButton = () => {
         onInitiateSave={() => {}}
         onInitiateSaveAsNew={() => {}}
         onLoad={handleLoadSavedQuery}
+        onRecentQueryRun={handleRunRecentQuery}
         onClearSavedQuery={handleClearSavedQuery}
         closeMenuPopover={() => setIsPopoverOpen(false)}
         showSaveQuery={!!services.capabilities?.agentTraces?.saveQuery}

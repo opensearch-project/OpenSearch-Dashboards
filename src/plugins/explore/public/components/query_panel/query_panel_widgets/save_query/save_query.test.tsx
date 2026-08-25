@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -25,6 +25,9 @@ const mockQueryStringManager = {
 };
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
+const mockHandleTimeChange = jest.fn();
+const mockRunPPLAnalyzeInBackground = jest.fn();
+const mockUseKeyboardShortcut = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -41,7 +44,12 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
         query: {
           savedQueries: mockSavedQueryService,
           queryString: mockQueryStringManager,
+          timefilter: { timefilter: mockTimeFilter },
         },
+      },
+      http: { fetch: jest.fn() },
+      keyboardShortcut: {
+        useKeyboardShortcut: mockUseKeyboardShortcut,
       },
       notifications: {
         toasts: {
@@ -61,6 +69,7 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.doMock('../../utils', () => ({
   useTimeFilter: () => ({
     timeFilter: mockTimeFilter,
+    handleTimeChange: mockHandleTimeChange,
   }),
 }));
 
@@ -102,7 +111,14 @@ jest.doMock('../../../../application/utils/state_management/slices', () => ({
 // Mock SavedQueryManagementComponent
 jest.doMock('../../../../../../data/public', () => {
   const MockSavedQueryManagementComponent = (props: any) => {
-    const { onLoad, onClearSavedQuery, saveQuery, loadedSavedQuery, saveQueryIsDisabled } = props;
+    const {
+      onLoad,
+      onClearSavedQuery,
+      onRecentQueryRun,
+      saveQuery,
+      loadedSavedQuery,
+      saveQueryIsDisabled,
+    } = props;
     return (
       <div data-test-subj="saved-query-management">
         <button
@@ -158,6 +174,34 @@ jest.doMock('../../../../../../data/public', () => {
         <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
           Clear Query
         </button>
+        {/* Stands in for the Recent queries tab of the Open query flyout. */}
+        {onRecentQueryRun && (
+          <>
+            <button
+              data-test-subj="mock-run-recent-button"
+              onClick={() =>
+                onRecentQueryRun(
+                  { query: 'SELECT * FROM test', language: 'SQL' },
+                  { from: 'now-1d', to: 'now' }
+                )
+              }
+            >
+              Run Recent Query
+            </button>
+            <button
+              data-test-subj="mock-run-recent-no-time-button"
+              onClick={() => onRecentQueryRun({ query: 'SELECT * FROM test2', language: 'SQL' })}
+            >
+              Run Recent Query Without Time Range
+            </button>
+            <button
+              data-test-subj="mock-run-recent-object-button"
+              onClick={() => onRecentQueryRun({ query: { match_all: {} }, language: 'DQL' })}
+            >
+              Run Recent Object Query
+            </button>
+          </>
+        )}
         {loadedSavedQuery && (
           <div data-test-subj="loaded-query-info">
             Loaded: {loadedSavedQuery.attributes?.query?.query}
@@ -170,6 +214,7 @@ jest.doMock('../../../../../../data/public', () => {
 
   return {
     SavedQueryManagementComponent: MockSavedQueryManagementComponent,
+    runPPLAnalyzeInBackground: mockRunPPLAnalyzeInBackground,
   };
 });
 
@@ -538,6 +583,120 @@ describe('SaveQueryButton', () => {
           }),
         }),
         expect.anything()
+      );
+    });
+  });
+
+  // Migrated from the retired RecentQueriesButton: recent queries now run through this popover's
+  // Open query flyout, so `handleRunRecentQuery` lives here.
+  describe('running a recent query', () => {
+    const runRecent = (testSubj = 'mock-run-recent-button') => {
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+      fireEvent.click(screen.getByTestId(testSubj));
+    };
+
+    it('passes onRecentQueryRun to the saved query management component', () => {
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+
+      expect(screen.getByTestId('mock-run-recent-button')).toBeInTheDocument();
+    });
+
+    it('loads the selected query into the editor', () => {
+      runRecent();
+
+      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            query: expect.objectContaining({ savedQueries: mockSavedQueryService }),
+          }),
+        }),
+        mockSetEditorTextWithQuery,
+        'SELECT * FROM test'
+      );
+      expect(mockDispatch).toHaveBeenCalled();
+    });
+
+    it('applies the time range when the recent query carries one', () => {
+      runRecent();
+
+      expect(mockHandleTimeChange).toHaveBeenCalledWith({
+        start: 'now-1d',
+        end: 'now',
+        isInvalid: false,
+        isQuickSelection: true,
+      });
+    });
+
+    it('leaves the time range alone when the recent query has none', () => {
+      runRecent('mock-run-recent-no-time-button');
+
+      expect(mockHandleTimeChange).not.toHaveBeenCalled();
+      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockSetEditorTextWithQuery,
+        'SELECT * FROM test2'
+      );
+    });
+
+    it('loads an empty string for a non-string query body', () => {
+      runRecent('mock-run-recent-object-button');
+
+      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockSetEditorTextWithQuery,
+        ''
+      );
+    });
+
+    it('refreshes the analyze panel only when it is already open', () => {
+      runRecent();
+
+      expect(mockRunPPLAnalyzeInBackground).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { query: 'SELECT * FROM test', language: 'SQL' },
+          onlyIfOpen: true,
+        })
+      );
+    });
+
+    // `waitFor` because EuiPopover keeps its panel mounted for the duration of the close animation.
+    it('closes the popover', async () => {
+      runRecent();
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  describe('keyboard shortcut', () => {
+    it('registers shift+q against the saved queries popover', () => {
+      renderWithStore();
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'saved_queries',
+        pluginId: 'explore',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: 'shift+q',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('toggles the popover when executed', async () => {
+      renderWithStore();
+      const { execute } = mockUseKeyboardShortcut.mock.calls[0][0];
+
+      expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument();
+
+      act(() => execute());
+      await waitFor(() => expect(screen.getByTestId('saved-query-management')).toBeInTheDocument());
+
+      act(() => execute());
+      await waitFor(() =>
+        expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument()
       );
     });
   });

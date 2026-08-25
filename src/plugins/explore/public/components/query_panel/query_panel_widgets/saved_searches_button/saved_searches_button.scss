@@ -4,10 +4,6 @@
  */
 @import "../../shared";
 
-.exploreRecentQueriesButton {
+.exploreSavedSearchesButton {
   @include exploreQueryPanelButton;
-
-  &__popover {
-    max-width: 800px;
-  }
 }

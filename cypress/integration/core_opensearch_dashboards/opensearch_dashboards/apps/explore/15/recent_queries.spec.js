@@ -14,6 +14,8 @@ import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
+  openRecentQueriesTab,
+  closeRecentQueriesTab,
   //TODO: QueryRegex,
 } from '../../../../../../utils/apps/explore/recent_queries';
 import {
@@ -81,9 +83,7 @@ const runRecentQueryTests = () => {
               true
             );
           });
-          cy.getElementByTestId('exploreRecentQueriesButton').click({
-            force: true,
-          });
+          openRecentQueriesTab();
           cy.getElementByTestIdLike('row-').should('have.length.at.least', TestQueries.length);
           const reverseList = [...TestQueries].reverse();
           const steps = [
@@ -94,6 +94,8 @@ const runRecentQueryTests = () => {
             {
               // check table after changing dataset and returning to the dataset under test
               action: () => {
+                // The flyout from the previous step covers the query panel.
+                closeRecentQueriesTab();
                 cy.explore.setIndexAsDataset(
                   config.alternativeDataset,
                   DATASOURCE_NAME,
@@ -101,23 +103,20 @@ const runRecentQueryTests = () => {
                   'updated_at'
                 );
                 cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-                cy.getElementByTestId('exploreRecentQueriesButton').click({
-                  force: true,
-                });
+                openRecentQueriesTab();
               },
             },
             {
               // check table after visiting a different URL and coming back to the workspace
               action: () => {
+                closeRecentQueriesTab();
                 cy.visit('/app/workspace_initial');
                 cy.osd.navigateToWorkSpaceSpecificPage({
                   workspaceName: workspace,
                   page: 'explore/logs',
                   isEnhancement: true,
                 });
-                cy.getElementByTestId('exploreRecentQueriesButton').click({
-                  force: true,
-                });
+                openRecentQueriesTab();
               },
             },
           ];
@@ -163,14 +162,14 @@ const runRecentQueryTests = () => {
             cy.explore.setQueryEditor(query, {}, true);
             cy.explore.setQueryEditor(query, {}, true); // Run the same query twice to test deduplication
 
-            cy.getElementByTestId('exploreRecentQueriesButton').click({
-              force: true,
-            });
+            openRecentQueriesTab();
             // Should have TestQueries.length + 1 new unique query (duplicates should be deduplicated)
             cy.getElementByTestIdLike('row-').should(
               'have.length.at.least',
               TestQueries.length + 1
             );
+            // The next iteration types into the query editor, which the flyout covers.
+            closeRecentQueriesTab();
           });
         });
 

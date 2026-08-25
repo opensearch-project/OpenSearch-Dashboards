@@ -327,6 +327,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       onQueryChange={handleQueryChange}
       customSubmitButton={customSubmitButton}
       groupActions={true}
+      groupedActionsBeforeDatePicker={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
       showQueryBar={true}

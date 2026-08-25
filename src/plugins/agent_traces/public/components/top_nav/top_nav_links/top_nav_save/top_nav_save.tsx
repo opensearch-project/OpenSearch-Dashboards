@@ -27,13 +27,15 @@ import { TabState } from '../../../../application/utils/state_management/slices'
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_agent_traces/transforms';
 
+// One label for both the tooltip and the aria-label: "Save" alone was too easily confused with
+// the query panel's "Save query" control, which persists something different.
+const saveSearchLabel = i18n.translate('agentTraces.topNav.saveAriaLabel', {
+  defaultMessage: 'Save search',
+});
+
 export const saveTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('agentTraces.topNav.saveTitle', {
-    defaultMessage: 'Save',
-  }),
-  ariaLabel: i18n.translate('agentTraces.topNav.saveAriaLabel', {
-    defaultMessage: `Save search`,
-  }),
+  tooltip: saveSearchLabel,
+  ariaLabel: saveSearchLabel,
   testId: 'discoverSaveButton',
   iconType: 'save',
   controlType: 'icon',
