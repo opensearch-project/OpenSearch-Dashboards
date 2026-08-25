@@ -48,6 +48,7 @@ import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
+import { SERVICE_NAME_FILTER_FIELD } from '../../../../utils/trace_field_constants';
 
 /*
  * Trace:Details
@@ -208,6 +209,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFilters(newFilters);
   };
 
+  // Server-side (PPL) filters are everything except the client-side `isError`
+  // toggle. Keyed so the trace refetch below only re-runs when they change
+  // (isError is applied client-side and must not trigger a refetch).
+  const serverFilterKey = useMemo(
+    () => JSON.stringify(spanFilters.filter((filter) => filter.field !== 'isError')),
+    [spanFilters]
+  );
+
   // Check for correlations and fetch logs data
   useEffect(() => {
     if (dataset?.id && correlationService && data && traceId) {
@@ -273,10 +282,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
-    // Including transformedHits.length causes duplicate ppl query calls
-    // Including spanFilters causes double re-renders when changing filters
+    // Refetch when the trace changes or when server-side filters change
+    // (serverFilterKey). spanFilters itself is intentionally excluded to avoid
+    // an extra refetch when only the client-side isError toggle changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [traceId, dataset, pplService]);
+  }, [traceId, dataset, pplService, serverFilterKey]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -373,12 +383,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
 
-  // Trace map node click resolves to a service's entry span; select it if present.
-  const handleTraceMapSpanSelect = (mapSpanId?: string) => {
-    if (mapSpanId) {
-      handleSpanSelect(mapSpanId);
+  // Add (or replace) a field filter — shared by the span-detail metadata tab and
+  // the trace map (clicking a service filters the whole trace by that service).
+  const addSpanFilter = (field: string, value: string | number | boolean) => {
+    const newFilters = [...spanFilters];
+    const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
+    if (index === -1) {
+      newFilters.push({ field, value });
+    } else {
+      newFilters.splice(index, 1, { field, value });
     }
+    setSpanFiltersWithStorage(newFilters);
   };
+
+  const activeServiceFilter = spanFilters.find((f) => f.field === SERVICE_NAME_FILTER_FIELD)
+    ?.value as string | undefined;
 
   // Force re-render of visualizations when container size changes
   const forceVisualizationResize = useCallback(() => {
@@ -600,8 +619,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             <TraceServiceFlow
                               hits={transformedHits}
                               colorMap={colorMap}
-                              selectedSpanId={spanId}
-                              onSelectSpan={handleTraceMapSpanSelect}
+                              activeServiceFilter={activeServiceFilter}
+                              onFilterService={(serviceName) =>
+                                addSpanFilter(SERVICE_NAME_FILTER_FIELD, serviceName)
+                              }
                             />
                           </div>
                         )}
@@ -649,18 +670,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                     <div className="exploreTraceView__sidebarPanel">
                       <SpanDetailTabs
                         selectedSpan={selectedSpan}
-                        addSpanFilter={(field: string, value: string | number | boolean) => {
-                          const newFilters = [...spanFilters];
-                          const index = newFilters.findIndex(
-                            ({ field: filterField }) => field === filterField
-                          );
-                          if (index === -1) {
-                            newFilters.push({ field, value });
-                          } else {
-                            newFilters.splice(index, 1, { field, value });
-                          }
-                          setSpanFiltersWithStorage(newFilters);
-                        }}
+                        addSpanFilter={addSpanFilter}
                         setCurrentSpan={handleSpanSelect}
                         logDatasets={logDatasets}
                         datasetLogs={datasetLogs}

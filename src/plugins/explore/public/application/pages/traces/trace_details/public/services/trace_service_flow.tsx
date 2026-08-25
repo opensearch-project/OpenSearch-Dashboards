@@ -7,71 +7,57 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 // @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
-import { CelestialMap, ServiceCardNode } from '@osd/apm-topology';
-import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
+import { CelestialMap } from '@osd/apm-topology';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
+import { TraceServiceNode } from './trace_service_node';
+import { TraceServiceEdge } from './trace_service_edge';
 import './trace_service_flow.scss';
 
-const NODE_TYPES = { serviceCard: ServiceCardNode };
+const NODE_TYPES = { traceServiceCard: TraceServiceNode };
+const EDGE_TYPES = { traceCallEdge: TraceServiceEdge };
 
 export interface TraceServiceFlowProps {
   hits: ServiceFlowHit[];
   colorMap?: Record<string, string>;
-  selectedSpanId?: string;
-  /** Called with the entry span of the clicked service (undefined when unresolved). */
-  onSelectSpan?: (spanId?: string) => void;
+  /** Service name currently applied as a filter (highlighted on the map). */
+  activeServiceFilter?: string;
+  /** Clicking a service card filters the trace by that service. */
+  onFilterService?: (serviceName: string) => void;
 }
 
 /**
- * "Trace map" tab content: a per-trace service topology rendered with
- * @osd/apm-topology's CelestialMap + ServiceCardNode. Nodes are the services in
- * the trace with per-trace RED metrics; edges are the service-to-service call
- * flow. Clicking a service selects its entry span in the shared trace state.
+ * "Trace map" tab: a per-trace service topology (custom nodes with Requests /
+ * Errors / Duration bars, custom call-volume edges). Clicking a service filters
+ * the whole trace view by that service; the filtered service is highlighted.
  */
 export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   hits,
   colorMap = {},
-  selectedSpanId,
-  onSelectSpan,
+  activeServiceFilter,
+  onFilterService,
 }) => {
-  const { map, entrySpanByService } = useMemo(
-    () => spansToServiceFlow(hits, colorMap),
-    [hits, colorMap]
-  );
+  const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
 
-  const selectedService = useMemo(() => {
-    if (!selectedSpanId || !hits || hits.length === 0) return undefined;
-    const span = hits.find((hit) => hit.spanId === selectedSpanId);
-    return span ? resolveServiceNameFromSpan(span) || span.serviceName : undefined;
-  }, [selectedSpanId, hits]);
-
-  // Mark the selected service with a badge instead of driving the package's
-  // selectedNodeId (which fits/zooms the camera onto that single node, chopping
-  // the rest of the graph and fighting manual zoom). This keeps the map fit to
-  // all nodes while still showing which service is selected. A service that
-  // already has an error badge keeps it (errors take priority over selection).
-  const displayMap = useMemo(() => {
-    if (!selectedService) return map;
-    return {
+  // Inject the click handler + active-filter highlight into node data.
+  const displayMap = useMemo(
+    () => ({
       root: {
         edges: map.root.edges,
-        nodes: map.root.nodes.map((node) =>
-          node.id === selectedService && node.data.typeBadge === false
-            ? {
-                ...node,
-                data: { ...node.data, typeBadge: { label: 'Selected', color: '#0268BC' } },
-              }
-            : node
-        ),
+        nodes: map.root.nodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            isFilterActive: !!activeServiceFilter && node.id === activeServiceFilter,
+            onSelect: onFilterService,
+          },
+        })),
       },
-    };
-  }, [map, selectedService]);
+    }),
+    [map, activeServiceFilter, onFilterService]
+  );
 
-  // The package fits the graph once, one tick after layout, clamped to zoom
-  // 0.6-1.0 and never re-fits on resize. In a flyout/resizable panel the
-  // container is often mis-sized at that moment, chopping/mis-centering nodes.
-  // Remounting on a settled size change (width OR height — the flyout uses a
-  // vertical split) forces a fresh fitView against the real size.
+  // The package fits once (clamped zoom) and never re-fits on resize; remount on
+  // a settled size change so fitView measures the real (possibly flyout) size.
   const containerRef = useRef<HTMLDivElement>(null);
   const [fitKey, setFitKey] = useState(0);
   useEffect(() => {
@@ -129,14 +115,12 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         key={fitKey}
         map={displayMap}
         nodeTypes={NODE_TYPES}
+        edgeTypes={EDGE_TYPES}
         layoutOptions={{ direction: 'LR', rankSeparation: 160, nodeSeparation: 60 }}
         legend={false}
         breadcrumbs={[]}
         showMinimap
         topN={Infinity}
-        onDashboardClick={(node?: { id?: string }) =>
-          onSelectSpan?.(node?.id ? entrySpanByService[node.id] : undefined)
-        }
       />
     </div>
   );

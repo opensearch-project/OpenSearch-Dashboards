@@ -4,8 +4,6 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import { Span } from '../types';
 import { TraceTimeRange, calculateSpanTimeRange } from '../../../utils/span_timerange_utils';
@@ -199,19 +197,6 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
           />
         </div>
       </div>
-      {isZoomed && (
-        <EuiButtonEmpty
-          size="xs"
-          iconType="editorUndo"
-          onClick={reset}
-          data-test-subj="timelineBrushReset"
-          className="exploreTimelineBrush__reset"
-        >
-          {i18n.translate('explore.traceView.timeline.resetZoom', {
-            defaultMessage: 'Reset zoom',
-          })}
-        </EuiButtonEmpty>
-      )}
     </div>
   );
 };

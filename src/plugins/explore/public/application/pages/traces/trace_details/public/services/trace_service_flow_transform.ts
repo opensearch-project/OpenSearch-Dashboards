@@ -19,7 +19,16 @@ export interface ServiceFlowHit {
   [key: string]: any;
 }
 
-/** A node shaped for @osd/apm-topology's ServiceCardNode (CelestialCardProps). */
+/** A single labeled metric bar on a service node. */
+export interface ServiceMetric {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+  formattedValue: string;
+}
+
+/** Data for the custom TraceServiceNode. */
 export interface ServiceFlowNode {
   id: string;
   type: string;
@@ -27,69 +36,52 @@ export interface ServiceFlowNode {
   data: {
     id: string;
     title: string;
-    subtitle?: string;
+    subtitle: string;
     color?: string;
-    metrics: { requests: number; faults5xx: number; errors4xx: number };
-    // A non-'breached'/'recovered' status keeps celestial's red border+tint
-    // (health.breached) WITHOUT its "SLI breach" label, which stays reserved
-    // for real SLO checks.
-    health?: { status: string; breached: number; recovered: number; total: number };
-    typeBadge: false | { label: string; color: string; textColor?: string };
-    actionButton: false;
-    showDonut: false;
-    keyAttributes: Record<string, string>;
+    hasError: boolean;
+    metrics: ServiceMetric[];
   };
 }
 
-// EUI danger — used for the "N errors" badge (matches OSD's error red).
-const ERROR_COLOR = '#BD271E';
-
-/** A directed service-to-service edge for @osd/apm-topology's celestial edge. */
+/** Data for the custom TraceServiceEdge. */
 export interface ServiceFlowEdge {
   id: string;
   source: string;
   target: string;
   type: string;
-  data: {
-    style: {
-      type: string;
-      marker: string;
-      animationType: string;
-      color?: string;
-      label?: string;
-    };
-  };
+  data: { callCount: number; hasError: boolean };
 }
 
-/** The `map` prop shape expected by CelestialMap: a single "root" group. */
 export interface ServiceFlowMap {
   root: { nodes: ServiceFlowNode[]; edges: ServiceFlowEdge[] };
 }
 
 export interface ServiceFlowResult {
   map: ServiceFlowMap;
-  /** Representative "entry" span per service, for wiring node click -> span selection. */
+  /** Representative "entry" span per service (kept for callers that need it). */
   entrySpanByService: Record<string, string>;
 }
 
 const UNKNOWN_SERVICE = 'unknown';
+const OK_COLOR = '#017D73'; // EUI success
+const ERROR_COLOR = '#BD271E'; // EUI danger
+const COUNT_COLOR = '#69707D'; // EUI subdued
+const DURATION_COLOR = '#0268BC'; // EUI primary
 
 const serviceOf = (hit: ServiceFlowHit): string =>
   resolveServiceNameFromSpan(hit) || hit.serviceName || UNKNOWN_SERVICE;
 
-const formatDuration = (ms: number): string => {
+export const formatDuration = (ms: number): string => {
   if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
   if (ms >= 1) return `${Math.round(ms)}ms`;
   return `${ms.toFixed(2)}ms`;
 };
 
 /**
- * Build a per-trace service topology from a trace's spans, shaped for
- * @osd/apm-topology's ServiceCardNode. Per service we surface a per-trace RED
- * analog: span count (rate), error count/rate (errors), and total time
- * (duration). Edges carry the cross-service call count and turn red when a
- * call span errored. Also returns each service's entry span so a node click can
- * select a meaningful span rather than an arbitrary one.
+ * Build a per-trace service topology. Each service node carries three per-trace
+ * RED-style metric bars (Requests = span count, Errors = error rate, Duration =
+ * total service time), scaled against the max across services so bars are
+ * comparable. Edges carry the cross-service call count + whether a call errored.
  */
 export const spansToServiceFlow = (
   hits: ServiceFlowHit[],
@@ -100,22 +92,19 @@ export const spansToServiceFlow = (
   }
 
   const id2svc = new Map<string, string>();
-  const requestCounts = new Map<string, number>();
+  const spanCounts = new Map<string, number>();
   const errorCounts = new Map<string, number>();
   const durationNanos = new Map<string, number>();
 
   hits.forEach((hit) => {
     const service = serviceOf(hit);
     id2svc.set(hit.spanId, service);
-    requestCounts.set(service, (requestCounts.get(service) || 0) + 1);
-    if (hit.status?.code === 2) {
-      errorCounts.set(service, (errorCounts.get(service) || 0) + 1);
-    }
+    spanCounts.set(service, (spanCounts.get(service) || 0) + 1);
+    if (hit.status?.code === 2) errorCounts.set(service, (errorCounts.get(service) || 0) + 1);
     durationNanos.set(service, (durationNanos.get(service) || 0) + extractSpanDuration(hit));
   });
 
-  // Entry span per service = first span whose parent is in a different service
-  // (or has no known parent). Falls back to the first span seen for the service.
+  // Entry span per service (span whose parent is in a different service).
   const entrySpanByService: Record<string, string> = {};
   const firstSpanByService: Record<string, string> = {};
   hits.forEach((hit) => {
@@ -130,7 +119,7 @@ export const spansToServiceFlow = (
     if (!(service in entrySpanByService)) entrySpanByService[service] = firstSpanByService[service];
   });
 
-  // Distinct parent-service -> child-service edges with call counts + error flag.
+  // Cross-service edges with call counts + error flag.
   const edgeCounts = new Map<string, number>();
   const edgeHasError = new Set<string>();
   hits.forEach((hit) => {
@@ -145,59 +134,63 @@ export const spansToServiceFlow = (
     }
   });
 
-  const nodes: ServiceFlowNode[] = Array.from(requestCounts.keys()).map((service) => {
-    const requests = requestCounts.get(service) || 0;
+  const services = Array.from(spanCounts.keys());
+  const maxSpanCount = Math.max(...services.map((s) => spanCounts.get(s) || 0), 1);
+  const maxDurationMs = Math.max(
+    ...services.map((s) => nanoToMilliSec(durationNanos.get(s) || 0)),
+    1
+  );
+
+  const nodes: ServiceFlowNode[] = services.map((service) => {
+    const spans = spanCounts.get(service) || 0;
     const errors = errorCounts.get(service) || 0;
     const totalMs = nanoToMilliSec(durationNanos.get(service) || 0);
+    const errorRate = spans > 0 ? (errors / spans) * 100 : 0;
     return {
       id: service,
-      type: 'serviceCard',
-      position: { x: 0, y: 0 }, // Dagre repositions in CelestialMap
+      type: 'traceServiceCard',
+      position: { x: 0, y: 0 },
       data: {
         id: service,
         title: service,
-        // Duration only — the span count is shown once via the card's "Req" line.
         subtitle: formatDuration(totalMs),
-        // Healthy services use the service's Gantt legend color for the border.
         color: colorMap[service],
-        // requests = span count (also the error-rate bar denominator);
-        // errors4xx = error spans.
-        metrics: { requests, faults5xx: 0, errors4xx: errors },
-        // Error services get a consistent red border + tint via health.breached,
-        // but a non-'breached' status suppresses the "SLI breach" label.
-        health:
-          errors > 0
-            ? { status: 'error', breached: errors, recovered: 0, total: requests }
-            : undefined,
-        // Red "N errors" badge with the count.
-        typeBadge:
-          errors > 0
-            ? { label: `${errors} error${errors === 1 ? '' : 's'}`, color: ERROR_COLOR }
-            : false,
-        actionButton: false,
-        showDonut: false,
-        keyAttributes: {},
+        hasError: errors > 0,
+        metrics: [
+          {
+            label: 'Requests',
+            value: spans,
+            max: maxSpanCount,
+            color: COUNT_COLOR,
+            formattedValue: `${spans}`,
+          },
+          {
+            label: 'Errors',
+            value: errors,
+            max: spans || 1,
+            color: errors > 0 ? ERROR_COLOR : OK_COLOR,
+            formattedValue: errors > 0 ? `${errors} (${errorRate.toFixed(0)}%)` : '0',
+          },
+          {
+            label: 'Duration',
+            value: totalMs,
+            max: maxDurationMs,
+            color: DURATION_COLOR,
+            formattedValue: formatDuration(totalMs),
+          },
+        ],
       },
     };
   });
 
   const edges: ServiceFlowEdge[] = Array.from(edgeCounts.entries()).map(([key, count]) => {
     const [source, target] = key.split('->');
-    const hasError = edgeHasError.has(key);
     return {
       id: key,
       source,
       target,
-      type: 'celestialEdge',
-      data: {
-        style: {
-          type: 'solid',
-          marker: 'arrowClosed',
-          animationType: 'flow',
-          label: count > 1 ? `${count} calls` : '1 call',
-          ...(hasError ? { color: 'var(--osd-color-status-error)' } : {}),
-        },
-      },
+      type: 'traceCallEdge',
+      data: { callCount: count, hasError: edgeHasError.has(key) },
     };
   });
 

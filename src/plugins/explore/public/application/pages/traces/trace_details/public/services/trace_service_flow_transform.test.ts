@@ -12,6 +12,8 @@ const hit = (over: Partial<ServiceFlowHit> & { spanId: string }): ServiceFlowHit
   ...over,
 });
 
+const metric = (node: any, label: string) => node.data.metrics.find((m: any) => m.label === label);
+
 describe('spansToServiceFlow', () => {
   it('returns an empty map for no hits', () => {
     expect(spansToServiceFlow([])).toEqual({
@@ -20,79 +22,55 @@ describe('spansToServiceFlow', () => {
     });
   });
 
-  it('creates one serviceCard node per service with request counts and color', () => {
+  it('creates a traceServiceCard node per service with Requests/Errors/Duration metrics', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }),
       hit({ spanId: 'c', parentSpanId: 'b', serviceName: 'cart' }),
     ];
 
-    const { map } = spansToServiceFlow(hits, { frontend: '#111', cart: '#222' });
-    const { nodes } = map.root;
-
+    const { nodes } = spansToServiceFlow(hits, { frontend: '#111', cart: '#222' }).map.root;
     expect(nodes).toHaveLength(2);
-    const frontend = nodes.find((n) => n.id === 'frontend')!;
     const cart = nodes.find((n) => n.id === 'cart')!;
-    expect(frontend.type).toBe('serviceCard');
-    expect(frontend.data.color).toBe('#111');
-    expect(frontend.data.metrics.requests).toBe(1);
-    expect(cart.data.metrics.requests).toBe(2);
-    // Subtitle is duration only (count shown once via the card's Req line).
-    expect(cart.data.subtitle).not.toContain('span');
+    expect(cart.type).toBe('traceServiceCard');
+    expect(cart.data.color).toBe('#222');
+    expect(cart.data.hasError).toBe(false);
+    expect(metric(cart, 'Requests').value).toBe(2);
+    expect(metric(cart, 'Requests').formattedValue).toBe('2');
+    expect(metric(cart, 'Duration').formattedValue).toBe('2ms');
+    expect(cart.data.metrics.map((m) => m.label)).toEqual(['Requests', 'Errors', 'Duration']);
   });
 
-  it('flags error services with a red border (health.breached) + "N errors" badge, no SLI breach label', () => {
+  it('flags error services and formats the Errors metric with a percentage', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
       hit({ spanId: 'b', serviceName: 'cart', status: { code: 0 } }),
     ];
-
     const cart = spansToServiceFlow(hits).map.root.nodes.find((n) => n.id === 'cart')!;
-    expect(cart.data.metrics.errors4xx).toBe(1);
-    expect(cart.data.metrics.faults5xx).toBe(0);
-    // health.breached drives the red border/tint; status is NOT 'breached' so the
-    // package suppresses the "SLI breach" indicator.
-    expect(cart.data.health).toEqual({ status: 'error', breached: 1, recovered: 0, total: 2 });
-    expect(cart.data.health!.status).not.toBe('breached');
-    expect(cart.data.typeBadge).toEqual({ label: '1 error', color: '#BD271E' });
+    expect(cart.data.hasError).toBe(true);
+    const errors = metric(cart, 'Errors');
+    expect(errors.value).toBe(1);
+    expect(errors.formattedValue).toBe('1 (50%)');
+    // Healthy service has hasError false and "0" errors.
+    const clean = spansToServiceFlow([hit({ spanId: 'x', serviceName: 'cart' })]).map.root.nodes[0];
+    expect(clean.data.hasError).toBe(false);
+    expect(metric(clean, 'Errors').formattedValue).toBe('0');
   });
 
-  it('pluralizes the error badge and leaves error-free services badge-less', () => {
-    const multi = spansToServiceFlow([
-      hit({ spanId: 'a', serviceName: 'cart', status: { code: 2 } }),
-      hit({ spanId: 'b', serviceName: 'cart', status: { code: 2 } }),
-    ]).map.root.nodes[0];
-    expect(multi.data.typeBadge).toEqual({ label: '2 errors', color: '#BD271E' });
-
-    const clean = spansToServiceFlow([hit({ spanId: 'a', serviceName: 'cart' })]).map.root.nodes[0];
-    expect(clean.data.typeBadge).toBe(false);
-    expect(clean.data.health).toBeUndefined();
-  });
-
-  it('builds deduped cross-service edges with call counts, skipping self-calls', () => {
+  it('builds deduped traceCallEdge edges with call counts + error flag, skipping self-calls', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }), // frontend -> cart
-      hit({ spanId: 'c', parentSpanId: 'a', serviceName: 'cart' }), // frontend -> cart again
-      hit({ spanId: 'd', parentSpanId: 'b', serviceName: 'cart' }), // cart -> cart (self, skipped)
+      hit({ spanId: 'c', parentSpanId: 'a', serviceName: 'cart', status: { code: 2 } }), // errored call
+      hit({ spanId: 'd', parentSpanId: 'b', serviceName: 'cart' }), // self, skipped
       hit({ spanId: 'e', parentSpanId: 'b', serviceName: 'payment' }), // cart -> payment
     ];
-
     const { edges } = spansToServiceFlow(hits).map.root;
     const byId = Object.fromEntries(edges.map((e) => [e.id, e]));
     expect(Object.keys(byId).sort()).toEqual(['cart->payment', 'frontend->cart']);
-    expect(byId['frontend->cart'].data.style.label).toBe('2 calls');
-    expect(byId['cart->payment'].data.style.label).toBe('1 call');
-    expect(byId['frontend->cart'].data.style.animationType).toBe('flow');
-  });
-
-  it('marks an edge red when a call span errored', () => {
-    const hits: ServiceFlowHit[] = [
-      hit({ spanId: 'a', serviceName: 'frontend' }),
-      hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart', status: { code: 2 } }),
-    ];
-    const edge = spansToServiceFlow(hits).map.root.edges[0];
-    expect(edge.data.style.color).toContain('error');
+    expect(byId['frontend->cart'].type).toBe('traceCallEdge');
+    expect(byId['frontend->cart'].data).toEqual({ callCount: 2, hasError: true });
+    expect(byId['cart->payment'].data).toEqual({ callCount: 1, hasError: false });
   });
 
   it('resolves each service entry span (span receiving the cross-service call)', () => {
@@ -103,7 +81,6 @@ describe('spansToServiceFlow', () => {
     ];
     const { entrySpanByService } = spansToServiceFlow(hits);
     expect(entrySpanByService.frontend).toBe('root');
-    // cart's entry is the span whose parent (frontend) is a different service.
     expect(entrySpanByService.cart).toBe('cartEntry');
   });
 });

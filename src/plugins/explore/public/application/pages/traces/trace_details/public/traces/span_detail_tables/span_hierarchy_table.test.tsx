@@ -123,13 +123,13 @@ describe('SpanHierarchyTable', () => {
     expect(toolbar).toBeInTheDocument();
   });
 
-  it('passes ServiceLegendButton and SpanStatusFilter to secondaryToolbar', () => {
+  it('passes status filter, reset-zoom and ServiceLegendButton to secondaryToolbar', () => {
     render(<SpanHierarchyTable {...defaultProps} />);
 
     const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall?.secondaryToolbar).toHaveLength(2);
-    expect(mockCall?.secondaryToolbar![0]).toBeDefined();
-    expect(mockCall?.secondaryToolbar![1]).toBeDefined();
+    // SpanStatusFilter, Reset-zoom control, ServiceLegendButton
+    expect(mockCall?.secondaryToolbar).toHaveLength(3);
+    mockCall?.secondaryToolbar!.forEach((item: unknown) => expect(item).toBeDefined());
   });
 
   it('displays only spans returned by applySpanFilters', () => {

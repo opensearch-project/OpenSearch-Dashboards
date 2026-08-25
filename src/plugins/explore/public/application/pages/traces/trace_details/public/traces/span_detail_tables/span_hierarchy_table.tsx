@@ -4,7 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
@@ -185,6 +185,34 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
       spanFilters={props.filters}
       setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
     />,
+    <EuiToolTip
+      key="resetZoomTip"
+      content={
+        visibleRange
+          ? i18n.translate('explore.spanDetailTable.resetZoom.enabledTooltip', {
+              defaultMessage: 'Reset the timeline zoom to the full trace',
+            })
+          : i18n.translate('explore.spanDetailTable.resetZoom.disabledTooltip', {
+              defaultMessage: 'Drag the timeline slider to zoom, then reset here',
+            })
+      }
+    >
+      {/* span wrapper so the tooltip still shows while the button is disabled */}
+      <span>
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          iconType="editorUndo"
+          isDisabled={!visibleRange}
+          onClick={() => setVisibleRange(undefined)}
+          data-test-subj="timelineResetZoom"
+        >
+          {i18n.translate('explore.spanDetailTable.resetZoom.label', {
+            defaultMessage: 'Reset zoom',
+          })}
+        </EuiButtonEmpty>
+      </span>
+    </EuiToolTip>,
     <ServiceLegendButton
       key="serviceLegend"
       servicesInOrder={servicesInOrder}

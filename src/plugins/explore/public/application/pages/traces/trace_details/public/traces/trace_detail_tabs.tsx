@@ -33,12 +33,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
       }),
     },
     {
-      id: TraceDetailTab.SERVICE_MAP,
-      name: i18n.translate('explore.traceView.tab.traceMap', {
-        defaultMessage: 'Trace map',
-      }),
-    },
-    {
       id: TraceDetailTab.SPAN_LIST,
       name: (
         <>
@@ -52,6 +46,12 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
           })}
         </>
       ),
+    },
+    {
+      id: TraceDetailTab.SERVICE_MAP,
+      name: i18n.translate('explore.traceView.tab.traceMap', {
+        defaultMessage: 'Trace map',
+      }),
     },
   ];
 

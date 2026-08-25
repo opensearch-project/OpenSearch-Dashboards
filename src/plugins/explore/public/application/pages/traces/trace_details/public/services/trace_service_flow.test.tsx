@@ -8,30 +8,29 @@ import { render, fireEvent } from '@testing-library/react';
 import { TraceServiceFlow } from './trace_service_flow';
 import { ServiceFlowHit } from './trace_service_flow_transform';
 
+jest.mock('./trace_service_node', () => ({ TraceServiceNode: () => null }));
+jest.mock('./trace_service_edge', () => ({ TraceServiceEdge: () => null }));
+
 jest.mock('@osd/apm-topology', () => ({
-  CelestialMap: (props: any) => (
-    <div
-      data-test-subj="celestial-map"
-      data-node-count={props.map?.root?.nodes?.length ?? 0}
-      data-edge-count={props.map?.root?.edges?.length ?? 0}
-      data-selected={props.selectedNodeId ?? ''}
-      data-selected-service={
-        (props.map?.root?.nodes ?? []).find((n: any) => n.data?.typeBadge?.label === 'Selected')
-          ?.id ?? ''
-      }
-      data-has-card-type={props.nodeTypes?.serviceCard ? 'true' : 'false'}
-      data-breadcrumbs={JSON.stringify(props.breadcrumbs)}
-      data-zoom={props.onNodeClickZoom ?? 'none'}
-    >
-      <button
-        data-test-subj="fireNodeClick"
-        onClick={() => props.onDashboardClick?.({ id: 'cart' })}
+  CelestialMap: (props: any) => {
+    const nodes = props.map?.root?.nodes ?? [];
+    return (
+      <div
+        data-test-subj="celestial-map"
+        data-node-count={nodes.length}
+        data-edge-count={props.map?.root?.edges?.length ?? 0}
+        data-active={nodes.find((n: any) => n.data?.isFilterActive)?.id ?? ''}
+        data-has-node-type={props.nodeTypes?.traceServiceCard ? 'true' : 'false'}
+        data-has-edge-type={props.edgeTypes?.traceCallEdge ? 'true' : 'false'}
+        data-breadcrumbs={JSON.stringify(props.breadcrumbs)}
+        data-selected-node-id={props.selectedNodeId ?? ''}
       >
-        click
-      </button>
-    </div>
-  ),
-  ServiceCardNode: () => null,
+        <button data-test-subj="fireSelect" onClick={() => nodes[0]?.data?.onSelect?.(nodes[0].id)}>
+          select
+        </button>
+      </div>
+    );
+  },
 }));
 
 const hits: ServiceFlowHit[] = [
@@ -40,35 +39,30 @@ const hits: ServiceFlowHit[] = [
 ];
 
 describe('TraceServiceFlow', () => {
-  it('renders CelestialMap with serviceCard nodes and no breadcrumb bar', () => {
+  it('registers the custom node + edge types and hides the breadcrumb bar', () => {
     const { getByTestId } = render(<TraceServiceFlow hits={hits} colorMap={{}} />);
     const map = getByTestId('celestial-map');
     expect(map).toHaveAttribute('data-node-count', '2');
     expect(map).toHaveAttribute('data-edge-count', '1');
-    expect(map).toHaveAttribute('data-has-card-type', 'true');
+    expect(map).toHaveAttribute('data-has-node-type', 'true');
+    expect(map).toHaveAttribute('data-has-edge-type', 'true');
     expect(map).toHaveAttribute('data-breadcrumbs', '[]');
+    // Never drives selectedNodeId (which would camera-focus a single node).
+    expect(map).toHaveAttribute('data-selected-node-id', '');
   });
 
-  it('does not enable onNodeClickZoom (avoids fighting the selected-node focus)', () => {
-    const { getByTestId } = render(<TraceServiceFlow hits={hits} />);
-    expect(getByTestId('celestial-map')).toHaveAttribute('data-zoom', 'none');
+  it('highlights the service that matches the active filter', () => {
+    const { getByTestId } = render(<TraceServiceFlow hits={hits} activeServiceFilter="cart" />);
+    expect(getByTestId('celestial-map')).toHaveAttribute('data-active', 'cart');
   });
 
-  it("badges the selected span's service (without driving camera-focusing selectedNodeId)", () => {
-    const { getByTestId } = render(<TraceServiceFlow hits={hits} selectedSpanId="b" />);
-    const map = getByTestId('celestial-map');
-    // We intentionally do NOT set selectedNodeId (it would zoom to the node).
-    expect(map).toHaveAttribute('data-selected', '');
-    // Instead the selected service ('cart', which contains span 'b') gets a badge.
-    expect(map).toHaveAttribute('data-selected-service', 'cart');
-  });
-
-  it("selects the clicked service's entry span, not an arbitrary one", () => {
-    const onSelectSpan = jest.fn();
-    const { getByTestId } = render(<TraceServiceFlow hits={hits} onSelectSpan={onSelectSpan} />);
-    fireEvent.click(getByTestId('fireNodeClick'));
-    // cart's entry span is 'b' (its parent 'a' is in a different service).
-    expect(onSelectSpan).toHaveBeenCalledWith('b');
+  it('clicking a service calls onFilterService with its name', () => {
+    const onFilterService = jest.fn();
+    const { getByTestId } = render(
+      <TraceServiceFlow hits={hits} onFilterService={onFilterService} />
+    );
+    fireEvent.click(getByTestId('fireSelect'));
+    expect(onFilterService).toHaveBeenCalledWith('frontend');
   });
 
   it('renders an empty prompt when there are no services', () => {

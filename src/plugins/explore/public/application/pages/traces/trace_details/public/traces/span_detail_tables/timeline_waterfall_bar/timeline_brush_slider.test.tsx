@@ -63,13 +63,6 @@ describe('TimelineBrushSlider', () => {
     expect(container.querySelectorAll('.exploreTimelineBrush__overviewBar')).toHaveLength(3);
   });
 
-  it('does not show the reset control when not zoomed', () => {
-    const { queryByTestId } = render(
-      <TimelineBrushSlider traceTimeRange={traceTimeRange} spans={spans} onChange={jest.fn()} />
-    );
-    expect(queryByTestId('timelineBrushReset')).toBeNull();
-  });
-
   it('resets to the full range on double-click', () => {
     const onChange = jest.fn();
     const { getByTestId } = render(
@@ -101,18 +94,5 @@ describe('TimelineBrushSlider', () => {
     const arg = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(arg).not.toBeNull();
     expect(arg.endTimeMs).toBe(6000);
-  });
-
-  it('shows the reset control when zoomed', () => {
-    const visibleRange = { startTimeMs: 2000, endTimeMs: 4000, durationMs: 2000 };
-    const { getByTestId } = render(
-      <TimelineBrushSlider
-        traceTimeRange={traceTimeRange}
-        visibleRange={visibleRange}
-        spans={spans}
-        onChange={jest.fn()}
-      />
-    );
-    expect(getByTestId('timelineBrushReset')).toBeInTheDocument();
   });
 });
