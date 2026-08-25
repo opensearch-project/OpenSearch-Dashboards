@@ -6,6 +6,7 @@
 import type { AskPPLLintFixRequest, PPLLintContext } from '@osd/monaco';
 import type { Query } from '../../common';
 import type { PPLLintFixHost } from './ppl_lint_fix_host';
+import { PPL_LINT_FIX_REQUEST_ID_CONTEXT_SUFFIX } from '../../common/chat_tools/ppl_lint_fix_protocol';
 
 export type { AskPPLLintFixRequest } from '@osd/monaco';
 
@@ -151,6 +152,7 @@ export function cleanupPPLLintFixRequest(
 ): void {
   try {
     removeContextById?.(contextIdPrefix + requestId);
+    removeContextById?.(contextIdPrefix + requestId + PPL_LINT_FIX_REQUEST_ID_CONTEXT_SUFFIX);
   } finally {
     // Disarm on every exit path.
     if (armedRequests.delete(requestId)) {

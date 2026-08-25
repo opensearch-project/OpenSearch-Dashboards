@@ -23,6 +23,7 @@ import {
   subscribePPLLintFixOutcome,
 } from './ppl_lint_fix_session';
 import type { RemovePPLLintFixContextById } from './ppl_lint_fix_session';
+import type { PPLLintFixApprovalArgs } from '../../common/chat_tools/ppl_lint_fix_protocol';
 import { PERFORMANCE_RULE_IDS } from './ppl_lint_fix_host';
 import type { PPLLintFixHost } from './ppl_lint_fix_host';
 
@@ -40,6 +41,16 @@ export interface PPLLintFixToolArgs {
 export type BoundPPLLintFixToolArgs = PPLLintFixToolArgs & {
   [PPL_LINT_FIX_UI_BINDING]?: string;
 };
+
+/**
+ * The request id a confirmed apply is bound to: the in-process symbol the card's
+ * Approve click sets, falling back to the explicit key an out-of-realm caller
+ * passes when the symbol cannot survive serialization. Never trusts a
+ * model-supplied request id.
+ */
+export const resolveApprovedRequestId = (args: unknown): string | undefined =>
+  (args as BoundPPLLintFixToolArgs | null | undefined)?.[PPL_LINT_FIX_UI_BINDING] ??
+  (args as PPLLintFixApprovalArgs | null | undefined)?.__approvedRequestId;
 
 /**
  * Subset of the assistant framework's render props the card needs. Declared here

@@ -4,6 +4,7 @@
  */
 
 import { AssistantAction } from './hooks/use_assistant_action';
+import { ToolDefinition } from './services/assistant_action_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextProviderSetupDeps {}
@@ -40,6 +41,9 @@ export interface ContextProviderStart {
   actions: {
     registerAssistantAction: (action: AssistantAction) => void;
     unregisterAssistantAction: (id: string) => void;
+    getToolDefinitions: () => ToolDefinition[];
+    hasAction: (name: string) => boolean;
+    executeAction: (name: string, args: any) => Promise<any>;
     suppressDefaultPageContext: () => void;
     unsuppressDefaultPageContext: () => void;
   };
