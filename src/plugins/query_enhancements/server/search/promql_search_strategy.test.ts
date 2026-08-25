@@ -299,6 +299,8 @@ describe('promqlSearchStrategy', () => {
               query: 'up',
               dataset: { id: 'dataset-1' },
               language: 'PROMQL',
+            },
+            options: {
               perQueryOptions: [{ legendFormat: '{{job}}-{{instance}}' }],
             },
             timeRange: {
@@ -1079,6 +1081,8 @@ describe('promqlSearchStrategy', () => {
               query: 'metric_a; metric_b',
               dataset: { id: 'dataset-1' },
               language: 'PROMQL',
+            },
+            options: {
               perQueryOptions: [
                 { legendFormat: '{{instance}}' },
                 { legendFormat: 'srv-{{instance}}' },
@@ -1112,6 +1116,8 @@ describe('promqlSearchStrategy', () => {
               query: 'metric_a; metric_b',
               dataset: { id: 'dataset-1' },
               language: 'PROMQL',
+            },
+            options: {
               perQueryOptions: [{ minStep: '5m' }, {}],
             },
             timeRange: {
@@ -1143,6 +1149,8 @@ describe('promqlSearchStrategy', () => {
               query: 'rate(x[$__rate_interval])',
               dataset: { id: 'dataset-1' },
               language: 'PROMQL',
+            },
+            options: {
               perQueryOptions: [{ minStep: '1m' }],
             },
             timeRange: {
@@ -1172,6 +1180,8 @@ describe('promqlSearchStrategy', () => {
               query: 'metric_a; metric_b',
               dataset: { id: 'dataset-1' },
               language: 'PROMQL',
+            },
+            options: {
               maxDataPoints: 100,
               perQueryOptions: [{ minStep: '5m' }, {}],
             },

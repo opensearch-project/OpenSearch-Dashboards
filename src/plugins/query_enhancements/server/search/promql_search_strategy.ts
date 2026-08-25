@@ -12,13 +12,14 @@ import {
   IDataFrame,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
+  Query,
   splitMultiQueries,
 } from '../../../data/common';
 import {
   DEFAULT_RESOLUTION,
   interpolateLegendFormat,
   interpolatePromQLMacros,
-  PromQLQuery,
+  PromQLSearchOptions,
   PromQLStepResolution,
   resolveStep,
 } from '../../common';
@@ -81,12 +82,11 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
-        const { dataset, query, language, maxDataPoints, perQueryOptions }: PromQLQuery =
-          requestBody.query;
+        const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
-        const requestOptions = requestBody.options as
-          { queryType?: string; time?: string; step?: number } | undefined;
+        const requestOptions = requestBody.options as PromQLSearchOptions | undefined;
+        const { maxDataPoints, perQueryOptions } = requestOptions ?? {};
         const isInstantQuery = requestOptions?.queryType?.toUpperCase() === 'INSTANT';
 
         const parsedQueries = splitMultiQueries(query as string);

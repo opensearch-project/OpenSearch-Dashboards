@@ -79,8 +79,8 @@ describe('PromQLSearchInterceptor', () => {
     interceptor.search({} as IOpenSearchDashboardsSearchRequest, options);
 
     const [context, query] = mockFetch.mock.calls[0];
-    expect(query).toMatchObject({
-      query: 'up',
+    expect(query).toEqual({ query: 'up', language: 'PROMQL' });
+    expect(context.body?.options).toEqual({
       maxDataPoints: 500,
       perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
     });
@@ -96,8 +96,11 @@ describe('PromQLSearchInterceptor', () => {
 
     interceptor.search(request, options);
 
-    const [, query] = mockFetch.mock.calls[0];
-    expect(query).toMatchObject({ query: 'rate(x[5m])', maxDataPoints: 500 });
-    expect((query as any).perQueryOptions).toBeUndefined();
+    const [context, query] = mockFetch.mock.calls[0];
+    expect(query).toEqual({ query: 'rate(x[5m])', language: 'PROMQL' });
+    expect(context.body?.options).toEqual({
+      maxDataPoints: 500,
+      perQueryOptions: undefined,
+    });
   });
 });

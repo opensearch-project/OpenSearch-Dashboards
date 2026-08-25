@@ -16,6 +16,14 @@ export interface PromQLQuery extends Query {
   perQueryOptions?: PerQueryOptions[];
 }
 
+export interface PromQLSearchOptions {
+  queryType?: string;
+  time?: string;
+  step?: number;
+  maxDataPoints?: number;
+  perQueryOptions?: PerQueryOptions[];
+}
+
 /**
  * Step actually used for each query segment, reported back so the editor can
  * display what ran instead of re-deriving it.

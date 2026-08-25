@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trimEnd } from 'lodash';
+import { omit, trimEnd } from 'lodash';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -11,7 +11,14 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { API, EnhancedFetchContext, fetch, PromQLQuery, SEARCH_STRATEGY } from '../../common';
+import {
+  API,
+  EnhancedFetchContext,
+  fetch,
+  PromQLQuery,
+  PromQLSearchOptions,
+  SEARCH_STRATEGY,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class PromQLSearchInterceptor extends SearchInterceptor {
@@ -29,20 +36,15 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
     const timefilter = this.queryService.timefilter.timefilter;
     const queryState: PromQLQuery = this.queryService.queryString.getQuery();
 
-    let query: PromQLQuery = queryState;
-    if (request.params?.body?.query?.queries && request.params.body.query.queries.length > 0) {
-      query = request.params.body.query.queries[0];
-    }
+    const requested: PromQLQuery | undefined = request.params?.body?.query?.queries?.[0];
+    const query = omit(requested ?? queryState, ['maxDataPoints', 'perQueryOptions']);
 
     // Step, macro interpolation, and legend naming are resolved server-side per
     // query segment. perQueryOptions is aligned to queryState.query's segments,
     // so only forward it when executing that same string.
-    const perQueryOptions =
-      query.query === queryState.query ? queryState.perQueryOptions : undefined;
-    query = {
-      ...query,
+    const searchOptions: PromQLSearchOptions = {
       maxDataPoints: queryState.maxDataPoints,
-      perQueryOptions,
+      perQueryOptions: query.query === queryState.query ? queryState.perQueryOptions : undefined,
     };
 
     const context: EnhancedFetchContext = {
@@ -51,6 +53,7 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
       signal: options.abortSignal,
       body: {
         timeRange: timefilter.getTime(),
+        options: { ...searchOptions },
       },
     };
 

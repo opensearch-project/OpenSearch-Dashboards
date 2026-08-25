@@ -4,12 +4,14 @@
  */
 
 import {
+  fetch,
   isPPLAggregationQuery,
   isPPLSearchQuery,
   queryEndsWithHead,
   throwFacetError,
   formatDate,
 } from './utils';
+import { EnhancedFetchContext } from './types';
 import { Query } from 'src/plugins/data/common';
 
 describe('throwFacetError', () => {
@@ -362,5 +364,33 @@ describe('isPPLSearchQuery', () => {
 
     query.query = 'search source = test | stats count';
     expect(isPPLSearchQuery(query)).toBe(true);
+  });
+});
+
+describe('fetch', () => {
+  const createContext = (body?: EnhancedFetchContext['body']) => ({
+    http: { fetch: jest.fn().mockResolvedValue({}) } as any,
+    path: '/api/enhancements/search/promql',
+    body,
+  });
+
+  const query: Query = { language: 'PROMQL', query: 'up' };
+
+  it('forwards search options when provided', () => {
+    const context = createContext({ options: { maxDataPoints: 500 } });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body).options).toEqual({
+      maxDataPoints: 500,
+    });
+  });
+
+  it('omits options when the context has none', () => {
+    const context = createContext({ timeRange: { from: 'now-1h', to: 'now' } });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body)).not.toHaveProperty('options');
   });
 });
