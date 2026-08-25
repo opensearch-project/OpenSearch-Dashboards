@@ -1158,38 +1158,6 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.query).toBe('rate(x[4m])');
     });
 
-    it('falls back to the datasource default min step for rows without one', async () => {
-      (prometheusManager.query as jest.Mock)
-        .mockResolvedValueOnce(seriesResponse(100))
-        .mockResolvedValueOnce(seriesResponse(200));
-
-      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
-      await strategy.search(
-        emptyRequestHandlerContext,
-        {
-          body: {
-            query: {
-              query: 'metric_a; metric_b',
-              dataset: { id: 'dataset-1' },
-              language: 'PROMQL',
-              defaultMinStep: '2m',
-              perQueryOptions: [{ minStep: '5m' }, {}],
-            },
-            timeRange: {
-              from: '2021-12-01T00:00:00.000Z',
-              to: '2021-12-01T01:00:00.000Z',
-            },
-          },
-        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
-        {}
-      );
-
-      const callA = (prometheusManager.query as jest.Mock).mock.calls[0][2];
-      const callB = (prometheusManager.query as jest.Mock).mock.calls[1][2];
-      expect(callA.body.options.step).toBe('300');
-      expect(callB.body.options.step).toBe('120');
-    });
-
     it('reports the step and rate window each query resolved to', async () => {
       (prometheusManager.query as jest.Mock)
         .mockResolvedValueOnce(seriesResponse(100))

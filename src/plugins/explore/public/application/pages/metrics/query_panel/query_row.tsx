@@ -52,7 +52,6 @@ export interface QueryRowProps {
   isDragging: boolean;
   dragHandleProps: DragHandleProps;
   stepReadout: RowStepReadout;
-  inheritedMinStep?: string;
 }
 
 export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
@@ -71,7 +70,6 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     isDragging,
     dragHandleProps,
     stepReadout,
-    inheritedMinStep,
   }) => {
     const [showCodeConfirm, setShowCodeConfirm] = useState(false);
 
@@ -252,7 +250,6 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
               <RowQueryOptions
                 minStep={row.minStep}
                 legendFormat={row.legendFormat}
-                inheritedMinStep={inheritedMinStep}
                 {...stepReadout}
                 onChange={(options) => onOptionsChange(row.id, options)}
               />

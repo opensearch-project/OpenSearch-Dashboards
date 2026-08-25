@@ -32,9 +32,6 @@ export interface RowStepReadout {
 export interface MetricsQueryOptionsProps {
   maxDataPoints?: number;
   onMaxDataPointsChange: (next?: number) => void;
-  defaultMinStep?: string;
-  onDefaultMinStepChange: (next?: string) => void;
-  connectionName?: string;
   /** Resolution the last run used, shown as the placeholder when left on auto. */
   resolvedMaxDataPoints?: number;
 }
@@ -42,8 +39,6 @@ export interface MetricsQueryOptionsProps {
 export interface RowQueryOptionsProps extends RowStepReadout {
   minStep?: string;
   legendFormat?: string;
-  /** Datasource-level default applied when this row leaves Min step empty. */
-  inheritedMinStep?: string;
   onChange: (next: PerQueryOptions) => void;
 }
 
@@ -62,26 +57,9 @@ const minStepError = () =>
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
   onMaxDataPointsChange,
-  defaultMinStep,
-  onDefaultMinStepChange,
-  connectionName,
   resolvedMaxDataPoints,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // Half-typed durations ("15") never reach the query state, so the field needs
-  // its own value to stay editable.
-  const [draftDefaultMinStep, setDraftDefaultMinStep] = useState<string | undefined>(undefined);
-  const editingDefaultMinStep = draftDefaultMinStep ?? defaultMinStep ?? '';
-  const defaultMinStepInvalid =
-    !!editingDefaultMinStep && parseStepIntervalSeconds(editingDefaultMinStep) === undefined;
-
-  const onDefaultMinStepInput = (raw: string) => {
-    setDraftDefaultMinStep(raw);
-    const trimmed = raw.trim();
-    const next = trimmed === '' ? undefined : trimmed;
-    if (next !== undefined && parseStepIntervalSeconds(next) === undefined) return;
-    if (next !== defaultMinStep) onDefaultMinStepChange(next);
-  };
 
   const button = (
     <EuiButtonEmpty
@@ -141,36 +119,6 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             data-test-subj="metricsStepMaxDataPointsInput"
           />
         </EuiFormRow>
-
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepLabel', {
-            defaultMessage: 'Default min step',
-          })}
-          isInvalid={defaultMinStepInvalid}
-          error={minStepError()}
-          helpText={
-            connectionName
-              ? i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepHelp', {
-                  defaultMessage:
-                    'Saved on {connection}. Match its scrape interval; rows with their own Min step override it.',
-                  values: { connection: connectionName },
-                })
-              : i18n.translate('explore.metricsQueryPanel.queryOptions.defaultMinStepHelpNoName', {
-                  defaultMessage:
-                    'Applies to every query on this data source; rows with their own Min step override it.',
-                })
-          }
-        >
-          <EuiFieldText
-            compressed
-            isInvalid={defaultMinStepInvalid}
-            placeholder="15s"
-            value={editingDefaultMinStep}
-            onChange={(e) => onDefaultMinStepInput(e.target.value)}
-            data-test-subj="metricsDefaultMinStepInput"
-          />
-        </EuiFormRow>
       </EuiForm>
     </EuiPopover>
   );
@@ -179,7 +127,6 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
 export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
   minStep,
   legendFormat,
-  inheritedMinStep,
   stepLabel,
   rateIntervalLabel,
   isFromLastRun,
@@ -239,21 +186,14 @@ export const RowQueryOptions: React.FC<RowQueryOptionsProps> = ({
           })}
           isInvalid={minStepInvalid}
           error={minStepError()}
-          helpText={
-            inheritedMinStep
-              ? i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelpInherited', {
-                  defaultMessage: 'Lower bound on the step. Empty inherits {inherited}.',
-                  values: { inherited: inheritedMinStep },
-                })
-              : i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelp', {
-                  defaultMessage: 'Lower bound on the step. Match your scrape interval.',
-                })
-          }
+          helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.minStepHelp', {
+            defaultMessage: 'Lower bound on the step. Match your scrape interval.',
+          })}
         >
           <EuiFieldText
             compressed
             isInvalid={minStepInvalid}
-            placeholder={inheritedMinStep ?? '15s'}
+            placeholder="15s"
             value={minStep ?? ''}
             onChange={(e) => {
               const raw = e.target.value.trim();

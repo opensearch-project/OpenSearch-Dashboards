@@ -81,14 +81,8 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
-        const {
-          dataset,
-          query,
-          language,
-          maxDataPoints,
-          perQueryOptions,
-          defaultMinStep,
-        }: PromQLQuery = requestBody.query;
+        const { dataset, query, language, maxDataPoints, perQueryOptions }: PromQLQuery =
+          requestBody.query;
         const datasetId = dataset?.id ?? '';
 
         const requestOptions = requestBody.options as
@@ -130,7 +124,7 @@ export const promqlSearchStrategyProvider = (
           const { stepSec, scrapeSec, rateIntervalSec } = resolveStep({
             rangeMs,
             resolution,
-            minStep: opt?.minStep ?? defaultMinStep,
+            minStep: opt?.minStep,
             stepOverrideSec: requestOptions?.step,
           });
           return {

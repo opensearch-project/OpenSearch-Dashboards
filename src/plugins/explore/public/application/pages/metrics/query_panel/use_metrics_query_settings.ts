@@ -11,40 +11,22 @@ import { ExploreServices } from '../../../../types';
 import { PromQLQueryOptions } from '../../../utils/languages';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { setMetricsQuerySettings } from '../../../../application/utils/state_management/slices/query/query_slice';
-import { useDatasourceDefaultMinStep } from './use_datasource_default_min_step';
 
 type MetricsQuery = Query & PromQLQueryOptions;
 
 export interface MetricsQuerySettings {
   maxDataPoints?: number;
   onMaxDataPointsChange: (next?: number) => void;
-  defaultMinStep?: string;
-  onDefaultMinStepChange: (next?: string) => void;
   getResolvedStep: (minStep?: string) => ResolvedStep | null;
 }
 
-export function useMetricsQuerySettings(
-  services: ExploreServices,
-  connectionId: string
-): MetricsQuerySettings {
+export function useMetricsQuerySettings(services: ExploreServices): MetricsQuerySettings {
   const dispatch = useDispatch();
   const { queryString } = services.data.query;
 
   const [maxDataPoints, setMaxDataPoints] = useState<number | undefined>(
     () => (queryString.getQuery() as MetricsQuery).maxDataPoints
   );
-
-  const { defaultMinStep, onDefaultMinStepChange: persistDefaultMinStep } =
-    useDatasourceDefaultMinStep(services, connectionId);
-
-  // The datasource default is loaded asynchronously and edited outside the query
-  // state, so mirror it onto the query the interceptor forwards to the server.
-  useEffect(() => {
-    const currentQuery = queryString.getQuery() as MetricsQuery;
-    if (currentQuery.defaultMinStep === defaultMinStep) return;
-    queryString.setQuery({ ...currentQuery, defaultMinStep } as MetricsQuery);
-    dispatch(setMetricsQuerySettings({ defaultMinStep }));
-  }, [defaultMinStep, queryString, dispatch]);
 
   const [timeTick, setTimeTick] = useState(0);
   useEffect(() => {
@@ -60,14 +42,10 @@ export function useMetricsQuerySettings(
       const min = bounds?.min?.valueOf();
       const max = bounds?.max?.valueOf();
       if (min === undefined || max === undefined || max <= min) return null;
-      return resolveStep({
-        rangeMs: max - min,
-        resolution: maxDataPoints,
-        minStep: minStep ?? defaultMinStep,
-      });
+      return resolveStep({ rangeMs: max - min, resolution: maxDataPoints, minStep });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [maxDataPoints, defaultMinStep, timeTick, services.data.query.timefilter]
+    [maxDataPoints, timeTick, services.data.query.timefilter]
   );
 
   const onMaxDataPointsChange = useCallback(
@@ -81,19 +59,5 @@ export function useMetricsQuerySettings(
     [queryString, dispatch]
   );
 
-  const onDefaultMinStepChange = useCallback(
-    (next?: string) => {
-      persistDefaultMinStep(next);
-      dispatch(setIsQueryEditorDirty(true));
-    },
-    [persistDefaultMinStep, dispatch]
-  );
-
-  return {
-    maxDataPoints,
-    onMaxDataPointsChange,
-    defaultMinStep,
-    onDefaultMinStepChange,
-    getResolvedStep,
-  };
+  return { maxDataPoints, onMaxDataPointsChange, getResolvedStep };
 }

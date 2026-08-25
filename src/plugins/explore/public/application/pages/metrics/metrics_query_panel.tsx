@@ -135,13 +135,8 @@ export const MetricsQueryPanel: React.FC = () => {
     [setEditorText, dispatch, queryString]
   );
 
-  const {
-    maxDataPoints,
-    onMaxDataPointsChange,
-    defaultMinStep,
-    onDefaultMinStepChange,
-    getResolvedStep,
-  } = useMetricsQuerySettings(services, dataConnectionId);
+  const { maxDataPoints, onMaxDataPointsChange, getResolvedStep } =
+    useMetricsQuerySettings(services);
 
   // Server-reported steps only line up with the rows by position, so trust them
   // only while the rows still serialize to the query that produced them.
@@ -314,7 +309,6 @@ export const MetricsQueryPanel: React.FC = () => {
                       isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
                       stepReadout={stepReadoutFor(getQueryLabel(idx), row.minStep)}
-                      inheritedMinStep={defaultMinStep}
                     />
                   )}
                 </EuiDraggable>
@@ -339,9 +333,6 @@ export const MetricsQueryPanel: React.FC = () => {
               <MetricsQueryOptions
                 maxDataPoints={maxDataPoints}
                 onMaxDataPointsChange={onMaxDataPointsChange}
-                defaultMinStep={defaultMinStep}
-                onDefaultMinStepChange={onDefaultMinStepChange}
-                connectionName={dataConnectionId}
                 resolvedMaxDataPoints={executedSteps?.maxDataPoints}
               />
             </EuiFlexItem>

@@ -50,7 +50,6 @@ describe('PromQLSearchInterceptor', () => {
       query: 'up',
       language: 'PROMQL',
       maxDataPoints: 500,
-      defaultMinStep: '15s',
       perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
     }));
     mockDataService.query.queryString.getQuery = getQuery;
@@ -83,7 +82,6 @@ describe('PromQLSearchInterceptor', () => {
     expect(query).toMatchObject({
       query: 'up',
       maxDataPoints: 500,
-      defaultMinStep: '15s',
       perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
     });
     expect(context.body?.timeRange).toEqual({ from: 'now-1h', to: 'now' });
@@ -99,13 +97,7 @@ describe('PromQLSearchInterceptor', () => {
     interceptor.search(request, options);
 
     const [, query] = mockFetch.mock.calls[0];
-    // The datasource default applies to any query on the connection, unlike the
-    // positional per-query options.
-    expect(query).toMatchObject({
-      query: 'rate(x[5m])',
-      maxDataPoints: 500,
-      defaultMinStep: '15s',
-    });
+    expect(query).toMatchObject({ query: 'rate(x[5m])', maxDataPoints: 500 });
     expect((query as any).perQueryOptions).toBeUndefined();
   });
 });

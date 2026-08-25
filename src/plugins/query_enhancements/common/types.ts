@@ -14,7 +14,6 @@ export interface PerQueryOptions {
 export interface PromQLQuery extends Query {
   maxDataPoints?: number;
   perQueryOptions?: PerQueryOptions[];
-  defaultMinStep?: string;
 }
 
 /**

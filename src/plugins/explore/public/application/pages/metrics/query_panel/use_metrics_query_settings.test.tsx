@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React from 'react';
@@ -23,7 +23,6 @@ describe('useMetricsQuerySettings', () => {
   let mockDispatch: jest.Mock;
   let getQuery: jest.Mock;
   let setQuery: jest.Mock;
-  let find: jest.Mock;
   let timeUpdate$: Subject<void>;
   let mockServices: any;
 
@@ -37,7 +36,6 @@ describe('useMetricsQuerySettings', () => {
     mockDispatch = jest.fn();
     getQuery = jest.fn(() => ({ ...initialQuery }));
     setQuery = jest.fn();
-    find = jest.fn(() => Promise.resolve({ savedObjects: [] }));
     timeUpdate$ = new Subject();
     mockServices = {
       data: {
@@ -54,8 +52,6 @@ describe('useMetricsQuerySettings', () => {
           },
         },
       },
-      savedObjects: { client: { find, update: jest.fn(() => Promise.resolve({})) } },
-      notifications: { toasts: { addWarning: jest.fn(), addDanger: jest.fn() } },
     };
     mockUseDispatch.mockReturnValue(mockDispatch);
   });
@@ -64,9 +60,9 @@ describe('useMetricsQuerySettings', () => {
     jest.clearAllMocks();
   });
 
-  const render = (connectionId = 'prom') => {
+  const render = () => {
     const store = configureStore({ reducer: () => ({}) });
-    return renderHook(() => useMetricsQuerySettings(mockServices, connectionId), {
+    return renderHook(() => useMetricsQuerySettings(mockServices), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
   };
@@ -121,55 +117,5 @@ describe('useMetricsQuerySettings', () => {
       timeUpdate$.next();
     });
     expect(result.current.getResolvedStep('1m')?.stepSec).toBe(60);
-  });
-
-  describe('datasource default min step', () => {
-    beforeEach(() => {
-      find.mockResolvedValue({
-        savedObjects: [
-          {
-            id: 'so-1',
-            attributes: { connectionId: 'prom', meta: JSON.stringify({ defaultMinStep: '30s' }) },
-          },
-        ],
-      });
-    });
-
-    it('floors the step by the datasource default when a row has none', async () => {
-      const { result } = render();
-      await waitFor(() => expect(result.current.defaultMinStep).toBe('30s'));
-      expect(result.current.getResolvedStep(undefined)?.stepSec).toBe(200);
-      expect(result.current.getResolvedStep(undefined)?.scrapeSec).toBe(30);
-    });
-
-    it('lets a row min step override the datasource default', async () => {
-      const { result } = render();
-      await waitFor(() => expect(result.current.defaultMinStep).toBe('30s'));
-      expect(result.current.getResolvedStep('5m')?.scrapeSec).toBe(300);
-    });
-
-    it('mirrors the loaded default onto the query without marking the editor dirty', async () => {
-      render();
-      await waitFor(() =>
-        expect(setQuery).toHaveBeenCalledWith(expect.objectContaining({ defaultMinStep: '30s' }))
-      );
-      expect(mockDispatch).toHaveBeenCalledTimes(1);
-    });
-
-    it('marks the editor dirty when the user changes the default', async () => {
-      const { result } = render();
-      await waitFor(() => expect(result.current.defaultMinStep).toBe('30s'));
-      mockDispatch.mockClear();
-      act(() => {
-        result.current.onDefaultMinStepChange('1m');
-      });
-      await waitFor(() => expect(result.current.defaultMinStep).toBe('1m'));
-      expect(mockServices.savedObjects.client.update).toHaveBeenCalledWith(
-        'data-connection',
-        'so-1',
-        { meta: JSON.stringify({ defaultMinStep: '1m' }) }
-      );
-      expect(mockDispatch).toHaveBeenCalled();
-    });
   });
 });

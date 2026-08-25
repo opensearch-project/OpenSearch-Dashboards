@@ -207,8 +207,8 @@ describe('querySlice reducers', () => {
     };
 
     it('merges only the provided keys', () => {
-      const state = queryReducer(existingState, setMetricsQuerySettings({ defaultMinStep: '30s' }));
-      expect(state).toEqual({ ...existingState, defaultMinStep: '30s' });
+      const state = queryReducer(existingState, setMetricsQuerySettings({ maxDataPoints: 200 }));
+      expect(state).toEqual({ ...existingState, maxDataPoints: 200 });
     });
 
     it('clears the fields when set to undefined', () => {

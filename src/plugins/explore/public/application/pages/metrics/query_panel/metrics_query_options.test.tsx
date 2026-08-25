@@ -26,16 +26,9 @@ describe('formatStepSeconds', () => {
 describe('MetricsQueryOptions', () => {
   const setup = (overrides = {}) => {
     const onMaxDataPointsChange = jest.fn();
-    const onDefaultMinStepChange = jest.fn();
-    render(
-      <MetricsQueryOptions
-        onMaxDataPointsChange={onMaxDataPointsChange}
-        onDefaultMinStepChange={onDefaultMinStepChange}
-        {...overrides}
-      />
-    );
+    render(<MetricsQueryOptions onMaxDataPointsChange={onMaxDataPointsChange} {...overrides} />);
     fireEvent.click(screen.getByTestId('metricsQueryOptionsButton'));
-    return { onMaxDataPointsChange, onDefaultMinStepChange };
+    return { onMaxDataPointsChange };
   };
 
   it('emits an integer maxDataPoints', () => {
@@ -60,49 +53,6 @@ describe('MetricsQueryOptions', () => {
       'placeholder',
       'auto = 1440'
     );
-  });
-
-  it('emits the datasource default min step once it parses', () => {
-    const { onDefaultMinStepChange } = setup();
-    const input = screen.getByTestId('metricsDefaultMinStepInput');
-    fireEvent.change(input, { target: { value: ' 30s ' } });
-    expect(onDefaultMinStepChange).toHaveBeenCalledWith('30s');
-  });
-
-  it('clears the datasource default when the field is emptied', () => {
-    const { onDefaultMinStepChange } = setup({ defaultMinStep: '30s' });
-    fireEvent.change(screen.getByTestId('metricsDefaultMinStepInput'), { target: { value: '' } });
-    expect(onDefaultMinStepChange).toHaveBeenCalledWith(undefined);
-  });
-
-  it('does not persist a half-typed datasource default', () => {
-    const { onDefaultMinStepChange } = setup();
-    const input = screen.getByTestId('metricsDefaultMinStepInput');
-    fireEvent.change(input, { target: { value: '30' } });
-    expect(onDefaultMinStepChange).not.toHaveBeenCalled();
-    fireEvent.change(input, { target: { value: '30s' } });
-    expect(onDefaultMinStepChange).toHaveBeenCalledWith('30s');
-  });
-
-  it('flags an invalid datasource default without persisting it', () => {
-    const { onDefaultMinStepChange } = setup();
-    fireEvent.change(screen.getByTestId('metricsDefaultMinStepInput'), {
-      target: { value: 'banana' },
-    });
-    expect(screen.getByText(/Enter a duration with a unit/)).toBeInTheDocument();
-    expect(onDefaultMinStepChange).not.toHaveBeenCalled();
-  });
-
-  it('keeps the typed text visible while it is still invalid', () => {
-    setup();
-    const input = screen.getByTestId('metricsDefaultMinStepInput');
-    fireEvent.change(input, { target: { value: '30' } });
-    expect(input).toHaveValue('30');
-  });
-
-  it('names the connection the default is saved on', () => {
-    setup({ connectionName: 'local' });
-    expect(screen.getByText(/Saved on local/)).toBeInTheDocument();
   });
 });
 
@@ -165,13 +115,6 @@ describe('RowQueryOptions', () => {
       target: { value: '' },
     });
     expect(onChange).toHaveBeenCalledWith({ minStep: undefined, legendFormat: undefined });
-  });
-
-  it('shows the inherited datasource default as the min step placeholder', () => {
-    setup({ inheritedMinStep: '30s' });
-    fireEvent.click(screen.getByTestId('metricsRowQueryOptionsButton'));
-    expect(screen.getByTestId('metricsStepMinStepInput')).toHaveAttribute('placeholder', '30s');
-    expect(screen.getByText(/Empty inherits 30s/)).toBeInTheDocument();
   });
 
   it('reports the resolved step and rate window from the last run', () => {
