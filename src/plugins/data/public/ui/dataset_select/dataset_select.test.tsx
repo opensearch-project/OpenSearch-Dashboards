@@ -63,20 +63,25 @@ const makeChild = (over: ChildOverrides): DataStructure => ({
     : {}),
 });
 
+// Mirrors indexPatternTypeConfig.toDataset: type/displayName/signalType/description come from
+// the child's CUSTOM meta (with datasetType overriding the default INDEX_PATTERN type).
 const indexPatternToDataset = (path: DataStructure[]) => {
   const child = path[path.length - 1];
   const meta = (child.meta ?? {}) as {
     timeFieldName?: string;
     displayName?: string;
     signalType?: string;
+    description?: string;
+    datasetType?: string;
   };
   return {
     id: child.id,
     title: child.title,
-    type: INDEX_PATTERN,
+    type: meta.datasetType || INDEX_PATTERN,
     timeFieldName: meta.timeFieldName,
     displayName: meta.displayName,
     signalType: meta.signalType,
+    description: meta.description,
     ...(child.parent
       ? { dataSource: { id: child.parent.id, title: child.parent.title, type: child.parent.type } }
       : {}),
@@ -130,12 +135,11 @@ describe('DatasetSelect', () => {
   const mockDataStartContract = dataPluginMock.createStartContract();
   const mockQueryService = queryServiceMock.createSetupContract();
 
-  // Only lazily-invoked methods remain used by the component: getDefault (default dataset),
-  // get (fallback enrichment for a selected dataset not in the list), convertToDataset and
-  // clearCache (advanced-selector save path). Reset per-test to avoid cross-test leakage.
+  // Only lazily-invoked methods remain used by the component: get (fallback enrichment for a
+  // selected dataset not in the list), convertToDataset and clearCache (advanced-selector save
+  // path). The default dataset id now comes from uiSettings, not getDefault. Reset per-test.
   const mockDataViews = {
     get: jest.fn(),
-    getDefault: jest.fn(),
     convertToDataset: jest.fn(),
     clearCache: jest.fn(),
   };
@@ -196,7 +200,6 @@ describe('DatasetSelect', () => {
       .mockReturnValue(makeDatasetService(makeIndexPatternType([defaultChild])));
 
     mockDataViews.get = jest.fn((id: string) => Promise.resolve({ ...mockDataViewData, id }));
-    mockDataViews.getDefault = jest.fn().mockResolvedValue(mockDataViewData);
     mockDataViews.convertToDataset = jest.fn((dataView: any) =>
       Promise.resolve({ id: dataView.id, title: dataView.title, type: INDEX_PATTERN })
     );
@@ -253,16 +256,29 @@ describe('DatasetSelect', () => {
     expect(mockCore.overlays.openModal).toHaveBeenCalled();
   });
 
-  it('selects default dataset if no current dataset', async () => {
+  it('selects the default dataset from settings when none is current', async () => {
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-    renderWithContext({
-      ...defaultProps,
-      signalType: CORE_SIGNAL_TYPES.LOGS,
-    });
+    // The default dataset id is read from uiSettings (defaultIndex), not a full DataView fetch.
+    const localServices = {
+      ...mockServices,
+      uiSettings: {
+        ...mockServices.uiSettings,
+        get: jest.fn((key: string) => (key === 'defaultIndex' ? 'index-pattern-id' : undefined)),
+      },
+    } as IDataPluginServices;
+
+    render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={localServices}>
+          <DatasetSelect {...defaultProps} signalType={CORE_SIGNAL_TYPES.LOGS} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
 
     await waitFor(() => {
-      expect(mockDataViews.getDefault).toHaveBeenCalled();
-      expect(mockOnSelect).toHaveBeenCalled();
+      expect(mockOnSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'index-pattern-id' })
+      );
     });
   });
 
@@ -324,7 +340,6 @@ describe('DatasetSelect', () => {
     mockQueryService.queryString.getDatasetService = jest
       .fn()
       .mockReturnValue(makeDatasetService(makeIndexPatternType([metricsChild, logsChild])));
-    mockDataViews.getDefault = jest.fn().mockResolvedValue({ id: 'metrics-id' });
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
       dataset: { id: 'metrics-id', title: 'metrics-dataset', type: INDEX_PATTERN },
     });
@@ -439,7 +454,6 @@ describe('DatasetSelect', () => {
 
   it('displays "Select dataset" when no dataset is selected', async () => {
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-    mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
     renderWithContext();
 
@@ -507,7 +521,6 @@ describe('DatasetSelect', () => {
     mockQueryService.queryString.getDatasetService = jest
       .fn()
       .mockReturnValue(makeDatasetService(makeIndexPatternType([])));
-    mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
     renderWithContext();
 
@@ -569,9 +582,13 @@ describe('DatasetSelect', () => {
 
     await openPopover();
 
-    // Description is read from child meta and threaded onto the dataset without breaking the list;
-    // the selected dataset renders by its display name.
-    expect(type.toDataset).toHaveBeenCalled();
+    // The list is populated from a single lightweight fetch (no per-pattern DataView build), and
+    // the dataset carries the description read from the pattern meta.
+    expect(type.fetch).toHaveBeenCalledTimes(1);
+    expect((mockDataViews as { getMultiple?: unknown }).getMultiple).toBeUndefined();
+    expect(type.toDataset).toHaveReturnedWith(
+      expect.objectContaining({ description: 'A dataset with a description' })
+    );
     expect(screen.getAllByText('Described Dataset').length).toBeGreaterThan(0);
   });
 
@@ -630,7 +647,6 @@ describe('DatasetSelect', () => {
         .mockReturnValue(
           makeDatasetService(makeIndexPatternType([withoutTimeChild, withTimeChild]))
         );
-      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
       renderWithContext({
         ...defaultProps,
@@ -651,7 +667,6 @@ describe('DatasetSelect', () => {
         .mockReturnValue(
           makeDatasetService(makeIndexPatternType([withoutTimeChild, withTimeChild]))
         );
-      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
       renderWithContext({
         ...defaultProps,

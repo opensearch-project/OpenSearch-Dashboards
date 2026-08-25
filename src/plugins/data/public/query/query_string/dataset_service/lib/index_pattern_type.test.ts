@@ -202,6 +202,44 @@ describe('indexPatternTypeConfig', () => {
       expect(result.type).toBe('INDEX_PATTERN');
     });
 
+    test('populates description from CUSTOM meta when present', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: {
+            timeFieldName: '@timestamp',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            description: 'A described dataset',
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath) as Dataset & {
+        description?: string;
+      };
+
+      expect(result.description).toBe('A described dataset');
+    });
+
+    test('omits description when CUSTOM meta has none', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath) as Dataset & {
+        description?: string;
+      };
+
+      expect(result.description).toBeUndefined();
+    });
+
     test('leaves dataSource undefined when pattern has no parent', () => {
       const mockPath: DataStructure[] = [
         {

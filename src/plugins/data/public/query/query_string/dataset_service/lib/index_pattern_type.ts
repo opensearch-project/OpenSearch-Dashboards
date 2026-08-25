@@ -45,6 +45,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       timeFieldName: patternMeta?.timeFieldName,
       // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
       ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
+      ...(patternMeta?.description && { description: patternMeta.description }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
@@ -58,9 +59,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     } as Dataset;
   },
 
-  fetch: async (services, path) => {
+  fetch: async (services, path, options) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchIndexPatterns(services.savedObjects.client);
+    const indexPatterns = await fetchIndexPatterns(
+      services.savedObjects.client,
+      options?.skipQueryEditorMeta
+    );
     return {
       ...dataStructure,
       columnHeader: 'Index patterns',
@@ -108,7 +112,10 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+const fetchIndexPatterns = async (
+  client: SavedObjectsClientContract,
+  skipQueryEditorMeta: boolean = false
+): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
     fields: [
@@ -218,6 +225,13 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     }
     return indexPatternDataStructure;
   });
+
+  // Query-editor extension meta (e.g. available languages) can trigger per-data-source network
+  // calls; skip it for callers that only need core dataset metadata (e.g. the dataset selector
+  // list), which would otherwise block on those lookups.
+  if (skipQueryEditorMeta) {
+    return dataStructures;
+  }
 
   return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };
