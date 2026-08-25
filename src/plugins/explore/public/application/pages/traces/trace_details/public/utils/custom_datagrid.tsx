@@ -196,22 +196,20 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
 
   const toolbarControls = useMemo(() => {
-    const fullScreenLabel = isFullScreen
-      ? i18n.translate('explore.toolbarControls.exitFullScreen', {
-          defaultMessage: 'Exit full screen',
-        })
-      : i18n.translate('explore.toolbarControls.fullScreen', {
-          defaultMessage: 'Full screen',
-        });
+    const fullScreenLabel = i18n.translate('explore.toolbarControls.fullScreen', {
+      defaultMessage: 'Full screen',
+    });
 
-    const fullScreenControl = (
+    // Only the "enter full screen" affordance. In full screen the overlay shows
+    // its own top-right close (×), so we hide this button to avoid a second ×.
+    const fullScreenControl = isFullScreen ? null : (
       <EuiToolTip key="fullScreen" content={fullScreenLabel}>
         <EuiButtonIcon
           size="xs"
-          onClick={() => setIsFullScreen((prev) => !prev)}
+          onClick={() => setIsFullScreen(true)}
           color="text"
           display="empty"
-          iconType={isFullScreen ? 'cross' : 'fullScreen'}
+          iconType="fullScreen"
           aria-label={fullScreenLabel}
           data-test-subj="fullScreenButton"
         />
@@ -222,7 +220,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     // No caller-provided controls (e.g. the flat span-list table): just the
     // view controls, left-aligned like EUI's native toolbar.
     if (toolbarButtons.length === 0 && secondaryToolbar.length === 0) {
-      return [fullScreenControl, densityControl];
+      return [fullScreenControl, densityControl].filter(Boolean);
     }
 
     // Unified single row: the caller's action buttons as a connected cluster on
@@ -243,11 +241,13 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
         )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {[fullScreenControl, densityControl, ...secondaryToolbar].map((control, i) => (
-              <EuiFlexItem grow={false} key={i}>
-                {control}
-              </EuiFlexItem>
-            ))}
+            {[fullScreenControl, densityControl, ...secondaryToolbar]
+              .filter(Boolean)
+              .map((control, i) => (
+                <EuiFlexItem grow={false} key={i}>
+                  {control}
+                </EuiFlexItem>
+              ))}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
