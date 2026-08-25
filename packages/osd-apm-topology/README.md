@@ -43,7 +43,7 @@ A feature-rich React component library for rendering APM service topology maps a
 
 ### Node Types
 
-The library ships four node types. All are wrapped in `NodeShell`, which provides consistent selection glow, fade state, border color, keyboard accessibility (`Enter`/`Space` to select), and 8 ReactFlow handles (top/right/bottom/left, source + target).
+The library ships five node types. All are wrapped in `NodeShell`, which provides consistent selection glow, fade state, border color, keyboard accessibility (`Enter`/`Space` to select), and 8 ReactFlow handles (top/right/bottom/left, source + target).
 
 | Node | Component | Use Case |
 |------|-----------|----------|
@@ -51,6 +51,7 @@ The library ships four node types. All are wrapped in `NodeShell`, which provide
 | **ServiceCardNode** | `serviceCard` | Modern APM card — TypeBadge, title/subtitle, optional donut, MetricBar, custom action button |
 | **ServiceCircleNode** | `serviceCircle` | Compact circle — HealthArc with proportional segments, center icon + metric value, label below |
 | **AgentCardNode** | `agentCard` | GenAI trace card — 7 node kinds with colored badges, provider icons, duration/token metric bars |
+| **MetricsCardNode** | `metricsCard` | Generic entity card — whole-card click, any number of labeled metric bars, plain `hasError` health (no SLO) |
 
 #### CelestialNode (Default APM Card)
 
@@ -113,6 +114,14 @@ The `provider` field (from OTel `gen_ai.system`) maps to recognized icons:
 
 Use `getProviderIcon(provider)` to resolve a provider string to its SVG icon URL.
 
+#### MetricsCardNode
+
+A generic, compact entity card (`type: 'metricsCard'`) that renders any number of **labeled metric bars** (`label ......... value` with a proportional `MetricBar` below). Unlike the APM cards it has no SLO/health-donut concept — health is a plain `hasError` boolean that turns the border and an error dot red — and the **whole card is clickable** (fires the map's `onDashboardClick` with the node's `data`). Identity color lives on the header dot, so a "reddish" service color never reads as an error. Built for per-trace RED-style views (Requests / Errors / Duration).
+
+**Key data props:** `id`, `title`, `subtitle?`, `color?` (identity dot/glow), `hasError?`, `isSelected?` (highlight glow without moving the camera), `metrics` (`MetricBarGroupItem[]` — `{ label, value, max, color, formattedValue? }`)
+
+Register via `nodeTypes={{ metricsCard: MetricsCardNode }}`. Highlight a card by setting `data.isSelected` (not the map-level `selectedNodeId`, which camera-focuses a single node).
+
 ### Edges
 
 The `CelestialEdge` component renders styled connections between nodes. Set `type: 'celestialEdge'` on an edge to activate custom rendering.
@@ -147,6 +156,31 @@ const edges = [
         marker: 'arrow',
       },
     },
+  },
+];
+```
+
+#### VolumeEdge
+
+A directed edge (`type: 'volumeEdge'`) whose **stroke thickness encodes a volume metric** (e.g. cross-service call count) and whose exact value shows in a tooltip **on hover** rather than as a permanent label. It uses a compact, fixed-size arrowhead that does **not** scale with stroke width (`markerUnits="userSpaceOnUse"`, unlike ReactFlow's default `ArrowClosed`), so busy edges keep a crisp arrow instead of a ballooning one, and the arrow is colored to match its line (red on error). Register via `edgeTypes={{ volumeEdge: VolumeEdge }}`.
+
+**Edge data (`edge.data`) — `VolumeEdgeData`:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `volume` | `number` | `1` | Drives stroke thickness (`1.25px` base → `~4.5px` at `maxVolume`) |
+| `maxVolume` | `number` | `volume` | Max volume across edges, for scaling |
+| `hasError` | `boolean` | `false` | Renders the edge and arrow in the error color |
+| `label` | `string` | — | Text shown in the hover tooltip (e.g. `"4 calls"`) |
+
+```tsx
+const edges = [
+  {
+    id: 'frontend->cart',
+    source: 'frontend',
+    target: 'cart',
+    type: 'volumeEdge',
+    data: { volume: 8, maxVolume: 8, hasError: false, label: '8 calls' },
   },
 ];
 ```
@@ -320,7 +354,9 @@ graph TD
     NS --> SCN[ServiceCardNode]
     NS --> SCiN[ServiceCircleNode]
     NS --> ACN[AgentCardNode]
+    NS --> MCN[MetricsCardNode]
     E --> CE[CelestialEdge]
+    E --> VE[VolumeEdge]
 ```
 
 ### Data Flow

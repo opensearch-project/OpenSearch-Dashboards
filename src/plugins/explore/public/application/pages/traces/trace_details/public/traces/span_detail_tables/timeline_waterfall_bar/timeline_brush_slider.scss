@@ -31,11 +31,11 @@
 
   &__overviewBar {
     position: absolute;
-    top: 25%;
-    height: 50%;
+    top: 20%;
+    height: 60%;
     min-width: 1px;
     border-radius: 1px;
-    opacity: 0.5;
+    opacity: 0.7;
   }
 
   &__window {
@@ -45,8 +45,8 @@
     min-width: 4px;
     cursor: grab;
     background-color: transparentize($euiColorPrimary, 0.85);
-    border-left: 1px solid $euiColorPrimary;
-    border-right: 1px solid $euiColorPrimary;
+    border: 1px solid $euiColorPrimary;
+    border-radius: 3px;
 
     &:active {
       cursor: grabbing;
@@ -64,7 +64,21 @@
     width: 6px;
     cursor: ew-resize;
     background-color: $euiColorPrimary;
+    border-radius: 3px;
     opacity: 0.7;
+
+    // Center grip line so the handle reads as draggable.
+    &::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      bottom: 25%;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background-color: $euiColorEmptyShade;
+      opacity: 0.7;
+    }
 
     &:hover {
       opacity: 1;

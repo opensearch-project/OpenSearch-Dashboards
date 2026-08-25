@@ -7,14 +7,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 // @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
-import { CelestialMap } from '@osd/apm-topology';
+import { CelestialMap, MetricsCardNode, VolumeEdge } from '@osd/apm-topology';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
-import { TraceServiceNode } from './trace_service_node';
-import { TraceServiceEdge } from './trace_service_edge';
 import './trace_service_flow.scss';
 
-const NODE_TYPES = { traceServiceCard: TraceServiceNode };
-const EDGE_TYPES = { traceCallEdge: TraceServiceEdge };
+const NODE_TYPES = { metricsCard: MetricsCardNode };
+const EDGE_TYPES = { volumeEdge: VolumeEdge };
 
 export interface TraceServiceFlowProps {
   hits: ServiceFlowHit[];
@@ -26,9 +24,10 @@ export interface TraceServiceFlowProps {
 }
 
 /**
- * "Trace map" tab: a per-trace service topology (custom nodes with Requests /
- * Errors / Duration bars, custom call-volume edges). Clicking a service filters
- * the whole trace view by that service; the filtered service is highlighted.
+ * "Trace map" tab: a per-trace service topology built on @osd/apm-topology's
+ * reusable MetricsCardNode (Requests / Errors / Duration bars) + VolumeEdge
+ * (thickness = call volume, count on hover). Clicking a service filters the
+ * whole trace view by that service; the filtered service is highlighted.
  */
 export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   hits,
@@ -38,7 +37,8 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
 }) => {
   const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
 
-  // Inject the click handler + active-filter highlight into node data.
+  // Highlight the filtered service via node data (not selectedNodeId, which
+  // would camera-focus a single node and chop the rest of the graph).
   const displayMap = useMemo(
     () => ({
       root: {
@@ -47,13 +47,12 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
           ...node,
           data: {
             ...node.data,
-            isFilterActive: !!activeServiceFilter && node.id === activeServiceFilter,
-            onSelect: onFilterService,
+            isSelected: !!activeServiceFilter && node.id === activeServiceFilter,
           },
         })),
       },
     }),
-    [map, activeServiceFilter, onFilterService]
+    [map, activeServiceFilter]
   );
 
   // The package fits once (clamped zoom) and never re-fits on resize; remount on
@@ -121,6 +120,9 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         breadcrumbs={[]}
         showMinimap
         topN={Infinity}
+        onDashboardClick={(node?: { id?: string }) => {
+          if (node?.id) onFilterService?.(node.id);
+        }}
       />
     </div>
   );

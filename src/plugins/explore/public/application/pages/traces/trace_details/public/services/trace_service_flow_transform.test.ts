@@ -22,7 +22,7 @@ describe('spansToServiceFlow', () => {
     });
   });
 
-  it('creates a traceServiceCard node per service with Requests/Errors/Duration metrics', () => {
+  it('creates a metricsCard node per service with Requests/Errors/Duration metrics', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }),
@@ -32,7 +32,7 @@ describe('spansToServiceFlow', () => {
     const { nodes } = spansToServiceFlow(hits, { frontend: '#111', cart: '#222' }).map.root;
     expect(nodes).toHaveLength(2);
     const cart = nodes.find((n) => n.id === 'cart')!;
-    expect(cart.type).toBe('traceServiceCard');
+    expect(cart.type).toBe('metricsCard');
     expect(cart.data.color).toBe('#222');
     expect(cart.data.hasError).toBe(false);
     expect(metric(cart, 'Requests').value).toBe(2);
@@ -57,7 +57,7 @@ describe('spansToServiceFlow', () => {
     expect(metric(clean, 'Errors').formattedValue).toBe('0');
   });
 
-  it('builds deduped traceCallEdge edges with call counts + error flag, skipping self-calls', () => {
+  it('builds deduped volumeEdge edges with volume + error flag, skipping self-calls', () => {
     const hits: ServiceFlowHit[] = [
       hit({ spanId: 'a', serviceName: 'frontend' }),
       hit({ spanId: 'b', parentSpanId: 'a', serviceName: 'cart' }), // frontend -> cart
@@ -68,9 +68,19 @@ describe('spansToServiceFlow', () => {
     const { edges } = spansToServiceFlow(hits).map.root;
     const byId = Object.fromEntries(edges.map((e) => [e.id, e]));
     expect(Object.keys(byId).sort()).toEqual(['cart->payment', 'frontend->cart']);
-    expect(byId['frontend->cart'].type).toBe('traceCallEdge');
-    expect(byId['frontend->cart'].data).toEqual({ callCount: 2, hasError: true });
-    expect(byId['cart->payment'].data).toEqual({ callCount: 1, hasError: false });
+    expect(byId['frontend->cart'].type).toBe('volumeEdge');
+    expect(byId['frontend->cart'].data).toEqual({
+      volume: 2,
+      maxVolume: 2,
+      hasError: true,
+      label: '2 calls',
+    });
+    expect(byId['cart->payment'].data).toEqual({
+      volume: 1,
+      maxVolume: 2,
+      hasError: false,
+      label: '1 call',
+    });
   });
 
   it('resolves each service entry span (span receiving the cross-service call)', () => {

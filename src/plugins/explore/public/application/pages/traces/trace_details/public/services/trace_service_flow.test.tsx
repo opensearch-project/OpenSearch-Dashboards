@@ -8,10 +8,9 @@ import { render, fireEvent } from '@testing-library/react';
 import { TraceServiceFlow } from './trace_service_flow';
 import { ServiceFlowHit } from './trace_service_flow_transform';
 
-jest.mock('./trace_service_node', () => ({ TraceServiceNode: () => null }));
-jest.mock('./trace_service_edge', () => ({ TraceServiceEdge: () => null }));
-
 jest.mock('@osd/apm-topology', () => ({
+  MetricsCardNode: () => null,
+  VolumeEdge: () => null,
   CelestialMap: (props: any) => {
     const nodes = props.map?.root?.nodes ?? [];
     return (
@@ -19,13 +18,18 @@ jest.mock('@osd/apm-topology', () => ({
         data-test-subj="celestial-map"
         data-node-count={nodes.length}
         data-edge-count={props.map?.root?.edges?.length ?? 0}
-        data-active={nodes.find((n: any) => n.data?.isFilterActive)?.id ?? ''}
-        data-has-node-type={props.nodeTypes?.traceServiceCard ? 'true' : 'false'}
-        data-has-edge-type={props.edgeTypes?.traceCallEdge ? 'true' : 'false'}
+        data-active={nodes.find((n: any) => n.data?.isSelected)?.id ?? ''}
+        data-node-type={nodes[0]?.type ?? ''}
+        data-edge-type={props.map?.root?.edges?.[0]?.type ?? ''}
+        data-has-node-type={props.nodeTypes?.metricsCard ? 'true' : 'false'}
+        data-has-edge-type={props.edgeTypes?.volumeEdge ? 'true' : 'false'}
         data-breadcrumbs={JSON.stringify(props.breadcrumbs)}
         data-selected-node-id={props.selectedNodeId ?? ''}
       >
-        <button data-test-subj="fireSelect" onClick={() => nodes[0]?.data?.onSelect?.(nodes[0].id)}>
+        <button
+          data-test-subj="fireSelect"
+          onClick={() => props.onDashboardClick?.({ id: nodes[0]?.id })}
+        >
           select
         </button>
       </div>
@@ -39,11 +43,13 @@ const hits: ServiceFlowHit[] = [
 ];
 
 describe('TraceServiceFlow', () => {
-  it('registers the custom node + edge types and hides the breadcrumb bar', () => {
+  it('renders metricsCard nodes + volumeEdge edges and hides the breadcrumb bar', () => {
     const { getByTestId } = render(<TraceServiceFlow hits={hits} colorMap={{}} />);
     const map = getByTestId('celestial-map');
     expect(map).toHaveAttribute('data-node-count', '2');
     expect(map).toHaveAttribute('data-edge-count', '1');
+    expect(map).toHaveAttribute('data-node-type', 'metricsCard');
+    expect(map).toHaveAttribute('data-edge-type', 'volumeEdge');
     expect(map).toHaveAttribute('data-has-node-type', 'true');
     expect(map).toHaveAttribute('data-has-edge-type', 'true');
     expect(map).toHaveAttribute('data-breadcrumbs', '[]');

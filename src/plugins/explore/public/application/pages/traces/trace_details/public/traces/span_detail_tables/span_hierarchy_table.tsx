@@ -182,6 +182,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const secondaryToolbar = [
     <SpanStatusFilter
+      key="statusFilter"
       spanFilters={props.filters}
       setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
     />,

@@ -28,7 +28,7 @@ export interface ServiceMetric {
   formattedValue: string;
 }
 
-/** Data for the custom TraceServiceNode. */
+/** Node data for @osd/apm-topology's MetricsCardNode (type: 'metricsCard'). */
 export interface ServiceFlowNode {
   id: string;
   type: string;
@@ -36,20 +36,19 @@ export interface ServiceFlowNode {
   data: {
     id: string;
     title: string;
-    subtitle: string;
     color?: string;
     hasError: boolean;
     metrics: ServiceMetric[];
   };
 }
 
-/** Data for the custom TraceServiceEdge. */
+/** Edge data for @osd/apm-topology's VolumeEdge (type: 'volumeEdge'). */
 export interface ServiceFlowEdge {
   id: string;
   source: string;
   target: string;
   type: string;
-  data: { callCount: number; hasError: boolean };
+  data: { volume: number; maxVolume: number; hasError: boolean; label: string };
 }
 
 export interface ServiceFlowMap {
@@ -148,12 +147,11 @@ export const spansToServiceFlow = (
     const errorRate = spans > 0 ? (errors / spans) * 100 : 0;
     return {
       id: service,
-      type: 'traceServiceCard',
+      type: 'metricsCard',
       position: { x: 0, y: 0 },
       data: {
         id: service,
         title: service,
-        subtitle: formatDuration(totalMs),
         color: colorMap[service],
         hasError: errors > 0,
         metrics: [
@@ -183,14 +181,20 @@ export const spansToServiceFlow = (
     };
   });
 
+  const maxVolume = Math.max(...Array.from(edgeCounts.values()), 1);
   const edges: ServiceFlowEdge[] = Array.from(edgeCounts.entries()).map(([key, count]) => {
     const [source, target] = key.split('->');
     return {
       id: key,
       source,
       target,
-      type: 'traceCallEdge',
-      data: { callCount: count, hasError: edgeHasError.has(key) },
+      type: 'volumeEdge',
+      data: {
+        volume: count,
+        maxVolume,
+        hasError: edgeHasError.has(key),
+        label: `${count} call${count === 1 ? '' : 's'}`,
+      },
     };
   });
 
