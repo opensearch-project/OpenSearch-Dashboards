@@ -41,7 +41,12 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
-import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
+import {
+  detectTraceData,
+  createAutoDetectedDatasets,
+  getIndexPatternSignalTypes,
+  collectTraceDataSourceIds,
+} from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -199,6 +204,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
                 let datasetsCreatedCount = 0;
 
+                // Resolve which data sources already have a trace dataset in a single
+                // lookup, so per-data-source detection below does not repeat it.
+                let traceDataSourceIds: Set<string | undefined> | undefined;
+                try {
+                  traceDataSourceIds = collectTraceDataSourceIds(
+                    await getIndexPatternSignalTypes(savedObjects.client)
+                  );
+                } catch {
+                  // Fall back to per-data-source detection when the lookup is unavailable.
+                }
+
                 // Run detection for each data source
                 for (const dataSourceId of dataSourcesToCheck) {
                   try {
@@ -206,7 +222,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                       savedObjects.client,
                       // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dataPlugin.dataViews,
-                      dataSourceId
+                      dataSourceId,
+                      traceDataSourceIds ? traceDataSourceIds.has(dataSourceId) : undefined
                     );
 
                     if (detection.tracesDetected || detection.logsDetected) {
