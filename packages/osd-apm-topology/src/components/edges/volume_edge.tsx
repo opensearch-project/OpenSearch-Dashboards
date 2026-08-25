@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import './volume_edge.scss';
@@ -38,7 +38,6 @@ export const VolumeEdge: React.FC<EdgeProps> = ({
   targetPosition,
   data,
 }) => {
-  const [hovered, setHovered] = useState(false);
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -79,17 +78,7 @@ export const VolumeEdge: React.FC<EdgeProps> = ({
         markerEnd={`url(#${markerId})`}
         style={{ stroke: color, strokeWidth, strokeDasharray: '6 4' }}
       />
-      {/* Wide invisible hit area for easy hover. */}
-      <path
-        d={edgePath}
-        fill="none"
-        strokeWidth={16}
-        stroke="transparent"
-        data-test-subj={`volumeEdgeHit-${id}`}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      />
-      {hovered && edgeData.label && (
+      {edgeData.label && (
         <EdgeLabelRenderer>
           <div
             className="celVolumeEdge__label"

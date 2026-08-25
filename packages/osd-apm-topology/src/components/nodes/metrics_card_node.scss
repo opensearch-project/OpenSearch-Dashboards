@@ -31,14 +31,26 @@
     white-space: nowrap;
   }
 
-  &__errorDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+  // Error badge: a small red "!" (not a bare dot) so it reads as "attention"
+  // at a glance and is distinct from the identity color dot; the title/aria
+  // label spells it out on hover.
+  &__errorBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
     margin-left: auto;
     flex-shrink: 0;
-    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: default;
+    /* stylelint-disable @osd/stylelint/no_restricted_values */
     background-color: var(--osd-color-status-error, #bd271e);
+    color: var(--osd-color-ghost, #fff);
+    /* stylelint-enable @osd/stylelint/no_restricted_values */
   }
 
   &__subtitle {

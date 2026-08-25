@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { VolumeEdge } from './volume_edge';
 
 jest.mock('@xyflow/react', () => ({
@@ -45,14 +45,15 @@ describe('VolumeEdge', () => {
     expect(marker).toHaveAttribute('markerWidth', '11');
   });
 
-  it('shows the volume label only on hover', () => {
-    const { getByTestId, queryByTestId } = render(
+  it('renders the volume label permanently (always visible, not hover-only)', () => {
+    const { getByTestId } = render(
       <VolumeEdge {...props} data={{ volume: 4, maxVolume: 10, label: '4 calls' }} />
     );
-    expect(queryByTestId('volumeEdgeLabel-e1')).toBeNull();
-    fireEvent.mouseEnter(getByTestId('volumeEdgeHit-e1'));
     expect(getByTestId('volumeEdgeLabel-e1').textContent).toBe('4 calls');
-    fireEvent.mouseLeave(getByTestId('volumeEdgeHit-e1'));
+  });
+
+  it('omits the label when none is provided', () => {
+    const { queryByTestId } = render(<VolumeEdge {...props} data={{ volume: 4, maxVolume: 10 }} />);
     expect(queryByTestId('volumeEdgeLabel-e1')).toBeNull();
   });
 });

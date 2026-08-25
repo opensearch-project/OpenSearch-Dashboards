@@ -16,8 +16,10 @@ export interface MetricsCardData {
   subtitle?: string;
   /** Identity color (border/glow/dot) when not in error. */
   color?: string;
-  /** When true, the card is styled as an error (red border, tint, dot). */
+  /** When true, the card is styled as an error (red border, tint, badge). */
   hasError?: boolean;
+  /** Tooltip/aria text for the error badge. Defaults to "Has errors". */
+  errorLabel?: string;
   /** Highlights the card (glow) without moving the camera. */
   isSelected?: boolean;
   /** Labeled metric bars rendered as "label ........ value" + a proportional bar. */
@@ -70,7 +72,15 @@ export const MetricsCardNode = ({ data }: NodeProps<MetricsCardCustomNode>) => {
             style={{ backgroundColor: data.color || NEUTRAL_BORDER }}
           />
           <span className="celMetricsCard__title">{data.title}</span>
-          {data.hasError && <span className="celMetricsCard__errorDot" />}
+          {data.hasError && (
+            <span
+              className="celMetricsCard__errorBadge"
+              title={data.errorLabel ?? 'Has errors'}
+              aria-label={data.errorLabel ?? 'Has errors'}
+            >
+              !
+            </span>
+          )}
         </div>
         {data.subtitle && <div className="celMetricsCard__subtitle">{data.subtitle}</div>}
         <div className="celMetricsCard__metrics">

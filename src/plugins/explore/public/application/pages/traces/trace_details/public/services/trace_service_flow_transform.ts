@@ -38,6 +38,7 @@ export interface ServiceFlowNode {
     title: string;
     color?: string;
     hasError: boolean;
+    errorLabel?: string;
     metrics: ServiceMetric[];
   };
 }
@@ -154,6 +155,10 @@ export const spansToServiceFlow = (
         title: service,
         color: colorMap[service],
         hasError: errors > 0,
+        errorLabel:
+          errors > 0
+            ? `${errors} error${errors === 1 ? '' : 's'} in this service (${errorRate.toFixed(0)}%)`
+            : undefined,
         metrics: [
           {
             label: 'Requests',

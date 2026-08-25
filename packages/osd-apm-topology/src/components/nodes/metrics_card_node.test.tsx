@@ -53,11 +53,26 @@ describe('MetricsCardNode', () => {
     screen.getByText('1.20s');
   });
 
-  it('shows an error dot only when hasError is true', () => {
+  it('shows the error badge only when hasError is true', () => {
     const { container, rerender } = render(<MetricsCardNode {...createProps()} />);
-    expect(container.querySelector('.celMetricsCard__errorDot')).toBeNull();
+    expect(container.querySelector('.celMetricsCard__errorBadge')).toBeNull();
     rerender(<MetricsCardNode {...createProps({ hasError: true })} />);
-    expect(container.querySelector('.celMetricsCard__errorDot')).toBeInTheDocument();
+    const badge = container.querySelector('.celMetricsCard__errorBadge');
+    expect(badge).toBeInTheDocument();
+    // Carries an explanatory label (default) so the indicator is understandable.
+    expect(badge).toHaveAttribute('aria-label', 'Has errors');
+  });
+
+  it('uses a custom errorLabel on the badge when provided', () => {
+    const { container } = render(
+      <MetricsCardNode
+        {...createProps({ hasError: true, errorLabel: '2 errors in this service' })}
+      />
+    );
+    expect(container.querySelector('.celMetricsCard__errorBadge')).toHaveAttribute(
+      'aria-label',
+      '2 errors in this service'
+    );
   });
 
   it('fires onDashboardClick with the node data when the whole card is clicked', () => {
