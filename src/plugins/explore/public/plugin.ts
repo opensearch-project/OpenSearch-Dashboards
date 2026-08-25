@@ -1126,11 +1126,11 @@ export class ExplorePlugin implements Plugin<
         .filter(
           (v) =>
             v.name === this.DISCOVER_VISUALIZATION_NAME ||
-            v.name === this.METRICS_VISUALIZATION_NAME ||
-            v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.METRICS_VISUALIZATION_NAME
         )
         .forEach((visAlias) => {
-          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          // Hide aliases that route into the normal Explore apps. The standalone
+          // visualization editor remains available for dashboard create flows.
           visAlias.hidden = true;
         });
     }

@@ -180,6 +180,7 @@ describe('ExplorePlugin', () => {
         registerTrigger: jest.fn(),
         getTrigger: jest.fn(),
         getTriggers: jest.fn(),
+        getTriggerActions: jest.fn().mockReturnValue([]),
         unregisterAction: jest.fn(),
         attachAction: jest.fn(),
         getAction: jest.fn(),
@@ -578,6 +579,24 @@ describe('ExplorePlugin', () => {
       // Verify both are enabled
       expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(true);
       expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
+    });
+
+    it('keeps the visualization editor alias visible outside Explore-enabled workspaces', async () => {
+      currentWorkspace$.next(null);
+      const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
+      const metricsAlias = { name: 'MetricsVisualization', hidden: false };
+      const editorAlias = { name: 'VisualizationEditor', hidden: false };
+      (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
+        discoverAlias,
+        metricsAlias,
+        editorAlias,
+      ]);
+
+      await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
+
+      expect(discoverAlias.hidden).toBe(true);
+      expect(metricsAlias.hidden).toBe(true);
+      expect(editorAlias.hidden).toBe(false);
     });
   });
 
