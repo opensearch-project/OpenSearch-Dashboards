@@ -126,6 +126,16 @@ describe('applySpanFilters', () => {
     expect(result).toEqual(mockSpans);
   });
 
+  it('should filter spans by a minimum duration (durationMin, in nanos)', () => {
+    const durationSpans: ParsedHit[] = [
+      { spanId: 'a', children: [], durationInNanos: 1e6 }, // 1ms
+      { spanId: 'b', children: [], durationInNanos: 5e6 }, // 5ms
+      { spanId: 'c', children: [], durationInNanos: 10e6 }, // 10ms
+    ];
+    const result = applySpanFilters(durationSpans, [{ field: 'durationMin', value: 5e6 }]);
+    expect(result.map((s) => s.spanId)).toEqual(['b', 'c']);
+  });
+
   it('should filter spans by simple field value', () => {
     const filters = [{ field: 'serviceName', value: 'user-service' }];
     const result = applySpanFilters(mockSpans, filters);

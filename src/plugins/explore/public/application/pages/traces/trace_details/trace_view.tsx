@@ -46,6 +46,8 @@ import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
+import { extractSpanDuration } from './public/utils/span_data_utils';
+import { DURATION_MIN_FILTER_FIELD } from './public/traces/span_detail_tables/utils';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { SERVICE_NAME_FILTER_FIELD } from '../../../../utils/trace_field_constants';
@@ -58,6 +60,19 @@ export interface SpanFilter {
   field: string;
   value: string | number | boolean;
 }
+
+// Filters applied in the browser (never sent to PPL, so they must not trigger a
+// server refetch): the `isError` status toggle and the `durationMin` threshold.
+const isClientSideFilter = (filter: SpanFilter): boolean =>
+  filter.field === 'isError' || filter.field === DURATION_MIN_FILTER_FIELD;
+
+// Human-readable rendering of a nanosecond duration (used in filter badges).
+const formatNanosDuration = (nanos: number): string => {
+  const ms = nanos / 1e6;
+  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
+  if (ms >= 1) return `${Math.round(ms)}ms`;
+  return `${Math.round(nanos / 1000)}µs`;
+};
 
 interface ResizeObserverTarget extends Element {
   _lastWidth?: number;
@@ -209,11 +224,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFilters(newFilters);
   };
 
-  // Server-side (PPL) filters are everything except the client-side `isError`
-  // toggle. Keyed so the trace refetch below only re-runs when they change
-  // (isError is applied client-side and must not trigger a refetch).
+  // Server-side (PPL) filters are everything except the client-side filters.
+  // Keyed so the trace refetch below only re-runs when they change (client-side
+  // filters are applied in-browser and must not trigger a refetch).
   const serverFilterKey = useMemo(
-    () => JSON.stringify(spanFilters.filter((filter) => filter.field !== 'isError')),
+    () => JSON.stringify(spanFilters.filter((filter) => !isClientSideFilter(filter))),
     [spanFilters]
   );
 
@@ -254,7 +269,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
       try {
         // Separate client-side filters from server-side filters
-        const serverFilters = filters.filter((filter) => filter.field !== 'isError');
+        const serverFilters = filters.filter((filter) => !isClientSideFilter(filter));
 
         const response = await pplService.fetchTraceSpans({
           traceId,
@@ -295,14 +310,17 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     let hits = transformed.length > 0 ? transformed : [];
 
     // Apply client-side filters
-    const clientFilters = spanFilters.filter((filter) => filter.field === 'isError');
-    if (clientFilters.length > 0) {
-      clientFilters.forEach((filter) => {
-        if (filter.field === 'isError' && filter.value === true) {
-          hits = hits.filter((span: TraceHit) => isSpanError(span));
-        }
-      });
-    }
+    const clientFilters = spanFilters.filter(isClientSideFilter);
+    clientFilters.forEach((filter) => {
+      if (filter.field === 'isError' && filter.value === true) {
+        hits = hits.filter((span: TraceHit) => isSpanError(span));
+      }
+      if (filter.field === DURATION_MIN_FILTER_FIELD) {
+        hits = hits.filter(
+          (span: TraceHit) => extractSpanDuration(span) >= (filter.value as number)
+        );
+      }
+    });
 
     hits = hits.filter((hit) => {
       const hasUnixNano = !!hit.startTimeUnixNano && !!hit.endTimeUnixNano;
@@ -443,6 +461,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
     if (filter.field === 'status.code' && filter.value === 0) {
       return 'Unset';
+    }
+    if (filter.field === DURATION_MIN_FILTER_FIELD) {
+      return `Duration ≥ ${formatNanosDuration(filter.value as number)}`;
     }
     return `${filter.field}: ${filter.value}`;
   };
@@ -642,6 +663,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             activeView={activeTab}
                             servicesInOrder={servicesInOrder}
                             isFlyoutPanel={isFlyout}
+                            allTraceSpans={unfilteredHits}
                           />
                         )}
 

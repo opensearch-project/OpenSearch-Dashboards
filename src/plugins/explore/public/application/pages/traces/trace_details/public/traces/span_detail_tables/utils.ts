@@ -5,6 +5,10 @@
 
 import { ParsedHit } from './types';
 import { isSpanError, extractStatusCode } from '../ppl_resolve_helpers';
+import { extractSpanDuration } from '../../utils/span_data_utils';
+
+/** Client-side filter field for a minimum span duration (value in nanoseconds). */
+export const DURATION_MIN_FILTER_FIELD = 'durationMin';
 
 export const parseHits = (payloadData: string): ParsedHit[] => {
   try {
@@ -35,6 +39,9 @@ export const applySpanFilters = (
     return filters.every(({ field, value }) => {
       if (field === 'isError' || field === 'status.code') {
         return isStatusMatch(span, field, value);
+      }
+      if (field === DURATION_MIN_FILTER_FIELD) {
+        return extractSpanDuration(span) >= (value as number);
       }
       const spanValue = field.includes('.')
         ? field.split('.').reduce((obj, key) => obj?.[key], span)
