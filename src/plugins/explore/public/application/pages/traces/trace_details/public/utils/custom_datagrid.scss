@@ -64,6 +64,10 @@
   /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
   .euiDataGrid__controls {
     width: 100%;
+
+    // Tighter than the default so the toolbar row hugs the bar.
+    padding-top: 2px;
+    padding-bottom: 2px;
   }
 
   /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
@@ -73,7 +77,17 @@
 }
 
 .exploreCustomDataGrid__toolbarRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
+}
+
+// Right-hand view/meta controls (full screen, density, reset zoom, legend).
+.exploreCustomDataGrid__toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
 }
 
 // Connected icon cluster for the tree action buttons (expand/collapse ± one

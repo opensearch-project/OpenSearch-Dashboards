@@ -300,7 +300,8 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
       <span>
         <EuiButtonEmpty
           size="xs"
-          color="text"
+          // Blue when actionable (a zoom is applied); greyed when disabled.
+          color="primary"
           iconType="editorUndo"
           isDisabled={!visibleRange}
           onClick={() => setVisibleRange(undefined)}

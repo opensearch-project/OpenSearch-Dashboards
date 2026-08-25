@@ -10,8 +10,6 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPopover,
@@ -225,32 +223,21 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
     // Unified single row: the caller's action buttons as a connected cluster on
     // the LEFT, and the view/meta controls (full screen, density, + secondary
-    // controls like reset zoom / legend) on the RIGHT.
+    // controls like reset zoom / legend) on the RIGHT. Plain flex (gap, no
+    // EuiFlexGroup) so the row hugs the 24px buttons instead of inflating.
     return (
-      <EuiFlexGroup
-        className="exploreCustomDataGrid__toolbarRow"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="m"
-        responsive={false}
-      >
+      <div className="exploreCustomDataGrid__toolbarRow">
         {toolbarButtons.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <div className="exploreCustomDataGrid__actionCluster">{toolbarButtons}</div>
-          </EuiFlexItem>
+          <div className="exploreCustomDataGrid__actionCluster">{toolbarButtons}</div>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {[fullScreenControl, densityControl, ...secondaryToolbar]
-              .filter(Boolean)
-              .map((control, i) => (
-                <EuiFlexItem grow={false} key={i}>
-                  {control}
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <div className="exploreCustomDataGrid__toolbarRight">
+          {[fullScreenControl, densityControl, ...secondaryToolbar]
+            .filter(Boolean)
+            .map((control, i) => (
+              <React.Fragment key={i}>{control}</React.Fragment>
+            ))}
+        </div>
+      </div>
     );
   }, [isFullScreen, density, toolbarButtons, secondaryToolbar]);
 
