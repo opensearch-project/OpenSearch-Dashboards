@@ -69,6 +69,17 @@
 // render the modifier class, so their header is untouched. (`:has()` is already used further down
 // this file.)
 @include euiBreakpoint("xs", "s", "m") {
+  // Publish the height of the wrapped second row so the `100vh`-derived layouts can subtract
+  // it. `$euiHeaderHeightCompensation` assumes a single-row application header, so without
+  // this the app wrapper (and every plugin layout built on `$osdHeaderOffset`) is exactly one
+  // action row too tall and the page overflows by that much. One control row
+  // ($euiSizeXL) plus the group's row gap ($euiSizeS). Declared on the root element because
+  // the action menu is portaled into the chrome header, which is a *sibling* of
+  // `.app-wrapper` — so the value has to reach both through inheritance.
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .coreSystemRootDomElement:has(.osdTopNavMenuGroup--actionsBeforeDatePicker) {
+    --osd-app-header-action-row-height: #{$euiSizeXL + $euiSizeS};
+  }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiHeaderSection:has(.osdTopNavMenuGroup--actionsBeforeDatePicker) {

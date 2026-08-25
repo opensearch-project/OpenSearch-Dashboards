@@ -1,5 +1,14 @@
 $osdHeaderOffset: $euiHeaderHeightCompensation;
 
+// Published by navigation's `osdTopNavMenuGroup--actionsBeforeDatePicker` opt-in below the `l`
+// breakpoint, where this app's header wraps its action row under the screen title. Kept as its
+// own term (rather than folded into `$osdHeaderOffset`) because that one gets multiplied below,
+// and SASS can't multiply a `calc()`. `0px` at wider widths, so nothing changes there.
+// The `0px` fallback needs its unit: this value is consumed inside `calc()`, where a
+// unitless zero is not a valid length.
+// stylelint-disable-next-line length-zero-no-unit
+$osdHeaderActionRowOffset: var(--osd-app-header-action-row-height, 0px);
+
 .deSidebar {
   height: 100%;
 
@@ -10,10 +19,10 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 }
 
 .explore-layout {
-  height: calc(100vh - #{$osdHeaderOffset * 1});
+  height: calc(100vh - #{$osdHeaderOffset * 1} - #{$osdHeaderActionRowOffset});
 
   &.dsc--next {
-    height: calc(100vh - #{$osdHeaderOffset * 2});
+    height: calc(100vh - #{$osdHeaderOffset * 2} - #{$osdHeaderActionRowOffset});
   }
 
   &__page-body {
@@ -133,10 +142,10 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 }
 
 .headerIsExpanded .explore-layout {
-  height: calc(100vh - #{$osdHeaderOffset * 2});
+  height: calc(100vh - #{$osdHeaderOffset * 2} - #{$osdHeaderActionRowOffset});
 
   &.dsc--next {
-    height: calc(100vh - #{$osdHeaderOffset * 3});
+    height: calc(100vh - #{$osdHeaderOffset * 3} - #{$osdHeaderActionRowOffset});
   }
 }
 
