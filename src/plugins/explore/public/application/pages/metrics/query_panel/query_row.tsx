@@ -144,7 +144,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem className="mqpRowEditor">
             {row.mode === 'builder' && row.builderState ? (
               <PromQLBuilder
                 client={client}
