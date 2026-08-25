@@ -141,16 +141,6 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
       if (this.core.chat) {
         const panelDataSourceId = query?.dataset?.dataSource?.id;
 
-        // Always set the active data source to the panel's data source.
-        // setActiveDataSource is a simple overwrite on every Ask AI click.
-        // it ensures the DS always tracks the most recently clicked panel.
-        // The LLM sees the current panel's Data Source ID in the message
-        // context and can call switch_data_source if it needs to query a
-        // different panel's data source mid-conversation.
-        if (panelDataSourceId) {
-          this.core.chat.setActiveDataSource(panelDataSourceId);
-        }
-
         await this.core.chat.sendMessageWithWindow(
           [
             // TODO adapt type image when strands is introduced
@@ -178,7 +168,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
               text: 'Give me a summary for the selected visualization',
             },
           ],
-          []
+          [],
+          { dataSourceId: panelDataSourceId }
         );
       }
     } catch (error) {

@@ -173,10 +173,6 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
         const panelDataSourceId =
           query?.dataset?.dataSource?.id ?? visEmbeddable.vis.data.indexPattern?.dataSourceRef?.id;
 
-        if (panelDataSourceId) {
-          this.core.chat.setActiveDataSource(panelDataSourceId);
-        }
-
         await this.core.chat.sendMessageWithWindow(
           [
             // TODO adapt type image when strands is introduced
@@ -200,7 +196,8 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
               text: 'Give me a summary for the selected visualization',
             },
           ],
-          []
+          [],
+          { dataSourceId: panelDataSourceId }
         );
       }
     } catch (error) {

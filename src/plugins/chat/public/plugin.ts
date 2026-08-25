@@ -174,12 +174,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        setActiveDataSource: (dataSourceId: string | undefined) => {
-          if (dataSourceId) {
-            this.chatService?.setLLMDataSourceId(dataSourceId);
-          } else {
-            this.chatService?.clearLLMDataSourceId();
-          }
+        setSessionDataSourceList: (dataSourceId: string | undefined) => {
+          this.chatService?.setSessionDataSourceList(dataSourceId);
         },
       });
     }

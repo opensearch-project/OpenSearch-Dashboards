@@ -35,7 +35,9 @@ const mockAssistantActionService = {
 
 const mockChatService = {
   sendToolResult: jest.fn(),
-  setLLMDataSourceId: jest.fn(),
+  setConfirmedDataSourceId: jest.fn(),
+  setSessionDataSourceList: jest.fn(),
+  clearSessionDataSourceList: jest.fn(),
   validateDataSourceId: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
   getCurrentDataSourceInfo: jest.fn().mockResolvedValue(undefined),
@@ -66,6 +68,18 @@ describe('ChatEventHandler', () => {
 
     // Reset confirmation requirement to default (no confirmation needed).
     mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(false);
+
+    mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+      observable: {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }),
+      },
+      toolMessage: {
+        id: 'tool-result-default',
+        role: 'tool',
+        content: JSON.stringify({ success: true }),
+        toolCallId: 'default-tool-call',
+      },
+    });
 
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
@@ -329,7 +343,11 @@ describe('ChatEventHandler', () => {
 
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
         status: 'complete',
-        result: undefined,
+        result: {
+          success: false,
+          message: 'Tool execution failed',
+          error: 'Tool execution failed',
+        },
       });
     });
 
@@ -571,7 +589,10 @@ describe('ChatEventHandler', () => {
         error: 'User rejected the tool execution',
         userRejected: true,
         data: {
+          success: false,
+          rejected: true,
           message: 'The user chose not to proceed with this action.',
+          error: 'User rejected the tool execution',
           toolName: 'test_action',
           args: { param: 'value' },
         },
@@ -606,7 +627,7 @@ describe('ChatEventHandler', () => {
       // Should send rejection back to assistant
       expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
         toolCallId,
-        mockRejectedResult,
+        mockRejectedResult.data,
         expect.any(Array),
         expect.any(AbortSignal)
       );
@@ -962,33 +983,6 @@ describe('ChatEventHandler', () => {
     });
 
     describe('switch_data_source restoration', () => {
-      // A snapshot that switched the data source: assistant tool call + tool result pair.
-      const buildSwitchSnapshot = (dataSourceId: string): Message[] =>
-        [
-          { id: 'msg-1', role: 'user', content: 'Use the other cluster' },
-          {
-            id: 'msg-2',
-            role: 'assistant',
-            content: '',
-            toolCalls: [
-              {
-                id: 'call-1',
-                type: 'function',
-                function: {
-                  name: 'switch_data_source',
-                  arguments: JSON.stringify({ dataSourceId }),
-                },
-              },
-            ],
-          },
-          {
-            id: 'msg-3',
-            role: 'tool',
-            toolCallId: 'call-1',
-            content: JSON.stringify({ success: true, dataSourceId }),
-          },
-        ] as unknown as Message[];
-
       // Validation is intentionally fire-and-forget, so let the microtask queue drain.
       const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -999,13 +993,36 @@ describe('ChatEventHandler', () => {
 
         await chatEventHandler.handleEvent({
           type: EventType.MESSAGES_SNAPSHOT,
-          messages: buildSwitchSnapshot('ds-a'),
+          messages: [{ id: 'msg-1', role: 'user', content: 'Use the other cluster' }],
+          sessionDataSourceList: ['ds-a'],
+          confirmedDataSourceId: 'ds-a',
           timestamp: Date.now(),
         });
         await flush();
 
+        expect(mockChatService.setSessionDataSourceList).toHaveBeenCalledWith('ds-a');
         expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('ds-a');
-        expect(mockChatService.setLLMDataSourceId).toHaveBeenCalledWith('ds-a');
+        expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-a');
+      });
+
+      it('should restore data source state from snapshot metadata', async () => {
+        mockChatService.validateDataSourceId = jest
+          .fn()
+          .mockResolvedValue({ valid: true, availableDataSources: [] });
+
+        await chatEventHandler.handleEvent({
+          type: EventType.MESSAGES_SNAPSHOT,
+          messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }],
+          sessionDataSourceList: ['ds-a', 'ds-b'],
+          confirmedDataSourceId: 'ds-b',
+          timestamp: Date.now(),
+        });
+        await flush();
+
+        expect(mockChatService.setSessionDataSourceList).toHaveBeenCalledWith('ds-a');
+        expect(mockChatService.setSessionDataSourceList).toHaveBeenCalledWith('ds-b');
+        expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('ds-b');
+        expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-b');
       });
 
       it('should not re-apply a data source that no longer exists', async () => {
@@ -1015,13 +1032,16 @@ describe('ChatEventHandler', () => {
 
         await chatEventHandler.handleEvent({
           type: EventType.MESSAGES_SNAPSHOT,
-          messages: buildSwitchSnapshot('deleted-ds'),
+          messages: [{ id: 'msg-1', role: 'user', content: 'Use the deleted cluster' }],
+          sessionDataSourceList: ['deleted-ds'],
+          confirmedDataSourceId: 'deleted-ds',
           timestamp: Date.now(),
         });
         await flush();
 
+        expect(mockChatService.setSessionDataSourceList).toHaveBeenCalledWith('deleted-ds');
         expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('deleted-ds');
-        expect(mockChatService.setLLMDataSourceId).not.toHaveBeenCalled();
+        expect(mockChatService.setConfirmedDataSourceId).not.toHaveBeenCalled();
       });
 
       it('should not touch the data source when the conversation never switched', async () => {
@@ -1035,7 +1055,7 @@ describe('ChatEventHandler', () => {
         await flush();
 
         expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
-        expect(mockChatService.setLLMDataSourceId).not.toHaveBeenCalled();
+        expect(mockChatService.setConfirmedDataSourceId).not.toHaveBeenCalled();
       });
     });
 

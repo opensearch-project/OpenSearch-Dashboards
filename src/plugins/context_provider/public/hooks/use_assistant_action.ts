@@ -13,7 +13,7 @@ export interface RenderProps<T = any> {
   args?: T;
   result?: any;
   error?: Error;
-  onApprove?: () => void;
+  onApprove?: (modifiedArgs?: Partial<T>) => void;
   onReject?: () => void;
 }
 

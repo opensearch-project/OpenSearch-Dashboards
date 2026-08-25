@@ -38,7 +38,7 @@ export interface TimelineToolCall {
 
 interface ToolCallRowProps {
   toolCall: TimelineToolCall;
-  onApprove?: () => void;
+  onApprove?: (modifiedArgs?: any) => void;
   onReject?: () => void;
   initialOpen?: boolean;
 }

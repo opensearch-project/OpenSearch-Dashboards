@@ -241,11 +241,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
       });
     });
 
-    describe('active data source', () => {
-      beforeEach(() => {
-        mockCore.chat.setActiveDataSource = jest.fn();
-      });
-
+    describe('data source message options', () => {
       const withIndexPattern = (indexPattern: Record<string, unknown>) =>
         ({
           ...mockEmbeddable,
@@ -255,7 +251,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
           },
         }) as unknown as VisualizeEmbeddable;
 
-      it('should set the panel data source from the index pattern dataSourceRef', async () => {
+      it('should pass the panel data source from the index pattern dataSourceRef', async () => {
         await action.execute({
           embeddable: withIndexPattern({
             id: 'ip-on-remote-cluster',
@@ -265,13 +261,15 @@ describe('AskAIVisualizeEmbeddableAction', () => {
         });
 
         await waitFor(() => {
-          expect(mockCore.chat.setActiveDataSource).toHaveBeenCalledWith('remote-ds-id');
+          expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(expect.any(Array), [], {
+            dataSourceId: 'remote-ds-id',
+          });
         });
       });
 
       // Regression: a local-cluster index pattern id is itself a UUID, which the old
       // "find a 36-char segment" fallback mistook for a data source id.
-      it('should not set a data source for a local index pattern with a UUID id', async () => {
+      it('should not pass a data source for a local index pattern with a UUID id', async () => {
         await action.execute({
           embeddable: withIndexPattern({
             id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
@@ -280,9 +278,10 @@ describe('AskAIVisualizeEmbeddableAction', () => {
         });
 
         await waitFor(() => {
-          expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalled();
+          expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(expect.any(Array), [], {
+            dataSourceId: undefined,
+          });
         });
-        expect(mockCore.chat.setActiveDataSource).not.toHaveBeenCalled();
       });
     });
   });

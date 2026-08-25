@@ -4,17 +4,31 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { useEffect, useState } from 'react';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { useAssistantAction } from '../../../context_provider/public';
 import { ChatService } from '../services/chat_service';
 
 import { SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
 
 interface SwitchDataSourceArgs {
-  dataSourceId: string;
-  datasourceTitle?: string;
+  // from the user's picker confirmation.
+  selectedDataSourceId?: string;
+  selectedDataSourceTitle?: string;
   reason?: string;
+  confirmed?: boolean;
 }
 
 interface SwitchDataSourceResult {
@@ -22,54 +36,212 @@ interface SwitchDataSourceResult {
   dataSourceId?: string;
   datasourceTitle?: string;
   message?: string;
+  error?: string;
 }
 
-const SwitchDataSourceCard: React.FC<{
-  status: 'running' | 'completed' | 'error';
+const SwitchDataSourceCard = ({
+  status,
+  args,
+  result,
+  chatService,
+  onApprove,
+  onReject,
+}: {
+  status: 'running' | 'complete' | 'error';
   args?: SwitchDataSourceArgs;
-  result?: string | SwitchDataSourceResult;
-}> = ({ status, args, result }) => {
-  // result may arrive as a JSON string (from toolCall.result) or an already-parsed object
-  let parsedResult: SwitchDataSourceResult | null = null;
-  if (result && typeof result === 'object') {
-    parsedResult = result as SwitchDataSourceResult;
-  } else if (typeof result === 'string') {
-    try {
-      const parsed = JSON.parse(result);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        parsedResult = parsed as SwitchDataSourceResult;
-      }
-    } catch {
-      // skip
-    }
-  }
+  result?: SwitchDataSourceResult | string;
+  chatService: ChatService;
+  onApprove?: (modifiedArgs?: Partial<SwitchDataSourceArgs>) => void;
+  onReject?: () => void;
+}) => {
+  const [availableDataSources, setAvailableDataSources] = useState<
+    Array<{ id: string; title: string }>
+  >([]);
+  const [currentDataSource, setCurrentDataSource] = useState<{ id: string; title?: string }>();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isSuccess = status === 'completed' && parsedResult?.success !== false;
-  const dataSourceId = parsedResult?.dataSourceId ?? args?.dataSourceId;
-  const dataSourceTitle = parsedResult?.datasourceTitle ?? args?.datasourceTitle;
+  useEffect(() => {
+    if (status !== 'running') {
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    Promise.all([
+      chatService.getAvailableDataSources(),
+      chatService.getCurrentDataSourceInfo().catch(() => undefined),
+    ])
+      .then(([dataSources, current]) => {
+        if (cancelled) return;
+        setAvailableDataSources(dataSources);
+        setCurrentDataSource(current);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [chatService, status]);
+
+  const parsedResult =
+    typeof result === 'string'
+      ? (() => {
+          try {
+            const parsed = JSON.parse(result);
+            return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+              ? (parsed as SwitchDataSourceResult)
+              : undefined;
+          } catch {
+            return undefined;
+          }
+        })()
+      : result;
+
+  const sessionDataSourceIds = chatService.getSessionDataSourceList();
+  const selectableDataSources =
+    sessionDataSourceIds.length > 0
+      ? sessionDataSourceIds.map((id) => {
+          const availableDataSource = availableDataSources.find((ds) => ds.id === id);
+          const currentTitle = currentDataSource?.id === id ? currentDataSource.title : undefined;
+          return {
+            id,
+            title: availableDataSource?.title ?? currentTitle ?? id,
+          };
+        })
+      : availableDataSources;
+
+  const isSuccess = status === 'complete' && parsedResult?.success !== false;
+  const dataSourceId = parsedResult?.dataSourceId;
+  const dataSourceTitle = parsedResult?.datasourceTitle;
   const dsLabel = dataSourceTitle || dataSourceId || null;
 
   if (status === 'running') {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0', height: 24 }}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="database" size="s" color="subdued" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('chat.switchDataSource.switching', {
-              defaultMessage: 'Switching data source\u2026',
+      <EuiPanel hasBorder paddingSize="m">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="database" size="m" color="primary" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('chat.switchDataSource.chooseTitle', {
+                  defaultMessage: 'Choose a data source to continue',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('chat.switchDataSource.chooseBody', {
+              defaultMessage:
+                'This conversation has used multiple data sources. Select which one to use for the next data-source-aware tools.',
             })}
+          </p>
+        </EuiText>
+
+        {args?.reason && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              <p>
+                {i18n.translate('chat.switchDataSource.reasonLabel', {
+                  defaultMessage: 'Reason: {reason}',
+                  values: { reason: args.reason },
+                })}
+              </p>
+            </EuiText>
+          </>
+        )}
+
+        {currentDataSource && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+              {currentDataSource && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('chat.switchDataSource.currentBadge', {
+                      defaultMessage: 'Current: {label}',
+                      values: { label: currentDataSource.title ?? currentDataSource.id },
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
+
+        <EuiSpacer size="m" />
+
+        {isLoading ? (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('chat.switchDataSource.loadingOptions', {
+                  defaultMessage: 'Loading available data sources…',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : selectableDataSources.length > 0 ? (
+          <EuiListGroup maxWidth={false} flush gutterSize="none">
+            {selectableDataSources.map((dataSource) => (
+              <EuiListGroupItem
+                key={dataSource.id}
+                label={dataSource.title}
+                iconType="database"
+                onClick={() =>
+                  onApprove?.({
+                    selectedDataSourceId: dataSource.id,
+                    selectedDataSourceTitle: dataSource.title,
+                  })
+                }
+                size="s"
+              />
+            ))}
+          </EuiListGroup>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('chat.switchDataSource.noOptions', {
+                defaultMessage:
+                  'No data sources from this conversation are currently available to choose from.',
+              })}
+            </p>
           </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        )}
+
+        {onReject && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty size="xs" flush="left" onClick={() => onReject()}>
+              {i18n.translate('chat.switchDataSource.cancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </>
+        )}
+      </EuiPanel>
     );
   }
 
   if (!isSuccess) {
     const errorMsg =
       parsedResult?.message ??
-      (typeof result === 'string' ? result : null) ??
+      parsedResult?.error ??
       i18n.translate('chat.switchDataSource.error.default', {
         defaultMessage: 'Failed to switch data source',
       });
@@ -116,111 +288,98 @@ const SwitchDataSourceCard: React.FC<{
 };
 
 /**
- * Registers the switch_data_source tool so the LLM can change the active data source
- * mid-conversation.
+ * Registers the switch_data_source tool so the LLM can request a data source switch
+ * and the user can make the final selection in the chat UI.
  */
 export function useSwitchDataSourceAction(chatService: ChatService, enabled: boolean = true) {
   useAssistantAction<SwitchDataSourceArgs>({
     name: SWITCH_DATA_SOURCE_TOOL_NAME,
     description:
-      'Switch the active data source for ALL subsequent tool calls ' +
-      '(IndexMappingTool, SearchIndexTool, PPLQueryTool, auto_create_visualization, etc.). ' +
-      'You MUST call this tool BEFORE any data query tool whenever the target data source ' +
-      'differs from the currently active one. ' +
-      'Once switched, the other tools pick up the new data source automatically — ' +
-      'you do not need to pass a data source id to them. ' +
-      'The available data sources and the currently active one are listed in the ' +
-      'available_data_sources context — check that context to identify the correct id ' +
-      'before switching.',
+      'Ask the user to choose the active data source for any subsequent data-source-aware tool that inspects fields, queries data, or creates a visualization. ' +
+      'You MUST call this tool before any such tool whenever more than one data source has already ' +
+      "appeared in this conversation. A previously confirmed data source is only the user's most " +
+      'recent choice and does NOT remove this requirement. ' +
+      "Do NOT choose a data source on the user's behalf. This tool presents a picker and the user " +
+      'makes the final selection. ' +
+      'Do NOT ask the user which data source to use in natural language when this tool should be used. ' +
+      'After the user confirms a selection, subsequent tools automatically use that data source, ' +
+      'so you do not need to pass a data source id to them. ' +
+      'The UI will present the data sources already seen in this conversation for the user to choose from.',
     parameters: {
       type: 'object',
       properties: {
-        dataSourceId: {
-          type: 'string',
-          description:
-            'The ID of the data source to switch to. ' +
-            'It MUST be one of the ids listed in the available_data_sources context, or a ' +
-            'data source id given by the user. It may also come from the page context ' +
-            '— but note that a dataset/index pattern id ' +
-            '(dataset.id) is NOT a data source id and will be rejected.',
-        },
         reason: {
           type: 'string',
           description:
-            'Optional. Brief explanation of why this data source is being selected ' +
-            '(e.g. "switching to the data source used by the Flights panel").',
-        },
-        datasourceTitle: {
-          type: 'string',
-          description:
-            'Optional. The human-readable title of the data source. ' +
-            'Get this from the available_data_sources context alongside dataSourceId.',
+            'Optional. Brief explanation shown to the user about why they need to choose a data source ' +
+            '(e.g. "the Flights panel uses a different data source").',
         },
       },
-      required: ['dataSourceId'],
+      required: [],
     },
     handler: async (args) => {
       try {
-        if (!args.dataSourceId || typeof args.dataSourceId !== 'string') {
+        if (args.confirmed !== true) {
           return {
             success: false,
-            message: i18n.translate('chat.switchDataSource.error.invalidId', {
-              defaultMessage: 'dataSourceId must be a non-empty string',
-            }),
+            message: 'Waiting for the user to choose a data source.',
+          };
+        }
+
+        if (!args.selectedDataSourceId || typeof args.selectedDataSourceId !== 'string') {
+          return {
+            success: false,
+            message: 'The user must choose a data source from the conversation list.',
           };
         }
 
         // Validate before writing to ChatService
         const { valid, dataSource, availableDataSources } = await chatService.validateDataSourceId(
-          args.dataSourceId
+          args.selectedDataSourceId
         );
 
         if (!valid) {
           return {
             success: false,
-            message: i18n.translate('chat.switchDataSource.error.unknownId', {
-              defaultMessage:
-                'Unknown dataSourceId "{id}". Valid data source ids are: {ids}. ' +
-                'Note that a dataset or index pattern id is not a data source id.',
-              values: {
-                id: args.dataSourceId,
-                ids: availableDataSources.map((ds) => ds.id).join(', '),
-              },
-            }),
+            message:
+              `Unknown dataSourceId "${args.selectedDataSourceId}". Valid data source ids are: ` +
+              `${availableDataSources.map((ds) => ds.id).join(', ')}. ` +
+              'Note that a dataset or index pattern id is not a data source id.',
           };
         }
 
-        chatService.setLLMDataSourceId(args.dataSourceId);
+        chatService.setConfirmedDataSourceId(args.selectedDataSourceId);
 
-        const resolvedTitle = dataSource?.title ?? args.datasourceTitle;
+        const resolvedTitle = dataSource?.title ?? args.selectedDataSourceTitle;
 
         return {
           success: true,
-          dataSourceId: args.dataSourceId,
+          dataSourceId: args.selectedDataSourceId,
           datasourceTitle: resolvedTitle,
-          message: i18n.translate('chat.switchDataSource.success.message', {
-            defaultMessage:
-              'Active data source switched to "{title}". All subsequent data queries will use this data source.',
-            values: { title: resolvedTitle ?? args.dataSourceId },
-          }),
+          message: `Confirmed "${resolvedTitle ?? args.selectedDataSourceId}" as the active data source for this conversation.`,
         };
       } catch (error) {
         return {
           success: false,
-          message:
-            error instanceof Error
-              ? error.message
-              : i18n.translate('chat.switchDataSource.error.unknown', {
-                  defaultMessage: 'Failed to switch data source',
-                }),
+          message: error instanceof Error ? error.message : 'Failed to switch data source',
         };
       }
     },
-    render: ({ status, args, result }) => {
+    render: ({ status, args, result, onApprove, onReject }) => {
       const cardStatus =
-        status === 'complete' ? 'completed' : status === 'failed' ? 'error' : 'running';
-      return <SwitchDataSourceCard status={cardStatus} args={args} result={result} />;
+        status === 'complete' ? 'complete' : status === 'failed' ? 'error' : 'running';
+      return (
+        <SwitchDataSourceCard
+          status={cardStatus}
+          args={args}
+          result={result}
+          chatService={chatService}
+          onApprove={onApprove}
+          onReject={onReject}
+        />
+      );
     },
+    requiresConfirmation: true,
     useCustomRenderer: true,
     enabled,
   });

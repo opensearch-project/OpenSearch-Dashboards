@@ -6,7 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
-import { TOOL_EXECUTION_ERROR_PREFIX, SWITCH_DATA_SOURCE_TOOL_NAME } from '../../common';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -421,7 +421,10 @@ export class ChatEventHandler {
         // until the rejection has actually been delivered to the assistant,
         // so the tool row keeps its running indicator during the send
         // rather than showing a failed state while still doing work.
-        await this.sendToolResultToAssistant(toolCallId, result);
+        await this.sendToolResultToAssistant(
+          toolCallId,
+          result.data ?? this.getAssistantToolResultPayload(result)
+        );
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'failed',
         });
@@ -443,6 +446,7 @@ export class ChatEventHandler {
         });
         // Don't send result back immediately, wait for TOOL_CALL_RESULT event
       } else {
+        const assistantResult = this.getAssistantToolResultPayload(result);
         // Tool was executed locally. Hold off on marking 'complete' until
         // the result has actually been delivered to the assistant and the
         // next streaming turn has started. Otherwise there would be a
@@ -452,10 +456,10 @@ export class ChatEventHandler {
         // appends a system message to the timeline so the user can see the
         // conversation is out of sync — the tool call itself still
         // completed locally, so mark it 'complete'.
-        await this.sendToolResultToAssistant(toolCallId, result.data);
+        await this.sendToolResultToAssistant(toolCallId, assistantResult);
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
-          result: result.data,
+          result: assistantResult,
         });
 
         // Record tool execution telemetry
@@ -549,6 +553,19 @@ export class ChatEventHandler {
       this.recordToolExecuted(pendingTool?.name ?? 'unknown', 'success', 'agent');
       this.toolExecutor.clearPendingTool(toolCallId);
     }
+  }
+
+  private getAssistantToolResultPayload(result: { success?: boolean; data?: any; error?: string }) {
+    if (result.data !== undefined) {
+      return result.data;
+    }
+
+    const message = result.error || 'Unknown error occurred';
+    return {
+      success: false,
+      message,
+      error: message,
+    };
   }
 
   /**
@@ -902,22 +919,25 @@ export class ChatEventHandler {
       });
     });
 
-    // Restore the LLM-selected data source from the conversation history.
+    // Restore the confirmed conversation data source override from the conversation history.
     // get the last successful switch_data_source result and re-apply it as session ds
-    this.restoreLLMDataSourceFromSnapshot(event.messages || []);
+    this.restoreDataSourceStateFromSnapshot(event);
 
     // Reset streaming state
     this.onStreamingStateChange(false);
   }
 
   /**
-   * Restore the LLM-selected data source from a snapshot.
-   *
-   * Scans the message history for the most recent successful `switch_data_source`
-   * tool call/result pair and re-applies the selected data source on ChatService.
+   * Restore conversation data source state from a snapshot.
    */
-  private restoreLLMDataSourceFromSnapshot(messages: Message[]): void {
-    const restoredId = this.findLastSwitchedDataSourceId(messages);
+  private restoreDataSourceStateFromSnapshot(event: MessagesSnapshotEvent): void {
+    const restoredSessionIds = event.sessionDataSourceList ?? [];
+
+    restoredSessionIds.forEach((dataSourceId) => {
+      this.chatService.setSessionDataSourceList(dataSourceId);
+    });
+
+    const restoredId = event.confirmedDataSourceId;
 
     if (!restoredId) return;
 
@@ -925,59 +945,12 @@ export class ChatEventHandler {
       .validateDataSourceId(restoredId)
       .then(({ valid }) => {
         if (valid) {
-          this.chatService.setLLMDataSourceId(restoredId);
+          this.chatService.setConfirmedDataSourceId(restoredId);
         }
       })
       .catch(() => {
         // keep the currently resolved data source
       });
-  }
-
-  /**
-   * Find the data source id of the most recent successful `switch_data_source` tool result
-   * in a message history. Returns undefined when the conversation never switched.
-   */
-  private findLastSwitchedDataSourceId(messages: Message[]): string | undefined {
-    // 1. build toolCallId → toolName index from assistant messages
-    const toolCallIdToName = new Map<string, string>();
-    for (const msg of messages) {
-      if (msg.role !== 'assistant') continue;
-      const toolCalls = msg.toolCalls;
-      if (!Array.isArray(toolCalls)) continue;
-      for (const call of toolCalls) {
-        if (call?.id && call?.function?.name) {
-          toolCallIdToName.set(call.id, call.function.name);
-        }
-      }
-    }
-
-    // 2. walk backwards through tool messages to find the last switch_data_source result
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const msg = messages[i];
-      if (msg.role !== 'tool') continue;
-
-      const toolCallId = msg.toolCallId as string | undefined;
-      if (!toolCallId) continue;
-
-      const toolName = toolCallIdToName.get(toolCallId);
-      // if (toolName !== 'switch_data_source') continue;
-      if (toolName !== SWITCH_DATA_SOURCE_TOOL_NAME) continue;
-
-      // Parse the tool result content
-      const content = msg.content as string | undefined;
-      if (!content) continue;
-
-      try {
-        const result = JSON.parse(content);
-        if (result?.success && result?.dataSourceId) {
-          return result.dataSourceId as string;
-        }
-      } catch {
-        // skip
-      }
-    }
-
-    return undefined;
   }
 
   /**

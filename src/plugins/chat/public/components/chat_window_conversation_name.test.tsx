@@ -97,6 +97,7 @@ describe('ChatWindow - Conversation Name', () => {
       getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
       getAvailableDataSources: jest.fn().mockResolvedValue([]),
       setDataSourceId: jest.fn(),
+      setConfirmedDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,

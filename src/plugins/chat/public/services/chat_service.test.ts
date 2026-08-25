@@ -511,6 +511,81 @@ describe('ChatService', () => {
         'Thread ID is required to send a message'
       );
     });
+
+    it('should include session data source history in available_data_sources context', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+      const service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient as any
+      );
+
+      service.newThread();
+      service.setSessionDataSourceList('ds-1');
+      service.setSessionDataSourceList('ds-2');
+      mockUiSettings.get.mockReturnValue(undefined);
+
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const availableDataSourcesContext = runInput.context.find(
+        (ctx: any) => ctx.description === 'available_data_sources'
+      );
+
+      expect(availableDataSourcesContext.value).toContain(
+        'Data sources already seen in this conversation: "Source One" (id: ds-1), "Source Two" (id: ds-2)'
+      );
+      expect(availableDataSourcesContext.value).toContain(
+        'If more than one data source has already appeared in this conversation'
+      );
+      expect(availableDataSourcesContext.value).toContain(
+        "A previously selected/confirmed data source is only the user's LAST choice."
+      );
+    });
+
+    it('should not include available_data_sources context when only one data source has appeared in the session', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+      const service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient as any
+      );
+
+      service.newThread();
+      service.setSessionDataSourceList('ds-1');
+      mockUiSettings.get.mockReturnValue(undefined);
+
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const availableDataSourcesContext = runInput.context.find(
+        (ctx: any) => ctx.description === 'available_data_sources'
+      );
+
+      expect(availableDataSourcesContext).toBeUndefined();
+    });
   });
 
   describe('sendToolResult', () => {
@@ -602,9 +677,9 @@ describe('ChatService', () => {
     });
 
     // Regression: the continuation run used to resolve only the workspace/global
-    // default data source, so a switch_data_source performed by the LLM was dropped
+    // default data source, so a confirmed switch_data_source override was dropped
     // as soon as a tool result was sent back.
-    it('should keep the LLM-selected data source on the continuation run', async () => {
+    it('should keep the confirmed data source override on the continuation run', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
@@ -612,11 +687,11 @@ describe('ChatService', () => {
         .fn()
         .mockResolvedValue(createMockMessagesSnapshot('tool-call-123'));
 
-      chatService.setLLMDataSourceId('llm-selected-ds');
+      chatService.setConfirmedDataSourceId('confirmed-ds');
 
       await chatService.sendToolResult('tool-call-123', { success: true }, []);
 
-      expect(mockAgent.runAgent).toHaveBeenCalledWith(expect.any(Object), 'llm-selected-ds');
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(expect.any(Object), 'confirmed-ds');
     });
 
     it('should handle string results directly', async () => {
@@ -1245,7 +1320,11 @@ describe('ChatService', () => {
 
       expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
         expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        messages
+        messages,
+        {
+          sessionDataSourceList: [],
+          confirmedDataSourceId: undefined,
+        }
       );
     });
   });
@@ -2414,6 +2493,20 @@ describe('ChatService', () => {
     afterEach(() => {
       delete (global as any).window.assistantContextStore;
       jest.clearAllMocks();
+    });
+  });
+
+  describe('session data source list', () => {
+    it('should dedupe data source ids and clear them on newThread', () => {
+      chatService.setSessionDataSourceList('ds-1');
+      chatService.setSessionDataSourceList('ds-1');
+      chatService.setSessionDataSourceList('ds-2');
+
+      expect(chatService.getSessionDataSourceList()).toEqual(['ds-1', 'ds-2']);
+
+      chatService.newThread();
+
+      expect(chatService.getSessionDataSourceList()).toEqual([]);
     });
   });
 

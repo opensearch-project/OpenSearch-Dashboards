@@ -118,6 +118,8 @@ export class LocalStorageMemoryProvider implements ConversationMemoryProvider {
       {
         type: EventType.MESSAGES_SNAPSHOT,
         messages: conversation.messages,
+        sessionDataSourceList: conversation.sessionDataSourceList,
+        confirmedDataSourceId: conversation.confirmedDataSourceId,
         timestamp,
       },
       {

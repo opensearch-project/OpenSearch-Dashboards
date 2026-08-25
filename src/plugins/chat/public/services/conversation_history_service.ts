@@ -15,6 +15,11 @@ import {
 
 export type { SavedConversation } from '../../../../core/public';
 
+export interface ConversationDataSourceState {
+  sessionDataSourceList?: string[];
+  confirmedDataSourceId?: string;
+}
+
 /**
  * Service for managing conversation history
  * Uses the memory provider from core chat service
@@ -65,7 +70,11 @@ export class ConversationHistoryService {
   /**
    * Save or update a conversation
    */
-  public async saveConversation(threadId: string, messages: Message[]): Promise<void> {
+  public async saveConversation(
+    threadId: string,
+    messages: Message[],
+    dataSourceState?: ConversationDataSourceState
+  ): Promise<void> {
     if (messages.length === 0) {
       // Don't save empty conversations
       return;
@@ -79,6 +88,8 @@ export class ConversationHistoryService {
     const provider = this.getMemoryProvider();
     // Get existing conversation events to preserve createdAt timestamp
     const existingEvents = await provider.getConversation(threadId);
+    const existingSnapshot = existingEvents?.find((event) => event.type === 'MESSAGES_SNAPSHOT') as
+      (Event & ConversationDataSourceState) | undefined;
 
     // Extract createdAt from first event's timestamp (RUN_STARTED event)
     // This preserves the original conversation creation time
@@ -89,6 +100,10 @@ export class ConversationHistoryService {
       threadId,
       name: this.getConversationName(messages),
       messages,
+      sessionDataSourceList:
+        dataSourceState?.sessionDataSourceList ?? existingSnapshot?.sessionDataSourceList,
+      confirmedDataSourceId:
+        dataSourceState?.confirmedDataSourceId ?? existingSnapshot?.confirmedDataSourceId,
       createdAt: existingCreatedAt ?? Date.now(),
       updatedAt: Date.now(),
     };

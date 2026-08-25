@@ -70,7 +70,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
     const toasts = services.core?.notifications?.toasts;
 
-    // Register the switch_data_source tool so the LLM can change the active data source mid-conversation
+    // Register the switch_data_source tool so the LLM can request a data source switch mid-conversation
     useSwitchDataSourceAction(chatService);
     const [timeline, setTimeline] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -365,7 +365,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Handler for when user selects a data source from the prompt
     const handleDataSourceSelect = useCallback(
       async (id: string) => {
-        chatService.setDataSourceId(id);
+        chatService.setConfirmedDataSourceId(id);
         setAvailableDataSources([]);
         const pending = pendingMessage;
         setPendingMessage(null);
@@ -614,11 +614,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       stopStreaming();
     }, [stopStreaming]);
 
-    const handleApproveConfirmation = useCallback(() => {
-      if (pendingConfirmation) {
-        confirmationService.approve(pendingConfirmation.id);
-      }
-    }, [pendingConfirmation, confirmationService]);
+    const handleApproveConfirmation = useCallback(
+      (modifiedArgs?: any) => {
+        if (pendingConfirmation) {
+          confirmationService.approve(pendingConfirmation.id, modifiedArgs);
+        }
+      },
+      [pendingConfirmation, confirmationService]
+    );
 
     const handleRejectConfirmation = useCallback(() => {
       if (pendingConfirmation) {
@@ -679,10 +682,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setPendingMessage(null);
         setAvailableDataSources([]);
 
-        // Clear LLM-selected data source.
-        // restoreLLMDataSourceFromSnapshot will re-apply the correct value if this
+        // Clear the confirmed conversation-level data source override.
+        // restoreConfirmedDataSourceFromSnapshot will re-apply the correct value if this
         // conversation contains a switch_data_source tool call.
-        chatService.clearLLMDataSourceId();
+        chatService.clearConfirmedDataSourceId();
+        chatService.clearSessionDataSourceList();
 
         // Abort any ongoing conversation loading
         if (conversationLoadAbortControllerRef.current) {

@@ -83,6 +83,8 @@ export interface RunErrorEvent extends BaseEvent {
 export interface MessagesSnapshotEvent extends BaseEvent {
   type: EventType.MESSAGES_SNAPSHOT;
   messages: Message[];
+  sessionDataSourceList?: string[];
+  confirmedDataSourceId?: string;
 }
 
 /**

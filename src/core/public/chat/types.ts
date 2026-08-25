@@ -193,12 +193,7 @@ export interface ChatServiceInterface {
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
 
-  /**
-   * Set the active data source explicitly (e.g. when the user clicks "Ask AI"
-   * on a dashboard panel). This overrides the page-context data source so all
-   * subsequent tool calls in this session target the panel's data source.
-   */
-  setActiveDataSource(dataSourceId: string | undefined): void;
+  setSessionDataSourceList(dataSourceId: string | undefined): void;
 }
 
 /**
@@ -218,7 +213,7 @@ export interface ChatImplementationFunctions {
     options?: { clearConversation?: boolean; dataSourceId?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
-  setActiveDataSource: (dataSourceId: string | undefined) => void;
+  setSessionDataSourceList: (dataSourceId: string | undefined) => void;
 }
 
 /**
@@ -306,6 +301,8 @@ export interface SavedConversation {
   threadId: string;
   name: string;
   messages: Message[];
+  sessionDataSourceList?: string[];
+  confirmedDataSourceId?: string;
   createdAt: number;
   updatedAt: number;
 }

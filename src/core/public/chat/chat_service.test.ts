@@ -23,7 +23,7 @@ describe('ChatService', () => {
         observable: null,
         userMessage: { id: '1', role: 'user', content: 'test' },
       }),
-      setActiveDataSource: jest.fn(),
+      setSessionDataSourceList: jest.fn(),
     };
   });
 
@@ -86,6 +86,7 @@ describe('ChatService', () => {
       expect(startContract).toHaveProperty('closeWindow');
       expect(startContract).toHaveProperty('sendMessage');
       expect(startContract).toHaveProperty('sendMessageWithWindow');
+      expect(startContract).toHaveProperty('setSessionDataSourceList');
       expect(startContract).toHaveProperty('screenshotPageContainerElement');
       expect(startContract).toHaveProperty('screenshot');
     });
