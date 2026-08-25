@@ -135,6 +135,7 @@ export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
+            color="text"
             iconType="filter"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             data-test-subj="span-status-filter-button"

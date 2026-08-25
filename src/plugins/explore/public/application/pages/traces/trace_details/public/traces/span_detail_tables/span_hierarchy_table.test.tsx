@@ -123,12 +123,13 @@ describe('SpanHierarchyTable', () => {
     expect(toolbar).toBeInTheDocument();
   });
 
-  it('passes status filter, duration filter, reset-zoom and ServiceLegendButton to secondaryToolbar', () => {
+  it('passes the timeline-grid controls (reset-zoom, ServiceLegendButton) to secondaryToolbar', () => {
     render(<SpanHierarchyTable {...defaultProps} />);
 
     const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    // SpanStatusFilter, SpanDurationFilter, Reset-zoom control, ServiceLegendButton
-    expect(mockCall?.secondaryToolbar).toHaveLength(4);
+    // Cross-tab filters (status/duration/attribute) live in the trace view's
+    // filter bar now; the grid keeps only Reset zoom + ServiceLegendButton.
+    expect(mockCall?.secondaryToolbar).toHaveLength(2);
     mockCall?.secondaryToolbar!.forEach((item: unknown) => expect(item).toBeDefined());
   });
 

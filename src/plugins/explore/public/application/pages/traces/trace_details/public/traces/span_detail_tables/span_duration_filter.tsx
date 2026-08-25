@@ -103,6 +103,7 @@ export const SpanDurationFilter: React.FC<SpanDurationFilterProps> = ({
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           size="xs"
+          color="text"
           iconType="clock"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           data-test-subj="span-duration-filter-button"

@@ -202,7 +202,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           defaultMessage: 'Full screen',
         });
 
-    // Order: full screen, density, then the caller's buttons (expand/collapse).
+    // One row: full screen, density, the caller's buttons (expand/collapse),
+    // then any secondary controls (e.g. reset zoom, legend). Rendered inline in
+    // the grid's native controls bar — no separate overlaid toolbar.
     return [
       <EuiToolTip key="fullScreen" content={fullScreenLabel}>
         <EuiButtonIcon
@@ -217,8 +219,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       </EuiToolTip>,
       <DensityControl key="density" density={density} onChange={setDensity} />,
       ...toolbarButtons,
+      ...secondaryToolbar,
     ];
-  }, [isFullScreen, density, toolbarButtons]);
+  }, [isFullScreen, density, toolbarButtons, secondaryToolbar]);
 
   const gridStyle = useMemo(
     () => ({
@@ -284,9 +287,6 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
                 overflow: isFullScreen ? 'visible' : 'hidden',
               }}
             />
-            {secondaryToolbar.length > 0 && (
-              <div className="exploreCustomDataGrid__secondaryToolbar">{secondaryToolbar}</div>
-            )}
           </div>
           {isTableDataLoading && (
             <div className="exploreCustomDataGrid__gridLoadingOverlay">

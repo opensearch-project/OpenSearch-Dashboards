@@ -81,6 +81,21 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
     return () => observer.disconnect();
   }, []);
 
+  // Signature of the node/edge SET (not selection) — changing it remounts the
+  // map so it re-fits when a filter adds/removes services; selection-only
+  // changes (isSelected) keep the same signature and update in place.
+  const dataSignature = useMemo(
+    () =>
+      `${map.root.nodes
+        .map((node) => node.id)
+        .sort()
+        .join(',')}|${map.root.edges
+        .map((edge) => edge.id)
+        .sort()
+        .join(',')}`,
+    [map]
+  );
+
   if (map.root.nodes.length === 0) {
     return (
       <EuiEmptyPrompt
@@ -111,7 +126,7 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
       ref={containerRef}
     >
       <CelestialMap
-        key={fitKey}
+        key={`${fitKey}-${dataSignature}`}
         map={displayMap}
         nodeTypes={NODE_TYPES}
         edgeTypes={EDGE_TYPES}

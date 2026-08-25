@@ -16,8 +16,6 @@ import { SpanCell } from './span_cell';
 import { parseHits, applySpanFilters } from './utils';
 import { ServiceLegendButton } from './service_legend_button';
 import { getSpanHierarchyTableColumns } from './span_table_columns';
-import { SpanStatusFilter } from './span_status_filter';
-import { SpanDurationFilter } from './span_duration_filter';
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const { availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
@@ -283,18 +281,9 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     ];
   }, [spans, expandOneLevel, collapseOneLevel, canExpandMore, canCollapseMore]);
 
+  // Timeline-grid controls only. Cross-tab filters (status / duration / attribute)
+  // live in the trace view's filter bar, since they apply across all span tabs.
   const secondaryToolbar = [
-    <SpanStatusFilter
-      key="statusFilter"
-      spanFilters={props.filters}
-      setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
-    />,
-    <SpanDurationFilter
-      key="durationFilter"
-      spans={props.allTraceSpans ?? allSpans}
-      spanFilters={props.filters}
-      setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
-    />,
     <EuiToolTip
       key="resetZoomTip"
       content={
@@ -309,18 +298,18 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     >
       {/* span wrapper so the tooltip still shows while the button is disabled */}
       <span>
-        <EuiButtonEmpty
+        <EuiButtonIcon
           size="xs"
           color="text"
+          display="empty"
           iconType="editorUndo"
           isDisabled={!visibleRange}
           onClick={() => setVisibleRange(undefined)}
-          data-test-subj="timelineResetZoom"
-        >
-          {i18n.translate('explore.spanDetailTable.resetZoom.label', {
+          aria-label={i18n.translate('explore.spanDetailTable.resetZoom.label', {
             defaultMessage: 'Reset zoom',
           })}
-        </EuiButtonEmpty>
+          data-test-subj="timelineResetZoom"
+        />
       </span>
     </EuiToolTip>,
     <ServiceLegendButton

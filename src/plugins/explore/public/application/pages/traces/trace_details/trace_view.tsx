@@ -32,6 +32,8 @@ import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { SpanAttributeFilter } from './public/traces/span_attribute_filter';
+import { SpanStatusFilter } from './public/traces/span_detail_tables/span_status_filter';
+import { SpanDurationFilter } from './public/traces/span_detail_tables/span_duration_filter';
 import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
   NoMatchMessage,
@@ -634,6 +636,19 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             onAddFilter={addSpanFilter}
                           />
                         </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <SpanStatusFilter
+                            spanFilters={spanFilters}
+                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <SpanDurationFilter
+                            spans={unfilteredHits}
+                            spanFilters={spanFilters}
+                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+                          />
+                        </EuiFlexItem>
                         {spanFilters.length > 0 && (
                           <EuiFlexItem grow={false}>
                             <EuiText size="s" color="subdued">
@@ -722,7 +737,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         {(activeTab === TraceDetailTab.TIMELINE ||
                           activeTab === TraceDetailTab.SPAN_LIST) && (
                           <SpanDetailPanel
-                            key={`span-panel-${visualizationKey}-${spanFilters.length}-${transformedHits.length}`}
+                            // Keyed only on the resize-driven visualizationKey. It
+                            // updates in place via payloadData/filters props; keying
+                            // on spanFilters/hits length caused a double remount
+                            // (flash) on every filter change.
+                            key={`span-panel-${visualizationKey}`}
                             chrome={chrome}
                             spanFilters={spanFilters}
                             setSpanFiltersWithStorage={setSpanFiltersWithStorage}

@@ -111,6 +111,7 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
   const button = (
     <EuiButtonEmpty
       size="xs"
+      color="text"
       iconType="plusInCircle"
       onClick={() => setIsOpen(!isOpen)}
       isSelected={isOpen}
