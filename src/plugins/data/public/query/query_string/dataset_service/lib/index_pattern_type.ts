@@ -40,6 +40,8 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
+      // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
+      ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
@@ -106,7 +108,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'displayName', 'timeFieldName', 'references'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
     search: `*`,
     searchFields: ['title', 'displayName'],
     perPage: 10000,
@@ -182,6 +184,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
+        signalType: savedObject.attributes.signalType,
       },
     };
 
