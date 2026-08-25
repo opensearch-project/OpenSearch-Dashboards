@@ -217,6 +217,17 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     const collapseOneLabel = i18n.translate('explore.spanDetailTable.button.collapseOneLevel', {
       defaultMessage: 'Collapse one level',
     });
+    // When disabled, explain WHY (otherwise the greyed icon reads as broken).
+    const expandOneTooltip = canExpandMore
+      ? expandOneLabel
+      : i18n.translate('explore.spanDetailTable.button.expandOneLevelDisabled', {
+          defaultMessage: 'Tree is fully expanded',
+        });
+    const collapseOneTooltip = canCollapseMore
+      ? collapseOneLabel
+      : i18n.translate('explore.spanDetailTable.button.collapseOneLevelDisabled', {
+          defaultMessage: 'Tree is fully collapsed',
+        });
     return [
       <EuiToolTip key="expandAll" content={expandAllLabel}>
         <EuiButtonIcon
@@ -240,7 +251,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           data-test-subj="treeCollapseAll"
         />
       </EuiToolTip>,
-      <EuiToolTip key="expandOne" content={expandOneLabel}>
+      <EuiToolTip key="expandOne" content={expandOneTooltip}>
         {/* span wrapper so the tooltip still shows while the button is disabled */}
         <span>
           <EuiButtonIcon
@@ -255,7 +266,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           />
         </span>
       </EuiToolTip>,
-      <EuiToolTip key="collapseOne" content={collapseOneLabel}>
+      <EuiToolTip key="collapseOne" content={collapseOneTooltip}>
         <span>
           <EuiButtonIcon
             size="xs"

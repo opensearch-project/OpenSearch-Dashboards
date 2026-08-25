@@ -31,6 +31,7 @@ import {
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
+import { SpanAttributeFilter } from './public/traces/span_attribute_filter';
 import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
   NoMatchMessage,
@@ -59,6 +60,14 @@ import { SERVICE_NAME_FILTER_FIELD } from '../../../../utils/trace_field_constan
 export interface SpanFilter {
   field: string;
   value: string | number | boolean;
+  /** Comparison operator for attribute filters. Defaults to '='. */
+  operator?: '=' | '!=';
+}
+
+/** A filterable field surfaced from the dataset's field list. */
+export interface DatasetField {
+  name: string;
+  type?: string;
 }
 
 // Filters applied in the browser (never sent to PPL, so they must not trigger a
@@ -166,6 +175,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
+  // Filterable fields surfaced from the dataset (data view) field list, merged
+  // UI-side with the fields present in the current result — restricted so the
+  // attribute filter only offers known-valid field paths.
+  const [datasetFields, setDatasetFields] = useState<DatasetField[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
@@ -350,6 +363,41 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
   }, [pplQueryData, spanFilters]);
 
+  // Load the dataset's filterable fields (data view field list), merged UI-side
+  // with fields present in the current result. Fields starting with "_" and
+  // non-scalar types are excluded so the attribute filter offers valid paths.
+  useEffect(() => {
+    let cancelled = false;
+    const excludedTypes = new Set(['_source', 'unknown', 'nested', 'geo_point', 'geo_shape']);
+    const loadFields = async () => {
+      const merged = new Map<string, DatasetField>();
+      try {
+        if (dataset?.id && (data as any)?.dataViews?.get) {
+          const dataView = await (data as any).dataViews.get(dataset.id);
+          (dataView?.fields ?? []).forEach((field: any) => {
+            if (field?.name && !field.name.startsWith('_') && !excludedTypes.has(field.type)) {
+              merged.set(field.name, { name: field.name, type: field.type });
+            }
+          });
+        }
+      } catch (e) {
+        // Dataset may not resolve to a saved data view — fall back to the result schema.
+      }
+      (pplQueryData?.schema ?? []).forEach((field) => {
+        if (field?.name && !field.name.startsWith('_') && !merged.has(field.name)) {
+          merged.set(field.name, { name: field.name, type: field.type });
+        }
+      });
+      if (!cancelled) {
+        setDatasetFields(Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name)));
+      }
+    };
+    loadFields();
+    return () => {
+      cancelled = true;
+    };
+  }, [dataset?.id, data, pplQueryData]);
+
   // Cleanup state sync on unmount
   useEffect(() => {
     return () => {
@@ -401,15 +449,20 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
 
-  // Add (or replace) a field filter — shared by the span-detail metadata tab and
-  // the trace map (clicking a service filters the whole trace by that service).
-  const addSpanFilter = (field: string, value: string | number | boolean) => {
+  // Add (or replace) a field filter — shared by the span-detail metadata tab, the
+  // trace map (service click), and the "+ Add filter" attribute bar. A field is
+  // held once; re-adding it (e.g. with a different operator/value) replaces it.
+  const addSpanFilter = (
+    field: string,
+    value: string | number | boolean,
+    operator: '=' | '!=' = '='
+  ) => {
     const newFilters = [...spanFilters];
     const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
     if (index === -1) {
-      newFilters.push({ field, value });
+      newFilters.push({ field, value, operator });
     } else {
-      newFilters.splice(index, 1, { field, value });
+      newFilters.splice(index, 1, { field, value, operator });
     }
     setSpanFiltersWithStorage(newFilters);
   };
@@ -438,7 +491,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
     const newFilters = spanFilters.filter(
-      (filter) => !(filter.field === filterToRemove.field && filter.value === filterToRemove.value)
+      (filter) =>
+        !(
+          filter.field === filterToRemove.field &&
+          filter.value === filterToRemove.value &&
+          (filter.operator ?? '=') === (filterToRemove.operator ?? '=')
+        )
     );
     setSpanFiltersWithStorage(newFilters);
   };
@@ -465,7 +523,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (filter.field === DURATION_MIN_FILTER_FIELD) {
       return `Duration ≥ ${formatNanosDuration(filter.value as number)}`;
     }
-    return `${filter.field}: ${filter.value}`;
+    return `${filter.field} ${filter.operator === '!=' ? '≠' : '='} ${filter.value}`;
   };
 
   // Set up ResizeObserver to detect when the main panel size changes
@@ -560,13 +618,20 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               </EuiPanel>
             </div>
 
-            {/* Filter badges section */}
-            {spanFilters.length > 0 && (
-              <div className="exploreTraceView__filtersContainer">
-                <EuiPanel paddingSize="s">
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+            {/* Filter bar: "+ Add filter" (dataset fields) + active-filter badges */}
+            <div className="exploreTraceView__filtersContainer">
+              <EuiPanel paddingSize="s">
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                      <EuiFlexItem grow={false}>
+                        <SpanAttributeFilter
+                          fields={datasetFields}
+                          spans={unfilteredHits}
+                          onAddFilter={addSpanFilter}
+                        />
+                      </EuiFlexItem>
+                      {spanFilters.length > 0 && (
                         <EuiFlexItem grow={false}>
                           <EuiText size="s" color="subdued">
                             {i18n.translate('explore.traceView.filters.activeFilters', {
@@ -574,27 +639,29 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             })}
                           </EuiText>
                         </EuiFlexItem>
-                        {spanFilters.map((filter, index) => (
-                          <EuiFlexItem grow={false} key={`filter-${index}`}>
-                            <EuiBadge
-                              color="primary"
-                              iconType="cross"
-                              iconSide="right"
-                              iconOnClick={() => removeFilter(filter)}
-                              iconOnClickAriaLabel={i18n.translate(
-                                'explore.traceView.filters.removeFilter',
-                                {
-                                  defaultMessage: 'Remove filter',
-                                }
-                              )}
-                              data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                            >
-                              {getFilterDisplayText(filter)}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
+                      )}
+                      {spanFilters.map((filter, index) => (
+                        <EuiFlexItem grow={false} key={`filter-${index}`}>
+                          <EuiBadge
+                            color="primary"
+                            iconType="cross"
+                            iconSide="right"
+                            iconOnClick={() => removeFilter(filter)}
+                            iconOnClickAriaLabel={i18n.translate(
+                              'explore.traceView.filters.removeFilter',
+                              {
+                                defaultMessage: 'Remove filter',
+                              }
+                            )}
+                            data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
+                          >
+                            {getFilterDisplayText(filter)}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {spanFilters.length > 0 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         size="xs"
@@ -606,10 +673,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </div>
-            )}
+                  )}
+                </EuiFlexGroup>
+              </EuiPanel>
+            </div>
 
             {/* Resizable container underneath filter badges */}
             <EuiResizableContainer

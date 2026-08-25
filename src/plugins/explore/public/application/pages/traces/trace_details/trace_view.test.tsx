@@ -586,11 +586,11 @@ describe('TraceDetails', () => {
 
     // Add filter
     fireEvent.click(screen.getByTestId('addSpanFilterButton'));
-    expect(screen.getByText('spanId: span-1')).toBeInTheDocument();
+    expect(screen.getByText('spanId = span-1')).toBeInTheDocument();
 
     // Remove filter
     fireEvent.click(screen.getByLabelText('Remove filter'));
-    expect(screen.queryByText('spanId: span-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('spanId = span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {

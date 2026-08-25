@@ -136,6 +136,24 @@ describe('applySpanFilters', () => {
     expect(result.map((s) => s.spanId)).toEqual(['b', 'c']);
   });
 
+  it('should support the != operator on attribute filters', () => {
+    const result = applySpanFilters(mockSpans, [
+      { field: 'serviceName', value: 'user-service', operator: '!=' },
+    ]);
+    expect(result.map((s) => s.serviceName)).toEqual(['order-service', 'product-service']);
+  });
+
+  it('should match numeric field values against a string filter value (coercion)', () => {
+    const spans: ParsedHit[] = [
+      { spanId: 'a', children: [], attributes: { http: { status_code: 200 } } },
+      { spanId: 'b', children: [], attributes: { http: { status_code: 500 } } },
+    ];
+    const result = applySpanFilters(spans, [
+      { field: 'attributes.http.status_code', value: '200', operator: '=' },
+    ]);
+    expect(result.map((s) => s.spanId)).toEqual(['a']);
+  });
+
   it('should filter spans by simple field value', () => {
     const filters = [{ field: 'serviceName', value: 'user-service' }];
     const result = applySpanFilters(mockSpans, filters);

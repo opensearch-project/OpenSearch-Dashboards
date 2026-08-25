@@ -31,12 +31,12 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
 
 export const applySpanFilters = (
   spans: ParsedHit[],
-  filters: Array<{ field: string; value: any }>
+  filters: Array<{ field: string; value: any; operator?: '=' | '!=' }>
 ): ParsedHit[] => {
   if (filters.length === 0) return spans;
 
   return spans.filter((span) => {
-    return filters.every(({ field, value }) => {
+    return filters.every(({ field, value, operator }) => {
       if (field === 'isError' || field === 'status.code') {
         return isStatusMatch(span, field, value);
       }
@@ -46,7 +46,10 @@ export const applySpanFilters = (
       const spanValue = field.includes('.')
         ? field.split('.').reduce((obj, key) => obj?.[key], span)
         : span[field];
-      return spanValue === value;
+      // Coerce both sides to strings so a numeric field value (e.g. 200) still
+      // matches a value coming from a text input, and honor the != operator.
+      const matches = String(spanValue) === String(value);
+      return operator === '!=' ? !matches : matches;
     });
   });
 };
