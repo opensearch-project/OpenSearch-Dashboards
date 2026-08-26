@@ -11,13 +11,17 @@ import { DURATION_MIN_FILTER_FIELD } from './utils';
 // Ten spans with durations 1ms..10ms (in nanos).
 const spans = Array.from({ length: 10 }, (_, i) => ({ durationInNanos: (i + 1) * 1e6 }));
 
-const setup = (spanFilters: Array<{ field: string; value: any }> = []) => {
+const setup = (
+  spanFilters: Array<{ field: string; value: any }> = [],
+  variant: 'button' | 'pill' = 'button'
+) => {
   const setSpanFiltersWithStorage = jest.fn();
   const utils = render(
     <SpanDurationFilter
       spans={spans}
       spanFilters={spanFilters}
       setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+      variant={variant}
     />
   );
   return { ...utils, setSpanFiltersWithStorage };
@@ -67,8 +71,32 @@ describe('SpanDurationFilter', () => {
     expect(setSpanFiltersWithStorage).toHaveBeenCalledWith([]);
   });
 
-  it('shows the active threshold as a badge', () => {
-    const { getByText } = setup([{ field: DURATION_MIN_FILTER_FIELD, value: 5e6 }]);
-    expect(getByText('≥ 5ms')).toBeInTheDocument();
+  it('shows the active threshold as an editable pill (pill variant)', () => {
+    const { getByText, getByTestId } = setup(
+      [{ field: DURATION_MIN_FILTER_FIELD, value: 5e6 }],
+      'pill'
+    );
+    expect(getByTestId('span-duration-filter-chip')).toBeInTheDocument();
+    expect(getByText('duration')).toBeInTheDocument();
+    expect(getByText('5ms')).toBeInTheDocument();
+  });
+
+  it('pill variant renders nothing when no duration filter is applied', () => {
+    const { queryByTestId } = setup([], 'pill');
+    expect(queryByTestId('span-duration-filter-chip')).not.toBeInTheDocument();
+  });
+
+  it('clears the duration filter via the pill × without opening the popover', () => {
+    const { getByTestId, setSpanFiltersWithStorage } = setup(
+      [
+        { field: 'serviceName', value: 'cart' },
+        { field: DURATION_MIN_FILTER_FIELD, value: 5e6 },
+      ],
+      'pill'
+    );
+    fireEvent.click(getByTestId('span-duration-filter-reset'));
+    expect(setSpanFiltersWithStorage).toHaveBeenCalledWith([
+      { field: 'serviceName', value: 'cart' },
+    ]);
   });
 });

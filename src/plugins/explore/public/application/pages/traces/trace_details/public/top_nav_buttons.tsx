@@ -123,7 +123,7 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
             target="blank"
           >
             {i18n.translate('explore.traceDetails.topNav.openFullPage', {
-              defaultMessage: 'Open full page',
+              defaultMessage: 'Full page',
             })}
           </EuiLink>
         </EuiFlexItem>

@@ -40,4 +40,15 @@
     white-space: nowrap;
     vertical-align: bottom;
   }
+
+  // Status/duration pills have a fixed field (only the value is editable), so the
+  // key reads as plain text: no caret, no pointer, no hover affordance.
+  .plqWhereChip__field--static {
+    cursor: default;
+
+    &:hover,
+    &:focus {
+      background: transparent;
+    }
+  }
 }

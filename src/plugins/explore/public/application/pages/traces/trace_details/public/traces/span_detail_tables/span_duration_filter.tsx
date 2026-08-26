@@ -6,9 +6,9 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +26,12 @@ export interface SpanDurationFilterProps {
   spans: Array<Record<string, any>>;
   spanFilters: SpanFilter[];
   setSpanFiltersWithStorage: (filters: SpanFilter[]) => void;
+  /**
+   * 'button' renders the persistent entry control (always shown). 'pill' renders
+   * the applied-filter chip (only when a duration filter is active). Both open
+   * the same duration editor.
+   */
+  variant?: 'button' | 'pill';
 }
 
 const NANOS_PER_MS = 1e6;
@@ -52,6 +58,7 @@ export const SpanDurationFilter: React.FC<SpanDurationFilterProps> = ({
   spans,
   spanFilters,
   setSpanFiltersWithStorage,
+  variant = 'button',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -98,29 +105,58 @@ export const SpanDurationFilter: React.FC<SpanDurationFilterProps> = ({
     }
   };
 
-  const button = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          iconType="clock"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          data-test-subj="span-duration-filter-button"
-          isSelected={isPopoverOpen}
-        >
-          {i18n.translate('explore.traceView.button.filterByDuration', {
-            defaultMessage: 'Filter by duration',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      {activeNanos !== undefined && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="primary">{`≥ ${formatNanos(activeNanos)}`}</EuiBadge>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+  const togglePopover = () => setIsPopoverOpen((open) => !open);
+
+  // In pill mode, render nothing until a duration filter is actually applied.
+  if (variant === 'pill' && activeNanos === undefined) return null;
+
+  // Applied-filter pill: the field (duration) is fixed, so only the value
+  // segment is an editable dropdown — the key carries no caret.
+  const pill = (
+    <span className="plqWhereChip" data-test-subj="span-duration-filter-chip">
+      <span className="plqWhereChip__field plqWhereChip__field--static">
+        {i18n.translate('explore.traceView.duration.chipField', { defaultMessage: 'duration' })}
+      </span>
+      <span className="plqWhereChip__op">≥</span>
+      <button type="button" className="plqWhereChip__val" onClick={togglePopover}>
+        <span className="plqWhereChip__valText">
+          {activeNanos !== undefined ? formatNanos(activeNanos) : ''}
+        </span>
+        <span className="plqWhereChip__caret">▾</span>
+      </button>
+      <EuiButtonIcon
+        className="plqPillX"
+        iconType="cross"
+        color="text"
+        size="s"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          clear();
+        }}
+        aria-label={i18n.translate('explore.traceView.duration.clearAriaLabel', {
+          defaultMessage: 'Clear duration filter',
+        })}
+        data-test-subj="span-duration-filter-reset"
+      />
+    </span>
   );
+
+  const triggerButton = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      iconType="clock"
+      onClick={togglePopover}
+      data-test-subj="span-duration-filter-button"
+      isSelected={isPopoverOpen}
+    >
+      {i18n.translate('explore.traceView.button.filterByDuration', {
+        defaultMessage: 'Duration',
+      })}
+    </EuiButtonEmpty>
+  );
+
+  const button = variant === 'pill' ? pill : triggerButton;
 
   return (
     <EuiPopover

@@ -158,7 +158,7 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
       isSelected={isOpen}
       data-test-subj="span-attribute-filter-button"
     >
-      {i18n.translate('explore.traceView.button.addFilter', { defaultMessage: 'Add filter' })}
+      {i18n.translate('explore.traceView.button.addFilter', { defaultMessage: 'Attributes' })}
     </EuiButtonEmpty>
   );
 

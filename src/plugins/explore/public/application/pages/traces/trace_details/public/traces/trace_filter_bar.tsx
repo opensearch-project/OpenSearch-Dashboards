@@ -68,17 +68,33 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
         className="plqGroup--wrap exploreTraceFilterBar__group"
         dataTestSubj="traceFilterGroup"
       >
+        {/* Persistent entry controls: add/edit each facet. */}
         <SpanStatusFilter
+          variant="button"
           spanFilters={spanFilters}
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
         />
         <SpanDurationFilter
+          variant="button"
           spans={spans}
           spanFilters={spanFilters}
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
         />
         <SpanAttributeFilter fields={datasetFields} spans={spans} onAddFilter={addSpanFilter} />
-        {/* Added filters accumulate to the right of the quick-filter controls. */}
+
+        {/* Applied filters render as uniform pills to the right of the controls:
+            status + duration facets first, then the attribute chips. */}
+        <SpanStatusFilter
+          variant="pill"
+          spanFilters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+        />
+        <SpanDurationFilter
+          variant="pill"
+          spans={spans}
+          spanFilters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+        />
         {chipFilters.map((filter, index) => (
           <TraceFilterChip
             key={`${filter.field}-${index}`}

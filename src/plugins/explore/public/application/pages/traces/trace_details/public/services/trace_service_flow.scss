@@ -27,4 +27,16 @@
     cursor: default;
     pointer-events: none;
   }
+
+  // Anchor the minimap bottom-left. In the narrow (laptop) flyout layout the
+  // span-details panel sits on the right and would otherwise cover a
+  // bottom-right minimap; the zoom controls live on the right, so the
+  // bottom-left corner is free. !important overrides react-flow's
+  // .panel.bottom.right positioning (higher specificity than a single class).
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .react-flow__minimap {
+    right: auto !important;
+    left: $euiSizeS !important;
+    bottom: $euiSizeS !important;
+  }
 }
