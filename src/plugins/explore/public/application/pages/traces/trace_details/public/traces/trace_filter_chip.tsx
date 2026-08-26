@@ -13,8 +13,14 @@ export interface TraceFilterChipProps {
   filter: SpanFilter;
   fields: DatasetField[];
   spans: Array<Record<string, any>>;
-  addSpanFilter: (field: string, value: string | number | boolean, operator?: '=' | '!=') => void;
   removeFilter: (filter: SpanFilter) => void;
+  /** Edit this filter in place (never appends a new one). */
+  replaceFilter: (
+    oldFilter: SpanFilter,
+    field: string,
+    value: string | number | boolean,
+    operator?: '=' | '!='
+  ) => void;
 }
 
 /**
@@ -27,17 +33,16 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
   filter,
   fields,
   spans,
-  addSpanFilter,
   removeFilter,
+  replaceFilter,
 }) => {
   const operator = filter.operator === '!=' ? '!=' : '=';
   const flipped = operator === '!=' ? '=' : '!=';
 
-  // Apply an edit: if the field changed, drop the old filter first (addSpanFilter
-  // only replaces same-field entries).
+  // Editing a chip always replaces this filter in place (never appends) — the
+  // append path is reserved for the "Add filter" control.
   const onReplace = (field: string, value: string | number | boolean, op: '=' | '!=') => {
-    if (field !== filter.field) removeFilter(filter);
-    addSpanFilter(field, value, op);
+    replaceFilter(filter, field, value, op);
   };
 
   const removeLabel = i18n.translate('explore.traceView.filters.removeFilter', {
@@ -56,7 +61,7 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
           <button
             type="button"
             className="plqWhereChip__field"
-            onClick={toggle}
+            onClick={() => toggle('field')}
             title={filter.field}
           >
             <span className="plqWhereChip__fieldText">{filter.field}</span>
@@ -65,7 +70,7 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
           <button
             type="button"
             className="plqWhereChip__op"
-            onClick={() => addSpanFilter(filter.field, filter.value, flipped)}
+            onClick={() => replaceFilter(filter, filter.field, filter.value, flipped)}
             title={i18n.translate('explore.traceView.filters.toggleOperator', {
               defaultMessage: 'Toggle = / ≠',
             })}
@@ -76,7 +81,7 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
           <button
             type="button"
             className="plqWhereChip__val"
-            onClick={toggle}
+            onClick={() => toggle('value')}
             title={String(filter.value)}
           >
             <span className="plqWhereChip__valText">{String(filter.value)}</span>

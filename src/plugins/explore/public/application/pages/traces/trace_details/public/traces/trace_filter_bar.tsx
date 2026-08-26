@@ -22,6 +22,13 @@ export interface TraceFilterBarProps {
   spans: Array<Record<string, any>>;
   addSpanFilter: (field: string, value: string | number | boolean, operator?: '=' | '!=') => void;
   removeFilter: (filter: SpanFilter) => void;
+  /** Edit an existing filter in place (never appends). */
+  replaceFilter: (
+    oldFilter: SpanFilter,
+    field: string,
+    value: string | number | boolean,
+    operator?: '=' | '!='
+  ) => void;
   clearAllFilters: () => void;
   setSpanFiltersWithStorage: (filters: SpanFilter[]) => void;
 }
@@ -46,6 +53,7 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
   spans,
   addSpanFilter,
   removeFilter,
+  replaceFilter,
   clearAllFilters,
   setSpanFiltersWithStorage,
 }) => {
@@ -60,16 +68,6 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
         className="plqGroup--wrap exploreTraceFilterBar__group"
         dataTestSubj="traceFilterGroup"
       >
-        {chipFilters.map((filter, index) => (
-          <TraceFilterChip
-            key={`${filter.field}-${index}`}
-            filter={filter}
-            fields={datasetFields}
-            spans={spans}
-            addSpanFilter={addSpanFilter}
-            removeFilter={removeFilter}
-          />
-        ))}
         <SpanStatusFilter
           spanFilters={spanFilters}
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
@@ -80,6 +78,17 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
         />
         <SpanAttributeFilter fields={datasetFields} spans={spans} onAddFilter={addSpanFilter} />
+        {/* Added filters accumulate to the right of the quick-filter controls. */}
+        {chipFilters.map((filter, index) => (
+          <TraceFilterChip
+            key={`${filter.field}-${index}`}
+            filter={filter}
+            fields={datasetFields}
+            spans={spans}
+            removeFilter={removeFilter}
+            replaceFilter={replaceFilter}
+          />
+        ))}
         {spanFilters.length > 0 && (
           <>
             <span className="exploreTraceFilterBar__spacer" />

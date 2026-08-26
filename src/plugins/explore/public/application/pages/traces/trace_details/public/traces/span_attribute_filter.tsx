@@ -28,8 +28,15 @@ export interface SpanAttributeFilterProps {
   onAddFilter: (field: string, value: string | number | boolean, operator: '=' | '!=') => void;
   /** Prefill the editor (edit an existing chip). Omit for the "+ Add filter" flow. */
   initial?: { field: string; value: string; operator: '=' | '!=' };
-  /** Custom popover trigger. Given a toggle fn + open state; defaults to the "+ Add filter" button. */
-  renderTrigger?: (toggle: () => void, isOpen: boolean) => React.ReactNode;
+  /**
+   * Custom popover trigger. Given a toggle fn + open state; defaults to the
+   * "+ Add filter" button. `toggle` optionally takes the segment being edited so
+   * the popover can focus that input (field vs value).
+   */
+  renderTrigger?: (
+    toggle: (focusTarget?: 'field' | 'value') => void,
+    isOpen: boolean
+  ) => React.ReactNode;
   /** Apply-button label (e.g. "Update" when editing). Defaults to "Add". */
   applyLabel?: string;
 }
@@ -82,14 +89,18 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
   const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [operator, setOperator] = useState<'=' | '!='>('=');
   const [selectedValue, setSelectedValue] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  // Which input to focus when the popover opens (editing a chip's value should
+  // land in the value input, not the field input).
+  const [focusTarget, setFocusTarget] = useState<'field' | 'value'>('field');
 
   // Seed the editor from `initial` (edit mode) each time it opens, so a chip's
   // popover reflects its current field/operator/value.
-  const toggle = () => {
+  const toggle = (nextFocusTarget: 'field' | 'value' = 'field') => {
     if (isOpen) {
       setIsOpen(false);
       return;
     }
+    setFocusTarget(nextFocusTarget);
     if (initial) {
       setSelectedField(initial.field ? [{ label: initial.field, value: initial.field }] : []);
       setOperator(initial.operator ?? '=');
@@ -157,6 +168,11 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="m"
+      // Route initial focus to the segment the user clicked: editing a value
+      // focuses the value input instead of grabbing the field input.
+      initialFocus={
+        focusTarget === 'value' ? '[data-test-subj="span-attribute-filter-value"] input' : undefined
+      }
       data-test-subj="span-attribute-filter-popover"
     >
       <div style={{ width: 320 }}>

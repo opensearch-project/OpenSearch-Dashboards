@@ -484,6 +484,42 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     return Array.from(serviceSet);
   }, [transformedHits, colorMap]);
 
+  // Replace one existing filter in place (atomically, preserving position) with
+  // an edited field/value/operator. Used by the chip edit flow so updating a
+  // filter never appends a duplicate — appends only happen via addSpanFilter
+  // ("Add filter"). Matching by the old filter's identity avoids the stale-state
+  // race of a separate remove + add.
+  const replaceFilter = (
+    oldFilter: SpanFilter,
+    field: string,
+    value: string | number | boolean,
+    operator: '=' | '!=' = '='
+  ) => {
+    const matches = (filter: SpanFilter) =>
+      filter.field === oldFilter.field &&
+      filter.value === oldFilter.value &&
+      (filter.operator ?? '=') === (oldFilter.operator ?? '=');
+    let replaced = false;
+    const newFilters = spanFilters
+      .map((filter) => {
+        if (!matches(filter)) return filter;
+        replaced = true;
+        return { field, value, operator };
+      })
+      // If the edit collides with another existing filter on the same field,
+      // drop that duplicate (keep the just-edited one).
+      .filter(
+        (filter, index, arr) =>
+          arr.findIndex(
+            (other) =>
+              other.field === filter.field &&
+              other.value === filter.value &&
+              (other.operator ?? '=') === (filter.operator ?? '=')
+          ) === index
+      );
+    setSpanFiltersWithStorage(replaced ? newFilters : [...spanFilters, { field, value, operator }]);
+  };
+
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
     const newFilters = spanFilters.filter(
@@ -604,6 +640,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   spans={unfilteredHits}
                   addSpanFilter={addSpanFilter}
                   removeFilter={removeFilter}
+                  replaceFilter={replaceFilter}
                   clearAllFilters={clearAllFilters}
                   setSpanFiltersWithStorage={setSpanFiltersWithStorage}
                 />

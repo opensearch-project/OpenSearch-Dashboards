@@ -32,18 +32,18 @@ jest.mock('./span_attribute_filter', () => ({
 const filter = { field: 'serviceName', value: 'cart', operator: '=' as const };
 
 const setup = () => {
-  const addSpanFilter = jest.fn();
   const removeFilter = jest.fn();
+  const replaceFilter = jest.fn();
   const utils = render(
     <TraceFilterChip
       filter={filter}
       fields={[]}
       spans={[]}
-      addSpanFilter={addSpanFilter}
       removeFilter={removeFilter}
+      replaceFilter={replaceFilter}
     />
   );
-  return { ...utils, addSpanFilter, removeFilter };
+  return { ...utils, removeFilter, replaceFilter };
 };
 
 describe('TraceFilterChip', () => {
@@ -54,10 +54,10 @@ describe('TraceFilterChip', () => {
     expect(getByTestId('trace-filter-op-serviceName').textContent).toBe('=');
   });
 
-  it('toggles the operator in place (= ⇄ ≠)', () => {
-    const { getByTestId, addSpanFilter } = setup();
+  it('toggles the operator in place (= ⇄ ≠) via replaceFilter', () => {
+    const { getByTestId, replaceFilter } = setup();
     fireEvent.click(getByTestId('trace-filter-op-serviceName'));
-    expect(addSpanFilter).toHaveBeenCalledWith('serviceName', 'cart', '!=');
+    expect(replaceFilter).toHaveBeenCalledWith(filter, 'serviceName', 'cart', '!=');
   });
 
   it('removes the filter via ×', () => {
@@ -66,17 +66,17 @@ describe('TraceFilterChip', () => {
     expect(removeFilter).toHaveBeenCalledWith(filter);
   });
 
-  it('editing the same field replaces in place (no remove)', () => {
-    const { getByTestId, addSpanFilter, removeFilter } = setup();
+  it('editing the same field replaces in place (no remove, no append)', () => {
+    const { getByTestId, replaceFilter, removeFilter } = setup();
     fireEvent.click(getByTestId('apply-same'));
-    expect(addSpanFilter).toHaveBeenCalledWith('serviceName', 'payment', '=');
+    expect(replaceFilter).toHaveBeenCalledWith(filter, 'serviceName', 'payment', '=');
     expect(removeFilter).not.toHaveBeenCalled();
   });
 
-  it('changing the field removes the old filter first', () => {
-    const { getByTestId, addSpanFilter, removeFilter } = setup();
+  it('changing the field also replaces in place (no remove, no append)', () => {
+    const { getByTestId, replaceFilter, removeFilter } = setup();
     fireEvent.click(getByTestId('apply-diff'));
-    expect(removeFilter).toHaveBeenCalledWith(filter);
-    expect(addSpanFilter).toHaveBeenCalledWith('attributes.http.method', 'GET', '=');
+    expect(replaceFilter).toHaveBeenCalledWith(filter, 'attributes.http.method', 'GET', '=');
+    expect(removeFilter).not.toHaveBeenCalled();
   });
 });

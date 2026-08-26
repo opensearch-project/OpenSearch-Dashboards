@@ -26,6 +26,7 @@ const baseProps = {
   spans: [],
   addSpanFilter: jest.fn(),
   removeFilter: jest.fn(),
+  replaceFilter: jest.fn(),
   clearAllFilters: jest.fn(),
   setSpanFiltersWithStorage: jest.fn(),
 };
