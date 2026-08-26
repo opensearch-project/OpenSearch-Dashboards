@@ -8,7 +8,12 @@ import { Query } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
 
-export type QueryState = QueryWithQueryAsString;
+export type QueryState = QueryWithQueryAsString & {
+  maxDataPoints?: number;
+  /** One entry per query segment, in segment order. The entry shape belongs to the language,
+   * so narrow it there rather than naming a language's fields here. */
+  perQueryOptions?: unknown[];
+};
 
 const initialState: QueryState = {
   query: '',
