@@ -7,7 +7,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SearchResponse } from 'elasticsearch';
 
 import { IFieldType } from '../../../../../../../../../src/plugins/data/common';
-import type { PromQLStepResolution } from '../../../../../../../query_enhancements/common';
 
 /**
  * Query profiling results, populated when query profiling is enabled
@@ -25,6 +24,8 @@ export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
   profile?: QueryProfile;
+  /** Data frame meta as the search strategy returned it; keys belong to the strategy. */
+  frameMeta?: Record<string, unknown>;
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
@@ -38,7 +39,6 @@ export interface IPrometheusSearchResult extends ISearchResult {
     totalSeriesCount: number;
     displayedSeriesCount: number;
   };
-  stepResolution?: PromQLStepResolution;
 }
 
 export interface ResultMetadata {

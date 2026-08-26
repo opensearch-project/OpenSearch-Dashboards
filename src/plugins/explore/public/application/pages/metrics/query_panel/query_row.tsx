@@ -27,7 +27,7 @@ import { PromQLBuilder, parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
 import { QueryRow, RowMode, modeButtons } from './row_state';
 import { RowQueryOptions, RowStepReadout } from './metrics_query_options';
-import { PerQueryOptions } from '../../../utils/languages';
+import type { PerQueryOptions } from '../../../../../../query_enhancements/common';
 
 import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
 

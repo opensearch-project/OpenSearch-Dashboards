@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import { parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
 import { splitMultiQueries } from '../../../utils/multi_query_utils';
-import { PerQueryOptions } from '../../../utils/languages';
+import type { PerQueryOptions } from '../../../../../../query_enhancements/common';
 
 export type RowMode = 'builder' | 'code';
 

@@ -31,7 +31,7 @@ describe('useExecutedStepResolution', () => {
   });
 
   it('maps the reported steps by query label', () => {
-    resultsCache.set('metric_a;\nmetric_b;', { stepResolution } as any);
+    resultsCache.set('metric_a;\nmetric_b;', { frameMeta: { stepResolution } } as any);
     const { result } = render({
       query: { query: 'metric_a;\nmetric_b;', language: 'PROMQL' },
       results: { 'metric_a;\nmetric_b;': { total: 2 } },
@@ -48,7 +48,7 @@ describe('useExecutedStepResolution', () => {
   });
 
   it('returns undefined until the query has results', () => {
-    resultsCache.set('up', { stepResolution } as any);
+    resultsCache.set('up', { frameMeta: { stepResolution } } as any);
     const { result } = render({ query: { query: 'up', language: 'PROMQL' }, results: {} });
     expect(result.current).toBeUndefined();
   });
@@ -63,7 +63,7 @@ describe('useExecutedStepResolution', () => {
   });
 
   it('ignores results from other query languages', () => {
-    resultsCache.set('source=logs', { stepResolution } as any);
+    resultsCache.set('source=logs', { frameMeta: { stepResolution } } as any);
     const { result } = render({
       query: { query: 'source=logs', language: 'PPL' },
       results: { 'source=logs': { total: 1 } },
@@ -72,7 +72,7 @@ describe('useExecutedStepResolution', () => {
   });
 
   it('picks up a new step after the same query re-runs', () => {
-    resultsCache.set('up', { stepResolution } as any);
+    resultsCache.set('up', { frameMeta: { stepResolution } } as any);
     const state = {
       query: { query: 'up', language: 'PROMQL' },
       results: { up: { total: 1 } },
@@ -84,9 +84,11 @@ describe('useExecutedStepResolution', () => {
     expect(result.current?.byLabel.A.stepSec).toBe(300);
 
     resultsCache.set('up', {
-      stepResolution: {
-        maxDataPoints: 20,
-        queries: [{ label: 'A', stepSec: 200, rateIntervalSec: 260 }],
+      frameMeta: {
+        stepResolution: {
+          maxDataPoints: 20,
+          queries: [{ label: 'A', stepSec: 200, rateIntervalSec: 260 }],
+        },
       },
     } as any);
     // Redux replaces the metadata object on every execution.

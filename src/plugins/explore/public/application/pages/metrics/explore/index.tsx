@@ -12,7 +12,7 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { Query } from '../../../../../../data/common';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
-import { PromQLQueryOptions } from '../../../utils/languages';
+import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
 import { clearLastExecutedData } from '../../../utils/state_management/slices';

@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PerQueryOptions } from '../../../utils/languages';
+import type { PerQueryOptions } from '../../../../../../query_enhancements/common';
 import {
   formatPromDuration,
   parseStepIntervalSeconds,

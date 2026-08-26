@@ -47,7 +47,7 @@ import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
 import '../../../components/query_panel/query_panel.scss';
 
-import { PerQueryOptions } from '../../utils/languages';
+import type { PerQueryOptions } from '../../../../../query_enhancements/common';
 import {
   QueryRowComponent,
   QueryRow,
@@ -101,7 +101,9 @@ export const MetricsQueryPanel: React.FC = () => {
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
 
-  const reduxPerQueryOptions = useSelector((state: RootState) => state.query.perQueryOptions);
+  const reduxPerQueryOptions = useSelector(
+    (state: RootState) => state.query.perQueryOptions as PerQueryOptions[] | undefined
+  );
   const perQueryOptionsRef = useRef(reduxPerQueryOptions);
   perQueryOptionsRef.current = reduxPerQueryOptions;
 

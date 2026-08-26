@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { Query } from '../../../../../../data/common';
 import { resolveStep, ResolvedStep } from '../../../../../../query_enhancements/common/prom_step';
 import { ExploreServices } from '../../../../types';
-import { PromQLQueryOptions } from '../../../utils/languages';
+import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { setMetricsQuerySettings } from '../../../../application/utils/state_management/slices/query/query_slice';
 

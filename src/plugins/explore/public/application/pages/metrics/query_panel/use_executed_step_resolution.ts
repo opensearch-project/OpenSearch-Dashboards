@@ -5,8 +5,9 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import type { PromQLStepResolution } from '../../../../../../query_enhancements/common';
 import { RootState } from '../../../utils/state_management/store';
-import { IPrometheusSearchResult, resultsCache } from '../../../utils/state_management/slices';
+import { resultsCache } from '../../../utils/state_management/slices';
 
 export interface ExecutedStepResolution {
   /** Query string these steps were resolved for; row labels only line up with it. */
@@ -29,8 +30,8 @@ export function useExecutedStepResolution(): ExecutedStepResolution | undefined 
 
   return useMemo(() => {
     if (language !== 'PROMQL' || !resultMetadata) return undefined;
-    const stepResolution = (resultsCache.get(queryText) as IPrometheusSearchResult | undefined)
-      ?.stepResolution;
+    const stepResolution = resultsCache.get(queryText)?.frameMeta?.stepResolution as
+      PromQLStepResolution | undefined;
     if (!stepResolution) return undefined;
 
     const byLabel: ExecutedStepResolution['byLabel'] = {};
