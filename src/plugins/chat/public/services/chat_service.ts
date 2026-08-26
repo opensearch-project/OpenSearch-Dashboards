@@ -306,6 +306,7 @@ export class ChatService {
 
   private getDataSourceFromPageContext() {
     const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+    this.setSessionDataSourceList(dsId);
     return dsId;
   }
 
@@ -351,7 +352,8 @@ export class ChatService {
       // Try to get data source from page context first
       const pageDataSourceId = this.getDataSourceFromPageContext();
       if (pageDataSourceId) {
-        this.cachedDataSourceId = pageDataSourceId;
+        // update cache data source and add new session data source
+        this.setDataSourceId(pageDataSourceId);
         return pageDataSourceId;
       }
 
@@ -379,8 +381,7 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-
-      this.cachedDataSourceId = dataSourceId || undefined;
+      this.setDataSourceId(dataSourceId || undefined);
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -1208,8 +1209,9 @@ export class ChatService {
   /**
    * Explicitly set the data source ID (e.g., after user selection)
    */
-  public setDataSourceId(id: string): void {
+  public setDataSourceId(id: string | undefined): void {
     this.cachedDataSourceId = id;
+    if (!id) return;
     this.setSessionDataSourceList(id);
   }
 
