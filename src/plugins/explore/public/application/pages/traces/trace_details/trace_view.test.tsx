@@ -584,13 +584,14 @@ describe('TraceDetails', () => {
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toBeInTheDocument();
 
-    // Add filter
+    // Add filter — renders as an editable chip (field · operator · value segments)
     fireEvent.click(screen.getByTestId('addSpanFilterButton'));
-    expect(screen.getByText('spanId = span-1')).toBeInTheDocument();
+    expect(screen.getByText('spanId')).toBeInTheDocument();
+    expect(screen.getByText('span-1')).toBeInTheDocument();
 
     // Remove filter
     fireEvent.click(screen.getByLabelText('Remove filter'));
-    expect(screen.queryByText('spanId = span-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {

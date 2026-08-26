@@ -7,7 +7,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TraceFilterBar } from './trace_filter_bar';
 
-// Stub the child filter popovers — this test focuses on the bar's chip logic.
+// Stub the child controls — this test focuses on the bar's chip selection logic.
+jest.mock('./trace_filter_chip', () => ({
+  TraceFilterChip: ({ filter }: any) => <div data-test-subj={`chip-${filter.field}`} />,
+}));
 jest.mock('./span_attribute_filter', () => ({
   SpanAttributeFilter: () => <div data-test-subj="mock-attr-filter" />,
 }));
@@ -18,8 +21,6 @@ jest.mock('./span_detail_tables/span_duration_filter', () => ({
   SpanDurationFilter: () => <div data-test-subj="mock-duration-filter" />,
 }));
 
-const getFilterDisplayText = (f: any) => `${f.field} ${f.operator ?? '='} ${f.value}`;
-
 const baseProps = {
   datasetFields: [],
   spans: [],
@@ -27,37 +28,25 @@ const baseProps = {
   removeFilter: jest.fn(),
   clearAllFilters: jest.fn(),
   setSpanFiltersWithStorage: jest.fn(),
-  getFilterDisplayText,
 };
 
 describe('TraceFilterBar', () => {
-  it('renders a pill only for non-special filters (not isError / status.code / durationMin)', () => {
+  it('renders a chip only for non-special filters (not isError / status.code / durationMin)', () => {
     const spanFilters = [
       { field: 'serviceName', value: 'cart', operator: '=' as const },
       { field: 'isError', value: true },
       { field: 'durationMin', value: 5e6 },
       { field: 'attributes.http.method', value: 'GET', operator: '=' as const },
     ];
-    const { container, getByText, queryByText } = render(
+    const { queryByTestId, container } = render(
       <TraceFilterBar {...baseProps} spanFilters={spanFilters} />
     );
-    // Two attribute chips, the status/duration filters are NOT chips.
-    expect(container.querySelectorAll('.plqPill')).toHaveLength(2);
-    expect(getByText('serviceName = cart')).toBeInTheDocument();
-    expect(getByText('attributes.http.method = GET')).toBeInTheDocument();
-    expect(queryByText('isError = true')).toBeNull();
-    // Renders inside the "Filters" fieldset group.
+    expect(container.querySelectorAll('[data-test-subj^="chip-"]')).toHaveLength(2);
+    expect(queryByTestId('chip-serviceName')).toBeInTheDocument();
+    expect(queryByTestId('chip-attributes.http.method')).toBeInTheDocument();
+    expect(queryByTestId('chip-isError')).toBeNull();
+    expect(queryByTestId('chip-durationMin')).toBeNull();
     expect(container.querySelector('[data-test-subj="traceFilterGroup"]')).toBeInTheDocument();
-  });
-
-  it('removes a filter when its chip × is clicked', () => {
-    const removeFilter = jest.fn();
-    const serviceFilter = { field: 'serviceName', value: 'cart', operator: '=' as const };
-    const { getByLabelText } = render(
-      <TraceFilterBar {...baseProps} spanFilters={[serviceFilter]} removeFilter={removeFilter} />
-    );
-    fireEvent.click(getByLabelText('Remove filter'));
-    expect(removeFilter).toHaveBeenCalledWith(serviceFilter);
   });
 
   it('shows Clear all only when filters exist and wires it', () => {

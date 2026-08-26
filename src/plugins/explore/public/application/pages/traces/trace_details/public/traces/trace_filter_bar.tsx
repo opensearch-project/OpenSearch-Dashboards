@@ -6,8 +6,9 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ControlGroup, FieldPill } from '../../../../../components/query_builder';
+import { ControlGroup } from '../../../../../components/query_builder';
 import { SpanAttributeFilter } from './span_attribute_filter';
+import { TraceFilterChip } from './trace_filter_chip';
 import { SpanStatusFilter } from './span_detail_tables/span_status_filter';
 import { SpanDurationFilter } from './span_detail_tables/span_duration_filter';
 import { DURATION_MIN_FILTER_FIELD } from './span_detail_tables/utils';
@@ -23,7 +24,6 @@ export interface TraceFilterBarProps {
   removeFilter: (filter: SpanFilter) => void;
   clearAllFilters: () => void;
   setSpanFiltersWithStorage: (filters: SpanFilter[]) => void;
-  getFilterDisplayText: (filter: SpanFilter) => string;
 }
 
 // The status/duration quick filters own their own popover UI (Error/OK/Unset,
@@ -48,7 +48,6 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
   removeFilter,
   clearAllFilters,
   setSpanFiltersWithStorage,
-  getFilterDisplayText,
 }) => {
   const chipFilters = spanFilters.filter((filter) => !isSpecialFilter(filter));
 
@@ -69,14 +68,13 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
             dataTestSubj="traceFilterGroup"
           >
             {chipFilters.map((filter, index) => (
-              <FieldPill
+              <TraceFilterChip
                 key={`${filter.field}-${index}`}
-                label={getFilterDisplayText(filter)}
-                onRemove={() => removeFilter(filter)}
-                removeAriaLabel={i18n.translate('explore.traceView.filters.removeFilter', {
-                  defaultMessage: 'Remove filter',
-                })}
-                dataTestSubj={`trace-filter-pill-${filter.field}`}
+                filter={filter}
+                fields={datasetFields}
+                spans={spans}
+                addSpanFilter={addSpanFilter}
+                removeFilter={removeFilter}
               />
             ))}
             <SpanAttributeFilter fields={datasetFields} spans={spans} onAddFilter={addSpanFilter} />

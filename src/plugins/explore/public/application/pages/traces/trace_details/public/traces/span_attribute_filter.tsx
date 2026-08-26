@@ -26,6 +26,12 @@ export interface SpanAttributeFilterProps {
   /** Spans used to suggest distinct values for the selected field. */
   spans: Array<Record<string, any>>;
   onAddFilter: (field: string, value: string | number | boolean, operator: '=' | '!=') => void;
+  /** Prefill the editor (edit an existing chip). Omit for the "+ Add filter" flow. */
+  initial?: { field: string; value: string; operator: '=' | '!=' };
+  /** Custom popover trigger. Given a toggle fn + open state; defaults to the "+ Add filter" button. */
+  renderTrigger?: (toggle: () => void, isOpen: boolean) => React.ReactNode;
+  /** Apply-button label (e.g. "Update" when editing). Defaults to "Add". */
+  applyLabel?: string;
 }
 
 const readFieldValue = (span: Record<string, any>, field: string): any =>
@@ -68,11 +74,33 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
   fields,
   spans,
   onAddFilter,
+  initial,
+  renderTrigger,
+  applyLabel,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [operator, setOperator] = useState<'=' | '!='>('=');
   const [selectedValue, setSelectedValue] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+
+  // Seed the editor from `initial` (edit mode) each time it opens, so a chip's
+  // popover reflects its current field/operator/value.
+  const toggle = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    if (initial) {
+      setSelectedField(initial.field ? [{ label: initial.field, value: initial.field }] : []);
+      setOperator(initial.operator ?? '=');
+      setSelectedValue(
+        initial.value !== undefined && initial.value !== ''
+          ? [{ label: String(initial.value), value: String(initial.value) }]
+          : []
+      );
+    }
+    setIsOpen(true);
+  };
 
   const fieldOptions = useMemo(
     () => fields.map((f) => ({ label: f.name, value: f.name })),
@@ -108,12 +136,14 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
     setIsOpen(false);
   };
 
-  const button = (
+  const button = renderTrigger ? (
+    renderTrigger(toggle, isOpen)
+  ) : (
     <EuiButtonEmpty
       size="xs"
-      color="text"
+      className="plqGhostAdd"
       iconType="plusInCircle"
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={toggle}
       isSelected={isOpen}
       data-test-subj="span-attribute-filter-button"
     >
@@ -238,7 +268,8 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
               isDisabled={!canApply}
               data-test-subj="span-attribute-filter-apply"
             >
-              {i18n.translate('explore.traceView.attributeFilter.add', { defaultMessage: 'Add' })}
+              {applyLabel ??
+                i18n.translate('explore.traceView.attributeFilter.add', { defaultMessage: 'Add' })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

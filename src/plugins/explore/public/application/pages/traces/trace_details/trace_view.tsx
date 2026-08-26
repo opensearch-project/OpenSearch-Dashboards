@@ -71,14 +71,6 @@ export interface DatasetField {
 const isClientSideFilter = (filter: SpanFilter): boolean =>
   filter.field === 'isError' || filter.field === DURATION_MIN_FILTER_FIELD;
 
-// Human-readable rendering of a nanosecond duration (used in filter badges).
-const formatNanosDuration = (nanos: number): string => {
-  const ms = nanos / 1e6;
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
-  if (ms >= 1) return `${Math.round(ms)}ms`;
-  return `${Math.round(nanos / 1000)}µs`;
-};
-
 interface ResizeObserverTarget extends Element {
   _lastWidth?: number;
   _lastHeight?: number;
@@ -365,13 +357,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   useEffect(() => {
     let cancelled = false;
     const excludedTypes = new Set(['_source', 'unknown', 'nested', 'geo_point', 'geo_shape']);
+    // The generic "+ Add filter" only offers serviceName + span attributes +
+    // resource attributes + instrumentation scope (status/duration have their
+    // own quick controls); everything else is out of scope for attribute filters.
+    const isFilterableField = (name: string): boolean =>
+      name === 'serviceName' ||
+      name.startsWith('attributes.') ||
+      name.startsWith('resource.attributes.') ||
+      name.startsWith('instrumentationScope.');
     const loadFields = async () => {
       const merged = new Map<string, DatasetField>();
       try {
         if (dataset?.id && (data as any)?.dataViews?.get) {
           const dataView = await (data as any).dataViews.get(dataset.id);
           (dataView?.fields ?? []).forEach((field: any) => {
-            if (field?.name && !field.name.startsWith('_') && !excludedTypes.has(field.type)) {
+            if (field?.name && !excludedTypes.has(field.type) && isFilterableField(field.name)) {
               merged.set(field.name, { name: field.name, type: field.type });
             }
           });
@@ -380,7 +380,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         // Dataset may not resolve to a saved data view — fall back to the result schema.
       }
       (pplQueryData?.schema ?? []).forEach((field) => {
-        if (field?.name && !field.name.startsWith('_') && !merged.has(field.name)) {
+        if (field?.name && isFilterableField(field.name) && !merged.has(field.name)) {
           merged.set(field.name, { name: field.name, type: field.type });
         }
       });
@@ -502,26 +502,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFiltersWithStorage([]);
   };
 
-  // Function to format filter display text
-  const getFilterDisplayText = (filter: SpanFilter) => {
-    if (filter.field === 'status.code' && filter.value === 2) {
-      return 'Error';
-    }
-    if (filter.field === 'isError' && filter.value === true) {
-      return 'Error';
-    }
-    if (filter.field === 'status.code' && filter.value === 1) {
-      return 'OK';
-    }
-    if (filter.field === 'status.code' && filter.value === 0) {
-      return 'Unset';
-    }
-    if (filter.field === DURATION_MIN_FILTER_FIELD) {
-      return `Duration ≥ ${formatNanosDuration(filter.value as number)}`;
-    }
-    return `${filter.field} ${filter.operator === '!=' ? '≠' : '='} ${filter.value}`;
-  };
-
   // Set up ResizeObserver to detect when the main panel size changes
   // Only enable this in non-embedded mode to avoid crashes in embedded contexts
   useEffect(() => {
@@ -626,7 +606,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   removeFilter={removeFilter}
                   clearAllFilters={clearAllFilters}
                   setSpanFiltersWithStorage={setSpanFiltersWithStorage}
-                  getFilterDisplayText={getFilterDisplayText}
                 />
               </div>
             )}
