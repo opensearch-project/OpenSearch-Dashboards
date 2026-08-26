@@ -9,8 +9,7 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
 
 export type QueryState = QueryWithQueryAsString & {
-  /** Options the language forwards to its search strategy. The entries belong to the
-   * language, so narrow them there rather than naming a language's fields here. */
+  /** Options the language forwards to its search strategy; narrow the entries there. */
   queryOptions?: Record<string, unknown>;
 };
 

@@ -1274,7 +1274,6 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.options.start).toBeUndefined();
       expect(callArgs.body.options.end).toBeUndefined();
       expect(callArgs.body.options.step).toBeUndefined();
-      // No step is sent, so there is nothing to report.
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta.stepResolution).toBeUndefined();
     });

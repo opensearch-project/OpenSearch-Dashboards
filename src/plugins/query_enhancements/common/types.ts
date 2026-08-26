@@ -26,10 +26,6 @@ export interface PromQLSearchOptions extends PromQLQueryOptions {
   step?: number;
 }
 
-/**
- * Step actually used for each query segment, reported back so the editor can
- * display what ran instead of re-deriving it.
- */
 export interface PromQLStepResolution {
   maxDataPoints: number;
   queries: Array<{

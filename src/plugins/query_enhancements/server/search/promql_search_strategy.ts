@@ -172,10 +172,6 @@ export const promqlSearchStrategyProvider = (
   };
 };
 
-/**
- * A single query ready to execute: macros already interpolated, with its own
- * resolved step and legend template.
- */
 interface QueryPlan {
   label: string;
   query: string;

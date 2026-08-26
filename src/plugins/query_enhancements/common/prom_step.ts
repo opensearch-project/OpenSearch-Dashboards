@@ -70,9 +70,6 @@ export interface ResolvedStep {
   rateIntervalSec: number;
 }
 
-// The single step resolver: the server calls it to build the request Prometheus
-// receives, and the editor calls it to preview a step before the first run. Any
-// second implementation would let the UI report a step the query never used.
 export function resolveStep({
   rangeMs,
   resolution,
@@ -92,7 +89,6 @@ export function resolveStep({
   return { stepSec, scrapeSec, rateIntervalSec: rateIntervalSeconds(stepSec, scrapeSec) };
 }
 
-// Prometheus accepts multi-unit duration literals, e.g. 90 -> "1m30s", 0.5 -> "500ms".
 export function formatPromDuration(seconds: number): string {
   const totalMs = Math.round(seconds * 1000);
   if (totalMs <= 0) return '0s';

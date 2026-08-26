@@ -11,7 +11,6 @@ import {
 } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 
-// Interval macros resolved by the PromQL search interceptor before the query is sent.
 const PROMQL_MACROS: Array<{ label: string; detail: string }> = [
   {
     label: '$__rate_interval',

@@ -25,14 +25,12 @@ import {
 export interface RowStepReadout {
   stepLabel: string;
   rateIntervalLabel: string;
-  /** False when no run has produced this step yet, so the labels are estimates. */
   isFromLastRun: boolean;
 }
 
 export interface MetricsQueryOptionsProps {
   maxDataPoints?: number;
   onMaxDataPointsChange: (next?: number) => void;
-  /** Resolution the last run used, shown as the placeholder when left on auto. */
   resolvedMaxDataPoints?: number;
 }
 
