@@ -22,4 +22,20 @@
   &--outside {
     opacity: 0.2;
   }
+
+  // Error span: a red outline reads as "this span errored" without losing the
+  // service color of the bar. Uses outline (not box-shadow) so it composes with
+  // the --selected ring.
+  &--error {
+    outline: 2px solid $euiColorDanger;
+    outline-offset: 0;
+  }
+}
+
+// Inline duration label at the trailing edge of each bar. Muted + tabular so the
+// numbers align down the column and don't compete with the bars.
+.exploreTimelineWaterfallBar__duration {
+  margin-left: $euiSizeS;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

@@ -7,9 +7,9 @@
   position: relative;
   width: 100%;
 
-  // Reserve space for the absolutely-positioned track (otherwise the wrapper
-  // collapses to 0 height and the slider is invisible).
-  height: 26px;
+  // Reserve space for the absolutely-positioned track plus the total caption
+  // beneath it (otherwise the wrapper collapses and the slider is invisible).
+  height: 38px;
 
   &__track {
     position: absolute;
@@ -19,6 +19,26 @@
     border: 1px solid $euiColorLightShade;
     border-radius: 3px;
     overflow: hidden;
+  }
+
+  // Faint vertical guides across the overview so the minimap reads as a time strip.
+  &__tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: $euiColorLightShade;
+    opacity: 0.6;
+  }
+
+  // Trace total-duration caption, aligned to the right edge of the track.
+  &__total {
+    position: absolute;
+    top: 24px;
+    font-size: 10px;
+    line-height: 1;
+    color: $euiColorDarkShade;
+    font-variant-numeric: tabular-nums;
   }
 
   &__overview {

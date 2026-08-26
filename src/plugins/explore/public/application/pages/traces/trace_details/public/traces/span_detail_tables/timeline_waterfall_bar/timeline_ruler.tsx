@@ -27,7 +27,7 @@ export const TimelineRuler: React.FC<TimelineRulerProps> = ({
   const ticks = useTimelineTicks(relEnd, relStart, 8, paddingPercent);
 
   return (
-    <div className="exploreTimelineRuler" style={{ height: '30px', position: 'relative' }}>
+    <div className="exploreTimelineRuler" style={{ height: '20px', position: 'relative' }}>
       <div className="exploreTimelineRuler__baseline" />
       {ticks.map((tick, index) => {
         const labelClassName =

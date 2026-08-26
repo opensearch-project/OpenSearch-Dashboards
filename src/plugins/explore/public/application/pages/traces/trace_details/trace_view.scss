@@ -33,6 +33,12 @@
     padding-left: $ouiSizeXXS;
     padding-right: $ouiSizeXXS;
     padding-bottom: $ouiSizeXXS;
+
+    // Keep only the active-tab underline; drop the tab strip's full-width bottom
+    // rule so it isn't one more stacked horizontal line down the page.
+    .euiTabs {
+      box-shadow: none;
+    }
   }
 
   &__filtersContainer {

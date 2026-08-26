@@ -27,7 +27,19 @@ export interface TimelineBrushSliderProps {
 // Minimum window width as a fraction of the full range, to avoid a zero-width zoom.
 const MIN_WINDOW_FRACTION = 0.02;
 
+// Evenly-spaced tick fractions drawn across the overview so the minimap reads as
+// a time strip (not just a colored blob).
+const BRUSH_TICK_FRACTIONS = [0.25, 0.5, 0.75];
+
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+// Compact total-duration caption for the minimap (e.g. "2.26s", "480ms").
+const formatTotalDuration = (durationMs: number): string => {
+  if (durationMs >= 1000) {
+    return `${(durationMs / 1000).toFixed(2)}s`;
+  }
+  return `${Math.round(durationMs)}ms`;
+};
 
 type DragMode = 'left' | 'right' | 'move';
 
@@ -166,6 +178,14 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
   return (
     <div className="exploreTimelineBrush" data-test-subj="timelineBrushSlider">
       <div className="exploreTimelineBrush__track" style={innerStyle} ref={trackRef}>
+        {BRUSH_TICK_FRACTIONS.map((frac) => (
+          <div
+            key={frac}
+            className="exploreTimelineBrush__tick"
+            style={{ left: `${frac * 100}%` }}
+            data-test-subj={`timelineBrushTick-${frac}`}
+          />
+        ))}
         <div className="exploreTimelineBrush__overview">
           {spans.map((span) => (
             <SpanOverviewBar
@@ -196,6 +216,13 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
             data-test-subj="timelineBrushHandleRight"
           />
         </div>
+      </div>
+      <div
+        className="exploreTimelineBrush__total"
+        style={{ right: `${paddingPercent}%` }}
+        data-test-subj="timelineBrushTotal"
+      >
+        {formatTotalDuration(traceDuration || 0)} total
       </div>
     </div>
   );

@@ -110,18 +110,12 @@ export const getSpanHierarchyTableColumns = (
         visibleRange: timelineOptions?.visibleRange,
         brush: timelineOptions?.brush,
       }),
-      initialWidth: availableWidth ? Math.floor(availableWidth / 2) : 600,
+      // The waterfall renders each span's duration inline at the bar's trailing
+      // edge, so the timeline column reclaims the full width instead of ceding a
+      // separate far-right Duration gutter.
+      initialWidth: availableWidth ? Math.floor(availableWidth * 0.62) : 720,
       isExpandable: false,
       isResizable: true,
-      actions: false,
-    },
-    {
-      id: 'durationInNanos',
-      display: i18n.translate('explore.spanDetailTable.column.duration', {
-        defaultMessage: 'Duration',
-      }),
-      initialWidth: 100,
-      isExpandable: false,
       actions: false,
     },
   ];

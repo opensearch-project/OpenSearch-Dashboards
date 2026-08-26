@@ -49,30 +49,27 @@ describe('HierarchySpanCell', () => {
     jest.clearAllMocks();
   });
 
-  it('renders with correct indentation for level 0', () => {
+  it('renders no tree guides at level 0', () => {
     const item = createMockItem({ level: 0 });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 
-    const hierarchyCell = document.querySelector('.exploreSpanDetailTable__hierarchyCell');
-    expect(hierarchyCell).toHaveStyle('padding-left: 0px');
+    expect(screen.queryAllByTestId('treeGuide')).toHaveLength(0);
     expect(screen.getByText('test-service')).toBeInTheDocument();
     expect(screen.getByText('test-operation')).toBeInTheDocument();
   });
 
-  it('renders with correct indentation for level 1', () => {
+  it('renders one tree guide per level (level 1)', () => {
     const item = createMockItem({ level: 1 });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 
-    const hierarchyCell = document.querySelector('.exploreSpanDetailTable__hierarchyCell');
-    expect(hierarchyCell).toHaveStyle('padding-left: 20px');
+    expect(screen.queryAllByTestId('treeGuide')).toHaveLength(1);
   });
 
-  it('renders with correct indentation for level 3', () => {
+  it('renders one tree guide per level (level 3)', () => {
     const item = createMockItem({ level: 3 });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 
-    const hierarchyCell = document.querySelector('.exploreSpanDetailTable__hierarchyCell');
-    expect(hierarchyCell).toHaveStyle('padding-left: 60px');
+    expect(screen.queryAllByTestId('treeGuide')).toHaveLength(3);
   });
 
   it('shows expand arrow for items with children', () => {

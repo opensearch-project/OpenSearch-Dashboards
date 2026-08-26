@@ -137,6 +137,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           setCellProps={setCellProps}
           setExpandedRows={setExpandedRows}
           expandedRows={expandedRows}
+          colorMap={colorMap}
         />
       ) : (
         <SpanCell

@@ -63,6 +63,21 @@ describe('TimelineBrushSlider', () => {
     expect(container.querySelectorAll('.exploreTimelineBrush__overviewBar')).toHaveLength(3);
   });
 
+  it('renders evenly-spaced minimap ticks', () => {
+    const { container } = render(
+      <TimelineBrushSlider traceTimeRange={traceTimeRange} spans={spans} onChange={jest.fn()} />
+    );
+    expect(container.querySelectorAll('.exploreTimelineBrush__tick')).toHaveLength(3);
+  });
+
+  it('renders the trace total-duration caption', () => {
+    const { getByTestId } = render(
+      <TimelineBrushSlider traceTimeRange={traceTimeRange} spans={spans} onChange={jest.fn()} />
+    );
+    // durationMs 5000 -> "5.00s total"
+    expect(getByTestId('timelineBrushTotal')).toHaveTextContent('5.00s total');
+  });
+
   it('resets to the full range on double-click', () => {
     const onChange = jest.fn();
     const { getByTestId } = render(

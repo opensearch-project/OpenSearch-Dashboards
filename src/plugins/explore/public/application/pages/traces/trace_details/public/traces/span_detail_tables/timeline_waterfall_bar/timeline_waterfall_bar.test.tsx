@@ -113,6 +113,32 @@ describe('TimelineWaterfallBar', () => {
     expect(barElement).not.toHaveClass('exploreTimelineWaterfallBar__bar--selected');
   });
 
+  it('renders the inline duration label at the bar edge', () => {
+    const { getByTestId } = render(
+      <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />
+    );
+
+    // durationMs 1500 -> "1.50s"
+    expect(getByTestId('timeline-bar-duration')).toHaveTextContent('1.50s');
+  });
+
+  it('applies the error modifier class for error spans', () => {
+    const errorSpan = { ...mockSpan, 'status.code': 2 } as Span;
+    const { getByTestId } = render(
+      <TimelineWaterfallBar span={errorSpan} traceTimeRange={mockTraceTimeRange} />
+    );
+
+    expect(getByTestId('timeline-bar')).toHaveClass('exploreTimelineWaterfallBar__bar--error');
+  });
+
+  it('does not apply the error modifier class for non-error spans', () => {
+    const { getByTestId } = render(
+      <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />
+    );
+
+    expect(getByTestId('timeline-bar')).not.toHaveClass('exploreTimelineWaterfallBar__bar--error');
+  });
+
   it('should render tooltip with correct Duration, Start, and End values on hover', async () => {
     const { getByTestId } = render(
       <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />
