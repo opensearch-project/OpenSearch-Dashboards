@@ -60,8 +60,8 @@ $osdGlobalSearchCommandPaletteMaskBackground: transparentize(
   .osdGlobalSearchCommandPalette__groupLabel {
     padding: $euiSizeS $euiSizeM $euiSizeXS;
     color: $euiTextSubduedColor;
-    font-size: $euiFontSizeXS;
-    font-weight: $euiFontWeightSemiBold;
+    font-size: 10px;
+    text-transform: uppercase;
   }
 
   .osdGlobalSearchCommandPalette__result {

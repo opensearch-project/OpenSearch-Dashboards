@@ -20,6 +20,10 @@ export const searchPages = async (
   navGroup?: ChromeNavGroupServiceStartContract,
   application?: InternalApplicationStart
 ): Promise<GlobalSearchResult[]> => {
+  if (!query) {
+    return [];
+  }
+
   if (navGroup && application) {
     const navGroupMap = await navGroup.getNavGroupsMap$().pipe(first()).toPromise();
 

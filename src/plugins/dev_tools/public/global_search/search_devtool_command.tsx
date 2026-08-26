@@ -25,6 +25,10 @@ export const searchForDevTools = async (
     uiActionsApi: () => UiActionsStart;
   }
 ): Promise<GlobalSearchResult[]> => {
+  if (!query) {
+    return [];
+  }
+
   const tools = props.devTools();
 
   const devTool = (

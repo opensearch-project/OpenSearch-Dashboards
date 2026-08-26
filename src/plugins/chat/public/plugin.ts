@@ -236,25 +236,31 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
         defaultMessage: 'Search or chat with AI',
       }),
-      run: async (query: string) => [
-        {
-          id: 'chat-with-ai',
-          label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
-            defaultMessage: 'Chat with AI',
-          }),
-          content: React.createElement(
-            EuiText,
-            {
-              size: 'xs',
-              color: 'subdued',
-            },
-            i18n.translate('chat.globalSearch.chatWithAI.hints', {
-              defaultMessage: 'Press Enter to chat with AI',
-            })
-          ),
-          execute: () => sendGlobalSearchMessage(query),
-        },
-      ],
+      run: async (query: string) => {
+        if (!query) {
+          return [];
+        }
+
+        return [
+          {
+            id: 'chat-with-ai',
+            label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
+              defaultMessage: 'Chat with AI',
+            }),
+            content: React.createElement(
+              EuiText,
+              {
+                size: 'xs',
+                color: 'subdued',
+              },
+              i18n.translate('chat.globalSearch.chatWithAI.hints', {
+                defaultMessage: 'Press Enter to chat with AI',
+              })
+            ),
+            execute: () => sendGlobalSearchMessage(query),
+          },
+        ];
+      },
       action: ({ content }: { content: string }) => sendGlobalSearchMessage(content),
     });
 

@@ -76,6 +76,7 @@ import { WorkspaceValidationService } from './services/workspace_validation_serv
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { searchAssets } from './components/global_search/search_assets_command';
+import { searchRecentlyAccessed } from './components/global_search/search_recently_accessed_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -577,6 +578,21 @@ export class WorkspacePlugin implements Plugin<
             abortSignal: options?.abortSignal,
             visibleWorkspaceIds,
           });
+        });
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'recentlyAccessedSearch',
+      type: 'RECENTLY_ACCESSED',
+      run: async (query: string) => {
+        const [{ chrome, workspaces, http }] = await core.getStartServices();
+
+        return searchRecentlyAccessed({
+          items: chrome.recentlyAccessed.get(),
+          query,
+          currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
+          basePath: http.basePath,
         });
       },
     });

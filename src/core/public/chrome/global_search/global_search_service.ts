@@ -25,6 +25,12 @@ export const SearchCommandTypes = {
     }),
     alias: SAVED_OBJECTS_SYMBOL,
   },
+  RECENTLY_ACCESSED: {
+    description: i18n.translate('core.globalSearch.recentlyAccessed.description', {
+      defaultMessage: 'Recently accessed',
+    }),
+    alias: null,
+  },
   ACTIONS: {
     description: i18n.translate('core.globalSearch.actions.description', {
       defaultMessage: 'Actions',

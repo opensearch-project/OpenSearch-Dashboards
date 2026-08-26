@@ -52,6 +52,8 @@ export const GlobalSearchCommandPalette = ({
   const activeAbortControllerRef = useRef<AbortController>();
   const closeAnimationTimerRef = useRef<number>();
   const paletteStateRef = useRef<CommandPaletteState>('closed');
+  const globalSearchCommandsRef = useRef(globalSearchCommands);
+  globalSearchCommandsRef.current = globalSearchCommands;
 
   const updatePaletteState = useCallback((state: CommandPaletteState) => {
     paletteStateRef.current = state;
@@ -62,6 +64,30 @@ export const GlobalSearchCommandPalette = ({
     () => resultGroups.flatMap((group) => group.results),
     [resultGroups]
   );
+
+  const search = useCallback(async (value: string) => {
+    setQuery(value);
+    activeAbortControllerRef.current?.abort('Superseded by a newer global search');
+
+    const abortController = new AbortController();
+    activeAbortControllerRef.current = abortController;
+    setResultGroups([]);
+    setIsLoading(true);
+
+    const groups = await runGlobalSearch({
+      commands: globalSearchCommandsRef.current,
+      value,
+      abortSignal: abortController.signal,
+    });
+
+    if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
+      return;
+    }
+
+    activeAbortControllerRef.current = undefined;
+    setResultGroups(groups);
+    setIsLoading(false);
+  }, []);
 
   const clearSearch = useCallback(() => {
     activeAbortControllerRef.current?.abort('Global command palette closed');
@@ -96,7 +122,8 @@ export const GlobalSearchCommandPalette = ({
     }
 
     updatePaletteState('open');
-  }, [clearSearch, updatePaletteState]);
+    search('');
+  }, [clearSearch, search, updatePaletteState]);
 
   const toggleCommandPalette = useCallback(() => {
     if (paletteStateRef.current === 'open') {
@@ -142,40 +169,6 @@ export const GlobalSearchCommandPalette = ({
       .getElementById(`${resultListId}-option-${activeResultIndex}`)
       ?.scrollIntoView({ block: 'nearest' });
   }, [activeResultIndex]);
-
-  const search = useCallback(
-    async (value: string) => {
-      setQuery(value);
-      activeAbortControllerRef.current?.abort('Superseded by a newer global search');
-
-      if (!value) {
-        activeAbortControllerRef.current = undefined;
-        setResultGroups([]);
-        setIsLoading(false);
-        return;
-      }
-
-      const abortController = new AbortController();
-      activeAbortControllerRef.current = abortController;
-      setResultGroups([]);
-      setIsLoading(true);
-
-      const groups = await runGlobalSearch({
-        commands: globalSearchCommands,
-        value,
-        abortSignal: abortController.signal,
-      });
-
-      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
-        return;
-      }
-
-      activeAbortControllerRef.current = undefined;
-      setResultGroups(groups);
-      setIsLoading(false);
-    },
-    [globalSearchCommands]
-  );
 
   const executeResult = useCallback(
     (result: GlobalSearchResult) => {

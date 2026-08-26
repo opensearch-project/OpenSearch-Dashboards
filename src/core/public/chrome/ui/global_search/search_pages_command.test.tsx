@@ -80,6 +80,12 @@ describe('<SearchPagesCommand />', () => {
     },
   };
 
+  it('returns no results for an empty query', async () => {
+    await expect(
+      searchPages('', coreStartMock.chrome.navGroup, coreStartMock.application as any)
+    ).resolves.toEqual([]);
+  });
+
   it('search return empty result', async () => {
     const searchResult = await searchPages(
       'bar',

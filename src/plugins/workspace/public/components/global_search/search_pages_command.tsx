@@ -18,6 +18,10 @@ export const workspaceSearchPages = async (
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>,
   coreStart?: CoreStart
 ): Promise<GlobalSearchResult[]> => {
+  if (!query) {
+    return [];
+  }
+
   if (coreStart) {
     const currentWorkspace = await coreStart.workspaces.currentWorkspace$.pipe(first()).toPromise();
 

@@ -27,7 +27,12 @@ interface RunGlobalSearchOptions extends GlobalSearchCommandRunOptions {
   value: string;
 }
 
-const SEARCH_COMMAND_TYPE_ORDER: SearchCommandKeyTypes[] = ['PAGES', 'SAVED_OBJECTS', 'ACTIONS'];
+const SEARCH_COMMAND_TYPE_ORDER: SearchCommandKeyTypes[] = [
+  'PAGES',
+  'RECENTLY_ACCESSED',
+  'SAVED_OBJECTS',
+  'ACTIONS',
+];
 
 const getCommandsForValue = (commands: GlobalSearchCommand[], value: string) => {
   const actionCommands = commands.filter((command) => command.type === 'ACTIONS');
@@ -48,10 +53,6 @@ export const runGlobalSearch = async ({
   value,
   abortSignal,
 }: RunGlobalSearchOptions): Promise<GlobalSearchResultGroup[]> => {
-  if (!value) {
-    return [];
-  }
-
   const selectedCommands = getCommandsForValue(commands, value);
   const settledResults = await Promise.allSettled(
     selectedCommands.map((command) => {

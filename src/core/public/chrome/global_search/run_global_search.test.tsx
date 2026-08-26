@@ -25,19 +25,25 @@ const createCommand = (
 
 describe('runGlobalSearch', () => {
   it('runs default commands and appends actions last', async () => {
+    const recentlyAccessedCommand = createCommand('recent', 'RECENTLY_ACCESSED', [
+      createResult('recent'),
+    ]);
     const pageCommand = createCommand('pages', 'PAGES', [createResult('page')]);
     const assetCommand = createCommand('assets', 'SAVED_OBJECTS', [createResult('asset')]);
     const actionCommand = createCommand('actions', 'ACTIONS', [createResult('action')]);
 
     const groups = await runGlobalSearch({
-      commands: [pageCommand, assetCommand, actionCommand],
+      commands: [pageCommand, assetCommand, actionCommand, recentlyAccessedCommand],
       value: 'dashboard',
     });
 
+    expect(recentlyAccessedCommand.run).toHaveBeenCalledWith('dashboard', {
+      abortSignal: undefined,
+    });
     expect(pageCommand.run).toHaveBeenCalledWith('dashboard', { abortSignal: undefined });
     expect(assetCommand.run).not.toHaveBeenCalled();
     expect(actionCommand.run).toHaveBeenCalledWith('dashboard', { abortSignal: undefined });
-    expect(groups.map((group) => group.type)).toEqual(['PAGES', 'ACTIONS']);
+    expect(groups.map((group) => group.type)).toEqual(['PAGES', 'RECENTLY_ACCESSED', 'ACTIONS']);
   });
 
   it('routes aliases and removes the matching prefix', async () => {
@@ -101,10 +107,29 @@ describe('runGlobalSearch', () => {
     expect(secondCommand.run).toHaveBeenCalledWith('page', { abortSignal: controller.signal });
   });
 
-  it('does not run commands for an empty value', async () => {
-    const command = createCommand('pages', 'PAGES');
+  it('lets selected commands decide how to handle an empty value', async () => {
+    const pageCommand = createCommand('pages', 'PAGES');
+    const recentlyAccessedCommand = createCommand('recent', 'RECENTLY_ACCESSED', [
+      createResult('recent'),
+    ]);
+    const actionCommand = createCommand('actions', 'ACTIONS');
 
-    await expect(runGlobalSearch({ commands: [command], value: '' })).resolves.toEqual([]);
-    expect(command.run).not.toHaveBeenCalled();
+    const groups = await runGlobalSearch({
+      commands: [pageCommand, recentlyAccessedCommand, actionCommand],
+      value: '',
+    });
+
+    expect(groups.map(({ type }) => type)).toEqual(['PAGES', 'RECENTLY_ACCESSED', 'ACTIONS']);
+    expect(groups.find(({ type }) => type === 'PAGES')?.results).toEqual([]);
+    expect(groups.find(({ type }) => type === 'RECENTLY_ACCESSED')?.results).toEqual([
+      {
+        commandId: 'recent',
+        result: expect.objectContaining({ id: 'recent' }),
+      },
+    ]);
+    expect(groups.find(({ type }) => type === 'ACTIONS')?.results).toEqual([]);
+    expect(pageCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });
+    expect(recentlyAccessedCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });
+    expect(actionCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });
   });
 });

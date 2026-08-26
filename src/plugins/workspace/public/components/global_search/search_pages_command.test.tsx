@@ -120,6 +120,10 @@ describe('<workspaceSearchPagesCommand />', () => {
     jest.clearAllMocks();
   });
 
+  it('returns no results for an empty query', async () => {
+    await expect(workspaceSearchPages('', registeredUseCases, coreStartMock)).resolves.toEqual([]);
+  });
+
   it('search return empty result', async () => {
     const searchResult = await workspaceSearchPages('bar', registeredUseCases, coreStartMock);
 

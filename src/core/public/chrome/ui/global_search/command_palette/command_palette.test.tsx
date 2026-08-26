@@ -47,7 +47,7 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
-  it('registers Cmd+K and opens with an empty initial state', () => {
+  it('registers Cmd+K and opens with an empty initial state', async () => {
     const command = createCommand('pages');
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
@@ -71,7 +71,9 @@ describe('<GlobalSearchCommandPalette />', () => {
     act(() => shortcuts[0].execute());
 
     expect(getByTestId('global-search-command-palette')).toBeVisible();
-    expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    await waitFor(() => {
+      expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    });
     expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('@Search assets');
     expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('>Commands');
     expect(getByTestId('global-search-command-palette-assets-token')).toHaveClass(
@@ -80,7 +82,34 @@ describe('<GlobalSearchCommandPalette />', () => {
     expect(getByTestId('global-search-command-palette-commands-token')).toHaveClass(
       'osdGlobalSearchCommandPalette__footerToken'
     );
-    expect(command.run).not.toHaveBeenCalled();
+    expect(command.run).toHaveBeenCalledWith('', {
+      abortSignal: expect.any(AbortSignal),
+    });
+  });
+
+  it('shows results returned by registered commands for an empty query', async () => {
+    const command = {
+      ...createCommand('recent', [createResult('recent-result')]),
+      type: 'RECENTLY_ACCESSED' as const,
+    };
+    const commands$ = new BehaviorSubject<GlobalSearchCommand[]>([command]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByText } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+
+    await waitFor(() => {
+      expect(command.run).toHaveBeenCalledWith('', {
+        abortSignal: expect.any(AbortSignal),
+      });
+      expect(getByText('Recently accessed')).toBeVisible();
+      expect(getByText('recent-result')).toBeVisible();
+    });
   });
 
   it('closes with Cmd+K while the palette input is focused', async () => {
@@ -243,7 +272,7 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
-  it('clears the query when dismissed and reopened', () => {
+  it('clears the query when dismissed and reopened', async () => {
     const commands$ = new BehaviorSubject([createCommand('pages')]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
     const { getByTestId } = render(
@@ -261,7 +290,9 @@ describe('<GlobalSearchCommandPalette />', () => {
     act(() => shortcuts[shortcuts.length - 1].execute());
 
     expect(getByTestId('global-search-command-palette-input')).toHaveValue('');
-    expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    await waitFor(() => {
+      expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    });
   });
 
   it('animates out before unmounting when the overlay is clicked', async () => {

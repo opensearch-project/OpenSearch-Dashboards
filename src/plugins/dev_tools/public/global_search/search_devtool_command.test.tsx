@@ -24,6 +24,16 @@ describe('DevtoolSearchCommand', () => {
     }),
   });
 
+  it('returns no results for an empty query', async () => {
+    await expect(
+      searchForDevTools('', {
+        devTools: devToolsFn,
+        title: 'Dev tools',
+        uiActionsApi: uiActionsApiFn,
+      })
+    ).resolves.toEqual([]);
+  });
+
   it('searchForDevTools without any match', async () => {
     const searchResult = await searchForDevTools('query', {
       devTools: devToolsFn,

@@ -334,6 +334,16 @@ describe('ChatPlugin', () => {
         clearConversation: true,
       });
     });
+
+    it('should return no selectable result for an empty query', async () => {
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+
+      await expect(commandConfig.run('')).resolves.toEqual([]);
+    });
   });
 
   describe('localStorage persistence', () => {
