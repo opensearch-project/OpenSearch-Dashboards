@@ -20,7 +20,7 @@ import type { PerQueryOptions } from '../../../../../../query_enhancements/commo
 import {
   formatPromDuration,
   parseStepIntervalSeconds,
-} from '../../../../../../query_enhancements/common/prom_step';
+} from '../../../../../../query_enhancements/common/metrics';
 
 export interface RowStepReadout {
   stepLabel: string;

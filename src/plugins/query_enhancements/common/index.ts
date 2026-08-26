@@ -4,6 +4,6 @@
  */
 
 export * from './constants';
-export * from './prom_legend';
+export * from './metrics';
 export * from './types';
 export * from './utils';

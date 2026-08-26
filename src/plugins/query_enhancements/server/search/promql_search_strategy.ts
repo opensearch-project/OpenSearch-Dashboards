@@ -16,7 +16,7 @@ import {
   splitMultiQueries,
 } from '../../../data/common';
 import { interpolateLegendFormat, PromQLSearchOptions, PromQLStepResolution } from '../../common';
-import { DEFAULT_RESOLUTION, interpolatePromQLMacros, resolveStep } from '../../common/prom_step';
+import { DEFAULT_RESOLUTION, interpolatePromQLMacros, resolveStep } from '../../common/metrics';
 import {
   MetricResult,
   prometheusManager,

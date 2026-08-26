@@ -33,7 +33,7 @@ import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
-import { calculateStep } from '../../../../../../query_enhancements/common/prom_step';
+import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 
 export const MetricsExploreTab = () => {
