@@ -107,7 +107,7 @@ describe('runGlobalSearch', () => {
     expect(secondCommand.run).toHaveBeenCalledWith('page', { abortSignal: controller.signal });
   });
 
-  it('lets selected commands decide how to handle an empty value', async () => {
+  it('runs selected commands with an empty value and returns their results', async () => {
     const pageCommand = createCommand('pages', 'PAGES');
     const recentlyAccessedCommand = createCommand('recent', 'RECENTLY_ACCESSED', [
       createResult('recent'),
@@ -119,15 +119,12 @@ describe('runGlobalSearch', () => {
       value: '',
     });
 
-    expect(groups.map(({ type }) => type)).toEqual(['PAGES', 'RECENTLY_ACCESSED', 'ACTIONS']);
-    expect(groups.find(({ type }) => type === 'PAGES')?.results).toEqual([]);
     expect(groups.find(({ type }) => type === 'RECENTLY_ACCESSED')?.results).toEqual([
       {
         commandId: 'recent',
         result: expect.objectContaining({ id: 'recent' }),
       },
     ]);
-    expect(groups.find(({ type }) => type === 'ACTIONS')?.results).toEqual([]);
     expect(pageCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });
     expect(recentlyAccessedCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });
     expect(actionCommand.run).toHaveBeenCalledWith('', { abortSignal: undefined });

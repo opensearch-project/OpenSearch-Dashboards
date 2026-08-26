@@ -257,6 +257,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 defaultMessage: 'Press Enter to chat with AI',
               })
             ),
+            placement: 'trailing',
             execute: () => sendGlobalSearchMessage(query),
           },
         ];

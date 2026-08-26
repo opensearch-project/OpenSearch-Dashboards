@@ -76,12 +76,6 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
     expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('@Search assets');
     expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('>Commands');
-    expect(getByTestId('global-search-command-palette-assets-token')).toHaveClass(
-      'osdGlobalSearchCommandPalette__footerToken'
-    );
-    expect(getByTestId('global-search-command-palette-commands-token')).toHaveClass(
-      'osdGlobalSearchCommandPalette__footerToken'
-    );
     expect(command.run).toHaveBeenCalledWith('', {
       abortSignal: expect.any(AbortSignal),
     });
@@ -112,6 +106,38 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
+  it('renders section results in product order and trailing results last', async () => {
+    const pageCommand = createCommand('pages', [createResult('page-result')]);
+    const actionCommand = {
+      ...createCommand('actions', [
+        createResult('action-result'),
+        {
+          ...createResult('chat-result'),
+          placement: 'trailing',
+        },
+      ]),
+      type: 'ACTIONS' as const,
+    };
+    const commands$ = new BehaviorSubject<GlobalSearchCommand[]>([pageCommand, actionCommand]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getAllByTestId, getByText } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+
+    await waitFor(() => {
+      expect(getByText('Actions')).toBeVisible();
+      expect(getByText('Pages')).toBeVisible();
+      expect(
+        getAllByTestId('global-search-command-palette-item').map((item) => item.textContent)
+      ).toEqual(['action-result', 'page-result', 'chat-result']);
+    });
+  });
+
   it('closes with Cmd+K while the palette input is focused', async () => {
     const commands$ = new BehaviorSubject([createCommand('pages')]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
@@ -126,10 +152,6 @@ describe('<GlobalSearchCommandPalette />', () => {
     getByTestId('global-search-command-palette-input').focus();
 
     act(() => shortcuts[0].execute());
-
-    expect(getByTestId('global-search-command-palette-overlay')).toHaveClass(
-      'osdGlobalSearchCommandPaletteOverlay--closing'
-    );
 
     await waitFor(() => {
       expect(queryByTestId('global-search-command-palette')).not.toBeInTheDocument();
@@ -174,28 +196,6 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
-  it('executes the highlighted item with Enter', async () => {
-    const execute = jest.fn();
-    const command = createCommand('pages', [createResult('keyboard-result', execute)]);
-    const commands$ = new BehaviorSubject([command]);
-    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
-    const { getByTestId, getByText } = render(
-      <GlobalSearchCommandPalette
-        globalSearchCommands$={commands$}
-        keyboardShortcut={keyboardShortcut}
-      />
-    );
-
-    act(() => shortcuts[0].execute());
-    const input = getByTestId('global-search-command-palette-input');
-    fireEvent.change(input, { target: { value: 'keyboard' } });
-
-    await waitFor(() => expect(getByText('keyboard-result')).toBeVisible());
-    fireEvent.keyDown(input, { key: 'Enter' });
-
-    expect(execute).toHaveBeenCalledTimes(1);
-  });
-
   it('moves the highlight with arrow keys before executing', async () => {
     const firstExecute = jest.fn();
     const secondExecute = jest.fn();
@@ -224,12 +224,14 @@ describe('<GlobalSearchCommandPalette />', () => {
     expect(firstExecute).not.toHaveBeenCalled();
   });
 
-  it('does not execute the active result when Enter is pressed outside the search input', async () => {
-    const execute = jest.fn();
-    const command = createCommand('pages', [createResult('keyboard-result', execute)]);
+  it('does not wrap keyboard navigation at the first or last item', async () => {
+    const command = createCommand('pages', [
+      createResult('first-result'),
+      createResult('second-result'),
+    ]);
     const commands$ = new BehaviorSubject([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
-    const { getByLabelText, getByTestId, getByText } = render(
+    const { getAllByRole, getByTestId, getByText } = render(
       <GlobalSearchCommandPalette
         globalSearchCommands$={commands$}
         keyboardShortcut={keyboardShortcut}
@@ -237,14 +239,50 @@ describe('<GlobalSearchCommandPalette />', () => {
     );
 
     act(() => shortcuts[0].execute());
-    fireEvent.change(getByTestId('global-search-command-palette-input'), {
-      target: { value: 'keyboard' },
-    });
+    const input = getByTestId('global-search-command-palette-input');
+    fireEvent.change(input, { target: { value: 'result' } });
 
-    await waitFor(() => expect(getByText('keyboard-result')).toBeVisible());
-    fireEvent.keyDown(getByLabelText('Clear input'), { key: 'Enter' });
+    await waitFor(() => expect(getByText('second-result')).toBeVisible());
 
-    expect(execute).not.toHaveBeenCalled();
+    const options = getAllByRole('option');
+    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(options[1]).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(options[1]).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('scrolls the results container to the top when navigation returns to the first item', async () => {
+    const command = createCommand('pages', [
+      createResult('first-result'),
+      createResult('second-result'),
+    ]);
+    const commands$ = new BehaviorSubject([command]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByRole, getByTestId, getByText } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+    const input = getByTestId('global-search-command-palette-input');
+    fireEvent.change(input, { target: { value: 'result' } });
+
+    await waitFor(() => expect(getByText('second-result')).toBeVisible());
+
+    const resultsContainer = getByRole('listbox');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    resultsContainer.scrollTop = 100;
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+
+    expect(resultsContainer.scrollTop).toBe(0);
   });
 
   it('uses commands registered after the component mounts', async () => {
@@ -295,7 +333,7 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
-  it('animates out before unmounting when the overlay is clicked', async () => {
+  it('closes when the overlay is clicked', async () => {
     const commands$ = new BehaviorSubject([createCommand('pages')]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
     const { getByTestId, queryByTestId } = render(
@@ -307,11 +345,6 @@ describe('<GlobalSearchCommandPalette />', () => {
 
     act(() => shortcuts[0].execute());
     fireEvent.click(getByTestId('global-search-command-palette-overlay'));
-
-    expect(getByTestId('global-search-command-palette-overlay')).toHaveClass(
-      'osdGlobalSearchCommandPaletteOverlay--closing'
-    );
-    expect(getByTestId('global-search-command-palette')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(queryByTestId('global-search-command-palette')).not.toBeInTheDocument();

@@ -60,6 +60,12 @@ describe('Workspace plugin', () => {
         type: 'RECENTLY_ACCESSED',
       })
     );
+    expect(setupMock.chrome.globalSearch.registerSearchCommand).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspaceCreateActions',
+        type: 'ACTIONS',
+      })
+    );
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {

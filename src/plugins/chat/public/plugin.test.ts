@@ -324,6 +324,7 @@ describe('ChatPlugin', () => {
         expect.objectContaining({
           id: 'chat-with-ai',
           label: 'Chat with AI',
+          placement: 'trailing',
           execute: expect.any(Function),
         }),
       ]);

@@ -53,6 +53,7 @@ export const GlobalSearchCommandPalette = ({
   const closeAnimationTimerRef = useRef<number>();
   const paletteStateRef = useRef<CommandPaletteState>('closed');
   const globalSearchCommandsRef = useRef(globalSearchCommands);
+  const resultsContainerRef = useRef<HTMLDivElement>(null);
   globalSearchCommandsRef.current = globalSearchCommands;
 
   const updatePaletteState = useCallback((state: CommandPaletteState) => {
@@ -60,9 +61,39 @@ export const GlobalSearchCommandPalette = ({
     setPaletteState(state);
   }, []);
 
+  const orderedResultGroups = useMemo(() => {
+    const actionsGroup = resultGroups.find((group) => group.type === 'ACTIONS');
+
+    return actionsGroup
+      ? [actionsGroup, ...resultGroups.filter((group) => group.type !== 'ACTIONS')]
+      : resultGroups;
+  }, [resultGroups]);
+
+  const { sectionResultGroups, trailingResults } = useMemo(() => {
+    const trailing: CommandPaletteResult[] = [];
+    const sections = orderedResultGroups
+      .map((group) => ({
+        ...group,
+        results: group.results.filter((result) => {
+          if (result.result.placement === 'trailing') {
+            trailing.push(result);
+            return false;
+          }
+
+          return true;
+        }),
+      }))
+      .filter((group) => group.results.length);
+
+    return {
+      sectionResultGroups: sections,
+      trailingResults: trailing,
+    };
+  }, [orderedResultGroups]);
+
   const results = useMemo<CommandPaletteResult[]>(
-    () => resultGroups.flatMap((group) => group.results),
-    [resultGroups]
+    () => [...sectionResultGroups.flatMap((group) => group.results), ...trailingResults],
+    [sectionResultGroups, trailingResults]
   );
 
   const search = useCallback(async (value: string) => {
@@ -165,6 +196,15 @@ export const GlobalSearchCommandPalette = ({
       return;
     }
 
+    // scrollIntoView with "nearest" can leave the first result's section heading clipped.
+    // Reset the container so keyboard navigation back to the first item reveals the full section.
+    if (activeResultIndex === 0) {
+      if (resultsContainerRef.current) {
+        resultsContainerRef.current.scrollTop = 0;
+      }
+      return;
+    }
+
     document
       .getElementById(`${resultListId}-option-${activeResultIndex}`)
       ?.scrollIntoView({ block: 'nearest' });
@@ -197,15 +237,13 @@ export const GlobalSearchCommandPalette = ({
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setActiveResultIndex((currentIndex) => (currentIndex + 1) % results.length);
+      setActiveResultIndex((currentIndex) => Math.min(currentIndex + 1, results.length - 1));
       return;
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      setActiveResultIndex((currentIndex) =>
-        currentIndex <= 0 ? results.length - 1 : currentIndex - 1
-      );
+      setActiveResultIndex((currentIndex) => Math.max(currentIndex - 1, 0));
       return;
     }
 
@@ -222,6 +260,39 @@ export const GlobalSearchCommandPalette = ({
 
   const hasResults = results.length > 0;
   let currentResultIndex = -1;
+
+  const renderResult = ({ commandId, result }: CommandPaletteResult) => {
+    currentResultIndex += 1;
+    const resultIndex = currentResultIndex;
+    const isActive = resultIndex === activeResultIndex;
+
+    return (
+      <div
+        key={`${commandId}:${result.id}`}
+        id={`${resultListId}-option-${resultIndex}`}
+        className="osdGlobalSearchCommandPalette__result"
+        role="option"
+        aria-label={result.label}
+        aria-selected={isActive}
+        tabIndex={-1}
+        data-test-subj="global-search-command-palette-item"
+        // Mouse enter can fire when keyboard scrolling moves a result under a stationary pointer.
+        // Only actual pointer movement should take selection ownership from the keyboard.
+        onMouseMove={() => setActiveResultIndex(resultIndex)}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => executeResult(result)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+            executeResult(result);
+          }
+        }}
+      >
+        {result.content}
+      </div>
+    );
+  };
 
   return (
     <EuiOverlayMask
@@ -287,6 +358,7 @@ export const GlobalSearchCommandPalette = ({
             </div>
           ) : hasResults ? (
             <div
+              ref={resultsContainerRef}
               id={resultListId}
               className="osdGlobalSearchCommandPalette__results"
               role="listbox"
@@ -294,60 +366,24 @@ export const GlobalSearchCommandPalette = ({
                 defaultMessage: 'Search results',
               })}
             >
-              {resultGroups
-                .filter((group) => group.results.length)
-                .map((group) => {
-                  const groupLabelId = `${resultListId}-group-${group.type}`;
+              {sectionResultGroups.map((group) => {
+                const groupLabelId = `${resultListId}-group-${group.type}`;
 
-                  return (
-                    <div
-                      key={group.type}
-                      className="osdGlobalSearchCommandPalette__group"
-                      role="group"
-                      aria-labelledby={group.type === 'ACTIONS' ? undefined : groupLabelId}
-                      aria-label={group.type === 'ACTIONS' ? group.label : undefined}
-                    >
-                      {group.type === 'ACTIONS' ? null : (
-                        <div
-                          id={groupLabelId}
-                          className="osdGlobalSearchCommandPalette__groupLabel"
-                        >
-                          {group.label}
-                        </div>
-                      )}
-                      {group.results.map(({ commandId, result }) => {
-                        currentResultIndex += 1;
-                        const resultIndex = currentResultIndex;
-                        const isActive = resultIndex === activeResultIndex;
-
-                        return (
-                          <div
-                            key={`${commandId}:${result.id}`}
-                            id={`${resultListId}-option-${resultIndex}`}
-                            className="osdGlobalSearchCommandPalette__result"
-                            role="option"
-                            aria-label={result.label}
-                            aria-selected={isActive}
-                            tabIndex={-1}
-                            data-test-subj="global-search-command-palette-item"
-                            onMouseEnter={() => setActiveResultIndex(resultIndex)}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => executeResult(result)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                executeResult(result);
-                              }
-                            }}
-                          >
-                            {result.content}
-                          </div>
-                        );
-                      })}
+                return (
+                  <div
+                    key={group.type}
+                    className="osdGlobalSearchCommandPalette__group"
+                    role="group"
+                    aria-labelledby={groupLabelId}
+                  >
+                    <div id={groupLabelId} className="osdGlobalSearchCommandPalette__groupLabel">
+                      {group.label}
                     </div>
-                  );
-                })}
+                    {group.results.map(renderResult)}
+                  </div>
+                );
+              })}
+              {trailingResults.map(renderResult)}
             </div>
           ) : (
             <div
@@ -374,23 +410,23 @@ export const GlobalSearchCommandPalette = ({
           >
             <span className="osdGlobalSearchCommandPalette__footerTip">
               Tips:
-              <span
+              <code
                 className="osdGlobalSearchCommandPalette__footerToken"
                 data-test-subj="global-search-command-palette-assets-token"
               >
                 {SAVED_OBJECTS_SYMBOL}
-              </span>
+              </code>
               {i18n.translate('core.globalSearch.commandPalette.searchAssetsTip', {
                 defaultMessage: 'Search assets',
               })}
             </span>
             <span className="osdGlobalSearchCommandPalette__footerTip">
-              <span
+              <code
                 className="osdGlobalSearchCommandPalette__footerToken"
                 data-test-subj="global-search-command-palette-commands-token"
               >
                 {COMMANDS_SYMBOL}
-              </span>
+              </code>
               {i18n.translate('core.globalSearch.commandPalette.searchCommandsTip', {
                 defaultMessage: 'Commands',
               })}

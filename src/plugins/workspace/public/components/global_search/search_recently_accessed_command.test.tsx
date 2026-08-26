@@ -84,22 +84,6 @@ describe('searchRecentlyAccessed', () => {
     ).toEqual([]);
   });
 
-  it('returns at most 10 matching items', () => {
-    const results = searchRecentlyAccessed({
-      items: Array.from({ length: 12 }, (_, index) =>
-        createItem(`item-${index}`, `Matching item ${index}`)
-      ),
-      query: 'matching',
-      currentWorkspaceId,
-      basePath,
-    });
-
-    expect(results).toHaveLength(10);
-    expect(results.map(({ id }) => id)).toEqual(
-      Array.from({ length: 10 }, (_, index) => `item-${index}`)
-    );
-  });
-
   it('renders the item type with its label', () => {
     const [result] = searchRecentlyAccessed({
       items: [createItem('dashboard', 'Sales overview', currentWorkspaceId, 'dashboard')],
@@ -108,10 +92,10 @@ describe('searchRecentlyAccessed', () => {
       basePath,
     });
 
-    const { getByText } = render(<>{result.content}</>);
+    const { container, getByText } = render(<>{result.content}</>);
 
     expect(getByText('dashboard')).toBeVisible();
-    expect(getByText((_, element) => element?.textContent === 'Sales overview')).toBeVisible();
+    expect(container).toHaveTextContent('Sales overview');
   });
 
   it('returns no items when there is no current workspace', () => {

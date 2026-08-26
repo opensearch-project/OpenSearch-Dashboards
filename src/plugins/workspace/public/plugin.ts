@@ -77,6 +77,7 @@ import { workspaceSearchPages } from './components/global_search/search_pages_co
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { searchAssets } from './components/global_search/search_assets_command';
 import { searchRecentlyAccessed } from './components/global_search/search_recently_accessed_command';
+import { searchCreateActions } from './components/global_search/search_create_actions_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -590,6 +591,20 @@ export class WorkspacePlugin implements Plugin<
 
         return searchRecentlyAccessed({
           items: chrome.recentlyAccessed.get(),
+          query,
+          currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
+          basePath: http.basePath,
+        });
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'workspaceCreateActions',
+      type: 'ACTIONS',
+      run: async (query: string) => {
+        const [{ workspaces, http }] = await core.getStartServices();
+
+        return searchCreateActions({
           query,
           currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
           basePath: http.basePath,

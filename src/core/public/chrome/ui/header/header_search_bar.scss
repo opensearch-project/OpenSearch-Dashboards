@@ -13,13 +13,13 @@
   z-index: 1;
   top: 0;
   bottom: 0;
-  right: $euiSizeS;
+  right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: $euiSizeXL;
+  min-width: 32px;
   color: $euiTextSubduedColor;
-  font-size: $euiFontSizeXS;
+  font-size: 12px;
   line-height: normal;
   text-align: center;
   pointer-events: none;

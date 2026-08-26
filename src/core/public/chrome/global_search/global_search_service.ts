@@ -73,6 +73,12 @@ export interface GlobalSearchResult {
   content: ReactNode;
 
   /**
+   * Controls whether the result is rendered in its command section or after all sections.
+   * Defaults to `section`.
+   */
+  placement?: 'section' | 'trailing';
+
+  /**
    * Optional native navigation target.
    */
   href?: string;

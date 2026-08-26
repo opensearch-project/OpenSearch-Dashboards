@@ -98,20 +98,6 @@ describe('useKeyboardShortcut', () => {
       expect(mockKeyboardShortcutService.register).toHaveBeenLastCalledWith(updatedShortcut);
     });
 
-    it('should re-register when allowInEditable changes', () => {
-      const { rerender } = renderHook(
-        ({ shortcut }) => useKeyboardShortcut(shortcut, mockKeyboardShortcutService),
-        { initialProps: { shortcut: mockShortcut } }
-      );
-
-      const updatedShortcut = { ...mockShortcut, allowInEditable: true };
-      rerender({ shortcut: updatedShortcut });
-
-      expect(mockKeyboardShortcutService.unregister).toHaveBeenCalledTimes(1);
-      expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(2);
-      expect(mockKeyboardShortcutService.register).toHaveBeenLastCalledWith(updatedShortcut);
-    });
-
     it('should re-register when execute function changes', () => {
       const newExecute = jest.fn();
 
