@@ -4,11 +4,11 @@
  */
 
 import { first } from 'rxjs/operators';
-import { ReactNode } from 'react';
 import { GlobalSearchPageItem } from './page_item';
 import { ChromeNavGroupServiceStartContract } from '../../nav_group';
 import { InternalApplicationStart } from '../../../../../core/public/application';
 import { searchNavigationLinks } from '../../utils';
+import { GlobalSearchResult } from '../../global_search';
 import {
   DEFAULT_NAV_GROUPS,
   renderNavGroupElement,
@@ -18,9 +18,8 @@ import {
 export const searchPages = async (
   query: string,
   navGroup?: ChromeNavGroupServiceStartContract,
-  application?: InternalApplicationStart,
-  callback?: () => void
-): Promise<ReactNode[]> => {
+  application?: InternalApplicationStart
+): Promise<GlobalSearchResult[]> => {
   if (navGroup && application) {
     const navGroupMap = await navGroup.getNavGroupsMap$().pipe(first()).toPromise();
 
@@ -35,30 +34,28 @@ export const searchPages = async (
     );
 
     const pages = searchResult.slice(0, 10).map((link) => {
-      return (
-        <GlobalSearchPageItem
-          link={link}
-          search={query}
-          callback={() => {
-            callback?.();
-            application.navigateToApp(link.id);
-          }}
-          renderBreadcrumbs={(breadcrumbs) => {
-            if (link.navGroup.type === NavGroupType.SYSTEM) {
-              /**
-               * Search items from dataAdministration and settingsAndSetup are technically out of the
-               * current navigation menu, add breadcrumbs before these search items for clarification
-               */
-              const updatedBreadcrumbs = [
-                { text: renderNavGroupElement(link.navGroup) },
-                ...breadcrumbs,
-              ];
-              return updatedBreadcrumbs;
-            }
-            return breadcrumbs;
-          }}
-        />
-      );
+      const isLandingPage = link.id.toLowerCase().endsWith('landing');
+      return {
+        id: link.id,
+        label: isLandingPage ? `${link.navGroup.title} ${link.title}` : link.title,
+        content: (
+          <GlobalSearchPageItem
+            link={link}
+            search={query}
+            renderBreadcrumbs={(breadcrumbs) => {
+              if (link.navGroup.type === NavGroupType.SYSTEM) {
+                /**
+                 * Search items from dataAdministration and settingsAndSetup are technically out of the
+                 * current navigation menu, add breadcrumbs before these search items for clarification
+                 */
+                return [{ text: renderNavGroupElement(link.navGroup) }, ...breadcrumbs];
+              }
+              return breadcrumbs;
+            }}
+          />
+        ),
+        execute: () => application.navigateToApp(link.id),
+      };
     });
 
     return pages;

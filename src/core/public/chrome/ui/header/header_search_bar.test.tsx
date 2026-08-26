@@ -5,8 +5,21 @@
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { HeaderSearchBarIcon, HeaderSearchBar } from './header_search_bar';
-import { GlobalSearchCommand } from '../../global_search';
+import { GlobalSearchCommand, GlobalSearchResult } from '../../global_search';
 import { EuiText } from '@elastic/eui';
+import { ReactNode } from 'react';
+
+const createResult = (
+  id: string,
+  content: ReactNode,
+  overrides: Partial<GlobalSearchResult> = {}
+): GlobalSearchResult => ({
+  id,
+  label: id,
+  content,
+  execute: jest.fn(),
+  ...overrides,
+});
 
 describe('<HeaderSearchBarIcon />', () => {
   const searchFn = jest.fn().mockResolvedValue([]);
@@ -59,7 +72,7 @@ describe('<HeaderSearchBarIcon />', () => {
 
     expect(getByTestId('global-search-input')).toBeVisible();
 
-    searchFn.mockResolvedValue([<EuiText>index page</EuiText>]);
+    searchFn.mockResolvedValue([createResult('index-page', <EuiText>index page</EuiText>)]);
     act(() => {
       fireEvent.change(getByTestId('global-search-input'), {
         target: { value: 'index' },
@@ -118,7 +131,7 @@ describe('<HeaderSearchBar />', () => {
     // focus on search input
     const searchInput = getByTestId('global-search-input');
     expect(searchInput).toBeVisible();
-    searchInput.focus();
+    fireEvent.focus(searchInput);
 
     await waitFor(() => {
       expect(queryByTestId('search-result-panel')).toBeVisible();
@@ -135,8 +148,10 @@ describe('<HeaderSearchBar />', () => {
 
     expect(getByTestId('global-search-input')).toBeVisible();
 
-    searchFn.mockResolvedValue([<EuiText>index page</EuiText>]);
-    searchFnBar.mockResolvedValue([<EuiText>index polices</EuiText>]);
+    searchFn.mockResolvedValue([createResult('index-page', <EuiText>index page</EuiText>)]);
+    searchFnBar.mockResolvedValue([
+      createResult('index-policies', <EuiText>index polices</EuiText>),
+    ]);
     act(() => {
       fireEvent.change(getByTestId('global-search-input'), {
         target: { value: 'index' },
@@ -161,7 +176,7 @@ describe('<HeaderSearchBar />', () => {
 
     expect(getByTestId('global-search-input')).toBeVisible();
 
-    searchFn.mockResolvedValue([<EuiText>index page</EuiText>]);
+    searchFn.mockResolvedValue([createResult('index-page', <EuiText>index page</EuiText>)]);
     searchFnBar.mockRejectedValue(new Error('Async search error'));
 
     act(() => {
@@ -213,7 +228,7 @@ describe('<HeaderSearchBar />', () => {
 
     expect(getByTestId('global-search-input')).toBeVisible();
 
-    searchFnBaz.mockResolvedValue([<div>saved objects</div>]);
+    searchFnBaz.mockResolvedValue([createResult('saved-object', <div>saved objects</div>)]);
 
     act(() => {
       fireEvent.change(getByTestId('global-search-input'), {
@@ -235,12 +250,12 @@ describe('<HeaderSearchBar />', () => {
     });
   });
 
-  it('should call onSearchResultClick callback when provided', async () => {
+  it('should execute a result and call onSearchResultClick when selected', async () => {
     const onSearchResultClick = jest.fn();
-    const mockSearchFn = jest.fn().mockImplementation((query, callback) => {
-      callback();
-      return Promise.resolve([<EuiText>result</EuiText>]);
-    });
+    const execute = jest.fn();
+    const mockSearchFn = jest
+      .fn()
+      .mockResolvedValue([createResult('result', <EuiText>result</EuiText>, { execute })]);
 
     const commands: GlobalSearchCommand[] = [
       {
@@ -250,7 +265,7 @@ describe('<HeaderSearchBar />', () => {
       },
     ];
 
-    const { getByTestId } = render(
+    const { getByTestId, getByText } = render(
       <HeaderSearchBar
         globalSearchCommands={commands}
         onSearchResultClick={onSearchResultClick}
@@ -266,16 +281,59 @@ describe('<HeaderSearchBar />', () => {
 
     await waitFor(() => {
       expect(mockSearchFn).toHaveBeenCalled();
-      expect(onSearchResultClick).toHaveBeenCalled();
+      expect(getByText('result')).toBeInTheDocument();
     });
+
+    fireEvent.click(getByText('result'));
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(onSearchResultClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves native link behavior without programmatically executing linked results', async () => {
+    const onSearchResultClick = jest.fn();
+    const execute = jest.fn();
+    const mockSearchFn = jest.fn().mockResolvedValue([
+      createResult('linked-result', <EuiText>linked result</EuiText>, {
+        href: '/app/linked-result',
+        execute,
+      }),
+    ]);
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'test',
+        type: 'PAGES',
+        run: mockSearchFn,
+      },
+    ];
+    const { getByTestId, getByRole } = render(
+      <HeaderSearchBar
+        globalSearchCommands={commands}
+        onSearchResultClick={onSearchResultClick}
+        panel
+      />
+    );
+
+    fireEvent.change(getByTestId('global-search-input'), {
+      target: { value: 'linked' },
+    });
+
+    const link = await waitFor(() => getByRole('link', { name: 'linked-result' }));
+    expect(link).toHaveAttribute('href', '/app/linked-result');
+    link.addEventListener('click', (event) => event.preventDefault());
+
+    fireEvent.click(link);
+
+    expect(execute).not.toHaveBeenCalled();
+    expect(onSearchResultClick).toHaveBeenCalledTimes(1);
   });
 
   it('should abort previous search requests when new search is triggered', async () => {
-    const abortedSearchFn = jest.fn().mockImplementation((query, callback, options) => {
+    const abortedSearchFn = jest.fn().mockImplementation((query, options) => {
       return new Promise((resolve) => {
         setTimeout(() => {
           if (!options?.abortSignal?.aborted) {
-            resolve([<EuiText>slow result</EuiText>]);
+            resolve([createResult('slow-result', <EuiText>slow result</EuiText>)]);
           }
         }, 100);
       });
@@ -319,7 +377,7 @@ describe('<HeaderSearchBar />', () => {
       <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
 
-    searchFn.mockResolvedValue([<EuiText>test result</EuiText>]);
+    searchFn.mockResolvedValue([createResult('test-result', <EuiText>test result</EuiText>)]);
 
     // First, perform a search
     act(() => {
@@ -414,7 +472,9 @@ describe('<HeaderSearchBar />', () => {
   });
 
   it('should include ACTIONS type commands in filtered results', async () => {
-    const actionSearchFn = jest.fn().mockResolvedValue([<EuiText>action result</EuiText>]);
+    const actionSearchFn = jest
+      .fn()
+      .mockResolvedValue([createResult('action-result', <EuiText>action result</EuiText>)]);
     const commandsWithActions: GlobalSearchCommand[] = [
       {
         id: 'page-command',
@@ -432,7 +492,7 @@ describe('<HeaderSearchBar />', () => {
       <HeaderSearchBar globalSearchCommands={commandsWithActions} panel />
     );
 
-    searchFn.mockResolvedValue([<EuiText>page result</EuiText>]);
+    searchFn.mockResolvedValue([createResult('page-result', <EuiText>page result</EuiText>)]);
 
     act(() => {
       fireEvent.change(getByTestId('global-search-input'), {

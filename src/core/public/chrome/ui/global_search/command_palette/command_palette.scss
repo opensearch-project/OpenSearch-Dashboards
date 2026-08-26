@@ -1,0 +1,140 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$osdGlobalSearchCommandPaletteMaskOpacity: 0.7;
+$osdGlobalSearchCommandPaletteMaskBackground: transparentize(
+  $euiColorEmptyShade,
+  1 - $osdGlobalSearchCommandPaletteMaskOpacity
+);
+
+@if lightness($euiTextColor) > 50 {
+  $osdGlobalSearchCommandPaletteMaskBackground: transparentize(
+    $euiColorLightShade,
+    1 - $osdGlobalSearchCommandPaletteMaskOpacity
+  );
+}
+
+.osdGlobalSearchCommandPaletteOverlay {
+  align-items: flex-start;
+  padding-top: 100px;
+  padding-bottom: 0;
+  background: $osdGlobalSearchCommandPaletteMaskBackground;
+  animation: osdGlobalSearchCommandPaletteMaskIn $euiAnimSpeedFast ease-out both;
+
+  &.osdGlobalSearchCommandPaletteOverlay--closing {
+    animation: osdGlobalSearchCommandPaletteMaskOut $euiAnimSpeedFast ease-in both;
+
+    .osdGlobalSearchCommandPalette {
+      animation: osdGlobalSearchCommandPaletteOut $euiAnimSpeedFast ease-in both;
+    }
+  }
+}
+
+.osdGlobalSearchCommandPalette {
+  width: min(640px, calc(100vw - #{$euiSizeL * 2}));
+  max-height: calc(100vh - 100px - #{$euiSizeL});
+  overflow: hidden;
+  animation:
+    osdGlobalSearchCommandPaletteIn
+    $euiAnimSpeedFast
+    $euiAnimSlightResistance
+    both;
+
+  .osdGlobalSearchCommandPalette__search {
+    padding: $euiSizeS;
+    border-bottom: $euiBorderThin;
+  }
+
+  .osdGlobalSearchCommandPalette__results {
+    max-height: min(480px, calc(100vh - 100px - #{$euiSizeXXL * 2}));
+    overflow-y: auto;
+    padding: $euiSizeS;
+  }
+
+  .osdGlobalSearchCommandPalette__group + .osdGlobalSearchCommandPalette__group {
+    margin-top: $euiSizeS;
+  }
+
+  .osdGlobalSearchCommandPalette__groupLabel {
+    padding: $euiSizeS $euiSizeM $euiSizeXS;
+    color: $euiTextSubduedColor;
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightSemiBold;
+  }
+
+  .osdGlobalSearchCommandPalette__result {
+    padding: $euiSizeS $euiSizeM;
+    border-radius: $euiBorderRadius;
+    cursor: pointer;
+
+    &[aria-selected="true"] {
+      background-color: $euiFocusBackgroundColor;
+    }
+  }
+
+  .osdGlobalSearchCommandPalette__message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $euiSizeS;
+    min-height: $euiSizeXXL * 2;
+    padding: $euiSizeL $euiSizeM;
+    color: $euiTextSubduedColor;
+    text-align: center;
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteMaskIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteMaskOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-$euiSizeS) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-$euiSizeXS) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .osdGlobalSearchCommandPaletteOverlay,
+  .osdGlobalSearchCommandPaletteOverlay--closing,
+  .osdGlobalSearchCommandPalette,
+  .osdGlobalSearchCommandPaletteOverlay--closing .osdGlobalSearchCommandPalette {
+    animation: none;
+  }
+}

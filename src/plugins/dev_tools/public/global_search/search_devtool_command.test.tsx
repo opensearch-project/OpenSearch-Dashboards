@@ -4,9 +4,7 @@
  */
 
 import { DevToolItem, searchForDevTools } from './search_devtool_command';
-import { fireEvent, render } from '@testing-library/react';
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
-import { DEVTOOL_TRIGGER_ID } from '../plugin';
+import { render } from '@testing-library/react';
 
 describe('DevtoolSearchCommand', () => {
   const devToolsFn = jest.fn().mockReturnValue([
@@ -19,7 +17,12 @@ describe('DevtoolSearchCommand', () => {
       title: 'others dev tools',
     },
   ]);
-  const uiActionsApiFn = jest.fn();
+  const executeTrigger = jest.fn();
+  const uiActionsApiFn = jest.fn().mockReturnValue({
+    getTrigger: jest.fn().mockReturnValue({
+      exec: executeTrigger,
+    }),
+  });
 
   it('searchForDevTools without any match', async () => {
     const searchResult = await searchForDevTools('query', {
@@ -50,53 +53,21 @@ describe('DevtoolSearchCommand', () => {
     });
 
     expect(searchResult).toHaveLength(1);
-    expect(searchResult[0]).toMatchInlineSnapshot(`
-      <DevToolItem
-        breadcrumbs={
-          Array [
-            Object {
-              "text": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem>
-                  <EuiIcon
-                    color="text"
-                    type="consoleApp"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiHighlight
-                    search="console"
-                  >
-                    Dev tools
-                  </EuiHighlight>
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-            },
-            Object {
-              "onClick": [Function],
-              "text": <EuiHighlight
-                search="console"
-              >
-                Console
-              </EuiHighlight>,
-            },
-          ]
-        }
-        toolId="console"
-      />
-    `);
+    expect(searchResult[0]).toEqual({
+      id: 'console',
+      label: 'Console',
+      content: expect.any(Object),
+      execute: expect.any(Function),
+    });
+
+    await searchResult[0].execute();
+
+    expect(uiActionsApiFn).toHaveBeenCalled();
+    expect(executeTrigger).toHaveBeenCalledWith({ defaultRoute: 'console' });
   });
 });
 
 describe('<DevToolItem />', () => {
-  const uiActionsStartMock = uiActionsPluginMock.createStartContract();
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  uiActionsStartMock.getTrigger.mockReturnValue({
-    id: '',
-    exec: jest.fn(),
-  });
   // test component DevToolItem
   it('render DevToolItem', () => {
     // render component with jest
@@ -108,11 +79,9 @@ describe('<DevToolItem />', () => {
           },
         ]}
         toolId="dev"
-        uiActionsApi={uiActionsStartMock}
       />
     );
     expect(container).toMatchSnapshot();
-    fireEvent.click(getByTestId('toolId-dev'));
-    expect(uiActionsStartMock.getTrigger).toHaveBeenCalledWith(DEVTOOL_TRIGGER_ID);
+    expect(getByTestId('toolId-dev')).toBeVisible();
   });
 });

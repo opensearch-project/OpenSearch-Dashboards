@@ -204,7 +204,7 @@ describe('KeyboardShortcutService', () => {
         'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "quickSave" from plugin "fileManager" ' +
           'conflicts with active shortcuts: save (editor). ' +
-          'The new shortcut will take precedence when the key is pressed.'
+          'The last eligible shortcut will take precedence when the key is pressed.'
       );
     });
 
@@ -248,7 +248,7 @@ describe('KeyboardShortcutService', () => {
         'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "quickSave" from plugin "fileManager" ' +
           'conflicts with active shortcuts: save (editor). ' +
-          'The new shortcut will take precedence when the key is pressed.'
+          'The last eligible shortcut will take precedence when the key is pressed.'
       );
 
       expect(consoleWarnSpy).toHaveBeenNthCalledWith(
@@ -256,7 +256,7 @@ describe('KeyboardShortcutService', () => {
         'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "autoSave" from plugin "backup" ' +
           'conflicts with active shortcuts: save (editor), quickSave (fileManager). ' +
-          'The new shortcut will take precedence when the key is pressed.'
+          'The last eligible shortcut will take precedence when the key is pressed.'
       );
     });
 
@@ -364,7 +364,7 @@ describe('KeyboardShortcutService', () => {
         'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "export" from plugin "dashboard" ' +
           'conflicts with active shortcuts: save (editor). ' +
-          'The new shortcut will take precedence when the key is pressed.'
+          'The last eligible shortcut will take precedence when the key is pressed.'
       );
 
       consoleWarnSpy.mockClear();
@@ -460,6 +460,118 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Element Filtering', () => {
+    it('should execute opted-in shortcuts from editable elements', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'open-command-palette',
+        pluginId: 'core',
+        name: 'Open command palette',
+        category: 'navigation',
+        keys: 'cmd+k',
+        allowInEditable: true,
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'k',
+        code: 'KeyK',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: input });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      document.body.removeChild(input);
+    });
+
+    it('should execute opted-in shortcuts from elements with combobox role', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'open-command-palette',
+        pluginId: 'core',
+        name: 'Open command palette',
+        category: 'navigation',
+        keys: 'cmd+k',
+        allowInEditable: true,
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('role', 'combobox');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'k',
+        code: 'KeyK',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      document.body.removeChild(div);
+    });
+
+    it('should use the last opted-in shortcut from editable elements', () => {
+      const start = service.start();
+      const optedInShortcut: ShortcutDefinition = {
+        id: 'open-command-palette',
+        pluginId: 'core',
+        name: 'Open command palette',
+        category: 'navigation',
+        keys: 'cmd+k',
+        allowInEditable: true,
+        execute: mockExecute,
+      };
+      const regularShortcut: ShortcutDefinition = {
+        id: 'regular-shortcut',
+        pluginId: 'test',
+        name: 'Regular shortcut',
+        category: 'test',
+        keys: 'cmd+k',
+        execute: mockExecute2,
+      };
+
+      start.register(optedInShortcut);
+      start.register(regularShortcut);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      const editableEvent = new KeyboardEvent('keydown', {
+        key: 'k',
+        code: 'KeyK',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      Object.defineProperty(editableEvent, 'target', { value: input });
+      document.dispatchEvent(editableEvent);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockExecute2).not.toHaveBeenCalled();
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'k',
+          code: 'KeyK',
+          ctrlKey: true,
+          bubbles: true,
+        })
+      );
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      document.body.removeChild(input);
+    });
+
     it('should ignore events from SELECT elements', () => {
       const start = service.start();
       const shortcut: ShortcutDefinition = {
@@ -721,6 +833,116 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Sequence Handling', () => {
+    it('should not start shortcut sequences from editable elements', () => {
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        allowInEditable: true,
+        execute: mockExecute,
+      };
+
+      start.register(sequenceShortcut);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      const editablePrefixEvent = new KeyboardEvent('keydown', {
+        key: 'g',
+        code: 'KeyG',
+        bubbles: true,
+      });
+      Object.defineProperty(editablePrefixEvent, 'target', { value: input });
+      document.dispatchEvent(editablePrefixEvent);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(input);
+    });
+
+    it('should not execute a sequence when its second key comes from an editable element', () => {
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+
+      start.register(sequenceShortcut);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+
+      const editableSecondKeyEvent = new KeyboardEvent('keydown', {
+        key: 'd',
+        code: 'KeyD',
+        bubbles: true,
+      });
+      Object.defineProperty(editableSecondKeyEvent, 'target', { value: input });
+      document.dispatchEvent(editableSecondKeyEvent);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(input);
+    });
+
+    it('should execute an opted-in modifier shortcut after a pending sequence', () => {
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+      const editableShortcut: ShortcutDefinition = {
+        id: 'open-command-palette',
+        pluginId: 'core',
+        name: 'Open command palette',
+        category: 'navigation',
+        keys: 'cmd+k',
+        allowInEditable: true,
+        execute: mockExecute2,
+      };
+
+      start.register(sequenceShortcut);
+      start.register(editableShortcut);
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+
+      // Real modifier shortcuts emit a modifier keydown before the character
+      // keydown. The modifier event ends the pending sequence.
+      const modifierEvent = new KeyboardEvent('keydown', {
+        key: 'Control',
+        code: 'ControlLeft',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      Object.defineProperty(modifierEvent, 'target', { value: input });
+      document.dispatchEvent(modifierEvent);
+
+      const editableShortcutEvent = new KeyboardEvent('keydown', {
+        key: 'k',
+        code: 'KeyK',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      Object.defineProperty(editableShortcutEvent, 'target', { value: input });
+      document.dispatchEvent(editableShortcutEvent);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      document.body.removeChild(input);
+    });
+
     it('should register and execute sequence shortcuts', () => {
       const start = service.start();
       const sequenceShortcut: ShortcutDefinition = {

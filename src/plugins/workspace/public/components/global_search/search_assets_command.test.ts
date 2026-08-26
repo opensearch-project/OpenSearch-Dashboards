@@ -145,8 +145,7 @@ describe('searchAssets', () => {
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].href).toContain(currentWorkspaceId);
+    expect(result[0].href).toContain(currentWorkspaceId);
   });
 
   it('should use first visible workspace when no currentWorkspaceId provided', async () => {
@@ -169,12 +168,11 @@ describe('searchAssets', () => {
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].href).toContain('workspace-2');
+    expect(result[0].href).toContain('workspace-2');
   });
 
-  it('should call onAssetClick callback and replace management path', async () => {
-    const onAssetClick = jest.fn();
+  it('should expose and execute the replaced management path', async () => {
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
     const mockAssets = [
       createMockAsset(
         '1',
@@ -192,12 +190,14 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds: [],
-      onAssetClick,
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].onClick).toBe(onAssetClick);
-    expect(breadcrumbProps.breadcrumbs[1].href).toBe(`${mockBasePath}/app/objects/dashboard/1`);
+    expect(result[0].href).toBe(`${mockBasePath}/app/objects/dashboard/1`);
+
+    result[0].execute();
+
+    expect(assignSpy).toHaveBeenCalledWith(`${mockBasePath}/app/objects/dashboard/1`);
+    assignSpy.mockRestore();
   });
 });

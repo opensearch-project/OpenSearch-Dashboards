@@ -47,6 +47,37 @@ export interface GlobalSearchCommandRunOptions {
 }
 
 /**
+ * A result returned by a {@link GlobalSearchCommand}.
+ * @experimental
+ */
+export interface GlobalSearchResult {
+  /**
+   * Stable identifier unique within the owning command.
+   */
+  id: string;
+
+  /**
+   * Plain text label used for accessibility and result identity.
+   */
+  label: string;
+
+  /**
+   * Provider-owned visual representation of the result.
+   */
+  content: ReactNode;
+
+  /**
+   * Optional native navigation target.
+   */
+  href?: string;
+
+  /**
+   * Executes the result without depending on a rendering surface.
+   */
+  execute: () => void | Promise<void>;
+}
+
+/**
  * @experimental
  */
 export interface GlobalSearchCommand {
@@ -69,16 +100,11 @@ export interface GlobalSearchCommand {
   inputPlaceholder?: string;
 
   /**
-   * do the search and return search result with a React element
+   * Executes the search and returns structured results.
    * @param value search query
-   * @param callback callback function when search is done
    * @param options options object containing abortSignal and other future extensible properties
    */
-  run(
-    value: string,
-    callback?: () => void,
-    options?: GlobalSearchCommandRunOptions
-  ): Promise<ReactNode[]>;
+  run(value: string, options?: GlobalSearchCommandRunOptions): Promise<GlobalSearchResult[]>;
 
   /**
    * Callback function executed when the user presses Enter in the global search bar.
@@ -116,9 +142,13 @@ export interface GlobalSearchServiceSetupContract {
    * chrome.globalSearch.registerSearchCommand({
    *   id: 'my-search-command',
    *   type: 'PAGES',
-   *   run: async (query, callback, abortSignal) => {
-   *     // Perform search logic
-   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   run: async (query, options) => {
+   *     return [{
+   *       id: 'result-1',
+   *       label: 'Result 1',
+   *       content: <SearchResult>Result 1</SearchResult>,
+   *       execute: () => navigateToResult('result-1'),
+   *     }];
    *   }
    * });
    * ```
@@ -185,9 +215,13 @@ export interface GlobalSearchServiceStartContract {
    * chrome.globalSearch.registerSearchCommand({
    *   id: 'my-search-command',
    *   type: 'PAGES',
-   *   run: async (query, callback, abortSignal) => {
-   *     // Perform search logic
-   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   run: async (query, options) => {
+   *     return [{
+   *       id: 'result-1',
+   *       label: 'Result 1',
+   *       content: <SearchResult>Result 1</SearchResult>,
+   *       execute: () => navigateToResult('result-1'),
+   *     }];
    *   }
    * });
    * ```

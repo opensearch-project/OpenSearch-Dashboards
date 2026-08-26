@@ -16,13 +16,10 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  GlobalSearchCommand,
-  SearchCommandKeyTypes,
-  SearchCommandTypes,
-} from '../../global_search';
+import { GlobalSearchCommand, GlobalSearchResult } from '../../global_search';
+import { GlobalSearchResultGroup, runGlobalSearch } from '../../global_search/run_global_search';
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
@@ -83,25 +80,46 @@ export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
 };
 
 export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultClick }: Props) => {
-  const [results, setResults] = useState([] as React.JSX.Element[]);
+  const [resultGroups, setResultGroups] = useState<GlobalSearchResultGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const enterKeyDownRef = useRef(false);
   const searchBarInputRef = useRef<HTMLInputElement | null>(null);
-  const ongoingAbortControllersRef = useRef<Array<{ controller: AbortController; query: string }>>(
-    []
+  const activeAbortControllerRef = useRef<AbortController>();
+
+  const clearSearch = useCallback(() => {
+    activeAbortControllerRef.current?.abort('Global search closed');
+    activeAbortControllerRef.current = undefined;
+    setIsPopoverOpen(false);
+    setResultGroups([]);
+    setIsLoading(false);
+    setSearchValue('');
+  }, []);
+
+  useEffect(() => {
+    return () => activeAbortControllerRef.current?.abort('Global search unmounted');
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    clearSearch();
+    onSearchResultClick?.();
+  }, [clearSearch, onSearchResultClick]);
+
+  const executeResult = useCallback(
+    (result: GlobalSearchResult) => {
+      closeSearch();
+      if (!result.href) {
+        result.execute();
+      }
+    },
+    [closeSearch]
   );
 
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-    setResults([]);
-    setSearchValue('');
-  };
-
-  const resultSection = (items: ReactNode[], sectionHeader: string | undefined) => {
+  const resultSection = (group: GlobalSearchResultGroup) => {
+    const sectionHeader = group.type === 'ACTIONS' ? undefined : group.label;
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs" key={sectionHeader}>
+      <EuiFlexGroup direction="column" gutterSize="xs" key={group.type}>
         {sectionHeader && (
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -112,10 +130,18 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          {items.length ? (
+          {group.results.length ? (
             <EuiListGroup flush={true} gutterSize="none" maxWidth={false}>
-              {items.map((item, index) => (
-                <EuiListGroupItem key={index} label={item} color="text" style={{ padding: 0 }} />
+              {group.results.map(({ commandId, result }) => (
+                <EuiListGroupItem
+                  key={`${commandId}:${result.id}`}
+                  label={result.content}
+                  aria-label={result.label}
+                  href={result.href}
+                  onClick={() => executeResult(result)}
+                  color="text"
+                  style={{ padding: 0 }}
+                />
               ))}
             </EuiListGroup>
           ) : (
@@ -132,10 +158,10 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
 
   const searchResultSections = (
     <>
-      {results && results.length ? (
+      {resultGroups.length ? (
         <EuiFlexGroup direction="column" gutterSize="none">
-          {results.map((result) => (
-            <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
+          {resultGroups.map((group) => (
+            <EuiFlexItem key={group.type}>{resultSection(group)}</EuiFlexItem>
           ))}
         </EuiFlexGroup>
       ) : (
@@ -150,8 +176,6 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
 
   const onSearch = useCallback(
     async (value: string) => {
-      const abortController = new AbortController();
-      ongoingAbortControllersRef.current.push({ controller: abortController, query: value });
       if (enterKeyDownRef.current) {
         globalSearchCommands.forEach((command) => {
           command.action?.({
@@ -164,92 +188,35 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
         searchBarInputRef.current?.blur();
         return;
       }
-      // Separate ACTIONS commands from other command types for special handling
-      // ACTIONS commands should always be executed and rendered at the end
-      const commandsWithoutActions = globalSearchCommands.filter(
-        (command) => command.type !== 'ACTIONS'
-      );
 
-      // Filter commands that have an alias and match the search input prefix
-      // For example, if a command has alias "@" and user types "@something", it will be included
-      const filteredCommands = commandsWithoutActions.filter((command) => {
-        const alias = SearchCommandTypes[command.type].alias;
-        return alias && value.startsWith(alias);
-      });
-
-      // Get commands without aliases as default search commands
-      const defaultSearchCommands = commandsWithoutActions.filter((command) => {
-        return !SearchCommandTypes[command.type].alias;
-      });
-
-      // If no alias-based commands matched, use default search commands instead
-      if (filteredCommands.length === 0) {
-        filteredCommands.push(...defaultSearchCommands);
-      }
-
-      // Always append ACTIONS commands at the end to ensure they are executed and rendered last
-      // This ensures action commands are available regardless of whether user used an alias or not
-      filteredCommands.push(
-        ...globalSearchCommands.filter((command) => command.type === 'ACTIONS')
-      );
-
-      if (value && filteredCommands && filteredCommands.length) {
-        setIsPopoverOpen(true);
-        setIsLoading(true);
-        const settleResults = await Promise.allSettled(
-          filteredCommands.map((command) => {
-            const callback = onSearchResultClick || closePopover;
-            const alias = SearchCommandTypes[command.type].alias;
-            const queryValue = alias ? value.replace(alias, '').trim() : value;
-            return command
-              .run(queryValue, callback, { abortSignal: abortController.signal })
-              .then((items) => {
-                return { items, type: command.type };
-              });
-          })
-        );
-        const searchResults = settleResults
-          .filter((result) => result.status === 'fulfilled')
-          .map(
-            (result) =>
-              (
-                result as PromiseFulfilledResult<{
-                  items: ReactNode[];
-                  type: SearchCommandKeyTypes;
-                }>
-              ).value
-          )
-          .reduce(
-            (acc, { items, type }) => {
-              return {
-                ...acc,
-                [type]: (acc[type] || []).concat(items),
-              };
-            },
-            {} as Record<SearchCommandKeyTypes, ReactNode[]>
-          );
-        const sections = Object.entries(searchResults).map(([key, items]) => {
-          const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
-          return resultSection(items, key !== 'ACTIONS' ? sectionHeader : undefined);
-        });
-        if (abortController.signal.aborted) {
-          return;
-        }
+      activeAbortControllerRef.current?.abort('Superseded by a newer global search');
+      if (!value) {
+        activeAbortControllerRef.current = undefined;
+        setResultGroups([]);
         setIsLoading(false);
-        setResults(sections);
-        // Abort previous search requests
-        do {
-          const currentItem = ongoingAbortControllersRef.current.shift();
-          if (currentItem?.controller === abortController) {
-            break;
-          }
-          currentItem?.controller?.abort('Previous search results filled');
-        } while (ongoingAbortControllersRef.current.length > 0);
-      } else {
-        setResults([]);
+        return;
       }
+
+      const abortController = new AbortController();
+      activeAbortControllerRef.current = abortController;
+      setIsPopoverOpen(true);
+      setIsLoading(true);
+
+      const groups = await runGlobalSearch({
+        commands: globalSearchCommands,
+        value,
+        abortSignal: abortController.signal,
+      });
+
+      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
+        return;
+      }
+
+      activeAbortControllerRef.current = undefined;
+      setIsLoading(false);
+      setResultGroups(groups);
     },
-    [globalSearchCommands, onSearchResultClick]
+    [globalSearchCommands]
   );
 
   const searchBar = (
@@ -319,7 +286,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
           display="block"
           isOpen={isPopoverOpen}
           closePopover={() => {
-            closePopover();
+            closeSearch();
           }}
         >
           {searchBarPanel}

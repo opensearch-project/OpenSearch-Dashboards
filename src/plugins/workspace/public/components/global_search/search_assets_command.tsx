@@ -5,8 +5,7 @@
 
 import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 
-import type { ApplicationStart } from '../../../../../core/public';
-import { HttpStart, IBasePath } from '../../../../../core/public';
+import { GlobalSearchResult, HttpStart, IBasePath } from '../../../../../core/public';
 import type { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { SUPPORTED_ASSET_TYPES } from './constants';
@@ -51,20 +50,17 @@ export const searchAssets = async ({
   currentWorkspaceId,
   abortSignal,
   visibleWorkspaceIds,
-  onAssetClick,
 }: {
   http: HttpStart;
   query: string;
-  application?: ApplicationStart;
   currentWorkspaceId?: string;
   abortSignal?: AbortSignal;
   visibleWorkspaceIds: string[];
-  onAssetClick?: () => void;
-}) => {
+}): Promise<GlobalSearchResult[]> => {
   let findResponse;
 
   try {
-    findResponse = await http.get<Record<string, any>>(
+    findResponse = await http.get<{ saved_objects: SavedObjectWithMetadata[] }>(
       '/api/opensearch-dashboards/management/saved_objects/_find',
       {
         query: {
@@ -80,35 +76,37 @@ export const searchAssets = async ({
     return [];
   }
 
-  return (
-    findResponse.saved_objects
-      // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .map((asset) => {
-        if (!asset.meta.title || !asset.meta.inAppUrl?.path) {
-          return null;
-        }
-        return (
+  return findResponse.saved_objects
+    .map((asset): GlobalSearchResult | null => {
+      if (!asset.meta.title || !asset.meta.inAppUrl?.path) {
+        return null;
+      }
+      const href = getAssetsFinalPath({
+        object: asset,
+        basePath: http.basePath,
+        currentWorkspaceId,
+        useUpdatedUX: true,
+        visibleWorkspaceIds,
+      });
+
+      return {
+        id: `${asset.type}:${asset.id}`,
+        label: asset.meta.title,
+        content: (
           <EuiSimplifiedBreadcrumbs
             breadcrumbs={[
               { text: asset.type },
               {
                 text: <EuiHighlight search={query}>{asset.meta.title}</EuiHighlight>,
-                href: getAssetsFinalPath({
-                  object: asset,
-                  basePath: http.basePath,
-                  currentWorkspaceId,
-                  useUpdatedUX: true,
-                  visibleWorkspaceIds,
-                }),
-                onClick: onAssetClick,
               },
             ]}
             hideTrailingSeparator
             responsive
           />
-        );
-      })
-      // @ts-expect-error TS7006 TODO(ts-error): fixme
-      .filter((item) => !!item)
-  );
+        ),
+        href,
+        execute: () => window.location.assign(href),
+      };
+    })
+    .filter((item): item is GlobalSearchResult => item !== null);
 };

@@ -551,8 +551,8 @@ export class WorkspacePlugin implements Plugin<
     core.chrome.globalSearch.registerSearchCommand({
       id: 'workspacePagesSearch',
       type: 'PAGES',
-      run: async (query: string, callback: () => void) =>
-        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
+      run: async (query: string) =>
+        workspaceSearchPages(query, this.registeredUseCases$, this.coreStart),
     });
 
     let resolver: (payload: Awaited<ReturnType<typeof searchAssets>>) => void;
@@ -563,7 +563,7 @@ export class WorkspacePlugin implements Plugin<
     core.chrome.globalSearch.registerSearchCommand({
       id: 'assetsSearch',
       type: 'SAVED_OBJECTS',
-      run: async (query: string, callback, options) => {
+      run: async (query: string, options) => {
         const [{ workspaces, http }] = await core.getStartServices();
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
         const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
@@ -576,7 +576,6 @@ export class WorkspacePlugin implements Plugin<
             currentWorkspaceId,
             abortSignal: options?.abortSignal,
             visibleWorkspaceIds,
-            onAssetClick: callback,
           });
         });
       },
