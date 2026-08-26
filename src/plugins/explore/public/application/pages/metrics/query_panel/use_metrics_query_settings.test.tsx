@@ -29,7 +29,7 @@ describe('useMetricsQuerySettings', () => {
   const initialQuery = {
     query: 'up',
     language: 'PROMQL',
-    maxDataPoints: 500,
+    queryOptions: { maxDataPoints: 500 },
   };
 
   beforeEach(() => {
@@ -102,7 +102,9 @@ describe('useMetricsQuerySettings', () => {
     act(() => {
       result.current.onMaxDataPointsChange(200);
     });
-    expect(setQuery).toHaveBeenCalledWith(expect.objectContaining({ maxDataPoints: 200 }));
+    expect(setQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ queryOptions: { maxDataPoints: 200 } })
+    );
     expect(mockDispatch).toHaveBeenCalledTimes(2);
     expect(result.current.maxDataPoints).toBe(200);
   });

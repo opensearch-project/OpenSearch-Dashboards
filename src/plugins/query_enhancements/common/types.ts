@@ -16,7 +16,9 @@ export interface PromQLQueryOptions {
   perQueryOptions?: PerQueryOptions[];
 }
 
-export interface PromQLQuery extends Query, PromQLQueryOptions {}
+export interface PromQLQuery extends Query {
+  queryOptions?: PromQLQueryOptions;
+}
 
 export interface PromQLSearchOptions extends PromQLQueryOptions {
   queryType?: string;

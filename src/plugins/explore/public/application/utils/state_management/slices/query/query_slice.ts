@@ -9,10 +9,9 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
 
 export type QueryState = QueryWithQueryAsString & {
-  maxDataPoints?: number;
-  /** One entry per query segment, in segment order. The entry shape belongs to the language,
-   * so narrow it there rather than naming a language's fields here. */
-  perQueryOptions?: unknown[];
+  /** Options the language forwards to its search strategy. The entries belong to the
+   * language, so narrow them there rather than naming a language's fields here. */
+  queryOptions?: Record<string, unknown>;
 };
 
 const initialState: QueryState = {
@@ -52,18 +51,13 @@ const querySlice = createSlice({
         meta: { addToHistory: true },
       }),
     },
-    setMetricsQuerySettings: (
-      state,
-      action: PayloadAction<Partial<Pick<QueryState, 'maxDataPoints' | 'perQueryOptions'>>>
-    ) => Object.assign(state, action.payload),
+    setQueryOptions: (state, action: PayloadAction<Record<string, unknown>>) => {
+      state.queryOptions = { ...state.queryOptions, ...action.payload };
+    },
   },
 });
 
-export const {
-  setQueryState,
-  setQueryWithHistory,
-  setQueryStringWithHistory,
-  setMetricsQuerySettings,
-} = querySlice.actions;
+export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory, setQueryOptions } =
+  querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();

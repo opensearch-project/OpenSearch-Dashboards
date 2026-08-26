@@ -8,11 +8,9 @@ import { useDispatch } from 'react-redux';
 import { Query } from '../../../../../../data/common';
 import { resolveStep, ResolvedStep } from '../../../../../../query_enhancements/common/prom_step';
 import { ExploreServices } from '../../../../types';
-import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
+import type { PromQLQuery } from '../../../../../../query_enhancements/common';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
-import { setMetricsQuerySettings } from '../../../../application/utils/state_management/slices/query/query_slice';
-
-type MetricsQuery = Query & PromQLQueryOptions;
+import { setQueryOptions } from '../../../../application/utils/state_management/slices/query/query_slice';
 
 export interface MetricsQuerySettings {
   maxDataPoints?: number;
@@ -25,7 +23,7 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
   const { queryString } = services.data.query;
 
   const [maxDataPoints, setMaxDataPoints] = useState<number | undefined>(
-    () => (queryString.getQuery() as MetricsQuery).maxDataPoints
+    () => (queryString.getQuery() as PromQLQuery).queryOptions?.maxDataPoints
   );
 
   const [timeTick, setTimeTick] = useState(0);
@@ -51,9 +49,12 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
   const onMaxDataPointsChange = useCallback(
     (next?: number) => {
       setMaxDataPoints(next);
-      const currentQuery = queryString.getQuery();
-      queryString.setQuery({ ...currentQuery, maxDataPoints: next } as MetricsQuery);
-      dispatch(setMetricsQuerySettings({ maxDataPoints: next }));
+      const currentQuery = queryString.getQuery() as PromQLQuery;
+      queryString.setQuery({
+        ...currentQuery,
+        queryOptions: { ...currentQuery.queryOptions, maxDataPoints: next },
+      } as Partial<Query>);
+      dispatch(setQueryOptions({ maxDataPoints: next }));
       dispatch(setIsQueryEditorDirty(true));
     },
     [queryString, dispatch]

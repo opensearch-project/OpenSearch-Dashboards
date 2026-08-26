@@ -9,10 +9,9 @@ import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { Query } from '../../../../../../data/common';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
-import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
+import type { PromQLQuery } from '../../../../../../query_enhancements/common';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
 import { clearLastExecutedData } from '../../../utils/state_management/slices';
@@ -72,9 +71,9 @@ export const MetricsExploreTab = () => {
     if (!timefilter) return 60;
     const bounds = timefilter.getBounds();
     if (!bounds?.min || !bounds?.max) return 60;
-    const query = services.data.query.queryString.getQuery() as Query & PromQLQueryOptions;
-    const resolution =
-      query.maxDataPoints && query.maxDataPoints > 0 ? query.maxDataPoints : undefined;
+    const { maxDataPoints } =
+      (services.data.query.queryString.getQuery() as PromQLQuery).queryOptions ?? {};
+    const resolution = maxDataPoints && maxDataPoints > 0 ? maxDataPoints : undefined;
     return calculateStep(bounds.max.valueOf() - bounds.min.valueOf(), resolution);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);

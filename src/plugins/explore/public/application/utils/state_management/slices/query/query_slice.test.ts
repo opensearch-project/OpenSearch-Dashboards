@@ -7,7 +7,7 @@ import {
   setQueryState,
   setQueryWithHistory,
   setQueryStringWithHistory,
-  setMetricsQuerySettings,
+  setQueryOptions,
   queryReducer,
   QueryState,
   queryInitialState,
@@ -197,27 +197,29 @@ describe('querySlice reducers', () => {
     });
   });
 
-  describe('setMetricsQuerySettings', () => {
+  describe('setQueryOptions', () => {
     const existingState: QueryState = {
       query: 'up',
       language: 'PROMQL',
       dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
-      maxDataPoints: 500,
-      perQueryOptions: [{ minStep: '1m' }],
+      queryOptions: { maxDataPoints: 500, perQueryOptions: [{ minStep: '1m' }] },
     };
 
-    it('merges only the provided keys', () => {
-      const state = queryReducer(existingState, setMetricsQuerySettings({ maxDataPoints: 200 }));
-      expect(state).toEqual({ ...existingState, maxDataPoints: 200 });
+    it('merges only the provided options', () => {
+      const state = queryReducer(existingState, setQueryOptions({ maxDataPoints: 200 }));
+      expect(state.queryOptions).toEqual({
+        maxDataPoints: 200,
+        perQueryOptions: [{ minStep: '1m' }],
+      });
     });
 
-    it('clears the fields when set to undefined', () => {
+    it('clears an option when set to undefined', () => {
       const state = queryReducer(
         existingState,
-        setMetricsQuerySettings({ maxDataPoints: undefined, perQueryOptions: undefined })
+        setQueryOptions({ maxDataPoints: undefined, perQueryOptions: undefined })
       );
-      expect(state.maxDataPoints).toBeUndefined();
-      expect(state.perQueryOptions).toBeUndefined();
+      expect(state.queryOptions?.maxDataPoints).toBeUndefined();
+      expect(state.queryOptions?.perQueryOptions).toBeUndefined();
       expect(state.query).toBe('up');
     });
   });

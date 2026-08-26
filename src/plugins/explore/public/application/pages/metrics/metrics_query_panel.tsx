@@ -38,7 +38,7 @@ import {
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
-import { setMetricsQuerySettings } from '../../../application/utils/state_management/slices/query/query_slice';
+import { setQueryOptions } from '../../../application/utils/state_management/slices/query/query_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
 import { RootState } from '../../../application/utils/state_management/store';
@@ -47,7 +47,11 @@ import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
 import '../../../components/query_panel/query_panel.scss';
 
-import type { PerQueryOptions } from '../../../../../query_enhancements/common';
+import type {
+  PerQueryOptions,
+  PromQLQuery,
+  PromQLQueryOptions,
+} from '../../../../../query_enhancements/common';
 import {
   QueryRowComponent,
   QueryRow,
@@ -102,7 +106,8 @@ export const MetricsQueryPanel: React.FC = () => {
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
 
   const reduxPerQueryOptions = useSelector(
-    (state: RootState) => state.query.perQueryOptions as PerQueryOptions[] | undefined
+    (state: RootState) =>
+      (state.query.queryOptions as PromQLQueryOptions | undefined)?.perQueryOptions
   );
   const perQueryOptionsRef = useRef(reduxPerQueryOptions);
   perQueryOptionsRef.current = reduxPerQueryOptions;
@@ -125,9 +130,13 @@ export const MetricsQueryPanel: React.FC = () => {
   const syncEditorText = useCallback(
     (updatedRows: QueryRow[]) => {
       const { query: combined, perQueryOptions } = serializeRows(updatedRows);
-      queryString.setQuery({ query: combined, perQueryOptions } as Partial<Query>);
+      const currentQuery = queryString.getQuery() as PromQLQuery;
+      queryString.setQuery({
+        query: combined,
+        queryOptions: { ...currentQuery.queryOptions, perQueryOptions },
+      } as Partial<Query>);
       if (!isEqual(perQueryOptions, perQueryOptionsRef.current)) {
-        dispatch(setMetricsQuerySettings({ perQueryOptions }));
+        dispatch(setQueryOptions({ perQueryOptions }));
       }
       dispatch(setIsQueryEditorDirty(true));
       if (combined === lastDispatchedRef.current) return;

@@ -49,8 +49,10 @@ describe('PromQLSearchInterceptor', () => {
     getQuery = jest.fn(() => ({
       query: 'up',
       language: 'PROMQL',
-      maxDataPoints: 500,
-      perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
+      queryOptions: {
+        maxDataPoints: 500,
+        perQueryOptions: [{ minStep: '1m', legendFormat: '{{job}}' }],
+      },
     }));
     mockDataService.query.queryString.getQuery = getQuery;
     mockDataService.query.timefilter.timefilter.getTime = jest.fn(() => ({
