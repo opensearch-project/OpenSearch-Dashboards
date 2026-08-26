@@ -76,7 +76,7 @@ export const VolumeEdge: React.FC<EdgeProps> = ({
         id={id}
         path={edgePath}
         markerEnd={`url(#${markerId})`}
-        style={{ stroke: color, strokeWidth, strokeDasharray: '6 4' }}
+        style={{ stroke: color, strokeWidth }}
       />
       {edgeData.label && (
         <EdgeLabelRenderer>

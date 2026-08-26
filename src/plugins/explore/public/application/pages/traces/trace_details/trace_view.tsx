@@ -9,11 +9,7 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiResizableContainer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
   EuiText,
-  EuiBadge,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiSpacer,
@@ -31,9 +27,7 @@ import {
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
-import { SpanAttributeFilter } from './public/traces/span_attribute_filter';
-import { SpanStatusFilter } from './public/traces/span_detail_tables/span_status_filter';
-import { SpanDurationFilter } from './public/traces/span_detail_tables/span_duration_filter';
+import { TraceFilterBar } from './public/traces/trace_filter_bar';
 import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
   NoMatchMessage,
@@ -620,80 +614,20 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               </EuiPanel>
             </div>
 
-            {/* Filter bar: "+ Add filter" (dataset fields) + active-filter badges.
-                Span filters scope the span-based tabs only — hide the bar on the
-                Related logs tab, which isn't filtered by span attributes. */}
+            {/* Filter bar (query-builder style). Span filters scope the span-based
+                tabs only — hide on the Related logs tab. */}
             {activeTab !== TraceDetailTab.LOGS && (
               <div className="exploreTraceView__filtersContainer">
-                <EuiPanel paddingSize="s">
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                        <EuiFlexItem grow={false}>
-                          <SpanAttributeFilter
-                            fields={datasetFields}
-                            spans={unfilteredHits}
-                            onAddFilter={addSpanFilter}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <SpanStatusFilter
-                            spanFilters={spanFilters}
-                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <SpanDurationFilter
-                            spans={unfilteredHits}
-                            spanFilters={spanFilters}
-                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
-                          />
-                        </EuiFlexItem>
-                        {spanFilters.length > 0 && (
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued">
-                              {i18n.translate('explore.traceView.filters.activeFilters', {
-                                defaultMessage: 'Active filters:',
-                              })}
-                            </EuiText>
-                          </EuiFlexItem>
-                        )}
-                        {spanFilters.map((filter, index) => (
-                          <EuiFlexItem grow={false} key={`filter-${index}`}>
-                            <EuiBadge
-                              color="primary"
-                              iconType="cross"
-                              iconSide="right"
-                              iconOnClick={() => removeFilter(filter)}
-                              iconOnClickAriaLabel={i18n.translate(
-                                'explore.traceView.filters.removeFilter',
-                                {
-                                  defaultMessage: 'Remove filter',
-                                }
-                              )}
-                              data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                            >
-                              {getFilterDisplayText(filter)}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {spanFilters.length > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          onClick={clearAllFilters}
-                          data-test-subj="clear-all-filters-button"
-                        >
-                          {i18n.translate('explore.traceView.filters.clearAll', {
-                            defaultMessage: 'Clear all',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiPanel>
+                <TraceFilterBar
+                  spanFilters={spanFilters}
+                  datasetFields={datasetFields}
+                  spans={unfilteredHits}
+                  addSpanFilter={addSpanFilter}
+                  removeFilter={removeFilter}
+                  clearAllFilters={clearAllFilters}
+                  setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+                  getFilterDisplayText={getFilterDisplayText}
+                />
               </div>
             )}
 

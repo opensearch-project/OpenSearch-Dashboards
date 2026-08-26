@@ -1,0 +1,19 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Reuse the logs "visual query builder" pill/fieldset styling (.plqGroup,
+// .plqPill, .plqGhostAdd, …) so the trace filter bar reads like the query builder.
+@import "../../../../../components/query_builder/query_builder";
+
+.exploreTraceFilterBar {
+  width: 100%;
+
+  // Let the popover-trigger quick filters (status/duration) and the ghost add
+  // sit inline in the fieldset without EUI's default button min-height inflating
+  // the row.
+  .plqGroup {
+    row-gap: 4px;
+  }
+}

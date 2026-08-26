@@ -28,7 +28,6 @@ export interface MetricsCardData {
 
 export type MetricsCardCustomNode = Node<MetricsCardData, string>;
 
-const ERROR_COLOR = 'var(--osd-color-status-error, #BD271E)';
 const NEUTRAL_BORDER = 'var(--osd-color-cl-gray-350, #98A2B3)';
 
 /**
@@ -40,10 +39,10 @@ const NEUTRAL_BORDER = 'var(--osd-color-cl-gray-350, #98A2B3)';
  */
 export const MetricsCardNode = ({ data }: NodeProps<MetricsCardCustomNode>) => {
   const { onDashboardClick } = useCelestialNodeActionsContext();
-  // Border encodes health only (red on error, neutral otherwise); the service
-  // identity color lives on the dot, so a "reddish" identity color never reads
-  // as an error.
-  const borderColor = data.hasError ? ERROR_COLOR : NEUTRAL_BORDER;
+  // Border stays neutral. Error is signaled by the pink tint + red "!" badge
+  // (two channels) — keeping a red border too made the card read as an over-red
+  // alarm. Identity color lives on the header dot.
+  const borderColor = NEUTRAL_BORDER;
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => onDashboardClick?.(event, data as any),
@@ -61,7 +60,7 @@ export const MetricsCardNode = ({ data }: NodeProps<MetricsCardCustomNode>) => {
       glowColor={data.isSelected ? 'var(--osd-color-cl-blue-450, #0268BC)' : borderColor}
       isSelected={!!data.isSelected}
       onClick={handleClick}
-      className="osd:bg-container-default osd:w-64 osd:p-3"
+      className="celMetricsCard__shell osd:bg-container-default osd:w-64 osd:p-3"
       data-test-subj={`metricsCardNode-${data.id}`}
       aria-label={data.title}
     >

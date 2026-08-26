@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Resting elevation so the card floats above the (dot-grid) canvas. On hover the
+// NodeShell's shadow-node-hover class (higher specificity) takes over cleanly.
+.celMetricsCard__shell {
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 10%), 0 4px 8px rgba(0, 0, 0, 6%);
+}
+
 .celMetricsCard {
   display: flex;
   flex-direction: column;

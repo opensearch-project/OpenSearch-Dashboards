@@ -134,6 +134,8 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         legend={false}
         breadcrumbs={[]}
         showMinimap
+        showGridBackground
+        nodesDraggable
         topN={Infinity}
         onDashboardClick={(node?: { id?: string }) => {
           if (node?.id) onFilterService?.(node.id);
