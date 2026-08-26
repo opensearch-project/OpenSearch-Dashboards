@@ -4,18 +4,14 @@
  */
 
 import { DataPublicPluginStart, TimeRange } from '../../../data/public';
-import { NormalizedVariableOption, PromQLLabelMatcher, PromQLVariableQueryType } from './types';
+import { NormalizedVariableOption, PromQLLabelMatcher, PromQLResourceQuery } from './types';
 import { applyRegexToVariableOptions } from './variable_query_utils';
 
-/**
- * Single source of truth for the free-text fields of each PromQL query type: applies
- * `transform` to every text field and returns a new query type. Both interpolation and
- * dependency detection build on this one switch, so they can't silently diverge.
- */
-export function mapPromqlQueryTypeTextFields(
-  queryType: PromQLVariableQueryType,
+/** Applies `transform` to every free-text field of a PromQL query type. */
+export function mapResourceQueryTextFields(
+  queryType: PromQLResourceQuery,
   transform: (value: string) => string
-): PromQLVariableQueryType {
+): PromQLResourceQuery {
   switch (queryType.kind) {
     case 'labelNames':
     case 'metrics':
@@ -37,10 +33,7 @@ export function mapPromqlQueryTypeTextFields(
       };
     case 'series':
       return { ...queryType, matcher: transform(queryType.matcher) };
-    case 'queryResult':
-      return queryType;
     default: {
-      // Exhaustiveness check for new query-type variants.
       const _exhaustive: never = queryType;
       return _exhaustive;
     }
@@ -48,30 +41,21 @@ export function mapPromqlQueryTypeTextFields(
 }
 
 /** Collect every free-text field value of a PromQL query type (for dependency detection). */
-export function collectPromqlQueryTypeTextFields(queryType: PromQLVariableQueryType): string[] {
+export function collectResourceQueryTextFields(queryType: PromQLResourceQuery): string[] {
   const fields: string[] = [];
-  mapPromqlQueryTypeTextFields(queryType, (value) => {
+  mapResourceQueryTextFields(queryType, (value) => {
     fields.push(value);
     return value;
   });
   return fields;
 }
 
-/**
- * Interpolate `${var}`/`$var` references that may appear in any of the
- * free-text-like fields of a PromQL fill-in-the-blank query type (Label,
- * Metric, Metric regex, Series matcher, and label filter values) — mirrors
- * how `variable.query` is interpolated for the free-text flow, but applied
- * field-by-field since promqlQueryType is a structured object, not a string.
- *
- * `interpolate` is expected to be a no-op for strings with no variable
- * references, so it is safe to call unconditionally on every field.
- */
-export function interpolatePromqlQueryType(
-  queryType: PromQLVariableQueryType,
+/** Interpolates `${var}`/`$var` references in every free-text field of a PromQL query type. */
+export function interpolateResourceQuery(
+  queryType: PromQLResourceQuery,
   interpolate: (value: string) => string
-): PromQLVariableQueryType {
-  return mapPromqlQueryTypeTextFields(queryType, interpolate);
+): PromQLResourceQuery {
+  return mapResourceQueryTextFields(queryType, interpolate);
 }
 
 /**
@@ -129,7 +113,11 @@ export interface PromQLResourceClientLike {
 export function getPromQLResourceClient(
   dataPlugin: DataPublicPluginStart
 ): PromQLResourceClientLike | undefined {
-  return dataPlugin.resourceClientFactory.get<PromQLResourceClientLike>('prometheus');
+  try {
+    return dataPlugin.resourceClientFactory.get<PromQLResourceClientLike>('prometheus');
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -167,6 +155,20 @@ function buildSeriesSelector(
   return `{${clauses.join(', ')}}`;
 }
 
+/**
+ * Returns true when a Prometheus `=~` matcher regex can match the empty string.
+ * Prometheus regex matchers are fully anchored (^...$), so we mirror that here.
+ * If the value is not a valid JS regex (it may still be valid RE2), we conservatively
+ * return false and let the backend validate it.
+ */
+function matcherRegexMatchesEmpty(value: string): boolean {
+  try {
+    return new RegExp(`^(?:${value})$`).test('');
+  } catch {
+    return false;
+  }
+}
+
 export function hasValidLabelValuesSelector(
   metric: string | undefined,
   matchers: PromQLLabelMatcher[]
@@ -178,7 +180,15 @@ export function hasValidLabelValuesSelector(
   if (activeMatchers.length === 0) {
     return true;
   }
-  return activeMatchers.some((matcher) => matcher.operator === '=' || matcher.operator === '=~');
+  // Prometheus rejects a series selector whose only matchers can match the empty string
+  // (HTTP 400 "vector selector must contain at least one non-empty matcher"). An `=` matcher
+  // is always a non-empty literal; an `=~` matcher only qualifies when its regex cannot match
+  // "" (e.g. `.*` / `a*` do, `.+` / `node_.*` do not).
+  return activeMatchers.some(
+    (matcher) =>
+      matcher.operator === '=' ||
+      (matcher.operator === '=~' && !matcherRegexMatchesEmpty(matcher.value))
+  );
 }
 
 /**
@@ -204,16 +214,9 @@ function seriesLabelSetToString(series: Record<string, string>): string {
 export async function executePromQLResourceQuery(
   dataPlugin: DataPublicPluginStart,
   dataConnectionId: string | undefined,
-  queryType: PromQLVariableQueryType,
+  queryType: PromQLResourceQuery,
   timeRange?: TimeRange
 ): Promise<string[]> {
-  if (queryType.kind === 'queryResult') {
-    throw new Error(
-      "executePromQLResourceQuery does not handle the 'queryResult' query type — " +
-        'use executeVariableQuery with the free-text query instead.'
-    );
-  }
-
   if (!dataConnectionId) {
     throw new Error('A dataset must be selected to fetch PromQL variable options.');
   }
@@ -263,7 +266,7 @@ export async function executePromQLResourceQuery(
     }
 
     default: {
-      // Exhaustiveness check — new PromQLVariableQueryType variants must be handled above.
+      // Exhaustiveness check — new PromQLResourceQuery variants must be handled above.
       const _exhaustive: never = queryType;
       throw new Error(`Unsupported PromQL variable query type: ${JSON.stringify(_exhaustive)}`);
     }

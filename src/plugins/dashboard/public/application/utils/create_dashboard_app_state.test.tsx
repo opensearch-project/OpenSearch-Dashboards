@@ -204,6 +204,7 @@ describe('updateStateUrl', () => {
           name: 'Airport',
           type: VariableType.Query,
           current: ['YOW'],
+          sourceKind: 'queryResult',
           query: 'source = flights | dedup DestAirportID',
           language: 'PPL',
           dataset: {
@@ -285,6 +286,7 @@ describe('hydrateDashboardAppState variable URL state', () => {
       name: 'Airport',
       type: VariableType.Query,
       current: ['PVG'],
+      sourceKind: 'queryResult',
       query: 'source = flights | dedup DestAirportID',
       language: 'PPL',
       dataset: {

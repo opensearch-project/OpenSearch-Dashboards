@@ -7,19 +7,18 @@ import React, { useCallback, useState } from 'react';
 import { EuiSmallButton, EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
-import { PromQLVariableQueryType } from '../../../../variables/types';
+import { PromQLResourceQuery } from '../../../../variables/types';
 import { QueryEditorModal, QueryEditorModalApplyResult } from './query_editor_modal';
 import './variable_query_panel.scss';
-
-const DEFAULT_PROMQL_QUERY_TYPE: PromQLVariableQueryType = { kind: 'queryResult' };
+import { Dataset } from '../../../../../../data/common';
 
 export interface VariableQueryPanelProps {
   query: string;
   language: string;
-  dataset: any;
+  dataset: Dataset | undefined;
   onQueryChange: (query: string) => void;
   onLanguageChange: (language: string) => void;
-  onDatasetChange: (dataset: any) => void;
+  onDatasetChange: (dataset: Dataset | undefined) => void;
   existingVariableNames?: string[];
   interpolationService?: IVariableInterpolationService;
   regex?: string;
@@ -31,8 +30,8 @@ export interface VariableQueryPanelProps {
   labelField?: string;
   onLabelFieldChange?: (labelField: string) => void;
   currentVariableName?: string;
-  promqlQueryType?: PromQLVariableQueryType;
-  onPromqlQueryTypeChange?: (queryType: PromQLVariableQueryType) => void;
+  promQLResourceQuery?: PromQLResourceQuery;
+  onResourceQueryChange?: (queryType: PromQLResourceQuery | undefined) => void;
   /** Called once, after a successful Apply inside QueryEditorModal. */
   onApplied?: () => void;
 }
@@ -55,8 +54,8 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   labelField = '',
   onLabelFieldChange,
   currentVariableName,
-  promqlQueryType = DEFAULT_PROMQL_QUERY_TYPE,
-  onPromqlQueryTypeChange,
+  promQLResourceQuery,
+  onResourceQueryChange,
   onApplied,
 }) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -69,7 +68,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
       onValueFieldChange?.(result.valueField);
       onLabelFieldChange?.(result.labelField);
       onRegexChange?.(result.regex);
-      onPromqlQueryTypeChange?.(result.promqlQueryType);
+      onResourceQueryChange?.(result.promQLResourceQuery);
       onApplied?.();
       setIsEditorOpen(false);
     },
@@ -80,7 +79,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
       onValueFieldChange,
       onLabelFieldChange,
       onRegexChange,
-      onPromqlQueryTypeChange,
+      onResourceQueryChange,
       onApplied,
     ]
   );
@@ -145,7 +144,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           valueField={valueField}
           labelField={labelField}
           currentVariableName={currentVariableName}
-          promqlQueryType={promqlQueryType}
+          promQLResourceQuery={promQLResourceQuery}
           onApply={handleApply}
           onDiscard={() => setIsEditorOpen(false)}
         />

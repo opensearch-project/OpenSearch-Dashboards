@@ -59,12 +59,13 @@ jest.mock('./dataset_select_widget', () => ({
 // The PromQL dropdown data hook hits the Prometheus resource client over the
 // network — stub it to isolate this modal's own state/wiring logic.
 jest.mock('./promql/use_promql_dropdown_data', () => ({
-  usePromqlDropdownData: () => ({
+  usePromqlDropdownData: ({ promQLResourceQuery }: any) => ({
     promqlLabelNameOptions: [],
     promqlMetricNameOptions: [],
     promqlMatcherValueOptions: {},
     loadPromqlMatcherValues: jest.fn(),
-    promqlMatchers: [],
+    promqlMatchers:
+      promQLResourceQuery?.kind === 'labelValues' ? (promQLResourceQuery.matchers ?? []) : [],
     addPromqlMatcher: jest.fn(),
     updatePromqlMatcherAt: jest.fn(),
     removePromqlMatcherAt: jest.fn(),
@@ -85,7 +86,6 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { executeVariableQuery } from '../../../../variables/variable_query_utils';
 import { executePromQLResourceQuery } from '../../../../variables/promql_variable_query_utils';
 import { QueryEditorModal, QueryEditorModalProps } from './query_editor_modal';
-import { PromQLVariableQueryType } from '../../../../variables/types';
 
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.Mock;
 const mockExecuteVariableQuery = executeVariableQuery as jest.Mock;
@@ -107,13 +107,13 @@ function defaultProps(overrides: Partial<QueryEditorModalProps> = {}): QueryEdit
   return {
     query: '',
     language: 'PPL',
-    dataset: null,
+    dataset: undefined,
     existingVariableNames: [],
     regex: '',
     useTimeFilter: false,
     valueField: '',
     labelField: '',
-    promqlQueryType: { kind: 'queryResult' } as PromQLVariableQueryType,
+    promQLResourceQuery: undefined,
     onApply: jest.fn(),
     onDiscard: jest.fn(),
     ...overrides,
@@ -155,10 +155,10 @@ beforeEach(() => {
 
 describe('QueryEditorModal — Apply gating', () => {
   it('blocks Apply and shows the callout when no Preview has been run', async () => {
-    // dataset: null on mount avoids the auto-run-Preview-on-mount effect,
+    // dataset: undefined on mount avoids the auto-run-Preview-on-mount effect,
     // isolating the "never previewed" gating behavior under test.
     const { component, onApply } = await mountModal({
-      dataset: null,
+      dataset: undefined,
       query: 'source = logs',
     });
 
@@ -174,7 +174,7 @@ describe('QueryEditorModal — Apply gating', () => {
   it('allows Apply once Preview succeeds, even with zero rows ("no results")', async () => {
     mockExecuteVariableQuery.mockResolvedValue(makeQueryResult([]));
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
     });
 
@@ -190,7 +190,7 @@ describe('QueryEditorModal — Apply gating', () => {
       makeQueryResult([{ nested: { a: 1 } }], ['nested'], {})
     );
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
       valueField: 'nested',
     });
@@ -205,7 +205,10 @@ describe('QueryEditorModal — Apply gating', () => {
 
 describe('QueryEditorModal — applyError callout auto-clears', () => {
   it('clears the callout once a fresh, valid Preview run completes — no second Apply click needed', async () => {
-    const { component, onApply } = await mountModal({ dataset: { id: 'ds-1' }, query: '   ' });
+    const { component, onApply } = await mountModal({
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
+      query: '   ',
+    });
 
     // First Apply with an empty query is rejected and shows the callout.
     await clickApply(component);
@@ -249,7 +252,7 @@ describe('QueryEditorModal — field switches do not require a re-Preview', () =
       )
     );
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
       valueField: 'service',
     });
@@ -278,7 +281,7 @@ describe('QueryEditorModal — field switches do not require a re-Preview', () =
       makeQueryResult([{ service: 'api' }], ['service'], { service: 'string' })
     );
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
     });
 
@@ -286,7 +289,7 @@ describe('QueryEditorModal — field switches do not require a re-Preview', () =
     await clickApply(component);
     expect(onApply).toHaveBeenCalledTimes(1);
 
-    // Switching dataset invalidates any previously-fetched queryResult.
+    // Switching dataset invalidates any previously-fetched freeTextResult.
     // DatasetSelectWidget is stubbed and does not expose a DOM affordance, so
     // exercise the equivalent hard-invalidating path via language switch
     // instead (also resets dataset and forces a fresh Preview).
@@ -307,13 +310,16 @@ describe('QueryEditorModal — auto-run Preview on mount', () => {
       makeQueryResult([{ service: 'api' }], ['service'], { service: 'string' })
     );
 
-    await mountModal({ dataset: { id: 'ds-1' }, query: 'source = logs' });
+    await mountModal({
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
+      query: 'source = logs',
+    });
 
     expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
   });
 
   it('does not auto-run when opened with an empty query (new-variable flow)', async () => {
-    await mountModal({ dataset: null, query: '' });
+    await mountModal({ dataset: undefined, query: '' });
 
     expect(mockExecuteVariableQuery).not.toHaveBeenCalled();
     expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
@@ -323,36 +329,53 @@ describe('QueryEditorModal — auto-run Preview on mount', () => {
     mockExecutePromQLResourceQuery.mockResolvedValue(['prometheus', 'node']);
 
     await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       language: 'PROMQL',
-      promqlQueryType: { kind: 'labelValues', label: 'job' },
+      promQLResourceQuery: { kind: 'labelValues', label: 'job' },
     });
 
     expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
   });
 
-  it('does not auto-run the PromQL resource query for the raw "queryResult" kind', async () => {
+  it('does not auto-run the PromQL resource query when there is no query type', async () => {
     await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       language: 'PROMQL',
       query: 'up',
-      promqlQueryType: { kind: 'queryResult' },
+      promQLResourceQuery: undefined,
     });
 
-    // queryResult is the free-text path — it should have gone through
-    // executeVariableQuery instead, and never through the resource client.
+    // No query type means the free-text path, which goes through
+    // executeVariableQuery and never through the resource client.
     expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
     expect(mockExecuteVariableQuery).toHaveBeenCalledTimes(1);
   });
 
   it('does not auto-run the PromQL resource query when there is no dataset yet', async () => {
     await mountModal({
-      dataset: null,
+      dataset: undefined,
       language: 'PROMQL',
-      promqlQueryType: { kind: 'labelValues', label: 'job' },
+      promQLResourceQuery: { kind: 'labelValues', label: 'job' },
     });
 
     expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
+  });
+
+  // Regression: opening an *existing saved* labelValues variable whose matchers
+  // is [] (never added a filter) must still show a default placeholder row —
+  // not just newly-selected labelValues / a dataset reset. Otherwise "Label
+  // filters" renders as an empty section with only "+ Add label filter",
+  // inconsistent with every other entry point into this query type.
+  it('normalizes an existing saved variable with empty matchers to show a default placeholder row', async () => {
+    const { component } = await mountModal({
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
+      language: 'PROMQL',
+      promQLResourceQuery: { kind: 'labelValues', label: 'job', matchers: [] },
+    });
+
+    expect(component.find('[data-test-subj="variableEditorPromqlMatcherLabel-0"]').exists()).toBe(
+      true
+    );
   });
 });
 
@@ -362,7 +385,7 @@ describe('QueryEditorModal — handleApply payload shaping', () => {
       makeQueryResult([{ service: 'api' }], ['service'], { service: 'string' })
     );
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
       valueField: 'service',
       labelField: '',
@@ -375,20 +398,20 @@ describe('QueryEditorModal — handleApply payload shaping', () => {
     expect(onApply).toHaveBeenCalledWith({
       query: 'source = logs',
       language: 'PPL',
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       valueField: 'service',
       labelField: '',
       regex: 'api',
-      promqlQueryType: { kind: 'queryResult' },
+      promQLResourceQuery: undefined,
     });
   });
 
-  it('omits query/valueField/labelField for PromQL fill-in-the-blank and filters empty matchers', async () => {
+  it('omits query/valueField/labelField for PromQL resource queries and filters empty matchers', async () => {
     mockExecutePromQLResourceQuery.mockResolvedValue(['prometheus']);
     const { component, onApply } = await mountModal({
-      dataset: { id: 'ds-1' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       language: 'PROMQL',
-      promqlQueryType: {
+      promQLResourceQuery: {
         kind: 'labelValues',
         label: 'job',
         matchers: [
@@ -406,7 +429,7 @@ describe('QueryEditorModal — handleApply payload shaping', () => {
         query: '',
         valueField: '',
         labelField: '',
-        promqlQueryType: {
+        promQLResourceQuery: {
           kind: 'labelValues',
           label: 'job',
           matchers: [{ label: 'env', operator: '=', value: 'prod' }],
@@ -417,9 +440,9 @@ describe('QueryEditorModal — handleApply payload shaping', () => {
 });
 
 describe('QueryEditorModal — language switch resets incompatible state', () => {
-  it('clears dataset/query/promqlQueryType when toggling from PPL to PromQL', async () => {
+  it('clears dataset/query/promQLResourceQuery when toggling from PPL to PromQL', async () => {
     const { component } = await mountModal({
-      dataset: { id: 'ds-1', type: 'INDEX_PATTERN' },
+      dataset: { id: 'ds-1', title: 'ds-1', type: 'INDEX_PATTERN' },
       query: 'source = logs',
       language: 'PPL',
     });

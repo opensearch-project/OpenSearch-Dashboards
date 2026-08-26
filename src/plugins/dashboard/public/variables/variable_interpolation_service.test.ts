@@ -140,6 +140,16 @@ describe('VariableInterpolationService', () => {
       const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['a|b'] })]);
       expect(svc.interpolate('$service', 'PROMQL')).toBe('a\\|b');
     });
+
+    it('rawValue=true skips PromQL regex-metacharacter escaping', () => {
+      const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['3.1.1'] })]);
+      expect(svc.interpolate('$service', 'PROMQL', undefined, true)).toBe('3.1.1');
+    });
+
+    it('rawValue=true still substitutes the value, just without escaping', () => {
+      const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['a|b'] })]);
+      expect(svc.interpolate('$service', 'PROMQL', undefined, true)).toBe('a|b');
+    });
   });
 
   describe('interpolate — multi-select', () => {

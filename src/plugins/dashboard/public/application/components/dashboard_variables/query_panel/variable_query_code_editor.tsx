@@ -9,6 +9,7 @@ import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public
 import { DashboardServices } from '../../../../types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
 import { DEFAULT_DATA } from '../../../../../../data/common';
+import { Dataset } from '../../../../../../data/common';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
@@ -68,7 +69,7 @@ export interface VariableQueryCodeEditorProps {
   query: string;
   onQueryChange: (query: string) => void;
   /** Current draft dataset — read via a ref internally so the memoized autocomplete provider stays stable. */
-  dataset: any;
+  dataset: Dataset | undefined;
   /** Names of other variables in this dashboard, offered as ${name} autocomplete suggestions. */
   existingVariableNames: string[];
   /** Invoked on Ctrl/Cmd+Enter inside the editor — typically runs the Preview query. */
@@ -129,21 +130,16 @@ export const VariableQueryCodeEditor: React.FC<VariableQueryCodeEditorProps> = (
       try {
         const currentLanguage = languageRef.current;
         const currentDataset = datasetRef.current || data.query.queryString.getQuery().dataset;
+        if (!currentDataset) {
+          return { suggestions: [], incomplete: false };
+        }
 
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(currentLanguage, 'explore');
 
-        let currentDataView;
-        if (currentDataset?.id) {
-          try {
-            currentDataView = await data.dataViews.get(
-              currentDataset.id,
-              currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-            );
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn('[VariableQueryCodeEditor] DataView not found for:', currentDataset.id, e);
-          }
-        }
+        const currentDataView = await data.dataViews.get(
+          currentDataset.id,
+          currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        );
 
         const queryText = model.getValue();
         const offset = model.getOffsetAt(position);
@@ -237,8 +233,12 @@ export const VariableQueryCodeEditor: React.FC<VariableQueryCodeEditorProps> = (
 
   const suggestionProvider = useMemo(() => {
     const languageTriggerCharacters = data.autocomplete?.getTriggerCharacters?.(language);
+    const baseTriggerCharacters = languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS;
+    const triggerCharacters = baseTriggerCharacters.includes('$')
+      ? baseTriggerCharacters
+      : [...baseTriggerCharacters, '$'];
     return {
-      triggerCharacters: languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
+      triggerCharacters,
       provideCompletionItems: (
         model: monaco.editor.ITextModel,
         position: monaco.Position,

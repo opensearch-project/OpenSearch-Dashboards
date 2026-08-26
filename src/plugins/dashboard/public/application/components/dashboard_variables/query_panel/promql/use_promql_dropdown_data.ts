@@ -6,31 +6,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { getPromQLResourceClient } from '../../../../../variables/promql_variable_query_utils';
-import { PromQLLabelMatcher, PromQLVariableQueryType } from '../../../../../variables/types';
+import { PromQLLabelMatcher, PromQLResourceQuery } from '../../../../../variables/types';
+import { Dataset } from '../../../../../../../data/common';
 
 export interface UsePromqlDropdownDataArgs {
   data: DataPublicPluginStart;
-  dataset: any;
+  dataset: Dataset | undefined;
   useTimeFilter: boolean;
-  isPromqlFillInBlank: boolean;
-  promqlQueryType: PromQLVariableQueryType;
-  onPromqlQueryTypeChange?: (queryType: PromQLVariableQueryType) => void;
+  isPrometheusResource: boolean;
+  promQLResourceQuery: PromQLResourceQuery | undefined;
+  onResourceQueryChange?: (queryType: PromQLResourceQuery) => void;
 }
 
 /**
  * Owns all Prometheus resource-API-backed dropdown data and Label filter row
- * mutation logic for the PromQL fill-in-the-blank forms (Label names/Label
+ * mutation logic for the PromQL resource query forms (Label names/Label
  * values/Metrics/Series query).
  */
 export function usePromqlDropdownData({
   data,
   dataset,
   useTimeFilter,
-  isPromqlFillInBlank,
-  promqlQueryType,
-  onPromqlQueryTypeChange,
+  isPrometheusResource,
+  promQLResourceQuery,
+  onResourceQueryChange,
 }: UsePromqlDropdownDataArgs) {
-  // Dropdown source data for the PromQL fill-in-the-blank forms (label names,
+  // Dropdown source data for the PromQL resource query forms (label names,
   // metric names) — backed by the same Prometheus resource API already used
   // for autocomplete elsewhere.
   const [promqlLabelNameOptions, setPromqlLabelNameOptions] = useState<string[]>([]);
@@ -38,7 +39,7 @@ export function usePromqlDropdownData({
 
   // Load the label name and metric name dropdown options for the PromQL.
   useEffect(() => {
-    if (!isPromqlFillInBlank || !dataset?.id) {
+    if (!isPrometheusResource || !dataset?.id) {
       setPromqlLabelNameOptions([]);
       setPromqlMetricNameOptions([]);
       return;
@@ -73,7 +74,7 @@ export function usePromqlDropdownData({
     return () => {
       cancelled = true;
     };
-  }, [isPromqlFillInBlank, dataset?.id, data, useTimeFilter]);
+  }, [isPrometheusResource, dataset?.id, data, useTimeFilter]);
 
   // Value options for each Label filter row, keyed by that row's selected
   // label. Loaded on demand when a row's label is chosen/changed.
@@ -108,8 +109,8 @@ export function usePromqlDropdownData({
 
   // Label filters row mutators — only meaningful for the `labelValues` query type.
   const promqlMatchers: PromQLLabelMatcher[] = useMemo(
-    () => (promqlQueryType.kind === 'labelValues' ? (promqlQueryType.matchers ?? []) : []),
-    [promqlQueryType]
+    () => (promQLResourceQuery?.kind === 'labelValues' ? (promQLResourceQuery.matchers ?? []) : []),
+    [promQLResourceQuery]
   );
 
   const promqlMatcherLabelsKey = useMemo(
@@ -118,7 +119,7 @@ export function usePromqlDropdownData({
   );
 
   useEffect(() => {
-    if (!isPromqlFillInBlank || !dataset?.id) {
+    if (!isPrometheusResource || !dataset?.id) {
       return;
     }
 
@@ -132,7 +133,7 @@ export function usePromqlDropdownData({
 
     labelsNeedingValues.forEach((label) => loadPromqlMatcherValues(label));
   }, [
-    isPromqlFillInBlank,
+    isPrometheusResource,
     dataset?.id,
     promqlMatcherLabelsKey,
     loadPromqlMatcherValues,
@@ -142,12 +143,12 @@ export function usePromqlDropdownData({
 
   const updatePromqlMatchers = useCallback(
     (nextMatchers: PromQLLabelMatcher[]) => {
-      if (promqlQueryType.kind !== 'labelValues' || !onPromqlQueryTypeChange) {
+      if (promQLResourceQuery?.kind !== 'labelValues' || !onResourceQueryChange) {
         return;
       }
-      onPromqlQueryTypeChange({ ...promqlQueryType, matchers: nextMatchers });
+      onResourceQueryChange({ ...promQLResourceQuery, matchers: nextMatchers });
     },
-    [promqlQueryType, onPromqlQueryTypeChange]
+    [promQLResourceQuery, onResourceQueryChange]
   );
 
   const addPromqlMatcher = useCallback(() => {

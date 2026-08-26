@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiTitle,
   EuiFormRow,
@@ -28,10 +28,11 @@ import {
   Variable,
   VariableSortOrder,
   VariableOption,
-  PromQLVariableQueryType,
+  PromQLResourceQuery,
 } from '../../../variables/types';
 import { VariableQueryPanel } from './query_panel/variable_query_panel';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
+import { Dataset } from '../../../../../data/common';
 
 export interface VariableEditorFlyoutProps {
   onClose: () => void;
@@ -130,13 +131,15 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [description, setDescription] = useState(existingVariable?.description || '');
   const [type, setType] = useState<VariableType>(existingVariable?.type || VariableType.Query);
   const [query, setQuery] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.query : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? existingVariable.query
+      : ''
   );
   const [language, setLanguage] = useState(
     existingVariable?.type === VariableType.Query ? existingVariable.language : 'PPL'
   );
-  const [dataset, setDataset] = useState<any>(
-    existingVariable?.type === VariableType.Query ? (existingVariable.dataset ?? null) : null
+  const [dataset, setDataset] = useState<Dataset | undefined>(
+    existingVariable?.type === VariableType.Query ? existingVariable.dataset : undefined
   );
   const [customValues, setCustomValues] = useState<CustomOptionRow[]>(
     existingVariable?.type === VariableType.Custom
@@ -160,23 +163,37 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       : false
   );
   const [valueField, setValueField] = useState(
-    existingVariable?.type === VariableType.Query ? (existingVariable.valueField ?? '') : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? (existingVariable.valueField ?? '')
+      : ''
   );
   const [labelField, setLabelField] = useState(
-    existingVariable?.type === VariableType.Query ? (existingVariable.labelField ?? '') : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? (existingVariable.labelField ?? '')
+      : ''
   );
   const [textValue, setTextValue] = useState(
     existingVariable?.type === VariableType.Text ? (existingVariable.current?.[0] ?? '') : ''
   );
-  const [promqlQueryType, setPromqlQueryType] = useState<PromQLVariableQueryType>(
-    (existingVariable?.type === VariableType.Query && existingVariable.promqlQueryType) || {
-      kind: 'queryResult',
-    }
+  const [promQLResourceQuery, setResourceQuery] = useState<PromQLResourceQuery | undefined>(
+    existingVariable?.type === VariableType.Query &&
+      existingVariable.sourceKind === 'prometheusResource'
+      ? existingVariable.promQLResourceQuery
+      : undefined
   );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isEditing = Boolean(existingVariable);
+
+  // A variable may only reference variables defined before it.
+  const priorVariableNames = useMemo(() => {
+    const index = existingVariable
+      ? existingVariables.findIndex((v) => v.id === existingVariable.id)
+      : -1;
+    const priorVariables = index === -1 ? existingVariables : existingVariables.slice(0, index);
+    return priorVariables.map((v) => v.name);
+  }, [existingVariables, existingVariable]);
   const [hasAppliedQuery, setHasAppliedQuery] = useState(false);
   const handleQueryApplied = useCallback(() => {
     setHasAppliedQuery(true);
@@ -190,12 +207,12 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     setQuery(newQuery);
   }, []);
 
-  const handleDatasetChange = useCallback((newDataset: any) => {
+  const handleDatasetChange = useCallback((newDataset: Dataset | undefined) => {
     setDataset(newDataset);
   }, []);
 
-  const handlePromqlQueryTypeChange = useCallback((newQueryType: PromQLVariableQueryType) => {
-    setPromqlQueryType(newQueryType);
+  const handleResourceQueryChange = useCallback((newQueryType: PromQLResourceQuery | undefined) => {
+    setResourceQuery(newQueryType);
   }, []);
 
   const validateForm = useCallback(() => {
@@ -271,7 +288,8 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       return false;
     }
 
-    if (type === VariableType.Query && !isEditing && !hasAppliedQuery) {
+    const wasAlreadyQueryType = existingVariable?.type === VariableType.Query;
+    if (type === VariableType.Query && !wasAlreadyQueryType && !hasAppliedQuery) {
       setError(
         i18n.translate('dashboard.variableEditor.queryEditorNotApplied', {
           defaultMessage: 'You must edit and apply a query in the query editor before saving',
@@ -313,16 +331,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     setError(null);
     return true;
-  }, [
-    name,
-    label,
-    type,
-    customValues,
-    existingVariables,
-    existingVariable,
-    isEditing,
-    hasAppliedQuery,
-  ]);
+  }, [name, label, type, customValues, existingVariables, existingVariable, hasAppliedQuery]);
 
   const handleSave = useCallback(async () => {
     if (!validateForm()) return;
@@ -337,15 +346,27 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     };
 
     if (type === VariableType.Query) {
+      // `sourceKind` has to be written explicitly here: `variableConfig` is typed as the
+      // collapsed `Omit<Variable, 'id'>` and populated via Object.assign, so the
+      // compiler cannot verify the persisted object matches either branch.
+      const isPrometheusResource = language.toUpperCase() === 'PROMQL' && !!promQLResourceQuery;
+
       Object.assign(variableConfig, {
-        query: query.trim(),
         language,
         dataset: dataset || undefined,
-        valueField: valueField || undefined,
-        labelField: labelField || undefined,
         regex: regex.trim() || undefined,
         useTimeFilter,
-        promqlQueryType: language.toUpperCase() === 'PROMQL' ? promqlQueryType : undefined,
+        ...(isPrometheusResource
+          ? {
+              sourceKind: 'prometheusResource',
+              promQLResourceQuery,
+            }
+          : {
+              sourceKind: 'queryResult',
+              query: query.trim(),
+              valueField: valueField || undefined,
+              labelField: labelField || undefined,
+            }),
       });
     } else if (type === VariableType.Custom) {
       Object.assign(variableConfig, {
@@ -377,7 +398,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     useTimeFilter,
     valueField,
     labelField,
-    promqlQueryType,
+    promQLResourceQuery,
     customValues,
     multi,
     includeAll,
@@ -539,7 +560,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
                 onQueryChange={handleQueryChange}
                 onLanguageChange={handleLanguageChange}
                 onDatasetChange={handleDatasetChange}
-                existingVariableNames={existingVariables.map((v) => v.name)}
+                existingVariableNames={priorVariableNames}
                 interpolationService={interpolationService}
                 regex={regex}
                 onRegexChange={setRegex}
@@ -550,8 +571,8 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
                 labelField={labelField}
                 onLabelFieldChange={setLabelField}
                 currentVariableName={name}
-                promqlQueryType={promqlQueryType}
-                onPromqlQueryTypeChange={handlePromqlQueryTypeChange}
+                promQLResourceQuery={promQLResourceQuery}
+                onResourceQueryChange={handleResourceQueryChange}
                 onApplied={handleQueryApplied}
               />
             )}

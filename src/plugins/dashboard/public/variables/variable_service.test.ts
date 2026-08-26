@@ -11,6 +11,7 @@ import {
   CustomVariable,
   QueryVariable,
   TextVariable,
+  DistributiveOmit,
 } from './types';
 import { VariableInterpolationService } from './variable_interpolation_service';
 
@@ -124,10 +125,11 @@ function makeQueryVariable(overrides: Partial<QueryVariable> = {}): QueryVariabl
     name: 'service',
     type: VariableType.Query,
     current: ['api'],
+    sourceKind: 'queryResult',
     query: 'source=logs | dedup service | fields service',
     language: 'PPL',
     ...overrides,
-  };
+  } as QueryVariable;
 }
 
 describe('VariableService', () => {
@@ -263,23 +265,26 @@ describe('VariableService', () => {
       ]);
     });
 
-    it('should persist promqlQueryType when adding a PromQL fill-in-blank variable (regression)', async () => {
+    it('should persist promQLResourceQuery when adding a PromQL resource query variable (regression)', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['node', 'job']);
       const { service } = createService([], 'dashboard-123', makeDataPluginStub());
 
       await service.addVariable({
         name: 'instance',
         type: VariableType.Query,
-        query: '',
         language: 'PROMQL',
         dataset: { id: 'ds-1' } as any,
-        promqlQueryType: { kind: 'labelValues', label: 'instance' },
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: { kind: 'labelValues', label: 'instance' },
       } as any);
 
-      const saved = service.getVariables()[0] as QueryVariable;
+      const saved = service.getVariables()[0] as Extract<
+        QueryVariable,
+        { sourceKind: 'prometheusResource' }
+      >;
       // buildVariable previously whitelisted fields and silently dropped
-      // promqlQueryType — this asserts it round-trips through addVariable.
-      expect(saved.promqlQueryType).toEqual({ kind: 'labelValues', label: 'instance' });
+      // promQLResourceQuery — this asserts it round-trips through addVariable.
+      expect(saved.promQLResourceQuery).toEqual({ kind: 'labelValues', label: 'instance' });
       expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
         expect.anything(),
         'ds-1',
@@ -481,23 +486,25 @@ describe('VariableService', () => {
       ]);
     });
 
-    it('should refresh options when promqlQueryType changes (shouldRefreshQueryOptions trigger)', async () => {
+    it('should refresh options when promQLResourceQuery changes (shouldRefreshQueryOptions trigger)', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['job']);
       const { service } = createService(
         [
           makeQueryVariable({
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'labelNames' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'labelNames' },
           }),
         ],
         'dashboard-123',
         makeDataPluginStub()
       );
 
-      // Only promqlQueryType changes — no other trigger field (query/language/dataset/etc.) is touched.
+      // Only promQLResourceQuery changes — no other trigger field (query/language/dataset/etc.) is touched.
       await service.updateVariable('query-1', {
-        promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: { kind: 'metrics', metricRegex: 'node_.*' },
       });
 
       expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
@@ -547,7 +554,7 @@ describe('VariableService', () => {
       expect(mockExecuteVariableQuery).toHaveBeenCalled();
     });
 
-    it('should persist promqlQueryType when switching from Custom to a PromQL Query variable (regression)', async () => {
+    it('should persist promQLResourceQuery when switching from Custom to a PromQL Query variable (regression)', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['up']);
       const { service } = createService(
         [makeCustomVariable()],
@@ -557,14 +564,17 @@ describe('VariableService', () => {
 
       await service.updateVariable('custom-1', {
         type: VariableType.Query,
-        query: '',
         language: 'PROMQL',
         dataset: { id: 'ds-1' } as any,
-        promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: { kind: 'metrics', metricRegex: 'node_.*' },
       } as any);
 
-      const updated = service.getVariables()[0] as QueryVariable;
-      expect(updated.promqlQueryType).toEqual({ kind: 'metrics', metricRegex: 'node_.*' });
+      const updated = service.getVariables()[0] as Extract<
+        QueryVariable,
+        { sourceKind: 'prometheusResource' }
+      >;
+      expect(updated.promQLResourceQuery).toEqual({ kind: 'metrics', metricRegex: 'node_.*' });
       expect(mockExecutePromQLResourceQuery).toHaveBeenCalled();
     });
   });
@@ -906,7 +916,7 @@ describe('VariableService', () => {
     });
   });
 
-  describe('refreshVariableOptions — PromQL fill-in-blank', () => {
+  describe('refreshVariableOptions — PromQL resource query', () => {
     it('should call executePromQLResourceQuery (not executeVariableQuery) for labelNames', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['instance', 'job', 'node']);
       const dataPlugin = makeDataPluginStub();
@@ -916,7 +926,8 @@ describe('VariableService', () => {
             current: undefined,
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'labelNames' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'labelNames' },
           }),
         ],
         undefined,
@@ -949,7 +960,8 @@ describe('VariableService', () => {
           makeQueryVariable({
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'metrics', metricRegex: 'node_.*' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'metrics', metricRegex: 'node_.*' },
             useTimeFilter: true,
           }),
         ],
@@ -968,7 +980,7 @@ describe('VariableService', () => {
       );
     });
 
-    it('should apply regex filtering to PromQL fill-in-blank results', async () => {
+    it('should apply regex filtering to PromQL resource query results', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['prod-api', 'staging-api', 'prod-web']);
       const { service } = createService(
         [
@@ -976,7 +988,8 @@ describe('VariableService', () => {
             current: undefined,
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'labelValues', label: 'instance' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'labelValues', label: 'instance' },
             regex: '^prod',
           }),
         ],
@@ -990,14 +1003,13 @@ describe('VariableService', () => {
       expect(getOptionValues(withState[0].options)).toEqual(['prod-api', 'prod-web']);
     });
 
-    it('should treat kind "queryResult" as the regular free-text query path, not PromQL fill-in-blank', async () => {
+    it('should take the free-text query path for a PROMQL variable with no sourceKind', async () => {
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-1']));
       const { service } = createService(
         [
           makeQueryVariable({
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'queryResult' },
             query: 'up',
           }),
         ],
@@ -1011,13 +1023,12 @@ describe('VariableService', () => {
       expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
     });
 
-    it('should treat non-PROMQL languages as the regular free-text query path even with promqlQueryType set', async () => {
+    it('should take the free-text query path for a non-PROMQL variable', async () => {
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['svc-1']));
       const { service } = createService(
         [
           makeQueryVariable({
             language: 'PPL',
-            promqlQueryType: { kind: 'labelNames' } as any,
           }),
         ],
         undefined,
@@ -1037,7 +1048,8 @@ describe('VariableService', () => {
           makeQueryVariable({
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'series', matcher: 'up' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'series', matcher: 'up' },
           }),
         ],
         undefined,
@@ -1057,7 +1069,8 @@ describe('VariableService', () => {
           makeQueryVariable({
             language: 'PROMQL',
             dataset: { id: 'ds-1' } as any,
-            promqlQueryType: { kind: 'labelNames' },
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'labelNames' },
           }),
         ],
         undefined,
@@ -1117,7 +1130,7 @@ describe('VariableService', () => {
       );
     });
 
-    it('should interpolate ${var} references inside promqlQueryType fields before the resource query', async () => {
+    it('should interpolate ${var} references inside promQLResourceQuery fields before the resource query', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['pod-a', 'pod-b']);
       const source = makeCustomVariable({ id: 'source-1', name: 'promsource', current: ['node'] });
       const promqlVar = makeQueryVariable({
@@ -1125,7 +1138,8 @@ describe('VariableService', () => {
         name: 'instance',
         language: 'PROMQL',
         dataset: { id: 'ds-1' } as any,
-        promqlQueryType: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
       });
       const { service } = createService([source, promqlVar], undefined, makeDataPluginStub());
       service.setInterpolationService({
@@ -1146,7 +1160,7 @@ describe('VariableService', () => {
       );
     });
 
-    it('should refresh a dependent PromQL fill-in-blank variable when the referenced variable changes', async () => {
+    it('should refresh a dependent PromQL resource query variable when the referenced variable changes', async () => {
       mockExecutePromQLResourceQuery.mockResolvedValue(['node']);
       const source = makeCustomVariable({ id: 'source-1', name: 'promsource', current: ['node'] });
       const promqlVar = makeQueryVariable({
@@ -1154,7 +1168,8 @@ describe('VariableService', () => {
         name: 'instance',
         language: 'PROMQL',
         dataset: { id: 'ds-1' } as any,
-        promqlQueryType: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: { kind: 'labelValues', label: 'instance', metric: '${promsource}' },
       });
       const { service } = createService([source, promqlVar], undefined, makeDataPluginStub());
 
@@ -1162,6 +1177,45 @@ describe('VariableService', () => {
       service.updateVariableValue('source-1', ['different-source']);
 
       expect(mockExecutePromQLResourceQuery).toHaveBeenCalledTimes(1);
+    });
+
+    // Regression test for a real double-escaping bug: interpolating a structured
+    // field (Label filter label/value) must NOT apply PromQL regex-metacharacter
+    // escaping, because buildSeriesSelector/escapeSelectorValue escapes it again
+    // downstream. Uses the REAL VariableInterpolationService (not a hand-rolled
+    // mock) so the rawValue plumbing is actually exercised end to end.
+    it('should not regex-escape ${var} values substituted into Label filter label/value fields', async () => {
+      mockExecutePromQLResourceQuery.mockResolvedValue(['ok']);
+      const source = makeCustomVariable({ id: 'source-1', name: 'a', current: ['3.1.1'] });
+      const promqlVar = makeQueryVariable({
+        id: 'query-1',
+        name: 'instance',
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: {
+          kind: 'labelValues',
+          label: '${a}',
+          matchers: [{ label: '${a}', operator: '=', value: '${a}' }],
+        },
+      });
+      const { service } = createService([source, promqlVar], undefined, makeDataPluginStub());
+      service.setInterpolationService(
+        new VariableInterpolationService(() => service.getVariablesWithState())
+      );
+
+      await service.refreshVariableOptions('query-1');
+
+      expect(mockExecutePromQLResourceQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        'ds-1',
+        {
+          kind: 'labelValues',
+          label: '3.1.1',
+          matchers: [{ label: '3.1.1', operator: '=', value: '3.1.1' }],
+        },
+        undefined
+      );
     });
   });
 
@@ -2048,7 +2102,7 @@ describe('VariableService', () => {
         type: VariableType.Custom,
         customOptions: ['dev'],
         allowCustomValue: true,
-      } as Omit<Variable, 'id'>);
+      } as DistributiveOmit<Variable, 'id'>);
 
       expect(service.getVariables()[0].allowCustomValue).toBe(true);
     });

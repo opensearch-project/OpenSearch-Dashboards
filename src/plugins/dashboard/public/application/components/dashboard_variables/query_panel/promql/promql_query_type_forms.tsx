@@ -16,7 +16,7 @@ import {
   EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { PromQLLabelMatcher, PromQLVariableQueryType } from '../../../../../variables/types';
+import { PromQLLabelMatcher, PromQLResourceQuery } from '../../../../../variables/types';
 import '../variable_query_panel.scss';
 
 const PROMQL_MATCHER_OPERATORS: Array<PromQLLabelMatcher['operator']> = ['=', '!=', '=~', '!~'];
@@ -40,8 +40,8 @@ const toComboBoxOptionsWithVariables = (
 ];
 
 export interface PromqlQueryTypeFormsProps {
-  queryType: PromQLVariableQueryType;
-  onChange: (queryType: PromQLVariableQueryType) => void;
+  queryType: PromQLResourceQuery;
+  onChange: (queryType: PromQLResourceQuery) => void;
   promqlLabelNameOptions: string[];
   promqlMetricNameOptions: string[];
   promqlMatcherValueOptions: Record<string, string[]>;
@@ -244,7 +244,10 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                           { defaultMessage: 'Select value...' }
                         )}
                         singleSelection={{ asPlainText: true }}
-                        options={toComboBoxOptions(promqlMatcherValueOptions[matcher.label] ?? [])}
+                        options={toComboBoxOptionsWithVariables(
+                          promqlMatcherValueOptions[matcher.label] ?? [],
+                          existingVariableNames
+                        )}
                         selectedOptions={matcher.value ? [{ label: matcher.value }] : []}
                         onChange={(selected) =>
                           updatePromqlMatcherAt(index, { value: selected[0]?.label || '' })

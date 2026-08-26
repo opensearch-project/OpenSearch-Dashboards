@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Dataset } from '../../../data/common';
+
 /**
  * Variable types supported by Dashboard
  */
@@ -51,25 +53,40 @@ export enum VariableSortOrder {
   NumericalDesc = 'numerical-desc',
 }
 
-/**
- * Query parameters for fetching variable options
- */
-export interface VariableQueryParams {
+/** Parameters for free-text query definition */
+export interface QueryResultBaseParams {
   query: string;
   language: string;
-  dataset?: {
-    id: string;
-    title: string;
-    type: string;
-    timeFieldName?: string;
-  };
+  dataset?: Dataset;
 }
+
+/**
+ * What a query variable's options are fetched from. Discriminated by `sourceKind`.
+ */
+export type VariableQueryParams =
+  | (QueryResultBaseParams & {
+      /** Free-text query expression run through the search strategy. */
+      sourceKind: 'queryResult';
+      /** Field used as the option value. Defaults to the first returned field when unset. */
+      valueField?: string;
+      /** Optional field used as the option display label. */
+      labelField?: string;
+    })
+  | {
+      /** Structured Prometheus resource lookup. */
+      sourceKind: 'prometheusResource';
+      language: 'PROMQL';
+      dataset?: Dataset;
+      promQLResourceQuery: PromQLResourceQuery;
+    };
+
+/** `Omit` that distributes over a union instead of collapsing it to common keys. */
+export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
 export interface NormalizedVariableOption {
   value: string;
   label?: string;
 }
-
 export type VariableOption = string | NormalizedVariableOption;
 
 /**
@@ -86,7 +103,8 @@ export interface PromQLLabelMatcher {
   value: string;
 }
 
-export type PromQLVariableQueryType =
+/** The structured Prometheus resource lookups a query variable can perform. */
+export type PromQLResourceQuery =
   | {
       kind: 'labelNames';
       /** Optional regular expression to scope the returned label names to matching metric names. */
@@ -110,27 +128,17 @@ export type PromQLVariableQueryType =
       kind: 'series';
       /** Series selector/matcher. */
       matcher: string;
-    }
-  | {
-      kind: 'queryResult';
     };
 
-/**
- * Query type variable — options fetched from a query
- */
-export interface QueryVariable extends VariableMeta, VariableQueryParams {
-  type: VariableType.Query;
-  /** Field used as the option value. Defaults to the first returned field when unset. */
-  valueField?: string;
-  /** Optional field used as the option display label. */
-  labelField?: string;
-  /** Regex filter/extractor — matching options are shown and capture groups can extract values */
-  regex?: string;
-  /** Whether to refresh options based on time range changes (default: false) */
-  useTimeFilter?: boolean;
-  /** PromQL query type */
-  promqlQueryType?: PromQLVariableQueryType;
-}
+/** Query type variable — options fetched from a query. */
+export type QueryVariable = VariableMeta &
+  VariableQueryParams & {
+    type: VariableType.Query;
+    /** Regex filter/extractor — matching options are shown and capture groups can extract values. */
+    regex?: string;
+    /** Whether to refresh options based on time range changes (default: false) */
+    useTimeFilter?: boolean;
+  };
 
 export interface TextVariable extends VariableMeta {
   type: VariableType.Text;

@@ -4,16 +4,16 @@
  */
 
 import {
-  mapPromqlQueryTypeTextFields,
-  interpolatePromqlQueryType,
-  collectPromqlQueryTypeTextFields,
+  mapResourceQueryTextFields,
+  interpolateResourceQuery,
+  collectResourceQueryTextFields,
   hasValidLabelValuesSelector,
   getPromQLResourceClient,
   executePromQLResourceQuery,
   buildPromQLVariableOptions,
   PromQLResourceClientLike,
 } from './promql_variable_query_utils';
-import { PromQLLabelMatcher, PromQLVariableQueryType } from './types';
+import { PromQLLabelMatcher, PromQLResourceQuery } from './types';
 
 function makeMatcher(overrides: Partial<PromQLLabelMatcher> = {}): PromQLLabelMatcher {
   return { label: 'job', operator: '=', value: 'prometheus', ...overrides };
@@ -38,33 +38,33 @@ function makeDataPlugin(client: PromQLResourceClientLike | undefined): any {
   };
 }
 
-describe('mapPromqlQueryTypeTextFields / interpolatePromqlQueryType / collectPromqlQueryTypeTextFields', () => {
+describe('mapResourceQueryTextFields / interpolateResourceQuery / collectResourceQueryTextFields', () => {
   it('transforms metricRegex for labelNames, leaving other kinds untouched by the same code path', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'labelNames', metricRegex: 'node_.*' };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => v.toUpperCase());
+    const queryType: PromQLResourceQuery = { kind: 'labelNames', metricRegex: 'node_.*' };
+    const result = mapResourceQueryTextFields(queryType, (v) => v.toUpperCase());
     expect(result).toEqual({ kind: 'labelNames', metricRegex: 'NODE_.*' });
   });
 
   it('leaves metricRegex undefined when not set (does not coerce to a transformed empty string)', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'labelNames' };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => `X${v}X`);
+    const queryType: PromQLResourceQuery = { kind: 'labelNames' };
+    const result = mapResourceQueryTextFields(queryType, (v) => `X${v}X`);
     expect(result).toEqual({ kind: 'labelNames', metricRegex: undefined });
   });
 
   it('transforms metricRegex for metrics the same way as labelNames', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'metrics', metricRegex: 'up' };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => `${v}!`);
+    const queryType: PromQLResourceQuery = { kind: 'metrics', metricRegex: 'up' };
+    const result = mapResourceQueryTextFields(queryType, (v) => `${v}!`);
     expect(result).toEqual({ kind: 'metrics', metricRegex: 'up!' });
   });
 
   it('transforms label, metric, and every matcher label/value for labelValues', () => {
-    const queryType: PromQLVariableQueryType = {
+    const queryType: PromQLResourceQuery = {
       kind: 'labelValues',
       label: '$mylabel',
       metric: '$mymetric',
       matchers: [makeMatcher({ label: '$k', value: '$v' })],
     };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => v.replace('$', 'resolved_'));
+    const result = mapResourceQueryTextFields(queryType, (v) => v.replace('$', 'resolved_'));
     expect(result).toEqual({
       kind: 'labelValues',
       label: 'resolved_mylabel',
@@ -74,48 +74,36 @@ describe('mapPromqlQueryTypeTextFields / interpolatePromqlQueryType / collectPro
   });
 
   it('leaves matchers undefined for labelValues when not set', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'labelValues', label: 'job' };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => v);
+    const queryType: PromQLResourceQuery = { kind: 'labelValues', label: 'job' };
+    const result = mapResourceQueryTextFields(queryType, (v) => v);
     expect((result as any).matchers).toBeUndefined();
   });
 
   it('transforms the matcher for series', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'series', matcher: 'up{job="$var"}' };
-    const result = mapPromqlQueryTypeTextFields(queryType, (v) => v.replace('$var', 'node'));
+    const queryType: PromQLResourceQuery = { kind: 'series', matcher: 'up{job="$var"}' };
+    const result = mapResourceQueryTextFields(queryType, (v) => v.replace('$var', 'node'));
     expect(result).toEqual({ kind: 'series', matcher: 'up{job="node"}' });
   });
 
-  it('is a no-op for queryResult (no free-text fields to transform)', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'queryResult' };
-    const transform = jest.fn((v: string) => v);
-    const result = mapPromqlQueryTypeTextFields(queryType, transform);
-    expect(result).toBe(queryType);
-    expect(transform).not.toHaveBeenCalled();
-  });
-
-  it('interpolatePromqlQueryType delegates straight to mapPromqlQueryTypeTextFields', () => {
-    const queryType: PromQLVariableQueryType = { kind: 'labelNames', metricRegex: '$x' };
-    const result = interpolatePromqlQueryType(queryType, (v) => v.replace('$x', 'resolved'));
+  it('interpolateResourceQuery delegates straight to mapResourceQueryTextFields', () => {
+    const queryType: PromQLResourceQuery = { kind: 'labelNames', metricRegex: '$x' };
+    const result = interpolateResourceQuery(queryType, (v) => v.replace('$x', 'resolved'));
     expect(result).toEqual({ kind: 'labelNames', metricRegex: 'resolved' });
   });
 
-  it('collectPromqlQueryTypeTextFields returns every free-text field value for labelValues, in field order', () => {
-    const queryType: PromQLVariableQueryType = {
+  it('collectResourceQueryTextFields returns every free-text field value for labelValues, in field order', () => {
+    const queryType: PromQLResourceQuery = {
       kind: 'labelValues',
       label: 'lbl',
       metric: 'met',
       matchers: [makeMatcher({ label: 'a', value: '1' }), makeMatcher({ label: 'b', value: '2' })],
     };
-    expect(collectPromqlQueryTypeTextFields(queryType)).toEqual(['lbl', 'met', 'a', '1', 'b', '2']);
+    expect(collectResourceQueryTextFields(queryType)).toEqual(['lbl', 'met', 'a', '1', 'b', '2']);
   });
 
-  it('collectPromqlQueryTypeTextFields returns an empty array for queryResult', () => {
-    expect(collectPromqlQueryTypeTextFields({ kind: 'queryResult' })).toEqual([]);
-  });
-
-  it('collectPromqlQueryTypeTextFields returns an empty array when labelNames/metrics have no metricRegex', () => {
-    expect(collectPromqlQueryTypeTextFields({ kind: 'labelNames' })).toEqual([]);
-    expect(collectPromqlQueryTypeTextFields({ kind: 'metrics' })).toEqual([]);
+  it('collectResourceQueryTextFields returns an empty array when labelNames/metrics have no metricRegex', () => {
+    expect(collectResourceQueryTextFields({ kind: 'labelNames' })).toEqual([]);
+    expect(collectResourceQueryTextFields({ kind: 'metrics' })).toEqual([]);
   });
 });
 
@@ -151,6 +139,26 @@ describe('hasValidLabelValuesSelector', () => {
       makeMatcher({ label: 'env', operator: '=~' }),
     ];
     expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(true);
+  });
+
+  it('is invalid when the only "=~" matcher can match the empty string (e.g. ".*") and there is no metric', () => {
+    // Prometheus rejects a selector whose only matcher matches "" with HTTP 400
+    // ("vector selector must contain at least one non-empty matcher").
+    expect(
+      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: '.*' })])
+    ).toBe(false);
+    expect(
+      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: 'a*' })])
+    ).toBe(false);
+  });
+
+  it('is valid when a "=~" matcher regex cannot match the empty string (e.g. ".+")', () => {
+    expect(
+      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: '.+' })])
+    ).toBe(true);
+    expect(
+      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: 'node_.*' })])
+    ).toBe(true);
   });
 
   it('is invalid when every matcher is negative-only ("!=") and there is no metric', () => {
@@ -190,16 +198,20 @@ describe('getPromQLResourceClient', () => {
     const dataPlugin = makeDataPlugin(undefined);
     expect(getPromQLResourceClient(dataPlugin)).toBeUndefined();
   });
+
+  it('returns undefined when the factory throws (query_enhancements not installed)', () => {
+    const dataPlugin: any = {
+      resourceClientFactory: {
+        get: jest.fn(() => {
+          throw new Error('Connection type unsupported: prometheus');
+        }),
+      },
+    };
+    expect(getPromQLResourceClient(dataPlugin)).toBeUndefined();
+  });
 });
 
 describe('executePromQLResourceQuery', () => {
-  it('throws for the "queryResult" kind — it is handled by the free-text flow, not here', async () => {
-    const dataPlugin = makeDataPlugin(makeClient());
-    await expect(
-      executePromQLResourceQuery(dataPlugin, 'ds-1', { kind: 'queryResult' })
-    ).rejects.toThrow(/does not handle the 'queryResult' query type/);
-  });
-
   it('throws when no dataConnectionId is provided', async () => {
     const dataPlugin = makeDataPlugin(makeClient());
     await expect(

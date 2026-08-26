@@ -15,11 +15,12 @@ import {
 import {
   executePromQLResourceQuery,
   buildPromQLVariableOptions,
-  interpolatePromqlQueryType,
+  interpolateResourceQuery,
   hasValidLabelValuesSelector,
 } from '../../../../variables/promql_variable_query_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
-import { NormalizedVariableOption, PromQLVariableQueryType } from '../../../../variables/types';
+import { NormalizedVariableOption, PromQLResourceQuery } from '../../../../variables/types';
+import { Dataset } from '../../../../../../data/common';
 
 const MAX_PREVIEW_OPTIONS = 100;
 const EMPTY_FIELDS: string[] = [];
@@ -28,20 +29,20 @@ export interface UseVariableQueryPreviewArgs {
   data: DataPublicPluginStart;
   query: string;
   language: string;
-  dataset: any;
+  dataset: Dataset | undefined;
   useTimeFilter: boolean;
   valueField: string;
   labelField: string;
   regex: string;
   interpolationService?: IVariableInterpolationService;
   currentVariableName?: string;
-  isPromqlFillInBlank: boolean;
-  promqlQueryType: PromQLVariableQueryType;
+  isPrometheusResource: boolean;
+  promQLResourceQuery: PromQLResourceQuery | undefined;
 }
 
 /**
  * Owns query execution (free-text via executeVariableQuery, or PromQL
- * fill-in-the-blank via executePromQLResourceQuery) and the derived preview
+ * resource lookups via executePromQLResourceQuery) and the derived preview
  * option list / error state shared by both modes.
  */
 export function useVariableQueryPreview({
@@ -55,38 +56,38 @@ export function useVariableQueryPreview({
   regex,
   interpolationService,
   currentVariableName,
-  isPromqlFillInBlank,
-  promqlQueryType,
+  isPrometheusResource,
+  promQLResourceQuery,
 }: UseVariableQueryPreviewArgs) {
   const [isLoading, setIsLoading] = useState(false);
-  const [queryResult, setQueryResult] = useState<VariableQueryResult | null>(null);
+  const [freeTextResult, setFreeTextResult] = useState<VariableQueryResult | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
-  const [promqlOptions, setPromqlOptions] = useState<NormalizedVariableOption[] | null>(null);
+  const [resourceOptions, setResourceOptions] = useState<NormalizedVariableOption[] | null>(null);
 
   useEffect(() => {
-    setQueryResult(null);
-    setPromqlOptions(null);
+    setFreeTextResult(null);
+    setResourceOptions(null);
     setExecutionError(null);
-  }, [query, dataset, language, promqlQueryType]);
+  }, [query, dataset, language, promQLResourceQuery]);
 
-  const availableFields = queryResult?.fields ?? EMPTY_FIELDS;
+  const availableFields = freeTextResult?.fields ?? EMPTY_FIELDS;
 
   const previewOptionsResult = useMemo(() => {
-    // Fill-in-the-blank PromQL query types return plain value lists directly —
+    // Resource query types return plain value lists directly —
     // there's no tabular result to pick a value/label field from.
-    if (isPromqlFillInBlank) {
-      return { options: promqlOptions ?? ([] as NormalizedVariableOption[]) };
+    if (isPrometheusResource) {
+      return { options: resourceOptions ?? ([] as NormalizedVariableOption[]) };
     }
 
-    if (!queryResult) {
+    if (!freeTextResult) {
       return { options: [] as NormalizedVariableOption[] };
     }
 
-    return buildVariableOptionsFromQueryResult(queryResult, {
+    return buildVariableOptionsFromQueryResult(freeTextResult, {
       valueField: valueField || undefined,
       labelField: labelField || undefined,
     });
-  }, [isPromqlFillInBlank, promqlOptions, queryResult, valueField, labelField]);
+  }, [isPrometheusResource, resourceOptions, freeTextResult, valueField, labelField]);
 
   const filteredPreviewOptions = useMemo(
     () => applyRegexToVariableOptions(previewOptionsResult.options, regex),
@@ -102,12 +103,12 @@ export function useVariableQueryPreview({
   const selectedValueField = valueField || availableFields[0];
 
   // Single classification of the preview outcome for BOTH the displayed message and Apply gating.
-  const previewResult = useMemo<{ message: string | null; blocking: boolean }>(() => {
-    if (isPromqlFillInBlank) {
-      if (promqlOptions === null || filteredPreviewOptions.length > 0) {
+  const previewValidation = useMemo<{ message: string | null; blocking: boolean }>(() => {
+    if (isPrometheusResource) {
+      if (resourceOptions === null || filteredPreviewOptions.length > 0) {
         return { message: null, blocking: false };
       }
-      if (promqlOptions.length === 0) {
+      if (resourceOptions.length === 0) {
         return {
           message: i18n.translate('dashboard.variableQueryPanel.promqlNoResults', {
             defaultMessage: 'Query returned no results',
@@ -123,11 +124,11 @@ export function useVariableQueryPreview({
       };
     }
 
-    if (!queryResult || filteredPreviewOptions.length > 0) {
+    if (!freeTextResult || filteredPreviewOptions.length > 0) {
       return { message: null, blocking: false };
     }
 
-    if (queryResult.rows.length === 0) {
+    if (freeTextResult.rows.length === 0) {
       return {
         message: i18n.translate('dashboard.variableQueryPanel.noResults', {
           defaultMessage: 'Query returned no results',
@@ -171,28 +172,30 @@ export function useVariableQueryPreview({
       blocking: false,
     };
   }, [
-    isPromqlFillInBlank,
-    promqlOptions,
+    isPrometheusResource,
+    resourceOptions,
     availableFields,
     filteredPreviewOptions.length,
     previewOptionsResult.options.length,
-    queryResult,
+    freeTextResult,
     selectedValueField,
   ]);
 
-  const previewError = executionError || previewResult.message;
+  const previewError = executionError || previewValidation.message;
 
-  const hasCompletedQuery = isPromqlFillInBlank ? promqlOptions !== null : queryResult !== null;
+  const hasCompletedQuery = isPrometheusResource
+    ? resourceOptions !== null
+    : freeTextResult !== null;
 
   // Valid once a query has executed since the last edit and there is no blocking error.
-  const canApply = hasCompletedQuery && !executionError && !previewResult.blocking;
+  const canApply = hasCompletedQuery && !executionError && !previewValidation.blocking;
 
-  const handleRunPromqlResourceQuery = useCallback(async () => {
-    if (promqlQueryType.kind === 'queryResult') {
+  const handleRunResourceQuery = useCallback(async () => {
+    if (!promQLResourceQuery) {
       return;
     }
 
-    if (promqlQueryType.kind === 'labelValues' && !promqlQueryType.label.trim()) {
+    if (promQLResourceQuery.kind === 'labelValues' && !promQLResourceQuery.label.trim()) {
       setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.promqlLabelEmpty', {
           defaultMessage: 'Label is required',
@@ -202,8 +205,8 @@ export function useVariableQueryPreview({
     }
 
     if (
-      promqlQueryType.kind === 'labelValues' &&
-      !hasValidLabelValuesSelector(promqlQueryType.metric, promqlQueryType.matchers ?? [])
+      promQLResourceQuery.kind === 'labelValues' &&
+      !hasValidLabelValuesSelector(promQLResourceQuery.metric, promQLResourceQuery.matchers ?? [])
     ) {
       setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.promqlNegativeOnlySelector', {
@@ -215,7 +218,7 @@ export function useVariableQueryPreview({
       return;
     }
 
-    if (promqlQueryType.kind === 'series' && !promqlQueryType.matcher.trim()) {
+    if (promQLResourceQuery.kind === 'series' && !promQLResourceQuery.matcher.trim()) {
       setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.promqlMatcherEmpty', {
           defaultMessage: 'Series selector is required',
@@ -228,11 +231,11 @@ export function useVariableQueryPreview({
     setExecutionError(null);
 
     try {
-      let queryTypeToExecute: PromQLVariableQueryType = promqlQueryType;
+      let queryTypeToExecute: PromQLResourceQuery = promQLResourceQuery;
       if (interpolationService) {
-        queryTypeToExecute = interpolatePromqlQueryType(promqlQueryType, (value) =>
+        queryTypeToExecute = interpolateResourceQuery(promQLResourceQuery, (value) =>
           interpolationService.hasVariables(value)
-            ? interpolationService.interpolate(value, language, currentVariableName)
+            ? interpolationService.interpolate(value, language, currentVariableName, true)
             : value
         );
       }
@@ -246,9 +249,9 @@ export function useVariableQueryPreview({
       );
       // Regex filtering/extraction is applied once, downstream, by
       // filteredPreviewOptions (same as the free-text query flow) — dedupe here only.
-      setPromqlOptions(buildPromQLVariableOptions(values));
+      setResourceOptions(buildPromQLVariableOptions(values));
     } catch (err: any) {
-      setPromqlOptions(null);
+      setResourceOptions(null);
       setExecutionError(
         err.message ||
           i18n.translate('dashboard.variableQueryPanel.executionFailed', {
@@ -259,7 +262,7 @@ export function useVariableQueryPreview({
       setIsLoading(false);
     }
   }, [
-    promqlQueryType,
+    promQLResourceQuery,
     useTimeFilter,
     data,
     dataset,
@@ -268,7 +271,7 @@ export function useVariableQueryPreview({
     currentVariableName,
   ]);
 
-  const handleRunQuery = useCallback(async () => {
+  const handleRunFreeTextQuery = useCallback(async () => {
     if (!query.trim()) {
       setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.queryEmpty', {
@@ -303,9 +306,9 @@ export function useVariableQueryPreview({
         useTimeFilter
       );
 
-      setQueryResult(result);
+      setFreeTextResult(result);
     } catch (err: any) {
-      setQueryResult(null);
+      setFreeTextResult(null);
       setExecutionError(
         err.message ||
           i18n.translate('dashboard.variableQueryPanel.executionFailed', {
@@ -326,7 +329,7 @@ export function useVariableQueryPreview({
     previewError,
     canApply,
     selectedValueField,
-    handleRunQuery,
-    handleRunPromqlResourceQuery,
+    handleRunFreeTextQuery,
+    handleRunResourceQuery,
   };
 }

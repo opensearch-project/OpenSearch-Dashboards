@@ -29,15 +29,20 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DashboardServices } from '../../../../types';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
-import { NormalizedVariableOption, PromQLVariableQueryType } from '../../../../variables/types';
+import { NormalizedVariableOption, PromQLResourceQuery } from '../../../../variables/types';
 import { LanguageToggle } from './language_toggle';
 import { DatasetSelectWidget } from './dataset_select_widget';
 import { MetricsExplorerModal } from './promql/metrics_explorer_modal';
-import { PromqlQueryTypeSelector } from './promql/promql_query_type_selector';
+import {
+  PromqlQueryTypeSelector,
+  DEFAULT_PROMQL_LABEL_FILTER_ROW,
+  ensureResourceQueryHasDefaultMatcherRow,
+} from './promql/promql_query_type_selector';
 import { PromqlQueryTypeForms } from './promql/promql_query_type_forms';
 import { usePromqlDropdownData } from './promql/use_promql_dropdown_data';
 import { useVariableQueryPreview } from './use_variable_query_preview';
 import { VariableQueryCodeEditor } from './variable_query_code_editor';
+import { Dataset } from '../../../../../../data/common';
 
 const getPreviewOptionDisplayText = (option: NormalizedVariableOption): string =>
   option.label ? `${option.label} (${option.value})` : option.value;
@@ -56,17 +61,17 @@ const buildFieldOptions = (
 export interface QueryEditorModalApplyResult {
   query: string;
   language: string;
-  dataset: any;
+  dataset: Dataset | undefined;
   valueField: string;
   labelField: string;
   regex: string;
-  promqlQueryType: PromQLVariableQueryType;
+  promQLResourceQuery: PromQLResourceQuery | undefined;
 }
 
 export interface QueryEditorModalProps {
   query: string;
   language: string;
-  dataset: any;
+  dataset: Dataset | undefined;
   existingVariableNames?: string[];
   interpolationService?: IVariableInterpolationService;
   regex?: string;
@@ -74,7 +79,7 @@ export interface QueryEditorModalProps {
   valueField?: string;
   labelField?: string;
   currentVariableName?: string;
-  promqlQueryType: PromQLVariableQueryType;
+  promQLResourceQuery: PromQLResourceQuery | undefined;
   /** Called when the user applies the changes made inside the modal. */
   onApply: (result: QueryEditorModalApplyResult) => void;
   /** Called when the user discards changes made inside the modal. */
@@ -92,7 +97,7 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
   valueField: initialValueField = '',
   labelField: initialLabelField = '',
   currentVariableName,
-  promqlQueryType: initialPromqlQueryType,
+  promQLResourceQuery: initialResourceQuery,
   onApply,
   onDiscard,
 }) => {
@@ -106,16 +111,18 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
   const [regex, setRegex] = useState(initialRegex);
   const [valueField, setValueField] = useState(initialValueField);
   const [labelField, setLabelField] = useState(initialLabelField);
-  const [promqlQueryType, setPromqlQueryTypeState] = useState(initialPromqlQueryType);
+  const [promQLResourceQuery, setResourceQueryState] = useState(
+    ensureResourceQueryHasDefaultMatcherRow(initialResourceQuery)
+  );
 
   const [applyError, setApplyError] = useState<string | null>(null);
 
   const isPromqlLanguage = language.toUpperCase() === 'PROMQL';
-  const isPromqlFillInBlank = isPromqlLanguage && promqlQueryType.kind !== 'queryResult';
+  const isPrometheusResource = isPromqlLanguage && promQLResourceQuery !== undefined;
 
   const [isMetricsExplorerOpen, setIsMetricsExplorerOpen] = useState(false);
 
-  const resetQueryResultFields = useCallback((opts: { query?: boolean; regex?: boolean } = {}) => {
+  const resetFreeTextFields = useCallback((opts: { query?: boolean; regex?: boolean } = {}) => {
     setValueField('');
     setLabelField('');
     if (opts.query) setQuery('');
@@ -123,12 +130,12 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
   }, []);
 
   // Switching the query TYPE (via the selector) resets the free-text query-result fields.
-  const handlePromqlQueryTypeSelect = useCallback(
-    (next: PromQLVariableQueryType) => {
-      resetQueryResultFields({ query: true });
-      setPromqlQueryTypeState(next);
+  const handleResourceQuerySelect = useCallback(
+    (next: PromQLResourceQuery | undefined) => {
+      resetFreeTextFields({ query: true });
+      setResourceQueryState(next);
     },
-    [resetQueryResultFields]
+    [resetFreeTextFields]
   );
 
   // When language changes between PPL and PROMQL, clear the dataset since
@@ -138,36 +145,40 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
       const wasPromQL = language.toUpperCase() === 'PROMQL';
       const isPromQL = newLanguage.toUpperCase() === 'PROMQL';
       if (wasPromQL !== isPromQL) {
-        setDataset(null);
+        setDataset(undefined);
         setQuery('');
-        setPromqlQueryTypeState({ kind: 'queryResult' });
+        setResourceQueryState(undefined);
       }
-      resetQueryResultFields({ regex: true });
+      resetFreeTextFields({ regex: true });
       setLanguage(newLanguage);
     },
-    [language, resetQueryResultFields]
+    [language, resetFreeTextFields]
   );
 
   const handleDatasetChange = useCallback(
-    (newDataset: any) => {
-      resetQueryResultFields({ query: true, regex: true });
-      setPromqlQueryTypeState((prev) => {
-        switch (prev.kind) {
+    (newDataset: Dataset | undefined) => {
+      resetFreeTextFields({ query: true, regex: true });
+      setResourceQueryState((prev) => {
+        switch (prev?.kind) {
           case 'labelNames':
           case 'metrics':
             return { kind: prev.kind, metricRegex: undefined };
           case 'labelValues':
-            return { kind: 'labelValues', label: '', metric: undefined, matchers: [] };
+            return {
+              kind: 'labelValues',
+              label: '',
+              metric: undefined,
+              matchers: [{ ...DEFAULT_PROMQL_LABEL_FILTER_ROW }],
+            };
           case 'series':
             return { kind: 'series', matcher: '' };
-          case 'queryResult':
           default:
             return prev;
         }
       });
       setDataset(newDataset);
     },
-    [resetQueryResultFields]
+    [resetFreeTextFields]
   );
 
   const {
@@ -183,9 +194,9 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
     data,
     dataset,
     useTimeFilter,
-    isPromqlFillInBlank,
-    promqlQueryType,
-    onPromqlQueryTypeChange: setPromqlQueryTypeState,
+    isPrometheusResource,
+    promQLResourceQuery,
+    onResourceQueryChange: setResourceQueryState,
   });
 
   const {
@@ -197,8 +208,8 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
     previewError,
     canApply,
     selectedValueField,
-    handleRunQuery,
-    handleRunPromqlResourceQuery,
+    handleRunFreeTextQuery,
+    handleRunResourceQuery,
   } = useVariableQueryPreview({
     data,
     query,
@@ -210,8 +221,8 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
     regex,
     interpolationService,
     currentVariableName,
-    isPromqlFillInBlank,
-    promqlQueryType,
+    isPrometheusResource,
+    promQLResourceQuery,
   });
 
   // Clear the "must preview" error as soon as the preview becomes valid.
@@ -223,12 +234,12 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
 
   // Auto-run Preview once when the modal opens with a pre-existing
   useEffect(() => {
-    const hasExistingFreeTextQuery = !isPromqlFillInBlank && initialQuery.trim() && initialDataset;
-    const hasExistingPromqlDraft = isPromqlFillInBlank && initialDataset;
+    const hasExistingFreeTextQuery = !isPrometheusResource && initialQuery.trim() && initialDataset;
+    const hasExistingResourceQuery = isPrometheusResource && initialDataset;
     if (hasExistingFreeTextQuery) {
-      handleRunQuery();
-    } else if (hasExistingPromqlDraft) {
-      handleRunPromqlResourceQuery();
+      handleRunFreeTextQuery();
+    } else if (hasExistingResourceQuery) {
+      handleRunResourceQuery();
     }
     // Intentionally run only once, on mount — this mirrors the pre-refactor
     // auto-preview behavior and must not re-fire on every draft edit.
@@ -256,23 +267,23 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
     }
     setApplyError(null);
 
-    const promqlQueryTypeToApply =
-      promqlQueryType.kind === 'labelValues' && promqlQueryType.matchers
+    const resourceQueryToApply =
+      promQLResourceQuery?.kind === 'labelValues' && promQLResourceQuery.matchers
         ? {
-            ...promqlQueryType,
-            matchers: promqlQueryType.matchers.filter(
+            ...promQLResourceQuery,
+            matchers: promQLResourceQuery.matchers.filter(
               (matcher) => matcher.label.trim() || matcher.value.trim()
             ),
           }
-        : promqlQueryType;
+        : promQLResourceQuery;
     onApply({
-      query: isPromqlFillInBlank ? '' : query,
+      query: isPrometheusResource ? '' : query,
       language,
       dataset,
-      valueField: isPromqlFillInBlank ? '' : (selectedValueField ?? ''),
-      labelField: isPromqlFillInBlank ? '' : labelField,
+      valueField: isPrometheusResource ? '' : (selectedValueField ?? ''),
+      labelField: isPrometheusResource ? '' : labelField,
       regex,
-      promqlQueryType: promqlQueryTypeToApply,
+      promQLResourceQuery: resourceQueryToApply,
     });
   }, [
     canApply,
@@ -283,8 +294,8 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
     selectedValueField,
     labelField,
     regex,
-    promqlQueryType,
-    isPromqlFillInBlank,
+    promQLResourceQuery,
+    isPrometheusResource,
   ]);
 
   return (
@@ -342,7 +353,9 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiSmallButtonEmpty
-                      onClick={isPromqlFillInBlank ? handleRunPromqlResourceQuery : handleRunQuery}
+                      onClick={
+                        isPrometheusResource ? handleRunResourceQuery : handleRunFreeTextQuery
+                      }
                       data-test-subj="queryEditorModalRunQuery"
                       isLoading={isLoading}
                     >
@@ -410,17 +423,17 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
                 {isPromqlLanguage && (
                   <>
                     <PromqlQueryTypeSelector
-                      queryType={promqlQueryType}
-                      onChange={handlePromqlQueryTypeSelect}
+                      queryType={promQLResourceQuery}
+                      onChange={handleResourceQuerySelect}
                     />
                     <EuiSpacer size="m" />
                   </>
                 )}
 
-                {isPromqlFillInBlank && (
+                {isPromqlLanguage && promQLResourceQuery && (
                   <PromqlQueryTypeForms
-                    queryType={promqlQueryType}
-                    onChange={setPromqlQueryTypeState}
+                    queryType={promQLResourceQuery}
+                    onChange={setResourceQueryState}
                     promqlLabelNameOptions={promqlLabelNameOptions}
                     promqlMetricNameOptions={promqlMetricNameOptions}
                     promqlMatcherValueOptions={promqlMatcherValueOptions}
@@ -434,21 +447,21 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
                   />
                 )}
 
-                {!isPromqlFillInBlank && (
+                {!isPrometheusResource && (
                   <VariableQueryCodeEditor
                     language={language}
                     query={query}
                     onQueryChange={setQuery}
                     dataset={dataset}
                     existingVariableNames={existingVariableNames}
-                    onRunQuery={handleRunQuery}
+                    onRunQuery={handleRunFreeTextQuery}
                     data={data}
                     services={services}
                   />
                 )}
 
                 <div style={{ maxWidth: 640 }}>
-                  {!isPromqlFillInBlank && (
+                  {!isPrometheusResource && (
                     <>
                       <EuiSpacer size="m" />
                       <EuiFlexGroup gutterSize="s">
@@ -562,8 +575,8 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
           dataConnectionId={dataset?.id}
           onClose={() => setIsMetricsExplorerOpen(false)}
           onSelectMetric={(metric) => {
-            if (promqlQueryType.kind === 'labelValues') {
-              setPromqlQueryTypeState({ ...promqlQueryType, metric });
+            if (promQLResourceQuery?.kind === 'labelValues') {
+              setResourceQueryState({ ...promQLResourceQuery, metric });
             }
             setIsMetricsExplorerOpen(false);
           }}

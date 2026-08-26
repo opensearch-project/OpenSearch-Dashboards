@@ -40,6 +40,7 @@ const enterEditMode = () => {
 };
 
 const openVariableEditor = () => {
+  cy.get('.euiOverlayMask').should('not.exist');
   cy.getElementByTestId('addVariableButton').click();
   cy.getElementByTestId('variableEditorPanel').should('be.visible');
 };
@@ -107,12 +108,20 @@ const previewInModal = () => {
 const applyModal = () => {
   cy.getElementByTestId('queryEditorModalApply').click();
   cy.getElementByTestId('queryEditorModal').should('not.exist');
+  cy.get('.euiOverlayMask').should('not.exist');
 };
 
 // Value/label fields are EuiComboBox (single-select) — open and pick an option.
 const selectModalComboBoxOption = (testId, optionText) => {
+  cy.getElementByTestId(testId, { timeout: 20000 }).should(
+    'not.have.class',
+    'euiComboBox-isDisabled'
+  );
   cy.getElementByTestId(testId).click();
-  cy.get('[role="option"]').contains(optionText).click({ force: true });
+  cy.get('.euiComboBoxOptionsList', { timeout: 10000 }).should('be.visible');
+  cy.get('.euiComboBoxOptionsList', { timeout: 10000 })
+    .contains('[role="option"]', optionText)
+    .click({ force: true });
   cy.wait(300);
 };
 
