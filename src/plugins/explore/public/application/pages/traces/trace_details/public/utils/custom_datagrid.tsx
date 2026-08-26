@@ -245,7 +245,10 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
   const gridStyle = useMemo(
     () => ({
-      border: 'horizontal' as const,
+      // No per-row horizontal rules — they read as clutter; the waterfall bars +
+      // indentation carry structure, and rowHover gives feedback. A single header
+      // underline is the one intentional separator.
+      border: 'none' as const,
       stripes: false,
       rowHover: 'highlight' as const,
       header: 'underline' as const,
