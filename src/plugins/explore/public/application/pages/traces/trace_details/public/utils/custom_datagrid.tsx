@@ -215,10 +215,17 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     );
     const densityControl = <DensityControl key="density" density={density} onChange={setDensity} />;
 
-    // No caller-provided controls (e.g. the flat span-list table): just the
-    // view controls, left-aligned like EUI's native toolbar.
+    // No caller-provided controls (e.g. the flat span-list table): render just
+    // the view controls, pushed to the far right of the toolbar (the outer
+    // --viewControlsRight class flexes the controls row and margin-autos this).
     if (toolbarButtons.length === 0 && secondaryToolbar.length === 0) {
-      return [fullScreenControl, densityControl].filter(Boolean);
+      return (
+        <div className="exploreCustomDataGrid__viewControlsRight">
+          {[fullScreenControl, densityControl].filter(Boolean).map((control, i) => (
+            <React.Fragment key={i}>{control}</React.Fragment>
+          ))}
+        </div>
+      );
     }
 
     // Unified single row: the caller's action buttons as a connected cluster on
@@ -267,6 +274,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               ? 'exploreCustomDataGrid__fullWrapper'
               : 'exploreCustomDataGrid__normalWrapper',
             hasUnifiedToolbar ? 'exploreCustomDataGrid--unifiedToolbar' : '',
+            !hasUnifiedToolbar ? 'exploreCustomDataGrid--viewControlsRight' : '',
           ]
             .filter(Boolean)
             .join(' ')}

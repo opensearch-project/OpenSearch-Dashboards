@@ -141,7 +141,7 @@ export const SpanAttributeFilter: React.FC<SpanAttributeFilterProps> = ({
   ) : (
     <EuiButtonEmpty
       size="xs"
-      className="plqGhostAdd"
+      color="text"
       iconType="plusInCircle"
       onClick={toggle}
       isSelected={isOpen}

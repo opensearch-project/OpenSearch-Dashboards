@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ControlGroup } from '../../../../../components/query_builder';
 import { SpanAttributeFilter } from './span_attribute_filter';
@@ -53,46 +53,39 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
 
   return (
     <div className="exploreTraceFilterBar" data-test-subj="traceFilterBar">
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
+      <ControlGroup
+        label={i18n.translate('explore.traceView.filters.groupLabel', {
+          defaultMessage: 'Filters',
+        })}
+        className="plqGroup--wrap exploreTraceFilterBar__group"
+        dataTestSubj="traceFilterGroup"
       >
-        <EuiFlexItem>
-          <ControlGroup
-            label={i18n.translate('explore.traceView.filters.groupLabel', {
-              defaultMessage: 'Filters',
-            })}
-            className="plqGroup--wrap"
-            dataTestSubj="traceFilterGroup"
-          >
-            {chipFilters.map((filter, index) => (
-              <TraceFilterChip
-                key={`${filter.field}-${index}`}
-                filter={filter}
-                fields={datasetFields}
-                spans={spans}
-                addSpanFilter={addSpanFilter}
-                removeFilter={removeFilter}
-              />
-            ))}
-            <SpanAttributeFilter fields={datasetFields} spans={spans} onAddFilter={addSpanFilter} />
-            <SpanStatusFilter
-              spanFilters={spanFilters}
-              setSpanFiltersWithStorage={setSpanFiltersWithStorage}
-            />
-            <SpanDurationFilter
-              spans={spans}
-              spanFilters={spanFilters}
-              setSpanFiltersWithStorage={setSpanFiltersWithStorage}
-            />
-          </ControlGroup>
-        </EuiFlexItem>
+        {chipFilters.map((filter, index) => (
+          <TraceFilterChip
+            key={`${filter.field}-${index}`}
+            filter={filter}
+            fields={datasetFields}
+            spans={spans}
+            addSpanFilter={addSpanFilter}
+            removeFilter={removeFilter}
+          />
+        ))}
+        <SpanStatusFilter
+          spanFilters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+        />
+        <SpanDurationFilter
+          spans={spans}
+          spanFilters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+        />
+        <SpanAttributeFilter fields={datasetFields} spans={spans} onAddFilter={addSpanFilter} />
         {spanFilters.length > 0 && (
-          <EuiFlexItem grow={false}>
+          <>
+            <span className="exploreTraceFilterBar__spacer" />
             <EuiButtonEmpty
               size="xs"
+              color="text"
               onClick={clearAllFilters}
               data-test-subj="clear-all-filters-button"
             >
@@ -100,9 +93,9 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
                 defaultMessage: 'Clear all',
               })}
             </EuiButtonEmpty>
-          </EuiFlexItem>
+          </>
         )}
-      </EuiFlexGroup>
+      </ControlGroup>
     </div>
   );
 };

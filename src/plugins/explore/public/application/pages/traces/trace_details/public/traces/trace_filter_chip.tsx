@@ -53,8 +53,13 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
       applyLabel={i18n.translate('explore.traceView.filters.update', { defaultMessage: 'Update' })}
       renderTrigger={(toggle) => (
         <span className="plqWhereChip" data-test-subj={`trace-filter-chip-${filter.field}`}>
-          <button type="button" className="plqWhereChip__field" onClick={toggle}>
-            {filter.field}
+          <button
+            type="button"
+            className="plqWhereChip__field"
+            onClick={toggle}
+            title={filter.field}
+          >
+            <span className="plqWhereChip__fieldText">{filter.field}</span>
             <span className="plqWhereChip__caret">▾</span>
           </button>
           <button
@@ -68,7 +73,12 @@ export const TraceFilterChip: React.FC<TraceFilterChipProps> = ({
           >
             {operator === '!=' ? '≠' : '='}
           </button>
-          <button type="button" className="plqWhereChip__val" onClick={toggle}>
+          <button
+            type="button"
+            className="plqWhereChip__val"
+            onClick={toggle}
+            title={String(filter.value)}
+          >
             <span className="plqWhereChip__valText">{String(filter.value)}</span>
             <span className="plqWhereChip__caret">▾</span>
           </button>
