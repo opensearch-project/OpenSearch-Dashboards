@@ -110,7 +110,7 @@ export const TraceFilterBar: React.FC<TraceFilterBarProps> = ({
             <span className="exploreTraceFilterBar__spacer" />
             <EuiButtonEmpty
               size="xs"
-              color="text"
+              color="primary"
               onClick={clearAllFilters}
               data-test-subj="clear-all-filters-button"
             >

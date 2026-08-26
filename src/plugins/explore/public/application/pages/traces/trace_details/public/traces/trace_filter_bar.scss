@@ -41,9 +41,10 @@
     vertical-align: bottom;
   }
 
-  // Status/duration pills have a fixed field (only the value is editable), so the
-  // key reads as plain text: no caret, no pointer, no hover affordance.
-  .plqWhereChip__field--static {
+  // Status/duration pills have a fixed field + operator (only the value is
+  // editable), so those segments read as plain text: no pointer, no hover.
+  .plqWhereChip__field--static,
+  .plqWhereChip__op--static {
     cursor: default;
 
     &:hover,

@@ -157,7 +157,7 @@ export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
         <span className="plqWhereChip__field plqWhereChip__field--static">
           {i18n.translate('explore.traceView.status.chipField', { defaultMessage: 'status' })}
         </span>
-        <span className="plqWhereChip__op">=</span>
+        <span className="plqWhereChip__op plqWhereChip__op--static">=</span>
         <button type="button" className="plqWhereChip__val" onClick={togglePopover}>
           <span className="plqWhereChip__valText">{selectedLabels.join(', ')}</span>
           <span className="plqWhereChip__caret">▾</span>

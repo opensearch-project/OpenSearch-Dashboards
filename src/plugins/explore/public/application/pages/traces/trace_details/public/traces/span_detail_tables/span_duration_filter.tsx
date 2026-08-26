@@ -117,7 +117,7 @@ export const SpanDurationFilter: React.FC<SpanDurationFilterProps> = ({
       <span className="plqWhereChip__field plqWhereChip__field--static">
         {i18n.translate('explore.traceView.duration.chipField', { defaultMessage: 'duration' })}
       </span>
-      <span className="plqWhereChip__op">≥</span>
+      <span className="plqWhereChip__op plqWhereChip__op--static">≥</span>
       <button type="button" className="plqWhereChip__val" onClick={togglePopover}>
         <span className="plqWhereChip__valText">
           {activeNanos !== undefined ? formatNanos(activeNanos) : ''}
