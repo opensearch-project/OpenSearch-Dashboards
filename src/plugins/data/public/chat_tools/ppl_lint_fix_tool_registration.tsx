@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import type { ContextProviderStart } from '../../../context_provider/public';
+import type { AssistantAction, ContextProviderStart } from '../../../context_provider/public';
 import type { QueryStringContract } from '../query/query_string';
 import {
   cleanupPPLLintFixRequest,
@@ -76,17 +76,20 @@ const failure = (
   ...extra,
 });
 
-export const PPLLintFixToolRegistration: React.FC<PPLLintFixToolRegistrationProps> = ({
+/**
+ * Build the apply-tool action. Extracted from the component so it can also be registered
+ * imperatively (synchronously, before a chat send) — see `onAskAiFix` — which avoids
+ * depending on the search bar's post-commit registration effect.
+ */
+export function createPPLLintFixApplyAction({
   queryString,
-  useAssistantAction,
   removeContextById,
-  enabled = true,
-}) => {
-  const useAssistantActionHook = useAssistantAction || noopUseAssistantAction;
-
-  useAssistantActionHook<PPLLintFixToolArgs>({
+}: {
+  queryString: QueryStringContract;
+  removeContextById?: RemovePPLLintFixContextById;
+}): AssistantAction<PPLLintFixToolArgs> {
+  return {
     name: PPL_LINT_FIX_DATA_HOST.applyToolName,
-    enabled,
     description: buildApplyToolDescription(PPL_LINT_FIX_DATA_HOST),
     parameters: PPL_LINT_FIX_APPLY_PARAMETERS,
     requiresConfirmation: true,
@@ -181,6 +184,20 @@ export const PPLLintFixToolRegistration: React.FC<PPLLintFixToolRegistrationProp
         testSubjPrefix="pplLintFix"
       />
     ),
+  };
+}
+
+export const PPLLintFixToolRegistration: React.FC<PPLLintFixToolRegistrationProps> = ({
+  queryString,
+  useAssistantAction,
+  removeContextById,
+  enabled = true,
+}) => {
+  const useAssistantActionHook = useAssistantAction || noopUseAssistantAction;
+
+  useAssistantActionHook<PPLLintFixToolArgs>({
+    ...createPPLLintFixApplyAction({ queryString, removeContextById }),
+    enabled,
   });
 
   return null;
@@ -198,16 +215,13 @@ export interface PPLLintFixTestToolArgs {
  * best of several candidate fixes — and to decide, when none clear, that it should
  * tell the user it cannot fix the query rather than propose one that would be
  * summarily rejected.
+ *
+ * Extracted as a factory (alongside {@link createPPLLintFixApplyAction}) so it can also be
+ * registered synchronously before a chat send.
  */
-export const PPLLintFixTestToolRegistration: React.FC<PPLLintFixToolRegistrationProps> = ({
-  useAssistantAction,
-  enabled = true,
-}) => {
-  const useAssistantActionHook = useAssistantAction || noopUseAssistantAction;
-
-  useAssistantActionHook<PPLLintFixTestToolArgs>({
+export function createPPLLintFixTestAction(): AssistantAction<PPLLintFixTestToolArgs> {
+  return {
     name: PPL_LINT_FIX_DATA_HOST.testToolName,
-    enabled,
     description: buildTestToolDescription(PPL_LINT_FIX_DATA_HOST),
     parameters: PPL_LINT_FIX_TEST_PARAMETERS,
     // No confirmation and no custom renderer: this tool must run silently and
@@ -215,6 +229,18 @@ export const PPLLintFixTestToolRegistration: React.FC<PPLLintFixToolRegistration
     requiresConfirmation: false,
     handler: async (args): Promise<PPLLintFixTestToolResult> =>
       runPPLLintFixTestTool(args.fixedQuery),
+  };
+}
+
+export const PPLLintFixTestToolRegistration: React.FC<PPLLintFixToolRegistrationProps> = ({
+  useAssistantAction,
+  enabled = true,
+}) => {
+  const useAssistantActionHook = useAssistantAction || noopUseAssistantAction;
+
+  useAssistantActionHook<PPLLintFixTestToolArgs>({
+    ...createPPLLintFixTestAction(),
+    enabled,
   });
 
   return null;

@@ -30,6 +30,10 @@ export interface PPLLintFixSession {
 
 let activeSession: PPLLintFixSession | undefined;
 
+// Requests in an active AI lint-fix flow, armed in onAskAiFix before the chat send
+// (chat snapshots tools at send time); disarmed by cleanupPPLLintFixRequest.
+const armedRequests = new Set<string>();
+
 /**
  * Terminal outcome of a request, driven directly by the card's Apply/Dismiss click
  * and the apply handler — NOT by the framework's tool-call status. The framework
@@ -103,6 +107,18 @@ export function subscribePPLLintFixOutcome(callback: () => void): () => void {
   return () => outcomeSubscribers.delete(callback);
 }
 
+export function armPPLLintFixRequest(requestId: string): void {
+  if (!armedRequests.has(requestId)) {
+    armedRequests.add(requestId);
+    notifyOutcomeSubscribers();
+  }
+}
+
+// True while a lint-fix flow is active; gates the tool registration, not lint itself.
+export function isPPLLintFixFlowActive(): boolean {
+  return armedRequests.size > 0 || activeSession !== undefined;
+}
+
 export function getPPLLintFixSession(requestId?: string): PPLLintFixSession | undefined {
   // With no requestId, return the single active session. Callers no longer key on
   // a model-provided requestId (weak models fill it with wrong values); the active
@@ -136,6 +152,10 @@ export function cleanupPPLLintFixRequest(
   try {
     removeContextById?.(contextIdPrefix + requestId);
   } finally {
+    // Disarm on every exit path.
+    if (armedRequests.delete(requestId)) {
+      notifyOutcomeSubscribers();
+    }
     clearPPLLintFixSession(requestId);
   }
 }
