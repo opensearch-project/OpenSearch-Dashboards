@@ -51,18 +51,27 @@ export function DocViewTableRow({
     'truncate-by-height': isCollapsible && isCollapsed,
   });
 
+  // No value filters on date/time fields: PPL exact-equality on a timestamp is broken
+  // (the timezone-formatted display differs from the raw value, and it effectively never
+  // matches). Time filtering is owned by the time picker. Still show the column toggle.
+  const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
+
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
         <td className="exploreDocViewer__buttons" data-test-subj="osdDocViewerButtons">
-          <DocViewTableRowBtnFilterAdd
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
-          />
-          <DocViewTableRowBtnFilterRemove
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
-          />
+          {!isDateField && (
+            <>
+              <DocViewTableRowBtnFilterAdd
+                disabled={!fieldMapping || !fieldMapping.filterable}
+                onClick={() => onFilter(fieldMapping, valueRaw, '+')}
+              />
+              <DocViewTableRowBtnFilterRemove
+                disabled={!fieldMapping || !fieldMapping.filterable}
+                onClick={() => onFilter(fieldMapping, valueRaw, '-')}
+              />
+            </>
+          )}
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}

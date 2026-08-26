@@ -23,6 +23,9 @@ export interface ITableCellProps {
   columnId: string;
   index?: number;
   isTimeField?: boolean;
+  // Hides the "+"/"-" value-filter buttons. Set for time/date fields where PPL
+  // exact-equality filtering is broken and timezone-confusing (see below).
+  disableValueFilter?: boolean;
   onFilter?: DocViewFilterFn;
   fieldMapping?: any;
   sanitizedCellValue: string;
@@ -37,6 +40,7 @@ export const TableCellUI = ({
   columnId,
   index,
   isTimeField,
+  disableValueFilter,
   onFilter,
   fieldMapping,
   sanitizedCellValue,
@@ -83,11 +87,11 @@ export const TableCellUI = ({
             size="xs"
           />
         )}
-        {/* No value filters on the time field. Exact-equality on a high-precision
+        {/* No value filters on time/date fields. Exact-equality on a high-precision
             timestamp is both misleading (the raw UTC value differs from the
             timezone-formatted display) and effectively never matches, so time
             filtering is owned by the time picker. */}
-        {!isTimeField && (
+        {!disableValueFilter && (
           <>
             <EuiToolTip
               content={i18n.translate('explore.filterForValue', {

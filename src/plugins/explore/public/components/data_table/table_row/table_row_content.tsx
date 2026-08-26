@@ -100,6 +100,13 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
       {columns.map((colName) => {
         const fieldInfo = dataset.fields.getByName(colName);
         const fieldMapping = flattened[colName];
+        const isTimeField = dataset.timeFieldName === colName;
+        // Suppress value filtering on the configured time field (regardless of its
+        // mapped type) and on any date-typed column: PPL exact-equality on a
+        // timestamp is broken (timezone-shifted display vs. raw value, and it
+        // effectively never matches). Time filtering is owned by the time picker.
+        const isDateField = fieldInfo?.type === 'date' || fieldInfo?.type === 'date_nanos';
+        const disableValueFilter = isTimeField || isDateField;
 
         if (shouldShowEmptyCell(row, null)) {
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
@@ -133,7 +140,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
               colName={colName}
               className={getCellClassName(dataset.timeFieldName, colName, wrapCellText)}
               sanitizedCellValue={sanitizedCellValue}
-              isTimeField={dataset.timeFieldName === colName}
+              isTimeField={isTimeField}
               index={index}
               rowData={row}
               columnId={colName}
@@ -147,7 +154,8 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             columnId={colName}
             index={index}
             onFilter={onFilter}
-            isTimeField={dataset.timeFieldName === colName}
+            isTimeField={isTimeField}
+            disableValueFilter={disableValueFilter}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
             rowData={row}
