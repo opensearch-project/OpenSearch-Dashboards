@@ -30,6 +30,7 @@
 
 export * from './filter_manager';
 export * from './multi_query';
+export * from './prom_step';
 export * from './timefilter';
 export * from './types';
 export * from './is_query';

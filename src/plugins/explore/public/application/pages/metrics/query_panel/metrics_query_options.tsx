@@ -17,10 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { PerQueryOptions } from '../../../utils/languages';
-import {
-  formatPromDuration,
-  parseStepIntervalSeconds,
-} from '../../../../../../query_enhancements/common/prom_step';
+import { formatPromDuration, parseStepIntervalSeconds } from '../../../../../../data/common';
 
 export interface RowStepReadout {
   stepLabel: string;
