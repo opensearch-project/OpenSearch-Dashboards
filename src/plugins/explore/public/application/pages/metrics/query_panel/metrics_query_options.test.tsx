@@ -47,6 +47,19 @@ describe('MetricsQueryOptions', () => {
     expect(onMaxDataPointsChange).toHaveBeenCalledWith(undefined);
   });
 
+  it('flags a max data points value below one', () => {
+    setup({ maxDataPoints: 0 });
+    expect(screen.getByText(/Enter a whole number of 1 or more/)).toBeInTheDocument();
+  });
+
+  it('clears maxDataPoints when the field holds no number', () => {
+    const { onMaxDataPointsChange } = setup({ maxDataPoints: 500 });
+    fireEvent.change(screen.getByTestId('metricsStepMaxDataPointsInput'), {
+      target: { value: '-' },
+    });
+    expect(onMaxDataPointsChange).toHaveBeenCalledWith(undefined);
+  });
+
   it('shows the resolution the last run used as the auto placeholder', () => {
     setup({ resolvedMaxDataPoints: 1440 });
     expect(screen.getByTestId('metricsStepMaxDataPointsInput')).toHaveAttribute(

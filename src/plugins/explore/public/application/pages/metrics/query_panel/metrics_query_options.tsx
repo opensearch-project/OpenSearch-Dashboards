@@ -51,12 +51,18 @@ const minStepError = () =>
     defaultMessage: 'Enter a duration with a unit (ms, s, m, h, d, w, y), e.g. 15s, 1m, 2h.',
   });
 
+const maxDataPointsError = () =>
+  i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsError', {
+    defaultMessage: 'Enter a whole number of 1 or more.',
+  });
+
 export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
   maxDataPoints,
   onMaxDataPointsChange,
   resolvedMaxDataPoints,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const maxDataPointsInvalid = maxDataPoints !== undefined && maxDataPoints < 1;
 
   const button = (
     <EuiButtonEmpty
@@ -85,6 +91,8 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
           label={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsLabel', {
             defaultMessage: 'Max data points',
           })}
+          isInvalid={maxDataPointsInvalid}
+          error={maxDataPointsError()}
           helpText={i18n.translate('explore.metricsQueryPanel.queryOptions.maxDataPointsHelp', {
             defaultMessage: 'Max points per series. Shared by every query.',
           })}
@@ -92,6 +100,7 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
           <EuiFieldNumber
             compressed
             min={1}
+            isInvalid={maxDataPointsInvalid}
             placeholder={
               resolvedMaxDataPoints
                 ? i18n.translate(
@@ -111,7 +120,8 @@ export const MetricsQueryOptions: React.FC<MetricsQueryOptionsProps> = ({
             value={maxDataPoints ?? ''}
             onChange={(e) => {
               const raw = e.target.value;
-              onMaxDataPointsChange(raw === '' ? undefined : Math.floor(Number(raw)));
+              const parsed = Math.floor(Number(raw));
+              onMaxDataPointsChange(raw === '' || !Number.isFinite(parsed) ? undefined : parsed);
             }}
             data-test-subj="metricsStepMaxDataPointsInput"
           />
