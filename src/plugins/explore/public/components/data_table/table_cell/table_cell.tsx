@@ -83,38 +83,46 @@ export const TableCellUI = ({
             size="xs"
           />
         )}
-        <EuiToolTip
-          content={i18n.translate('explore.filterForValue', {
-            defaultMessage: 'Filter for value',
-          })}
-        >
-          <EuiButtonIcon
-            size="xs"
-            onClick={() => onFilter?.(columnId, fieldMapping, '+')}
-            iconType="magnifyWithPlus"
-            aria-label={i18n.translate('explore.filterForValue', {
-              defaultMessage: 'Filter for value',
-            })}
-            data-test-subj="filterForValue"
-            className="exploreDocTableCell__filterButton"
-          />
-        </EuiToolTip>
-        <EuiToolTip
-          content={i18n.translate('explore.filterOutValue', {
-            defaultMessage: 'Filter out value',
-          })}
-        >
-          <EuiButtonIcon
-            size="xs"
-            onClick={() => onFilter?.(columnId, fieldMapping, '-')}
-            iconType="magnifyWithMinus"
-            aria-label={i18n.translate('explore.filterOutValue', {
-              defaultMessage: 'Filter out value',
-            })}
-            data-test-subj="filterOutValue"
-            className="exploreDocTableCell__filterButton"
-          />
-        </EuiToolTip>
+        {/* No value filters on the time field. Exact-equality on a high-precision
+            timestamp is both misleading (the raw UTC value differs from the
+            timezone-formatted display) and effectively never matches, so time
+            filtering is owned by the time picker. */}
+        {!isTimeField && (
+          <>
+            <EuiToolTip
+              content={i18n.translate('explore.filterForValue', {
+                defaultMessage: 'Filter for value',
+              })}
+            >
+              <EuiButtonIcon
+                size="xs"
+                onClick={() => onFilter?.(columnId, fieldMapping, '+')}
+                iconType="magnifyWithPlus"
+                aria-label={i18n.translate('explore.filterForValue', {
+                  defaultMessage: 'Filter for value',
+                })}
+                data-test-subj="filterForValue"
+                className="exploreDocTableCell__filterButton"
+              />
+            </EuiToolTip>
+            <EuiToolTip
+              content={i18n.translate('explore.filterOutValue', {
+                defaultMessage: 'Filter out value',
+              })}
+            >
+              <EuiButtonIcon
+                size="xs"
+                onClick={() => onFilter?.(columnId, fieldMapping, '-')}
+                iconType="magnifyWithMinus"
+                aria-label={i18n.translate('explore.filterOutValue', {
+                  defaultMessage: 'Filter out value',
+                })}
+                data-test-subj="filterOutValue"
+                className="exploreDocTableCell__filterButton"
+              />
+            </EuiToolTip>
+          </>
+        )}
       </span>
     </>
   );

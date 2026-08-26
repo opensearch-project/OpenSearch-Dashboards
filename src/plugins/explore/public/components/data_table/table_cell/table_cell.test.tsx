@@ -96,6 +96,15 @@ describe('TableCell', () => {
     expect(screen.getByTestId('filterOutValue')).toBeInTheDocument();
   });
 
+  it('does not render value filter buttons for the time field', () => {
+    // Exact-equality on a high-precision timestamp is misleading (raw UTC value differs
+    // from the timezone-formatted display) and effectively never matches.
+    render(<TableCell {...defaultProps} isTimeField={true} />);
+
+    expect(screen.queryByTestId('filterForValue')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterOutValue')).not.toBeInTheDocument();
+  });
+
   it('calls onFilter with correct parameters when filter for value button is clicked', () => {
     render(<TableCell {...defaultProps} />);
 
