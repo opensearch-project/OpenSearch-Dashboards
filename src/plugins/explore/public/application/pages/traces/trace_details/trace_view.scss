@@ -19,6 +19,10 @@
 
   &__resizableContainer {
     height: calc(100vh - 140px);
+
+    // Small breathing room between the (now flush) filter bar and the
+    // resizable panels beneath it.
+    margin-top: 4px;
   }
 
   &__mainPanel {

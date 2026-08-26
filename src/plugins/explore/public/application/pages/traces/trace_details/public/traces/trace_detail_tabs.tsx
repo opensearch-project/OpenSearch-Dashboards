@@ -72,7 +72,7 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   });
 
   return (
-    <EuiTabs>
+    <EuiTabs display="condensed">
       {tabs.map((tab) => (
         <EuiTab key={tab.id} isSelected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
           {tab.name}
