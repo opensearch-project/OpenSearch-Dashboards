@@ -168,6 +168,78 @@ describe('indexPatternTypeConfig', () => {
       expect(result.signalType).toBeUndefined();
     });
 
+    test('uses datasetType from CUSTOM meta as the dataset type when present', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: {
+            timeFieldName: '@timestamp',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            datasetType: 'rollup',
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.type).toBe('rollup');
+    });
+
+    test('defaults type to INDEX_PATTERN when CUSTOM meta has no datasetType', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.type).toBe('INDEX_PATTERN');
+    });
+
+    test('populates description from CUSTOM meta when present', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: {
+            timeFieldName: '@timestamp',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            description: 'A described dataset',
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath) as Dataset & {
+        description?: string;
+      };
+
+      expect(result.description).toBe('A described dataset');
+    });
+
+    test('omits description when CUSTOM meta has none', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath) as Dataset & {
+        description?: string;
+      };
+
+      expect(result.description).toBeUndefined();
+    });
+
     test('leaves dataSource undefined when pattern has no parent', () => {
       const mockPath: DataStructure[] = [
         {
@@ -296,7 +368,15 @@ describe('indexPatternTypeConfig', () => {
 
       expect(client.find).toHaveBeenCalledWith({
         type: 'index-pattern',
-        fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
+        fields: [
+          'title',
+          'displayName',
+          'timeFieldName',
+          'references',
+          'signalType',
+          'description',
+          'type',
+        ],
         search: '*',
         searchFields: ['title', 'displayName'],
         perPage: 10000,
@@ -325,7 +405,7 @@ describe('indexPatternTypeConfig', () => {
       });
     });
 
-    test('carries signalType from index-pattern attributes into CUSTOM meta', async () => {
+    test('carries signalType, description and type from attributes into CUSTOM meta', async () => {
       const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
@@ -336,6 +416,8 @@ describe('indexPatternTypeConfig', () => {
                 title: 'otel-v1-apm-span*',
                 timeFieldName: 'startTime',
                 signalType: 'traces',
+                description: 'APM spans',
+                type: 'rollup',
               },
               references: [],
             },
@@ -352,6 +434,8 @@ describe('indexPatternTypeConfig', () => {
         timeFieldName: 'startTime',
         displayName: undefined,
         signalType: 'traces',
+        description: 'APM spans',
+        datasetType: 'rollup',
       });
     });
 

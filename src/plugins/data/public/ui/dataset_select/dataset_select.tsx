@@ -431,30 +431,42 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     setDatasets([]);
 
     try {
-      const datasetIds = await dataViews.getIds(true);
-      // Deduplicate IDs to prevent duplicate fetches and error notifications
-      const uniqueDatasetIds = [...new Set(datasetIds)];
       const fetchedDatasets: DetailedDataset[] = [];
 
-      // Fetch all DataViews in parallel using bulkGet optimization
-      const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
+      // Index patterns: fetch lightweight metadata (title, time field, data source, signal type,
+      // description, type) through the type config instead of materializing a full DataView per
+      // pattern. The heavy field list is not needed to render the list and is fetched lazily when a
+      // dataset is actually selected, so this scales to workspaces with many index patterns.
+      // `schemaMappings` is intentionally not carried here — the list/tooltip don't use it, and the
+      // consumers that do (e.g. trace-log correlation) re-resolve the dataset by id themselves.
+      const indexPatternType = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+      if (indexPatternType?.fetch) {
+        try {
+          const indexPatternRoot: DataStructure = {
+            id: indexPatternType.id,
+            title: indexPatternType.title,
+            type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          };
+          // Skip query-editor meta enrichment: the list only needs core dataset metadata, and
+          // that enrichment can block on per-data-source language lookups.
+          const result = await indexPatternType.fetch(services, [indexPatternRoot], {
+            skipQueryEditorMeta: true,
+          });
+          // toDataset populates displayName/signalType/description/type from the pattern's meta.
+          result.children?.forEach((child) => {
+            fetchedDatasets.push(
+              indexPatternType.toDataset([indexPatternRoot, child]) as DetailedDataset
+            );
+          });
+        } catch (error) {
+          // Don't let an index-pattern fetch failure wipe out the other dataset types below.
+          // eslint-disable-next-line no-console
+          console.error('[DatasetSelect] Error fetching index patterns:', error);
+        }
+      }
 
-      // Convert all DataViews to datasets in parallel
-      const datasetPromises = dataViewsArray.map(async (dataView) => {
-        const dataset = await dataViews.convertToDataset(dataView);
-        return {
-          ...dataset,
-          description: dataView.description,
-          displayName: dataView.displayName,
-          signalType: dataView.signalType,
-        };
-      });
-
-      const convertedDatasets = await Promise.all(datasetPromises);
-      fetchedDatasets.push(...convertedDatasets);
-
-      // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
-      // These types have their own fetch mechanism via the type config
+      // Other dataset types that do not use data views (e.g., PROMETHEUS) have their own fetch
+      // mechanism via the type config.
       await Promise.all(
         supportedTypes?.map(async (type) => {
           if ([DEFAULT_DATA.SET_TYPES.INDEX_PATTERN, DEFAULT_DATA.SET_TYPES.INDEX].includes(type))
@@ -468,7 +480,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
             fetchedDatasets.push({
               ...dataset,
               displayName: child.title,
-              signalType: dataset.signalType,
             });
           });
         }) || []
@@ -518,21 +529,17 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
       );
 
-      // @ts-expect-error TS7034 TODO(ts-error): fixme
-      let defaultDataView;
-      try {
-        defaultDataView = await dataViews.getDefault();
-        if (defaultDataView) {
-          setDefaultDatasetId(defaultDataView.id);
-        }
-      } catch (error) {
-        // Default dataset not found (stale reference), continue without it
-        // eslint-disable-next-line no-console
-        console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
+      // Read the default dataset id from settings rather than building a full DataView just to
+      // read its id. A stale id simply means no "Default" badge and the first-available fallback,
+      // which is the same behavior the previous getDefault() failure path had.
+      const defaultDatasetIdSetting = services.uiSettings?.get('defaultIndex') as
+        string | undefined;
+      if (defaultDatasetIdSetting) {
+        setDefaultDatasetId(defaultDatasetIdSetting);
       }
       const defaultDataset =
-        // @ts-expect-error TS7005 TODO(ts-error): fixme
-        deduplicatedDatasets.find((d) => d.id === defaultDataView?.id) ?? deduplicatedDatasets[0];
+        deduplicatedDatasets.find((d) => d.id === defaultDatasetIdSetting) ??
+        deduplicatedDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;
 
@@ -563,7 +570,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       }
     }
   }, [
-    dataViews,
     signalType,
     onSelect,
     queryString,
@@ -741,7 +747,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                             // Convert dataView back to dataset to get the correct type
                             const updatedDataset = await dataViews.convertToDataset(dataView);
                             onSelect(updatedDataset);
-                            // Clear cache to ensure getIds() returns fresh results including the newly saved dataset
+                            // Clear the saved-objects cache so the refetch below picks up the newly saved dataset.
                             dataViews.clearCache();
                             await fetchDatasets();
                           } else {
