@@ -5,8 +5,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { resolveStep, ResolvedStep } from '../../../../../../data/common';
 import { Query } from '../../../../../../data/common';
+import { resolveStep, ResolvedStep } from '../../../../../../query_enhancements/common/prom_step';
 import { ExploreServices } from '../../../../types';
 import { PromQLQueryOptions } from '../../../utils/languages';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';

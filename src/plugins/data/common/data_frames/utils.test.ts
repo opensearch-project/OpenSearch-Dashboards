@@ -626,30 +626,4 @@ describe('convertResult', () => {
       displayedSeriesCount: 2000,
     });
   });
-
-  it('should pass through step resolution metadata from data frame meta', () => {
-    const stepResolution = {
-      maxDataPoints: 1440,
-      queries: [{ label: 'A', stepSec: 15, rateIntervalSec: 240 }],
-    };
-    const response: IDataFrameResponse = {
-      took: 100,
-      timed_out: false,
-      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-      hits: { total: 0, max_score: 0, hits: [] },
-      body: {
-        fields: [
-          { name: 'Time', type: 'time', values: [1702483200000] },
-          { name: 'Value', type: 'number', values: [0.95] },
-        ],
-        size: 1,
-        name: 'prometheus-data',
-        meta: { stepResolution },
-      },
-      type: DATA_FRAME_TYPES.DEFAULT,
-    };
-
-    const result = convertResult({ response });
-    expect((result as any).stepResolution).toEqual(stepResolution);
-  });
 });

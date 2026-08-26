@@ -9,16 +9,14 @@ import dateMath from '@elastic/datemath';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  DEFAULT_RESOLUTION,
   IDataFrame,
   IDataFrameResponse,
-  interpolatePromQLMacros,
   IOpenSearchDashboardsSearchRequest,
   Query,
-  resolveStep,
   splitMultiQueries,
 } from '../../../data/common';
 import { interpolateLegendFormat, PromQLSearchOptions, PromQLStepResolution } from '../../common';
+import { DEFAULT_RESOLUTION, interpolatePromQLMacros, resolveStep } from '../../common/prom_step';
 import {
   MetricResult,
   prometheusManager,

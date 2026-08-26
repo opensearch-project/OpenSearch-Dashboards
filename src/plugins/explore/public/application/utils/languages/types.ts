@@ -4,16 +4,9 @@
  */
 
 import { Query } from '../../../../../data/common';
+import type { PromQLQueryOptions } from '../../../../../query_enhancements/common';
 
-export interface PerQueryOptions {
-  minStep?: string;
-  legendFormat?: string;
-}
-
-export interface PromQLQueryOptions {
-  maxDataPoints?: number;
-  perQueryOptions?: PerQueryOptions[];
-}
+export type { PerQueryOptions, PromQLQueryOptions } from '../../../../../query_enhancements/common';
 
 export type QueryWithQueryAsString = Omit<Query, 'query'> & {
   query: string;

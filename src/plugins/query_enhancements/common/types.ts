@@ -11,17 +11,17 @@ export interface PerQueryOptions {
   legendFormat?: string;
 }
 
-export interface PromQLQuery extends Query {
+export interface PromQLQueryOptions {
   maxDataPoints?: number;
   perQueryOptions?: PerQueryOptions[];
 }
 
-export interface PromQLSearchOptions {
+export interface PromQLQuery extends Query, PromQLQueryOptions {}
+
+export interface PromQLSearchOptions extends PromQLQueryOptions {
   queryType?: string;
   time?: string;
   step?: number;
-  maxDataPoints?: number;
-  perQueryOptions?: PerQueryOptions[];
 }
 
 /**
