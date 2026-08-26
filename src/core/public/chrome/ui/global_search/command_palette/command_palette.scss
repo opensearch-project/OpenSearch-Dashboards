@@ -84,6 +84,39 @@ $osdGlobalSearchCommandPaletteMaskBackground: transparentize(
     color: $euiTextSubduedColor;
     text-align: center;
   }
+
+  .osdGlobalSearchCommandPalette__footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $euiSizeM;
+    padding: $euiSizeS $euiSizeM;
+    border-top: $euiBorderThin;
+    color: $euiTextSubduedColor;
+    font-size: $euiFontSizeXS;
+  }
+
+  .osdGlobalSearchCommandPalette__footerTip {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+    white-space: nowrap;
+  }
+
+  .osdGlobalSearchCommandPalette__footerToken {
+    @include euiCodeFont;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: $euiSize;
+    height: $euiSize;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadiusSmall;
+    background-color: $euiColorLightestShade;
+    color: $euiTextColor;
+    font-weight: $euiFontWeightSemiBold;
+    line-height: 1;
+  }
 }
 
 @keyframes osdGlobalSearchCommandPaletteMaskIn {

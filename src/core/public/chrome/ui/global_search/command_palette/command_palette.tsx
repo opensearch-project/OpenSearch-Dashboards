@@ -15,7 +15,12 @@ import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KeyboardShortcutStart } from '../../../../keyboard_shortcut';
-import { GlobalSearchCommand, GlobalSearchResult } from '../../../global_search';
+import {
+  COMMANDS_SYMBOL,
+  GlobalSearchCommand,
+  GlobalSearchResult,
+  SAVED_OBJECTS_SYMBOL,
+} from '../../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../../global_search/run_global_search';
 import './command_palette.scss';
 
@@ -369,6 +374,35 @@ export const GlobalSearchCommandPalette = ({
                   })}
             </div>
           )}
+
+          <footer
+            className="osdGlobalSearchCommandPalette__footer"
+            data-test-subj="global-search-command-palette-footer"
+          >
+            <span className="osdGlobalSearchCommandPalette__footerTip">
+              Tips:
+              <span
+                className="osdGlobalSearchCommandPalette__footerToken"
+                data-test-subj="global-search-command-palette-assets-token"
+              >
+                {SAVED_OBJECTS_SYMBOL}
+              </span>
+              {i18n.translate('core.globalSearch.commandPalette.searchAssetsTip', {
+                defaultMessage: 'Search assets',
+              })}
+            </span>
+            <span className="osdGlobalSearchCommandPalette__footerTip">
+              <span
+                className="osdGlobalSearchCommandPalette__footerToken"
+                data-test-subj="global-search-command-palette-commands-token"
+              >
+                {COMMANDS_SYMBOL}
+              </span>
+              {i18n.translate('core.globalSearch.commandPalette.searchCommandsTip', {
+                defaultMessage: 'Commands',
+              })}
+            </span>
+          </footer>
         </EuiPanel>
       </EuiFocusTrap>
     </EuiOverlayMask>

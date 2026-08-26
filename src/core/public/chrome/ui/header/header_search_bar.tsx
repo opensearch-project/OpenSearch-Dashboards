@@ -20,6 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { GlobalSearchCommand, GlobalSearchResult } from '../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../global_search/run_global_search';
+import './header_search_bar.scss';
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
@@ -87,6 +88,10 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
   const enterKeyDownRef = useRef(false);
   const searchBarInputRef = useRef<HTMLInputElement | null>(null);
   const activeAbortControllerRef = useRef<AbortController>();
+  const commandPaletteShortcutLabel =
+    typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('mac')
+      ? '⌘+k'
+      : 'Ctrl+k';
 
   const clearSearch = useCallback(() => {
     activeAbortControllerRef.current?.abort('Global search closed');
@@ -219,39 +224,51 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     [globalSearchCommands]
   );
 
+  const showShortcutHint = !searchValue;
   const searchBar = (
-    <EuiFieldSearch
-      compressed
-      incremental
-      onSearch={onSearch}
-      fullWidth
-      placeholder={
-        globalSearchCommands.find((item) => item.inputPlaceholder)?.inputPlaceholder ??
-        i18n.translate('core.globalSearch.input.placeholder', {
-          defaultMessage: 'Search menu or assets',
-        })
-      }
-      isLoading={isLoading}
-      aria-label="Search the menus"
-      data-test-subj="global-search-input"
-      className="searchInput"
-      onFocus={() => {
-        setIsPopoverOpen(true);
-      }}
-      inputRef={(input) => {
-        searchBarInputRef.current = input;
-      }}
-      style={{ paddingRight: 32 }}
-      value={searchValue}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          enterKeyDownRef.current = true;
+    <div className="osdHeaderSearchBar">
+      <EuiFieldSearch
+        compressed
+        incremental
+        onSearch={onSearch}
+        fullWidth
+        placeholder={
+          globalSearchCommands.find((item) => item.inputPlaceholder)?.inputPlaceholder ??
+          i18n.translate('core.globalSearch.input.placeholder', {
+            defaultMessage: 'Search menu or assets',
+          })
         }
-      }}
-      onChange={(e) => {
-        setSearchValue(e.currentTarget.value);
-      }}
-    />
+        isLoading={isLoading}
+        aria-label="Search the menus"
+        data-test-subj="global-search-input"
+        className="searchInput"
+        onFocus={() => {
+          setIsPopoverOpen(true);
+        }}
+        inputRef={(input) => {
+          searchBarInputRef.current = input;
+        }}
+        style={{ paddingRight: 32 }}
+        value={searchValue}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            enterKeyDownRef.current = true;
+          }
+        }}
+        onChange={(e) => {
+          setSearchValue(e.currentTarget.value);
+        }}
+      />
+      {showShortcutHint && (
+        <span
+          className="osdHeaderSearchBar__shortcutHint"
+          data-test-subj="global-search-command-palette-shortcut"
+          aria-hidden="true"
+        >
+          {commandPaletteShortcutLabel}
+        </span>
+      )}
+    </div>
   );
 
   const searchBarPanel = (

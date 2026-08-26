@@ -72,6 +72,14 @@ describe('<GlobalSearchCommandPalette />', () => {
 
     expect(getByTestId('global-search-command-palette')).toBeVisible();
     expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('@Search assets');
+    expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('>Commands');
+    expect(getByTestId('global-search-command-palette-assets-token')).toHaveClass(
+      'osdGlobalSearchCommandPalette__footerToken'
+    );
+    expect(getByTestId('global-search-command-palette-commands-token')).toHaveClass(
+      'osdGlobalSearchCommandPalette__footerToken'
+    );
     expect(command.run).not.toHaveBeenCalled();
   });
 

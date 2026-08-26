@@ -139,6 +139,16 @@ describe('<HeaderSearchBar />', () => {
     });
   });
 
+  it('renders the command palette shortcut hint', () => {
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
+    );
+
+    expect(getByTestId('global-search-command-palette-shortcut')).toHaveTextContent(
+      /^(⌘\+k|Ctrl\+k)$/
+    );
+  });
+
   it('render HeaderSearchBar with search result', async () => {
     const { getByTestId, queryByText } = render(
       <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />

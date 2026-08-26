@@ -1,0 +1,26 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.osdHeaderSearchBar {
+  position: relative;
+  width: 100%;
+}
+
+.osdHeaderSearchBar__shortcutHint {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  right: $euiSizeS;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $euiSizeXL;
+  color: $euiTextSubduedColor;
+  font-size: $euiFontSizeXS;
+  line-height: normal;
+  text-align: center;
+  pointer-events: none;
+}
