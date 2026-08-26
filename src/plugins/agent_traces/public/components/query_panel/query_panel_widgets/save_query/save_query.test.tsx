@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -22,8 +22,6 @@ const mockSavedQueryService = {
 };
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
-const mockHandleTimeChange = jest.fn();
-const mockUseKeyboardShortcut = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -40,9 +38,6 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
         query: {
           savedQueries: mockSavedQueryService,
         },
-      },
-      keyboardShortcut: {
-        useKeyboardShortcut: mockUseKeyboardShortcut,
       },
       notifications: {
         toasts: {
@@ -62,7 +57,6 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.doMock('../../utils', () => ({
   useTimeFilter: () => ({
     timeFilter: mockTimeFilter,
-    handleTimeChange: mockHandleTimeChange,
   }),
 }));
 
@@ -102,14 +96,7 @@ jest.doMock('../../../../application/utils/state_management/slices', () => ({
 // Mock SavedQueryManagementComponent
 jest.doMock('../../../../../../data/public', () => {
   const MockSavedQueryManagementComponent = (props: any) => {
-    const {
-      onLoad,
-      onClearSavedQuery,
-      onRecentQueriesClick,
-      saveQuery,
-      loadedSavedQuery,
-      saveQueryIsDisabled,
-    } = props;
+    const { onLoad, onClearSavedQuery, saveQuery, loadedSavedQuery, saveQueryIsDisabled } = props;
     return (
       <div data-test-subj="saved-query-management">
         <button
@@ -165,12 +152,6 @@ jest.doMock('../../../../../../data/public', () => {
         <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
           Clear Query
         </button>
-        {/* Stands in for the third "Recent queries" option of the popover's option list. */}
-        {onRecentQueriesClick && (
-          <button data-test-subj="mock-recent-queries-option" onClick={onRecentQueriesClick}>
-            Recent Queries
-          </button>
-        )}
         {loadedSavedQuery && (
           <div data-test-subj="loaded-query-info">
             Loaded: {loadedSavedQuery.attributes?.query?.query}
@@ -181,38 +162,8 @@ jest.doMock('../../../../../../data/public', () => {
     );
   };
 
-  // Stands in for the real recent-queries table: one button per scenario the popover has to apply.
-  const MockRecentQueriesTable = ({ onClickRecentQuery }: any) => (
-    <div data-test-subj="mock-recent-queries-table">
-      <button
-        data-test-subj="mock-run-recent-button"
-        onClick={() =>
-          onClickRecentQuery(
-            { query: 'SELECT * FROM test', language: 'SQL' },
-            { from: 'now-1d', to: 'now' }
-          )
-        }
-      >
-        Run Recent Query
-      </button>
-      <button
-        data-test-subj="mock-run-recent-no-time-button"
-        onClick={() => onClickRecentQuery({ query: 'SELECT * FROM test2', language: 'SQL' })}
-      >
-        Run Recent Query Without Time Range
-      </button>
-      <button
-        data-test-subj="mock-run-recent-object-button"
-        onClick={() => onClickRecentQuery({ query: { match_all: {} }, language: 'DQL' })}
-      >
-        Run Recent Object Query
-      </button>
-    </div>
-  );
-
   return {
     SavedQueryManagementComponent: MockSavedQueryManagementComponent,
-    RecentQueriesTable: MockRecentQueriesTable,
   };
 });
 
@@ -553,149 +504,6 @@ describe('SaveQueryButton', () => {
       const saveButton = screen.getByTestId('mock-save-button');
       expect(saveButton).toBeDisabled();
       expect(screen.getByTestId('save-disabled-indicator')).toBeInTheDocument();
-    });
-  });
-
-  // Migrated from the retired RecentQueriesButton: recent queries are now a second view of this
-  // popover, reached from its "Recent queries" option, so `handleRunRecentQuery` lives here.
-  describe('running a recent query', () => {
-    const openRecentQueries = () => {
-      renderWithStore();
-      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
-      fireEvent.click(screen.getByTestId('mock-recent-queries-option'));
-    };
-
-    const runRecent = (testSubj = 'mock-run-recent-button') => {
-      openRecentQueries();
-      fireEvent.click(screen.getByTestId(testSubj));
-    };
-
-    it('offers a Recent queries option in the popover', () => {
-      renderWithStore();
-      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
-
-      expect(screen.getByTestId('mock-recent-queries-option')).toBeInTheDocument();
-    });
-
-    // The option swaps the popover's content rather than opening anything alongside it.
-    it('replaces the option list with the recent queries table', () => {
-      openRecentQueries();
-
-      expect(screen.getByTestId('mock-recent-queries-table')).toBeInTheDocument();
-      expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument();
-    });
-
-    it('returns to the option list from the back button', () => {
-      openRecentQueries();
-
-      fireEvent.click(screen.getByTestId('agentTracesSaveQueryRecentQueriesBackButton'));
-
-      expect(screen.getByTestId('saved-query-management')).toBeInTheDocument();
-      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
-    });
-
-    // Landing back on the table you last looked at would hide the Save/Open options behind a back
-    // button, so reopening always starts from the option list.
-    it('reopens on the option list after the recent queries view was left open', async () => {
-      openRecentQueries();
-
-      // Close, then reopen from the trigger.
-      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
-      await waitFor(() =>
-        expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument()
-      );
-      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
-
-      expect(screen.getByTestId('saved-query-management')).toBeInTheDocument();
-      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
-    });
-
-    it('loads the selected query into the editor', () => {
-      runRecent();
-
-      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            query: expect.objectContaining({ savedQueries: mockSavedQueryService }),
-          }),
-        }),
-        mockSetEditorTextWithQuery,
-        'SELECT * FROM test'
-      );
-      expect(mockDispatch).toHaveBeenCalled();
-    });
-
-    it('applies the time range when the recent query carries one', () => {
-      runRecent();
-
-      expect(mockHandleTimeChange).toHaveBeenCalledWith({
-        start: 'now-1d',
-        end: 'now',
-        isInvalid: false,
-        isQuickSelection: true,
-      });
-    });
-
-    it('leaves the time range alone when the recent query has none', () => {
-      runRecent('mock-run-recent-no-time-button');
-
-      expect(mockHandleTimeChange).not.toHaveBeenCalled();
-      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
-        expect.any(Object),
-        mockSetEditorTextWithQuery,
-        'SELECT * FROM test2'
-      );
-    });
-
-    it('loads an empty string for a non-string query body', () => {
-      runRecent('mock-run-recent-object-button');
-
-      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
-        expect.any(Object),
-        mockSetEditorTextWithQuery,
-        ''
-      );
-    });
-
-    // `waitFor` because EuiPopover keeps its panel mounted for the duration of the close animation.
-    it('closes the popover', async () => {
-      runRecent();
-
-      // The view resets to the option list synchronously, so the panel itself is what has to go.
-      await waitFor(() =>
-        expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument()
-      );
-      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('keyboard shortcut', () => {
-    it('registers shift+q against the saved queries popover', () => {
-      renderWithStore();
-
-      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
-        id: 'saved_queries',
-        pluginId: 'agentTraces',
-        name: expect.any(String),
-        category: expect.any(String),
-        keys: 'shift+q',
-        execute: expect.any(Function),
-      });
-    });
-
-    it('toggles the popover when executed', async () => {
-      renderWithStore();
-      const { execute } = mockUseKeyboardShortcut.mock.calls[0][0];
-
-      expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument();
-
-      act(() => execute());
-      await waitFor(() => expect(screen.getByTestId('saved-query-management')).toBeInTheDocument());
-
-      act(() => execute());
-      await waitFor(() =>
-        expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument()
-      );
     });
   });
 });

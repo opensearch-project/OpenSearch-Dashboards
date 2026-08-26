@@ -14,8 +14,6 @@ import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
-  openRecentQueries,
-  closeRecentQueries,
   //TODO: QueryRegex,
 } from '../../../../../../utils/apps/explore/recent_queries';
 import {
@@ -83,7 +81,9 @@ const runRecentQueryTests = () => {
               true
             );
           });
-          openRecentQueries();
+          cy.getElementByTestId('exploreRecentQueriesButton').click({
+            force: true,
+          });
           cy.getElementByTestIdLike('row-').should('have.length.at.least', TestQueries.length);
           const reverseList = [...TestQueries].reverse();
           const steps = [
@@ -94,8 +94,6 @@ const runRecentQueryTests = () => {
             {
               // check table after changing dataset and returning to the dataset under test
               action: () => {
-                // The popover from the previous step covers the query panel.
-                closeRecentQueries();
                 cy.explore.setIndexAsDataset(
                   config.alternativeDataset,
                   DATASOURCE_NAME,
@@ -103,20 +101,23 @@ const runRecentQueryTests = () => {
                   'updated_at'
                 );
                 cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-                openRecentQueries();
+                cy.getElementByTestId('exploreRecentQueriesButton').click({
+                  force: true,
+                });
               },
             },
             {
               // check table after visiting a different URL and coming back to the workspace
               action: () => {
-                closeRecentQueries();
                 cy.visit('/app/workspace_initial');
                 cy.osd.navigateToWorkSpaceSpecificPage({
                   workspaceName: workspace,
                   page: 'explore/logs',
                   isEnhancement: true,
                 });
-                openRecentQueries();
+                cy.getElementByTestId('exploreRecentQueriesButton').click({
+                  force: true,
+                });
               },
             },
           ];
@@ -162,14 +163,14 @@ const runRecentQueryTests = () => {
             cy.explore.setQueryEditor(query, {}, true);
             cy.explore.setQueryEditor(query, {}, true); // Run the same query twice to test deduplication
 
-            openRecentQueries();
+            cy.getElementByTestId('exploreRecentQueriesButton').click({
+              force: true,
+            });
             // Should have TestQueries.length + 1 new unique query (duplicates should be deduplicated)
             cy.getElementByTestIdLike('row-').should(
               'have.length.at.least',
               TestQueries.length + 1
             );
-            // The next iteration types into the query editor, which the popover covers.
-            closeRecentQueries();
           });
         });
 

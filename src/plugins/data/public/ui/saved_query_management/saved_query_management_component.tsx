@@ -71,16 +71,6 @@ interface Props {
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   saveQueryIsDisabled?: boolean;
   textSize?: React.ComponentProps<typeof EuiText>['size'];
-  /**
-   * Opt-in (observability: explore / agent_traces). When provided, a third "Recent queries" option
-   * is listed under Save query / Open query, so query history lives with the other query controls
-   * instead of behind its own toolbar button — users kept reaching for one when they meant the
-   * other. The caller owns what the option shows, because the recent-queries table needs that
-   * app's own "run this query" wiring.
-   *
-   * Callers that omit it (legacy Discover, dashboards) get exactly today's two options.
-   */
-  onRecentQueriesClick?: () => void;
 }
 
 export function SavedQueryManagementComponent({
@@ -96,7 +86,6 @@ export function SavedQueryManagementComponent({
   saveQuery,
   saveQueryIsDisabled,
   textSize = 's',
-  onRecentQueriesClick,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -290,22 +279,6 @@ export function SavedQueryManagementComponent({
             </EuiText>
           </EuiButtonEmpty>
         </div>
-        {onRecentQueriesClick && (
-          <div className="osdSavedQueryManagement__newUIItem">
-            <EuiButtonEmpty
-              className="osdSavedQueryManagement__newUIButton"
-              data-test-subj="saved-query-management-recent-queries-button"
-              iconType="clock"
-              onClick={onRecentQueriesClick}
-            >
-              <EuiText size={textSize}>
-                {i18n.translate('data.saved_query_management.recent_queries_item_label', {
-                  defaultMessage: 'Recent queries',
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
-          </div>
-        )}
       </EuiListGroup>
     </div>
   ) : (

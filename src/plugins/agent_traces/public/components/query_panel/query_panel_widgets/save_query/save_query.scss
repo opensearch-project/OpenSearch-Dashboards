@@ -25,12 +25,3 @@
     justify-content: flex-start;
   }
 }
-
-// The recent-queries view of the same popover. Inherited from the retired
-// `.agentTracesRecentQueriesButton__popover`: the table has a query column that needs room, so the
-// panel is allowed to grow well past the width of the option list it replaces.
-// `RecentQueriesTable`'s own `.recentQuery__table` supplies the border and the gutter, so the panel
-// stays `panelPaddingSize="none"` for the option list.
-.agentTracesSaveQuery__popoverContent--recentQueries {
-  max-width: 800px;
-}

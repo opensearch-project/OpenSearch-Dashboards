@@ -8,19 +8,6 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Query } from 'src/plugins/data/common';
 import { SavedQueryAttributes } from '../../query';
 
-const mockOpenFlyout = jest.fn();
-
-jest.mock('../../../../opensearch_dashboards_react/public', () => ({
-  // Spread the real module: the rest of `data/public` pulls other helpers (e.g.
-  // `withOpenSearchDashboards`) out of it at import time.
-  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
-  useOpenSearchDashboards: () => ({
-    services: { overlays: { openFlyout: mockOpenFlyout }, notifications: {} },
-  }),
-  // Hand back the element itself so the flyout's props can be inspected.
-  toMountPoint: (node: unknown) => node,
-}));
-
 const mockProps = () => ({
   savedQueryService: {
     saveQuery: jest.fn(),
@@ -84,51 +71,5 @@ describe('Saved query management component', () => {
     );
     clearSavedQueryButton.simulate('click');
     expect(props.onClearSavedQuery).toHaveBeenCalled();
-  });
-
-  describe('onRecentQueriesClick (new saved query UI)', () => {
-    const RECENT_QUERIES_BUTTON = '[data-test-subj="saved-query-management-recent-queries-button"]';
-
-    const renderNewUI = (extraProps = {}) => {
-      const props = mockProps();
-      props.savedQueryService.findSavedQueries.mockResolvedValue({ total: 0, queries: [] });
-
-      return shallowWithIntl(
-        <SavedQueryManagementComponent {...props} useNewSavedQueryUI={true} {...extraProps} />
-      );
-    };
-
-    it('lists a third Recent queries option when the caller opts in', () => {
-      const wrapper = renderNewUI({ onRecentQueriesClick: jest.fn() });
-
-      expect(wrapper.find(RECENT_QUERIES_BUTTON).exists()).toBe(true);
-    });
-
-    // Legacy callers (Discover, dashboards) must keep exactly the two options they have today.
-    it('omits the Recent queries option when the caller omits the prop', () => {
-      const wrapper = renderNewUI();
-
-      expect(wrapper.find(RECENT_QUERIES_BUTTON).exists()).toBe(false);
-    });
-
-    // Deliberately does NOT close the popover: the caller swaps the popover's content for its own
-    // recent-queries view, so closing here would dismiss the thing being opened.
-    it('calls onRecentQueriesClick without closing the popover', () => {
-      const onRecentQueriesClick = jest.fn();
-      const props = mockProps();
-      props.savedQueryService.findSavedQueries.mockResolvedValue({ total: 0, queries: [] });
-
-      const wrapper = shallowWithIntl(
-        <SavedQueryManagementComponent
-          {...props}
-          useNewSavedQueryUI={true}
-          onRecentQueriesClick={onRecentQueriesClick}
-        />
-      );
-      wrapper.find(RECENT_QUERIES_BUTTON).at(0).simulate('click');
-
-      expect(onRecentQueriesClick).toHaveBeenCalledTimes(1);
-      expect(props.closeMenuPopover).not.toHaveBeenCalled();
-    });
   });
 });

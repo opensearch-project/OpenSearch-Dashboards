@@ -31,7 +31,6 @@ import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
 import { getSaveButtonRun } from './top_nav_links/top_nav_save/top_nav_save';
-import { setSaveSearchRun } from './saved_search_actions';
 import { SavedExplore } from '../../saved_explore';
 import {
   setDateRange,
@@ -248,14 +247,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     activeTabId,
     savedExplore,
   ]);
-
-  // Republish the save action for the query panel footer's Saved searches popover, which cannot
-  // assemble it itself (see `saved_search_actions.ts`). Cleared on unmount so a stale closure over
-  // a torn-down app's services can never be invoked.
-  useEffect(() => {
-    setSaveSearchRun(savedExplore ? handleSaveShortcut : undefined);
-    return () => setSaveSearchRun(undefined);
-  }, [handleSaveShortcut, savedExplore]);
 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'saved_search',
