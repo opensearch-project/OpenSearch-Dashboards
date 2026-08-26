@@ -560,11 +560,9 @@ export class ChatEventHandler {
       return result.data;
     }
 
-    const message = result.error || 'Unknown error occurred';
     return {
       success: false,
-      message,
-      error: message,
+      error: result.error || 'Unknown error occurred',
     };
   }
 
@@ -919,38 +917,8 @@ export class ChatEventHandler {
       });
     });
 
-    // Restore the confirmed conversation data source override from the conversation history.
-    // get the last successful switch_data_source result and re-apply it as session ds
-    this.restoreDataSourceStateFromSnapshot(event);
-
     // Reset streaming state
     this.onStreamingStateChange(false);
-  }
-
-  /**
-   * Restore conversation data source state from a snapshot.
-   */
-  private restoreDataSourceStateFromSnapshot(event: MessagesSnapshotEvent): void {
-    const restoredSessionIds = event.sessionDataSourceList ?? [];
-
-    restoredSessionIds.forEach((dataSourceId) => {
-      this.chatService.setSessionDataSourceList(dataSourceId);
-    });
-
-    const restoredId = event.confirmedDataSourceId;
-
-    if (!restoredId) return;
-
-    this.chatService
-      .validateDataSourceId(restoredId)
-      .then(({ valid }) => {
-        if (valid) {
-          this.chatService.setConfirmedDataSourceId(restoredId);
-        }
-      })
-      .catch(() => {
-        // keep the currently resolved data source
-      });
   }
 
   /**

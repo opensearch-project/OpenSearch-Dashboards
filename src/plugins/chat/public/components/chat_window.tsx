@@ -365,7 +365,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Handler for when user selects a data source from the prompt
     const handleDataSourceSelect = useCallback(
       async (id: string) => {
-        chatService.setConfirmedDataSourceId(id);
+        chatService.setDataSourceId(id);
         setAvailableDataSources([]);
         const pending = pendingMessage;
         setPendingMessage(null);
@@ -801,6 +801,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           <ConversationHistoryPanel
             conversationHistoryService={chatService.conversationHistoryService}
             onSelectConversation={handleSelectConversation}
+            onDeleteConversation={(threadId) => chatService.deleteConversation(threadId)}
           />
         ) : (
           <ChatSessionErrorBoundary onStartNewSession={handleNewChat}>

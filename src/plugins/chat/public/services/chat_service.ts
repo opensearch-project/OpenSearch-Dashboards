@@ -24,6 +24,7 @@ import {
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
+import { ConversationDataSourceStore } from './conversation_data_source_store';
 
 export interface DataSourceInfo {
   id: string;
@@ -79,6 +80,8 @@ export class ChatService {
   private confirmedDataSourceId?: string;
   // Data source ids that have appeared in this conversation.
   private sessionDataSourceList: string[] = [];
+  // Persists confirmedDataSourceId + sessionDataSourceList per threadId
+  private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
 
@@ -408,6 +411,7 @@ export class ChatService {
   public setConfirmedDataSourceId(id: string): void {
     this.confirmedDataSourceId = id;
     this.setSessionDataSourceList(id);
+    this.persistDataSourceState();
   }
 
   public getConfirmedDataSourceId(): string | undefined {
@@ -415,6 +419,7 @@ export class ChatService {
   }
 
   public clearConfirmedDataSourceId(): void {
+    // In-memory reset only
     this.confirmedDataSourceId = undefined;
   }
 
@@ -428,10 +433,57 @@ export class ChatService {
     }
 
     this.sessionDataSourceList = [...this.sessionDataSourceList, id];
+    this.persistDataSourceState();
   }
 
   public getSessionDataSourceList(): string[] {
     return [...this.sessionDataSourceList];
+  }
+
+  private persistDataSourceState(): void {
+    const threadId = this.getThreadId();
+    if (!threadId) return;
+    this.conversationDataSourceStore.set(threadId, {
+      sessionDataSourceList: this.sessionDataSourceList,
+      confirmedDataSourceId: this.confirmedDataSourceId,
+    });
+  }
+
+  /**
+   * Restore a conversation's data source state from the store
+   */
+  private restoreDataSourceStateFromStore(threadId: string): void {
+    const stored = this.conversationDataSourceStore.get(threadId);
+    if (!stored) return;
+
+    Promise.all(
+      (stored.sessionDataSourceList ?? []).map((id) =>
+        this.validateDataSourceId(id)
+          .then(({ valid }) => (valid ? id : undefined))
+          .catch(() => undefined)
+      )
+    )
+      .then((validIds) => {
+        validIds.forEach((id) => {
+          if (id) this.setSessionDataSourceList(id);
+        });
+      })
+      .catch(() => {
+        // skip
+      });
+
+    const restoredId = stored.confirmedDataSourceId;
+    if (!restoredId) return;
+
+    this.validateDataSourceId(restoredId)
+      .then(({ valid }) => {
+        if (valid) {
+          this.setConfirmedDataSourceId(restoredId);
+        }
+      })
+      .catch(() => {
+        // skip
+      });
   }
 
   /**
@@ -479,9 +531,6 @@ export class ChatService {
     // multi data sources already seen in this conversation,  inject the available ds list context
     const sessionDataSourceList = this.getSessionDataSourceList();
 
-    // TODO delete console
-    // eslint-disable-next-line no-console
-    console.log('sessionDataSourceList', sessionDataSourceList);
     if (sessionDataSourceList.length > 1) {
       const availableDataSources = await this.getAvailableDataSources();
       const dsListText = availableDataSources
@@ -560,8 +609,8 @@ export class ChatService {
     }
 
     // Get workspace-aware data source ID
+    //  Only explicit user selections (setDataSourceId / setConfirmedDataSourceId) are recorded as session data sources.
     const dataSourceId = await this.getCurrentDataSourceId();
-    this.setSessionDataSourceList(dataSourceId);
     const context = await this.buildAvailableDsContext(dataSourceId);
 
     const threadId = this.getThreadId();
@@ -794,10 +843,8 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // try the confirmed conversation override first; getCurrentDataSourceId still falls back
-    // to getWorkspaceAwareDataSourceId
+    //  Only explicit user selections (setDataSourceId / setConfirmedDataSourceId) are recorded as session data sources.
     const dataSourceId = await this.getCurrentDataSourceId();
-    this.setSessionDataSourceList(dataSourceId);
     const context = await this.buildAvailableDsContext(dataSourceId);
 
     // Send the tool result back to the agent with full conversation history
@@ -925,10 +972,7 @@ export class ChatService {
       if (!threadId) {
         throw new Error('Thread ID is required to save conversation');
       }
-      await this.conversationHistoryService.saveConversation(threadId, messages, {
-        sessionDataSourceList: this.getSessionDataSourceList(),
-        confirmedDataSourceId: this.getConfirmedDataSourceId(),
-      });
+      await this.conversationHistoryService.saveConversation(threadId, messages);
     }
   }
 
@@ -1101,6 +1145,9 @@ export class ChatService {
         this.coreChatService.setThreadId(latestConversationSummary.threadId);
       }
 
+      // Restore the per-conversation data source state
+      this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
+
       return this.injectUnfinishedToolCallEvents(events);
     }
 
@@ -1124,7 +1171,17 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
+    this.restoreDataSourceStateFromStore(threadId);
+
     return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /**
+   * Delete a conversation and its persisted data source state.
+   */
+  public async deleteConversation(threadId: string): Promise<void> {
+    await this.conversationHistoryService.deleteConversation(threadId);
+    this.conversationDataSourceStore.delete(threadId);
   }
 
   /**
@@ -1161,7 +1218,7 @@ export class ChatService {
    */
   public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
     // The cache lives until newThread(), so a data source created mid-session is invisible
-    // to it. forceRefresh lets validateDataSourceId() re-check before rejecting an id.
+    // to it. forceRefresh lets validateDataSourceId() re-check.
     if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 

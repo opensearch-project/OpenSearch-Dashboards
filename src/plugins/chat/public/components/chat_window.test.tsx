@@ -963,7 +963,7 @@ describe('ChatWindow', () => {
         await new Promise((r) => setTimeout(r, 0));
       });
 
-      expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'hello',
         expect.any(Array),
@@ -1013,7 +1013,7 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed
-      expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
       expect(mockHandler).toHaveBeenCalledWith('some args');
       // The command returns a message to send to the agent
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
@@ -1069,7 +1069,7 @@ describe('ChatWindow', () => {
       });
 
       // After data source selection, the slash command should be executed locally
-      expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
       expect(mockHandler).toHaveBeenCalled();
       // Should NOT send to the agent since it's a local command
       expect(mockChatService.sendMessage).not.toHaveBeenCalled();

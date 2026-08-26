@@ -64,23 +64,6 @@ describe('ConversationHistoryService', () => {
       );
     });
 
-    it('should persist conversation data source state when provided', async () => {
-      const threadId = 'thread-1';
-      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'Hello' }];
-
-      await service.saveConversation(threadId, messages, {
-        sessionDataSourceList: ['ds-a', 'ds-b'],
-        confirmedDataSourceId: 'ds-b',
-      });
-
-      expect(mockMemoryProvider.saveConversation).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sessionDataSourceList: ['ds-a', 'ds-b'],
-          confirmedDataSourceId: 'ds-b',
-        })
-      );
-    });
-
     it('should use first user message as conversation name', async () => {
       const threadId = 'thread-1';
       const messages: Message[] = [

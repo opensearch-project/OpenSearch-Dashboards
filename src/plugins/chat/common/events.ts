@@ -177,8 +177,6 @@ export const StateDeltaEventSchema = BaseEventSchema.extend({
 export const MessagesSnapshotEventSchema = BaseEventSchema.extend({
   type: z.literal(EventType.MESSAGES_SNAPSHOT),
   messages: z.array(MessageSchema),
-  sessionDataSourceList: z.array(z.string()).optional(),
-  confirmedDataSourceId: z.string().optional(),
 });
 
 export const RawEventSchema = BaseEventSchema.extend({

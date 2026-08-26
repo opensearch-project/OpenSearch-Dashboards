@@ -59,6 +59,9 @@ const SwitchDataSourceCard = ({
   >([]);
   const [currentDataSource, setCurrentDataSource] = useState<{ id: string; title?: string }>();
   const [isLoading, setIsLoading] = useState(false);
+  // Set synchronously the moment the user picks a data source, so the card gives instant
+  // feedback instead of waiting for the tool-call status
+  const [switchingTo, setSwitchingTo] = useState<{ id: string; title: string }>();
 
   useEffect(() => {
     if (status !== 'running') {
@@ -121,8 +124,28 @@ const SwitchDataSourceCard = ({
   const dsLabel = dataSourceTitle || dataSourceId || null;
 
   if (status === 'running') {
+    if (switchingTo) {
+      return (
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                {i18n.translate('chat.switchDataSource.switching', {
+                  defaultMessage: 'Switching to {label}…',
+                  values: { label: switchingTo.title },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      );
+    }
+
     return (
-      <EuiPanel hasBorder paddingSize="m">
+      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="database" size="m" color="primary" />
@@ -166,18 +189,12 @@ const SwitchDataSourceCard = ({
         {currentDataSource && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-              {currentDataSource && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {i18n.translate('chat.switchDataSource.currentBadge', {
-                      defaultMessage: 'Current: {label}',
-                      values: { label: currentDataSource.title ?? currentDataSource.id },
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiBadge color="hollow">
+              {i18n.translate('chat.switchDataSource.currentBadge', {
+                defaultMessage: 'Current: {label}',
+                values: { label: currentDataSource.title ?? currentDataSource.id },
+              })}
+            </EuiBadge>
           </>
         )}
 
@@ -203,12 +220,13 @@ const SwitchDataSourceCard = ({
                 key={dataSource.id}
                 label={dataSource.title}
                 iconType="database"
-                onClick={() =>
+                onClick={() => {
+                  setSwitchingTo({ id: dataSource.id, title: dataSource.title });
                   onApprove?.({
                     selectedDataSourceId: dataSource.id,
                     selectedDataSourceTitle: dataSource.title,
-                  })
-                }
+                  });
+                }}
                 size="s"
               />
             ))}
@@ -246,7 +264,12 @@ const SwitchDataSourceCard = ({
         defaultMessage: 'Failed to switch data source',
       });
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" style={{ padding: '2px 0', height: 24 }}>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        gutterSize="xs"
+        responsive={false}
+        style={{ padding: '2px 0' }}
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="s" color="danger" />
         </EuiFlexItem>
@@ -263,8 +286,9 @@ const SwitchDataSourceCard = ({
     <EuiFlexGroup
       alignItems="center"
       gutterSize="xs"
-      style={{ padding: '2px 0', height: 24 }}
+      responsive={false}
       wrap={false}
+      style={{ padding: '2px 0' }}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="database" size="s" color="primary" />
@@ -277,8 +301,8 @@ const SwitchDataSourceCard = ({
         </EuiText>
       </EuiFlexItem>
       {dsLabel && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" style={{ fontWeight: 400 }}>
+        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+          <EuiBadge color="hollow" style={{ fontWeight: 400, maxWidth: 200 }}>
             {dsLabel}
           </EuiBadge>
         </EuiFlexItem>

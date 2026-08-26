@@ -1320,12 +1320,24 @@ describe('ChatService', () => {
 
       expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
         expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        messages,
-        {
-          sessionDataSourceList: [],
-          confirmedDataSourceId: undefined,
-        }
+        messages
       );
+    });
+  });
+
+  describe('deleteConversation', () => {
+    it('should delete the conversation and clear its persisted data source state', async () => {
+      chatService.conversationHistoryService.deleteConversation = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      const storeDeleteSpy = jest.spyOn((chatService as any).conversationDataSourceStore, 'delete');
+
+      await chatService.deleteConversation('thread-x');
+
+      expect(chatService.conversationHistoryService.deleteConversation).toHaveBeenCalledWith(
+        'thread-x'
+      );
+      expect(storeDeleteSpy).toHaveBeenCalledWith('thread-x');
     });
   });
 

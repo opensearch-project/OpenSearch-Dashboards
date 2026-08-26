@@ -207,24 +207,6 @@ describe('LocalStorageMemoryProvider', () => {
       expect(events![2]).toHaveProperty('runId');
     });
 
-    it('should include saved data source state in the snapshot event', async () => {
-      const conversationWithDataSourceState: SavedConversation = {
-        ...testConversation,
-        threadId: 'thread-with-ds',
-        id: 'conv-with-ds',
-        sessionDataSourceList: ['ds-a', 'ds-b'],
-        confirmedDataSourceId: 'ds-b',
-      };
-
-      await provider.saveConversation(conversationWithDataSourceState);
-
-      const events = await provider.getConversation('thread-with-ds');
-      const snapshot = events?.[1] as any;
-
-      expect(snapshot.sessionDataSourceList).toEqual(['ds-a', 'ds-b']);
-      expect(snapshot.confirmedDataSourceId).toBe('ds-b');
-    });
-
     it('should return null for non-existent conversation', async () => {
       const events = await provider.getConversation('non-existent');
 

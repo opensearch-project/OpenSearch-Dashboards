@@ -301,8 +301,6 @@ export interface SavedConversation {
   threadId: string;
   name: string;
   messages: Message[];
-  sessionDataSourceList?: string[];
-  confirmedDataSourceId?: string;
   createdAt: number;
   updatedAt: number;
 }

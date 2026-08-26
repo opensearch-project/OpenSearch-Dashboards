@@ -202,22 +202,6 @@ describe('useSwitchDataSourceAction', () => {
       expect(screen.getByText('Cluster A')).toBeInTheDocument();
     });
 
-    it('should show a confirmation label when the selected data source was already active', () => {
-      renderCard({
-        status: 'complete',
-        args: {},
-        result: JSON.stringify({
-          success: true,
-          dataSourceId: 'ds-a',
-          datasourceTitle: 'Cluster A',
-          alreadyActive: true,
-        }),
-      });
-
-      expect(screen.getByText('Using data source')).toBeInTheDocument();
-      expect(screen.getByText('Cluster A')).toBeInTheDocument();
-    });
-
     it('should show the failure message when the switch was rejected', () => {
       renderCard({
         status: 'complete',
