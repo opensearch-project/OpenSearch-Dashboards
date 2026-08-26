@@ -326,7 +326,7 @@ export function buildCommandSuggestion<S extends Token, T extends ATNSimulator>(
     code: 'UNKNOWN_COMMAND',
     typed,
     suggestion,
-    message: `Unknown command "${typed}". Did you mean "${suggestion}"?`,
+    message: `Unrecognized or misspelled command '${typed}'. Did you mean '${suggestion}'?`,
     // Title matches field_validation's `Replace with "..."` convention.
     fix: { title: `Replace with "${suggestion}"`, text: suggestion },
   };

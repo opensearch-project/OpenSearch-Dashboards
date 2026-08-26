@@ -87,4 +87,7 @@ export interface QueryEditorProps {
    * particular feature.
    */
   completionProviders?: EditorCompletionProvider[];
+
+  readOnly?: boolean;
+  readOnlyTooltip?: string;
 }

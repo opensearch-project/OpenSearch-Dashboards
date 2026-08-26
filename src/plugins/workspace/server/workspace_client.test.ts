@@ -18,6 +18,7 @@ import {
 import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
   IUiSettingsClient,
 } from '../../../core/server';
 import { IRequestDetail } from './types';
@@ -93,6 +94,7 @@ describe('#WorkspaceClient', () => {
     const client = new WorkspaceClient(coreSetup, logger);
     await client.setup(coreSetup);
     client?.setSavedObjects(savedObjects);
+    const createMock = savedObjectClient.create as jest.Mock;
 
     await client.create(mockRequestDetail, {
       name: mockWorkspaceName,
@@ -107,6 +109,9 @@ describe('#WorkspaceClient', () => {
     expect(addToWorkspaces).toHaveBeenCalledWith(DATA_CONNECTION_SAVED_OBJECT_TYPE, 'id1', [
       mockWorkspaceId,
     ]);
+    expect(createMock.mock.invocationCallOrder[0]).toBeLessThan(
+      addToWorkspaces.mock.invocationCallOrder[0]
+    );
   });
 
   it('create# should call set default opensearch data source after creating', async () => {
@@ -323,6 +328,126 @@ describe('#WorkspaceClient', () => {
     expect(logger.error).toHaveBeenLastCalledWith(
       'Set default data source error during workspace updating'
     );
+  });
+
+  it('create# should return error if a workspace with the provided custom id already exists', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+    find.mockReset();
+    find.mockResolvedValueOnce({ total: 0 });
+    (savedObjectClient.create as jest.Mock).mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('workspace', 'custom1')
+    );
+
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'workspace id has already been used, try with a different id',
+    });
+  });
+
+  it('create# should not associate data sources when the provided custom id conflicts', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+
+    find.mockReset();
+    find.mockResolvedValueOnce({ total: 0 });
+    (savedObjectClient.create as jest.Mock).mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('workspace', 'custom1')
+    );
+
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+      dataSources: ['id1'],
+    });
+
+    expect(addToWorkspaces).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      success: false,
+      error: 'workspace id has already been used, try with a different id',
+    });
+  });
+
+  it('create# should report failed associations without failing workspace creation', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+    client?.setUiSettings(uiSettings);
+
+    find.mockReset();
+    find.mockResolvedValueOnce({ total: 0 });
+    (savedObjectClient.create as jest.Mock).mockResolvedValueOnce({
+      id: 'custom1',
+      attributes: { name: mockWorkspaceName },
+    });
+    addToWorkspaces.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1')
+    );
+    addToWorkspaces.mockResolvedValueOnce(undefined);
+
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+      dataSources: ['id1', 'id2'],
+    });
+
+    expect(addToWorkspaces).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({
+      success: true,
+      result: {
+        id: 'custom1',
+        failedAssociations: [
+          {
+            id: 'id1',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            error: expect.stringContaining(DATA_SOURCE_SAVED_OBJECT_TYPE),
+          },
+        ],
+      },
+    });
+    expect(mockCheckAndSetDefaultDataSource).toHaveBeenCalledWith(
+      uiSettings.asScopedToClient(savedObjectClient),
+      ['id2'],
+      false
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Failed to associate ${DATA_SOURCE_SAVED_OBJECT_TYPE} [id1] with workspace [custom1]`
+      )
+    );
+  });
+
+  it('create# should proceed normally if no workspace with the provided custom id exists', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+
+    // reset any implementation set by previous tests, then mock for name check (no duplicate)
+    find.mockReset();
+    find.mockResolvedValueOnce({ total: 0 });
+    (savedObjectClient.create as jest.Mock).mockResolvedValueOnce({
+      id: 'custom1',
+      attributes: { name: mockWorkspaceName },
+    });
+
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+    });
+
+    expect(result.success).toBe(true);
+    expect(savedObjectClient.get).not.toHaveBeenCalled();
   });
 
   it('delete# should unassign data source before deleting related saved objects', async () => {

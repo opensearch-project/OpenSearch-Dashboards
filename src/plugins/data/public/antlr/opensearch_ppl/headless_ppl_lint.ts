@@ -80,6 +80,18 @@ export interface HeadlessLintContext {
 }
 
 /**
+ * A successful runtime-grammar parse plus the text the parser actually saw.
+ * `parserSource` differs from the input query on pipe-first queries (a
+ * synthetic `source=... ` prefix of `parserPrefixLength` chars is prepended),
+ * and consumers that map tree offsets back to user text need both.
+ */
+export interface RuntimeParseOutcome {
+  tree: ParserRuleContext;
+  parserSource: string;
+  parserPrefixLength: number;
+}
+
+/**
  * Build a parse tree for `query` using the interpreter-backed runtime grammar.
  *
  * Shared by the browser runtime-lint fallback and the headless CI API so both
@@ -90,7 +102,7 @@ export interface HeadlessLintContext {
 export function buildRuntimeTree(
   query: string,
   grammar: CachedGrammar
-): ParserRuleContext | undefined {
+): RuntimeParseOutcome | undefined {
   const isPipeFirst = query.trimStart().startsWith('|');
   const effective = isPipeFirst ? PIPE_FIRST_PREFIX + query : query;
 
@@ -135,7 +147,13 @@ export function buildRuntimeTree(
     // rules unconditionally on whatever `root()` returns. Only a thrown exception
     // (no tree at all) suppresses linting.
     const tree = parser.parse(startRuleIndex);
-    return tree ?? undefined;
+    return tree
+      ? {
+          tree,
+          parserSource: effective,
+          parserPrefixLength: isPipeFirst ? PIPE_FIRST_PREFIX.length : 0,
+        }
+      : undefined;
   } catch {
     return undefined;
   }
@@ -160,8 +178,8 @@ export function lintWithGrammar(
     return { diagnostics: [] };
   }
 
-  const tree = buildRuntimeTree(query, grammar);
-  if (!tree) {
+  const parse = buildRuntimeTree(query, grammar);
+  if (!parse) {
     return { diagnostics: [] };
   }
 
@@ -171,7 +189,7 @@ export function lintWithGrammar(
   // every pipe-first query.
   const isPipeFirst = query.trimStart().startsWith('|');
 
-  const diagnostics = runLint(tree, {
+  const diagnostics = runLint(parse.tree, {
     ruleNameToIndex: createRuntimeRuleNameToIndex(grammar.runtimeRuleNameToIndex),
     dataSourceVersion: context?.dataSourceVersion,
     knownVersion,

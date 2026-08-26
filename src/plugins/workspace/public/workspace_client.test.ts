@@ -145,6 +145,29 @@ describe('#WorkspaceClient', () => {
     });
   });
 
+  it('#create serializes a custom workspace id', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch.mockResolvedValue({
+      success: true,
+      result: {
+        workspaces: [],
+      },
+    });
+
+    await workspaceClient.create({ id: 'custom1', name: 'foo' }, {});
+
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces', {
+      method: 'POST',
+      body: JSON.stringify({
+        attributes: {
+          id: 'custom1',
+          name: 'foo',
+        },
+        settings: {},
+      }),
+    });
+  });
+
   it('#delete', async () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
     httpSetupMock.fetch.mockResolvedValue({

@@ -6,6 +6,15 @@
 // This is for the animation colors
 /* stylelint-disable  @osd/stylelint/no_restricted_values */
 
+$pplLintHoverZIndex: 10001;
+
+// The core application container creates a z-index: 0 stacking context below
+// the top navigation. Raise it only while a PPL hover is visible.
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.application:has(.exploreQueryPanelEditor--ppl .monaco-hover:not(.hidden)) {
+  z-index: $pplLintHoverZIndex;
+}
+
 .exploreQueryPanelEditor {
   border: 1px solid $ouiBorderColor;
   border-radius: $ouiBorderRadius;
@@ -19,6 +28,30 @@
     margin-bottom: -1px; // prevent layout shifting due to increase in border width;
   }
 
+  &--readOnly {
+    cursor: not-allowed;
+    background-color: $ouiColorLightestShade;
+    border-style: dashed;
+
+    // Monaco paints its own opaque background layers over the wrapper, so tint
+    // them directly to make the read-only (disabled) state visible. Text stays
+    // legible; the cursor signals non-interactivity across the whole surface.
+    .monaco-editor,
+    .monaco-editor-background,
+    .monaco-editor .margin,
+    .monaco-editor .inputarea,
+    .monaco-editor textarea {
+      background-color: $ouiColorLightestShade !important;
+      cursor: not-allowed !important;
+    }
+
+    &.exploreQueryPanelEditor--focused {
+      border-bottom-width: 1px;
+      border-bottom-color: $ouiBorderColor;
+      margin-bottom: 0;
+    }
+  }
+
   &__placeholder {
     position: absolute;
     left: 29px; // hard-code to match where the text is in editor
@@ -28,14 +61,25 @@
     color: $ouiColorDisabledText;
   }
 
-  &--ppl .monaco-hover {
-    // Keep lint guidance above navigation, popovers, and other page controls.
-    z-index: $ouiZLevel9 !important;
+  &--ppl {
+    // Monaco portals the hover through a fixed-position wrapper with an inline
+    // z-index of 50. Raise that stacking context as well as the card itself.
+    .overflowingContentWidgets > div:has(> .monaco-hover),
+    .monaco-hover {
+      z-index: $pplLintHoverZIndex !important;
+    }
 
     // Monaco inserts "View Problem" as the first marker action. Keep the
     // remaining status-bar children so quick fixes stay visible.
-    .hover-row.status-bar > .actions > .action-container:first-child {
-      display: none !important;
+    .monaco-hover {
+      // The generic Monaco fade makes the card look as though it is beneath the
+      // results panel during its first paint.
+      animation: none !important;
+      opacity: 1 !important;
+
+      .hover-row.status-bar > .actions > .action-container:first-child {
+        display: none !important;
+      }
     }
   }
 

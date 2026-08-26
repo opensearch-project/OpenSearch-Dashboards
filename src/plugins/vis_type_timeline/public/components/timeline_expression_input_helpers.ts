@@ -32,7 +32,7 @@ import { get, startsWith } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 
-import { Parser } from 'pegjs';
+import { Parser } from 'peggy';
 
 // @ts-ignore
 import { parse } from '../../common/_generated_/chain';

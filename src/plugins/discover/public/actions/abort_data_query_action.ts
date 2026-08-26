@@ -14,7 +14,8 @@ export interface AbortDataQueryContext {
 // Create the action creator function
 export function createAbortDataQueryAction(
   refs: Array<React.MutableRefObject<{ abortController: AbortController | undefined }>>,
-  actionId: string
+  actionId: string,
+  onAbort?: (reason: string) => void
 ): ActionByType<typeof ACTION_ABORT_DATA_QUERY> {
   return createAction<typeof ACTION_ABORT_DATA_QUERY>({
     type: ACTION_ABORT_DATA_QUERY,
@@ -26,6 +27,7 @@ export function createAbortDataQueryAction(
           const controller = ref.current?.abortController;
           controller?.abort?.(context.reason);
         });
+        onAbort?.(context.reason);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn(`[ACTION_ABORT_DATA_QUERY] Failed to abort data query:`, e);

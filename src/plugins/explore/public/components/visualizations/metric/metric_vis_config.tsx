@@ -13,6 +13,7 @@ import {
   VisFieldType,
   PercentageColor,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
@@ -24,7 +25,7 @@ export type LayoutType = 'horizontal' | 'vertical' | 'auto';
 export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
 export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
-export interface MetricChartStyleOptions {
+export interface MetricChartStyleOptions extends StandardOptions {
   showTitle?: boolean;
   title?: string;
   fontSize?: number;
@@ -45,10 +46,7 @@ export interface MetricChartStyleOptions {
    * @deprecated - use global thresholdOptions instead
    */
   customRanges?: RangeValue[];
-  unitId?: string;
   thresholdOptions?: ThresholdOptions;
-  min?: number;
-  max?: number;
   useThresholdColor?: boolean;
   layoutType?: LayoutType;
   textMode?: TextMode;
@@ -62,6 +60,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'colorSchema'
     | 'customRanges'
     | 'useColor'
@@ -78,6 +78,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'min'
     | 'max'
     | 'layoutType'
@@ -121,7 +123,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
           const value = props.axisColumnMappings.value?.[0];
           if (!value) throw Error('Missing axis config for metric chart');
           const mapping: MetricAxisMapping = { [AxisRole.Value]: value };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}
@@ -148,7 +150,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
             [AxisRole.Value]: value,
             [AxisRole.Time]: time,
           };
-          const spec = createSingleMetric(props.transformedData, props.styleOptions, mapping);
+          const spec = createSingleMetric(props.data, props.styleOptions, mapping);
           return (
             <MetricChartRender
               spec={spec}

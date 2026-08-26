@@ -80,7 +80,7 @@ describe('PPLLanguageAnalyzer.lint (compiled surface)', () => {
         .diagnostics.filter((d) => d.ruleId === 'field-validation');
 
       expect(diags).toHaveLength(1);
-      expect(diags[0].message).not.toContain('Unknown field');
+      expect(diags[0].message).not.toContain('not defined or recognized');
     });
   });
 
@@ -93,7 +93,9 @@ describe('PPLLanguageAnalyzer.lint (compiled surface)', () => {
       const d = diag('source=logs | where severtyText = "x"', 'field-validation', {
         fields: new Set(['severityText', 'body', 'status']),
       });
-      expect(d?.message).toContain('Unknown field "severtyText"');
+      expect(d?.message).toContain(
+        "Field 'severtyText' is not defined or recognized in the current schema."
+      );
       expect(d?.message).toContain('Did you mean "severityText"');
     });
 

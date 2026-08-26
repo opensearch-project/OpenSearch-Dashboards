@@ -11,10 +11,24 @@ import { EditorContext, InternalEditorContextValue } from '../../../context';
 describe('useSetEditorText', () => {
   const mockGetValue = jest.fn();
   const mockSetValue = jest.fn();
+  const mockGetFullModelRange = jest.fn(() => ({
+    startLineNumber: 1,
+    startColumn: 1,
+    endLineNumber: 1,
+    endColumn: 1,
+  }));
+  const mockGetModel = jest.fn(() => ({
+    getFullModelRange: mockGetFullModelRange,
+  }));
+  const mockPushUndoStop = jest.fn();
+  const mockExecuteEdits = jest.fn(() => true);
 
   const mockEditor = {
     getValue: mockGetValue,
     setValue: mockSetValue,
+    getModel: mockGetModel,
+    pushUndoStop: mockPushUndoStop,
+    executeEdits: mockExecuteEdits,
   };
 
   const mockEditorRef: InternalEditorContextValue = {
@@ -47,6 +61,25 @@ describe('useSetEditorText', () => {
 
     expect(mockSetValue).toHaveBeenCalledWith(testText);
     expect(mockSetValue).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses one undoable Monaco edit when undo preservation is requested', () => {
+    const { result } = renderHook(() => useSetEditorText(), { wrapper });
+    const fixedQuery = 'source=logs | where status = 500';
+
+    act(() => {
+      result.current(fixedQuery, { preserveUndo: true });
+    });
+
+    expect(mockExecuteEdits).toHaveBeenCalledWith('explore.setEditorText', [
+      {
+        range: mockGetFullModelRange(),
+        text: fixedQuery,
+        forceMoveMarkers: true,
+      },
+    ]);
+    expect(mockPushUndoStop).toHaveBeenCalledTimes(2);
+    expect(mockSetValue).not.toHaveBeenCalled();
   });
 
   it('should handle function callback by getting current value and setting new value', () => {

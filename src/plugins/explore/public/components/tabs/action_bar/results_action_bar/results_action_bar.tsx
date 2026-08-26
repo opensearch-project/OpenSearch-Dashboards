@@ -31,6 +31,7 @@ import { SlotItemsForType } from '../../../../services/slot_registry';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
+  bucketCount?: number;
   showResetButton?: boolean;
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
@@ -43,6 +44,7 @@ export interface DiscoverResultsActionBarProps {
 
 export const DiscoverResultsActionBar = ({
   hits,
+  bucketCount,
   showResetButton = false,
   resetQuery,
   rows,
@@ -84,6 +86,7 @@ export const DiscoverResultsActionBar = ({
           <EuiFlexItem grow={false}>
             <HitsCounter
               hits={hits}
+              bucketCount={bucketCount}
               showResetButton={showResetButton}
               onResetQuery={resetQuery}
               rows={rows}

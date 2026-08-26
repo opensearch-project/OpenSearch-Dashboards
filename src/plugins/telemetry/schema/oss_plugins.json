@@ -1439,6 +1439,9 @@
         "discover:sampleSize": {
           "type": "long"
         },
+        "discover:aggregationSampleSize": {
+          "type": "long"
+        },
         "defaultColumns": {
           "type": "keyword"
         },

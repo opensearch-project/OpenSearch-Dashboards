@@ -8,12 +8,15 @@ import {
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
+  WorkspaceCreateResult,
   SavedObjectsServiceStart,
   Permissions,
   UiSettingsServiceStart,
   WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
+import { WorkspaceAssociateResult } from '../common/types';
+
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
@@ -54,9 +57,10 @@ export interface IWorkspaceClientImpl {
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
     }
-  ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
+  ): Promise<IResponse<WorkspaceCreateResult>>;
   /**
    * List workspaces
    * @param requestDetail {@link IRequestDetail}
@@ -120,9 +124,9 @@ export interface IWorkspaceClientImpl {
    * If the association succeeds, the object is included in the result without an error.
    * If there is an issue associating an object, an error message is returned for that object.
    *
-   * @returns A promise that resolves to a response object containing an array of results for each object.
-   *          Each result will include the object's `id` and, if there was an error during association, an `error` field
-   *          with the error message.
+   * @returns A promise that resolves to a response object containing a result per object. Each
+   *          result carries the object's `id` and `type` -- both are needed because an id is only
+   *          unique within its type. A result without an `error` was associated successfully.
    *
    * @public
    */
@@ -130,7 +134,7 @@ export interface IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     workspaceId: string,
     objects: Array<{ id: string; type: string }>
-  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
+  ): Promise<IResponse<WorkspaceAssociateResult[]>>;
 
   /**
    * Dissociates a list of objects from the given workspace ID.

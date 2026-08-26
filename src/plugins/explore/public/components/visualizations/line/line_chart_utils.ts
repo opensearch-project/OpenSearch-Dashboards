@@ -3,34 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineSeriesOption } from 'echarts';
-import { LineChartStyle, LineMode } from './line_vis_config';
+import { BarSeriesOption, LineSeriesOption } from 'echarts';
+import { LineChartStyle } from './line_vis_config';
+import { getLineInterpolation, getLineDashType } from '../style_panel/share/line_shared_options';
+import { getPointSymbol } from '../style_panel/share/point_size_options';
+import { buildValueLabel } from '../style_panel/share/value_label_options';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getSeriesDisplayName } from '../utils/series';
 import { getColors } from '../theme/default_colors';
+import {
+  createSeriesLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
 
-const getLineInterpolation = (lineMode: LineMode) => {
-  switch (lineMode) {
-    case 'straight':
-      return {};
-    case 'smooth':
-      return {
-        smooth: true,
-      };
-    case 'stepped':
-      return {
-        step: true,
-      };
-  }
-};
-
-const generateLineStyles = (styles: LineChartStyle) => {
+const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
+  // Point size and value labels are only offered in dots mode
+  // other modes keep drawing their symbols at the size ECharts picks and stay unlabelled
   return {
-    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
+    ...getPointSymbol(styles.pointSize, styles.showValues),
+    ...(styles.lineStyle === 'line'
+      ? styles.showValues
+        ? { showSymbol: true, symbolSize: 0 }
+        : { showSymbol: false }
+      : {}),
+    ...buildValueLabel({
+      showValues: styles.showValues,
+      valueField,
+      decimals: styles.decimals,
+      unitId: styles.unitId,
+      unitSuffix: styles.unitSuffix,
+    }),
     lineStyle: {
       width: lineWidth,
+      type: getLineDashType(styles.lineDashStyle),
     },
     ...getLineInterpolation(styles.lineMode),
   };
@@ -42,11 +51,15 @@ export const createLineSeries =
     seriesFields,
     categoryField,
     addTimeMarker = true,
+    allData,
+    colorField,
   }: {
     styles: LineChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
     categoryField: string;
     addTimeMarker?: boolean;
+    allData?: Array<Record<string, any>>;
+    colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
     const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
@@ -59,7 +72,13 @@ export const createLineSeries =
     }
 
     const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields,
+      columns: allColumns,
+    });
+    const legendItems: LegendItem[] = [];
 
     if (usedTimeMarker) {
       {
@@ -70,14 +89,14 @@ export const createLineSeries =
       }
     }
 
-    const series = seriesFields?.map((item: string) => {
+    const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
-      const colorIndex = sortedNames.indexOf(name);
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
 
       return {
         name,
         type: 'line',
-        connectNulls: true,
         encode: {
           x: categoryField,
           y: item,
@@ -85,15 +104,16 @@ export const createLineSeries =
         emphasis: {
           focus: 'self',
         },
-        ...generateLineStyles(styles),
-        ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+        ...generateLineStyles(styles, item),
+        ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
         itemStyle: {
-          color: palette[colorIndex % palette.length],
+          color,
         },
       };
     });
 
     newState.series = series as LineSeriesOption[];
+    newState.legendItems = legendItems;
 
     return newState;
   };
@@ -113,6 +133,14 @@ export const createLineBarSeries =
   (state) => {
     const { xAxisConfig, axisColumnMappings } = state;
     const newState = { ...state };
+    const palette = getColors().categories;
+    const allColumns = Object.values(axisColumnMappings).flat();
+    const seriesFields = [...valueField, ...value2Field];
+    const sortedNames = getLegendNameDomain({
+      seriesFields,
+      columns: allColumns,
+    });
+    const legendItems: LegendItem[] = [];
 
     // TODO: move this to buildAxisConfigs function
     if (styles.addTimeMarker) {
@@ -126,11 +154,16 @@ export const createLineBarSeries =
 
     const series = [
       ...valueField.map((field) => {
-        const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+        const name = getSeriesDisplayName(field, allColumns);
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createSeriesLegendItem(name, color));
         return {
           type: 'line',
           name,
-          ...generateLineStyles(styles),
+          itemStyle: {
+            color,
+          },
+          ...generateLineStyles(styles, field),
           ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
           yAxisIndex: 0,
           encode: {
@@ -143,15 +176,30 @@ export const createLineBarSeries =
         };
       }),
       ...value2Field.map((field) => {
-        const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+        const name = getSeriesDisplayName(field, allColumns);
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createSeriesLegendItem(name, color));
         return {
           type: 'bar',
           name,
+          itemStyle: {
+            color,
+          },
           yAxisIndex: 1,
           encode: {
             x: categoryField,
             y: field,
           },
+          ...buildValueLabel({
+            showValues: styles.showValues,
+            valueField: field,
+            decimals: styles.decimals,
+            unitId: styles.unitId,
+            unitSuffix: styles.unitSuffix,
+            // force the value label to be positioned inside the bar
+            isStack: true,
+            chartType: 'bar',
+          }),
           emphasis: {
             focus: 'self',
           },
@@ -159,7 +207,8 @@ export const createLineBarSeries =
       }),
     ];
 
-    newState.series = series as LineSeriesOption[];
+    newState.series = series as Array<LineSeriesOption | BarSeriesOption>;
+    newState.legendItems = legendItems;
 
     return newState;
   };

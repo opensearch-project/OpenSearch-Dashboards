@@ -14,6 +14,7 @@ import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyle>;
 
@@ -59,6 +60,16 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

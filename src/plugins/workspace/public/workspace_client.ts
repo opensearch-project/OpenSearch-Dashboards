@@ -9,6 +9,8 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
@@ -18,6 +20,7 @@ import {
   PermissionModeId,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 import { MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
 
@@ -204,19 +207,19 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Create a workspace
    *
    * @param attributes
-   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
+   * @returns {Promise<IResponse<WorkspaceCreateResult>>} result of the workspace creation
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
       dataConnections?: string[];
     }
-  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
+  ): Promise<IResponse<WorkspaceCreateResult>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
+    const result = await this.safeFetch<WorkspaceCreateResult>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
@@ -395,7 +398,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       savedObjects,
       workspaceId,
     };
-    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+    const result = await this.safeFetch<WorkspaceAssociateResult[]>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });

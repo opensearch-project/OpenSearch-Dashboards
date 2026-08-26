@@ -41,6 +41,11 @@ import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { TimeRangeToolRegistration } from '../../chat_tools/time_range_tool_registration';
+import {
+  PPLLintFixToolRegistration,
+  PPLLintFixTestToolRegistration,
+  PPL_LINT_FIX_DATA_TOOL_NAME,
+} from '../../chat_tools/ppl_lint_fix_tool_registration';
 import { ContextProviderStart } from '../../../../../plugins/context_provider/public';
 
 interface StatefulSearchBarDeps {
@@ -134,10 +139,18 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
 };
 
 export function createSearchBar({ core, storage, data, contextProvider }: StatefulSearchBarDeps) {
+  const removePPLLintFixContextById = contextProvider
+    ? (contextId: string) =>
+        contextProvider.getAssistantContextStore()?.removeContextById(contextId)
+    : undefined;
+
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
+    const pplLintFixEnabled = Boolean(
+      contextProvider?.hooks?.useAssistantAction && props.showQueryInput !== false
+    );
 
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
@@ -185,15 +198,29 @@ export function createSearchBar({ core, storage, data, contextProvider }: Statef
           appName: props.appName,
           data,
           storage,
+          pplLintFixToolName: pplLintFixEnabled ? PPL_LINT_FIX_DATA_TOOL_NAME : undefined,
           ...core,
+          contextProvider,
         }}
       >
         {!props.disableTimeRangeTool && (
           <TimeRangeToolRegistration
             timefilter={data.query.timefilter.timefilter}
             useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+            enabled={(query?.language || '').toUpperCase() !== 'SQL'}
           />
         )}
+        <PPLLintFixToolRegistration
+          queryString={data.query.queryString}
+          useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+          removeContextById={removePPLLintFixContextById}
+          enabled={pplLintFixEnabled}
+        />
+        <PPLLintFixTestToolRegistration
+          queryString={data.query.queryString}
+          useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+          enabled={pplLintFixEnabled}
+        />
         <SearchBar
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}

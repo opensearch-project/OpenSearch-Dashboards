@@ -51,7 +51,9 @@ const mockGetResolvedVersion = pplGrammarCache.getResolvedVersion as jest.Mock;
 const mockGetCachedSettings = calciteSettingsCache.getCached as jest.Mock;
 
 const services = {
-  uiSettings: {} as IUiSettingsClient,
+  // enableAIFeatures is read straight off uiSettings (with a default); tests
+  // model the setting as absent → the passed default wins.
+  uiSettings: { get: (_key: string, dflt?: unknown) => dflt } as unknown as IUiSettingsClient,
   http: {} as HttpSetup,
 };
 

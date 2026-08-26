@@ -10,13 +10,14 @@ describe('head-without-sort (compiled surface)', () => {
   beforeEach(() => {
     analyzer = new PPLLanguageAnalyzer();
   });
-  const ids = (code: string) => analyzer.lint(code).diagnostics.map((d) => d.ruleId);
+  const enabled = { overrides: { 'head-without-sort': { enabled: true } } };
+  const ids = (code: string) => analyzer.lint(code, enabled).diagnostics.map((d) => d.ruleId);
 
   it('flags a head with no preceding sort', () =>
     expect(ids('search source=logs | head 5')).toContain('head-without-sort'));
   it('reports the message from the rule catalog (not a hardcoded literal)', () => {
     const diagnostic = analyzer
-      .lint('search source=logs | head 5')
+      .lint('search source=logs | head 5', enabled)
       .diagnostics.find((d) => d.ruleId === 'head-without-sort');
     expect(diagnostic?.message).toBe(
       'Without sort, head can return different rows each time the query runs.'

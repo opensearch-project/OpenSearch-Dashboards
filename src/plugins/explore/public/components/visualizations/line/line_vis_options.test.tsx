@@ -14,8 +14,9 @@ import {
   AxisRole,
   AxisColumnMappings,
   StandardAxes,
+  LineStyle,
 } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
+import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the child components
 jest.mock('../style_panel/legend/legend', () => ({
@@ -189,6 +190,7 @@ describe('LineVisStyleControls', () => {
 
   const mockProps: LineVisStyleControlsProps = {
     styleOptions: {
+      ...defaultLineChartStyles,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       legendTitle: '',
@@ -203,7 +205,7 @@ describe('LineVisStyleControls', () => {
       },
       tooltipOptions: defaultTooltipOptions,
       standardAxes: [defaultCategoryAxis, defaultValueAxis],
-      showFullTimeRange: false,
+      showFullTimeRange: true,
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],

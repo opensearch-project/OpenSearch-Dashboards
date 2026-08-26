@@ -70,7 +70,7 @@ After creating your data source and workspace, you need to create a trace index 
    # Replace <index_pattern_title> with the index pattern to match (supports wildcards) 
    # <index_pattern_title> OTel standard of <otel-v1-apm-span*>
    # Replace <time_field> with the timestamp field name in your indices
-   # <time_field> OTel standard of <endTime>
+   # <time_field> OTel standard of <startTime>
    # Replace <data_source_id> with your data source ID (found in Data sources page)
 
    curl -u '<username>:<password>' -X POST \
@@ -100,7 +100,7 @@ After creating your data source and workspace, you need to create a trace index 
      -d '{
        "attributes": {
          "title": "otel-v1-apm-span*",
-         "timeFieldName": "endTime",
+         "timeFieldName": "startTime",
          "signalType": "traces"
        },
        "references": [
@@ -108,7 +108,7 @@ After creating your data source and workspace, you need to create a trace index 
        ]
      }'
    # Output
-   {"type":"index-pattern","id":"otel-traces","attributes":{"title":"otel-v1-apm-span*","timeFieldName":"endTime","signalType":"traces"},"references":[{"type":"data-source","name":"dataSource","id":"7d5eb970-9d5b-11f0-a487-c138f227c1e6"}],"migrationVersion":{"index-pattern":"7.6.0"},"updated_at":"2025-09-29T21:18:19.911Z","version":"WzExMywxXQ==","workspaces":["UL8Q0B"],"namespaces":["default"]}%
+   {"type":"index-pattern","id":"otel-traces","attributes":{"title":"otel-v1-apm-span*","timeFieldName":"startTime","signalType":"traces"},"references":[{"type":"data-source","name":"dataSource","id":"7d5eb970-9d5b-11f0-a487-c138f227c1e6"}],"migrationVersion":{"index-pattern":"7.6.0"},"updated_at":"2025-09-29T21:18:19.911Z","version":"WzExMywxXQ==","workspaces":["UL8Q0B"],"namespaces":["default"]}%
    ```
 
 4. **Navigate to the Index patterns page** and click on the created index pattern after the command is successfully run.

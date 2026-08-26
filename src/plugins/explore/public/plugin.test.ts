@@ -3,11 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { ExplorePlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
-import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
+import {
+  CoreSetup,
+  CoreStart,
+  DEFAULT_NAV_GROUPS,
+  getUseCaseFeatureConfig,
+} from 'opensearch-dashboards/public';
 import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
@@ -26,6 +32,9 @@ import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
+import { registerDisabledPPLLintFixAction } from './components/query_panel/actions/ppl_lint_fix_action';
+import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
+import { registerAutoVisualizationAction } from './components/visualizations/actions/auto_visualization_action';
 
 // Mock the action
 jest.mock('./actions/ask_ai_embeddable_action');
@@ -48,7 +57,21 @@ jest.mock('./actions/ask_ai_action', () => ({
 // Mock registerDisabledPPLExecuteQueryAction
 jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
   registerDisabledPPLExecuteQueryAction: jest.fn(),
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION: { name: 'execute_ppl_query' },
+  APPLY_PPL_QUERY_TOOL_DEFINITION: { name: 'apply_ppl_query' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_action', () => ({
+  registerDisabledPPLLintFixAction: jest.fn(),
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION: { name: 'apply_ppl_lint_fix_explore' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_session', () => ({
+  clearActivePPLLintFixSession: jest.fn(),
+}));
+
+jest.mock('./components/visualizations/actions/auto_visualization_action', () => ({
+  registerAutoVisualizationAction: jest.fn(),
+  AUTO_VISUALIZATION_TOOL_NAME: 'auto_create_visualization',
 }));
 
 // Mock createOsdUrlTracker
@@ -69,6 +92,7 @@ describe('ExplorePlugin', () => {
   let setupDeps: ExploreSetupDependencies;
   let startDeps: ExploreStartDependencies;
   let mockCapabilities: any;
+  let currentWorkspace$: BehaviorSubject<{ features?: string[] } | null>;
 
   function createMockInitializerContext() {
     return {
@@ -156,6 +180,7 @@ describe('ExplorePlugin', () => {
         registerTrigger: jest.fn(),
         getTrigger: jest.fn(),
         getTriggers: jest.fn(),
+        getTriggerActions: jest.fn().mockReturnValue([]),
         unregisterAction: jest.fn(),
         attachAction: jest.fn(),
         getAction: jest.fn(),
@@ -220,20 +245,14 @@ describe('ExplorePlugin', () => {
 
     // Mock core start
     coreStart = coreMock.createStart();
-    // Add workspaces mock with proper BehaviorSubject-like structure
+    // A real BehaviorSubject rather than a hand-rolled stub: the plugin both reads it once
+    // (`getIsExploreEnabledWorkspace`) and subscribes to it for the lifetime of start()
+    // (`getIsExploreEnabledWorkspace$`), and tests need to push workspace switches through it.
+    currentWorkspace$ = new BehaviorSubject<{ features?: string[] } | null>({
+      features: ['observability'],
+    });
     Object.defineProperty(coreStart, 'workspaces', {
-      value: {
-        currentWorkspace$: {
-          pipe: jest.fn().mockReturnValue({
-            toPromise: jest.fn().mockResolvedValue({
-              features: ['observability'],
-            }),
-          }),
-          subscribe: jest.fn(),
-          getValue: jest.fn(),
-          next: jest.fn(),
-        },
-      },
+      value: { currentWorkspace$ },
       writable: true,
       configurable: true,
     });
@@ -561,6 +580,24 @@ describe('ExplorePlugin', () => {
       expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(true);
       expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
     });
+
+    it('keeps the visualization editor alias visible outside Explore-enabled workspaces', async () => {
+      currentWorkspace$.next(null);
+      const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
+      const metricsAlias = { name: 'MetricsVisualization', hidden: false };
+      const editorAlias = { name: 'VisualizationEditor', hidden: false };
+      (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
+        discoverAlias,
+        metricsAlias,
+        editorAlias,
+      ]);
+
+      await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
+
+      expect(discoverAlias.hidden).toBe(true);
+      expect(metricsAlias.hidden).toBe(true);
+      expect(editorAlias.hidden).toBe(false);
+    });
   });
 
   describe('stop', () => {
@@ -571,15 +608,19 @@ describe('ExplorePlugin', () => {
       expect(() => plugin.stop()).not.toThrow();
     });
 
-    it('should unregister execute_ppl_query assistant action on stop', () => {
+    it('should unregister apply_ppl_query assistant action on stop', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
       plugin.stop();
 
       expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
-        'execute_ppl_query'
+        'apply_ppl_query'
       );
+      expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
+        'apply_ppl_lint_fix_explore'
+      );
+      expect(clearActivePPLLintFixSession).toHaveBeenCalled();
     });
 
     it('should not throw on stop when contextProvider was not available at start', () => {
@@ -595,22 +636,27 @@ describe('ExplorePlugin', () => {
     });
   });
 
-  describe('disabled PPL query action registration', () => {
-    // Cast the imported mocked function to jest.Mock
+  describe('disabled PPL assistant action registration', () => {
+    // Cast the imported mocked functions to jest.Mock
     const mockRegisterDisabledPPLExecuteQueryAction =
       registerDisabledPPLExecuteQueryAction as jest.Mock;
+    const mockRegisterDisabledPPLLintFixAction = registerDisabledPPLLintFixAction as jest.Mock;
 
     beforeEach(() => {
-      // Clear the mock before each test
+      // Clear the mocks before each test
       mockRegisterDisabledPPLExecuteQueryAction.mockClear();
+      mockRegisterDisabledPPLLintFixAction.mockClear();
     });
 
-    it('should register disabled execute_ppl_query action when contextProvider is available', () => {
+    it('should register disabled apply_ppl_query action when contextProvider is available', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledTimes(1);
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(
+        startDeps.contextProvider.actions.registerAssistantAction
+      );
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(
         startDeps.contextProvider.actions.registerAssistantAction
       );
     });
@@ -625,6 +671,7 @@ describe('ExplorePlugin', () => {
       plugin.start(coreStart, startDepsWithoutContextProvider);
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).not.toHaveBeenCalled();
+      expect(mockRegisterDisabledPPLLintFixAction).not.toHaveBeenCalled();
     });
 
     it('should register disabled action with the correct function reference', () => {
@@ -633,6 +680,7 @@ describe('ExplorePlugin', () => {
 
       const registerActionFn = startDeps.contextProvider?.actions?.registerAssistantAction;
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(registerActionFn);
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(registerActionFn);
     });
 
     it('should register disabled action before other start lifecycle actions', () => {
@@ -660,6 +708,71 @@ describe('ExplorePlugin', () => {
       // Verify disabled action is registered before other actions
       const disabledActionIndex = callOrder.indexOf('registerDisabledAction');
       expect(disabledActionIndex).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('visualization assistant tool workspace gating', () => {
+    const mockRegisterAutoVisualizationAction = registerAutoVisualizationAction as jest.Mock;
+    // isNavGroupInFeatureConfigs matches on the prefixed form, not the bare nav group id.
+    const OBSERVABILITY_FEATURE = getUseCaseFeatureConfig(DEFAULT_NAV_GROUPS.observability.id);
+
+    const unregisterCalls = () =>
+      (startDeps.contextProvider!.actions.unregisterAssistantAction as jest.Mock).mock.calls.filter(
+        ([name]) => name === 'auto_create_visualization'
+      );
+
+    beforeEach(() => {
+      mockRegisterAutoVisualizationAction.mockClear();
+    });
+
+    it('registers the tool when start happens inside a workspace', () => {
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledTimes(1);
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledWith(
+        startDeps.contextProvider!.actions.registerAssistantAction,
+        coreStart,
+        startDeps.data,
+        startDeps.contextProvider
+      );
+    });
+
+    it('registers once the workspace loads, not just at start', () => {
+      // currentWorkspace$ is null until the workspace list resolves, which is the state
+      // start() usually observes. A one-shot read here would skip registration for good.
+      currentWorkspace$.next(null);
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+      expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
+
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledTimes(1);
+    });
+
+    it('unregisters the tool when leaving the workspace', () => {
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      const before = unregisterCalls().length;
+      currentWorkspace$.next(null);
+
+      expect(unregisterCalls().length).toBe(before + 1);
+    });
+
+    it('stops reacting to workspace changes after stop', () => {
+      currentWorkspace$.next(null);
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+      plugin.stop();
+
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+
+      expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
     });
   });
 });

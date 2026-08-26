@@ -7,6 +7,30 @@ import semver from 'semver';
 import { getBundledCatalog, loadCatalog, validateCatalogEntry } from '../catalog';
 import { OSD_KNOWN_VERSION } from '../version_filter';
 
+const DEFAULT_ON_RULES = [
+  'agg-on-text',
+  'division-by-zero',
+  'enabled-false-object',
+  'field-validation',
+  'invalid-capture-group-name',
+  'multisearch-min-subsearch',
+  'replace-wildcard-asymmetry',
+  'rex-scan-cost',
+  'type-mismatch-numeric',
+  'union-min-datasets',
+  'unsupported-window-function-in-eventstats',
+  'wildcard-source-zero-match',
+];
+
+const DEFAULT_OFF_RULES = [
+  'dedup-consecutive-unsupported',
+  'disabled-join-type',
+  'flat-object-subfield',
+  'head-without-sort',
+  'operation-not-pushed',
+  'operation-pushed-as-script',
+];
+
 describe('catalog loading', () => {
   it('loads the bundled catalog with the expected rule ids', () => {
     const ids = getBundledCatalog().map((c) => c.id);
@@ -132,6 +156,28 @@ describe('catalog loading', () => {
     for (const entry of getBundledCatalog()) {
       expect(entry.howToFix.trim()).not.toBe('');
     }
+  });
+
+  it('ships the exact release default sets', () => {
+    const catalog = getBundledCatalog();
+    expect(
+      catalog
+        .filter((rule) => rule.enabled)
+        .map((rule) => rule.id)
+        .sort()
+    ).toEqual(DEFAULT_ON_RULES);
+    expect(
+      catalog
+        .filter((rule) => !rule.enabled)
+        .map((rule) => rule.id)
+        .sort()
+    ).toEqual(DEFAULT_OFF_RULES);
+  });
+
+  it('ships wildcard-source-zero-match as a warning', () => {
+    expect(
+      getBundledCatalog().find((rule) => rule.id === 'wildcard-source-zero-match')?.severity
+    ).toBe('warning');
   });
 
   it('rejects an invalid engine predicate', () => {

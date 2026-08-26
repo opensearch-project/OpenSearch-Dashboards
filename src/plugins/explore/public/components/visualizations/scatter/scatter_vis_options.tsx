@@ -14,6 +14,7 @@ import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapp
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyle>;
 
@@ -61,6 +62,20 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               showThresholdStyle={true}
             />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
@@ -75,7 +90,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
             styleOptions={styleOptions}
             updateStyleOption={updateStyleOption}
             shouldShow={hasColorMapping || hasSizeMapping}
-            hasSizeLegend={hasSizeMapping}
           />
 
           <EuiFlexItem grow={false}>

@@ -9,51 +9,42 @@ import { HoverCardInput, renderHoverCard } from '../hover_card';
 function render(overrides: Partial<HoverCardInput> = {}): string {
   return renderHoverCard({
     severityLabel: 'Warning',
-    message: 'Something happened.',
     ...overrides,
   });
 }
 
 describe('renderHoverCard', () => {
-  it('renders a concise, action-oriented division-by-zero card', () => {
+  it('renders supplemental guidance without repeating marker content', () => {
     const entry = getCatalogEntryById('division-by-zero');
+    const markerMessage = 'Dividing by zero returns no value (null) instead of an error.';
     const md = render({
-      ruleId: 'division-by-zero',
-      message: 'Dividing by zero returns no value (null) instead of an error.',
+      docUrl: entry?.docUrl,
       howToFix: entry?.howToFix,
     });
 
     expect(md).toContain('⚠️ **Warning**');
-    expect(md).toContain('Rule: `division-by-zero`');
-    expect(md).toContain('Dividing by zero returns no value');
-    expect(md).toContain('**Fix** — Use the intended divisor');
-    expect(md).not.toContain('Learn more');
-    // The verbose engine-outcomes sections are gone from the simplified card.
-    expect(md).not.toContain('Engine behavior');
-    expect(md).not.toContain('Why warning');
-    expect(md).not.toContain('Your query');
-    expect(md).not.toContain('Safe to ignore');
+    expect(md).not.toContain('Rule:');
+    expect(md).not.toContain('division-by-zero');
+    expect(md).not.toContain(markerMessage);
+    expect(md).toContain('**Fix** — Check your divisor');
+    expect(md).toContain(
+      '[Learn more →](https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators)'
+    );
   });
 
   it('renders the Fix line from catalog howToFix and no facts section', () => {
     const entry = getCatalogEntryById('agg-on-text');
-    const md = render({
-      message:
-        'avg on text field "response_body" may return no value (null), because text is not stored as a number.',
-      howToFix: entry?.howToFix,
-    });
+    const md = render({ howToFix: entry?.howToFix });
 
-    expect(md).toContain('text field "response\\_body"');
-    expect(md).toContain('**Fix** — Aggregate a numeric field instead');
+    expect(md).toContain('**Fix** — Aggregate a numeric field instead, cast this field');
+    expect(md).not.toContain('Numeric aggregations cannot');
     expect(md).not.toContain('**Your query**');
-    expect(md).not.toContain('mapped as');
   });
 
   it('renders a deterministic quick-fix preview', () => {
     const entry = getCatalogEntryById('field-validation');
     const md = render({
       severityLabel: 'Error',
-      message: 'Unknown field "reveneu". Did you mean "revenue"?',
       howToFix: entry?.howToFix,
       fixText: 'revenue',
     });
@@ -67,7 +58,6 @@ describe('renderHoverCard', () => {
     const entry = getCatalogEntryById('wildcard-source-zero-match');
     const md = render({
       severityLabel: 'Info',
-      message: 'Source pattern "lgos-*" matches no known index.',
       howToFix: entry?.howToFix,
       fixText: '`logs-2026.07.25`',
     });
@@ -85,26 +75,20 @@ describe('renderHoverCard', () => {
     expect(md).not.toContain('weirdˋname');
   });
 
-  it('fences an unusual rule id containing a backtick', () => {
-    const md = render({ ruleId: 'rule`id' });
-    expect(md).toContain('Rule: `` rule`id ``');
-  });
-
   it('preserves inline-code Markdown in bundled howToFix guidance', () => {
     const entry = getCatalogEntryById('head-without-sort');
     const md = render({ howToFix: entry?.howToFix });
     expect(md).toContain('Add `sort` before `head`');
   });
 
-  it('escapes markdown-significant characters in the detector message', () => {
-    const md = render({ message: 'use *star*, _under_, [brackets], ~~strike~~, and pipe |' });
-    expect(md).toContain(
-      'use \\*star\\*, \\_under\\_, \\[brackets\\], \\~\\~strike\\~\\~, and pipe \\|'
-    );
+  it('percent-encodes parentheses in the doc link target', () => {
+    const md = render({
+      docUrl: 'https://docs.example/path_(disambiguation)/#a',
+    });
+    expect(md).toContain('[Learn more →](https://docs.example/path_%28disambiguation%29/#a)');
   });
 
-  it('degrades to the severity and message when no rule help is available', () => {
-    const md = render({ severityLabel: 'Info', message: 'Something happened.' });
-    expect(md).toBe('ℹ️ **Info**\n\nSomething happened.');
+  it('returns an empty string when no supplemental guidance is available', () => {
+    expect(render()).toBe('');
   });
 });

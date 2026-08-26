@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { ExploreEmbeddable } from './explore_embeddable';
+import { ExploreEmbeddable, getCrosshairGroup } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
@@ -27,10 +27,39 @@ jest.mock('react-dom/client', () => ({
 
 // Mock the ExploreEmbeddableComponent
 jest.mock('./explore_embeddable_component', () => ({
-  ExploreEmbeddableComponent: jest.fn(() => (
-    <div data-test-subj="mockExploreEmbeddableComponent" />
-  )),
+  ExploreEmbeddableComponent: jest.fn(() => null),
 }));
+
+// Mock the PanelDataService singleton so fetch()/destroy() interactions with the
+// shared panel-data store can be asserted directly, without depending on whether
+// PanelDataService.init() was called (getInstance() now safely returns null when
+// uninitialized, e.g. when contextProvider is disabled).
+jest.mock('./panel_data_service', () => {
+  const mockPanelDataInstance = {
+    setPanelData: jest.fn(),
+    removePanelData: jest.fn(),
+  };
+  return {
+    PanelDataService: {
+      getInstance: jest.fn(() => mockPanelDataInstance),
+      init: jest.fn(),
+    },
+  };
+});
+
+describe('getCrosshairGroup', () => {
+  it('returns no group when shared crosshair is disabled', () => {
+    expect(getCrosshairGroup(false, 'dashboard-123')).toBeUndefined();
+  });
+
+  it('uses the container id when shared crosshair is enabled', () => {
+    expect(getCrosshairGroup(true, 'dashboard-123')).toBe('dashboard-123');
+  });
+
+  it('uses the static id for an unsaved dashboard', () => {
+    expect(getCrosshairGroup(true, '')).toBe('dashboard-unsaved');
+  });
+});
 
 // Mock the services
 jest.mock('../application/legacy/discover/opensearch_dashboards_services', () => {
@@ -262,6 +291,43 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.type).toBe(EXPLORE_EMBEDDABLE_TYPE);
   });
 
+  test('uses visualization metadata for the default panel title and description', () => {
+    const services = createMockServices();
+    const metadataContainer = createTestContainer('metadata-embeddable');
+    const metadataEmbeddable = new ExploreEmbeddable(
+      {
+        savedExplore: {
+          ...mockSavedExplore,
+          visualization: JSON.stringify({
+            chartType: 'bar',
+            title: 'Visualization title',
+            description: 'Visualization description',
+          }),
+        },
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: services.filterManager,
+        services,
+        editApp: 'explore/logs',
+      },
+      { ...mockInput, id: 'metadata-embeddable' },
+      mockExecuteTriggerActions,
+      metadataContainer
+    );
+
+    expect(metadataEmbeddable.getTitle()).toBe('Visualization title');
+    expect(metadataEmbeddable.getDescription()).toBe('Visualization description');
+
+    metadataEmbeddable.destroy();
+    metadataContainer.destroy();
+  });
+
+  test('falls back to the saved object title when visualization title is empty', () => {
+    expect(embeddable.getTitle()).toBe('Test Explore');
+  });
+
   test('should have return inspector adaptors', () => {
     expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
     expect(embeddable.getInspectorAdapters().data).toBeDefined();
@@ -282,6 +348,14 @@ describe('ExploreEmbeddable', () => {
     embeddable.render(mockNode);
     embeddable.destroy();
     expect(mockUnmount).toHaveBeenCalled();
+  });
+
+  test('destroy does not throw when PanelDataService is uninitialized (contextProvider disabled)', () => {
+    const { PanelDataService } = jest.requireMock('./panel_data_service');
+    PanelDataService.getInstance.mockReturnValueOnce(null);
+
+    embeddable.render(mockNode);
+    expect(() => embeddable.destroy()).not.toThrow();
   });
 
   test('updates input correctly', () => {
@@ -698,7 +772,7 @@ describe('ExploreEmbeddable', () => {
     expect(adaptLegacyDataSpy).toHaveBeenCalled();
   });
 
-  describe('variable interpolation in panel title', () => {
+  describe('variable interpolation in panel metadata', () => {
     test('interpolates input.title when it contains variables', () => {
       const mockInterpolation: Partial<IVariableInterpolationService> = {
         hasVariables: jest.fn((str: string) => str.includes('$')),
@@ -737,7 +811,7 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
 
       expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Sales for $region');
       expect(emb.getOutput().title).toBe('Sales for Region-A');
@@ -773,7 +847,7 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
 
       expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Logs for $env');
       expect(emb.getOutput().title).toBe('Logs for prod');
@@ -809,8 +883,47 @@ describe('ExploreEmbeddable', () => {
       );
 
       // @ts-ignore
-      emb.handleTitleVariables();
+      emb.handlePanelMetadataVariables();
       expect(mockInterpolation.interpolate).not.toHaveBeenCalled();
+
+      emb.destroy();
+      parent.destroy();
+    });
+
+    test('interpolates visualization description when it contains variables', () => {
+      const mockInterpolation: Partial<IVariableInterpolationService> = {
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn((str: string) => str.replace('$env', 'production')),
+        getCurrentValues: jest.fn().mockReturnValue({}),
+        getVariables: jest.fn().mockReturnValue([]),
+      };
+      const parent = createTestContainer('description-var-emb', {}, mockInterpolation);
+      const mockServices = createMockServices();
+
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: {
+            ...mockSavedExplore,
+            visualization: JSON.stringify({
+              chartType: 'bar',
+              description: 'Logs for $env',
+            }),
+          },
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'description-var-emb' },
+        mockExecuteTriggerActions,
+        parent
+      );
+
+      expect(mockInterpolation.interpolate).toHaveBeenCalledWith('Logs for $env');
+      expect(emb.getDescription()).toBe('Logs for production');
 
       emb.destroy();
       parent.destroy();
@@ -856,6 +969,57 @@ describe('ExploreEmbeddable', () => {
         });
 
       parent.variables$.next([{ id: 'env', value: 'production' }]);
+    });
+
+    test('re-interpolates description when variables$ emits new values', () => {
+      let environment = 'initial';
+      const mockInterpolation: Partial<IVariableInterpolationService> = {
+        hasVariables: jest.fn((str: string) => str.includes('$')),
+        interpolate: jest.fn((str: string) => str.replace('$env', environment)),
+        getCurrentValues: jest.fn().mockReturnValue({}),
+        getVariables: jest.fn().mockReturnValue([]),
+      };
+      const parent = createTestContainer('reactive-description-emb', {}, mockInterpolation);
+      const mockServices = createMockServices();
+
+      const emb = new ExploreEmbeddable(
+        {
+          savedExplore: {
+            ...mockSavedExplore,
+            visualization: JSON.stringify({
+              chartType: 'bar',
+              description: 'Logs for $env',
+            }),
+          },
+          editUrl: '/app/explore/logs/test',
+          editPath: 'test',
+          indexPatterns: [],
+          editable: true,
+          filterManager: mockServices.filterManager,
+          services: mockServices,
+          editApp: 'explore/logs',
+        },
+        { ...mockInput, id: 'reactive-description-emb' },
+        mockExecuteTriggerActions,
+        parent
+      );
+
+      expect(emb.getDescription()).toBe('Logs for initial');
+      const outputListener = jest.fn();
+      const outputSubscription = emb.getOutput$().subscribe(outputListener);
+      outputListener.mockClear();
+
+      environment = 'production';
+      parent.variables$.next([{ id: 'env', value: 'production' }]);
+
+      expect(emb.getDescription()).toBe('Logs for production');
+      expect(outputListener).toHaveBeenCalledWith(
+        expect.objectContaining({ description: 'Logs for production' })
+      );
+
+      outputSubscription.unsubscribe();
+      emb.destroy();
+      parent.destroy();
     });
   });
 

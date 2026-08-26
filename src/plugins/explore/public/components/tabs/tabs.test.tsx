@@ -237,6 +237,78 @@ describe('ExploreTabsComponent', () => {
     mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs); // Reset for other tests
   });
 
+  describe('language-based tab visibility', () => {
+    // Two tabs: one language-agnostic (declares nothing), one PPL-only.
+    const servicesWithLanguages = (supportedLanguages: string[]) => ({
+      tabRegistry: {
+        getAllTabs: jest.fn(() => [
+          {
+            id: 'logs_tab',
+            label: 'Logs',
+            component: () => <div>Logs Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
+          {
+            id: 'lang_gated_tab',
+            label: 'Gated',
+            component: () => <div>Gated Content</div>,
+            flavor: [ExploreFlavor.Logs],
+            supportedLanguages,
+          },
+        ]),
+        getTab: jest.fn((id: string) => ({
+          id,
+          label: id,
+          component: () => <div>{id} Content</div>,
+          prepareQuery: undefined,
+          flavor: [ExploreFlavor.Logs],
+        })),
+      },
+    });
+
+    const renderWithLanguage = (supportedLanguages: string[], language: string) => {
+      const store = createMockStore({
+        query: {
+          query: 'SELECT * FROM logs',
+          language,
+          dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        },
+      });
+      return render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={servicesWithLanguages(supportedLanguages)}>
+            <ExploreTabs />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+    };
+
+    it('renders a tab whose supportedLanguages include the active language', () => {
+      renderWithLanguage(['PPL', 'SQL'], 'SQL');
+      expect(screen.getByText('Gated')).toBeInTheDocument();
+    });
+
+    it('hides a tab whose supportedLanguages exclude the active language', () => {
+      // Previously only Patterns and Field statistics were hidden for SQL by a
+      // hardcoded id check, so a PPL-only tab like this one still rendered.
+      renderWithLanguage(['PPL'], 'SQL');
+      expect(screen.queryByText('Gated')).not.toBeInTheDocument();
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+    });
+
+    it('treats a tab that declares no supportedLanguages as language-agnostic', () => {
+      // The Logs tab in this fixture declares none and must survive both languages.
+      renderWithLanguage(['PPL'], 'SQL');
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+    });
+
+    it('matches languages case-sensitively against the canonical values', () => {
+      // EXPLORE_DEFAULT_LANGUAGE is 'PPL'; query.language is always uppercase.
+      renderWithLanguage(['PPL'], 'PPL');
+      expect(screen.getByText('Gated')).toBeInTheDocument();
+    });
+  });
+
   it('should fallback to first tab when activeTabId is empty', () => {
     const store = createMockStore({
       ui: {

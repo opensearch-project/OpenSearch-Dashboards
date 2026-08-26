@@ -23,6 +23,7 @@ import {
   IRequestDetail,
   WorkspaceAttributeWithPermission,
 } from './types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { workspace } from './saved_objects';
 import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } from './utils';
 import {
@@ -40,6 +41,10 @@ const WORKSPACE_ID_SIZE = 6;
 
 const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.error', {
   defaultMessage: 'workspace name has already been used, try with a different name',
+});
+
+const DUPLICATE_WORKSPACE_ID_ERROR = i18n.translate('workspace.duplicate.id.error', {
+  defaultMessage: 'workspace id has already been used, try with a different id',
 });
 
 const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
@@ -94,12 +99,33 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       permissions: savedObject.permissions,
     };
   }
-  private formatError(error: Error | any): string {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+  private formatError(error: unknown): string {
+    if (
+      SavedObjectsErrorHelpers.isSavedObjectsClientError(error) &&
+      SavedObjectsErrorHelpers.isNotFoundError(error)
+    ) {
       return WORKSPACE_NOT_FOUND_ERROR;
     }
 
-    return error.message || error.error || 'Error';
+    return this.getErrorMessage(error);
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (typeof error !== 'object' || error === null) {
+      return 'Error';
+    }
+
+    const { message, error: errorMessage } = error as {
+      message?: unknown;
+      error?: unknown;
+    };
+    if (typeof message === 'string' && message) {
+      return message;
+    }
+    if (typeof errorMessage === 'string' && errorMessage) {
+      return errorMessage;
+    }
+    return 'Error';
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
@@ -111,13 +137,14 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
       dataConnections?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
+    const { permissions, dataSources, dataConnections, id: requestedId, ...attributes } = payload;
     try {
-      const { permissions, dataSources, dataConnections, ...attributes } = payload;
-      const id = generateRandomId(WORKSPACE_ID_SIZE);
+      const id = requestedId || generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const clientWithoutPermission = this.getScopedClientWithoutPermission(requestDetail);
       const existingWorkspaceRes = await clientWithoutPermission?.find({
@@ -148,31 +175,60 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       }
 
-      const promises = [];
-
-      if (dataSources) {
-        for (const dataSourceId of dataSources) {
-          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
-        }
-      }
-      if (dataConnections) {
-        for (const connectionId of dataConnections) {
-          promises.push(
-            client.addToWorkspaces(DATA_CONNECTION_SAVED_OBJECT_TYPE, connectionId, [id])
-          );
-        }
-      }
-      await Promise.all(promises);
-
-      const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
-        WORKSPACE_TYPE,
-        attributes,
-        {
+      let result;
+      try {
+        result = await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
           id,
           permissions,
+        });
+      } catch (e: unknown) {
+        if (
+          requestedId &&
+          SavedObjectsErrorHelpers.isSavedObjectsClientError(e) &&
+          SavedObjectsErrorHelpers.isConflictError(e)
+        ) {
+          return {
+            success: false,
+            error: DUPLICATE_WORKSPACE_ID_ERROR,
+          };
         }
+        throw e;
+      }
+
+      const associations = [
+        ...(dataSources ?? []).map((dataSourceId) => ({
+          id: dataSourceId,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        })),
+        ...(dataConnections ?? []).map((connectionId) => ({
+          id: connectionId,
+          type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        })),
+      ];
+      const associationResults = await Promise.allSettled(
+        associations.map(({ id: objectId, type }) => client.addToWorkspaces(type, objectId, [id]))
       );
-      if (dataSources && this.uiSettings && client) {
+      const failedAssociations = associationResults.flatMap((associationResult, index) => {
+        if (associationResult.status === 'fulfilled') {
+          return [];
+        }
+
+        const association = associations[index];
+        const error = this.getErrorMessage(associationResult.reason);
+        this.logger.warn(
+          `Failed to associate ${association.type} [${association.id}] with workspace [${id}]: ${error}`
+        );
+        return [{ ...association, error }];
+      });
+      const associatedDataSources = associationResults.flatMap((associationResult, index) => {
+        const association = associations[index];
+        return associationResult.status === 'fulfilled' &&
+          association.type === DATA_SOURCE_SAVED_OBJECT_TYPE
+          ? [association.id]
+          : [];
+      });
+
+      if (associatedDataSources.length > 0 && this.uiSettings && client) {
         const rawState = getWorkspaceState(requestDetail.request);
         // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.
         updateWorkspaceState(requestDetail.request, {
@@ -181,7 +237,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         try {
-          await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
+          await checkAndSetDefaultDataSource(uiSettingsClient, associatedDataSources, false);
         } catch {
           this.logger.error('Set default data source error');
         } finally {
@@ -196,6 +252,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         success: true,
         result: {
           id: result.id,
+          ...(failedAssociations.length > 0 ? { failedAssociations } : {}),
         },
       };
     } catch (e: unknown) {
@@ -446,17 +503,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     workspaceId: string,
     objects: Array<{ id: string; type: string }>
-  ): Promise<IResponse<Array<{ id: string; error?: string }>>> {
+  ): Promise<IResponse<WorkspaceAssociateResult[]>> {
     const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
     const promises = objects.map(async (obj) => {
       try {
         await savedObjectClient.addToWorkspaces(obj.type, obj.id, [workspaceId]);
-        return {
-          id: obj.id,
-        };
+        return { id: obj.id, type: obj.type };
       } catch (e) {
         return {
           id: obj.id,
+          type: obj.type,
           error: this.formatError(e),
         };
       }

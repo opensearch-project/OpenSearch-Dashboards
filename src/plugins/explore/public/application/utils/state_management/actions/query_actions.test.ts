@@ -27,6 +27,8 @@ jest.mock('moment-timezone', () => {
 
 jest.mock('./utils', () => ({
   buildPPLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLTopBreakdownQuery: jest.fn((queryString) => queryString),
   processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
   createHistogramConfigWithInterval: jest.fn(() => ({
     histogramConfigs: {
@@ -47,6 +49,7 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
+  queryHasStats: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -1627,6 +1630,136 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(result.payload).toBeUndefined();
       expect(mockServices.data.search.showError).not.toHaveBeenCalled();
     });
+
+    describe('SQL breakdown two-pass flow', () => {
+      const utilsMock = jest.requireMock('./utils');
+      const histogramRows = { hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 };
+
+      const useSQLWithBreakdown = () => {
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: 'status', queryStatusMap: {} },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+          breakdownField: 'status',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+      };
+
+      const runHistogram = () =>
+        executeHistogramQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'SELECT * FROM logs',
+          interval: '5m',
+        })(mockDispatch, mockGetState, undefined);
+
+      it('keeps the breakdown when the top-N pass returns values', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({
+            hits: { hits: [{ _source: { breakdown: 'ok' } }], total: 1 },
+          })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: 'status' }),
+          ['ok']
+        );
+      });
+
+      // Without a top-N list the breakdown expression is the bare field, which
+      // would emit one series per distinct value.
+      it('drops the breakdown when the top-N pass comes back empty', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({ hits: { hits: [], total: 0 } })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
+
+      it.each([
+        ['3.9.0', true],
+        ['3.10.2', true],
+        ['3.8.0', false],
+        ['2.19.1', false],
+        [undefined, true],
+        ['not-a-version', true],
+      ])('data source version %s -> histogram built: %s', async (version, built) => {
+        useSQLWithBreakdown();
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        // The engine and version are read off the dataset convertToDataset returns, not off state.
+        (mockServices.data.dataViews.convertToDataset as jest.Mock).mockReturnValue({
+          id: 'test',
+          type: 'INDEX_PATTERN',
+          dataSource: { type: 'OpenSearch', engineType: 'OpenSearch', version },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+        mockSearchSource.fetch.mockResolvedValue(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledTimes(built ? 1 : 0);
+      });
+
+      it('drops the breakdown when the top-N pass fails', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockRejectedValueOnce(new Error('pass 1 exploded'))
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
+    });
   });
 
   describe('executeDataTableQuery', () => {
@@ -1784,6 +1917,42 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           }),
         })
       );
+    });
+
+    // A tab whose prepareQuery cannot yet build a query returns '' -- see the patterns
+    // tab, whose field is derived from logs results that are gone after a page reload.
+    it('does not run anything when the cache key is empty', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: '',
+        queryString: '',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+      expect(setResults).not.toHaveBeenCalled();
+      // The tab must stay uninitialized rather than stuck on a spinner.
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            status: expect.objectContaining({ status: QueryExecutionStatus.LOADING }),
+          }),
+        })
+      );
+    });
+
+    // The BRAIN retry in register_tabs deliberately passes a queryString that
+    // differs from its cacheKey, so the guard must not key off queryString.
+    it('still runs when only the query string differs from the cache key', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: 'some-key',
+        queryString: 'source=logs',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
     });
 
     it('should handle missing services gracefully', async () => {

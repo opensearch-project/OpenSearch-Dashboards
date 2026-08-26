@@ -114,10 +114,20 @@ const runAiEditorTests = () => {
 
           cy.explore.setQueryEditor(' ');
           cy.getElementByTestId('field-category-showDetails').click({ force: true });
-          cy.getElementByTestId('plus-category-Network').click();
-          cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', 'category');
-          cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', 'is');
-          cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', "'Network'");
+          cy.get('[data-test-subj^="plus-category-"]')
+            .first()
+            .then(($plusButton) => {
+              const categoryValue = $plusButton
+                .attr('data-test-subj')
+                .replace('plus-category-', '');
+              cy.wrap($plusButton).click();
+              cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', 'category');
+              cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', 'is');
+              cy.getElementByTestId('exploreQueryPanelEditor').should(
+                'contain.text',
+                `'${categoryValue}'`
+              );
+            });
         });
       }
     });

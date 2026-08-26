@@ -82,6 +82,7 @@ const AddFilterMenu: React.FC<{
   return (
     <SearchPopoverMenu
       options={options}
+      rankByQuery
       allowCreate={{ onCreate: onPick, dataTestSubj: 'pplBuilderFilterFieldOptionCreate' }}
       searchPlaceholder={i18n.translate('explore.pplBuilder.filterFieldSearch', {
         defaultMessage: 'Filter on field…',
@@ -221,6 +222,7 @@ const ChipValuePopover: React.FC<{
       checkable={multi}
       keepOpenOnSelect={multi}
       loading={loading}
+      rankByQuery
       onOpen={() => loadSuggestions()}
       onSearchChange={(searchTerm) => loadSuggestions(searchTerm)}
       allowCreate={{
