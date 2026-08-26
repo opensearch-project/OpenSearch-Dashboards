@@ -253,22 +253,19 @@ describe('QueryResult - Ask AI for help', () => {
     },
   });
 
-  it('renders the button in Discover when errored with retained results and chat available', () => {
+  it('renders the button in Discover when errored and chat available', () => {
     setServices();
     render(<QueryResult {...errorStatus(5)} />);
     expect(screen.getByTestId('discoverQueryErrorAskAiForHelp')).toBeInTheDocument();
   });
 
-  it('does not render the button when there are no retained results', () => {
+  it('renders the button on error regardless of the retained results count', () => {
     setServices();
-    render(<QueryResult {...errorStatus(0)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
-  });
+    const { rerender } = render(<QueryResult {...errorStatus(0)} />);
+    expect(screen.getByTestId('discoverQueryErrorAskAiForHelp')).toBeInTheDocument();
 
-  it('does not render the button when resultsCount is undefined', () => {
-    setServices();
-    render(<QueryResult {...errorStatus(undefined)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+    rerender(<QueryResult {...errorStatus(undefined)} />);
+    expect(screen.getByTestId('discoverQueryErrorAskAiForHelp')).toBeInTheDocument();
   });
 
   it('does not render the button outside classic Discover', () => {

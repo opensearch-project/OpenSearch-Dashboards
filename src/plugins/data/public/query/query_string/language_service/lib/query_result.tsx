@@ -134,9 +134,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     undefined
   );
   const showAskAiForHelp =
-    currentAppId === DISCOVER_APP_ID &&
-    (services?.chat?.isAvailable?.() ?? false) &&
-    (props.queryStatus.resultsCount ?? 0) > 0;
+    currentAppId === DISCOVER_APP_ID && (services?.chat?.isAvailable?.() ?? false);
 
   const onAskAiForHelp = () => {
     const error = extractQueryError(props.queryStatus.body?.error);
