@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Hack because the management wrapper is flat HTML and needs a class
 .mgtPage__body {
   max-width: map-get($euiBreakpoints, "xl");
