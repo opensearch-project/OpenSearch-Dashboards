@@ -95,9 +95,9 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
         values: { buttonText },
       })}
       compressed={true}
-      // The button is always filled, so the "unapplied changes" signal has to live in the
-      // colour instead — which is OUI's own convention for this control.
-      color={needsUpdate ? 'success' : 'primary'}
+      // Always primary: the "unapplied changes" signal stays on the label and tooltip
+      // (Refresh -> Update / "Click to apply"), not the colour.
+      color="primary"
       // Not filled when disabled: filled + disabled renders a solid grey block that reads
       // as an enabled control.
       fill={!isDisabled}

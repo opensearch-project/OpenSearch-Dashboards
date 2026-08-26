@@ -7,3 +7,24 @@
 .exploreSavedSearchesButton {
   @include exploreQueryPanelButton;
 }
+
+// Deliberately the same metrics as the Saved queries popover's option list (see
+// `save_query.scss`), so the two footer popovers read as siblings rather than as two unrelated
+// controls. Own class names because those belong to the `data` plugin's component.
+.exploreSavedSearchesButton__popoverContent {
+  .exploreSavedSearchesButton__optionList {
+    padding: 0;
+  }
+
+  .exploreSavedSearchesButton__option {
+    padding: 0;
+    margin: 0;
+  }
+
+  .exploreSavedSearchesButton__optionButton {
+    padding: $ouiSizeXXS;
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+  }
+}

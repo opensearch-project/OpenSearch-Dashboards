@@ -114,7 +114,7 @@ jest.doMock('../../../../../../data/public', () => {
     const {
       onLoad,
       onClearSavedQuery,
-      onRecentQueryRun,
+      onRecentQueriesClick,
       saveQuery,
       loadedSavedQuery,
       saveQueryIsDisabled,
@@ -174,33 +174,11 @@ jest.doMock('../../../../../../data/public', () => {
         <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
           Clear Query
         </button>
-        {/* Stands in for the Recent queries tab of the Open query flyout. */}
-        {onRecentQueryRun && (
-          <>
-            <button
-              data-test-subj="mock-run-recent-button"
-              onClick={() =>
-                onRecentQueryRun(
-                  { query: 'SELECT * FROM test', language: 'SQL' },
-                  { from: 'now-1d', to: 'now' }
-                )
-              }
-            >
-              Run Recent Query
-            </button>
-            <button
-              data-test-subj="mock-run-recent-no-time-button"
-              onClick={() => onRecentQueryRun({ query: 'SELECT * FROM test2', language: 'SQL' })}
-            >
-              Run Recent Query Without Time Range
-            </button>
-            <button
-              data-test-subj="mock-run-recent-object-button"
-              onClick={() => onRecentQueryRun({ query: { match_all: {} }, language: 'DQL' })}
-            >
-              Run Recent Object Query
-            </button>
-          </>
+        {/* Stands in for the third "Recent queries" option of the popover's option list. */}
+        {onRecentQueriesClick && (
+          <button data-test-subj="mock-recent-queries-option" onClick={onRecentQueriesClick}>
+            Recent Queries
+          </button>
         )}
         {loadedSavedQuery && (
           <div data-test-subj="loaded-query-info">
@@ -212,8 +190,38 @@ jest.doMock('../../../../../../data/public', () => {
     );
   };
 
+  // Stands in for the real recent-queries table: one button per scenario the popover has to apply.
+  const MockRecentQueriesTable = ({ onClickRecentQuery }: any) => (
+    <div data-test-subj="mock-recent-queries-table">
+      <button
+        data-test-subj="mock-run-recent-button"
+        onClick={() =>
+          onClickRecentQuery(
+            { query: 'SELECT * FROM test', language: 'SQL' },
+            { from: 'now-1d', to: 'now' }
+          )
+        }
+      >
+        Run Recent Query
+      </button>
+      <button
+        data-test-subj="mock-run-recent-no-time-button"
+        onClick={() => onClickRecentQuery({ query: 'SELECT * FROM test2', language: 'SQL' })}
+      >
+        Run Recent Query Without Time Range
+      </button>
+      <button
+        data-test-subj="mock-run-recent-object-button"
+        onClick={() => onClickRecentQuery({ query: { match_all: {} }, language: 'DQL' })}
+      >
+        Run Recent Object Query
+      </button>
+    </div>
+  );
+
   return {
     SavedQueryManagementComponent: MockSavedQueryManagementComponent,
+    RecentQueriesTable: MockRecentQueriesTable,
     runPPLAnalyzeInBackground: mockRunPPLAnalyzeInBackground,
   };
 });
@@ -587,20 +595,58 @@ describe('SaveQueryButton', () => {
     });
   });
 
-  // Migrated from the retired RecentQueriesButton: recent queries now run through this popover's
-  // Open query flyout, so `handleRunRecentQuery` lives here.
+  // Migrated from the retired RecentQueriesButton: recent queries are now a second view of this
+  // popover, reached from its "Recent queries" option, so `handleRunRecentQuery` lives here.
   describe('running a recent query', () => {
-    const runRecent = (testSubj = 'mock-run-recent-button') => {
+    const openRecentQueries = () => {
       renderWithStore();
       fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+      fireEvent.click(screen.getByTestId('mock-recent-queries-option'));
+    };
+
+    const runRecent = (testSubj = 'mock-run-recent-button') => {
+      openRecentQueries();
       fireEvent.click(screen.getByTestId(testSubj));
     };
 
-    it('passes onRecentQueryRun to the saved query management component', () => {
+    it('offers a Recent queries option in the popover', () => {
       renderWithStore();
       fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
 
-      expect(screen.getByTestId('mock-run-recent-button')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-recent-queries-option')).toBeInTheDocument();
+    });
+
+    // The option swaps the popover's content rather than opening anything alongside it.
+    it('replaces the option list with the recent queries table', () => {
+      openRecentQueries();
+
+      expect(screen.getByTestId('mock-recent-queries-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument();
+    });
+
+    it('returns to the option list from the back button', () => {
+      openRecentQueries();
+
+      fireEvent.click(screen.getByTestId('exploreSaveQueryRecentQueriesBackButton'));
+
+      expect(screen.getByTestId('saved-query-management')).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
+    });
+
+    // Landing back on the table you last looked at would hide the Save/Open options behind a back
+    // button, so reopening always starts from the option list.
+    it('reopens on the option list after the recent queries view was left open', async () => {
+      openRecentQueries();
+
+      // Close, then reopen from the trigger.
+      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('queryPanelFooterSaveQueryButton'));
+
+      expect(screen.getByTestId('saved-query-management')).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
     });
 
     it('loads the selected query into the editor', () => {
@@ -665,9 +711,11 @@ describe('SaveQueryButton', () => {
     it('closes the popover', async () => {
       runRecent();
 
+      // The view resets to the option list synchronously, so the panel itself is what has to go.
       await waitFor(() =>
         expect(screen.queryByTestId('saved-query-management')).not.toBeInTheDocument()
       );
+      expect(screen.queryByTestId('mock-recent-queries-table')).not.toBeInTheDocument();
     });
   });
 

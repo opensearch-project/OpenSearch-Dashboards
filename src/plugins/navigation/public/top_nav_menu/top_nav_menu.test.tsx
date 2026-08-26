@@ -363,8 +363,13 @@ describe('TopNavMenu', () => {
       await mountGrouped();
 
       expect(portalTarget.querySelector('.osdTopNavMenuGroup')).not.toBeNull();
-      // Legacy apps (discover / dashboard / visualize) must keep today's layout.
+      // Legacy apps (discover / dashboard / visualize) must keep today's layout, so neither the
+      // modifier nor the extra wrapper element may appear.
       expect(portalTarget.querySelector('.osdTopNavMenuGroup--actionsBeforeDatePicker')).toBeNull();
+      expect(portalTarget.querySelector('.osdTopNavMenuGroup__actionRow')).toBeNull();
+      // The icons and the picker stay direct children of the group.
+      expect(portalTarget.querySelector('.osdTopNavMenuGroup > .osdTopNavMenu')).not.toBeNull();
+      expect(portalTarget.querySelector('.osdTopNavMenuGroup > .globalDatePicker')).not.toBeNull();
     });
 
     it('adds the actionsBeforeDatePicker modifier when opted in', async () => {
@@ -375,6 +380,20 @@ describe('TopNavMenu', () => {
       ).not.toBeNull();
       // The modifier is purely presentational — the date picker slot must still render.
       expect(portalTarget.querySelector('.globalDatePicker')).not.toBeNull();
+      // The icons and the picker share one box so the narrow layout can give the pair a row of
+      // its own; a `flex-basis: 100%` on either one alone would strand the other.
+      const actionRow = portalTarget.querySelector(
+        '.osdTopNavMenuGroup--actionsBeforeDatePicker > .osdTopNavMenuGroup__actionRow'
+      );
+      expect(actionRow).not.toBeNull();
+      expect(actionRow!.querySelector(':scope > .osdTopNavMenu')).not.toBeNull();
+      expect(actionRow!.querySelector(':scope > .globalDatePicker')).not.toBeNull();
+      // The screen title stays outside it, on the breadcrumb row.
+      expect(
+        portalTarget.querySelector(
+          '.osdTopNavMenuGroup--actionsBeforeDatePicker > .osdTopNavMenuScreenTitle'
+        )
+      ).not.toBeNull();
     });
   });
 

@@ -22,22 +22,33 @@
 }
 
 // Opt-in via TopNavMenu's `groupedActionsBeforeDatePicker` prop (explore / agent_traces only).
-// The DOM order is already [screenTitle][osdTopNavMenu][globalDatePicker]; the icons only *look*
-// stranded next to the title because `.globalDatePicker` is an EuiFlexItem with `flex-grow: 1`
-// that absorbs all the free space. So we move the free space in front of the icons instead.
+// The DOM order is already [screenTitle][actionRow[osdTopNavMenu][globalDatePicker]]; the icons
+// only *look* stranded next to the title because `.globalDatePicker` is an EuiFlexItem with
+// `flex-grow: 1` that absorbs all the free space. So we move the free space in front of the pair
+// instead.
 .osdTopNavMenuGroup--actionsBeforeDatePicker {
-  > .osdTopNavMenu {
-    margin-left: auto;
-  }
+  // The action icons and the date picker share one box (`top_nav_menu.tsx` renders it only for
+  // this opt-in). Wide widths: it absorbs the free space after the title and packs its contents
+  // to the right, which reproduces the pre-existing single-row look.
+  > .osdTopNavMenuGroup__actionRow {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
 
-  > .globalDatePicker {
-    // Without this the picker keeps eating the free space and `margin-left: auto` above is inert.
-    // Safe because the picker has an intrinsic width: it renders with `showUpdateButton={false}`
-    // (OUI fixes the wrapper width) and `_query_editor.scss` already pins
-    // `.osdQueryEditor__datePickerWrapper { flex-grow: 0 }` from `m` up. Note that
-    // `_global_filter_group.scss` also right-aligns this item's text from `m` up — inert while
-    // grow is 0, but it would fight `margin-left: auto` if grow ever came back.
-    flex-grow: 0;
+    // `.osdTopNavMenuGroup > .euiFlexItem` above no longer reaches these two — they are
+    // grandchildren now — so re-apply it here. Without `flex-grow: 0` the picker keeps eating
+    // the free space and `justify-content` is inert. Safe because the picker has an intrinsic
+    // width: it renders with `showUpdateButton={false}` (OUI fixes the wrapper width) and
+    // `_query_editor.scss` already pins `.osdQueryEditor__datePickerWrapper { flex-grow: 0 }`
+    // from `m` up.
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    > .euiFlexItem {
+      width: auto !important;
+      flex-basis: auto !important;
+      flex-grow: 0 !important;
+    }
   }
 
   // Narrow: the screen title keeps row 1 with the breadcrumbs and the chrome, while the action
@@ -46,25 +57,27 @@
   // sits outside `.dscCanvas` so container queries can't reach it, and its width *is* the window
   // width minus the side nav.
   @include euiBreakpoint("xs", "s", "m") {
-    flex-wrap: wrap;
+    // Flattened so the group's children become direct flex items of the wrapping
+    // `.euiHeaderSection` (the companion block below flattens the two chrome wrappers in
+    // between). Without this, `flex-basis: 100%` on the action row resolves against the action
+    // menu — which starts *after* the recents button and the breadcrumbs — and row 2 ends up
+    // indented by that much, reading as centred at ~900px and overflowing onto a third row
+    // below ~600px.
+    display: contents;
 
-    > .osdTopNavMenuScreenTitle {
-      // `!important` beats `.osdTopNavMenuGroup > .euiFlexItem { flex-basis: auto !important }`.
-      flex-basis: 100% !important;
-    }
+    > .osdTopNavMenuGroup__actionRow {
+      // A whole row of the header section, so it starts flush at the header's left edge.
+      flex: 0 0 100%;
 
-    // Row 2 starts flush left.
-    > .osdTopNavMenu {
-      margin-left: 0;
+      // Icons at the left edge, picker + Refresh at the right.
+      justify-content: space-between;
     }
   }
 }
 
 // Companion to the wrap above. `renderApplicationHeader()` puts the recents button, the
-// breadcrumbs and the action menu in one nowrap, centre-aligned `EuiHeaderSection`; once the
-// action menu is two rows tall that centring drops the recents button and breadcrumbs into the
-// gap *between* the rows, aligned with neither. Top-align them instead, and give them the height
-// of a single action row so they still read as centred on row 1 next to the screen title.
+// breadcrumbs and the action menu in one nowrap `EuiHeaderSection`, so the second row has to be
+// created there — the group itself cannot break out of a nowrap parent.
 // `:has()` keeps this to the two opted-in observability apps — legacy callers of TopNavMenu never
 // render the modifier class, so their header is untouched. (`:has()` is already used further down
 // this file.)
@@ -73,7 +86,7 @@
   // it. `$euiHeaderHeightCompensation` assumes a single-row application header, so without
   // this the app wrapper (and every plugin layout built on `$osdHeaderOffset`) is exactly one
   // action row too tall and the page overflows by that much. One control row
-  // ($euiSizeXL) plus the group's row gap ($euiSizeS). Declared on the root element because
+  // ($euiSizeXL) plus the section's row gap ($euiSizeS). Declared on the root element because
   // the action menu is portaled into the chrome header, which is a *sibling* of
   // `.app-wrapper` — so the value has to reach both through inheritance.
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
@@ -83,14 +96,23 @@
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiHeaderSection:has(.osdTopNavMenuGroup--actionsBeforeDatePicker) {
-    align-items: flex-start;
+    flex-wrap: wrap;
 
-    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    > .euiHeaderSectionItem:not(.headerAppActionMenuSection),
-    > .euiFlexItem {
-      min-height: $euiSizeXL;
-      align-items: center;
-    }
+    // `.euiHeaderSection--grow` is `flex: 1 0 auto`. Once the section wraps, that
+    // `flex-shrink: 0` sizes it to its max-content width and it overflows the header
+    // horizontally, so hand shrinking back.
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  // Flatten the two chrome wrappers between the header section and the group, so the screen
+  // title and the action row become direct flex items of the section and can be placed on
+  // separate rows of it.
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .headerAppActionMenuSection:has(.osdTopNavMenuGroup--actionsBeforeDatePicker),
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .headerAppActionMenu:has(.osdTopNavMenuGroup--actionsBeforeDatePicker) {
+    display: contents;
   }
 }
 

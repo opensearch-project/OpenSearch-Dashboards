@@ -272,7 +272,21 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             );
 
           // Show the SearchBar in-place
-          default:
+          default: {
+            const actionsItem = (
+              <EuiFlexItem grow={false} className="osdTopNavMenu">
+                {renderMenu(menuClassName)}
+              </EuiFlexItem>
+            );
+            const datePickerItem = (
+              <EuiFlexItem className="globalDatePicker">
+                <div ref={datePickerRef} />
+                {!showDatePicker && props.customSubmitButton && (
+                  <div className="osdTopNavCustomSubmitButton">{props.customSubmitButton}</div>
+                )}
+              </EuiFlexItem>
+            );
+
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
@@ -282,22 +296,27 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                         <h1>{screenTitle}</h1>
                       </EuiTitle>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="osdTopNavMenu">
-                      {renderMenu(menuClassName)}
-                    </EuiFlexItem>
-                    <EuiFlexItem className="globalDatePicker">
-                      <div ref={datePickerRef} />
-                      {!showDatePicker && props.customSubmitButton && (
-                        <div className="osdTopNavCustomSubmitButton">
-                          {props.customSubmitButton}
-                        </div>
-                      )}
-                    </EuiFlexItem>
+                    {groupedActionsBeforeDatePicker ? (
+                      // One box around the action icons and the date picker. At narrow widths it
+                      // takes a row of its own (see `_index.scss`), which is only expressible if
+                      // the pair is a single flex item — a bare `flex-basis: 100%` on either one
+                      // would strand the other on a third row.
+                      <div className="osdTopNavMenuGroup__actionRow">
+                        {actionsItem}
+                        {datePickerItem}
+                      </div>
+                    ) : (
+                      <>
+                        {actionsItem}
+                        {datePickerItem}
+                      </>
+                    )}
                   </EuiFlexGroup>
                 </MountPointPortal>
                 {renderSearchBar({ datePickerRef })}
               </>
             );
+          }
         }
       }
 

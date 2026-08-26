@@ -246,8 +246,8 @@ describe('QueryExecutionButton', () => {
     const button = screen.getByTestId('exploreQueryExecutionButton');
     // Verify the button shows "Update" text when needsUpdate is true
     expect(screen.getByText('Update')).toBeInTheDocument();
-    // The button is always filled, so unapplied changes are signalled by the colour instead
-    expect(button).toHaveClass('euiButton--success');
+    // Always primary: the state shows in the label, not the colour.
+    expect(button).toHaveClass('euiButton--primary');
     expect(button).toHaveClass('euiButton--fill');
   });
 

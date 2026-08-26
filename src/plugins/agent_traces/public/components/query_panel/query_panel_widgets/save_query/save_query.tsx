@@ -7,9 +7,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
-import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import {
   Query,
+  RecentQueriesTable,
   SavedQueryManagementComponent,
   SavedQueryMeta,
   SavedQuery,
@@ -41,6 +42,10 @@ export const SaveQueryButton = () => {
   const getEditorText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // The popover has two views: the option list, and the recent-queries table reached from its
+  // "Recent queries" option. Kept here rather than inside SavedQueryManagementComponent because
+  // the table needs this app's run-this-query wiring and because the panel has to widen for it.
+  const [showRecentQueries, setShowRecentQueries] = useState(false);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dispatch = useDispatch();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
@@ -68,11 +73,19 @@ export const SaveQueryButton = () => {
     }
   }, [currentSavedQueryId, savedQueryService, dispatch]);
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen((open) => !open), []);
-  const closePopover = () => setIsPopoverOpen(false);
+  // Always reopens on the option list: landing back on the recent-queries table you last looked at
+  // would hide the Save/Open options behind a back button.
+  const onButtonClick = useCallback(() => {
+    setShowRecentQueries(false);
+    setIsPopoverOpen((open) => !open);
+  }, []);
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+    setShowRecentQueries(false);
+  }, []);
 
-  // Inherited from the retired Recent queries button, which is now the "Recent queries" tab of this
-  // popover's Open query flyout. The key still opens the popover; recents are one flyout deeper.
+  // Inherited from the retired Recent queries button, which is now the "Recent queries" option of
+  // this popover. The key still opens the popover; recents are one click deeper.
   const { keyboardShortcut } = services;
   keyboardShortcut?.useKeyboardShortcut({
     id: 'saved_queries',
@@ -131,7 +144,7 @@ export const SaveQueryButton = () => {
 
       services.notifications.toasts.addSuccess(`Your query "${attributes.title}" was saved`);
 
-      setIsPopoverOpen(false);
+      closePopover();
     } catch (error) {
       services.notifications.toasts.addDanger(
         i18n.translate('agentTraces.queryPanel.saveQuery.failedToSaveQuery', {
@@ -168,18 +181,18 @@ export const SaveQueryButton = () => {
         }
       }
 
-      setIsPopoverOpen(false);
+      closePopover();
       dispatch(clearResults());
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
-    [dispatch, services, setEditorTextWithQuery, timeFilter]
+    [closePopover, dispatch, services, setEditorTextWithQuery, timeFilter]
   );
 
   const handleRunRecentQuery = useCallback(
     (selectedQuery: Query, timeRange?: TimeRange) => {
       const updatedQuery = typeof selectedQuery.query === 'string' ? selectedQuery.query : '';
-      setIsPopoverOpen(false);
+      closePopover();
       // NOTE: `timeRange` is currently always undefined — query_history.ts persists the field as
       // `dateRange` while RecentQueriesTable reads `timeRange`. Left threaded so the fix stays a
       // one-liner; fixing either side here would change legacy Discover, which shares that table.
@@ -194,13 +207,13 @@ export const SaveQueryButton = () => {
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
     },
-    [dispatch, handleTimeChange, services, setEditorTextWithQuery]
+    [closePopover, dispatch, handleTimeChange, services, setEditorTextWithQuery]
   );
 
   const handleClearSavedQuery = useCallback(() => {
     dispatch(setSavedQuery(undefined));
-    setIsPopoverOpen(false);
-  }, [dispatch]);
+    closePopover();
+  }, [closePopover, dispatch]);
 
   return (
     <EuiPopover
@@ -225,23 +238,50 @@ export const SaveQueryButton = () => {
       closePopover={closePopover}
       anchorPosition="downCenter"
       panelPaddingSize="none"
-      panelClassName="agentTracesSaveQuery__popoverContent"
+      panelClassName={
+        showRecentQueries
+          ? 'agentTracesSaveQuery__popoverContent agentTracesSaveQuery__popoverContent--recentQueries'
+          : 'agentTracesSaveQuery__popoverContent'
+      }
     >
-      <SavedQueryManagementComponent
-        savedQueryService={savedQueryService}
-        loadedSavedQuery={currentSavedQuery}
-        onInitiateSave={() => {}}
-        onInitiateSaveAsNew={() => {}}
-        onLoad={handleLoadSavedQuery}
-        onRecentQueryRun={handleRunRecentQuery}
-        onClearSavedQuery={handleClearSavedQuery}
-        closeMenuPopover={() => setIsPopoverOpen(false)}
-        showSaveQuery={!!services.capabilities?.agentTraces?.saveQuery}
-        saveQuery={handleSaveQuery}
-        useNewSavedQueryUI={true}
-        saveQueryIsDisabled={saveButtonIsDisabled}
-        textSize="xs"
-      />
+      {showRecentQueries ? (
+        <>
+          <EuiPopoverTitle paddingSize="s">
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType="arrowLeft"
+              data-test-subj="agentTracesSaveQueryRecentQueriesBackButton"
+              onClick={() => setShowRecentQueries(false)}
+            >
+              {i18n.translate('agentTraces.queryPanel.saveQueryButton.recentQueries', {
+                defaultMessage: 'Recent queries',
+              })}
+            </EuiButtonEmpty>
+          </EuiPopoverTitle>
+          <RecentQueriesTable
+            isVisible={true}
+            queryString={services.data.query.queryString}
+            onClickRecentQuery={handleRunRecentQuery}
+          />
+        </>
+      ) : (
+        <SavedQueryManagementComponent
+          savedQueryService={savedQueryService}
+          loadedSavedQuery={currentSavedQuery}
+          onInitiateSave={() => {}}
+          onInitiateSaveAsNew={() => {}}
+          onLoad={handleLoadSavedQuery}
+          onClearSavedQuery={handleClearSavedQuery}
+          closeMenuPopover={closePopover}
+          onRecentQueriesClick={() => setShowRecentQueries(true)}
+          showSaveQuery={!!services.capabilities?.agentTraces?.saveQuery}
+          saveQuery={handleSaveQuery}
+          useNewSavedQueryUI={true}
+          saveQueryIsDisabled={saveButtonIsDisabled}
+          textSize="xs"
+        />
+      )}
     </EuiPopover>
   );
 };

@@ -59,8 +59,8 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
     expect(button).toHaveClass('euiButton--fill');
-    // Unapplied changes are signalled by the colour, not the fill.
-    expect(button).toHaveClass('euiButton--success');
+    // Always primary: the state shows in the label, not the colour.
+    expect(button).toHaveClass('euiButton--primary');
   });
 
   it('disables button when date range is invalid', () => {

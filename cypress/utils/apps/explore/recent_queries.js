@@ -34,18 +34,18 @@ export const BaseQuery = {
 export const TestQueries = ['bytes_transferred >', 'bytes_transferred < 8000'];
 
 /**
- * Recent queries live in the "Recent queries" tab of the saved queries "Open query" flyout — the
- * standalone footer button was retired so that saved *searches* and saved *queries* stop competing
- * for the same spot in the footer.
+ * Recent queries are a second view of the saved queries popover, reached from its "Recent queries"
+ * option — the standalone footer button was retired so that saved *searches* and saved *queries*
+ * stop competing for the same spot in the footer.
  */
-export const openRecentQueriesTab = () => {
+export const openRecentQueries = () => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
-  cy.getElementByTestId('saved-query-management-open-button').click({ force: true });
-  cy.getElementByTestId('openQueryFlyoutRecentQueriesTab').click({ force: true });
+  cy.getElementByTestId('saved-query-management-recent-queries-button').click({ force: true });
 };
 
-export const closeRecentQueriesTab = () => {
-  cy.getElementByTestId('euiFlyoutCloseButton').click({ force: true });
+// Toggling the trigger closes the popover outright; the back arrow would only return to the options.
+export const closeRecentQueries = () => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
 };
 
 /**
