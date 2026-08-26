@@ -59,6 +59,8 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               lineWidth={styleOptions.lineWidth}
               pointSize={styleOptions.pointSize}
               showValues={styleOptions.showValues}
+              connectNullValues={styleOptions.connectNullValues}
+              disconnectValues={styleOptions.disconnectValues}
               lineStyle={styleOptions.lineStyle}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
@@ -76,6 +78,12 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
               onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
               onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+              onConnectNullValuesChange={(connectNullValues) =>
+                updateStyleOption('connectNullValues', connectNullValues)
+              }
+              onDisconnectValuesChange={(disconnectValues) =>
+                updateStyleOption('disconnectValues', disconnectValues)
+              }
             />
           </EuiFlexItem>
 
