@@ -16,7 +16,6 @@ import {
   executePromQLResourceQuery,
   buildPromQLVariableOptions,
   interpolateResourceQuery,
-  hasValidLabelValuesSelector,
 } from '../../../../variables/promql_variable_query_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
 import { NormalizedVariableOption, PromQLResourceQuery } from '../../../../variables/types';
@@ -199,20 +198,6 @@ export function useVariableQueryPreview({
       setExecutionError(
         i18n.translate('dashboard.variableQueryPanel.promqlLabelEmpty', {
           defaultMessage: 'Label is required',
-        })
-      );
-      return;
-    }
-
-    if (
-      promQLResourceQuery.kind === 'labelValues' &&
-      !hasValidLabelValuesSelector(promQLResourceQuery.metric, promQLResourceQuery.matchers ?? [])
-    ) {
-      setExecutionError(
-        i18n.translate('dashboard.variableQueryPanel.promqlNegativeOnlySelector', {
-          defaultMessage:
-            'Add a Metric, or an "=" / "=~" label filter — a selector made only of "!=" / "!~" ' +
-            'filters is not valid in PromQL.',
         })
       );
       return;

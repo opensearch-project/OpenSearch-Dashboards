@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { getPromQLResourceClient } from '../../../../../variables/promql_variable_query_utils';
+import {
+  buildSeriesSelector,
+  getPromQLResourceClient,
+} from '../../../../../variables/promql_variable_query_utils';
 import { PromQLLabelMatcher, PromQLResourceQuery } from '../../../../../variables/types';
 import { Dataset } from '../../../../../../../data/common';
+
+/** Cache key for a Label filter row's value options, keyed by label + selector. */
+const matcherValueCacheKey = (label: string, selector?: string): string =>
+  `${label}\n${selector ?? ''}`;
 
 export interface UsePromqlDropdownDataArgs {
   data: DataPublicPluginStart;
@@ -31,59 +38,116 @@ export function usePromqlDropdownData({
   promQLResourceQuery,
   onResourceQueryChange,
 }: UsePromqlDropdownDataArgs) {
-  // Dropdown source data for the PromQL resource query forms (label names,
-  // metric names) — backed by the same Prometheus resource API already used
-  // for autocomplete elsewhere.
-  const [promqlLabelNameOptions, setPromqlLabelNameOptions] = useState<string[]>([]);
-  const [promqlMetricNameOptions, setPromqlMetricNameOptions] = useState<string[]>([]);
+  const promqlMetric =
+    promQLResourceQuery?.kind === 'labelValues' ? promQLResourceQuery.metric : undefined;
 
-  // Load the label name and metric name dropdown options for the PromQL.
+  // Latest scope, read when a fetch resolves to discard results issued under a
+  // now-changed dataset/metric (out-of-order responses).
+  const currentScopeRef = useRef({ datasetId: dataset?.id, metric: promqlMetric });
+  currentScopeRef.current = { datasetId: dataset?.id, metric: promqlMetric };
+
+  // Skip state updates from fetches that resolve after unmount.
+  const isMountedRef = useRef(true);
   useEffect(() => {
-    if (!isPrometheusResource || !dataset?.id) {
-      setPromqlLabelNameOptions([]);
-      setPromqlMetricNameOptions([]);
-      return;
-    }
-
-    const client = getPromQLResourceClient(data);
-    if (!client) {
-      return;
-    }
-
-    let cancelled = false;
-    const timeRange = useTimeFilter ? data.query.timefilter.timefilter.getTime() : undefined;
-
-    client
-      .getLabels(dataset.id, undefined, undefined, timeRange)
-      .then((labels) => {
-        if (!cancelled) setPromqlLabelNameOptions(labels);
-      })
-      .catch(() => {
-        if (!cancelled) setPromqlLabelNameOptions([]);
-      });
-
-    client
-      .getMetrics(dataset.id, undefined, timeRange)
-      .then((metrics) => {
-        if (!cancelled) setPromqlMetricNameOptions(metrics);
-      })
-      .catch(() => {
-        if (!cancelled) setPromqlMetricNameOptions([]);
-      });
-
+    isMountedRef.current = true;
     return () => {
-      cancelled = true;
+      isMountedRef.current = false;
     };
-  }, [isPrometheusResource, dataset?.id, data, useTimeFilter]);
+  }, []);
 
-  // Value options for each Label filter row, keyed by that row's selected
-  // label. Loaded on demand when a row's label is chosen/changed.
+  const getTimeRange = useCallback(
+    () => (useTimeFilter ? data.query.timefilter.timefilter.getTime() : undefined),
+    [useTimeFilter, data]
+  );
+
+  // Shared lazy loader for the metric-name and label-name dropdowns: dedups when
+  // already loaded/in-flight, and drops out-of-order or post-unmount responses.
+  const loadNameList = useCallback(
+    (opts: {
+      alreadyLoaded: boolean;
+      fetchList: () => Promise<string[]>;
+      isStale: () => boolean;
+      setOptions: (v: string[]) => void;
+      setLoading: (v: boolean) => void;
+      onLoaded: () => void;
+    }) => {
+      if (!isPrometheusResource || !dataset?.id || opts.alreadyLoaded) {
+        return;
+      }
+      if (!getPromQLResourceClient(data)) {
+        return;
+      }
+      opts.setLoading(true);
+      opts
+        .fetchList()
+        .then((list) => {
+          if (opts.isStale()) return;
+          opts.setOptions(list);
+          opts.onLoaded();
+        })
+        .catch(() => {
+          if (opts.isStale()) return;
+          opts.setOptions([]);
+        })
+        .finally(() => {
+          if (opts.isStale()) return;
+          opts.setLoading(false);
+        });
+    },
+    [isPrometheusResource, dataset?.id, data]
+  );
+
+  // Metric names for the Metric dropdown. Loaded lazily, cached per dataset.
+  const [promqlMetricNameOptions, setPromqlMetricNameOptions] = useState<string[]>([]);
+  const [promqlMetricNamesLoading, setPromqlMetricNamesLoading] = useState(false);
+  const [loadedMetricNamesDataset, setLoadedMetricNamesDataset] = useState<string | undefined>(
+    undefined
+  );
+
+  // Reset cache and loading when the dataset changes.
+  useEffect(() => {
+    setPromqlMetricNameOptions([]);
+    setLoadedMetricNamesDataset(undefined);
+    setPromqlMetricNamesLoading(false);
+  }, [dataset?.id]);
+
+  const loadMetricNames = useCallback(() => {
+    const datasetId = dataset?.id;
+    loadNameList({
+      alreadyLoaded: loadedMetricNamesDataset === datasetId || promqlMetricNamesLoading,
+      fetchList: () =>
+        getPromQLResourceClient(data)!.getMetrics(datasetId!, undefined, getTimeRange()),
+      isStale: () => !isMountedRef.current || currentScopeRef.current.datasetId !== datasetId,
+      setOptions: setPromqlMetricNameOptions,
+      setLoading: setPromqlMetricNamesLoading,
+      onLoaded: () => setLoadedMetricNamesDataset(datasetId),
+    });
+  }, [
+    loadNameList,
+    dataset?.id,
+    data,
+    getTimeRange,
+    loadedMetricNamesDataset,
+    promqlMetricNamesLoading,
+  ]);
+
+  // Per-row Label filter value options, loaded lazily and keyed by label + selector.
   const [promqlMatcherValueOptions, setPromqlMatcherValueOptions] = useState<
     Record<string, string[]>
   >({});
+  const [promqlMatcherValueLoading, setPromqlMatcherValueLoading] = useState<
+    Record<string, boolean>
+  >({});
+
+  // Matcher values are scoped by dataset and metric; drop them (and any stale
+  // in-flight loading flags) when either changes.
+  useEffect(() => {
+    setPromqlMatcherValueOptions({});
+    setPromqlMatcherValueLoading({});
+  }, [dataset?.id, promqlMetric]);
 
   const loadPromqlMatcherValues = useCallback(
-    (label: string) => {
+    (label: string, selector: string | undefined, metricAtRequest: string | undefined) => {
       if (!label.trim() || !dataset?.id) {
         return;
       }
@@ -93,18 +157,44 @@ export function usePromqlDropdownData({
         return;
       }
 
-      const timeRange = useTimeFilter ? data.query.timefilter.timefilter.getTime() : undefined;
+      const cacheKey = matcherValueCacheKey(label, selector);
+      // Skip if already fetched or a fetch is already in flight for this key.
+      if (cacheKey in promqlMatcherValueOptions || promqlMatcherValueLoading[cacheKey]) {
+        return;
+      }
 
+      const meta = selector ? { 'match[]': selector } : undefined;
+      const timeRange = getTimeRange();
+      const datasetId = dataset.id;
+
+      // Ignore the result if unmounted or the dataset/metric changed mid-flight.
+      // The values are selector-scoped (metric + siblings), so a late response
+      // from an old scope must not write into the (now-orphaned) cache entry.
+      const isStale = () =>
+        !isMountedRef.current ||
+        currentScopeRef.current.datasetId !== datasetId ||
+        currentScopeRef.current.metric !== metricAtRequest;
+
+      setPromqlMatcherValueLoading((prev) => ({ ...prev, [cacheKey]: true }));
       client
-        .getLabelValues(dataset.id, undefined, label, timeRange)
+        .getLabelValues(datasetId, meta, label, timeRange)
         .then((values) => {
-          setPromqlMatcherValueOptions((prev) => ({ ...prev, [label]: values }));
+          if (isStale()) return;
+          setPromqlMatcherValueOptions((prev) => ({ ...prev, [cacheKey]: values }));
         })
         .catch(() => {
-          setPromqlMatcherValueOptions((prev) => ({ ...prev, [label]: [] }));
+          if (isStale()) return;
+          setPromqlMatcherValueOptions((prev) => ({ ...prev, [cacheKey]: [] }));
+        })
+        .finally(() => {
+          if (isStale()) return;
+          setPromqlMatcherValueLoading((prev) => {
+            const { [cacheKey]: _removed, ...rest } = prev;
+            return rest;
+          });
         });
     },
-    [dataset?.id, data, useTimeFilter]
+    [dataset?.id, data, getTimeRange, promqlMatcherValueOptions, promqlMatcherValueLoading]
   );
 
   // Label filters row mutators — only meaningful for the `labelValues` query type.
@@ -113,27 +203,102 @@ export function usePromqlDropdownData({
     [promQLResourceQuery]
   );
 
-  const promqlMatcherLabelsKey = useMemo(
-    () => promqlMatchers.map((m) => m.label).join(','),
-    [promqlMatchers]
+  // Label names for the "Select label..." dropdown. Loaded lazily, scoped to the
+  // selected metric, cached per metric.
+  const [promqlLabelNameOptions, setPromqlLabelNameOptions] = useState<string[]>([]);
+  const [promqlLabelNamesLoading, setPromqlLabelNamesLoading] = useState(false);
+  const [loadedLabelNamesMetric, setLoadedLabelNamesMetric] = useState<string | undefined>(
+    undefined
   );
 
+  // Reset cache and loading when the metric or dataset changes.
   useEffect(() => {
-    if (!isPrometheusResource || !dataset?.id) {
-      return;
-    }
+    setPromqlLabelNameOptions([]);
+    setLoadedLabelNamesMetric(undefined);
+    setPromqlLabelNamesLoading(false);
+  }, [promqlMetric, dataset?.id]);
 
-    const labelsNeedingValues = Array.from(
-      new Set(
-        promqlMatchers
-          .map((matcher) => matcher.label.trim())
-          .filter((label) => label && !(label in promqlMatcherValueOptions))
-      )
-    );
+  const loadLabelNames = useCallback(() => {
+    const datasetId = dataset?.id;
+    const metricAtRequest = promqlMetric;
+    loadNameList({
+      alreadyLoaded: loadedLabelNamesMetric === (metricAtRequest ?? '') || promqlLabelNamesLoading,
+      fetchList: () =>
+        getPromQLResourceClient(data)!.getLabels(
+          datasetId!,
+          undefined,
+          buildSeriesSelector(metricAtRequest),
+          getTimeRange()
+        ),
+      isStale: () =>
+        !isMountedRef.current ||
+        currentScopeRef.current.datasetId !== datasetId ||
+        currentScopeRef.current.metric !== metricAtRequest,
+      setOptions: setPromqlLabelNameOptions,
+      setLoading: setPromqlLabelNamesLoading,
+      onLoaded: () => setLoadedLabelNamesMetric(metricAtRequest ?? ''),
+    });
+  }, [
+    loadNameList,
+    dataset?.id,
+    data,
+    getTimeRange,
+    promqlMetric,
+    loadedLabelNamesMetric,
+    promqlLabelNamesLoading,
+  ]);
 
-    labelsNeedingValues.forEach((label) => loadPromqlMatcherValues(label));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPrometheusResource, dataset?.id, promqlMatcherLabelsKey, loadPromqlMatcherValues]);
+  // Selector for row `i`'s value lookup: current metric + every other filled sibling matcher.
+  const selectorForRow = useCallback(
+    (index: number): string | undefined => {
+      const siblings = promqlMatchers.filter(
+        (matcher, i) => i !== index && matcher.label.trim() && matcher.value.trim()
+      );
+      return buildSeriesSelector(promqlMetric, siblings);
+    },
+    [promqlMatchers, promqlMetric]
+  );
+
+  // A row's trimmed label + its scoped cache key, or undefined when unset.
+  const rowKey = useCallback(
+    (index: number): { label: string; cacheKey: string } | undefined => {
+      const label = promqlMatchers[index]?.label.trim();
+      if (!label) {
+        return undefined;
+      }
+      return { label, cacheKey: matcherValueCacheKey(label, selectorForRow(index)) };
+    },
+    [promqlMatchers, selectorForRow]
+  );
+
+  // Load a row's value options — called when the user opens that row's dropdown.
+  const loadMatcherValues = useCallback(
+    (index: number) => {
+      const key = rowKey(index);
+      if (key) {
+        loadPromqlMatcherValues(key.label, selectorForRow(index), promqlMetric);
+      }
+    },
+    [rowKey, selectorForRow, loadPromqlMatcherValues, promqlMetric]
+  );
+
+  // Value options for a given Label filter row, scoped to that row's selector.
+  const getMatcherValueOptions = useCallback(
+    (index: number): string[] => {
+      const key = rowKey(index);
+      return key ? (promqlMatcherValueOptions[key.cacheKey] ?? []) : [];
+    },
+    [rowKey, promqlMatcherValueOptions]
+  );
+
+  // Whether a row's value options are currently being fetched.
+  const isMatcherValueLoading = useCallback(
+    (index: number): boolean => {
+      const key = rowKey(index);
+      return key ? !!promqlMatcherValueLoading[key.cacheKey] : false;
+    },
+    [rowKey, promqlMatcherValueLoading]
+  );
 
   const updatePromqlMatchers = useCallback(
     (nextMatchers: PromQLLabelMatcher[]) => {
@@ -168,9 +333,14 @@ export function usePromqlDropdownData({
 
   return {
     promqlLabelNameOptions,
+    promqlLabelNamesLoading,
+    loadLabelNames,
     promqlMetricNameOptions,
-    promqlMatcherValueOptions,
-    loadPromqlMatcherValues,
+    promqlMetricNamesLoading,
+    loadMetricNames,
+    getMatcherValueOptions,
+    loadMatcherValues,
+    isMatcherValueLoading,
     promqlMatchers,
     addPromqlMatcher,
     updatePromqlMatcherAt,

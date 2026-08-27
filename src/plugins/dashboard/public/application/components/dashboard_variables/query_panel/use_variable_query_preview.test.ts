@@ -345,26 +345,6 @@ describe('useVariableQueryPreview — PromQL resource query branch', () => {
     expect(result.current.canApply).toBe(false);
   });
 
-  it('blocks Apply and does not call the network for a negative-only label selector', async () => {
-    const args = defaultArgs({
-      isPrometheusResource: true,
-      promQLResourceQuery: {
-        kind: 'labelValues',
-        label: 'job',
-        matchers: [{ label: 'job', operator: '!=', value: 'prometheus' }],
-      },
-    });
-    const { result } = renderHook(() => useVariableQueryPreview(args));
-
-    await act(async () => {
-      await result.current.handleRunResourceQuery();
-    });
-
-    expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
-    expect(result.current.previewError).toContain('is not valid in PromQL');
-    expect(result.current.canApply).toBe(false);
-  });
-
   it('blocks Apply and does not call the network when the Series matcher is empty', async () => {
     const args = defaultArgs({
       isPrometheusResource: true,

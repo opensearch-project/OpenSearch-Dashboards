@@ -131,7 +131,7 @@ function escapeSelectorValue(value: string): string {
 /**
  * Combine an optional metric filter and a list of label matchers.
  */
-function buildSeriesSelector(
+export function buildSeriesSelector(
   metric?: string,
   matchers?: PromQLLabelMatcher[],
   metricOperator: '=' | '=~' = '='
@@ -153,42 +153,6 @@ function buildSeriesSelector(
   }
 
   return `{${clauses.join(', ')}}`;
-}
-
-/**
- * Returns true when a Prometheus `=~` matcher regex can match the empty string.
- * Prometheus regex matchers are fully anchored (^...$), so we mirror that here.
- * If the value is not a valid JS regex (it may still be valid RE2), we conservatively
- * return false and let the backend validate it.
- */
-function matcherRegexMatchesEmpty(value: string): boolean {
-  try {
-    return new RegExp(`^(?:${value})$`).test('');
-  } catch {
-    return false;
-  }
-}
-
-export function hasValidLabelValuesSelector(
-  metric: string | undefined,
-  matchers: PromQLLabelMatcher[]
-): boolean {
-  if (metric && metric.trim()) {
-    return true;
-  }
-  const activeMatchers = matchers.filter((matcher) => matcher.label.trim() && matcher.value.trim());
-  if (activeMatchers.length === 0) {
-    return true;
-  }
-  // Prometheus rejects a series selector whose only matchers can match the empty string
-  // (HTTP 400 "vector selector must contain at least one non-empty matcher"). An `=` matcher
-  // is always a non-empty literal; an `=~` matcher only qualifies when its regex cannot match
-  // "" (e.g. `.*` / `a*` do, `.+` / `node_.*` do not).
-  return activeMatchers.some(
-    (matcher) =>
-      matcher.operator === '=' ||
-      (matcher.operator === '=~' && !matcherRegexMatchesEmpty(matcher.value))
-  );
 }
 
 /**
@@ -235,12 +199,6 @@ export async function executePromQLResourceQuery(
     }
 
     case 'labelValues': {
-      if (!hasValidLabelValuesSelector(queryType.metric, queryType.matchers ?? [])) {
-        throw new Error(
-          'Add a Metric, or an "=" / "=~" label filter — a selector made only of "!=" / "!~" ' +
-            'filters is not valid in PromQL.'
-        );
-      }
       const selector = buildSeriesSelector(queryType.metric, queryType.matchers);
       return client.getLabelValues(
         dataConnectionId,

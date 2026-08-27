@@ -7,7 +7,6 @@ import {
   mapResourceQueryTextFields,
   interpolateResourceQuery,
   collectResourceQueryTextFields,
-  hasValidLabelValuesSelector,
   getPromQLResourceClient,
   executePromQLResourceQuery,
   buildPromQLVariableOptions,
@@ -107,85 +106,6 @@ describe('mapResourceQueryTextFields / interpolateResourceQuery / collectResourc
   });
 });
 
-describe('hasValidLabelValuesSelector', () => {
-  // Regression coverage for the fix that made executePromQLResourceQuery's labelValues
-  // branch enforce the same "at least one non-negative-only matcher, or a metric" rule
-  // that the Preview UI already enforced — see use_variable_query_preview.ts.
-
-  it('is valid when a metric is set, regardless of matchers', () => {
-    expect(hasValidLabelValuesSelector('up', [])).toBe(true);
-    expect(hasValidLabelValuesSelector('up', [makeMatcher({ operator: '!=' })])).toBe(true);
-  });
-
-  it('is valid when there are no matchers and no metric (fully unscoped label-values query)', () => {
-    expect(hasValidLabelValuesSelector(undefined, [])).toBe(true);
-  });
-
-  it('is valid when there are no matchers and metric is an empty/whitespace string', () => {
-    expect(hasValidLabelValuesSelector('   ', [])).toBe(true);
-  });
-
-  it('is valid when at least one matcher uses "=" even if others are negative', () => {
-    const matchers = [
-      makeMatcher({ operator: '!=' }),
-      makeMatcher({ label: 'env', operator: '=' }),
-    ];
-    expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(true);
-  });
-
-  it('is valid when at least one matcher uses "=~" even if others are negative', () => {
-    const matchers = [
-      makeMatcher({ operator: '!~' }),
-      makeMatcher({ label: 'env', operator: '=~' }),
-    ];
-    expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(true);
-  });
-
-  it('is invalid when the only "=~" matcher can match the empty string (e.g. ".*") and there is no metric', () => {
-    // Prometheus rejects a selector whose only matcher matches "" with HTTP 400
-    // ("vector selector must contain at least one non-empty matcher").
-    expect(
-      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: '.*' })])
-    ).toBe(false);
-    expect(
-      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: 'a*' })])
-    ).toBe(false);
-  });
-
-  it('is valid when a "=~" matcher regex cannot match the empty string (e.g. ".+")', () => {
-    expect(
-      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: '.+' })])
-    ).toBe(true);
-    expect(
-      hasValidLabelValuesSelector(undefined, [makeMatcher({ operator: '=~', value: 'node_.*' })])
-    ).toBe(true);
-  });
-
-  it('is invalid when every matcher is negative-only ("!=") and there is no metric', () => {
-    const matchers = [makeMatcher({ operator: '!=' })];
-    expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(false);
-  });
-
-  it('is invalid when every matcher is negative-only ("!~") and there is no metric', () => {
-    const matchers = [
-      makeMatcher({ operator: '!~' }),
-      makeMatcher({ label: 'env', operator: '!~' }),
-    ];
-    expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(false);
-  });
-
-  it('ignores half-empty matcher rows (blank label or value) when deciding validity', () => {
-    // A matcher with an empty label/value is not yet "active" — should not count
-    // toward satisfying the "at least one =/=~ matcher" requirement, nor toward
-    // making the selector negative-only.
-    const matchers = [
-      makeMatcher({ label: '', value: '', operator: '=' }),
-      makeMatcher({ operator: '!=' }),
-    ];
-    expect(hasValidLabelValuesSelector(undefined, matchers)).toBe(false);
-  });
-});
-
 describe('getPromQLResourceClient', () => {
   it('returns the registered "prometheus" resource client', () => {
     const client = makeClient();
@@ -277,20 +197,25 @@ describe('executePromQLResourceQuery', () => {
     expect(getLabelValues).toHaveBeenCalledWith('ds-1', undefined, 'job', undefined);
   });
 
-  it('labelValues: rejects with a clear error for a negative-only selector, without calling the client', async () => {
-    // Regression test for the fix that made the runtime/cascade-refresh path enforce
-    // the same negative-only-selector guard the Preview UI already enforced.
-    const getLabelValues = jest.fn();
+  it('labelValues: sends a negative-only selector to the client (Prometheus validates, not the UI)', async () => {
+    // We no longer pre-validate matcher semantics client-side; a selector made only of
+    // negative matchers is passed through so Prometheus can return its own error, which the
+    // caller surfaces to the user.
+    const getLabelValues = jest.fn().mockResolvedValue([]);
     const dataPlugin = makeDataPlugin(makeClient({ getLabelValues }));
 
-    await expect(
-      executePromQLResourceQuery(dataPlugin, 'ds-1', {
-        kind: 'labelValues',
-        label: 'job',
-        matchers: [makeMatcher({ operator: '!=' })],
-      })
-    ).rejects.toThrow(/is not valid in PromQL/);
-    expect(getLabelValues).not.toHaveBeenCalled();
+    await executePromQLResourceQuery(dataPlugin, 'ds-1', {
+      kind: 'labelValues',
+      label: 'job',
+      matchers: [makeMatcher({ label: 'env', operator: '!=', value: 'prod' })],
+    });
+
+    expect(getLabelValues).toHaveBeenCalledWith(
+      'ds-1',
+      { 'match[]': '{env!="prod"}' },
+      'job',
+      undefined
+    );
   });
 
   it('labelValues: allows a negative matcher when a metric is also set', async () => {

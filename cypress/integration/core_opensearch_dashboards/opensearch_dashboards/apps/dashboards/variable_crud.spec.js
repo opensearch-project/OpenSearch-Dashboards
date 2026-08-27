@@ -609,12 +609,12 @@ export const runDashboardVariableTests = () => {
         // Choose the "Label values" fill-in-the-blank query type.
         selectPromqlQueryType('Label values');
 
-        // Pick a label every Prometheus target exposes. 'job'/'instance' always exist
+        // Pick a label every Prometheus target exposes. 'job'/'instance' always exist.
+        cy.getElementByTestId('variableEditorPromqlLabelValuesLabel').find('input').click();
         cy.getElementByTestId('variableEditorPromqlLabelValuesLabel')
           .find('input')
           .type('job', { force: true });
-        cy.wait(300);
-        cy.get('[role="option"]').contains('job').click({ force: true });
+        cy.get('[role="option"]', { timeout: 30000 }).contains('job').click({ force: true });
         cy.wait(300);
 
         // Preview loads the label values, then Apply + Save.

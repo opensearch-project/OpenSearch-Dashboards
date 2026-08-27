@@ -43,8 +43,14 @@ export interface PromqlQueryTypeFormsProps {
   queryType: PromQLResourceQuery;
   onChange: (queryType: PromQLResourceQuery) => void;
   promqlLabelNameOptions: string[];
+  promqlLabelNamesLoading: boolean;
+  loadLabelNames: () => void;
   promqlMetricNameOptions: string[];
-  promqlMatcherValueOptions: Record<string, string[]>;
+  promqlMetricNamesLoading: boolean;
+  loadMetricNames: () => void;
+  getMatcherValueOptions: (index: number) => string[];
+  loadMatcherValues: (index: number) => void;
+  isMatcherValueLoading: (index: number) => boolean;
   promqlMatchers: PromQLLabelMatcher[];
   addPromqlMatcher: () => void;
   updatePromqlMatcherAt: (index: number, patch: Partial<PromQLLabelMatcher>) => void;
@@ -58,8 +64,14 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
   queryType,
   onChange,
   promqlLabelNameOptions,
+  promqlLabelNamesLoading,
+  loadLabelNames,
   promqlMetricNameOptions,
-  promqlMatcherValueOptions,
+  promqlMetricNamesLoading,
+  loadMetricNames,
+  getMatcherValueOptions,
+  loadMatcherValues,
+  isMatcherValueLoading,
   promqlMatchers,
   addPromqlMatcher,
   updatePromqlMatcherAt,
@@ -113,6 +125,8 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
               { defaultMessage: 'Select label...' }
             )}
             singleSelection={{ asPlainText: true }}
+            isLoading={promqlLabelNamesLoading}
+            onFocus={() => loadLabelNames()}
             options={toComboBoxOptionsWithVariables(promqlLabelNameOptions, existingVariableNames)}
             selectedOptions={queryType.label ? [{ label: queryType.label }] : []}
             onChange={(selected) => {
@@ -145,6 +159,8 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                   { defaultMessage: 'Select metric...' }
                 )}
                 singleSelection={{ asPlainText: true }}
+                isLoading={promqlMetricNamesLoading}
+                onFocus={() => loadMetricNames()}
                 options={toComboBoxOptionsWithVariables(
                   promqlMetricNameOptions,
                   existingVariableNames
@@ -196,15 +212,14 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                           { defaultMessage: 'Select label...' }
                         )}
                         singleSelection={{ asPlainText: true }}
+                        isLoading={promqlLabelNamesLoading}
+                        onFocus={() => loadLabelNames()}
                         options={toComboBoxOptionsWithVariables(
                           promqlLabelNameOptions,
                           existingVariableNames
                         )}
                         selectedOptions={matcher.label ? [{ label: matcher.label }] : []}
                         onChange={(selected) => {
-                          // Values for the chosen label are loaded centrally by the
-                          // matcher-labels effect in usePromqlDropdownData (deduped), so we
-                          // only update the matcher here — loading again would double-fetch.
                           const label = selected[0]?.label || '';
                           updatePromqlMatcherAt(
                             index,
@@ -243,8 +258,10 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                           { defaultMessage: 'Select value...' }
                         )}
                         singleSelection={{ asPlainText: true }}
+                        isLoading={isMatcherValueLoading(index)}
+                        onFocus={() => loadMatcherValues(index)}
                         options={toComboBoxOptionsWithVariables(
-                          promqlMatcherValueOptions[matcher.label] ?? [],
+                          getMatcherValueOptions(index),
                           existingVariableNames
                         )}
                         selectedOptions={matcher.value ? [{ label: matcher.value }] : []}

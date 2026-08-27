@@ -61,9 +61,14 @@ jest.mock('./dataset_select_widget', () => ({
 jest.mock('./promql/use_promql_dropdown_data', () => ({
   usePromqlDropdownData: ({ promQLResourceQuery }: any) => ({
     promqlLabelNameOptions: [],
+    promqlLabelNamesLoading: false,
+    loadLabelNames: jest.fn(),
     promqlMetricNameOptions: [],
-    promqlMatcherValueOptions: {},
-    loadPromqlMatcherValues: jest.fn(),
+    promqlMetricNamesLoading: false,
+    loadMetricNames: jest.fn(),
+    getMatcherValueOptions: () => [],
+    loadMatcherValues: jest.fn(),
+    isMatcherValueLoading: () => false,
     promqlMatchers:
       promQLResourceQuery?.kind === 'labelValues' ? (promQLResourceQuery.matchers ?? []) : [],
     addPromqlMatcher: jest.fn(),

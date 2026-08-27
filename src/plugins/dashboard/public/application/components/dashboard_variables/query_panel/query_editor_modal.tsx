@@ -183,8 +183,14 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
 
   const {
     promqlLabelNameOptions,
+    promqlLabelNamesLoading,
+    loadLabelNames,
     promqlMetricNameOptions,
-    promqlMatcherValueOptions,
+    promqlMetricNamesLoading,
+    loadMetricNames,
+    getMatcherValueOptions,
+    loadMatcherValues,
+    isMatcherValueLoading,
     promqlMatchers,
     addPromqlMatcher,
     updatePromqlMatcherAt,
@@ -434,8 +440,14 @@ export const QueryEditorModal: React.FC<QueryEditorModalProps> = ({
                     queryType={promQLResourceQuery}
                     onChange={setResourceQueryState}
                     promqlLabelNameOptions={promqlLabelNameOptions}
+                    promqlLabelNamesLoading={promqlLabelNamesLoading}
+                    loadLabelNames={loadLabelNames}
                     promqlMetricNameOptions={promqlMetricNameOptions}
-                    promqlMatcherValueOptions={promqlMatcherValueOptions}
+                    promqlMetricNamesLoading={promqlMetricNamesLoading}
+                    loadMetricNames={loadMetricNames}
+                    getMatcherValueOptions={getMatcherValueOptions}
+                    loadMatcherValues={loadMatcherValues}
+                    isMatcherValueLoading={isMatcherValueLoading}
                     promqlMatchers={promqlMatchers}
                     addPromqlMatcher={addPromqlMatcher}
                     updatePromqlMatcherAt={updatePromqlMatcherAt}
