@@ -140,6 +140,24 @@ describe('DocViewTableRow', () => {
     }
   );
 
+  it('does not render value filter buttons for the configured time field even when not date-typed', () => {
+    // Mirrors the data-table gate: the time field is suppressed regardless of its mapped type.
+    render(
+      <DocViewTableRow
+        {...defaultProps}
+        fieldType="string"
+        isTimeField={true}
+        onFilter={mockOnFilter}
+        onToggleColumn={mockOnToggleColumn}
+        fieldMapping={mockFieldMapping}
+      />
+    );
+
+    expect(screen.queryByTestId('filterAddButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterRemoveButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('toggleColumnButton')).toBeInTheDocument();
+  });
+
   it('renders toggle column button when provided', () => {
     render(
       <DocViewTableRow
