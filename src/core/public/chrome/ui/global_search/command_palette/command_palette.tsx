@@ -16,10 +16,9 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KeyboardShortcutStart } from '../../../../keyboard_shortcut';
 import {
-  COMMANDS_SYMBOL,
   GlobalSearchCommand,
   GlobalSearchResult,
-  SAVED_OBJECTS_SYMBOL,
+  SearchCommandTypes,
 } from '../../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../../global_search/run_global_search';
 import './command_palette.scss';
@@ -95,6 +94,16 @@ export const GlobalSearchCommandPalette = ({
     () => [...sectionResultGroups.flatMap((group) => group.results), ...trailingResults],
     [sectionResultGroups, trailingResults]
   );
+
+  const searchTips = useMemo(() => {
+    const registeredTypes = new Set(globalSearchCommands.map((command) => command.type));
+
+    return Array.from(registeredTypes).flatMap((type) => {
+      const { alias, description } = SearchCommandTypes[type];
+
+      return alias ? [{ type, alias, description }] : [];
+    });
+  }, [globalSearchCommands]);
 
   const search = useCallback(async (value: string) => {
     setQuery(value);
@@ -404,34 +413,20 @@ export const GlobalSearchCommandPalette = ({
             </div>
           )}
 
-          <footer
-            className="osdGlobalSearchCommandPalette__footer"
-            data-test-subj="global-search-command-palette-footer"
-          >
-            <span className="osdGlobalSearchCommandPalette__footerTip">
-              Tips:
-              <code
-                className="osdGlobalSearchCommandPalette__footerToken"
-                data-test-subj="global-search-command-palette-assets-token"
-              >
-                {SAVED_OBJECTS_SYMBOL}
-              </code>
-              {i18n.translate('core.globalSearch.commandPalette.searchAssetsTip', {
-                defaultMessage: 'Search assets',
-              })}
-            </span>
-            <span className="osdGlobalSearchCommandPalette__footerTip">
-              <code
-                className="osdGlobalSearchCommandPalette__footerToken"
-                data-test-subj="global-search-command-palette-commands-token"
-              >
-                {COMMANDS_SYMBOL}
-              </code>
-              {i18n.translate('core.globalSearch.commandPalette.searchCommandsTip', {
-                defaultMessage: 'Commands',
-              })}
-            </span>
-          </footer>
+          {searchTips.length > 0 && (
+            <footer
+              className="osdGlobalSearchCommandPalette__footer"
+              data-test-subj="global-search-command-palette-footer"
+            >
+              {searchTips.map(({ type, alias, description }, index) => (
+                <span key={type} className="osdGlobalSearchCommandPalette__footerTip">
+                  {index === 0 && 'Tips:'}
+                  <code className="osdGlobalSearchCommandPalette__footerToken">{alias}</code>
+                  {description}
+                </span>
+              ))}
+            </footer>
+          )}
         </EuiPanel>
       </EuiFocusTrap>
     </EuiOverlayMask>

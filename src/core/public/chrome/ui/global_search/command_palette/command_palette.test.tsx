@@ -74,10 +74,30 @@ describe('<GlobalSearchCommandPalette />', () => {
     await waitFor(() => {
       expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
     });
-    expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('@Search assets');
-    expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('>Commands');
+    expect(queryByTestId('global-search-command-palette-footer')).not.toBeInTheDocument();
     expect(command.run).toHaveBeenCalledWith('', {
       abortSignal: expect.any(AbortSignal),
+    });
+  });
+
+  it('shows tips for registered command types with aliases', async () => {
+    const command = {
+      ...createCommand('assets'),
+      type: 'SAVED_OBJECTS' as const,
+    };
+    const commands$ = new BehaviorSubject<GlobalSearchCommand[]>([command]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByTestId } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+
+    await waitFor(() => {
+      expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('Tips:@Assets');
     });
   });
 

@@ -8,10 +8,15 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
- * search input match with `@` will handled by saved objects search command
- * search input match with `>` will handled by plugin customized commands
+ * Search input matching `@` is handled by saved object search commands.
  */
 export const SAVED_OBJECTS_SYMBOL = '@';
+
+/**
+ * Legacy command symbol retained for compatibility.
+ * No current search command type uses this alias.
+ * @deprecated
+ */
 export const COMMANDS_SYMBOL = '>';
 
 export const SearchCommandTypes = {

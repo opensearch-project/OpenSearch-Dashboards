@@ -41,6 +41,8 @@
 }
 
 .osdGlobalSearchCommandPalette {
+  display: flex;
+  flex-direction: column;
   width: min(800px, calc(100vw - 48px));
   max-height: calc(100vh - var(--osd-command-palette-top-offset) - 24px);
   overflow: hidden;
