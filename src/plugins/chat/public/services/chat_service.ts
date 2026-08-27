@@ -8,6 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { PPLLintFixRequestCategory } from '../../../data/common/chat_tools/ppl_lint_fix_protocol';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
@@ -304,6 +305,24 @@ export class ChatService {
   }
 
   /**
+   * Contexts sent to the agent, in AG-UI `{description, value}` form. The PPL
+   * quick-fix stamps its approved request id under this category purely so a
+   * cross-window caller can recover it from the store; the model must never
+   * receive it, or it could echo the id back as an apply arg and stand in for
+   * the user's Approve click. Typed against data's category so a rename there
+   * fails to compile here.
+   */
+  private getAgentContexts(): Array<{ description: string; value: string }> {
+    const pplLintFixRequestCategory: PPLLintFixRequestCategory = 'ppl-lint-fix-request';
+    return this.getAllAssistantContexts()
+      .filter((ctx) => !ctx.categories?.includes(pplLintFixRequestCategory))
+      .map((ctx) => ({
+        description: ctx.description,
+        value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+      }));
+  }
+
+  /**
    * Resolve the parsed value of the current page context (the one carrying appId).
    */
   private getPageContextValue(): any | undefined {
@@ -432,15 +451,7 @@ export class ChatService {
     // Get workspace-aware data source ID
     const dataSourceId = await this.getCurrentDataSourceId();
 
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const context = this.getAgentContexts();
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -674,15 +685,7 @@ export class ChatService {
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();
 
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const context = this.getAgentContexts();
 
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =

@@ -328,6 +328,34 @@ describe('ChatService', () => {
       expect(result.userMessage.content).toBe('Hello');
     });
 
+    it('excludes the PPL lint fix request-id context from the agent payload', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          { categories: ['page', 'chat'], description: 'Page context', value: 'page-data' },
+          {
+            categories: ['page', 'ppl-lint-fix-request'],
+            description: 'PPL lint quick-fix request id',
+            value: 'req-123',
+          },
+        ]),
+      };
+
+      await chatService.sendMessage('test', []);
+      // Reassigning global.window is a no-op under jsdom, so the shared store
+      // property must be cleared here or it leaks into later tests.
+      delete (global as any).window.assistantContextStore;
+
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: [{ description: 'Page context', value: 'page-data' }],
+        }),
+        undefined
+      );
+    });
+
     it('should include available tools in request', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
