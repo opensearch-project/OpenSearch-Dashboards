@@ -50,10 +50,6 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     try {
       const hits = parseHits(props.payloadData);
       setAllSpans(hits);
-      // New trace payload: reset any prior zoom window and column sizing so a
-      // previous trace's resized widths don't leak onto this one.
-      setVisibleRange(undefined);
-      setColumnWidths({});
       const filteredSpans = applySpanFilters(hits, props.filters);
       setSpans(filteredSpans);
 
@@ -71,6 +67,15 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
       setIsSpansTableDataLoading(false);
     }
   }, [props.payloadData, props.DSL, props.filters]);
+
+  // Reset the zoom window and any column resizing only when the trace itself
+  // changes (identified by traceId). Filter changes re-fetch/re-filter the same
+  // trace, so they must not wipe the user's zoom or column widths.
+  const traceId = allSpans[0]?.traceId;
+  useEffect(() => {
+    setVisibleRange(undefined);
+    setColumnWidths({});
+  }, [traceId]);
 
   type SpanMap = Record<string, Span>;
 

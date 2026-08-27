@@ -8,6 +8,17 @@ import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
 
 /**
+ * Largest `valueOf(item)` across an iterable, folded pairwise (no `Math.max(...spread)`,
+ * so no call-stack argument limit and no intermediate array). `seed` is also the
+ * result for an empty iterable (defaults to 1, a safe denominator for bar scaling).
+ */
+const maxBy = <T>(items: Iterable<T>, valueOf: (item: T) => number, seed = 1): number => {
+  let max = seed;
+  for (const item of items) max = Math.max(max, valueOf(item));
+  return max;
+};
+
+/**
  * Minimal span shape needed to build a per-trace service flow. Compatible with
  * the transformed trace hits produced by the trace details view.
  */
@@ -135,11 +146,8 @@ export const spansToServiceFlow = (
   });
 
   const services = Array.from(spanCounts.keys());
-  const maxSpanCount = Math.max(...services.map((s) => spanCounts.get(s) || 0), 1);
-  const maxDurationMs = Math.max(
-    ...services.map((s) => nanoToMilliSec(durationNanos.get(s) || 0)),
-    1
-  );
+  const maxSpanCount = maxBy(services, (s) => spanCounts.get(s) || 0);
+  const maxDurationMs = maxBy(services, (s) => nanoToMilliSec(durationNanos.get(s) || 0));
 
   const nodes: ServiceFlowNode[] = services.map((service) => {
     const spans = spanCounts.get(service) || 0;
@@ -186,7 +194,7 @@ export const spansToServiceFlow = (
     };
   });
 
-  const maxVolume = Math.max(...Array.from(edgeCounts.values()), 1);
+  const maxVolume = maxBy(edgeCounts.values(), (v) => v);
   const edges: ServiceFlowEdge[] = Array.from(edgeCounts.entries()).map(([key, count]) => {
     const [source, target] = key.split('->');
     return {

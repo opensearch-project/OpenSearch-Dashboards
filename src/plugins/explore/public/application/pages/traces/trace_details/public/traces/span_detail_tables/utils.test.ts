@@ -198,16 +198,17 @@ describe('applySpanFilters', () => {
     expect(result).toEqual([]);
   });
 
-  it('treats a missing field as non-matching for "=" and matching for "!="', () => {
+  it('excludes spans with a missing field for both "=" and "!=" (matches PPL server semantics)', () => {
     const spans = [{ serviceName: 'cart' }] as any;
     // "=" against an absent field must not match (no "undefined" string coercion).
     expect(applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '=' }])).toEqual(
       []
     );
-    // "!=" against an absent field matches (the field is not that value).
+    // "!=" also excludes absent-field spans, matching `where field != value` on
+    // the server (which drops null/absent rows) so both layers keep the same set.
     expect(
       applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '!=' }])
-    ).toEqual(spans);
+    ).toEqual([]);
   });
 
   it('should handle empty spans array', () => {

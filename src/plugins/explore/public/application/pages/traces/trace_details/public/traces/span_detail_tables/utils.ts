@@ -46,15 +46,13 @@ export const applySpanFilters = (
       const spanValue = field.includes('.')
         ? field.split('.').reduce((obj, key) => obj?.[key], span)
         : span[field];
-      // A missing field never equals a concrete filter value (and always
-      // satisfies "!="), so absent values don't string-coerce to "undefined"/
-      // "null" and match unexpectedly.
-      const matches =
-        spanValue === undefined || spanValue === null
-          ? false
-          : // Coerce both sides to strings so a numeric field value (e.g. 200)
-            // still matches a value coming from a text input.
-            String(spanValue) === String(value);
+      // A missing field satisfies neither "=" nor "!=", matching server-side PPL
+      // (`where field = value` / `field != value` both exclude null/absent rows),
+      // so client-side and server-side filtering keep the same spans.
+      if (spanValue === undefined || spanValue === null) return false;
+      // Coerce both sides to strings so a numeric field value (e.g. 200) still
+      // matches a value coming from a text input; honor the != operator.
+      const matches = String(spanValue) === String(value);
       return operator === '!=' ? !matches : matches;
     });
   });
