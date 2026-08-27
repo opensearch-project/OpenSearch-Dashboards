@@ -5,10 +5,13 @@
 
 import { withTimeout } from '@osd/std';
 import type { AssistantContextStore } from '../../../../context_provider/public';
-import { cleanupPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
+import {
+  cleanupPPLLintFixRequest,
+  createPPLLintFixApprovalNonce,
+} from '../../chat_tools/ppl_lint_fix_session';
 import {
   PPL_LINT_FIX_REQUEST_CATEGORY,
-  PPL_LINT_FIX_REQUEST_ID_CONTEXT_SUFFIX,
+  PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX,
 } from '../../../common/chat_tools/ppl_lint_fix_protocol';
 import type { PPLLintFixHost } from '../../chat_tools/ppl_lint_fix_host';
 import type {
@@ -48,10 +51,10 @@ export function addPPLLintFixAssistantContext(
   });
 
   contextStore.addContext({
-    id: host.contextIdPrefix + request.requestId + PPL_LINT_FIX_REQUEST_ID_CONTEXT_SUFFIX,
-    description: 'PPL lint quick-fix request id',
-    value: request.requestId,
-    label: 'PPL lint fix request id',
+    id: host.contextIdPrefix + request.requestId + PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX,
+    description: 'PPL lint quick-fix approval nonce',
+    value: createPPLLintFixApprovalNonce(request.requestId),
+    label: 'PPL lint fix approval nonce',
     categories: ['page', PPL_LINT_FIX_REQUEST_CATEGORY],
   });
 }

@@ -22,6 +22,7 @@ import {
 import {
   cleanupPPLLintFixRequest,
   clearPPLLintFixSession,
+  createPPLLintFixApprovalNonce,
   getPPLLintFixOutcome,
   getPPLLintFixSession,
   storePPLLintFixSession,
@@ -1034,6 +1035,44 @@ describe('PPLLintFixToolRegistration', () => {
 
     expect(result?.success).toBe(true);
     expect(queryString.setQuery).toHaveBeenCalled();
+  });
+
+  it('applies a cross-window fix authorized by a valid approval nonce', async () => {
+    storeSession();
+    mockValidate.mockReturnValue({ accepted: true });
+    const config = renderRegistration();
+    const nonce = createPPLLintFixApprovalNonce(request.requestId);
+
+    let result: any;
+    await act(async () => {
+      result = await config.handler({
+        fixedQuery: 'source=logs | where status_code = 500',
+        __approvedNonce: nonce,
+        confirmed: true,
+      });
+    });
+
+    expect(result?.success).toBe(true);
+    expect(queryString.setQuery).toHaveBeenCalled();
+  });
+
+  it('fails closed when a cross-window apply carries an unissued nonce', async () => {
+    storeSession();
+    mockValidate.mockReturnValue({ accepted: true });
+    const config = renderRegistration();
+
+    let result: any;
+    await act(async () => {
+      result = await config.handler({
+        fixedQuery: 'source=logs | where status_code = 500',
+        __approvedNonce: 'nonce-the-model-invented',
+        confirmed: true,
+      });
+    });
+
+    expect(result?.success).toBe(false);
+    expect(result?.reason).toBe('missing-request');
+    expect(queryString.setQuery).not.toHaveBeenCalled();
   });
 
   it('cleans an abandoned request when its chat card unmounts', () => {

@@ -8,7 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
-import type { PPLLintFixRequestCategory } from '../../../data/common/chat_tools/ppl_lint_fix_protocol';
+import type { PPLLintFixRequestCategory } from '../../../data/public';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,

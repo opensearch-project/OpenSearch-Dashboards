@@ -20,6 +20,7 @@ import {
   getPPLLintFixOutcome,
   getPPLLintFixSession,
   markPPLLintFixDismissed,
+  resolveRequestIdByApprovalNonce,
   subscribePPLLintFixOutcome,
 } from './ppl_lint_fix_session';
 import type { RemovePPLLintFixContextById } from './ppl_lint_fix_session';
@@ -44,15 +45,16 @@ export type BoundPPLLintFixToolArgs = PPLLintFixToolArgs & {
 
 /**
  * The request id a confirmed apply is bound to: the in-process symbol the card's
- * Approve click sets, falling back to the explicit key an out-of-realm caller
- * passes when the symbol cannot survive serialization. Never trusts a
- * model-supplied request id.
+ * Approve click sets, falling back to the approval nonce an out-of-realm caller
+ * passes when the symbol cannot survive serialization. The nonce is resolved
+ * against the nonces issued in this realm, so a value the model invented (it
+ * never sees a real nonce) resolves to nothing and the apply fails closed.
  */
 export const resolveApprovedRequestId = (args: unknown): string | undefined => {
   const bound = (args as BoundPPLLintFixToolArgs | null | undefined)?.[PPL_LINT_FIX_UI_BINDING];
   if (typeof bound === 'string') return bound;
-  const explicit = (args as PPLLintFixApprovalArgs | null | undefined)?.__approvedRequestId;
-  return typeof explicit === 'string' ? explicit : undefined;
+  const nonce = (args as PPLLintFixApprovalArgs | null | undefined)?.__approvedNonce;
+  return typeof nonce === 'string' ? resolveRequestIdByApprovalNonce(nonce) : undefined;
 };
 
 /**
