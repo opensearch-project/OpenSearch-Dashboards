@@ -1810,6 +1810,45 @@ describe('ChatService', () => {
       expect(lastMsg.toolCalls).toHaveLength(0);
     });
 
+    it('injects synthetic tool call events before RUN_FINISHED', async () => {
+      // RUN_FINISHED clears the event handler's active-message map, so a tool call replayed after it
+      // cannot resolve its parent and spawns a second assistant message (losing the restored one's
+      // text). Synthetic events must sit where they do in a live stream: before the run ends.
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        (name: string) => name === 'ask_user'
+      );
+
+      const messages = [
+        { id: '0', role: 'user', content: 'ask me some question' },
+        {
+          id: '1',
+          role: 'assistant',
+          content: "I'd love to chat!",
+          toolCalls: [
+            { id: 'tc-ask', type: 'function', function: { name: 'ask_user', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        { type: 'RUN_STARTED', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      const types = result!.map((e: any) => e.type);
+      expect(types).toEqual([
+        'RUN_STARTED',
+        'MESSAGES_SNAPSHOT',
+        'TOOL_CALL_START',
+        'TOOL_CALL_ARGS',
+        'TOOL_CALL_END',
+        'RUN_FINISHED',
+      ]);
+    });
+
     it('should not inject synthetic events for non-frontend tool calls', async () => {
       const mockHasAction = jest.fn().mockReturnValue(false);
       (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(

@@ -866,13 +866,17 @@ export class ChatService {
       } as ToolCallEndEvent);
     }
 
-    // Return: events before snapshot + patched snapshot + events after snapshot + synthetic events
-    return [
+    // Tool call events belong BEFORE the run ends, as they do in a live stream: RUN_FINISHED clears
+    // the handler's active-message map, so a tool call replayed after it can no longer resolve its
+    // parent and would spawn a second assistant message instead of attaching to the restored one.
+    const rebuilt = [
       ...events.slice(0, snapshotIndex),
       patchedSnapshot,
       ...events.slice(snapshotIndex + 1),
-      ...syntheticEvents,
     ];
+    const runFinishedIndex = rebuilt.findIndex((e) => e.type === EventType.RUN_FINISHED);
+    const insertAt = runFinishedIndex === -1 ? rebuilt.length : runFinishedIndex;
+    return [...rebuilt.slice(0, insertAt), ...syntheticEvents, ...rebuilt.slice(insertAt)];
   }
 
   /**

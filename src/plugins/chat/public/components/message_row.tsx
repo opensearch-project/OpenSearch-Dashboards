@@ -12,7 +12,6 @@ import type { Message, AssistantMessage } from '../../common/types';
 import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
 import { getImageSrc } from '../utils/user_message_input';
 import { ShareModal } from './share_modal';
-import { getImageSrc } from '../utils/user_message_input';
 import './message_row.scss';
 
 interface MessageRowProps {

@@ -2250,4 +2250,167 @@ describe('ChatEventHandler', () => {
       ]);
     });
   });
+
+  describe('restore of a conversation ending in an unfinished frontend tool', () => {
+    // A restored snapshot can still carry the tool call that the replayed TOOL_CALL_START
+    // re-attaches. Each toolCalls entry renders its own card, so the message must never end up
+    // holding the same tool call twice — an unanswered ask_user would show as two cards.
+    it('does not duplicate a tool call the snapshot already carries', async () => {
+      const toolCallId = 'tooluse_ask';
+      const toolCall = {
+        id: toolCallId,
+        type: 'function',
+        function: { name: 'ask_user', arguments: '{"prompt":"What?"}' },
+      };
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', toolCalls: [toolCall] },
+        ],
+      } as any);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.filter((tc) => tc.id === toolCallId)).toHaveLength(1);
+      expect(timeline.filter((m) => m.id === '1')).toHaveLength(1);
+    });
+
+    // Restore shape: the snapshot carries the tool call and replay re-announces it via a synthetic
+    // TOOL_CALL_START. It must land on the existing message even when the parent lookup misses.
+    it('keeps one message when the re-announced tool call cannot resolve its parent', async () => {
+      const toolCallId = 'tooluse_iAFNqCSCNIniFcsnxrbbGf';
+      const toolCall = {
+        id: toolCallId,
+        type: 'function',
+        function: { name: 'ask_user', arguments: '{"prompt":"What?"}' },
+      };
+
+      // Snapshot as the server sends it: assistant already carries the tool call.
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me something' },
+          { id: '1', role: 'assistant', toolCalls: [toolCall] },
+        ],
+      } as any);
+
+      // Timeline read lags a render behind mid-replay, so parent/dedupe lookups via it miss.
+      mockGetTimeline.mockReturnValue([]);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      const assistants = timeline.filter((m) => m.role === 'assistant');
+      expect(assistants).toHaveLength(1);
+      expect(
+        (assistants[0] as AssistantMessage).toolCalls?.filter((tc) => tc.id === toolCallId)
+      ).toHaveLength(1);
+    });
+
+    // A repeated TOOL_CALL_START for one tool call still leaves a single entry on the message.
+    it('does not duplicate when the same TOOL_CALL_START is replayed twice', async () => {
+      const toolCallId = 'tooluse_ask_twice';
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', toolCalls: [] },
+        ],
+      } as any);
+
+      for (let i = 0; i < 2; i++) {
+        await chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_START,
+          toolCallId,
+          toolCallName: 'ask_user',
+          parentMessageId: '1',
+        } as any);
+        await chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_ARGS,
+          toolCallId,
+          delta: '{"prompt":"What?"}',
+        } as any);
+      }
+
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.filter((tc) => tc.id === toolCallId)).toHaveLength(1);
+      expect(timeline.filter((m) => m.id === '1')).toHaveLength(1);
+    });
+
+    // The caller keeps the restore event array for further restores, so replay leaves it untouched.
+    it('does not mutate the snapshot event messages when re-attaching', async () => {
+      const toolCallId = 'tooluse_ask2';
+      const snapshotAssistant: any = { id: '1', role: 'assistant', toolCalls: [] };
+      const event: any = {
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [{ id: '0', role: 'user', content: 'q' }, snapshotAssistant],
+      };
+
+      await chatEventHandler.handleEvent(event);
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      expect(snapshotAssistant.toolCalls).toHaveLength(0);
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.map((tc) => tc.id)).toEqual([toolCallId]);
+    });
+
+    // With a stale getTimeline() mid-replay, the re-announced tool call still re-attaches to the
+    // existing assistant message (resolved via activeAssistantMessages) rather than spawning a
+    // second message with the same id.
+    it('re-attaches the re-injected tool call to the snapshot message even when getTimeline is stale', async () => {
+      // 1. Replay the (patched) snapshot: assistant "1" has its ask_user stripped.
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', content: 'let me ask', toolCalls: [] },
+        ],
+      } as any);
+
+      expect(timeline).toHaveLength(2);
+
+      // 2. Simulate React not having flushed the snapshot into timelineRef yet:
+      // getTimeline() returns a stale (empty) view while the synthetic tool-call
+      // events replay. onTimelineUpdate still applies to the real timeline.
+      mockGetTimeline.mockReturnValue([]);
+
+      // 3. The re-injected unfinished ask_user, parented to message "1".
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: 'tooluse_ask',
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      // Exactly one message with id "1" — no duplicate turn.
+      const idOnes = timeline.filter((m) => m.id === '1');
+      expect(idOnes).toHaveLength(1);
+
+      // The original assistant text is preserved, and the tool call is attached to it.
+      const assistant = idOnes[0] as AssistantMessage;
+      expect(assistant.content).toBe('let me ask');
+      expect(assistant.toolCalls?.map((tc) => tc.id)).toEqual(['tooluse_ask']);
+
+      // The whole timeline is still just [user, assistant].
+      expect(timeline).toHaveLength(2);
+    });
+  });
 });

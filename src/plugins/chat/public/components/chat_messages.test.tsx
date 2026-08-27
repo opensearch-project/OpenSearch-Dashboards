@@ -538,6 +538,31 @@ describe('ChatMessages', () => {
 });
 
 describe('convertTimelineToMessageRows', () => {
+  // Rows are keyed by tool call id and each row renders the tool's card, so a tool call referenced
+  // by several messages must still yield a single row.
+  it('emits one row per tool call even when several messages carry the same tool call', () => {
+    const toolCall = {
+      id: 'tooluse_iAFNqCSCNIniFcsnxrbbGf',
+      type: 'function' as const,
+      function: { name: 'ask_user', arguments: '{"prompt":"What?"}' },
+    };
+    const timeline: Message[] = [
+      { id: '0', role: 'user', content: 'ask me something' } as UserMessage,
+      { id: '1', role: 'assistant', toolCalls: [toolCall] } as AssistantMessage,
+      { id: 'fake-assistant-message-123', role: 'assistant', toolCalls: [toolCall] } as AssistantMessage,
+    ];
+
+    const rows = convertTimelineToMessageRows(timeline);
+    const toolCallRows = rows.filter((r: any) => r.role === 'toolCall');
+    const grouped = rows
+      .filter((r: any) => r.role === 'toolCallGroup')
+      .flatMap((r: any) => r.toolCalls);
+
+    expect([...toolCallRows.map((r: any) => r.toolCall.id), ...grouped.map((t: any) => t.id)]).toEqual([
+      toolCall.id,
+    ]);
+  });
+
   it('should handle empty timeline and simple messages without tool calls', () => {
     // Empty timeline
     expect(convertTimelineToMessageRows([])).toEqual([]);

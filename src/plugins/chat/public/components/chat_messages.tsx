@@ -220,10 +220,20 @@ export const convertTimelineToMessageRows = (
     return -1; // No closing message found
   };
 
+  // A tool call yields exactly one row, however many messages reference it: rows are keyed by tool
+  // call id, and each row renders the tool's own card.
+  const emittedToolCallIds = new Set<string>();
+  const takeUnemitted = (toolCalls: ToolCall[]): ToolCall[] =>
+    toolCalls.filter((tc) => {
+      if (emittedToolCallIds.has(tc.id)) return false;
+      emittedToolCallIds.add(tc.id);
+      return true;
+    });
+
   // Helper: Add tool calls as individual rows
   const addIndividualToolCalls = (toolCalls?: ToolCall[]) => {
     if (!toolCalls?.length) return;
-    toolCalls.forEach((tc) => {
+    takeUnemitted(toolCalls).forEach((tc) => {
       result.push({ role: 'toolCall', toolCall: toTimelineToolCall(tc) });
     });
   };
@@ -235,7 +245,7 @@ export const convertTimelineToMessageRows = (
   const addIndividualToolCallsBeforeCurrentMessage = (toolCalls?: ToolCall[]) => {
     if (!toolCalls?.length) return;
     const insertAt = Math.max(0, result.length - 1); // before the just-pushed message
-    const rows = toolCalls.map(
+    const rows = takeUnemitted(toolCalls).map(
       (tc) => ({ role: 'toolCall', toolCall: toTimelineToolCall(tc) }) as const
     );
     result.splice(insertAt, 0, ...rows);
@@ -244,9 +254,11 @@ export const convertTimelineToMessageRows = (
   // Helper: Add tool calls as a group
   const addToolCallGroup = (toolCalls: ToolCall[]) => {
     if (!toolCalls.length) return;
+    const fresh = takeUnemitted(toolCalls);
+    if (!fresh.length) return;
     result.push({
       role: 'toolCallGroup',
-      toolCalls: toolCalls.map(toTimelineToolCall),
+      toolCalls: fresh.map(toTimelineToolCall),
     });
   };
 

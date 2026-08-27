@@ -369,6 +369,13 @@ export class ChatEventHandler {
     // Add to pending map for args accumulation
     this.pendingToolCalls.set(toolCallId, toolCall);
 
+    // A tool call belongs to exactly one message: if some message already carries this id, it is
+    // updated there rather than attached again elsewhere.
+    const host = this.findMessageIdWithToolCall(toolCallId);
+    if (host && this.addToolCallToMessage(host, toolCall)) {
+      return;
+    }
+
     // Strategy 1: Use explicitly provided parent message ID
     // This is the most reliable approach when the backend provides it
     if (parentMessageId && this.addToolCallToMessage(parentMessageId, toolCall)) {
@@ -401,6 +408,15 @@ export class ChatEventHandler {
     // Since there's no TEXT_MESSAGE_START event, we need to create a fake assistant message
     // to hold the tool calls so they appear in the correct position in the timeline.
     const newMessageId = parentMessageId ?? `fake-assistant-message-` + new Date().getTime();
+
+    // Message ids are unique in the timeline: when this id already exists, the tool call folds into
+    // that message instead of appending a duplicate.
+    if (this.getTimeline().some((m) => m.id === newMessageId)) {
+      this.addToolCallToMessage(newMessageId, toolCall);
+      this.lastTextMessageStartId = newMessageId;
+      return;
+    }
+
     const newMessage: AssistantMessage = {
       id: newMessageId,
       role: 'assistant',
@@ -749,14 +765,38 @@ export class ChatEventHandler {
   }
 
   /**
-   * Add tool call to a specific message in timeline
+   * Id of the message already carrying `toolCallId`, or null. Checks the active map first, then the
+   * timeline (which may lag a render behind mid-replay).
+   */
+  private findMessageIdWithToolCall(toolCallId: string): string | null {
+    for (const [messageId, message] of this.activeAssistantMessages) {
+      if (message.toolCalls?.some((tc) => tc.id === toolCallId)) return messageId;
+    }
+    const known = this.getTimeline().find(
+      (m) =>
+        m.role === 'assistant' &&
+        (m as AssistantMessage).toolCalls?.some((tc) => tc.id === toolCallId)
+    );
+    return known ? known.id : null;
+  }
+
+  /**
+   * Add tool call to a specific message in timeline. Tool calls are keyed by id — an id already on
+   * the message is replaced, not appended, since each entry renders its own card.
    */
   private addToolCallToMessage(messageId: string, toolCall: ToolCall): boolean {
+    const upsert = (list: ToolCall[]): ToolCall[] => {
+      const at = list.findIndex((tc) => tc.id === toolCall.id);
+      if (at < 0) return [...list, toolCall];
+      const merged = [...list];
+      merged[at] = toolCall;
+      return merged;
+    };
+
     // Check if message is in active messages
     const activeMessage = this.activeAssistantMessages.get(messageId);
     if (activeMessage) {
-      activeMessage.toolCalls = activeMessage.toolCalls || [];
-      activeMessage.toolCalls.push(toolCall);
+      activeMessage.toolCalls = upsert(activeMessage.toolCalls || []);
 
       // Update timeline
       this.onTimelineUpdate((prev) => {
@@ -783,9 +823,10 @@ export class ChatEventHandler {
         const message = updated[messageIndex];
         if (message.role === 'assistant') {
           const assistantMsg = message as AssistantMessage;
-          assistantMsg.toolCalls = assistantMsg.toolCalls || [];
-          assistantMsg.toolCalls.push(toolCall);
-          updated[messageIndex] = { ...assistantMsg };
+          updated[messageIndex] = {
+            ...assistantMsg,
+            toolCalls: upsert(assistantMsg.toolCalls || []),
+          };
         }
       }
 
@@ -1135,10 +1176,31 @@ export class ChatEventHandler {
    * Simply sets the timeline to the saved messages
    */
   private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
+    // Copies, not the event's own objects: replay re-attaches tool calls by mutating the assistant
+    // message it resolves, and the caller keeps this event array for further restores.
+    const snapshotMessages: Message[] = (event.messages || []).map((message) =>
+      message.role === 'assistant'
+        ? ({
+            ...message,
+            ...((message as AssistantMessage).toolCalls
+              ? { toolCalls: [...(message as AssistantMessage).toolCalls!] }
+              : {}),
+          } as Message)
+        : message
+    );
+
+    // Registered so a replayed TOOL_CALL_START resolves its parent through this map — the timeline
+    // read it would otherwise fall back on may not have flushed yet mid-replay.
+    for (const message of snapshotMessages) {
+      if (message.role === 'assistant') {
+        this.activeAssistantMessages.set(message.id, message as AssistantMessage);
+      }
+    }
+
     // agent backends may serialize a user message's `InputContent[]` to str
     // restore multimodal user messages
     this.onTimelineUpdate((prev) => {
-      const snapshot = event.messages || [];
+      const snapshot = snapshotMessages;
 
       const localArrayContent = new Map<string, unknown>();
       for (const message of prev) {
