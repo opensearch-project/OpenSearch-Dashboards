@@ -8,6 +8,10 @@ import { render, fireEvent } from '@testing-library/react';
 import { AskUserCard, AskUserAnsweredCard, InlineAskUser } from './ask_user_card';
 import { AskUserRequest, HumanInputService } from '../services/human_input_service';
 
+// jsdom does not implement scrollIntoView, which InlineAskUser calls to bring a
+// pending question into view.
+Element.prototype.scrollIntoView = jest.fn();
+
 const baseRequest = (overrides: Partial<AskUserRequest> = {}): AskUserRequest => ({
   id: 'req-1',
   toolCallId: 'tc-1',

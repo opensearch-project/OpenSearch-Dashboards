@@ -38,6 +38,7 @@ jest.mock('../services/chat_event_handler', () => ({
     clearState: jest.fn(),
     cancelToolResultDispatch: jest.fn(),
     handleStreamTermination: jest.fn(),
+    markStreamingMessageHalted: jest.fn(),
     sendToolResultToAssistant: jest.fn(),
     sendToolResultsToAssistant: jest.fn(),
   })),
@@ -791,6 +792,10 @@ describe('ChatWindow', () => {
         handleEvent: jest.fn(),
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        markStreamingMessageHalted: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
       }));
 
       const ref = React.createRef<ChatWindowInstance>();
@@ -1499,6 +1504,7 @@ describe('ChatWindow', () => {
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
         handleStreamTermination: jest.fn(),
+        markStreamingMessageHalted: jest.fn(),
         sendToolResultToAssistant: jest.fn(),
         sendToolResultsToAssistant: jest.fn(),
       }));
@@ -1554,6 +1560,7 @@ describe('ChatWindow', () => {
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
         handleStreamTermination: jest.fn(),
+        markStreamingMessageHalted: jest.fn(),
         sendToolResultToAssistant: jest.fn(),
         sendToolResultsToAssistant: jest.fn(),
       }));
@@ -1625,6 +1632,7 @@ describe('ChatWindow', () => {
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
         handleStreamTermination: jest.fn(),
+        markStreamingMessageHalted: jest.fn(),
         sendToolResultToAssistant: jest.fn(),
         sendToolResultsToAssistant: jest.fn(),
       }));
@@ -1765,6 +1773,7 @@ describe('ChatWindow', () => {
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
         handleStreamTermination: jest.fn(),
+        markStreamingMessageHalted: jest.fn(),
         sendToolResultToAssistant: jest.fn(),
         sendToolResultsToAssistant: jest.fn(),
       }));
@@ -2324,9 +2333,10 @@ describe('ChatWindow', () => {
           handleEvent: jest.fn(),
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
-        handleStreamTermination: jest.fn(),
-        sendToolResultToAssistant: jest.fn(),
-        sendToolResultsToAssistant: jest.fn(),
+          handleStreamTermination: jest.fn(),
+          markStreamingMessageHalted: jest.fn(),
+          sendToolResultToAssistant: jest.fn(),
+          sendToolResultsToAssistant: jest.fn(),
         };
       });
 
@@ -2366,9 +2376,10 @@ describe('ChatWindow', () => {
           handleEvent: jest.fn(),
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
-        handleStreamTermination: jest.fn(),
-        sendToolResultToAssistant: jest.fn(),
-        sendToolResultsToAssistant: jest.fn(),
+          handleStreamTermination: jest.fn(),
+          markStreamingMessageHalted: jest.fn(),
+          sendToolResultToAssistant: jest.fn(),
+          sendToolResultsToAssistant: jest.fn(),
         };
       });
 
@@ -2406,6 +2417,7 @@ describe('ChatWindow', () => {
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
           handleStreamTermination: jest.fn(),
+          markStreamingMessageHalted: jest.fn(),
           sendToolResultsToAssistant: jest.fn(),
           sendToolResultToAssistant: jest.fn().mockResolvedValue(undefined),
         };
