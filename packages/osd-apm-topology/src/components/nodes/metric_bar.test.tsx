@@ -49,6 +49,21 @@ describe('MetricBar', () => {
     const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
     expect(fillBar.style.marginLeft).toBe('0%');
   });
+
+  it('applies a minimum width so tiny nonzero values stay visible', () => {
+    const { container } = render(<MetricBar value={1} max={10000} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    // Real percentage stays honest (sub-pixel), but a minWidth floor keeps it visible.
+    expect(fillBar.style.width).toBe('0.01%');
+    expect(fillBar.style.minWidth).toBe('2px');
+  });
+
+  it('does not apply a minimum width floor when value is 0', () => {
+    const { container } = render(<MetricBar value={0} max={10000} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.width).toBe('0%');
+    expect(fillBar.style.minWidth).toBe('');
+  });
 });
 
 describe('MetricBarGroup', () => {

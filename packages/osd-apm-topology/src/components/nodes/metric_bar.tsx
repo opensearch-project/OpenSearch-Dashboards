@@ -41,6 +41,10 @@ export const MetricBar: React.FC<MetricBarProps> = ({
           className="osd:h-full osd:rounded-full osd:transition-all osd:duration-300"
           style={{
             width: `${pct}%`,
+            // Guarantee a visible sliver for tiny-but-nonzero values that would
+            // otherwise round to a sub-pixel width and disappear. True zeros stay
+            // empty. The label carries the exact value, so this is not misleading.
+            minWidth: value > 0 ? '2px' : undefined,
             marginLeft: `${offsetPct}%`,
             backgroundColor: color,
           }}
