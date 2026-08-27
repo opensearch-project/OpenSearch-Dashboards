@@ -6,7 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
-import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
+import { TOOL_EXECUTION_ERROR_PREFIX, HALT_MARKER } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -253,6 +253,37 @@ export class ChatEventHandler {
         });
       }
     }
+  }
+
+  /**
+   * Append the halt marker to the assistant message currently streaming, so a stopped run reads
+   * as "partial answer + stop line" immediately — the same shape the agent server persists on
+   * halt, so a reload matches. No-op if no assistant message is streaming (e.g. stopped before
+   * any text arrived). Matched to the last TEXT_MESSAGE_START, which is the streaming turn.
+   */
+  markStreamingMessageHalted(): void {
+    const messageId = this.lastTextMessageStartId;
+    if (!messageId) {
+      return;
+    }
+    const assistantMessage = this.activeAssistantMessages.get(messageId);
+    if (!assistantMessage) {
+      return;
+    }
+    const existing = (assistantMessage.content as string) || '';
+    if (existing.endsWith(HALT_MARKER)) {
+      return; // already marked
+    }
+    assistantMessage.content = existing + HALT_MARKER;
+    this.onTimelineUpdate((prev) => {
+      const index = prev.findIndex((m) => m.id === messageId);
+      if (index >= 0) {
+        const updated = [...prev];
+        updated[index] = { ...assistantMessage };
+        return updated;
+      }
+      return prev;
+    });
   }
 
   /**

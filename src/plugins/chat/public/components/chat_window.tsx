@@ -589,6 +589,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     // Helper function to stop streaming and clean up subscriptions
     const stopStreaming = useCallback(() => {
+      // Mark the streaming message as halted before tearing down, so the user immediately sees
+      // "partial answer + stop line" — matching what the agent server persists for the reload.
+      eventHandler.markStreamingMessageHalted();
       // Abort the current streaming request
       chatService.abort();
       // Unsubscribe from current observable if exists
