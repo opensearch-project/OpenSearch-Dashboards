@@ -94,11 +94,7 @@ const createGaugeText = ({
   }
 
   if (selectedUnit?.display) {
-    const unitDisplay = selectedUnit.display(
-      calculatedValue,
-      selectedUnit.symbol,
-      styles.decimals
-    );
+    const unitDisplay = selectedUnit.display(calculatedValue, selectedUnit.symbol, styles.decimals);
     const segments = unitDisplay.segments;
 
     if (!segments?.length) {
