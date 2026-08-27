@@ -95,6 +95,13 @@ export interface DatasetSelectProps {
    *   where modifying the global query state is undesirable
    */
   controlledSelectedDataset?: DetailedDataset;
+  /**
+   * Force controlled mode. Defaults to inferring it from
+   * `controlledSelectedDataset !== undefined`, which lets a controlled consumer
+   * fall back to the global `queryString` dataset when its selection is undefined.
+   * Pass this to stay controlled regardless of the current selection.
+   */
+  isControlled?: boolean;
 }
 
 interface ViewDatasetsModalProps {
@@ -301,12 +308,15 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   signalType,
   showNonTimeFieldDatasets = true,
   controlledSelectedDataset,
+  isControlled: isControlledProp,
 }) => {
-  const isControlled = controlledSelectedDataset !== undefined;
+  const isControlled = isControlledProp ?? controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
   const previousSignalType = useRef(signalType);
+  const controlledSelectedDatasetRef = useRef(controlledSelectedDataset);
+  controlledSelectedDatasetRef.current = controlledSelectedDataset;
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<DetailedDataset | undefined>();
@@ -540,8 +550,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       const defaultDataset =
         deduplicatedDatasets.find((d) => d.id === defaultDatasetIdSetting) ??
         deduplicatedDatasets[0];
-      // Get fresh current dataset value at execution time
-      const currentlySelectedDataset = queryString.getQuery().dataset;
+      // Get fresh current dataset value at execution time. In controlled mode the
+      // selection lives in the consumer's prop, not in the global query state.
+      const currentlySelectedDataset = isControlled
+        ? controlledSelectedDatasetRef.current
+        : queryString.getQuery().dataset;
 
       // Only auto-select datasets on initial load when there's no dataset selected
       // During refetches (e.g., when flyouts open), we don't want to trigger dataset changes
@@ -577,6 +590,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     services,
     supportedTypes,
     showNonTimeFieldDatasets,
+    isControlled,
   ]);
 
   useEffect(() => {

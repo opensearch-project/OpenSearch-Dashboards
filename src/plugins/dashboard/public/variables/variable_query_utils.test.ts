@@ -8,7 +8,9 @@ import {
   buildVariableOptionsFromQueryResult,
   parseResponseToQueryResult,
   executeVariableQuery,
+  normalizePersistedVariables,
 } from './variable_query_utils';
+import { VariableType } from './types';
 
 describe('parseResponseToQueryResult', () => {
   it('should return empty metadata for undefined response', () => {
@@ -575,5 +577,102 @@ describe('executeVariableQuery', () => {
     );
 
     expect(mockSetField).not.toHaveBeenCalledWith('skipTimeFilter', true);
+  });
+});
+
+describe('normalizePersistedVariables', () => {
+  it('should return undefined when input is not an array', () => {
+    expect(normalizePersistedVariables(undefined)).toBeUndefined();
+    expect(normalizePersistedVariables(null)).toBeUndefined();
+    expect(normalizePersistedVariables({})).toBeUndefined();
+    expect(normalizePersistedVariables('not-an-array')).toBeUndefined();
+  });
+
+  it('should return an empty array unchanged', () => {
+    expect(normalizePersistedVariables([])).toEqual([]);
+  });
+
+  it('should back-fill sourceKind=queryResult on a query variable that lacks it', () => {
+    const legacy = { id: '1', name: 'svc', type: VariableType.Query, query: 'source=logs' };
+
+    const result = normalizePersistedVariables([legacy]);
+
+    expect(result).toEqual([{ ...legacy, sourceKind: 'queryResult' }]);
+  });
+
+  it('should not mutate the input variable when back-filling', () => {
+    const legacy = { id: '1', name: 'svc', type: VariableType.Query };
+
+    const result = normalizePersistedVariables([legacy])!;
+
+    expect(result[0]).not.toBe(legacy);
+    expect(legacy).not.toHaveProperty('sourceKind');
+  });
+
+  it('should leave a query variable that already has sourceKind untouched', () => {
+    const queryResultVar = {
+      id: '1',
+      name: 'svc',
+      type: VariableType.Query,
+      sourceKind: 'queryResult',
+    };
+    const prometheusVar = {
+      id: '2',
+      name: 'label',
+      type: VariableType.Query,
+      sourceKind: 'prometheusResource',
+    };
+
+    const result = normalizePersistedVariables([queryResultVar, prometheusVar])!;
+
+    expect(result[0]).toBe(queryResultVar);
+    expect(result[1]).toBe(prometheusVar);
+  });
+
+  it('should not touch non-query variables (custom/text)', () => {
+    const custom = { id: '1', name: 'c', type: VariableType.Custom };
+    const text = { id: '2', name: 't', type: VariableType.Text };
+
+    const result = normalizePersistedVariables([custom, text])!;
+
+    expect(result[0]).toBe(custom);
+    expect(result[1]).toBe(text);
+    expect(result[0]).not.toHaveProperty('sourceKind');
+    expect(result[1]).not.toHaveProperty('sourceKind');
+  });
+
+  it('should drop non-object entries without throwing', () => {
+    const result = normalizePersistedVariables([null, undefined, 'x', 42])!;
+
+    expect(result).toEqual([]);
+  });
+
+  it('should drop dirty entries interleaved with valid variables (downstream .map(v => v.name) stays safe)', () => {
+    const legacyQuery = { id: '1', name: 'svc', type: VariableType.Query };
+    const custom = { id: '2', name: 'c', type: VariableType.Custom };
+
+    const result = normalizePersistedVariables([null, legacyQuery, 'bad', custom, 42])!;
+
+    // Only the two real variables survive, in order, with back-fill applied.
+    expect(result).toEqual([{ ...legacyQuery, sourceKind: 'queryResult' }, custom]);
+    // Guard the exact failure mode the normalizer is meant to prevent.
+    expect(() => result.map((v) => v.name)).not.toThrow();
+  });
+
+  it('should normalize a mixed array, only touching query variables missing sourceKind', () => {
+    const legacyQuery = { id: '1', name: 'svc', type: VariableType.Query };
+    const newQuery = {
+      id: '2',
+      name: 'label',
+      type: VariableType.Query,
+      sourceKind: 'prometheusResource',
+    };
+    const custom = { id: '3', name: 'c', type: VariableType.Custom };
+
+    const result = normalizePersistedVariables([legacyQuery, newQuery, custom])!;
+
+    expect(result[0]).toEqual({ ...legacyQuery, sourceKind: 'queryResult' });
+    expect(result[1]).toBe(newQuery);
+    expect(result[2]).toBe(custom);
   });
 });

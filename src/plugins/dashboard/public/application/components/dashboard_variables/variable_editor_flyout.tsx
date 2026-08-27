@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiTitle,
   EuiFormRow,
@@ -20,6 +20,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiText,
+  EuiAccordion,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -27,9 +28,11 @@ import {
   Variable,
   VariableSortOrder,
   VariableOption,
+  PromQLResourceQuery,
 } from '../../../variables/types';
 import { VariableQueryPanel } from './query_panel/variable_query_panel';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
+import { Dataset } from '../../../../../data/common';
 
 export interface VariableEditorFlyoutProps {
   onClose: () => void;
@@ -128,13 +131,15 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [description, setDescription] = useState(existingVariable?.description || '');
   const [type, setType] = useState<VariableType>(existingVariable?.type || VariableType.Query);
   const [query, setQuery] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.query : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? existingVariable.query
+      : ''
   );
   const [language, setLanguage] = useState(
     existingVariable?.type === VariableType.Query ? existingVariable.language : 'PPL'
   );
-  const [dataset, setDataset] = useState<any>(
-    existingVariable?.type === VariableType.Query ? (existingVariable.dataset ?? null) : null
+  const [dataset, setDataset] = useState<Dataset | undefined>(
+    existingVariable?.type === VariableType.Query ? existingVariable.dataset : undefined
   );
   const [customValues, setCustomValues] = useState<CustomOptionRow[]>(
     existingVariable?.type === VariableType.Custom
@@ -158,50 +163,56 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       : false
   );
   const [valueField, setValueField] = useState(
-    existingVariable?.type === VariableType.Query ? (existingVariable.valueField ?? '') : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? (existingVariable.valueField ?? '')
+      : ''
   );
   const [labelField, setLabelField] = useState(
-    existingVariable?.type === VariableType.Query ? (existingVariable.labelField ?? '') : ''
+    existingVariable?.type === VariableType.Query && existingVariable.sourceKind === 'queryResult'
+      ? (existingVariable.labelField ?? '')
+      : ''
   );
   const [textValue, setTextValue] = useState(
     existingVariable?.type === VariableType.Text ? (existingVariable.current?.[0] ?? '') : ''
   );
+  const [promQLResourceQuery, setResourceQuery] = useState<PromQLResourceQuery | undefined>(
+    existingVariable?.type === VariableType.Query &&
+      existingVariable.sourceKind === 'prometheusResource'
+      ? existingVariable.promQLResourceQuery
+      : undefined
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // When editing an existing variable, assume preview is valid (user already saved it before)
-  // For new variables, require preview before saving (Query type only — Text/Custom have no preview step)
-  const [isPreviewValid, setIsPreviewValid] = useState(
-    Boolean(existingVariable && existingVariable.type === VariableType.Query)
-  );
-
   const isEditing = Boolean(existingVariable);
 
-  // When language changes between PPL and PROMQL, clear the dataset since
-  // dataset types are incompatible (INDEX/INDEX_PATTERN vs PROMETHEUS)
-  const handleLanguageChange = useCallback(
-    (newLanguage: string) => {
-      const wasPromQL = language.toUpperCase() === 'PROMQL';
-      const isPromQL = newLanguage.toUpperCase() === 'PROMQL';
-      if (wasPromQL !== isPromQL) {
-        setDataset(null);
-        setQuery('');
-        setIsPreviewValid(false);
-      }
-      setLanguage(newLanguage);
-    },
-    [language]
-  );
-
-  // Reset preview validation when query or dataset changes
-  const handleQueryChange = useCallback((newQuery: string) => {
-    setQuery(newQuery);
-    setIsPreviewValid(false);
+  // A variable may only reference variables defined before it.
+  const priorVariableNames = useMemo(() => {
+    const index = existingVariable
+      ? existingVariables.findIndex((v) => v.id === existingVariable.id)
+      : -1;
+    const priorVariables = index === -1 ? existingVariables : existingVariables.slice(0, index);
+    return priorVariables.map((v) => v.name);
+  }, [existingVariables, existingVariable]);
+  const [hasAppliedQuery, setHasAppliedQuery] = useState(false);
+  const handleQueryApplied = useCallback(() => {
+    setHasAppliedQuery(true);
   }, []);
 
-  const handleDatasetChange = useCallback((newDataset: any) => {
+  const handleLanguageChange = useCallback((newLanguage: string) => {
+    setLanguage(newLanguage);
+  }, []);
+
+  const handleQueryChange = useCallback((newQuery: string) => {
+    setQuery(newQuery);
+  }, []);
+
+  const handleDatasetChange = useCallback((newDataset: Dataset | undefined) => {
     setDataset(newDataset);
-    setIsPreviewValid(false);
+  }, []);
+
+  const handleResourceQueryChange = useCallback((newQueryType: PromQLResourceQuery | undefined) => {
+    setResourceQuery(newQueryType);
   }, []);
 
   const validateForm = useCallback(() => {
@@ -277,19 +288,11 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       return false;
     }
 
-    if (type === VariableType.Query && !query.trim()) {
+    const wasAlreadyQueryType = existingVariable?.type === VariableType.Query;
+    if (type === VariableType.Query && !wasAlreadyQueryType && !hasAppliedQuery) {
       setError(
-        i18n.translate('dashboard.variableEditor.queryRequired', {
-          defaultMessage: 'Query is required for Query type variables',
-        })
-      );
-      return false;
-    }
-
-    if (type === VariableType.Query && !isPreviewValid) {
-      setError(
-        i18n.translate('dashboard.variableEditor.previewRequired', {
-          defaultMessage: 'You must preview the query successfully before saving',
+        i18n.translate('dashboard.variableEditor.queryEditorNotApplied', {
+          defaultMessage: 'You must edit and apply a query in the query editor before saving',
         })
       );
       return false;
@@ -328,7 +331,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     setError(null);
     return true;
-  }, [name, label, type, query, customValues, existingVariables, existingVariable, isPreviewValid]);
+  }, [name, label, type, customValues, existingVariables, existingVariable, hasAppliedQuery]);
 
   const handleSave = useCallback(async () => {
     if (!validateForm()) return;
@@ -343,14 +346,27 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     };
 
     if (type === VariableType.Query) {
+      // `sourceKind` has to be written explicitly here: `variableConfig` is typed as the
+      // collapsed `Omit<Variable, 'id'>` and populated via Object.assign, so the
+      // compiler cannot verify the persisted object matches either branch.
+      const isPrometheusResource = language.toUpperCase() === 'PROMQL' && !!promQLResourceQuery;
+
       Object.assign(variableConfig, {
-        query: query.trim(),
         language,
         dataset: dataset || undefined,
-        valueField: valueField || undefined,
-        labelField: labelField || undefined,
         regex: regex.trim() || undefined,
         useTimeFilter,
+        ...(isPrometheusResource
+          ? {
+              sourceKind: 'prometheusResource',
+              promQLResourceQuery,
+            }
+          : {
+              sourceKind: 'queryResult',
+              query: query.trim(),
+              valueField: valueField || undefined,
+              labelField: labelField || undefined,
+            }),
       });
     } else if (type === VariableType.Custom) {
       Object.assign(variableConfig, {
@@ -382,6 +398,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     useTimeFilter,
     valueField,
     labelField,
+    promQLResourceQuery,
     customValues,
     multi,
     includeAll,
@@ -392,6 +409,18 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     onSave,
     validateForm,
   ]);
+
+  const accordionTitleMap = {
+    [VariableType.Custom]: i18n.translate('dashboard.variableEditor.customOptionsAccordion', {
+      defaultMessage: 'Custom options',
+    }),
+    [VariableType.Query]: i18n.translate('dashboard.variableEditor.queryOptionsAccordion', {
+      defaultMessage: 'Query options',
+    }),
+    [VariableType.Text]: i18n.translate('dashboard.variableEditor.textOptionsAccordion', {
+      defaultMessage: 'Text options',
+    }),
+  };
 
   return (
     <EuiPanel
@@ -432,15 +461,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
         <EuiFlexItem>
           {error && (
             <>
-              <EuiCallOut
-                title={i18n.translate('dashboard.variableEditor.errorTitle', {
-                  defaultMessage: 'Error',
-                })}
-                color="danger"
-                iconType="alert"
-              >
-                {error}
-              </EuiCallOut>
+              <EuiCallOut title={error} color="danger" size="s" iconType="alert" />
               <EuiSpacer size="s" />
             </>
           )}
@@ -510,7 +531,6 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onChange={(t) => {
                 setType(t);
                 setError(null);
-                setIsPreviewValid(false);
               }}
               data-test-subj="variableEditorType"
               compressed
@@ -520,171 +540,183 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
         <EuiHorizontalRule margin="none" />
         <EuiFlexItem>
-          {type === VariableType.Query && (
-            <VariableQueryPanel
-              query={query}
-              language={language}
-              dataset={dataset}
-              onQueryChange={handleQueryChange}
-              onLanguageChange={handleLanguageChange}
-              onDatasetChange={handleDatasetChange}
-              existingVariableNames={existingVariables.map((v) => v.name)}
-              interpolationService={interpolationService}
-              regex={regex}
-              onRegexChange={setRegex}
-              useTimeFilter={useTimeFilter}
-              onUseTimeFilterChange={setUseTimeFilter}
-              valueField={valueField}
-              onValueFieldChange={setValueField}
-              labelField={labelField}
-              onLabelFieldChange={setLabelField}
-              onPreviewValidationChange={setIsPreviewValid}
-              currentVariableName={name}
-            />
-          )}
+          <EuiAccordion
+            id="variableEditorQueryOptionsAccordion"
+            data-test-subj="variableEditorQueryOptionsAccordion"
+            arrowDisplay="right"
+            buttonContent={
+              <EuiText size="s" style={{ fontWeight: 600 }}>
+                {accordionTitleMap[type]}
+              </EuiText>
+            }
+            initialIsOpen
+          >
+            <EuiSpacer size="m" />
+            {type === VariableType.Query && (
+              <VariableQueryPanel
+                query={query}
+                language={language}
+                dataset={dataset}
+                onQueryChange={handleQueryChange}
+                onLanguageChange={handleLanguageChange}
+                onDatasetChange={handleDatasetChange}
+                existingVariableNames={priorVariableNames}
+                interpolationService={interpolationService}
+                regex={regex}
+                onRegexChange={setRegex}
+                useTimeFilter={useTimeFilter}
+                onUseTimeFilterChange={setUseTimeFilter}
+                valueField={valueField}
+                onValueFieldChange={setValueField}
+                labelField={labelField}
+                onLabelFieldChange={setLabelField}
+                currentVariableName={name}
+                promQLResourceQuery={promQLResourceQuery}
+                onResourceQueryChange={handleResourceQueryChange}
+                onApplied={handleQueryApplied}
+              />
+            )}
 
-          {type === VariableType.Custom && (
-            <>
-              <EuiFormRow
-                label={i18n.translate('dashboard.variableEditor.customOptionsLabel', {
-                  defaultMessage: 'Custom options',
-                })}
-                helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
-                  defaultMessage:
-                    'Add value and optional label pairs. Maximum 100 options will be displayed.',
-                })}
-              >
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="s"
-                  data-test-subj="variableEditorCustomValues"
+            {type === VariableType.Custom && (
+              <>
+                <EuiFormRow
+                  helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
+                    defaultMessage:
+                      'Add value and optional label pairs. Maximum 100 options will be displayed.',
+                  })}
                 >
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s" responsive={false}>
-                      <EuiFlexItem>
-                        <EuiText size="xs" color="subdued">
-                          {i18n.translate('dashboard.variableEditor.customOptionValueHeader', {
-                            defaultMessage: 'Value',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="xs" color="subdued">
-                          {i18n.translate('dashboard.variableEditor.customOptionLabelHeader', {
-                            defaultMessage: 'Label',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} style={{ width: 32 }} />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  {customValues.map((customValue, index) => (
-                    <EuiFlexItem key={index}>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="s"
+                    data-test-subj="variableEditorCustomValues"
+                  >
+                    <EuiFlexItem>
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
                         <EuiFlexItem>
-                          <EuiFieldText
-                            value={customValue.value}
-                            onChange={(e) => {
-                              const nextCustomValues = [...customValues];
-                              nextCustomValues[index] = {
-                                ...customValue,
-                                value: e.target.value,
-                              };
-                              setCustomValues(nextCustomValues);
-                            }}
-                            aria-label={i18n.translate(
-                              'dashboard.variableEditor.customOptionValueAriaLabel',
-                              {
-                                defaultMessage: 'Custom option value',
-                              }
-                            )}
-                            data-test-subj={`variableEditorCustomValue-${index}`}
-                            compressed
-                          />
+                          <EuiText size="xs" color="subdued">
+                            {i18n.translate('dashboard.variableEditor.customOptionValueHeader', {
+                              defaultMessage: 'Value',
+                            })}
+                          </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiFieldText
-                            value={customValue.label}
-                            onChange={(e) => {
-                              const nextCustomValues = [...customValues];
-                              nextCustomValues[index] = {
-                                ...customValue,
-                                label: e.target.value,
-                              };
-                              setCustomValues(nextCustomValues);
-                            }}
-                            aria-label={i18n.translate(
-                              'dashboard.variableEditor.customOptionLabelAriaLabel',
-                              {
-                                defaultMessage: 'Custom option label',
-                              }
-                            )}
-                            data-test-subj={`variableEditorCustomLabel-${index}`}
-                            compressed
-                          />
+                          <EuiText size="xs" color="subdued">
+                            {i18n.translate('dashboard.variableEditor.customOptionLabelHeader', {
+                              defaultMessage: 'Label',
+                            })}
+                          </EuiText>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType="trash"
-                            color="danger"
-                            aria-label={i18n.translate(
-                              'dashboard.variableEditor.deleteCustomOption',
-                              {
-                                defaultMessage: 'Delete custom option',
-                              }
-                            )}
-                            onClick={() =>
-                              setCustomValues(customValues.filter((_, i) => i !== index))
-                            }
-                            data-test-subj={`variableEditorDeleteCustomOption-${index}`}
-                          />
-                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} style={{ width: 32 }} />
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                  ))}
-                  <EuiFlexItem grow={false}>
-                    <EuiSmallButtonEmpty
-                      iconType="plusInCircle"
-                      onClick={() => setCustomValues([...customValues, { value: '', label: '' }])}
-                      data-test-subj="variableEditorAddCustomOption"
-                    >
-                      {i18n.translate('dashboard.variableEditor.addCustomOption', {
-                        defaultMessage: 'Add option',
-                      })}
-                    </EuiSmallButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-              {customValues.length > 100 && (
-                <EuiCallOut
-                  title={i18n.translate('dashboard.variableEditor.tooManyOptionsWarning', {
-                    defaultMessage: 'Only the first 100 options will be displayed',
-                  })}
-                  color="warning"
-                  iconType="alert"
-                  size="s"
-                />
-              )}
-            </>
-          )}
+                    {customValues.map((customValue, index) => (
+                      <EuiFlexItem key={index}>
+                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                          <EuiFlexItem>
+                            <EuiFieldText
+                              value={customValue.value}
+                              onChange={(e) => {
+                                const nextCustomValues = [...customValues];
+                                nextCustomValues[index] = {
+                                  ...customValue,
+                                  value: e.target.value,
+                                };
+                                setCustomValues(nextCustomValues);
+                              }}
+                              aria-label={i18n.translate(
+                                'dashboard.variableEditor.customOptionValueAriaLabel',
+                                {
+                                  defaultMessage: 'Custom option value',
+                                }
+                              )}
+                              data-test-subj={`variableEditorCustomValue-${index}`}
+                              compressed
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiFieldText
+                              value={customValue.label}
+                              onChange={(e) => {
+                                const nextCustomValues = [...customValues];
+                                nextCustomValues[index] = {
+                                  ...customValue,
+                                  label: e.target.value,
+                                };
+                                setCustomValues(nextCustomValues);
+                              }}
+                              aria-label={i18n.translate(
+                                'dashboard.variableEditor.customOptionLabelAriaLabel',
+                                {
+                                  defaultMessage: 'Custom option label',
+                                }
+                              )}
+                              data-test-subj={`variableEditorCustomLabel-${index}`}
+                              compressed
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              iconType="trash"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'dashboard.variableEditor.deleteCustomOption',
+                                {
+                                  defaultMessage: 'Delete custom option',
+                                }
+                              )}
+                              onClick={() =>
+                                setCustomValues(customValues.filter((_, i) => i !== index))
+                              }
+                              data-test-subj={`variableEditorDeleteCustomOption-${index}`}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    ))}
+                    <EuiFlexItem grow={false}>
+                      <EuiSmallButtonEmpty
+                        iconType="plusInCircle"
+                        onClick={() => setCustomValues([...customValues, { value: '', label: '' }])}
+                        data-test-subj="variableEditorAddCustomOption"
+                      >
+                        {i18n.translate('dashboard.variableEditor.addCustomOption', {
+                          defaultMessage: 'Add option',
+                        })}
+                      </EuiSmallButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+                {customValues.length > 100 && (
+                  <EuiCallOut
+                    title={i18n.translate('dashboard.variableEditor.tooManyOptionsWarning', {
+                      defaultMessage: 'Only the first 100 options will be displayed',
+                    })}
+                    color="warning"
+                    iconType="alert"
+                    size="s"
+                  />
+                )}
+              </>
+            )}
 
-          {type === VariableType.Text && (
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.textValueLabel', {
-                defaultMessage: 'Value',
-              })}
-              helpText={i18n.translate('dashboard.variableEditor.textValueHelp', {
-                defaultMessage: 'Free-form text value for this variable',
-              })}
-            >
-              <EuiFieldText
-                value={textValue}
-                onChange={(e) => setTextValue(e.target.value)}
-                data-test-subj="variableEditorTextValue"
-                compressed
-              />
-            </EuiFormRow>
-          )}
+            {type === VariableType.Text && (
+              <EuiFormRow
+                label={i18n.translate('dashboard.variableEditor.textValueLabel', {
+                  defaultMessage: 'Value',
+                })}
+                helpText={i18n.translate('dashboard.variableEditor.textValueHelp', {
+                  defaultMessage: 'Free-form text value for this variable',
+                })}
+              >
+                <EuiFieldText
+                  value={textValue}
+                  onChange={(e) => setTextValue(e.target.value)}
+                  data-test-subj="variableEditorTextValue"
+                  compressed
+                />
+              </EuiFormRow>
+            )}
+          </EuiAccordion>
         </EuiFlexItem>
 
         {type !== VariableType.Text && (
@@ -692,95 +724,110 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             <EuiHorizontalRule margin="none" />
 
             <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('dashboard.variableEditor.sortLabel', {
-                  defaultMessage: 'Sort',
-                })}
-                helpText={i18n.translate('dashboard.variableEditor.sortLabelHelp', {
-                  defaultMessage: 'How options are sorted in the dropdown',
-                })}
-              >
-                <EuiSuperSelect
-                  options={[
-                    {
-                      value: VariableSortOrder.Disabled,
-                      inputDisplay: i18n.translate('dashboard.variableEditor.sortDisabled', {
-                        defaultMessage: 'Disabled',
-                      }),
-                    },
-                    {
-                      value: VariableSortOrder.AlphabeticalAsc,
-                      inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaAsc', {
-                        defaultMessage: 'Alphabetical (asc)',
-                      }),
-                    },
-                    {
-                      value: VariableSortOrder.AlphabeticalDesc,
-                      inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaDesc', {
-                        defaultMessage: 'Alphabetical (desc)',
-                      }),
-                    },
-                    {
-                      value: VariableSortOrder.NumericalAsc,
-                      inputDisplay: i18n.translate('dashboard.variableEditor.sortNumAsc', {
-                        defaultMessage: 'Numerical (asc)',
-                      }),
-                    },
-                    {
-                      value: VariableSortOrder.NumericalDesc,
-                      inputDisplay: i18n.translate('dashboard.variableEditor.sortNumDesc', {
-                        defaultMessage: 'Numerical (desc)',
-                      }),
-                    },
-                  ]}
-                  valueOfSelected={sort}
-                  onChange={(v) => setSort(v)}
-                  data-test-subj="variableEditorSort"
-                  compressed
-                />
-              </EuiFormRow>
-              <EuiFormRow>
-                <EuiSwitch
-                  label={i18n.translate('dashboard.variableEditor.allowCustomValueLabel', {
-                    defaultMessage: 'Allow custom values',
-                  })}
-                  checked={allowCustomValue}
-                  onChange={(e) => setAllowCustomValue(e.target.checked)}
-                  data-test-subj="variableEditorAllowCustomValue"
-                  compressed
-                />
-              </EuiFormRow>
-              <EuiFormRow>
-                <EuiSwitch
-                  label={i18n.translate('dashboard.variableEditor.multiLabel', {
-                    defaultMessage: 'Allow multiple selections',
-                  })}
-                  checked={multi}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setMulti(checked);
-                    if (!checked) {
-                      setIncludeAll(false);
-                    }
-                  }}
-                  data-test-subj="variableEditorMulti"
-                  compressed
-                />
-              </EuiFormRow>
-
-              {multi && (
-                <EuiFormRow>
-                  <EuiSwitch
-                    label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
-                      defaultMessage: 'Include All option',
+              <EuiAccordion
+                id="variableEditorSelectionOptionsAccordion"
+                data-test-subj="variableEditorSelectionOptionsAccordion"
+                arrowDisplay="right"
+                buttonContent={
+                  <EuiText size="s" style={{ fontWeight: 600 }}>
+                    {i18n.translate('dashboard.variableEditor.selectionOptionsAccordion', {
+                      defaultMessage: 'Selection options',
                     })}
-                    checked={includeAll}
-                    onChange={(e) => setIncludeAll(e.target.checked)}
-                    data-test-subj="variableEditorIncludeAll"
+                  </EuiText>
+                }
+                initialIsOpen
+              >
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={i18n.translate('dashboard.variableEditor.sortLabel', {
+                    defaultMessage: 'Sort',
+                  })}
+                  helpText={i18n.translate('dashboard.variableEditor.sortLabelHelp', {
+                    defaultMessage: 'How options are sorted in the dropdown',
+                  })}
+                >
+                  <EuiSuperSelect
+                    options={[
+                      {
+                        value: VariableSortOrder.Disabled,
+                        inputDisplay: i18n.translate('dashboard.variableEditor.sortDisabled', {
+                          defaultMessage: 'Disabled',
+                        }),
+                      },
+                      {
+                        value: VariableSortOrder.AlphabeticalAsc,
+                        inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaAsc', {
+                          defaultMessage: 'Alphabetical (asc)',
+                        }),
+                      },
+                      {
+                        value: VariableSortOrder.AlphabeticalDesc,
+                        inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaDesc', {
+                          defaultMessage: 'Alphabetical (desc)',
+                        }),
+                      },
+                      {
+                        value: VariableSortOrder.NumericalAsc,
+                        inputDisplay: i18n.translate('dashboard.variableEditor.sortNumAsc', {
+                          defaultMessage: 'Numerical (asc)',
+                        }),
+                      },
+                      {
+                        value: VariableSortOrder.NumericalDesc,
+                        inputDisplay: i18n.translate('dashboard.variableEditor.sortNumDesc', {
+                          defaultMessage: 'Numerical (desc)',
+                        }),
+                      },
+                    ]}
+                    valueOfSelected={sort}
+                    onChange={(v) => setSort(v)}
+                    data-test-subj="variableEditorSort"
                     compressed
                   />
                 </EuiFormRow>
-              )}
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={i18n.translate('dashboard.variableEditor.allowCustomValueLabel', {
+                      defaultMessage: 'Allow custom values',
+                    })}
+                    checked={allowCustomValue}
+                    onChange={(e) => setAllowCustomValue(e.target.checked)}
+                    data-test-subj="variableEditorAllowCustomValue"
+                    compressed
+                  />
+                </EuiFormRow>
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={i18n.translate('dashboard.variableEditor.multiLabel', {
+                      defaultMessage: 'Allow multiple selections',
+                    })}
+                    checked={multi}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setMulti(checked);
+                      if (!checked) {
+                        setIncludeAll(false);
+                      }
+                    }}
+                    data-test-subj="variableEditorMulti"
+                    compressed
+                  />
+                </EuiFormRow>
+
+                {multi && (
+                  <EuiFormRow>
+                    <EuiSwitch
+                      label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
+                        defaultMessage: 'Include All option',
+                      })}
+                      checked={includeAll}
+                      onChange={(e) => setIncludeAll(e.target.checked)}
+                      data-test-subj="variableEditorIncludeAll"
+                      compressed
+                    />
+                  </EuiFormRow>
+                )}
+              </EuiAccordion>
             </EuiFlexItem>
           </>
         )}
