@@ -440,6 +440,10 @@ export class VariableService {
         optionType = builtResult.optionType;
       }
 
+      if (controller.signal.aborted) {
+        return;
+      }
+
       // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
       const limitedOptions = options.slice(0, MAX_DISPLAY_OPTIONS);
       const sortedOptions = this.sortVariableOptions(limitedOptions, queryVariable.sort);

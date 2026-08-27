@@ -1083,6 +1083,102 @@ describe('VariableService', () => {
       expect(withState[0].error).toBe('VariableService not initialized with dataPlugin');
       expect(mockExecutePromQLResourceQuery).not.toHaveBeenCalled();
     });
+
+    // The PromQL resource client cannot observe the AbortSignal, so a superseded
+    // request still resolves. These tests pin the guard that drops the stale
+    // result before it overwrites the fresh options / persisted `current`.
+    it('should discard a stale PromQL result that resolves after a newer refresh', async () => {
+      // Two deferred results so we can force the FIRST (stale) request to resolve LAST.
+      const deferreds: Array<{ resolve: (values: string[]) => void }> = [];
+      mockExecutePromQLResourceQuery.mockImplementation(
+        () =>
+          new Promise<string[]>((resolve) => {
+            deferreds.push({ resolve });
+          })
+      );
+
+      const { service } = createService(
+        [
+          makeQueryVariable({
+            current: undefined,
+            language: 'PROMQL',
+            dataset: { id: 'ds-1' } as any,
+            sourceKind: 'prometheusResource' as const,
+            promQLResourceQuery: { kind: 'labelValues', label: 'instance' },
+          }),
+        ],
+        undefined,
+        makeDataPluginStub()
+      );
+
+      const first = service.refreshVariableOptions('query-1'); // stale
+      const second = service.refreshVariableOptions('query-1'); // fresh, aborts the first
+
+      expect(deferreds).toHaveLength(2);
+      // Fresh request resolves first, then the stale one resolves out of order.
+      deferreds[1].resolve(['fresh-1', 'fresh-2']);
+      deferreds[0].resolve(['stale-1', 'stale-2']);
+      await Promise.all([first, second]);
+
+      // The stale result must NOT overwrite the fresh options.
+      const withState = service.getVariablesWithState();
+      expect(getOptionValues(withState[0].options)).toEqual(['fresh-1', 'fresh-2']);
+    });
+
+    it('should not let a stale cascade refresh overwrite the persisted current value', async () => {
+      // region (upstream) -> service (PromQL labelValues matcher referencing ${region}).
+      // Rapidly changing region triggers refreshDependentVariables -> refreshVariableOptions
+      // twice without awaiting; the first (region=us-east) resolves after the second (eu-west).
+      const deferreds: Array<{ resolve: (values: string[]) => void }> = [];
+      mockExecutePromQLResourceQuery.mockImplementation(
+        () =>
+          new Promise<string[]>((resolve) => {
+            deferreds.push({ resolve });
+          })
+      );
+
+      const region = makeCustomVariable({ id: 'region-1', name: 'region', current: ['us-east'] });
+      const svc = makeQueryVariable({
+        id: 'service-1',
+        name: 'service',
+        current: undefined,
+        language: 'PROMQL',
+        dataset: { id: 'ds-1' } as any,
+        sourceKind: 'prometheusResource' as const,
+        promQLResourceQuery: {
+          kind: 'labelValues',
+          label: 'instance',
+          matchers: [{ label: 'region', operator: '=', value: '${region}' }],
+        },
+      });
+      const { service } = createService([region, svc], undefined, makeDataPluginStub());
+      service.setInterpolationService({
+        hasVariables: (q: string) => /\$\{\w+\}|\$\w+/.test(q),
+        interpolate: (q: string) => q.replace(/\$\{region\}/g, 'RESOLVED'),
+        getCurrentValues: () => ({ region: 'us-east' }),
+        getVariables: () => [{ name: 'region', value: 'us-east' }],
+      });
+
+      // Two rapid upstream changes → two concurrent, non-awaited dependent refreshes.
+      service.updateVariableValue('region-1', ['stale']);
+      service.updateVariableValue('region-1', ['fresh']);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(deferreds).toHaveLength(2);
+      // Fresh refresh resolves first, stale one resolves afterwards (out of order).
+      deferreds[1].resolve(['fresh-instance']);
+      deferreds[0].resolve(['stale-instance']);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const withState = service.getVariablesWithState();
+      const serviceVar = withState.find((v) => v.id === 'service-1')!;
+      expect(getOptionValues(serviceVar.options)).toEqual(['fresh-instance']);
+      // `current` was unset, so it defaults to the first option of the winning
+      // request. It must reflect the fresh result, not the stale one.
+      expect(service.getVariables().find((v) => v.id === 'service-1')!.current).toEqual([
+        'fresh-instance',
+      ]);
+    });
   });
 
   describe('destroy', () => {

@@ -45,7 +45,6 @@ export interface PromqlQueryTypeFormsProps {
   promqlLabelNameOptions: string[];
   promqlMetricNameOptions: string[];
   promqlMatcherValueOptions: Record<string, string[]>;
-  loadPromqlMatcherValues: (label: string) => void;
   promqlMatchers: PromQLLabelMatcher[];
   addPromqlMatcher: () => void;
   updatePromqlMatcherAt: (index: number, patch: Partial<PromQLLabelMatcher>) => void;
@@ -61,7 +60,6 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
   promqlLabelNameOptions,
   promqlMetricNameOptions,
   promqlMatcherValueOptions,
-  loadPromqlMatcherValues,
   promqlMatchers,
   addPromqlMatcher,
   updatePromqlMatcherAt,
@@ -204,12 +202,14 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                         )}
                         selectedOptions={matcher.label ? [{ label: matcher.label }] : []}
                         onChange={(selected) => {
+                          // Values for the chosen label are loaded centrally by the
+                          // matcher-labels effect in usePromqlDropdownData (deduped), so we
+                          // only update the matcher here — loading again would double-fetch.
                           const label = selected[0]?.label || '';
                           updatePromqlMatcherAt(
                             index,
                             label === matcher.label ? { label } : { label, value: '' }
                           );
-                          if (label) loadPromqlMatcherValues(label);
                         }}
                         onCreateOption={(value) => {
                           const label = value.trim();
@@ -218,7 +218,6 @@ export const PromqlQueryTypeForms: React.FC<PromqlQueryTypeFormsProps> = ({
                               index,
                               label === matcher.label ? { label } : { label, value: '' }
                             );
-                            loadPromqlMatcherValues(label);
                           }
                         }}
                         data-test-subj={`variableEditorPromqlMatcherLabel-${index}`}
