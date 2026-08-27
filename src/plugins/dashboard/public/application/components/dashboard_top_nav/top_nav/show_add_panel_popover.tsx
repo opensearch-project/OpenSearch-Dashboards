@@ -34,12 +34,14 @@ const PanelPopover = ({
   onClose,
   button,
   onAddExistingPanelFlyout,
+  onAddSection,
   uiActions,
   containerInfo,
 }: {
   onClose: () => void;
   button: HTMLElement;
   onAddExistingPanelFlyout: () => void;
+  onAddSection?: () => void;
   uiActions: UiActionsStart;
   containerInfo?: ContainerInfo;
 }) => {
@@ -50,12 +52,47 @@ const PanelPopover = ({
   const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
 
   const panels = useAsync(() => {
-    return buildContextMenuForActions({
-      actions: actionsRef.current.map((action) => ({
-        action,
+    const actions = actionsRef.current.map((action) => ({
+      action,
+      context: triggerContext,
+      trigger: DASHBOARD_ADD_PANEL_TRIGGER as any,
+    }));
+
+    // Dashboard collapsible sections: inject an "Add section"
+    // entry into the same "Create new" menu as the visualization types, placed
+    // immediately AFTER the Metrics visualization entry. We derive the order
+    // from the live Metrics action's own order (order-1 -> renders right after
+    // it) rather than a hard-coded constant, so the position stays correct
+    // regardless of which visualization types are installed/registered.
+    if (onAddSection) {
+      const metricsAction = actionsRef.current.find(
+        (a) => a.id === 'add_vis_action_MetricsVisualization'
+      );
+      const sectionOrder = (metricsAction?.order ?? 0) - 1;
+      const addSectionAction = {
+        id: 'addDashboardSection',
+        order: sectionOrder,
+        type: 'addDashboardSection',
+        getDisplayName: () =>
+          i18n.translate('dashboard.addPanel.addSectionMenuItem', {
+            defaultMessage: 'Section',
+          }),
+        getIconType: () => 'list',
+        isCompatible: async () => true,
+        execute: async () => {
+          onAddSection();
+          onClose();
+        },
+      };
+      actions.push({
+        action: addSectionAction as any,
         context: triggerContext,
         trigger: DASHBOARD_ADD_PANEL_TRIGGER as any,
-      })),
+      });
+    }
+
+    return buildContextMenuForActions({
+      actions,
       closeMenu: onClose,
       title: '',
       autoWrapItems: false,
@@ -92,11 +129,13 @@ const PanelPopover = ({
 export function showAddPanelPopover({
   anchorElement,
   onAddExistingPanelFlyout,
+  onAddSection,
   uiActions,
   containerInfo,
 }: {
   anchorElement: HTMLElement;
   onAddExistingPanelFlyout: () => void;
+  onAddSection?: () => void;
   uiActions: UiActionsStart;
   containerInfo?: ContainerInfo;
 }) {
@@ -112,6 +151,7 @@ export function showAddPanelPopover({
   root.render(
     <PanelPopover
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
+      onAddSection={onAddSection}
       button={anchorElement}
       onClose={unmount}
       uiActions={uiActions}

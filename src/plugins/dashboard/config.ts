@@ -32,6 +32,11 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   allowByValueEmbeddables: schema.boolean({ defaultValue: false }),
+  // Dashboard collapsible sections. Off by default; gates all
+  // section write paths (factory registration, "Add section" menu entry, and
+  // the move/change-section action). No saved-object migration is registered,
+  // so toggling this never mutates stored dashboards.
+  allowDashboardSections: schema.boolean({ defaultValue: false }),
   variables: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),

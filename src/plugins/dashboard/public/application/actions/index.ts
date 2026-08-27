@@ -58,3 +58,19 @@ export {
   LibraryNotificationAction,
   ACTION_LIBRARY_NOTIFICATION,
 } from './library_notification_action';
+export {
+  MovePanelToSectionAction,
+  MovePanelToSectionActionContext,
+  ACTION_MOVE_PANEL_TO_SECTION,
+} from './move_panel_to_section_action';
+export {
+  AddPanelToSectionAction,
+  AddPanelToSectionActionContext,
+  ACTION_ADD_PANEL_TO_SECTION,
+} from './add_panel_to_section_action';
+export { openAddPanelToSectionFlyout } from './add_panel_to_section_flyout';
+export {
+  UngroupSectionAction,
+  UngroupSectionActionContext,
+  ACTION_UNGROUP_SECTION,
+} from './ungroup_section_action';

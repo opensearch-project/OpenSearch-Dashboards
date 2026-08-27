@@ -49,6 +49,7 @@ import {
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { isSectionEmbeddable } from '../embeddable/section';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -85,7 +86,10 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
       embeddable.getRoot() &&
       embeddable.getRoot().isContainer &&
-      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
+      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
+      // Cloning a section container would only duplicate an empty shell (its
+      // members live in the flat panels map, not inside it) -- excluded.
+      !isSectionEmbeddable(embeddable)
     );
   }
 

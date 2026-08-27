@@ -346,6 +346,9 @@ function getAddConfig(action: NavAction): TopNavMenuIconData {
   };
 }
 
+/**
+ * Dashboard collapsible sections.
+ */
 function getShareConfig(action: NavAction | undefined): TopNavMenuIconData {
   return {
     tooltip: i18n.translate('dashboard.topNav.shareButtonTooltip', {

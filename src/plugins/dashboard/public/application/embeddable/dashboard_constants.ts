@@ -32,4 +32,24 @@ export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 export const DEFAULT_PANEL_HEIGHT = 15;
+
+/**
+ * Outer-grid rows reserved for a collapsible section's header strip
+ * (chevron/title/chrome) above its inner members grid. A section's
+ * outer height = SECTION_HEADER_ROWS + its inner grid content rows, and its
+ * members' section-relative y are offset by SECTION_HEADER_ROWS when released
+ * to absolute coordinates (ungroup). The header is forced to a single line via
+ * `.dshDashboardGrid__sectionHeader .embPanel__title { flex-wrap: nowrap }`
+ * (see _dashboard_grid.scss); its rendered height (~26px incl. padding/border)
+ * is a little over one outer row's ~20px, so 1 row clips the last member by a
+ * few px and 2 rows clears it with a small (~half-row) residual gap. We accept
+ * that tiny gap rather than clip a member. Larger values only add empty space
+ * at the bottom (the inner grid is content-height and top-anchored, so surplus
+ * rows are never filled).
+ *
+ * Single source of truth -- imported by DashboardGrid (height/render),
+ * DashboardContainer (ungroup repositioning) and get_nav_actions (new-section
+ * placement) so the three cannot drift.
+ */
+export const SECTION_HEADER_ROWS = 2;
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';

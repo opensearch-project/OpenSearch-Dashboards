@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { IEmbeddable } from '../../../../embeddable/public';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { isSectionEmbeddable } from '../embeddable/section';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
@@ -82,7 +83,10 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
   }
 
   public async isCompatible({ embeddable }: ExpandPanelActionContext) {
-    return Boolean(embeddable.parent && isDashboard(embeddable.parent));
+    // Sections are structural containers, not maximizable content panels.
+    return Boolean(
+      embeddable.parent && isDashboard(embeddable.parent) && !isSectionEmbeddable(embeddable)
+    );
   }
 
   public async execute({ embeddable }: ExpandPanelActionContext) {
