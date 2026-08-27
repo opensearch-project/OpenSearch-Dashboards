@@ -566,4 +566,72 @@ describe('LanguageToggle', () => {
       expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
     });
   });
+
+  describe('Picker Layout', () => {
+    it('renders the source type section with OpenSearch as the selected entry', () => {
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      const sourceType = screen.getByTestId('queryPanelFooterSourceType-OpenSearch');
+      expect(sourceType).toHaveTextContent('OpenSearch');
+      expect(sourceType).toHaveClass('exploreLanguagePicker__sourceType--selected');
+    });
+
+    it('marks only the current language chip as selected', async () => {
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toHaveClass(
+        'exploreLanguagePicker__chip--selected'
+      );
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).not.toHaveClass(
+        'exploreLanguagePicker__chip--selected'
+      );
+    });
+
+    it('marks the AI chip as selected in prompt mode and leaves the language chips unselected', () => {
+      mockSelectIsPromptEditorMode.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-AI')).toHaveClass(
+        'exploreLanguagePicker__chip--selected'
+      );
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).not.toHaveClass(
+        'exploreLanguagePicker__chip--selected'
+      );
+    });
+
+    it('does not render the AI chip when hideAI is set, even if prompt mode is available', () => {
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle hideAI />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-AI')).not.toBeInTheDocument();
+    });
+
+    it('reflects the popover open state on the trigger', () => {
+      renderWithProvider(<LanguageToggle />);
+
+      const trigger = screen.getByTestId('queryPanelFooterLanguageToggle');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      expect(trigger).toHaveTextContent('PPL');
+
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
 });

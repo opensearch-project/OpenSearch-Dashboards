@@ -44,3 +44,174 @@
     }
   }
 }
+
+// The source-type + query-language picker in the Explore query panel. Kept
+// separate from `.exploreLanguageToggle` above, which the in-context
+// visualization editor still imports for its own copy of the toggle.
+// Sizes follow the design prototype; theme tokens are used wherever one lands
+// on the same value.
+$exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
+
+.exploreLanguagePicker {
+  // create a new stacking context to allow for gradient border
+  isolation: isolate;
+
+  &__trigger {
+    // The toolbar row is a stretch flex container, so centre explicitly and
+    // pin the height to the 24px the beta badge this replaced occupied —
+    // the prototype's absolute sizes are drawn at a larger scale than the
+    // Explore toolbar actually runs at.
+    align-items: center;
+    align-self: center;
+    background: $ouiColorEmptyShade;
+    border: 1px solid $ouiBorderColor;
+    border-radius: $ouiSizeL;
+    color: $ouiTextColor;
+    display: inline-flex;
+    gap: $ouiSizeXS;
+    height: $ouiSizeL;
+    margin-right: $ouiSizeS;
+    padding: 0 $ouiSizeS;
+    position: relative;
+    transition:
+      border-color $ouiAnimSpeedFast ease-in,
+      box-shadow $ouiAnimSpeedFast ease-in;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #00d0ff 0%, #1034d4 50%, #9b1fa8 100%);
+      opacity: 0;
+    }
+
+    // Pointer affordance only, so the resting state stays neutral. AI mode
+    // owns the border through the gradient below and opts out of both.
+    &:hover:not(.exploreLanguagePicker__trigger--aiMode) {
+      border-color: $ouiColorPrimary;
+    }
+
+    // While the popover is open the outline also carries the halo, matching
+    // the prototype's `:focus-within` treatment.
+    &:focus-visible:not(.exploreLanguagePicker__trigger--aiMode),
+    &--open:not(.exploreLanguagePicker__trigger--aiMode) {
+      border-color: $ouiColorPrimary;
+      box-shadow: 0 0 0 3px $exploreLanguagePickerSoftPrimary;
+    }
+
+    &--aiMode {
+      background:
+        linear-gradient(180deg, rgba(87, 196, 251, 10%) 0%, rgba(165, 20, 255, 10%) 100%),
+        $ouiColorEmptyShade;
+      border-color: transparent;
+
+      &::before {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+    }
+  }
+
+  // The divider between the logo and the language is this label's own left
+  // border, so the two never drift apart.
+  &__triggerLabel {
+    @include ouiCodeFont;
+
+    border-left: 1px solid $ouiBorderColor;
+    color: $ouiTextSubduedColor;
+    font-size: $ouiFontSizeXS;
+    font-weight: $ouiFontWeightMedium;
+    line-height: $ouiSize;
+    padding-left: $ouiSizeXS + $ouiSizeXXS;
+    white-space: nowrap;
+  }
+
+  &__triggerCaret {
+    color: $ouiTextSubduedColor;
+  }
+
+  &__panel {
+    display: flex;
+  }
+
+  &__section {
+    padding: $ouiSizeM 14px;
+
+    &--sourceType {
+      border-right: 1px solid $ouiColorLightShade;
+      padding: 10px;
+      width: 168px;
+    }
+  }
+
+  &__sectionTitle {
+    @include ouiCodeFont;
+
+    color: $ouiTextSubduedColor;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: $ouiSizeXS $ouiSizeS 6px;
+    text-transform: uppercase;
+
+    &--flush {
+      padding-left: 0;
+    }
+  }
+
+  &__sourceType {
+    border-radius: 5px;
+    font-size: $ouiFontSizeS;
+    padding: $ouiSizeS 10px;
+
+    &--selected {
+      background: $exploreLanguagePickerSoftPrimary;
+      color: $ouiColorPrimaryText;
+      font-weight: $ouiFontWeightSemiBold;
+    }
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $ouiSizeS;
+  }
+
+  &__chip {
+    background: $ouiColorEmptyShade;
+    border: 1px solid $ouiBorderColor;
+    border-radius: $ouiSizeL;
+    color: $ouiTextColor;
+    font-size: $ouiFontSizeXS;
+    line-height: 1;
+    padding: 5px 13px;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      border-color: $ouiColorPrimary;
+    }
+
+    // The selected chip is intentionally disabled — it must still read as
+    // selected rather than as an unavailable control.
+    &:disabled {
+      cursor: default;
+    }
+
+    &--ai {
+      border-color: $ouiColorPrimary;
+      border-style: dashed;
+      color: $ouiColorPrimaryText;
+    }
+
+    // Declared after `--ai` on purpose: an active AI chip drops the dashed
+    // outline, as in the prototype.
+    &--selected {
+      background: $exploreLanguagePickerSoftPrimary;
+      border-color: $ouiColorPrimary;
+      border-style: solid;
+      color: $ouiColorPrimaryText;
+      font-weight: $ouiFontWeightSemiBold;
+    }
+  }
+}

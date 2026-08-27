@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import {
@@ -25,6 +25,28 @@ import './language_toggle.scss';
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
   defaultMessage: 'AI',
 });
+
+const sourceTypeSectionTitle = i18n.translate(
+  'explore.queryPanelFooter.languageToggle.sourceTypeSectionTitle',
+  {
+    defaultMessage: 'Source type',
+  }
+);
+
+const queryLanguageSectionTitle = i18n.translate(
+  'explore.queryPanelFooter.languageToggle.queryLanguageSectionTitle',
+  {
+    defaultMessage: 'Query language',
+  }
+);
+
+const openPickerAriaLabel = i18n.translate('explore.queryPanelFooter.languageToggle.ariaLabel', {
+  defaultMessage: 'Select source type and query language',
+});
+
+// OpenSearch is the only source type the query panel can talk to today, so it is
+// rendered as the selected, non-interactive entry rather than a real list.
+const OPENSEARCH_SOURCE_TYPE = 'OpenSearch';
 
 interface LanguageToggleProps {
   hideAI?: boolean;
@@ -157,72 +179,114 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
-  const items = useMemo(() => {
-    const output: React.ReactElement[] = [];
-
-    // Add all supported languages for the active tab
-    for (const langId of supportedLanguages) {
+  const languageChips = useMemo(() => {
+    // A chip is selected exactly when it is the mode the editor is already in, and
+    // the selected chip is the one that cannot be clicked again.
+    return supportedLanguages.map((langId) => {
       const langConfig = languageService.getLanguage(langId);
       const title = langConfig?.title ?? langId;
-      output.push(
-        <EuiContextMenuItem
+      const isSelected = !isPromptMode && langId === language;
+      return (
+        <button
+          type="button"
           key={langId}
           onClick={() =>
             langId === language ? onItemClick(EditorMode.Query) : onLanguageClick(langId)
           }
-          disabled={!isPromptMode && langId === language}
+          disabled={isSelected}
+          className={classNames('exploreLanguagePicker__chip', {
+            ['exploreLanguagePicker__chip--selected']: isSelected,
+          })}
           data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
         >
           {title}
-        </EuiContextMenuItem>
+        </button>
       );
+    });
+  }, [supportedLanguages, languageService, isPromptMode, language, onItemClick, onLanguageClick]);
+
+  const aiChip = useMemo(() => {
+    if (!promptModeIsAvailable || hideAI) {
+      return null;
     }
 
-    if (promptModeIsAvailable && !hideAI) {
-      output.push(
-        <EuiContextMenuItem
-          key="ai"
-          onClick={() => onItemClick(EditorMode.Prompt)}
-          disabled={isPromptMode}
-          data-test-subj="queryPanelFooterLanguageToggle-AI"
-        >
-          {promptOptionText}
-        </EuiContextMenuItem>
-      );
-    }
-
-    return output;
-  }, [
-    isPromptMode,
-    onItemClick,
-    onLanguageClick,
-    promptModeIsAvailable,
-    hideAI,
-    supportedLanguages,
-    language,
-    languageService,
-  ]);
+    return (
+      <button
+        type="button"
+        onClick={() => onItemClick(EditorMode.Prompt)}
+        disabled={isPromptMode}
+        className={classNames('exploreLanguagePicker__chip', 'exploreLanguagePicker__chip--ai', {
+          ['exploreLanguagePicker__chip--selected']: isPromptMode,
+        })}
+        data-test-subj="queryPanelFooterLanguageToggle-AI"
+      >
+        {promptOptionText}
+      </button>
+    );
+  }, [promptModeIsAvailable, hideAI, isPromptMode, onItemClick]);
 
   return (
     // This div is needed to allow for the gradient styling
-    <div className="exploreLanguageToggle">
+    <div className="exploreLanguagePicker">
       <EuiPopover
         button={
-          <EuiBetaBadge
+          <button
+            type="button"
             onClick={onButtonClick}
+            aria-haspopup="true"
+            aria-expanded={isPopoverOpen}
+            aria-label={openPickerAriaLabel}
             data-test-subj="queryPanelFooterLanguageToggle"
-            className={classNames('exploreLanguageToggle__button', {
-              ['exploreLanguageToggle__button--aiMode']: isPromptMode,
+            className={classNames('exploreLanguagePicker__trigger', {
+              ['exploreLanguagePicker__trigger--aiMode']: isPromptMode,
+              // Keep the hover outline while the popover is open, so moving the
+              // pointer off the button and into the panel does not drop it.
+              ['exploreLanguagePicker__trigger--open']: isPopoverOpen,
             })}
-            label={badgeLabel}
-          />
+          >
+            <EuiIcon type="logoOpenSearch" size="m" />
+            <span className="exploreLanguagePicker__triggerLabel">{badgeLabel}</span>
+            <EuiIcon type="arrowDown" size="s" className="exploreLanguagePicker__triggerCaret" />
+          </button>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         panelPaddingSize="none"
+        hasArrow={false}
+        // Without an arrow OuiPopover drops to an 8px gap, most of which the
+        // open trigger's 3px halo eats, so the panel reads as touching the
+        // pill. The extra 4px lands its top edge at the query editor below.
+        offset={4}
+        // Focus stays on the trigger. With the default focus trap the popover
+        // focuses the first focusable child on open, which is never the current
+        // language — that chip is disabled — so the chip the user did not pick
+        // came up looking pre-highlighted. This branch of OuiPopover still
+        // closes on Escape and on an outside click.
+        ownFocus={false}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <div className="exploreLanguagePicker__panel">
+          <div className="exploreLanguagePicker__section exploreLanguagePicker__section--sourceType">
+            <div className="exploreLanguagePicker__sectionTitle">{sourceTypeSectionTitle}</div>
+            <div
+              className="exploreLanguagePicker__sourceType exploreLanguagePicker__sourceType--selected"
+              data-test-subj={`queryPanelFooterSourceType-${OPENSEARCH_SOURCE_TYPE}`}
+            >
+              {OPENSEARCH_SOURCE_TYPE}
+            </div>
+          </div>
+          <div className="exploreLanguagePicker__section">
+            <div className="exploreLanguagePicker__sectionTitle exploreLanguagePicker__sectionTitle--flush">
+              {queryLanguageSectionTitle}
+            </div>
+            {/* One wrapping row: the AI chip flows with the languages rather
+                than being pinned to its own line. */}
+            <div className="exploreLanguagePicker__chips">
+              {languageChips}
+              {aiChip}
+            </div>
+          </div>
+        </div>
       </EuiPopover>
     </div>
   );
