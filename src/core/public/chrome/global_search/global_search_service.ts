@@ -12,13 +12,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
  */
 export const SAVED_OBJECTS_SYMBOL = '@';
 
-/**
- * Legacy command symbol retained for compatibility.
- * No current search command type uses this alias.
- * @deprecated
- */
-export const COMMANDS_SYMBOL = '>';
-
 export const SearchCommandTypes = {
   PAGES: {
     description: i18n.translate('core.globalSearch.pages.description', { defaultMessage: 'Pages' }),
