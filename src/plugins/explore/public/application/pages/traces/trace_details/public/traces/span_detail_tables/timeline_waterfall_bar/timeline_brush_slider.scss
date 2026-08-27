@@ -55,7 +55,22 @@
     height: 60%;
     min-width: 1px;
     border-radius: 1px;
-    opacity: 0.7;
+
+    // Neutral fill: all spans stack in one band, so a single muted color reads
+    // as a clean activity silhouette instead of a clash of overwriting service
+    // colors. Service colors live in the waterfall below.
+    background-color: $euiColorMediumShade;
+    opacity: 0.5;
+  }
+
+  // Dims the parts of the trace outside the selected (zoomed) window so the brush
+  // reads as a range selector. Non-interactive so drags reach the track/handles.
+  &__mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: transparentize($euiColorInk, 0.85);
+    pointer-events: none;
   }
 
   &__window {

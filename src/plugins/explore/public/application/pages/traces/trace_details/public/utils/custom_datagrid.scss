@@ -24,10 +24,13 @@
   z-index: 10000;
 }
 
-// Container for the grid when full‐screen
+// Container for the grid when full‐screen. Pad the top so the grid toolbar
+// (which right-aligns the Service legend / reset-zoom controls) starts below the
+// absolutely-positioned close ✕ instead of colliding with it.
 .exploreCustomDataGrid__fullScreenContent {
   flex: 1 1 auto;
   overflow: auto;
+  padding-top: $euiSizeXL;
 }
 
 // Wrapper for non‐fullscreen layout
