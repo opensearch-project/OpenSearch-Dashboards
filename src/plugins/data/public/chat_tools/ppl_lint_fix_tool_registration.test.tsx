@@ -9,6 +9,8 @@ import { hasExplainOutcome } from '@osd/monaco/target/ppl/lint/explain/explain_o
 import { explainCache } from '@osd/monaco/target/ppl/lint/explain/explain_cache';
 import { buildPerformanceFixProbeQueries } from '../ppl_lint/performance_fix_revalidation';
 import {
+  createPPLLintFixApplyAction,
+  createPPLLintFixTestAction,
   PPLLintFixToolArgs,
   PPLLintFixToolRegistration,
   PPLLintFixTestToolRegistration,
@@ -18,12 +20,14 @@ import {
   PPL_LINT_FIX_TEST_DATA_TOOL_NAME,
 } from './ppl_lint_fix_tool_registration';
 import {
+  cleanupPPLLintFixRequest,
   clearPPLLintFixSession,
   getPPLLintFixOutcome,
   getPPLLintFixSession,
   storePPLLintFixSession,
 } from './ppl_lint_fix_session';
 import { PPL_LINT_FIX_UI_BINDING } from './ppl_lint_fix_card';
+import { AssistantActionService } from '../../../context_provider/public/services/assistant_action_service';
 
 jest.mock('@osd/monaco', () => ({
   validatePPLLintFixCandidate: jest.fn(),
@@ -161,6 +165,42 @@ describe('PPLLintFixToolRegistration', () => {
     const config = renderRegistration(false);
 
     expect(config.enabled).toBe(false);
+  });
+
+  it('stays recoverable when cleanup clears the session while an Apply confirmation is pending', async () => {
+    // Reviewer concern (CR): TTL expiry or editor unmount can fire cleanup while an Apply
+    // confirmation is pending. Confirm the request still reaches a terminal, recoverable
+    // outcome instead of leaving the card stuck.
+    const config = renderRegistration();
+    storeSession();
+
+    const args = { fixedQuery: 'source=logs | head 10' } as PPLLintFixToolArgs;
+    const card = render(
+      <>{config.render({ status: 'executing', args, onApprove: jest.fn(), onReject: jest.fn() })}</>
+    );
+    // The user clicks Apply (binding the captured request id onto the tool args)...
+    fireEvent.click(card.getByText('Apply to editor'));
+    // ...but cleanup races in and clears the session before the handler runs.
+    act(() =>
+      cleanupPPLLintFixRequest(
+        request.requestId,
+        PPL_LINT_FIX_DATA_CONTEXT_ID_PREFIX,
+        removeContextById
+      )
+    );
+    expect(getPPLLintFixSession()).toBeUndefined();
+
+    let result: unknown;
+    await act(async () => {
+      result = await config.handler(args);
+    });
+
+    // Recovery: a terminal missing-request failure is returned and recorded as the outcome,
+    // so the card resolves rather than hanging on the vanished session.
+    expect(result).toEqual(expect.objectContaining({ success: false, reason: 'missing-request' }));
+    expect(getPPLLintFixOutcome(request.requestId)).toEqual(
+      expect.objectContaining({ kind: 'failed' })
+    );
   });
 
   it('rejects a missing active request', async () => {
@@ -1142,5 +1182,25 @@ describe('PPLLintFixToolRegistration', () => {
 
       expect(result).toEqual(expect.objectContaining({ ok: false, reason: 'missing-request' }));
     });
+  });
+});
+
+describe('synchronous imperative registration', () => {
+  // Reviewer concern (CR): arming registers the tools in a post-commit effect, which can
+  // land after the chat send snapshots the tool list. onAskAiFix instead registers them
+  // synchronously via the same action service; confirm they are visible immediately.
+  it('exposes both fix tools in the tool list as soon as they are registered', () => {
+    const service = AssistantActionService.getInstance();
+    const queryString = { getQuery: jest.fn(), setQuery: jest.fn() } as any;
+
+    service.registerAction(createPPLLintFixApplyAction({ queryString }));
+    service.registerAction(createPPLLintFixTestAction());
+
+    const toolNames = service.getToolDefinitions().map((tool) => tool.name);
+    expect(toolNames).toContain(PPL_LINT_FIX_DATA_TOOL_NAME);
+    expect(toolNames).toContain(PPL_LINT_FIX_TEST_DATA_TOOL_NAME);
+
+    service.unregisterAction(PPL_LINT_FIX_DATA_TOOL_NAME);
+    service.unregisterAction(PPL_LINT_FIX_TEST_DATA_TOOL_NAME);
   });
 });

@@ -1,0 +1,2 @@
+fix:
+- Scope PPL lint AI-fix assistant tools to an active fix flow ([#12650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12650))
