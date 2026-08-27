@@ -5,6 +5,11 @@
 
 .agentTracesMetrics__bar {
   padding: $ouiSizeXS 0 $ouiSizeXS 0;
+
+  // The metrics bar and the tabs are the canvas' only two children and shared a 0px gap with no
+  // divider, so the two regions read as one slab. Mirrors `.dscCanvas__chart` in explore.
+  margin-bottom: $ouiSizeS;
+  border-bottom: $ouiBorderThin;
 }
 
 .agentTracesMetrics__content {

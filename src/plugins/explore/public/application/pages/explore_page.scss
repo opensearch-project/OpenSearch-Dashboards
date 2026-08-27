@@ -165,7 +165,9 @@ $osdHeaderActionRowOffset: var(--osd-app-header-action-row-height, 0px);
   }
 
   .dscCanvas__chart {
-    // margin-bottom: $euiSizeXS;
+    // The chart and the tabs are the canvas' only two children and shared a 0px gap, so the
+    // histogram's x-axis labels sat directly on the tab row.
+    margin-bottom: $ouiSizeS;
     border-bottom: $ouiBorderThin;
   }
 
