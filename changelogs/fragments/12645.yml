@@ -1,5 +1,0 @@
-fix:
-- Move the Explore and Agent Traces header actions next to the time picker and rename their labels, so narrow views split cleanly into a breadcrumb row and an action row ([#12645](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12645))
-- Keep the Explore and Agent Traces refresh button filled and primary so it no longer reads as a secondary control ([#12645](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12645))
-- Present the fields sidebar as an overlay flyout when the Agent Traces container is narrow, matching Explore ([#12645](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12645))
-- Stop the wrapped application header action row from overflowing layouts derived from `100vh` ([#12645](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12645))

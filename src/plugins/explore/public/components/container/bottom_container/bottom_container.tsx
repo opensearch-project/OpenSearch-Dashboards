@@ -10,10 +10,12 @@ import { CanvasPanel } from '../../panel/canvas_panel';
 import { DiscoverPanel } from '../../fields_selector/fields_selector_panel';
 import { BottomRightContainer } from './bottom_right_container';
 
-// Below this *container* width the fields sidebar is presented as an overlay flyout rather
-// than an inline panel. We measure the container (not the window) so the narrow treatment
-// also kicks in when this view is embedded in a narrow host container (e.g. the Maya ~940px
-// canvas) inside a wide browser window, where window breakpoints would never fire.
+// Below this *container* width the fields sidebar becomes an overlay flyout. Measured on the
+// container, not the window, so it also fires when this view is embedded in a narrow host
+// (~940px canvas) inside a wide window.
+// JS not `@container`: the modes are different trees, not two skins — EuiResizableContainer
+// (imperative togglePanel) vs rail + overlay with role="dialog"/Escape/mask. Cost: crossing
+// 992 remounts the results subtree, resetting grid scroll and expanded rows. Live resize only.
 // 992 = OUI `l` breakpoint.
 const NARROW_CONTAINER_WIDTH = 992;
 
