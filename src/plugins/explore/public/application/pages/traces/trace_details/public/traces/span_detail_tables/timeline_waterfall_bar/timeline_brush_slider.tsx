@@ -92,24 +92,32 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
   fracRef.current = { start: startFrac, end: endFrac };
   const pointerStartRef = useRef({ x: 0, start: 0, end: 0 });
 
+  // Latest window fractions awaiting emit. The rAF throttle emits the most
+  // recent sample per frame (not the first), and flush() drains it on release.
+  const pendingRef = useRef<{ start: number; end: number } | null>(null);
+  const flush = useCallback(() => {
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (!pending) return;
+    if (pending.start <= 0 && pending.end >= 1) {
+      onChange(null);
+      return;
+    }
+    const startMs = traceStart + pending.start * fullDuration;
+    const endMs = traceStart + pending.end * fullDuration;
+    onChange({ startTimeMs: startMs, endTimeMs: endMs, durationMs: endMs - startMs });
+  }, [onChange, traceStart, fullDuration]);
+
   const emit = useCallback(
     (nextStart: number, nextEnd: number) => {
-      const runEmit = () => {
-        if (nextStart <= 0 && nextEnd >= 1) {
-          onChange(null);
-          return;
-        }
-        const startMs = traceStart + nextStart * fullDuration;
-        const endMs = traceStart + nextEnd * fullDuration;
-        onChange({ startTimeMs: startMs, endTimeMs: endMs, durationMs: endMs - startMs });
-      };
+      pendingRef.current = { start: nextStart, end: nextEnd };
       if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
-        runEmit();
+        flush();
       });
     },
-    [onChange, traceStart, fullDuration]
+    [flush]
   );
 
   const handlePointerMove = useCallback(
@@ -142,7 +150,14 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
     dragModeRef.current = null;
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerup', stopDragging);
-  }, [handlePointerMove]);
+    // Flush the final release position so the zoom ends exactly where the user
+    // let go, even if the last pointermove fell in an already-scheduled frame.
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    flush();
+  }, [handlePointerMove, flush]);
 
   const startDragging = useCallback(
     (mode: DragMode) => (event: React.PointerEvent) => {

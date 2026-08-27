@@ -69,8 +69,6 @@ export interface ServiceFlowMap {
 
 export interface ServiceFlowResult {
   map: ServiceFlowMap;
-  /** Representative "entry" span per service (kept for callers that need it). */
-  entrySpanByService: Record<string, string>;
 }
 
 const UNKNOWN_SERVICE = 'unknown';
@@ -99,7 +97,7 @@ export const spansToServiceFlow = (
   colorMap: Record<string, string> = {}
 ): ServiceFlowResult => {
   if (!hits || hits.length === 0) {
-    return { map: { root: { nodes: [], edges: [] } }, entrySpanByService: {} };
+    return { map: { root: { nodes: [], edges: [] } } };
   }
 
   const id2svc = new Map<string, string>();
@@ -113,21 +111,6 @@ export const spansToServiceFlow = (
     spanCounts.set(service, (spanCounts.get(service) || 0) + 1);
     if (hit.status?.code === 2) errorCounts.set(service, (errorCounts.get(service) || 0) + 1);
     durationNanos.set(service, (durationNanos.get(service) || 0) + extractSpanDuration(hit));
-  });
-
-  // Entry span per service (span whose parent is in a different service).
-  const entrySpanByService: Record<string, string> = {};
-  const firstSpanByService: Record<string, string> = {};
-  hits.forEach((hit) => {
-    const service = serviceOf(hit);
-    if (!(service in firstSpanByService)) firstSpanByService[service] = hit.spanId;
-    const parentService = hit.parentSpanId ? id2svc.get(hit.parentSpanId) : undefined;
-    if (!(service in entrySpanByService) && parentService !== service) {
-      entrySpanByService[service] = hit.spanId;
-    }
-  });
-  Object.keys(firstSpanByService).forEach((service) => {
-    if (!(service in entrySpanByService)) entrySpanByService[service] = firstSpanByService[service];
   });
 
   // Cross-service edges with call counts + error flag.
@@ -211,5 +194,5 @@ export const spansToServiceFlow = (
     };
   });
 
-  return { map: { root: { nodes, edges } }, entrySpanByService };
+  return { map: { root: { nodes, edges } } };
 };

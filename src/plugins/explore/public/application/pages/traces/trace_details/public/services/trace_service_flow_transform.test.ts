@@ -18,7 +18,6 @@ describe('spansToServiceFlow', () => {
   it('returns an empty map for no hits', () => {
     expect(spansToServiceFlow([])).toEqual({
       map: { root: { nodes: [], edges: [] } },
-      entrySpanByService: {},
     });
   });
 
@@ -81,16 +80,5 @@ describe('spansToServiceFlow', () => {
       hasError: false,
       label: '1 call',
     });
-  });
-
-  it('resolves each service entry span (span receiving the cross-service call)', () => {
-    const hits: ServiceFlowHit[] = [
-      hit({ spanId: 'root', serviceName: 'frontend' }),
-      hit({ spanId: 'cartEntry', parentSpanId: 'root', serviceName: 'cart' }),
-      hit({ spanId: 'cartChild', parentSpanId: 'cartEntry', serviceName: 'cart' }),
-    ];
-    const { entrySpanByService } = spansToServiceFlow(hits);
-    expect(entrySpanByService.frontend).toBe('root');
-    expect(entrySpanByService.cart).toBe('cartEntry');
   });
 });

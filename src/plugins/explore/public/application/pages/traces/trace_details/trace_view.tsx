@@ -71,6 +71,16 @@ export interface DatasetField {
 const isClientSideFilter = (filter: SpanFilter): boolean =>
   filter.field === 'isError' || filter.field === DURATION_MIN_FILTER_FIELD;
 
+// Field-list helpers for the generic "+ Add filter": only serviceName + span /
+// resource attributes + instrumentation scope are offered (status/duration have
+// their own quick controls); other field types are not filterable.
+const EXCLUDED_FIELD_TYPES = new Set(['_source', 'unknown', 'nested', 'geo_point', 'geo_shape']);
+const isFilterableField = (name: string): boolean =>
+  name === 'serviceName' ||
+  name.startsWith('attributes.') ||
+  name.startsWith('resource.attributes.') ||
+  name.startsWith('instrumentationScope.');
+
 interface ResizeObserverTarget extends Element {
   _lastWidth?: number;
   _lastHeight?: number;
@@ -163,10 +173,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
-  // Filterable fields surfaced from the dataset (data view) field list, merged
-  // UI-side with the fields present in the current result — restricted so the
-  // attribute filter only offers known-valid field paths.
-  const [datasetFields, setDatasetFields] = useState<DatasetField[]>([]);
+  // Filterable fields resolved from the dataset (data view) field list. Resolved
+  // only when the dataset changes (the data-view lookup is async/expensive), then
+  // merged UI-side with the current result's fields in the datasetFields memo.
+  const [dataViewFields, setDataViewFields] = useState<DatasetField[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
@@ -354,45 +364,48 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   // Load the dataset's filterable fields (data view field list), merged UI-side
   // with fields present in the current result. Fields starting with "_" and
   // non-scalar types are excluded so the attribute filter offers valid paths.
+  // Resolve the data-view field list only when the dataset changes — the lookup
+  // is async and shouldn't re-run on every server-filter refetch.
   useEffect(() => {
     let cancelled = false;
-    const excludedTypes = new Set(['_source', 'unknown', 'nested', 'geo_point', 'geo_shape']);
-    // The generic "+ Add filter" only offers serviceName + span attributes +
-    // resource attributes + instrumentation scope (status/duration have their
-    // own quick controls); everything else is out of scope for attribute filters.
-    const isFilterableField = (name: string): boolean =>
-      name === 'serviceName' ||
-      name.startsWith('attributes.') ||
-      name.startsWith('resource.attributes.') ||
-      name.startsWith('instrumentationScope.');
-    const loadFields = async () => {
-      const merged = new Map<string, DatasetField>();
+    const resolveDataViewFields = async () => {
+      const fields: DatasetField[] = [];
       try {
         if (dataset?.id && (data as any)?.dataViews?.get) {
           const dataView = await (data as any).dataViews.get(dataset.id);
           (dataView?.fields ?? []).forEach((field: any) => {
-            if (field?.name && !excludedTypes.has(field.type) && isFilterableField(field.name)) {
-              merged.set(field.name, { name: field.name, type: field.type });
+            if (
+              field?.name &&
+              !EXCLUDED_FIELD_TYPES.has(field.type) &&
+              isFilterableField(field.name)
+            ) {
+              fields.push({ name: field.name, type: field.type });
             }
           });
         }
       } catch (e) {
         // Dataset may not resolve to a saved data view — fall back to the result schema.
       }
-      (pplQueryData?.schema ?? []).forEach((field) => {
-        if (field?.name && isFilterableField(field.name) && !merged.has(field.name)) {
-          merged.set(field.name, { name: field.name, type: field.type });
-        }
-      });
-      if (!cancelled) {
-        setDatasetFields(Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name)));
-      }
+      if (!cancelled) setDataViewFields(fields);
     };
-    loadFields();
+    resolveDataViewFields();
     return () => {
       cancelled = true;
     };
-  }, [dataset?.id, data, pplQueryData]);
+  }, [dataset?.id, data]);
+
+  // Merge the resolved data-view fields with the fields present in the current
+  // result (cheap, in-memory) so a refetch doesn't re-resolve the data view.
+  const datasetFields = useMemo(() => {
+    const merged = new Map<string, DatasetField>();
+    dataViewFields.forEach((field) => merged.set(field.name, field));
+    (pplQueryData?.schema ?? []).forEach((field) => {
+      if (field?.name && isFilterableField(field.name) && !merged.has(field.name)) {
+        merged.set(field.name, { name: field.name, type: field.type });
+      }
+    });
+    return Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [dataViewFields, pplQueryData]);
 
   // Cleanup state sync on unmount
   useEffect(() => {
