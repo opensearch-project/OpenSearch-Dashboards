@@ -201,6 +201,13 @@ export const convertTimelineToMessageRows = (
     return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
   };
 
+  // Helper: Check if every tool call renders its card below the assistant message
+  const rendersBelowMessage = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    const service = AssistantActionService.getInstance();
+    return toolCalls.every((tc) => service.getRenderPlacement(tc.function.name) === 'below');
+  };
+
   // Helper: Find next message that closes a tool call batch
   // (non-assistant message or assistant with content)
   const findBatchEndIndex = (startIndex: number): number => {
@@ -258,9 +265,10 @@ export const convertTimelineToMessageRows = (
     if (!toolCalls?.length) continue;
 
     // If any tool is running, show individually and continue processing.
-    // Custom-renderer tools render above the message text (see helper); others stay below.
+    // Custom-renderer tools render above the message text unless they opt into
+    // renderPlacement: 'below'; others stay below.
     if (hasRunningTool(toolCalls)) {
-      if (hasCustomRendererTool(toolCalls)) {
+      if (hasCustomRendererTool(toolCalls) && !rendersBelowMessage(toolCalls)) {
         addIndividualToolCallsBeforeCurrentMessage(toolCalls);
       } else {
         addIndividualToolCalls(toolCalls);
@@ -268,10 +276,14 @@ export const convertTimelineToMessageRows = (
       continue;
     }
 
-    // If any tool has custom renderer, show individually (don't group) and above
-    // the assistant text so the action card sits at the top of the turn.
+    // If any tool has custom renderer, show individually (don't group). The action
+    // chooses its placement: 'above' (default) tops the turn, 'below' follows the text.
     if (hasCustomRendererTool(toolCalls)) {
-      addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      if (rendersBelowMessage(toolCalls)) {
+        addIndividualToolCalls(toolCalls);
+      } else {
+        addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      }
       continue;
     }
 

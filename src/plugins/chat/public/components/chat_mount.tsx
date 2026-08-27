@@ -15,6 +15,7 @@ import { ChatLayoutMode } from '../types';
 import { ContextProviderStart } from '../../../context_provider/public';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
 
 import './chat_mount.scss';
@@ -26,6 +27,7 @@ interface ChatMountProps {
   charts?: any;
   suggestedActionsService: SuggestedActionsService;
   confirmationService: ConfirmationService;
+  humanInputService: HumanInputService;
 }
 
 export const ChatMount = ({
@@ -35,6 +37,7 @@ export const ChatMount = ({
   charts,
   suggestedActionsService,
   confirmationService,
+  humanInputService,
 }: ChatMountProps) => {
   const services = useMemo(
     () => ({
@@ -65,6 +68,7 @@ export const ChatMount = ({
                 chatService={chatService}
                 suggestedActionsService={suggestedActionsService}
                 confirmationService={confirmationService}
+                humanInputService={humanInputService}
               >
                 <ChatWindow layoutMode={ChatLayoutMode.SIDECAR} onClose={handleClose} />
               </ChatProvider>

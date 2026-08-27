@@ -13,6 +13,7 @@ import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 
 // Create mock observable before using it in mocks
 const mockObservable = of({ toolDefinitions: [], toolCallStates: new Map() });
@@ -36,6 +37,9 @@ jest.mock('../services/chat_event_handler', () => ({
     handleEvent: jest.fn(),
     clearState: jest.fn(),
     cancelToolResultDispatch: jest.fn(),
+    handleStreamTermination: jest.fn(),
+    sendToolResultToAssistant: jest.fn(),
+    sendToolResultsToAssistant: jest.fn(),
   })),
 }));
 
@@ -59,6 +63,7 @@ describe('ChatWindow', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockSuggestedActionsService: jest.Mocked<SuggestedActionsService>;
   let mockConfirmationService: jest.Mocked<ConfirmationService>;
+  let mockHumanInputService: jest.Mocked<HumanInputService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -108,6 +113,14 @@ describe('ChatWindow', () => {
       cancel: jest.fn(),
       cleanAll: jest.fn(),
     } as any;
+    mockHumanInputService = {
+      getPending$: jest.fn().mockReturnValue(of([])),
+      getPending: jest.fn().mockReturnValue([]),
+      hasPending: jest.fn().mockReturnValue(false),
+      ask: jest.fn(),
+      answer: jest.fn(),
+      cleanAll: jest.fn(),
+    } as any;
   });
 
   const renderWithContext = (component: React.ReactElement) => {
@@ -119,6 +132,7 @@ describe('ChatWindow', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           {component}
         </ChatProvider>
@@ -1484,6 +1498,9 @@ describe('ChatWindow', () => {
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1536,6 +1553,9 @@ describe('ChatWindow', () => {
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1582,6 +1602,77 @@ describe('ChatWindow', () => {
       const calledTypes = mockHandleEvent.mock.calls.map((call: any) => call[0]?.type);
       expect(calledTypes).toContain('MESSAGES_SNAPSHOT');
       expect(calledTypes).toContain('TOOL_CALL_START');
+    });
+
+    it('should not await TOOL_CALL_END during replay, so parallel halt-type tools all register', async () => {
+      // Regression for: reloading a thread with several parallel `ask_user` calls showed only
+      // one card. A halt-type tool blocks inside handleToolCallEnd on humanInputService.ask()
+      // forever during replay; awaiting its TOOL_CALL_END stalled the loop so the synthetic
+      // events for the other parallel calls were never consumed. TOOL_CALL_END must be
+      // fire-and-forget so every parallel tool's synthetic events get dispatched.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockClearState = jest.fn();
+      // First TOOL_CALL_END blocks forever (mimics ask_user awaiting a user answer).
+      const mockHandleEvent = jest.fn().mockImplementation((event: any) => {
+        if (event?.type === 'TOOL_CALL_END') {
+          return new Promise(() => {}); // never resolves
+        }
+        return Promise.resolve();
+      });
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: mockHandleEvent,
+        clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
+      }));
+
+      // Two parallel ask_user calls, each as START/ARGS/END (as injectUnfinishedToolCallEvents emits).
+      const mockEvents = [
+        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'u1', role: 'user', content: 'Hi' }], timestamp: Date.now() },
+        { type: 'TOOL_CALL_START', toolCallId: 'tc-A', toolCallName: 'ask_user', timestamp: Date.now() },
+        { type: 'TOOL_CALL_ARGS', toolCallId: 'tc-A', delta: '{}', timestamp: Date.now() },
+        { type: 'TOOL_CALL_END', toolCallId: 'tc-A', timestamp: Date.now() },
+        { type: 'TOOL_CALL_START', toolCallId: 'tc-B', toolCallName: 'ask_user', timestamp: Date.now() },
+        { type: 'TOOL_CALL_ARGS', toolCallId: 'tc-B', delta: '{}', timestamp: Date.now() },
+        { type: 'TOOL_CALL_END', toolCallId: 'tc-B', timestamp: Date.now() },
+      ];
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+
+      const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      // Both tool calls' synthetic events must all be dispatched even though the first
+      // TOOL_CALL_END never resolves — proving the loop did not await it.
+      const calledTypes = mockHandleEvent.mock.calls.map((call: any) => call[0]?.type);
+      const calledIds = mockHandleEvent.mock.calls.map((call: any) => call[0]?.toolCallId);
+      expect(mockHandleEvent).toHaveBeenCalledTimes(mockEvents.length);
+      expect(calledTypes.filter((t: string) => t === 'TOOL_CALL_END')).toHaveLength(2);
+      expect(calledIds).toContain('tc-A');
+      expect(calledIds).toContain('tc-B');
     });
 
     it('should cancel ongoing streaming when switching to another conversation', async () => {
@@ -1673,6 +1764,9 @@ describe('ChatWindow', () => {
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
         cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
       }));
 
       // Mock ongoing streaming that continues after switch
@@ -2230,6 +2324,9 @@ describe('ChatWindow', () => {
           handleEvent: jest.fn(),
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
         };
       });
 
@@ -2269,6 +2366,9 @@ describe('ChatWindow', () => {
           handleEvent: jest.fn(),
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
+        handleStreamTermination: jest.fn(),
+        sendToolResultToAssistant: jest.fn(),
+        sendToolResultsToAssistant: jest.fn(),
         };
       });
 
@@ -2305,6 +2405,8 @@ describe('ChatWindow', () => {
           handleEvent: jest.fn(),
           clearState: jest.fn(),
           cancelToolResultDispatch: jest.fn(),
+          handleStreamTermination: jest.fn(),
+          sendToolResultsToAssistant: jest.fn(),
           sendToolResultToAssistant: jest.fn().mockResolvedValue(undefined),
         };
       });

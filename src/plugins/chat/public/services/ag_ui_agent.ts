@@ -117,7 +117,8 @@ export class AgUiAgent {
           this.activeConnection = false;
 
           if (error.name === 'AbortError') {
-            return; // Request was cancelled
+            observer.complete();
+            return;
           }
 
           // eslint-disable-next-line no-console
