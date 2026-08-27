@@ -12,6 +12,7 @@ import type { Message, AssistantMessage } from '../../common/types';
 import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
 import { getImageSrc } from '../utils/user_message_input';
 import { ShareModal } from './share_modal';
+import { getImageSrc } from '../utils/user_message_input';
 import './message_row.scss';
 
 interface MessageRowProps {
@@ -73,6 +74,9 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       return (
         <>
           {content
+            // Named blocks (e.g. visualization_context) are context for the agent, not for the
+            // user bubble; skip them here. getImageSrc resolves both the legacy `binary` shape
+            // and the `image` shape, so images survive a reload either way.
             .filter((block: any) => !block.name)
             .map((block: any, index: number) => {
               const imageSrc = getImageSrc(block);

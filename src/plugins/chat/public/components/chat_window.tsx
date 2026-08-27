@@ -465,20 +465,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Prepare additional messages for sending (but don't add to timeline yet)
       const additionalMessages = options?.messages ?? [];
-      // Only add screenshot data if messages not provided
+
+      // Merge the screenshot INTO the user message content rather than sending it as a separate
+      // message. A separate message is dropped on the delta-only send path (only the single user
+      // message is transmitted when full history is off), so the agent would never see the image.
       if (!options?.input && typeof messageContent === 'string' && screenshotData) {
         messageContent = [
-          // {
-          //   type: 'image',
-          //   source: {
-          //     type: 'data',
-          //     value: screenshotData.base64,
-          //     mimeType: screenshotData.mimeType,
-          //   },
-          // },
-
-          // binary is deprecated
-          // change to image when strands is introduced.
+          // binary is deprecated on the wire; the agent server upgrades it to an image block.
           {
             type: 'binary' as const,
             mimeType: screenshotData.mimeType,
@@ -506,7 +499,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         if (!result.valid) return;
 
         // Check if this is a slash command — pass userMsg so executeSlashCommand
-        // can replace it (by id) with the resolved command message.
+        // can replace it (by id) with the resolved command message. Only plain-text
+        // input can be a command (a multimodal message carries an image block).
         if (typeof messageContent === 'string') {
           const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
           if (handled) return;
