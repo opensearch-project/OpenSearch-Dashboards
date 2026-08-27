@@ -21,6 +21,11 @@ export interface TraceServiceFlowProps {
   activeServiceFilter?: string;
   /** Clicking a service card filters the trace by that service. */
   onFilterService?: (serviceName: string) => void;
+  /**
+   * Show the overview minimap. Off in the narrow flyout, where the graph is
+   * already fit-to-view and the minimap would only cover the nodes.
+   */
+  showMinimap?: boolean;
 }
 
 /**
@@ -34,6 +39,7 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   colorMap = {},
   activeServiceFilter,
   onFilterService,
+  showMinimap = true,
 }) => {
   const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
 
@@ -133,7 +139,7 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         layoutOptions={{ direction: 'LR', rankSeparation: 160, nodeSeparation: 60 }}
         legend={false}
         breadcrumbs={[]}
-        showMinimap
+        showMinimap={showMinimap}
         showGridBackground
         nodesDraggable
         topN={Infinity}
