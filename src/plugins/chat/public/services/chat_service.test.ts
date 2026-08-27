@@ -601,6 +601,33 @@ describe('ChatService', () => {
       ); // dataSourceId is undefined when no uiSettings provided
     });
 
+    it('should abort the halted main run BEFORE the sync-poll window, not just at dispatch', async () => {
+      // Regression guard for the stuck-session race: the tool-result run is a continuation of
+      // the halted main run and must supersede it up front. If the main run's SSE stayed open
+      // across waitForToolCallSync (up to 15s), both runs would write the same thread and race
+      // on message_id. Assert abort() is called, and that it happens before runAgent dispatch.
+      const callOrder: string[] = [];
+      mockAgent.abort.mockImplementation(() => {
+        callOrder.push('abort');
+      });
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockImplementation(() => {
+        callOrder.push('runAgent');
+        return mockObservable;
+      });
+
+      const toolCallId = 'tool-call-123';
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+      await chatService.sendToolResult(toolCallId, { success: true }, []);
+
+      expect(mockAgent.abort).toHaveBeenCalled();
+      expect(callOrder[0]).toBe('abort');
+      expect(callOrder.indexOf('abort')).toBeLessThan(callOrder.indexOf('runAgent'));
+    });
+
     it('should handle string results directly', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -987,6 +1014,11 @@ describe('ChatService', () => {
         expect(response.skipped).toBeUndefined();
         expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
 
+        // sendToolResult aborts the halted main run up front (before the sync window), so one
+        // abort has already happened by now. This test verifies the *signal-driven* abort that
+        // fires after dispatch — assert on the additional call, not an absolute count.
+        const abortsBeforeSignal = mockAgent.abort.mock.calls.length;
+
         const nextSpy = jest.fn();
         const errorSpy = jest.fn();
         const completeSpy = jest.fn();
@@ -999,7 +1031,7 @@ describe('ChatService', () => {
 
         controller.abort();
 
-        expect(mockAgent.abort).toHaveBeenCalledTimes(1);
+        expect(mockAgent.abort.mock.calls.length).toBe(abortsBeforeSignal + 1);
         expect(errorSpy).toHaveBeenCalledTimes(1);
         const emittedError = errorSpy.mock.calls[0][0];
         expect(emittedError).toBeInstanceOf(Error);

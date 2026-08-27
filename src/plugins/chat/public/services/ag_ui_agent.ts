@@ -30,17 +30,13 @@ export class AgUiAgent {
 
   public runAgent(input: RunAgentInput, dataSourceId?: string): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
-      // Only abort if we're not in the middle of an active connection
-      // This prevents tool result submissions from breaking the main SSE stream
-      if (this.abortController && !this.activeConnection) {
+      // Serialize requests on this instance: a new request supersedes the previous one so the
+      // same thread never has two concurrent runs. (Restore polling uses its own instance.)
+      if (this.abortController) {
         this.abortController.abort();
       }
-
-      // Create new controller if none exists OR if the existing one is aborted
-      if (!this.abortController || this.abortController.signal.aborted) {
-        this.abortController = new AbortController();
-        this.sseBuffer = ''; // Reset buffer for new request
-      }
+      this.abortController = new AbortController();
+      this.sseBuffer = ''; // Reset buffer for new request
 
       // Set active connection flag
       this.activeConnection = true;

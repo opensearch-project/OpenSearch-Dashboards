@@ -708,6 +708,10 @@ export class ChatService {
       forwardedProps: {},
     };
 
+    // Abort the halted main run before the sync-poll window (not just at runAgent dispatch),
+    // so the two runs never overlap while waitForToolCallSync polls for up to 15s.
+    this.agent.abort();
+
     // Wait for tool call result to be synced to agentic memory only when not including full history
     // (when full history is included, messages are passed directly so no sync wait needed)
     if (!includeFullHistory) {
