@@ -48,9 +48,12 @@ export type BoundPPLLintFixToolArgs = PPLLintFixToolArgs & {
  * passes when the symbol cannot survive serialization. Never trusts a
  * model-supplied request id.
  */
-export const resolveApprovedRequestId = (args: unknown): string | undefined =>
-  (args as BoundPPLLintFixToolArgs | null | undefined)?.[PPL_LINT_FIX_UI_BINDING] ??
-  (args as PPLLintFixApprovalArgs | null | undefined)?.__approvedRequestId;
+export const resolveApprovedRequestId = (args: unknown): string | undefined => {
+  const bound = (args as BoundPPLLintFixToolArgs | null | undefined)?.[PPL_LINT_FIX_UI_BINDING];
+  if (typeof bound === 'string') return bound;
+  const explicit = (args as PPLLintFixApprovalArgs | null | undefined)?.__approvedRequestId;
+  return typeof explicit === 'string' ? explicit : undefined;
+};
 
 /**
  * Subset of the assistant framework's render props the card needs. Declared here

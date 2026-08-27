@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useRef } from 'react';
 import { useMount, useUnmount } from 'react-use';
 import {
   buildApplyToolDescription,
@@ -136,8 +137,11 @@ export function usePPLLintFixAction(
     store?.removeContextById?.(contextId);
   };
 
+  const didRegister = useRef(false);
+
   useMount(() => {
     if (!registerAction) return;
+    didRegister.current = true;
     enabledActionMounts += 1;
 
     registerAction({
@@ -242,9 +246,10 @@ export function usePPLLintFixAction(
   });
 
   useUnmount(() => {
-    if (registerAction) {
+    if (didRegister.current) {
+      didRegister.current = false;
       enabledActionMounts = Math.max(0, enabledActionMounts - 1);
-      if (enabledActionMounts === 0) {
+      if (enabledActionMounts === 0 && registerAction) {
         registerDisabledPPLLintFixTestAction(registerAction);
         registerDisabledPPLLintFixAction(registerAction);
       }

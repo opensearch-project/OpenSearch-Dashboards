@@ -43,7 +43,7 @@ export interface ContextProviderStart {
     unregisterAssistantAction: (id: string) => void;
     getToolDefinitions: () => ToolDefinition[];
     hasAction: (name: string) => boolean;
-    executeAction: (name: string, args: any) => Promise<any>;
+    executeAction: (name: string, args: unknown) => Promise<unknown>;
     suppressDefaultPageContext: () => void;
     unsuppressDefaultPageContext: () => void;
   };
