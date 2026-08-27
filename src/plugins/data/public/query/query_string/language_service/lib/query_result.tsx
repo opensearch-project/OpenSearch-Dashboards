@@ -267,10 +267,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
             flush="left"
             style={{ marginLeft: 8 }}
             onClick={onAskAiForHelp}
-            data-test-subj="discoverQueryErrorAskAiForHelp"
+            data-test-subj="discoverQueryEditorErrorAskAiForHelp"
             className="editor__footerItem"
           >
-            <EuiText size="xs" className="editor__footerItem" data-test-subj="editorFooterItem">
+            <EuiText size="xs" className="editor__footerItem">
               {i18n.translate('data.query.languageService.queryResults.askAI', {
                 defaultMessage: `Ask AI for help`,
               })}
