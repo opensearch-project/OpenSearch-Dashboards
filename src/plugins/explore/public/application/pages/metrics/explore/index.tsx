@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
-import type { PromQLQuery } from '../../../../../../query_enhancements/common';
+import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
 import { clearLastExecutedData } from '../../../utils/state_management/slices';
@@ -63,20 +63,20 @@ export const MetricsExploreTab = () => {
     return new PrometheusClient(services, dataConnectionId);
   }, [services, dataConnectionId]);
 
+  const maxDataPoints = (queryState.queryOptions as PromQLQueryOptions | undefined)?.maxDataPoints;
+
   // Chart step (seconds) derived from the active time range. Used to size the
-  // PromQL rate window so zoomed-out views stay gap-free. Recomputed whenever
-  // refreshCounter bumps (time range change, manual refresh).
+  // PromQL rate window so zoomed-out views stay gap-free. Recomputed on a time
+  // range change, manual refresh, or a Max data points edit.
   const stepSec = useMemo(() => {
     const timefilter = services.data?.query?.timefilter?.timefilter;
     if (!timefilter) return 60;
     const bounds = timefilter.getBounds();
     if (!bounds?.min || !bounds?.max) return 60;
-    const { maxDataPoints } =
-      (services.data.query.queryString.getQuery() as PromQLQuery).queryOptions ?? {};
     const resolution = maxDataPoints && maxDataPoints > 0 ? maxDataPoints : undefined;
     return calculateStep(bounds.max.valueOf() - bounds.min.valueOf(), resolution);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
+  }, [services.data?.query?.timefilter?.timefilter, refreshCounter, maxDataPoints]);
 
   // Absolute time bounds (epoch ms) for anchoring sparkline x-axis to the full
   // time picker range. Recomputed alongside stepSec on every refresh.

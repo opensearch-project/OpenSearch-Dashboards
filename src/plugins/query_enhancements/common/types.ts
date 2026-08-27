@@ -32,6 +32,7 @@ export interface PromQLStepResolution {
     label: string;
     stepSec: number;
     rateIntervalSec: number;
+    minStep?: string;
   }>;
 }
 

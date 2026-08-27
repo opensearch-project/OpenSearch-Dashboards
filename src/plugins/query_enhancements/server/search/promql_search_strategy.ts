@@ -128,6 +128,7 @@ export const promqlSearchStrategyProvider = (
             stepSec,
             rateIntervalSec,
             legendFormat: opt?.legendFormat,
+            minStep: opt?.minStep,
           };
         });
 
@@ -149,10 +150,11 @@ export const promqlSearchStrategyProvider = (
           ? undefined
           : {
               maxDataPoints: resolution,
-              queries: plans.map(({ label, stepSec, rateIntervalSec }) => ({
+              queries: plans.map(({ label, stepSec, rateIntervalSec, minStep }) => ({
                 label,
                 stepSec,
                 rateIntervalSec,
+                minStep,
               })),
             };
 
@@ -179,6 +181,7 @@ interface QueryPlan {
   stepSec: number;
   rateIntervalSec: number;
   legendFormat?: string;
+  minStep?: string;
 }
 
 type SharedExecOptions =

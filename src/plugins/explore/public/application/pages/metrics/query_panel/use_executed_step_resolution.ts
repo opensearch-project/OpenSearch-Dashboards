@@ -12,7 +12,7 @@ import { resultsCache } from '../../../utils/state_management/slices';
 export interface ExecutedStepResolution {
   query: string;
   maxDataPoints: number;
-  byLabel: Record<string, { stepSec: number; rateIntervalSec: number }>;
+  byLabel: Record<string, { stepSec: number; rateIntervalSec: number; minStep?: string }>;
 }
 
 export function useExecutedStepResolution(): ExecutedStepResolution | undefined {
@@ -30,8 +30,8 @@ export function useExecutedStepResolution(): ExecutedStepResolution | undefined 
     if (!stepResolution) return undefined;
 
     const byLabel: ExecutedStepResolution['byLabel'] = {};
-    stepResolution.queries.forEach(({ label, stepSec, rateIntervalSec }) => {
-      byLabel[label] = { stepSec, rateIntervalSec };
+    stepResolution.queries.forEach(({ label, stepSec, rateIntervalSec, minStep }) => {
+      byLabel[label] = { stepSec, rateIntervalSec, minStep };
     });
     return { query: queryText, maxDataPoints: stepResolution.maxDataPoints, byLabel };
   }, [language, queryText, resultMetadata]);

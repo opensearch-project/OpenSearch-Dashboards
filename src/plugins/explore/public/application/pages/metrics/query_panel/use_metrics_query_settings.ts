@@ -25,6 +25,12 @@ export function useMetricsQuerySettings(services: ExploreServices): MetricsQuery
   const [maxDataPoints, setMaxDataPoints] = useState<number | undefined>(
     () => (queryString.getQuery() as PromQLQuery).queryOptions?.maxDataPoints
   );
+  useEffect(() => {
+    const sub = queryString.getUpdates$().subscribe(() => {
+      setMaxDataPoints((queryString.getQuery() as PromQLQuery).queryOptions?.maxDataPoints);
+    });
+    return () => sub.unsubscribe();
+  }, [queryString]);
 
   const [timeTick, setTimeTick] = useState(0);
   useEffect(() => {

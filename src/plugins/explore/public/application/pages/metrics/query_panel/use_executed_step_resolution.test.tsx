@@ -13,7 +13,7 @@ import { resultsCache } from '../../../utils/state_management/slices';
 const stepResolution = {
   maxDataPoints: 1440,
   queries: [
-    { label: 'A', stepSec: 300, rateIntervalSec: 1200 },
+    { label: 'A', stepSec: 300, rateIntervalSec: 1200, minStep: '5m' },
     { label: 'B', stepSec: 15, rateIntervalSec: 240 },
   ],
 };
@@ -41,7 +41,7 @@ describe('useExecutedStepResolution', () => {
       query: 'metric_a;\nmetric_b;',
       maxDataPoints: 1440,
       byLabel: {
-        A: { stepSec: 300, rateIntervalSec: 1200 },
+        A: { stepSec: 300, rateIntervalSec: 1200, minStep: '5m' },
         B: { stepSec: 15, rateIntervalSec: 240 },
       },
     });

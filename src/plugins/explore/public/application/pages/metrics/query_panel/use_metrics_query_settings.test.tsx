@@ -24,6 +24,7 @@ describe('useMetricsQuerySettings', () => {
   let getQuery: jest.Mock;
   let setQuery: jest.Mock;
   let timeUpdate$: Subject<void>;
+  let queryUpdate$: Subject<void>;
   let mockServices: any;
 
   const initialQuery = {
@@ -37,10 +38,11 @@ describe('useMetricsQuerySettings', () => {
     getQuery = jest.fn(() => ({ ...initialQuery }));
     setQuery = jest.fn();
     timeUpdate$ = new Subject();
+    queryUpdate$ = new Subject();
     mockServices = {
       data: {
         query: {
-          queryString: { getQuery, setQuery },
+          queryString: { getQuery, setQuery, getUpdates$: jest.fn(() => queryUpdate$) },
           timefilter: {
             timefilter: {
               getBounds: jest.fn(() => ({
@@ -107,6 +109,16 @@ describe('useMetricsQuerySettings', () => {
     );
     expect(mockDispatch).toHaveBeenCalledTimes(2);
     expect(result.current.maxDataPoints).toBe(200);
+  });
+
+  it('re-syncs max data points when the query changes externally', () => {
+    const { result } = render();
+    expect(result.current.maxDataPoints).toBe(500);
+    getQuery.mockReturnValue({ ...initialQuery, queryOptions: { maxDataPoints: 42 } });
+    act(() => {
+      queryUpdate$.next();
+    });
+    expect(result.current.maxDataPoints).toBe(42);
   });
 
   it('recomputes the resolved step when the time range updates', () => {

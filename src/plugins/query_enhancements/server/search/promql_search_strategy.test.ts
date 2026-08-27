@@ -1198,7 +1198,7 @@ describe('promqlSearchStrategy', () => {
       expect(result.body.meta.stepResolution).toEqual({
         maxDataPoints: 100,
         queries: [
-          { label: 'A', stepSec: 300, rateIntervalSec: 1200 },
+          { label: 'A', stepSec: 300, rateIntervalSec: 1200, minStep: '5m' },
           { label: 'B', stepSec: 50, rateIntervalSec: 240 },
         ],
       });

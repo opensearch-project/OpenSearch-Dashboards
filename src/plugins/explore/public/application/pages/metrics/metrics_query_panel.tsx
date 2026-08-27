@@ -156,7 +156,13 @@ export const MetricsQueryPanel: React.FC = () => {
 
   const stepReadoutFor = useCallback(
     (label: string, minStep?: string): RowStepReadout => {
-      const executed = executedStepsMatchRows ? executedSteps?.byLabel[label] : undefined;
+      const candidate = executedStepsMatchRows ? executedSteps?.byLabel[label] : undefined;
+      // The server resolved these steps against the min step in effect at run
+      // time, so a since-edited min step must fall back to a fresh estimate.
+      const executed =
+        candidate && (candidate.minStep ?? undefined) === (minStep ?? undefined)
+          ? candidate
+          : undefined;
       const resolved = executed ?? getResolvedStep(minStep);
       return {
         stepLabel: formatStepSeconds(resolved?.stepSec),
