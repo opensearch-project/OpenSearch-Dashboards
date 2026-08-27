@@ -132,14 +132,8 @@ export function usePromqlDropdownData({
     );
 
     labelsNeedingValues.forEach((label) => loadPromqlMatcherValues(label));
-  }, [
-    isPrometheusResource,
-    dataset?.id,
-    promqlMatcherLabelsKey,
-    loadPromqlMatcherValues,
-    promqlMatcherValueOptions,
-    promqlMatchers,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPrometheusResource, dataset?.id, promqlMatcherLabelsKey, loadPromqlMatcherValues]);
 
   const updatePromqlMatchers = useCallback(
     (nextMatchers: PromQLLabelMatcher[]) => {
