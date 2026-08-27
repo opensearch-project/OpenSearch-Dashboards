@@ -74,6 +74,10 @@ export class ChatEventHandler {
   // Telemetry tracking
   private interactionStartTime: number | null = null;
   private runErrorOccurred = false;
+  // Start timestamp per tool call (keyed by toolCallId), captured on
+  // TOOL_CALL_START and consumed when the execution telemetry is recorded to
+  // compute the tool call duration (result time − start time).
+  private toolCallStartTimes = new Map<string, number>();
 
   constructor(config: ChatEventHandlerConfig) {
     this.assistantActionService = config.assistantActionService;
@@ -290,6 +294,10 @@ export class ChatEventHandler {
     this.onStartResponse(true);
     const { toolCallId, toolCallName, parentMessageId } = event;
 
+    // Record the start time so the execution duration can be reported when the
+    // tool completes (locally) or the agent returns a TOOL_CALL_RESULT.
+    this.toolCallStartTimes.set(toolCallId, Date.now());
+
     // Update tool call state in AssistantActionService
     this.assistantActionService.updateToolCallState(toolCallId, {
       id: toolCallId,
@@ -413,6 +421,7 @@ export class ChatEventHandler {
       // Check if tool execution was cancelled (e.g., due to cleanup)
       if (result.cancelled) {
         this.pendingToolCalls.delete(toolCallId);
+        this.toolCallStartTimes.delete(toolCallId);
         return;
       }
 
@@ -427,7 +436,7 @@ export class ChatEventHandler {
         });
 
         // Record rejected telemetry
-        this.recordToolExecuted(toolCall.function.name, 'rejected', 'local');
+        this.recordToolExecuted(toolCallId, toolCall.function.name, 'rejected', 'local');
 
         // Clean up pending tool call
         this.pendingToolCalls.delete(toolCallId);
@@ -460,6 +469,7 @@ export class ChatEventHandler {
 
         // Record tool execution telemetry
         this.recordToolExecuted(
+          toolCallId,
           toolCall.function.name,
           result.success ? 'success' : 'failure',
           'local'
@@ -495,7 +505,7 @@ export class ChatEventHandler {
       });
 
       // Record tool execution failure telemetry
-      this.recordToolExecuted(toolCall.function.name, 'error', 'local');
+      this.recordToolExecuted(toolCallId, toolCall.function.name, 'error', 'local');
     } finally {
       // Clean up pending tool call
       this.pendingToolCalls.delete(toolCallId);
@@ -546,21 +556,32 @@ export class ChatEventHandler {
     // if a duplicate TOOL_CALL_RESULT arrives after the entry was already cleared.
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
       const pendingTool = this.toolExecutor.getPendingTool(toolCallId);
-      this.recordToolExecuted(pendingTool?.name ?? 'unknown', 'success', 'agent');
+      this.recordToolExecuted(toolCallId, pendingTool?.name ?? 'unknown', 'success', 'agent');
       this.toolExecutor.clearPendingTool(toolCallId);
     }
   }
 
   /**
-   * Record a `chat_tool_executed` telemetry event.
+   * Record a `chat_tool_executed` telemetry event, plus a
+   * `chat_tool_executed_duration_ms` metric carrying the execution duration.
    * `source` distinguishes browser-executed actions ('local') from
    * agent-executed tools reported via TOOL_CALL_RESULT ('agent').
+   * The duration is the elapsed time from TOOL_CALL_START to this record,
+   * derived from the per-tool-call start timestamp; the metric is skipped when
+   * the start time is unknown (e.g. a tool call replayed from a snapshot with
+   * no observed TOOL_CALL_START).
    */
   private recordToolExecuted(
+    toolCallId: string,
     toolName: string,
     status: 'success' | 'failure' | 'error' | 'rejected',
     source: 'local' | 'agent'
   ): void {
+    // Always consume the start-time entry so it does not leak, even when
+    // telemetry is disabled.
+    const startTime = this.toolCallStartTimes.get(toolCallId);
+    this.toolCallStartTimes.delete(toolCallId);
+
     if (!this.telemetryRecorder) {
       return;
     }
@@ -568,11 +589,27 @@ export class ChatEventHandler {
     this.telemetryRecorder.recordEvent({
       name: 'chat_tool_executed',
       data: {
-        toolName,
-        status,
-        source,
+        chatToolCallToolName: toolName,
+        chatToolCallStatus: status,
+        chatToolCallSource: source,
       },
     });
+
+    // Report the execution duration as an aggregatable metric (avg/p90/etc.)
+    // rather than embedding it in the event payload. Only emitted when the
+    // TOOL_CALL_START timestamp was observed.
+    if (startTime !== undefined) {
+      this.telemetryRecorder.recordMetric({
+        name: 'chat_tool_executed_duration_ms',
+        value: Date.now() - startTime,
+        unit: 'ms',
+        labels: {
+          chatToolCallToolName: toolName,
+          chatToolCallStatus: status,
+          chatToolCallSource: source,
+        },
+      });
+    }
   }
 
   /**
@@ -912,6 +949,7 @@ export class ChatEventHandler {
   clearState(): void {
     this.activeAssistantMessages.clear();
     this.pendingToolCalls.clear();
+    this.toolCallStartTimes.clear();
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
     // Drain the process-wide AssistantActionService tool call states so
