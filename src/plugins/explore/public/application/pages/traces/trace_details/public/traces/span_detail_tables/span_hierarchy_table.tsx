@@ -27,6 +27,16 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
   // Visible time window driven by the timeline brush (undefined = full range).
   const [visibleRange, setVisibleRange] = useState<TraceTimeRange | undefined>(undefined);
+  // User column-resize widths, persisted so they survive columns being recomputed
+  // on zoom (EUI resets column widths to initialWidth whenever the columns array
+  // reference changes). Reset per trace so one trace's sizing doesn't leak to the
+  // next. Fed back as initialWidth in the columns memo below.
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const handleColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) =>
+      setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
+    []
+  );
 
   const traceTimeRange = useMemo(() => calculateTraceTimeRange(allSpans), [allSpans]);
 
@@ -40,8 +50,10 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     try {
       const hits = parseHits(props.payloadData);
       setAllSpans(hits);
-      // New trace payload: reset any prior zoom window.
+      // New trace payload: reset any prior zoom window and column sizing so a
+      // previous trace's resized widths don't leak onto this one.
       setVisibleRange(undefined);
+      setColumnWidths({});
       const filteredSpans = applySpanFilters(hits, props.filters);
       setSpans(filteredSpans);
 
@@ -114,17 +126,6 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   // avoids a stale-closure no-op on the first click after a re-render.
   const flattenedItemsRef = useRef(flattenedItems);
   flattenedItemsRef.current = flattenedItems;
-
-  // User column-resize widths, persisted here so they survive columns being
-  // recomputed on zoom. EUI's data grid resets column widths to `initialWidth`
-  // whenever the columns array reference changes, so we feed the resized width
-  // back in as initialWidth to keep the user's sizing.
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const handleColumnResize = useCallback(
-    ({ columnId, width }: { columnId: string; width: number }) =>
-      setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
-    []
-  );
 
   const columns = useMemo(() => {
     const base = getSpanHierarchyTableColumns(traceTimeRange, availableWidth, {

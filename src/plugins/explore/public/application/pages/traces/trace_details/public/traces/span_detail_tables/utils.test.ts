@@ -198,6 +198,18 @@ describe('applySpanFilters', () => {
     expect(result).toEqual([]);
   });
 
+  it('treats a missing field as non-matching for "=" and matching for "!="', () => {
+    const spans = [{ serviceName: 'cart' }] as any;
+    // "=" against an absent field must not match (no "undefined" string coercion).
+    expect(applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '=' }])).toEqual(
+      []
+    );
+    // "!=" against an absent field matches (the field is not that value).
+    expect(
+      applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '!=' }])
+    ).toEqual(spans);
+  });
+
   it('should handle empty spans array', () => {
     const filters = [{ field: 'serviceName', value: 'test' }];
     const result = applySpanFilters([], filters);

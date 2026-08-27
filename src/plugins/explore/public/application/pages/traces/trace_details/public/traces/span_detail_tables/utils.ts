@@ -46,9 +46,15 @@ export const applySpanFilters = (
       const spanValue = field.includes('.')
         ? field.split('.').reduce((obj, key) => obj?.[key], span)
         : span[field];
-      // Coerce both sides to strings so a numeric field value (e.g. 200) still
-      // matches a value coming from a text input, and honor the != operator.
-      const matches = String(spanValue) === String(value);
+      // A missing field never equals a concrete filter value (and always
+      // satisfies "!="), so absent values don't string-coerce to "undefined"/
+      // "null" and match unexpectedly.
+      const matches =
+        spanValue === undefined || spanValue === null
+          ? false
+          : // Coerce both sides to strings so a numeric field value (e.g. 200)
+            // still matches a value coming from a text input.
+            String(spanValue) === String(value);
       return operator === '!=' ? !matches : matches;
     });
   });
