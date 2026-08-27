@@ -159,6 +159,8 @@ interface RenderCustomDataGridParams {
   defaultHeight?: string;
   visibleColumns?: string[];
   isTableDataLoading?: boolean;
+  /** Notified when a user resizes a column, so callers can persist the width. */
+  onColumnResize?: (args: { columnId: string; width: number }) => void;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -175,6 +177,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   defaultHeight = '500px',
   visibleColumns,
   isTableDataLoading,
+  onColumnResize,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
     return columns
@@ -312,6 +315,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               }}
               pagination={pagination}
               gridStyle={gridStyle}
+              onColumnResize={onColumnResize}
               style={{
                 width: isFullScreen ? '100%' : availableWidth ? `${availableWidth}px` : '100%',
                 height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,

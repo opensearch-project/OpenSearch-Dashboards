@@ -115,14 +115,34 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const flattenedItemsRef = useRef(flattenedItems);
   flattenedItemsRef.current = flattenedItems;
 
-  const columns = useMemo(
-    () =>
-      getSpanHierarchyTableColumns(traceTimeRange, availableWidth, {
-        visibleRange,
-        brush: { spans: allSpans, colorMap, onChange: handleVisibleRangeChange },
-      }),
-    [traceTimeRange, availableWidth, visibleRange, allSpans, colorMap, handleVisibleRangeChange]
+  // User column-resize widths, persisted here so they survive columns being
+  // recomputed on zoom. EUI's data grid resets column widths to `initialWidth`
+  // whenever the columns array reference changes, so we feed the resized width
+  // back in as initialWidth to keep the user's sizing.
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const handleColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) =>
+      setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
+    []
   );
+
+  const columns = useMemo(() => {
+    const base = getSpanHierarchyTableColumns(traceTimeRange, availableWidth, {
+      visibleRange,
+      brush: { spans: allSpans, colorMap, onChange: handleVisibleRangeChange },
+    });
+    return base.map((col) =>
+      columnWidths[col.id] != null ? { ...col, initialWidth: columnWidths[col.id] } : col
+    );
+  }, [
+    traceTimeRange,
+    availableWidth,
+    visibleRange,
+    allSpans,
+    colorMap,
+    handleVisibleRangeChange,
+    columnWidths,
+  ]);
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
   const renderCellValue = useCallback(
@@ -341,6 +361,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
         visibleColumns,
         isTableDataLoading: isSpansTableDataLoading,
         defaultHeight: tableHeight,
+        onColumnResize: handleColumnResize,
       })}
     </div>
   );

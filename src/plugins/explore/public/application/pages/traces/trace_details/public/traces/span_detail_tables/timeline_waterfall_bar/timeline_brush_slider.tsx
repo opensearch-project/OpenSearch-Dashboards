@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { Span } from '../types';
 import { TraceTimeRange, calculateSpanTimeRange } from '../../../utils/span_timerange_utils';
+import { useTimelineBarColor } from './timeline_waterfall_bar_hooks';
 import './timeline_brush_slider.scss';
 
 export interface TimelineBrushSliderProps {
@@ -42,14 +43,12 @@ const formatTotalDuration = (durationMs: number): string => {
 
 type DragMode = 'left' | 'right' | 'move';
 
-// The overview is a compact orientation strip. All spans stack in one thin band,
-// so per-service colors would just overwrite each other (whichever draws last
-// wins) and read as a confusing blur. A single muted color instead renders a
-// clean activity silhouette; service colors live in the waterfall below.
 const SpanOverviewBar: React.FC<{
   span: Span;
   traceTimeRange: TraceTimeRange;
-}> = ({ span, traceTimeRange }) => {
+  colorMap?: Record<string, string>;
+}> = ({ span, traceTimeRange, colorMap }) => {
+  const color = useTimelineBarColor(span, colorMap);
   const { startTimeMs, durationMs } = calculateSpanTimeRange(span);
   const { startTimeMs: traceStart, durationMs: traceDuration } = traceTimeRange;
   const dur = traceDuration || 1;
@@ -59,7 +58,7 @@ const SpanOverviewBar: React.FC<{
   return (
     <div
       className="exploreTimelineBrush__overviewBar"
-      style={{ left: `${left}%`, width: `${width}%` }}
+      style={{ left: `${left}%`, width: `${width}%`, backgroundColor: color }}
     />
   );
 };
@@ -68,6 +67,7 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
   traceTimeRange,
   visibleRange,
   spans,
+  colorMap,
   paddingPercent = 2,
   onChange,
 }) => {
@@ -188,7 +188,12 @@ export const TimelineBrushSlider: React.FC<TimelineBrushSliderProps> = ({
         ))}
         <div className="exploreTimelineBrush__overview">
           {spans.map((span) => (
-            <SpanOverviewBar key={span.spanId} span={span} traceTimeRange={traceTimeRange} />
+            <SpanOverviewBar
+              key={span.spanId}
+              span={span}
+              traceTimeRange={traceTimeRange}
+              colorMap={colorMap}
+            />
           ))}
         </div>
         {/* Dim the regions outside the selected window so the brush reads as a
