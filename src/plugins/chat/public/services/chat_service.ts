@@ -41,6 +41,13 @@ export interface CurrentChatState {
   messages: Message[];
 }
 
+/**
+ * How long a frontend-tool continuation waits before dispatch, so the tool-result write is visible
+ * to a backend that does not reconcile it server-side (ml-commons). See
+ * {@link ChatService.waitBeforeContinuation}.
+ */
+export const CONTINUATION_DISPATCH_DELAY_MS = 3000;
+
 export class ChatService {
   private agent: AgUiAgent;
   public availableTools: ToolDefinition[] = [];
@@ -567,7 +574,7 @@ export class ChatService {
     // The tool result is dispatched directly; the server reconciles it into the persisted
     // placeholder via its {wire tool_call_id -> native toolUseId} map (ag_ui_strands
     // session_reconcile), which is idempotent and cross-process.
-    if (signal?.aborted) return skip('aborted');
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
 
     // Fix #11881: wait for the previous run (e.g. the one that requested this
     // frontend tool) to finish before dispatching this tool-result run.
@@ -584,6 +591,32 @@ export class ChatService {
     this.events$ = trackedObservable;
 
     return { observable: trackedObservable, toolMessage };
+  }
+
+  /**
+   * Wait before dispatching a frontend-tool continuation.
+   *
+   * The agent server reconciles a tool result into its persisted placeholder through the
+   * ag_ui_strands wire->native map, so it needs no delay. ml-commons has no such reconciliation and
+   * no backend polling, so a continuation that arrives before the placeholder write is visible can
+   * miss it. This delay keeps that path working while both backends are supported.
+   *
+   * Resolves false when the caller aborts during the wait, so the dispatch is skipped rather than
+   * firing seconds after cancellation.
+   */
+  private waitBeforeContinuation(signal?: AbortSignal): Promise<boolean> {
+    if (signal?.aborted) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      const onAbort = () => {
+        clearTimeout(timer);
+        resolve(false);
+      };
+      const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve(true);
+      }, CONTINUATION_DISPATCH_DELAY_MS);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
   }
 
   /**
@@ -717,7 +750,7 @@ export class ChatService {
 
     // Each result is dispatched directly; the server reconciles it via its wire->native map
     // (see sendToolResult), which is idempotent and cross-process.
-    if (signal?.aborted) return skip('aborted');
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
 
     const observable = this.agent.runAgent(runInput, dataSourceId);
     const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
