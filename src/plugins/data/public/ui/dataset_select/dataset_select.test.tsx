@@ -138,7 +138,7 @@ describe('DatasetSelect', () => {
   // Only lazily-invoked methods remain used by the component: get (fallback enrichment for a
   // selected dataset not in the list), convertToDataset and clearCache (advanced-selector save
   // path). The default dataset id now comes from uiSettings, not getDefault. Reset per-test.
-  const mockDataViews = {
+  const mockDataViews: Record<string, jest.Mock> = {
     get: jest.fn(),
     convertToDataset: jest.fn(),
     clearCache: jest.fn(),
@@ -708,6 +708,95 @@ describe('DatasetSelect', () => {
       fireEvent.click(viewDatasetsButton);
 
       expect(mockCore.overlays.openModal).toHaveBeenCalled();
+    });
+  });
+
+  describe('isControlled prop', () => {
+    beforeEach(() => {
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(makeDatasetService(makeIndexPatternType([defaultChild])));
+      (getQueryService as jest.Mock).mockReturnValue(mockQueryService);
+
+      mockDataViews.getIds = jest.fn().mockResolvedValue(['index-pattern-id']);
+      mockDataViews.get = jest
+        .fn()
+        .mockImplementation((id) => Promise.resolve({ ...mockDataViewData, id }));
+      mockDataViews.getMultiple = jest
+        .fn()
+        .mockImplementation((ids) =>
+          Promise.resolve(ids.map((id: string) => ({ ...mockDataViewData, id })))
+        );
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(mockDataViewData);
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) =>
+        Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        })
+      );
+    });
+
+    it('treats an undefined controlled selection as "no dataset" and auto-selects the default, ignoring the global query dataset', async () => {
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue(mockQuery);
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(mockDataViewData);
+
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+        isControlled: true,
+        controlledSelectedDataset: undefined,
+      });
+
+      await waitFor(() => {
+        expect(mockOnSelect).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'index-pattern-id' })
+        );
+      });
+    });
+
+    it('does not auto-select when the controlled selection is already set', async () => {
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+        isControlled: true,
+        controlledSelectedDataset: {
+          id: 'index-pattern-id',
+          title: 'Test Index Pattern',
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        } as any,
+      });
+
+      // Wait for the initial dataset fetch to settle (button leaves the disabled state).
+      await waitFor(() =>
+        expect(screen.getByTestId('datasetSelectButton')).not.toHaveClass(
+          'euiButtonEmpty-isDisabled'
+        )
+      );
+
+      // A controlled selection is already set => the initial-load auto-select is skipped.
+      expect(mockOnSelect).not.toHaveBeenCalled();
+    });
+
+    it('reads the global query dataset (not auto-select) when uncontrolled', async () => {
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue(mockQuery);
+
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      // Wait for the initial dataset fetch to settle (button leaves the disabled state).
+      await waitFor(() =>
+        expect(screen.getByTestId('datasetSelectButton')).not.toHaveClass(
+          'euiButtonEmpty-isDisabled'
+        )
+      );
+
+      // Uncontrolled + global query already has a dataset => no auto-select fires.
+      expect(mockOnSelect).not.toHaveBeenCalled();
     });
   });
 });
