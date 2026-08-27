@@ -127,3 +127,75 @@ describe('hits counter', () => {
     expect(props.onResetQuery).toHaveBeenCalled();
   });
 });
+
+describe('hits counter - aggregation format', () => {
+  let props: HitsCounterProps;
+  let component: ReactWrapper<HitsCounterProps>;
+
+  beforeAll(() => {
+    props = {
+      onResetQuery: jest.fn(),
+      showResetButton: false,
+      hits: 2540,
+      bucketCount: 849,
+      rows: Array(500).fill({
+        fields: {},
+        sort: [],
+        _source: {},
+        _id: '1',
+        _index: 'idx1',
+        _type: '',
+        _score: 1,
+      }),
+      elapsedMs: 66,
+    };
+  });
+
+  it('should render aggregation format with bucketCount and hits', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    const bucketCountEl = findTestSubject(component, 'discoverQueryBucketCount');
+    expect(bucketCountEl.text()).toBe('849');
+    const hitsEl = findTestSubject(component, 'discoverQueryHits');
+    expect(hitsEl.text()).toBe('2,540');
+  });
+
+  it('should render rowsCount in aggregation format', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    const rowsEl = findTestSubject(component, 'discoverQueryRowsCount');
+    expect(rowsEl.text()).toBe('500');
+  });
+
+  it('should render elapsedMs in aggregation format', () => {
+    component = mountWithIntl(<HitsCounter {...props} />);
+    const elapsedEl = findTestSubject(component, 'discoverQueryElapsedMs');
+    expect(elapsedEl.text()).toBe('66');
+  });
+
+  it('should render formatted large numbers in aggregation format', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={2000000} bucketCount={5050} />);
+    const bucketCountEl = findTestSubject(component, 'discoverQueryBucketCount');
+    expect(bucketCountEl.text()).toBe('5,050');
+    const hitsEl = findTestSubject(component, 'discoverQueryHits');
+    expect(hitsEl.text()).toBe('2,000,000');
+  });
+
+  it('should not render bucketCount element when bucketCount is undefined', () => {
+    component = mountWithIntl(<HitsCounter {...props} bucketCount={undefined} />);
+    expect(component.exists('[data-test-subj="discoverQueryBucketCount"]')).toBeFalsy();
+  });
+
+  it('should fall back to standard format when hits is defined but bucketCount is not', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={2852} bucketCount={undefined} />);
+    expect(component.exists('[data-test-subj="discoverQueryBucketCount"]')).toBeFalsy();
+    const hitsEl = findTestSubject(component, 'discoverQueryHits');
+    expect(hitsEl.text()).toBe('2,852');
+  });
+
+  it('should fall back to no-hits format when both hits and bucketCount are undefined', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={undefined} bucketCount={undefined} />);
+    expect(component.exists('[data-test-subj="discoverQueryHits"]')).toBeFalsy();
+    expect(component.exists('[data-test-subj="discoverQueryBucketCount"]')).toBeFalsy();
+    const rowsEl = findTestSubject(component, 'discoverQueryRowsCount');
+    expect(rowsEl.text()).toBe('500');
+  });
+});

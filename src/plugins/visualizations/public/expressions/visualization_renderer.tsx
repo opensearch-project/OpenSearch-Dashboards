@@ -55,6 +55,13 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
     vis.eventsSubject = { next: handlers.event };
 
     const uiState = handlers.uiState || vis.getUiState();
+    // A fresh ExprVis is constructed on every render. <Visualization>'s React
+    // constructor only fires on the initial mount, so without this assignment
+    // every subsequent ExprVis would carry an empty PersistedState. Downstream
+    // consumers (vislib's legend, color lookup) read vis.getUiState() when the
+    // chart mounts; if the chart ever unmounts and remounts (e.g. zero hits
+    // then results return) they would lose saved colors and legend visibility.
+    vis.setUiState(uiState);
 
     let root = rootsMap.get(domNode);
     if (!root) {

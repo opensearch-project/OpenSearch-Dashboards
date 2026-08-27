@@ -7,8 +7,8 @@ import { i18n } from '@osd/i18n';
 import semver from 'semver';
 import qs from 'query-string';
 import rison from 'rison-node';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -102,6 +102,11 @@ import {
 } from './components/query_panel/actions/ppl_lint_fix_action';
 import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
 
+import {
+  registerAutoVisualizationAction,
+  AUTO_VISUALIZATION_TOOL_NAME,
+} from './components/visualizations/actions/auto_visualization_action';
+
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
   ExplorePluginStart,
@@ -141,6 +146,8 @@ export class ExplorePlugin implements Plugin<
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
   private unregisterPPLLintFixAction?: () => void;
+  private unregisterVisualizationTools?: () => void;
+  private visualizationToolsWorkspaceSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -887,7 +894,16 @@ export class ExplorePlugin implements Plugin<
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
-    // Register disabled apply_ppl_query action as placeholder
+    // Create saved explore loader so tool can use it
+    const savedExploreLoader = createSavedExploreLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: plugins.data.indexPatterns,
+      search: plugins.data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+
+    // Register disabled execute_ppl_query action as placeholder
     // This will be overridden when query panel mounts and restored when it unmounts
     if (plugins.contextProvider) {
       registerDisabledPPLExecuteQueryAction(
@@ -905,17 +921,31 @@ export class ExplorePlugin implements Plugin<
       const { registerAssistantAction, unregisterAssistantAction } =
         plugins.contextProvider.actions;
 
+      // The tool will only be registered in an explore-enabled workspace as it depends on vis editor
+      this.visualizationToolsWorkspaceSubscription = this.getIsInsideWorkspace$(core).subscribe(
+        (isExploreEnabledWorkspace) => {
+          if (isExploreEnabledWorkspace) {
+            registerAutoVisualizationAction(
+              registerAssistantAction,
+              core,
+              plugins.data,
+              plugins.contextProvider
+            );
+          } else {
+            // Leaving the workspace must take the tool back out of availableTools
+            unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+          }
+        }
+      );
+
+      this.unregisterVisualizationTools = () => {
+        this.visualizationToolsWorkspaceSubscription?.unsubscribe();
+        unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+      };
+
       // Inject contextProvider action helpers into PanelDataService
       PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
     }
-
-    const savedExploreLoader = createSavedExploreLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: plugins.data.indexPatterns,
-      search: plugins.data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
 
     return {
       urlGenerator: this.urlGenerator,
@@ -934,8 +964,9 @@ export class ExplorePlugin implements Plugin<
     this.unregisterPPLExecuteQueryAction?.();
     this.unregisterPPLLintFixAction?.();
     clearActivePPLLintFixSession();
+    this.unregisterVisualizationTools?.();
     // cleanup shared panel-data store + fetch_panel_data tool.
-    PanelDataService.getInstance().reset();
+    PanelDataService.getInstance()?.reset();
   }
 
   private registerEmbeddable(
@@ -1095,11 +1126,11 @@ export class ExplorePlugin implements Plugin<
         .filter(
           (v) =>
             v.name === this.DISCOVER_VISUALIZATION_NAME ||
-            v.name === this.METRICS_VISUALIZATION_NAME ||
-            v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.METRICS_VISUALIZATION_NAME
         )
         .forEach((visAlias) => {
-          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          // Hide aliases that route into the normal Explore apps. The standalone
+          // visualization editor remains available for dashboard create flows.
           visAlias.hidden = true;
         });
     }
@@ -1115,6 +1146,16 @@ export class ExplorePlugin implements Plugin<
         (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
           isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
+    );
+  }
+
+  /**
+   * Emits whether the user is inside workspace
+   */
+  private getIsInsideWorkspace$(core: CoreStart): Observable<boolean> {
+    return core.workspaces.currentWorkspace$.pipe(
+      map((workspace) => !!workspace),
+      distinctUntilChanged()
     );
   }
 }

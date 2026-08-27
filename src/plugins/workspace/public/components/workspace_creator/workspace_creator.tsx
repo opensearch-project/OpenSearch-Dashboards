@@ -26,6 +26,7 @@ import {
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
 import {
@@ -40,7 +41,12 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
-import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
+import {
+  detectTraceData,
+  createAutoDetectedDatasets,
+  getIndexPatternSignalTypes,
+  collectTraceDataSourceIds,
+} from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -115,7 +121,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       }
       setIsFormSubmitting(true);
       try {
-        const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
+        const { permissionSettings, selectedDataSourceConnections, customId, ...attributes } = data;
         const selectedDataSourceIds = (selectedDataSourceConnections ?? [])
           .filter(
             ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
@@ -130,20 +136,33 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           .map(({ id }) => {
             return id;
           });
-        result = await workspaceClient.create(attributes, {
-          dataSources: selectedDataSourceIds,
-          dataConnections: selectedDataConnectionIds,
-          ...(isPermissionEnabled
-            ? {
-                permissions: convertPermissionSettingsToPermissions(permissionSettings),
-              }
-            : {}),
-        });
+        result = await workspaceClient.create(
+          { ...attributes, ...(customId ? { id: customId } : {}) },
+          {
+            dataSources: selectedDataSourceIds,
+            dataConnections: selectedDataConnectionIds,
+            ...(isPermissionEnabled
+              ? {
+                  permissions: convertPermissionSettingsToPermissions(permissionSettings),
+                }
+              : {}),
+          }
+        );
         if (result?.success) {
+          const failedAssociationCount = result.result.failedAssociations?.length ?? 0;
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
               defaultMessage: 'Create workspace successfully',
             }),
+            ...(failedAssociationCount > 0
+              ? {
+                  text: i18n.translate('workspace.create.associationFailed', {
+                    defaultMessage:
+                      '{failedAssociationCount, plural, one {# selected data source or connection was not associated.} other {# selected data sources or connections were not associated.}} You can add them later from workspace settings.',
+                    values: { failedAssociationCount },
+                  }),
+                }
+              : {}),
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;
@@ -159,10 +178,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                 // Set workspace context for saved objects client
                 savedObjects.client.setCurrentWorkspace(newWorkspaceId);
 
-                // Get selected data sources (OpenSearch connections only)
-                const dataSourceConnections = (selectedDataSourceConnections ?? []).filter(
+                const selectedOpenSearchConnections = (selectedDataSourceConnections ?? []).filter(
                   ({ connectionType }) =>
                     connectionType === DataSourceConnectionType.OpenSearchConnection
+                );
+                const failedDataSourceIds = new Set(
+                  (result.result.failedAssociations ?? [])
+                    .filter(({ type }) => type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+                    .map(({ id }) => id)
+                );
+                const dataSourceConnections = selectedOpenSearchConnections.filter(
+                  ({ id }) => !failedDataSourceIds.has(id)
                 );
 
                 // Create mapping from dataSourceId to name
@@ -170,13 +196,24 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                   dataSourceConnections.map(({ id, name }) => [id, name])
                 );
 
-                // If no data sources selected, check local cluster
+                // Check the local cluster only when no OpenSearch data source was selected.
                 const dataSourcesToCheck =
-                  dataSourceConnections.length > 0
-                    ? dataSourceConnections.map(({ id }) => id)
-                    : [undefined]; // undefined means local cluster
+                  selectedOpenSearchConnections.length === 0
+                    ? [undefined]
+                    : dataSourceConnections.map(({ id }) => id);
 
                 let datasetsCreatedCount = 0;
+
+                // Resolve which data sources already have a trace dataset in a single
+                // lookup, so per-data-source detection below does not repeat it.
+                let traceDataSourceIds: Set<string | undefined> | undefined;
+                try {
+                  traceDataSourceIds = collectTraceDataSourceIds(
+                    await getIndexPatternSignalTypes(savedObjects.client)
+                  );
+                } catch {
+                  // Fall back to per-data-source detection when the lookup is unavailable.
+                }
 
                 // Run detection for each data source
                 for (const dataSourceId of dataSourcesToCheck) {
@@ -185,7 +222,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                       savedObjects.client,
                       // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dataPlugin.dataViews,
-                      dataSourceId
+                      dataSourceId,
+                      traceDataSourceIds ? traceDataSourceIds.has(dataSourceId) : undefined
                     );
 
                     if (detection.tracesDetected || detection.logsDetected) {

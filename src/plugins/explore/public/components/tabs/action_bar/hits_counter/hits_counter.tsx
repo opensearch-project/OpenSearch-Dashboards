@@ -41,6 +41,10 @@ export interface HitsCounterProps {
    */
   hits?: number;
   /**
+   * total bucket count for aggregation queries (shown as denominator instead of hits)
+   */
+  bucketCount?: number;
+  /**
    * displays the reset button
    */
   showResetButton: boolean;
@@ -64,6 +68,7 @@ export interface HitsCounterProps {
 
 export function HitsCounter({
   hits,
+  bucketCount,
   showResetButton,
   onResetQuery,
   rows,
@@ -84,7 +89,31 @@ export function HitsCounter({
       >
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {hits ? (
+            {hits && bucketCount ? (
+              <FormattedMessage
+                id="explore.discover.hitsAggregationResultTitle"
+                defaultMessage="{rowsCount} / {bucketCount} {bucketCountRaw, plural, one {bucket} other {buckets}} · {hits} hits · {elapsedMs} ms"
+                values={{
+                  rowsCount: (
+                    <strong data-test-subj="discoverQueryRowsCount">
+                      {rowsCount.toLocaleString()}
+                    </strong>
+                  ),
+                  hits: <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>,
+                  bucketCount: (
+                    <strong data-test-subj="discoverQueryBucketCount">
+                      {bucketCount.toLocaleString()}
+                    </strong>
+                  ),
+                  bucketCountRaw: bucketCount,
+                  elapsedMs: (
+                    <strong data-test-subj="discoverQueryElapsedMs">
+                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
+                    </strong>
+                  ),
+                }}
+              />
+            ) : hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
                 defaultMessage="{rowsCount} / {hits} hits · {elapsedMs} ms"

@@ -165,38 +165,56 @@ export const translatePermissionsToRole = (
   principals?: Principals
 ): PermissionModeId => {
   let permissionMode = PermissionModeId.Owner;
-  if (isPermissionControlEnabled && permissions) {
-    const modes = [] as WorkspacePermissionMode[];
-    const currentUserId = principals?.users?.[0] || '';
-    const currentGroupId = principals?.groups?.[0] || '';
-    [
-      WorkspacePermissionMode.Write,
-      WorkspacePermissionMode.LibraryWrite,
-      WorkspacePermissionMode.LibraryRead,
-      WorkspacePermissionMode.Read,
-    ].forEach((mode) => {
-      if (
-        permissions[mode] &&
-        (permissions[mode].users?.includes(currentUserId) ||
-          permissions[mode].groups?.includes(currentGroupId))
-      ) {
-        modes.push(mode);
-      }
-    });
+  if (isPermissionControlEnabled) {
+    if (permissions) {
+      const modes = [] as WorkspacePermissionMode[];
+      [
+        WorkspacePermissionMode.Write,
+        WorkspacePermissionMode.LibraryWrite,
+        WorkspacePermissionMode.LibraryRead,
+        WorkspacePermissionMode.Read,
+      ].forEach((mode) => {
+        if (permissions[mode]) {
+          if (permissions[mode].users?.includes('*') || permissions[mode].groups?.includes('*')) {
+            modes.push(mode);
+            return;
+          }
 
-    if (
-      modes.includes(WorkspacePermissionMode.LibraryWrite) &&
-      modes.includes(WorkspacePermissionMode.Write)
-    ) {
-      permissionMode = PermissionModeId.Owner;
-    } else if (modes.includes(WorkspacePermissionMode.LibraryWrite)) {
-      permissionMode = PermissionModeId.ReadAndWrite;
+          const isGroupMatched = (principals?.groups || []).find((group) =>
+            permissions[mode].groups?.includes(group)
+          );
+
+          if (isGroupMatched) {
+            modes.push(mode);
+            return;
+          }
+
+          const isUserMatched = (principals?.users || []).find((user) =>
+            permissions[mode].users?.includes(user)
+          );
+
+          if (isUserMatched) {
+            modes.push(mode);
+            return;
+          }
+        }
+      });
+
+      if (
+        modes.includes(WorkspacePermissionMode.LibraryWrite) &&
+        modes.includes(WorkspacePermissionMode.Write)
+      ) {
+        permissionMode = PermissionModeId.Owner;
+      } else if (modes.includes(WorkspacePermissionMode.LibraryWrite)) {
+        permissionMode = PermissionModeId.ReadAndWrite;
+      } else {
+        permissionMode = PermissionModeId.Read;
+      }
     } else {
       permissionMode = PermissionModeId.Read;
     }
-  } else {
-    permissionMode = PermissionModeId.Read;
   }
+
   return permissionMode;
 };
 

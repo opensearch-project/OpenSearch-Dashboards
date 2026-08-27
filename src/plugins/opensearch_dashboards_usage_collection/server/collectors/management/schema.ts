@@ -74,6 +74,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:searchOnPageLoad': { type: 'boolean' },
   'doc_table:hideTimeColumn': { type: 'boolean' },
   'discover:sampleSize': { type: 'long' },
+  'discover:aggregationSampleSize': { type: 'long' },
   defaultColumns: { type: 'keyword' }, // it's an array
   'context:defaultSize': { type: 'long' },
   'discover:aggs:terms:size': { type: 'long' },

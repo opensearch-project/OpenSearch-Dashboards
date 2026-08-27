@@ -66,7 +66,8 @@ describe('Area Chart to_expression', () => {
       thresholdStyle: ThresholdMode.Solid,
     },
     standardAxes: [],
-    showFullTimeRange: false,
+    showFullTimeRange: true,
+    stackMode: 'total',
   };
 
   describe('createSimpleAreaChart', () => {

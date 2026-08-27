@@ -9,6 +9,8 @@ import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from './constants';
 export const validateWorkspaceColor = (color?: string) =>
   !!color && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
 
+export const validateWorkspaceId = (id: string) => /^[a-zA-Z0-9_-]{6,36}$/.test(id);
+
 export const validateIsWorkspaceDataSourceAndConnectionObjectType = (type: string) =>
   WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES.includes(type);
 

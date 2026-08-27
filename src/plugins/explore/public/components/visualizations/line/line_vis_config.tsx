@@ -16,9 +16,10 @@ import {
   VisFieldType,
   ThresholdOptions,
   StandardAxes,
+  LineDashStyle,
+  LineStyle,
 } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
-import { TooltipOptions } from '../types';
+import { TooltipOptions, StandardOptions } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
   createSimpleLineChart,
@@ -32,7 +33,7 @@ import { EchartsRender } from '../echarts_render';
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
-export interface LineChartStyleOptions {
+export interface LineChartStyleOptions extends StandardOptions {
   addLegend?: boolean;
   legendPosition?: Positions;
   // @deprecated - removed this once migrated to echarts
@@ -40,6 +41,8 @@ export interface LineChartStyleOptions {
   addTimeMarker?: boolean;
 
   lineStyle?: LineStyle;
+  // Border line configuration
+  lineDashStyle?: LineDashStyle;
   lineMode?: LineMode;
   lineWidth?: number;
   tooltipOptions?: TooltipOptions;
@@ -63,12 +66,30 @@ export interface LineChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   showFullTimeRange?: boolean;
+  pointSize?: number;
+  // Renders each data point's value
+  showValues?: boolean;
 }
 
 export type LineChartStyle = Required<
-  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'>
+  Omit<
+    LineChartStyleOptions,
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'categoryAxes'
+    | 'valueAxes'
+    | 'pointSize'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >
 > &
-  Pick<LineChartStyleOptions, 'legendTitle'>;
+  Pick<
+    LineChartStyleOptions,
+    'legendTitle' | 'pointSize' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
@@ -92,7 +113,9 @@ export const defaultLineChartStyles: LineChartStyle = {
 
   standardAxes: [],
 
-  showFullTimeRange: false,
+  showFullTimeRange: true,
+  showValues: false,
+  lineDashStyle: 'solid',
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
@@ -124,6 +147,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -158,6 +182,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -191,6 +216,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -224,6 +250,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}

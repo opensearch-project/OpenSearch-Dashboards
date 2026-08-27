@@ -118,6 +118,7 @@ export interface DashboardAppState {
   options: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    useSharedCrosshair?: boolean;
   };
   query: Query | string;
   filters: Filter[];

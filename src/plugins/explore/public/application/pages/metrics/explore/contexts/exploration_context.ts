@@ -84,6 +84,7 @@ interface ExplorationContextValue {
   executePromQL: (promql: string) => void;
   refreshCounter: number;
   onTimeRangeChange?: (from: string, to: string) => void;
+  timeBounds?: { min: number; max: number };
 }
 
 export const ExplorationContext = createContext<ExplorationContextValue | null>(null);

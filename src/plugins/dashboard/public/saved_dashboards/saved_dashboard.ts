@@ -112,6 +112,7 @@ export function createSavedDashboardClass(
             // for BWC reasons we can't default dashboards that already exist without this setting to true.
             useMargins: !id,
             hidePanelTitles: false,
+            useSharedCrosshair: false,
           }),
           variablesJSON: undefined,
           version: 1,

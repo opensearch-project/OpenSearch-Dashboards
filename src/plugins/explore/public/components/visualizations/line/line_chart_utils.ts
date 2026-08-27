@@ -4,7 +4,10 @@
  */
 
 import { BarSeriesOption, LineSeriesOption } from 'echarts';
-import { LineChartStyle, LineMode } from './line_vis_config';
+import { LineChartStyle } from './line_vis_config';
+import { getLineInterpolation, getLineDashType } from '../style_panel/share/line_shared_options';
+import { getPointSymbol } from '../style_panel/share/point_size_options';
+import { buildValueLabel } from '../style_panel/share/value_label_options';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getSeriesDisplayName } from '../utils/series';
@@ -16,27 +19,27 @@ import {
   LegendItem,
 } from '../utils/legend';
 
-const getLineInterpolation = (lineMode: LineMode) => {
-  switch (lineMode) {
-    case 'straight':
-      return {};
-    case 'smooth':
-      return {
-        smooth: true,
-      };
-    case 'stepped':
-      return {
-        step: true,
-      };
-  }
-};
-
-const generateLineStyles = (styles: LineChartStyle) => {
+const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
   const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
+  // Point size and value labels are only offered in dots mode
+  // other modes keep drawing their symbols at the size ECharts picks and stay unlabelled
   return {
-    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
+    ...getPointSymbol(styles.pointSize, styles.showValues),
+    ...(styles.lineStyle === 'line'
+      ? styles.showValues
+        ? { showSymbol: true, symbolSize: 0 }
+        : { showSymbol: false }
+      : {}),
+    ...buildValueLabel({
+      showValues: styles.showValues,
+      valueField,
+      decimals: styles.decimals,
+      unitId: styles.unitId,
+      unitSuffix: styles.unitSuffix,
+    }),
     lineStyle: {
       width: lineWidth,
+      type: getLineDashType(styles.lineDashStyle),
     },
     ...getLineInterpolation(styles.lineMode),
   };
@@ -86,7 +89,7 @@ export const createLineSeries =
       }
     }
 
-    const series = seriesFields?.map((item: string) => {
+    const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
       const color = getLegendColor(name, palette, sortedNames);
       legendItems.push(createSeriesLegendItem(name, color));
@@ -94,7 +97,6 @@ export const createLineSeries =
       return {
         name,
         type: 'line',
-        connectNulls: true,
         encode: {
           x: categoryField,
           y: item,
@@ -102,8 +104,8 @@ export const createLineSeries =
         emphasis: {
           focus: 'self',
         },
-        ...generateLineStyles(styles),
-        ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+        ...generateLineStyles(styles, item),
+        ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
         itemStyle: {
           color,
         },
@@ -161,7 +163,7 @@ export const createLineBarSeries =
           itemStyle: {
             color,
           },
-          ...generateLineStyles(styles),
+          ...generateLineStyles(styles, field),
           ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
           yAxisIndex: 0,
           encode: {
@@ -188,6 +190,16 @@ export const createLineBarSeries =
             x: categoryField,
             y: field,
           },
+          ...buildValueLabel({
+            showValues: styles.showValues,
+            valueField: field,
+            decimals: styles.decimals,
+            unitId: styles.unitId,
+            unitSuffix: styles.unitSuffix,
+            // force the value label to be positioned inside the bar
+            isStack: true,
+            chartType: 'bar',
+          }),
           emphasis: {
             focus: 'self',
           },

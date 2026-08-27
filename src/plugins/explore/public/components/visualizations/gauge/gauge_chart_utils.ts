@@ -59,7 +59,13 @@ export const createGaugeSeries =
 
       const selectedUnit = getUnitById(styles?.unitId);
 
-      const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
+      const displayValue = showDisplayValue(
+        isValidNumber,
+        selectedUnit,
+        calculatedValue,
+        styles?.decimals,
+        styles?.unitSuffix
+      );
 
       const { minBase, maxBase } = getMaxAndMinBase(
         minNumber,

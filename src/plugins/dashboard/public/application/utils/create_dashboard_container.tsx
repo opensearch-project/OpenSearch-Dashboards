@@ -369,6 +369,7 @@ const getDashboardInputFromAppState = (
     id: savedDashboardId || '',
     filters: data.query.filterManager.getFilters(),
     hidePanelTitles: appStateData.options.hidePanelTitles,
+    useSharedCrosshair: appStateData.options.useSharedCrosshair ?? false,
     query: data.query.queryString.getQuery(),
     timeRange: data.query.timefilter.timefilter.getTime(),
     refreshConfig: data.query.timefilter.timefilter.getRefreshInterval(),

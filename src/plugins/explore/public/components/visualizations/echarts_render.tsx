@@ -14,13 +14,138 @@ import { LegendTarget } from './utils/legend';
 
 interface Props {
   spec: echarts.EChartsOption;
+  group?: string;
   onSelectTimeRange?: (range: TimeRange) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;
   highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
 }
 
+interface SharedAxisInfo {
+  axisDim?: string;
+  axisIndex?: number;
+  value?: unknown;
+}
+
+interface SharedAxisPointerEvent {
+  axesInfo?: SharedAxisInfo[];
+}
+
+const sharedCrosshairGroups = new Map<string, Set<echarts.ECharts>>();
+let activePointerChart: echarts.ECharts | undefined;
+
+/**
+ * Converts the shared axis value into coordinates local to the target chart.
+ * The orthogonal coordinate is placed inside the target grid so ECharts can
+ * resolve its own nearest data point, while values outside the grid are ignored.
+ */
+const getTargetAxisPoint = (
+  instance: echarts.ECharts,
+  axisInfo: SharedAxisInfo
+): { x: number; y: number } | undefined => {
+  const { axisDim, value } = axisInfo;
+  if ((axisDim !== 'x' && axisDim !== 'y') || value == null) {
+    return;
+  }
+
+  const axisIndex = axisInfo.axisIndex ?? 0;
+  // Project the value through the target axis because each panel has its own
+  // scale, dimensions, and grid position.
+  const pixel = instance.convertToPixel(
+    { [`${axisDim}AxisIndex`]: axisIndex },
+    value as string | number
+  );
+  if (typeof pixel !== 'number' || !Number.isFinite(pixel)) {
+    return;
+  }
+
+  const axisModel = (instance as any).getModel()?.getComponent(`${axisDim}Axis`, axisIndex);
+  const gridRect = axisModel?.axis?.grid?.getRect?.();
+  const gridStart = gridRect?.[axisDim];
+  const gridSize = gridRect?.[axisDim === 'x' ? 'width' : 'height'];
+
+  // Do not render a shared pointer when the value is outside the target's
+  // visible axis range.
+  if (
+    typeof gridStart === 'number' &&
+    typeof gridSize === 'number' &&
+    (pixel < gridStart || pixel > gridStart + gridSize)
+  ) {
+    return;
+  }
+
+  const gridCenterX = gridRect ? gridRect.x + gridRect.width / 2 : instance.getWidth() / 2;
+  const gridCenterY = gridRect ? gridRect.y + gridRect.height / 2 : instance.getHeight() / 2;
+
+  // ECharts requires a two-dimensional point to resolve the tooltip. Keep the
+  // synchronized coordinate on the shared axis and center the other coordinate.
+  return {
+    x: axisDim === 'x' ? pixel : gridCenterX,
+    y: axisDim === 'y' ? pixel : gridCenterY,
+  };
+};
+
+/**
+ * Replays the active chart's axis value across the group using each target's
+ * coordinate system. Only the chart under the pointer may publish, preventing
+ * target update events from being relayed back through the group.
+ */
+const syncAxisPointerByValue = (
+  group: string,
+  source: echarts.ECharts,
+  event: SharedAxisPointerEvent
+) => {
+  // A dispatched target update emits the same ECharts event. Only the chart
+  // currently under the mouse may relay it, which prevents synchronization loops.
+  if (activePointerChart !== source) {
+    return;
+  }
+
+  // Synchronize by the semantic axis value instead of a source data index,
+  // which may refer to a different or missing row in another panel.
+  const axisInfo = event.axesInfo?.find(
+    ({ axisDim, value }) => (axisDim === 'x' || axisDim === 'y') && value != null
+  );
+  if (!axisInfo) {
+    hideSharedCrosshair(group, source);
+    return;
+  }
+
+  sharedCrosshairGroups.get(group)?.forEach((target) => {
+    if (target === source || target.isDisposed()) {
+      return;
+    }
+
+    // Recompute the pointer position in the target chart before dispatching so
+    // its native axis pointer and tooltip resolve against the target data.
+    const point = getTargetAxisPoint(target, axisInfo);
+    if (!point) {
+      // Clear any previous synchronized state when the shared value cannot be
+      // represented in this target's visible axis range.
+      target.dispatchAction({ type: 'hideTip' });
+      target.dispatchAction({ type: 'updateAxisPointer', currTrigger: 'leave' });
+      return;
+    }
+
+    target.dispatchAction({
+      type: 'updateAxisPointer',
+      axesInfo: event.axesInfo,
+      ...point,
+    });
+  });
+};
+
+const hideSharedCrosshair = (group: string, source: echarts.ECharts) => {
+  sharedCrosshairGroups.get(group)?.forEach((target) => {
+    if (target === source || target.isDisposed()) {
+      return;
+    }
+    target.dispatchAction({ type: 'hideTip' });
+    target.dispatchAction({ type: 'updateAxisPointer', currTrigger: 'leave' });
+  });
+};
+
 export const EchartsRender = React.memo(
-  ({ spec, onSelectTimeRange, legendSelected$, highlightedLegendTarget$ }: Props) => {
+  ({ spec, group, onSelectTimeRange, legendSelected$, highlightedLegendTarget$ }: Props) => {
     const [instance, setInstance] = useState<echarts.ECharts | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const instanceRef = useRef<echarts.ECharts | null>(null);
@@ -55,6 +180,52 @@ export const EchartsRender = React.memo(
         }
       };
     }, [containerResizeObserver]);
+
+    useEffect(() => {
+      if (!instance) return;
+
+      if (group) {
+        const instances = sharedCrosshairGroups.get(group) ?? new Set<echarts.ECharts>();
+        instances.add(instance);
+        sharedCrosshairGroups.set(group, instances);
+
+        const onAxisPointerUpdate = (...args: unknown[]) => {
+          const [event] = args;
+          if (typeof event !== 'object' || event === null) {
+            return;
+          }
+          syncAxisPointerByValue(group, instance, event as SharedAxisPointerEvent);
+        };
+        const onMouseMove = () => {
+          activePointerChart = instance;
+        };
+        const onGlobalOut = () => {
+          if (activePointerChart === instance) {
+            activePointerChart = undefined;
+            hideSharedCrosshair(group, instance);
+          }
+        };
+        const zrender = instance.getZr();
+        zrender.on('mousemove', onMouseMove);
+        zrender.on('globalout', onGlobalOut);
+        instance.on('updateAxisPointer', onAxisPointerUpdate);
+
+        return () => {
+          if (!instance.isDisposed()) {
+            instance.off('updateAxisPointer', onAxisPointerUpdate);
+            zrender.off('mousemove', onMouseMove);
+            zrender.off('globalout', onGlobalOut);
+            instance.dispatchAction({ type: 'hideTip' });
+            instance.dispatchAction({ type: 'updateAxisPointer', currTrigger: 'leave' });
+          }
+          onGlobalOut();
+          instances.delete(instance);
+          if (instances.size === 0) {
+            sharedCrosshairGroups.delete(group);
+          }
+        };
+      }
+    }, [group, instance]);
 
     useEffect(() => {
       function onBrushEnd(params: any) {
