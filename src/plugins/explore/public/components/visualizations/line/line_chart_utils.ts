@@ -37,7 +37,6 @@ const generateLineStyles = (styles: LineChartStyle, valueField?: string) => {
       unitId: styles.unitId,
       unitSuffix: styles.unitSuffix,
     }),
-    connectNulls: true,
     lineStyle: {
       width: lineWidth,
       type: getLineDashType(styles.lineDashStyle),

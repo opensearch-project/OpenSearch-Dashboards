@@ -8,6 +8,7 @@ import {
   DEFAULT_RESOLUTION,
   formatPromDuration,
   interpolatePromQLMacros,
+  MAX_RESOLUTION,
   MIN_STEP_INTERVAL,
   parseStepIntervalSeconds,
   rateIntervalSeconds,
@@ -143,6 +144,25 @@ describe('resolveStep', () => {
     expect(resolveStep({ rangeMs: ONE_HOUR, resolution: 0 }).stepSec).toBe(
       calculateStep(ONE_HOUR, DEFAULT_RESOLUTION)
     );
+  });
+
+  it('floors the resolved step at one second when a fine min step drives it sub-second', () => {
+    expect(
+      resolveStep({ rangeMs: ONE_HOUR, resolution: MAX_RESOLUTION, minStep: '1ms' }).stepSec
+    ).toBe(1);
+  });
+
+  it('floors an explicit sub-second step override', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, stepOverrideSec: 0.001 }).stepSec).toBe(1);
+  });
+
+  it('ignores a non-positive step override', () => {
+    expect(resolveStep({ rangeMs: ONE_HOUR, stepOverrideSec: -5 }).stepSec).toBe(15);
+  });
+
+  it('clamps a resolution above the Prometheus point cap', () => {
+    const clamped = resolveStep({ rangeMs: ONE_HOUR, resolution: 1_000_000 }).stepSec;
+    expect(clamped).toBe(resolveStep({ rangeMs: ONE_HOUR, resolution: MAX_RESOLUTION }).stepSec);
   });
 });
 

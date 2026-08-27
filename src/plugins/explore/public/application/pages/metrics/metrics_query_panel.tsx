@@ -277,6 +277,11 @@ export const MetricsQueryPanel: React.FC = () => {
     return () => cancelAnimationFrame(rafId);
   }, [isPromptMode, editorRef]);
 
+  // Server steps are keyed by the labels of active (non-empty) rows only, so an
+  // empty row must not borrow a neighbor's label when reading its step back.
+  let activeRowSeen = 0;
+  const readoutLabels = rows.map((row) => (row.query.trim() ? getQueryLabel(activeRowSeen++) : ''));
+
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
@@ -319,7 +324,7 @@ export const MetricsQueryPanel: React.FC = () => {
                       canRemove={rows.length > 1}
                       isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
-                      stepReadout={stepReadoutFor(getQueryLabel(idx), row.minStep)}
+                      stepReadout={stepReadoutFor(readoutLabels[idx], row.minStep)}
                     />
                   )}
                 </EuiDraggable>

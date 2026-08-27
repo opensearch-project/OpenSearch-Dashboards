@@ -5,6 +5,9 @@
 
 export const DEFAULT_RESOLUTION = 1440;
 export const MIN_STEP_INTERVAL = 15;
+// Prometheus rejects range queries that resolve to more than ~11k points per series.
+export const MAX_RESOLUTION = 11000;
+export const MIN_RESOLVED_STEP = 1;
 
 function roundInterval(intervalMs: number): number {
   if (intervalMs <= 1) return 1;
@@ -78,13 +81,13 @@ export function resolveStep({
 }: StepResolutionInput): ResolvedStep {
   const parsed = minStep ? parseStepIntervalSeconds(minStep) : undefined;
   const minStepSec = parsed && parsed > 0 ? parsed : undefined;
-  const stepSec =
-    stepOverrideSec ??
-    calculateStep(
-      rangeMs,
-      resolution && resolution > 0 ? resolution : DEFAULT_RESOLUTION,
-      minStepSec ?? MIN_STEP_INTERVAL
-    );
+  const clampedResolution =
+    resolution && resolution > 0 ? Math.min(resolution, MAX_RESOLUTION) : DEFAULT_RESOLUTION;
+  const rawStepSec =
+    stepOverrideSec && stepOverrideSec > 0
+      ? stepOverrideSec
+      : calculateStep(rangeMs, clampedResolution, minStepSec ?? MIN_STEP_INTERVAL);
+  const stepSec = Math.max(rawStepSec, MIN_RESOLVED_STEP);
   const scrapeSec = minStepSec ?? ASSUMED_SCRAPE_INTERVAL;
   return { stepSec, scrapeSec, rateIntervalSec: rateIntervalSeconds(stepSec, scrapeSec) };
 }
