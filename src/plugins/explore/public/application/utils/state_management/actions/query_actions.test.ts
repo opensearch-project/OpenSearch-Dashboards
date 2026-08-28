@@ -63,6 +63,7 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
@@ -2321,6 +2322,44 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(3);
       expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('shouldSkipQueryExecution', () => {
+    const queryFor = (language: string, queryText: unknown): Query =>
+      ({
+        language,
+        query: queryText,
+        dataset: { id: 'd', title: 't', type: 'INDEX_PATTERN' },
+      }) as Query;
+
+    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY (''), and a blank
+    // SQL query used to be sent verbatim: the data table asked the cluster to run
+    // '', and the histogram wrapped it into `FROM ()`, which does not parse.
+    it.each([
+      ['', 'empty'],
+      ['   ', 'whitespace only'],
+    ])('skips a %s SQL query (%s)', (queryText) => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', queryText))).toBe(true);
+    });
+
+    it('skips a SQL query whose text is not a string', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', undefined))).toBe(true);
+    });
+
+    it('runs a non-empty SQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', 'SELECT * FROM idx'))).toBe(false);
+    });
+
+    it('still skips a blank PromQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', ''))).toBe(true);
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', 'up'))).toBe(false);
+    });
+
+    // PPL must not be skipped: defaultPreparePplQuery turns a blank editor into
+    // `source = <table>`, so an empty PPL query is still runnable.
+    it('runs a blank PPL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PPL', ''))).toBe(false);
     });
   });
 });

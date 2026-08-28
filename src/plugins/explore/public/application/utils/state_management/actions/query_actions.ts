@@ -99,7 +99,16 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const shouldSkipQueryExecution = (query: Query): boolean => {
   switch (query.language) {
+    // PPL is deliberately absent: `defaultPreparePplQuery` fills a blank editor
+    // in with `source = <table>`, so an empty PPL query is still a runnable one.
+    // SQL and PromQL are sent to the cluster verbatim, and a blank one is not a
+    // query at all. Selecting a dataset resets the editor to `EMPTY_QUERY.QUERY`
+    // (the empty string), so without this a freshly picked dataset fired two
+    // failing requests: the data table's empty query, and — when the dataset has
+    // a time field — the histogram, which wraps the base query as a derived
+    // table and so asked the cluster to parse `FROM ()`.
     case 'PROMQL':
+    case 'SQL':
       const queryValue = query.query;
       return typeof queryValue !== 'string' || !queryValue.trim();
     default:
