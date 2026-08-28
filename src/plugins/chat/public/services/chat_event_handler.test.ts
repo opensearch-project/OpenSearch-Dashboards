@@ -1408,7 +1408,11 @@ describe('ChatEventHandler', () => {
     const expectToolExecuted = (data: { toolName: string; status: string; source: string }) =>
       expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
         name: 'chat_tool_executed',
-        data,
+        data: {
+          chatToolCallToolName: data.toolName,
+          chatToolCallStatus: data.status,
+          chatToolCallSource: data.source,
+        },
       });
 
     it('should record success when a registered action resolves', async () => {
@@ -1485,6 +1489,24 @@ describe('ChatEventHandler', () => {
       } as ToolCallResultEvent);
 
       expectToolExecuted({ toolName: 'agentTool', status: 'success', source: 'agent' });
+    });
+
+    it('should record tool execution duration as a metric derived from TOOL_CALL_START', async () => {
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue('tool output');
+      mockToolResultDispatch('t-dur');
+
+      await runToolCall('t-dur', 'timedTool', '{"key": "value"}');
+
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_tool_executed_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          chatToolCallToolName: 'timedTool',
+          chatToolCallStatus: 'success',
+          chatToolCallSource: 'local',
+        },
+      });
     });
 
     it('should never call executeAction for agent tools (no await before markToolPending)', async () => {
