@@ -79,9 +79,10 @@ export const aggregate =
     timeUnit?: TimeUnit;
     // TODO: align AggregationType and CalculationMethod
     calculateType?: CalculationMethod;
+    preserveNull?: boolean;
   }) =>
   (data: Array<Record<string, any>>) => {
-    const { groupBy, aggregationType, timeUnit, calculateType } = options;
+    const { groupBy, aggregationType, timeUnit, calculateType, preserveNull = false } = options;
     const fields = Array.isArray(options.field) ? options.field : [options.field];
 
     // Determine if this is time-based grouping
@@ -130,6 +131,11 @@ export const aggregate =
           };
         }
         for (const f of fields) {
+          // let an all-null group collapse to null, not 0
+          if (preserveNull && row[f] === null) {
+            acc[groupKey].valuesByField[f].push(row[f]);
+            continue;
+          }
           const value = Number(row[f]);
           if (!isNaN(value)) {
             acc[groupKey].valuesByField[f].push(value);
@@ -158,7 +164,11 @@ export const aggregate =
             const aggregatedValue = aggregateValues(
               aggregationType,
               valuesByField[f],
-              calculateType
+              calculateType,
+              {
+                preserveNull:
+                  preserveNull && valuesByField[f].length === 1 && valuesByField[f][0] === null,
+              }
             );
             const isValidNumber =
               aggregatedValue !== undefined &&
