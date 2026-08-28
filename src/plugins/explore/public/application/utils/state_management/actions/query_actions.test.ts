@@ -1208,6 +1208,61 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
     });
 
+    it('runs nothing at all for a blank SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: '   ', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue(''),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // No inner thunk is dispatched, so the cluster never sees the empty query
+      // itself, nor the `FROM ()` the histogram would have wrapped it in.
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks).toHaveLength(0);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/executeQueries/fulfilled' })
+      );
+    });
+
+    it('still runs a non-empty SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'SELECT * FROM logs', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue('SELECT * FROM logs'),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should skip histogram query when language is PROMQL', async () => {
       mockDispatch.mockClear();
 
