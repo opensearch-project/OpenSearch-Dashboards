@@ -72,6 +72,30 @@
       // Icons at the left edge, picker + Refresh at the right.
       justify-content: space-between;
     }
+
+    // Save is the only labeled action (controlType: 'button', so it shows "Save search" at wide
+    // widths). Once the header wraps, collapse it to an icon-only button matching the other
+    // actions: hide the label, drop EuiButton's 112px default min-width, and shrink the content
+    // padding from 12px to 8px so it renders as a 32px square like the neighbouring EuiButtonIcons.
+    // aria-label + tooltip keep the name in the collapsed state. Scoped to this opt-in modifier +
+    // breakpoint, so legacy TopNavMenu callers are untouched.
+    .osdTopNavGroup--button {
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiButton {
+        min-width: 0;
+      }
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiButton__content {
+        padding-left: $euiSizeS;
+        padding-right: $euiSizeS;
+      }
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiButton__text {
+        display: none;
+      }
+    }
   }
 }
 

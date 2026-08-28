@@ -12,7 +12,7 @@
 import { i18n } from '@osd/i18n';
 
 import { DataView as Dataset } from 'src/plugins/data/common';
-import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
+import { TopNavMenuButtonUIData, TopNavMenuIconRun } from '../types';
 import { AgentTracesServices } from '../../../../types';
 import { ExecutionContextSearch } from '../../../../../../expressions';
 import { SavedAgentTraces } from '../../../../types/saved_agent_traces_types';
@@ -33,12 +33,16 @@ const saveSearchLabel = i18n.translate('agentTraces.topNav.saveAriaLabel', {
   defaultMessage: 'Save search',
 });
 
-export const saveTopNavData: TopNavMenuIconUIData = {
+// Save is the primary action, so it renders as a labeled button showing "Save search" at wide
+// widths; the header's narrow breakpoint (_index.scss) hides the label so it collapses to icon-only
+// like the other actions. tooltip stays for the collapsed state; aria-label is the name in both.
+export const saveTopNavData: TopNavMenuButtonUIData = {
+  label: saveSearchLabel,
   tooltip: saveSearchLabel,
   ariaLabel: saveSearchLabel,
   testId: 'discoverSaveButton',
   iconType: 'save',
-  controlType: 'icon',
+  controlType: 'button',
 };
 
 export interface SaveStateProps {

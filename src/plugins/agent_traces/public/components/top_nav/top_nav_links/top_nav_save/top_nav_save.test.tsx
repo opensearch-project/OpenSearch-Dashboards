@@ -84,7 +84,9 @@ describe('top_nav_save', () => {
       expect(saveTopNavData.ariaLabel).toBe(saveTopNavData.tooltip);
       expect(saveTopNavData.testId).toBe('discoverSaveButton');
       expect(saveTopNavData.iconType).toBe('save');
-      expect(saveTopNavData.controlType).toBe('icon');
+      // Labeled button (shows "Save search" at wide widths); the label collapses via CSS at narrow.
+      expect(saveTopNavData.controlType).toBe('button');
+      expect(saveTopNavData.label).toBe('Save search');
     });
   });
 
