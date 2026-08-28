@@ -25,8 +25,8 @@ import {
   runPPLLintFixTestTool,
 } from './evaluate_ppl_lint_fix_candidate';
 import type { PPLLintFixTestToolResult } from './evaluate_ppl_lint_fix_candidate';
-import { PPLLintFixCard, PPL_LINT_FIX_UI_BINDING } from './ppl_lint_fix_card';
-import type { BoundPPLLintFixToolArgs, PPLLintFixToolArgs } from './ppl_lint_fix_card';
+import { PPLLintFixCard, resolveApprovedRequestId } from './ppl_lint_fix_card';
+import type { PPLLintFixToolArgs } from './ppl_lint_fix_card';
 
 export type { PPLLintFixToolArgs } from './ppl_lint_fix_card';
 
@@ -98,7 +98,7 @@ export function createPPLLintFixApplyAction({
       // Confirmation clones the model args before invoking this handler. Bind that
       // clone back to the request captured by the card's Approve click, rather
       // than trusting a model-provided request id or object identity.
-      const capturedRequestId = (args as BoundPPLLintFixToolArgs)[PPL_LINT_FIX_UI_BINDING];
+      const capturedRequestId = resolveApprovedRequestId(args);
       if (!capturedRequestId) {
         return failure(
           'missing-request',

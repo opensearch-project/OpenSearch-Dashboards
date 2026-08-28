@@ -7,11 +7,13 @@ import {
   armPPLLintFixRequest,
   cleanupPPLLintFixRequest,
   clearPPLLintFixSession,
+  createPPLLintFixApprovalNonce,
   getPPLLintFixOutcome,
   getPPLLintFixSession,
   isPPLLintFixFlowActive,
   markPPLLintFixApplied,
   markPPLLintFixDismissed,
+  resolveRequestIdByApprovalNonce,
   storePPLLintFixSession,
   subscribePPLLintFixOutcome,
 } from './ppl_lint_fix_session';
@@ -72,6 +74,36 @@ describe('PPL lint fix session', () => {
       })
     ).toThrow('context store unavailable');
     expect(getPPLLintFixSession()).toBeUndefined();
+  });
+
+  it('resolves an issued approval nonce back to its request id', () => {
+    const nonce = createPPLLintFixApprovalNonce('request-a');
+
+    expect(typeof nonce).toBe('string');
+    expect(nonce).not.toBe('request-a');
+    expect(resolveRequestIdByApprovalNonce(nonce)).toBe('request-a');
+  });
+
+  it('reuses the same nonce for a request rather than minting a second', () => {
+    const first = createPPLLintFixApprovalNonce('request-a');
+    const second = createPPLLintFixApprovalNonce('request-a');
+
+    expect(second).toBe(first);
+  });
+
+  it('does not resolve a nonce that was never issued', () => {
+    createPPLLintFixApprovalNonce('request-a');
+
+    expect(resolveRequestIdByApprovalNonce('made-up-nonce')).toBeUndefined();
+  });
+
+  it('forgets the nonce once its request is cleaned up', () => {
+    const nonce = createPPLLintFixApprovalNonce('request-a');
+    storePPLLintFixSession(createSession('request-a'));
+
+    cleanupPPLLintFixRequest('request-a', PREFIX, jest.fn());
+
+    expect(resolveRequestIdByApprovalNonce(nonce)).toBeUndefined();
   });
 
   it('keeps outcomes scoped to their originating request', () => {

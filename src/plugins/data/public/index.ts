@@ -722,12 +722,20 @@ export type {
   PPLLintFixCandidateEvaluation,
   PPLLintFixTestToolResult,
 } from './chat_tools/evaluate_ppl_lint_fix_candidate';
-export { PPLLintFixCard, PPL_LINT_FIX_UI_BINDING } from './chat_tools/ppl_lint_fix_card';
+export {
+  PPLLintFixCard,
+  PPL_LINT_FIX_UI_BINDING,
+  resolveApprovedRequestId,
+} from './chat_tools/ppl_lint_fix_card';
 export type {
   BoundPPLLintFixToolArgs,
   PPLLintFixCardProps,
   PPLLintFixToolArgs,
 } from './chat_tools/ppl_lint_fix_card';
+export type {
+  PPLLintFixApprovalArgs,
+  PPLLintFixRequestCategory,
+} from '../common/chat_tools/ppl_lint_fix_protocol';
 // Host-parameterized launch lifecycle: supersession of a prior request, a TTL
 // that expires an abandoned request, and serialized chat launches. Shared by
 // both editor hosts so Explore reuses it rather than reimplementing addContext

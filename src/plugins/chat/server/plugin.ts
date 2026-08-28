@@ -60,7 +60,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       getHttpAuth
     );
 
-    return {};
+    return {
+      mlCommonsAgentId: config.mlCommonsAgentId,
+      observabilityAgentId: config.observabilityAgentId,
+    };
   }
 
   public start(core: CoreStart) {

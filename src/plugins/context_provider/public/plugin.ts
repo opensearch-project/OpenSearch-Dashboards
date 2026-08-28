@@ -52,6 +52,9 @@ export class ContextProviderPlugin implements Plugin<
         actions: {
           registerAssistantAction: () => undefined,
           unregisterAssistantAction: () => undefined,
+          getToolDefinitions: () => [],
+          hasAction: () => false,
+          executeAction: async () => undefined,
           suppressDefaultPageContext: () => undefined,
           unsuppressDefaultPageContext: () => undefined,
         },
@@ -70,6 +73,10 @@ export class ContextProviderPlugin implements Plugin<
       actions: {
         registerAssistantAction: AssistantActionService.getInstance().registerAction,
         unregisterAssistantAction: AssistantActionService.getInstance().unregisterAction,
+        getToolDefinitions: () => AssistantActionService.getInstance().getToolDefinitions(),
+        hasAction: (name) => AssistantActionService.getInstance().hasAction(name),
+        executeAction: (name, args) =>
+          AssistantActionService.getInstance().executeAction(name, args),
         suppressDefaultPageContext: () => this.contextCaptureService!.suppressDefaultPageContext(),
         unsuppressDefaultPageContext: () =>
           this.contextCaptureService!.unsuppressDefaultPageContext(),

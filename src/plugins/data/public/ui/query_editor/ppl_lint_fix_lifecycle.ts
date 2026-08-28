@@ -5,7 +5,14 @@
 
 import { withTimeout } from '@osd/std';
 import type { AssistantContextStore } from '../../../../context_provider/public';
-import { cleanupPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
+import {
+  cleanupPPLLintFixRequest,
+  createPPLLintFixApprovalNonce,
+} from '../../chat_tools/ppl_lint_fix_session';
+import {
+  PPL_LINT_FIX_REQUEST_CATEGORY,
+  PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX,
+} from '../../../common/chat_tools/ppl_lint_fix_protocol';
 import type { PPLLintFixHost } from '../../chat_tools/ppl_lint_fix_host';
 import type {
   AskPPLLintFixRequest,
@@ -41,6 +48,14 @@ export function addPPLLintFixAssistantContext(
     // clearConversation removes non-page contexts before sending the message.
     // Explicit request cleanup still removes this entry on every exit path.
     categories: ['page', 'chat', 'ppl-lint-fix'],
+  });
+
+  contextStore.addContext({
+    id: host.contextIdPrefix + request.requestId + PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX,
+    description: 'PPL lint quick-fix approval nonce',
+    value: createPPLLintFixApprovalNonce(request.requestId),
+    label: 'PPL lint fix approval nonce',
+    categories: ['page', PPL_LINT_FIX_REQUEST_CATEGORY],
   });
 }
 

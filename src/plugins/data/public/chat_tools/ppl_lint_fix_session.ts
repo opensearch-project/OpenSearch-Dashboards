@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AskPPLLintFixRequest, PPLLintContext } from '@osd/monaco';
 import type { Query } from '../../common';
 import type { PPLLintFixHost } from './ppl_lint_fix_host';
+import { PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX } from '../../common/chat_tools/ppl_lint_fix_protocol';
 
 export type { AskPPLLintFixRequest } from '@osd/monaco';
 
@@ -33,6 +35,54 @@ let activeSession: PPLLintFixSession | undefined;
 // Requests in an active AI lint-fix flow, armed in onAskAiFix before the chat send
 // (chat snapshots tools at send time); disarmed by cleanupPPLLintFixRequest.
 const armedRequests = new Set<string>();
+
+const MAX_RETAINED_APPROVAL_NONCES = 100;
+const nonceByRequestId = new Map<string, string>();
+const requestIdByNonce = new Map<string, string>();
+
+/**
+ * Mint (or reuse) the secret nonce that authorizes a cross-window apply of this
+ * request. Callers publish it only under the request category that agent payloads
+ * strip; it never reaches the model, so a caller that holds it (not the model)
+ * stands in for the user's Approve click.
+ */
+export function createPPLLintFixApprovalNonce(requestId: string): string {
+  const existing = nonceByRequestId.get(requestId);
+  if (existing) {
+    return existing;
+  }
+  const nonce = uuidv4();
+  nonceByRequestId.set(requestId, nonce);
+  requestIdByNonce.set(nonce, requestId);
+  if (requestIdByNonce.size > MAX_RETAINED_APPROVAL_NONCES) {
+    const oldestNonce = requestIdByNonce.keys().next().value;
+    if (oldestNonce !== undefined) {
+      const oldestRequestId = requestIdByNonce.get(oldestNonce);
+      requestIdByNonce.delete(oldestNonce);
+      if (oldestRequestId !== undefined && nonceByRequestId.get(oldestRequestId) === oldestNonce) {
+        nonceByRequestId.delete(oldestRequestId);
+      }
+    }
+  }
+  return nonce;
+}
+
+/**
+ * Resolve an approval nonce back to the request id it was minted for. Liveness of
+ * that request is enforced downstream by getPPLLintFixSession; this only refuses
+ * a nonce that was never issued.
+ */
+export function resolveRequestIdByApprovalNonce(nonce: string): string | undefined {
+  return requestIdByNonce.get(nonce);
+}
+
+function deletePPLLintFixApprovalNonce(requestId: string): void {
+  const nonce = nonceByRequestId.get(requestId);
+  if (nonce !== undefined) {
+    requestIdByNonce.delete(nonce);
+  }
+  nonceByRequestId.delete(requestId);
+}
 
 /**
  * Terminal outcome of a request, driven directly by the card's Apply/Dismiss click
@@ -151,7 +201,9 @@ export function cleanupPPLLintFixRequest(
 ): void {
   try {
     removeContextById?.(contextIdPrefix + requestId);
+    removeContextById?.(contextIdPrefix + requestId + PPL_LINT_FIX_APPROVAL_NONCE_CONTEXT_SUFFIX);
   } finally {
+    deletePPLLintFixApprovalNonce(requestId);
     // Disarm on every exit path.
     if (armedRequests.delete(requestId)) {
       notifyOutcomeSubscribers();
