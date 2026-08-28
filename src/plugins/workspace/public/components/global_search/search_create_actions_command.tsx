@@ -5,13 +5,14 @@
 
 import { EuiHighlight } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { GlobalSearchResult, IBasePath } from '../../../../../core/public';
+import { ApplicationStart, GlobalSearchResult, IBasePath } from '../../../../../core/public';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 interface SearchCreateActionsOptions {
   query: string;
   currentWorkspaceId?: string;
   basePath: IBasePath;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
 const createActions = [
@@ -35,6 +36,7 @@ export const searchCreateActions = ({
   query,
   currentWorkspaceId,
   basePath,
+  navigateToUrl,
 }: SearchCreateActionsOptions): GlobalSearchResult[] => {
   if (!currentWorkspaceId) {
     return [];
@@ -52,7 +54,7 @@ export const searchCreateActions = ({
         label,
         content: <EuiHighlight search={query}>{label}</EuiHighlight>,
         href,
-        execute: () => window.location.assign(href),
+        execute: () => navigateToUrl(href),
       };
     });
 };

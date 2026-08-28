@@ -353,6 +353,34 @@ describe('<GlobalSearchCommandPalette />', () => {
     });
   });
 
+  it('renders linked results as anchors and uses programmatic navigation on click', async () => {
+    const execute = jest.fn();
+    const linkedResult = {
+      ...createResult('linked-result', execute),
+      href: '/app/linked-result',
+    };
+    const commands$ = new BehaviorSubject([createCommand('pages', [linkedResult])]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByRole, getByTestId } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+    fireEvent.change(getByTestId('global-search-command-palette-input'), {
+      target: { value: 'linked' },
+    });
+
+    const link = await waitFor(() => getByRole('option', { name: 'linked-result' }));
+    expect(link).toHaveAttribute('href', '/app/linked-result');
+
+    fireEvent.click(link);
+
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
   it('closes when the overlay is clicked', async () => {
     const commands$ = new BehaviorSubject([createCommand('pages')]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();

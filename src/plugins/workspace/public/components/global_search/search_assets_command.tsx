@@ -5,7 +5,12 @@
 
 import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 
-import { GlobalSearchResult, HttpStart, IBasePath } from '../../../../../core/public';
+import {
+  ApplicationStart,
+  GlobalSearchResult,
+  HttpStart,
+  IBasePath,
+} from '../../../../../core/public';
 import type { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { SUPPORTED_ASSET_TYPES } from './constants';
@@ -50,12 +55,14 @@ export const searchAssets = async ({
   currentWorkspaceId,
   abortSignal,
   visibleWorkspaceIds,
+  navigateToUrl,
 }: {
   http: HttpStart;
   query: string;
   currentWorkspaceId?: string;
   abortSignal?: AbortSignal;
   visibleWorkspaceIds: string[];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }): Promise<GlobalSearchResult[]> => {
   let findResponse;
 
@@ -105,7 +112,7 @@ export const searchAssets = async ({
           />
         ),
         href,
-        execute: () => window.location.assign(href),
+        execute: () => navigateToUrl(href),
       };
     })
     .filter((item): item is GlobalSearchResult => item !== null);

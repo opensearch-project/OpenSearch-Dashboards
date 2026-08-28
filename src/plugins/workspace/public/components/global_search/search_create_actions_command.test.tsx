@@ -11,6 +11,7 @@ const basePath = {
   remove: jest.fn((path: string) => path),
   prepend: jest.fn((path: string) => `/base${path}`),
 } as unknown as IBasePath;
+const navigateToUrl = jest.fn().mockResolvedValue(undefined);
 
 describe('searchCreateActions', () => {
   beforeEach(() => {
@@ -22,6 +23,7 @@ describe('searchCreateActions', () => {
       query: '',
       currentWorkspaceId,
       basePath,
+      navigateToUrl,
     });
 
     expect(results.map(({ id }) => id)).toEqual(['new-dashboard', 'new-visualization']);
@@ -36,6 +38,7 @@ describe('searchCreateActions', () => {
         query: 'DASH',
         currentWorkspaceId,
         basePath,
+        navigateToUrl,
       }).map(({ id }) => id)
     ).toEqual(['new-dashboard']);
 
@@ -44,6 +47,7 @@ describe('searchCreateActions', () => {
         query: 'visual',
         currentWorkspaceId,
         basePath,
+        navigateToUrl,
       }).map(({ id }) => id)
     ).toEqual(['new-visualization']);
   });
@@ -53,21 +57,21 @@ describe('searchCreateActions', () => {
       searchCreateActions({
         query: '',
         basePath,
+        navigateToUrl,
       })
     ).toEqual([]);
   });
 
   it('navigates to the workspace-aware action URL', () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
     const [result] = searchCreateActions({
       query: '',
       currentWorkspaceId,
       basePath,
+      navigateToUrl,
     });
 
     result.execute();
 
-    expect(assignSpy).toHaveBeenCalledWith(result.href);
-    assignSpy.mockRestore();
+    expect(navigateToUrl).toHaveBeenCalledWith(result.href);
   });
 });

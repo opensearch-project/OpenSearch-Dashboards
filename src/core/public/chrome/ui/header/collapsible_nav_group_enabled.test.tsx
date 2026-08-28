@@ -112,6 +112,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       },
       capabilities: { ...capabilitiesServiceMock.createStartContract().capabilities },
       globalSearchCommands$: new BehaviorSubject([]),
+      commandPaletteAvailable: true,
       ...props,
     };
   }

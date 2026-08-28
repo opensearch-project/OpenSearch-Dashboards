@@ -5,6 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiText } from '@elastic/eui';
 import {
+  ApplicationStart,
   ChromeRecentlyAccessedHistoryItem,
   GlobalSearchResult,
   IBasePath,
@@ -16,6 +17,7 @@ interface SearchRecentlyAccessedOptions {
   query: string;
   currentWorkspaceId?: string;
   basePath: IBasePath;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
 type RecentlyAccessedItemWithType = ChromeRecentlyAccessedHistoryItem & {
@@ -33,6 +35,7 @@ export const searchRecentlyAccessed = ({
   query,
   currentWorkspaceId,
   basePath,
+  navigateToUrl,
 }: SearchRecentlyAccessedOptions): GlobalSearchResult[] => {
   if (!currentWorkspaceId) {
     return [];
@@ -63,7 +66,7 @@ export const searchRecentlyAccessed = ({
           </EuiFlexGroup>
         ),
         href,
-        execute: () => window.location.assign(href),
+        execute: () => navigateToUrl(href),
       };
     });
 };

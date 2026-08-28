@@ -566,7 +566,7 @@ export class WorkspacePlugin implements Plugin<
       id: 'assetsSearch',
       type: 'SAVED_OBJECTS',
       run: async (query: string, options) => {
-        const [{ workspaces, http }] = await core.getStartServices();
+        const [{ application, workspaces, http }] = await core.getStartServices();
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
         const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
 
@@ -578,6 +578,7 @@ export class WorkspacePlugin implements Plugin<
             currentWorkspaceId,
             abortSignal: options?.abortSignal,
             visibleWorkspaceIds,
+            navigateToUrl: application.navigateToUrl,
           });
         });
       },
@@ -587,13 +588,14 @@ export class WorkspacePlugin implements Plugin<
       id: 'recentlyAccessedSearch',
       type: 'RECENTLY_ACCESSED',
       run: async (query: string) => {
-        const [{ chrome, workspaces, http }] = await core.getStartServices();
+        const [{ application, chrome, workspaces, http }] = await core.getStartServices();
 
         return searchRecentlyAccessed({
           items: chrome.recentlyAccessed.get(),
           query,
           currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
           basePath: http.basePath,
+          navigateToUrl: application.navigateToUrl,
         });
       },
     });
@@ -602,12 +604,13 @@ export class WorkspacePlugin implements Plugin<
       id: 'workspaceCreateActions',
       type: 'ACTIONS',
       run: async (query: string) => {
-        const [{ workspaces, http }] = await core.getStartServices();
+        const [{ application, workspaces, http }] = await core.getStartServices();
 
         return searchCreateActions({
           query,
           currentWorkspaceId: workspaces.currentWorkspaceId$.getValue(),
           basePath: http.basePath,
+          navigateToUrl: application.navigateToUrl,
         });
       },
     });

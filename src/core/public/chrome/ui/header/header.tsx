@@ -757,6 +757,7 @@ export function Header({
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
             globalSearchCommands$={observables.globalSearchCommands$}
+            commandPaletteAvailable={Boolean(keyboardShortcut)}
             enableIconSideNav={enableIconSideNav}
             navPopoverServices={observables.navPopoverServices}
             isLocked={isLocked}

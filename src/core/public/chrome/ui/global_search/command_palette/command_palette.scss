@@ -64,6 +64,11 @@
   padding: 8px;
 }
 
+.osdGlobalSearchCommandPalette__group {
+  display: flex;
+  flex-direction: column;
+}
+
 .osdGlobalSearchCommandPalette__group + .osdGlobalSearchCommandPalette__group {
   margin-top: 8px;
 }
@@ -78,7 +83,9 @@
 .osdGlobalSearchCommandPalette__result {
   padding: 8px 12px;
   border-radius: 4px;
+  color: inherit;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .osdGlobalSearchCommandPalette__result[aria-selected="true"] {

@@ -29,6 +29,7 @@ const basePath = {
   remove: jest.fn((path: string) => path),
   prepend: jest.fn((path: string) => `/base${path}`),
 } as unknown as IBasePath;
+const navigateToUrl = jest.fn().mockResolvedValue(undefined);
 
 describe('searchRecentlyAccessed', () => {
   beforeEach(() => {
@@ -53,6 +54,7 @@ describe('searchRecentlyAccessed', () => {
       query: '',
       currentWorkspaceId,
       basePath,
+      navigateToUrl,
     });
 
     expect(results.map(({ id }) => id)).toEqual(['first', 'second']);
@@ -71,6 +73,7 @@ describe('searchRecentlyAccessed', () => {
         query: 'TIME',
         currentWorkspaceId,
         basePath,
+        navigateToUrl,
       }).map(({ id }) => id)
     ).toEqual(['time-series']);
 
@@ -80,6 +83,7 @@ describe('searchRecentlyAccessed', () => {
         query: 'dashboard',
         currentWorkspaceId,
         basePath,
+        navigateToUrl,
       })
     ).toEqual([]);
   });
@@ -90,6 +94,7 @@ describe('searchRecentlyAccessed', () => {
       query: 'sales',
       currentWorkspaceId,
       basePath,
+      navigateToUrl,
     });
 
     const { container, getByText } = render(<>{result.content}</>);
@@ -104,22 +109,22 @@ describe('searchRecentlyAccessed', () => {
         items: [createItem('item', 'Item')],
         query: '',
         basePath,
+        navigateToUrl,
       })
     ).toEqual([]);
   });
 
   it('navigates to the workspace-aware result URL', () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
     const [result] = searchRecentlyAccessed({
       items: [createItem('item', 'Item')],
       query: '',
       currentWorkspaceId,
       basePath,
+      navigateToUrl,
     });
 
     result.execute();
 
-    expect(assignSpy).toHaveBeenCalledWith(result.href);
-    assignSpy.mockRestore();
+    expect(navigateToUrl).toHaveBeenCalledWith(result.href);
   });
 });

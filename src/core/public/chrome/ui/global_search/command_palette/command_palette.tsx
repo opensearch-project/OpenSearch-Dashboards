@@ -11,7 +11,15 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  KeyboardEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KeyboardShortcutStart } from '../../../../keyboard_shortcut';
@@ -274,22 +282,40 @@ export const GlobalSearchCommandPalette = ({
     currentResultIndex += 1;
     const resultIndex = currentResultIndex;
     const isActive = resultIndex === activeResultIndex;
+    const resultProps = {
+      id: `${resultListId}-option-${resultIndex}`,
+      className: 'osdGlobalSearchCommandPalette__result',
+      role: 'option',
+      'aria-label': result.label,
+      'aria-selected': isActive,
+      tabIndex: -1,
+      'data-test-subj': 'global-search-command-palette-item',
+      // Mouse enter can fire when keyboard scrolling moves a result under a stationary pointer.
+      // Only actual pointer movement should take selection ownership from the keyboard.
+      onMouseMove: () => setActiveResultIndex(resultIndex),
+      onMouseDown: (event: MouseEvent<HTMLElement>) => {
+        if (event.button === 0) {
+          event.preventDefault();
+        }
+      },
+      onClick: (event: MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        executeResult(result);
+      },
+    };
+
+    if (result.href) {
+      return (
+        <a key={`${commandId}:${result.id}`} href={result.href} {...resultProps}>
+          {result.content}
+        </a>
+      );
+    }
 
     return (
       <div
         key={`${commandId}:${result.id}`}
-        id={`${resultListId}-option-${resultIndex}`}
-        className="osdGlobalSearchCommandPalette__result"
-        role="option"
-        aria-label={result.label}
-        aria-selected={isActive}
-        tabIndex={-1}
-        data-test-subj="global-search-command-palette-item"
-        // Mouse enter can fire when keyboard scrolling moves a result under a stationary pointer.
-        // Only actual pointer movement should take selection ownership from the keyboard.
-        onMouseMove={() => setActiveResultIndex(resultIndex)}
-        onMouseDown={(event) => event.preventDefault()}
-        onClick={() => executeResult(result)}
+        {...resultProps}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();

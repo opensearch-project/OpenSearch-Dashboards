@@ -24,11 +24,12 @@ import './header_search_bar.scss';
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
+  commandPaletteAvailable?: boolean;
   panel?: boolean;
   onSearchResultClick?: () => void;
 }
 
-export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
+export const HeaderSearchBarIcon = ({ globalSearchCommands, commandPaletteAvailable }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
@@ -69,6 +70,7 @@ export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
       >
         <HeaderSearchBar
           globalSearchCommands={globalSearchCommands}
+          commandPaletteAvailable={commandPaletteAvailable}
           panel
           onSearchResultClick={() => {
             setIsSearchPopoverOpen(false);
@@ -80,7 +82,12 @@ export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
   );
 };
 
-export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultClick }: Props) => {
+export const HeaderSearchBar = ({
+  globalSearchCommands,
+  commandPaletteAvailable,
+  panel,
+  onSearchResultClick,
+}: Props) => {
   const [resultGroups, setResultGroups] = useState<GlobalSearchResultGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -114,9 +121,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
   const executeResult = useCallback(
     (result: GlobalSearchResult) => {
       closeSearch();
-      if (!result.href) {
-        result.execute();
-      }
+      result.execute();
     },
     [closeSearch]
   );
@@ -143,7 +148,10 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
                   label={result.content}
                   aria-label={result.label}
                   href={result.href}
-                  onClick={() => executeResult(result)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    executeResult(result);
+                  }}
                   color="text"
                   style={{ padding: 0 }}
                 />
@@ -224,7 +232,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     [globalSearchCommands]
   );
 
-  const showShortcutHint = !searchValue;
+  const showShortcutHint = commandPaletteAvailable && !searchValue;
   const searchBar = (
     <div className="osdHeaderSearchBar">
       <EuiFieldSearch

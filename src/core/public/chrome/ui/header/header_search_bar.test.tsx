@@ -141,12 +141,20 @@ describe('<HeaderSearchBar />', () => {
 
   it('renders the command palette shortcut hint', () => {
     const { getByTestId } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} commandPaletteAvailable panel />
     );
 
     expect(getByTestId('global-search-command-palette-shortcut')).toHaveTextContent(
       /^(⌘\+k|Ctrl\+k)$/
     );
+  });
+
+  it('does not render the command palette shortcut hint when the palette is unavailable', () => {
+    const { queryByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
+    );
+
+    expect(queryByTestId('global-search-command-palette-shortcut')).not.toBeInTheDocument();
   });
 
   it('render HeaderSearchBar with search result', async () => {
@@ -300,7 +308,7 @@ describe('<HeaderSearchBar />', () => {
     expect(onSearchResultClick).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves native link behavior without programmatically executing linked results', async () => {
+  it('uses programmatic navigation for an unmodified link click', async () => {
     const onSearchResultClick = jest.fn();
     const execute = jest.fn();
     const mockSearchFn = jest.fn().mockResolvedValue([
@@ -330,11 +338,10 @@ describe('<HeaderSearchBar />', () => {
 
     const link = await waitFor(() => getByRole('link', { name: 'linked-result' }));
     expect(link).toHaveAttribute('href', '/app/linked-result');
-    link.addEventListener('click', (event) => event.preventDefault());
 
     fireEvent.click(link);
 
-    expect(execute).not.toHaveBeenCalled();
+    expect(execute).toHaveBeenCalledTimes(1);
     expect(onSearchResultClick).toHaveBeenCalledTimes(1);
   });
 

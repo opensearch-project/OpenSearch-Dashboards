@@ -153,22 +153,18 @@ describe('<workspaceSearchPagesCommand />', () => {
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('foo-group-link1');
   });
 
-  it('executes system page navigation with window assign', async () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
-
+  it('executes system page navigation through the application service', async () => {
     const searchResult = await workspaceSearchPages('Settings', registeredUseCases, coreStartMock);
 
     searchResult[0].execute();
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignSpy).toHaveBeenCalledWith('http://localhost:5601/link1');
-
-    assignSpy.mockRestore();
+    expect(coreStartMock.application.navigateToUrl).toHaveBeenCalledWith(
+      'http://localhost:5601/link1'
+    );
   });
 
   it('removes workspace information from system page URLs while preserving the base path', async () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
-
     const originalBasePath = coreStartMock.http.basePath;
     const basePath = '/foo';
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
@@ -179,9 +175,10 @@ describe('<workspaceSearchPagesCommand />', () => {
     searchResult[0].execute();
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignSpy).toHaveBeenCalledWith(`http://localhost:5601${basePath}/link1`);
+    expect(coreStartMock.application.navigateToUrl).toHaveBeenCalledWith(
+      `http://localhost:5601${basePath}/link1`
+    );
 
-    assignSpy.mockRestore();
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = originalBasePath;
   });

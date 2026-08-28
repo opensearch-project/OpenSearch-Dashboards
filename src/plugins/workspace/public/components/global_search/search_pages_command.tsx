@@ -52,10 +52,9 @@ export const workspaceSearchPages = async (
           coreStart.http.basePath,
           true
         );
-        window.location.assign(urlWithoutWorkspace);
-        return;
+        return coreStart.application.navigateToUrl(urlWithoutWorkspace);
       }
-      coreStart.application.navigateToApp(link.id);
+      return coreStart.application.navigateToApp(link.id);
     };
 
     const pages = searchResult.slice(0, 10).map((link) => {

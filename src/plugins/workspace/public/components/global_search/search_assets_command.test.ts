@@ -12,6 +12,7 @@ import { SUPPORTED_ASSET_TYPES } from './constants';
 describe('searchAssets', () => {
   let httpMock: jest.Mocked<HttpStart>;
   const mockBasePath = '/test-base-path';
+  const navigateToUrl = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     const coreStart = coreMock.createStart();
@@ -52,6 +53,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(result).toEqual([]);
@@ -80,6 +82,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'dashboard',
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(httpMock.get).toHaveBeenCalledWith(
@@ -109,6 +112,7 @@ describe('searchAssets', () => {
       query: 'test',
       currentWorkspaceId,
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(httpMock.get).toHaveBeenCalledWith(
@@ -142,6 +146,7 @@ describe('searchAssets', () => {
       query: 'test',
       currentWorkspaceId,
       visibleWorkspaceIds: [currentWorkspaceId],
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
@@ -165,6 +170,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds,
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
@@ -172,7 +178,6 @@ describe('searchAssets', () => {
   });
 
   it('should expose and execute the replaced management path', async () => {
-    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
     const mockAssets = [
       createMockAsset(
         '1',
@@ -190,6 +195,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
@@ -197,7 +203,6 @@ describe('searchAssets', () => {
 
     result[0].execute();
 
-    expect(assignSpy).toHaveBeenCalledWith(`${mockBasePath}/app/objects/dashboard/1`);
-    assignSpy.mockRestore();
+    expect(navigateToUrl).toHaveBeenCalledWith(`${mockBasePath}/app/objects/dashboard/1`);
   });
 });
