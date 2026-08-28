@@ -288,6 +288,35 @@ function formatMetricLabels(metric: Record<string, string>): string {
   return `{${labelParts.join(', ')}}`;
 }
 
+function distinguishingLabelKeysByTemplatedName(
+  series: MetricResult[],
+  legendTemplate: string
+): Map<string, string[]> {
+  const groups = new Map<string, Array<Record<string, string>>>();
+  series.forEach((metricResult, seriesIndex) => {
+    if (seriesIndex >= MAX_SERIES_TABLE) return;
+    const name = interpolateLegendFormat(legendTemplate, metricResult.metric).trim();
+    if (!name) return;
+    const labels = { ...metricResult.metric };
+    delete labels.__name__;
+    const group = groups.get(name);
+    if (group) group.push(labels);
+    else groups.set(name, [labels]);
+  });
+
+  const distinguishing = new Map<string, string[]>();
+  groups.forEach((members, name) => {
+    if (members.length < 2) return;
+    const keys = new Set<string>();
+    members.forEach((labels) => Object.keys(labels).forEach((key) => keys.add(key)));
+    distinguishing.set(
+      name,
+      Array.from(keys).filter((key) => new Set(members.map((labels) => labels[key] ?? '')).size > 1)
+    );
+  });
+  return distinguishing;
+}
+
 /**
  * Unified DataFrame creation for single and multi-query results.
  * - Single query: uses `Value` column, simpler series names
@@ -344,6 +373,10 @@ function createDataFrame(
     const series = normalizeResult(queryResult?.resultType, queryResult?.result);
     const legendTemplate = result.legendFormat?.trim() ? result.legendFormat : undefined;
 
+    const distinguishingKeys = legendTemplate
+      ? distinguishingLabelKeysByTemplatedName(series, legendTemplate)
+      : new Map<string, string[]>();
+
     series.forEach((metricResult, seriesIndex) => {
       if (seriesIndex >= MAX_SERIES_TABLE) return;
 
@@ -352,10 +385,23 @@ function createDataFrame(
       const labelsWithoutName = { ...metricResult.metric };
       delete labelsWithoutName.__name__;
 
+      const fallbackName = `${metricName}${formatMetricLabels(labelsWithoutName)}`;
       const templatedName = legendTemplate
         ? interpolateLegendFormat(legendTemplate, metricResult.metric).trim()
         : '';
-      const baseName = templatedName || `${metricName}${formatMetricLabels(labelsWithoutName)}`;
+      let baseName = fallbackName;
+      if (templatedName) {
+        const differing = distinguishingKeys.get(templatedName);
+        if (differing?.length) {
+          const distinguishing: Record<string, string> = {};
+          differing.forEach((key) => {
+            if (labelsWithoutName[key] !== undefined) distinguishing[key] = labelsWithoutName[key];
+          });
+          baseName = `${templatedName} ${formatMetricLabels(distinguishing)}`;
+        } else {
+          baseName = templatedName;
+        }
+      }
       const seriesName = isSingleQuery ? baseName : `${result.label}: ${baseName}`;
       // TODO: remove escaping if not using vega
       // Escape brackets in series name to prevent Vega's splitAccessPath from
