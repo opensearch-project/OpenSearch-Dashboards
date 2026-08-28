@@ -4,7 +4,7 @@
  */
 
 import { AreaChartStyle } from './area_vis_config';
-import { AxisRole, VisColumn, TimeUnit, AggregationType } from '../types';
+import { AxisRole, VisColumn, TimeUnit, AggregationType, DisableMode } from '../types';
 import {
   getAxisConfig,
   getColumnsFromAxisColumnMapping,
@@ -19,7 +19,7 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
+import { createAreaSeries, replaceNullWithZero, createStackAreaSeries } from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
@@ -28,6 +28,11 @@ import {
   aggregate,
   resolveStackMode,
   transformStackPercentage,
+  connectNullValues,
+  disconnectValues,
+  groupSeriesDatasets,
+  splitSeriesDatasets,
+  transformDatasetsStackPercentage,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
 
@@ -43,7 +48,6 @@ export const createSimpleAreaChart = (
   const axisConfig = getAxisConfig(styles);
 
   const { categoryField: timeField, seriesFields } = getNormalizedAxisConfig(axisColumnMappings);
-  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
     transform(
@@ -55,10 +59,18 @@ export const createSimpleAreaChart = (
             groupBy: timeField,
             field: seriesFields,
             aggregationType: AggregationType.SUM,
+            preserveNull: true,
           })
         : (data) => data,
       transformStackPercentage(styles, { excludeFields: [timeField] }),
-      convertTo2DArray(allColumns)
+      splitSeriesDatasets({
+        valueFields: seriesFields,
+        timeField,
+        perSeries: (field: string, rows: Array<Record<string, any>>) =>
+          connectNullValues(styles, { timeField, seriesFields: [field] })(
+            disconnectValues(styles, { timeField, seriesFields: [field] })(rows)
+          ),
+      })
     ),
     createBaseConfig({
       legend: { show: false },
@@ -69,7 +81,8 @@ export const createSimpleAreaChart = (
     createAreaSeries({
       styles,
       categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      seriesFields,
+      perSeriesDatasets: true,
     }),
     assembleSpec
   )({
@@ -106,17 +119,27 @@ export const createMultiAreaChart = (
   const result = pipe(
     transform(
       sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-        timeUnit: TimeUnit.SECOND,
-        aggregationType: AggregationType.SUM,
+      groupSeriesDatasets({
+        groupField: colorField,
+        valueField,
+        timeField,
+        // when both disconnectValues and connectNullValues are configed, the process sequence is first disconnectValues then connectNullValues
+        perSeries: (rows: Array<Record<string, any>>) =>
+          connectNullValues(styles, {
+            timeField,
+            seriesFields: [valueField],
+          })(
+            disconnectValues(styles, { timeField, seriesFields: [valueField] })(
+              aggregate({
+                groupBy: timeField,
+                field: valueField,
+                aggregationType: AggregationType.SUM,
+                preserveNull: true,
+              })(rows)
+            )
+          ),
       }),
-      (data) =>
-        resolveStackMode(styles) === 'none' ? data : replaceNullWithZero(data, [timeField]),
-      transformStackPercentage(styles, { excludeFields: [timeField] }),
-      convertTo2DArray()
+      transformDatasetsStackPercentage(styles)
     ),
     createBaseConfig({
       legend: { show: false },
@@ -124,13 +147,10 @@ export const createMultiAreaChart = (
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,
-    buildVisMap({
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    createAreaSeries({
+    createStackAreaSeries({
       styles,
       categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      valueField,
       allData,
       colorField,
     }),
