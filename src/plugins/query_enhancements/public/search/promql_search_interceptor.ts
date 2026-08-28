@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trimEnd } from 'lodash';
+import { omit, trimEnd } from 'lodash';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -11,7 +11,14 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { API, EnhancedFetchContext, fetch, SEARCH_STRATEGY } from '../../common';
+import {
+  API,
+  EnhancedFetchContext,
+  fetch,
+  PromQLQuery,
+  PromQLSearchOptions,
+  SEARCH_STRATEGY,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class PromQLSearchInterceptor extends SearchInterceptor {
@@ -26,20 +33,29 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
+    const timefilter = this.queryService.timefilter.timefilter;
+    const queryState: PromQLQuery = this.queryService.queryString.getQuery();
+
+    const requested: PromQLQuery | undefined = request.params?.body?.query?.queries?.[0];
+    const query = omit(requested ?? queryState, 'queryOptions');
+    const { maxDataPoints, perQueryOptions } = queryState.queryOptions ?? {};
+
+    // perQueryOptions is aligned to queryState.query's segments, so only forward it
+    // when executing that same string.
+    const searchOptions: PromQLSearchOptions = {
+      maxDataPoints,
+      perQueryOptions: query.query === queryState.query ? perQueryOptions : undefined,
+    };
+
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${SEARCH_STRATEGY.PROMQL}`),
       signal: options.abortSignal,
       body: {
-        timeRange: this.queryService.timefilter.timefilter.getTime(),
+        timeRange: timefilter.getTime(),
+        options: { ...searchOptions },
       },
     };
-
-    // Extract the query from the request if available, otherwise fall back to global query service
-    let query = this.queryService.queryString.getQuery();
-    if (request.params?.body?.query?.queries && request.params.body.query.queries.length > 0) {
-      query = request.params.body.query.queries[0];
-    }
 
     return fetch(context, query);
   }

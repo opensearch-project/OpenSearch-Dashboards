@@ -24,6 +24,8 @@ export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
   profile?: QueryProfile;
+  /** Data frame meta as the search strategy returned it; keys belong to the strategy. */
+  frameMeta?: Record<string, unknown>;
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
