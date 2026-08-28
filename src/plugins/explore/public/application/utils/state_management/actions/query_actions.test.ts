@@ -1227,8 +1227,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const thunk = executeQueries({ services: mockServices });
       await thunk(mockDispatch, mockGetState, undefined);
 
-      // No inner thunk is dispatched, so the cluster never sees the empty query
-      // itself, nor the `FROM ()` the histogram would have wrapped it in.
+      // Neither the empty query nor the histogram's `FROM ()` reaches the cluster.
       const dispatchedThunks = mockDispatch.mock.calls.filter(
         (call) => typeof call[0] === 'function'
       );
@@ -2388,9 +2387,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         dataset: { id: 'd', title: 't', type: 'INDEX_PATTERN' },
       }) as Query;
 
-    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY (''), and a blank
-    // SQL query used to be sent verbatim: the data table asked the cluster to run
-    // '', and the histogram wrapped it into `FROM ()`, which does not parse.
+    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY ('').
     it.each([
       ['', 'empty'],
       ['   ', 'whitespace only'],
@@ -2411,8 +2408,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(shouldSkipQueryExecution(queryFor('PROMQL', 'up'))).toBe(false);
     });
 
-    // PPL must not be skipped: defaultPreparePplQuery turns a blank editor into
-    // `source = <table>`, so an empty PPL query is still runnable.
+    // defaultPreparePplQuery turns a blank PPL editor into `source = <table>`.
     it('runs a blank PPL query', () => {
       expect(shouldSkipQueryExecution(queryFor('PPL', ''))).toBe(false);
     });
