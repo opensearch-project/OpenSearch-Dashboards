@@ -133,9 +133,9 @@ export const AutoVisMeta = {
     '\n2. timeFieldName is MANDATORY for time-based queries: If the user request ' +
     'involves any time concept (e.g. "last 7 days", "trends", "over time", "history", ' +
     'time ranges, or time-series analysis), you MUST call the index mapping tool to get the timeFieldName \n' +
-    '\n2. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
-    '\n3. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
-    '\n4. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
+    '\n3. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
+    '\n4. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
+    '\n5. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
     CHART_GUIDE,
 
   parameters: {

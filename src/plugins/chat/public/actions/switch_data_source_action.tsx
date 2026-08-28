@@ -192,7 +192,7 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
           };
         }
 
-        chatService.setConfirmedDataSourceId(args.dataSourceId);
+        chatService.setDataSourceId(args.dataSourceId);
 
         const resolvedTitle = dataSource?.title ?? args.dataSourceId;
 

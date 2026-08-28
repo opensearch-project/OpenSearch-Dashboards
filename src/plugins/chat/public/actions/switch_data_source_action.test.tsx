@@ -32,7 +32,7 @@ describe('useSwitchDataSourceAction', () => {
     });
 
     mockChatService = {
-      setConfirmedDataSourceId: jest.fn(),
+      setDataSourceId: jest.fn(),
       validateDataSourceId: jest.fn().mockResolvedValue({
         valid: true,
         dataSource: { id: 'ds-a', title: 'Cluster A' },
@@ -70,7 +70,7 @@ describe('useSwitchDataSourceAction', () => {
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
       expect(mockChatService.validateDataSourceId).toHaveBeenCalledWith('ds-a');
-      expect(mockChatService.setConfirmedDataSourceId).toHaveBeenCalledWith('ds-a');
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-a');
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
@@ -97,7 +97,7 @@ describe('useSwitchDataSourceAction', () => {
       // The error names the valid ids so the LLM can correct itself in the same turn.
       expect(result.message).toContain('ds-a');
       expect(result.message).toContain('ds-b');
-      expect(mockChatService.setConfirmedDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
     });
 
     it('should reject a missing / empty id without validating or mutating state', async () => {
@@ -110,7 +110,7 @@ describe('useSwitchDataSourceAction', () => {
       expect(missing.message).toBe('A dataSourceId is required to switch the data source.');
       expect(empty.success).toBe(false);
       expect(mockChatService.validateDataSourceId).not.toHaveBeenCalled();
-      expect(mockChatService.setConfirmedDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
     });
 
     it('should report a failure when validation throws', async () => {
@@ -120,7 +120,7 @@ describe('useSwitchDataSourceAction', () => {
       const result = await registeredAction.handler({ dataSourceId: 'ds-a' });
 
       expect(result).toEqual({ success: false, message: 'boom' });
-      expect(mockChatService.setConfirmedDataSourceId).not.toHaveBeenCalled();
+      expect(mockChatService.setDataSourceId).not.toHaveBeenCalled();
     });
   });
 

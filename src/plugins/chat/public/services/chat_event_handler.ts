@@ -657,7 +657,7 @@ export class ChatEventHandler {
     if (result.data !== undefined) {
       return result.data;
     }
-
+    if (result.success) return { success: true };
     return {
       success: false,
       error: result.error || 'Unknown error occurred',

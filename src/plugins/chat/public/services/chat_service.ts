@@ -292,7 +292,7 @@ export class ChatService {
     }
 
     if (options?.dataSourceId) {
-      this.setConfirmedDataSourceId(options.dataSourceId);
+      this.setDataSourceId(options.dataSourceId);
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -433,12 +433,6 @@ export class ChatService {
     return ds;
   }
 
-  public setConfirmedDataSourceId(id: string): void {
-    this.confirmedDataSourceId = id;
-    this.setSessionDataSourceList(id);
-    this.persistDataSourceState();
-  }
-
   public getConfirmedDataSourceId(): string | undefined {
     return this.confirmedDataSourceId;
   }
@@ -480,38 +474,31 @@ export class ChatService {
   /**
    * Restore a conversation's data source state from the store
    */
-  private restoreDataSourceStateFromStore(threadId: string): void {
+  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
     const stored = this.conversationDataSourceStore.get(threadId);
     if (!stored) return;
 
-    Promise.all(
-      (stored.sessionDataSourceList ?? []).map((id) =>
-        this.validateDataSourceId(id)
-          .then(({ valid }) => (valid ? id : undefined))
-          .catch(() => undefined)
-      )
-    )
-      .then((validIds) => {
-        validIds.forEach((id) => {
-          if (id) this.setSessionDataSourceList(id);
-        });
-      })
-      .catch(() => {
-        // skip
-      });
+    const [validIds, confirmedValid] = await Promise.all([
+      Promise.all(
+        (stored.sessionDataSourceList ?? []).map((id) =>
+          this.validateDataSourceId(id)
+            .then(({ valid }) => (valid ? id : undefined))
+            .catch(() => undefined)
+        )
+      ),
+      stored.confirmedDataSourceId
+        ? this.validateDataSourceId(stored.confirmedDataSourceId)
+            .then(({ valid }) => valid)
+            .catch(() => false)
+        : Promise.resolve(false),
+    ]);
 
-    const restoredId = stored.confirmedDataSourceId;
-    if (!restoredId) return;
+    if (this.getThreadId() !== threadId) return;
 
-    this.validateDataSourceId(restoredId)
-      .then(({ valid }) => {
-        if (valid) {
-          this.setConfirmedDataSourceId(restoredId);
-        }
-      })
-      .catch(() => {
-        // skip
-      });
+    this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
+    this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
+
+    this.persistDataSourceState();
   }
 
   /**
@@ -594,12 +581,9 @@ export class ChatService {
       contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
     }
 
-    // Build the per-run context from the store (static + dynamic + the datasource context above).
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-    return allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    // Build the per-run context from the store (static + dynamic + the datasource context above),
+    // filtering out categories the model must never receive (e.g. the PPL quick-fix request id).
+    return this.getAgentContexts();
   }
 
   public async sendMessage(
@@ -636,9 +620,8 @@ export class ChatService {
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getCurrentDataSourceId();
-    const availableDsContext = await this.buildAvailableDsContext(dataSourceId);
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
-    const context = this.getAgentContexts();
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -652,7 +635,7 @@ export class ChatService {
         ? [...messages, userMessage]
         : [userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
-      context: [...context, ...availableDsContext], // All contexts (static + dynamic) with stringified values
+      context, // All contexts (static + dynamic) with stringified values
       state: {}, // Empty for agent internal use only
       forwardedProps: {},
     };
@@ -724,8 +707,7 @@ export class ChatService {
     // try the confirmed conversation override first; getCurrentDataSourceId still falls back
     // to getWorkspaceAwareDataSourceId
     const dataSourceId = await this.getCurrentDataSourceId();
-    const availableDsContext = await this.buildAvailableDsContext(dataSourceId);
-    const context = this.getAgentContexts();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =
@@ -746,7 +728,7 @@ export class ChatService {
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
-      context: [...context, ...availableDsContext], // All contexts (static + dynamic) with stringified values
+      context, // All contexts (static + dynamic) with stringified values
       state: {}, // Empty for agent internal use only
       forwardedProps: {},
     };
@@ -902,14 +884,8 @@ export class ChatService {
 
     if (signal?.aborted) return skip('aborted');
 
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
-
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
     const includeFullHistory =
       this.conversationHistoryService.getMemoryProvider().includeFullHistory;
@@ -1137,7 +1113,7 @@ export class ChatService {
       }
 
       // Restore the per-conversation data source state
-      this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
+      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
 
       return this.injectUnfinishedToolCallEvents(events);
     }
@@ -1162,7 +1138,7 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
-    this.restoreDataSourceStateFromStore(threadId);
+    await this.restoreDataSourceStateFromStore(threadId);
 
     return this.injectUnfinishedToolCallEvents(events);
   }
@@ -1203,6 +1179,7 @@ export class ChatService {
     this.confirmedDataSourceId = id;
     if (!id) return;
     this.setSessionDataSourceList(id);
+    this.persistDataSourceState();
   }
 
   /**

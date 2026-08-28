@@ -137,12 +137,16 @@ describe('ToolExecutor', () => {
 
       await executionPromise;
 
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
-        dataSourceId: 'ds-b',
-        datasourceTitle: 'Cluster B',
-        reason: 'assistant suggestion',
-        confirmed: true,
-      });
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'confirmTool',
+        {
+          dataSourceId: 'ds-b',
+          datasourceTitle: 'Cluster B',
+          reason: 'assistant suggestion',
+          confirmed: true,
+        },
+        'call-123'
+      );
     });
 
     it('should reject execution when user rejects confirmation', async () => {

@@ -35,7 +35,7 @@ const mockAssistantActionService = {
 
 const mockChatService = {
   sendToolResult: jest.fn(),
-  setConfirmedDataSourceId: jest.fn(),
+  setDataSourceId: jest.fn(),
   setSessionDataSourceList: jest.fn(),
   clearSessionDataSourceList: jest.fn(),
   validateDataSourceId: jest.fn(),
