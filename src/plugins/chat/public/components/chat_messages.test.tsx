@@ -549,7 +549,11 @@ describe('convertTimelineToMessageRows', () => {
     const timeline: Message[] = [
       { id: '0', role: 'user', content: 'ask me something' } as UserMessage,
       { id: '1', role: 'assistant', toolCalls: [toolCall] } as AssistantMessage,
-      { id: 'fake-assistant-message-123', role: 'assistant', toolCalls: [toolCall] } as AssistantMessage,
+      {
+        id: 'fake-assistant-message-123',
+        role: 'assistant',
+        toolCalls: [toolCall],
+      } as AssistantMessage,
     ];
 
     const rows = convertTimelineToMessageRows(timeline);
@@ -558,9 +562,10 @@ describe('convertTimelineToMessageRows', () => {
       .filter((r: any) => r.role === 'toolCallGroup')
       .flatMap((r: any) => r.toolCalls);
 
-    expect([...toolCallRows.map((r: any) => r.toolCall.id), ...grouped.map((t: any) => t.id)]).toEqual([
-      toolCall.id,
-    ]);
+    expect([
+      ...toolCallRows.map((r: any) => r.toolCall.id),
+      ...grouped.map((t: any) => t.id),
+    ]).toEqual([toolCall.id]);
   });
 
   it('should handle empty timeline and simple messages without tool calls', () => {

@@ -490,7 +490,6 @@ export class ChatService {
     return { observable: trackedObservable, userMessage };
   }
 
-
   public async sendToolResult(
     toolCallId: string,
     result: any,
@@ -728,8 +727,8 @@ export class ChatService {
       value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
     }));
 
-    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
-      .includeFullHistory;
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, ...toolMessages] : [...toolMessages];
 
     const threadId = this.getThreadId();

@@ -7,13 +7,13 @@ import { createAskUserAction } from './ask_user_action';
 import { HumanInputService } from './human_input_service';
 
 const makeService = (askImpl?: jest.Mock) =>
-  (({
+  ({
     ask: askImpl ?? jest.fn().mockResolvedValue({ answer: 'blue' }),
     getPending$: jest.fn(),
     getPending: jest.fn().mockReturnValue([]),
     getAnswers$: jest.fn(),
     getAnswers: jest.fn().mockReturnValue(new Map()),
-  } as unknown) as HumanInputService);
+  }) as unknown as HumanInputService;
 
 describe('createAskUserAction', () => {
   it('asks under the tool call id it was given', async () => {

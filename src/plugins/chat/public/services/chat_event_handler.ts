@@ -1065,8 +1065,7 @@ export class ChatEventHandler {
     let observable: Observable<ChatEvent>;
     let toolMessages: ToolMessage[];
     let skipped:
-      | { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' }
-      | undefined;
+      { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' } | undefined;
 
     try {
       const messages = this.getTimeline();

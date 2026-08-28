@@ -1639,11 +1639,25 @@ describe('ChatWindow', () => {
 
       // Two parallel ask_user calls, each as START/ARGS/END (as injectUnfinishedToolCallEvents emits).
       const mockEvents = [
-        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'u1', role: 'user', content: 'Hi' }], timestamp: Date.now() },
-        { type: 'TOOL_CALL_START', toolCallId: 'tc-A', toolCallName: 'ask_user', timestamp: Date.now() },
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Hi' }],
+          timestamp: Date.now(),
+        },
+        {
+          type: 'TOOL_CALL_START',
+          toolCallId: 'tc-A',
+          toolCallName: 'ask_user',
+          timestamp: Date.now(),
+        },
         { type: 'TOOL_CALL_ARGS', toolCallId: 'tc-A', delta: '{}', timestamp: Date.now() },
         { type: 'TOOL_CALL_END', toolCallId: 'tc-A', timestamp: Date.now() },
-        { type: 'TOOL_CALL_START', toolCallId: 'tc-B', toolCallName: 'ask_user', timestamp: Date.now() },
+        {
+          type: 'TOOL_CALL_START',
+          toolCallId: 'tc-B',
+          toolCallName: 'ask_user',
+          timestamp: Date.now(),
+        },
         { type: 'TOOL_CALL_ARGS', toolCallId: 'tc-B', delta: '{}', timestamp: Date.now() },
         { type: 'TOOL_CALL_END', toolCallId: 'tc-B', timestamp: Date.now() },
       ];

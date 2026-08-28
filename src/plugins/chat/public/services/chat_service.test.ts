@@ -772,7 +772,6 @@ describe('ChatService', () => {
       });
     });
 
-
     describe('abort signal', () => {
       beforeEach(() => {
         mockCoreChatService.getMemoryProvider = jest
@@ -1120,7 +1119,6 @@ describe('ChatService', () => {
         toolCallId: 'tool-B',
       });
     });
-
 
     it('should include full history and skip the sync wait when includeFullHistory is true', async () => {
       const mockObservable = new Observable<BaseEvent>();
