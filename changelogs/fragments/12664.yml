@@ -1,0 +1,2 @@
+fix:
+- Skip query execution for a blank SQL query in Explore ([#12664](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12664))
