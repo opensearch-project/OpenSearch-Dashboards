@@ -264,6 +264,14 @@ export class GlobalSearchService {
   }
 
   private registerSearchCommand(searchHandler: GlobalSearchCommand) {
+    if (!Object.prototype.hasOwnProperty.call(SearchCommandTypes, searchHandler.type)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Unknown SearchCommand type ${String(searchHandler.type)} for id ${searchHandler.id}`
+      );
+      return;
+    }
+
     const exists = this.searchCommands.find((item) => {
       return item.id === searchHandler.id;
     });

@@ -59,7 +59,7 @@ describe('runGlobalSearch', () => {
     expect(pageCommand.run).not.toHaveBeenCalled();
     expect(assetCommand.run).toHaveBeenCalledWith('dashboard', { abortSignal: undefined });
     expect(actionCommand.run).toHaveBeenCalledWith('@ dashboard', { abortSignal: undefined });
-    expect(groups.map((group) => group.type)).toEqual(['SAVED_OBJECTS', 'ACTIONS']);
+    expect(groups.map((group) => group.type)).toEqual(['SAVED_OBJECTS']);
   });
 
   it('merges commands with the same type and preserves result ownership', async () => {
@@ -90,6 +90,19 @@ describe('runGlobalSearch', () => {
 
     expect(groups[0].results).toHaveLength(1);
     expect(groups[0].results[0].result.id).toBe('result');
+  });
+
+  it('omits groups whose commands return no results', async () => {
+    const pageCommand = createCommand('pages', 'PAGES', [createResult('page')]);
+    const recentlyAccessedCommand = createCommand('recent', 'RECENTLY_ACCESSED');
+    const actionCommand = createCommand('actions', 'ACTIONS');
+
+    const groups = await runGlobalSearch({
+      commands: [pageCommand, recentlyAccessedCommand, actionCommand],
+      value: 'page',
+    });
+
+    expect(groups.map((group) => group.type)).toEqual(['PAGES']);
   });
 
   it('passes the abort signal to every selected command', async () => {

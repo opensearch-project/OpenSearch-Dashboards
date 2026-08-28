@@ -55,6 +55,7 @@ export const GlobalSearchCommandPalette = ({
   const [query, setQuery] = useState('');
   const [resultGroups, setResultGroups] = useState<GlobalSearchResultGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSearchError, setHasSearchError] = useState(false);
   const [activeResultIndex, setActiveResultIndex] = useState(-1);
   const activeAbortControllerRef = useRef<AbortController>();
   const closeAnimationTimerRef = useRef<number>();
@@ -113,6 +114,19 @@ export const GlobalSearchCommandPalette = ({
     });
   }, [globalSearchCommands]);
 
+  const searchPlaceholder = searchTips.length
+    ? i18n.translate('core.globalSearch.commandPalette.inputPlaceholderWithTips', {
+        defaultMessage: 'Type to search, {tips}',
+        values: {
+          tips: searchTips
+            .map(({ alias, description }) => `type ${alias} to search ${description}`)
+            .join(', '),
+        },
+      })
+    : i18n.translate('core.globalSearch.commandPalette.inputPlaceholder', {
+        defaultMessage: 'Type to search',
+      });
+
   const search = useCallback(async (value: string) => {
     setQuery(value);
     activeAbortControllerRef.current?.abort('Superseded by a newer global search');
@@ -120,21 +134,35 @@ export const GlobalSearchCommandPalette = ({
     const abortController = new AbortController();
     activeAbortControllerRef.current = abortController;
     setResultGroups([]);
+    setHasSearchError(false);
     setIsLoading(true);
 
-    const groups = await runGlobalSearch({
-      commands: globalSearchCommandsRef.current,
-      value,
-      abortSignal: abortController.signal,
-    });
+    try {
+      const groups = await runGlobalSearch({
+        commands: globalSearchCommandsRef.current,
+        value,
+        abortSignal: abortController.signal,
+      });
 
-    if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
-      return;
+      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
+        return;
+      }
+
+      setResultGroups(groups);
+    } catch (error) {
+      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
+        return;
+      }
+
+      // eslint-disable-next-line no-console
+      console.error('Global search failed', error);
+      setHasSearchError(true);
+    } finally {
+      if (!abortController.signal.aborted && activeAbortControllerRef.current === abortController) {
+        activeAbortControllerRef.current = undefined;
+        setIsLoading(false);
+      }
     }
-
-    activeAbortControllerRef.current = undefined;
-    setResultGroups(groups);
-    setIsLoading(false);
   }, []);
 
   const clearSearch = useCallback(() => {
@@ -143,6 +171,7 @@ export const GlobalSearchCommandPalette = ({
     setQuery('');
     setResultGroups([]);
     setIsLoading(false);
+    setHasSearchError(false);
     setActiveResultIndex(-1);
   }, []);
 
@@ -358,13 +387,7 @@ export const GlobalSearchCommandPalette = ({
               onChange={(event) => {
                 search(event.target.value);
               }}
-              placeholder={
-                globalSearchCommands.find((command) => command.inputPlaceholder)
-                  ?.inputPlaceholder ??
-                i18n.translate('core.globalSearch.input.placeholder', {
-                  defaultMessage: 'Search menu or assets',
-                })
-              }
+              placeholder={searchPlaceholder}
               aria-label={i18n.translate('core.globalSearch.commandPalette.inputLabel', {
                 defaultMessage: 'Search commands',
               })}
@@ -390,6 +413,15 @@ export const GlobalSearchCommandPalette = ({
                   defaultMessage: 'Loading…',
                 })}
               </span>
+            </div>
+          ) : hasSearchError ? (
+            <div
+              className="osdGlobalSearchCommandPalette__message"
+              data-test-subj="global-search-command-palette-error"
+            >
+              {i18n.translate('core.globalSearch.commandPalette.errorMessage', {
+                defaultMessage: 'Unable to load search results.',
+              })}
             </div>
           ) : hasResults ? (
             <div

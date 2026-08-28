@@ -69,6 +69,10 @@ export const runGlobalSearch = async ({
       return;
     }
 
+    if (!settledResult.value.length) {
+      return;
+    }
+
     const command = selectedCommands[index];
     const currentResults = resultsByType.get(command.type) ?? [];
     resultsByType.set(command.type, [

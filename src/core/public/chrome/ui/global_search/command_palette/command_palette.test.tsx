@@ -70,6 +70,10 @@ describe('<GlobalSearchCommandPalette />', () => {
 
     act(() => shortcuts[0].execute());
 
+    expect(getByTestId('global-search-command-palette-input')).toHaveAttribute(
+      'placeholder',
+      'Type to search'
+    );
     expect(getByTestId('global-search-command-palette')).toBeVisible();
     await waitFor(() => {
       expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
@@ -84,6 +88,7 @@ describe('<GlobalSearchCommandPalette />', () => {
     const command = {
       ...createCommand('assets'),
       type: 'SAVED_OBJECTS' as const,
+      inputPlaceholder: 'Search or chat with AI',
     };
     const commands$ = new BehaviorSubject<GlobalSearchCommand[]>([command]);
     const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
@@ -99,6 +104,10 @@ describe('<GlobalSearchCommandPalette />', () => {
     await waitFor(() => {
       expect(getByTestId('global-search-command-palette-footer')).toHaveTextContent('Tips:@Assets');
     });
+    expect(getByTestId('global-search-command-palette-input')).toHaveAttribute(
+      'placeholder',
+      'Type to search, type @ to search Assets'
+    );
   });
 
   it('shows results returned by registered commands for an empty query', async () => {
@@ -124,6 +133,54 @@ describe('<GlobalSearchCommandPalette />', () => {
       expect(getByText('Recently accessed')).toBeVisible();
       expect(getByText('recent-result')).toBeVisible();
     });
+  });
+
+  it('shows an error message when search fails and clears it on retry', async () => {
+    const command = createCommand('pages', [createResult('page-result')]);
+    (command.run as jest.Mock).mockImplementation((value: string) => {
+      if (value === 'failure') {
+        throw new Error('search failed');
+      }
+
+      return Promise.resolve(value ? [createResult('page-result')] : []);
+    });
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const commands$ = new BehaviorSubject([command]);
+    const { keyboardShortcut, shortcuts } = createKeyboardShortcut();
+    const { getByTestId, getByText, queryByTestId } = render(
+      <GlobalSearchCommandPalette
+        globalSearchCommands$={commands$}
+        keyboardShortcut={keyboardShortcut}
+      />
+    );
+
+    act(() => shortcuts[0].execute());
+    await waitFor(() => {
+      expect(getByTestId('global-search-command-palette-initial')).toBeVisible();
+    });
+
+    fireEvent.change(getByTestId('global-search-command-palette-input'), {
+      target: { value: 'failure' },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('global-search-command-palette-error')).toHaveTextContent(
+        'Unable to load search results.'
+      );
+    });
+    expect(queryByTestId('global-search-command-palette-loading')).not.toBeInTheDocument();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Global search failed', expect.any(Error));
+
+    fireEvent.change(getByTestId('global-search-command-palette-input'), {
+      target: { value: 'page' },
+    });
+
+    await waitFor(() => {
+      expect(getByText('page-result')).toBeVisible();
+    });
+    expect(queryByTestId('global-search-command-palette-error')).not.toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('renders section results in product order and trailing results last', async () => {
