@@ -235,7 +235,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-        <EuiTabs size="l">
+        <EuiTabs size="l" display="condensed">
           {tabs.map((tab) => (
             <EuiTab
               key={tab.id}

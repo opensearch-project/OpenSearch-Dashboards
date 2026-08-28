@@ -17,6 +17,7 @@ export const HierarchySpanCell = ({
   setCellProps,
   expandedRows,
   setExpandedRows,
+  colorMap,
 }: {
   rowIndex: number;
   items: ParsedHit[];
@@ -25,6 +26,7 @@ export const HierarchySpanCell = ({
   setCellProps?: (props: any) => void;
   expandedRows: Set<string>;
   setExpandedRows: React.Dispatch<React.SetStateAction<Set<string>>>;
+  colorMap?: Record<string, string>;
 }) => {
   const item = items[rowIndex];
   const isRowSelected =
@@ -40,11 +42,19 @@ export const HierarchySpanCell = ({
     }
   }, [props.selectedSpanId, item?.spanId, disableInteractions, isRowSelected, setCellProps]);
 
-  const indentation = `${(item?.level || 0) * 20}px`;
   const isExpanded = expandedRows.has(item?.spanId);
   const serviceName = resolveServiceNameFromSpan(item);
   const operationName = item?.name;
   const hasError = isSpanError(item);
+  const level = item?.level || 0;
+  const serviceColor = (serviceName && colorMap?.[serviceName]) || undefined;
+
+  // The service repeats down consecutive rows of the same service; only surface
+  // its name where it actually changes (the color dot always anchors it) so the
+  // eye follows the operation names, not a wall of duplicated service labels.
+  const prevItem = rowIndex > 0 ? items[rowIndex - 1] : undefined;
+  const prevServiceName = prevItem ? resolveServiceNameFromSpan(prevItem) : undefined;
+  const showService = rowIndex === 0 || serviceName !== prevServiceName;
 
   const ExpandCollapseIcon = () =>
     item?.children && item.children.length > 0 ? (
@@ -69,6 +79,16 @@ export const HierarchySpanCell = ({
       <EuiIcon type="empty" className="exploreSpanDetailTable__hiddenIcon" />
     );
 
+  // Light vertical guides, one per ancestor level, so nesting reads without a
+  // heavy indent block.
+  const TreeGuides = () => (
+    <>
+      {Array.from({ length: level }).map((_, i) => (
+        <span key={i} className="exploreSpanDetailTable__treeGuide" data-test-subj="treeGuide" />
+      ))}
+    </>
+  );
+
   const SpanText = () => (
     <EuiToolTip
       content={
@@ -78,16 +98,22 @@ export const HierarchySpanCell = ({
         </EuiText>
       }
     >
-      <span
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          display: 'block',
-        }}
-      >
-        <strong>{serviceName || '-'}</strong>
-        {operationName && ` ${operationName}`}
+      <span className="exploreSpanDetailTable__spanLabel">
+        {serviceColor && (
+          <span
+            className="exploreSpanDetailTable__serviceDot"
+            style={{ backgroundColor: serviceColor }}
+            data-test-subj="serviceDot"
+          />
+        )}
+        {showService && (
+          <span className="exploreSpanDetailTable__serviceName" data-test-subj="serviceName">
+            {serviceName || '-'}
+          </span>
+        )}
+        <span className="exploreSpanDetailTable__operationName">
+          {operationName || (showService ? '' : serviceName) || '-'}
+        </span>
       </span>
     </EuiToolTip>
   );
@@ -108,7 +134,8 @@ export const HierarchySpanCell = ({
   );
 
   const cellContent = (
-    <div className="exploreSpanDetailTable__hierarchyCell" style={{ paddingLeft: indentation }}>
+    <div className="exploreSpanDetailTable__hierarchyCell">
+      <TreeGuides />
       <ExpandCollapseIcon />
       <SpanContent />
     </div>

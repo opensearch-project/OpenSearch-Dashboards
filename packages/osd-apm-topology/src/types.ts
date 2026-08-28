@@ -101,6 +101,9 @@ export interface CelestialMapProps {
   /** Show the ReactFlow minimap overlay. Default: false */
   showMinimap?: boolean;
 
+  /** Render a subtle dot-grid canvas background. Default: false */
+  showGridBackground?: boolean;
+
   /** Show SLI/SLO entries in the default legend. Default: false */
   showSliSlo?: boolean;
 

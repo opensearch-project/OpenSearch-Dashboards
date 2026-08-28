@@ -11,16 +11,23 @@ import { useTimelineTicks } from './timeline_ruler_hooks';
 export interface TimelineRulerProps {
   traceTimeRange: TraceTimeRange;
   paddingPercent?: number;
+  /** When zoomed, the ruler spans this visible window (relative to trace start). */
+  visibleRange?: TraceTimeRange;
 }
 
 export const TimelineRuler: React.FC<TimelineRulerProps> = ({
   traceTimeRange,
   paddingPercent = 2,
+  visibleRange,
 }) => {
-  const ticks = useTimelineTicks(traceTimeRange.durationMs, 0, 8, paddingPercent);
+  const relStart = visibleRange ? visibleRange.startTimeMs - traceTimeRange.startTimeMs : 0;
+  const relEnd = visibleRange
+    ? visibleRange.endTimeMs - traceTimeRange.startTimeMs
+    : traceTimeRange.durationMs;
+  const ticks = useTimelineTicks(relEnd, relStart, 8, paddingPercent);
 
   return (
-    <div className="exploreTimelineRuler" style={{ height: '30px', position: 'relative' }}>
+    <div className="exploreTimelineRuler" style={{ height: '20px', position: 'relative' }}>
       <div className="exploreTimelineRuler__baseline" />
       {ticks.map((tick, index) => {
         const labelClassName =

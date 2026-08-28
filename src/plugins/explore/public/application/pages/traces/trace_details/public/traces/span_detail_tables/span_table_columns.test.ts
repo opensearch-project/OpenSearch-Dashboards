@@ -20,7 +20,9 @@ describe('getSpanHierarchyTableColumns', () => {
   it('should return correct column structure with default width', () => {
     const columns = getSpanHierarchyTableColumns(mockTraceTimeRange);
 
-    expect(columns).toHaveLength(3);
+    // The waterfall renders per-span duration inline at the bar's trailing edge,
+    // so there is no separate far-right Duration column — just Span + Timeline.
+    expect(columns).toHaveLength(2);
     expect(columns[0]).toEqual({
       id: 'span',
       display: 'Span',
@@ -30,30 +32,24 @@ describe('getSpanHierarchyTableColumns', () => {
     });
     expect(columns[1]).toMatchObject({
       id: 'timeline',
-      initialWidth: 600,
+      initialWidth: 720,
       isExpandable: false,
       isResizable: true,
       actions: false,
     });
-    expect(columns[2]).toEqual({
-      id: 'durationInNanos',
-      display: 'Duration',
-      initialWidth: 100,
-      isExpandable: false,
-      actions: false,
-    });
+    expect(columns.some((col) => col.id === 'durationInNanos')).toBe(false);
   });
 
   it('should calculate timeline width based on availableWidth', () => {
     const availableWidth = 1200;
     const columns = getSpanHierarchyTableColumns(mockTraceTimeRange, availableWidth);
 
-    expect(columns[1].initialWidth).toBe(600); // Math.floor(1200 / 2)
+    expect(columns[1].initialWidth).toBe(744); // Math.floor(1200 * 0.62)
   });
 
   it('should use default width when availableWidth is not provided', () => {
     const columns = getSpanHierarchyTableColumns(mockTraceTimeRange);
 
-    expect(columns[1].initialWidth).toBe(600);
+    expect(columns[1].initialWidth).toBe(720);
   });
 });
