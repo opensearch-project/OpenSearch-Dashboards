@@ -38,10 +38,14 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       id: pattern.id,
       title: pattern.title,
       ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      // Dataset type from the saved object's `type` attribute (e.g. a rollup index pattern),
+      // defaulting to INDEX_PATTERN. Preserves downstream type-config routing for
+      // non-standard index patterns rather than flattening every dataset to INDEX_PATTERN.
+      type: patternMeta?.datasetType || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
       ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
+      ...(patternMeta?.description && { description: patternMeta.description }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
@@ -55,9 +59,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     } as Dataset;
   },
 
-  fetch: async (services, path) => {
+  fetch: async (services, path, options) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchIndexPatterns(services.savedObjects.client);
+    const indexPatterns = await fetchIndexPatterns(
+      services.savedObjects.client,
+      options?.skipQueryEditorMeta
+    );
     return {
       ...dataStructure,
       columnHeader: 'Index patterns',
@@ -105,10 +112,21 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+const fetchIndexPatterns = async (
+  client: SavedObjectsClientContract,
+  skipQueryEditorMeta: boolean = false
+): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'displayName', 'timeFieldName', 'references', 'signalType'],
+    fields: [
+      'title',
+      'displayName',
+      'timeFieldName',
+      'references',
+      'signalType',
+      'description',
+      'type',
+    ],
     search: `*`,
     searchFields: ['title', 'displayName'],
     perPage: 10000,
@@ -185,6 +203,10 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
         signalType: savedObject.attributes.signalType,
+        description: savedObject.attributes.description,
+        // Saved-object `type` attribute (distinct from the CUSTOM meta discriminator above),
+        // carried so toDataset can preserve a non-INDEX_PATTERN dataset type.
+        datasetType: savedObject.attributes.type,
       },
     };
 
@@ -203,6 +225,13 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     }
     return indexPatternDataStructure;
   });
+
+  // Query-editor extension meta (e.g. available languages) can trigger per-data-source network
+  // calls; skip it for callers that only need core dataset metadata (e.g. the dataset selector
+  // list), which would otherwise block on those lookups.
+  if (skipQueryEditorMeta) {
+    return dataStructures;
+  }
 
   return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };

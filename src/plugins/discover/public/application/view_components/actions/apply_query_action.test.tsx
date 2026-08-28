@@ -271,6 +271,21 @@ describe('useApplyQueryAction', () => {
     expect(result.resultsCount).toBe(3);
   });
 
+  it('reports a READY result with a zero hit total as 0 (not undefined)', async () => {
+    const h = setup({ currentLanguage: 'PPL' });
+    const action = lastEnabled(h.registered);
+
+    const promise = action.handler({ query: 'source=logs' });
+    h.queryComplete$.next({
+      data: { status: READY, hits: 0 },
+      query: { query: 'source=logs', language: 'PPL' },
+    });
+
+    const result = await promise;
+    expect(result.success).toBe(true);
+    expect(result.resultsCount).toBe(0);
+  });
+
   it('reports a genuine empty result set as success with zero results', async () => {
     const h = setup({ currentLanguage: 'PPL' });
     const action = lastEnabled(h.registered);

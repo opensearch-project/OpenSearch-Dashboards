@@ -27,6 +27,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
 import { Variable, VariableType, VariableWithState } from '../../../variables/types';
+import { collectResourceQueryTextFields } from '../../../variables/promql_variable_query_utils';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardServices } from '../../../types';
 
@@ -113,9 +114,14 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
     (varName: string): boolean => {
       const pattern = new RegExp(`\\$\\{${varName}\\}|\\$${varName}\\b`);
       // Check other query variables
-      const referencedByVariable = variables.some(
-        (v) => v.type === VariableType.Query && v.name !== varName && pattern.test(v.query)
-      );
+      const referencedByVariable = variables.some((v) => {
+        if (v.type !== VariableType.Query || v.name === varName) return false;
+        return v.sourceKind === 'prometheusResource'
+          ? collectResourceQueryTextFields(v.promQLResourceQuery).some((field) =>
+              pattern.test(field)
+            )
+          : pattern.test(v.query);
+      });
       if (referencedByVariable) return true;
       // Check panel queries
       return panelQueries.some((q) => pattern.test(q));

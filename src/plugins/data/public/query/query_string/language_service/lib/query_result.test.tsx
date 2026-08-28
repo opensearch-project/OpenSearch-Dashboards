@@ -253,34 +253,31 @@ describe('QueryResult - Ask AI for help', () => {
     },
   });
 
-  it('renders the button in Discover when errored with retained results and chat available', () => {
+  it('renders the button in Discover when errored and chat available', () => {
     setServices();
     render(<QueryResult {...errorStatus(5)} />);
-    expect(screen.getByTestId('discoverQueryErrorAskAiForHelp')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryEditorErrorAskAiForHelp')).toBeInTheDocument();
   });
 
-  it('does not render the button when there are no retained results', () => {
+  it('renders the button on error regardless of the retained results count', () => {
     setServices();
-    render(<QueryResult {...errorStatus(0)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
-  });
+    const { rerender } = render(<QueryResult {...errorStatus(0)} />);
+    expect(screen.getByTestId('discoverQueryEditorErrorAskAiForHelp')).toBeInTheDocument();
 
-  it('does not render the button when resultsCount is undefined', () => {
-    setServices();
-    render(<QueryResult {...errorStatus(undefined)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+    rerender(<QueryResult {...errorStatus(undefined)} />);
+    expect(screen.getByTestId('discoverQueryEditorErrorAskAiForHelp')).toBeInTheDocument();
   });
 
   it('does not render the button outside classic Discover', () => {
     setServices({ appId: 'explore/logs' });
     render(<QueryResult {...errorStatus(5)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+    expect(screen.queryByTestId('discoverQueryEditorErrorAskAiForHelp')).toBeNull();
   });
 
   it('does not render the button when chat is unavailable', () => {
     setServices({ chatAvailable: false });
     render(<QueryResult {...errorStatus(5)} />);
-    expect(screen.queryByTestId('discoverQueryErrorAskAiForHelp')).toBeNull();
+    expect(screen.queryByTestId('discoverQueryEditorErrorAskAiForHelp')).toBeNull();
   });
 
   it('sends the error escalation message to chat on click', () => {
@@ -288,7 +285,7 @@ describe('QueryResult - Ask AI for help', () => {
     setServices({ sendMessageWithWindow });
     render(<QueryResult {...errorStatus(5)} />);
 
-    fireEvent.click(screen.getByTestId('discoverQueryErrorAskAiForHelp'));
+    fireEvent.click(screen.getByTestId('discoverQueryEditorErrorAskAiForHelp'));
 
     expect(sendMessageWithWindow).toHaveBeenCalledTimes(1);
     const [message, attachments] = sendMessageWithWindow.mock.calls[0];
