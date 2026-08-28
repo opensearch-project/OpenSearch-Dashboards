@@ -57,18 +57,12 @@ export const runCreateVisTests = () => {
       cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
-      let beforeCanvasDataUrl;
-      cy.get('.exploreVisContainer canvas')
-        .should('be.visible')
-        .then((canvas) => {
-          beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
-        });
+
+      cy.get('.exploreVisContainer .gauge-title').should('be.visible');
+
       cy.getElementByTestId('showTitleSwitch').click();
-      // compare with new canvas
-      cy.get('.exploreVisContainer canvas').then((canvas) => {
-        const afterCanvasDataUrl = canvas[0].toDataURL();
-        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-      });
+
+      cy.get('.exploreVisContainer .gauge-title').should('not.exist');
     });
     it('should add threshold for gauge chart and reflect immediatly to the gauge visualization', () => {
       const query = `source=${datasetName} | stats count()`;
