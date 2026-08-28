@@ -35,6 +35,10 @@ const mockAssistantActionService = {
 
 const mockChatService = {
   sendToolResult: jest.fn(),
+  setConfirmedDataSourceId: jest.fn(),
+  setSessionDataSourceList: jest.fn(),
+  clearSessionDataSourceList: jest.fn(),
+  validateDataSourceId: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
   getCurrentDataSourceInfo: jest.fn().mockResolvedValue(undefined),
   getCurrentTimeRange: jest.fn().mockReturnValue(undefined),
@@ -64,6 +68,18 @@ describe('ChatEventHandler', () => {
 
     // Reset confirmation requirement to default (no confirmation needed).
     mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(false);
+
+    mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+      observable: {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }),
+      },
+      toolMessage: {
+        id: 'tool-result-default',
+        role: 'tool',
+        content: JSON.stringify({ success: true }),
+        toolCallId: 'default-tool-call',
+      },
+    });
 
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
@@ -338,7 +354,10 @@ describe('ChatEventHandler', () => {
 
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
         status: 'complete',
-        result: undefined,
+        result: {
+          success: false,
+          error: 'Tool execution failed',
+        },
       });
     });
 
@@ -580,7 +599,10 @@ describe('ChatEventHandler', () => {
         error: 'User rejected the tool execution',
         userRejected: true,
         data: {
+          success: false,
+          rejected: true,
           message: 'The user chose not to proceed with this action.',
+          error: 'User rejected the tool execution',
           toolName: 'test_action',
           args: { param: 'value' },
         },
@@ -619,7 +641,7 @@ describe('ChatEventHandler', () => {
       // Should send rejection back to assistant
       expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
         toolCallId,
-        mockRejectedResult,
+        mockRejectedResult.data,
         expect.any(Array),
         expect.any(AbortSignal)
       );

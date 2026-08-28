@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChatService } from './chat_service';
+import {
+  AVAILABLE_DATA_SOURCES_CONTEXT_ID,
+  ChatService,
+  AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+} from './chat_service';
 import { AgUiAgent, BaseEvent } from './ag_ui_agent';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Message } from '../../common/types';
@@ -272,20 +276,35 @@ describe('ChatService', () => {
   });
 
   describe('sendMessage', () => {
+    const createStatefulContextStore = () => {
+      const storedContexts: Array<{ id: string; description: string; value: string }> = [];
+      return {
+        addContext: jest.fn((ctx: any) => {
+          storedContexts.push(ctx);
+        }),
+        removeContextById: jest.fn((id: string) => {
+          const index = storedContexts.findIndex((ctx) => ctx.id === id);
+          if (index !== -1) storedContexts.splice(index, 1);
+        }),
+        getAllContexts: jest.fn(() => storedContexts),
+        getBackendFormattedContexts: jest.fn().mockReturnValue([]),
+      };
+    };
+
     beforeEach(() => {
       // Initialize a thread first - required for sendMessage
       chatService.newThread();
-      // Mock window.assistantContextStore
-      (global as any).window = {
-        assistantContextStore: {
-          getAllContexts: jest.fn().mockReturnValue([]),
-          getBackendFormattedContexts: jest.fn().mockReturnValue([]),
-        },
+      // Mock window.assistantContextStore.
+      (window as any).assistantContextStore = {
+        addContext: jest.fn(),
+        removeContextById: jest.fn(),
+        getAllContexts: jest.fn().mockReturnValue([]),
+        getBackendFormattedContexts: jest.fn().mockReturnValue([]),
       };
     });
 
     afterEach(() => {
-      delete (global as any).window;
+      delete (window as any).assistantContextStore;
     });
 
     it('should send message and return observable with user message', async () => {
@@ -537,6 +556,90 @@ describe('ChatService', () => {
 
       await expect(newService.sendMessage('test', [])).rejects.toThrow(
         'Thread ID is required to send a message'
+      );
+    });
+
+    it('should include session data source history in available-data-sources-context context', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+      const service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient as any
+      );
+
+      (window as any).assistantContextStore = createStatefulContextStore();
+
+      service.newThread();
+      service.setSessionDataSourceList('ds-1');
+      service.setSessionDataSourceList('ds-2');
+      mockUiSettings.get.mockReturnValue(undefined);
+
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const availableDataSourcesContext = runInput.context.find(
+        (ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+
+      expect(availableDataSourcesContext.value).toContain(
+        'Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): "Source One" (id: ds-1), "Source Two" (id: ds-2)'
+      );
+      expect(availableDataSourcesContext.value).toContain(
+        'IMPORTANT — this conversation involves MORE THAN ONE data source.'
+      );
+      expect(availableDataSourcesContext.value).toContain(
+        'A data source being currently active or previously confirmed does NOT satisfy this'
+      );
+    });
+
+    it('should not include available-data-sources-context context when only one data source has appeared in the session', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+      const service = new ChatService(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient as any
+      );
+
+      const contextStore = createStatefulContextStore();
+      (window as any).assistantContextStore = contextStore;
+
+      service.newThread();
+      service.setSessionDataSourceList('ds-1');
+      mockUiSettings.get.mockReturnValue(undefined);
+
+      await service.sendMessage('test', []);
+
+      const runInput = mockAgent.runAgent.mock.calls[0][0];
+      const availableDataSourcesContext = runInput.context.find(
+        (ctx: any) => ctx.description === AVAILABLE_DATA_SOURCES_CONTEXT_DES
+      );
+
+      expect(availableDataSourcesContext).toBeUndefined();
+      expect(contextStore.addContext).not.toHaveBeenCalled();
+      expect(contextStore.removeContextById).toHaveBeenCalledWith(
+        AVAILABLE_DATA_SOURCES_CONTEXT_ID
       );
     });
   });
@@ -1316,6 +1419,22 @@ describe('ChatService', () => {
         expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
         messages
       );
+    });
+  });
+
+  describe('deleteConversation', () => {
+    it('should delete the conversation and clear its persisted data source state', async () => {
+      chatService.conversationHistoryService.deleteConversation = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      const storeDeleteSpy = jest.spyOn((chatService as any).conversationDataSourceStore, 'delete');
+
+      await chatService.deleteConversation('thread-x');
+
+      expect(chatService.conversationHistoryService.deleteConversation).toHaveBeenCalledWith(
+        'thread-x'
+      );
+      expect(storeDeleteSpy).toHaveBeenCalledWith('thread-x');
     });
   });
 
@@ -2298,6 +2417,83 @@ describe('ChatService', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should bypass the cache when forceRefresh is true', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      await service.getAvailableDataSources();
+      await service.getAvailableDataSources(true);
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('validateDataSourceId', () => {
+    let mockSavedObjectsClient: any;
+
+    const buildClient = (ids: string[]) => ({
+      find: jest.fn().mockResolvedValue({
+        savedObjects: ids.map((id) => ({
+          id,
+          attributes: { title: `title-${id}`, dataSourceEngineType: 'OpenSearch' },
+        })),
+      }),
+    });
+
+    beforeEach(() => {
+      mockSavedObjectsClient = buildClient(['ds-1', 'ds-2']);
+    });
+
+    const buildService = (client: any = mockSavedObjectsClient) =>
+      new (ChatService as any)(mockUiSettings, mockCoreChatService, undefined, client);
+
+    it('should accept a known data source id and return its info', async () => {
+      const result = await buildService().validateDataSourceId('ds-1');
+
+      expect(result.valid).toBe(true);
+      expect(result.dataSource).toEqual({ id: 'ds-1', title: 'title-ds-1' });
+    });
+
+    it('should reject an unknown id and report the valid ids', async () => {
+      const result = await buildService().validateDataSourceId('not-a-data-source');
+
+      expect(result.valid).toBe(false);
+      expect(result.dataSource).toBeUndefined();
+      expect(result.availableDataSources.map((ds: any) => ds.id)).toEqual(['ds-1', 'ds-2']);
+    });
+
+    it('should refresh the cached list once before rejecting an id', async () => {
+      const service = buildService();
+      // Warm the cache, then have the client report a newly created data source.
+      await service.getAvailableDataSources();
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [
+          { id: 'ds-1', attributes: { title: 'title-ds-1' } },
+          { id: 'ds-2', attributes: { title: 'title-ds-2' } },
+          { id: 'ds-new', attributes: { title: 'Freshly created' } },
+        ],
+      });
+
+      const result = await service.validateDataSourceId('ds-new');
+
+      expect(result.valid).toBe(true);
+      expect(result.dataSource).toEqual({ id: 'ds-new', title: 'Freshly created' });
+    });
+
+    it('should fail open when the data source list cannot be resolved', async () => {
+      // An empty list also means "no savedObjectsClient" or "find() threw" — validation
+      // must not make switching impossible in that case.
+      const serviceWithoutClient = new (ChatService as any)(mockUiSettings, mockCoreChatService);
+      const result = await serviceWithoutClient.validateDataSourceId('anything');
+
+      expect(result.valid).toBe(true);
+      expect(result.availableDataSources).toEqual([]);
+    });
   });
 
   describe('getCurrentDataSourceId', () => {
@@ -2445,6 +2641,20 @@ describe('ChatService', () => {
     afterEach(() => {
       delete (global as any).window.assistantContextStore;
       jest.clearAllMocks();
+    });
+  });
+
+  describe('session data source list', () => {
+    it('should dedupe data source ids and clear them on newThread', () => {
+      chatService.setSessionDataSourceList('ds-1');
+      chatService.setSessionDataSourceList('ds-1');
+      chatService.setSessionDataSourceList('ds-2');
+
+      expect(chatService.getSessionDataSourceList()).toEqual(['ds-1', 'ds-2']);
+
+      chatService.newThread();
+
+      expect(chatService.getSessionDataSourceList()).toEqual([]);
     });
   });
 

@@ -119,6 +119,32 @@ describe('ToolExecutor', () => {
       );
     });
 
+    it('should let the user override tool arguments before execution', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'confirmed' });
+
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { dataSourceId: 'ds-a', reason: 'assistant suggestion' },
+        'call-123'
+      );
+
+      const pending = confirmationService.getPendingConfirmations();
+      confirmationService.approve(pending[0].id, {
+        dataSourceId: 'ds-b',
+        datasourceTitle: 'Cluster B',
+      });
+
+      await executionPromise;
+
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
+        dataSourceId: 'ds-b',
+        datasourceTitle: 'Cluster B',
+        reason: 'assistant suggestion',
+        confirmed: true,
+      });
+    });
+
     it('should reject execution when user rejects confirmation', async () => {
       mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
 

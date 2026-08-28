@@ -116,6 +116,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
         `Title: ${title}`,
         `Chart Type: ${chartType || visType}`,
         `Saved Object ID: ${savedObjectId}`,
+        `Data Source ID: ${query?.dataset?.dataSource?.id || 'N/A'}`,
+        `Data Source title: ${query?.dataset?.dataSource?.title || 'N/A'}`,
         `Index: ${query?.dataset?.title || 'N/A'}`,
         `Query: ${query?.query || 'N/A'}`,
         `Time Range: ${timeRange ? `${timeRange.from} → ${timeRange.to}` : 'N/A'}`,
@@ -141,6 +143,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
         // sending it as a separate message. A separate message is dropped on the delta-only
         // send path and never renders in the user bubble; carrying it in the message content
         // makes it both visible in the bubble and delivered to the agent.
+        const panelDataSourceId = query?.dataset?.dataSource?.id;
+
         await this.core.chat.sendMessageWithWindow(
           [
             { type: 'binary' as const, mimeType: 'image/jpeg', data: visualizationBase64 },
@@ -151,7 +155,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
             },
             { type: 'text' as const, text: 'Give me a summary for the selected visualization' },
           ],
-          []
+          [],
+          { dataSourceId: panelDataSourceId }
         );
       }
     } catch (error) {

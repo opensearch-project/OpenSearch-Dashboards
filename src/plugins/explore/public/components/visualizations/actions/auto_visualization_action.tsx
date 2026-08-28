@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
 import rison from 'rison-node';
 import {
@@ -28,6 +29,7 @@ import {
 import { VisData } from '../../../components/visualizations/visualization_builder.types';
 import { CommonVisualizationRender } from '../../../components/visualizations/visualization_render';
 import { normalizeResultRows } from '../../../components/visualizations/utils/normalize_result_rows';
+import { isValidMapping } from '../../../components/visualizations/visualization_builder_utils';
 import { visualizationRegistry } from '../../../components/visualizations/visualization_registry';
 import { SAMPLE_SIZE_SETTING, VISUALIZATION_EDITOR_APP_ID } from '../../../../common';
 import { VisEditorNoResults } from '../../../application/in_context_vis_editor/component/vis_editor_no_results';
@@ -380,6 +382,23 @@ export function ChartPreview({
   const [visData, setVisData] = useState<VisData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Every field name the agent put in the axes mapping must exist in the columns the query actually returned.
+  // agent may infer the wrong mapping, so validate first.
+  const validateVisConfig = (
+    visualizationData: VisData,
+    resolvedAxesMapping: AxisFieldNameMappings
+  ) => {
+    const { categoricalColumns, numericalColumns, dateColumns, unknownColumns } = visualizationData;
+
+    const allColumns = [
+      ...(numericalColumns ?? []),
+      ...(categoricalColumns ?? []),
+      ...(dateColumns ?? []),
+      ...(unknownColumns ?? []),
+    ];
+
+    return isValidMapping(resolvedAxesMapping, allColumns);
+  };
   useEffect(() => {
     let cancelled = false;
     const abortController = new AbortController();
@@ -433,6 +452,19 @@ export function ChartPreview({
       <div style={{ height: 250, width: '100%' }}>
         <VisEditorNoResults />
       </div>
+    );
+  }
+
+  if (!validateVisConfig(visData, visConfig.axesMapping ?? {})) {
+    return (
+      <EuiCallOut size="s" color="warning" title="Could not render chart">
+        <EuiText size="xs">
+          {i18n.translate('explore.autoVisualization.validateError', {
+            defaultMessage:
+              ' The axes mapping assumed for this chart does not match the fields returned by the query. Open the visualization editor to configure the axes',
+          })}
+        </EuiText>
+      </EuiCallOut>
     );
   }
 
@@ -553,6 +585,7 @@ export function registerAutoVisualizationAction(
     handler: async (args: AutoVisualizationArgs) => {
       try {
         checkTimeRangeArgsUsable(args);
+
         const { visConfig, query, resolvedChartType, resolvedAxesMapping } = buildVisConfig(args);
         const resolvedTimeRange = getAbsoluteTimeRange(data, args);
         const { originatingApp, dashboardId } = getCurrentDashboardContext(contextProvider);
