@@ -14,10 +14,25 @@
     flex-shrink: 0;
     flex-grow: 0;
     border-bottom: $ouiBorderThin;
+
+    // Narrow container (small window or embedded ~940px canvas): the tabs and the results
+    // action bar share this row. Let it wrap so the action bar drops onto its own line
+    // instead of overflowing/clipping off-screen. Container-query so it also fires when
+    // embedded in a narrow host inside a wide window.
+    @container canvas (max-width: 992px) {
+      flex-wrap: wrap;
+      row-gap: $ouiSizeXS;
+    }
   }
 
   &__tabs {
     flex-shrink: 0;
+
+    // If the tab strip itself still exceeds a very narrow container, scroll rather than clip.
+    @container canvas (max-width: 992px) {
+      max-width: 100%;
+      overflow-x: auto;
+    }
   }
 
   &__tabPanel {

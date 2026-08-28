@@ -13,13 +13,15 @@ import {
 } from '../../../../../../opensearch_dashboards_react/public';
 import { OpenSearchPanel } from './open_search_panel';
 
+// One label for both the tooltip and the aria-label. "Browse" rather than "Open" so it reads
+// distinctly from the query panel's "Open query".
+const browseSearchesLabel = i18n.translate('explore.topNav.openAriaLabel', {
+  defaultMessage: 'Browse searches',
+});
+
 export const openTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('explore.topNav.openTitle', {
-    defaultMessage: 'Open',
-  }),
-  ariaLabel: i18n.translate('explore.topNav.openAriaLabel', {
-    defaultMessage: `Open Saved Search`,
-  }),
+  tooltip: browseSearchesLabel,
+  ariaLabel: browseSearchesLabel,
   testId: 'discoverOpenButton',
   iconType: 'folderOpen',
   controlType: 'icon',
