@@ -1,0 +1,36 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Direct child of the flex-column message list — pin to content size so it
+// doesn't stretch to fill the column's cross axis.
+.askUserCard {
+  align-self: flex-start;
+  width: 100%;
+  height: min-content;
+}
+
+// Placeholder shown while the question is still being generated, before the
+// card renders. Mirrors the message list's "Thinking…" text.
+.askUserCard__generating {
+  align-self: flex-start;
+  color: $euiColorMediumShade;
+  font-style: italic;
+  font-size: 14px;
+  padding: 8px 12px;
+  animation: askUserPulse 2.5s ease-in-out infinite;
+}
+
+// Local copy of the message list's pulse keyframe so this component does not
+// depend on chat_messages.scss being loaded first.
+@keyframes askUserPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

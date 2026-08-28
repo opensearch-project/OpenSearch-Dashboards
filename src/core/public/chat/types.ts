@@ -23,26 +23,7 @@ interface BinaryInputContent {
   name?: string;
 }
 
-interface InputContentDataSource {
-  type: 'data';
-  value: string;
-  mimeType: string;
-}
-
-interface InputContentUrlSource {
-  type: 'url';
-  value: string;
-  mimeType?: string;
-}
-
-type InputContentSource = InputContentDataSource | InputContentUrlSource;
-
-interface ImageInputContent {
-  type: 'image';
-  source: InputContentSource;
-  metadata?: Record<string, unknown>;
-}
-export type InputContent = TextInputContent | BinaryInputContent | ImageInputContent;
+export type InputContent = TextInputContent | BinaryInputContent;
 
 /**
  * Function call interface

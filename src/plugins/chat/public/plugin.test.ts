@@ -513,6 +513,7 @@ describe('ChatPlugin', () => {
         charts: mockDeps.charts,
         suggestedActionsService: expect.any(Object),
         confirmationService: expect.any(Object),
+        humanInputService: expect.any(Object),
       });
     });
 

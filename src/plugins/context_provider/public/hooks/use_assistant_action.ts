@@ -13,6 +13,8 @@ export interface RenderProps<T = any> {
   args?: T;
   result?: any;
   error?: Error;
+  /** The id of the tool call being rendered, for renderers that correlate to external state. */
+  toolCallId?: string;
   onApprove?: () => void;
   onReject?: () => void;
 }
@@ -25,13 +27,14 @@ export interface AssistantAction<T = any> {
     properties: Record<string, any>;
     required: string[];
   };
-  handler?: (args: T) => Promise<any>;
+  handler?: (args: T, toolCallId?: string) => Promise<any>;
   render?: (props: RenderProps<T>) => ReactNode;
   available?: 'enabled' | 'disabled'; // 'disabled' for render-only actions
   enabled?: boolean;
   deps?: any[];
   requiresConfirmation?: boolean; // Whether this action requires user confirmation
   useCustomRenderer?: boolean; // Whether to use custom render method for tool results
+  renderPlacement?: 'above' | 'below'; // Custom-rendered row's position vs the assistant message (default 'above')
 }
 
 export function useAssistantAction<T = any>(action: AssistantAction<T>) {
