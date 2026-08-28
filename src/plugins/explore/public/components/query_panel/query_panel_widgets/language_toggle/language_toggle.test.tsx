@@ -185,14 +185,28 @@ describe('LanguageToggle', () => {
   });
 
   describe('Menu Items', () => {
-    it('disables PPL option when not in prompt mode', () => {
+    it('marks the current PPL option as current, and leaves it enabled', () => {
       renderWithProvider(<LanguageToggle />);
 
       const button = screen.getByTestId('queryPanelFooterLanguageToggle');
       fireEvent.click(button);
 
+      // Selection is conveyed semantically rather than by disabling the control,
+      // which would announce as unavailable and leave the tab order.
       const pplOption = screen.getByTestId('queryPanelFooterLanguageToggle-PPL');
-      expect(pplOption).toBeDisabled();
+      expect(pplOption).toHaveAttribute('aria-current', 'true');
+      expect(pplOption).not.toBeDisabled();
+    });
+
+    it('does nothing when the already-current language is clicked', () => {
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      mockDispatch.mockClear();
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle-PPL'));
+
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockSetQuery).not.toHaveBeenCalled();
     });
 
     it('enables PPL option when in prompt mode', () => {
@@ -219,7 +233,7 @@ describe('LanguageToggle', () => {
       expect(aiOption.closest('button')).not.toBeDisabled();
     });
 
-    it('disables AI option when in prompt mode', () => {
+    it('marks the AI option as current in prompt mode, and leaves it enabled', () => {
       mockSelectIsPromptEditorMode.mockReturnValue(true);
       mockSelectPromptModeIsAvailable.mockReturnValue(true);
 
@@ -229,7 +243,21 @@ describe('LanguageToggle', () => {
       fireEvent.click(button);
 
       const aiOption = screen.getByTestId('queryPanelFooterLanguageToggle-AI');
-      expect(aiOption).toBeDisabled();
+      expect(aiOption).toHaveAttribute('aria-current', 'true');
+      expect(aiOption).not.toBeDisabled();
+    });
+
+    it('does nothing when the AI chip is clicked while already in prompt mode', () => {
+      mockSelectIsPromptEditorMode.mockReturnValue(true);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      mockDispatch.mockClear();
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle-AI'));
+
+      expect(mockDispatch).not.toHaveBeenCalled();
     });
 
     it('does not show AI option when prompt mode is not available', () => {
@@ -621,6 +649,24 @@ describe('LanguageToggle', () => {
 
       expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-AI')).not.toBeInTheDocument();
+    });
+
+    it('labels both columns as groups so the headings are announced as group names', () => {
+      renderWithProvider(<LanguageToggle />);
+
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.getByRole('group', { name: 'Source type' })).toBeInTheDocument();
+      expect(screen.getByRole('group', { name: 'Query language' })).toBeInTheDocument();
+    });
+
+    it('exposes the trigger as a disclosure rather than a menu button', () => {
+      renderWithProvider(<LanguageToggle />);
+
+      // The panel is a labelled group of buttons, not a menu, so aria-haspopup
+      // (whose `true` value means "menu") must not be claimed.
+      const trigger = screen.getByTestId('queryPanelFooterLanguageToggle');
+      expect(trigger).not.toHaveAttribute('aria-haspopup');
     });
 
     it('reflects the popover open state on the trigger', () => {

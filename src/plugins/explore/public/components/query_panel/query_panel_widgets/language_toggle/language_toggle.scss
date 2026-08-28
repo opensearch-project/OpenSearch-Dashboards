@@ -53,16 +53,19 @@
 $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
 
 .exploreLanguagePicker {
+  // The toolbar row (`.exploreQueryPanelWidgets__left`) is a stretch flex
+  // container and this element is its direct child — the trigger itself sits
+  // two levels deeper, behind OuiPopover's anchor, where `align-self` is inert.
+  align-self: center;
+
   // create a new stacking context to allow for gradient border
   isolation: isolate;
 
   &__trigger {
-    // The toolbar row is a stretch flex container, so centre explicitly and
-    // pin the height to the 24px the beta badge this replaced occupied —
-    // the prototype's absolute sizes are drawn at a larger scale than the
-    // Explore toolbar actually runs at.
+    // Pinned to the 24px the beta badge this replaced occupied: the design
+    // prototype's absolute sizes are drawn at a larger scale than the Explore
+    // toolbar actually runs at. Centring is handled on the block above.
     align-items: center;
-    align-self: center;
     background: $ouiColorEmptyShade;
     border: 1px solid $ouiBorderColor;
     border-radius: $ouiSizeL;
@@ -188,13 +191,14 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
     padding: 5px 13px;
     white-space: nowrap;
 
-    &:hover:not(:disabled) {
+    &:hover:not([aria-current="true"]) {
       border-color: $ouiColorPrimary;
     }
 
-    // The selected chip is intentionally disabled — it must still read as
-    // selected rather than as an unavailable control.
-    &:disabled {
+    // The selected chip stays enabled and focusable so it keeps its place in the
+    // tab order and is announced as the current choice, but clicking it does
+    // nothing — so it should not offer a pointer.
+    &[aria-current="true"] {
       cursor: default;
     }
 

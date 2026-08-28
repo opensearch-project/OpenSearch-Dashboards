@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiPopover, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import {
@@ -179,9 +179,20 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
+  // The two columns are labelled groups, so the section headings are announced
+  // as the group name rather than as loose text before the controls.
+  const sourceTypeTitleId = useMemo(() => htmlIdGenerator('exploreLanguagePickerSourceType')(), []);
+  const queryLanguageTitleId = useMemo(
+    () => htmlIdGenerator('exploreLanguagePickerQueryLanguage')(),
+    []
+  );
+
   const languageChips = useMemo(() => {
-    // A chip is selected exactly when it is the mode the editor is already in, and
-    // the selected chip is the one that cannot be clicked again.
+    // A chip is selected exactly when it is the mode the editor is already in.
+    // Selection is announced with `aria-current` rather than by disabling the
+    // chip: a disabled button is announced as unavailable rather than as the
+    // current choice, and drops out of the tab order. Clicking the selected chip
+    // remains a no-op, as it was when the chip was disabled.
     return supportedLanguages.map((langId) => {
       const langConfig = languageService.getLanguage(langId);
       const title = langConfig?.title ?? langId;
@@ -190,10 +201,16 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
         <button
           type="button"
           key={langId}
-          onClick={() =>
-            langId === language ? onItemClick(EditorMode.Query) : onLanguageClick(langId)
-          }
-          disabled={isSelected}
+          onClick={() => {
+            if (isSelected) return;
+            // Same language, but the editor is in prompt mode: go back to query mode.
+            if (langId === language) {
+              onItemClick(EditorMode.Query);
+            } else {
+              onLanguageClick(langId);
+            }
+          }}
+          aria-current={isSelected ? 'true' : undefined}
           className={classNames('exploreLanguagePicker__chip', {
             ['exploreLanguagePicker__chip--selected']: isSelected,
           })}
@@ -213,8 +230,11 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
     return (
       <button
         type="button"
-        onClick={() => onItemClick(EditorMode.Prompt)}
-        disabled={isPromptMode}
+        onClick={() => {
+          if (isPromptMode) return;
+          onItemClick(EditorMode.Prompt);
+        }}
+        aria-current={isPromptMode ? 'true' : undefined}
         className={classNames('exploreLanguagePicker__chip', 'exploreLanguagePicker__chip--ai', {
           ['exploreLanguagePicker__chip--selected']: isPromptMode,
         })}
@@ -233,7 +253,9 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
           <button
             type="button"
             onClick={onButtonClick}
-            aria-haspopup="true"
+            // A disclosure button: `aria-expanded` alone. `aria-haspopup` is
+            // deliberately absent — its `true` value means "menu", and the panel
+            // is a labelled group of buttons, not a menu with roving focus.
             aria-expanded={isPopoverOpen}
             aria-label={openPickerAriaLabel}
             data-test-subj="queryPanelFooterLanguageToggle"
@@ -259,24 +281,37 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
         // pill. The extra 4px lands its top edge at the query editor below.
         offset={4}
         // Focus stays on the trigger. With the default focus trap the popover
-        // focuses the first focusable child on open, which is never the current
-        // language — that chip is disabled — so the chip the user did not pick
-        // came up looking pre-highlighted. This branch of OuiPopover still
+        // focuses the first focusable child on open, so a chip the user did not
+        // pick came up looking pre-highlighted. This branch of OuiPopover still
         // closes on Escape and on an outside click.
         ownFocus={false}
       >
         <div className="exploreLanguagePicker__panel">
-          <div className="exploreLanguagePicker__section exploreLanguagePicker__section--sourceType">
-            <div className="exploreLanguagePicker__sectionTitle">{sourceTypeSectionTitle}</div>
+          <div
+            className="exploreLanguagePicker__section exploreLanguagePicker__section--sourceType"
+            role="group"
+            aria-labelledby={sourceTypeTitleId}
+          >
+            <div className="exploreLanguagePicker__sectionTitle" id={sourceTypeTitleId}>
+              {sourceTypeSectionTitle}
+            </div>
             <div
               className="exploreLanguagePicker__sourceType exploreLanguagePicker__sourceType--selected"
+              aria-current="true"
               data-test-subj={`queryPanelFooterSourceType-${OPENSEARCH_SOURCE_TYPE}`}
             >
               {OPENSEARCH_SOURCE_TYPE}
             </div>
           </div>
-          <div className="exploreLanguagePicker__section">
-            <div className="exploreLanguagePicker__sectionTitle exploreLanguagePicker__sectionTitle--flush">
+          <div
+            className="exploreLanguagePicker__section"
+            role="group"
+            aria-labelledby={queryLanguageTitleId}
+          >
+            <div
+              className="exploreLanguagePicker__sectionTitle exploreLanguagePicker__sectionTitle--flush"
+              id={queryLanguageTitleId}
+            >
               {queryLanguageSectionTitle}
             </div>
             {/* One wrapping row: the AI chip flows with the languages rather
