@@ -111,6 +111,6 @@ describe('LineExclusiveVisOptions', () => {
     render(<LineExclusiveVisOptions {...defaultProps} lineMode="smooth" />);
 
     const smoothInput = screen.getByTestId('smooth');
-    expect(smoothInput).toBeChecked();
+    expect(smoothInput).toHaveAttribute('checked', '');
   });
 });
