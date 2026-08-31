@@ -62,11 +62,12 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
     let toCreate: Map<string, ApplicationUsageDailyWithVersion>;
     do {
       toCreate = new Map();
-      const { saved_objects: rawApplicationUsageTransactional } =
-        await savedObjectsClient.find<ApplicationUsageTransactional>({
-          type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-          perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
-        });
+      const { saved_objects: rawApplicationUsageTransactional } = await savedObjectsClient.find<
+        ApplicationUsageTransactional
+      >({
+        type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+        perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
+      });
 
       for (const doc of rawApplicationUsageTransactional) {
         const {
@@ -104,7 +105,11 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
     } while (toCreate.size > 0);
   } catch (err) {
     logger.warn(`Failed to rollup transactional to daily entries`);
-    logger.warn(err);
+    if (err instanceof Error) {
+      logger.warn(`Details: ${err.message}`);
+    } else {
+      logger.warn(`Details: ${String(err)}`);
+    }
   }
 }
 
@@ -207,6 +212,10 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
     ]);
   } catch (err) {
     logger.warn(`Failed to rollup daily entries to totals`);
-    logger.warn(err);
+    if (err instanceof Error) {
+      logger.warn(`Details: ${err.message}`);
+    } else {
+      logger.warn(`Details: ${String(err)}`);
+    }
   }
 }
