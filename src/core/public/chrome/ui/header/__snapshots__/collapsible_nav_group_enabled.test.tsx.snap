@@ -61,7 +61,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
             class="osdHeaderSearchBar__shortcutHint"
             data-test-subj="global-search-command-palette-shortcut"
           >
-            Ctrl+k
+            Ctrl+K
           </span>
         </div>
       </div>
@@ -227,7 +227,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
             class="osdHeaderSearchBar__shortcutHint"
             data-test-subj="global-search-command-palette-shortcut"
           >
-            Ctrl+k
+            Ctrl+K
           </span>
         </div>
       </div>
