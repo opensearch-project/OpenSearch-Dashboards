@@ -34,6 +34,15 @@ import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 export interface ContainerInfo {
   containerName: string;
   containerId: string;
+  /**
+   * Opaque, container-owned context that the originating container wants to
+   * round-trip through an editor. The embeddable framework and editors treat
+   * this as a pass-through: they carry it out (in {@link EmbeddableEditorState})
+   * and echo it back (in {@link EmbeddablePackageState}) without interpreting
+   * it. A container populates it via the optional
+   * `IContainer.getStateTransferContainerInfoData()` method.
+   */
+  containerData?: Record<string, unknown>;
 }
 
 /**
@@ -59,6 +68,12 @@ export interface EmbeddablePackageState {
   type: string;
   input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
   embeddableId?: string;
+  /**
+   * Echoed back verbatim from the {@link EmbeddableEditorState} the editor was
+   * launched with, so the originating container can recover its own
+   * pass-through context (see {@link ContainerInfo.containerData}).
+   */
+  containerInfo?: ContainerInfo;
 }
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {

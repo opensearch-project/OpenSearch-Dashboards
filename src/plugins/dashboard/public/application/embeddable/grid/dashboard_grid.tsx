@@ -28,102 +28,25 @@
  * under the License.
  */
 
-import 'react-resizable/css/styles.css';
-
-// @ts-ignore
-import sizeMe from 'react-sizeme';
-
 import { injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import { Layout } from 'react-grid-layout';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-
-let lastValidGridSize = 0;
+import { ResponsiveSizedGrid } from './dashboard_responsive_grid';
 
 /**
- * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
- * taller than the current grid.
- * see https://github.com/elastic/kibana/issues/14710.
+ * The classic single react-grid-layout of dashboard panels (GridLayout mode).
+ * The SectionLayout mode is rendered by SectionLayoutContainer, not here;
+ * DashboardViewport picks the renderer based on `layout.type`.
  */
-function ensureWindowScrollsToBottom(event: { clientY: number; pageY: number }) {
-  // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
-  // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
-  const WINDOW_BUFFER = 10;
-  if (event.clientY > window.innerHeight - WINDOW_BUFFER) {
-    window.scrollTo(0, event.pageY + WINDOW_BUFFER - window.innerHeight);
-  }
-}
-
-function ResponsiveGrid({
-  size,
-  isViewMode,
-  layout,
-  onLayoutChange,
-  children,
-  maximizedPanelId,
-  useMargins,
-}: {
-  size: { width: number };
-  isViewMode: boolean;
-  layout: Layout[];
-  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
-  children: JSX.Element[];
-  maximizedPanelId?: string;
-  useMargins: boolean;
-}) {
-  // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
-  // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
-  // grid to re-render so it'll show a grid with a width of 0.
-  lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
-  const classes = classNames({
-    'dshLayout--viewing': isViewMode,
-    'dshLayout--editing': !isViewMode,
-    'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
-    'dshLayout-withoutMargins': !useMargins,
-  });
-
-  const MARGINS = useMargins ? 8 : 0;
-  // We can't take advantage of isDraggable or isResizable due to performance concerns:
-  // https://github.com/STRML/react-grid-layout/issues/240
-  return (
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
-    <ReactGridLayout
-      width={lastValidGridSize}
-      className={classes}
-      isDraggable={true}
-      isResizable={true}
-      // There is a bug with d3 + firefox + elements using transforms.
-      // See https://github.com/elastic/kibana/issues/16870 for more context.
-      useCSSTransforms={false}
-      margin={[MARGINS, MARGINS]}
-      cols={DASHBOARD_GRID_COLUMN_COUNT}
-      rowHeight={DASHBOARD_GRID_HEIGHT}
-      // Pass the named classes of what should get the dragging handle
-      // (.doesnt-exist literally doesnt exist)
-      draggableHandle={isViewMode ? '.doesnt-exist' : '.embPanel__dragger'}
-      layout={layout}
-      onLayoutChange={onLayoutChange}
-      onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
-    >
-      {children}
-    </ReactGridLayout>
-  );
-}
-
-// Using sizeMe sets up the grid to be re-rendered automatically not only when the window size changes, but also
-// when the container size changes, so it works for Full Screen mode switches.
-const config = { monitorWidth: true };
-const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
-
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   opensearchDashboards: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
@@ -211,17 +134,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, (panel) => {
-      return panel.gridData;
-    });
+    return _.map(this.state.panels, (panel) => panel.gridData);
   };
 
   public onLayoutChange = (layout: PanelLayout[]) => {
-    const panels = this.state.panels;
+    const { panels } = this.state;
     const updatedPanels: { [key: string]: DashboardPanelState } = layout.reduce(
       (updatedPanelsAcc, panelLayout) => {
+        const existing = panels[panelLayout.i];
+        if (!existing) return updatedPanelsAcc;
         updatedPanelsAcc[panelLayout.i] = {
-          ...panels[panelLayout.i],
+          ...existing,
           gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
         };
         return updatedPanelsAcc;
@@ -250,16 +173,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   public renderPanels() {
     const { focusedPanelIndex, panels, expandedPanelId } = this.state;
 
-    // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(
-      (key: string) => panels[key] as DashboardPanelState
-    );
+    // Part of our unofficial API - need to render in a consistent order for
+    // plugins to work correctly.
+    const panelsInOrder = Object.keys(panels).map((key) => panels[key] as DashboardPanelState);
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
-      } else {
-        return panelA.gridData.y - panelB.gridData.y;
       }
+      return panelA.gridData.y - panelB.gridData.y;
     });
 
     return _.map(panelsInOrder, (panel) => {
@@ -270,19 +191,21 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         'dshDashboardGrid__item--expanded': expandPanel,
         'dshDashboardGrid__item--hidden': hidePanel,
       });
+
+      const id = panel.explicitInput.id;
       return (
         <div
-          style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
+          style={{ zIndex: focusedPanelIndex === id ? 2 : 'auto' }}
           className={classes}
-          key={panel.explicitInput.id}
+          key={id}
           data-test-subj="dashboardPanel"
           ref={(reactGridItem) => {
-            this.gridItems[panel.explicitInput.id] = reactGridItem;
+            this.gridItems[id] = reactGridItem;
           }}
         >
           <EmbeddableChildPanel
             key={panel.type}
-            embeddableId={panel.explicitInput.id}
+            embeddableId={id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}
           />
@@ -296,7 +219,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       return null;
     }
 
-    const { viewMode } = this.state;
+    const { viewMode, useMargins } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
@@ -304,7 +227,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
         maximizedPanelId={this.state.expandedPanelId!}
-        useMargins={this.state.useMargins}
+        useMargins={useMargins}
       >
         {this.renderPanels()}
       </ResponsiveSizedGrid>

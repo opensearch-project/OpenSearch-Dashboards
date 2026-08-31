@@ -49,6 +49,7 @@ import {
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+import { ContainerInfo } from '../../../../embeddable/public';
 import { VisualizeTopNavIds } from './constants';
 
 interface TopNavConfigParams {
@@ -63,6 +64,7 @@ interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  containerInfo?: ContainerInfo;
   onAppLeave: AppMountParameters['onAppLeave'];
 }
 
@@ -83,6 +85,7 @@ export const getLegacyTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    containerInfo,
     onAppLeave,
   }: TopNavConfigParams,
   {
@@ -243,6 +246,7 @@ export const getNavActions = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    containerInfo,
     onAppLeave,
   }: TopNavConfigParams,
   {
@@ -297,7 +301,14 @@ export const getNavActions = (
 
           if (newlyCreated && stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-              state: { type: VISUALIZE_EMBEDDABLE_TYPE, input: { savedObjectId: id } },
+              state: {
+                type: VISUALIZE_EMBEDDABLE_TYPE,
+                input: { savedObjectId: id },
+                // Echo the originating container's pass-through context (e.g. the
+                // dashboard section this create was launched from) so it can be
+                // recovered when the editor returns.
+                ...(containerInfo ? { containerInfo } : {}),
+              },
             });
           } else {
             application.navigateToApp(originatingApp);
@@ -346,6 +357,10 @@ export const getNavActions = (
       } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
+      // Echo the originating container's pass-through context (e.g. the
+      // dashboard section this create was launched from) so it can be recovered
+      // when the editor returns.
+      ...(containerInfo ? { containerInfo } : {}),
     };
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
@@ -476,6 +491,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    containerInfo,
     onAppLeave,
   }: TopNavConfigParams,
   {

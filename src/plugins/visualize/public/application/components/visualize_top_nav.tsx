@@ -41,6 +41,7 @@ import {
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig, getNavActions, getLegacyTopNavConfig } from '../utils';
+import { ContainerInfo } from '../../../../embeddable/public';
 import { VisualizeTopNavIds } from '../utils/constants';
 import type { IndexPattern } from '../../../../data/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
@@ -55,6 +56,7 @@ interface VisualizeTopNavProps {
   originatingApp?: string;
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
+  containerInfo?: ContainerInfo;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
@@ -70,6 +72,7 @@ const TopNav = ({
   hasUnappliedChanges,
   originatingApp,
   setOriginatingApp,
+  containerInfo,
   visInstance,
   stateContainer,
   visualizationIdFromUrl,
@@ -108,6 +111,7 @@ const TopNav = ({
       visualizationIdFromUrl,
       stateTransfer,
       embeddableId,
+      containerInfo,
       onAppLeave,
     },
     services
@@ -145,6 +149,7 @@ const TopNav = ({
             openInspector,
             originatingApp,
             setOriginatingApp,
+            containerInfo,
             visInstance,
             stateContainer,
             visualizationIdFromUrl,
@@ -164,6 +169,7 @@ const TopNav = ({
             openInspector,
             originatingApp,
             setOriginatingApp,
+            containerInfo,
             visInstance,
             stateContainer,
             visualizationIdFromUrl,
@@ -185,6 +191,7 @@ const TopNav = ({
     originatingApp,
     visInstance,
     setOriginatingApp,
+    containerInfo,
     stateContainer,
     visualizationIdFromUrl,
     services,
