@@ -1,0 +1,91 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Resting elevation so the card floats above the (dot-grid) canvas. On hover the
+// NodeShell's shadow-node-hover class (higher specificity) takes over cleanly.
+.celMetricsCard__shell {
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 10%), 0 4px 8px rgba(0, 0, 0, 6%);
+}
+
+.celMetricsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-weight: 700;
+    font-size: 12px;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: var(--osd-color-text-default, #1a1c21);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Error badge: a small red "!" (not a bare dot) so it reads as "attention"
+  // at a glance and is distinct from the identity color dot; the title/aria
+  // label spells it out on hover.
+  &__errorBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    margin-left: auto;
+    flex-shrink: 0;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: default;
+    /* stylelint-disable @osd/stylelint/no_restricted_values */
+    background-color: var(--osd-color-status-error, #bd271e);
+    color: var(--osd-color-ghost, #fff);
+    /* stylelint-enable @osd/stylelint/no_restricted_values */
+  }
+
+  &__subtitle {
+    font-size: 11px;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: var(--osd-color-text-secondary, #69707d);
+    margin-top: -4px;
+  }
+
+  &__metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__metricHead {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    line-height: 1.2;
+    margin-bottom: 2px;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: var(--osd-color-text-secondary, #69707d);
+  }
+
+  &__metricValue {
+    font-weight: 600;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: var(--osd-color-text-default, #1a1c21);
+  }
+}

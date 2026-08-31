@@ -68,6 +68,15 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
     };
     data?: DataPublicPluginStart;
     groupActions?: boolean;
+    /**
+     * Opt-in (observability: explore / agent_traces). Pins the grouped action icons immediately to
+     * the left of the date picker instead of leaving them next to the screen title, and wraps the
+     * group onto two rows at narrow widths (OUI breakpoint `m` and below) so the screen title stays
+     * on the breadcrumb row while the actions and the date picker drop to their own row.
+     *
+     * Defaults to false so discover, dashboard, visualize and vis_builder keep today's layout.
+     */
+    groupedActionsBeforeDatePicker?: boolean;
     className?: string;
     datePickerRef?: any;
     /**
@@ -110,6 +119,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     showDatasetSelect = false,
     dataSourceMenuConfig,
     groupActions = false,
+    groupedActionsBeforeDatePicker = false,
     screenTitle = '',
     showCancelButton = false,
     showQueryBar = true,
@@ -209,6 +219,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderLayout() {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
+    const groupClassName = classNames('osdTopNavMenuGroup', {
+      'osdTopNavMenuGroup--actionsBeforeDatePicker': groupedActionsBeforeDatePicker,
+    });
 
     // Check if setMenuMountPoint is a meaningful function (not just an empty function)
     const hasValidMountPoint = setMenuMountPoint && setMenuMountPoint.toString() !== '() => {}';
@@ -220,11 +233,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup
-                    alignItems="stretch"
-                    gutterSize="none"
-                    className="osdTopNavMenuGroup"
-                  >
+                  <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
                         <h1>{screenTitle}</h1>
@@ -245,7 +254,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
           case TopNavMenuItemRenderType.OMITTED:
             return screenTitle ? (
               <MountPointPortal setMountPoint={setMenuMountPoint}>
-                <EuiFlexGroup alignItems="stretch" gutterSize="none" className="osdTopNavMenuGroup">
+                <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                     <EuiTitle size="xs">
                       <h1>{screenTitle}</h1>
@@ -263,36 +272,51 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             );
 
           // Show the SearchBar in-place
-          default:
+          default: {
+            const actionsItem = (
+              <EuiFlexItem grow={false} className="osdTopNavMenu">
+                {renderMenu(menuClassName)}
+              </EuiFlexItem>
+            );
+            const datePickerItem = (
+              <EuiFlexItem className="globalDatePicker">
+                <div ref={datePickerRef} />
+                {!showDatePicker && props.customSubmitButton && (
+                  <div className="osdTopNavCustomSubmitButton">{props.customSubmitButton}</div>
+                )}
+              </EuiFlexItem>
+            );
+
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup
-                    alignItems="stretch"
-                    gutterSize="none"
-                    className="osdTopNavMenuGroup"
-                  >
+                  <EuiFlexGroup alignItems="stretch" gutterSize="none" className={groupClassName}>
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
                         <h1>{screenTitle}</h1>
                       </EuiTitle>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="osdTopNavMenu">
-                      {renderMenu(menuClassName)}
-                    </EuiFlexItem>
-                    <EuiFlexItem className="globalDatePicker">
-                      <div ref={datePickerRef} />
-                      {!showDatePicker && props.customSubmitButton && (
-                        <div className="osdTopNavCustomSubmitButton">
-                          {props.customSubmitButton}
-                        </div>
-                      )}
-                    </EuiFlexItem>
+                    {groupedActionsBeforeDatePicker ? (
+                      // One box around the action icons and the date picker. At narrow widths it
+                      // takes a row of its own (see `_index.scss`), which is only expressible if
+                      // the pair is a single flex item — a bare `flex-basis: 100%` on either one
+                      // would strand the other on a third row.
+                      <div className="osdTopNavMenuGroup__actionRow">
+                        {actionsItem}
+                        {datePickerItem}
+                      </div>
+                    ) : (
+                      <>
+                        {actionsItem}
+                        {datePickerItem}
+                      </>
+                    )}
                   </EuiFlexGroup>
                 </MountPointPortal>
                 {renderSearchBar({ datePickerRef })}
               </>
             );
+          }
         }
       }
 

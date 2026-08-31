@@ -110,7 +110,7 @@ export class AssistantActionService {
     }
   };
 
-  executeAction = async (name: string, args: any) => {
+  executeAction = async (name: string, args: any, toolCallId?: string) => {
     const currentState = this.state$.getValue();
     const action = currentState.actions.get(name);
     if (!action) {
@@ -119,7 +119,11 @@ export class AssistantActionService {
     if (!action.handler) {
       throw new Error(`Action ${name} has no handler`);
     }
-    return action.handler(args);
+    // toolCallId is forwarded so handlers that correlate an out-of-band UI
+    // interaction back to the originating tool call (e.g. the `ask_user`
+    // human-in-the-loop tool) can key on it. Existing handlers ignore the
+    // extra argument.
+    return action.handler(args, toolCallId);
   };
 
   updateToolCallState = (id: string, state: Partial<ToolCallState>) => {
@@ -192,6 +196,16 @@ export class AssistantActionService {
     const action = currentState.actions.get(name);
 
     return action?.useCustomRenderer === true;
+  };
+
+  /**
+   * Get where an action's custom-rendered row sits relative to the assistant message
+   */
+  getRenderPlacement = (name: string): 'above' | 'below' => {
+    const currentState = this.state$.getValue();
+    const action = currentState.actions.get(name);
+
+    return action?.renderPlacement ?? 'above';
   };
 
   /**

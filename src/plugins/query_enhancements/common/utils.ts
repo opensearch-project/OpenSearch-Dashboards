@@ -86,6 +86,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
+    ...(context.body?.options && { options: context.body.options }),
     ...(highlight && { highlight }),
     ...(context.body?.queryId && { queryId: context.body.queryId }),
   });

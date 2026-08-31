@@ -95,8 +95,12 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
         values: { buttonText },
       })}
       compressed={true}
+      // Always primary: the "unapplied changes" signal stays on the label and tooltip
+      // (Refresh -> Update / "Click to apply"), not the colour.
       color="primary"
-      fill={needsUpdate}
+      // Not filled when disabled: filled + disabled renders a solid grey block that reads
+      // as an enabled control.
+      fill={!isDisabled}
     >
       {buttonText}
     </EuiSuperUpdateButton>

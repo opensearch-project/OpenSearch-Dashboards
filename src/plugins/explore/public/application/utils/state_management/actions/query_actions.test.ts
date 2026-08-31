@@ -63,6 +63,7 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
@@ -1207,6 +1208,60 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
     });
 
+    it('runs nothing at all for a blank SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: '   ', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue(''),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Neither the empty query nor the histogram's `FROM ()` reaches the cluster.
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks).toHaveLength(0);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/executeQueries/fulfilled' })
+      );
+    });
+
+    it('still runs a non-empty SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'SELECT * FROM logs', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue('SELECT * FROM logs'),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should skip histogram query when language is PROMQL', async () => {
       mockDispatch.mockClear();
 
@@ -2321,6 +2376,41 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(3);
       expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('shouldSkipQueryExecution', () => {
+    const queryFor = (language: string, queryText: unknown): Query =>
+      ({
+        language,
+        query: queryText,
+        dataset: { id: 'd', title: 't', type: 'INDEX_PATTERN' },
+      }) as Query;
+
+    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY ('').
+    it.each([
+      ['', 'empty'],
+      ['   ', 'whitespace only'],
+    ])('skips a %s SQL query (%s)', (queryText) => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', queryText))).toBe(true);
+    });
+
+    it('skips a SQL query whose text is not a string', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', undefined))).toBe(true);
+    });
+
+    it('runs a non-empty SQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', 'SELECT * FROM idx'))).toBe(false);
+    });
+
+    it('still skips a blank PromQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', ''))).toBe(true);
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', 'up'))).toBe(false);
+    });
+
+    // defaultPreparePplQuery turns a blank PPL editor into `source = <table>`.
+    it('runs a blank PPL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PPL', ''))).toBe(false);
     });
   });
 });

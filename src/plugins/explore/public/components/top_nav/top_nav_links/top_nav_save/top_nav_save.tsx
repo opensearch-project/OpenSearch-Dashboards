@@ -12,7 +12,7 @@
 import { i18n } from '@osd/i18n';
 
 import { DataView as Dataset } from 'src/plugins/data/common';
-import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
+import { TopNavMenuButtonUIData, TopNavMenuIconRun } from '../types';
 import { ExploreServices } from '../../../../types';
 import { ExecutionContextSearch } from '../../../../../../expressions';
 import { SavedExplore } from '../../../../types/saved_explore_types';
@@ -31,16 +31,22 @@ import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { UrlTransformationState } from '../../../data_transformations';
 
-export const saveTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('explore.topNav.saveTitle', {
-    defaultMessage: 'Save',
-  }),
-  ariaLabel: i18n.translate('explore.topNav.saveAriaLabel', {
-    defaultMessage: `Save search`,
-  }),
+// One label for both the tooltip and the aria-label: "Save" alone was too easily confused with
+// the query panel's "Save query" control, which persists something different.
+const saveSearchLabel = i18n.translate('explore.topNav.saveAriaLabel', {
+  defaultMessage: 'Save search',
+});
+
+// Save is the primary action, so it renders as a labeled button showing "Save search" at wide
+// widths; the header's narrow breakpoint (_index.scss) hides the label so it collapses to icon-only
+// like the other actions. tooltip stays for the collapsed state; aria-label is the name in both.
+export const saveTopNavData: TopNavMenuButtonUIData = {
+  label: saveSearchLabel,
+  tooltip: saveSearchLabel,
+  ariaLabel: saveSearchLabel,
   testId: 'discoverSaveButton',
   iconType: 'save',
-  controlType: 'icon',
+  controlType: 'button',
 };
 
 export interface SaveStateProps {

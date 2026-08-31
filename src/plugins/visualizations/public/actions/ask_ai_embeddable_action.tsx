@@ -170,28 +170,14 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
 
       // Send visualization screenshot to chat
       if (this.core.chat) {
+        // Merge the image INTO the user message content (a multimodal message) rather than
+        // sending it as a separate message. A separate message is dropped on the delta-only
+        // send path and never renders in the user bubble; carrying it in the message content
+        // makes it both visible in the bubble and delivered to the agent.
         await this.core.chat.sendMessageWithWindow(
           [
-            // TODO adapt type image when strands is introduced
-            // {
-            //   type: 'image',
-            //   source: {
-            //     type: 'data',
-            //     value: visualizationBase64,
-            //     mimeType: 'image/jpeg',
-            //   },
-            // },
-
-            {
-              type: 'binary' as const,
-              mimeType: 'image/jpeg',
-              data: visualizationBase64,
-            },
-
-            {
-              type: 'text',
-              text: 'Give me a summary for the selected visualization',
-            },
+            { type: 'binary' as const, mimeType: 'image/jpeg', data: visualizationBase64 },
+            { type: 'text' as const, text: 'Give me a summary for the selected visualization' },
           ],
           []
         );

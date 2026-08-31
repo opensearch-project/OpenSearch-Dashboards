@@ -8,6 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { PPLLintFixRequestCategory } from '../../../data/public';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
@@ -40,6 +41,13 @@ export interface CurrentChatState {
   threadId: string;
   messages: Message[];
 }
+
+/**
+ * How long a frontend-tool continuation waits before dispatch, so the tool-result write is visible
+ * to a backend that does not reconcile it server-side (ml-commons). See
+ * {@link ChatService.waitBeforeContinuation}.
+ */
+export const CONTINUATION_DISPATCH_DELAY_MS = 3000;
 
 export class ChatService {
   private agent: AgUiAgent;
@@ -304,6 +312,24 @@ export class ChatService {
   }
 
   /**
+   * Contexts sent to the agent, in AG-UI `{description, value}` form. The PPL
+   * quick-fix stamps its approved request id under this category purely so a
+   * cross-window caller can recover it from the store; the model must never
+   * receive it, or it could echo the id back as an apply arg and stand in for
+   * the user's Approve click. Typed against data's category so a rename there
+   * fails to compile here.
+   */
+  private getAgentContexts(): Array<{ description: string; value: string }> {
+    const pplLintFixRequestCategory: PPLLintFixRequestCategory = 'ppl-lint-fix-request';
+    return this.getAllAssistantContexts()
+      .filter((ctx) => !ctx.categories?.includes(pplLintFixRequestCategory))
+      .map((ctx) => ({
+        description: ctx.description,
+        value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+      }));
+  }
+
+  /**
    * Resolve the parsed value of the current page context (the one carrying appId).
    */
   private getPageContextValue(): any | undefined {
@@ -432,15 +458,7 @@ export class ChatService {
     // Get workspace-aware data source ID
     const dataSourceId = await this.getCurrentDataSourceId();
 
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const context = this.getAgentContexts();
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -481,154 +499,6 @@ export class ChatService {
     this.events$ = trackedObservable;
 
     return { observable: trackedObservable, userMessage };
-  }
-
-  /**
-   * Number of consecutive polls in which the tool call id must be observed
-   * in history before we treat it as stably synced. Any pending observation
-   * or error resets the streak. This guards against transient snapshots
-   * where the id briefly appears then disappears as memory is rewritten.
-   */
-  private readonly TOOL_CALL_SYNC_MATURITY_THRESHOLD = 3;
-
-  /**
-   * Sleep for `ms` milliseconds, bailing out early if `signal` aborts.
-   * Returns true if the sleep was interrupted by the signal, false if the
-   * timer completed normally.
-   */
-  private interruptibleSleep(ms: number, signal?: AbortSignal): Promise<boolean> {
-    if (signal?.aborted) return Promise.resolve(true);
-
-    return new Promise<boolean>((resolve) => {
-      const onAbort = () => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      };
-      const timeoutId = setTimeout(() => {
-        signal?.removeEventListener('abort', onAbort);
-        resolve(false);
-      }, ms);
-      signal?.addEventListener('abort', onAbort, { once: true });
-    });
-  }
-
-  /**
-   * Wait for tool call to be synced to agentic memory.
-   *
-   * Polls conversation history up to `maxAttempts` times, waiting `intervalMs`
-   * between polls. Returns one of:
-   * - `{ shouldSend: true,  reason: 'synced' }`              — tool call is in
-   *   history, caller may dispatch the tool result.
-   * - `{ shouldSend: false, reason: 'result_already_exists' }` — another
-   *   window persisted a tool result first; caller should skip dispatch.
-   * - `{ shouldSend: false, reason: 'sync_timeout' }`        — polling
-   *   exhausted without observing sync; caller should skip dispatch and
-   *   surface a resendable failure to the user.
-   * - `{ shouldSend: false, reason: 'no_thread_id' }`        — no thread id
-   *   available; caller should skip dispatch.
-   * - `{ shouldSend: false, reason: 'aborted' }`             — caller-supplied
-   *   abort signal fired; caller should skip dispatch.
-   *
-   * Note: exhausted attempts no longer silently proceed — the caller must
-   * decide whether to resend.
-   */
-  private async waitForToolCallSync(
-    toolCallId: string,
-    maxAttempts: number = 15,
-    intervalMs: number = 1000,
-    signal?: AbortSignal
-  ): Promise<{
-    shouldSend: boolean;
-    reason: 'synced' | 'no_thread_id' | 'result_already_exists' | 'sync_timeout' | 'aborted';
-  }> {
-    if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-    const threadId = this.getThreadId();
-    if (!threadId) return { shouldSend: false, reason: 'no_thread_id' };
-
-    const checkSyncStatus = async (): Promise<'result_already_exists' | 'synced' | 'pending'> => {
-      const events = await this.conversationHistoryService.getConversation(threadId);
-      if (!events) return 'pending';
-
-      const hasToolResult = events.some((event) => {
-        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
-          const messages = (event as any).messages as Message[];
-          return messages.some(
-            (msg) =>
-              msg.role === 'tool' && 'toolCallId' in msg && (msg as any).toolCallId === toolCallId
-          );
-        }
-        return false;
-      });
-      if (hasToolResult) return 'result_already_exists';
-
-      const hasToolCall = events.some((event) => {
-        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
-          const messages = (event as any).messages as Message[];
-          return messages.some(
-            (msg) =>
-              msg.role === 'assistant' &&
-              'toolCalls' in msg &&
-              Array.isArray((msg as any).toolCalls) &&
-              (msg as any).toolCalls.some((tc: any) => tc.id === toolCallId)
-          );
-        }
-        return false;
-      });
-      return hasToolCall ? 'synced' : 'pending';
-    };
-
-    let consecutiveSyncedPolls = 0;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-      try {
-        const status = await checkSyncStatus();
-        if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-        if (status === 'result_already_exists') {
-          return { shouldSend: false, reason: 'result_already_exists' };
-        }
-        if (status === 'synced') {
-          // Require `TOOL_CALL_SYNC_MATURITY_THRESHOLD` consecutive synced
-          // observations before treating the tool call as stably synced.
-          // This guards against transient snapshots where the id appears
-          // briefly before being rewritten.
-          consecutiveSyncedPolls += 1;
-          if (consecutiveSyncedPolls >= this.TOOL_CALL_SYNC_MATURITY_THRESHOLD) {
-            return { shouldSend: true, reason: 'synced' };
-          }
-        } else {
-          // Pending — id not yet in snapshot. Reset the streak so the
-          // maturity guarantee is "consecutive", not "cumulative".
-          consecutiveSyncedPolls = 0;
-        }
-      } catch (error) {
-        // Reset the streak on any error — maturity requires uninterrupted
-        // successful observations.
-        consecutiveSyncedPolls = 0;
-        // eslint-disable-next-line no-console
-        console.warn(`Failed to check tool call sync status (attempt ${attempt + 1}):`, error);
-      }
-
-      // Wait before next attempt (skip the wait after the final attempt).
-      // The sleep is interruptible so `cancelToolResultDispatch` aborts
-      // immediately rather than waiting for the next tick.
-      if (attempt < maxAttempts - 1) {
-        const interrupted = await this.interruptibleSleep(intervalMs, signal);
-        if (interrupted) return { shouldSend: false, reason: 'aborted' };
-      }
-    }
-
-    // Exhausted attempts without observing sync — do NOT silently dispatch.
-    // Surface the failure so the caller can show a system message and let the
-    // user decide whether to resend.
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Tool call sync check timed out after ${maxAttempts} attempts for toolCallId: ${toolCallId}`
-    );
-    return { shouldSend: false, reason: 'sync_timeout' };
   }
 
   public async sendToolResult(
@@ -674,15 +544,7 @@ export class ChatService {
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();
 
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const context = this.getAgentContexts();
 
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =
@@ -708,24 +570,13 @@ export class ChatService {
       forwardedProps: {},
     };
 
-    // Wait for tool call result to be synced to agentic memory only when not including full history
-    // (when full history is included, messages are passed directly so no sync wait needed)
-    if (!includeFullHistory) {
-      const syncResult = await this.waitForToolCallSync(toolCallId, undefined, undefined, signal);
+    // Abort the halted main run so it does not overlap the continuation.
+    this.agent.abort();
 
-      // Sync check returned a reason to skip dispatch:
-      // - `result_already_exists`: another window already persisted a tool
-      //   result. Skip to avoid a duplicate.
-      // - `sync_timeout`: polling exhausted. Skip and surface the failure so
-      //   the user can resend.
-      // - `aborted`: caller cancelled via the AbortSignal. Skip silently.
-      if (!syncResult.shouldSend) {
-        return skip(syncResult.reason as Exclude<typeof syncResult.reason, 'synced'>);
-      }
-    }
-
-    // If the signal fired between sync completion and dispatch, bail out.
-    if (signal?.aborted) return skip('aborted');
+    // The tool result is dispatched directly; the server reconciles it into the persisted
+    // placeholder via its {wire tool_call_id -> native toolUseId} map (ag_ui_strands
+    // session_reconcile), which is idempotent and cross-process.
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
 
     // Fix #11881: wait for the previous run (e.g. the one that requested this
     // frontend tool) to finish before dispatching this tool-result run.
@@ -737,12 +588,52 @@ export class ChatService {
 
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, dataSourceId);
+    const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
-    // Wrap observable to track completion and honor the caller's abort
-    // signal. When the signal fires, we abort the underlying agent fetch and
-    // surface an AbortError to subscribers so they can distinguish a
-    // cancellation from a real stream error.
-    const trackedObservable = new Observable((subscriber: any) => {
+    this.events$ = trackedObservable;
+
+    return { observable: trackedObservable, toolMessage };
+  }
+
+  /**
+   * Wait before dispatching a frontend-tool continuation.
+   *
+   * The agent server reconciles a tool result into its persisted placeholder through the
+   * ag_ui_strands wire->native map, so it needs no delay. ml-commons has no such reconciliation and
+   * no backend polling, so a continuation that arrives before the placeholder write is visible can
+   * miss it. This delay keeps that path working while both backends are supported.
+   *
+   * Resolves false when the caller aborts during the wait, so the dispatch is skipped rather than
+   * firing seconds after cancellation.
+   */
+  private waitBeforeContinuation(signal?: AbortSignal): Promise<boolean> {
+    if (signal?.aborted) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      const onAbort = () => {
+        clearTimeout(timer);
+        resolve(false);
+      };
+      const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve(true);
+      }, CONTINUATION_DISPATCH_DELAY_MS);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  /**
+   * Wrap a run observable to track completion and honor the caller's abort
+   * signal. When the signal fires, we abort the underlying agent fetch and
+   * surface an AbortError to subscribers so they can distinguish a
+   * cancellation from a real stream error. Shared by the single- and
+   * batched-tool-result dispatch paths.
+   */
+  private buildTrackedRunObservable(
+    observable: any,
+    requestId: string,
+    signal?: AbortSignal
+  ): Observable<any> {
+    return new Observable((subscriber: any) => {
       // `settled` guards against emitting twice when the abort handler races
       // with the inner subscription's error/complete (aborting the agent
       // typically triggers both paths).
@@ -786,10 +677,89 @@ export class ChatService {
         subscription.unsubscribe();
       };
     });
+  }
+
+  /**
+   * Batched sibling of {@link sendToolResult}: sends several parallel frontend
+   * tool results in one continuation run (one `role=tool` message per
+   * `toolCallId`), keeping each `toolUse` adjacent to its `toolResult` and
+   * matching the memory store's fan-out shape. Since all calls belong to one
+   * assistant message, a single `abort()` + one sync-poll (on the last id)
+   * covers the batch.
+   */
+  public async sendToolResults(
+    items: Array<{ toolCallId: string; result: any }>,
+    messages: Message[],
+    signal?: AbortSignal
+  ): Promise<{
+    observable: any;
+    toolMessages: ToolMessage[];
+    skipped?: {
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted';
+    };
+  }> {
+    const requestId = this.generateRequestId();
+    this.addActiveRequest(requestId);
+
+    const toolMessages: ToolMessage[] = items.map((item) => ({
+      id: this.generateMessageId(),
+      role: 'tool',
+      content: typeof item.result === 'string' ? item.result : JSON.stringify(item.result),
+      toolCallId: item.toolCallId,
+    }));
+
+    const skip = (
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted'
+    ) => {
+      this.removeActiveRequest(requestId);
+      return {
+        observable: new Observable((subscriber) => subscriber.complete()),
+        toolMessages,
+        skipped: { reason },
+      };
+    };
+
+    if (signal?.aborted) return skip('aborted');
+
+    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+
+    const contextStore = (window as any).assistantContextStore;
+    const allContexts = contextStore ? contextStore.getAllContexts() : [];
+    const context = allContexts.map((ctx: any) => ({
+      description: ctx.description,
+      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+    }));
+
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
+    const mappedMessages = includeFullHistory ? [...messages, ...toolMessages] : [...toolMessages];
+
+    const threadId = this.getThreadId();
+    if (!threadId) return skip('no_thread_id');
+
+    const runInput: RunAgentInput = {
+      threadId,
+      runId: this.generateRunId(),
+      messages: mappedMessages,
+      tools: this.availableTools || [],
+      context,
+      state: {},
+      forwardedProps: {},
+    };
+
+    // Abort the halted main run so it does not overlap the continuation.
+    this.agent.abort();
+
+    // Each result is dispatched directly; the server reconciles it via its wire->native map
+    // (see sendToolResult), which is idempotent and cross-process.
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
+
+    const observable = this.agent.runAgent(runInput, dataSourceId);
+    const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
     this.events$ = trackedObservable;
 
-    return { observable: trackedObservable, toolMessage };
+    return { observable: trackedObservable, toolMessages };
   }
 
   public abort(): void {
@@ -931,13 +901,17 @@ export class ChatService {
       } as ToolCallEndEvent);
     }
 
-    // Return: events before snapshot + patched snapshot + events after snapshot + synthetic events
-    return [
+    // Tool call events belong BEFORE the run ends, as they do in a live stream: RUN_FINISHED clears
+    // the handler's active-message map, so a tool call replayed after it can no longer resolve its
+    // parent and would spawn a second assistant message instead of attaching to the restored one.
+    const rebuilt = [
       ...events.slice(0, snapshotIndex),
       patchedSnapshot,
       ...events.slice(snapshotIndex + 1),
-      ...syntheticEvents,
     ];
+    const runFinishedIndex = rebuilt.findIndex((e) => e.type === EventType.RUN_FINISHED);
+    const insertAt = runFinishedIndex === -1 ? rebuilt.length : runFinishedIndex;
+    return [...rebuilt.slice(0, insertAt), ...syntheticEvents, ...rebuilt.slice(insertAt)];
   }
 
   /**

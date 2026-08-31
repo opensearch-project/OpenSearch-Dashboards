@@ -8,6 +8,13 @@ export const PLUGIN_NAME = 'chat';
 export const CHAT_DEFAULT_AG_UI_URL = 'http://localhost:3000';
 
 /**
+ * Appended to a halted assistant message. Shown live when the user clicks stop, and persisted by
+ * the agent server on halt (OpenSearchSessionManager.HALT_MARKER), so an immediate halt and a
+ * later reload show the same "partial answer + this line". Keep the two definitions in sync.
+ */
+export const HALT_MARKER = '\n\nThe response was stopped.';
+
+/**
  * Prefix used on the tool result content when a tool execution fails locally
  * (e.g. JSON parse error, thrown exception in the executor).
  *

@@ -95,6 +95,12 @@ jest.mock('../../../components/query_panel/query_panel_generated_query', () => (
 jest.mock('../../../components/query_panel/actions/ppl_execute_query_action', () => ({
   usePPLExecuteQueryAction: jest.fn(),
 }));
+// The action module builds PPL-lint-fix tool definitions from the data plugin at
+// load time and registers/cleans up assistant actions on mount/unmount; neither
+// is exercised here, so stub the hook.
+jest.mock('../../../components/query_panel/actions/ppl_lint_fix_action', () => ({
+  usePPLLintFixAction: jest.fn(),
+}));
 // Stubbed to a no-op thunk; the real action pulls in createHistogramConfigs
 // (data plugin) at module load.
 jest.mock('../../utils/state_management/actions/query_editor', () => ({

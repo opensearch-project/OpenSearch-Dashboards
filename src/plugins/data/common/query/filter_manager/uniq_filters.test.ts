@@ -76,5 +76,24 @@ describe('filter manager utilities', () => {
 
       expect(results).toHaveLength(1);
     });
+
+    test('should respect comparator options', () => {
+      const includedFilter = buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+      const excludedFilter = {
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        meta: {
+          ...includedFilter.meta,
+          negate: true,
+        },
+      };
+
+      const results = uniqFilters([includedFilter, excludedFilter], { negate: true });
+
+      expect(results).toEqual([includedFilter, excludedFilter]);
+    });
   });
 });

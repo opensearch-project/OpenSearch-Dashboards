@@ -286,14 +286,6 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
-  const handlerRef = useRef(
-    debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100)
-  );
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
@@ -308,7 +300,12 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     const element = overlayRef.current;
     if (!element) return;
 
-    const handler = handlerRef.current;
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
     const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);

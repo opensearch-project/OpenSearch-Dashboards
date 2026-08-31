@@ -246,18 +246,31 @@ describe('QueryExecutionButton', () => {
     const button = screen.getByTestId('exploreQueryExecutionButton');
     // Verify the button shows "Update" text when needsUpdate is true
     expect(screen.getByText('Update')).toBeInTheDocument();
-    // Verify the button has the primary color (blue) for consistent theming
+    // Always primary: the state shows in the label, not the colour.
     expect(button).toHaveClass('euiButton--primary');
-    // Verify the button is filled when needsUpdate is true
     expect(button).toHaveClass('euiButton--fill');
   });
 
-  it('shows unfilled button in Refresh state', () => {
+  it('shows a filled primary button in Refresh state', () => {
     renderWithProvider(<QueryExecutionButton />);
 
     const button = screen.getByTestId('exploreQueryExecutionButton');
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     expect(button).toHaveClass('euiButton--primary');
+    expect(button).toHaveClass('euiButton--fill');
+  });
+
+  it('shows an unfilled button when the date range is invalid', () => {
+    // Filled + disabled renders a solid grey block that reads as enabled, so the disabled
+    // state stays hollow.
+    mockIsTimeRangeInvalid.mockReturnValue(true);
+
+    renderWithProvider(<QueryExecutionButton />, {
+      dateRange: { from: 'invalid', to: 'invalid' },
+    });
+
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(button).toBeDisabled();
     expect(button).not.toHaveClass('euiButton--fill');
   });
 

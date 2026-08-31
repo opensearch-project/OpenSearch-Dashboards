@@ -201,6 +201,13 @@ export const convertTimelineToMessageRows = (
     return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
   };
 
+  // Helper: Check if every tool call renders its card below the assistant message
+  const rendersBelowMessage = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    const service = AssistantActionService.getInstance();
+    return toolCalls.every((tc) => service.getRenderPlacement(tc.function.name) === 'below');
+  };
+
   // Helper: Find next message that closes a tool call batch
   // (non-assistant message or assistant with content)
   const findBatchEndIndex = (startIndex: number): number => {
@@ -213,10 +220,20 @@ export const convertTimelineToMessageRows = (
     return -1; // No closing message found
   };
 
+  // A tool call yields exactly one row, however many messages reference it: rows are keyed by tool
+  // call id, and each row renders the tool's own card.
+  const emittedToolCallIds = new Set<string>();
+  const takeUnemitted = (toolCalls: ToolCall[]): ToolCall[] =>
+    toolCalls.filter((tc) => {
+      if (emittedToolCallIds.has(tc.id)) return false;
+      emittedToolCallIds.add(tc.id);
+      return true;
+    });
+
   // Helper: Add tool calls as individual rows
   const addIndividualToolCalls = (toolCalls?: ToolCall[]) => {
     if (!toolCalls?.length) return;
-    toolCalls.forEach((tc) => {
+    takeUnemitted(toolCalls).forEach((tc) => {
       result.push({ role: 'toolCall', toolCall: toTimelineToolCall(tc) });
     });
   };
@@ -228,7 +245,7 @@ export const convertTimelineToMessageRows = (
   const addIndividualToolCallsBeforeCurrentMessage = (toolCalls?: ToolCall[]) => {
     if (!toolCalls?.length) return;
     const insertAt = Math.max(0, result.length - 1); // before the just-pushed message
-    const rows = toolCalls.map(
+    const rows = takeUnemitted(toolCalls).map(
       (tc) => ({ role: 'toolCall', toolCall: toTimelineToolCall(tc) }) as const
     );
     result.splice(insertAt, 0, ...rows);
@@ -237,9 +254,11 @@ export const convertTimelineToMessageRows = (
   // Helper: Add tool calls as a group
   const addToolCallGroup = (toolCalls: ToolCall[]) => {
     if (!toolCalls.length) return;
+    const fresh = takeUnemitted(toolCalls);
+    if (!fresh.length) return;
     result.push({
       role: 'toolCallGroup',
-      toolCalls: toolCalls.map(toTimelineToolCall),
+      toolCalls: fresh.map(toTimelineToolCall),
     });
   };
 
@@ -258,9 +277,10 @@ export const convertTimelineToMessageRows = (
     if (!toolCalls?.length) continue;
 
     // If any tool is running, show individually and continue processing.
-    // Custom-renderer tools render above the message text (see helper); others stay below.
+    // Custom-renderer tools render above the message text unless they opt into
+    // renderPlacement: 'below'; others stay below.
     if (hasRunningTool(toolCalls)) {
-      if (hasCustomRendererTool(toolCalls)) {
+      if (hasCustomRendererTool(toolCalls) && !rendersBelowMessage(toolCalls)) {
         addIndividualToolCallsBeforeCurrentMessage(toolCalls);
       } else {
         addIndividualToolCalls(toolCalls);
@@ -268,10 +288,14 @@ export const convertTimelineToMessageRows = (
       continue;
     }
 
-    // If any tool has custom renderer, show individually (don't group) and above
-    // the assistant text so the action card sits at the top of the turn.
+    // If any tool has custom renderer, show individually (don't group). The action
+    // chooses its placement: 'above' (default) tops the turn, 'below' follows the text.
     if (hasCustomRendererTool(toolCalls)) {
-      addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      if (rendersBelowMessage(toolCalls)) {
+        addIndividualToolCalls(toolCalls);
+      } else {
+        addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      }
       continue;
     }
 

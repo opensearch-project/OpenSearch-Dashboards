@@ -4,3 +4,5 @@
  */
 
 export { CelestialEdge } from './celestial_edge';
+export { VolumeEdge } from './volume_edge';
+export type { VolumeEdgeData } from './volume_edge';

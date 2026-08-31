@@ -224,6 +224,143 @@ describe('promqlSearchStrategy', () => {
       });
     });
 
+    it('should name series with the metric name prefix and drop __name__ when no template is provided', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: {
+                  __name__: 'go_goroutines',
+                  instance: 'localhost:9090',
+                  job: 'prometheus',
+                },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'go_goroutines',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values[0]).toBe(
+        'go_goroutines{instance="localhost:9090", job="prometheus"}'
+      );
+    });
+
+    it('should name series from a per-query legendFormat template when provided', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'localhost:9090', job: 'prometheus' },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ legendFormat: '{{job}}-{{instance}}' }],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values[0]).toBe('prometheus-localhost:9090');
+    });
+
+    it('keeps series distinct when a legendFormat template collapses them to one name', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              { metric: { job: 'api', instance: 'node-1' }, values: [[1638316800, 1]] },
+              { metric: { job: 'api', instance: 'node-2' }, values: [[1638316800, 2]] },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ legendFormat: '{{job}}' }],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values).toEqual(['api {instance="node-1"}', 'api {instance="node-2"}']);
+      expect(new Set(seriesField?.values).size).toBe(2);
+    });
+
     it('should create instant schema with all label keys', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
@@ -962,6 +1099,181 @@ describe('promqlSearchStrategy', () => {
     });
   });
 
+  describe('per-query options', () => {
+    const seriesResponse = (value: number) => ({
+      queryId: 'query-1',
+      sessionId: 'session-1',
+      results: {
+        'dataset-1': {
+          resultType: 'matrix',
+          result: [{ metric: { instance: 'server1' }, values: [[1638316800, value]] }],
+        },
+      },
+    });
+
+    it('applies each query its own legend template', async () => {
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(seriesResponse(100))
+        .mockResolvedValueOnce(seriesResponse(200));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'metric_a; metric_b',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [
+                { legendFormat: '{{instance}}' },
+                { legendFormat: 'srv-{{instance}}' },
+              ],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values).toEqual(['A: server1', 'B: srv-server1']);
+    });
+
+    it('resolves each query its own step from its min step', async () => {
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(seriesResponse(100))
+        .mockResolvedValueOnce(seriesResponse(200));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'metric_a; metric_b',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ minStep: '5m' }, {}],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callA = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      const callB = (prometheusManager.query as jest.Mock).mock.calls[1][2];
+      expect(callA.body.query).toBe('metric_a');
+      expect(callA.body.options.step).toBe('300');
+      expect(callB.body.query).toBe('metric_b');
+      expect(callB.body.options.step).toBe('15');
+    });
+
+    it('interpolates PromQL macros server-side using the resolved step', async () => {
+      mockPrometheusManagerQuery(seriesResponse(100));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'rate(x[$__rate_interval])',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ minStep: '1m' }],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.query).toBe('rate(x[4m])');
+    });
+
+    it('reports the step and rate window each query resolved to', async () => {
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(seriesResponse(100))
+        .mockResolvedValueOnce(seriesResponse(200));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: 'metric_a; metric_b',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              maxDataPoints: 100,
+              perQueryOptions: [{ minStep: '5m' }, {}],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toEqual({
+        maxDataPoints: 100,
+        queries: [
+          { label: 'A', stepSec: 300, rateIntervalSec: 1200, minStep: '5m' },
+          { label: 'B', stepSec: 50, rateIntervalSec: 240 },
+        ],
+      });
+    });
+
+    it('defaults the reported resolution when max data points is unset', async () => {
+      mockPrometheusManagerQuery(seriesResponse(100));
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'metric_a', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toEqual({
+        maxDataPoints: 1440,
+        queries: [{ label: 'A', stepSec: 15, rateIntervalSec: 240 }],
+      });
+    });
+  });
+
   describe('instant query support', () => {
     it('should pass instant query params when options.queryType is INSTANT', async () => {
       const mockResponse = {
@@ -982,7 +1294,7 @@ describe('promqlSearchStrategy', () => {
 
       mockPrometheusManagerQuery(mockResponse);
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
-      await strategy.search(
+      const result = await strategy.search(
         emptyRequestHandlerContext,
         {
           body: {
@@ -1006,6 +1318,8 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.options.start).toBeUndefined();
       expect(callArgs.body.options.end).toBeUndefined();
       expect(callArgs.body.options.step).toBeUndefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta.stepResolution).toBeUndefined();
     });
 
     it('should handle instant query response with singular value field', async () => {

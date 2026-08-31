@@ -46,6 +46,7 @@ import {
   PPLLintFixTestToolRegistration,
   PPL_LINT_FIX_DATA_TOOL_NAME,
 } from '../../chat_tools/ppl_lint_fix_tool_registration';
+import { useIsPPLLintFixFlowActive } from '../../chat_tools/use_ppl_lint_fix_flow_active';
 import { ContextProviderStart } from '../../../../../plugins/context_provider/public';
 
 interface StatefulSearchBarDeps {
@@ -151,6 +152,9 @@ export function createSearchBar({ core, storage, data, contextProvider }: Statef
     const pplLintFixEnabled = Boolean(
       contextProvider?.hooks?.useAssistantAction && props.showQueryInput !== false
     );
+    // Register the apply/test tools only during an active fix flow, so an unrelated agent
+    // turn can't call test_ppl_lint_fix_data with no session (missing-request).
+    const pplLintFixFlowActive = useIsPPLLintFixFlowActive();
 
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
@@ -214,12 +218,12 @@ export function createSearchBar({ core, storage, data, contextProvider }: Statef
           queryString={data.query.queryString}
           useAssistantAction={contextProvider?.hooks?.useAssistantAction}
           removeContextById={removePPLLintFixContextById}
-          enabled={pplLintFixEnabled}
+          enabled={pplLintFixEnabled && pplLintFixFlowActive}
         />
         <PPLLintFixTestToolRegistration
           queryString={data.query.queryString}
           useAssistantAction={contextProvider?.hooks?.useAssistantAction}
-          enabled={pplLintFixEnabled}
+          enabled={pplLintFixEnabled && pplLintFixFlowActive}
         />
         <SearchBar
           showAutoRefreshOnly={props.showAutoRefreshOnly}

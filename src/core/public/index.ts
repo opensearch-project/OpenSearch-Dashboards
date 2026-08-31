@@ -456,6 +456,8 @@ export {
   ChatServiceStart,
   ChatImplementationFunctions,
   Message,
+  UserMessage,
+  InputContent,
   ChatWindowState,
   SavedConversation,
   ConversationMemoryProvider,
