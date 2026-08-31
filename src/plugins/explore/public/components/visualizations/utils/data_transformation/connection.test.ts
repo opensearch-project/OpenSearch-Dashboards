@@ -20,6 +20,8 @@ describe('parseThresholdDuration', () => {
     ['1h', 3_600_000],
     ['1.5h', 5_400_000],
     ['05m', 300_000],
+    ['500ms', 500],
+    ['2d', 172_800_000],
   ])('parses %s', (input, expected) => {
     expect(parseThresholdDuration(input)).toBe(expected);
   });
@@ -33,7 +35,7 @@ describe('parseThresholdDuration', () => {
     ['a bare number', '5'],
     ['a bare unit', 'h'],
     ['an unsupported unit', '5w'],
-    ['milliseconds', '1ms'],
+    // ['milliseconds', '1ms'],
   ])('returns undefined for %s', (_label, input) => {
     expect(parseThresholdDuration(input)).toBeUndefined();
   });

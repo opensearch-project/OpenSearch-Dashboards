@@ -179,7 +179,7 @@ export const AreaExclusiveVisOptions = ({
             disconnectValues={disconnectValues}
             onConnectNullValuesChange={onConnectNullValuesChange}
             onDisconnectValuesChange={onDisconnectValuesChange}
-            testsubj="line"
+            testsubj="area"
           />
         </>
       )}
