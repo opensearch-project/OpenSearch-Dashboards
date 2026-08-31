@@ -133,4 +133,25 @@ describe('SplitContainer', () => {
 
     expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '60px' });
   });
+
+  it('uses 300px as the default horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer groups={createGroups(1)} layout="horizontal" renderChart={mockRenderChart} />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '300px' });
+  });
+
+  it('uses the configured horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer
+        groups={createGroups(1)}
+        layout="horizontal"
+        horizontalItemMinWidth={180}
+        renderChart={mockRenderChart}
+      />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '180px' });
+  });
 });
