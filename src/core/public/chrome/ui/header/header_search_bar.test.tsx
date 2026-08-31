@@ -145,7 +145,7 @@ describe('<HeaderSearchBar />', () => {
     );
 
     expect(getByTestId('global-search-command-palette-shortcut')).toHaveTextContent(
-      /^(⌘\+k|Ctrl\+k)$/
+      /^(⌘K|Ctrl\+K)$/
     );
   });
 
@@ -235,6 +235,49 @@ describe('<HeaderSearchBar />', () => {
     await waitFor(() => {
       expect(queryByText('No results found.')).toBeInTheDocument();
     });
+  });
+
+  it('shows an error message when search fails and clears it on retry', async () => {
+    const search = jest.fn().mockImplementation((value: string) => {
+      if (value === 'failure') {
+        throw new Error('search failed');
+      }
+
+      return Promise.resolve(
+        value ? [createResult('page-result', <EuiText>page result</EuiText>)] : []
+      );
+    });
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'pages',
+        type: 'PAGES',
+        run: search,
+      },
+    ];
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={commands} panel />
+    );
+
+    fireEvent.change(getByTestId('global-search-input'), {
+      target: { value: 'failure' },
+    });
+
+    await waitFor(() => {
+      expect(queryByText('Unable to load search results.')).toBeInTheDocument();
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Global search failed', expect.any(Error));
+
+    fireEvent.change(getByTestId('global-search-input'), {
+      target: { value: 'page' },
+    });
+
+    await waitFor(() => {
+      expect(queryByText('page result')).toBeInTheDocument();
+    });
+    expect(queryByText('Unable to load search results.')).not.toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('render HeaderSearchBar with search saved objects', async () => {

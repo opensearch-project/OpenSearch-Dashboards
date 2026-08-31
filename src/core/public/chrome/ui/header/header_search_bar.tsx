@@ -20,7 +20,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { GlobalSearchCommand, GlobalSearchResult } from '../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../global_search/run_global_search';
+import { KeyStringParser } from '../../../keyboard_shortcut/key_parser';
 import './header_search_bar.scss';
+
+const keyStringParser = new KeyStringParser();
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
@@ -90,15 +93,13 @@ export const HeaderSearchBar = ({
 }: Props) => {
   const [resultGroups, setResultGroups] = useState<GlobalSearchResultGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSearchError, setHasSearchError] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const enterKeyDownRef = useRef(false);
   const searchBarInputRef = useRef<HTMLInputElement | null>(null);
   const activeAbortControllerRef = useRef<AbortController>();
-  const commandPaletteShortcutLabel =
-    typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('mac')
-      ? '⌘+k'
-      : 'Ctrl+k';
+  const commandPaletteShortcutLabel = keyStringParser.getDisplayString('cmd+k');
 
   const clearSearch = useCallback(() => {
     activeAbortControllerRef.current?.abort('Global search closed');
@@ -106,6 +107,7 @@ export const HeaderSearchBar = ({
     setIsPopoverOpen(false);
     setResultGroups([]);
     setIsLoading(false);
+    setHasSearchError(false);
     setSearchValue('');
   }, []);
 
@@ -171,7 +173,13 @@ export const HeaderSearchBar = ({
 
   const searchResultSections = (
     <>
-      {resultGroups.length ? (
+      {hasSearchError ? (
+        <EuiText color="subdued" size="xs">
+          {i18n.translate('core.globalSearch.error.description', {
+            defaultMessage: 'Unable to load search results.',
+          })}
+        </EuiText>
+      ) : resultGroups.length ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           {resultGroups.map((group) => (
             <EuiFlexItem key={group.type}>{resultSection(group)}</EuiFlexItem>
@@ -207,27 +215,52 @@ export const HeaderSearchBar = ({
         activeAbortControllerRef.current = undefined;
         setResultGroups([]);
         setIsLoading(false);
+        setHasSearchError(false);
         return;
       }
 
       const abortController = new AbortController();
       activeAbortControllerRef.current = abortController;
       setIsPopoverOpen(true);
+      setHasSearchError(false);
       setIsLoading(true);
 
-      const groups = await runGlobalSearch({
-        commands: globalSearchCommands,
-        value,
-        abortSignal: abortController.signal,
-      });
+      try {
+        const groups = await runGlobalSearch({
+          commands: globalSearchCommands,
+          value,
+          abortSignal: abortController.signal,
+        });
 
-      if (abortController.signal.aborted || activeAbortControllerRef.current !== abortController) {
-        return;
+        if (
+          abortController.signal.aborted ||
+          activeAbortControllerRef.current !== abortController
+        ) {
+          return;
+        }
+
+        setResultGroups(groups);
+      } catch (error) {
+        if (
+          abortController.signal.aborted ||
+          activeAbortControllerRef.current !== abortController
+        ) {
+          return;
+        }
+
+        // eslint-disable-next-line no-console
+        console.error('Global search failed', error);
+        setResultGroups([]);
+        setHasSearchError(true);
+      } finally {
+        if (
+          !abortController.signal.aborted &&
+          activeAbortControllerRef.current === abortController
+        ) {
+          activeAbortControllerRef.current = undefined;
+          setIsLoading(false);
+        }
       }
-
-      activeAbortControllerRef.current = undefined;
-      setIsLoading(false);
-      setResultGroups(groups);
     },
     [globalSearchCommands]
   );

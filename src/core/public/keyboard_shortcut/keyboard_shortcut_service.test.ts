@@ -771,6 +771,26 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Service Cleanup', () => {
+    it('should cancel a pending sequence on stop', () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(window, 'clearTimeout');
+      const start = service.start();
+      start.register({
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      });
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      service.stop();
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
     it('should clear all data structures on stop', () => {
       const start = service.start();
       const shortcut: ShortcutDefinition = {

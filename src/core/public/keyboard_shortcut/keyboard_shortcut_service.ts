@@ -50,7 +50,7 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
-    this.sequenceHandler = new SequenceHandler();
+    this.sequenceHandler.cancel();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
