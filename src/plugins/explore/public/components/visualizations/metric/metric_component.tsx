@@ -161,7 +161,7 @@ function calculateMetricTextData(
   const selectedUnit = getUnitById(styles?.unitId);
 
   // Determine threshold-based color
-  const finiteValues = numericalValues.map((v) => Number(v)).filter((n) => Number.isFinite(n));
+  const finiteValues = numericalValues.filter((n): n is number => Number.isFinite(n));
   const metricRange = finiteValues.length
     ? { min: Math.min(...finiteValues), max: Math.max(...finiteValues) }
     : undefined;

@@ -339,10 +339,10 @@ const buildSizeVisualMap = (
 });
 
 // for size-only scatter, build a second threshold visualMap alongside the size one
-const buildThresholdColorVisualMap = (styles: ScatterChartStyle) => {
+const buildThresholdColorVisualMap = (styles: ScatterChartStyle, dataRange?: DataRange) => {
   if (!styles.useThresholdColor) return undefined;
 
-  const pieces = buildThresholds(styles);
+  const pieces = buildThresholds(styles, dataRange);
   if (pieces.length === 0) return undefined;
 
   return {
@@ -357,11 +357,12 @@ const buildThresholdColorVisualMap = (styles: ScatterChartStyle) => {
 const buildSizeVisualMaps = (
   styles: ScatterChartStyle,
   sizeRange: { min: number; max: number },
-  allowThresholdColor: boolean
+  allowThresholdColor: boolean,
+  dataRange?: DataRange
 ) => {
   const sizeVisualMap = buildSizeVisualMap(styles, sizeRange);
   const thresholdColorVisualMap = allowThresholdColor
-    ? buildThresholdColorVisualMap(styles)
+    ? buildThresholdColorVisualMap(styles, dataRange)
     : undefined;
 
   return thresholdColorVisualMap ? [sizeVisualMap, thresholdColorVisualMap] : [sizeVisualMap];
@@ -433,7 +434,7 @@ export const createSizeScatterSeries =
         },
       ] as ScatterSeriesOption[];
 
-      newState.visualMap = buildSizeVisualMaps(styles, sizeRange, true);
+      newState.visualMap = buildSizeVisualMaps(styles, sizeRange, true, dataRange);
       newState.legendItems = [];
 
       return newState;

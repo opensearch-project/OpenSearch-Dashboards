@@ -260,10 +260,8 @@ export const computeDataRange = (
     return undefined;
   }
 
-  const toFinite = (v: unknown): number | undefined => {
-    const n = typeof v === 'number' ? v : Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  };
+  const toFinite = (v: unknown): number | undefined =>
+    typeof v === 'number' && Number.isFinite(v) ? v : undefined;
 
   const header = data[0] as string[];
   const [, ...rows] = data;
@@ -280,18 +278,19 @@ export const computeDataRange = (
 
   for (const row of rows) {
     if (stacked && colIndexes.length > 1) {
-      let sum = 0;
-      let hasSum = false;
+      let positiveSum = 0;
+      let negativeSum = 0;
+      let hasValue = false;
       for (const index of colIndexes) {
         const value = toFinite(row[index]);
-        if (value !== undefined) {
-          sum += value;
-          hasSum = true;
-        }
+        if (value === undefined) continue;
+        hasValue = true;
+        if (value >= 0) positiveSum += value;
+        else negativeSum += value;
       }
-      if (hasSum) {
-        if (sum < stackMin) stackMin = sum;
-        if (sum > stackMax) stackMax = sum;
+      if (hasValue) {
+        if (negativeSum < stackMin) stackMin = negativeSum;
+        if (positiveSum > stackMax) stackMax = positiveSum;
       }
     }
     for (const index of colIndexes) {

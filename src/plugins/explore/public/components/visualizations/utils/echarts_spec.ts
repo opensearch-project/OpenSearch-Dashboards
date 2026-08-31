@@ -153,8 +153,12 @@ export const buildDataRange =
     if (dataRange && fromBase) {
       // Bar chart compute min base from baseline
       dataRange.min = Math.min(0, dataRange.min);
+      dataRange.max = Math.max(0, dataRange.max);
       if (dataRange.stackMin !== undefined) {
         dataRange.stackMin = Math.min(0, dataRange.stackMin);
+      }
+      if (dataRange.stackMax !== undefined) {
+        dataRange.stackMax = Math.max(0, dataRange.stackMax);
       }
     }
 

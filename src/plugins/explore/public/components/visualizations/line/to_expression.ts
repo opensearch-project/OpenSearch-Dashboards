@@ -98,7 +98,7 @@ export const createLineBarChart = (
     buildAxisConfigs,
     applyTimeRange,
     buildDataRange({
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      seriesFields: valueField,
     }),
     createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
     assembleSpec

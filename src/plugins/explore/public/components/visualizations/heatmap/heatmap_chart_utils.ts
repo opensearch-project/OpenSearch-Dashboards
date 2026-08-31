@@ -63,7 +63,12 @@ const buildVisualMap = (visualMap: any, styles: HeatmapChartStyle, numericalValu
   };
 
   if (styles.useThresholdColor) {
-    return visualMap.map((vm: any) => ({ ...vm, ...baseStyle }));
+    // for out of range rect, set it DEFAULT_GREY
+    return visualMap.map((vm: any) => ({
+      ...vm,
+      ...baseStyle,
+      outOfRange: { color: DEFAULT_GREY, opacity: 0.15 },
+    }));
   }
 
   const { min, max } = styles.exclusive.percentageMode
