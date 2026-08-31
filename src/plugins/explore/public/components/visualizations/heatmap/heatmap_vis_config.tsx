@@ -150,7 +150,7 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
             [AxisRole.COLOR]: color,
           });
           props.onLegend?.(legendItems);
-          return <EchartsRender spec={spec ?? {}} />;
+          return <EchartsRender spec={spec ?? {}} legendSelected$={props.legendSelected$} />;
         },
       },
     ];

@@ -51,7 +51,15 @@ const defaultStyleOptions: TableChartStyle = {
   globalAlignment: 'left',
 };
 
-const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+const CUSTOM_LEGEND_CHART_TYPES = [
+  'area',
+  'line',
+  'bar',
+  'pie',
+  'scatter',
+  'state_timeline',
+  'heatmap',
+];
 const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
 const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
 const SUPPORT_ONE_LEGEND = ['heatmap', 'state_timeline'];
