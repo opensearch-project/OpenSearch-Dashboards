@@ -8,9 +8,11 @@ import { DisableMode, ConnectNullValuesOption, DisconnectValuesOption } from '..
 export const DEFAULT_GAP_THRESHOLD = '1h';
 
 const DURATION_UNIT_MS: Record<string, number> = {
+  ms: 1,
   s: 1000,
   m: 60 * 1000,
   h: 60 * 60 * 1000,
+  d: 60 * 60 * 1000 * 24,
 };
 
 interface StyleOptions {
@@ -19,7 +21,7 @@ interface StyleOptions {
 }
 
 export const parseThresholdDuration = (threshold?: string): number | undefined => {
-  const match = threshold?.trim().match(/^(\d+(?:\.\d+)?)\s*(s|m|h)$/i);
+  const match = threshold?.trim().match(/^(\d+(?:\.\d+)?)\s*(ms|s|m|h|d)$/i);
 
   if (!match) {
     return undefined;
