@@ -15,7 +15,7 @@ import {
   RefetchSubject,
   ResultStatus,
 } from '../utils/use_search';
-import { extractQueryError } from '../utils/format_error';
+import { extractQueryError } from '../../../../../data/common';
 
 export interface LanguageToolConfig {
   /** Language key stored on the query bar (matches query.language in page context). */
@@ -203,7 +203,9 @@ const createApplyHandler =
         }
 
         const noResults = status === ResultStatus.NO_RESULTS;
-        const resultsCount = noResults ? 0 : finalData.hits || finalData.rows?.length || undefined;
+        const resultsCount = noResults
+          ? 0
+          : (finalData.hits ?? finalData.rows?.length ?? undefined);
         return {
           success: true,
           executed: true,

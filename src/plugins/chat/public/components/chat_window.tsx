@@ -21,7 +21,8 @@ import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ConfirmationRequest } from '../services/confirmation_service';
-import { type Event as ChatEvent } from '../../common/events';
+import { AskUserRequest } from '../services/human_input_service';
+import { type Event as ChatEvent, EventType } from '../../common/events';
 import type { InputContent, Message, SystemMessage, UserMessage } from '../../common/types';
 import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
@@ -65,7 +66,7 @@ export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   ({ layoutMode = ChatLayoutMode.SIDECAR, onClose }, ref) => {
     const service = AssistantActionService.getInstance();
-    const { chatService, confirmationService } = useChatContext();
+    const { chatService, confirmationService, humanInputService } = useChatContext();
     const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
     const toasts = services.core?.notifications?.toasts;
     const [timeline, setTimeline] = useState<Message[]>([]);
@@ -75,6 +76,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(
       null
     );
+    const [pendingAskUser, setPendingAskUser] = useState<AskUserRequest | null>(null);
     const [showHistory, setShowHistory] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const handleSendRef = useRef<typeof handleSend>();
@@ -145,6 +147,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     }, [confirmationService]);
 
+    // Track a pending ask_user question only to lock the composer; the question
+    // UI is rendered inline at its tool-call position by InlineAskUser, not here.
+    useEffect(() => {
+      const subscription = humanInputService.getPending$().subscribe((requests) => {
+        setPendingAskUser(requests.length > 0 ? requests[0] : null);
+      });
+
+      return () => subscription.unsubscribe();
+    }, [humanInputService]);
+
     // Get telemetry recorder from core services
     const telemetryRecorder = useMemo(
       () => services.core?.telemetry?.getPluginRecorder('chat'),
@@ -183,12 +195,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     }, [service, chatService]);
 
-    // Clean up event handler on component unmount
+    // Clean up event handler and human input service on component unmount
     useEffect(() => {
       return () => {
+        humanInputService.cleanAll();
         eventHandler.clearState();
       };
-    }, [eventHandler]);
+    }, [eventHandler, humanInputService]);
 
     // Initialize with fresh conversation on mount
     useMount(() => {
@@ -277,12 +290,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             },
             error: (error: any) => {
               console.error('Subscription error:', error);
+              eventHandler.handleStreamTermination();
               isStreamingRef.current = false;
               setStartResponse(false);
               setIsStreaming(false);
               currentSubscriptionRef.current = null;
             },
             complete: () => {
+              eventHandler.handleStreamTermination();
               isStreamingRef.current = false;
               setStartResponse(false);
               setIsStreaming(false);
@@ -450,20 +465,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Prepare additional messages for sending (but don't add to timeline yet)
       const additionalMessages = options?.messages ?? [];
-      // Only add screenshot data if messages not provided
+
+      // Merge the screenshot INTO the user message content rather than sending it as a separate
+      // message. A separate message is dropped on the delta-only send path (only the single user
+      // message is transmitted when full history is off), so the agent would never see the image.
       if (!options?.input && typeof messageContent === 'string' && screenshotData) {
         messageContent = [
-          // {
-          //   type: 'image',
-          //   source: {
-          //     type: 'data',
-          //     value: screenshotData.base64,
-          //     mimeType: screenshotData.mimeType,
-          //   },
-          // },
-
-          // binary is deprecated
-          // change to image when strands is introduced.
+          // binary is deprecated on the wire; the agent server upgrades it to an image block.
           {
             type: 'binary' as const,
             mimeType: screenshotData.mimeType,
@@ -491,7 +499,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         if (!result.valid) return;
 
         // Check if this is a slash command — pass userMsg so executeSlashCommand
-        // can replace it (by id) with the resolved command message.
+        // can replace it (by id) with the resolved command message. Only plain-text
+        // input can be a command (a multimodal message carries an image block).
         if (typeof messageContent === 'string') {
           const handled = await executeSlashCommand(messageContent, messagesToSend, userMsg);
           if (handled) return;
@@ -561,13 +570,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         if (isStreamingRef.current || hasActiveToolCallsRef.current) return;
         // Remove the error message from timeline
         setTimelineSynced((prev) => prev.filter((msg) => msg.id !== messageId));
-        await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
+        // If toolResult is a batch array (from sendToolResultsToAssistant's sync_timeout),
+        // dispatch it through the batched path so each item's toolCallId is preserved.
+        if (Array.isArray(toolResult)) {
+          await eventHandler.sendToolResultsToAssistant(toolResult);
+        } else {
+          await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
+        }
       },
       [eventHandler, setTimelineSynced]
     );
 
     // Helper function to stop streaming and clean up subscriptions
     const stopStreaming = useCallback(() => {
+      // Mark the streaming message as halted before tearing down, so the user immediately sees
+      // "partial answer + stop line" — matching what the agent server persists for the reload.
+      eventHandler.markStreamingMessageHalted();
       // Abort the current streaming request
       chatService.abort();
       // Unsubscribe from current observable if exists
@@ -598,13 +616,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setTimelineSynced([]);
       setCurrentRunId(null);
       setPendingConfirmation(null);
+      setPendingAskUser(null);
       setPendingMessage(null);
       setAvailableDataSources([]);
       isValidatingRef.current = false;
       setIsValidating(false);
       confirmationService.cleanAll();
+      humanInputService.cleanAll();
       setShowHistory(false);
-    }, [chatService, confirmationService, eventHandler, stopStreaming, setTimelineSynced]);
+    }, [
+      chatService,
+      confirmationService,
+      eventHandler,
+      humanInputService,
+      stopStreaming,
+      setTimelineSynced,
+    ]);
 
     const handleStop = useCallback(() => {
       stopStreaming();
@@ -700,17 +727,34 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             eventHandler.clearState();
             setCurrentRunId(null);
             setPendingConfirmation(null);
+            setPendingAskUser(null);
             confirmationService.cleanAll();
+            humanInputService.cleanAll();
             setShowHistory(false);
             setIsLoading(false);
 
-            // Replay all events to reconstruct the conversation
+            // Replay all events to reconstruct the conversation.
+            //
+            // TOOL_CALL_END is dispatched WITHOUT awaiting. A halt-type frontend
+            // tool (e.g. `ask_user`) blocks inside handleToolCallEnd on
+            // humanInputService.ask() until the user answers, which never happens
+            // during replay. Awaiting it would stall the loop on the first such
+            // tool, so the synthetic events for the remaining parallel tool calls
+            // would never be consumed — only one ask_user card would appear. This
+            // mirrors the live path, where the RxJS subscriber's async `next` does
+            // not await handleEvent, letting parallel tool calls register
+            // concurrently. All other events stay awaited to preserve order.
             for (const event of events) {
               // Check abort signal during replay
               if (abortController.signal.aborted) {
                 return;
               }
-              await eventHandler.handleEvent(event);
+              if (event.type === EventType.TOOL_CALL_END) {
+                // Fire-and-forget: let parallel halt-type tools register together.
+                void eventHandler.handleEvent(event);
+              } else {
+                await eventHandler.handleEvent(event);
+              }
             }
           }
         } catch (error: any) {
@@ -738,7 +782,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           }
         }
       },
-      [chatService, eventHandler, confirmationService, toasts, stopStreaming]
+      [chatService, eventHandler, confirmationService, humanInputService, toasts, stopStreaming]
     );
 
     const windowInstance = useMemo<ChatWindowInstance>(
@@ -873,6 +917,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                 hasActiveToolCalls ||
                 hasPendingResend ||
                 !!pendingConfirmation ||
+                !!pendingAskUser ||
                 availableDataSources.length > 0 ||
                 isValidating
               }
@@ -881,19 +926,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                   ? i18n.translate('chat.input.selectDataSource', {
                       defaultMessage: 'Select a data source to continue...',
                     })
-                  : pendingConfirmation
-                    ? i18n.translate('chat.input.waitingForConfirmation', {
-                        defaultMessage: 'Waiting for confirmation...',
+                  : pendingAskUser
+                    ? i18n.translate('chat.input.waitingForAnswer', {
+                        defaultMessage: 'Answer the question above to continue...',
                       })
-                    : hasPendingResend
-                      ? i18n.translate('chat.input.pendingResend', {
-                          defaultMessage: 'Resend the tool result to continue...',
+                    : pendingConfirmation
+                      ? i18n.translate('chat.input.waitingForConfirmation', {
+                          defaultMessage: 'Waiting for confirmation...',
                         })
-                      : hasActiveToolCalls
-                        ? i18n.translate('chat.input.waitingForToolExecution', {
-                            defaultMessage: 'Waiting for tool execution...',
+                      : hasPendingResend
+                        ? i18n.translate('chat.input.pendingResend', {
+                            defaultMessage: 'Resend the tool result to continue...',
                           })
-                        : undefined
+                        : hasActiveToolCalls
+                          ? i18n.translate('chat.input.waitingForToolExecution', {
+                              defaultMessage: 'Waiting for tool execution...',
+                            })
+                          : undefined
               }
               onInputChange={setInput}
               onSend={handleSend}

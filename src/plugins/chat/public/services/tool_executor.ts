@@ -95,7 +95,11 @@ export class ToolExecutor {
       }
 
       // First, check if this is a registered assistant action
-      const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);
+      const registeredAction = await this.tryExecuteRegisteredAction(
+        toolName,
+        enrichedToolArgs,
+        toolCallId
+      );
       if (registeredAction.handled && registeredAction.result) {
         return registeredAction.result;
       }
@@ -116,11 +120,29 @@ export class ToolExecutor {
    */
   private async tryExecuteRegisteredAction(
     toolName: string,
-    toolArgs: any
+    toolArgs: any,
+    toolCallId?: string
   ): Promise<{ handled: boolean; result?: ToolResult }> {
     try {
-      // Use the assistantActionService to execute the action
-      const result = await this.assistantActionService.executeAction(toolName, toolArgs);
+      // toolCallId lets handlers (e.g. ask_user) correlate the answer to this call.
+      const result = await this.assistantActionService.executeAction(
+        toolName,
+        toolArgs,
+        toolCallId
+      );
+
+      // A handler returning { cancelled: true } (e.g. ask_user torn down mid-question)
+      // short-circuits without dispatching a stray result on a dead thread.
+      if (result && typeof result === 'object' && (result as any).cancelled === true) {
+        return {
+          handled: true,
+          result: {
+            success: false,
+            cancelled: true,
+            source: 'registered_action',
+          },
+        };
+      }
 
       return {
         handled: true,

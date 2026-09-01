@@ -10,7 +10,7 @@ import { ThresholdOptions, AxisRole, VisFieldType, Threshold, StandardOptions } 
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { createGauge } from './to_expression';
-import { EchartsRender } from '../echarts_render';
+import { GaugeChartRender } from './gauge_component';
 
 export interface GaugeChartStyleOptions extends StandardOptions {
   showTitle?: boolean;
@@ -64,10 +64,16 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
         render(props) {
           const value = props.axisColumnMappings.value?.[0];
           if (!value) throw Error('Missing axis config for gauge chart');
-          const spec = createGauge(props.data, props.styleOptions, {
+          const gauge = createGauge(props.data, props.styleOptions, {
             [AxisRole.Value]: value,
           });
-          return <EchartsRender spec={spec ?? {}} />;
+          return (
+            <GaugeChartRender
+              spec={gauge.spec}
+              text={gauge.text}
+              seriesName={props.renderContext?.seriesName}
+            />
+          );
         },
       },
     ];

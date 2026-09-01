@@ -8,12 +8,12 @@ import { OpenSearchDashboardsContext } from '../../../expression_types';
 import { opensearchDashboardsContextFunction } from '../opensearch_dashboards_context';
 import { functionWrapper } from './utils';
 
-const createFilter = (alias: string, disabled: boolean): Filter =>
+const createFilter = (alias: string, disabled: boolean, negate = false): Filter =>
   ({
     meta: {
       alias,
       disabled,
-      negate: false,
+      negate,
     },
     query: {
       match_phrase: {
@@ -49,5 +49,31 @@ describe('interpreter/functions#opensearch-dashboards-context', () => {
     const actual = await fn(input, { filters: JSON.stringify([visualizationFilter]) });
 
     expect(actual.filters).toEqual([dashboardFilter]);
+  });
+
+  it('keeps a negated visualization filter when the matching dashboard filter is enabled', async () => {
+    const dashboardFilter = createFilter('dashboard filter', false);
+    const visualizationFilter = createFilter('visualization filter', false, true);
+    const input: OpenSearchDashboardsContext = {
+      type: 'opensearch_dashboards_context',
+      filters: [dashboardFilter],
+    };
+
+    const actual = await fn(input, { filters: JSON.stringify([visualizationFilter]) });
+
+    expect(actual.filters).toEqual([dashboardFilter, visualizationFilter]);
+  });
+
+  it('keeps a visualization filter when the matching dashboard filter is negated', async () => {
+    const dashboardFilter = createFilter('dashboard filter', false, true);
+    const visualizationFilter = createFilter('visualization filter', false);
+    const input: OpenSearchDashboardsContext = {
+      type: 'opensearch_dashboards_context',
+      filters: [dashboardFilter],
+    };
+
+    const actual = await fn(input, { filters: JSON.stringify([visualizationFilter]) });
+
+    expect(actual.filters).toEqual([dashboardFilter, visualizationFilter]);
   });
 });

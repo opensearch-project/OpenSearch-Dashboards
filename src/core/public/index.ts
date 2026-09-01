@@ -84,6 +84,7 @@ import {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
+  GlobalSearchResult,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -427,6 +428,7 @@ export {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
+  GlobalSearchResult,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
@@ -454,6 +456,8 @@ export {
   ChatServiceStart,
   ChatImplementationFunctions,
   Message,
+  UserMessage,
+  InputContent,
   ChatWindowState,
   SavedConversation,
   ConversationMemoryProvider,

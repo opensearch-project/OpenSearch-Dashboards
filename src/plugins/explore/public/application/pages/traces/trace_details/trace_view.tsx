@@ -9,11 +9,7 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiResizableContainer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
   EuiText,
-  EuiBadge,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiSpacer,
@@ -31,7 +27,8 @@ import {
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
-import { ServiceMap } from './public/services/service_map';
+import { TraceFilterBar } from './public/traces/trace_filter_bar';
+import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
   NoMatchMessage,
   getServiceInfo,
@@ -46,8 +43,11 @@ import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
+import { extractSpanDuration } from './public/utils/span_data_utils';
+import { DURATION_MIN_FILTER_FIELD } from './public/traces/span_detail_tables/utils';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
+import { SERVICE_NAME_FILTER_FIELD } from '../../../../utils/trace_field_constants';
 
 /*
  * Trace:Details
@@ -56,7 +56,30 @@ import { validateRequiredTraceFields } from '../../../../utils/trace_field_valid
 export interface SpanFilter {
   field: string;
   value: string | number | boolean;
+  /** Comparison operator for attribute filters. Defaults to '='. */
+  operator?: '=' | '!=';
 }
+
+/** A filterable field surfaced from the dataset's field list. */
+export interface DatasetField {
+  name: string;
+  type?: string;
+}
+
+// Filters applied in the browser (never sent to PPL, so they must not trigger a
+// server refetch): the `isError` status toggle and the `durationMin` threshold.
+const isClientSideFilter = (filter: SpanFilter): boolean =>
+  filter.field === 'isError' || filter.field === DURATION_MIN_FILTER_FIELD;
+
+// Field-list helpers for the generic "+ Add filter": only serviceName + span /
+// resource attributes + instrumentation scope are offered (status/duration have
+// their own quick controls); other field types are not filterable.
+const EXCLUDED_FIELD_TYPES = new Set(['_source', 'unknown', 'nested', 'geo_point', 'geo_shape']);
+const isFilterableField = (name: string): boolean =>
+  name === 'serviceName' ||
+  name.startsWith('attributes.') ||
+  name.startsWith('resource.attributes.') ||
+  name.startsWith('instrumentationScope.');
 
 interface ResizeObserverTarget extends Element {
   _lastWidth?: number;
@@ -150,6 +173,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
+  // Filterable fields resolved from the dataset (data view) field list. Resolved
+  // only when the dataset changes (the data-view lookup is async/expensive), then
+  // merged UI-side with the current result's fields in the datasetFields memo.
+  const [dataViewFields, setDataViewFields] = useState<DatasetField[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
@@ -208,6 +235,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFilters(newFilters);
   };
 
+  // Server-side (PPL) filters are everything except the client-side filters.
+  // Keyed so the trace refetch below only re-runs when they change (client-side
+  // filters are applied in-browser and must not trigger a refetch).
+  const serverFilterKey = useMemo(
+    () => JSON.stringify(spanFilters.filter((filter) => !isClientSideFilter(filter))),
+    [spanFilters]
+  );
+
   // Check for correlations and fetch logs data
   useEffect(() => {
     if (dataset?.id && correlationService && data && traceId) {
@@ -245,7 +280,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
       try {
         // Separate client-side filters from server-side filters
-        const serverFilters = filters.filter((filter) => filter.field !== 'isError');
+        const serverFilters = filters.filter((filter) => !isClientSideFilter(filter));
 
         const response = await pplService.fetchTraceSpans({
           traceId,
@@ -273,10 +308,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
-    // Including transformedHits.length causes duplicate ppl query calls
-    // Including spanFilters causes double re-renders when changing filters
+    // Refetch when the trace changes or when server-side filters change
+    // (serverFilterKey). spanFilters itself is intentionally excluded to avoid
+    // an extra refetch when only the client-side isError toggle changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [traceId, dataset, pplService]);
+  }, [traceId, dataset, pplService, serverFilterKey]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -285,14 +321,17 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     let hits = transformed.length > 0 ? transformed : [];
 
     // Apply client-side filters
-    const clientFilters = spanFilters.filter((filter) => filter.field === 'isError');
-    if (clientFilters.length > 0) {
-      clientFilters.forEach((filter) => {
-        if (filter.field === 'isError' && filter.value === true) {
-          hits = hits.filter((span: TraceHit) => isSpanError(span));
-        }
-      });
-    }
+    const clientFilters = spanFilters.filter(isClientSideFilter);
+    clientFilters.forEach((filter) => {
+      if (filter.field === 'isError' && filter.value === true) {
+        hits = hits.filter((span: TraceHit) => isSpanError(span));
+      }
+      if (filter.field === DURATION_MIN_FILTER_FIELD) {
+        hits = hits.filter(
+          (span: TraceHit) => extractSpanDuration(span) >= (filter.value as number)
+        );
+      }
+    });
 
     hits = hits.filter((hit) => {
       const hasUnixNano = !!hit.startTimeUnixNano && !!hit.endTimeUnixNano;
@@ -321,6 +360,52 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       setFieldValidation(null);
     }
   }, [pplQueryData, spanFilters]);
+
+  // Load the dataset's filterable fields (data view field list), merged UI-side
+  // with fields present in the current result. Fields starting with "_" and
+  // non-scalar types are excluded so the attribute filter offers valid paths.
+  // Resolve the data-view field list only when the dataset changes — the lookup
+  // is async and shouldn't re-run on every server-filter refetch.
+  useEffect(() => {
+    let cancelled = false;
+    const resolveDataViewFields = async () => {
+      const fields: DatasetField[] = [];
+      try {
+        if (dataset?.id && (data as any)?.dataViews?.get) {
+          const dataView = await (data as any).dataViews.get(dataset.id);
+          (dataView?.fields ?? []).forEach((field: any) => {
+            if (
+              field?.name &&
+              !EXCLUDED_FIELD_TYPES.has(field.type) &&
+              isFilterableField(field.name)
+            ) {
+              fields.push({ name: field.name, type: field.type });
+            }
+          });
+        }
+      } catch (e) {
+        // Dataset may not resolve to a saved data view — fall back to the result schema.
+      }
+      if (!cancelled) setDataViewFields(fields);
+    };
+    resolveDataViewFields();
+    return () => {
+      cancelled = true;
+    };
+  }, [dataset?.id, data]);
+
+  // Merge the resolved data-view fields with the fields present in the current
+  // result (cheap, in-memory) so a refetch doesn't re-resolve the data view.
+  const datasetFields = useMemo(() => {
+    const merged = new Map<string, DatasetField>();
+    dataViewFields.forEach((field) => merged.set(field.name, field));
+    (pplQueryData?.schema ?? []).forEach((field) => {
+      if (field?.name && isFilterableField(field.name) && !merged.has(field.name)) {
+        merged.set(field.name, { name: field.name, type: field.type });
+      }
+    });
+    return Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [dataViewFields, pplQueryData]);
 
   // Cleanup state sync on unmount
   useEffect(() => {
@@ -373,6 +458,27 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
 
+  // Add (or replace) a field filter — shared by the span-detail metadata tab, the
+  // trace map (service click), and the "+ Add filter" attribute bar. A field is
+  // held once; re-adding it (e.g. with a different operator/value) replaces it.
+  const addSpanFilter = (
+    field: string,
+    value: string | number | boolean,
+    operator: '=' | '!=' = '='
+  ) => {
+    const newFilters = [...spanFilters];
+    const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
+    if (index === -1) {
+      newFilters.push({ field, value, operator });
+    } else {
+      newFilters.splice(index, 1, { field, value, operator });
+    }
+    setSpanFiltersWithStorage(newFilters);
+  };
+
+  const activeServiceFilter = spanFilters.find((f) => f.field === SERVICE_NAME_FILTER_FIELD)
+    ?.value as string | undefined;
+
   // Force re-render of visualizations when container size changes
   const forceVisualizationResize = useCallback(() => {
     setVisualizationKey((prev) => prev + 1);
@@ -391,10 +497,51 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     return Array.from(serviceSet);
   }, [transformedHits, colorMap]);
 
+  // Replace one existing filter in place (atomically, preserving position) with
+  // an edited field/value/operator. Used by the chip edit flow so updating a
+  // filter never appends a duplicate — appends only happen via addSpanFilter
+  // ("Add filter"). Matching by the old filter's identity avoids the stale-state
+  // race of a separate remove + add.
+  const replaceFilter = (
+    oldFilter: SpanFilter,
+    field: string,
+    value: string | number | boolean,
+    operator: '=' | '!=' = '='
+  ) => {
+    const matches = (filter: SpanFilter) =>
+      filter.field === oldFilter.field &&
+      filter.value === oldFilter.value &&
+      (filter.operator ?? '=') === (oldFilter.operator ?? '=');
+    let replaced = false;
+    const newFilters = spanFilters
+      .map((filter) => {
+        if (!matches(filter)) return filter;
+        replaced = true;
+        return { field, value, operator };
+      })
+      // If the edit collides with another existing filter on the same field,
+      // drop that duplicate (keep the just-edited one).
+      .filter(
+        (filter, index, arr) =>
+          arr.findIndex(
+            (other) =>
+              other.field === filter.field &&
+              other.value === filter.value &&
+              (other.operator ?? '=') === (filter.operator ?? '=')
+          ) === index
+      );
+    setSpanFiltersWithStorage(replaced ? newFilters : [...spanFilters, { field, value, operator }]);
+  };
+
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
     const newFilters = spanFilters.filter(
-      (filter) => !(filter.field === filterToRemove.field && filter.value === filterToRemove.value)
+      (filter) =>
+        !(
+          filter.field === filterToRemove.field &&
+          filter.value === filterToRemove.value &&
+          (filter.operator ?? '=') === (filterToRemove.operator ?? '=')
+        )
     );
     setSpanFiltersWithStorage(newFilters);
   };
@@ -402,23 +549,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   // Function to clear all filters
   const clearAllFilters = () => {
     setSpanFiltersWithStorage([]);
-  };
-
-  // Function to format filter display text
-  const getFilterDisplayText = (filter: SpanFilter) => {
-    if (filter.field === 'status.code' && filter.value === 2) {
-      return 'Error';
-    }
-    if (filter.field === 'isError' && filter.value === true) {
-      return 'Error';
-    }
-    if (filter.field === 'status.code' && filter.value === 1) {
-      return 'OK';
-    }
-    if (filter.field === 'status.code' && filter.value === 0) {
-      return 'Unset';
-    }
-    return `${filter.field}: ${filter.value}`;
   };
 
   // Set up ResizeObserver to detect when the main panel size changes
@@ -513,54 +643,20 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               </EuiPanel>
             </div>
 
-            {/* Filter badges section */}
-            {spanFilters.length > 0 && (
+            {/* Filter bar (query-builder style). Span filters scope the span-based
+                tabs only — hide on the Related logs tab. */}
+            {activeTab !== TraceDetailTab.LOGS && (
               <div className="exploreTraceView__filtersContainer">
-                <EuiPanel paddingSize="s">
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            {i18n.translate('explore.traceView.filters.activeFilters', {
-                              defaultMessage: 'Active filters:',
-                            })}
-                          </EuiText>
-                        </EuiFlexItem>
-                        {spanFilters.map((filter, index) => (
-                          <EuiFlexItem grow={false} key={`filter-${index}`}>
-                            <EuiBadge
-                              color="primary"
-                              iconType="cross"
-                              iconSide="right"
-                              iconOnClick={() => removeFilter(filter)}
-                              iconOnClickAriaLabel={i18n.translate(
-                                'explore.traceView.filters.removeFilter',
-                                {
-                                  defaultMessage: 'Remove filter',
-                                }
-                              )}
-                              data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                            >
-                              {getFilterDisplayText(filter)}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        onClick={clearAllFilters}
-                        data-test-subj="clear-all-filters-button"
-                      >
-                        {i18n.translate('explore.traceView.filters.clearAll', {
-                          defaultMessage: 'Clear all',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
+                <TraceFilterBar
+                  spanFilters={spanFilters}
+                  datasetFields={datasetFields}
+                  spans={unfilteredHits}
+                  addSpanFilter={addSpanFilter}
+                  removeFilter={removeFilter}
+                  replaceFilter={replaceFilter}
+                  clearAllFilters={clearAllFilters}
+                  setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+                />
               </div>
             )}
 
@@ -582,13 +678,24 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       {/* Tab content */}
                       <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
                         {activeTab === TraceDetailTab.SERVICE_MAP && (
-                          <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-                            <ServiceMap
+                          <div
+                            style={{
+                              // Bounded height in the flyout (vertical split) so the graph
+                              // stays compact and fully visible; full height on the page.
+                              height: isFlyout ? 500 : 'calc(100vh - 200px)',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <TraceServiceFlow
                               hits={transformedHits}
                               colorMap={colorMap}
-                              paddingSize="none"
-                              hasShadow={false}
-                              selectedSpanId={spanId}
+                              activeServiceFilter={activeServiceFilter}
+                              onFilterService={(serviceName) =>
+                                addSpanFilter(SERVICE_NAME_FILTER_FIELD, serviceName)
+                              }
+                              // The narrow flyout shows the whole graph fit-to-view,
+                              // so the minimap would only cover nodes — hide it there.
+                              showMinimap={!isFlyout}
                             />
                           </div>
                         )}
@@ -596,7 +703,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         {(activeTab === TraceDetailTab.TIMELINE ||
                           activeTab === TraceDetailTab.SPAN_LIST) && (
                           <SpanDetailPanel
-                            key={`span-panel-${visualizationKey}-${spanFilters.length}-${transformedHits.length}`}
+                            // Keyed only on the resize-driven visualizationKey. It
+                            // updates in place via payloadData/filters props; keying
+                            // on spanFilters/hits length caused a double remount
+                            // (flash) on every filter change.
+                            key={`span-panel-${visualizationKey}`}
                             chrome={chrome}
                             spanFilters={spanFilters}
                             setSpanFiltersWithStorage={setSpanFiltersWithStorage}
@@ -608,6 +719,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             activeView={activeTab}
                             servicesInOrder={servicesInOrder}
                             isFlyoutPanel={isFlyout}
+                            allTraceSpans={unfilteredHits}
                           />
                         )}
 
@@ -636,18 +748,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                     <div className="exploreTraceView__sidebarPanel">
                       <SpanDetailTabs
                         selectedSpan={selectedSpan}
-                        addSpanFilter={(field: string, value: string | number | boolean) => {
-                          const newFilters = [...spanFilters];
-                          const index = newFilters.findIndex(
-                            ({ field: filterField }) => field === filterField
-                          );
-                          if (index === -1) {
-                            newFilters.push({ field, value });
-                          } else {
-                            newFilters.splice(index, 1, { field, value });
-                          }
-                          setSpanFiltersWithStorage(newFilters);
-                        }}
+                        addSpanFilter={addSpanFilter}
                         setCurrentSpan={handleSpanSelect}
                         logDatasets={logDatasets}
                         datasetLogs={datasetLogs}

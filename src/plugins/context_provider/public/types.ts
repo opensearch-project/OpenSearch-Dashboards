@@ -4,6 +4,7 @@
  */
 
 import { AssistantAction } from './hooks/use_assistant_action';
+import { ToolDefinition } from './services/assistant_action_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextProviderSetupDeps {}
@@ -40,6 +41,16 @@ export interface ContextProviderStart {
   actions: {
     registerAssistantAction: (action: AssistantAction) => void;
     unregisterAssistantAction: (id: string) => void;
+    getToolDefinitions: () => ToolDefinition[];
+    hasAction: (name: string) => boolean;
+    /**
+     * Runs an action's handler directly. It does NOT enforce the
+     * `requiresConfirmation` gate — that lives in the chat tool executor. A
+     * caller invoking a confirmation-required action (e.g. the PPL apply tools)
+     * is responsible for obtaining the user's approval out-of-band first, and
+     * the action's own handler must stay fail-closed rather than trust the args.
+     */
+    executeAction: (name: string, args: unknown) => Promise<unknown>;
     suppressDefaultPageContext: () => void;
     unsuppressDefaultPageContext: () => void;
   };

@@ -13,6 +13,7 @@ import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_w
 import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
@@ -74,6 +75,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const setEditorText = useSetEditorText();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+  usePPLLintFixAction(setEditorTextWithQuery);
 
   const { queryString } = services.data.query;
 

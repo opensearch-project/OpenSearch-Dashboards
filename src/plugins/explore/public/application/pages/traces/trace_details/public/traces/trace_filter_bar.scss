@@ -1,0 +1,55 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Reuse the logs "visual query builder" pill/fieldset styling (.plqGroup,
+// .plqPill, .plqGhostAdd, …) so the trace filter bar reads like the query builder.
+@import "../../../../../components/query_builder/query_builder";
+
+.exploreTraceFilterBar {
+  width: 100%;
+
+  // Let the popover-trigger quick filters (status/duration) and the add-filter
+  // control sit inline in the fieldset without EUI's default button min-height
+  // inflating the row.
+  .plqGroup {
+    row-gap: 4px;
+  }
+
+  // The fieldset spans the full bar so "Clear all" can sit inside the container,
+  // pushed to the far right by the flexible spacer.
+  &__group {
+    display: flex;
+    width: 100%;
+  }
+
+  &__spacer {
+    flex: 1 1 auto;
+  }
+
+  // Keep long attribute keys/values from stretching a chip across the bar — cap
+  // and ellipsize each segment; the full text stays available via the button's
+  // title tooltip.
+  .plqWhereChip__fieldText,
+  .plqWhereChip__valText {
+    display: inline-block;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  // Status/duration pills have a fixed field + operator (only the value is
+  // editable), so those segments read as plain text: no pointer, no hover.
+  .plqWhereChip__field--static,
+  .plqWhereChip__op--static {
+    cursor: default;
+
+    &:hover,
+    &:focus {
+      background: transparent;
+    }
+  }
+}

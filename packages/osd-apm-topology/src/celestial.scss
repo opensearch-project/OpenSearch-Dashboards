@@ -255,3 +255,9 @@
 .react-flow__attribution {
   background-color: transparent;
 }
+
+/* Render edge labels (e.g. VolumeEdge call counts) above node cards so a label
+   whose edge passes near/behind a node isn't hidden behind it. */
+.react-flow__edgelabel-renderer {
+  z-index: 6;
+}

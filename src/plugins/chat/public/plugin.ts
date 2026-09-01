@@ -29,6 +29,9 @@ import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
 import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
+import { HumanInputService } from './services/human_input_service';
+import { createAskUserAction } from './services/ask_user_action';
+import { AssistantActionService } from '../../context_provider/public';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 import { ChatMountService } from './services/chat_mount_service';
 
@@ -53,6 +56,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private suggestedActionsService = new SuggestedActionsService();
   private commandRegistryService = new CommandRegistryService();
   private confirmationService = new ConfirmationService();
+  private humanInputService = new HumanInputService();
   private chatMountService?: ChatMountService;
   private paddingSizeSubscription?: Subscription;
   private windowStateChangeSubscription?: Subscription;
@@ -192,6 +196,16 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       }
     }
 
+    // Register the `ask_user` human-in-the-loop tool eagerly, before any
+    // conversation replay can run. The AssistantActionService is a
+    // process-wide singleton, so registering here (rather than in a React
+    // effect) guarantees `hasAction('ask_user')` is true when
+    // `injectUnfinishedToolCallEvents` decides whether to replay an unfinished
+    // question on reload — closing the effect-ordering race.
+    AssistantActionService.getInstance().registerAction(
+      createAskUserAction(this.humanInputService)
+    );
+
     this.chatMountService = new ChatMountService();
 
     this.chatMountService.start({
@@ -201,6 +215,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       charts: deps.charts,
       suggestedActionsService: this.suggestedActionsService!,
       confirmationService: this.confirmationService,
+      humanInputService: this.humanInputService,
     });
 
     // Register chat button in header with conditional visibility
@@ -226,27 +241,43 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       },
     });
 
+    const sendGlobalSearchMessage = async (content: string) => {
+      await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+    };
+
     core.chrome.globalSearch.registerSearchCommand({
       id: 'AI_CHATBOT_COMMAND',
       type: 'ACTIONS',
       inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
         defaultMessage: 'Search or chat with AI',
       }),
-      run: async () => [
-        React.createElement(
-          EuiText,
+      run: async (query: string) => {
+        if (!query) {
+          return [];
+        }
+
+        return [
           {
-            size: 'xs',
-            color: 'subdued',
+            id: 'chat-with-ai',
+            label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
+              defaultMessage: 'Chat with AI',
+            }),
+            content: React.createElement(
+              EuiText,
+              {
+                size: 'xs',
+                color: 'subdued',
+              },
+              i18n.translate('chat.globalSearch.chatWithAI.hints', {
+                defaultMessage: 'Press Enter to chat with AI',
+              })
+            ),
+            placement: 'trailing',
+            execute: () => sendGlobalSearchMessage(query),
           },
-          i18n.translate('chat.globalSearch.chatWithAI.hints', {
-            defaultMessage: 'Press Enter to chat with AI',
-          })
-        ),
-      ],
-      action: async ({ content }: { content: string }) => {
-        await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+        ];
       },
+      action: ({ content }: { content: string }) => sendGlobalSearchMessage(content),
     });
 
     this.setupChatbotWindowState(core);
@@ -264,5 +295,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.autoFocusWindowCloseSubscription?.();
     this.chatService?.destroy();
     this.confirmationService.cleanAll();
+    this.humanInputService.cleanAll();
+    AssistantActionService.getInstance().unregisterAction('ask_user');
   }
 }

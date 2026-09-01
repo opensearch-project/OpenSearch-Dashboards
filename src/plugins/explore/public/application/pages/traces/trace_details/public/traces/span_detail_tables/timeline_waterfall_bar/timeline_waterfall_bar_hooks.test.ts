@@ -101,6 +101,7 @@ describe('timeline_waterfall_bar_hooks', () => {
         durationMs: 1000,
         relativeStart: 1000, // 2000 - 1000
         relativeEnd: 2000, // 3000 - 1000
+        isOutsideWindow: false,
       });
     });
 
@@ -131,6 +132,7 @@ describe('timeline_waterfall_bar_hooks', () => {
         durationMs: 500,
         relativeStart: 0,
         relativeEnd: 500,
+        isOutsideWindow: false,
       });
     });
 
@@ -149,6 +151,7 @@ describe('timeline_waterfall_bar_hooks', () => {
         durationMs: 1000,
         relativeStart: 4000, // 5000 - 1000
         relativeEnd: 5000, // 6000 - 1000
+        isOutsideWindow: false,
       });
     });
 
@@ -167,7 +170,44 @@ describe('timeline_waterfall_bar_hooks', () => {
         durationMs: 1000,
         relativeStart: 1000,
         relativeEnd: 2000,
+        isOutsideWindow: false,
       });
+    });
+
+    it('recomputes offset/width relative to a visible window (zoom)', () => {
+      mockCalculateSpanTimeRange.mockReturnValue({
+        durationMs: 500,
+        startTimeMs: 3000,
+        endTimeMs: 3500,
+      });
+
+      // Visible window [2000, 4000] (duration 2000) within the full trace.
+      const visibleRange = { durationMs: 2000, startTimeMs: 2000, endTimeMs: 4000 };
+      const { result } = renderHook(() =>
+        useTimelineBarRange(mockSpan, traceTimeRange, 0, visibleRange)
+      );
+
+      // offset: (3000 - 2000) / 2000 = 50%, width: 500 / 2000 = 25%
+      expect(result.current.timelineBarOffsetPercent).toBe(50);
+      expect(result.current.timelineBarWidthPercent).toBe(25);
+      expect(result.current.isOutsideWindow).toBe(false);
+      // Tooltip values remain relative to the full trace start (1000).
+      expect(result.current.relativeStart).toBe(2000);
+    });
+
+    it('flags spans that fall entirely outside the visible window', () => {
+      mockCalculateSpanTimeRange.mockReturnValue({
+        durationMs: 200,
+        startTimeMs: 5000,
+        endTimeMs: 5200,
+      });
+
+      const visibleRange = { durationMs: 2000, startTimeMs: 2000, endTimeMs: 4000 };
+      const { result } = renderHook(() =>
+        useTimelineBarRange(mockSpan, traceTimeRange, 0, visibleRange)
+      );
+
+      expect(result.current.isOutsideWindow).toBe(true);
     });
   });
 });

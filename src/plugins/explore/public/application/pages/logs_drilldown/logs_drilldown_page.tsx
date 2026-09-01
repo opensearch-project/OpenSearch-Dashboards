@@ -231,6 +231,10 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
         onTimeChange={onTimeChange}
         onRefresh={onRefresh}
         showUpdateButton
+        // No `updateButtonProps={{ fill: true }}` here, unlike the query views' Refresh: this
+        // picker disables its own update button on an invalid typed range, and that state is
+        // internal (onTimeChange can't fire while disabled, so there's nothing to gate fill on).
+        // Filled + disabled reads as enabled; OUI's hollow default is correct throughout.
       />
     ),
     [time.from, time.to, onTimeChange, onRefresh]

@@ -273,9 +273,20 @@ describe('ChatEventHandler', () => {
         toolCallId,
       } as ToolCallEndEvent);
 
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('registered_action', {
-        param: 'value',
-      });
+      // Frontend tool results are now buffered and dispatched when the batch is
+      // sealed on RUN_FINISHED, so drive that event to trigger the dispatch.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue so
+      // the tool result message lands in the timeline before asserting.
+      await new Promise((r) => setImmediate(r));
+
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'registered_action',
+        {
+          param: 'value',
+        },
+        toolCallId
+      );
 
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
         status: 'complete',
@@ -596,6 +607,10 @@ describe('ChatEventHandler', () => {
         toolCallId,
       } as ToolCallEndEvent);
 
+      // Rejection results are now buffered and dispatched when the batch is
+      // sealed on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+
       // Should update state to failed
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
         status: 'failed',
@@ -650,6 +665,10 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // Frontend tool results are now buffered and dispatched when the batch is
+      // sealed on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
 
       // Should update state to complete
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
@@ -729,6 +748,10 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // The error result is buffered and dispatched when the batch is sealed
+      // on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
 
       // The payload sent to the assistant starts with the execution error
       // prefix so a snapshot reload can render the tool row as an error
@@ -845,6 +868,12 @@ describe('ChatEventHandler', () => {
         toolCallId,
       } as ToolCallEndEvent);
 
+      // Dispatch is deferred to the batch flush on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue so
+      // the observable is subscribed and the teardown captured.
+      await new Promise((r) => setImmediate(r));
+
       // Clear previous calls to focus on the teardown
       mockOnStartResponse.mockClear();
 
@@ -905,6 +934,12 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // Dispatch is deferred to the batch flush on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue so
+      // the observable is subscribed and the error/teardown callbacks captured.
+      await new Promise((r) => setImmediate(r));
 
       // Clear previous calls to focus on the error callback
       mockOnStartResponse.mockClear();
@@ -1143,6 +1178,13 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // Dispatch (and therefore the subscribe) is deferred to the batch flush
+      // on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue so
+      // the observable is subscribed before asserting.
+      await new Promise((r) => setImmediate(r));
 
       // Verify streaming was started
       expect(mockObservable.subscribe).toHaveBeenCalled();
@@ -1408,7 +1450,11 @@ describe('ChatEventHandler', () => {
     const expectToolExecuted = (data: { toolName: string; status: string; source: string }) =>
       expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
         name: 'chat_tool_executed',
-        data,
+        data: {
+          chatToolCallToolName: data.toolName,
+          chatToolCallStatus: data.status,
+          chatToolCallSource: data.source,
+        },
       });
 
     it('should record success when a registered action resolves', async () => {
@@ -1487,6 +1533,24 @@ describe('ChatEventHandler', () => {
       expectToolExecuted({ toolName: 'agentTool', status: 'success', source: 'agent' });
     });
 
+    it('should record tool execution duration as a metric derived from TOOL_CALL_START', async () => {
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue('tool output');
+      mockToolResultDispatch('t-dur');
+
+      await runToolCall('t-dur', 'timedTool', '{"key": "value"}');
+
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_tool_executed_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          chatToolCallToolName: 'timedTool',
+          chatToolCallStatus: 'success',
+          chatToolCallSource: 'local',
+        },
+      });
+    });
+
     it('should never call executeAction for agent tools (no await before markToolPending)', async () => {
       // Regression: agent tools call executeAgentTool directly, so executeAction
       // is never invoked and markToolPending runs without delay.
@@ -1563,6 +1627,11 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // Dispatch is deferred to the batch flush on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue.
+      await new Promise((r) => setImmediate(r));
 
       const toolMessagesInTimeline = timeline.filter((m) => m.role === 'tool');
       expect(toolMessagesInTimeline).not.toContainEqual(constructedToolMessage);
@@ -1656,6 +1725,11 @@ describe('ChatEventHandler', () => {
         toolCallId,
       } as ToolCallEndEvent);
 
+      // Dispatch is deferred to the batch flush on RUN_FINISHED.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      // The batch flush dispatches asynchronously; drain the microtask queue.
+      await new Promise((r) => setImmediate(r));
+
       expect(timeline).toContainEqual(constructedToolMessage);
       const skipInfoMessage = timeline.find((m) => (m as any).id?.startsWith('tool-skipped-'));
       expect(skipInfoMessage).toBeUndefined();
@@ -1682,6 +1756,14 @@ describe('ChatEventHandler', () => {
         type: EventType.TOOL_CALL_END,
         toolCallId,
       } as ToolCallEndEvent);
+
+      // Frontend tool results are buffered and only dispatched once the batch
+      // is sealed on RUN_FINISHED, so seal it to trigger the dispatch.
+      await handler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+
+      // The batch flush dispatches via a fire-and-forget async call, so let the
+      // microtask queue drain until the dispatch's awaits settle.
+      await new Promise((r) => setImmediate(r));
     };
 
     beforeEach(() => {
@@ -1868,6 +1950,467 @@ describe('ChatEventHandler', () => {
       expect(noThreadMessage.toolCallId).toBe(toolCallId);
       // No resend affordance — retrying without a thread would hit the same path.
       expect(noThreadMessage.canResend).toBeUndefined();
+    });
+  });
+
+  describe('parallel frontend tool calls (batching)', () => {
+    // A minimal observable stub matching what the handler subscribes to: its
+    // subscribe returns a subscription with unsubscribe + add.
+    const makeMockObservable = () => ({
+      subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }),
+    });
+
+    // Drain the microtask queue so the fire-and-forget batch flush (and the
+    // awaits inside sendToolResult(s)ToAssistant) settle before assertions.
+    const flushMicrotasks = () => new Promise((r) => setImmediate(r));
+
+    // Drive a single frontend tool through START -> ARGS -> END. The END is
+    // awaited by default; pass awaitEnd=false to fire it without awaiting (used
+    // to keep a slow tool in flight while later events are delivered).
+    const driveTool = async (
+      handler: ChatEventHandler,
+      toolCallId: string,
+      toolCallName: string,
+      { awaitEnd = true }: { awaitEnd?: boolean } = {}
+    ) => {
+      await handler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName,
+      } as ToolCallStartEvent);
+
+      await handler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      const endPromise = handler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      if (awaitEnd) await endPromise;
+      return endPromise;
+    };
+
+    beforeEach(() => {
+      // Both dispatch APIs are stubbed so either path can be asserted on. The
+      // singular path is used for a batch of one; the plural path for 2+.
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: makeMockObservable(),
+        toolMessage: { id: 'tm', role: 'tool', content: '{}', toolCallId: 'x' } as ToolMessage,
+      });
+      (mockChatService as any).sendToolResults = jest.fn().mockResolvedValue({
+        observable: makeMockObservable(),
+        toolMessages: [] as ToolMessage[],
+      });
+    });
+
+    it('dispatches two parallel frontend tools as a single batched send on RUN_FINISHED', async () => {
+      const resultA = { value: 'A' };
+      const resultB = { value: 'B' };
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockResolvedValueOnce(resultA)
+        .mockResolvedValueOnce(resultB);
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-A', 'tool_a');
+      await driveTool(chatEventHandler, 'tool-B', 'tool_b');
+
+      // Nothing dispatched until the batch is sealed.
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalled();
+      expect((mockChatService as any).sendToolResults).not.toHaveBeenCalled();
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      // The two results go out in one batched (plural) run; the singular path
+      // is untouched.
+      expect((mockChatService as any).sendToolResults).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalled();
+
+      const items = (mockChatService as any).sendToolResults.mock.calls[0][0];
+      expect(items).toEqual([
+        { toolCallId: 'tool-A', result: resultA },
+        { toolCallId: 'tool-B', result: resultB },
+      ]);
+    });
+
+    it('preserves toolUse order (A before B) in the batched items array', async () => {
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockResolvedValueOnce({ value: 'A' })
+        .mockResolvedValueOnce({ value: 'B' });
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-A', 'tool_a');
+      await driveTool(chatEventHandler, 'tool-B', 'tool_b');
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      const items = (mockChatService as any).sendToolResults.mock.calls[0][0];
+      expect(items.map((i: any) => i.toolCallId)).toEqual(['tool-A', 'tool-B']);
+    });
+
+    it('routes a batch of one through the singular sendToolResult path', async () => {
+      const resultA = { value: 'A' };
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(resultA);
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-solo', 'tool_solo');
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      // Single-frontend-tool case collapses to the unchanged singular path.
+      expect(mockChatService.sendToolResult).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        'tool-solo',
+        resultA,
+        expect.any(Array),
+        expect.any(AbortSignal)
+      );
+      expect((mockChatService as any).sendToolResults).not.toHaveBeenCalled();
+    });
+
+    it('dispatches only the frontend tool when mixed with a backend (waitingForAgentResponse) tool', async () => {
+      const resultA = { value: 'A' };
+      // Frontend tool resolves; backend tool is not a registered action, so the
+      // executor treats it as an agent tool (waitingForAgentResponse).
+      mockAssistantActionService.hasAction = jest.fn((name: string) => name !== 'backend_tool');
+      mockAssistantActionService.executeAction = jest.fn((name: string) =>
+        name === 'backend_tool'
+          ? Promise.reject(new Error('Action not found'))
+          : Promise.resolve(resultA)
+      );
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-A', 'frontend_tool');
+      await driveTool(chatEventHandler, 'tool-B', 'backend_tool');
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      // The backend tool is removed from the batch, which collapses to one
+      // member -> the singular path dispatches only the frontend tool.
+      expect(mockChatService.sendToolResult).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        'tool-A',
+        resultA,
+        expect.any(Array),
+        expect.any(AbortSignal)
+      );
+      // The backend tool never goes through either dispatch path — it waits for
+      // its TOOL_CALL_RESULT event instead.
+      expect((mockChatService as any).sendToolResults).not.toHaveBeenCalled();
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalledWith(
+        'tool-B',
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('drops the pending entry for a backend tool once it hands off to the agent', async () => {
+      // Every terminal branch releases its pendingToolCalls entry; the backend-tool path is not
+      // exempt, since TOOL_CALL_RESULT does not read that map.
+      mockAssistantActionService.hasAction = jest.fn().mockReturnValue(false);
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+      await driveTool(chatEventHandler, 'tool-B', 'backend_tool');
+      await flushMicrotasks();
+
+      expect((chatEventHandler as any).pendingToolCalls.has('tool-B')).toBe(false);
+    });
+
+    it('flushes a sealed batch when a member leaves it after RUN_FINISHED', async () => {
+      // A registered action can be unregistered while it runs (its component unmounts), so
+      // executeAction rejects with "not found" and the call falls back to the agent-tool path.
+      // Removing that member is what completes the batch, so this branch must re-check the flush.
+      const resultA = { value: 'A' };
+      let rejectB: (e: Error) => void = () => {};
+      const bPending = new Promise((_resolve, reject) => {
+        rejectB = reject;
+      });
+      mockAssistantActionService.hasAction = jest.fn().mockReturnValue(true);
+      mockAssistantActionService.executeAction = jest.fn((name: string) =>
+        name === 'tool_b' ? (bPending as Promise<any>) : Promise.resolve(resultA)
+      );
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-A', 'tool_a');
+      // B stays in flight: its END is not awaited and its action promise is still pending.
+      driveTool(chatEventHandler, 'tool-B', 'tool_b', { awaitEnd: false });
+      await flushMicrotasks();
+
+      // Seal while B is unresolved — the batch cannot flush yet.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalled();
+
+      // B's action turns out to be gone, so it drops out, leaving {A} fully resolved.
+      rejectB(new Error('Action not found'));
+      await flushMicrotasks();
+
+      expect(mockChatService.sendToolResult).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        'tool-A',
+        resultA,
+        expect.any(Array),
+        expect.any(AbortSignal)
+      );
+    });
+
+    it('drops a cancelled tool from the batch and dispatches only the survivor', async () => {
+      const resultA = { value: 'A' };
+      // Tool B resolves as cancelled; the executor surfaces { cancelled: true }
+      // and the handler drops it from the batch.
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockResolvedValueOnce(resultA)
+        .mockResolvedValueOnce({ cancelled: true });
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      await driveTool(chatEventHandler, 'tool-A', 'tool_a');
+      await driveTool(chatEventHandler, 'tool-B', 'tool_b');
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      // Batch collapses to just A (singular path); the cancelled tool is absent.
+      expect(mockChatService.sendToolResult).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        'tool-A',
+        resultA,
+        expect.any(Array),
+        expect.any(AbortSignal)
+      );
+      expect((mockChatService as any).sendToolResults).not.toHaveBeenCalled();
+      // The cancelled tool's id never appears in any dispatched items.
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalledWith(
+        'tool-B',
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('waits for a slow tool before flushing, then dispatches the whole batch', async () => {
+      const resultA = { value: 'A' };
+      const resultB = { value: 'B' };
+
+      // B stays pending until we resolve it, simulating a slow frontend tool.
+      let resolveB: (v: any) => void = () => {};
+      const bPromise = new Promise((resolve) => {
+        resolveB = resolve;
+      });
+
+      mockAssistantActionService.executeAction = jest
+        .fn()
+        .mockResolvedValueOnce(resultA)
+        .mockReturnValueOnce(bPromise);
+
+      await chatEventHandler.handleEvent({ type: EventType.RUN_STARTED } as any);
+
+      // A resolves fully.
+      await driveTool(chatEventHandler, 'tool-A', 'tool_a');
+
+      // B is fired but left in flight (its execution promise is unresolved).
+      // The synchronous prefix of handleToolCallEnd still adds B to the batch.
+      driveTool(chatEventHandler, 'tool-B', 'tool_b', { awaitEnd: false });
+      await flushMicrotasks();
+
+      // Seal the batch while B is still pending — must NOT dispatch yet.
+      await chatEventHandler.handleEvent({ type: EventType.RUN_FINISHED } as any);
+      await flushMicrotasks();
+
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalled();
+      expect((mockChatService as any).sendToolResults).not.toHaveBeenCalled();
+
+      // Now B resolves; the completed batch dispatches with both members.
+      resolveB(resultB);
+      await flushMicrotasks();
+
+      expect((mockChatService as any).sendToolResults).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendToolResult).not.toHaveBeenCalled();
+
+      const items = (mockChatService as any).sendToolResults.mock.calls[0][0];
+      expect(items).toEqual([
+        { toolCallId: 'tool-A', result: resultA },
+        { toolCallId: 'tool-B', result: resultB },
+      ]);
+    });
+  });
+
+  describe('restore of a conversation ending in an unfinished frontend tool', () => {
+    // A restored snapshot can still carry the tool call that the replayed TOOL_CALL_START
+    // re-attaches. Each toolCalls entry renders its own card, so the message must never end up
+    // holding the same tool call twice — an unanswered ask_user would show as two cards.
+    it('does not duplicate a tool call the snapshot already carries', async () => {
+      const toolCallId = 'tooluse_ask';
+      const toolCall = {
+        id: toolCallId,
+        type: 'function',
+        function: { name: 'ask_user', arguments: '{"prompt":"What?"}' },
+      };
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', toolCalls: [toolCall] },
+        ],
+      } as any);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.filter((tc) => tc.id === toolCallId)).toHaveLength(1);
+      expect(timeline.filter((m) => m.id === '1')).toHaveLength(1);
+    });
+
+    // Restore shape: the snapshot carries the tool call and replay re-announces it via a synthetic
+    // TOOL_CALL_START. It must land on the existing message even when the parent lookup misses.
+    it('keeps one message when the re-announced tool call cannot resolve its parent', async () => {
+      const toolCallId = 'tooluse_iAFNqCSCNIniFcsnxrbbGf';
+      const toolCall = {
+        id: toolCallId,
+        type: 'function',
+        function: { name: 'ask_user', arguments: '{"prompt":"What?"}' },
+      };
+
+      // Snapshot as the server sends it: assistant already carries the tool call.
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me something' },
+          { id: '1', role: 'assistant', toolCalls: [toolCall] },
+        ],
+      } as any);
+
+      // Timeline read lags a render behind mid-replay, so parent/dedupe lookups via it miss.
+      mockGetTimeline.mockReturnValue([]);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      const assistants = timeline.filter((m) => m.role === 'assistant');
+      expect(assistants).toHaveLength(1);
+      expect(
+        (assistants[0] as AssistantMessage).toolCalls?.filter((tc) => tc.id === toolCallId)
+      ).toHaveLength(1);
+    });
+
+    // A repeated TOOL_CALL_START for one tool call still leaves a single entry on the message.
+    it('does not duplicate when the same TOOL_CALL_START is replayed twice', async () => {
+      const toolCallId = 'tooluse_ask_twice';
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', toolCalls: [] },
+        ],
+      } as any);
+
+      for (let i = 0; i < 2; i++) {
+        await chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_START,
+          toolCallId,
+          toolCallName: 'ask_user',
+          parentMessageId: '1',
+        } as any);
+        await chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_ARGS,
+          toolCallId,
+          delta: '{"prompt":"What?"}',
+        } as any);
+      }
+
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.filter((tc) => tc.id === toolCallId)).toHaveLength(1);
+      expect(timeline.filter((m) => m.id === '1')).toHaveLength(1);
+    });
+
+    // The caller keeps the restore event array for further restores, so replay leaves it untouched.
+    it('does not mutate the snapshot event messages when re-attaching', async () => {
+      const toolCallId = 'tooluse_ask2';
+      const snapshotAssistant: any = { id: '1', role: 'assistant', toolCalls: [] };
+      const event: any = {
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [{ id: '0', role: 'user', content: 'q' }, snapshotAssistant],
+      };
+
+      await chatEventHandler.handleEvent(event);
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      expect(snapshotAssistant.toolCalls).toHaveLength(0);
+      const assistant = timeline.find((m) => m.id === '1') as AssistantMessage;
+      expect(assistant.toolCalls?.map((tc) => tc.id)).toEqual([toolCallId]);
+    });
+
+    // With a stale getTimeline() mid-replay, the re-announced tool call still re-attaches to the
+    // existing assistant message (resolved via activeAssistantMessages) rather than spawning a
+    // second message with the same id.
+    it('re-attaches the re-injected tool call to the snapshot message even when getTimeline is stale', async () => {
+      // 1. Replay the (patched) snapshot: assistant "1" has its ask_user stripped.
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [
+          { id: '0', role: 'user', content: 'ask me some question' },
+          { id: '1', role: 'assistant', content: 'let me ask', toolCalls: [] },
+        ],
+      } as any);
+
+      expect(timeline).toHaveLength(2);
+
+      // 2. Simulate React not having flushed the snapshot into timelineRef yet:
+      // getTimeline() returns a stale (empty) view while the synthetic tool-call
+      // events replay. onTimelineUpdate still applies to the real timeline.
+      mockGetTimeline.mockReturnValue([]);
+
+      // 3. The re-injected unfinished ask_user, parented to message "1".
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: 'tooluse_ask',
+        toolCallName: 'ask_user',
+        parentMessageId: '1',
+      } as any);
+
+      // Exactly one message with id "1" — no duplicate turn.
+      const idOnes = timeline.filter((m) => m.id === '1');
+      expect(idOnes).toHaveLength(1);
+
+      // The original assistant text is preserved, and the tool call is attached to it.
+      const assistant = idOnes[0] as AssistantMessage;
+      expect(assistant.content).toBe('let me ask');
+      expect(assistant.toolCalls?.map((tc) => tc.id)).toEqual(['tooluse_ask']);
+
+      // The whole timeline is still just [user, assistant].
+      expect(timeline).toHaveLength(2);
     });
   });
 });

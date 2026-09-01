@@ -126,6 +126,34 @@ describe('applySpanFilters', () => {
     expect(result).toEqual(mockSpans);
   });
 
+  it('should filter spans by a minimum duration (durationMin, in nanos)', () => {
+    const durationSpans: ParsedHit[] = [
+      { spanId: 'a', children: [], durationInNanos: 1e6 }, // 1ms
+      { spanId: 'b', children: [], durationInNanos: 5e6 }, // 5ms
+      { spanId: 'c', children: [], durationInNanos: 10e6 }, // 10ms
+    ];
+    const result = applySpanFilters(durationSpans, [{ field: 'durationMin', value: 5e6 }]);
+    expect(result.map((s) => s.spanId)).toEqual(['b', 'c']);
+  });
+
+  it('should support the != operator on attribute filters', () => {
+    const result = applySpanFilters(mockSpans, [
+      { field: 'serviceName', value: 'user-service', operator: '!=' },
+    ]);
+    expect(result.map((s) => s.serviceName)).toEqual(['order-service', 'product-service']);
+  });
+
+  it('should match numeric field values against a string filter value (coercion)', () => {
+    const spans: ParsedHit[] = [
+      { spanId: 'a', children: [], attributes: { http: { status_code: 200 } } },
+      { spanId: 'b', children: [], attributes: { http: { status_code: 500 } } },
+    ];
+    const result = applySpanFilters(spans, [
+      { field: 'attributes.http.status_code', value: '200', operator: '=' },
+    ]);
+    expect(result.map((s) => s.spanId)).toEqual(['a']);
+  });
+
   it('should filter spans by simple field value', () => {
     const filters = [{ field: 'serviceName', value: 'user-service' }];
     const result = applySpanFilters(mockSpans, filters);
@@ -168,6 +196,19 @@ describe('applySpanFilters', () => {
     const filters = [{ field: 'attributes.non.existent.field', value: 'test' }];
     const result = applySpanFilters(mockSpans, filters);
     expect(result).toEqual([]);
+  });
+
+  it('excludes spans with a missing field for both "=" and "!=" (matches PPL server semantics)', () => {
+    const spans = [{ serviceName: 'cart' }] as any;
+    // "=" against an absent field must not match (no "undefined" string coercion).
+    expect(applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '=' }])).toEqual(
+      []
+    );
+    // "!=" also excludes absent-field spans, matching `where field != value` on
+    // the server (which drops null/absent rows) so both layers keep the same set.
+    expect(
+      applySpanFilters(spans, [{ field: 'missingField', value: 'x', operator: '!=' }])
+    ).toEqual([]);
   });
 
   it('should handle empty spans array', () => {

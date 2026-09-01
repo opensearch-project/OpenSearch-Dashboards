@@ -8,16 +8,19 @@ import { ChatProvider, useChatContext } from './chat_context';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action/suggested_actions_service';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 
 // Mock services
 jest.mock('../services/chat_service');
 jest.mock('../services/suggested_action/suggested_actions_service');
 jest.mock('../services/confirmation_service');
+jest.mock('../services/human_input_service');
 
 describe('ChatContext', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockSuggestedActionsService: jest.Mocked<SuggestedActionsService>;
   let mockConfirmationService: jest.Mocked<ConfirmationService>;
+  let mockHumanInputService: jest.Mocked<HumanInputService>;
 
   beforeEach(() => {
     mockChatService = {
@@ -47,6 +50,15 @@ describe('ChatContext', () => {
       getPendingConfirmations: jest.fn(),
       hasPendingConfirmations: jest.fn(),
     } as any;
+
+    mockHumanInputService = {
+      getPending$: jest.fn(),
+      getPending: jest.fn(),
+      hasPending: jest.fn(),
+      ask: jest.fn(),
+      answer: jest.fn(),
+      cleanAll: jest.fn(),
+    } as any;
   });
 
   describe('ChatProvider', () => {
@@ -65,6 +77,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -88,6 +101,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -113,6 +127,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -138,6 +153,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -154,6 +170,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <div data-test-subj="child">Child Component</div>
         </ChatProvider>
@@ -179,6 +196,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -202,6 +220,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -250,6 +269,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -259,7 +279,7 @@ describe('ChatContext', () => {
       expect(screen.getByTestId('has-suggested-actions-service')).toHaveTextContent('true');
       expect(screen.getByTestId('has-confirmation-service')).toHaveTextContent('true');
       expect(screen.getByTestId('context-keys')).toHaveTextContent(
-        'chatService,confirmationService,suggestedActionsService'
+        'chatService,confirmationService,humanInputService,suggestedActionsService'
       );
     });
   });
@@ -279,6 +299,7 @@ describe('ChatContext', () => {
           chatService={service1}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -291,6 +312,7 @@ describe('ChatContext', () => {
           chatService={service2}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -313,6 +335,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={confirmationService1}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -325,6 +348,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={confirmationService2}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -351,6 +375,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <Consumer1 />
           <Consumer2 />
@@ -385,6 +410,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <Consumer1 />
           <Consumer2 />
@@ -413,6 +439,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -427,6 +454,7 @@ describe('ChatContext', () => {
           chatService={newChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -454,6 +482,7 @@ describe('ChatContext', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           <TestComponent />
         </ChatProvider>
@@ -466,6 +495,7 @@ describe('ChatContext', () => {
             chatService={mockChatService}
             suggestedActionsService={mockSuggestedActionsService}
             confirmationService={mockConfirmationService}
+            humanInputService={mockHumanInputService}
           >
             <TestComponent />
           </ChatProvider>

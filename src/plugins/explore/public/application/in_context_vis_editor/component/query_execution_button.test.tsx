@@ -48,7 +48,9 @@ describe('QueryExecutionButton', () => {
     render(<QueryExecutionButton />);
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
-    expect(button).not.toHaveClass('euiButton--fill');
+    // Always filled; the resting state is signalled by the primary colour.
+    expect(button).toHaveClass('euiButton--fill');
+    expect(button).toHaveClass('euiButton--primary');
   });
 
   it('shows Update when query is dirty', () => {
@@ -57,6 +59,8 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
     expect(button).toHaveClass('euiButton--fill');
+    // Always primary: the state shows in the label, not the colour.
+    expect(button).toHaveClass('euiButton--primary');
   });
 
   it('disables button when date range is invalid', () => {
@@ -65,7 +69,10 @@ describe('QueryExecutionButton', () => {
       buildState({ dateRange: { from: 'now', to: 'now' } })
     );
     render(<QueryExecutionButton />);
-    expect(screen.getByTestId('exploreQueryExecutionButton')).toBeDisabled();
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(button).toBeDisabled();
+    // Filled + disabled reads as enabled, so the disabled state stays hollow.
+    expect(button).not.toHaveClass('euiButton--fill');
   });
 
   it('calls onClick when run button is clicked', () => {

@@ -99,7 +99,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const shouldSkipQueryExecution = (query: Query): boolean => {
   switch (query.language) {
+    // PPL is absent on purpose: `defaultPreparePplQuery` fills a blank editor in
+    // with `source = <table>`, so an empty PPL query is still runnable.
     case 'PROMQL':
+    case 'SQL':
       const queryValue = query.query;
       return typeof queryValue !== 'string' || !queryValue.trim();
     default:
@@ -704,6 +707,7 @@ const executeQueryBase = async (
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
     };
 
     if (isHistogramQuery && effectiveHistogramConfig) {

@@ -457,6 +457,57 @@ describe('VisualizationRender', () => {
     );
   });
 
+  it.each(['gauge', 'pie'] as ChartType[])(
+    'uses compact horizontal split item width for %s charts',
+    (chartType) => {
+      const config: RenderChartConfig = {
+        type: chartType,
+        styles: {},
+        axesMapping: { value: 'count' },
+        splitField: 'field1',
+        splitLayout: 'horizontal',
+      };
+
+      const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+      const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(config);
+      const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+      render(
+        <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+      );
+
+      expect(mockSplitContainer.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          horizontalItemMinWidth: 180,
+        })
+      );
+    }
+  );
+
+  it('uses the default horizontal split item width for other charts', () => {
+    const config: RenderChartConfig = {
+      type: 'line',
+      styles: {},
+      axesMapping: { value: 'count' },
+      splitField: 'field1',
+      splitLayout: 'horizontal',
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(config);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(mockSplitContainer.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        horizontalItemMinWidth: undefined,
+      })
+    );
+  });
+
   it('returns null when no matching rule is found', () => {
     mockFindRuleByAxesMapping.mockReturnValue(null);
 

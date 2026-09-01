@@ -307,6 +307,44 @@ describe('ChatPlugin', () => {
         clearConversation: true,
       });
     });
+
+    it('should return a selectable result that sends the current query', async () => {
+      const sendMessageWithWindowMock = jest.fn();
+      jest
+        .spyOn(ChatService.prototype, 'sendMessageWithWindow')
+        .mockImplementationOnce(sendMessageWithWindowMock);
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+      const results = await commandConfig.run('test query');
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          id: 'chat-with-ai',
+          label: 'Chat with AI',
+          placement: 'trailing',
+          execute: expect.any(Function),
+        }),
+      ]);
+
+      await results[0].execute();
+
+      expect(sendMessageWithWindowMock).toHaveBeenCalledWith('test query', [], {
+        clearConversation: true,
+      });
+    });
+
+    it('should return no selectable result for an empty query', async () => {
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+
+      await expect(commandConfig.run('')).resolves.toEqual([]);
+    });
   });
 
   describe('localStorage persistence', () => {
@@ -513,6 +551,7 @@ describe('ChatPlugin', () => {
         charts: mockDeps.charts,
         suggestedActionsService: expect.any(Object),
         confirmationService: expect.any(Object),
+        humanInputService: expect.any(Object),
       });
     });
 

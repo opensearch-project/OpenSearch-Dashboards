@@ -13,7 +13,7 @@ import {
 } from './ppl_request_helpers';
 
 export interface PPLQueryParamsWithFilters extends PPLQueryParams {
-  filters?: Array<{ field: string; value: any }>;
+  filters?: Array<{ field: string; value: any; operator?: '=' | '!=' }>;
 }
 
 export interface PPLSpanQueryParams {
@@ -33,13 +33,14 @@ export class TracePPLService extends PPLService {
     dataset: Dataset,
     traceId: string,
     limit: number,
-    filters: Array<{ field: string; value: any }> = []
+    filters: Array<{ field: string; value: any; operator?: '=' | '!=' }> = []
   ): string {
     let query = `source = ${dataset.title} | where traceId = "${traceId}"`;
 
     filters.forEach((filter) => {
       const escapedValue = escapePPLValue(filter.value);
-      query += ` | where ${filter.field} = ${escapedValue}`;
+      const operator = filter.operator === '!=' ? '!=' : '=';
+      query += ` | where ${filter.field} ${operator} ${escapedValue}`;
     });
 
     query += ` | head ${limit}`;

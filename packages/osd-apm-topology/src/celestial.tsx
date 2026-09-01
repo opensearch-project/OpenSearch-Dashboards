@@ -151,6 +151,7 @@ export const Celestial = (props: CelestialMapProps) => {
             edgeTypes={props.edgeTypes}
             legend={props.legend}
             showMinimap={props.showMinimap}
+            showGridBackground={props.showGridBackground}
             showSliSlo={props.showSliSlo}
             showLayoutControls={props.showLayoutControls}
             nodesDraggable={props.nodesDraggable}
