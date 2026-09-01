@@ -162,12 +162,11 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       coreSetup.chrome.globalSearch.registerSearchCommand({
         id: 'devtools',
         type: 'PAGES',
-        run: async (query: string, callback?: () => void) =>
+        run: async (query: string) =>
           searchForDevTools(query, {
             devTools: this.getSortedDevTools.bind(this),
             title: this.title,
             uiActionsApi: this.getUiActionsStart.bind(this),
-            callback,
           }),
       });
 

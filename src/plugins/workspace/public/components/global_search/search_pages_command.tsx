@@ -5,10 +5,9 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import { first } from 'rxjs/operators';
-import { ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
-import { DEFAULT_NAV_GROUPS, NavGroupType } from '../../../../../core/public';
+import { DEFAULT_NAV_GROUPS, GlobalSearchResult, NavGroupType } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { searchNavigationLinks } from '../../../../../core/public';
@@ -17,9 +16,12 @@ import { NavLink, WorkspaceGlobalSearchPageItem } from './workspace_global_searc
 export const workspaceSearchPages = async (
   query: string,
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>,
-  coreStart?: CoreStart,
-  callback?: () => void
-): Promise<ReactNode[]> => {
+  coreStart?: CoreStart
+): Promise<GlobalSearchResult[]> => {
+  if (!query) {
+    return [];
+  }
+
   if (coreStart) {
     const currentWorkspace = await coreStart.workspaces.currentWorkspace$.pipe(first()).toPromise();
 
@@ -40,8 +42,7 @@ export const workspaceSearchPages = async (
 
     const searchResult = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
-    const handleCallback = (link: NavLink) => {
-      callback?.();
+    const executeResult = (link: NavLink) => {
       const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
       if (isPageOutOfWorkspace && currentWorkspace) {
         // remove workspace information in the URL, special handling for data source which could visible both in/out workspace
@@ -51,22 +52,26 @@ export const workspaceSearchPages = async (
           coreStart.http.basePath,
           true
         );
-        window.location.assign(urlWithoutWorkspace);
-        return;
+        return coreStart.application.navigateToUrl(urlWithoutWorkspace);
       }
-      coreStart.application.navigateToApp(link.id);
+      return coreStart.application.navigateToApp(link.id);
     };
 
     const pages = searchResult.slice(0, 10).map((link) => {
-      return (
-        <WorkspaceGlobalSearchPageItem
-          link={link}
-          search={query}
-          onCallback={handleCallback}
-          currentWorkspace={currentWorkspace}
-          registeredUseCases$={registeredUseCases$}
-        />
-      );
+      const isLandingPage = link.id.toLowerCase().endsWith('landing');
+      return {
+        id: link.id,
+        label: isLandingPage ? `${link.navGroup.title} ${link.title}` : link.title,
+        content: (
+          <WorkspaceGlobalSearchPageItem
+            link={link}
+            search={query}
+            currentWorkspace={currentWorkspace}
+            registeredUseCases$={registeredUseCases$}
+          />
+        ),
+        execute: () => executeResult(link),
+      };
     });
 
     return pages;
