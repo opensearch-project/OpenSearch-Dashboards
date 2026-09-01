@@ -218,6 +218,7 @@ export class LegacyService implements CoreService {
         getServerInfo: startDeps.core.http.getServerInfo,
       },
       savedObjects: {
+        annotations: startDeps.core.savedObjects.annotations,
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,

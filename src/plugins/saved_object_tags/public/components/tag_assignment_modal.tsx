@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiColorPicker,
@@ -18,6 +17,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSmallButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -36,6 +36,8 @@ const getErrorMessage = (error: unknown) =>
     : i18n.translate('savedObjectTags.tagAssignmentModal.unknownError', {
         defaultMessage: 'An unexpected error occurred.',
       });
+
+const normalizeTagName = (name: string) => name.trim().toLowerCase();
 
 export const TagAssignmentModal = ({ annotationService, target, onClose, onChange }: Props) => {
   const [tags, setTags] = useState<SavedObjectAnnotation[]>([]);
@@ -99,8 +101,24 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
   );
 
   const selectedOptions = options.filter(
-    ({ value }): value is string => typeof value === 'string' && selectedTagIds.includes(value)
+    ({ value }) => typeof value === 'string' && selectedTagIds.includes(value)
   );
+  const duplicateTag = useMemo(() => {
+    if (!showCreateTag) {
+      return undefined;
+    }
+
+    const normalizedName = normalizeTagName(newTagName);
+    return tags.find((tag) => normalizeTagName(tag.name) === normalizedName);
+  }, [newTagName, showCreateTag, tags]);
+  const duplicateTagError = duplicateTag
+    ? i18n.translate('savedObjectTags.tagAssignmentModal.duplicateTagError', {
+        defaultMessage: 'A tag named "{tagName}" already exists. Select the existing tag instead.',
+        values: {
+          tagName: duplicateTag.name,
+        },
+      })
+    : undefined;
 
   const saveAssignments = async () => {
     setIsSaving(true);
@@ -182,6 +200,7 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
           })}
         >
           <EuiComboBox
+            compressed
             data-test-subj="savedObjectTagAssignmentSelect"
             fullWidth
             isLoading={isLoading}
@@ -206,7 +225,7 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
             data-test-subj="savedObjectTagAssignmentShowCreate"
             flush="left"
             iconType="plusInCircle"
-            size="s"
+            size="xs"
             onClick={() => setShowCreateTag(true)}
           >
             {i18n.translate('savedObjectTags.tagAssignmentModal.createTagButton', {
@@ -216,15 +235,19 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
         ) : (
           <>
             <EuiFormRow
+              error={duplicateTagError}
               fullWidth
+              isInvalid={Boolean(duplicateTag)}
               label={i18n.translate('savedObjectTags.tagAssignmentModal.newTagNameLabel', {
                 defaultMessage: 'New tag name',
               })}
             >
               <EuiFieldText
                 autoFocus
+                compressed
                 data-test-subj="savedObjectTagAssignmentName"
                 fullWidth
+                isInvalid={Boolean(duplicateTag)}
                 value={newTagName}
                 onChange={(event) => setNewTagName(event.target.value)}
               />
@@ -258,22 +281,22 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="savedObjectTagAssignmentCancel" onClick={onClose}>
+        <EuiButtonEmpty size="s" data-test-subj="savedObjectTagAssignmentCancel" onClick={onClose}>
           {i18n.translate('savedObjectTags.tagAssignmentModal.cancelButton', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="savedObjectTagAssignmentSave"
           fill
-          isDisabled={isLoading}
+          isDisabled={isLoading || Boolean(duplicateTag)}
           isLoading={isSaving}
           onClick={saveAssignments}
         >
           {i18n.translate('savedObjectTags.tagAssignmentModal.saveButton', {
             defaultMessage: 'Save',
           })}
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

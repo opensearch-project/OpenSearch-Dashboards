@@ -14,6 +14,11 @@ import { SavedObjectsErrorHelpers } from '../service/lib/errors';
 export interface SavedObjectAnnotationTypeRegistration {
   type: string;
   supportedObjectTypes: string[];
+  /**
+   * Reject names that match an existing annotation of this type after trimming
+   * whitespace and applying case-insensitive comparison.
+   */
+  uniqueName?: boolean;
 }
 
 export interface SavedObjectAnnotationsSetup {
@@ -24,7 +29,7 @@ export class SavedObjectAnnotationTypeRegistry {
   private readonly registrations = new Map<string, SavedObjectAnnotationTypeRegistration>();
 
   public register(registration: SavedObjectAnnotationTypeRegistration) {
-    const { type, supportedObjectTypes } = registration;
+    const { type, supportedObjectTypes, uniqueName } = registration;
     if (!type) {
       throw new Error('Annotation type must be a non-empty string');
     }
@@ -38,6 +43,7 @@ export class SavedObjectAnnotationTypeRegistry {
     this.registrations.set(type, {
       type,
       supportedObjectTypes: Array.from(new Set(supportedObjectTypes)),
+      ...(uniqueName && { uniqueName }),
     });
   }
 

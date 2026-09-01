@@ -67,6 +67,7 @@ export const TagSelector = ({ annotationService, selectedTagId, onChange }: Prop
 
   return (
     <EuiComboBox
+      compressed
       aria-label={i18n.translate('savedObjectTags.tagSelector.ariaLabel', {
         defaultMessage: 'Filter by tag',
       })}
@@ -76,7 +77,7 @@ export const TagSelector = ({ annotationService, selectedTagId, onChange }: Prop
       })}
       options={options}
       selectedOptions={selectedOptions}
-      singleSelection={{ asPlainText: true }}
+      singleSelection
       renderOption={renderTagOption}
       isClearable
       isLoading={isLoading}

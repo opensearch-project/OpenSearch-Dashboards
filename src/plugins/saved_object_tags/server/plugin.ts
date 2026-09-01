@@ -11,6 +11,7 @@ export class SavedObjectTagsPlugin implements Plugin<void, void> {
     core.savedObjects.annotations.registerAnnotationType({
       type: TAG_ANNOTATION_TYPE,
       supportedObjectTypes: ['dashboard', 'visualization'],
+      uniqueName: true,
     });
   }
 

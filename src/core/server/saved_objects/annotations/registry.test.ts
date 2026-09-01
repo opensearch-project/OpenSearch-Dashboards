@@ -17,11 +17,13 @@ describe('SavedObjectAnnotationTypeRegistry', () => {
     registry.register({
       type: 'tag',
       supportedObjectTypes: ['dashboard', 'dashboard', 'visualization'],
+      uniqueName: true,
     });
 
     expect(registry.get('tag')).toEqual({
       type: 'tag',
       supportedObjectTypes: ['dashboard', 'visualization'],
+      uniqueName: true,
     });
   });
 

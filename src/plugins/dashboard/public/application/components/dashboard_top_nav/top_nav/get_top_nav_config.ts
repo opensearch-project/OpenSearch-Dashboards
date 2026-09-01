@@ -143,7 +143,6 @@ function getLegacySaveConfig(action: NavAction) {
 function getLegacyTagsConfig(action: NavAction, tooltip?: ReactNode) {
   return {
     id: 'tags',
-    iconType: 'tag',
     label: i18n.translate('dashboard.topNav.tagsButtonAriaLabel', {
       defaultMessage: 'tags',
     }),

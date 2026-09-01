@@ -182,9 +182,10 @@ describe('#savedObjects', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
+      const getAnnotationClient = jest.mocked(coreStart.savedObjects.annotations.getClient);
 
       const annotations = context.savedObjects.annotations;
-      expect(annotations).toBe(coreStart.savedObjects.annotations.getClient.mock.results[0].value);
+      expect(annotations).toBe(getAnnotationClient.mock.results[0].value);
     });
 
     test('lazily created', () => {
@@ -202,11 +203,12 @@ describe('#savedObjects', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
+      const getAnnotationClient = jest.mocked(coreStart.savedObjects.annotations.getClient);
 
       const annotations1 = context.savedObjects.annotations;
       const annotations2 = context.savedObjects.annotations;
       expect(coreStart.savedObjects.annotations.getClient).toHaveBeenCalledTimes(1);
-      const mockResult = coreStart.savedObjects.annotations.getClient.mock.results[0].value;
+      const mockResult = getAnnotationClient.mock.results[0].value;
       expect(annotations1).toBe(mockResult);
       expect(annotations2).toBe(mockResult);
     });

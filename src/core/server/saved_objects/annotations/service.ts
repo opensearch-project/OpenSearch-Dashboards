@@ -21,9 +21,12 @@ import {
   SAVED_OBJECT_ANNOTATION_TYPE,
   UpdateSavedObjectAnnotationInput,
 } from '../../../types';
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from '../types';
-import { SavedObjectsErrorHelpers } from '../service/lib/errors';
-import { SavedObjectAnnotationTypeRegistry } from './registry';
+import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObjectsErrorHelpers, SavedObjectsFindResponse } from '../service';
+import {
+  SavedObjectAnnotationTypeRegistration,
+  SavedObjectAnnotationTypeRegistry,
+} from './registry';
 import { SavedObjectAnnotationAttributes } from './saved_object_type';
 import {
   createSavedObjectAnnotationReferenceName,
@@ -35,6 +38,8 @@ const FIND_PAGE_SIZE = 1000;
 const hasOwn = (object: object, property: string) =>
   Object.prototype.hasOwnProperty.call(object, property);
 
+const normalizeAnnotationName = (name: string) => name.trim().toLowerCase();
+
 export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationService {
   constructor(
     private readonly client: SavedObjectsClientContract,
@@ -45,7 +50,8 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
   public async createAnnotation(
     input: CreateSavedObjectAnnotationInput
   ): Promise<SavedObjectAnnotation> {
-    this.registry.get(input.type);
+    const registration = this.registry.get(input.type);
+    await this.ensureUniqueName(registration, input.name);
     const savedObject = await this.client.create<SavedObjectAnnotationAttributes>(
       SAVED_OBJECT_ANNOTATION_TYPE,
       this.serializeCreateInput(input)
@@ -56,11 +62,12 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
   public async updateAnnotation(
     input: UpdateSavedObjectAnnotationInput
   ): Promise<SavedObjectAnnotation> {
-    this.registry.get(input.type);
+    const registration = this.registry.get(input.type);
     const existing = await this.getAndValidateAnnotation(input.annotationId, input.type);
     const attributes: Partial<SavedObjectAnnotationAttributes> = {};
 
-    if (hasOwn(input, 'name')) {
+    if (hasOwn(input, 'name') && input.name !== undefined) {
+      await this.ensureUniqueName(registration, input.name, input.annotationId);
       attributes.name = input.name;
     }
     if (hasOwn(input, 'description')) {
@@ -274,6 +281,36 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
       ...(description !== undefined && { description }),
       ...(payload !== undefined && { payload: JSON.parse(payload) }),
     };
+  }
+
+  private async ensureUniqueName(
+    registration: SavedObjectAnnotationTypeRegistration,
+    name: string,
+    annotationId?: string
+  ) {
+    if (!registration.uniqueName) {
+      return;
+    }
+
+    const normalizedName = normalizeAnnotationName(name);
+    const annotations = await this.findAll<SavedObjectAnnotationAttributes>({
+      type: SAVED_OBJECT_ANNOTATION_TYPE,
+      filter: `${SAVED_OBJECT_ANNOTATION_TYPE}.attributes.type: ${JSON.stringify(
+        registration.type
+      )}`,
+    });
+    const duplicate = annotations.find(
+      (annotation) =>
+        annotation.id !== annotationId &&
+        normalizeAnnotationName(annotation.attributes.name) === normalizedName
+    );
+
+    if (duplicate) {
+      throw SavedObjectsErrorHelpers.decorateConflictError(
+        new Error('Conflict'),
+        `An annotation of type '${registration.type}' named '${name.trim()}' already exists`
+      );
+    }
   }
 
   private async findAll<T = unknown>(

@@ -10,8 +10,11 @@
  */
 
 import {
+  SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientWrapperFactory,
+  SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '../service';
 import { preserveSavedObjectAnnotationReferences } from './reference_utils';
@@ -23,6 +26,64 @@ export const ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY = Number.MIN_SAF
 export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFactory = ({
   client,
 }) => {
+  const preserveReferences = async (
+    type: string,
+    id: string,
+    incomingReferences: NonNullable<SavedObjectsCreateOptions['references']>
+  ) => {
+    try {
+      const persistedObject = await client.get(type, id);
+      return preserveSavedObjectAnnotationReferences(
+        persistedObject.references,
+        incomingReferences
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return incomingReferences;
+      }
+      throw error;
+    }
+  };
+
+  const create: typeof client.create = async (
+    type,
+    attributes,
+    options: SavedObjectsCreateOptions = {}
+  ) => {
+    if (!options.overwrite || !options.id || !Array.isArray(options.references)) {
+      return client.create(type, attributes, options);
+    }
+
+    return client.create(type, attributes, {
+      ...options,
+      references: await preserveReferences(type, options.id, options.references),
+    });
+  };
+
+  const bulkCreate: typeof client.bulkCreate = async <T = unknown>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options: SavedObjectsCreateOptions = {}
+  ) => {
+    if (!options.overwrite) {
+      return client.bulkCreate(objects, options);
+    }
+
+    const objectsWithPreservedReferences = await Promise.all(
+      objects.map(async (object) => {
+        if (!object.id || !Array.isArray(object.references)) {
+          return object;
+        }
+
+        return {
+          ...object,
+          references: await preserveReferences(object.type, object.id, object.references),
+        };
+      })
+    );
+
+    return client.bulkCreate(objectsWithPreservedReferences, options);
+  };
+
   const update: typeof client.update = async (
     type,
     id,
@@ -33,10 +94,7 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
       return client.update(type, id, attributes, options);
     }
 
-    const persistedObject = await client.get(type, id, {
-      namespace: options.namespace,
-      workspaces: options.workspaces,
-    });
+    const persistedObject = await client.get(type, id);
     return client.update(type, id, attributes, {
       ...options,
       references: preserveSavedObjectAnnotationReferences(
@@ -56,10 +114,7 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
           return object;
         }
 
-        const persistedObject = await client.get(object.type, object.id, {
-          namespace: object.namespace ?? options.namespace,
-          workspaces: object.workspaces,
-        });
+        const persistedObject = await client.get(object.type, object.id);
         return {
           ...object,
           references: preserveSavedObjectAnnotationReferences(
@@ -74,6 +129,8 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
   };
 
   return Object.assign(Object.create(client), {
+    create,
+    bulkCreate,
     update,
     bulkUpdate,
   });

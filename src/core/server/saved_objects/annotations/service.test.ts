@@ -38,6 +38,7 @@ describe('SavedObjectAnnotationServiceImpl', () => {
   registry.register({
     type: 'tag',
     supportedObjectTypes: ['dashboard', 'visualization'],
+    uniqueName: true,
   });
 
   let client: ReturnType<typeof savedObjectsClientMock.create>;
@@ -47,6 +48,12 @@ describe('SavedObjectAnnotationServiceImpl', () => {
   beforeEach(() => {
     client = savedObjectsClientMock.create();
     mutationClient = savedObjectsClientMock.create();
+    client.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 1000,
+    });
     service = new SavedObjectAnnotationServiceImpl(client, mutationClient, registry);
   });
 
@@ -69,6 +76,79 @@ describe('SavedObjectAnnotationServiceImpl', () => {
       type: 'tag',
       name: 'Production',
       payload: '{"color":"#54B399"}',
+    });
+  });
+
+  it('rejects a duplicate annotation name ignoring case and surrounding whitespace', async () => {
+    client.find.mockResolvedValue({
+      saved_objects: [{ ...tag, score: 1 }],
+      total: 1,
+      page: 1,
+      per_page: 1000,
+    });
+
+    await expect(
+      service.createAnnotation({
+        type: 'tag',
+        name: ' production ',
+      })
+    ).rejects.toThrow("An annotation of type 'tag' named 'production' already exists");
+    expect(client.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects renaming an annotation to an existing name', async () => {
+    client.get.mockResolvedValue(tag);
+    client.find.mockResolvedValue({
+      saved_objects: [
+        {
+          ...tag,
+          id: 'tag-2',
+          attributes: { type: 'tag', name: 'Executive' },
+          score: 1,
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 1000,
+    });
+
+    await expect(
+      service.updateAnnotation({
+        annotationId: 'tag-1',
+        type: 'tag',
+        name: ' executive ',
+      })
+    ).rejects.toThrow("An annotation of type 'tag' named 'executive' already exists");
+    expect(client.update).not.toHaveBeenCalled();
+  });
+
+  it('allows an annotation to retain its own normalized name', async () => {
+    client.get.mockResolvedValue(tag);
+    client.find.mockResolvedValue({
+      saved_objects: [{ ...tag, score: 1 }],
+      total: 1,
+      page: 1,
+      per_page: 1000,
+    });
+    client.update.mockResolvedValue({
+      ...tag,
+      attributes: {
+        ...tag.attributes,
+        name: ' production ',
+      },
+    });
+
+    await expect(
+      service.updateAnnotation({
+        annotationId: 'tag-1',
+        type: 'tag',
+        name: ' production ',
+      })
+    ).resolves.toEqual({
+      id: 'tag-1',
+      type: 'tag',
+      name: ' production ',
+      payload: { color: '#54B399' },
     });
   });
 

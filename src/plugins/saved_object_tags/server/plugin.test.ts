@@ -17,6 +17,7 @@ describe('SavedObjectTagsPlugin', () => {
     expect(core.savedObjects.annotations.registerAnnotationType).toHaveBeenCalledWith({
       type: TAG_ANNOTATION_TYPE,
       supportedObjectTypes: ['dashboard', 'visualization'],
+      uniqueName: true,
     });
   });
 });

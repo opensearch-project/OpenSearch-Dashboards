@@ -26,7 +26,11 @@ describe('TagSelector', () => {
     } as unknown as SavedObjectAnnotationService;
     const onChange = jest.fn();
     const component = mount(
-      <TagSelector annotationService={annotationService} onChange={onChange} />
+      <TagSelector
+        annotationService={annotationService}
+        selectedTagId="tag-1"
+        onChange={onChange}
+      />
     );
 
     await act(async () => {
@@ -38,6 +42,10 @@ describe('TagSelector', () => {
     expect(comboBox.prop('options')).toEqual([
       { label: 'Production', key: 'tag-1', value: 'tag-1', color: '#54B399' },
     ]);
+    expect(comboBox.prop('selectedOptions')).toEqual([
+      { label: 'Production', key: 'tag-1', value: 'tag-1', color: '#54B399' },
+    ]);
+    expect(comboBox.prop('singleSelection')).toBe(true);
 
     const renderedOption = mount(
       <>{comboBox.prop('renderOption')!(comboBox.prop('options')![0], 'prod', '')}</>

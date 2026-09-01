@@ -7,11 +7,11 @@ import React from 'react';
 import { act } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiColorPicker,
   EuiComboBox,
   EuiFieldText,
+  EuiSmallButton,
 } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { SavedObjectAnnotationService } from '../../../../core/public';
@@ -77,7 +77,7 @@ describe('TagAssignmentModal', () => {
 
     await act(async () => {
       component
-        .find(EuiButton)
+        .find(EuiSmallButton)
         .filterWhere((button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentSave')
         .prop('onClick')!({} as React.MouseEvent<HTMLButtonElement>);
       await flushPromises();
@@ -147,7 +147,7 @@ describe('TagAssignmentModal', () => {
 
     await act(async () => {
       component
-        .find(EuiButton)
+        .find(EuiSmallButton)
         .filterWhere((button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentSave')
         .prop('onClick')!({} as React.MouseEvent<HTMLButtonElement>);
       await flushPromises();
@@ -163,5 +163,62 @@ describe('TagAssignmentModal', () => {
       type: 'tag',
       target,
     });
+  });
+
+  it('rejects a duplicate tag name ignoring case and surrounding whitespace', async () => {
+    const annotationService = createAnnotationService();
+    annotationService.findAnnotations.mockResolvedValue([
+      { id: 'tag-1', type: 'tag', name: 'Production' },
+    ]);
+    annotationService.getAnnotationsForObject.mockResolvedValue([]);
+    const component = mount(
+      <TagAssignmentModal
+        annotationService={annotationService}
+        target={target}
+        onClose={() => {}}
+      />
+    );
+
+    await act(async () => {
+      await flushPromises();
+    });
+    component.update();
+
+    act(() => {
+      component
+        .find(EuiButtonEmpty)
+        .filterWhere(
+          (button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentShowCreate'
+        )
+        .prop('onClick')!({} as React.MouseEvent<HTMLButtonElement>);
+    });
+    component.update();
+
+    act(() => {
+      component
+        .find(EuiFieldText)
+        .filterWhere((field) => field.prop('data-test-subj') === 'savedObjectTagAssignmentName')
+        .prop('onChange')!({
+        target: { value: ' production ' },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+    component.update();
+
+    expect(
+      component
+        .find(EuiFieldText)
+        .filterWhere((field) => field.prop('data-test-subj') === 'savedObjectTagAssignmentName')
+        .prop('isInvalid')
+    ).toBe(true);
+    expect(component.text()).toContain(
+      'A tag named "Production" already exists. Select the existing tag instead.'
+    );
+    expect(
+      component
+        .find(EuiSmallButton)
+        .filterWhere((button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentSave')
+        .prop('isDisabled')
+    ).toBe(true);
+    expect(annotationService.createAnnotation).not.toHaveBeenCalled();
   });
 });
