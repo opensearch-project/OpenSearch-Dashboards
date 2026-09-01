@@ -62,7 +62,7 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
                   defaultMessage: 'Copy to clipboard',
                 })}
                 onClick={copy}
-                iconType="copyClipboard"
+                iconType="copy"
               />
             )}
           </EuiCopy>
@@ -236,7 +236,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                           defaultMessage: 'Copy to clipboard',
                         })}
                         onClick={copy}
-                        iconType="copyClipboard"
+                        iconType="copy"
                       />
                     )}
                   </EuiCopy>
