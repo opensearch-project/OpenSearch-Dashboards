@@ -241,27 +241,43 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       },
     });
 
+    const sendGlobalSearchMessage = async (content: string) => {
+      await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+    };
+
     core.chrome.globalSearch.registerSearchCommand({
       id: 'AI_CHATBOT_COMMAND',
       type: 'ACTIONS',
       inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
         defaultMessage: 'Search or chat with AI',
       }),
-      run: async () => [
-        React.createElement(
-          EuiText,
+      run: async (query: string) => {
+        if (!query) {
+          return [];
+        }
+
+        return [
           {
-            size: 'xs',
-            color: 'subdued',
+            id: 'chat-with-ai',
+            label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
+              defaultMessage: 'Chat with AI',
+            }),
+            content: React.createElement(
+              EuiText,
+              {
+                size: 'xs',
+                color: 'subdued',
+              },
+              i18n.translate('chat.globalSearch.chatWithAI.hints', {
+                defaultMessage: 'Press Enter to chat with AI',
+              })
+            ),
+            placement: 'trailing',
+            execute: () => sendGlobalSearchMessage(query),
           },
-          i18n.translate('chat.globalSearch.chatWithAI.hints', {
-            defaultMessage: 'Press Enter to chat with AI',
-          })
-        ),
-      ],
-      action: async ({ content }: { content: string }) => {
-        await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+        ];
       },
+      action: ({ content }: { content: string }) => sendGlobalSearchMessage(content),
     });
 
     this.setupChatbotWindowState(core);

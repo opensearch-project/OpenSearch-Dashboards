@@ -54,6 +54,7 @@ export interface CollapsibleNavGroupEnabledProps {
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   globalSearchCommands$: Rx.Observable<GlobalSearchCommand[]>;
+  commandPaletteAvailable: boolean;
   enableIconSideNav?: boolean;
   navPopoverServices?: NavPopoverServices;
   isLocked?: boolean;
@@ -92,6 +93,7 @@ export function CollapsibleNavGroupEnabled({
   isLocked,
   onIsLockedUpdate,
   openNav,
+  commandPaletteAvailable,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -282,7 +284,10 @@ export function CollapsibleNavGroupEnabled({
         {!isNavOpen ? (
           <div className="searchBarIcon euiHeaderSectionItemButton">
             {globalSearchCommands && (
-              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
+              <HeaderSearchBarIcon
+                globalSearchCommands={globalSearchCommands}
+                commandPaletteAvailable={commandPaletteAvailable}
+              />
             )}
           </div>
         ) : (
@@ -293,7 +298,10 @@ export function CollapsibleNavGroupEnabled({
             className="searchBar-wrapper"
           >
             {globalSearchCommands && (
-              <HeaderSearchBar globalSearchCommands={globalSearchCommands} />
+              <HeaderSearchBar
+                globalSearchCommands={globalSearchCommands}
+                commandPaletteAvailable={commandPaletteAvailable}
+              />
             )}
           </EuiPanel>
         )}
@@ -371,7 +379,10 @@ export function CollapsibleNavGroupEnabled({
           enableIconSideNav={enableIconSideNav}
           searchElement={
             globalSearchCommands ? (
-              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
+              <HeaderSearchBarIcon
+                globalSearchCommands={globalSearchCommands}
+                commandPaletteAvailable={commandPaletteAvailable}
+              />
             ) : undefined
           }
         />
@@ -482,7 +493,12 @@ export function CollapsibleNavGroupEnabled({
           />
         </EuiPanel>
         <EuiPanel hasBorder={false} paddingSize="s" hasShadow={false} className="searchBar-wrapper">
-          {globalSearchCommands && <HeaderSearchBar globalSearchCommands={globalSearchCommands} />}
+          {globalSearchCommands && (
+            <HeaderSearchBar
+              globalSearchCommands={globalSearchCommands}
+              commandPaletteAvailable={commandPaletteAvailable}
+            />
+          )}
         </EuiPanel>
         <EuiPanel
           hasBorder={false}
