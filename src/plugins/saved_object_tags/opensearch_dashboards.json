@@ -1,6 +1,7 @@
 {
   "id": "savedObjectTags",
   "version": "opensearchDashboards",
+  "configPath": ["savedObjectTags"],
   "requiredPlugins": [],
   "server": true,
   "ui": true

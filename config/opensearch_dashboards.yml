@@ -377,6 +377,12 @@
 # if the security plugin is not installed and this config is true, permission control takes no effect.
 # savedObjects.permission.enabled: true
 
+# Enable the saved object annotation framework.
+# savedObjects.annotations.enabled: true
+
+# Enable saved object tags. This also requires savedObjects.annotations.enabled.
+# savedObjectTags.enabled: true
+
 # uiSettings:
 #   overrides:
 #     "home:useNewHomePage": true

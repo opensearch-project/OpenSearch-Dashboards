@@ -377,7 +377,10 @@ export class SavedObjectsService implements CoreService<
       .pipe(first())
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-    this.typeRegistry.registerType(savedObjectAnnotationType);
+    if (this.config.annotations.enabled) {
+      this.typeRegistry.registerType(savedObjectAnnotationType);
+      registerSavedObjectAnnotationRoutes(setupDeps.http);
+    }
 
     // Recorded before any plugin runs, for callers that build mappings without the raw
     // configuration. Permission control comes from the validated config -- the same source
@@ -418,14 +421,19 @@ export class SavedObjectsService implements CoreService<
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
       getCapabilities: () => this.capabilitiesResolver,
     });
-    registerSavedObjectAnnotationRoutes(setupDeps.http);
 
     return {
       status$: this.savedObjectServiceStatus$.asObservable(),
       annotations: {
+        enabled: this.config.annotations.enabled,
         registerAnnotationType: (registration) => {
           if (this.started) {
             throw new Error('cannot call `registerAnnotationType` after service startup.');
+          }
+          if (!this.config?.annotations.enabled) {
+            throw new Error(
+              'Saved object annotations are disabled. Set `savedObjects.annotations.enabled` to `true` to register annotation types.'
+            );
           }
           this.annotationTypeRegistry.register(registration);
         },
@@ -620,11 +628,13 @@ export class SavedObjectsService implements CoreService<
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    clientProvider.addClientWrapperFactory(
-      ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
-      ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
-      annotationReferencePreservationWrapper
-    );
+    if (this.config.annotations.enabled) {
+      clientProvider.addClientWrapperFactory(
+        ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+        ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+        annotationReferencePreservationWrapper
+      );
+    }
     this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
       clientProvider.addClientWrapperFactory(priority, id, factory);
     });

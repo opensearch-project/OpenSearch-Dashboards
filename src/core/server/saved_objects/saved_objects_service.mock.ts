@@ -88,6 +88,7 @@ const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObject
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     annotations: {
+      enabled: true,
       registerAnnotationType: jest.fn(),
     },
     setClientFactoryProvider: jest.fn(),

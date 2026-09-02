@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { configSchema, SavedObjectTagsConfig } from './config';
 import { SavedObjectTagsPlugin } from './plugin';
 
-export const plugin = (_initializerContext: PluginInitializerContext) =>
+export const config: PluginConfigDescriptor<SavedObjectTagsConfig> = {
+  schema: configSchema,
+};
+
+export const plugin = (_initializerContext: PluginInitializerContext<SavedObjectTagsConfig>) =>
   new SavedObjectTagsPlugin();

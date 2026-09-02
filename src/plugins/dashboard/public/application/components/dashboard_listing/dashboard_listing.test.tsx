@@ -184,6 +184,35 @@ describe('dashboard tags', () => {
       'dashboard:dashboard-1'
     );
   });
+
+  it('hides tag controls when the tags plugin is disabled', async () => {
+    const mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find.mockResolvedValue({
+      savedObjects: [],
+      total: 0,
+    });
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
+    mockServices.navigation = {
+      ui: {
+        HeaderControl: () => null,
+      },
+    };
+    mockServices.savedObjectTags = undefined;
+
+    let component: ReturnType<typeof mount>;
+    await act(async () => {
+      component = mount(wrapDashboardListingInContext(mockServices));
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    const tableListView = component.find(TableListView);
+    expect(tableListView.prop('tableFilters')).toBeUndefined();
+    expect((tableListView.prop('tableColumns') as any[]).map(({ name }) => name)).not.toContain(
+      'Tags'
+    );
+  });
 });
 
 // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7488

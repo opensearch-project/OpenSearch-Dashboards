@@ -9,11 +9,15 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects",
-    "savedObjectTags"
+    "savedObjects"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
+  "optionalPlugins": ["home", "share", "usageCollection", "savedObjectTags"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home", "contextProvider"]
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact",
+    "home",
+    "contextProvider"
+  ]
 }

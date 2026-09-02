@@ -62,7 +62,6 @@ const TopNav = ({
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
-  const { TagAssignmentModal, TagList } = services.savedObjectTags.ui;
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
 
@@ -95,7 +94,8 @@ const TopNav = ({
   }, []);
 
   const openTagAssignmentModal = useCallback(() => {
-    if (!dashboardIdFromUrl) {
+    const TagAssignmentModal = services.savedObjectTags?.ui.TagAssignmentModal;
+    if (!dashboardIdFromUrl || !TagAssignmentModal) {
       return;
     }
 
@@ -111,7 +111,7 @@ const TopNav = ({
         />
       )
     );
-  }, [TagAssignmentModal, dashboardIdFromUrl, handleTagsChange, services.overlays]);
+  }, [dashboardIdFromUrl, handleTagsChange, services.overlays, services.savedObjectTags]);
 
   const handleAddPanel = useCallback(() => {
     // directly open the add panel flyout
@@ -246,19 +246,21 @@ const TopNav = ({
         dashboardIdFromUrl,
         currentContainer
       );
-      if (dashboardIdFromUrl) {
+      const TagList = services.savedObjectTags?.ui.TagList;
+      if (dashboardIdFromUrl && services.savedObjectTags) {
         navActions[TopNavIds.TAGS] = openTagAssignmentModal;
       }
-      const tagsTooltip = dashboardIdFromUrl ? (
-        <DashboardTagListTooltip
-          TagList={TagList}
-          target={{
-            objectType: 'dashboard',
-            objectId: dashboardIdFromUrl,
-          }}
-          refreshKey={tagRefreshKey}
-        />
-      ) : undefined;
+      const tagsTooltip =
+        dashboardIdFromUrl && TagList ? (
+          <DashboardTagListTooltip
+            TagList={TagList}
+            target={{
+              objectType: 'dashboard',
+              objectId: dashboardIdFromUrl,
+            }}
+            refreshKey={tagRefreshKey}
+          />
+        ) : undefined;
       setTopNavMenu(
         showActionsInGroup
           ? getTopNavConfig(
@@ -290,7 +292,6 @@ const TopNav = ({
     dashboardIdFromUrl,
     showActionsInGroup,
     openTagAssignmentModal,
-    TagList,
     tagRefreshKey,
   ]);
 

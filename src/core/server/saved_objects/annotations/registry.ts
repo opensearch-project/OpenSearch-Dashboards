@@ -22,6 +22,7 @@ export interface SavedObjectAnnotationTypeRegistration {
 }
 
 export interface SavedObjectAnnotationsSetup {
+  enabled: boolean;
   registerAnnotationType(registration: SavedObjectAnnotationTypeRegistration): void;
 }
 

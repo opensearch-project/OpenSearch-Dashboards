@@ -47,7 +47,7 @@ export const DashboardListing = () => {
   const [selectedTagId, setSelectedTagId] = useState<string>();
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
-  const { TagList, TagSelector } = savedObjectTags.ui;
+  const TagSelector = savedObjectTags?.ui.TagSelector;
   const { setAppRightControls } = application;
 
   useEffect(() => {
@@ -100,9 +100,15 @@ export const DashboardListing = () => {
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
 
-  const tableColumns = useMemo(
-    () => [
-      ...getTableColumns(application, history, uiSettings),
+  const tableColumns = useMemo(() => {
+    const columns = getTableColumns(application, history, uiSettings);
+    if (!savedObjectTags) {
+      return columns;
+    }
+
+    const { TagList } = savedObjectTags.ui;
+    return [
+      ...columns,
       {
         field: 'id',
         name: i18n.translate('dashboard.listing.table.tagsColumnName', {
@@ -126,9 +132,8 @@ export const DashboardListing = () => {
           />
         ),
       },
-    ],
-    [application, history, uiSettings, TagList]
-  );
+    ];
+  }, [application, history, uiSettings, savedObjectTags]);
 
   const createItem = useCallback(() => {
     history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
@@ -273,17 +278,19 @@ export const DashboardListing = () => {
         })}
         toastNotifications={notifications.toasts}
         showUpdatedUx={showUpdatedUx}
-        refreshKey={selectedTagId}
-        hasActiveFilters={Boolean(selectedTagId)}
+        refreshKey={savedObjectTags ? selectedTagId : undefined}
+        hasActiveFilters={Boolean(savedObjectTags && selectedTagId)}
         tableFilters={
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false} className="dshTagSelector">
-                <TagSelector selectedTagId={selectedTagId} onChange={setSelectedTagId} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
+          TagSelector ? (
+            <>
+              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false} className="dshTagSelector">
+                  <TagSelector selectedTagId={selectedTagId} onChange={setSelectedTagId} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          ) : undefined
         }
       />
     </>

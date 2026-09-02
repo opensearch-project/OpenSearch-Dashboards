@@ -65,7 +65,8 @@ describe('SavedObjectsService', () => {
   const createCoreContext = ({
     skipMigration = true,
     env,
-  }: { skipMigration?: boolean; env?: Env } = {}) => {
+    annotationsEnabled = false,
+  }: { skipMigration?: boolean; env?: Env; annotationsEnabled?: boolean } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
     configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
@@ -75,6 +76,7 @@ describe('SavedObjectsService', () => {
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: new ByteSizeValue(0),
         permission: { enabled: false },
+        annotations: { enabled: annotationsEnabled },
         storage: {
           backend: 'opensearch',
           sqlite: { path: ':memory:' },
@@ -146,7 +148,7 @@ describe('SavedObjectsService', () => {
 
     describe('#addClientWrapper', () => {
       it('registers the wrapper to the clientProvider', async () => {
-        const coreContext = createCoreContext();
+        const coreContext = createCoreContext({ annotationsEnabled: true });
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -175,6 +177,20 @@ describe('SavedObjectsService', () => {
           wrapperB
         );
       });
+
+      it('does not register the annotation wrapper when annotations are disabled', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        expect(clientProviderInstanceMock.addClientWrapperFactory).not.toHaveBeenCalledWith(
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+          annotationReferencePreservationWrapper
+        );
+      });
     });
 
     describe('#registerType', () => {
@@ -191,11 +207,46 @@ describe('SavedObjectsService', () => {
         };
         setup.registerType(type);
 
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(2);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+      });
+
+      it('registers the annotation saved object type when annotations are enabled', async () => {
+        const coreContext = createCoreContext({ annotationsEnabled: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setupDeps = createSetupDeps();
+        const setup = await soService.setup(setupDeps);
+
+        expect(setup.annotations.enabled).toBe(true);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(
           savedObjectAnnotationType
         );
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+        expect(setupDeps.http.createRouter).toHaveBeenCalledWith(
+          '/internal/saved_object_annotations'
+        );
+      });
+
+      it('does not register annotation persistence when annotations are disabled', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setupDeps = createSetupDeps();
+        const setup = await soService.setup(setupDeps);
+
+        expect(setup.annotations.enabled).toBe(false);
+        expect(typeRegistryInstanceMock.registerType).not.toHaveBeenCalledWith(
+          savedObjectAnnotationType
+        );
+        expect(setupDeps.http.createRouter).not.toHaveBeenCalledWith(
+          '/internal/saved_object_annotations'
+        );
+        expect(() =>
+          setup.annotations.registerAnnotationType({
+            type: 'tag',
+            supportedObjectTypes: ['dashboard'],
+          })
+        ).toThrow(
+          'Saved object annotations are disabled. Set `savedObjects.annotations.enabled` to `true` to register annotation types.'
+        );
       });
     });
 

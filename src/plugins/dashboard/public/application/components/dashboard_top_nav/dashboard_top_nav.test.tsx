@@ -219,6 +219,28 @@ describe('Dashboard top nav', () => {
     expect(mockServices.overlays.openModal).toHaveBeenCalledTimes(1);
   });
 
+  test('hides tags when the tags plugin is disabled', async () => {
+    mockServices.savedObjectTags = undefined;
+    mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
+    const component = mount(
+      wrapDashboardTopNavInContext(
+        mockServices,
+        { ...currentState, fullScreenMode: false, viewMode: ViewMode.VIEW },
+        false,
+        'dashboard-1',
+        true
+      )
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => process.nextTick(resolve));
+    });
+    component.update();
+
+    const config = component.find(TopNavMenu).prop('config') as any[];
+    expect(config.map(({ testId }) => testId)).not.toContain('dashboardTagsMenuItem');
+  });
+
   describe('Keyboard Shortcuts Integration', () => {
     let mockUseKeyboardShortcut: jest.Mock;
     let mockRegister: jest.Mock;
