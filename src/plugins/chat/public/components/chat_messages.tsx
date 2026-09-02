@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
 import {
   EuiIcon,
   EuiText,
@@ -16,6 +16,9 @@ import {
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { map } from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
+import { CoreStart } from '../../../../core/public';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
 import { TimelineToolCall, ToolCallRow } from './tool_call_row';
@@ -25,12 +28,22 @@ import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
-import { AssistantActionService, ToolCallState } from '../../../context_provider/public';
+import {
+  AssistantActionService,
+  ContextProviderStart,
+  ToolCallState,
+} from '../../../context_provider/public';
 import { RecentSessions } from './recent_sessions';
 import {
   ConversationHistoryService,
   SavedConversation,
 } from '../services/conversation_history_service';
+import { useChatContext } from '../contexts/chat_context';
+import {
+  StarterSuggestionItem,
+  StarterSuggestionsPluginStart,
+  StarterSuggestionsResult,
+} from '../../../starter_suggestions/public';
 
 /**
  * Determine tool status.
@@ -73,24 +86,49 @@ function getToolStatus(
   return 'completed';
 }
 
-interface SuggestionItem {
-  icon: string;
-  iconColor?: string;
-  text: string;
-  prompt?: string;
-  action?: () => void;
+const SUGGESTION_TEST_SUBJ_PREFIX = 'chatbotStarterSuggestion';
+/** Stands in for the provider id when the built-in defaults are on screen. */
+const DEFAULT_SUGGESTION_PROVIDER_ID = 'default';
+
+interface SuggestionItem extends StarterSuggestionItem {
   /** When set, this suggestion is only shown if the named tool is registered. */
   requiredTool?: string;
 }
 
+interface VisibleSuggestions {
+  appId?: string;
+  providerId: string;
+  items: SuggestionItem[];
+}
+
+/**
+ * `chatbotStarterSuggestion-{appId}-{providerId}-{cardId}`. All three segments
+ * come from the same snapshot as the items, so the subj never pairs one app's
+ * id with another's provider. Cards without an id fall back to their position.
+ */
+const buildSuggestionTestSubj = (
+  { appId, providerId }: VisibleSuggestions,
+  suggestion: SuggestionItem,
+  index: number
+) => {
+  const segments = [SUGGESTION_TEST_SUBJ_PREFIX];
+  if (appId) {
+    segments.push(appId);
+  }
+  segments.push(providerId, String(suggestion.id ?? index));
+  return segments.join('-');
+};
+
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
   {
+    id: 'askData',
     icon: 'search',
     iconColor: 'primary',
     text: 'Ask questions about your data',
     prompt: 'What indices do I have?',
   },
   {
+    id: 'investigate',
     icon: 'notebookApp',
     iconColor: 'danger',
     text: '/investigate an issue',
@@ -98,6 +136,7 @@ const STARTER_SUGGESTIONS: SuggestionItem[] = [
     requiredTool: 'create_investigation',
   },
   {
+    id: 'explain',
     icon: 'help',
     iconColor: 'warning',
     text: 'Explain a concept',
@@ -388,17 +427,111 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   );
 
   // Filter starter suggestions based on tool availability
-  const visibleSuggestions = useMemo(() => {
-    return STARTER_SUGGESTIONS.filter((suggestion) => {
-      if (suggestion.requiredTool) {
-        if (!toolDefinitions) {
-          return false;
-        }
-        return toolDefinitions.some((tool) => tool.name === suggestion.requiredTool);
-      }
-      return true;
+  const availableRequiredTools = useMemo(
+    () =>
+      STARTER_SUGGESTIONS.map((suggestion) => suggestion.requiredTool)
+        .filter((requiredTool) =>
+          Boolean(requiredTool && toolDefinitions?.some((tool) => tool.name === requiredTool))
+        )
+        .join(','),
+    [toolDefinitions]
+  );
+
+  const visibleDefaults = useMemo(
+    () =>
+      STARTER_SUGGESTIONS.filter(
+        (suggestion) =>
+          !suggestion.requiredTool ||
+          availableRequiredTools.split(',').includes(suggestion.requiredTool)
+      ),
+    [availableRequiredTools]
+  );
+
+  // Page-aware starter suggestions: an active provider can replace/filter defaults
+  const { chatService } = useChatContext();
+  const { services } = useOpenSearchDashboards<{
+    core: CoreStart;
+    contextProvider?: ContextProviderStart;
+    starterSuggestions: StarterSuggestionsPluginStart;
+  }>();
+  const currentAppId = useObservable(services.core.application.currentAppId$);
+  const [visibleSuggestions, setVisibleSuggestions] = useState<VisibleSuggestions>({
+    providerId: DEFAULT_SUGGESTION_PROVIDER_ID,
+    items: visibleDefaults,
+  });
+  const contextProvider = services.contextProvider;
+  const starterSuggestionsService = services.starterSuggestions;
+  const isEmptyScreen = timeline.length === 0 && !isStreaming;
+
+  useEffect(() => {
+    setVisibleSuggestions({
+      appId: currentAppId,
+      providerId: DEFAULT_SUGGESTION_PROVIDER_ID,
+      items: visibleDefaults,
     });
-  }, [toolDefinitions]);
+
+    if (!currentAppId || !isEmptyScreen || !starterSuggestionsService.hasProvider(currentAppId)) {
+      return;
+    }
+
+    let cancelled = false;
+    let latestRequestId = 0;
+
+    const fetchStarterSuggestions = () => {
+      const requestId = ++latestRequestId;
+      starterSuggestionsService
+        .getSuggestions({
+          appId: currentAppId,
+          pathname: window.location.pathname,
+          getDataSourceId: () => chatService.getCurrentDataSourceId(),
+          contexts: chatService.getAgentVisibleContexts(),
+          defaults: visibleDefaults,
+        })
+        .then((result: StarterSuggestionsResult | null) => {
+          if (!cancelled && requestId === latestRequestId && result) {
+            setVisibleSuggestions({
+              appId: result.appId,
+              providerId: result.providerId,
+              items: result.items,
+            });
+          }
+        })
+        .catch(() => {
+          // Keep whatever is currently displayed
+        });
+    };
+
+    fetchStarterSuggestions();
+
+    const unsubscribeInvalidate = starterSuggestionsService.onInvalidate((invalidatedAppId) => {
+      if (invalidatedAppId === currentAppId) {
+        fetchStarterSuggestions();
+      }
+    });
+
+    let lastContexts = chatService.getAgentVisibleContexts();
+    const unsubscribeContexts = contextProvider?.getAssistantContextStore().subscribe(() => {
+      const contexts = chatService.getAgentVisibleContexts();
+      if (deepEqual(contexts, lastContexts)) {
+        return;
+      }
+      lastContexts = contexts;
+      fetchStarterSuggestions();
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribeInvalidate();
+      unsubscribeContexts?.();
+    };
+  }, [
+    currentAppId,
+    isEmptyScreen,
+    starterSuggestionsService,
+    chatService,
+    contextProvider,
+    visibleDefaults,
+  ]);
 
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
@@ -560,7 +693,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
       {/* Timeline Area */}
       <div className={`chatMessages chatMessages--${layoutMode}`} ref={messagesContainerRef}>
-        {timeline.length === 0 && !isStreaming && (
+        {isEmptyScreen && (
           <div className="chatMessages__emptyState">
             <div className="chatMessages__emptyStateHeader">
               <EuiIcon type="generate" size="xxl" />
@@ -573,12 +706,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
               </EuiText>
             </div>
             <div className="chatMessages__suggestions">
-              {visibleSuggestions.map((suggestion, index) => (
+              {visibleSuggestions.items.map((suggestion, index) => (
                 <EuiPanel
                   key={index}
                   paddingSize="m"
                   hasBorder
                   className="chatMessages__suggestionCard"
+                  data-test-subj={buildSuggestionTestSubj(visibleSuggestions, suggestion, index)}
                   onClick={() => {
                     if (suggestion.action) {
                       suggestion.action();
