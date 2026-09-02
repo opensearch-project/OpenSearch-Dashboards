@@ -404,7 +404,7 @@ describe('TraceDetails', () => {
   });
 
   it('surfaces a distinct query-failure callout (not "invalid trace") when the fetch fails', async () => {
-    mockPplService.fetchTraceSpans.mockRejectedValue(new Error('For input string: "VC-05"'));
+    mockPplService.fetchTraceSpans.mockRejectedValue(new Error('For input string: "ABC-123"'));
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const history = createMemoryHistory();
@@ -416,7 +416,7 @@ describe('TraceDetails', () => {
 
     const errorCallout = await screen.findByTestId('traceViewFetchError');
     expect(errorCallout).toBeInTheDocument();
-    expect(errorCallout).toHaveTextContent('For input string: "VC-05"');
+    expect(errorCallout).toHaveTextContent('For input string: "ABC-123"');
     // Must NOT mislabel a failed query as a missing/invalid trace.
     expect(screen.queryByText(/invalid or could not be found/i)).not.toBeInTheDocument();
 

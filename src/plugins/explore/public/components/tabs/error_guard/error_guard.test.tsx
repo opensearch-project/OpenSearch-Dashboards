@@ -98,9 +98,10 @@ describe('ErrorGuard', () => {
       statusCode: 503,
       error: 'Service Unavailable',
       message: {
-        reason: 'java.sql.SQLException: exception while executing query: For input string: "VC-05"',
+        reason:
+          'java.sql.SQLException: exception while executing query: For input string: "ABC-123"',
         details:
-          'java.sql.SQLException: exception while executing query: For input string: "VC-05"',
+          'java.sql.SQLException: exception while executing query: For input string: "ABC-123"',
         type: 'RuntimeException',
       },
       originalErrorMessage: 'Original error message',
@@ -118,7 +119,7 @@ describe('ErrorGuard', () => {
     // The raw exception is shown in the Details block, not as the headline.
     expect(
       screen.getByText(
-        'java.sql.SQLException: exception while executing query: For input string: "VC-05"'
+        'java.sql.SQLException: exception while executing query: For input string: "ABC-123"'
       )
     ).toBeInTheDocument();
     expect(screen.getByText('RuntimeException')).toBeInTheDocument();
