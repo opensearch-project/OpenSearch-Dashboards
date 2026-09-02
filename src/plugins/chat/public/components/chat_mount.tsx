@@ -14,6 +14,7 @@ import { ChatProvider } from '../contexts/chat_context';
 import { ChatLayoutMode } from '../types';
 import { ContextProviderStart } from '../../../context_provider/public';
 import { SuggestedActionsService } from '../services/suggested_action';
+import { StarterSuggestionsPluginStart } from '../../../starter_suggestions/public';
 import { ConfirmationService } from '../services/confirmation_service';
 import { HumanInputService } from '../services/human_input_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
@@ -28,6 +29,7 @@ interface ChatMountProps {
   suggestedActionsService: SuggestedActionsService;
   confirmationService: ConfirmationService;
   humanInputService: HumanInputService;
+  starterSuggestionsService: StarterSuggestionsPluginStart;
 }
 
 export const ChatMount = ({
@@ -38,14 +40,16 @@ export const ChatMount = ({
   suggestedActionsService,
   confirmationService,
   humanInputService,
+  starterSuggestionsService,
 }: ChatMountProps) => {
   const services = useMemo(
     () => ({
       core,
       contextProvider,
       charts,
+      starterSuggestions: starterSuggestionsService,
     }),
-    [core, contextProvider, charts]
+    [core, contextProvider, charts, starterSuggestionsService]
   );
 
   const handleClose = useCallback(() => {

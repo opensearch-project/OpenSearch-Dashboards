@@ -5,6 +5,7 @@
 
 import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
+import { StarterSuggestionsService } from '../../starter_suggestions/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { BehaviorSubject, of } from 'rxjs';
 import { ChatMountService } from './services/chat_mount_service';
@@ -90,6 +91,7 @@ describe('ChatPlugin', () => {
       navigation: {} as any,
       contextProvider: {} as any,
       charts: {} as any,
+      starterSuggestions: new StarterSuggestionsService(),
     };
 
     // Mock toMountPoint
@@ -552,6 +554,7 @@ describe('ChatPlugin', () => {
         suggestedActionsService: expect.any(Object),
         confirmationService: expect.any(Object),
         humanInputService: expect.any(Object),
+        starterSuggestionsService: expect.any(StarterSuggestionsService),
       });
     });
 
