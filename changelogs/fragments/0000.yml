@@ -1,2 +1,0 @@
-feat:
-- Surface backend query warnings (e.g. partial results over a subset of indices) as a banner above the explore results grid ([#0000](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/0000))
