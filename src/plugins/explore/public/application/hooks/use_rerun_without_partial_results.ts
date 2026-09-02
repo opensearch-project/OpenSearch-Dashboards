@@ -9,6 +9,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { ExploreServices } from '../../types';
 import { executeQueries } from '../utils/state_management/actions/query_actions';
 import {
+  clearQueryStatusMap,
   clearResults,
   clearResultsCache,
   setDisablePartialResults,
@@ -31,6 +32,10 @@ export const useRerunWithoutPartialResults = () => {
     dispatch(setDisablePartialResults(true));
     clearResultsCache();
     dispatch(clearResults());
+    // Also reset query statuses: executeQueries only re-runs the separate bucket-count query when
+    // its status is missing/uninitialized. Clearing results without clearing status would skip it,
+    // leaving bucketCount undefined and reverting the summary from "N / M buckets" to "N / M hits".
+    dispatch(clearQueryStatusMap());
     // @ts-expect-error TS2345 TODO(ts-error): executeQueries' thunk arg type
     dispatch(executeQueries({ services }));
   }, [dispatch, services]);
