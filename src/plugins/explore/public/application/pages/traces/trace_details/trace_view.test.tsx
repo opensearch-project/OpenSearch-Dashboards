@@ -403,6 +403,26 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
+  it('surfaces a distinct query-failure callout (not "invalid trace") when the fetch fails', async () => {
+    mockPplService.fetchTraceSpans.mockRejectedValue(new Error('For input string: "VC-05"'));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const history = createMemoryHistory();
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    const errorCallout = await screen.findByTestId('traceViewFetchError');
+    expect(errorCallout).toBeInTheDocument();
+    expect(errorCallout).toHaveTextContent('For input string: "VC-05"');
+    // Must NOT mislabel a failed query as a missing/invalid trace.
+    expect(screen.queryByText(/invalid or could not be found/i)).not.toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+  });
+
   it('handles default dataset', async () => {
     const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
 

@@ -29,6 +29,10 @@ export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
 };
 
+export const isTraceIdColumn = (columnId: string): boolean => {
+  return columnId === 'traceId' || columnId === 'trace_id' || columnId === 'traceID';
+};
+
 export const isDurationColumn = (columnId: string) => {
   return columnId === 'durationNano' || columnId === 'durationInNanos';
 };
@@ -157,6 +161,76 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
       <EuiLink
         onClick={handleSpanIdClick}
         data-test-subj="spanIdLink"
+        className="exploreSpanIdLink"
+      >
+        {displayValue}
+        <EuiIcon type="popout" size="s" />
+      </EuiLink>
+    </EuiToolTip>
+  );
+};
+
+export const handleTraceIdNavigation = (
+  rowData: OpenSearchSearchHit<Record<string, unknown>>,
+  dataset: Dataset
+): void => {
+  // Extract traceId from row data
+  const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
+
+  // Intentionally omit spanId: the trace details page selects the trace's root
+  // span (parentless, else earliest by startTime) when no spanId is provided.
+  const fullPageUrl = buildTraceDetailsUrl('', traceIdValue, dataset);
+  window.open(fullPageUrl, '_blank');
+};
+
+export interface TraceIdLinkProps {
+  sanitizedCellValue: string;
+  rowData: OpenSearchSearchHit<Record<string, unknown>>;
+  dataset: Dataset;
+}
+
+export const TraceIdLink: React.FC<TraceIdLinkProps> = ({
+  sanitizedCellValue,
+  rowData,
+  dataset,
+}) => {
+  // Validate required fields before allowing navigation (mirrors SpanIdLink)
+  const validationResult = validateRequiredTraceFields(rowData as any);
+  const isValid = validationResult.isValid;
+
+  const handleTraceIdClick = () => {
+    if (isValid) {
+      handleTraceIdNavigation(rowData, dataset);
+    }
+  };
+
+  const displayValue = sanitizedCellValue.replace(/<[^>]*>/g, '').trim();
+
+  if (!isValid) {
+    // Return non-clickable text when required fields are missing
+    return (
+      <EuiToolTip
+        content={i18n.translate('explore.traceIdLink.missingFieldsTooltip', {
+          defaultMessage:
+            'Required trace fields are missing. Please update your data ingestion to include all required fields.',
+        })}
+      >
+        <EuiText size="s" color="subdued">
+          {displayValue}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('explore.traceIdLink.redirectTooltip', {
+        defaultMessage: 'View full trace (opens in a new tab)',
+      })}
+    >
+      <EuiLink
+        onClick={handleTraceIdClick}
+        data-test-subj="traceIdLink"
         className="exploreSpanIdLink"
       >
         {displayValue}
