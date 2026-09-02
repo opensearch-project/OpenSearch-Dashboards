@@ -103,7 +103,8 @@ export const createNumericalStateTimeline = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  allData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -154,6 +155,7 @@ export const createNumericalStateTimeline = (
     styles: styleOptions,
     axisConfig,
     axisColumnMappings,
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -216,7 +218,8 @@ export const createSingleCategoricalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn },
-  allData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -255,6 +258,7 @@ export const createSingleCategoricalStateTimeline = (
     styles: styleOptions,
     axisConfig,
     axisColumnMappings,
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };

@@ -15,6 +15,8 @@ import {
   ScatterSeriesOption,
   HeatmapSeriesOption,
 } from 'echarts';
+import DOMPurify from 'dompurify';
+import { escape } from 'lodash';
 import {
   AggregationType,
   Positions,
@@ -75,9 +77,15 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   axisConfig?: EChartsAxisConfig;
   axisColumnMappings: { [K in AxisRole]?: VisColumn | VisColumn[] };
   timeRange?: { from: string; to: string };
+  // Series originName / displayName Series Map
+  seriesDisplayNames?: Record<string, string>;
 }
 
 export type AxisType = 'category' | 'value' | 'time';
+
+export const escapeTooltipText = (value: unknown) => escape(String(value ?? ''));
+
+export const sanitizeTooltipHtml = (html: string) => DOMPurify.sanitize(html);
 
 /**
  * State object that flows through the pipeline
@@ -152,9 +160,30 @@ export const createBaseConfig =
     legend?: EChartsOption['legend'];
   } = {}) =>
   (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-    const { styles, axisConfig } = state;
+    const { styles, axisConfig, seriesDisplayNames } = state;
 
     const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+
+    const formatValue = (value: unknown) =>
+      hasUnit && typeof value === 'number'
+        ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
+        : String(value ?? '');
+
+    const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
+    const formatterDisplayName = (params: any) => {
+      const rows = Array.isArray(params) ? params : [params];
+      const lines = rows.map((p: any) => {
+        const seriesIndex = p.seriesIndex;
+        const seriesName = p.seriesName;
+        const label = seriesDisplayNames?.[seriesName] ?? seriesName;
+        // ignore value[0] which is axis x
+        const valueRaw = p.value.slice(1);
+        return `${p.marker ?? ''}${escapeTooltipText(label)}: ${escapeTooltipText(
+          formatValue(valueRaw[seriesIndex])
+        )}`;
+      });
+      return sanitizeTooltipHtml([...lines].join('<br/>'));
+    };
 
     const baseConfig = {
       tooltip: {
@@ -164,12 +193,11 @@ export const createBaseConfig =
         show: styles.tooltipOptions?.mode !== 'hidden',
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
         axisPointer: { type: 'line' as const },
-        ...(hasUnit && {
-          valueFormatter: (value: unknown) =>
-            typeof value === 'number'
-              ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
-              : String(value ?? ''),
-        }),
+        ...(hasDisplayNames
+          ? { formatter: formatterDisplayName }
+          : hasUnit && {
+              valueFormatter: formatValue,
+            }),
       },
       legend: {
         show: false,

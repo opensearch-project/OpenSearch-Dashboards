@@ -26,6 +26,7 @@ import {
   QueryAssistParameters,
   QueryAssistResponse,
 } from '../../../../../query_enhancements/common/query_assist';
+import { PromQLQueryOptions } from '../../../../../query_enhancements/common';
 
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
@@ -67,6 +68,7 @@ export interface QueryState {
   query: string;
   language: string;
   dataset?: Dataset;
+  queryOptions?: PromQLQueryOptions;
 }
 
 export interface QueryEditorState {
@@ -200,6 +202,9 @@ export class QueryBuilder {
     const finalQueryState = {
       ...preloadedQueryState,
       query: finalQuery,
+      ...(languageType === SupportLanguageType.promQL && queryStateFromUrl?.queryOptions
+        ? { queryOptions: queryStateFromUrl.queryOptions }
+        : {}),
     };
 
     this.updateQueryState(finalQueryState);
@@ -288,8 +293,13 @@ export class QueryBuilder {
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
 
+          const cleanQuery =
+            newQuery?.language === SupportLanguageType.promQL
+              ? newQuery
+              : { ...newQuery, queryOptions: undefined };
+
           // sync query state with global queryStringManager
-          this.getServices().data.query.queryString.setQuery(newQuery);
+          this.getServices().data.query.queryString.setQuery(cleanQuery);
 
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
@@ -534,6 +544,15 @@ export class QueryBuilder {
     };
 
     this.queryState$.next(updatedQuery);
+  }
+
+  // Only for updating PromQL step/legend options
+  updateQueryOptions(partial: Partial<PromQLQueryOptions>) {
+    const queryOptions = {
+      ...this.queryState$.value.queryOptions,
+      ...partial,
+    };
+    this.updateQueryState({ queryOptions });
   }
 
   async waitForDatasetReady(): Promise<DatasetViewState> {

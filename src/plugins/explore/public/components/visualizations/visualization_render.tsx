@@ -340,5 +340,6 @@ const ChartRender = ({
     onLegend,
     legendSelected$,
     highlightedLegendTarget$,
+    seriesDisplayNames: data.seriesDisplayNames,
   });
 };

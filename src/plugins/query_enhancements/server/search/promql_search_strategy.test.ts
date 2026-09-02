@@ -272,7 +272,7 @@ describe('promqlSearchStrategy', () => {
       );
     });
 
-    it('should name series from a per-query legendFormat template when provided', async () => {
+    it('keeps Series original name and maps the legendFormat name in meta.seriesDisplayNames', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
         sessionId: 'session-1',
@@ -314,10 +314,16 @@ describe('promqlSearchStrategy', () => {
 
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values[0]).toBe('prometheus-localhost:9090');
+      const identity = seriesField?.values[0];
+      expect(identity).toBe('{instance="localhost:9090", job="prometheus"}');
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toEqual({
+        [identity as string]: 'prometheus-localhost:9090',
+      });
     });
 
-    it('keeps series distinct when a legendFormat template collapses them to one name', async () => {
+    it('keeps two same-display-name series as distinct identity keys in the map', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
         sessionId: 'session-1',
@@ -357,8 +363,56 @@ describe('promqlSearchStrategy', () => {
 
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values).toEqual(['api {instance="node-1"}', 'api {instance="node-2"}']);
+      expect(seriesField?.values).toEqual([
+        '{instance="node-1", job="api"}',
+        '{instance="node-2", job="api"}',
+      ]);
       expect(new Set(seriesField?.values).size).toBe(2);
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      const map = result.body.meta?.seriesDisplayNames;
+      expect(map).toEqual({
+        '{instance="node-1", job="api"}': 'api',
+        '{instance="node-2", job="api"}': 'api',
+      });
+      expect(Object.keys(map).length).toBe(2);
+    });
+
+    it('omits meta.seriesDisplayNames entirely when no legendFormat is provided', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'localhost:9090', job: 'prometheus' },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'up', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toBeUndefined();
     });
 
     it('keeps series distinct by __name__ when a legendFormat template collapses them to one name', async () => {
@@ -1191,9 +1245,17 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
+      // Series keeps the per-query label prefix + raw identity, unchanged by templates.
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
-      expect(seriesField?.values).toEqual(['A: server1', 'B: srv-server1']);
+      expect(seriesField?.values).toEqual(['A: {instance="server1"}', 'B: {instance="server1"}']);
+
+      // Each query's interpolated display name rides in meta, keyed by identity.
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.meta?.seriesDisplayNames).toEqual({
+        'A: {instance="server1"}': 'server1',
+        'B: {instance="server1"}': 'srv-server1',
+      });
     });
 
     it('resolves each query its own step from its min step', async () => {

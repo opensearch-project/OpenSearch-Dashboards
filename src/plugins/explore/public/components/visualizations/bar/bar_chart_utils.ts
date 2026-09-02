@@ -100,7 +100,7 @@ export const createBarSeries =
     } = options;
     let seriesFields = options.seriesFields;
 
-    const { axisColumnMappings, transformedData = [] } = state;
+    const { axisColumnMappings, transformedData = [], seriesDisplayNames } = state;
     const palette = getColors().categories;
     const newState = { ...state };
 
@@ -131,8 +131,10 @@ export const createBarSeries =
 
     const series = seriesFields.map((seriesField, index) => {
       const name = getSeriesDisplayName(seriesField, allColumns);
+      const displayLabel = seriesDisplayNames?.[seriesField] ?? name;
+
       const color = getLegendColor(name, palette, sortedNames);
-      legendItems.push(createSeriesLegendItem(name, color));
+      legendItems.push(createSeriesLegendItem(displayLabel, color, name));
       const seriesConfig = {
         type: 'bar',
         emphasis: {
