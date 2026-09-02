@@ -269,12 +269,23 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
                   }}
                 >
                   {i18n.translate('savedObjectTags.tagAssignmentModal.cancelCreateTagButton', {
-                    defaultMessage: 'Cancel',
+                    defaultMessage: 'Discard',
                   })}
                 </EuiButtonEmpty>
               }
             >
-              <EuiColorPicker color={newTagColor} compressed fullWidth onChange={setNewTagColor} />
+              <EuiColorPicker
+                color={newTagColor}
+                compressed
+                fullWidth
+                placeholder={i18n.translate(
+                  'savedObjectTags.tagAssignmentModal.noColorPlaceholder',
+                  {
+                    defaultMessage: 'No color',
+                  }
+                )}
+                onChange={setNewTagColor}
+              />
             </EuiFormRow>
           </>
         )}
@@ -294,7 +305,7 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
           onClick={saveAssignments}
         >
           {i18n.translate('savedObjectTags.tagAssignmentModal.saveButton', {
-            defaultMessage: 'Save',
+            defaultMessage: 'Save tags',
           })}
         </EuiSmallButton>
       </EuiModalFooter>

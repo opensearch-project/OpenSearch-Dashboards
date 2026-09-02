@@ -130,6 +130,16 @@ describe('TagAssignmentModal', () => {
     });
     component.update();
 
+    expect(
+      component
+        .find(EuiButtonEmpty)
+        .filterWhere(
+          (button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentCancelCreate'
+        )
+        .text()
+    ).toBe('Discard');
+    expect(component.find(EuiColorPicker).prop('placeholder')).toBe('No color');
+
     act(() => {
       component
         .find(EuiFieldText)
@@ -163,6 +173,12 @@ describe('TagAssignmentModal', () => {
       type: 'tag',
       target,
     });
+    expect(
+      component
+        .find(EuiSmallButton)
+        .filterWhere((button) => button.prop('data-test-subj') === 'savedObjectTagAssignmentSave')
+        .text()
+    ).toBe('Save tags');
   });
 
   it('rejects a duplicate tag name ignoring case and surrounding whitespace', async () => {
