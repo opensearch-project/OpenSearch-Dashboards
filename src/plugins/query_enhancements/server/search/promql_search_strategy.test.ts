@@ -361,6 +361,56 @@ describe('promqlSearchStrategy', () => {
       expect(new Set(seriesField?.values).size).toBe(2);
     });
 
+    it('keeps series distinct by __name__ when a legendFormat template collapses them to one name', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { __name__: 'http_requests_total', job: 'api' },
+                values: [[1638316800, 1]],
+              },
+              { metric: { __name__: 'http_errors_total', job: 'api' }, values: [[1638316800, 2]] },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: {
+              query: '{job="api"}',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              perQueryOptions: [{ legendFormat: '{{job}}' }],
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField?.values).toEqual([
+        'api {__name__="http_requests_total"}',
+        'api {__name__="http_errors_total"}',
+      ]);
+      expect(new Set(seriesField?.values).size).toBe(2);
+    });
+
     it('should create instant schema with all label keys', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
