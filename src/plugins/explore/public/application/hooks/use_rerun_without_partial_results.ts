@@ -11,7 +11,6 @@ import { executeQueries } from '../utils/state_management/actions/query_actions'
 import {
   clearQueryStatusMap,
   clearResults,
-  clearResultsCache,
   setDisablePartialResults,
 } from '../utils/state_management/slices';
 
@@ -30,7 +29,10 @@ export const useRerunWithoutPartialResults = () => {
 
   return useCallback(() => {
     dispatch(setDisablePartialResults(true));
-    clearResultsCache();
+    // Clear all cached results, like a normal query run (run_query), rather than by key: one query
+    // spans several cache keys (table, histogram, bucket count, tabs) and missing one would serve a
+    // stale partial result. clearResults also empties the module resultsCache via the store's cache
+    // middleware, so it must not be cleared directly here.
     dispatch(clearResults());
     // Also reset query statuses: executeQueries only re-runs the separate bucket-count query when
     // its status is missing/uninitialized. Clearing results without clearing status would skip it,
