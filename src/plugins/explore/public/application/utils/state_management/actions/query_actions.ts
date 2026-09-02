@@ -863,7 +863,8 @@ export const createSearchSourceWithQuery = async (
     // the warning banner's rerun action, which wins over the setting.
     ...(preparedQuery.language === 'PPL'
       ? {
-          partial_result: !disablePartialResults && !!uiSettings.get(PARTIAL_RESULTS_SETTING, true),
+          partial_result:
+            !disablePartialResults && !!uiSettings.get(PARTIAL_RESULTS_SETTING, false),
         }
       : {}),
   };

@@ -79,11 +79,11 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('explore.advancedSettings.enablePartialResultsTitle', {
       defaultMessage: 'Return partial results on mapping conflicts',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('explore.advancedSettings.enablePartialResultsText', {
       defaultMessage:
         'When a field is mapped inconsistently across indices (e.g. text in some, keyword in ' +
-        'others), an aggregation on that field normally fails. When enabled (the default), the ' +
+        'others), an aggregation on that field normally fails. When enabled, the ' +
         'aggregation runs over the indices where the field is aggregatable and the result is ' +
         'returned with a warning naming the excluded indices, instead of failing the query. The ' +
         'warning offers a one-click rerun without partial results when the complete-or-fail ' +
