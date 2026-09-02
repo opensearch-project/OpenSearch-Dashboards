@@ -44,7 +44,7 @@ export const DashboardTagListTooltip = ({
       }
       emptyContent={
         <div data-test-subj="dashboardTagListTooltipEmpty" style={centeredContentStyle}>
-          <EuiText color="subdued" size="xs">
+          <EuiText size="xs">
             {i18n.translate('dashboard.topNav.tagsTooltip.emptyMessage', {
               defaultMessage: 'No tags',
             })}
