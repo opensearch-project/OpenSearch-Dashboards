@@ -217,6 +217,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       contextProvider: deps.contextProvider,
       charts: deps.charts,
       suggestedActionsService: this.suggestedActionsService!,
+      starterSuggestionsService: deps.starterSuggestions,
       confirmationService: this.confirmationService,
       humanInputService: this.humanInputService,
     });
