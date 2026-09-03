@@ -17,7 +17,7 @@ import { clearQueryStatusMap, clearResults } from '../utils/state_management/sli
  *
  * Used by the partial-results warning banner. The opt-out is passed to executeQueries as a
  * per-execution thunk arg rather than stored in state, so it applies to this one run only: a later
- * time-range change or refresh reverts to the `discover:enablePartialResults` preference. Cached
+ * time-range change or refresh reverts to the `explore:enablePartialResults` preference. Cached
  * results are cleared first, otherwise the rerun would be served the existing (partial) result for
  * the same cache key.
  */
