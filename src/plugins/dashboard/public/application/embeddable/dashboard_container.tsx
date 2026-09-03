@@ -320,7 +320,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (useSection) {
       // Insert the placeholder into panels AND as a member of the target section
       // in one update, so it appears in the section (loading) from the start.
-      const appended = appendMemberToSection(layout!.items, sectionId!, placeholderId);
+      // Forward the placeholder's grid size so the section member keeps the
+      // source panel's width/height instead of defaulting to a full-width slot.
+      const appended = appendMemberToSection(
+        layout!.items,
+        sectionId!,
+        placeholderId,
+        placeholderPanelState.gridData.w,
+        placeholderPanelState.gridData.h
+      );
       this.updateInput({
         panels: { ...this.input.panels, [placeholderId]: placeholderPanelState },
         ...(appended ? { layout: { type: 'SectionLayout', items: appended.items } } : {}),
