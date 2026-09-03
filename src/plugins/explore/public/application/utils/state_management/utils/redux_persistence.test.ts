@@ -165,27 +165,6 @@ describe('redux_persistence', () => {
       );
     });
 
-    it('should not persist the transient disablePartialResults override to _a', () => {
-      const mockState = {
-        query: { query: 'source=logs', language: 'PPL', dataset: undefined },
-        ui: { activeTabId: '', showHistogram: true, disablePartialResults: true },
-        results: {},
-        tab: { logs: {}, patterns: { patternsField: undefined, usingRegexPatterns: false } },
-        legacy: { columns: ['_source'], sort: [], isDirty: false, interval: 'auto' },
-        queryEditor: {},
-        meta: { isInitialized: false },
-      } as any;
-
-      persistReduxState(mockState, mockServices);
-
-      const appStateCall = (mockServices.osdUrlStateStorage!.set as jest.Mock).mock.calls.find(
-        ([key]) => key === '_a'
-      );
-      expect(appStateCall).toBeDefined();
-      expect(appStateCall![1].ui).toEqual({ activeTabId: '', showHistogram: true });
-      expect(appStateCall![1].ui).not.toHaveProperty('disablePartialResults');
-    });
-
     it('should handle missing osdUrlStateStorage gracefully', () => {
       const mockState: RootState = {} as any;
       const servicesWithoutStorage = { ...mockServices, osdUrlStateStorage: undefined };

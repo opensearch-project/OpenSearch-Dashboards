@@ -268,9 +268,9 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
  */
 export const executeQueries = createAsyncThunk<
   void,
-  { services: ExploreServices },
+  { services: ExploreServices; disablePartialResults?: boolean },
   { state: RootState }
->('query/executeQueries', async ({ services }, { getState, dispatch }) => {
+>('query/executeQueries', async ({ services, disablePartialResults }, { getState, dispatch }) => {
   const state = getState();
   const query = state.query;
   const activeTabId = state.ui.activeTabId;
@@ -310,6 +310,7 @@ export const executeQueries = createAsyncThunk<
       dispatch(
         executeDataTableQuery({
           services,
+          disablePartialResults,
           cacheKey: dataTableCacheKey,
           queryString,
         })
@@ -323,6 +324,7 @@ export const executeQueries = createAsyncThunk<
     dispatch(
       executeHistogramQuery({
         services,
+        disablePartialResults,
         cacheKey: histogramCacheKey,
         queryString,
         interval,
@@ -343,6 +345,7 @@ export const executeQueries = createAsyncThunk<
       dispatch(
         executeBucketCountQuery({
           services,
+          disablePartialResults,
           cacheKey: bucketCountCacheKey,
           queryString: prepareBucketCountQueryString(query),
         })
@@ -465,6 +468,7 @@ export const executeQueries = createAsyncThunk<
       dispatch(
         executeTabQuery({
           services,
+          disablePartialResults,
           cacheKey: visualizationTabCacheKey,
           queryString: visualizationTabCacheKey, // For tabs, cache key IS the query string
         })
@@ -478,6 +482,7 @@ export const executeQueries = createAsyncThunk<
       dispatch(
         executeTabQuery({
           services,
+          disablePartialResults,
           cacheKey: activeTabCacheKey,
           queryString: activeTabCacheKey, // For tabs, cache key IS the query string
         })
@@ -501,6 +506,7 @@ const executeQueryBase = async (
     interval?: string;
     avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
     isHistogramQuery?: boolean;
+    disablePartialResults?: boolean;
   },
   thunkAPI: {
     getState: () => RootState;
@@ -515,6 +521,7 @@ const executeQueryBase = async (
     interval,
     avoidDispatchingError,
     isHistogramQuery,
+    disablePartialResults = false,
   } = params;
   const { getState, dispatch } = thunkAPI;
 
@@ -651,9 +658,6 @@ const executeQueryBase = async (
       dataset,
       query: effectiveQuery,
     };
-
-    // One-shot opt-out set by the partial-results warning banner's rerun action.
-    const disablePartialResults = !!getState().ui?.disablePartialResults;
 
     let searchSource;
     // TODO: Following split queries change, we can move away from creating search source with includeHistogram
@@ -860,8 +864,9 @@ export const createSearchSourceWithQuery = async (
     // Ask the engine to return a partial result (with a warning) for an aggregation whose field is
     // mapped inconsistently across indices, rather than the slower complete scan that reads every
     // document. PPL-only, and sent explicitly so it overrides the cluster-side default.
-    // `disablePartialResults` is the one-shot override behind the warning banner's rerun action,
-    // which wins over the setting.
+    // `disablePartialResults` is the per-execution override behind the warning banner's rerun
+    // action (passed as a thunk arg, not stored in state), which wins over the setting for that
+    // one run only.
     ...(preparedQuery.language === 'PPL'
       ? {
           partial_result:
@@ -903,6 +908,7 @@ export const executeHistogramQuery = createAsyncThunk<
     cacheKey: string;
     queryString: string;
     interval?: string;
+    disablePartialResults?: boolean;
   },
   { state: RootState }
 >('query/executeHistogramQuery', async (params, thunkAPI) => {
@@ -927,6 +933,7 @@ export const executeTabQuery = createAsyncThunk<
     services: ExploreServices;
     cacheKey: string;
     queryString: string;
+    disablePartialResults?: boolean;
   },
   { state: RootState }
 >('query/executeTabQuery', async (params, thunkAPI) => {
@@ -987,6 +994,7 @@ export const executeBucketCountQuery = createAsyncThunk<
     services: ExploreServices;
     cacheKey: string;
     queryString: string;
+    disablePartialResults?: boolean;
   },
   { state: RootState }
 >('query/executeBucketCountQuery', async (params, thunkAPI) => {
@@ -1029,6 +1037,7 @@ export const executeDataTableQuery = createAsyncThunk<
     services: ExploreServices;
     cacheKey: string;
     queryString: string;
+    disablePartialResults?: boolean;
   },
   { state: RootState }
 >('query/executeDataTableQuery', async (params, thunkAPI) => {

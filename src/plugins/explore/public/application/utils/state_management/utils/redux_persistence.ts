@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { omit } from 'lodash';
 import { getCurrentAppId, getFlavorFromAppId } from '../../../../helpers/get_flavor_from_app_id';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
@@ -42,13 +41,11 @@ export const persistReduxState = (
     // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace });
 
-    // Sync up _a (Application state) to URL state. disablePartialResults is a one-shot,
-    // query-scoped override from the warning banner's rerun action, so strip it here — it must not
-    // persist to the URL, where a reload or shared link would silently disable partial results.
+    // Sync up _a (Application state) to URL state
     services.osdUrlStateStorage.set(
       '_a',
       {
-        ui: omit(state.ui, 'disablePartialResults'),
+        ui: state.ui,
         tab: state.tab,
         legacy: state.legacy,
       },
@@ -111,11 +108,8 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       services.data.query.queryString.addToQueryHistory(finalQueryState, timefilter.getTime());
     }
 
-    // Only run preload functions for missing sections. Drop any persisted disablePartialResults
-    // from an older URL: it is a one-shot, query-scoped override and must not resurrect on load.
-    const finalUIState = appState?.ui
-      ? omit(appState.ui, 'disablePartialResults')
-      : getPreloadedUIState(services);
+    // Only run preload functions for missing sections
+    const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
 
