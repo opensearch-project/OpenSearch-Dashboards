@@ -38,4 +38,6 @@ export type Query = {
   language: string;
   dataset?: Dataset;
   profile?: boolean;
+  /** Ask the engine to return a partial result over the aggregatable indices on a mapping conflict. */
+  partial_result?: boolean;
 };

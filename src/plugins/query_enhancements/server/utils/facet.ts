@@ -113,8 +113,8 @@ export class Facet {
           ...(query.profile && { profile: true }),
           // Forward the partial-result preference when the client set it (false is meaningful --
           // it overrides the cluster-side default -- so send it whenever it is defined).
-          ...((query as any).partial_result !== undefined && {
-            partial_result: (query as any).partial_result,
+          ...(query.partial_result !== undefined && {
+            partial_result: query.partial_result,
           }),
         },
         ...(format && { format }),
