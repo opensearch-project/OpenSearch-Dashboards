@@ -203,6 +203,9 @@ test('Cloning a section member (flag on) drops the clone into the same section',
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Neo', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,
+        // Distinctive size so we can assert the clone inherits it rather than
+        // falling back to the default section slot (24x15).
+        gridData: { x: 0, y: 0, w: 12, h: 20, i: '123' },
       }),
     },
     layout: {
@@ -237,4 +240,10 @@ test('Cloning a section member (flag on) drops the clone into the same section',
   const memberIds = s1.members.map((m: any) => m.idRef);
   expect(memberIds).toContain('123');
   expect(memberIds).toContain(newId);
+
+  // The cloned member keeps the source panel's width/height (12x20), not the
+  // default section slot (24x15).
+  const clonedMember = s1.members.find((m: any) => m.idRef === newId);
+  expect(clonedMember.gridData.w).toBe(12);
+  expect(clonedMember.gridData.h).toBe(20);
 });
