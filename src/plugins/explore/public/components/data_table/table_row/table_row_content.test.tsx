@@ -247,6 +247,28 @@ describe('TableRowContent', () => {
     );
   });
 
+  it('routes ALL columns through TableCell on the traces page, even a non-trace non-filterable field', () => {
+    // The Traces page is all-PPL, so nothing goes to the no-link NonFilterableTableCell —
+    // TableCell decides link-vs-plain and suppresses filter buttons for non-filterable fields.
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: false });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} isOnTracesPage={true} columns={['field1']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-field1')).toBeInTheDocument();
+    expect(screen.queryByTestId('non-filterable-cell-field1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+      'data-disable-value-filter',
+      'true'
+    );
+  });
+
   it('passes the dataset down to TableCell (so links do not depend on context)', () => {
     mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
     mockDataset.formatField.mockReturnValue('test_value');

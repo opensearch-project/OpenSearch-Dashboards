@@ -18,11 +18,6 @@ import { TableCell } from '../table_cell/table_cell';
 import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
-import {
-  isSpanIdColumn,
-  isTraceIdColumn,
-  isDurationColumn,
-} from '../table_cell/trace_utils/trace_utils';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 export interface TableRowContentProps {
@@ -111,17 +106,6 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         // timestamp is broken (timezone-shifted display vs. raw value, and it
         // effectively never matches). Time filtering is owned by the time picker.
         const isDateField = fieldInfo?.type === 'date' || fieldInfo?.type === 'date_nanos';
-        // Trace-detail link columns (Span ID / time / duration) must keep their
-        // interactive rendering on the Traces page even when the field is not
-        // filterable — otherwise they silently degrade to plain text (e.g. when a
-        // field-caps mapping conflict across the spans_* indices flips a field to
-        // non-filterable). See TableCell's trace-cell branches.
-        const isTraceLinkColumn =
-          isOnTracesPage &&
-          (isSpanIdColumn(colName) ||
-            isTraceIdColumn(colName) ||
-            isTimeField ||
-            isDurationColumn(colName));
         const disableValueFilter = isTimeField || isDateField || fieldInfo?.filterable === false;
 
         if (shouldShowEmptyCell(row, null)) {
@@ -149,7 +133,13 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (fieldInfo?.filterable === false && !isTraceLinkColumn) {
+        // On the Traces page every query is PPL (list, charts, trace-details), so
+        // the DSL-path enforcement of searchable/aggregatable never applies here.
+        // Route all cells through TableCell — it decides link-vs-plain per column
+        // and suppresses value-filter buttons via disableValueFilter — rather than
+        // the no-link NonFilterableTableCell, so a trace-link column can never be
+        // silently stripped of its link when its field resolves non-filterable.
+        if (fieldInfo?.filterable === false && !isOnTracesPage) {
           return (
             <NonFilterableTableCell
               key={colName}
