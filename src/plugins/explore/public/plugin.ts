@@ -101,6 +101,7 @@ import {
   registerDisabledPPLLintFixAction,
 } from './components/query_panel/actions/ppl_lint_fix_action';
 import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
+import { isPPLAggregationQuery } from './application/utils/state_management/actions/utils';
 
 import {
   registerAutoVisualizationAction,
@@ -230,9 +231,23 @@ export class ExplorePlugin implements Plugin<
       }),
       generateCb: (renderProps: Record<string, unknown>) => {
         const queryString = getServices().data.query.queryString;
+        const currentQuery = queryString.getQuery();
+        const language = currentQuery.language;
         const showDocLinks =
-          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
-            ?.showDocLinks ?? undefined;
+          queryString.getLanguageService().getLanguage(language)?.showDocLinks ?? undefined;
+
+        const hit = (renderProps as any).hit;
+        const indexPattern = (renderProps as any).indexPattern;
+
+        // PPL-specific hide conditions in addition to the common checks below.
+        const isPPL = language === 'PPL';
+        const isPPLHidden =
+          isPPL && // Aggregation results are buckets, not documents — no document to surround.
+          (isPPLAggregationQuery(String(currentQuery.query ?? '')) ||
+            // _id absent means the backend didn't return metadata (old cluster / non-Calcite engine).
+            !hit._id ||
+            // S3/async datasets use a different search path; context queries don't support it.
+            currentQuery.dataset?.type === 'S3');
 
         // Note: Explore uses Redux for filter management, not filterManager
         // So we don't include filter state in URLs for context links
@@ -248,14 +263,15 @@ export class ExplorePlugin implements Plugin<
         );
 
         const contextUrl = `#/context/${encodeURIComponent(
-          (renderProps as any).indexPattern.id
-        )}/${encodeURIComponent((renderProps as any).hit._id)}?${hash}`;
+          indexPattern.id
+        )}/${encodeURIComponent(hit._id)}?${hash}`;
 
         return {
           url: generateDocViewsUrl(contextUrl),
           hide:
+            isPPLHidden ||
             (showDocLinks !== undefined ? !showDocLinks : false) ||
-            !(renderProps as any).indexPattern.isTimeBased(),
+            !indexPattern.isTimeBased(),
         };
       },
       order: 1,

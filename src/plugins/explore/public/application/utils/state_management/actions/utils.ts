@@ -126,6 +126,25 @@ const maskPPLSubqueriesAndStrings = (queryString: string): string => {
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
  * Subquery brackets and quoted strings are masked so that head inside them is ignored.
  */
+// Commands whose presence means the query produces buckets/aggregations rather than raw documents.
+// Mirrors the same list in query_enhancements/common/utils.ts — keep in sync.
+const PPL_AGGREGATING_COMMANDS = [
+  'stats',
+  'rare',
+  'top',
+  'eventstats',
+  'trendline',
+  'transpose',
+  'xyseries',
+  'timewrap',
+  'patterns',
+];
+
+export const isPPLAggregationQuery = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return new RegExp(`\\|\\s*(${PPL_AGGREGATING_COMMANDS.join('|')})\\b`, 'i').test(masked);
+};
+
 export const queryEndsWithHead = (queryString: string): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
   return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);

@@ -131,7 +131,7 @@ export class QueryEnhancementsPlugin implements Plugin<
         }),
         url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
       },
-      showDocLinks: false,
+      showDocLinks: true,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
       editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
       supportedAppNames: [
