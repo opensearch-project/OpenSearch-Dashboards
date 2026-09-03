@@ -13,8 +13,8 @@ export interface UIState {
   /**
    * One-shot override from the partial-results warning banner's rerun action: when true, the next
    * query asks the engine NOT to return partial results, so an inconsistently-mapped aggregation
-   * fails loudly instead of returning a subset. Overrides the `discover:enablePartialResults`
-   * setting.
+   * returns the complete (slower) result over all indices instead of a partial subset. Overrides
+   * the `discover:enablePartialResults` setting.
    */
   disablePartialResults?: boolean;
 }

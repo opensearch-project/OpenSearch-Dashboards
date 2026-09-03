@@ -857,10 +857,11 @@ export const createSearchSourceWithQuery = async (
     ...(services.queryProfilingEnabled && preparedQuery.language === 'PPL'
       ? { profile: true }
       : {}),
-    // Ask the engine to return a partial result (with a warning) instead of failing an aggregation
-    // whose field is mapped inconsistently across indices. PPL-only, and sent explicitly so it
-    // overrides the cluster-side default. `disablePartialResults` is the one-shot override behind
-    // the warning banner's rerun action, which wins over the setting.
+    // Ask the engine to return a partial result (with a warning) for an aggregation whose field is
+    // mapped inconsistently across indices, rather than the slower complete scan that reads every
+    // document. PPL-only, and sent explicitly so it overrides the cluster-side default.
+    // `disablePartialResults` is the one-shot override behind the warning banner's rerun action,
+    // which wins over the setting.
     ...(preparedQuery.language === 'PPL'
       ? {
           partial_result:

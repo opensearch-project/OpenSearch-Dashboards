@@ -11,8 +11,9 @@ import { QueryWarning } from '../../application/utils/state_management/slices';
 interface QueryWarningsCalloutProps {
   warnings: QueryWarning[];
   /**
-   * Rerun the query with partial results turned off, so an inconsistently-mapped aggregation fails
-   * instead of returning a subset. Omit to hide the action (e.g. where a rerun is not available).
+   * Rerun the query with partial results turned off, so an inconsistently-mapped aggregation
+   * returns the complete (slower) result over all indices instead of a partial subset. Omit to
+   * hide the action (e.g. where a rerun is not available).
    */
   onRerunWithoutPartialResults?: () => void;
 }
@@ -56,8 +57,8 @@ const WarningCallout: React.FC<{
   onRerunWithoutPartialResults?: () => void;
 }> = ({ warning, onRerunWithoutPartialResults }) => {
   const [expanded, setExpanded] = useState(false);
-  // The rerun only makes sense for a partial result -- it is what turns the subset back into a
-  // complete-or-fail answer.
+  // The rerun only makes sense for a partial result -- it is what turns the subset back into the
+  // complete (slower) answer over all indices.
   const showRerun = warning.type === PARTIAL_RESULT_TYPE && !!onRerunWithoutPartialResults;
 
   return (

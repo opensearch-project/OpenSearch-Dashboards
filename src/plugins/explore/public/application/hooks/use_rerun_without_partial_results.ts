@@ -16,7 +16,8 @@ import {
 
 /**
  * Rerun the current query with partial results turned off, so an aggregation over an
- * inconsistently-mapped field fails loudly instead of returning a subset of the indices.
+ * inconsistently-mapped field returns the complete result over all indices (via a slower
+ * full-document scan) instead of a partial result over just the aggregatable subset.
  *
  * Used by the partial-results warning banner. The override lives in UI state rather than the
  * `discover:enablePartialResults` setting, so it applies to this query only and does not change the
