@@ -179,7 +179,8 @@ describe('AskAIEmbeddableAction', () => {
               text: expect.stringContaining('Test Visualization'),
             }),
           ]),
-          []
+          [],
+          { dataSourceId: undefined }
         );
       });
     });

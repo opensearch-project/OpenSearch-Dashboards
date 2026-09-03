@@ -127,12 +127,15 @@ export const AutoVisMeta = {
     'execute the query itself — it resolves the axes mapping from the provided columns, renders a ' +
     'chart preview, and provides an editor link.' +
     '\n\nWORKFLOW (follow in order):' +
-    '\n1. timeFieldName is MANDATORY for time-based queries: If the user request ' +
+    '\n1. DATA SOURCE: If more than one data source has already appeared in this conversation ' +
+    '(check available_data_sources context), call switch_data_source FIRST so the USER can choose the correct data source. ' +
+    'This tool then automatically targets the active data source — you do not pass any data source parameter here.' +
+    '\n2. timeFieldName is MANDATORY for time-based queries: If the user request ' +
     'involves any time concept (e.g. "last 7 days", "trends", "over time", "history", ' +
     'time ranges, or time-series analysis), you MUST call the index mapping tool to get the timeFieldName \n' +
-    '\n2. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
-    '\n3. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
-    '\n4. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
+    '\n3. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
+    '\n4. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
+    '\n5. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
     CHART_GUIDE,
 
   parameters: {
