@@ -12,6 +12,9 @@ const mockBuildVisConfig = jest.fn();
 const mockGetAbsoluteTimeRange = jest.fn();
 const mockCheckTimeRangeArgsUsable = jest.fn();
 let mockChartPreviewError: string | undefined;
+// Per-title overrides so a single render can mix healthy and failing previews.
+let mockChartPreviewErrorByTitle: Record<string, string> = {};
+let mockChartPreviewEmptyTitles: string[] = [];
 
 jest.mock('./auto_visualization_action', () => ({
   buildVisConfig: (...args: any[]) => mockBuildVisConfig(...args),
@@ -19,13 +22,24 @@ jest.mock('./auto_visualization_action', () => ({
   checkTimeRangeArgsUsable: (...args: any[]) => mockCheckTimeRangeArgsUsable(...args),
   ChartPreview: (props: any) => {
     const { useEffect } = jest.requireActual('react') as typeof import('react');
-    const { onError } = props;
+    const { onError, onEmpty, visConfig } = props;
+    // The card does not pass a title down, so key the fixtures off the chart config.
+    const title = visConfig?.title;
 
+    // Empty deps on purpose: the real fetch effect also runs once with `[]`, so the callbacks
+    // it invokes are the ones captured on the first render. Anything that survives here
+    // survives that frozen closure too.
     useEffect(() => {
-      if (mockChartPreviewError) {
-        onError?.(mockChartPreviewError);
+      const error = (title && mockChartPreviewErrorByTitle[title]) || mockChartPreviewError;
+      if (error) {
+        onError?.(error);
+        return;
       }
-    }, [onError]);
+      if (title && mockChartPreviewEmptyTitles.includes(title)) {
+        onEmpty?.();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return <div data-test-subj="chartPreview" />;
   },
@@ -62,7 +76,9 @@ const preparedQueryFor = (indexName: string) => ({
 
 const generatedVis = (title: string, indexName = 'flights') => ({
   title,
-  visConfig: { type: 'bar', axesMapping: { x: 'carrier' }, styles: { color: 'red' } },
+  // The card passes only visConfig/query down, so carry the title inside visConfig — that is
+  // how the ChartPreview mock tells one card apart from another.
+  visConfig: { type: 'bar', axesMapping: { x: 'carrier' }, styles: { color: 'red' }, title },
   preparedQuery: preparedQueryFor(indexName),
   resolvedTimeRange: undefined,
   transformations: undefined,
@@ -129,6 +145,8 @@ beforeEach(() => {
   mockGetDashboardVersion.mockReturnValue({ version: '3.0.0' });
   mockGetAbsoluteTimeRange.mockReturnValue(undefined);
   mockChartPreviewError = undefined;
+  mockChartPreviewErrorByTitle = {};
+  mockChartPreviewEmptyTitles = [];
   // clearAllMocks wipes recorded calls but keeps implementations, so reset the
   // validator to a no-op or a test that makes it throw would leak into later ones.
   mockCheckTimeRangeArgsUsable.mockImplementation(() => undefined);
@@ -197,7 +215,9 @@ describe('handler', () => {
       visualizations: [{ ...visSpec('Chart A'), transformations }],
     });
     expect(result.visualizations[0].transformations).toBe(transformations);
-    expect(mockBuildVisConfig).toHaveBeenCalledWith(expect.objectContaining({ transformations }));
+    expect(mockBuildVisConfig.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ transformations })
+    );
   });
 
   it('checks the dashboard-level time range against every spec timeFieldName', async () => {
@@ -238,7 +258,7 @@ describe('handler', () => {
       to: 'now',
       timeFieldName: 'timestamp',
     });
-    expect(mockBuildVisConfig).toHaveBeenCalledWith(
+    expect(mockBuildVisConfig.mock.calls[0][0]).toEqual(
       expect.objectContaining({ timeFieldName: 'timestamp' })
     );
   });
@@ -265,12 +285,10 @@ describe('handler', () => {
       to: 'now',
       timeFieldName: 'timestamp',
     });
-    expect(mockBuildVisConfig).toHaveBeenNthCalledWith(
-      1,
+    expect(mockBuildVisConfig.mock.calls[0][0]).toEqual(
       expect.objectContaining({ timeFieldName: 'event_time' })
     );
-    expect(mockBuildVisConfig).toHaveBeenNthCalledWith(
-      2,
+    expect(mockBuildVisConfig.mock.calls[1][0]).toEqual(
       expect.objectContaining({ timeFieldName: 'timestamp' })
     );
   });
@@ -387,6 +405,32 @@ describe('render', () => {
       expect(screen.getByText('Save to Dashboard')).toBeInTheDocument();
     });
   });
+
+  it('unchecks and disables only the card whose preview failed at runtime', async () => {
+    mockChartPreviewErrorByTitle = { 'Chart A': 'boom' };
+
+    renderAction(completeWith([generatedVis('Chart A'), generatedVis('Chart B')]));
+
+    const boxA = screen.getByLabelText('Include "Chart A" in the dashboard');
+    const boxB = screen.getByLabelText('Include "Chart B" in the dashboard');
+
+    // Disabling a still-ticked box would read as "broken but will be saved".
+    await waitFor(() => expect(boxA).toBeDisabled());
+    expect(boxA).not.toBeChecked();
+
+    // The healthy sibling keeps its default selection.
+    expect(boxB).toBeEnabled();
+    expect(boxB).toBeChecked();
+  });
+
+  it('disables the save button when the only vis fails to render', async () => {
+    mockChartPreviewError = 'preview failed';
+
+    renderAction(completeWith([generatedVis('Chart A')]));
+
+    const saveButton = screen.getByText('Save to Dashboard').closest('button')!;
+    await waitFor(() => expect(saveButton).toBeDisabled());
+  });
 });
 
 describe('save to dashboard', () => {
@@ -499,6 +543,23 @@ describe('save to dashboard', () => {
     await waitFor(() => expect(core.application.navigateToApp).toHaveBeenCalled());
     expect(saved).toHaveLength(1);
     expect(saved[0].title).toBe('Chart B');
+  });
+
+  it('never saves a vis whose preview failed at runtime', async () => {
+    mockChartPreviewErrorByTitle = { 'Chart B': 'boom' };
+
+    const { core, saved } = await renderAndSave([
+      generatedVis('Chart A'),
+      generatedVis('Chart B'),
+      generatedVis('Chart C'),
+    ]);
+
+    await waitFor(() => expect(core.application.navigateToApp).toHaveBeenCalled());
+
+    // Chart B built fine but rendered blank, so it must not reach the dashboard.
+    expect(saved.map((s: any) => s.title)).toEqual(['Chart A', 'Chart C']);
+    const appState = decodeAppState(core);
+    expect(appState.panels).toHaveLength(2);
   });
 
   it('encodes the resolved absolute time range into _g', async () => {

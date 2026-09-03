@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import rison from 'rison-node';
 import {
   EuiPanel,
@@ -41,7 +41,6 @@ interface VisualizationConfig {
   splitField?: string;
   timeFieldName?: string;
   transformations?: UrlTransformationState[];
-  sampleRow?: Record<string, unknown>;
 }
 
 interface TextToDashboardArgs {
@@ -85,18 +84,21 @@ function VisualizationCard({
   vis,
   index,
   checked,
-  onToggle,
   core,
   data,
+  hasRenderError,
+  onToggle,
+  onRenderError,
 }: {
   vis: GeneratedVis;
   index: number;
   checked: boolean;
-  onToggle: (index: number) => void;
   core: CoreStart;
   data: DataPublicPluginStart;
+  hasRenderError: boolean;
+  onToggle: (index: number) => void;
+  onRenderError: (index: number, message: string) => void;
 }) {
-  const [hasRenderError, setHasRenderError] = useState<boolean>(false);
   const renderable = isRenderable(vis);
 
   return (
@@ -105,7 +107,7 @@ function VisualizationCard({
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={`t2-dash-vis-${index}`}
-            checked={checked}
+            checked={checked && !hasRenderError}
             disabled={!renderable || hasRenderError}
             onChange={() => onToggle(index)}
             aria-label={`Include "${vis.title}" in the dashboard`}
@@ -127,7 +129,7 @@ function VisualizationCard({
             data={data}
             timeRange={vis.resolvedTimeRange}
             transformations={vis.transformations}
-            onError={(message) => setHasRenderError(!!message)}
+            onError={(message) => onRenderError(index, message)}
           />
         </div>
       ) : (
@@ -155,24 +157,44 @@ function TextToDashboardRenderer({
   const [selected, setSelected] = useState<boolean[]>(() => visualizations.map(isRenderable));
   const [isSaving, setIsSaving] = useState(false);
 
+  // Runtime rendering errors
+  const [renderErrors, setRenderErrors] = useState<Record<number, string>>({});
+
   const [saveErrors, setSaveErrors] = useState<{ messages: string[]; partial: boolean }>({
     messages: [],
     partial: false,
   });
 
+  const isSavable = (index: number) => isRenderable(visualizations[index]) && !renderErrors[index];
+
   const hasSuccess = visualizations.some(isRenderable);
-  const hasSelected = selected.some((s, i) => s && isRenderable(visualizations[i]));
+  const hasSelected = selected.some((s, i) => s && isSavable(i));
 
   const handleToggle = (index: number) => {
     setSelected((prev) => prev.map((s, i) => (i === index ? !s : s)));
   };
+
+  const unselect = useCallback((index: number) => {
+    setSelected((prev) => (prev[index] ? prev.map((s, i) => (i === index ? false : s)) : prev));
+  }, []);
+
+  const handleRenderError = useCallback(
+    (index: number, message: string) => {
+      if (!message) return;
+      setRenderErrors((prev) => (prev[index] ? prev : { ...prev, [index]: message }));
+      unselect(index);
+    },
+    [unselect]
+  );
 
   const handleSaveToDashboard = async () => {
     if (isSaving) return;
     setIsSaving(true);
     setSaveErrors({ messages: [], partial: false });
 
-    const selectedVis = visualizations.filter((v, i) => selected[i]).filter(isRenderable);
+    const selectedVis = visualizations
+      .filter((_, i) => selected[i] && !renderErrors[i])
+      .filter(isRenderable);
     const { version } = getDashboardVersion();
     const PANEL_WIDTH = 24;
     const PANEL_HEIGHT = 15;
@@ -319,7 +341,9 @@ function TextToDashboardRenderer({
             vis={vis}
             index={i}
             checked={selected[i]}
+            hasRenderError={Boolean(renderErrors[i])}
             onToggle={handleToggle}
+            onRenderError={handleRenderError}
             core={core}
             data={data}
           />
@@ -372,38 +396,45 @@ export function registerT2DashboardAction(
     handler: async (args: TextToDashboardArgs): Promise<TextToDashboardResult> => {
       const resolvedTimeRange = getAbsoluteTimeRange(data, args);
 
-      const visualizations: GeneratedVis[] = args.visualizations.map((vis) => {
-        try {
-          //  A spec may carry its own timeFieldName (different index); otherwise it falls back to the shared top-level one.
-          const timeFieldName = vis.timeFieldName ?? args.timeFieldName;
-          checkTimeRangeArgsUsable({
-            from: args.from,
-            to: args.to,
-            timeFieldName,
-          });
+      const visualizations: GeneratedVis[] = await Promise.all(
+        args.visualizations.map(async (vis) => {
+          try {
+            //  A spec may carry its own timeFieldName (different index); otherwise it falls back to the shared top-level one.
+            const timeFieldName = vis.timeFieldName ?? args.timeFieldName;
+            checkTimeRangeArgsUsable({
+              from: args.from,
+              to: args.to,
+              timeFieldName,
+            });
 
-          const { visConfig, query: preparedQuery } = buildVisConfig({
-            ...vis,
-            timeFieldName,
-            datasourceId: args.datasourceId,
-            datasourceTitle: args.datasourceTitle,
-            timeRange: args.timeRange,
-          });
+            const { visConfig, query: preparedQuery } = await buildVisConfig(
+              {
+                ...vis,
+                timeFieldName,
+                datasourceId: args.datasourceId,
+                datasourceTitle: args.datasourceTitle,
+                timeRange: args.timeRange,
+              },
+              core,
+              data,
+              resolvedTimeRange
+            );
 
-          return {
-            title: vis.title.trim(),
-            visConfig,
-            preparedQuery,
-            resolvedTimeRange,
-            transformations: vis.transformations,
-          };
-        } catch (e) {
-          return {
-            title: vis.title.trim(),
-            error: e instanceof Error ? e.message : String(e),
-          };
-        }
-      });
+            return {
+              title: vis.title.trim(),
+              visConfig,
+              preparedQuery,
+              resolvedTimeRange,
+              transformations: vis.transformations,
+            };
+          } catch (e) {
+            return {
+              title: vis.title.trim(),
+              error: e instanceof Error ? e.message : String(e),
+            };
+          }
+        })
+      );
 
       return { success: true, visualizations, resolvedTimeRange };
     },

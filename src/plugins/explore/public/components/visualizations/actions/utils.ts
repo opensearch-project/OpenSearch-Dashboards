@@ -147,15 +147,6 @@ const VIS_SPEC_PROPERTIES = {
       required: ['definitionId', 'config'],
     },
   },
-  sampleRow: {
-    type: 'object',
-    description:
-      'Optional. A single data row from the ppl execution result as a plain key-value object ' +
-      '(one entry from the datarows array, with column names as keys). ' +
-      'Required when transformations include types that add new columns or change the output schema ' +
-      '(for example: add_field, group_by,extract_fields) so the axes mapping can reflect the post-transformation schema. ' +
-      'Pass one representative row — the first non-null row is ideal.',
-  },
 };
 
 const VIS_SPEC_REQUIRED = ['query', 'indexName', 'columns'];

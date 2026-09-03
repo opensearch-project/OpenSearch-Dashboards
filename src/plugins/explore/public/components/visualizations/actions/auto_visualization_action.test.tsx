@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import rison from 'rison-node';
 import {
   registerAutoVisualizationAction,
+  getInvalidAxesColumns,
   AUTO_VISUALIZATION_TOOL_NAME,
 } from './auto_visualization_action';
 
@@ -430,5 +431,126 @@ describe('render', () => {
     const paramsJson = screen.getByText(/"timeRange"/).textContent ?? '';
     expect(paramsJson).toContain('2026-01-01T00:00:00.000Z');
     expect(paramsJson).not.toContain('now-7d');
+  });
+});
+
+describe('handler with transformations', () => {
+  const rawSchema = [
+    { name: 'carrier', type: 'keyword' },
+    { name: 'avg(price)', type: 'double' },
+  ];
+
+  const createSearchableData = (rows: any[], schema = rawSchema) => {
+    const data = createData();
+    data.dataViews = { get: jest.fn().mockResolvedValue({}) };
+    data.query.queryString = {
+      getLanguageService: () => ({ getLanguage: () => ({}) }),
+      getDatasetService: () => ({ cacheDataset: jest.fn() }),
+    };
+    data.search.searchSource.create = jest.fn().mockResolvedValue({
+      setFields: jest.fn(),
+      fetch: jest.fn().mockResolvedValue({ hits: { hits: rows } }),
+      getDataFrame: jest.fn(() => ({ schema })),
+    });
+    return data;
+  };
+
+  const groupByCarrier = [
+    {
+      definitionId: 'group_by',
+      config: {
+        groupByField: 'carrier',
+        aggregations: [{ field: 'avg(price)', method: 'mean' }],
+      },
+    },
+  ] as any;
+
+  it('does not run an extra query when there are no transformations', async () => {
+    const data = createSearchableData([]);
+    const action = registerAndGetAction(createCore(), data);
+
+    const result = await action.handler(baseArgs);
+
+    expect(result.success).toBe(true);
+    // The columns the llm passed already describe the rendered data, so no query is needed.
+    expect(data.search.searchSource.create).not.toHaveBeenCalled();
+    expect(mockNormalizeResultRows).toHaveBeenCalledWith([], rawSchema);
+  });
+
+  it('resolves the axes against the post-transformation columns', async () => {
+    const data = createSearchableData([
+      { _source: { carrier: 'AA', 'avg(price)': 100 } },
+      { _source: { carrier: 'AA', 'avg(price)': 200 } },
+    ]);
+    const action = registerAndGetAction(createCore(), data);
+
+    const result = await action.handler({ ...baseArgs, transformations: groupByCarrier });
+
+    expect(result.success).toBe(true);
+    expect(data.search.searchSource.create).toHaveBeenCalled();
+    // group_by replaces `avg(price)` with `mean_avg(price)`; the chart must be planned
+    // against that, not against the raw column list.
+    expect(mockNormalizeResultRows).toHaveBeenCalledWith(
+      [],
+      [
+        { name: 'carrier', type: 'keyword' },
+        { name: 'mean_avg(price)', type: 'integer' },
+      ]
+    );
+  });
+
+  it('fails when the pipeline drops every row, instead of planning from a degraded schema', async () => {
+    // deriveSchemaFromRows is a no-op on an empty row set, so finalSchema would silently fall
+    // back to the pre-transformation columns.
+    const data = createSearchableData([]);
+    const action = registerAndGetAction(createCore(), data);
+
+    const result = await action.handler({ ...baseArgs, transformations: groupByCarrier });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('dropped every row');
+    expect(result.message).toContain('group_by');
+  });
+
+  it('reports the query failure instead of a chart when the extra query throws', async () => {
+    const data = createSearchableData([]);
+    data.search.searchSource.create = jest.fn().mockRejectedValue(new Error('index_not_found'));
+    const action = registerAndGetAction(createCore(), data);
+
+    const result = await action.handler({ ...baseArgs, transformations: groupByCarrier });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('index_not_found');
+  });
+});
+
+describe('getInvalidAxesColumns', () => {
+  const schema = [{ name: 'carrier' }, { name: 'avg(price)' }];
+
+  it('returns nothing when every referenced column exists', () => {
+    const visConfig = {
+      axesMapping: { x: 'carrier', y: 'avg(price)' },
+      splitField: 'carrier',
+    } as any;
+    expect(getInvalidAxesColumns(visConfig, schema)).toEqual([]);
+  });
+
+  it('reports axes and split columns the real schema does not produce', () => {
+    const visConfig = {
+      axesMapping: { x: 'carrier', y: 'total' },
+      splitField: 'region',
+    } as any;
+    expect(getInvalidAxesColumns(visConfig, schema)).toEqual(['total', 'region']);
+  });
+
+  it('flattens array-valued axes and de-duplicates repeats', () => {
+    const visConfig = {
+      axesMapping: { x: ['carrier', 'total'], y: 'total' },
+    } as any;
+    expect(getInvalidAxesColumns(visConfig, schema)).toEqual(['total']);
+  });
+
+  it('tolerates a config with no axes mapping at all', () => {
+    expect(getInvalidAxesColumns({} as any, schema)).toEqual([]);
   });
 });
