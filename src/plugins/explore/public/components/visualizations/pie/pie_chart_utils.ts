@@ -42,8 +42,9 @@ export const createPieSeries =
       state.transformedData.forEach((d) => {
         const value = d[valueField];
         const name = normalizeEmptyValue(d[cateField]);
+        const displayLabel = state.seriesDisplayNames?.[name] ?? name;
         const color = getLegendColor(name, palette, sortedNames);
-        legendItems.push(createDataLegendItem(name, color, 0));
+        legendItems.push(createDataLegendItem(displayLabel, color, 0, name));
         data.push({
           name,
           value,

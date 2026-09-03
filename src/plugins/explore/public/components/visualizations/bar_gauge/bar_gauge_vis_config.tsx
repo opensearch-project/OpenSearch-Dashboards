@@ -94,6 +94,7 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
               data={gaugeData}
               styles={props.styleOptions}
               isHorizontal={isHorizontal}
+              seriesDisplayNames={props.seriesDisplayNames}
             />
           );
         },

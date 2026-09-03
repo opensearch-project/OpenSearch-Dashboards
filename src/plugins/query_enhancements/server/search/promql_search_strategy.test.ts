@@ -459,8 +459,8 @@ describe('promqlSearchStrategy', () => {
       // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
       expect(seriesField?.values).toEqual([
-        'api {__name__="http_requests_total"}',
-        'api {__name__="http_errors_total"}',
+        'http_requests_total{job="api"}',
+        'http_errors_total{job="api"}',
       ]);
       expect(new Set(seriesField?.values).size).toBe(2);
     });

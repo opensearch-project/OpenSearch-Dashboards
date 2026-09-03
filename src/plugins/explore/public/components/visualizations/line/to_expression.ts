@@ -13,6 +13,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   applyTimeRange,
+  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
@@ -22,6 +23,7 @@ import {
   flatten,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
+import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 /**
  * Create a simple line chart with one metric and one date
@@ -141,6 +143,7 @@ export const createMultiLineChart = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyTimeRange,
     createLineSeries({
@@ -169,7 +172,8 @@ export const createMultiLineChart = (
 export const createCategoryLineChart = (
   transformedData: Array<Record<string, any>>,
   styles: LineChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -183,6 +187,7 @@ export const createCategoryLineChart = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildAxisConfigs,
     createLineSeries({
       styles,
@@ -196,6 +201,7 @@ export const createCategoryLineChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };

@@ -274,10 +274,15 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category line chart');
 
-          const { spec, legendItems } = createCategoryLineChart(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createCategoryLineChart(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender

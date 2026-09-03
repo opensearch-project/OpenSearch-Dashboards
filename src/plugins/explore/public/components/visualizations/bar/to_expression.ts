@@ -15,6 +15,7 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
 import {
@@ -24,13 +25,15 @@ import {
   transform,
   pivot,
 } from '../utils/data_transformation';
+import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -51,6 +54,7 @@ export const createBarSpec = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyPercentageAxis(styles),
     buildVisMap({
@@ -69,6 +73,7 @@ export const createBarSpec = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
+    seriesDisplayNames,
   });
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
@@ -196,6 +201,7 @@ export const createGroupedTimeBarChart = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,

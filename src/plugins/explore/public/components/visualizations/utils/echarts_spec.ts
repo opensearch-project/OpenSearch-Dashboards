@@ -15,8 +15,6 @@ import {
   ScatterSeriesOption,
   HeatmapSeriesOption,
 } from 'echarts';
-import DOMPurify from 'dompurify';
-import { escape } from 'lodash';
 import {
   AggregationType,
   Positions,
@@ -29,7 +27,7 @@ import {
   VisColumn,
   StandardOptions,
 } from '../types';
-import { convertThresholds } from './utils';
+import { convertThresholds, valueUnitFormatter, TooltipFormatFn } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { LegendItem } from './legend';
 import { formatUnitValue } from '../style_panel/unit/collection';
@@ -82,10 +80,6 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
 }
 
 export type AxisType = 'category' | 'value' | 'time';
-
-export const escapeTooltipText = (value: unknown) => escape(String(value ?? ''));
-
-export const sanitizeTooltipHtml = (html: string) => DOMPurify.sanitize(html);
 
 /**
  * State object that flows through the pipeline
@@ -160,30 +154,11 @@ export const createBaseConfig =
     legend?: EChartsOption['legend'];
   } = {}) =>
   (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-    const { styles, axisConfig, seriesDisplayNames } = state;
+    const { styles, axisConfig } = state;
 
     const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
 
-    const formatValue = (value: unknown) =>
-      hasUnit && typeof value === 'number'
-        ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
-        : String(value ?? '');
-
-    const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
-    const formatterDisplayName = (params: any) => {
-      const rows = Array.isArray(params) ? params : [params];
-      const lines = rows.map((p: any) => {
-        const seriesIndex = p.seriesIndex;
-        const seriesName = p.seriesName;
-        const label = seriesDisplayNames?.[seriesName] ?? seriesName;
-        // ignore value[0] which is axis x
-        const valueRaw = p.value.slice(1);
-        return `${p.marker ?? ''}${escapeTooltipText(label)}: ${escapeTooltipText(
-          formatValue(valueRaw[seriesIndex])
-        )}`;
-      });
-      return sanitizeTooltipHtml([...lines].join('<br/>'));
-    };
+    const formatValue = valueUnitFormatter(styles, hasUnit);
 
     const baseConfig = {
       tooltip: {
@@ -193,11 +168,9 @@ export const createBaseConfig =
         show: styles.tooltipOptions?.mode !== 'hidden',
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
         axisPointer: { type: 'line' as const },
-        ...(hasDisplayNames
-          ? { formatter: formatterDisplayName }
-          : hasUnit && {
-              valueFormatter: formatValue,
-            }),
+        ...(hasUnit && {
+          valueFormatter: formatValue,
+        }),
       },
       legend: {
         show: false,
@@ -214,15 +187,44 @@ export const createBaseConfig =
   };
 
 /**
+ * Let each chart own its tooltip rendering, must run after createBaseConfig.
+ */
+
+export const addTooltipFormatter =
+  <T extends BaseChartStyle>(formatFn: TooltipFormatFn) =>
+  (state: EChartsSpecState<T>): EChartsSpecState<T> => {
+    const { styles, seriesDisplayNames, baseConfig } = state;
+    if (!seriesDisplayNames || Object.keys(seriesDisplayNames).length < 1) return state;
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+
+    const formatter = formatFn({
+      styles,
+      seriesDisplayNames,
+      formatValue: valueUnitFormatter(styles, hasUnit),
+    });
+
+    return {
+      ...state,
+      baseConfig: {
+        ...baseConfig,
+        tooltip: {
+          ...baseConfig?.tooltip,
+          formatter,
+        },
+      },
+    };
+  };
+
+/**
  * Build axis configurations
  */
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, axisColumnMappings } = state;
+  const { axisConfig, axisColumnMappings, seriesDisplayNames } = state;
 
   const hasY2 = axisColumnMappings.y2 !== undefined;
-
+  const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
   const { styles } = state;
   const hasUnit = !!styles.unitId || styles.decimals != null || !!styles?.unitSuffix;
 
@@ -251,6 +253,13 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
             ...axisStyling.axisLabel,
             formatter: (value: number) =>
               formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix),
+          },
+        }),
+      ...(!isValueAxis &&
+        hasDisplayNames && {
+          axisLabel: {
+            ...axisStyling.axisLabel,
+            formatter: (value: number) => seriesDisplayNames?.[value] ?? value,
           },
         }),
       // if min and max are not valid, ignore

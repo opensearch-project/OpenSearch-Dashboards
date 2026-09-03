@@ -29,10 +29,15 @@ export const createSeriesLegendItem = (
   target: { type: 'series', name: originalName },
 });
 
-export const createDataLegendItem = (name: string, color: string, seriesIndex = 0): LegendItem => ({
+export const createDataLegendItem = (
+  name: string,
+  color: string,
+  seriesIndex = 0,
+  originalName: string = name
+): LegendItem => ({
   label: name,
   color,
-  target: { type: 'data', name, seriesIndex },
+  target: { type: 'data', name: originalName, seriesIndex },
 });
 
 export const dedupeLegendItems = (items: LegendItem[]) => {

@@ -6,16 +6,13 @@
 import { groupBy } from 'lodash';
 import { Threshold, ValueMapping } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
-import {
-  BaseChartStyle,
-  escapeTooltipText,
-  PipelineFn,
-  sanitizeTooltipHtml,
-} from '../utils/echarts_spec';
+import { PipelineFn, BaseChartStyle } from '../utils/echarts_spec';
 import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
+
+import { escapeTooltipText, sanitizeTooltipHtml } from '../utils/utils';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import DOMPurify from 'dompurify';
+import { escape } from 'lodash';
 import { mergeWith, isPlainObject } from 'lodash';
 import {
   StandardAxes,
@@ -18,6 +20,7 @@ import {
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 import { BaseChartStyle, PipelineFn } from './echarts_spec';
 import { resolveStackMode, formatDecimal } from './data_transformation';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
 export const applyAxisStyling = ({
   axis,
@@ -427,3 +430,66 @@ export const getNormalizedAxisConfig = (
     seriesEncode,
   };
 };
+
+export const escapeTooltipText = (value: unknown) => escape(String(value ?? ''));
+
+export const sanitizeTooltipHtml = (html: string) => DOMPurify.sanitize(html);
+
+export interface TooltipFormatParams<T extends BaseChartStyle = BaseChartStyle> {
+  styles: T;
+  seriesDisplayNames?: Record<string, string>;
+  formatValue: (value: unknown) => string;
+}
+
+export type TooltipFormatFn = (params: TooltipFormatParams) => (echartsParams: any) => string;
+
+export const valueUnitFormatter = <T extends BaseChartStyle>(styles: T, hasUnit: boolean) => {
+  return (value: unknown) =>
+    hasUnit && typeof value === 'number'
+      ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
+      : String(value ?? '');
+};
+
+/**
+ * Use this formatter when you have seriesDisplayName map only for time-series chart
+ */
+export const seriesDisplayNameTooltipFormatter: TooltipFormatFn =
+  ({ seriesDisplayNames, formatValue }) =>
+  (params: any) => {
+    const rows = Array.isArray(params) ? params : [params];
+    const lines = rows.map((p: any) => {
+      const seriesIndex = p.seriesIndex;
+      const seriesName = p.seriesName;
+      const label = seriesDisplayNames?.[seriesName] ?? seriesName;
+      // ignore value[0] which is axis x
+      const valueRaw = p.value.slice(1);
+      return `${p.marker ?? ''}${escapeTooltipText(label)}: ${escapeTooltipText(
+        formatValue(valueRaw[seriesIndex])
+      )}`;
+    });
+    return sanitizeTooltipHtml(lines.join('<br/>'));
+  };
+
+export const axisDisplayNameTooltipFormatter: TooltipFormatFn =
+  ({ seriesDisplayNames }) =>
+  (params: any) => {
+    // 0 is categorical field, 1 is value field
+    const label = seriesDisplayNames?.[params[0].value[0]] ?? [params[0].value[0]];
+    return sanitizeTooltipHtml(
+      [
+        `<strong>${escapeTooltipText(label)}</strong>`,
+        `${params[0].marker ?? ''}${escapeTooltipText(params[0].seriesName)}: ${escapeTooltipText(params[0].value[1])}`,
+      ]
+        .filter(Boolean)
+        .join('<br/>')
+    );
+  };
+
+export const pieDisplayNameTooltipFormatter: TooltipFormatFn =
+  ({ seriesDisplayNames }) =>
+  (params: any) => {
+    const displayName = seriesDisplayNames?.[params.name] ?? params.name;
+    return sanitizeTooltipHtml(
+      `${params.marker ?? ''}<strong>${escapeTooltipText(displayName)}</strong>: ${escapeTooltipText(params.value)}`
+    );
+  };

@@ -263,10 +263,15 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category area chart');
 
-          const { spec, legendItems } = createCategoryAreaChart(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createCategoryAreaChart(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
