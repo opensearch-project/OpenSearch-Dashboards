@@ -14,7 +14,6 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientWrapperFactory,
   SavedObjectsCreateOptions,
-  SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '../service';
 import { preserveSavedObjectAnnotationReferences } from './reference_utils';
@@ -26,23 +25,65 @@ export const ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY = Number.MIN_SAF
 export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFactory = ({
   client,
 }) => {
-  const preserveReferences = async (
-    type: string,
-    id: string,
-    incomingReferences: NonNullable<SavedObjectsCreateOptions['references']>
-  ) => {
-    try {
-      const persistedObject = await client.get(type, id);
-      return preserveSavedObjectAnnotationReferences(
-        persistedObject.references,
-        incomingReferences
-      );
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return incomingReferences;
+  const preserveReferences = async <
+    T extends {
+      type: string;
+      id?: string;
+      references?: SavedObjectsCreateOptions['references'];
+    },
+  >(
+    objects: T[]
+  ): Promise<T[]> => {
+    // Only writes with an ID and an explicit references array can replace existing
+    // annotation references, so objects without either value do not need to be read.
+    const objectIndexesToResolve = objects.reduce<number[]>((indexes, object, index) => {
+      if (object.id && Array.isArray(object.references)) {
+        indexes.push(index);
       }
-      throw error;
+      return indexes;
+    }, []);
+
+    if (!objectIndexesToResolve.length) {
+      return objects;
     }
+
+    // Resolve all target objects in one request so bulk writes do not issue one read
+    // per object. bulkGet returns results in the same order as the requested objects.
+    const { saved_objects: persistedObjects } = await client.bulkGet(
+      objectIndexesToResolve.map((index) => ({
+        type: objects[index].type,
+        id: objects[index].id!,
+      }))
+    );
+    const objectsWithPreservedReferences = [...objects];
+
+    objectIndexesToResolve.forEach((objectIndex, persistedObjectIndex) => {
+      const object = objects[objectIndex];
+      const persistedObject = persistedObjects[persistedObjectIndex];
+
+      if (persistedObject.error) {
+        // A missing target has no annotation references to preserve. Leave it unchanged
+        // and let create, update, or bulkUpdate apply its normal not-found behavior.
+        if (persistedObject.error.statusCode === 404) {
+          return;
+        }
+        // Other lookup errors may hide an existing target, so stop instead of risking
+        // an update that unintentionally removes its annotation references.
+        throw new Error(persistedObject.error.message);
+      }
+
+      // Incoming non-annotation references remain authoritative while persisted
+      // annotation attachments are restored to prevent ordinary saves from removing them.
+      objectsWithPreservedReferences[objectIndex] = {
+        ...object,
+        references: preserveSavedObjectAnnotationReferences(
+          persistedObject.references,
+          object.references!
+        ),
+      };
+    });
+
+    return objectsWithPreservedReferences;
   };
 
   const create: typeof client.create = async (
@@ -54,9 +95,13 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
       return client.create(type, attributes, options);
     }
 
+    const [objectWithPreservedReferences] = await preserveReferences([
+      { type, id: options.id, references: options.references },
+    ]);
+
     return client.create(type, attributes, {
       ...options,
-      references: await preserveReferences(type, options.id, options.references),
+      references: objectWithPreservedReferences.references,
     });
   };
 
@@ -68,18 +113,7 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
       return client.bulkCreate(objects, options);
     }
 
-    const objectsWithPreservedReferences = await Promise.all(
-      objects.map(async (object) => {
-        if (!object.id || !Array.isArray(object.references)) {
-          return object;
-        }
-
-        return {
-          ...object,
-          references: await preserveReferences(object.type, object.id, object.references),
-        };
-      })
-    );
+    const objectsWithPreservedReferences = await preserveReferences(objects);
 
     return client.bulkCreate(objectsWithPreservedReferences, options);
   };
@@ -94,13 +128,13 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
       return client.update(type, id, attributes, options);
     }
 
-    const persistedObject = await client.get(type, id);
+    const [objectWithPreservedReferences] = await preserveReferences([
+      { type, id, references: options.references },
+    ]);
+
     return client.update(type, id, attributes, {
       ...options,
-      references: preserveSavedObjectAnnotationReferences(
-        persistedObject.references,
-        options.references
-      ),
+      references: objectWithPreservedReferences.references,
     });
   };
 
@@ -108,22 +142,7 @@ export const annotationReferencePreservationWrapper: SavedObjectsClientWrapperFa
     objects: SavedObjectsBulkUpdateObject[] = [],
     options = {}
   ) => {
-    const objectsWithPreservedReferences = await Promise.all(
-      objects.map(async (object) => {
-        if (!Array.isArray(object.references)) {
-          return object;
-        }
-
-        const persistedObject = await client.get(object.type, object.id);
-        return {
-          ...object,
-          references: preserveSavedObjectAnnotationReferences(
-            persistedObject.references,
-            object.references
-          ),
-        };
-      })
-    );
+    const objectsWithPreservedReferences = await preserveReferences(objects);
 
     return client.bulkUpdate(objectsWithPreservedReferences, options);
   };
