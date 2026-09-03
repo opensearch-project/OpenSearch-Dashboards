@@ -174,7 +174,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       sendMessageWithWindow: async (
         content: string | InputContent[],
         messages: Message[],
-        options?: { clearConversation?: boolean }
+        options?: { clearConversation?: boolean; dataSourceId?: string }
       ) => {
         if (!this.implementation) {
           throw new Error(
@@ -182,6 +182,15 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
           );
         }
         return this.implementation.sendMessageWithWindow(content, messages, options);
+      },
+
+      setSessionDataSourceList: (dataSourceId: string | undefined) => {
+        if (!this.implementation) {
+          throw new Error(
+            'Chat service is not available. Please ensure the chat plugin is enabled.'
+          );
+        }
+        this.implementation.setSessionDataSourceList(dataSourceId);
       },
 
       // Infrastructure service - use getter to ensure dynamic access

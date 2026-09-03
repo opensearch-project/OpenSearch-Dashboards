@@ -65,6 +65,7 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
     observable: null,
     userMessage: { id: 'mock-id', role: 'user', content: 'mock-content' },
   }),
+  setSessionDataSourceList: jest.fn(),
   getWindowState$: jest.fn().mockReturnValue(
     new BehaviorSubject({
       isWindowOpen: false,
