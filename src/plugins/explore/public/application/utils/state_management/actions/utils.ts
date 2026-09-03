@@ -15,6 +15,7 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
+import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -102,25 +103,6 @@ export function fillMissingTimestamps(
 
   return filledSeriesMap;
 }
-
-/**
- * Masks subquery brackets and quoted string literals in a PPL query so that command-detection
- * regexes only match top-level pipes.
- *
- * - Brackets: `[...]` content is replaced with NUL characters. Uses [\s\S]*? to cross newlines.
- * - Quotes: single- and double-quoted strings are replaced with NUL characters so that
- *   `| stats` inside a string literal (e.g. `where msg = '| stats count()'`) is not matched.
- *
- * Shared by queryEndsWithHead and queryHasStats.
- */
-const maskPPLSubqueriesAndStrings = (queryString: string): string => {
-  // First mask quoted strings (handles escaped quotes within)
-  let masked = queryString.replace(/'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-  masked = masked.replace(/"(?:[^"\\]|\\.)*"/g, (match) => '\0'.repeat(match.length));
-  // Then mask bracket subqueries ([\s\S]*? crosses newlines)
-  masked = masked.replace(/\[[\s\S]*?\]/g, (match) => '\0'.repeat(match.length));
-  return masked;
-};
 
 /**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).

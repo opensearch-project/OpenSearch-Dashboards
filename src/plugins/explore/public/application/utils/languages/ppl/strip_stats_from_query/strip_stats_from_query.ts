@@ -5,6 +5,7 @@
 
 import { Query } from '../../../../../../../data/common';
 import { QueryWithQueryAsString } from '../../types';
+import { maskPPLSubqueriesAndStrings } from '../mask_ppl_subqueries_and_strings';
 
 /**
  * Removes the first aggregation pipe (and everything after it) for histogram compatibility.
@@ -20,11 +21,15 @@ import { QueryWithQueryAsString } from '../../types';
 export const stripStatsFromQuery = (query: Query): QueryWithQueryAsString => {
   const queryString = typeof query.query === 'string' ? query.query : '';
 
-  // Remove the aggregation pipe (and everything after it). [\s\S]* is used instead of .* so the
-  // match crosses newline boundaries in multi-line queries (e.g. "| stats count by host\n| sort
-  // -count"). \b after the command name avoids matching field/command names that merely start with
-  // it (e.g. a "topic" field).
-  const strippedQueryString = queryString.replace(/\s*\|\s*(stats|top|rare)\b[\s\S]*$/i, '');
+  // Mask quoted strings and bracketed subqueries first so a "| stats/top/rare" inside a string
+  // literal or nested subquery isn't mistaken for the aggregation pipe. The mask preserves length,
+  // so the match index maps back onto the original, which we slice. [\s\S]* (not .*) lets the match
+  // cross newlines; \b avoids matching names that merely start with the command (e.g. a "topic"
+  // field).
+  const masked = maskPPLSubqueriesAndStrings(queryString);
+  const match = masked.match(/\s*\|\s*(stats|top|rare)\b[\s\S]*$/i);
+  const strippedQueryString =
+    match && match.index !== undefined ? queryString.slice(0, match.index) : queryString;
 
   return {
     ...query,
