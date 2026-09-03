@@ -9,6 +9,7 @@ import {
   buildPPLQueryRequest,
   executePPLQuery,
   escapePPLValue,
+  escapePplIdentifier,
   PPLService,
 } from './ppl_request_helpers';
 
@@ -197,11 +198,60 @@ describe('ppl_request_helpers', () => {
     });
   });
 
+  describe('escapePplIdentifier', () => {
+    it('wraps a field name in backticks', () => {
+      expect(escapePplIdentifier('message')).toBe('`message`');
+    });
+
+    it('leaves field names containing dots and dashes intact', () => {
+      expect(escapePplIdentifier('http.request-id')).toBe('`http.request-id`');
+    });
+
+    // BQUOTA_STRING: '`' ( '\\'. | '``' | ~('`'|'\\') )* '`'
+    it('doubles embedded backticks', () => {
+      expect(escapePplIdentifier('we`ird')).toBe('`we``ird`');
+    });
+
+    it('doubles backslashes', () => {
+      expect(escapePplIdentifier('back\\slash')).toBe('`back\\\\slash`');
+    });
+
+    it('neutralizes a field name that would otherwise close the identifier', () => {
+      // A raw `${field}` interpolation of this value would end the identifier
+      // and append an arbitrary command to the query.
+      expect(escapePplIdentifier('a` | fields *')).toBe('`a`` | fields *`');
+    });
+  });
+
   describe('escapePPLValue', () => {
     it('escapes string values', () => {
       expect(escapePPLValue('test')).toBe('"test"');
       expect(escapePPLValue('test"quote')).toBe('"test\\"quote"');
-      expect(escapePPLValue('test\\backslash')).toBe('"test\\backslash"');
+    });
+
+    // The PPL lexer treats `\` as an escape character
+    // (DQUOTA_STRING: '"' ( '\\'. | '""' | ~('"'|'\\') )* '"'), so backslashes
+    // must be doubled or the literal terminates early and spills into the query.
+    it('doubles backslashes', () => {
+      expect(escapePPLValue('test\\backslash')).toBe('"test\\\\backslash"');
+    });
+
+    it('escapes a backslash that precedes a quote', () => {
+      // Without doubling, this emits "a\\"b" — the lexer consumes \\ as an
+      // escaped backslash, then " closes the literal early.
+      expect(escapePPLValue('a\\"b')).toBe('"a\\\\\\"b"');
+    });
+
+    it('escapes a trailing backslash', () => {
+      // Without doubling, this emits "a\" — the closing quote is escaped and
+      // the string literal never terminates.
+      expect(escapePPLValue('a\\')).toBe('"a\\\\"');
+    });
+
+    it('escapes backslashes inside stringified objects', () => {
+      // JSON.stringify already emits {"path":"C:\\logs"}; escaping then doubles
+      // each of those backslashes and escapes each quote.
+      expect(escapePPLValue({ path: 'C:\\logs' })).toBe('"{\\"path\\":\\"C:\\\\\\\\logs\\"}"');
     });
 
     it('handles number values', () => {
