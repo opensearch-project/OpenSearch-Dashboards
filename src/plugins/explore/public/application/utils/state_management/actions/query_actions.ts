@@ -345,7 +345,6 @@ export const executeQueries = createAsyncThunk<
       dispatch(
         executeBucketCountQuery({
           services,
-          disablePartialResults,
           cacheKey: bucketCountCacheKey,
           queryString: prepareBucketCountQueryString(query),
         })
@@ -994,7 +993,6 @@ export const executeBucketCountQuery = createAsyncThunk<
     services: ExploreServices;
     cacheKey: string;
     queryString: string;
-    disablePartialResults?: boolean;
   },
   { state: RootState }
 >('query/executeBucketCountQuery', async (params, thunkAPI) => {
@@ -1007,6 +1005,12 @@ export const executeBucketCountQuery = createAsyncThunk<
         includeHistogram: false,
         interval: undefined,
         avoidDispatchingError: () => true,
+        // Always run the bucket count complete. It is the denominator shown in the ActionBar; a
+        // partial count would silently undercount it (the same mapping conflict hits the inner
+        // aggregation) and its warnings render nowhere, so partial mode would move the
+        // "partial mistaken for complete" problem into the denominator. The count is a size=0
+        // aggregation, cheap relative to being wrong.
+        disablePartialResults: true,
       },
       thunkAPI
     );
