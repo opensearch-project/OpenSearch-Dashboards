@@ -219,12 +219,7 @@ export const queryExecution = async ({
       query: queryString,
     };
 
-    const searchSource = await createSearchSourceWithQuery(
-      preparedQueryObject,
-      dataView,
-      services,
-      false // No histogram
-    );
+    const searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services);
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));

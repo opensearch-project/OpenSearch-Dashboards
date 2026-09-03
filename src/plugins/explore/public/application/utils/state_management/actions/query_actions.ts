@@ -629,8 +629,7 @@ const executeQueryBase = async (
           const topBreakdownSource = await createSearchSourceWithQuery(
             { ...query, dataset, query: topBreakdownQuery },
             dataView,
-            services,
-            false
+            services
           );
           const topBreakdownResults = await topBreakdownSource.fetch({
             abortSignal: abortController.signal,
@@ -664,26 +663,16 @@ const executeQueryBase = async (
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        true, // Include histogram
-        effectiveInterval,
-        undefined,
-        disablePartialResults
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {
+        includeHistogram: true,
+        customInterval: effectiveInterval,
+        disablePartialResults,
+      });
     } else {
       // Tab-specific: Create without aggregations
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        false, // No histogram
-        undefined,
-        undefined,
-        disablePartialResults
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {
+        disablePartialResults,
+      });
     }
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
@@ -828,11 +817,19 @@ export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
-  includeHistogram: boolean = false,
-  customInterval?: string,
-  sizeParam?: number,
-  disablePartialResults: boolean = false
+  options: {
+    includeHistogram?: boolean;
+    customInterval?: string;
+    sizeParam?: number;
+    disablePartialResults?: boolean;
+  } = {}
 ) => {
+  const {
+    includeHistogram = false,
+    customInterval,
+    sizeParam,
+    disablePartialResults = false,
+  } = options;
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
