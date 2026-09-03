@@ -18,6 +18,7 @@ import {
   RemoveSavedObjectAnnotationFromObjectInput,
   SavedObjectAnnotation,
   SavedObjectAnnotationService,
+  SetSavedObjectAnnotationsForObjectInput,
   UpdateSavedObjectAnnotationInput,
 } from '../../types';
 import { HttpSetup } from '../http';
@@ -74,6 +75,15 @@ export class SavedObjectAnnotationClient implements SavedObjectAnnotationService
     input: RemoveSavedObjectAnnotationFromObjectInput
   ): Promise<void> {
     await this.http.fetch(`${API_BASE_URL}/_detach`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  public async setAnnotationsForObject(
+    input: SetSavedObjectAnnotationsForObjectInput
+  ): Promise<void> {
+    await this.http.fetch(`${API_BASE_URL}/_set_for_object`, {
       method: 'POST',
       body: JSON.stringify(input),
     });

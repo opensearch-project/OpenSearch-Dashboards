@@ -26,6 +26,7 @@ const createAnnotationService = () =>
     createAnnotation: jest.fn(),
     addAnnotationToObject: jest.fn().mockResolvedValue(undefined),
     removeAnnotationFromObject: jest.fn().mockResolvedValue(undefined),
+    setAnnotationsForObject: jest.fn().mockResolvedValue(undefined),
   }) as unknown as jest.Mocked<SavedObjectAnnotationService>;
 
 const target = {
@@ -34,7 +35,7 @@ const target = {
 };
 
 describe('TagAssignmentModal', () => {
-  it('loads current assignments and saves added and removed tags', async () => {
+  it('loads current assignments and replaces them with the selected tags', async () => {
     const annotationService = createAnnotationService();
     annotationService.findAnnotations.mockResolvedValue([
       { id: 'tag-1', type: 'tag', name: 'Production', payload: { color: '#54B399' } },
@@ -83,16 +84,13 @@ describe('TagAssignmentModal', () => {
       await flushPromises();
     });
 
-    expect(annotationService.addAnnotationToObject).toHaveBeenCalledWith({
-      annotationId: 'tag-2',
+    expect(annotationService.setAnnotationsForObject).toHaveBeenCalledWith({
+      annotationIds: ['tag-2'],
       type: 'tag',
       target,
     });
-    expect(annotationService.removeAnnotationFromObject).toHaveBeenCalledWith({
-      annotationId: 'tag-1',
-      type: 'tag',
-      target,
-    });
+    expect(annotationService.addAnnotationToObject).not.toHaveBeenCalled();
+    expect(annotationService.removeAnnotationFromObject).not.toHaveBeenCalled();
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -168,8 +166,8 @@ describe('TagAssignmentModal', () => {
       name: 'Production',
       payload: { color: '#54B399' },
     });
-    expect(annotationService.addAnnotationToObject).toHaveBeenCalledWith({
-      annotationId: 'tag-new',
+    expect(annotationService.setAnnotationsForObject).toHaveBeenCalledWith({
+      annotationIds: ['tag-new'],
       type: 'tag',
       target,
     });

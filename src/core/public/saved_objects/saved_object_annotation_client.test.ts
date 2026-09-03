@@ -37,4 +37,24 @@ describe('SavedObjectAnnotationClient', () => {
       query: { type: 'tag' },
     });
   });
+
+  it('replaces object annotations through the set transport', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = new SavedObjectAnnotationClient(http);
+    const input = {
+      annotationIds: ['tag-1', 'tag-2'],
+      type: 'tag',
+      target: {
+        objectType: 'dashboard',
+        objectId: 'dashboard-1',
+      },
+    };
+
+    await client.setAnnotationsForObject(input);
+
+    expect(http.fetch).toHaveBeenCalledWith('/internal/saved_object_annotations/_set_for_object', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  });
 });

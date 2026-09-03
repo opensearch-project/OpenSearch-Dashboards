@@ -27,6 +27,7 @@ describe('saved object annotation routes', () => {
     findAnnotations: jest.Mock;
     addAnnotationToObject: jest.Mock;
     removeAnnotationFromObject: jest.Mock;
+    setAnnotationsForObject: jest.Mock;
     getAnnotationsForObject: jest.Mock;
   };
   let router: ReturnType<typeof mockRouter.create>;
@@ -41,6 +42,7 @@ describe('saved object annotation routes', () => {
       findAnnotations: jest.fn(),
       addAnnotationToObject: jest.fn(),
       removeAnnotationFromObject: jest.fn(),
+      setAnnotationsForObject: jest.fn(),
       getAnnotationsForObject: jest.fn(),
     };
     router = mockRouter.create();
@@ -72,6 +74,7 @@ describe('saved object annotation routes', () => {
       '/_find',
       '/_attach',
       '/_detach',
+      '/_set_for_object',
       '/_get_for_object',
     ]);
     expect(router.put.mock.calls.map(([config]) => config.path)).toEqual(['/{annotationId}']);
@@ -139,6 +142,11 @@ describe('saved object annotation routes', () => {
       { body: { annotationId: 'tag-1', type: 'tag', target } } as any,
       response
     );
+    await getHandler('post', '/_set_for_object')(
+      context,
+      { body: { annotationIds: ['tag-1'], type: 'tag', target } } as any,
+      response
+    );
     await getHandler('post', '/_get_for_object')(
       context,
       { body: { type: 'tag', target } } as any,
@@ -152,6 +160,11 @@ describe('saved object annotation routes', () => {
     });
     expect(annotationService.removeAnnotationFromObject).toHaveBeenCalledWith({
       annotationId: 'tag-1',
+      type: 'tag',
+      target,
+    });
+    expect(annotationService.setAnnotationsForObject).toHaveBeenCalledWith({
+      annotationIds: ['tag-1'],
       type: 'tag',
       target,
     });

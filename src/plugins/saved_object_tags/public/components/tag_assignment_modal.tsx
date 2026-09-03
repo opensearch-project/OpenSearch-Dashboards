@@ -41,7 +41,6 @@ const normalizeTagName = (name: string) => name.trim().toLowerCase();
 
 export const TagAssignmentModal = ({ annotationService, target, onClose, onChange }: Props) => {
   const [tags, setTags] = useState<SavedObjectAnnotation[]>([]);
-  const [initialTagIds, setInitialTagIds] = useState<string[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,7 +69,6 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
 
         const assignedTagIds = assignedTags.map(({ id }) => id);
         setTags(availableTags);
-        setInitialTagIds(assignedTagIds);
         setSelectedTagIds(assignedTagIds);
       })
       .catch((error) => {
@@ -124,40 +122,21 @@ export const TagAssignmentModal = ({ annotationService, target, onClose, onChang
     setIsSaving(true);
     setErrorMessage(undefined);
 
-    const initialTagIdSet = new Set(initialTagIds);
-    const selectedTagIdSet = new Set(selectedTagIds);
-    const tagIdsToAdd = selectedTagIds.filter((tagId) => !initialTagIdSet.has(tagId));
-    const tagIdsToRemove = initialTagIds.filter((tagId) => !selectedTagIdSet.has(tagId));
-
     try {
-      for (const annotationId of tagIdsToAdd) {
-        await annotationService.addAnnotationToObject({
-          annotationId,
-          type: TAG_ANNOTATION_TYPE,
-          target: { objectId, objectType },
-        });
-      }
-
-      for (const annotationId of tagIdsToRemove) {
-        await annotationService.removeAnnotationFromObject({
-          annotationId,
-          type: TAG_ANNOTATION_TYPE,
-          target: { objectId, objectType },
-        });
-      }
-
+      let annotationIds = selectedTagIds;
       if (showCreateTag) {
         const newTag = await annotationService.createAnnotation({
           type: TAG_ANNOTATION_TYPE,
           name: newTagName,
           payload: newTagColor ? { color: newTagColor } : undefined,
         });
-        await annotationService.addAnnotationToObject({
-          annotationId: newTag.id,
-          type: TAG_ANNOTATION_TYPE,
-          target: { objectId, objectType },
-        });
+        annotationIds = [...annotationIds, newTag.id];
       }
+      await annotationService.setAnnotationsForObject({
+        annotationIds,
+        type: TAG_ANNOTATION_TYPE,
+        target: { objectId, objectType },
+      });
 
       onChange?.();
       onClose();

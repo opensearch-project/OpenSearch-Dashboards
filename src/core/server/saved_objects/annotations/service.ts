@@ -19,6 +19,7 @@ import {
   SavedObjectAnnotation,
   SavedObjectAnnotationService,
   SAVED_OBJECT_ANNOTATION_TYPE,
+  SetSavedObjectAnnotationsForObjectInput,
   UpdateSavedObjectAnnotationInput,
 } from '../../../types';
 import { SavedObject, SavedObjectsClientContract } from '../types';
@@ -195,6 +196,93 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
       return;
     }
 
+    await this.mutationClient.update(
+      target.objectType,
+      target.objectId,
+      {},
+      {
+        references,
+      }
+    );
+  }
+
+  public async setAnnotationsForObject({
+    annotationIds,
+    type,
+    target,
+  }: SetSavedObjectAnnotationsForObjectInput): Promise<void> {
+    // 1. Validate the target and load its current references.
+    this.validateTarget(type, target.objectType);
+    const targetObject = await this.mutationClient.get(target.objectType, target.objectId);
+    const selectedAnnotationIds = new Set(annotationIds);
+
+    // 2. Resolve current annotations to preserve other types and detect 404 orphan references,
+    // and resolve selected annotations so they can be validated.
+    const annotationIdsToResolve = new Set(
+      targetObject.references.filter(isSavedObjectAnnotationReference).map(({ id }) => id)
+    );
+    selectedAnnotationIds.forEach((annotationId) => annotationIdsToResolve.add(annotationId));
+    const annotations = annotationIdsToResolve.size
+      ? (
+          await this.client.bulkGet<SavedObjectAnnotationAttributes>(
+            Array.from(annotationIdsToResolve, (id) => ({
+              type: SAVED_OBJECT_ANNOTATION_TYPE,
+              id,
+            }))
+          )
+        ).saved_objects
+      : [];
+    const annotationsById = new Map(annotations.map((annotation) => [annotation.id, annotation]));
+
+    // 3. Validate that every selected annotation exists and belongs to the requested type.
+    selectedAnnotationIds.forEach((annotationId) => {
+      const annotation = annotationsById.get(annotationId);
+      if (!annotation || annotation.error?.statusCode === 404) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          SAVED_OBJECT_ANNOTATION_TYPE,
+          annotationId
+        );
+      }
+      if (annotation.error) {
+        throw new Error(annotation.error.message);
+      }
+      if (annotation.attributes.type !== type) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `Annotation '${annotationId}' is not of type '${type}'`
+        );
+      }
+    });
+
+    // 4. Preserve unrelated references while removing this type and missing annotations.
+    const references = targetObject.references.filter((reference) => {
+      if (!isSavedObjectAnnotationReference(reference)) {
+        return true;
+      }
+
+      const annotation = annotationsById.get(reference.id);
+      // Only missing definitions are orphaned; other lookup errors must not delete references.
+      if (!annotation || annotation.error?.statusCode === 404) {
+        return false;
+      }
+      if (annotation.error) {
+        return true;
+      }
+      if (annotation.attributes.type !== type) {
+        return true;
+      }
+      return false;
+    });
+
+    // 5. Add the complete selected annotation set with fresh reference names.
+    selectedAnnotationIds.forEach((annotationId) => {
+      references.push({
+        name: createSavedObjectAnnotationReferenceName(references),
+        type: SAVED_OBJECT_ANNOTATION_TYPE,
+        id: annotationId,
+      });
+    });
+
+    // 6. Persist the rebuilt references in one target update.
     await this.mutationClient.update(
       target.objectType,
       target.objectId,

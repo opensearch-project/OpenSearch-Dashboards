@@ -211,6 +211,130 @@ describe('SavedObjectAnnotationServiceImpl', () => {
     );
   });
 
+  it('replaces annotations of one type while preserving other references', async () => {
+    const tag2 = {
+      ...tag,
+      id: 'tag-2',
+      attributes: {
+        ...tag.attributes,
+        name: 'Executive',
+      },
+    };
+    const tag3 = {
+      ...tag,
+      id: 'tag-3',
+      attributes: {
+        ...tag.attributes,
+        name: 'Operations',
+      },
+    };
+    const note = {
+      ...tag,
+      id: 'note-1',
+      attributes: {
+        type: 'note',
+        name: 'Reviewed',
+      },
+    };
+    const targetObject = {
+      ...dashboard,
+      references: [
+        ...dashboard.references,
+        { name: 'annotation_0', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-1' },
+        { name: 'annotation_1', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-2' },
+        { name: 'annotation_2', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'note-1' },
+        { name: 'annotation_3', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'missing-tag' },
+        { name: 'annotation_4', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'restricted-note' },
+      ],
+    };
+    mutationClient.get.mockResolvedValue(targetObject);
+    client.bulkGet.mockResolvedValue({
+      saved_objects: [
+        tag,
+        tag2,
+        note,
+        {
+          id: 'missing-tag',
+          type: SAVED_OBJECT_ANNOTATION_TYPE,
+          attributes: {},
+          references: [],
+          error: {
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object not found',
+          },
+        },
+        {
+          id: 'restricted-note',
+          type: SAVED_OBJECT_ANNOTATION_TYPE,
+          attributes: {},
+          references: [],
+          error: {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to read annotation',
+          },
+        },
+        tag3,
+      ],
+    });
+    mutationClient.update.mockResolvedValue({} as any);
+
+    await service.setAnnotationsForObject({
+      annotationIds: ['tag-1', 'tag-3'],
+      type: 'tag',
+      target: { objectType: 'dashboard', objectId: 'dashboard-1' },
+    });
+
+    expect(client.bulkGet).toHaveBeenCalledWith([
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-1' },
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-2' },
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'note-1' },
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'missing-tag' },
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'restricted-note' },
+      { type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-3' },
+    ]);
+    expect(mutationClient.update).toHaveBeenCalledWith(
+      'dashboard',
+      'dashboard-1',
+      {},
+      {
+        references: [
+          ...dashboard.references,
+          { name: 'annotation_2', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'note-1' },
+          { name: 'annotation_4', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'restricted-note' },
+          { name: 'annotation_0', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-1' },
+          { name: 'annotation_1', type: SAVED_OBJECT_ANNOTATION_TYPE, id: 'tag-3' },
+        ],
+      }
+    );
+  });
+
+  it('rejects setting an annotation whose stored type does not match', async () => {
+    mutationClient.get.mockResolvedValue(dashboard);
+    client.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          ...tag,
+          id: 'note-1',
+          attributes: {
+            type: 'note',
+            name: 'Reviewed',
+          },
+        },
+      ],
+    });
+
+    await expect(
+      service.setAnnotationsForObject({
+        annotationIds: ['note-1'],
+        type: 'tag',
+        target: { objectType: 'dashboard', objectId: 'dashboard-1' },
+      })
+    ).rejects.toThrow("Annotation 'note-1' is not of type 'tag'");
+    expect(mutationClient.update).not.toHaveBeenCalled();
+  });
+
   it('rejects removal when the stored annotation type does not match', async () => {
     client.get.mockResolvedValue({
       ...tag,

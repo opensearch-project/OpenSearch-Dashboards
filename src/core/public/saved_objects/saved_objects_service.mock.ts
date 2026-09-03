@@ -39,6 +39,7 @@ const createStartContractMock = () => {
       findAnnotations: jest.fn(),
       addAnnotationToObject: jest.fn(),
       removeAnnotationFromObject: jest.fn(),
+      setAnnotationsForObject: jest.fn(),
       getAnnotationsForObject: jest.fn(),
     },
     client: {

@@ -69,6 +69,7 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     findAnnotations: jest.fn(),
     addAnnotationToObject: jest.fn(),
     removeAnnotationFromObject: jest.fn(),
+    setAnnotationsForObject: jest.fn(),
     getAnnotationsForObject: jest.fn(),
   });
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());

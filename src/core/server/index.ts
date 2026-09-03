@@ -389,6 +389,7 @@ export {
   SavedObjectAnnotationService,
   SavedObjectAnnotationTarget,
   SAVED_OBJECT_ANNOTATION_TYPE,
+  SetSavedObjectAnnotationsForObjectInput,
   UpdateSavedObjectAnnotationInput,
   WorkspaceFindOptions,
   WorkspacePermissionMode,

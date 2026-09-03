@@ -135,6 +135,23 @@ export const registerSavedObjectAnnotationRoutes = (http: InternalHttpServiceSet
 
   router.post(
     {
+      path: '/_set_for_object',
+      validate: {
+        body: schema.object({
+          annotationIds: schema.arrayOf(schema.string()),
+          type: schema.string(),
+          target: targetSchema,
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, request, response) => {
+      await context.core.savedObjects.annotations.setAnnotationsForObject(request.body);
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
       path: '/_get_for_object',
       validate: {
         body: schema.object({

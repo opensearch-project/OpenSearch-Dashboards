@@ -60,6 +60,12 @@ export interface RemoveSavedObjectAnnotationFromObjectInput {
   target: SavedObjectAnnotationTarget;
 }
 
+export interface SetSavedObjectAnnotationsForObjectInput {
+  annotationIds: string[];
+  type: string;
+  target: SavedObjectAnnotationTarget;
+}
+
 export interface GetSavedObjectAnnotationsForObjectInput {
   type: string;
   target: SavedObjectAnnotationTarget;
@@ -72,6 +78,7 @@ export interface SavedObjectAnnotationService {
   findAnnotations(options: FindSavedObjectAnnotationsOptions): Promise<SavedObjectAnnotation[]>;
   addAnnotationToObject(input: AddSavedObjectAnnotationToObjectInput): Promise<void>;
   removeAnnotationFromObject(input: RemoveSavedObjectAnnotationFromObjectInput): Promise<void>;
+  setAnnotationsForObject(input: SetSavedObjectAnnotationsForObjectInput): Promise<void>;
   getAnnotationsForObject(
     input: GetSavedObjectAnnotationsForObjectInput
   ): Promise<SavedObjectAnnotation[]>;
