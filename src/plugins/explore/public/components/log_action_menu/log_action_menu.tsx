@@ -98,6 +98,7 @@ export const LogActionMenu: React.FC<LogActionMenuProps> = ({
         name: action.displayName,
         icon: action.iconType,
         onClick: () => handleActionSelect(action),
+        'data-test-subj': `logActionMenuItem-${action.id}`,
       })),
     },
   ];

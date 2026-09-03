@@ -140,6 +140,20 @@ describe('LogActionMenu', () => {
       });
     });
 
+    it('sets a data-test-subj on each menu item using the action id', async () => {
+      mockGetCompatibleActions.mockReturnValue([mockAction1, mockAction2]);
+
+      render(<LogActionMenu {...defaultProps} />);
+
+      const button = screen.getByTestId('logActionMenuButton');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('logActionMenuItem-action-1')).toBeInTheDocument();
+        expect(screen.getByTestId('logActionMenuItem-action-2')).toBeInTheDocument();
+      });
+    });
+
     it('displays action icons in the menu', async () => {
       mockGetCompatibleActions.mockReturnValue([mockAction1]);
 
