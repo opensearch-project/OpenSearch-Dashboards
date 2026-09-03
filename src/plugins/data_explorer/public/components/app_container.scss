@@ -17,6 +17,10 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     height: calc(100vh - #{$osdHeaderOffset * 2});
   }
 
+  &--embed {
+    height: 100vh;
+  }
+
   &__canvas {
     height: 100%;
   }
