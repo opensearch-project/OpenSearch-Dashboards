@@ -247,11 +247,15 @@ const TopNav = ({
         currentContainer
       );
       const TagList = services.savedObjectTags?.ui.TagList;
-      if (dashboardIdFromUrl && services.savedObjectTags) {
+      if (
+        dashboardIdFromUrl &&
+        services.savedObjectTags &&
+        services.dashboardCapabilities.showWriteControls
+      ) {
         navActions[TopNavIds.TAGS] = openTagAssignmentModal;
       }
       const tagsTooltip =
-        dashboardIdFromUrl && TagList ? (
+        dashboardIdFromUrl && TagList && services.dashboardCapabilities.showWriteControls ? (
           <DashboardTagListTooltip
             TagList={TagList}
             target={{

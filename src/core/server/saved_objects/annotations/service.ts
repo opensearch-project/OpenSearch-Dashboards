@@ -41,6 +41,15 @@ const hasOwn = (object: object, property: string) =>
 
 const normalizeAnnotationName = (name: string) => name.trim().toLowerCase();
 
+const validateAnnotationName = (name: string) => {
+  // Preserve the original display name while requiring at least one non-whitespace character.
+  if (!name.trim()) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'Annotation name must be a non-empty string'
+    );
+  }
+};
+
 export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationService {
   constructor(
     private readonly client: SavedObjectsClientContract,
@@ -52,6 +61,7 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
     input: CreateSavedObjectAnnotationInput
   ): Promise<SavedObjectAnnotation> {
     const registration = this.registry.get(input.type);
+    validateAnnotationName(input.name);
     await this.ensureUniqueName(registration, input.name);
     const savedObject = await this.client.create<SavedObjectAnnotationAttributes>(
       SAVED_OBJECT_ANNOTATION_TYPE,
@@ -68,6 +78,7 @@ export class SavedObjectAnnotationServiceImpl implements SavedObjectAnnotationSe
     const attributes: Partial<SavedObjectAnnotationAttributes> = {};
 
     if (hasOwn(input, 'name') && input.name !== undefined) {
+      validateAnnotationName(input.name);
       await this.ensureUniqueName(registration, input.name, input.annotationId);
       attributes.name = input.name;
     }

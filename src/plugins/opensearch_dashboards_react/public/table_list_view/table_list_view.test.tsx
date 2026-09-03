@@ -22,7 +22,6 @@ jest.mock(
   { virtual: true }
 );
 
-import React from 'react';
 import { act } from 'react';
 import { shallow } from 'enzyme';
 import { TableListView, TableListViewProps } from './table_list_view';

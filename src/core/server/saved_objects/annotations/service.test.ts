@@ -96,6 +96,21 @@ describe('SavedObjectAnnotationServiceImpl', () => {
     expect(client.create).not.toHaveBeenCalled();
   });
 
+  it('rejects creating an annotation with a blank name', async () => {
+    client.create.mockResolvedValue({
+      ...tag,
+      attributes: { ...tag.attributes, name: '   ' },
+    });
+
+    await expect(
+      service.createAnnotation({
+        type: 'tag',
+        name: '   ',
+      })
+    ).rejects.toThrow('Annotation name must be a non-empty string');
+    expect(client.create).not.toHaveBeenCalled();
+  });
+
   it('rejects renaming an annotation to an existing name', async () => {
     client.get.mockResolvedValue(tag);
     client.find.mockResolvedValue({
@@ -119,6 +134,23 @@ describe('SavedObjectAnnotationServiceImpl', () => {
         name: ' executive ',
       })
     ).rejects.toThrow("An annotation of type 'tag' named 'executive' already exists");
+    expect(client.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects renaming an annotation to a blank name', async () => {
+    client.get.mockResolvedValue(tag);
+    client.update.mockResolvedValue({
+      ...tag,
+      attributes: { ...tag.attributes, name: '   ' },
+    });
+
+    await expect(
+      service.updateAnnotation({
+        annotationId: 'tag-1',
+        type: 'tag',
+        name: '   ',
+      })
+    ).rejects.toThrow('Annotation name must be a non-empty string');
     expect(client.update).not.toHaveBeenCalled();
   });
 

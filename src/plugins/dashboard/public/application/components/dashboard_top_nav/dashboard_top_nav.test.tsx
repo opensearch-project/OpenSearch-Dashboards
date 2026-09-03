@@ -62,6 +62,7 @@ function wrapDashboardTopNavInContext(
   const services = {
     ...servicesWithoutKeyboardShortcut,
     dashboardCapabilities: {
+      ...servicesWithoutKeyboardShortcut.dashboardCapabilities,
       saveQuery: true,
     },
     navigation: {
@@ -183,6 +184,9 @@ describe('Dashboard top nav', () => {
   });
 
   test('shows tags in the saved dashboard view header and opens the assignment modal', async () => {
+    mockServices.dashboardCapabilities = {
+      showWriteControls: true,
+    };
     mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
     const component = mount(
       wrapDashboardTopNavInContext(
@@ -219,8 +223,35 @@ describe('Dashboard top nav', () => {
     expect(mockServices.overlays.openModal).toHaveBeenCalledTimes(1);
   });
 
+  test('hides the tag mutation control when write controls are disabled', async () => {
+    mockServices.dashboardCapabilities = {
+      showWriteControls: false,
+    };
+    mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
+    const component = mount(
+      wrapDashboardTopNavInContext(
+        mockServices,
+        { ...currentState, fullScreenMode: false, viewMode: ViewMode.VIEW },
+        false,
+        'dashboard-1',
+        true
+      )
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => process.nextTick(resolve));
+    });
+    component.update();
+
+    const config = component.find(TopNavMenu).prop('config') as any[];
+    expect(config.map(({ testId }) => testId)).not.toContain('dashboardTagsMenuItem');
+  });
+
   test('hides tags when the tags plugin is disabled', async () => {
     mockServices.savedObjectTags = undefined;
+    mockServices.dashboardCapabilities = {
+      showWriteControls: true,
+    };
     mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
     const component = mount(
       wrapDashboardTopNavInContext(
