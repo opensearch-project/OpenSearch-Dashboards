@@ -63,9 +63,6 @@ export interface AutoVisualizationArgs {
   to?: string;
   // Optional transformation pipeline applied to raw query results before rendering
   transformations?: UrlTransformationState[];
-  // Optional sample row from the ppl_execute result — a single data row as a plain object.
-  // Used to derive the post-transformation column schema
-  sampleRow?: Record<string, unknown>;
 }
 
 export interface PreparedQuery {
@@ -353,38 +350,64 @@ function applyTransformationPipeline(
   return service.applyPipeline(rawRows, rawSchema);
 }
 
-// Derive the post-transformation schema without executing PPL given a sample row
-function deriveSchemaAfterTransformations(
-  originalSchema: Array<{ name?: string; type?: string }>,
-  transformations: UrlTransformationState[] | undefined,
-  sampleRow?: Record<string, unknown>
-): Array<{ name?: string; type?: string }> {
-  if (!transformations || transformations.length === 0 || !sampleRow) {
-    return originalSchema;
+/**
+ * A transformation pipeline can rename, drop or add columns, so the column list the LLM passed no longer describes what the chart will actually render.
+ * Run the query once here purely to obtain the post-transformation schema.
+ */
+async function deriveSchemaAfterTransformations(
+  preparedQueryObject: PreparedQuery,
+  transformations: UrlTransformationState[],
+  core: CoreStart,
+  data: DataPublicPluginStart,
+  timeRange?: TimeRange
+): Promise<Array<{ name?: string; type?: string }>> {
+  const { rawRows, rawSchema } = await executePPLQuery(preparedQueryObject, core, data, timeRange);
+
+  const { rows: transformedRows, finalSchema } = applyTransformationPipeline(
+    rawRows,
+    rawSchema,
+    transformations
+  );
+
+  if (transformedRows.length === 0) {
+    const activeSteps = transformations
+      .filter((step) => !step.hide)
+      .map((step) => step.definitionId)
+      .join(', ');
+    throw new Error(
+      `The transformation pipeline [${activeSteps}] dropped every row, so the post-transformation ` +
+        'columns cannot be resolved. Loosen the filter/limit steps or widen the time range.'
+    );
   }
 
-  const rows: OpenSearchSearchHit[] = [{ _source: sampleRow } as OpenSearchSearchHit];
-
-  const service = new TransformationService();
-  registerAllTransformations(service);
-  service.restoreFromState(transformations);
-  const { finalSchema } = service.applyPipeline(rows, originalSchema);
   return finalSchema;
 }
 
 /**
  * resolve the chart config from ppl execution columns results.
  */
-export function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult {
+export async function buildVisConfig(
+  args: AutoVisualizationArgs,
+  core: CoreStart,
+  data: DataPublicPluginStart,
+  resolvedTimeRange?: TimeRange
+): Promise<VisualizationConfigResult> {
   const preparedQueryObject = buildPreparedQuery(args);
 
   // 1. get normalized schema — use post-transformation schema when available
   const originalSchema = (args.columns || []).map((col) => ({ name: col.name, type: col.type }));
-  const schema = deriveSchemaAfterTransformations(
-    originalSchema,
-    args.transformations,
-    args.sampleRow
-  );
+
+  // with transformations, execute query once to get the transformed columns
+  const schema =
+    args.transformations && args.transformations.length > 0
+      ? await deriveSchemaAfterTransformations(
+          preparedQueryObject,
+          args.transformations,
+          core,
+          data,
+          resolvedTimeRange
+        )
+      : originalSchema;
 
   const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows([], schema);
 
@@ -648,9 +671,13 @@ export function registerAutoVisualizationAction(
     handler: async (args: AutoVisualizationArgs) => {
       try {
         checkTimeRangeArgsUsable(args);
-
-        const { visConfig, query, resolvedChartType, resolvedAxesMapping } = buildVisConfig(args);
         const resolvedTimeRange = getAbsoluteTimeRange(data, args);
+        const { visConfig, query, resolvedChartType, resolvedAxesMapping } = await buildVisConfig(
+          args,
+          core,
+          data,
+          resolvedTimeRange
+        );
         const { originatingApp, dashboardId } = getCurrentDashboardContext(contextProvider);
 
         const dashboardName = dashboardId ? await getDashboardName(core, dashboardId) : undefined;
