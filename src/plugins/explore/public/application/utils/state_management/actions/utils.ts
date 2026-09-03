@@ -15,6 +15,7 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
+import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
 export interface HistogramConfig {
@@ -114,17 +115,16 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a `stats` command, whose output rows are aggregation
- * buckets rather than documents. Subquery brackets and quoted strings are masked so that
- * `stats` inside them is ignored.
+ * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
+ * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
+ * brackets and quoted strings are masked so that a command inside them is ignored.
  *
- * Used to detect queries where the hit counter should show bucket count separately from
- * document count. Other aggregating commands (chart, timechart, top, rare, etc.) will be
- * added in a follow-up PR once stripStatsFromQuery is extended to handle them.
+ * Used to detect queries where the hit counter should show bucket count separately from document
+ * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
  */
-export const queryHasStats = (queryString: string): boolean => {
+export const queryHasAggregation = (queryString: string): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return /\|\s*stats\b/i.test(masked);
+  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
 };
 
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {

@@ -12,11 +12,14 @@ import {
   EXPLORE_STATISTICS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
+import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
 
-// stats/table/top/rare all produce aggregated (non-document) output that belongs on the Statistics
-// tab. top/rare are included so they are classified consistently with stats (and stripped from the
-// Logs/histogram queries by stripStatsFromQuery).
-const hasAggregation = (q: string) => /\|\s*(stats|table|top|rare)\b/i.test(q);
+// The bucketing aggregations (AGGREGATION_COMMANDS: stats/top/rare) and `table` all produce
+// non-document output that belongs on the Statistics tab. The aggregation set is shared with
+// stripStatsFromQuery and the bucket-count summary so the three stay in sync; `table` is routed
+// here only (it is a projection, so it keeps hit-count semantics and is not stripped).
+const hasAggregation = (q: string) =>
+  new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN}|table)\\b`, 'i').test(q);
 const hasChartOrTimechart = (q: string) => /\|\s*(chart|timechart)\b/i.test(q);
 
 /**

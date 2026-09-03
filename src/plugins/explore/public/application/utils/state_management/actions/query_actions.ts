@@ -49,7 +49,7 @@ import {
   buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
-  queryHasStats,
+  queryHasAggregation,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { ExploreFlavor } from '../../../../../common';
@@ -333,7 +333,7 @@ export const executeQueries = createAsyncThunk<
   // Execute bucket count query for aggregation queries (non-blocking)
   // This appends | stats count() to get the true total bucket count
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
-  if (query.language === 'PPL' && queryHasStats(originalQueryString)) {
+  if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
     const bucketCountCacheKey = prepareBucketCountCacheKey(query);
     const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
     const needsBucketCountQuery =

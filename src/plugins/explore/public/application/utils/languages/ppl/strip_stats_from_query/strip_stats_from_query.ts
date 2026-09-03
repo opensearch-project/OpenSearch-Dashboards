@@ -5,6 +5,7 @@
 
 import { Query } from '../../../../../../../data/common';
 import { QueryWithQueryAsString } from '../../types';
+import { AGGREGATION_COMMAND_PATTERN } from '../aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../mask_ppl_subqueries_and_strings';
 
 /**
@@ -27,7 +28,9 @@ export const stripStatsFromQuery = (query: Query): QueryWithQueryAsString => {
   // cross newlines; \b avoids matching names that merely start with the command (e.g. a "topic"
   // field).
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  const match = masked.match(/\s*\|\s*(stats|top|rare)\b[\s\S]*$/i);
+  const match = masked.match(
+    new RegExp(`\\s*\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b[\\s\\S]*$`, 'i')
+  );
   const strippedQueryString =
     match && match.index !== undefined ? queryString.slice(0, match.index) : queryString;
 
