@@ -43,6 +43,7 @@ import {
   IEmbeddable,
 } from '../../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { isSectionEmbeddable } from '../embeddable/section';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -81,7 +82,10 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
       embeddable.getRoot().isContainer &&
       embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
       isReferenceOrValueEmbeddable(embeddable) &&
-      embeddable.inputIsRefType(embeddable.getInput())
+      embeddable.inputIsRefType(embeddable.getInput()) &&
+      // A section is not a library-backed content panel (defensive; a section
+      // is not a reference-or-value embeddable either).
+      !isSectionEmbeddable(embeddable)
     );
   }
 

@@ -127,6 +127,26 @@ function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription)
   return '';
 }
 
+/**
+ * Dashboard collapsible sections: an embeddable may
+ * optionally contribute a small element rendered at the START of the panel
+ * header, before the title (e.g. a section's collapse/expand chevron). This
+ * is opt-in via a duck-typed method -- embeddables that don't implement it
+ * are completely unaffected. Kept generic (not section-specific) so the panel
+ * header has no dependency on the dashboard plugin.
+ */
+type EmbeddableWithHeaderPrepend = IEmbeddable & { renderHeaderPrepend: () => React.ReactNode };
+
+function getHeaderPrepend(embeddable: IEmbeddable): React.ReactNode {
+  if (
+    'renderHeaderPrepend' in embeddable &&
+    typeof (embeddable as EmbeddableWithHeaderPrepend).renderHeaderPrepend === 'function'
+  ) {
+    return (embeddable as EmbeddableWithHeaderPrepend).renderHeaderPrepend();
+  }
+  return null;
+}
+
 export function PanelHeader({
   title,
   isViewMode,
@@ -210,6 +230,7 @@ export function PanelHeader({
     >
       <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {getHeaderPrepend(embeddable)}
         {renderTitle()}
         {renderBadges(badges, embeddable)}
       </h2>

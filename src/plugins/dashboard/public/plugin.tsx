@@ -110,6 +110,15 @@ import {
   ACTION_LIBRARY_NOTIFICATION,
   LibraryNotificationActionContext,
   LibraryNotificationAction,
+  ACTION_MOVE_PANEL_TO_SECTION,
+  MovePanelToSectionAction,
+  MovePanelToSectionActionContext,
+  ACTION_ADD_PANEL_TO_SECTION,
+  AddPanelToSectionAction,
+  AddPanelToSectionActionContext,
+  ACTION_UNGROUP_SECTION,
+  UngroupSectionAction,
+  UngroupSectionActionContext,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -120,6 +129,7 @@ import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
+import { SectionEmbeddableFactory } from './application/embeddable/section';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
 import {
@@ -141,6 +151,7 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  allowDashboardSections: boolean;
   variables: { enabled: boolean };
 }
 
@@ -204,6 +215,9 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [ACTION_MOVE_PANEL_TO_SECTION]: MovePanelToSectionActionContext;
+    [ACTION_ADD_PANEL_TO_SECTION]: AddPanelToSectionActionContext;
+    [ACTION_UNGROUP_SECTION]: UngroupSectionActionContext;
   }
 }
 
@@ -301,6 +315,15 @@ export class DashboardPlugin implements Plugin<
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+
+    // Dashboard collapsible sections.
+    // Section support is gated behind the allowDashboardSections feature flag.
+    // No saved-object migration is registered, so a dashboard saved with
+    // sections while the flag was on is not mutated when the flag is off.
+    if (this.dashboardFeatureFlagConfig?.allowDashboardSections) {
+      const sectionFactory = new SectionEmbeddableFactory();
+      embeddable.registerEmbeddableFactory(sectionFactory.type, sectionFactory);
+    }
 
     const {
       appMounted,
@@ -428,6 +451,7 @@ export class DashboardPlugin implements Plugin<
           }),
           core: coreStart,
           dashboardConfig,
+          allowDashboardSections: this.dashboardFeatureFlagConfig?.allowDashboardSections ?? false,
           navigateToDefaultApp,
           navigateToLegacyOpenSearchDashboardsUrl,
           navigation,
@@ -638,6 +662,26 @@ export class DashboardPlugin implements Plugin<
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    // Dashboard collapsible sections.
+    // Gated behind the allowDashboardSections feature flag.
+    if (this.dashboardFeatureFlagConfig?.allowDashboardSections) {
+      const movePanelToSectionAction = new MovePanelToSectionAction(core);
+      uiActions.registerAction(movePanelToSectionAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, movePanelToSectionAction.id);
+
+      const addPanelToSectionAction = new AddPanelToSectionAction(
+        core,
+        SavedObjectFinder,
+        plugins.embeddable.getEmbeddableFactories
+      );
+      uiActions.registerAction(addPanelToSectionAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, addPanelToSectionAction.id);
+
+      const ungroupSectionAction = new UngroupSectionAction(core);
+      uiActions.registerAction(ungroupSectionAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, ungroupSectionAction.id);
+    }
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
       const addToLibraryAction = new AddToLibraryAction();

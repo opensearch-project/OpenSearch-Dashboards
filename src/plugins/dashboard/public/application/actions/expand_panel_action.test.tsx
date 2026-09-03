@@ -38,6 +38,7 @@ import {
 } from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { ExpandPanelAction } from './expand_panel_action';
+import { DASHBOARD_SECTION_EMBEDDABLE } from '../embeddable/section';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
@@ -118,6 +119,18 @@ test('Execute throws an error when called with an embeddable not in a parent', a
     await action.execute({ embeddable: container });
   }
   await expect(check()).rejects.toThrow(Error);
+});
+
+test('Is not compatible with a section embeddable', async () => {
+  const action = new ExpandPanelAction();
+  // Preserve the instance prototype (methods like getInput) while overriding
+  // the type so the action sees a section container inside the dashboard.
+  const sectionEmbeddable = Object.assign(
+    Object.create(Object.getPrototypeOf(embeddable)),
+    embeddable,
+    { type: DASHBOARD_SECTION_EMBEDDABLE }
+  );
+  expect(await action.isCompatible({ embeddable: sectionEmbeddable })).toBe(false);
 });
 
 test('Returns title', async () => {

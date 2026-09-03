@@ -270,3 +270,125 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
   // expect(action.length).toBe(1);
 });
+
+test('ungroupSection repositions members to the section location, then removes only the section', () => {
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      section1: {
+        gridData: { x: 0, y: 0, w: 48, h: 4, i: 'section1' },
+        type: 'dashboard_section',
+        // Option 1: the section owns its members via explicitInput.members.
+        explicitInput: {
+          id: 'section1',
+          title: 'Section 1',
+          collapsed: false,
+          members: [
+            { id: 'm1', gridData: { x: 0, y: 0, w: 6, h: 6 } },
+            { id: 'm2', gridData: { x: 6, y: 0, w: 6, h: 6 } },
+          ],
+        },
+      } as any,
+      m1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'm1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+      m2: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'b', id: 'm2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  // Member panels start at some absolute home; ungroup must reposition them to
+  // the section's rendered location (sectionY + HEADER_ROWS + memberY).
+  initialInput.panels.m1.gridData = { x: 0, y: 40, w: 6, h: 6, i: 'm1' };
+  initialInput.panels.m2.gridData = { x: 6, y: 40, w: 6, h: 6, i: 'm2' };
+
+  const container = new DashboardContainer(initialInput, options);
+  // Ungrouping a section converts its members' section-relative layout to
+  // absolute at the section's location, then removes the section panel (only).
+  container.ungroupSection('section1');
+
+  const panels = container.getInput().panels;
+  expect(panels.section1).toBeUndefined();
+  expect(panels.m1).toBeDefined();
+  expect(panels.m2).toBeDefined();
+  // section1 is at y:0, SECTION_HEADER_ROWS=2, so members land at y = 2 + memberY.
+  expect(panels.m1.gridData).toEqual({ x: 0, y: 2, w: 6, h: 6, i: 'm1' });
+  expect(panels.m2.gridData).toEqual({ x: 6, y: 2, w: 6, h: 6, i: 'm2' });
+});
+
+test('removeEmbeddable on a section confirms, then deletes the section AND its members', async () => {
+  const openConfirm = jest.fn().mockResolvedValue(true);
+  const deleteOptions = { ...options, overlays: { openConfirm } as any };
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      section1: {
+        gridData: { x: 0, y: 0, w: 48, h: 4, i: 'section1' },
+        type: 'dashboard_section',
+        explicitInput: {
+          id: 'section1',
+          title: 'Section 1',
+          collapsed: false,
+          members: [
+            { id: 'm1', gridData: { x: 0, y: 0, w: 6, h: 6 } },
+            { id: 'm2', gridData: { x: 6, y: 0, w: 6, h: 6 } },
+          ],
+        },
+      } as any,
+      m1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'm1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+      m2: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'b', id: 'm2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, deleteOptions);
+  container.removeEmbeddable('section1');
+  // openConfirm is async (fire-and-forget from the sync removeEmbeddable);
+  // let the microtasks settle before asserting.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  expect(openConfirm).toHaveBeenCalledTimes(1);
+  const panels = container.getInput().panels;
+  // Section AND both members are gone.
+  expect(panels.section1).toBeUndefined();
+  expect(panels.m1).toBeUndefined();
+  expect(panels.m2).toBeUndefined();
+});
+
+test('removeEmbeddable on a section does nothing when the delete confirm is cancelled', async () => {
+  const openConfirm = jest.fn().mockResolvedValue(false);
+  const deleteOptions = { ...options, overlays: { openConfirm } as any };
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      section1: {
+        gridData: { x: 0, y: 0, w: 48, h: 4, i: 'section1' },
+        type: 'dashboard_section',
+        explicitInput: {
+          id: 'section1',
+          title: 'Section 1',
+          collapsed: false,
+          members: [{ id: 'm1', gridData: { x: 0, y: 0, w: 6, h: 6 } }],
+        },
+      } as any,
+      m1: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'a', id: 'm1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, deleteOptions);
+  container.removeEmbeddable('section1');
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  expect(openConfirm).toHaveBeenCalledTimes(1);
+  const panels = container.getInput().panels;
+  // Nothing removed.
+  expect(panels.section1).toBeDefined();
+  expect(panels.m1).toBeDefined();
+});

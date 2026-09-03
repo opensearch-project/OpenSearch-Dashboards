@@ -42,6 +42,7 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { ClonePanelAction } from '.';
+import { DASHBOARD_SECTION_EMBEDDABLE } from '../embeddable/section';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -107,6 +108,16 @@ test('Clone is incompatible with Error Embeddables', async () => {
     embeddable.getRoot() as IContainer
   );
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
+});
+
+test('Clone is incompatible with a section embeddable', async () => {
+  const action = new ClonePanelAction(coreStart);
+  const sectionEmbeddable = Object.assign(
+    Object.create(Object.getPrototypeOf(embeddable)),
+    embeddable,
+    { type: DASHBOARD_SECTION_EMBEDDABLE }
+  );
+  expect(await action.isCompatible({ embeddable: sectionEmbeddable })).toBe(false);
 });
 
 test('Clone adds a new embeddable', async () => {

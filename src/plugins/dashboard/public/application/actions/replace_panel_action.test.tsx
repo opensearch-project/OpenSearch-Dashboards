@@ -38,6 +38,7 @@ import {
 } from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { ReplacePanelAction } from './replace_panel_action';
+import { DASHBOARD_SECTION_EMBEDDABLE } from '../embeddable/section';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -136,6 +137,24 @@ test('Execute throws an error when called with an embeddable not in a parent', a
     await action.execute({ embeddable: container });
   }
   await expect(check()).rejects.toThrow(Error);
+});
+
+test('Is not compatible with a section embeddable', async () => {
+  let SavedObjectFinder: any;
+  let notifications: any;
+  const action = new ReplacePanelAction(
+    coreStart,
+    SavedObjectFinder,
+    notifications,
+    start.getEmbeddableFactories
+  );
+  // Preserve the instance prototype (getInput, etc.) while overriding type.
+  const sectionEmbeddable = Object.assign(
+    Object.create(Object.getPrototypeOf(embeddable)),
+    embeddable,
+    { type: DASHBOARD_SECTION_EMBEDDABLE }
+  );
+  expect(await action.isCompatible({ embeddable: sectionEmbeddable })).toBe(false);
 });
 
 test('Returns title', async () => {

@@ -221,7 +221,23 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.errorEmbeddable) {
       this.state.errorEmbeddable.destroy();
     }
-    this.props.embeddable.destroy();
+    // Dashboard collapsible sections: only destroy a
+    // STANDALONE embeddable here. An embeddable that belongs to a container
+    // (has a `parent`) has its lifecycle owned by that container -- the
+    // container destroys it when its panel is removed from input
+    // (Container.onPanelRemoved) and when the container itself is destroyed.
+    // Destroying it here on a mere React unmount is redundant AND harmful:
+    // when a container child's panel simply MOVES in the React tree -- e.g. a
+    // dashboard panel moving between the dashboard grid and a section's nested
+    // grid, or a section being deleted so its members re-render at the top
+    // level -- React unmounts+remounts its EmbeddablePanel. Destroying the
+    // embeddable on that unmount tears down a child the container still holds
+    // in `panels`, and the container does not re-create a still-present child,
+    // so it renders blank after the move. Leave container-owned teardown to
+    // the container.
+    if (!this.props.embeddable.parent) {
+      this.props.embeddable.destroy();
+    }
   }
 
   public onFocus = (focusedPanelIndex: string) => {

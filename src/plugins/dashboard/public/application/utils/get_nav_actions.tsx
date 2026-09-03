@@ -31,6 +31,15 @@ import {
 import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  SECTION_HEADER_ROWS,
+} from '../embeddable/dashboard_constants';
+import {
+  DASHBOARD_SECTION_EMBEDDABLE,
+  buildSectionMemberMap,
+  DashboardSectionEmbeddableInput,
+} from '../embeddable/section';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
@@ -173,6 +182,14 @@ export const getNavActions = (
         showAddPanelPopover({
           anchorElement,
           uiActions: services.uiActions,
+          // "Add section" lives inside this "Create new" menu
+          // (after the Metrics visualization entry), not as a separate top-nav
+          // button. Reuses the same creation logic as navActions[ADD_SECTION].
+          // Gated behind the allowDashboardSections feature flag -- when off,
+          // onAddSection is undefined and the popover omits the "Section" item.
+          onAddSection: services.allowDashboardSections
+            ? () => navActions[TopNavIds.ADD_SECTION]?.(anchorElement)
+            : undefined,
           onAddExistingPanelFlyout: () => {
             openAddPanelFlyout({
               embeddable: currentContainer,
@@ -222,6 +239,70 @@ export const getNavActions = (
       throw new EmbeddableFactoryNotFoundError(type);
     }
     await factory.create({} as EmbeddableInput, currentContainer);
+  };
+
+  // Dashboard collapsible sections.
+  // Creates a section via the same container.addNewEmbeddable() primitive every
+  // other panel uses. addNewEmbeddable's default placement gives a half-width
+  // box (DEFAULT_PANEL_WIDTH); a section is widened to full-width right after,
+  // matching the plan's "row-spanning header marker" design -- no custom
+  // placement-strategy code needed.
+  navActions[TopNavIds.ADD_SECTION] = async () => {
+    if (!currentContainer || isErrorEmbeddable(currentContainer)) {
+      return;
+    }
+    const sectionEmbeddable = await currentContainer.addNewEmbeddable(
+      DASHBOARD_SECTION_EMBEDDABLE,
+      {
+        title: i18n.translate('dashboard.topNav.addSection.defaultTitle', {
+          defaultMessage: 'New section',
+        }),
+        collapsed: false,
+        // Option 1: the section owns its members. A new section starts empty.
+        members: [],
+      }
+    );
+    const panels = currentContainer.getInput().panels;
+    const sectionPanel = panels[sectionEmbeddable.id];
+    if (sectionPanel) {
+      // place a NEW section at the BOTTOM of the dashboard by
+      // default (below all existing top-level content), not wherever
+      // addNewEmbeddable's default top-left placement put it. Compute the
+      // max bottom edge across outer-space panels (ungrouped panels + section
+      // panels), treating each section's rendered height as its header rows
+      // plus its members' content -- mirroring DashboardGrid.
+      // computeSectionOuterHeight so we land just past the last section too.
+      const memberMap = buildSectionMemberMap(panels);
+      let maxBottom = 0;
+      Object.values(panels).forEach((p) => {
+        if (p.explicitInput.id === sectionEmbeddable.id) return;
+        if (memberMap.has(p.explicitInput.id)) return; // members live in inner grids
+        let effectiveH = p.gridData.h;
+        if (p.type === DASHBOARD_SECTION_EMBEDDABLE) {
+          const members =
+            (p.explicitInput as Partial<DashboardSectionEmbeddableInput>).members ?? [];
+          const innerRows = members.reduce((mx, m) => Math.max(mx, m.gridData.y + m.gridData.h), 0);
+          const collapsed = Boolean((p.explicitInput as { collapsed?: boolean }).collapsed);
+          effectiveH = collapsed ? SECTION_HEADER_ROWS : SECTION_HEADER_ROWS + innerRows;
+        }
+        maxBottom = Math.max(maxBottom, p.gridData.y + effectiveH);
+      });
+      currentContainer.updateInput({
+        panels: {
+          ...panels,
+          [sectionEmbeddable.id]: {
+            ...sectionPanel,
+            gridData: {
+              ...sectionPanel.gridData,
+              x: 0,
+              y: maxBottom,
+              w: DASHBOARD_GRID_COLUMN_COUNT,
+              h: 4,
+            },
+          },
+        },
+      });
+    }
   };
 
   navActions[TopNavIds.OPTIONS] = (anchorElement) => {

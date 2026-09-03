@@ -33,6 +33,7 @@ import { CoreStart } from 'src/core/public';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../../../../embeddable/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { isSectionEmbeddable } from '../embeddable/section';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
@@ -79,6 +80,11 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
       if (embeddable.getInput().viewMode === ViewMode.VIEW) {
         return false;
       }
+    }
+
+    // A section has no single underlying saved object to swap out.
+    if (isSectionEmbeddable(embeddable)) {
+      return false;
     }
 
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
