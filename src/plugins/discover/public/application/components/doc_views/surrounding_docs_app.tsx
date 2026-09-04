@@ -52,7 +52,7 @@ export function SurroundingDocsApp() {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: `Context of #{docId}`,
           values: {
-            docId: id,
+            docId: decodeURIComponent(id),
           },
         }),
       },
@@ -66,5 +66,5 @@ export function SurroundingDocsApp() {
   if (!indexPattern) {
     return <div>Index pattern loading</div>;
   }
-  return <SurroundingDocsView id={id} indexPattern={indexPattern} />;
+  return <SurroundingDocsView id={decodeURIComponent(id)} indexPattern={indexPattern} />;
 }
