@@ -32,14 +32,38 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   const selected = useObservable(legendSelected$) ?? {};
   const isVertical = position === Positions.LEFT || position === Positions.RIGHT;
 
-  const handleToggle = useCallback(
-    (item: LegendItem) => {
+  const handleLegendClick = useCallback(
+    (item: LegendItem, event: React.MouseEvent<HTMLButtonElement>) => {
       const name = item.target.name;
       const prev = legendSelected$.getValue();
-      const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
+      const isMultiSelect = event.ctrlKey || event.metaKey;
+
+      // Missing entries are selected by default, so only explicit false values are hidden.
+      const selectedItems = legendItems.filter(
+        (legendItem) => prev[legendItem.target.name] !== false
+      );
+
+      // A plain click on the sole selected item restores all items.
+      const shouldSelectAll =
+        !isMultiSelect && selectedItems.length === 1 && selectedItems[0].target.name === name;
+
+      // Object.fromEntries preserves data-derived names such as "__proto__" as own properties.
+      const next = Object.fromEntries(
+        legendItems.map((legendItem) => {
+          const legendName = legendItem.target.name;
+          if (isMultiSelect) {
+            const isSelected =
+              legendName === name ? prev[name] === false : prev[legendName] !== false;
+            return [legendName, isSelected];
+          }
+
+          return [legendName, shouldSelectAll || legendName === name];
+        })
+      );
+
       legendSelected$.next(next);
     },
-    [legendSelected$]
+    [legendItems, legendSelected$]
   );
 
   const handleMouseEnter = useCallback(
@@ -75,7 +99,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
           <button
             key={getLegendTargetKey(item.target)}
             className={`customLegend__item ${isHidden ? 'customLegend__item--hidden' : ''}`}
-            onClick={() => handleToggle(item)}
+            onClick={(event) => handleLegendClick(item, event)}
             onMouseEnter={() => handleMouseEnter(item)}
             onMouseLeave={handleMouseLeave}
             title={item.label}
