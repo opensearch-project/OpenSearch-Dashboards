@@ -8,7 +8,7 @@ import type { LineSeriesOption } from 'echarts';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle, DEFAULT_FILL_OPACITY } from './area_vis_config';
-
+import { DisableMode } from '../types';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getColors } from '../theme/default_colors';
@@ -19,7 +19,7 @@ import {
   LegendItem,
 } from '../utils/legend';
 import { hexToRgb, rgbToHex } from '../theme/color_utils';
-import { resolveStackMode } from '../utils/data_transformation';
+import { resolveStackMode, resolveConnectMode, groupSeries } from '../utils/data_transformation';
 import {
   DEFAULT_LINE_WIDTH,
   getLineDashType,
@@ -97,6 +97,9 @@ export const buildBorderInterpolation = (styles: AreaChartStyle) =>
 export const buildStackConfig = (styles: AreaChartStyle) =>
   resolveStackMode(styles) === 'none' ? {} : { stack: 'total' };
 
+export const buildConnectNulls = (styles: AreaChartStyle): boolean =>
+  resolveConnectMode(styles) === DisableMode.Always;
+
 /**
  * Create area series configuration for ECharts
  */
@@ -108,6 +111,7 @@ export const createAreaSeries =
     allData,
     colorField,
     addTimeMarker = true,
+    perSeriesDatasets = false,
   }: {
     styles: AreaChartStyle;
     seriesFields: string[] | ((headers?: string[]) => string[]);
@@ -115,6 +119,8 @@ export const createAreaSeries =
     allData?: Array<Record<string, any>>;
     colorField?: string;
     addTimeMarker?: boolean;
+    // When true, each series reads its own dataset (from splitSeriesDatasets) format: [timeField, valueColumn]
+    perSeriesDatasets?: boolean;
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData = [], axisColumnMappings, xAxisConfig } = state;
@@ -144,6 +150,7 @@ export const createAreaSeries =
     const legendItems: LegendItem[] = [];
     const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker);
     const stackConfig = buildStackConfig(styles);
+    const connectNulls = buildConnectNulls(styles);
     const borderLineStyle = buildBorderLineStyle(styles);
     const interpolation = buildBorderInterpolation(styles);
     const pointSymbol = getPointSymbol(styles.pointSize, styles.showValues);
@@ -155,6 +162,9 @@ export const createAreaSeries =
       return {
         name,
         type: 'line',
+        ...(perSeriesDatasets ? { datasetIndex: index } : {}),
+        // per-column datasets are [timeField, valueColumn] and encoded by position
+        encode: perSeriesDatasets ? { x: 0, y: 1 } : { x: categoryField, y: item },
         ...pointSymbol,
         ...(styles.lineStyle === 'line'
           ? styles.showValues
@@ -170,15 +180,108 @@ export const createAreaSeries =
           isPercentage: resolveStackMode(styles) === 'percentage',
           isStack: resolveStackMode(styles) !== 'none',
         }),
-        // TODO remove it for connection/disconnection
-        connectNulls: true,
+        connectNulls,
+        ...stackConfig,
+        areaStyle: buildAreaStyle(styles, color),
+        lineStyle: borderLineStyle,
+        ...interpolation,
+        emphasis: {
+          focus: 'self',
+        },
+        itemStyle: {
+          color,
+        },
+        ...(index === 0 && markLines),
+      };
+    });
+
+    newState.series = series as LineSeriesOption[];
+    newState.legendItems = legendItems;
+
+    return newState;
+  };
+
+/**
+ * Build one series per group, each bound to its own dataset.
+ */
+export const createStackAreaSeries =
+  <T extends BaseChartStyle>({
+    styles,
+    categoryField,
+    valueField,
+    addTimeMarker = true,
+    allData,
+    colorField,
+  }: {
+    styles: AreaChartStyle;
+    categoryField: string;
+    valueField: string;
+    addTimeMarker?: boolean;
+    allData?: Array<Record<string, any>>;
+    colorField?: string;
+  }): PipelineFn<T> =>
+  (state) => {
+    const { xAxisConfig, axisColumnMappings, data = [] } = state;
+    const palette = getColors().categories;
+    const newState = { ...state };
+    const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
+
+    const allColumns = Object.values(axisColumnMappings).flat();
+
+    const allValues = colorField
+      ? groupSeries(data, { groupField: colorField, valueField }).map(({ name }) => name)
+      : [];
+    const sortedNames = getLegendNameDomain({
+      data: allData,
+      nameField: colorField,
+      seriesFields: allValues,
+      columns: allColumns,
+    });
+    const legendItems: LegendItem[] = [];
+    const connectNulls = buildConnectNulls(styles);
+    const markLines = composeMarkLine(styles.thresholdOptions, usedTimeMarker);
+    const stackConfig = buildStackConfig(styles);
+    const borderLineStyle = buildBorderLineStyle(styles);
+    const interpolation = buildBorderInterpolation(styles);
+    const pointSymbol = getPointSymbol(styles.pointSize, styles.showValues);
+
+    if (usedTimeMarker) {
+      const newXAxisConfig = { ...xAxisConfig };
+      newXAxisConfig.max = new Date();
+      newState.xAxisConfig = newXAxisConfig;
+    }
+
+    const series = allValues.map((name, index) => {
+      const color = getLegendColor(name, palette, sortedNames);
+      legendItems.push(createSeriesLegendItem(name, color));
+
+      return {
+        name,
+        type: 'line',
+        datasetIndex: index,
+        ...pointSymbol,
+        ...(styles.lineStyle === 'line'
+          ? styles.showValues
+            ? { showSymbol: true, symbolSize: 0 }
+            : { showSymbol: false }
+          : {}),
+        ...buildValueLabel({
+          showValues: styles.showValues,
+          valueField,
+          decimals: styles.decimals,
+          unitId: styles.unitId,
+          unitSuffix: styles.unitSuffix,
+          isPercentage: resolveStackMode(styles) === 'percentage',
+          isStack: resolveStackMode(styles) !== 'none',
+        }),
+        connectNulls,
         ...stackConfig,
         areaStyle: buildAreaStyle(styles, color),
         lineStyle: borderLineStyle,
         ...interpolation,
         encode: {
           x: categoryField,
-          y: item,
+          y: valueField,
         },
         emphasis: {
           focus: 'self',

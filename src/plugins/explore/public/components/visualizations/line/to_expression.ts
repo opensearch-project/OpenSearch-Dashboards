@@ -5,7 +5,7 @@
 
 import { LineChartStyle } from './line_vis_config';
 import { AxisRole, VisColumn } from '../types';
-import { createLineSeries, createLineBarSeries } from './line_chart_utils';
+import { createLineSeries, createLineBarSeries, createGroupedLineSeries } from './line_chart_utils';
 import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
 import {
   pipe,
@@ -20,6 +20,10 @@ import {
   pivot,
   sortByTime,
   flatten,
+  connectNullValues,
+  disconnectValues,
+  groupSeriesDatasets,
+  splitSeriesDatasets,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
 
@@ -37,10 +41,19 @@ export const createSimpleLineChart = (
   const timeField = axisColumnMappings[AxisRole.X].column;
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
 
-  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
-
   const result = pipe(
-    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    transform(
+      sortByTime(timeField),
+      splitSeriesDatasets({
+        valueFields: valueField,
+        timeField,
+        // when both disconnectValues and connectNullValues are configed, the process sequence is first disconnectValues then connectNullValues
+        perSeries: (field: string, rows: Array<Record<string, any>>) =>
+          connectNullValues(styles, { timeField, seriesFields: [field] })(
+            disconnectValues(styles, { timeField, seriesFields: [field] })(rows)
+          ),
+      })
+    ),
     createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
     applyTimeRange,
@@ -48,6 +61,7 @@ export const createSimpleLineChart = (
       styles,
       categoryField: timeField,
       seriesFields: valueField,
+      perSeriesDatasets: true,
     }),
     assembleSpec
   )({
@@ -129,23 +143,26 @@ export const createMultiLineChart = (
   const result = pipe(
     transform(
       sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-      }),
-      flatten(),
-      convertTo2DArray()
+      groupSeriesDatasets({
+        groupField: colorField,
+        valueField,
+        timeField,
+        // when both disconnectValues and connectNullValues are configed, the process sequence is first disconnectValues then connectNullValues
+        perSeries: (rows: Array<Record<string, any>>) =>
+          connectNullValues(styles, { timeField, seriesFields: [valueField] })(
+            disconnectValues(styles, { timeField, seriesFields: [valueField] })(rows)
+          ),
+      })
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
-    createLineSeries({
+    createGroupedLineSeries({
       styles,
       categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      valueField,
       allData,
       colorField,
     }),
