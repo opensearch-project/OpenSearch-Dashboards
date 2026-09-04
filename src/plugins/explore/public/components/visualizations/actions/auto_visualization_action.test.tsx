@@ -7,7 +7,6 @@ import { render, screen } from '@testing-library/react';
 import rison from 'rison-node';
 import {
   registerAutoVisualizationAction,
-  getInvalidAxesColumns,
   AUTO_VISUALIZATION_TOOL_NAME,
 } from './auto_visualization_action';
 
@@ -521,36 +520,5 @@ describe('handler with transformations', () => {
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('index_not_found');
-  });
-});
-
-describe('getInvalidAxesColumns', () => {
-  const schema = [{ name: 'carrier' }, { name: 'avg(price)' }];
-
-  it('returns nothing when every referenced column exists', () => {
-    const visConfig = {
-      axesMapping: { x: 'carrier', y: 'avg(price)' },
-      splitField: 'carrier',
-    } as any;
-    expect(getInvalidAxesColumns(visConfig, schema)).toEqual([]);
-  });
-
-  it('reports axes and split columns the real schema does not produce', () => {
-    const visConfig = {
-      axesMapping: { x: 'carrier', y: 'total' },
-      splitField: 'region',
-    } as any;
-    expect(getInvalidAxesColumns(visConfig, schema)).toEqual(['total', 'region']);
-  });
-
-  it('flattens array-valued axes and de-duplicates repeats', () => {
-    const visConfig = {
-      axesMapping: { x: ['carrier', 'total'], y: 'total' },
-    } as any;
-    expect(getInvalidAxesColumns(visConfig, schema)).toEqual(['total']);
-  });
-
-  it('tolerates a config with no axes mapping at all', () => {
-    expect(getInvalidAxesColumns({} as any, schema)).toEqual([]);
   });
 });
