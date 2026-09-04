@@ -35,6 +35,7 @@ export * from './streams';
 export { getPrincipalsFromRequest } from './auth_info';
 export { getWorkspaceIdFromUrl, cleanWorkspaceId } from '../../utils';
 export { updateWorkspaceState, getWorkspaceState } from './workspace';
+export { isRequestWorkspaceAuthorized, WorkspaceAccessContract } from './workspace_access';
 export {
   ACLAuditorStateKey,
   initializeACLAuditor,

@@ -10,6 +10,13 @@ import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { RequestHandlerContext, Logger } from '../../../../core/server';
+import { getWorkspaceState } from '../../../../core/server/utils/workspace';
+import { WorkspacePluginStart } from '../../../workspace/server';
+
+jest.mock('../../../../core/server/utils/workspace', () => ({
+  ...jest.requireActual('../../../../core/server/utils/workspace'),
+  getWorkspaceState: jest.fn(() => ({})),
+}));
 
 // Mock native fetch
 global.fetch = jest.fn();
@@ -25,7 +32,8 @@ describe('Chat Proxy Routes', () => {
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
     mlCommonsAgentId?: string,
-    forwardCredentials?: boolean
+    forwardCredentials?: boolean,
+    getWorkspace?: () => { authorizeWorkspace: jest.Mock } | undefined
   ) => {
     const { server: testServer, httpSetup, handlerContext } = await setupServer();
     lastHandlerContext = handlerContext;
@@ -39,7 +47,9 @@ describe('Chat Proxy Routes', () => {
       getCapabilitiesResolver,
       mlCommonsAgentId,
       undefined,
-      forwardCredentials
+      forwardCredentials,
+      undefined,
+      getWorkspace as unknown as (() => WorkspacePluginStart | undefined) | undefined
     );
 
     // Mock dynamicConfigService required by server.start()
@@ -64,6 +74,7 @@ describe('Chat Proxy Routes', () => {
     });
 
     jest.clearAllMocks();
+    (getWorkspaceState as jest.Mock).mockReturnValue({});
   });
 
   afterEach(async () => {
@@ -598,6 +609,77 @@ describe('Chat Proxy Routes', () => {
 
         expect(requestBody.messages).toHaveLength(1);
         expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
+
+    describe('Workspace access', () => {
+      const mockAgUiStream = () =>
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => ({ read: jest.fn().mockResolvedValue({ done: true }) }) },
+        } as any);
+
+      const forwardedBody = () =>
+        JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+
+      it('strips a client-supplied workspaceId on an unscoped request', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({});
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(200);
+
+        expect(forwardedBody().forwardedProps).not.toHaveProperty('workspaceId');
+      });
+
+      it('pins workspaceId to the request workspace, overwriting a spoofed value', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({ requestWorkspaceId: 'ws-real' });
+        const authorizeWorkspace = jest.fn().mockResolvedValue({ authorized: true });
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          () => ({
+            authorizeWorkspace,
+          })
+        );
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(200);
+
+        expect(authorizeWorkspace).toHaveBeenCalledWith(expect.any(Object), ['ws-real']);
+        expect(forwardedBody().forwardedProps.workspaceId).toBe('ws-real');
+      });
+
+      it('returns 403 when the caller is not authorized for the request workspace', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({ requestWorkspaceId: 'ws-real' });
+        const authorizeWorkspace = jest.fn().mockResolvedValue({ authorized: false });
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          () => ({
+            authorizeWorkspace,
+          })
+        );
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(403);
+
+        expect(response.body.message).toBe('Access to this workspace is denied');
+        expect(mockFetch).not.toHaveBeenCalled();
       });
     });
   });
