@@ -117,7 +117,7 @@ export const createAreaSeries =
     addTimeMarker?: boolean;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], axisColumnMappings, xAxisConfig } = state;
+    const { transformedData = [], axisColumnMappings, xAxisConfig, seriesDisplayNames } = state;
     const palette = getColors().categories;
     const newState = { ...state };
     const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
@@ -149,8 +149,10 @@ export const createAreaSeries =
     const pointSymbol = getPointSymbol(styles.pointSize, styles.showValues);
     const series = seriesFields?.map((item: string, index: number) => {
       const name = getSeriesDisplayName(item, allColumns);
+      // legend label is overridden to the display name
+      const displayLabel = seriesDisplayNames?.[item] ?? name;
       const color = getLegendColor(name, palette, sortedNames);
-      legendItems.push(createSeriesLegendItem(name, color));
+      legendItems.push(createSeriesLegendItem(displayLabel, color, name));
 
       return {
         name,

@@ -78,7 +78,8 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
               [AxisRole.SIZE]: size,
               [AxisRole.COLOR]: color,
             },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

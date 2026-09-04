@@ -18,6 +18,7 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
@@ -30,6 +31,7 @@ import {
   transformStackPercentage,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
+import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -95,7 +97,8 @@ export const createMultiAreaChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  allData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -121,6 +124,7 @@ export const createMultiAreaChart = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,
@@ -141,6 +145,7 @@ export const createMultiAreaChart = (
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
     timeRange,
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -152,7 +157,8 @@ export const createMultiAreaChart = (
 export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -174,6 +180,7 @@ export const createCategoryAreaChart = (
     createBaseConfig({
       legend: { show: false },
     }),
+    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyPercentageAxis(styles),
     createAreaSeries({
@@ -188,6 +195,7 @@ export const createCategoryAreaChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };

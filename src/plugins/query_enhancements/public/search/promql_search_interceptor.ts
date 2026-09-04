@@ -37,14 +37,16 @@ export class PromQLSearchInterceptor extends SearchInterceptor {
     const queryState: PromQLQuery = this.queryService.queryString.getQuery();
 
     const requested: PromQLQuery | undefined = request.params?.body?.query?.queries?.[0];
-    const query = omit(requested ?? queryState, 'queryOptions');
-    const { maxDataPoints, perQueryOptions } = queryState.queryOptions ?? {};
+
+    const source = requested ?? queryState;
+    const query = omit(source, 'queryOptions');
+    const { maxDataPoints, perQueryOptions } = source.queryOptions ?? {};
 
     // perQueryOptions is aligned to queryState.query's segments, so only forward it
     // when executing that same string.
     const searchOptions: PromQLSearchOptions = {
       maxDataPoints,
-      perQueryOptions: query.query === queryState.query ? perQueryOptions : undefined,
+      perQueryOptions,
     };
 
     const context: EnhancedFetchContext = {
