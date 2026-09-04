@@ -12,6 +12,7 @@ import { SUPPORTED_ASSET_TYPES } from './constants';
 describe('searchAssets', () => {
   let httpMock: jest.Mocked<HttpStart>;
   const mockBasePath = '/test-base-path';
+  const navigateToUrl = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     const coreStart = coreMock.createStart();
@@ -52,6 +53,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(result).toEqual([]);
@@ -80,6 +82,7 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'dashboard',
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(httpMock.get).toHaveBeenCalledWith(
@@ -109,6 +112,7 @@ describe('searchAssets', () => {
       query: 'test',
       currentWorkspaceId,
       visibleWorkspaceIds: [],
+      navigateToUrl,
     });
 
     expect(httpMock.get).toHaveBeenCalledWith(
@@ -142,11 +146,11 @@ describe('searchAssets', () => {
       query: 'test',
       currentWorkspaceId,
       visibleWorkspaceIds: [currentWorkspaceId],
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].href).toContain(currentWorkspaceId);
+    expect(result[0].href).toContain(currentWorkspaceId);
   });
 
   it('should use first visible workspace when no currentWorkspaceId provided', async () => {
@@ -166,15 +170,14 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds,
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].href).toContain('workspace-2');
+    expect(result[0].href).toContain('workspace-2');
   });
 
-  it('should call onAssetClick callback and replace management path', async () => {
-    const onAssetClick = jest.fn();
+  it('should expose and execute the replaced management path', async () => {
     const mockAssets = [
       createMockAsset(
         '1',
@@ -192,12 +195,14 @@ describe('searchAssets', () => {
       http: httpMock,
       query: 'test',
       visibleWorkspaceIds: [],
-      onAssetClick,
+      navigateToUrl,
     });
 
     expect(result).toHaveLength(1);
-    const breadcrumbProps = (result[0] as any).props;
-    expect(breadcrumbProps.breadcrumbs[1].onClick).toBe(onAssetClick);
-    expect(breadcrumbProps.breadcrumbs[1].href).toBe(`${mockBasePath}/app/objects/dashboard/1`);
+    expect(result[0].href).toBe(`${mockBasePath}/app/objects/dashboard/1`);
+
+    result[0].execute();
+
+    expect(navigateToUrl).toHaveBeenCalledWith(`${mockBasePath}/app/objects/dashboard/1`);
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceGlobalSearchPageItem } from './workspace_global_search_item';
 import { NavGroupType } from '../../../../../core/public';
@@ -37,14 +37,11 @@ describe('WorkspaceGlobalSearchPageItem', () => {
     { id: 'use-case-1', name: 'Test Use Case' },
   ]);
 
-  const mockOnCallback = jest.fn();
-
   const defaultProps = {
     link: mockLink as any,
     search: 'test search',
     currentWorkspace: mockWorkspace,
     registeredUseCases$: mockRegisteredUseCases$,
-    onCallback: mockOnCallback,
   };
 
   beforeEach(() => {
@@ -73,12 +70,5 @@ describe('WorkspaceGlobalSearchPageItem', () => {
     expect(screen.getByText('Test Link')).toBeInTheDocument();
     expect(screen.queryByText('Test Workspace')).not.toBeInTheDocument();
     expect(screen.getByText('System Type')).toBeInTheDocument();
-  });
-
-  it('calls onCallback when clicked', () => {
-    render(<WorkspaceGlobalSearchPageItem {...(defaultProps as any)} />);
-
-    fireEvent.click(screen.getByText('Test Link'));
-    expect(mockOnCallback).toHaveBeenCalledWith(mockLink);
   });
 });

@@ -62,6 +62,12 @@ export interface ShortcutDefinition {
   keys: string;
 
   /**
+   * Whether the shortcut can execute while focus is in an editable element.
+   * Defaults to false. Sequence shortcuts remain disabled in editable elements.
+   */
+  allowInEditable?: boolean;
+
+  /**
    * Function to execute when the shortcut is triggered
    */
   execute: () => void;

@@ -231,8 +231,7 @@ export class ChromeService {
     globalSearch.registerSearchCommand({
       id: 'pagesSearch',
       type: 'PAGES',
-      run: async (query: string, callback: () => void) =>
-        searchPages(query, this.navGroupStart, this.applicationStart, callback),
+      run: async (query: string) => searchPages(query, this.navGroupStart, this.applicationStart),
     });
 
     return {

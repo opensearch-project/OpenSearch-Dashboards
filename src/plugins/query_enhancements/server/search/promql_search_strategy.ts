@@ -297,11 +297,9 @@ function distinguishingLabelKeysByTemplatedName(
     if (seriesIndex >= MAX_SERIES_TABLE) return;
     const name = interpolateLegendFormat(legendTemplate, metricResult.metric).trim();
     if (!name) return;
-    const labels = { ...metricResult.metric };
-    delete labels.__name__;
     const group = groups.get(name);
-    if (group) group.push(labels);
-    else groups.set(name, [labels]);
+    if (group) group.push(metricResult.metric);
+    else groups.set(name, [metricResult.metric]);
   });
 
   const distinguishing = new Map<string, string[]>();
@@ -395,7 +393,8 @@ function createDataFrame(
         if (differing?.length) {
           const distinguishing: Record<string, string> = {};
           differing.forEach((key) => {
-            if (labelsWithoutName[key] !== undefined) distinguishing[key] = labelsWithoutName[key];
+            if (metricResult.metric[key] !== undefined)
+              distinguishing[key] = metricResult.metric[key];
           });
           baseName = `${templatedName} ${formatMetricLabels(distinguishing)}`;
         } else {

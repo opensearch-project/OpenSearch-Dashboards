@@ -174,12 +174,16 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
         // sending it as a separate message. A separate message is dropped on the delta-only
         // send path and never renders in the user bubble; carrying it in the message content
         // makes it both visible in the bubble and delivered to the agent.
+        const panelDataSourceId =
+          query?.dataset?.dataSource?.id ?? visEmbeddable.vis.data.indexPattern?.dataSourceRef?.id;
+
         await this.core.chat.sendMessageWithWindow(
           [
             { type: 'binary' as const, mimeType: 'image/jpeg', data: visualizationBase64 },
             { type: 'text' as const, text: 'Give me a summary for the selected visualization' },
           ],
-          []
+          [],
+          { dataSourceId: panelDataSourceId }
         );
       }
     } catch (error) {

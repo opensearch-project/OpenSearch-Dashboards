@@ -54,6 +54,18 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toHaveBeenCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toHaveBeenCalledTimes(1);
+    expect(setupMock.chrome.globalSearch.registerSearchCommand).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'recentlyAccessedSearch',
+        type: 'RECENTLY_ACCESSED',
+      })
+    );
+    expect(setupMock.chrome.globalSearch.registerSearchCommand).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspaceCreateActions',
+        type: 'ACTIONS',
+      })
+    );
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {
