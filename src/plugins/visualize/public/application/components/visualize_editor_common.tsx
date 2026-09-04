@@ -33,6 +33,7 @@ import { RefObject } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'opensearch-dashboards/public';
+import { ContainerInfo } from '../../../../embeddable/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import {
@@ -55,6 +56,7 @@ interface VisualizeEditorCommonProps {
   visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
+  containerInfo?: ContainerInfo;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
 }
@@ -71,6 +73,7 @@ export const VisualizeEditorCommon = ({
   onAppLeave,
   originatingApp,
   setOriginatingApp,
+  containerInfo,
   visualizationIdFromUrl,
   embeddableId,
   visEditorRef,
@@ -87,6 +90,7 @@ export const VisualizeEditorCommon = ({
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
           setOriginatingApp={setOriginatingApp}
+          containerInfo={containerInfo}
           visInstance={visInstance}
           stateContainer={appState}
           visualizationIdFromUrl={visualizationIdFromUrl}

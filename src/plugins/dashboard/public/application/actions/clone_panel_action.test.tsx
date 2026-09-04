@@ -174,3 +174,76 @@ test('Gets a unique title ', async () => {
     'testThirdTitle (copy 89)'
   );
 });
+
+test('Cloning a section member (flag on) drops the clone into the same section', async () => {
+  const localCore = coreMock.createStart();
+  localCore.savedObjects.client = {
+    ...localCore.savedObjects.client,
+    get: jest.fn(),
+    find: jest.fn(),
+    create: jest.fn(),
+  } as any;
+
+  const options = {
+    ExitFullScreenButton: () => null,
+    SavedObjectFinder: () => null,
+    application: {} as any,
+    embeddable: start,
+    chrome: {} as any,
+    inspector: {} as any,
+    notifications: {} as any,
+    overlays: localCore.overlays,
+    savedObjectMetaData: {} as any,
+    uiActions: {} as any,
+    // Sections feature on: showPlaceholderUntil self-gates on this.
+    allowDashboardSections: true,
+  };
+  const input = getSampleDashboardInput({
+    panels: {
+      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Neo', id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
+        // Distinctive size so we can assert the clone inherits it rather than
+        // falling back to the default section slot (24x15).
+        gridData: { x: 0, y: 0, w: 12, h: 20, i: '123' },
+      }),
+    },
+    layout: {
+      type: 'SectionLayout',
+      items: [
+        {
+          id: 's1',
+          type: 'section',
+          name: 'Section 1',
+          collapsed: false,
+          members: [{ idRef: '123', type: 'panel', gridData: { x: 0, y: 0, w: 24, h: 15 } }],
+        },
+      ],
+    },
+  } as any);
+  const sectioned = new DashboardContainer(input, options as any);
+  const child = await sectioned.untilEmbeddableLoaded('123');
+
+  const action = new ClonePanelAction(localCore);
+  await action.execute({ embeddable: child as any });
+  // Let the async placeholder -> clone replace settle.
+  await new Promise((r) => setTimeout(r, 20));
+
+  const panels = sectioned.getInput().panels;
+  const newId = Object.keys(panels).find((id) => id !== '123');
+  expect(newId).toBeDefined();
+
+  // The clone is a member of the SAME section (not the Ungrouped group), and the
+  // original is still there -- the panel's own gridData stays untouched.
+  const layout = sectioned.getInput().layout as any;
+  const s1 = layout.items.find((s: any) => s.id === 's1');
+  const memberIds = s1.members.map((m: any) => m.idRef);
+  expect(memberIds).toContain('123');
+  expect(memberIds).toContain(newId);
+
+  // The cloned member keeps the source panel's width/height (12x20), not the
+  // default section slot (24x15).
+  const clonedMember = s1.members.find((m: any) => m.idRef === newId);
+  expect(clonedMember.gridData.w).toBe(12);
+  expect(clonedMember.gridData.h).toBe(20);
+});

@@ -31,6 +31,7 @@ import {
 import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
+import { appendEmptySection, migrateAllPanelsToSection } from '../embeddable/section_layout_utils';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
@@ -173,6 +174,14 @@ export const getNavActions = (
         showAddPanelPopover({
           anchorElement,
           uiActions: services.uiActions,
+          // "Add section" lives inside this "Create new" menu
+          // (after the Metrics visualization entry), not as a separate top-nav
+          // button. Reuses the same creation logic as navActions[ADD_SECTION].
+          // Gated behind the allowDashboardSections feature flag -- when off,
+          // onAddSection is undefined and the popover omits the "Section" item.
+          onAddSection: services.allowDashboardSections
+            ? () => navActions[TopNavIds.ADD_SECTION]?.(anchorElement)
+            : undefined,
           onAddExistingPanelFlyout: () => {
             openAddPanelFlyout({
               embeddable: currentContainer,
@@ -222,6 +231,31 @@ export const getNavActions = (
       throw new EmbeddableFactoryNotFoundError(type);
     }
     await factory.create({} as EmbeddableInput, currentContainer);
+  };
+
+  // Dashboard collapsible sections.
+  // "Add section" operates on the top-level `layout` attribute, not on panels.
+  // The FIRST section migrates ALL current panels into it and flips the layout
+  // to SectionLayout; subsequent clicks append a new empty section.
+  navActions[TopNavIds.ADD_SECTION] = () => {
+    if (!currentContainer || isErrorEmbeddable(currentContainer)) {
+      return;
+    }
+    const input = currentContainer.getInput();
+    const existing = input.layout;
+    if (!existing || existing.type !== 'SectionLayout' || existing.items.length === 0) {
+      // Migrating every panel from the flat grid into a section re-parents them
+      // across the grid -> section-grid component swap, so recreate them via the
+      // container's natural remove/add lifecycle (see reparentPanels).
+      currentContainer.reparentPanels(Object.keys(input.panels), {
+        type: 'SectionLayout',
+        items: [migrateAllPanelsToSection(input.panels)],
+      });
+    } else {
+      currentContainer.updateInput({
+        layout: { type: 'SectionLayout', items: appendEmptySection(existing.items) },
+      });
+    }
   };
 
   navActions[TopNavIds.OPTIONS] = (anchorElement) => {

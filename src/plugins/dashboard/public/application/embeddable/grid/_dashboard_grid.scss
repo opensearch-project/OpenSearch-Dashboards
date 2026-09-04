@@ -36,6 +36,13 @@
   height: 100% !important; /* 1. */
   width: 100%;
   position: absolute !important; /* 1 */
+
+  // A maximized panel fills the grid and must not be resizable (drag is disabled
+  // via the draggableHandle in dashboard_responsive_grid) -- hide the handle,
+  // mirroring the .dshLayout--viewing rule.
+  .react-resizable-handle {
+    display: none;
+  }
 }
 
 /**
@@ -61,6 +68,287 @@
   // Altered panel styles can be found in ../panel
 }
 
+/**
+ * Rendering architecture: nested grids.
+ * A section is one outer grid item containing its header (EmbeddablePanel
+ * chrome) stacked above its own inner react-grid-layout of member panels.
+ * The inner grid's wrapper carries the `dshDashboardSectionGrid` marker class
+ * that the OUTER grid targets via draggableCancel for disjoint-drag isolation.
+ */
+.dshDashboardGrid__item--section {
+  display: flex;
+  flex-direction: column;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  background-color: transparentize($euiColorLightestShade, 0.5);
+  overflow: hidden;
+}
+
+/**
+ * A hidden section must stay hidden (e.g. every non-owning section while a
+ * panel is maximized). `.dshDashboardGrid__item--hidden { display: none }` is
+ * declared earlier than `.dshDashboardGrid__item--section { display: flex }`
+ * above, and both are single-class selectors -- so on a section that carries
+ * BOTH classes, source order makes `display: flex` win and the section would
+ * stay visible, overlapping the maximized panel. This compound selector
+ * (specificity 0,2,0) restores display:none for that case.
+ */
+.dshDashboardGrid__item--section.dshDashboardGrid__item--hidden {
+  display: none;
+}
+
+/**
+ * The section's OWN header panel only (title + collapse chevron + kebab). It
+ * must stay header-height and never grow. Scoped to this wrapper -- NOT
+ * `.dshDashboardGrid__item--section .embPanel`, which would also match every
+ * MEMBER panel's .embPanel inside the inner grid and collapse their charts to
+ * ~1px (they have no intrinsic height). Member panels keep the default
+ * height:100% that fills their inner-grid item.
+ */
+.dshDashboardGrid__sectionHeader {
+  flex: 0 0 auto;
+
+  .embPanel {
+    height: auto;
+  }
+
+  // Keep the section header on a single row AND fix its height here, on the
+  // title row. .embPanel__title is a single element (unlike .embPanel, which is
+  // nested twice -- outer EmbeddableChildPanel wrapper + inner EuiPanel -- and
+  // would double any rule). The title text already truncates (euiTextTruncate on
+  // .embPanel__titleText), but .embPanel__title is flex-wrap:wrap by default,
+  // which would let the chevron + title + kebab wrap to a second line; nowrap
+  // (with min-width:0 so the title can shrink to its ellipsis) keeps it one row.
+
+  // Fixed height sizes the header to what the section reserves: at
+  // SECTION_HEADER_ROWS=2 the outer section item is a CONSTANT 38px taller than
+  // its inner grid (both grids share rowHeight/margin, so the per-row terms
+  // cancel: item - grid = 28*2 - 8 - 2*border = 38, independent of member count).
+  // The header card is the title row + ~2px card border, so a 36px title makes
+  // the card 38px -> header + inner grid == item content, and the grid fills the
+  // section exactly (no trailing gap, no clip). The card already renders the
+  // #FCFEFF (euiPanel--plain) background. Coupled to SECTION_HEADER_ROWS=2; if
+  // that changes, retune (item - grid = 38).
+  .embPanel__title {
+    flex-wrap: nowrap;
+    min-width: 0;
+    height: 36px;
+  }
+
+  // Empty section-embeddable body -- no visual footprint.
+  .dshSectionEmbeddable {
+    display: none;
+  }
+}
+
+.dshDashboardSectionGrid {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  // Nested grid needs its own positioning context; inner react-grid-layout
+  // items are absolutely positioned relative to this wrapper.
+  position: relative;
+  width: 100%;
+}
+
+// The actual nested react-grid-layout. Hidden when collapsed, but kept mounted
+// (see DashboardSectionGrid `collapsed` prop -- unmounting would destroy the
+// member embeddables via EmbeddablePanel.componentWillUnmount).
+.dshDashboardSectionGrid__inner--collapsed {
+  display: none;
+}
+
+// Shown in place of the grid when the section is collapsed. Fills the section
+// body and centers the hint text both horizontally and vertically.
+.dshDashboardSectionGrid__collapsedHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: $euiSizeS $euiSize;
+  color: $euiColorDarkShade;
+  font-size: $euiFontSizeXS;
+  font-style: italic;
+  text-align: center;
+}
+
+// Call-to-action shown inside an empty, expanded section to add a first panel.
+// Fills the section body so the widget is centered horizontally + vertically.
+.dshDashboardSectionGrid__emptyCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: $euiSize;
+}
+
+// Mirrors the empty-dashboard start screen (.dshEmptyWidget): a dashed,
+// centered box with a prompt + "Add existing visualization" button. Uses
+// lighter padding than the full-dashboard widget so it fits a section's area.
+.dshDashboardSectionGrid__emptyWidget {
+  border: $euiBorderThin;
+  border-style: dashed;
+  border-radius: $euiBorderRadius;
+  padding: $euiSize $euiSizeXL;
+  text-align: center;
+  max-width: 400px;
+}
+
+/**
+ * SectionLayout (v2 data model). The dashboard is a plain vertical stack of
+ * sections (NOT an outer react-grid-layout). Each section is a bordered card
+ * with a bespoke header (collapse chevron + name) above its own inner grid
+ * (.dshDashboardSectionGrid, reused from the nested-grid renderer). A collapsed
+ * section shows only its header; its inner grid is CSS-hidden but stays mounted.
+ */
+.dshSectionLayout {
+  display: flex;
+  flex-direction: column;
+  gap: $euiSize;
+
+  // Match the classic grid's outer gutter. In GridLayout the react-grid-layout
+  // `margin={[8,8]}` doubles as container padding (an 8px inset around the whole
+  // grid); the section stack is not a react-grid-layout, so it renders flush to
+  // the viewport edges without this. Pad it to restore the same breathing room.
+  padding: $euiSizeS;
+}
+
+.dshSectionLayout__section {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  overflow: hidden;
+
+  // A non-owning section while a member is maximized.
+  &--hidden {
+    display: none;
+  }
+
+  // The section that owns the currently-maximized member. It breaks out of the
+  // normal stack to fill the dashboard viewport so the maximized member fills
+  // the screen (classic maximize) instead of being clipped to the section box.
+  // overflow is released and the inner grid's `position:absolute; height:100%`
+  // (.dshLayout-isMaximizedPanel) then resolves against this filled section.
+  &--maximized {
+    position: absolute;
+    inset: 0;
+    z-index: $euiZLevel1;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+
+    // Fill the viewport as a column so the inner grid gets a definite height.
+    display: flex;
+    flex-direction: column;
+
+    // Hide the section header so the maximized panel fills edge-to-edge, matching
+    // the classic full-viewport maximize (the panel keeps its own minimize button).
+    .dshSectionLayout__sectionHeader {
+      display: none;
+    }
+
+    // The maximized inner grid root goes `position:absolute` (see
+    // .dshLayout-isMaximizedPanel), so its containing block is the positioned
+    // .dshDashboardSectionGrid wrapper. Once the grid root is out of flow that
+    // wrapper collapses to 0 height, making the panel's height:100% resolve to
+    // 0. Force the wrapper to fill this section so height:100% == viewport.
+    .dshDashboardSectionGrid {
+      flex: 1 1 auto;
+      height: 100%;
+    }
+  }
+}
+
+.dshSectionLayout__sectionHeader {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: $euiSizeXS $euiSizeS;
+
+  // Section reorder drag handle (edit mode). Only this element starts a section
+  // drag, so the inner grid's panel drag/resize is unaffected.
+  .dshSectionLayout__dragHandle {
+    display: flex;
+    align-items: center;
+    margin-right: $euiSizeXS;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  // Match the member panel card background (#FCFEFF) + a bottom divider that
+  // adds no layout height (inset shadow, not border-bottom).
+  background-color: $euiColorEmptyShade;
+  box-shadow: inset 0 -1px 0 $euiBorderColor;
+
+  .dshSectionLayout__sectionTitle {
+    margin-left: $euiSizeXS;
+
+    // Grow to fill the row so the title truncates with an ellipsis (min-width:0
+    // lets it shrink below its content width) and the kebab is pushed to the
+    // far right of the header.
+    flex: 1 1 auto;
+    min-width: 0;
+
+    h3 {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // Section options kebab -- pinned to the right edge of the header.
+  .dshSectionLayout__sectionMenu {
+    flex: 0 0 auto;
+    margin-left: $euiSizeXS;
+  }
+}
+
+// The trailing read-only "Ungrouped" virtual section (computed, never stored).
+// Subdued italic title distinguishes it from real, user-created sections.
+.dshSectionLayout__section--virtual {
+  // Real sections sit inside an EuiDraggable (spacing="l" => 8px padding); the
+  // Ungrouped section is rendered outside the droppable, so add matching outer
+  // spacing here so it lines up horizontally with the real sections.
+  margin: 0 $euiSizeS $euiSizeS;
+
+  .dshSectionLayout__sectionTitle h3 {
+    color: $euiColorDarkShade;
+    font-style: italic;
+  }
+
+  // The Ungrouped section is read-only: its panels can't be dragged or resized
+  // (the grid renders in view mode). Its member panels still inherit the
+  // dashboard's edit viewMode, so they'd otherwise show edit affordances
+  // (a "move" cursor + dashed border) that falsely imply interactivity.
+  // Neutralize those here, scoped to this section only.
+
+  // Belt-and-suspenders: keep resize handles hidden (already hidden by the
+  // view-mode grid, but make it explicit for this read-only section).
+  .react-resizable-handle {
+    display: none;
+  }
+
+  // No drag affordance: the panel title is the RGL drag handle in edit mode
+  // (.embPanel__dragger) and shows cursor:move on hover -- but this grid has no
+  // active drag handle. Reset the cursor and the edit hover highlight.
+  .embPanel__dragger {
+    cursor: default;
+
+    &:hover {
+      cursor: default;
+      background-color: transparent;
+    }
+  }
+
+  // Render member panels with a solid (non-dashed) border so they read as
+  // static, not editable.
+  .embPanel--editing {
+    border-style: solid;
+  }
+}
+
 // REACT-GRID
 
 .react-grid-item {
@@ -83,6 +371,20 @@
     &:focus {
       background-color: $embEditingModeHoverColor;
     }
+  }
+
+  /**
+   * hide the resize handle on non-resizable items (the section
+   * container passes isResizable:false -- see DashboardGrid.buildLayoutFromPanels).
+   * When an item is not resizable, react-grid-layout keeps rendering the handle
+   * and instead tags the item with `.react-resizable-hide`, expecting its OWN
+   * stylesheet (react-grid-layout/css/styles.css) to `display:none` it. This
+   * project doesn't import that stylesheet -- it only pulls in
+   * react-resizable/css/styles.css (the handle image) and manages handle
+   * visibility itself here -- so we must supply the hide rule ourselves.
+   */
+  &.react-resizable-hide > .react-resizable-handle {
+    display: none;
   }
 
   /**

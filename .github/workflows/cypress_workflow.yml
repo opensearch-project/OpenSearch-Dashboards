@@ -277,6 +277,10 @@ jobs:
           - group: Dashboards
             config: explore
             test_location: source
+          # Dashboard sections tests (flag enabled)
+          - group: DashboardSections
+            config: dashboard_sections
+            test_location: source
           # Observability tests (Traces, Metrics)
           - group: 1Observability
             config: observability
@@ -294,13 +298,15 @@ jobs:
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --explore.logsDrilldown.enabled=true --explore.logsQueryBuilder.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true --dashboard.variables.enabled=true' ||
         matrix.config == 'observability' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
+        matrix.config == 'dashboard_sections' &&
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true --uiSettings.overrides[''home:useNewHomePage'']=true --dashboard.allowDashboardSections=true' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true' ||
         'node ../scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true' }}
       OPENSEARCH_SNAPSHOT_CMD:
         ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore' || matrix.config == 'observability') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
-        matrix.config == 'dashboard' &&
+        (matrix.config == 'dashboard' || matrix.config == 'dashboard_sections') &&
         'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' ||
         'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' }}
       # prevents extra Cypress installation progress messages
@@ -530,7 +536,7 @@ jobs:
           PROMETHEUS_CONNECTION_URL: 'http://localhost:9090'
 
       - name: Run OSD Cypress tests without query enhancements
-        if: matrix.test_location == 'source' && matrix.config == 'dashboard'
+        if: matrix.test_location == 'source' && (matrix.config == 'dashboard' || matrix.config == 'dashboard_sections')
         uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         with:
           install-command: npx cypress install --force

@@ -100,6 +100,15 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       throw new PanelNotFoundError();
     }
 
+    // If the source panel belongs to a section, clone into that same section
+    // rather than the read-only "Ungrouped" group. showPlaceholderUntil
+    // self-gates on the sections feature flag, so this is a no-op when off.
+    const layout = dashboard.getInput().layout;
+    const sourceSectionId =
+      layout?.type === 'SectionLayout'
+        ? layout.items.find((section) => section.members.some((m) => m.idRef === embeddable.id))?.id
+        : undefined;
+
     dashboard.showPlaceholderUntil(
       this.cloneEmbeddable(panelToClone, embeddable.type),
       placePanelBeside,
@@ -108,7 +117,8 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
         height: panelToClone.gridData.h,
         currentPanels: dashboard.getInput().panels,
         placeBesideId: panelToClone.explicitInput.id,
-      } as IPanelPlacementBesideArgs
+      } as IPanelPlacementBesideArgs,
+      sourceSectionId
     );
   }
 
