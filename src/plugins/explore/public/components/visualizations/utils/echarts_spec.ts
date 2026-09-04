@@ -255,11 +255,11 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
               formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix),
           },
         }),
-      ...(!isValueAxis &&
+      ...(axisType === 'category' &&
         hasDisplayNames && {
           axisLabel: {
             ...axisStyling.axisLabel,
-            formatter: (value: number) => seriesDisplayNames?.[value] ?? value,
+            formatter: (value: string | number) => String(seriesDisplayNames?.[value] ?? value),
           },
         }),
       // if min and max are not valid, ignore

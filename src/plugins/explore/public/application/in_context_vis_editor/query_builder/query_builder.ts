@@ -166,6 +166,9 @@ export class QueryBuilder {
 
     const preferredDataset = queryStateFromUrl?.dataset ?? options?.savedQueryState?.dataset;
 
+    const queryOptions =
+      queryStateFromUrl?.queryOptions ?? options?.savedQueryState?.queryOptions ?? {};
+
     // Retrieve the preloaded query state based on the language type for a new explore object,
     // or validate whether the URL dataset is compatible with the language type before proceeding.
     // This prevents errors that would otherwise be thrown and avoids invalid operations
@@ -202,9 +205,7 @@ export class QueryBuilder {
     const finalQueryState = {
       ...preloadedQueryState,
       query: finalQuery,
-      ...(languageType === SupportLanguageType.promQL && queryStateFromUrl?.queryOptions
-        ? { queryOptions: queryStateFromUrl.queryOptions }
-        : {}),
+      ...(languageType === SupportLanguageType.promQL && queryOptions ? { queryOptions } : {}),
     };
 
     this.updateQueryState(finalQueryState);

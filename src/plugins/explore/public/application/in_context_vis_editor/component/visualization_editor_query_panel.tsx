@@ -7,9 +7,10 @@ import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
 import { QueryEditorState, SupportLanguageType } from '../query_builder/query_builder';
-import { QueryExecutionStatus } from '../../utils/state_management/types';
+import { EditorMode, QueryExecutionStatus } from '../../utils/state_management/types';
 import { QueryPanelWidgets } from './query_panel_widget';
-import { QueryPanelEditor, MetricQueryPanelEditor } from './query_editor';
+import { QueryPanelEditor } from './query_editor';
+import { MetricMultiQueryPanelEditor } from './metric_multi_query_editor';
 import { QueryPanelGeneratedQuery } from './generated_query_panel';
 import '../visualization_editor.scss';
 
@@ -20,6 +21,8 @@ export const QueryPanel = ({
 }) => {
   const queryEditorState = useObservable(queryEditorState$, queryEditorState$.getValue());
   const languageType = queryEditorState.languageType;
+
+  const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
 
   const isLoading =
     queryEditorState?.queryStatus.status === QueryExecutionStatus.LOADING ||
@@ -36,10 +39,10 @@ export const QueryPanel = ({
     >
       <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">
-        {languageType !== SupportLanguageType.promQL ? (
+        {languageType !== SupportLanguageType.promQL || isPromptMode ? (
           <QueryPanelEditor />
         ) : (
-          <MetricQueryPanelEditor />
+          <MetricMultiQueryPanelEditor />
         )}
         <QueryPanelGeneratedQuery />
       </div>

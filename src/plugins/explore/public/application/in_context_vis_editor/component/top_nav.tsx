@@ -17,7 +17,7 @@ import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
-import { abortAllActiveQueries } from '../query_builder/query_builder';
+import { abortAllActiveQueries, SupportLanguageType } from '../query_builder/query_builder';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -70,13 +70,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       if (payload?.dateRange) {
         queryBuilder.updateQueryEditorState({ dateRange: payload.dateRange });
       }
+
       // update current query text only if on Query tab and not in Prompt mode
       if (
         queryEditorState.editorMode !== EditorMode.Prompt &&
-        queryEditorState.activeBottomPanelTab === 'QUERY_TAB'
+        queryEditorState.activeBottomPanelTab === 'QUERY_TAB' &&
+        queryEditorState.languageType !== SupportLanguageType.promQL
       ) {
         queryBuilder.updateQueryState({ query: getEditorText() });
       }
+
       await queryBuilder.onQueryExecutionSubmit();
     },
     [
@@ -84,6 +87,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       queryEditorState.editorMode,
       queryEditorState.activeBottomPanelTab,
       getEditorText,
+      queryEditorState.languageType,
     ]
   );
 
