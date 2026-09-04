@@ -19,6 +19,25 @@ export function nanoToMilliSec(nano: number) {
   return nano / 1000000;
 }
 
+/**
+ * Format a raw nanosecond span duration into a compact, human-readable string,
+ * scaling the unit up as the magnitude grows so large durations stay readable
+ * instead of showing an unwieldy millisecond count:
+ *   < 1 s   -> "256.62 ms"
+ *   < 60 s  -> "1.53 s"
+ *   >= 60 s -> "2.10 min"
+ * Mirrors the observability APM latency formatter (ms -> s at 1000 ms),
+ * extended to minutes. Values <= 0 / non-numeric render as "0 ms".
+ */
+export function formatSpanDuration(nano: number): string {
+  const ms = nanoToMilliSec(Math.max(0, Number(nano) || 0));
+  if (ms < 1000) return `${round(ms, 2)} ms`;
+  const seconds = ms / 1000;
+  if (seconds < 60) return `${round(seconds, 2)} s`;
+  const minutes = seconds / 60;
+  return `${round(minutes, 2)} min`;
+}
+
 export function get(obj: any, path: string, defaultValue?: any): any {
   const travel = (regexp: RegExp) =>
     String.prototype.split

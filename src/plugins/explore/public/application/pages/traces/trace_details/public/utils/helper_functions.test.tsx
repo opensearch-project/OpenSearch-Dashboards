@@ -8,6 +8,7 @@ import {
   NoMatchMessage,
   microToMilliSec,
   nanoToMilliSec,
+  formatSpanDuration,
   getServiceInfo,
 } from './helper_functions';
 
@@ -40,6 +41,32 @@ describe('nanoToMilliSec', () => {
   it('handles invalid input', () => {
     expect(nanoToMilliSec(NaN)).toBe(0);
     expect(nanoToMilliSec(undefined as any)).toBe(0);
+  });
+});
+
+describe('formatSpanDuration', () => {
+  it('renders milliseconds for sub-second durations', () => {
+    expect(formatSpanDuration(256620)).toBe('0.26 ms');
+    expect(formatSpanDuration(2000000)).toBe('2 ms');
+    expect(formatSpanDuration(999000000)).toBe('999 ms');
+  });
+
+  it('scales to seconds at >= 1s', () => {
+    expect(formatSpanDuration(1000000000)).toBe('1 s'); // 1000 ms
+    expect(formatSpanDuration(1500000000)).toBe('1.5 s');
+    expect(formatSpanDuration(59000000000)).toBe('59 s');
+  });
+
+  it('scales to minutes at >= 60s', () => {
+    expect(formatSpanDuration(60000000000)).toBe('1 min');
+    expect(formatSpanDuration(90000000000)).toBe('1.5 min');
+  });
+
+  it('handles zero, negative, and invalid input as 0 ms', () => {
+    expect(formatSpanDuration(0)).toBe('0 ms');
+    expect(formatSpanDuration(-1000000)).toBe('0 ms');
+    expect(formatSpanDuration(NaN)).toBe('0 ms');
+    expect(formatSpanDuration(undefined as any)).toBe('0 ms');
   });
 });
 

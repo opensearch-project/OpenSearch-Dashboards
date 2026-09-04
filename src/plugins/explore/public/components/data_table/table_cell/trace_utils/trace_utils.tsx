@@ -13,10 +13,7 @@ import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
-import {
-  round,
-  nanoToMilliSec,
-} from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
+import { formatSpanDuration } from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -317,7 +314,7 @@ export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedC
     .replace(/,/g, '')
     .trim();
 
-  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+  const durationLabel = formatSpanDuration(Number(duration));
 
   return (
     <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">

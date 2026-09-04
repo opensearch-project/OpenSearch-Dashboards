@@ -319,6 +319,18 @@ describe('trace_utils', () => {
       render(<DurationTableCell sanitizedCellValue="-1000000" />);
       expect(screen.getByText('0 ms')).toBeInTheDocument();
     });
+
+    it('should scale up to seconds for durations >= 1s', () => {
+      // 1,500,000,000 ns = 1500 ms = 1.5 s
+      render(<DurationTableCell sanitizedCellValue="<span>1,500,000,000</span>" />);
+      expect(screen.getByText('1.5 s')).toBeInTheDocument();
+    });
+
+    it('should scale up to minutes for durations >= 60s', () => {
+      // 90,000,000,000 ns = 90,000 ms = 90 s = 1.5 min
+      render(<DurationTableCell sanitizedCellValue="90000000000" />);
+      expect(screen.getByText('1.5 min')).toBeInTheDocument();
+    });
   });
 
   describe('buildTraceDetailsUrl', () => {
