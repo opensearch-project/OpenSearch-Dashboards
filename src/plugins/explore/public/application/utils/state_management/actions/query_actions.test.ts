@@ -49,7 +49,7 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasStats: jest.fn(() => false),
+  queryHasAggregation: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -63,13 +63,14 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  executeBucketCountQuery,
   shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, PARTIAL_RESULTS_SETTING } from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -1911,6 +1912,59 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         cacheKey: 'source=logs__datatable',
         results: expect.any(Object),
       });
+    });
+  });
+
+  describe('partial_result gating for the bucket-count query', () => {
+    let mockGetState: jest.Mock;
+    let mockDispatch: jest.Mock;
+
+    beforeEach(() => {
+      mockGetState = jest.fn().mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test', type: 'INDEX_PATTERN' },
+        },
+      });
+      mockDispatch = jest.fn();
+      (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
+      // Partial results turned ON at the setting level, so a normal query would send it.
+      (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) => {
+        if (key === SAMPLE_SIZE_SETTING) return 500;
+        if (key === PARTIAL_RESULTS_SETTING) return true;
+        if (key === 'data:withLongNumerals') return false;
+        return undefined;
+      });
+    });
+
+    const runAndGetQuery = async (thunk: any) => {
+      await thunk(mockDispatch, mockGetState, undefined);
+      const call = (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query);
+      return call?.[0]?.query;
+    };
+
+    it('forces partial_result:false for the bucket-count query even when the setting is on', async () => {
+      const query = await runAndGetQuery(
+        executeBucketCountQuery({
+          services: mockServices,
+          cacheKey: 'bucketCount:source=logs | stats count() as bucket_count',
+          queryString: 'source=logs | stats count() as bucket_count',
+        })
+      );
+      // The denominator must be complete; a partial bucket count would undercount it silently.
+      expect(query).toEqual(expect.objectContaining({ partial_result: false }));
+    });
+
+    it('honors the setting (partial_result:true) for a normal data-table query', async () => {
+      const query = await runAndGetQuery(
+        executeDataTableQuery({
+          services: mockServices,
+          cacheKey: 'source=logs',
+          queryString: 'source=logs',
+        })
+      );
+      expect(query).toEqual(expect.objectContaining({ partial_result: true }));
     });
   });
 
