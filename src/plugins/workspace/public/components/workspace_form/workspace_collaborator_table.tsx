@@ -161,6 +161,7 @@ export const WorkspaceCollaboratorTable = ({
   handleSubmitPermissionSettings,
 }: Props) => {
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
+  const tableRef = useRef<EuiInMemoryTable<PermissionSettingWithAccessLevelAndDisplayedType>>(null);
   const {
     overlays,
     services: { notifications, http },
@@ -432,6 +433,7 @@ export const WorkspaceCollaboratorTable = ({
               }),
             });
             setSelection([]);
+            tableRef.current?.setSelection([]);
             modal.close();
           }
         },
@@ -469,6 +471,10 @@ export const WorkspaceCollaboratorTable = ({
         selection={selection}
         handleSubmitPermissionSettings={handleSubmitPermissionSettings}
         openChangeAccessLevelModal={openChangeAccessLevelModal}
+        onSelectionReset={() => {
+          setSelection([]);
+          tableRef.current?.setSelection([]);
+        }}
       />
     );
   };
@@ -567,6 +573,7 @@ export const WorkspaceCollaboratorTable = ({
 
   return (
     <EuiInMemoryTable
+      ref={tableRef}
       items={items}
       columns={columns}
       compressed={true}
@@ -587,6 +594,7 @@ const Actions = ({
   handleSubmitPermissionSettings,
   openDeleteConfirmModal,
   openChangeAccessLevelModal,
+  onSelectionReset,
 }: {
   isTableAction: boolean;
   selection?: PermissionSettingWithAccessLevelAndDisplayedType[];
@@ -610,6 +618,7 @@ const Actions = ({
     selections: PermissionSettingWithAccessLevelAndDisplayedType[];
     type: WorkspaceCollaboratorAccessLevel;
   }) => { close: () => void };
+  onSelectionReset?: () => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const {
@@ -656,6 +665,7 @@ const Actions = ({
                   },
                 }),
               });
+              onSelectionReset?.();
             }
             modal.close();
           },
