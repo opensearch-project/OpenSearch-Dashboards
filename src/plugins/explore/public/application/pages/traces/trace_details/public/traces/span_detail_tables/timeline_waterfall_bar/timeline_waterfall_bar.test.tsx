@@ -24,7 +24,6 @@ describe('TimelineWaterfallBar', () => {
     serviceName: 'test-service',
     startTime: 1000,
     endTime: 2000,
-    durationInNanos: 1500000000, // 1.5 s — drives the duration label/hover
   } as Span;
 
   const mockTraceTimeRange = {
@@ -119,8 +118,8 @@ describe('TimelineWaterfallBar', () => {
       <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />
     );
 
-    // durationMs 1500 -> 1.5 s (shared formatSpanDuration ladder)
-    expect(getByTestId('timeline-bar-duration')).toHaveTextContent('1.5 s');
+    // durationMs 1500 -> "1.50s"
+    expect(getByTestId('timeline-bar-duration')).toHaveTextContent('1.50s');
   });
 
   it('applies the error modifier class for error spans', () => {
@@ -150,9 +149,9 @@ describe('TimelineWaterfallBar', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText('Duration: 1.5 s')).toBeInTheDocument();
-        expect(screen.getByText('Start: 1 s')).toBeInTheDocument();
-        expect(screen.getByText('End: 2.5 s')).toBeInTheDocument();
+        expect(screen.getByText('Duration: 1500 ms')).toBeInTheDocument();
+        expect(screen.getByText('Start: 1000 ms')).toBeInTheDocument();
+        expect(screen.getByText('End: 2500 ms')).toBeInTheDocument();
       },
       { timeout: 2000 }
     );

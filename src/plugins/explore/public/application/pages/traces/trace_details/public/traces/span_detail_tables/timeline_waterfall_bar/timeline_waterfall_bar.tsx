@@ -10,13 +10,7 @@ import { Span } from '../types';
 import { TraceTimeRange } from '../../../utils/span_timerange_utils';
 import { isSpanError } from '../../ppl_resolve_helpers';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';
-import { formatSpanDuration } from '../../../utils/helper_functions';
-import { extractSpanDuration } from '../../../utils/span_data_utils';
 import './timeline_waterfall_bar.scss';
-
-// The timeline hook's start/end offsets are in milliseconds; formatSpanDuration
-// takes nanoseconds.
-const MS_TO_NANOS = 1_000_000;
 
 export interface TimelineWaterfallBarProps {
   span: Span;
@@ -27,6 +21,19 @@ export interface TimelineWaterfallBarProps {
   /** Visible time window driven by the timeline brush (zoom). */
   visibleRange?: TraceTimeRange;
 }
+
+// Compact duration label shown at the bar's trailing edge (replaces the separate
+// far-right Duration column so the timeline reclaims that gutter). Sub-second
+// durations read as ms; anything >= 1s reads as seconds so long spans stay legible.
+const formatBarDuration = (durationMs: number): string => {
+  if (durationMs >= 1000) {
+    return `${(durationMs / 1000).toFixed(2)}s`;
+  }
+  if (durationMs >= 10) {
+    return `${Math.round(durationMs)}ms`;
+  }
+  return `${durationMs.toFixed(2)}ms`;
+};
 
 export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
   span,
@@ -41,19 +48,11 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
   const {
     timelineBarOffsetPercent,
     timelineBarWidthPercent,
+    durationMs,
     relativeStart,
     relativeEnd,
     isOutsideWindow,
   } = useTimelineBarRange(span, traceTimeRange, paddingPercent, visibleRange);
-
-  // Formatted with the shared ladder (ns -> µs -> ms -> s -> min) so labels read
-  // consistently with the Discover Traces grid. Duration uses the raw span
-  // nanoseconds (the hook's durationMs is rounded to ms and would lose sub-ms
-  // precision, e.g. 512ns -> "1 µs"). Start/End are elapsed offsets from the
-  // trace start (ms), so the same ladder applies.
-  const durationLabel = formatSpanDuration(extractSpanDuration(span));
-  const startLabel = formatSpanDuration(relativeStart * MS_TO_NANOS);
-  const endLabel = formatSpanDuration(relativeEnd * MS_TO_NANOS);
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -87,13 +86,13 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
               data-testid="timeline-tooltip-content"
             >
               <EuiFlexItem>
-                <EuiText size="s">Duration: {durationLabel}</EuiText>
+                <EuiText size="s">Duration: {durationMs} ms</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s">Start: {startLabel}</EuiText>
+                <EuiText size="s">Start: {relativeStart} ms</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s">End: {endLabel}</EuiText>
+                <EuiText size="s">End: {relativeEnd} ms</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -113,7 +112,7 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
           className="exploreTimelineWaterfallBar__duration"
           data-test-subj="timeline-bar-duration"
         >
-          {durationLabel}
+          {formatBarDuration(durationMs)}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

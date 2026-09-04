@@ -8,7 +8,6 @@ import {
   NoMatchMessage,
   microToMilliSec,
   nanoToMilliSec,
-  formatSpanDuration,
   getServiceInfo,
 } from './helper_functions';
 
@@ -41,49 +40,6 @@ describe('nanoToMilliSec', () => {
   it('handles invalid input', () => {
     expect(nanoToMilliSec(NaN)).toBe(0);
     expect(nanoToMilliSec(undefined as any)).toBe(0);
-  });
-});
-
-describe('formatSpanDuration', () => {
-  it('renders nanoseconds for sub-microsecond durations', () => {
-    expect(formatSpanDuration(512)).toBe('512 ns');
-    expect(formatSpanDuration(999)).toBe('999 ns');
-  });
-
-  it('scales to microseconds at >= 1µs', () => {
-    expect(formatSpanDuration(1000)).toBe('1 µs');
-    expect(formatSpanDuration(256620)).toBe('256.62 µs');
-    expect(formatSpanDuration(999000)).toBe('999 µs');
-  });
-
-  it('scales to milliseconds at >= 1ms', () => {
-    expect(formatSpanDuration(1000000)).toBe('1 ms');
-    expect(formatSpanDuration(2000000)).toBe('2 ms');
-    expect(formatSpanDuration(999000000)).toBe('999 ms');
-  });
-
-  it('scales to seconds at >= 1s', () => {
-    expect(formatSpanDuration(1000000000)).toBe('1 s');
-    expect(formatSpanDuration(1500000000)).toBe('1.5 s');
-    expect(formatSpanDuration(59000000000)).toBe('59 s');
-  });
-
-  it('scales to minutes at >= 60s', () => {
-    expect(formatSpanDuration(60000000000)).toBe('1 min');
-    expect(formatSpanDuration(90000000000)).toBe('1.5 min');
-  });
-
-  it('promotes to the next unit at rounding boundaries', () => {
-    expect(formatSpanDuration(999999)).toBe('1 ms'); // 999.999 µs -> 1 ms, not "1000 µs"
-    expect(formatSpanDuration(999999999)).toBe('1 s'); // 999.999999 ms -> 1 s, not "1000 ms"
-    expect(formatSpanDuration(59999000000)).toBe('1 min'); // 59.999 s -> 1 min, not "60 s"
-  });
-
-  it('handles zero, negative, and invalid input as 0 ns', () => {
-    expect(formatSpanDuration(0)).toBe('0 ns');
-    expect(formatSpanDuration(-1000000)).toBe('0 ns');
-    expect(formatSpanDuration(NaN)).toBe('0 ns');
-    expect(formatSpanDuration(undefined as any)).toBe('0 ns');
   });
 });
 
