@@ -317,7 +317,13 @@ describe('trace_utils', () => {
 
     it('should handle negative values', () => {
       render(<DurationTableCell sanitizedCellValue="-1000000" />);
-      expect(screen.getByText('0 ms')).toBeInTheDocument();
+      expect(screen.getByText('0 ns')).toBeInTheDocument();
+    });
+
+    it('should scale down to microseconds for sub-millisecond durations', () => {
+      // 256,620 ns = 256.62 µs
+      render(<DurationTableCell sanitizedCellValue="256620" />);
+      expect(screen.getByText('256.62 µs')).toBeInTheDocument();
     });
 
     it('should scale up to seconds for durations >= 1s', () => {
