@@ -34,6 +34,7 @@ jest.mock('moment', () => {
 // Mock helper functions
 jest.mock('../../utils/helper_functions', () => ({
   nanoToMilliSec: jest.fn((nanos: number) => nanos / 1000000),
+  formatSpanDuration: jest.fn((nanos: number) => `${nanos} ns`),
   isEmpty: jest.fn((obj: any) => {
     return (
       obj == null ||
@@ -146,7 +147,7 @@ describe('SpanOverviewTab', () => {
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Start time')).toBeInTheDocument();
-      expect(screen.getByText('Jan 15 @ 14:30:45.123 (5ms)')).toBeInTheDocument();
+      expect(screen.getByText('Jan 15 @ 14:30:45.123 (5000000 ns)')).toBeInTheDocument();
     });
 
     it('renders dash when start time is missing', () => {
@@ -517,7 +518,7 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
-      expect(screen.getByText('Jan 15 @ 14:30:45.123 (0ms)')).toBeInTheDocument();
+      expect(screen.getByText('Jan 15 @ 14:30:45.123 (0 ns)')).toBeInTheDocument();
     });
 
     it('handles span with only HTTP URL but no method', () => {

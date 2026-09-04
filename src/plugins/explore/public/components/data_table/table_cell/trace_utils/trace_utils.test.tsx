@@ -317,7 +317,25 @@ describe('trace_utils', () => {
 
     it('should handle negative values', () => {
       render(<DurationTableCell sanitizedCellValue="-1000000" />);
-      expect(screen.getByText('0 ms')).toBeInTheDocument();
+      expect(screen.getByText('0 ns')).toBeInTheDocument();
+    });
+
+    it('should scale down to microseconds for sub-millisecond durations', () => {
+      // 256,620 ns = 256.62 µs
+      render(<DurationTableCell sanitizedCellValue="256620" />);
+      expect(screen.getByText('256.62 µs')).toBeInTheDocument();
+    });
+
+    it('should scale up to seconds for durations >= 1s', () => {
+      // 1,500,000,000 ns = 1500 ms = 1.5 s
+      render(<DurationTableCell sanitizedCellValue="<span>1,500,000,000</span>" />);
+      expect(screen.getByText('1.5 s')).toBeInTheDocument();
+    });
+
+    it('should scale up to minutes for durations >= 60s', () => {
+      // 90,000,000,000 ns = 90,000 ms = 90 s = 1.5 min
+      render(<DurationTableCell sanitizedCellValue="90000000000" />);
+      expect(screen.getByText('1.5 min')).toBeInTheDocument();
     });
   });
 
