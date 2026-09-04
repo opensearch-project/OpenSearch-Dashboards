@@ -4,13 +4,14 @@
  */
 
 import { groupBy } from 'lodash';
-import { Threshold, ValueMapping } from '../types';
+import { Threshold, ThresholdValueMode, ValueMapping } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
-import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
+import { resolveThresholds } from '../utils/utils';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -106,7 +107,10 @@ const mergeRecordsWithColor = (
   };
 };
 
-export const convertThresholdsToValueMappings = (thresholds: Threshold[]): ValueMapping[] => {
+export const convertThresholdsToValueMappings = (
+  thresholds: Threshold[],
+  percentageLabels?: Threshold[]
+): ValueMapping[] => {
   return thresholds.map((t, i) => ({
     type: 'range',
     range: {
@@ -114,6 +118,12 @@ export const convertThresholdsToValueMappings = (thresholds: Threshold[]): Value
       max: i === thresholds.length - 1 ? undefined : thresholds[i + 1].value,
     },
     color: t.color,
+    ...(percentageLabels && {
+      displayText:
+        i === percentageLabels.length - 1
+          ? `≥ ${percentageLabels[i].value}%`
+          : `${percentageLabels[i].value}% ~ ${percentageLabels[i + 1].value}%`,
+    }),
   }));
 };
 
@@ -498,15 +508,27 @@ const renderItem =
     };
   };
 
+const buildThresholdLegendItems = (mappings: ValueMapping[]): LegendItem[] =>
+  mappings
+    .filter((m) => m.range && m.range.min !== m.range.max)
+    .map((m) => {
+      const label =
+        m.displayText ??
+        (m.range?.max === undefined ? `≥ ${m.range?.min}` : `${m.range?.min} ~ ${m.range?.max}`);
+      return createSeriesLegendItem(label, resolveColor(m.color) ?? '');
+    });
+
 export const createStateTimeLineSpec =
   <T extends BaseChartStyle>({
     styles,
     groupField,
     legendNameDomain,
+    thresholdMappings,
   }: {
     styles: StateTimeLineChartStyle;
     groupField?: string;
     legendNameDomain?: string[];
+    thresholdMappings?: ValueMapping[];
   }): PipelineFn<T> =>
   (state) => {
     const { transformedData, yAxisConfig } = state;
@@ -554,7 +576,37 @@ export const createStateTimeLineSpec =
     });
 
     newState.series = allSeries?.flat() as any;
-    newState.legendItems = legendItems;
+
+    newState.legendItems =
+      styles.useThresholdColor && thresholdMappings?.length
+        ? buildThresholdLegendItems(thresholdMappings)
+        : legendItems;
 
     return newState;
   };
+
+export const getConvertedThresholds = ({
+  transformedData,
+  colorCol,
+  completeThreshold,
+  thresholdMode,
+}: {
+  transformedData: Array<Record<string, any>>;
+  colorCol: string;
+  completeThreshold: Threshold[];
+  thresholdMode?: ThresholdValueMode;
+}) => {
+  const numericValues = transformedData
+    .map((row) => Number(row[colorCol]))
+    .filter((n) => Number.isFinite(n));
+  const thresholdDataRange = numericValues.length
+    ? { min: Math.min(...numericValues), max: Math.max(...numericValues) }
+    : undefined;
+
+  const convertedThresholds = convertThresholdsToValueMappings(
+    resolveThresholds(completeThreshold, thresholdMode, thresholdDataRange),
+    thresholdMode === 'percentage' ? completeThreshold : undefined
+  );
+
+  return convertedThresholds;
+};

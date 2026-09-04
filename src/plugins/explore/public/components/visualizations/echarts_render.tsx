@@ -144,6 +144,48 @@ const hideSharedCrosshair = (group: string, source: echarts.ECharts) => {
   });
 };
 
+/**
+ * Threshold charts (e.g. heatmap) build their CustomLegend from visualMap.
+ * visualMap *pieces* instead of series, so `legendSelected$` is keyed by piece
+ * label. ECharts cannot filter pieces through `legend.selected` — it keys
+ * visualMap selection by piece *index* (`PiecewiseModel.getSelectedMapKey`
+ * returns `piece.index` in `pieces` mode). Translate label -> index here.
+ *
+ * Returns undefined when no piecewise visualMap matches the selected keys,
+ * which is the normal series-legend case.
+ */
+const resolveVisualMapPieceSelection = (
+  visualMap: echarts.EChartsOption['visualMap'],
+  selected: Record<string, boolean>
+): { visualMapIndex: number; selected: Record<string, boolean> } | undefined => {
+  const visualMaps = (Array.isArray(visualMap) ? visualMap : [visualMap]) as Array<{
+    type?: string;
+    pieces?: Array<{ label?: string }>;
+  }>;
+
+  for (let visualMapIndex = 0; visualMapIndex < visualMaps.length; visualMapIndex++) {
+    const { type, pieces } = visualMaps[visualMapIndex] ?? {};
+    if (type !== 'piecewise' || !Array.isArray(pieces)) continue;
+
+    const selectedByPieceIndex: Record<string, boolean> = {};
+    let matched = false;
+
+    pieces.forEach((piece, pieceIndex) => {
+      const label = piece?.label;
+      const isSelected = label != null ? selected[label] : undefined;
+      if (isSelected !== undefined) {
+        matched = true;
+      }
+      // a piece the legend never toggled counts as selected
+      selectedByPieceIndex[String(pieceIndex)] = isSelected !== false;
+    });
+
+    if (matched) {
+      return { visualMapIndex, selected: selectedByPieceIndex };
+    }
+  }
+};
+
 export const EchartsRender = React.memo(
   ({ spec, group, onSelectTimeRange, legendSelected$, highlightedLegendTarget$ }: Props) => {
     const [instance, setInstance] = useState<echarts.ECharts | null>(null);
@@ -286,9 +328,24 @@ export const EchartsRender = React.memo(
         // Apply legend selected state from BehaviorSubject
         if (legendSelected$) {
           const selected = legendSelected$.getValue();
-          const legend = Array.isArray(option.legend) ? option.legend[0] : option.legend;
-          if (legend && typeof legend === 'object' && Object.keys(selected).length > 0) {
-            (legend as any).selected = selected;
+          const dataRangeSelection = resolveVisualMapPieceSelection(option.visualMap, selected);
+          if (dataRangeSelection) {
+            // Threshold legend: filter through the piecewise visualMap, not the series legend
+            const visualMaps = Array.isArray(option.visualMap)
+              ? [...option.visualMap]
+              : [option.visualMap];
+            visualMaps[dataRangeSelection.visualMapIndex] = {
+              ...visualMaps[dataRangeSelection.visualMapIndex],
+              selected: dataRangeSelection.selected,
+            } as any;
+            option.visualMap = (
+              Array.isArray(option.visualMap) ? visualMaps : visualMaps[0]
+            ) as echarts.EChartsOption['visualMap'];
+          } else {
+            const legend = Array.isArray(option.legend) ? option.legend[0] : option.legend;
+            if (legend && typeof legend === 'object' && Object.keys(selected).length > 0) {
+              (legend as any).selected = selected;
+            }
           }
         }
 
@@ -315,7 +372,20 @@ export const EchartsRender = React.memo(
     useEffect(() => {
       if (!instance || !legendSelected$) return;
       const sub = legendSelected$.subscribe((selected) => {
-        instance.setOption({ legend: { selected } });
+        const dataRangeSelection = resolveVisualMapPieceSelection(
+          (instance.getOption() as echarts.EChartsOption)?.visualMap,
+          selected
+        );
+        // a threshold legend built from visualMap pieces has to go through the selectDataRange action instead
+        if (dataRangeSelection) {
+          instance.dispatchAction({
+            type: 'selectDataRange',
+            visualMapIndex: dataRangeSelection.visualMapIndex,
+            selected: dataRangeSelection.selected,
+          });
+        } else {
+          instance.setOption({ legend: { selected } });
+        }
       });
       return () => sub.unsubscribe();
     }, [instance, legendSelected$]);

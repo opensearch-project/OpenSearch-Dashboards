@@ -26,8 +26,9 @@ import {
   AxisRole,
   VisColumn,
   StandardOptions,
+  DataRange,
 } from '../types';
-import { convertThresholds } from './utils';
+import { computeDataRange, convertThresholds, resolveThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { LegendItem } from './legend';
 import { formatUnitValue } from '../style_panel/unit/collection';
@@ -102,6 +103,8 @@ export interface EChartsSpecState<
   >;
   visualMap?: EChartsOption['visualMap'];
   legendItems?: LegendItem[];
+  // Min/max of the value data
+  dataRange?: DataRange;
   // Final output
   spec?: EChartsOption;
 }
@@ -121,6 +124,46 @@ export function pipe<T extends BaseChartStyle>(
 ): (state: EChartsSpecState<T>) => EChartsSpecState<T> {
   return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
+
+/**
+ * compute the series data range(min, max)
+ *
+ * @param seriesFields the Y-value columns — an array, or a headers->fields fn
+ *   (resolved here against the header row, same as the series builders do).
+ * @param stacked whether the series are stacked
+ * @param fromBase whether the series shall consider baseline
+ */
+export const buildDataRange =
+  <T extends BaseChartStyle>({
+    seriesFields,
+    stacked = false,
+    fromBase = false,
+  }: {
+    seriesFields: string[] | ((headers?: string[]) => string[]);
+    stacked?: boolean;
+    fromBase?: boolean;
+  }): PipelineFn<T> =>
+  (state) => {
+    const data = state.transformedData;
+    const header = Array.isArray(data) && Array.isArray(data[0]) ? data[0] : undefined;
+    const fields = Array.isArray(seriesFields) ? seriesFields : seriesFields(header);
+
+    const dataRange = computeDataRange(data, fields, stacked);
+
+    if (dataRange && fromBase) {
+      // Bar chart compute min base from baseline
+      dataRange.min = Math.min(0, dataRange.min);
+      dataRange.max = Math.max(0, dataRange.max);
+      if (dataRange.stackMin !== undefined) {
+        dataRange.stackMin = Math.min(0, dataRange.stackMin);
+      }
+      if (dataRange.stackMax !== undefined) {
+        dataRange.stackMax = Math.max(0, dataRange.stackMax);
+      }
+    }
+
+    return { ...state, dataRange };
+  };
 
 /**
  * Get ECharts axis type from VisColumn schema
@@ -356,7 +399,7 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildThresholds = (styles: BaseChartStyle) => {
+export const buildThresholds = (styles: BaseChartStyle, dataRange?: DataRange) => {
   const completeThreshold =
     styles.thresholdOptions && styles?.thresholdOptions.thresholds
       ? [
@@ -365,21 +408,45 @@ export const buildThresholds = (styles: BaseChartStyle) => {
         ]
       : [];
 
-  return convertThresholds(completeThreshold).map((t) => ({
-    gte: t.min,
-    lt: t.max,
-    color: t.color,
-  }));
+  const isPercentage = styles.thresholdOptions?.thresholdMode === 'percentage';
+
+  // transform Percentage thresholds to absolute first, base threshold { value: 0 } becomes to the range floor
+  const resolved = resolveThresholds(
+    completeThreshold,
+    styles.thresholdOptions?.thresholdMode,
+    dataRange
+  );
+
+  const originalRanges = convertThresholds(completeThreshold);
+
+  return (
+    convertThresholds(resolved)
+      .map((range, i) => ({ range, original: originalRanges[i] }))
+      // Drop zero-range threshold
+      // avoid showing 0%-0%
+      .filter(({ original }) => original.min !== original.max)
+      .map(({ range, original }) => ({
+        gte: range.min,
+        lt: range.max,
+        color: range.color,
+        ...{
+          label:
+            original.max === Infinity
+              ? `≥ ${original.min}${isPercentage ? '%' : ''}`
+              : `${original.min}${isPercentage ? '%' : ''} ~ ${original.max}${isPercentage ? '%' : ''}`,
+        },
+      }))
+  );
 };
 
 export const buildVisMap =
   ({ seriesFields }: { seriesFields: (headers?: string[]) => string[] }) =>
   (state: EChartsSpecState) => {
-    const { styles, transformedData = [] } = state;
+    const { styles, transformedData = [], dataRange } = state;
 
     if (!styles.useThresholdColor) return state;
 
-    const pieces = buildThresholds(styles);
+    const pieces = buildThresholds(styles, dataRange);
 
     const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
       const originalIndex = transformedData[0]?.indexOf(c);

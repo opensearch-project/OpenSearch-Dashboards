@@ -5,13 +5,13 @@
 
 import { AxisRole, VisColumn, DisableMode, Threshold, ValueMapping } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
-import { getAxisConfig } from '../utils/utils';
+import { getAxisConfig, resolveThresholds } from '../utils/utils';
 import {
   mergeDataCore,
-  convertThresholdsToValueMappings,
   groupByMergedLabel,
   createStateTimeLineSpec,
   getStateTimeLineLegendNameDomain,
+  getConvertedThresholds,
 } from './state_timeline_utils';
 import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
@@ -118,7 +118,12 @@ export const createNumericalStateTimeline = (
     ...(styleOptions.thresholdOptions.thresholds || []),
   ];
 
-  const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
+  const convertedThresholds = getConvertedThresholds({
+    transformedData,
+    colorCol: colorCol.column,
+    completeThreshold,
+    thresholdMode: styleOptions.thresholdOptions.thresholdMode,
+  });
 
   const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
   const transforms = createStateTimeLineTransforms({
@@ -147,6 +152,7 @@ export const createNumericalStateTimeline = (
       styles: styleOptions,
       groupField: yCol.column,
       legendNameDomain: getLegendNameDomain(allData, transforms),
+      thresholdMappings: convertedThresholds,
     }),
     assembleSpec
   )({
@@ -277,7 +283,12 @@ export const createSingleNumericalStateTimeline = (
     ...(styleOptions.thresholdOptions.thresholds || []),
   ];
 
-  const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
+  const convertedThresholds = getConvertedThresholds({
+    transformedData,
+    colorCol: colorCol.column,
+    completeThreshold,
+    thresholdMode: styleOptions.thresholdOptions.thresholdMode,
+  });
 
   const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
   const transforms = createStateTimeLineTransforms({
@@ -306,6 +317,7 @@ export const createSingleNumericalStateTimeline = (
       styles: styleOptions,
       groupField: undefined,
       legendNameDomain: getLegendNameDomain(allData, transforms),
+      thresholdMappings: convertedThresholds,
     }),
     assembleSpec
   )({
