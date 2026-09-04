@@ -199,9 +199,10 @@ export class DataSourceSavedObjectsClientWrapper {
 
     switch (auth.type) {
       case AuthType.NoAuth:
+      case AuthType.JWT:
         return {
           ...attributes,
-          // Drop the credentials attribute for no_auth
+          // Drop the credentials attribute for no_auth / jwt
           auth: {
             type: auth.type,
             credentials: undefined,
@@ -251,9 +252,10 @@ export class DataSourceSavedObjectsClientWrapper {
 
     switch (type) {
       case AuthType.NoAuth:
+      case AuthType.JWT:
         return {
           ...attributes,
-          // Drop the credentials attribute for no_auth
+          // Drop the credentials attribute for no_auth / jwt
           auth: {
             type: auth.type,
             credentials: null,
@@ -351,6 +353,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
     switch (type) {
       case AuthType.NoAuth:
+      case AuthType.JWT:
         break;
       case AuthType.UsernamePasswordType:
         if (!credentials) {
@@ -439,6 +442,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
     switch (auth.type) {
       case AuthType.NoAuth:
+      case AuthType.JWT:
         // Signing the data source with existing endpoint
         encryptionContext = { endpoint };
         break;

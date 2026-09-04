@@ -7,6 +7,7 @@ import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import {
   ISavedObjectsRepository,
+  OpenSearchDashboardsRequest,
   SavedObjectsClientContract,
 } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
@@ -151,6 +152,19 @@ export const getAWSCredential = async (
   };
 
   return credential;
+};
+
+export const getJwtAuthorizationHeader = (request?: OpenSearchDashboardsRequest): string => {
+  const authorization = request?.headers?.authorization;
+  // Headers may be string[] when a header is repeated; a bearer token must be a single value.
+  if (typeof authorization !== 'string' || authorization.trim().length === 0) {
+    throw new Error(
+      `Data source auth type '${AuthType.JWT}' requires an 'authorization' header on the incoming ` +
+        `request, but none was present. The request is unauthenticated or the user's session has expired.`
+    );
+  }
+
+  return authorization;
 };
 
 export const generateCacheKey = (endpoint: string, cacheKeySuffix?: string) => {
