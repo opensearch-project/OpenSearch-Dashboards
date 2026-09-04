@@ -106,7 +106,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         // timestamp is broken (timezone-shifted display vs. raw value, and it
         // effectively never matches). Time filtering is owned by the time picker.
         const isDateField = fieldInfo?.type === 'date' || fieldInfo?.type === 'date_nanos';
-        const disableValueFilter = isTimeField || isDateField;
+        const disableValueFilter = isTimeField || isDateField || fieldInfo?.filterable === false;
 
         if (shouldShowEmptyCell(row, null)) {
           return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
@@ -133,7 +133,13 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (fieldInfo?.filterable === false) {
+        // On the Traces page every query is PPL (list, charts, trace-details), so
+        // the DSL-path enforcement of searchable/aggregatable never applies here.
+        // Route all cells through TableCell — it decides link-vs-plain per column
+        // and suppresses value-filter buttons via disableValueFilter — rather than
+        // the no-link NonFilterableTableCell, so a trace-link column can never be
+        // silently stripped of its link when its field resolves non-filterable.
+        if (fieldInfo?.filterable === false && !isOnTracesPage) {
           return (
             <NonFilterableTableCell
               key={colName}
@@ -159,6 +165,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
             rowData={row}
+            dataset={dataset}
             isOnTracesPage={isOnTracesPage}
             setIsRowSelected={setIsRowSelected}
             wrapCellText={wrapCellText}
