@@ -57,25 +57,23 @@ const flattenSeries = (
       throw new Error('Each series must have a "values" array');
     }
 
-    return s.values.map(
-      (v): FlattenedSeriesItem => {
-        const baseItem: FlattenedSeriesItem = {
-          x: v.x,
-          y: v.y,
-          series: s.label,
-        };
+    return s.values.map((v): FlattenedSeriesItem => {
+      const baseItem: FlattenedSeriesItem = {
+        x: v.x,
+        y: v.y,
+        series: s.label,
+      };
 
-        if (v.z !== undefined) {
-          baseItem.z = v.z;
-        }
-
-        if (splitLabel) {
-          baseItem.split = splitLabel;
-        }
-
-        return baseItem;
+      if (v.z !== undefined) {
+        baseItem.z = v.z;
       }
-    );
+
+      if (splitLabel) {
+        baseItem.split = splitLabel;
+      }
+
+      return baseItem;
+    });
   });
 };
 
@@ -153,8 +151,8 @@ export const flattenDataHandler = (context, dimensions, handlerType = 'series') 
   const group = dimensions.splitRow
     ? converted.rows
     : dimensions.splitColumn
-    ? converted.columns
-    : [];
+      ? converted.columns
+      : [];
 
   if (handlerType === 'series') {
     // Determine the group based on split dimensions

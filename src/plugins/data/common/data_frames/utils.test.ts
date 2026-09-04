@@ -219,8 +219,8 @@ describe('convertResult', () => {
       name === 'metadata.created_at'
         ? createdAtField
         : name === 'metadata.status'
-        ? statusField
-        : undefined
+          ? statusField
+          : undefined
     );
     mockFields.getByType = jest.fn((type) =>
       type === 'date' ? [createdAtField] : type === 'keyword' ? [statusField] : []
@@ -522,7 +522,7 @@ describe('convertResult', () => {
     };
 
     // `index` is the raw string id — no `.fields` to iterate.
-    const fields: SearchSourceFields = { index: ('abc-123' as unknown) as IndexPattern };
+    const fields: SearchSourceFields = { index: 'abc-123' as unknown as IndexPattern };
 
     const result = convertResult({ response, fields, options });
     // Nested date isn't formatted (no index pattern fields to look up the type), but

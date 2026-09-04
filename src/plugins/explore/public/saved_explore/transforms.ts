@@ -23,6 +23,8 @@ export interface ExploreState {
 }
 
 interface VisState {
+  title?: string;
+  description?: string;
   chartType?: ChartType;
   styleOptions?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
@@ -34,7 +36,7 @@ interface VisState {
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  flavorId: string,
+  flavorId?: string,
   tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
@@ -43,9 +45,8 @@ export const saveStateToSavedObject = (
   // Serialize the state into the saved object
   obj.type = flavorId;
   obj.visualization = JSON.stringify({
-    // TODO: Add title to saved object
-    // Visualization has an independent title?
-    title: '',
+    title: visState?.title ?? '',
+    description: visState?.description,
     chartType: visState?.chartType ?? 'line',
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,
@@ -90,7 +91,7 @@ export const getStateFromSavedObject = (obj: SavedExploreAttributes): ExploreSav
         query: queryState,
       },
     };
-  } catch (error) {
+  } catch {
     throw new InvalidJSONProperty(
       i18n.translate('explore.getStateFromSavedObject.genericJSONError', {
         defaultMessage:
@@ -115,7 +116,7 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
       columns: legacyState.columns || [],
       sort: legacyState.sort || [],
     };
-  } catch (error) {
+  } catch {
     return {
       columns: [],
       sort: [],
@@ -140,7 +141,7 @@ export const updateLegacyPropertiesInSavedObject = (
 
     savedExplore.legacyState = JSON.stringify(updatedLegacyState);
     return savedExplore;
-  } catch (error) {
+  } catch {
     return savedExplore;
   }
 };

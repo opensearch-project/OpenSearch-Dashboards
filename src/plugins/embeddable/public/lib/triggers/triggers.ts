@@ -61,8 +61,7 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 }
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
-  | ValueClickContext<T>
-  | RangeSelectContext<T>;
+  ValueClickContext<T> | RangeSelectContext<T>;
 
 export const isValueClickTriggerContext = (
   context: ChartActionContext

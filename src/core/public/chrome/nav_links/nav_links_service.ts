@@ -185,7 +185,7 @@ export class NavLinksService {
             [...navLinks.entries()].map(([linkId, link]) => {
               return [linkId, link.id === id ? link.update(values) : link] as [
                 string,
-                NavLinkWrapper
+                NavLinkWrapper,
               ];
             })
           );

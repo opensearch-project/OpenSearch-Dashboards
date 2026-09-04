@@ -336,9 +336,8 @@ export const DataImporterPluginApp = ({
   const renderDataSourceComponent = useMemo(() => {
     if (!dataSourceEnabled || !dataSourceManagement) return null;
 
-    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<
-      any
-    >;
+    const DataSourceSelector = dataSourceManagement!.ui
+      .DataSourceSelector as React.ComponentType<any>;
     return (
       <DataSourceSelector
         savedObjectsClient={savedObjects.client}

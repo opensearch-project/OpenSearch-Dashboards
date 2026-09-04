@@ -69,8 +69,8 @@ run(
       throw createFlagError('expected --no-examples to have no value');
     }
 
-    const profileWebpack = flags.profile ?? false;
-    if (typeof profileWebpack !== 'boolean') {
+    const profileRspack = flags.profile ?? false;
+    if (typeof profileRspack !== 'boolean') {
       throw createFlagError('expected --profile to have no value');
     }
 
@@ -118,7 +118,7 @@ run(
       dist: dist || updateLimits,
       cache,
       examples: examples && !(validateLimits || updateLimits),
-      profileWebpack,
+      profileRspack,
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
@@ -173,7 +173,7 @@ run(
       help: `
         --watch            run the optimizer in watch mode
         --workers          max number of workers to use
-        --profile          profile the webpack builds and write stats.json files to build outputs
+        --profile          profile the rspack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable rspack persistent cache (forces full rebuild)
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported

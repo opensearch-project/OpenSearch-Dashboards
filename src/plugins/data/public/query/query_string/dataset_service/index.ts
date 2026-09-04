@@ -4,4 +4,4 @@
  */
 
 export * from './types';
-export { DatasetServiceContract, DatasetService } from './dataset_service';
+export { DatasetServiceContract, DatasetService, DatasetFilter } from './dataset_service';

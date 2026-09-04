@@ -64,6 +64,9 @@ export const SERVICE_NAME_FIELD_PATHS = [
   'fields.service_name',
 ] as const;
 
+/** PPL field used to filter a trace by service (e.g. trace-map service click). */
+export const SERVICE_NAME_FILTER_FIELD = 'serviceName';
+
 export const SPAN_NAME_FIELD_PATHS = [
   'name',
   'operationName',

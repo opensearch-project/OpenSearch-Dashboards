@@ -53,7 +53,7 @@ function checkModuleNameNode(context, mappings, node) {
   // support for toRelative added to migrate away from X-Pack being bundled
   // within node modules. after that migration, this can be removed.
   if (mapping.toRelative) {
-    const sourceDirectory = path.dirname(context.getFilename());
+    const sourceDirectory = path.dirname(context.filename);
     const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
     const modulePath = path.resolve(
       OPENSEARCH_DASHBOARDS_ROOT,

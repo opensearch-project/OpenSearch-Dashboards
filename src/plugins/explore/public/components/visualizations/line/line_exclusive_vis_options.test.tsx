@@ -4,7 +4,8 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { LineExclusiveVisOptions, LineStyle } from './line_exclusive_vis_options';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
+import { LineStyle } from '../types';
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
@@ -33,7 +34,7 @@ describe('LineExclusiveVisOptions', () => {
     render(<LineExclusiveVisOptions {...defaultProps} />);
 
     expect(screen.getByText('Line')).toBeInTheDocument();
-    expect(screen.getAllByText('Style')).toHaveLength(2);
+    expect(screen.getAllByText('Line Style')).toHaveLength(2);
     expect(screen.getAllByText('Interpolation')).toHaveLength(2);
     expect(screen.getByText('Line width')).toBeInTheDocument();
     expect(screen.getByText('Show current time marker')).toBeInTheDocument();

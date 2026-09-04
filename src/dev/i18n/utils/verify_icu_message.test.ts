@@ -33,17 +33,17 @@ import { verifyICUMessage, checkEnglishOnly } from './verify_icu_message';
 describe('verifyICUMessage', () => {
   it('passes on plain text', () => {
     const message = 'plain text here';
-    expect(() => verifyICUMessage(message)).not.toThrowError();
+    expect(() => verifyICUMessage(message)).not.toThrow();
   });
 
   it('passes on empty string', () => {
     const message = '';
-    expect(() => verifyICUMessage(message)).not.toThrowError();
+    expect(() => verifyICUMessage(message)).not.toThrow();
   });
 
   it('passes on variable icu-syntax', () => {
     const message = 'Your regular {foobar}';
-    expect(() => verifyICUMessage(message)).not.toThrowError();
+    expect(() => verifyICUMessage(message)).not.toThrow();
   });
 
   it('passes on correct plural icu-syntax', () => {
@@ -53,20 +53,20 @@ describe('verifyICUMessage', () => {
       other {{itemCount} items}
     }.`;
 
-    expect(() => verifyICUMessage(message)).not.toThrowError();
+    expect(() => verifyICUMessage(message)).not.toThrow();
   });
 
   it('throws on malformed string', () => {
     const message =
       'CDATA[extended_bounds設定を使用すると、強制的にヒストグラムアグリゲーションを実行し、特定の最小値に対してバケットの作成を開始し、最大値までバケットを作成し続けます。 ]]></target>\n\t\t\t<note>OpenSearchDashboards-SW - String "data.search.aggs.buckets.dateHistogram.extendedBounds.help" in Json.Root "messages\\strings" ';
 
-    expect(() => verifyICUMessage(message)).toThrowError();
+    expect(() => verifyICUMessage(message)).toThrow();
   });
 
   it('throws on missing curly brackets', () => {
     const message = `A missing {curly`;
 
-    expect(() => verifyICUMessage(message)).toThrowError();
+    expect(() => verifyICUMessage(message)).toThrow();
   });
 
   it('throws on incorrect plural icu-syntax', () => {
@@ -74,7 +74,7 @@ describe('verifyICUMessage', () => {
     const message =
       '{textScale, select, small {小さい} 中くらい {Medium} 大きい {Large} その他の {{textScale}} }';
 
-    expect(() => verifyICUMessage(message)).toThrowError();
+    expect(() => verifyICUMessage(message)).toThrow();
   });
 });
 

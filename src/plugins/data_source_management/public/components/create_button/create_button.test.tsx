@@ -12,7 +12,7 @@ import { ScopedHistory } from 'opensearch-dashboards/public';
 const createButtonIdentifier = `[data-test-subj="createDataSourceButton"]`;
 
 describe('CreateButton', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   const dataTestSubj = 'createDataSourceButton';
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
@@ -29,6 +29,6 @@ describe('CreateButton', () => {
   it('should click event normally', () => {
     component.find(createButtonIdentifier).first().simulate('click');
 
-    expect(history.push).toBeCalledWith('/create');
+    expect(history.push).toHaveBeenCalledWith('/create');
   });
 });

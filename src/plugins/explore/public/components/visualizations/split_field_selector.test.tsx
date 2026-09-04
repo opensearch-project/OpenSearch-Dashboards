@@ -14,16 +14,12 @@ describe('SplitFieldSelector', () => {
       name: 'region',
       schema: VisFieldType.Categorical,
       column: 'region',
-      validValuesCount: 100,
-      uniqueValuesCount: 5,
     },
     {
       id: 2,
       name: 'status',
       schema: VisFieldType.Categorical,
       column: 'status',
-      validValuesCount: 100,
-      uniqueValuesCount: 3,
     },
   ];
 
@@ -33,8 +29,6 @@ describe('SplitFieldSelector', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
   ];
 

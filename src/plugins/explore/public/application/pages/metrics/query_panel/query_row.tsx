@@ -26,6 +26,8 @@ import { PrometheusClient } from '../explore/services/prometheus_client';
 import { PromQLBuilder, parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
 import { QueryRow, RowMode, modeButtons } from './row_state';
+import { RowQueryOptions, RowStepReadout } from './metrics_query_options';
+import type { PerQueryOptions } from '../../../../../../query_enhancements/common';
 
 import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
 
@@ -43,11 +45,13 @@ export interface QueryRowProps {
   onCodeChange: (rowId: string, query: string) => void;
   onModeChange: (rowId: string, mode: RowMode) => void;
   onRemove: (rowId: string) => void;
+  onOptionsChange: (rowId: string, options: PerQueryOptions) => void;
   onRun: () => void;
   languageTitle: string;
   canRemove: boolean;
   isDragging: boolean;
   dragHandleProps: DragHandleProps;
+  stepReadout: RowStepReadout;
 }
 
 export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
@@ -59,11 +63,13 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     onCodeChange,
     onModeChange,
     onRemove,
+    onOptionsChange,
     onRun,
     languageTitle,
     canRemove,
     isDragging,
     dragHandleProps,
+    stepReadout,
   }) => {
     const [showCodeConfirm, setShowCodeConfirm] = useState(false);
 
@@ -89,10 +95,10 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
               'This query cannot be represented in Builder mode. Simplify it or use Code mode.',
           })
         : row.mode === 'builder'
-        ? i18n.translate('explore.promqlBuilder.codeMayBeIrreversible', {
-            defaultMessage: 'Switching to Code mode may prevent switching back to Builder mode.',
-          })
-        : undefined;
+          ? i18n.translate('explore.promqlBuilder.codeMayBeIrreversible', {
+              defaultMessage: 'Switching to Code mode may prevent switching back to Builder mode.',
+            })
+          : undefined;
 
     const handleModeChange = useCallback(
       (id: string) => {
@@ -138,7 +144,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem className="mqpRowEditor">
             {row.mode === 'builder' && row.builderState ? (
               <PromQLBuilder
                 client={client}
@@ -241,6 +247,12 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                   </EuiFlexGroup>
                 </div>
               </EuiPopover>
+              <RowQueryOptions
+                minStep={row.minStep}
+                legendFormat={row.legendFormat}
+                {...stepReadout}
+                onChange={(options) => onOptionsChange(row.id, options)}
+              />
               {canRemove && (
                 <EuiToolTip
                   content={i18n.translate('explore.metricsQueryPanel.removeQuery', {

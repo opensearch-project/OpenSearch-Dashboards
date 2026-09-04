@@ -44,8 +44,8 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
     data.health?.status === 'breached'
       ? 'error'
       : data.health?.status === 'recovered'
-      ? 'warning'
-      : undefined;
+        ? 'warning'
+        : undefined;
 
   const onViewDashboardClick = useCallback(
     (event: React.MouseEvent) => {

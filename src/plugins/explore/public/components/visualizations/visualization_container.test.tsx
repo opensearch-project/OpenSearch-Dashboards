@@ -53,8 +53,6 @@ const mockVisualizationBuilder = {
         name: 'count',
         schema: VisFieldType.Numerical,
         column: 'count',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     categoricalColumns: [
@@ -63,8 +61,6 @@ const mockVisualizationBuilder = {
         name: 'field1',
         schema: VisFieldType.Categorical,
         column: 'field1',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     dateColumns: [],

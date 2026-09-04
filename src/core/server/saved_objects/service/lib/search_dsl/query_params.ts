@@ -380,7 +380,7 @@ const getMatchPhrasePrefixFields = ({
     if (rawBoost) {
       try {
         boost = parseInt(rawBoost, 10);
-      } catch (e) {
+      } catch {
         boost = 1;
       }
     }

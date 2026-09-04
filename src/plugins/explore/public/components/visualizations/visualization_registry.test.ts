@@ -90,24 +90,18 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const catCol: VisColumn = {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const dateCol: VisColumn = {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
 
     it('should return exact matches when column counts match rule mappings', () => {
@@ -227,8 +221,6 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
 
     it('should return null when no rules match', () => {
@@ -283,16 +275,12 @@ describe('VisualizationRegistry', () => {
         name: 'count',
         schema: VisFieldType.Numerical,
         column: 'count',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const catCol: VisColumn = {
         id: 2,
         name: 'category',
         schema: VisFieldType.Categorical,
         column: 'category',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [numCol], [catCol], []);
@@ -327,24 +315,18 @@ describe('VisualizationRegistry', () => {
         name: 'revenue',
         schema: VisFieldType.Numerical,
         column: 'revenue',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const numCol2: VisColumn = {
         id: 2,
         name: 'cost',
         schema: VisFieldType.Numerical,
         column: 'cost',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const dateCol: VisColumn = {
         id: 3,
         name: 'timestamp',
         schema: VisFieldType.Date,
         column: 'timestamp',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [numCol1, numCol2], [], [dateCol]);
@@ -367,8 +349,6 @@ describe('VisualizationRegistry', () => {
         name: 'timestamp',
         schema: VisFieldType.Date,
         column: 'timestamp',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
 
       const result = registry.getAxesMappingByRule(rule, [], [], [dateCol]);
@@ -382,24 +362,18 @@ describe('VisualizationRegistry', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const catCol: VisColumn = {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const dateCol: VisColumn = {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
     };
     const allColumns = [numCol, catCol, dateCol];
 
@@ -510,8 +484,6 @@ describe('VisualizationRegistry', () => {
         name: 'value2',
         schema: VisFieldType.Numerical,
         column: 'value2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const rule = makeRule(100, [
         {
@@ -552,8 +524,6 @@ describe('VisualizationRegistry', () => {
         name: 'value2',
         schema: VisFieldType.Numerical,
         column: 'value2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       };
       const rule = makeRule(100, [
         {
@@ -600,8 +570,6 @@ describe('VisualizationRegistry', () => {
       name,
       schema,
       column: name,
-      validValuesCount: 10,
-      uniqueValuesCount: 5,
     });
 
     it('should return the saved mapping when all fields still exist and types match', () => {

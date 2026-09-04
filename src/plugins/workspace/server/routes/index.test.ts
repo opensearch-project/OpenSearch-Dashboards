@@ -10,6 +10,7 @@ import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock, dynamicConfigServiceMock } from '../../../../core/server/mocks';
 
 import { workspaceClientMock } from '../workspace_client.mock';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../../common/constants';
 
 import { registerRoutes, WORKSPACES_API_BASE_URL } from './index';
 import { IWorkspaceClientImpl } from '../types';
@@ -28,6 +29,10 @@ describe(`Workspace routes`, () => {
     const router = httpSetup.createRouter('');
 
     mockedWorkspaceClient = workspaceClientMock.create();
+    (mockedWorkspaceClient.list as jest.Mock).mockResolvedValue({
+      success: true,
+      result: { workspaces: [], total: 0, per_page: 0, page: 1 },
+    });
 
     registerRoutes({
       router,
@@ -65,6 +70,51 @@ describe(`Workspace routes`, () => {
     );
   });
 
+  describe('_list', () => {
+    it('accepts the MAXIMUM_WORKSPACES_PER_PAGE sentinel and forwards it to the client', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: MAXIMUM_WORKSPACES_PER_PAGE })
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: MAXIMUM_WORKSPACES_PER_PAGE })
+      );
+    });
+
+    it('defaults to a page size of 20 when perPage is omitted', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({})
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: 20 })
+      );
+    });
+
+    it('honors an explicit numeric perPage from the request', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: 10 })
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: 10 })
+      );
+    });
+
+    it('rejects a perPage that is neither a number nor the sentinel', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: 'not-a-number' })
+        .expect(400);
+    });
+  });
+
   /**
    * This test verifies that the get route returns the exact error message
    * "Invalid saved objects permission" when a user lacks access to a workspace.
@@ -85,6 +135,103 @@ describe(`Workspace routes`, () => {
     expect(result.body).toEqual({
       success: false,
       error: 'Invalid saved objects permission',
+    });
+  });
+
+  describe('custom workspace id', () => {
+    it('creates a workspace with a valid custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc-12',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ id: 'abc-12' })
+      );
+    });
+
+    it('creates a workspace with a 36-character custom id', async () => {
+      const customId = 'a'.repeat(36);
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: customId,
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ id: customId })
+      );
+    });
+
+    it('creates a workspace without a custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.not.objectContaining({ id: expect.anything() })
+      );
+    });
+
+    it('returns 400 when id is shorter than 6 characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain('must be 6–36 characters');
+    });
+
+    it('returns 400 when id is longer than 36 characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'a'.repeat(37),
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain('must be 6–36 characters');
+    });
+
+    it('returns 400 when id contains invalid characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc!@#',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain(
+        'must be 6–36 characters using only letters, numbers, underscores, and hyphens.'
+      );
     });
   });
 

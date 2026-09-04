@@ -17,7 +17,7 @@ describe('application config string utils', () => {
     const validatedInput = validate(input, logger);
 
     expect(validatedInput).toBe(input);
-    expect(logger.error).not.toBeCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('returns trimmed input when input is not empty and prefix or suffix whitespaces', () => {
@@ -31,7 +31,7 @@ describe('application config string utils', () => {
     const validatedInput = validate(input, logger);
 
     expect(validatedInput).toBe('abc');
-    expect(logger.error).not.toBeCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('throws error when input is empty', () => {
@@ -42,6 +42,6 @@ describe('application config string utils', () => {
     expect(() => {
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       validate('   ', logger);
-    }).toThrowError('Input cannot be empty!');
+    }).toThrow('Input cannot be empty!');
   });
 });

@@ -306,14 +306,8 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   renderContent() {
-    const {
-      allIndices,
-      isInitiallyLoadingIndices,
-      step,
-      indexPattern,
-      dataSourceRef,
-      docLinks,
-    } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef, docLinks } =
+      this.state;
 
     const stepInfo = {
       totalStepNumber: this.totalSteps,
@@ -335,7 +329,7 @@ export class CreateIndexPatternWizard extends Component<
       <HeaderControl
         controls={[
           {
-            description: ((
+            description: (
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.description"
                 defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
@@ -345,7 +339,7 @@ export class CreateIndexPatternWizard extends Component<
                   star: <EuiCode>filebeat-*</EuiCode>,
                 }}
               />
-            ) as unknown) as string,
+            ) as unknown as string,
             links: [
               {
                 href: docLinks.links.noDocumentation.indexPatterns.introduction,

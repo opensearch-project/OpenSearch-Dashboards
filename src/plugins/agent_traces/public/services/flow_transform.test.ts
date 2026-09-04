@@ -51,6 +51,7 @@ describe('spansToFlow', () => {
         title: 'TestAgent',
         nodeKind: 'agent',
         duration: 100,
+        maxDuration: 100,
         latency: '100ms',
         status: undefined,
       },

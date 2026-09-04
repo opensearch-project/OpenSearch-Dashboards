@@ -201,9 +201,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
         SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-        SearchStrategyResponse extends
-          | IOpenSearchDashboardsSearchResponse
-          | IDataFrameResponse = IOpenSearchSearchResponse
+        SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+          IOpenSearchSearchResponse,
       >(
         request: SearchStrategyRequest,
         options: ISearchOptions

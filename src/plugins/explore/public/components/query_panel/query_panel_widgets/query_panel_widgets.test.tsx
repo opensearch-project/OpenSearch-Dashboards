@@ -19,6 +19,8 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectQueryStatus: jest.fn(),
   selectEditorMode: jest.fn(),
+  selectQueryLanguage: jest.fn(() => 'PPL'),
+  selectIsPromptEditorMode: jest.fn(() => false),
 }));
 
 // Mock opensearch-dashboards-react
@@ -59,6 +61,15 @@ jest.mock('../../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
 }));
 
+jest.mock('./use_analyze_panel_state', () => ({
+  useAnalyzePanelState: jest.fn(() => ({
+    isOpen: false,
+    setIsOpen: jest.fn(),
+    hasResult: false,
+    isLoading: false,
+  })),
+}));
+
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
@@ -88,9 +99,10 @@ describe('QueryPanelWidgets', () => {
     } as any;
 
     // Mock useOpenSearchDashboards
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    mockUseOpenSearchDashboards = require('../../../../../opensearch_dashboards_react/public')
-      .useOpenSearchDashboards;
+
+    mockUseOpenSearchDashboards =
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../opensearch_dashboards_react/public').useOpenSearchDashboards;
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
         queryPanelActionsRegistry: mockQueryPanelActionsRegistry,

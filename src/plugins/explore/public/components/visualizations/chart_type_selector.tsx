@@ -41,23 +41,26 @@ export const ChartTypeSelector = <T extends ChartType>({
   const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
 
   const chartTypeMappedOptions = useMemo(() => {
-    return visualizationRegistry.getAvailableChartTypes().reduce((acc, metadata) => {
-      if (!acc[metadata.type]) {
-        const { all } = visualizationRegistry.findRulesByColumns(
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          metadata.type
-        );
-        acc[metadata.type] = {
-          value: metadata.type,
-          inputDisplay: metadata.name,
-          iconType: metadata.icon,
-          disabled: all.length === 0 && metadata.type !== 'table',
-        };
-      }
-      return acc;
-    }, {} as Record<string, AvailableChartTypeOption>);
+    return visualizationRegistry.getAvailableChartTypes().reduce(
+      (acc, metadata) => {
+        if (!acc[metadata.type]) {
+          const { all } = visualizationRegistry.findRulesByColumns(
+            numericalColumns,
+            categoricalColumns,
+            dateColumns,
+            metadata.type
+          );
+          acc[metadata.type] = {
+            value: metadata.type,
+            inputDisplay: metadata.name,
+            iconType: metadata.icon,
+            disabled: all.length === 0 && metadata.type !== 'table',
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, AvailableChartTypeOption>
+    );
   }, [numericalColumns, categoricalColumns, dateColumns]);
 
   const selectOptions = useMemo(() => {

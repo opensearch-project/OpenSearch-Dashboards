@@ -406,12 +406,10 @@ describe('plugins discovery system', () => {
         [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
         [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
         [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid(
-          'plugin5'
-        ),
-        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
-          'plugin6'
-        ),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]:
+          Plugins.valid('plugin5'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]:
+          Plugins.valid('plugin6'),
       },
       { createCwd: false }
     );

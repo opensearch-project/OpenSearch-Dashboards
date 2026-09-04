@@ -54,14 +54,14 @@ jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
 describe('GaugeVisStyleControls', () => {
   const mockProps: GaugeVisStyleControlsProps = {
     axisColumnMappings: {
-      value: {
-        id: 1,
-        name: 'value',
-        schema: VisFieldType.Numerical,
-        column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
+      value: [
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+        },
+      ],
     },
     updateVisualization: jest.fn(),
     styleOptions: defaultGaugeChartStyles,
@@ -72,8 +72,6 @@ describe('GaugeVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     ],
     categoricalColumns: [],
@@ -109,7 +107,9 @@ describe('GaugeVisStyleControls', () => {
     };
     render(<GaugeVisStyleControls {...propsWithTitle} />);
 
-    expect(screen.getByPlaceholderText('Title')).toBeInTheDocument();
+    const titleInput = screen.getByPlaceholderText('Auto');
+    expect(titleInput).toBeInTheDocument();
+    expect(titleInput).toHaveValue('');
   });
 
   it('calls onStyleChange when title is changed', async () => {
@@ -119,7 +119,7 @@ describe('GaugeVisStyleControls', () => {
     };
     render(<GaugeVisStyleControls {...propsWithTitle} />);
 
-    const titleInput = screen.getByPlaceholderText('Title');
+    const titleInput = screen.getByPlaceholderText('Auto');
     await fireEvent.change(titleInput, {
       target: { value: 'New Title' },
     });

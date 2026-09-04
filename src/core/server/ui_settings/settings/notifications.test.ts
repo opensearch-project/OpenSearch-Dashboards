@@ -43,10 +43,16 @@ describe('notifications settings', () => {
     it('should only accept string values', () => {
       expect(() => validate('some text')).not.toThrow();
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `
+        "expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+        `
       );
       expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+        `
       );
     });
   });
@@ -58,10 +64,16 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
     });
   });
@@ -73,10 +85,16 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
     });
   });
@@ -88,10 +106,16 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
     });
   });
@@ -103,10 +127,16 @@ describe('notifications settings', () => {
       expect(() => validate(42)).not.toThrow();
       expect(() => validate('Infinity')).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Infinity]"`
+        `
+        "SchemaTypeError: expected value to equal [Infinity]
+        Cause: SchemaTypeError: expected value to equal [Infinity]"
+        `
       );
     });
   });

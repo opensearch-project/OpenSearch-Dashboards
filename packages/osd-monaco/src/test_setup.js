@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-env jest */
-
 // Mock window.matchMedia for Monaco editor
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

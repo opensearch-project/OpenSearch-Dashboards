@@ -3,282 +3,310 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GaugeSeriesOption, CustomSeriesOption } from 'echarts';
-import { PipelineFn, EChartsSpecState, BaseChartStyle } from '../utils/echarts_spec';
+import { GaugeSeriesOption } from 'echarts';
+import { VisColumn } from '../types';
 import { GaugeChartStyle } from './gauge_vis_config';
-import { getSeriesDisplayName } from '../utils/series';
 import { calculateValue } from '../utils/calculation';
-import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { getUnitById } from '../style_panel/unit/collection';
 import {
   getMaxAndMinBase,
   mergeThresholdsWithBase,
   locateThreshold,
 } from '../style_panel/threshold/threshold_utils';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { formatDecimal } from '../utils/data_transformation';
 
-export const createGaugeSeries = ({
-  styles,
-  seriesFields,
-}: {
+const GAUGE_RADIUS = '92%';
+const GAUGE_CENTER: [string, string] = ['50%', '60%'];
+const GAUGE_START_ANGLE = 200;
+const GAUGE_END_ANGLE = -20;
+const GAUGE_ARC_WIDTH = 12;
+
+export interface GaugeTextRenderData {
+  value: string;
+  unit?: string;
+  unitSuffix?: string;
+  unitFirst: boolean;
+  title?: {
+    valueFieldName: string;
+    customTitle?: string;
+  };
+  valueColor: string;
+  titleColor: string;
+  unitColor: string;
+}
+
+interface GaugeArcRenderData {
+  calculatedValue: number | undefined;
+  minBase: number;
+  maxBase: number;
+  normalizedThresholds: Array<[number, string]>;
+  valueArcColor: string;
+}
+
+interface GaugeRenderData {
+  arc: GaugeArcRenderData;
+  text: GaugeTextRenderData;
+}
+
+interface BuildGaugeRenderDataArgs {
+  transformedData: any[][];
   styles: GaugeChartStyle;
-  seriesFields: string[];
-}): PipelineFn => (state) => {
-  const { transformedData = [], axisColumnMappings } = state;
-  const newState = { ...state };
+  valueColumn: VisColumn;
+}
 
-  const series: Array<GaugeSeriesOption | CustomSeriesOption> = [];
+const isValidDisplayNumber = (value: unknown): value is number =>
+  value !== undefined && typeof value === 'number' && !isNaN(value);
 
-  // TODO use instance width and height
-  const fontSizeFactor = 12;
-
-  seriesFields.forEach((item: string) => {
-    if (!transformedData.length || !Array.isArray(transformedData[0])) {
-      // No dataset/header row available; keep rendering stable.
-      return;
-    }
-
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
-
-    const numericalValues: number[] = [];
-
-    const seriesIndex = transformedData[0].indexOf(item);
-
-    if (seriesIndex < 0) return;
-    for (let i = 1; i < transformedData.length; i++) {
-      numericalValues.push(transformedData[i][seriesIndex]);
-    }
-
-    const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
-    const validValues = numericalValues.filter((v) => !isNaN(v));
-    const maxNumber = validValues.length > 0 ? Math.max(...validValues) : 0;
-    const minNumber = validValues.length > 0 ? Math.min(...validValues) : 0;
-
-    const isValidNumber =
-      calculatedValue !== undefined &&
-      typeof calculatedValue === 'number' &&
-      !isNaN(calculatedValue);
-
-    const selectedUnit = getUnitById(styles?.unitId);
-
-    const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
-
-    const { minBase, maxBase } = getMaxAndMinBase(
-      minNumber,
-      maxNumber,
-      styles?.min,
-      styles?.max,
-      calculatedValue
-    );
-
-    const { textColor, mergedThresholds } = mergeThresholdsWithBase(
-      minBase,
-      maxBase,
-      styles?.thresholdOptions?.baseColor,
-      styles?.thresholdOptions?.thresholds,
-      calculatedValue
-    );
-
-    const targetThreshold = locateThreshold(mergedThresholds, calculatedValue);
-
-    const valueArcColor = targetThreshold?.color ?? 'transparent';
-
-    // Gauge colors are defined as “up to this point”, not “from this point” — each [percent, color] means use this color until this percent.
-    const normalizeThresholds =
-      maxBase > minBase
-        ? mergedThresholds.map((t, index) => {
-            if (index > 0)
-              return [(t.value - minBase) / (maxBase - minBase), mergedThresholds[index - 1].color];
-            return [0, t.color];
-          })
-        : [];
-
-    if (normalizeThresholds.length > 0) {
-      normalizeThresholds.push([1, mergedThresholds[mergedThresholds.length - 1].color]);
-    }
-
-    const thresholdArc = {
-      type: 'gauge',
-      center: ['50%', '60%'],
-      startAngle: 200,
-      radius: '100%',
-      endAngle: -20,
-      z: 5,
-      min: minBase,
-      max: maxBase,
-      tooltip: { show: false },
-      progress: {
-        show: true,
-        width: fontSizeFactor + 2,
-        itemStyle: {
-          color: getColors().backgroundShade,
-        },
-      },
-      pointer: {
-        show: false,
-      },
-      axisLine: {
-        lineStyle: {
-          width: fontSizeFactor + 4,
-          ...(normalizeThresholds.length > 0 && { color: normalizeThresholds }),
-        },
-      },
-      axisTick: {
-        show: false,
-      },
-      splitLine: {
-        show: false,
-      },
-      axisLabel: {
-        show: false,
-      },
-      anchor: {
-        show: false,
-      },
+const createGaugeText = ({
+  calculatedValue,
+  selectedUnit,
+  styles,
+  valueFieldName,
+  textColor,
+}: {
+  calculatedValue: number | undefined;
+  selectedUnit: ReturnType<typeof getUnitById>;
+  styles: GaugeChartStyle;
+  valueFieldName: string;
+  textColor: string;
+}): GaugeTextRenderData => {
+  const isValidNumber = isValidDisplayNumber(calculatedValue);
+  const effectiveTextColor = styles.useThresholdColor ? textColor : getColors().text;
+  const baseText = {
+    unitFirst: false,
+    ...(styles.showTitle && {
       title: {
-        show: false,
+        valueFieldName,
+        customTitle: styles.title || undefined,
       },
-      detail: {
-        show: false,
-      },
-      data: [
-        {
-          value: maxBase,
-          name: styles?.title || seriesDisplayName,
-        },
-      ],
-    } as GaugeSeriesOption;
-
-    const valueArc: GaugeSeriesOption = {
-      type: 'gauge',
-      center: ['50%', '60%'],
-      radius: '100%',
-      startAngle: 200,
-      endAngle: -20,
-      z: 10,
-      min: minBase,
-      max: maxBase,
-      tooltip: { show: false },
-      itemStyle: {
-        color: valueArcColor,
-      },
-      progress: {
-        show: true,
-        width: fontSizeFactor,
-      },
-      pointer: {
-        show: false,
-      },
-
-      axisLine: {
-        show: true,
-        lineStyle: {
-          width: fontSizeFactor,
-          color: [
-            [1, DEFAULT_GREY], // remaining grey part
-          ],
-        },
-      },
-      axisTick: {
-        show: false,
-      },
-      splitLine: {
-        show: false,
-      },
-      axisLabel: {
-        show: false,
-      },
-      detail: {
-        show: false,
-      },
-      data: [
-        {
-          value: calculatedValue,
-        },
-      ],
-    };
-
-    const textCustom: CustomSeriesOption = {
-      type: 'custom',
-      coordinateSystem: 'polar',
-      tooltip: { show: false },
-      data: [
-        {
-          value: calculatedValue,
-        },
-      ],
-      renderItem(params, api) {
-        const width = api.getWidth();
-        const height = api.getHeight();
-
-        const textSizeFactor = Math.min(width, height) / 20;
-        const valueFontSize = 2 * textSizeFactor * (selectedUnit?.fontScale ?? 1);
-        const titleFontSize = textSizeFactor / 2;
-        return {
-          type: 'group',
-          x: width * 0.5,
-          y: height * 0.6,
-          children: [
-            {
-              type: 'text' as const,
-              style: {
-                x: 0,
-                y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: displayValue as string,
-                textAlign: 'center',
-                fontSize: valueFontSize,
-                fontWeight: 'bold',
-                fill: styles?.useThresholdColor ? textColor : getColors().text,
-              },
-            },
-            ...(styles.showTitle
-              ? [
-                  {
-                    type: 'text' as const,
-                    style: {
-                      x: 0,
-                      y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                      text: styles?.title || seriesDisplayName,
-                      textAlign: 'center',
-                      fontSize: titleFontSize,
-                      fill: getColors().text,
-                    },
-                  },
-                ]
-              : []),
-          ],
-        };
-      },
-    };
-
-    series.push(valueArc);
-    series.push(thresholdArc);
-    series.push(textCustom);
-  });
-
-  newState.series = series;
-
-  return newState;
-};
-
-export const assembleGaugeSpec = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { baseConfig, transformedData = [], series } = state;
-
-  const spec = {
-    ...baseConfig,
-    // Polar coordinate for text layer
-    angleAxis: { show: false },
-    radiusAxis: {
-      show: false,
-    },
-    polar: {
-      center: ['50%', '60%'],
-      radius: '100%',
-    },
-    dataset: { source: transformedData },
-    series,
+    }),
+    valueColor: effectiveTextColor,
+    titleColor: getColors().text,
+    unitColor: effectiveTextColor,
   };
 
-  return { ...state, spec };
+  if (!isValidNumber) {
+    return {
+      ...baseText,
+      value: '-',
+    };
+  }
+
+  if (selectedUnit?.display) {
+    const unitDisplay = selectedUnit.display(calculatedValue, selectedUnit.symbol, styles.decimals);
+    const segments = unitDisplay.segments;
+
+    if (!segments?.length) {
+      return {
+        ...baseText,
+        value: String(unitDisplay.label),
+        unitSuffix: styles.unitSuffix,
+      };
+    }
+
+    const unitSegment = segments.find((segment) => segment.type === 'unit');
+    const valueSegment = segments.find((segment) => segment.type === 'value');
+
+    return {
+      ...baseText,
+      value: valueSegment !== undefined ? String(valueSegment.value) : String(unitDisplay.label),
+      unit: unitSegment !== undefined ? String(unitSegment.value) : undefined,
+      unitSuffix: styles.unitSuffix,
+      unitFirst: segments[0]?.type === 'unit',
+    };
+  }
+
+  return {
+    ...baseText,
+    value: formatDecimal(calculatedValue, styles.decimals),
+    unit: selectedUnit?.symbol,
+    unitSuffix: styles.unitSuffix,
+  };
 };
+
+export const buildGaugeRenderData = ({
+  transformedData,
+  styles,
+  valueColumn,
+}: BuildGaugeRenderDataArgs): GaugeRenderData | undefined => {
+  if (!transformedData.length || !Array.isArray(transformedData[0])) {
+    return undefined;
+  }
+
+  const field = valueColumn.column;
+  const seriesIndex = transformedData[0].indexOf(field);
+
+  if (seriesIndex < 0) return undefined;
+
+  const numericalValues: any[] = [];
+  for (let i = 1; i < transformedData.length; i++) {
+    numericalValues.push(transformedData[i][seriesIndex]);
+  }
+
+  const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
+  const validValues = numericalValues.filter((value) => !isNaN(value));
+  const maxNumber = validValues.length > 0 ? Math.max(...validValues) : 0;
+  const minNumber = validValues.length > 0 ? Math.min(...validValues) : 0;
+  const selectedUnit = getUnitById(styles.unitId);
+
+  const { minBase, maxBase } = getMaxAndMinBase(
+    minNumber,
+    maxNumber,
+    styles.min,
+    styles.max,
+    calculatedValue
+  );
+
+  const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+    minBase,
+    maxBase,
+    styles.thresholdOptions?.baseColor,
+    styles.thresholdOptions?.thresholds,
+    calculatedValue
+  );
+
+  const targetThreshold = locateThreshold(mergedThresholds, calculatedValue);
+  const valueArcColor = targetThreshold?.color ?? 'transparent';
+
+  // Gauge colors are defined as "up to this point", not "from this point".
+  const normalizedThresholds: Array<[number, string]> =
+    maxBase > minBase
+      ? mergedThresholds.map((threshold, index) => {
+          if (index > 0) {
+            return [
+              (threshold.value - minBase) / (maxBase - minBase),
+              mergedThresholds[index - 1].color,
+            ];
+          }
+          return [0, threshold.color];
+        })
+      : [];
+
+  if (normalizedThresholds.length > 0) {
+    normalizedThresholds.push([1, mergedThresholds[mergedThresholds.length - 1].color]);
+  }
+
+  return {
+    arc: {
+      calculatedValue,
+      minBase,
+      maxBase,
+      normalizedThresholds,
+      valueArcColor,
+    },
+    text: createGaugeText({
+      calculatedValue,
+      selectedUnit,
+      styles,
+      valueFieldName: valueColumn.name,
+      textColor,
+    }),
+  };
+};
+
+const createThresholdArc = (arc: GaugeArcRenderData): GaugeSeriesOption =>
+  ({
+    type: 'gauge',
+    center: GAUGE_CENTER,
+    startAngle: GAUGE_START_ANGLE,
+    radius: GAUGE_RADIUS,
+    endAngle: GAUGE_END_ANGLE,
+    z: 5,
+    min: arc.minBase,
+    max: arc.maxBase,
+    tooltip: { show: false },
+    progress: {
+      show: true,
+      width: GAUGE_ARC_WIDTH + 2,
+      itemStyle: {
+        color: getColors().backgroundShade,
+      },
+    },
+    pointer: {
+      show: false,
+    },
+    axisLine: {
+      lineStyle: {
+        width: GAUGE_ARC_WIDTH + 4,
+        ...(arc.normalizedThresholds.length > 0 && { color: arc.normalizedThresholds }),
+      },
+    },
+    axisTick: {
+      show: false,
+    },
+    splitLine: {
+      show: false,
+    },
+    axisLabel: {
+      show: false,
+    },
+    anchor: {
+      show: false,
+    },
+    title: {
+      show: false,
+    },
+    detail: {
+      show: false,
+    },
+    data: [
+      {
+        value: arc.maxBase,
+      },
+    ],
+  }) as GaugeSeriesOption;
+
+const createValueArc = (arc: GaugeArcRenderData): GaugeSeriesOption => ({
+  type: 'gauge',
+  center: GAUGE_CENTER,
+  radius: GAUGE_RADIUS,
+  startAngle: GAUGE_START_ANGLE,
+  endAngle: GAUGE_END_ANGLE,
+  z: 10,
+  min: arc.minBase,
+  max: arc.maxBase,
+  tooltip: { show: false },
+  itemStyle: {
+    color: arc.valueArcColor,
+  },
+  progress: {
+    show: true,
+    width: GAUGE_ARC_WIDTH,
+  },
+  pointer: {
+    show: false,
+  },
+  axisLine: {
+    show: true,
+    lineStyle: {
+      width: GAUGE_ARC_WIDTH,
+      color: [
+        [1, DEFAULT_GREY], // remaining grey part
+      ],
+    },
+  },
+  axisTick: {
+    show: false,
+  },
+  splitLine: {
+    show: false,
+  },
+  axisLabel: {
+    show: false,
+  },
+  title: {
+    show: false,
+  },
+  detail: {
+    show: false,
+  },
+  data: [
+    {
+      value: arc.calculatedValue,
+    },
+  ],
+});
+
+export const createGaugeSeries = (arc?: GaugeArcRenderData): GaugeSeriesOption[] =>
+  arc ? [createValueArc(arc), createThresholdArc(arc)] : [];

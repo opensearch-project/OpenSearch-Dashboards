@@ -33,13 +33,13 @@ import { regenerateIds } from './regenerate_ids';
 import { SavedObject } from '../types';
 
 describe('#regenerateIds', () => {
-  const objects = ([
+  const objects = [
     { type: 'foo', id: '1' },
     { type: 'bar', id: '2' },
     { type: 'baz', id: '3' },
-  ] as any) as SavedObject[];
+  ] as any as SavedObject[];
 
-  const dataSourceObjects = ([{ type: 'data-source', id: '1' }] as any) as SavedObject[];
+  const dataSourceObjects = [{ type: 'data-source', id: '1' }] as any as SavedObject[];
 
   test('can filter out data source object', () => {
     expect(regenerateIds(dataSourceObjects, '').size).toBe(0);

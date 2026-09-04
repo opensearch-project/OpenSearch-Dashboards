@@ -70,48 +70,48 @@ describe('Vislib Color Service', () => {
   it('should throw error if not initialized', () => {
     const colorsBad = new ColorsService();
 
-    expect(() => colorsBad.createColorLookupFunction(arr, {})).toThrowError();
+    expect(() => colorsBad.createColorLookupFunction(arr, {})).toThrow();
   });
 
   it('should throw an error if input is not an array', () => {
     expect(() => {
       colors.createColorLookupFunction(200);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       colors.createColorLookupFunction('help');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       colors.createColorLookupFunction(true);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       colors.createColorLookupFunction();
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       colors.createColorLookupFunction(nullValue);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       colors.createColorLookupFunction(emptyObject);
-    }).toThrowError();
+    }).toThrow();
   });
 
   describe('when array is not composed of numbers, strings, or undefined values', () => {
     it('should throw an error', () => {
       expect(() => {
         colors.createColorLookupFunction(arrayOfObjects);
-      }).toThrowError();
+      }).toThrow();
 
       expect(() => {
         colors.createColorLookupFunction(arrayOfBooleans);
-      }).toThrowError();
+      }).toThrow();
 
       expect(() => {
         colors.createColorLookupFunction(arrayOfNullValues);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 
@@ -119,15 +119,15 @@ describe('Vislib Color Service', () => {
     it('should not throw an error', () => {
       expect(() => {
         colors.createColorLookupFunction(arr);
-      }).not.toThrowError();
+      }).not.toThrow();
 
       expect(() => {
         colors.createColorLookupFunction(arrayOfNumbers);
-      }).not.toThrowError();
+      }).not.toThrow();
 
       expect(() => {
         colors.createColorLookupFunction(arrayOfUndefinedValues);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 

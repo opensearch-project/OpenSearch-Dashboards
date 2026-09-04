@@ -13,6 +13,7 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ChartConfig } from '../../../components/visualizations/visualization_builder.types';
 
 jest.mock('../hooks/use_query_builder_state', () => ({
   useQueryBuilderState: jest.fn(),
@@ -82,12 +83,19 @@ const buildServices = () => ({
 const mockSavedExplore = {
   id: 'explore-1',
   title: 'My Explore',
+  visualization: '',
   save: jest.fn().mockResolvedValue('explore-1'),
 };
 
-const buildVisualizationBuilder = () => ({
+const buildVisualizationBuilder = (
+  visConfig: ChartConfig = {
+    type: 'bar',
+    styles: {},
+    axesMapping: { x: 'field' },
+  }
+) => ({
   visualizationBuilderForEditor: {
-    visConfig$: { value: { type: 'bar', styles: {}, axesMapping: { x: 'field' } } },
+    visConfig$: new BehaviorSubject(visConfig),
     isVisDirty$: new BehaviorSubject(false),
     getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
   },
@@ -127,10 +135,12 @@ describe('SaveVisButton', () => {
     expect(screen.getByTestId('saveVisualizationEditorButton')).toHaveTextContent('Save and back');
   });
 
-  it('opens SaveVisModal when save is clicked for new explore', () => {
+  it('opens SaveVisModal when save is clicked for new explore', async () => {
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
-    expect(screen.getByTestId('save-vis-modal')).toBeInTheDocument();
+    // The click handler is async (slow-query save warning is awaited first), so
+    // the modal opens on the next tick.
+    expect(await screen.findByTestId('save-vis-modal')).toBeInTheDocument();
   });
 
   it('saves directly without modal for existing explore when not dirty', async () => {
@@ -146,9 +156,22 @@ describe('SaveVisButton', () => {
     });
   });
 
-  it('saves directly without modal for existing explore when dirty', async () => {
+  it('serializes panel settings when saving an existing visualization', async () => {
+    const savedExplore = {
+      ...mockSavedExplore,
+      save: jest.fn().mockResolvedValue('explore-1'),
+    };
     (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
-    (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: mockSavedExplore });
+    (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore });
+    (useVisualizationBuilder as jest.Mock).mockReturnValue(
+      buildVisualizationBuilder({
+        type: 'bar',
+        styles: {},
+        axesMapping: { x: 'field' },
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
     (useQueryBuilderState as jest.Mock).mockReturnValue({
       queryEditorState: {
         isQueryEditorDirty: true,
@@ -162,8 +185,14 @@ describe('SaveVisButton', () => {
     fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
 
     await waitFor(() => {
-      expect(mockSavedExplore.save).toHaveBeenCalled();
+      expect(savedExplore.save).toHaveBeenCalled();
     });
+    expect(JSON.parse(savedExplore.visualization)).toEqual(
+      expect.objectContaining({
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
   });
 
   it('discards and navigates to originatingApp when originatingApp is set', () => {
@@ -175,11 +204,8 @@ describe('SaveVisButton', () => {
 
   it('saves and navigates to edit path when originatingApp is set', () => {
     mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    const mockReload = jest.fn();
-    Object.defineProperty(window, 'location', {
-      value: { ...window.location, reload: mockReload },
-      writable: true,
-    });
+    // jsdom 26: spy on location.reload rather than replacing the location object.
+    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
 
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));

@@ -17,13 +17,13 @@ import { DATASET, S3_FIELD_TYPES } from '../../common';
 import { castS3FieldTypeToOSDFieldType, s3TypeConfig } from './s3_type';
 
 describe('s3TypeConfig', () => {
-  const mockHttp = ({
+  const mockHttp = {
     fetch: jest.fn(),
     post: jest.fn(),
-  } as unknown) as HttpSetup;
-  const mockSavedObjectsClient = ({
+  } as unknown as HttpSetup;
+  const mockSavedObjectsClient = {
     find: jest.fn(),
-  } as unknown) as SavedObjectsClientContract;
+  } as unknown as SavedObjectsClientContract;
   const mockServices = {
     http: mockHttp,
     savedObjects: { client: mockSavedObjectsClient },

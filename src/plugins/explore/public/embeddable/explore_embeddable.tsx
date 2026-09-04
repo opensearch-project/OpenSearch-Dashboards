@@ -64,9 +64,9 @@ import { CommonVisualizationRender } from '../components/visualizations/visualiz
 import { RenderChartConfig } from '../components/visualizations/types';
 import {
   TransformationService,
-  UrlTransformationState,
   registerAllTransformations,
 } from '../components/data_transformations';
+import { PanelDataService } from './panel_data_service';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -114,9 +114,35 @@ interface ExploreEmbeddableConfig {
   editApp: string;
 }
 
+interface VisualizationMetadata {
+  title?: string;
+  description?: string;
+}
+
+const getVisualizationMetadata = (visualization?: string): VisualizationMetadata => {
+  if (!visualization) {
+    return {};
+  }
+
+  try {
+    const { title, description } = JSON.parse(visualization);
+    return { title, description };
+  } catch {
+    return {};
+  }
+};
+
+const UNSAVED_DASHBOARD_CROSSHAIR_GROUP = 'dashboard-unsaved';
+
+export const getCrosshairGroup = (
+  useSharedCrosshair: boolean | undefined,
+  containerId: string | undefined
+) => (useSharedCrosshair ? containerId || UNSAVED_DASHBOARD_CROSSHAIR_GROUP : undefined);
+
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
-  implements IEmbeddable<ExploreInput, ExploreOutput> {
+  implements IEmbeddable<ExploreInput, ExploreOutput>
+{
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -124,6 +150,7 @@ export class ExploreEmbeddable
   private filtersSearchSource?: ISearchSource;
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
+  private panelMetadataVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   private panelTitle: string = '';
   private filterManager: FilterManager;
@@ -137,13 +164,15 @@ export class ExploreEmbeddable
   private root?: Root;
 
   // Variable interpolation support
-  private interpolationService: IVariableInterpolationService = createNoOpVariableInterpolationService();
+  private interpolationService: IVariableInterpolationService =
+    createNoOpVariableInterpolationService();
   private variableSubscription?: Subscription;
   public originalQuery?: string;
   private lastInterpolatedQuery?: string;
 
   // Data transformation support
   private transformationService: TransformationService;
+  private readonly visualizationMetadata: VisualizationMetadata;
 
   constructor(
     {
@@ -160,10 +189,12 @@ export class ExploreEmbeddable
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
+    const visualizationMetadata = getVisualizationMetadata(savedExplore.visualization);
     super(
       initialInput,
       {
-        defaultTitle: savedExplore.title,
+        defaultTitle: visualizationMetadata.title || savedExplore.title,
+        description: visualizationMetadata.description,
         editUrl,
         editPath,
         editApp,
@@ -175,12 +206,12 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    this.visualizationMetadata = visualizationMetadata;
     // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
       data: new DataAdapter(),
     };
-
     // Initialize transformation service
     this.transformationService = new TransformationService();
     registerAllTransformations(this.transformationService);
@@ -205,6 +236,19 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+    // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
+    // fires input$.next() (which triggers handlePanelMetadataVariables correctly) but then immediately
+    // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
+    // Subscribing to output$ ensures handlePanelMetadataVariables re-applies variable interpolation
+    // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
+    if (parent && 'variableService' in parent) {
+      const dashboardContainer = parent as unknown as DashboardContainer;
+      this.panelMetadataVariableSubscription = merge(
+        this.getInput$(),
+        this.getOutput$(),
+        dashboardContainer.variableService.getVariables$()
+      ).subscribe(this.handlePanelMetadataVariables);
+    }
   }
 
   // initialize transformation pipeline from saved explore
@@ -223,6 +267,31 @@ export class ExploreEmbeddable
     }
   }
 
+  private handlePanelMetadataVariables = () => {
+    let panelTitle = this.output.title ?? '';
+    if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
+      panelTitle = this.interpolationService.interpolate(this.input.title);
+    } else {
+      const defaultTitle = this.visualizationMetadata.title || this.savedExplore.title;
+      if (this.interpolationService.hasVariables(defaultTitle)) {
+        panelTitle = this.interpolationService.interpolate(defaultTitle);
+      }
+    }
+
+    const description = this.visualizationMetadata.description;
+    const panelDescription =
+      description && this.interpolationService.hasVariables(description)
+        ? this.interpolationService.interpolate(description)
+        : description;
+
+    this.updateOutput({ title: panelTitle, description: panelDescription });
+    this.panelTitle = panelTitle;
+  };
+
+  public getDescription() {
+    return this.output.description;
+  }
+
   /**
    * Initialize variable interpolation service and subscription
    * Variables are managed by the parent DashboardContainer
@@ -232,7 +301,7 @@ export class ExploreEmbeddable
     this.interpolationService = createNoOpVariableInterpolationService();
 
     if (parent && 'variableInterpolationService' in parent) {
-      const dashboardContainer = (parent as unknown) as DashboardContainer;
+      const dashboardContainer = parent as unknown as DashboardContainer;
       this.interpolationService = dashboardContainer.variableInterpolationService;
 
       if ('variableService' in dashboardContainer) {
@@ -533,12 +602,8 @@ export class ExploreEmbeddable
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const {
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        unknownColumns,
-      } = visualizationData;
+      const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
+        visualizationData;
       const allColumns = [
         ...(numericalColumns ?? []),
         ...(categoricalColumns ?? []),
@@ -623,6 +688,10 @@ export class ExploreEmbeddable
               showRawTable={false}
               timeRange={searchContext.timeRange}
               onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+              crosshairGroup={getCrosshairGroup(
+                this.input.useSharedCrosshair,
+                this.parent?.getInput().id
+              )}
             />
           );
           this.searchProps.chartRender = chartRender;
@@ -635,6 +704,15 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
+
+    // Update shared panel data store so the global fetch_panel_data tool returns fresh data
+    const savedExploreId = this.savedExplore.id;
+    if (savedExploreId) {
+      PanelDataService.getInstance()?.setPanelData(savedExploreId, {
+        rows: transformedRows,
+        panelTitle: this.panelTitle || this.savedExplore.title,
+      });
+    }
 
     // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
@@ -694,9 +772,17 @@ export class ExploreEmbeddable
       this.variableSubscription.unsubscribe();
     }
 
+    if (this.panelMetadataVariableSubscription) {
+      this.panelMetadataVariableSubscription.unsubscribe();
+    }
+
     // Cleanup transformation service
     if (this.transformationService) {
       this.transformationService.destroy();
+    }
+
+    if (this.savedExplore.id) {
+      PanelDataService.getInstance()?.removePanelData(this.savedExplore.id);
     }
 
     if (this.abortController) {

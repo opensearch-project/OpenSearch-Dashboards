@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`StaticLookupFormatEditor should render multiple lookup entries and unknown key value 1`] = `
 <Fragment>

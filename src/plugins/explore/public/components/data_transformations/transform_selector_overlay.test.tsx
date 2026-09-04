@@ -8,7 +8,7 @@ import { TransformSelectorButton } from './transform_selector_overlay';
 import { ITransformationService } from './types';
 
 const createMockService = (): ITransformationService =>
-  (({
+  ({
     getDefinitions: jest.fn(() => [
       {
         id: 'limit',
@@ -32,7 +32,7 @@ const createMockService = (): ITransformationService =>
         iconType: 'filter',
       },
     ]),
-  } as unknown) as ITransformationService);
+  }) as unknown as ITransformationService;
 
 describe('TransformSelectorButton', () => {
   const onSelectTransformation = jest.fn();

@@ -51,7 +51,7 @@ export interface ExpressionFunctionDefinition<
   Input,
   Arguments extends Record<string, any>,
   Output,
-  Context extends ExecutionContext = ExecutionContext
+  Context extends ExecutionContext = ExecutionContext,
 > {
   /**
    * The name of the function, as will be used in expression.

@@ -63,14 +63,8 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const {
-        type,
-        objects,
-        search,
-        excludeExportDetails,
-        includeReferencesDeep,
-        workspaces,
-      } = req.body;
+      const { type, objects, search, excludeExportDetails, includeReferencesDeep, workspaces } =
+        req.body;
       const types = typeof type === 'string' ? [type] : type;
 
       // need to access the registry for type validation, can't use the schema for this

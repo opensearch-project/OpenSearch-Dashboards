@@ -76,18 +76,36 @@ describe('ppl_request_helpers', () => {
     it('builds query request with correct structure', () => {
       const dataset = createMockDataset();
       const result = buildPPLQueryRequest(dataset, 'source = test-index');
+      const query = {
+        query: 'source = test-index',
+        language: 'PPL',
+        format: 'jdbc',
+        dataset: buildPPLDataset(dataset),
+      };
       expect(result).toEqual({
         params: {
           index: 'test-index',
           body: {
             query: {
-              query: 'source = test-index',
-              language: 'PPL',
-              format: 'jdbc',
-              dataset: buildPPLDataset(dataset),
+              ...query,
+              // The interceptor reads the query to run from queries[0].
+              queries: [query],
             },
           },
         },
+      });
+    });
+
+    it('carries the query in queries[0] so the interceptor does not fall back to the shared query string', () => {
+      const dataset = createMockDataset();
+      const result = buildPPLQueryRequest(dataset, 'source = test-index');
+      const { queries } = result.params.body.query;
+      expect(queries).toHaveLength(1);
+      expect(queries?.[0]).toEqual({
+        query: 'source = test-index',
+        language: 'PPL',
+        format: 'jdbc',
+        dataset: buildPPLDataset(dataset),
       });
     });
 
@@ -131,7 +149,7 @@ describe('ppl_request_helpers', () => {
   });
 
   describe('executePPLQuery', () => {
-    const mockDataService = ({
+    const mockDataService = {
       query: {
         queryString: {
           setQuery: jest.fn(),
@@ -140,7 +158,7 @@ describe('ppl_request_helpers', () => {
       search: {
         search: jest.fn(),
       },
-    } as unknown) as DataPublicPluginStart;
+    } as unknown as DataPublicPluginStart;
 
     const mockRequest = buildPPLQueryRequest(createMockDataset(), 'source = test-index');
 
@@ -153,10 +171,14 @@ describe('ppl_request_helpers', () => {
 
     it('executes query successfully', async () => {
       await executePPLQuery(mockDataService, mockRequest);
-      expect(mockDataService.query.queryString.setQuery).toHaveBeenCalledWith(
-        mockRequest.params.body.query
-      );
       expect(mockDataService.search.search).toHaveBeenCalledWith(mockRequest, {});
+    });
+
+    it('does not mutate the shared query string', async () => {
+      // These are background fetches from the flyout; mutating the shared
+      // QueryStringManager would leak the flyout's query/dataset into the main editor.
+      await executePPLQuery(mockDataService, mockRequest);
+      expect(mockDataService.query.queryString.setQuery).not.toHaveBeenCalled();
     });
 
     it('throws error when data service is not available', async () => {
@@ -218,7 +240,7 @@ describe('ppl_request_helpers', () => {
   });
 
   describe('PPLService', () => {
-    const mockDataService = ({
+    const mockDataService = {
       query: {
         queryString: {
           setQuery: jest.fn(),
@@ -227,7 +249,7 @@ describe('ppl_request_helpers', () => {
       search: {
         search: jest.fn(),
       },
-    } as unknown) as DataPublicPluginStart;
+    } as unknown as DataPublicPluginStart;
 
     let pplService: PPLService;
 

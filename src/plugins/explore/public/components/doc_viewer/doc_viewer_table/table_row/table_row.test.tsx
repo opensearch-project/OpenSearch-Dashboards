@@ -121,6 +121,43 @@ describe('DocViewTableRow', () => {
     expect(screen.getByTestId('filterRemoveButton')).toBeDisabled();
   });
 
+  it.each(['date', 'date_nanos'])(
+    'does not render value filter buttons for %s fields but keeps the column toggle',
+    (fieldType) => {
+      render(
+        <DocViewTableRow
+          {...defaultProps}
+          fieldType={fieldType}
+          onFilter={mockOnFilter}
+          onToggleColumn={mockOnToggleColumn}
+          fieldMapping={{ ...mockFieldMapping, type: fieldType }}
+        />
+      );
+
+      expect(screen.queryByTestId('filterAddButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('filterRemoveButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleColumnButton')).toBeInTheDocument();
+    }
+  );
+
+  it('does not render value filter buttons for the configured time field even when not date-typed', () => {
+    // Mirrors the data-table gate: the time field is suppressed regardless of its mapped type.
+    render(
+      <DocViewTableRow
+        {...defaultProps}
+        fieldType="string"
+        isTimeField={true}
+        onFilter={mockOnFilter}
+        onToggleColumn={mockOnToggleColumn}
+        fieldMapping={mockFieldMapping}
+      />
+    );
+
+    expect(screen.queryByTestId('filterAddButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterRemoveButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('toggleColumnButton')).toBeInTheDocument();
+  });
+
   it('renders toggle column button when provided', () => {
     render(
       <DocViewTableRow

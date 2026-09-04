@@ -74,7 +74,7 @@ describe('#add()', () => {
     expect(stopCoreSystem).not.toHaveBeenCalled();
     expect(() => {
       fatalErrors.add(new Error('foo'));
-    }).toThrowError();
+    }).toThrow();
     expect(stopCoreSystem).toHaveBeenCalled();
     expect(stopCoreSystem).toHaveBeenCalledWith();
   });
@@ -91,7 +91,7 @@ describe('#add()', () => {
     expect(rootDomElement.children).toHaveLength(2);
     expect(() => {
       fatalErrors.add(new Error('foo'));
-    }).toThrowError();
+    }).toThrow();
     expect(rootDomElement).toMatchSnapshot('fatal error screen container');
     expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
   });
@@ -107,7 +107,7 @@ describe('setup.get$()', () => {
     expect(onError).not.toHaveBeenCalled();
     expect(() => {
       fatalErrors.add(new Error('bar'));
-    }).toThrowError();
+    }).toThrow();
 
     expect(onError).toHaveBeenCalled();
     expect(onError).toHaveBeenCalledWith({

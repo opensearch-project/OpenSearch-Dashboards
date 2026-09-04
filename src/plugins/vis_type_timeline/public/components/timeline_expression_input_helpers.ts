@@ -32,7 +32,7 @@ import { get, startsWith } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 
-import { Parser } from 'pegjs';
+import { Parser } from 'peggy';
 
 // @ts-ignore
 import { parse } from '../../common/_generated_/chain';
@@ -167,7 +167,7 @@ export async function suggest(
       // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
       // attempt will throw an error.
       message = JSON.parse(err.message);
-    } catch (e) {
+    } catch {
       // The expression isn't correctly formatted, so JSON.parse threw an error.
       return;
     }

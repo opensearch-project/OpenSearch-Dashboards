@@ -13,6 +13,6 @@ describe('<HomeIcon />', () => {
     const { container } = render(<HomeIcon core={coreStartMock} appId="foo" />);
     const component = container.children[0].children[0];
     fireEvent.click(component);
-    expect(coreStartMock.application.navigateToApp).toBeCalledWith('foo');
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('foo');
   });
 });

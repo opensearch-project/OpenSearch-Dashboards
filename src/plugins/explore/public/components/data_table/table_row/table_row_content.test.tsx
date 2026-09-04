@@ -12,8 +12,13 @@ import { TableRowContent } from './table_row_content';
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
-  TableCell: ({ columnId, sanitizedCellValue }: any) => (
-    <td data-test-subj={`table-cell-${columnId}`}>{sanitizedCellValue}</td>
+  TableCell: ({ columnId, sanitizedCellValue, disableValueFilter }: any) => (
+    <td
+      data-test-subj={`table-cell-${columnId}`}
+      data-disable-value-filter={String(Boolean(disableValueFilter))}
+    >
+      {sanitizedCellValue}
+    </td>
   ),
 }));
 
@@ -146,6 +151,50 @@ describe('TableRowContent', () => {
     expect(screen.getByTestId('table-cell-field1')).toBeInTheDocument();
     expect(screen.getByTestId('table-cell-field2')).toBeInTheDocument();
   });
+
+  it('disables value filtering on the configured time field regardless of its type', () => {
+    // timeFieldName is 'timestamp'; type is string here to prove it's the identity check.
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['timestamp', 'field2']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-timestamp')).toHaveAttribute(
+      'data-disable-value-filter',
+      'true'
+    );
+    expect(screen.getByTestId('table-cell-field2')).toHaveAttribute(
+      'data-disable-value-filter',
+      'false'
+    );
+  });
+
+  it.each(['date', 'date_nanos'])(
+    'disables value filtering on %s fields even when they are not the time field',
+    (type) => {
+      mockDataset.fields.getByName.mockReturnValue({ type, filterable: true });
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'true'
+      );
+    }
+  );
 
   it('hides expand toggle when on traces page', () => {
     render(

@@ -60,6 +60,13 @@ export interface IUiSettingsClient {
   getUserProvidedWithScope: <T = any>(key: string, scope: UiSettingScope) => Promise<T>;
 
   /**
+   * Asynchronously fetches all user-provided values for a single scope.
+   */
+  getAllUserProvidedWithScope: (
+    scope: UiSettingScope
+  ) => Promise<Record<string, UserProvidedValues>>;
+
+  /**
    * Gets an observable of the current value for a config key, and all updates to that config
    * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
    */

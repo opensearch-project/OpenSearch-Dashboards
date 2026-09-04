@@ -212,7 +212,7 @@ type FieldValue = unknown;
 export interface ValidationConfig<
   FormType extends FormData = any,
   Error extends string = string,
-  ValueType = unknown
+  ValueType = unknown,
 > {
   validator: ValidationFunc<FormType, Error, ValueType>;
   type?: string;

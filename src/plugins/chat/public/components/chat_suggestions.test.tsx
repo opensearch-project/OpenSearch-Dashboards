@@ -77,7 +77,7 @@ describe('ChatSuggestions', () => {
 
     // Wait for suggestions to load
     await waitFor(() => {
-      expect(screen.getByText('Available suggestions')).toBeInTheDocument();
+      expect(screen.getByText('Follow up')).toBeInTheDocument();
     });
 
     // Check that both suggestions are rendered
@@ -149,6 +149,30 @@ describe('ChatSuggestions', () => {
         messageHistory: mockMessages,
       });
     });
+  });
+
+  it('should call onFillInput when an inline suggestion is clicked', async () => {
+    const onFillInput = jest.fn();
+    mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue([]);
+
+    render(
+      <ChatSuggestions
+        messages={mockMessages}
+        currentMessage={{
+          ...mockMessage,
+          content: 'Hi there!\nSUGGESTIONS:["What is OpenSearch?"]',
+        }}
+        onFillInput={onFillInput}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('What is OpenSearch?')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText('What is OpenSearch?'));
+
+    expect(onFillInput).toHaveBeenCalledWith('What is OpenSearch?');
   });
 
   it('should invoke action callback when suggestion is clicked', async () => {

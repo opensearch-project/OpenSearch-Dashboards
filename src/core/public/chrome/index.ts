@@ -59,13 +59,20 @@ export {
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
 export { RightNavigationOrder, HeaderVariant } from './constants';
-export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
+export {
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  NavGroupItemInMap,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
+} from './nav_group';
 export {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,
   getSortedNavLinks,
   searchNavigationLinks,
 } from './utils';
-export { SearchCommandKeyTypes, GlobalSearchCommand } from './global_search';
+export { SearchCommandKeyTypes, GlobalSearchCommand, GlobalSearchResult } from './global_search';
 export { GlobalSearchPageItem } from './ui/global_search/page_item';
 export { renderNavGroupElement } from './ui/nav_group_element';

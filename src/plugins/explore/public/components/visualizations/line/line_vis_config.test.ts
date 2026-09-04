@@ -4,19 +4,35 @@
  */
 
 import React from 'react';
-import { createLineConfig } from './line_vis_config';
+import { createLineConfig, defaultLineChartStyles } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
+import {
+  GridOptions,
+  ThresholdMode,
+  Positions,
+  TooltipOptions,
+  LineStyle,
+  VisFieldType,
+  AxisRole,
+} from '../types';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   createElement: jest.fn(),
 }));
 
+jest.mock('./to_expression', () => ({
+  createSimpleLineChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createLineBarChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createMultiLineChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createCategoryLineChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createCategoryMultiLineChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+}));
+
 describe('line_vis_config', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (React.createElement as jest.Mock).mockImplementation((type, props) => ({ type, props }));
   });
 
   describe('createLineConfig', () => {
@@ -61,12 +77,39 @@ describe('line_vis_config', () => {
       expect(rules.length).toBeGreaterThan(0);
     });
 
+    it('should only pass the shared crosshair group to rules with a date x-axis', () => {
+      const config = createLineConfig();
+      const crosshairGroup = 'dashboard';
+
+      config.getRules().forEach((rule) => {
+        const rendered = rule.render({
+          data: [],
+          allData: [],
+          styleOptions: config.ui.style.defaults,
+          axisColumnMappings: {
+            x: [{}],
+            y: [{}],
+            y2: [{}],
+            color: [{}],
+          },
+          timeRange: { from: 'now-1h', to: 'now' },
+          renderContext: { crosshairGroup },
+        } as any) as React.ReactElement<{ group?: string }>;
+        const hasDateXAxis = rule.mappings.some(
+          (mapping) => mapping[AxisRole.X]?.type === VisFieldType.Date
+        );
+
+        expect(rendered.props.group).toBe(hasDateXAxis ? crosshairGroup : undefined);
+      });
+    });
+
     it('should render the LineVisStyleControls component with the provided props', () => {
       const config = createLineConfig();
       const renderFunction = config.ui.style.render;
 
       const mockProps = {
         styleOptions: {
+          ...defaultLineChartStyles,
           addLegend: true,
           legendPosition: Positions.RIGHT,
           thresholdOptions: {
@@ -81,7 +124,7 @@ describe('line_vis_config', () => {
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
           standardAxes: [],
-          showFullTimeRange: false,
+          showFullTimeRange: true,
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],

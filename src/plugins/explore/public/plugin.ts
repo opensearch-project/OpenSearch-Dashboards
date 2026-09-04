@@ -4,10 +4,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { stringify } from 'query-string';
+import semver from 'semver';
+import qs from 'query-string';
 import rison from 'rison-node';
-import { BehaviorSubject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
@@ -36,8 +37,12 @@ import {
   PLUGIN_NAME,
   VISUALIZATION_EDITOR_APP_ID,
   VISUALIZATION_EDITOR_APP_NAME,
+  LOGS_DRILLDOWN_APP_ID,
+  LOGS_DRILLDOWN_APP_NAME,
 } from '../common';
 import { ConfigSchema } from '../common/config';
+import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
+import * as exploreManifest from '../opensearch_dashboards.json';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -71,7 +76,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
-import { ExploreEmbeddableFactory } from './embeddable';
+import { ExploreEmbeddableFactory, PanelDataService } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
@@ -84,21 +89,30 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
+import { logsDrilldownActionConfig } from './actions/logs_drilldown_action';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 import {
   registerDisabledPPLExecuteQueryAction,
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+  APPLY_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import {
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION,
+  registerDisabledPPLLintFixAction,
+} from './components/query_panel/actions/ppl_lint_fix_action';
+import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
 
-export class ExplorePlugin
-  implements
-    Plugin<
-      ExplorePluginSetup,
-      ExplorePluginStart,
-      ExploreSetupDependencies,
-      ExploreStartDependencies
-    > {
+import {
+  registerAutoVisualizationAction,
+  AUTO_VISUALIZATION_TOOL_NAME,
+} from './components/visualizations/actions/auto_visualization_action';
+
+export class ExplorePlugin implements Plugin<
+  ExplorePluginSetup,
+  ExplorePluginStart,
+  ExploreSetupDependencies,
+  ExploreStartDependencies
+> {
   private stateUpdaterByApp: Partial<
     Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
   > = {
@@ -131,6 +145,9 @@ export class ExplorePlugin
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
+  private unregisterPPLLintFixAction?: () => void;
+  private unregisterVisualizationTools?: () => void;
+  private visualizationToolsWorkspaceSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -149,6 +166,12 @@ export class ExplorePlugin
     this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
     this.dataSourceManagement = setupDeps.dataSourceManagement;
 
+    // Feature flag: the standalone Logs Drilldown canvas ships behind `explore.logsDrilldown.enabled`
+    // (default off). Read synchronously from the browser-exposed config (mirrors `sqlSupport`); gates
+    // the app registration, the query-bar action, and the nav-popover entry point below.
+    const logsDrilldownEnabled =
+      this.initializerContext.config.get<ConfigSchema>().logsDrilldown?.enabled ?? false;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualizationAlias(setupDeps);
@@ -160,6 +183,11 @@ export class ExplorePlugin
     // Register import data action if data importer is available
     if (this.dataImporterConfig) {
       queryPanelActionsRegistry.register(importDataActionConfig);
+    }
+
+    // Query-bar entry point to the standalone Logs Drilldown app (feature-flagged).
+    if (logsDrilldownEnabled) {
+      queryPanelActionsRegistry.register(logsDrilldownActionConfig);
     }
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -208,7 +236,7 @@ export class ExplorePlugin
 
         // Note: Explore uses Redux for filter management, not filterManager
         // So we don't include filter state in URLs for context links
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({}), // No global filters (explore uses Redux)
             _a: rison.encode({
@@ -271,12 +299,27 @@ export class ExplorePlugin
       const flavorSuffix = flavor ? `/${flavor}` : '';
       const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
       const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
         storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
+        // Never persist the transient `_openSaved` command marker as the app's
+        // "last URL". Otherwise navigating away and re-opening the app via its
+        // nav link would restore a URL still carrying the marker and re-open the
+        // saved-search flyout unexpectedly. Match the EXACT query param (not a
+        // loose substring) so a saved-object title / filter value that merely
+        // contains the string "_openSaved" doesn't disable URL persistence.
+        shouldTrackUrlUpdate: (hash: string) => {
+          const qIndex = hash.indexOf('?');
+          if (qIndex === -1) return true;
+          return new URLSearchParams(hash.slice(qIndex + 1)).get('_openSaved') !== 'true';
+        },
         stateParams: [
           {
             osdUrlKey: '_g',
@@ -344,9 +387,8 @@ export class ExplorePlugin
           // Check if this is a context or doc route (following discover pattern)
           const path = window.location.hash;
           if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-            const { renderDocView } = await import(
-              './application/legacy/discover/application/components/doc_views'
-            );
+            const { renderDocView } =
+              await import('./application/legacy/discover/application/components/doc_views');
             const unmount = renderDocView(params.element);
             return () => {
               unmount();
@@ -419,8 +461,71 @@ export class ExplorePlugin
       };
     };
 
+    // Standalone Logs Drilldown app: its OWN lightweight mount — builds `services` via the shared
+    // buildServices, but renders the self-contained onboarding canvas WITHOUT the explore Redux
+    // store, tabs, or query panel. Handoff to the logs Query experience is via navigateToApp, so the
+    // widely-used logs flavor state is never touched.
+    const createLogsDrilldownApp = (): App => ({
+      id: LOGS_DRILLDOWN_APP_ID,
+      title: LOGS_DRILLDOWN_APP_NAME,
+      order: 1000,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      euiIconType: 'discoverApp',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      // Reached via the Logs nav-popover action + the query-bar action, NOT its own side-nav item.
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (params: AppMountParameters) => {
+        if (!this.initializeServices) {
+          throw Error('Explore plugin method initializeServices is undefined');
+        }
+        const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
+        const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+        if (
+          !isExploreEnabledWorkspace ||
+          !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
+        ) {
+          coreStart.application.navigateToApp('discover', { replace: true });
+          return () => {};
+        }
+
+        pluginsStart.data.indexPatterns.clearCache();
+
+        const services = buildServices(
+          coreStart,
+          pluginsStart,
+          this.initializerContext,
+          this.tabRegistry,
+          this.visualizationRegistryService,
+          this.queryPanelActionsRegistryService,
+          this.isDatasetManagementEnabled,
+          this.slotRegistryService,
+          this.dataImporterConfig,
+          this.dataSourceEnabled,
+          this.hideLocalCluster,
+          this.dataSourceManagement
+        );
+
+        // URL state storage (like the flavor apps) so the drilldown persists its time range (`_g`)
+        // and selected data source (`_a`) — bookmarkable/shareable and reload-proof. Uses this app's
+        // own scoped history.
+        services.osdUrlStateStorage = createOsdUrlStateStorage({
+          history: params.history,
+          useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          ...withNotifyOnErrors(coreStart.notifications.toasts),
+        });
+
+        const { renderLogsDrilldownApp } = await import('./application/pages/logs_drilldown');
+        return renderLogsDrilldownApp(params, services);
+      },
+    });
+
     const createExploreVisualizationEditorApp = () => {
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
         storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
@@ -543,6 +648,12 @@ export class ExplorePlugin
         updater$: this.stateUpdaterByApp[ExploreFlavor.Metrics]!.asObservable(),
       })
     );
+    // Standalone Logs Drilldown app (own mount, no shared store), feature-flagged. MUST be registered
+    // before the base `explore` app: the base app's route (`/app/explore`) is a non-exact prefix that
+    // would otherwise match `/app/explore/logs-drilldown` first and redirect to the logs flavor.
+    if (logsDrilldownEnabled) {
+      core.application.register(createLogsDrilldownApp());
+    }
     core.application.register(createExploreApp());
 
     // Register nav links for different workspaces
@@ -584,18 +695,21 @@ export class ExplorePlugin
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
           category: undefined,
           order: 300,
           euiIconType: 'visAreaStacked' as const,
+          navPopover: buildMetricsNavPopover(),
         },
       ]);
     } else {
@@ -651,10 +765,56 @@ export class ExplorePlugin
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+
+    // Register a dataset filter based on minDataSourceEngineVersions from the manifest.
+    // This hides data sources whose engine version is below the declared minimum (e.g.
+    // Elasticsearch < 7.9.0 which lacks PPL support required by Explore).
+    const minVersions = (
+      exploreManifest as {
+        minDataSourceEngineVersions?: Record<string, string>;
+      }
+    ).minDataSourceEngineVersions;
+    if (minVersions) {
+      const datasetService = plugins.data.query.queryString.getDatasetService();
+      datasetService.registerDatasetFilter(PLUGIN_ID, (dataset) => {
+        const engine = dataset.dataSource?.engineType ?? dataset.dataSource?.type;
+        if (!engine) return true;
+        const minVersion = minVersions[engine];
+        if (!minVersion) return true;
+        const coerced = semver.coerce(dataset.dataSource?.version);
+        if (!coerced) return true;
+        return semver.gte(coerced.version, minVersion);
+      });
+    }
     setDashboardVersion({ version: opensearchDashboardsVersion });
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);
+    }
+
+    // Add 'explore' and 'dataset_management' to SQL's supported apps only when SQL support is
+    // enabled. SQL is registered by query_enhancements (in setup) without 'explore'; explore opts
+    // in here (in start, after registration) when the flag is on.
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    if (sqlSupportEnabled) {
+      const languageService = plugins.data.query.queryString?.getLanguageService?.();
+      const sqlConfig = languageService?.getLanguage('SQL');
+      if (sqlConfig) {
+        const addApp = (names: string[] = [], app: string) =>
+          names.includes(app) ? names : [...names, app];
+        let supportedAppNames = sqlConfig.supportedAppNames ?? [];
+        let editorSupportedAppNames = sqlConfig.editorSupportedAppNames ?? [];
+        supportedAppNames = addApp(supportedAppNames, 'explore');
+        supportedAppNames = addApp(supportedAppNames, 'dataset_management');
+        editorSupportedAppNames = addApp(editorSupportedAppNames, 'explore');
+        const updated = {
+          ...sqlConfig,
+          supportedAppNames,
+          editorSupportedAppNames,
+        };
+        languageService?.registerLanguage?.(updated);
+      }
     }
 
     // Control nav link visibility based on dynamic capabilities
@@ -734,18 +894,7 @@ export class ExplorePlugin
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
-    // Register disabled execute_ppl_query action as placeholder
-    // This will be overridden when query panel mounts and restored when it unmounts
-    if (plugins.contextProvider) {
-      registerDisabledPPLExecuteQueryAction(
-        plugins.contextProvider.actions.registerAssistantAction
-      );
-      this.unregisterPPLExecuteQueryAction = () =>
-        plugins.contextProvider!.actions.unregisterAssistantAction(
-          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
-        );
-    }
-
+    // Create saved explore loader so tool can use it
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
@@ -753,6 +902,50 @@ export class ExplorePlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      registerDisabledPPLExecuteQueryAction(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
+      registerDisabledPPLLintFixAction(plugins.contextProvider.actions.registerAssistantAction);
+      this.unregisterPPLExecuteQueryAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          APPLY_PPL_QUERY_TOOL_DEFINITION.name
+        );
+      this.unregisterPPLLintFixAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name
+        );
+      const { registerAssistantAction, unregisterAssistantAction } =
+        plugins.contextProvider.actions;
+
+      // The tool will only be registered in an explore-enabled workspace as it depends on vis editor
+      this.visualizationToolsWorkspaceSubscription = this.getIsInsideWorkspace$(core).subscribe(
+        (isExploreEnabledWorkspace) => {
+          if (isExploreEnabledWorkspace) {
+            registerAutoVisualizationAction(
+              registerAssistantAction,
+              core,
+              plugins.data,
+              plugins.contextProvider
+            );
+          } else {
+            // Leaving the workspace must take the tool back out of availableTools
+            unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+          }
+        }
+      );
+
+      this.unregisterVisualizationTools = () => {
+        this.visualizationToolsWorkspaceSubscription?.unsubscribe();
+        unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+      };
+
+      // Inject contextProvider action helpers into PanelDataService
+      PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
+    }
 
     return {
       urlGenerator: this.urlGenerator,
@@ -769,6 +962,11 @@ export class ExplorePlugin
       this.editorStopUrlTracking();
     }
     this.unregisterPPLExecuteQueryAction?.();
+    this.unregisterPPLLintFixAction?.();
+    clearActivePPLLintFixSession();
+    this.unregisterVisualizationTools?.();
+    // cleanup shared panel-data store + fetch_panel_data tool.
+    PanelDataService.getInstance()?.reset();
   }
 
   private registerEmbeddable(
@@ -825,7 +1023,7 @@ export class ExplorePlugin
               iconType = chart.icon;
               chartName = chart.name;
             }
-          } catch (e) {
+          } catch {
             iconType = '';
           }
 
@@ -928,11 +1126,11 @@ export class ExplorePlugin
         .filter(
           (v) =>
             v.name === this.DISCOVER_VISUALIZATION_NAME ||
-            v.name === this.METRICS_VISUALIZATION_NAME ||
-            v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.METRICS_VISUALIZATION_NAME
         )
         .forEach((visAlias) => {
-          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          // Hide aliases that route into the normal Explore apps. The standalone
+          // visualization editor remains available for dashboard create flows.
           visAlias.hidden = true;
         });
     }
@@ -948,6 +1146,16 @@ export class ExplorePlugin
         (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
           isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
+    );
+  }
+
+  /**
+   * Emits whether the user is inside workspace
+   */
+  private getIsInsideWorkspace$(core: CoreStart): Observable<boolean> {
+    return core.workspaces.currentWorkspace$.pipe(
+      map((workspace) => !!workspace),
+      distinctUntilChanged()
     );
   }
 }

@@ -83,7 +83,7 @@ describe('IndexPatternSelect', () => {
     await call;
     await compInstance.debouncedFetch.flush();
 
-    expect(savedObjectsClient.bulkGet).toBeCalledWith([
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
       { id: 'testDataSourceId1', type: 'data-source' },
       { id: 'testDataSourceId2', type: 'data-source' },
     ]);
@@ -128,7 +128,7 @@ describe('IndexPatternSelect', () => {
     await call;
     await compInstance.debouncedFetch.flush();
 
-    expect(savedObjectsClient.bulkGet).toBeCalledWith([
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
       { id: 'testDataSourceId0', type: 'data-source' },
     ]);
   });

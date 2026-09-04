@@ -10,7 +10,8 @@ import { MetricChartStyle } from './metric_vis_config';
 import { AxisRole, RendererSpecConfig } from '../types';
 import { MetricAxisMapping } from './to_expression';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, appendUnitSuffix } from '../style_panel/unit/collection';
+import { formatDecimal } from '../utils/data_transformation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { EchartsRender } from '../echarts_render';
 import { darkenHexColor, getContrastTextColor, normalizeHexColor } from '../utils/color';
@@ -22,6 +23,7 @@ interface MetricTextData {
   numericValue: string;
   unitText: string;
   unitFirst: boolean; // True if unit should be displayed before value (e.g., currency)
+  unitSuffix: string;
   fillColor: string;
   changeText: string;
   changeColor: string;
@@ -33,6 +35,7 @@ interface MetricChartRenderProps {
   styles: MetricChartStyle;
   axisColumnMappings: MetricAxisMapping;
   spec?: RendererSpecConfig | RendererSpecConfig[];
+  seriesName?: string;
 }
 
 // Helper functions for metric text data calculation
@@ -200,12 +203,17 @@ function calculateMetricTextData(
   let valueText = '';
   let unitText = '';
   let unitFirst = false;
+  let unitSuffix = '';
 
   if (showValue) {
     if (isValidNumber && calculatedValue !== undefined) {
       // Format the numeric value
       if (selectedUnit?.display) {
-        const unitDisplay = selectedUnit.display(calculatedValue, selectedUnit.symbol);
+        const unitDisplay = selectedUnit.display(
+          calculatedValue,
+          selectedUnit.symbol,
+          styles.decimals
+        );
 
         // Check if we have segments to extract value and unit separately
         if (unitDisplay.segments) {
@@ -230,9 +238,12 @@ function calculateMetricTextData(
         }
       } else {
         // Simple formatting without custom display
-        valueText = `${Math.round(calculatedValue * 100) / 100}`;
+        valueText = formatDecimal(calculatedValue, styles.decimals);
         unitText = selectedUnit?.symbol || '';
         unitFirst = false;
+      }
+      if (styles?.unitSuffix) {
+        unitSuffix = styles?.unitSuffix;
       }
     } else {
       valueText = '-';
@@ -250,6 +261,7 @@ function calculateMetricTextData(
     changeColor,
     backgroundColor,
     backgroundGradient,
+    unitSuffix,
   };
 }
 
@@ -257,13 +269,16 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   styles,
   axisColumnMappings,
   spec: rawSpec,
+  seriesName,
 }) => {
-  const s = useMemo(() => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined), [
-    rawSpec,
-  ]);
+  const s = useMemo(
+    () => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined),
+    [rawSpec]
+  );
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';
+  const displayName = seriesName ?? name;
 
   const valueColumn = axisColumnMappings[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -271,14 +286,6 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
-  const handlerRef = useRef(
-    debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100)
-  );
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
@@ -286,14 +293,19 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     return calculateMetricTextData(data, styles, numericField);
   }, [data, styles, numericField]);
 
-  const title = getTitleText(styles.textMode, name);
+  const title = getTitleText(styles.textMode, displayName);
 
   // ResizeObserver to track container dimensions
   useEffect(() => {
     const element = overlayRef.current;
     if (!element) return;
 
-    const handler = handlerRef.current;
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
     const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);
@@ -331,7 +343,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     }
 
     // Calculate number of visible elements
-    const hasTitle = !!name;
+    const hasTitle = !!title;
     const hasValue = !!textData.numericValue;
     const hasChange = styles.showPercentage && !!textData.changeText;
     const visibleElements = [hasTitle, hasValue, hasChange].filter(Boolean).length;
@@ -371,10 +383,11 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     }
 
     // Build the full text string for each element
-    const fullValueText = textData.unitFirst
+    let fullValueText = textData.unitFirst
       ? `${textData.unitText}${textData.numericValue}`
       : `${textData.numericValue}${textData.unitText}`;
 
+    fullValueText = appendUnitSuffix(fullValueText, styles.unitSuffix);
     const titleText = title || '';
     const changeText = textData.changeText || '';
 
@@ -415,9 +428,9 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     styles.fontSize,
     styles.percentageSize,
     styles.showPercentage,
-    name,
-    textData,
     title,
+    textData,
+    styles.unitSuffix,
   ]);
 
   if (!s || !textData) {
@@ -495,6 +508,19 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
               }}
             >
               {textData.unitText}
+            </span>
+          )}
+
+          {textData.unitSuffix && (
+            <span
+              className="metric-unit-suffix"
+              style={{
+                fontSize: valueFontSize * 0.45,
+                color: textData.fillColor,
+                marginLeft: textData.unitSuffix.startsWith('/') ? '0' : '0.2em',
+              }}
+            >
+              {textData.unitSuffix}
             </span>
           )}
         </div>

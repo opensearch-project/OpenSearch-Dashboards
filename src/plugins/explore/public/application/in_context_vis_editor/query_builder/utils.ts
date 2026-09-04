@@ -65,7 +65,7 @@ export const resolveDatasetByLanguage = async (
       if (isSignalTypeCompatible(effectiveSignalType, requiredSignalType)) {
         return existingDataset;
       }
-    } catch (error) {
+    } catch {
       // Dataset no longer exists or validation failed
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
@@ -107,13 +107,14 @@ export const getPreloadedQueryState = async (
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || 'PPL',
+      language: minimalDataset.language || languageType || 'PPL',
     });
 
     // override the initial query to be an empty string
     return {
       ...initialQueryByDataset,
-      query: '',
+      // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
+      ...(languageType !== SupportLanguageType.sql ? { query: '' } : {}),
       // Ensure we use the minimal dataset
       dataset: minimalDataset,
     };
@@ -210,7 +211,7 @@ export const queryExecution = async ({
       throw new Error('Dataset not found for query execution');
     }
 
-    const dataset = services.data.dataViews.convertToDataset(dataView);
+    const dataset = await services.data.dataViews.convertToDataset(dataView);
 
     const preparedQueryObject = {
       ...query,
@@ -255,6 +256,7 @@ export const queryExecution = async ({
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
     updateResultFn(rawResultsWithMeta);

@@ -38,7 +38,7 @@ import {
   deepCloneWithBuffers as clone,
   IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE,
 } from '../../utils';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
@@ -176,7 +176,7 @@ export class Config {
     let subSchema;
     try {
       subSchema = this.getSchema().extract(schemaKey);
-    } catch (e) {
+    } catch {
       throw new Error(`Unknown config key: ${key}.`);
     }
     if (!subSchema) {
@@ -194,7 +194,7 @@ export class Config {
     try {
       const sub = this.getSchema().extract(key);
       return !!sub;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

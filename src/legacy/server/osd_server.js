@@ -31,7 +31,7 @@
 import { constant, once, compact, flatten } from 'lodash';
 
 import { isWorker } from 'cluster';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';

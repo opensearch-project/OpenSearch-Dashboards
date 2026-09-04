@@ -63,6 +63,7 @@ import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
 import { DataSourcePluginSetup } from '../../data_source/server';
 import { ConfigSchema } from '../config';
+import { WorkspaceConfigService } from './services';
 
 export interface WorkspacePluginDependencies {
   dataSource: DataSourcePluginSetup;
@@ -77,6 +78,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
   private workspaceConfig$: Observable<ConfigSchema>;
+  private readonly configService: WorkspaceConfigService;
   private env: PluginInitializerContext['env'];
   private aclEnforceEndpointPatterns: string[] = [];
 
@@ -112,7 +114,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       // There may be calls to saved objects client before user get authenticated, need to add a try catch here as `getPrincipalsFromRequest` will throw error when user is not authenticated.
       try {
         ({ groups = [], users = [] } = this.permissionControl!.getPrincipalsFromRequest(request));
-      } catch (e) {
+      } catch {
         return toolkit.next();
       }
       // Get config from dynamic service client.
@@ -176,36 +178,51 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.http.registerOnPostAuth(async (request, response, toolkit) => {
       const path = request.url.pathname;
       if (path === '/') {
-        const workspaceListResponse = await this.client?.list(
-          { request },
-          { page: 1, perPage: 100 }
+        // initialize coreStart and uiSettingsClient first to allow access to defaultRoute
+        const [coreStart] = await core.getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
         );
+
+        // check if defaultRoute is configured (and not the default home page)
+        // has to be handled here instead of core_app.ts as this method registers
+        // a middleware hook, which overrides registerDefaultRoutes in core_app.ts
+        const defaultRoute = await uiSettingsClient.get<string>('defaultRoute');
+        if (defaultRoute && defaultRoute !== '/app/home') {
+          // skips the middleware and allow registerDefaultRoutes to take effect
+          return toolkit.next();
+        }
+
+        // Only the total and, when there is exactly one workspace, its id are needed
+        // here. Fetching a single page keeps this independent of how many workspaces
+        // the user has, so the default workspace below is resolved by id rather than
+        // by searching within an arbitrarily sized page.
+        const workspaceListResponse = await this.client?.list({ request }, { page: 1, perPage: 1 });
         const basePath = core.http.basePath.serverBasePath;
 
         if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
           const workspaceList = workspaceListResponse.result.workspaces;
           // If user only has one workspace, go to overview page of that workspace
-          if (workspaceList.length === 1) {
+          if (workspaceListResponse.result.total === 1) {
             return response.redirected({
               headers: {
                 location: `${basePath}/w/${workspaceList[0].id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
               },
             });
           }
-          const [coreStart] = await core.getStartServices();
-          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-            coreStart.savedObjects.getScopedClient(request)
-          );
-          const defaultWorkspaceId = await uiSettingsClient.get(DEFAULT_WORKSPACE);
-          const defaultWorkspace = workspaceList.find(
-            (workspace) => workspace.id === defaultWorkspaceId
-          );
+          const defaultWorkspaceId = await uiSettingsClient.get<string>(DEFAULT_WORKSPACE);
+          // Resolve the default workspace directly so that it is honored no matter
+          // where it would have fallen in the workspace list. The client is scoped to
+          // the request, so this fails for a workspace the user cannot access.
+          const defaultWorkspaceResponse = defaultWorkspaceId
+            ? await this.client?.get({ request }, defaultWorkspaceId)
+            : undefined;
           // If user has a default workspace configured, go to overview page of that workspace
           // If user has more than one workspaces, go to homepage
-          if (defaultWorkspace) {
+          if (defaultWorkspaceResponse?.success) {
             return response.redirected({
               headers: {
-                location: `${basePath}/w/${defaultWorkspace.id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
+                location: `${basePath}/w/${defaultWorkspaceResponse.result.id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
               },
             });
           } else {
@@ -227,6 +244,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
     this.workspaceConfig$ = initializerContext.config.create();
+    this.configService = new WorkspaceConfigService(this.logger);
     this.env = initializerContext.env;
   }
 
@@ -240,9 +258,15 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     // setup new ui_setting user's default workspace
     core.uiSettings.register(uiSettings);
 
-    this.client = new WorkspaceClient(core, this.logger, {
-      maximum_workspaces: workspaceConfig.maximum_workspaces,
+    // The config is resolved per request through the dynamic config service so that a
+    // config store override is honored, falling back to the value read from
+    // `opensearch_dashboards.yml`.
+    this.configService.setup({
+      dynamicConfigService: core.dynamicConfigService,
+      staticConfig: workspaceConfig,
     });
+
+    this.client = new WorkspaceClient(core, this.logger, this.configService);
 
     this.aclEnforceEndpointPatterns = workspaceConfig.aclEnforceEndpointPatterns;
 
@@ -318,9 +342,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
-    this.workspaceUiSettingsClientWrapper?.setAsScopedUISettingsClient(
-      core.uiSettings.asScopedToClient
-    );
 
     return {
       client: this.client as IWorkspaceClientImpl,
@@ -374,8 +395,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           const hasAccess = isReadOnly
             ? true
             : permissions
-            ? new ACL(permissions).hasPermission(permissionModes, principals)
-            : false;
+              ? new ACL(permissions).hasPermission(permissionModes, principals)
+              : false;
 
           this.logger.debug(
             `Workspace authorization: workspace=${workspaceId}, modes=${permissionModes.join(

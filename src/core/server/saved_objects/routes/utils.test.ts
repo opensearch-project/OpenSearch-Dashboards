@@ -125,7 +125,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
           },
         })
       )
-    ).rejects.toThrowError(/invalid key/i);
+    ).rejects.toThrow(/invalid key/i);
     expect(({} as any).polluted).toBeUndefined();
   });
 
@@ -141,7 +141,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
           },
         })
       )
-    ).rejects.toThrowError(/invalid key/i);
+    ).rejects.toThrow(/invalid key/i);
   });
 
   it('rejects objects with __proto__ in nested attributes', async () => {
@@ -156,7 +156,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
           },
         })
       )
-    ).rejects.toThrowError(/invalid key/i);
+    ).rejects.toThrow(/invalid key/i);
   });
 });
 

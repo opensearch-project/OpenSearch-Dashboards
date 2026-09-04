@@ -223,7 +223,7 @@ async function writeMessages(
 function isSpreadableObject(value: unknown) {
   try {
     // @ts-ignore: Intentionally allowing type error to catch it
-    return { ...value }, true;
+    return ({ ...value }, true);
   } catch {
     return false;
   }
@@ -248,7 +248,7 @@ async function getIntegrationBase(options: IntegrateOptions) {
   if (options.targetFileName && options.update) {
     try {
       await accessAsync(resolve(options.targetFileName));
-    } catch (ex) {
+    } catch {
       options.log.warning(
         `Failed to read from the existing target file at ${normalizePath(
           options.targetFileName
@@ -266,7 +266,7 @@ async function getIntegrationBase(options: IntegrateOptions) {
         localizedMessages.formats = existingDefinition.formats;
       if (isSpreadableObject(existingDefinition.messages))
         localizedMessages.messages = existingDefinition.messages;
-    } catch (ex) {
+    } catch {
       throw createFailError(
         `Failed to parse the existing target file at ${normalizePath(options.targetFileName)}`
       );

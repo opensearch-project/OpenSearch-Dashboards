@@ -7,7 +7,7 @@ import { TopologyNodePresenter } from './topology_node.presenter';
 import { TopologyNodeModel } from '../models/topology_node.model';
 
 const createMockModel = (overrides: Record<string, any> = {}): TopologyNodeModel =>
-  (({
+  ({
     name: 'TestNode',
     isGroup: false,
     platform: undefined,
@@ -16,7 +16,7 @@ const createMockModel = (overrides: Record<string, any> = {}): TopologyNodeModel
     numberOfServices: 0,
     numberOfUninstrumentedServices: 0,
     ...overrides,
-  } as unknown) as TopologyNodeModel);
+  }) as unknown as TopologyNodeModel;
 
 describe('TopologyNodePresenter', () => {
   it('title returns model name', () => {

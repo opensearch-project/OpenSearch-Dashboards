@@ -28,4 +28,7 @@
  * under the License.
  */
 
-export const hasMinLengthArray = (length = 1) => (value: any[]): boolean => value.length >= length;
+export const hasMinLengthArray =
+  (length = 1) =>
+  (value: any[]): boolean =>
+    value.length >= length;

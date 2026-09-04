@@ -84,22 +84,14 @@ describe('#setup()', () => {
   });
 
   it('setup basePath with workspaceId provided in window.location.href and basePath present in injectedMetadata', () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/base_path/w/workspaceId/app',
-          },
-        } as any)
-    );
+    window.history.pushState({}, '', '/base_path/w/workspaceId/app');
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     injectedMetadata.getBasePath.mockReturnValue('/base_path');
     const fatalErrors = fatalErrorsServiceMock.createSetupContract();
     const httpService = new HttpService();
     const setupResult = httpService.setup({ fatalErrors, injectedMetadata });
     expect(setupResult.basePath.get()).toEqual('/base_path/w/workspaceId');
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 });
 

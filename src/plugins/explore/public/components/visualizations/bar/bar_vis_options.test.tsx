@@ -28,8 +28,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'x1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 const mockCategoricalColumns: VisColumn[] = [
@@ -38,8 +36,6 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     column: 'category',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   },
 ];
 
@@ -274,8 +270,6 @@ describe('BarVisStyleControls', () => {
             name: 'Color Category',
             schema: VisFieldType.Categorical,
             column: 'color',
-            validValuesCount: 10,
-            uniqueValuesCount: 5,
           },
         ],
       },
@@ -301,8 +295,6 @@ describe('BarVisStyleControls', () => {
             name: 'Color Category',
             schema: VisFieldType.Categorical,
             column: 'color',
-            validValuesCount: 10,
-            uniqueValuesCount: 5,
           },
         ],
         [AxisRole.FACET]: [
@@ -311,8 +303,6 @@ describe('BarVisStyleControls', () => {
             name: 'Facet Category',
             schema: VisFieldType.Categorical,
             column: 'facet',
-            validValuesCount: 10,
-            uniqueValuesCount: 5,
           },
         ],
       },
@@ -338,8 +328,6 @@ describe('BarVisStyleControls', () => {
             name: 'Color Category',
             schema: VisFieldType.Categorical,
             column: 'color',
-            validValuesCount: 10,
-            uniqueValuesCount: 5,
           },
         ],
       },
@@ -487,8 +475,6 @@ describe('BarVisStyleControls', () => {
             name: 'Date X',
             schema: VisFieldType.Date,
             column: 'column',
-            validValuesCount: 100,
-            uniqueValuesCount: 50,
           },
         ],
       },

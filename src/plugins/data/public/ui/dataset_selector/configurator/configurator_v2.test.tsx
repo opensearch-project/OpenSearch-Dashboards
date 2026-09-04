@@ -31,6 +31,7 @@ const mockQueryService = {
     getLanguageService: () => ({
       getLanguage: (id: string) =>
         id === 'PPL' ? { id: 'PPL', title: 'PPL', supportedAppNames: ['explore'] } : undefined,
+      isLanguageSupportedForDataset: jest.fn().mockReturnValue(true),
     }),
     getDatasetService: () => mockDatasetService,
   },

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`I18n engine addMessages should throw error if locale is not specified or empty 1`] = `"[I18n] A \`locale\` must be a non-empty string to add messages."`;
 

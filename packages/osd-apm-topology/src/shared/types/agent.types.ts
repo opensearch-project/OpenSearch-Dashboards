@@ -18,17 +18,13 @@ import type { BaseNodeData } from '../../types';
  * - Unknown operations → `'other'`
  */
 export type AgentNodeKind =
-  | 'agent'
-  | 'llm'
-  | 'tool'
-  | 'retrieval'
-  | 'embeddings'
-  | 'content'
-  | 'other';
+  'agent' | 'llm' | 'tool' | 'retrieval' | 'embeddings' | 'content' | 'other';
 
 export interface AgentNodeData extends BaseNodeData {
   nodeKind: AgentNodeKind;
   duration?: number;
+  /** Maximum duration (e.g., root trace duration) for scaling the latency bar. */
+  maxDuration?: number;
   latency?: string;
   tokens?: { prompt: number; completion: number };
   cost?: number;

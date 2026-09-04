@@ -23,6 +23,20 @@ export interface WorkspaceAttribute {
   lastUpdatedTime?: string;
 }
 
+export type WorkspaceCreateAttributes = Omit<WorkspaceAttribute, 'id'> & {
+  id?: WorkspaceAttribute['id'];
+};
+
+export interface WorkspaceAssociationFailure {
+  id: string;
+  type: string;
+  error: string;
+}
+
+export interface WorkspaceCreateResult extends Pick<WorkspaceAttribute, 'id'> {
+  failedAssociations?: WorkspaceAssociationFailure[];
+}
+
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
@@ -37,7 +51,12 @@ export enum WorkspacePermissionMode {
 
 export interface WorkspaceFindOptions {
   page?: number;
-  perPage?: number;
+  /**
+   * The page size for the `_list` API. A number pages as usual; the special
+   * `'maximum_workspaces'` sentinel (see `MAXIMUM_WORKSPACES_PER_PAGE` in the workspace
+   * plugin constants) tells the server to page by `workspace.maximum_workspaces`.
+   */
+  perPage?: number | 'maximum_workspaces';
   search?: string;
   searchFields?: string[];
   sortField?: string;

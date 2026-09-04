@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { getDashboardVersion } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { DashboardUrlGeneratorState } from '../../../../dashboard/public';
@@ -47,7 +47,7 @@ export const addToDashboard = async (
   try {
     dashboard = await loader.get(options.existingDashboardId);
     panels = JSON.parse(dashboard.panelsJSON || '[]');
-  } catch (error) {
+  } catch {
     throw new Error('Fail to get dashboard');
   }
 
@@ -66,7 +66,7 @@ export const addToDashboard = async (
     }
   }
 
-  const panelIndex = uuid.v4();
+  const panelIndex = uuidv4();
   panels.push({
     version,
     id: obj.id,

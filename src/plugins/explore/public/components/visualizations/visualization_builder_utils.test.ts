@@ -50,24 +50,18 @@ describe('visualization_container_utils', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
     {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 100,
-      uniqueValuesCount: 10,
     },
     {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 100,
-      uniqueValuesCount: 80,
     },
   ];
 
@@ -224,8 +218,6 @@ describe('visualization_container_utils', () => {
           name: 'average',
           schema: VisFieldType.Numerical,
           column: 'average',
-          validValuesCount: 100,
-          uniqueValuesCount: 30,
         },
       ];
 

@@ -235,6 +235,10 @@ export const getNavActions = (
       onHidePanelTitlesChange: (isChecked: boolean) => {
         stateContainer.transitions.setOption('hidePanelTitles', isChecked);
       },
+      useSharedCrosshair: appState.options.useSharedCrosshair ?? false,
+      onUseSharedCrosshairChange: (isChecked: boolean) => {
+        stateContainer.transitions.setOption('useSharedCrosshair', isChecked);
+      },
     });
   };
 
@@ -303,7 +307,7 @@ export const getNavActions = (
         return (
           <EuiCompressedCheckboxGroup
             options={checkboxes}
-            idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
+            idToSelectedMap={urlParamsSelectedMap as unknown as EuiCheckboxGroupIdToSelectedMap}
             onChange={handleChange}
             legend={{
               children: i18n.translate('dashboard.embedUrlParamExtension.include', {
@@ -371,6 +375,7 @@ export const getNavActions = (
       newStateContainer.options = {
         hidePanelTitles: dashboard.options.hidePanelTitles,
         useMargins: dashboard.options.useMargins,
+        useSharedCrosshair: dashboard.options.useSharedCrosshair,
       };
       newStateContainer.timeRestore = dashboard.timeRestore;
       stateContainer.transitions.setDashboard(newStateContainer);

@@ -15,8 +15,9 @@ jest.mock('../../../../../../opensearch_dashboards_utils/public', () => ({
 describe('shareTopNavData', () => {
   it('should have correct properties', () => {
     expect(shareTopNavData).toMatchObject({
-      tooltip: expect.any(String),
-      ariaLabel: expect.any(String),
+      tooltip: 'Share search',
+      // Tooltip and aria-label are deliberately the same string.
+      ariaLabel: 'Share search',
       testId: 'shareTopNavButton',
       iconType: 'share',
       controlType: 'icon',
@@ -44,7 +45,6 @@ describe('getShareButtonRun', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (window as any).location = { href: 'http://localhost/test' };
   });
 
   it('should do nothing if savedAgentTraces is missing', async () => {
@@ -67,7 +67,7 @@ describe('getShareButtonRun', () => {
       expect.objectContaining({
         allowEmbed: false,
         allowShortUrl: true,
-        shareableUrl: 'unhashed:http://localhost/',
+        shareableUrl: `unhashed:${window.location.href}`,
         objectId: '123',
         objectType: 'search',
         sharingData: expect.objectContaining({

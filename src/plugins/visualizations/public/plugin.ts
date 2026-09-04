@@ -151,14 +151,12 @@ export interface VisualizationsStartDeps {
  *
  * @internal
  */
-export class VisualizationsPlugin
-  implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsSetupDeps,
-      VisualizationsStartDeps
-    > {
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsSetup,
+  VisualizationsStart,
+  VisualizationsSetupDeps,
+  VisualizationsStartDeps
+> {
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 

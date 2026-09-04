@@ -40,10 +40,14 @@ function invoke({
   def = defDefault,
   name = 'woah',
   value = 'forreal',
+  isUserProvided,
+  inheritedValue,
 }: {
   def?: PublicUiSettingsParams & { isOverridden?: boolean };
   name?: string;
   value?: any;
+  isUserProvided?: boolean;
+  inheritedValue?: unknown;
 }) {
   return toEditableConfig({
     def,
@@ -53,6 +57,8 @@ function invoke({
     isOverridden: true,
     isPermissionControlled: false,
     userSettingsEnabled: false,
+    isUserProvided,
+    inheritedValue,
   });
 }
 
@@ -146,6 +152,31 @@ describe('Settings', function () {
 
         it('sets validation to undefined', function () {
           expect(invoke({}).validation).to.be(undefined);
+        });
+      });
+
+      describe('scoped settings fields', function () {
+        it('passes scope through from the definition', function () {
+          const def = { value: 'v', scope: 'user' } as PublicUiSettingsParams;
+          expect(invoke({ def }).scope).to.equal('user');
+        });
+
+        it('passes an array scope through from the definition', function () {
+          const scope = ['global', 'user'];
+          const def = { value: 'v', scope } as PublicUiSettingsParams;
+          expect(invoke({ def }).scope).to.equal(scope);
+        });
+
+        it('passes isUserProvided and inheritedValue through', function () {
+          const result = invoke({ isUserProvided: true, inheritedValue: 'from-global' });
+          expect(result.isUserProvided).to.be(true);
+          expect(result.inheritedValue).to.equal('from-global');
+        });
+
+        it('leaves scoped fields undefined when not provided (Application page)', function () {
+          const result = invoke({});
+          expect(result.isUserProvided).to.be(undefined);
+          expect(result.inheritedValue).to.be(undefined);
         });
       });
     });

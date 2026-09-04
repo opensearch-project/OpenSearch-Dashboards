@@ -111,7 +111,11 @@ const sessionStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 describe('ChromeNavGroupService#setup()', () => {
   it('should be able to `addNavLinksToGroup`', async () => {
@@ -133,7 +137,7 @@ describe('ChromeNavGroupService#setup()', () => {
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
     expect(groupsMap[mockedGroupFoo.id].id).toEqual(mockedGroupFoo.id);
-    expect(warnMock).toBeCalledTimes(0);
+    expect(warnMock).toHaveBeenCalledTimes(0);
   });
 
   it('should output warning message if `addNavLinksToGroup` with same group id and navLink id', async () => {
@@ -157,8 +161,8 @@ describe('ChromeNavGroupService#setup()', () => {
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
-    expect(warnMock).toBeCalledTimes(1);
-    expect(warnMock).toBeCalledWith(
+    expect(warnMock).toHaveBeenCalledTimes(1);
+    expect(warnMock).toHaveBeenCalledWith(
       `[ChromeService] Navlink of ${mockedGroupFoo.id} has already been registered in group ${mockedGroupFoo.id}`
     );
   });

@@ -47,6 +47,13 @@ function getEscapedQuery(query = '') {
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 
+function getCaseInsensitiveQuery(query = '') {
+  // Lucene regexp has no case-insensitive flag; expand letters into [aA] classes instead.
+  return getEscapedQuery(query).replace(/[a-zA-Z]/g, (match) => {
+    return `[${match.toLowerCase()}${match.toUpperCase()}]`;
+  });
+}
+
 interface TermsAggArgs {
   field?: IFieldType;
   size: number | null;
@@ -76,7 +83,7 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
   }
 
   if (query) {
-    terms.include = `.*${getEscapedQuery(query)}.*`;
+    terms.include = `.*${getCaseInsensitiveQuery(query)}.*`;
   }
 
   return {

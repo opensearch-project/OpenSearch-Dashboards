@@ -80,8 +80,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
-    | ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void)
-    | undefined;
+    ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void) | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
@@ -185,7 +184,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if (this.props.outsideVisualizeApp) {
       this.navigate('visualize', `#${basePath}${params.join('&')}`);
     } else {
-      location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
+      window.location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
     }
   }
 

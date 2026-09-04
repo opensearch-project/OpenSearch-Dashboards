@@ -141,7 +141,7 @@ const BUCKET_INTERVALS: Array<[number, string]> = [
 function transformAutoDateHistogram(adh: Record<string, any>): Record<string, any> {
   const buckets = adh.buckets as number | undefined;
   const interval = buckets
-    ? BUCKET_INTERVALS.find(([max]) => buckets <= max)?.[1] ?? 'hour'
+    ? (BUCKET_INTERVALS.find(([max]) => buckets <= max)?.[1] ?? 'hour')
     : 'day';
 
   const result: Record<string, any> = { field: adh.field, interval };

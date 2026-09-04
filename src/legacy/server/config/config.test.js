@@ -224,7 +224,7 @@ describe('lib/config/config', function () {
         const run = function () {
           config.get('test.does.not.exist');
         };
-        expect(run).toThrowError(/Unknown config key: test.does.not.exist/);
+        expect(run).toThrow(/Unknown config key: test.does.not.exist/);
       });
 
       it('should not throw exception for undefined known config values', function () {
@@ -351,13 +351,13 @@ describe('lib/config/config', function () {
 
         expect(config.get('a')).toBe(1);
         config.removeSchema('a');
-        expect(() => config.get('a')).toThrowError('Unknown config key');
+        expect(() => config.get('a')).toThrow('Unknown config key');
       });
 
       it('only removes existing keys', function () {
         const config = new Config(Joi.object());
 
-        expect(() => config.removeSchema('b')).toThrowError('Unknown schema');
+        expect(() => config.removeSchema('b')).toThrow('Unknown schema');
       });
     });
   });

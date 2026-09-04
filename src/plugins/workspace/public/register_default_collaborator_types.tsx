@@ -20,29 +20,29 @@ export const generateOnAddCallback: (
   options: Omit<AddCollaboratorsModalProps, 'onClose' | 'onAddCollaborators'> & {
     getStartServices: CoreSetup['getStartServices'];
   }
-) => WorkspaceCollaboratorType['onAdd'] = ({ getStartServices, ...props }) => async ({
-  onAddCollaborators,
-}) => {
-  let overlayRef: OverlayRef | null = null;
-  const [coreStart] = await getStartServices();
-  overlayRef = coreStart.overlays.openModal(
-    toMountPoint(
-      <OpenSearchDashboardsContextProvider services={coreStart}>
-        <AddCollaboratorsModal
-          {...props}
-          http={coreStart.http}
-          onClose={() => {
-            overlayRef?.close();
-          }}
-          onAddCollaborators={async (collaborators) => {
-            await onAddCollaborators(collaborators);
-            overlayRef?.close();
-          }}
-        />
-      </OpenSearchDashboardsContextProvider>
-    )
-  );
-};
+) => WorkspaceCollaboratorType['onAdd'] =
+  ({ getStartServices, ...props }) =>
+  async ({ onAddCollaborators }) => {
+    let overlayRef: OverlayRef | null = null;
+    const [coreStart] = await getStartServices();
+    overlayRef = coreStart.overlays.openModal(
+      toMountPoint(
+        <OpenSearchDashboardsContextProvider services={coreStart}>
+          <AddCollaboratorsModal
+            {...props}
+            http={coreStart.http}
+            onClose={() => {
+              overlayRef?.close();
+            }}
+            onAddCollaborators={async (collaborators) => {
+              await onAddCollaborators(collaborators);
+              overlayRef?.close();
+            }}
+          />
+        </OpenSearchDashboardsContextProvider>
+      )
+    );
+  };
 
 export const registerDefaultCollaboratorTypes = ({
   getStartServices,

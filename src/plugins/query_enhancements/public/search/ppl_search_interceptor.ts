@@ -7,7 +7,12 @@ import { trimEnd } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
-import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
+import {
+  formatTimePickerDate,
+  getDataSourceEngineCapabilities,
+  Query,
+  UI_SETTINGS,
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
@@ -33,6 +38,22 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
+const DEFAULT_SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
+  `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+const canAppendDefaultSort = (queryString: string): boolean => {
+  const masked = queryString
+    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
+
+  const hasFieldsProjection = /\|\s*fields\b/i.test(masked) && !/\|\s*fields\s+\*/i.test(masked);
+
+  return !hasFieldsProjection && !SORT_BLOCKING_COMMAND_REGEX.test(masked);
+};
+
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
 
@@ -48,7 +69,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
       this.uiSettings = coreStart.uiSettings;
-      this.indexPatterns = (depsStart as QueryEnhancementsPluginStartDependencies).data.indexPatterns;
+      this.indexPatterns = (
+        depsStart as QueryEnhancementsPluginStartDependencies
+      ).data.indexPatterns;
     });
   }
 
@@ -71,7 +94,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     return from(this.buildQuery(request)).pipe(
-      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+      switchMap((query) =>
+        fetch(context, this.appendDefaultSort(query), this.getAggConfig(searchRequest, query))
+      )
     );
   }
 
@@ -150,9 +175,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
+      // Prefer an explicit time range passed and fall back to the global timefilter.
       const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
-        this.queryService.timefilter.timefilter.getTime()
+        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime(),
+        dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
       whereCommands.push(timeFilter);
     }
@@ -169,10 +196,37 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
   }
 
+  /**
+   * Appends a default descending sort on the time field to match legacy Discover behavior,
+   * unless the query already sorts, aggregates, projects specific fields, or limits results.
+   * Applied only to the results query, not to the histogram aggregation query.
+   */
+  private appendDefaultSort(query: Query): Query {
+    if (
+      !isPPLSearchQuery(query) ||
+      !query.dataset?.timeFieldName ||
+      !canAppendDefaultSort(query.query)
+    ) {
+      return query;
+    }
+
+    return {
+      ...query,
+      query: `${query.query} | sort - \`${query.dataset.timeFieldName}\``,
+    };
+  }
+
   // PPL aggregations are not in use for the histogram anymore
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
+
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()` grouping expression in
+    // the PPL `stats` by-clause, so the histogram aggregation query fails to parse. Skip emitting the
+    // agg config for those engines; the main query still runs.
+    const engineType = query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
+    if (!getDataSourceEngineCapabilities(engineType).supportsPplSpan) return;
+
     const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),

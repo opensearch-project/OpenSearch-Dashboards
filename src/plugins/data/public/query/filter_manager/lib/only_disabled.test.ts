@@ -152,7 +152,7 @@ describe('filter manager utilities', () => {
 
       expect(() => {
         onlyDisabledFiltersChanged(newFilters, filters);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 });

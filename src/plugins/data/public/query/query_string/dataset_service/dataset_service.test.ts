@@ -456,7 +456,7 @@ describe('DatasetService', () => {
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     service = new DatasetService(uiSettings, sessionStorage);
 
-    indexPatterns = ({
+    indexPatterns = {
       ...dataPluginMock.createStartContract().indexPatterns,
       get: jest.fn().mockResolvedValue({
         id: 'id',
@@ -464,7 +464,7 @@ describe('DatasetService', () => {
         type: DEFAULT_DATA.SET_TYPES.INDEX,
       }),
       getDataSource: jest.fn().mockResolvedValue(undefined),
-    } as unknown) as IndexPatternsContract;
+    } as unknown as IndexPatternsContract;
     service.init(indexPatterns);
 
     await waitFor(() => {
@@ -484,14 +484,14 @@ describe('DatasetService', () => {
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     service = new DatasetService(uiSettings, sessionStorage);
 
-    indexPatterns = ({
+    indexPatterns = {
       ...dataPluginMock.createStartContract().indexPatterns,
       get: jest.fn().mockResolvedValue({
         id: 'id',
         title: 'my-index-*',
       }),
       getDataSource: jest.fn().mockResolvedValue(undefined),
-    } as unknown) as IndexPatternsContract;
+    } as unknown as IndexPatternsContract;
     service.init(indexPatterns);
 
     await waitFor(() => {

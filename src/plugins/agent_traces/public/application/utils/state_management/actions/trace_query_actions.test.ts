@@ -284,9 +284,10 @@ describe('Trace Query Actions - Test Suite', () => {
   });
 
   describe('prepareTraceCacheKeys', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     it('should correctly prepare query string for RED metrics (regression test)', () => {
       mockDefaultPreparePplQuery.mockReturnValue({
@@ -311,10 +312,12 @@ describe('Trace Query Actions - Test Suite', () => {
   describe('Trace Aggregation Queries', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockBuildRequestCountQuery = jest.requireMock('./trace_aggregation_builder')
-      .buildRequestCountQuery;
-    const mockBuildErrorCountQuery = jest.requireMock('./trace_aggregation_builder')
-      .buildErrorCountQuery;
+    const mockBuildRequestCountQuery = jest.requireMock(
+      './trace_aggregation_builder'
+    ).buildRequestCountQuery;
+    const mockBuildErrorCountQuery = jest.requireMock(
+      './trace_aggregation_builder'
+    ).buildErrorCountQuery;
     const mockBuildLatencyQuery = jest.requireMock('./trace_aggregation_builder').buildLatencyQuery;
 
     beforeEach(() => {

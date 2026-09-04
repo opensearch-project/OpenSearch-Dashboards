@@ -57,7 +57,7 @@ describe('ServiceCircleNode', () => {
       zIndex: 0,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-    } as any);
+    }) as any;
 
   it('renders title and subtitle', () => {
     render(<ServiceCircleNode {...createNodeProps()} />);
@@ -138,7 +138,8 @@ describe('ServiceCircleNode', () => {
   it('applies custom color as borderColor when no metrics', () => {
     const { container } = render(<ServiceCircleNode {...createNodeProps({ color: '#6366F1' })} />);
     const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
-    expect(circleContainer.style.borderColor).toBe('#6366f1');
+    // jsdom converts hex to rgb
+    expect(circleContainer.style.borderColor).toBe('rgb(99, 102, 241)');
   });
 
   it('does not apply custom borderColor when metrics are present', () => {

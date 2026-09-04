@@ -13,10 +13,12 @@ import { CustomApiSchemaRegistry } from '../schema_registry';
 import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { registerFetchDataSourceMetaDataRoute } from './fetch_data_source_metadata';
-import { AuthType } from '../../common/data_sources';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { AuthType, SigV4ServiceName } from '../../common/data_sources';
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
-import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  dynamicConfigServiceMock,
+  savedObjectsRepositoryMock,
+} from '../../../../../src/core/server/mocks';
 
 jest.mock('../util/endpoint_validator', () => ({
   isValidURL: jest.fn(),
@@ -528,5 +530,143 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
 
     expect(result.body.message).toEqual('Fetch data source metadata endpoint validation failed');
     expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
+  });
+});
+
+describe(`Fetch DataSource MetaData ${URL} — internalSavedObjects forwarding`, () => {
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let cryptographyMock: jest.Mocked<CryptographyServiceSetup>;
+  let dataSourceServiceSetupMock: DataSourceServiceSetup;
+  let authRegistryPromiseMock: Promise<IAuthenticationMethodRegistry>;
+  let customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>;
+  let dataSourceClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  const dynamicConfigServiceStart = dynamicConfigServiceMock.createInternalStartContract();
+  const mockLogger: any = {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn(),
+    get: jest.fn().mockReturnThis(),
+  };
+  const installedPlugins = [
+    { name: 'hash1', component: 'opensearch-ml', version: '2.11.0' },
+    { name: 'hash2', component: 'opensearch-sql', version: '2.11.0' },
+  ];
+  // Reuse-stored-password flow: dataSourceId present, password omitted
+  const dataSourceAttrMissingPassword = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.UsernamePasswordType,
+      credentials: { username: 'testUser', password: '' },
+    },
+  };
+
+  // Reuse-stored-SigV4-keys flow: dataSourceId present, both keys empty
+  const dataSourceAttrMissingSigV4Keys = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.SigV4,
+      credentials: {
+        region: 'us-east-1',
+        service: SigV4ServiceName.OpenSearch,
+        accessKey: '',
+        secretKey: '',
+      },
+    },
+  };
+
+  const setupRoute = async (
+    getInternalSavedObjects?: () => ReturnType<typeof savedObjectsRepositoryMock.create> | undefined
+  ) => {
+    ({ server, httpSetup } = await setupServer());
+    dataSourceClient = opensearchClientMock.createInternalClient();
+    dataSourceClient.info.mockImplementation(() =>
+      opensearchClientMock.createSuccessTransportRequestPromise({
+        version: { number: '2.11.0', distribution: 'opensearch' },
+      })
+    );
+    dataSourceClient.cat.plugins.mockImplementation(() =>
+      opensearchClientMock.createSuccessTransportRequestPromise(installedPlugins)
+    );
+    dataSourceServiceSetupMock = {
+      getDataSourceClient: jest.fn(() => Promise.resolve(dataSourceClient)),
+      getDataSourceLegacyClient: jest.fn(),
+    };
+    customApiSchemaRegistryPromise = Promise.resolve(new CustomApiSchemaRegistry());
+    authRegistryPromiseMock = Promise.resolve(authenticationMethodRegistryMock.create());
+    mockedIsValidURL.mockResolvedValue({ valid: true });
+
+    const router = httpSetup.createRouter('');
+    registerFetchDataSourceMetaDataRoute(
+      router,
+      dataSourceServiceSetupMock,
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
+      cryptographyMock,
+      authRegistryPromiseMock,
+      customApiSchemaRegistryPromise,
+      mockLogger,
+      BLOCKED_IP_RANGES,
+      undefined,
+      getInternalSavedObjects as any
+    );
+    await server.start({ dynamicConfigService: dynamicConfigServiceStart });
+  };
+
+  afterEach(async () => {
+    await server.stop();
+    mockedIsValidURL.mockReset();
+  });
+
+  it('forwards internalSavedObjects when editing non-credential fields with stored password (username_password reuse flow)', async () => {
+    const internalRepo = savedObjectsRepositoryMock.create();
+    await setupRoute(() => internalRepo);
+
+    await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({ id: 'existing-ds-id', dataSourceAttr: dataSourceAttrMissingPassword })
+      .expect(200);
+
+    // internalSavedObjects must reach getDataSourceClient so configureClient can
+    // call getDataSourceInternal and recover encrypted credentials from the store
+    expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceId: 'existing-ds-id',
+        internalSavedObjects: internalRepo,
+      })
+    );
+  });
+
+  it('forwards internalSavedObjects when editing non-credential fields with stored SigV4 keys (sigv4 reuse flow)', async () => {
+    const internalRepo = savedObjectsRepositoryMock.create();
+    await setupRoute(() => internalRepo);
+
+    await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({ id: 'existing-ds-id', dataSourceAttr: dataSourceAttrMissingSigV4Keys })
+      .expect(200);
+
+    expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceId: 'existing-ds-id',
+        internalSavedObjects: internalRepo,
+      })
+    );
+  });
+
+  it('passes undefined internalSavedObjects when no getter is provided (no regression on existing callers)', async () => {
+    await setupRoute(/* no getter */);
+
+    await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({ id: 'existing-ds-id', dataSourceAttr: dataSourceAttrMissingPassword })
+      .expect(200);
+
+    expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
+      expect.objectContaining({ internalSavedObjects: undefined })
+    );
   });
 });

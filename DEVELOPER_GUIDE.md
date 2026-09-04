@@ -68,6 +68,16 @@ We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) t
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
+#### Node.js version files
+
+The project uses multiple files to manage the Node.js version for different purposes:
+
+| File | Format | Purpose | When to update |
+|------|--------|---------|----------------|
+| `.node-version` | Exact version (e.g. `22.23.0`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
+| `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
+| `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
+
 ### Fork and clone OpenSearch Dashboards
 
 All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
@@ -502,7 +512,7 @@ remove it, don't simply comment it out.
 #### Prettier and linting
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
-and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
+and some JavaScript code (check `eslint.config.js`) is using Prettier to format code. You
 can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
@@ -723,7 +733,7 @@ less likely to introduce bugs in the future due to insufficient types.
 
 If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
 [`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
-linting rule for your plugin via the [`.eslintrc.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/.eslintrc.js) config.
+linting rule for your plugin via the [`eslint.config.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/eslint.config.js) config.
 
 #### Avoid non-null assertions
 
@@ -742,7 +752,7 @@ assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
 [`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
-linting rule for you plugin in the [`.eslintrc.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.eslintrc.js) config.
+linting rule for you plugin in the [`eslint.config.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/eslint.config.js) config.
 
 #### Return/throw early from functions
 
@@ -894,10 +904,10 @@ define(['lodash'], function (_) {
 ```
 
 In those extremely rare cases where you're writing server-side JavaScript in a
-file that does not pass run through webpack, then use CommonJS modules.
+file that does not pass run through rspack, then use CommonJS modules.
 
 In those even rarer cases where you're writing client-side code that does not
-run through webpack, then do not use a module loader at all.
+run through rspack, then do not use a module loader at all.
 
 ##### Import only top-level modules
 

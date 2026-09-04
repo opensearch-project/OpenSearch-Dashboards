@@ -4,7 +4,12 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, OpenSearchClient } from 'opensearch-dashboards/server';
+import {
+  IRouter,
+  ISavedObjectsRepository,
+  Logger,
+  OpenSearchClient,
+} from 'opensearch-dashboards/server';
 import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
@@ -21,7 +26,8 @@ export const registerFetchDataSourceMetaDataRoute = async (
   customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
   logger: Logger,
   endpointDeniedIPs?: string[],
-  endpointAllowlistedSuffixes?: string[]
+  endpointAllowlistedSuffixes?: string[],
+  getInternalSavedObjects?: () => ISavedObjectsRepository | undefined
 ) => {
   const authRegistry = await authRegistryPromise;
   router.post(
@@ -104,6 +110,7 @@ export const registerFetchDataSourceMetaDataRoute = async (
         const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
           {
             savedObjects: context.core.savedObjects.client,
+            internalSavedObjects: getInternalSavedObjects?.(),
             cryptography,
             dataSourceId,
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,

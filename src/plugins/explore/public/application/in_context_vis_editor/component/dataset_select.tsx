@@ -77,9 +77,10 @@ export const DatasetSelectWidget = () => {
     );
   }, [services.supportedTypes, queryEditorState.languageType]);
 
-  const signalTypes = useMemo(() => getRequiredSignalType(queryEditorState.languageType), [
-    queryEditorState.languageType,
-  ]);
+  const signalTypes = useMemo(
+    () => getRequiredSignalType(queryEditorState.languageType),
+    [queryEditorState.languageType]
+  );
 
   return (
     <div ref={containerRef} className="exploreDatasetSelectWrapper">

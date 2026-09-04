@@ -4,13 +4,21 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
+import { of } from 'rxjs';
 import { ExpandedSideNav, ExpandedSideNavProps } from './expanded_side_nav';
 import { ChromeNavLink } from '../../nav_links';
-import { ChromeRegistrationNavLink } from '../../nav_group';
+import { ChromeRegistrationNavLink, NavPopoverServices } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
+
+const makePopoverServices = (): NavPopoverServices => ({
+  navigateToApp: jest.fn(),
+  basePath: mockBasePath,
+  http: httpServiceMock.createStartContract(),
+  recentlyAccessed$: of([]),
+});
 
 type MergedNavLink = ChromeNavLink & ChromeRegistrationNavLink;
 
@@ -21,7 +29,7 @@ const makeLink = (partial: Partial<MergedNavLink>): MergedNavLink =>
     baseUrl: '',
     href: '',
     ...partial,
-  } as MergedNavLink);
+  }) as MergedNavLink;
 
 describe('<ExpandedSideNav />', () => {
   const defaultProps: ExpandedSideNavProps = {
@@ -91,8 +99,13 @@ describe('<ExpandedSideNav />', () => {
         category: DEFAULT_APP_CATEGORIES.observabilityTools,
       }),
     ];
-    const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
-    expect(getByText(DEFAULT_APP_CATEGORIES.observabilityTools!.label)).toBeInTheDocument();
+    const { getByText, getByTestId } = render(
+      <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+    );
+    // The observabilityTools category was renamed "Tools" → "More".
+    expect(DEFAULT_APP_CATEGORIES.observabilityTools!.label).toBe('More');
+    expect(getByText('More')).toBeInTheDocument();
+    expect(getByTestId('obsNavSection-More')).toBeInTheDocument();
   });
 
   it('renders cluster gap before categories', () => {
@@ -154,6 +167,60 @@ describe('<ExpandedSideNav />', () => {
     expect(getByTestId('obsNavSection-Tools')).toBeInTheDocument();
   });
 
+  describe('collapsible category persistence', () => {
+    const collapsibleCategory = {
+      id: 'tools',
+      label: 'Tools',
+      collapsible: true,
+      euiIconType: 'wrench' as const,
+    };
+    const navLinks = [
+      makeLink({
+        id: 'tool1',
+        title: 'Tool 1',
+        euiIconType: 'wrench',
+        category: collapsibleCategory,
+      }),
+    ];
+
+    const makeStorage = (initial: Record<string, string> = {}): Storage => {
+      const store: Record<string, string> = { ...initial };
+      return {
+        getItem: (k: string) => (k in store ? store[k] : null),
+        setItem: (k: string, v: string) => {
+          store[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        },
+        clear: () => undefined,
+        key: () => null,
+        length: 0,
+      } as Storage;
+    };
+
+    it('writes open/closed state to storage on toggle (key core.navGroup.<id>)', () => {
+      const storage = makeStorage();
+      const setItem = jest.spyOn(storage, 'setItem');
+      const { getByTestId } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      fireEvent.click(getByTestId('obsNavSection-Tools'));
+      expect(setItem).toHaveBeenCalledWith('core.navGroup.tools', expect.any(String));
+    });
+
+    it('honors a stored collapsed state on first render', () => {
+      const storage = makeStorage({ 'core.navGroup.tools': 'false' });
+      const { container } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      // data-collapsed reflects the persisted "closed" state.
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('true');
+    });
+  });
+
   it('prevents default on link click and calls navigateToApp', () => {
     const navigateToApp = jest.fn();
     const navLinks = [makeLink({ id: 'app1', title: 'App 1', euiIconType: 'apps' })];
@@ -165,5 +232,251 @@ describe('<ExpandedSideNav />', () => {
     Object.defineProperty(clickEvent, 'preventDefault', { value: jest.fn() });
     link.dispatchEvent(clickEvent);
     expect(navigateToApp).toHaveBeenCalledWith('app1');
+  });
+
+  describe('category label sentence-casing', () => {
+    it('sentence-cases a multi-word Title Case category label', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'agents',
+          title: 'Agents',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      expect(getByText('Agent monitoring')).toBeInTheDocument();
+      // The original Title Case label should not be displayed.
+      expect(queryByText('Agent Monitoring')).not.toBeInTheDocument();
+    });
+
+    it('leaves a single-word category label unchanged', () => {
+      const category = {
+        id: 'tools',
+        label: 'Tools',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'tool1',
+          title: 'Tool 1',
+          euiIconType: 'wrench',
+          category,
+        }),
+      ];
+      const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
+      expect(getByText('Tools')).toBeInTheDocument();
+    });
+
+    it('preserves all-caps acronym tokens in a category label', () => {
+      const category = {
+        id: 'apm',
+        label: 'APM Services',
+      };
+      const navLinks = [makeLink({ id: 'svc', title: 'Service', euiIconType: 'apps', category })];
+      const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
+      // "APM" stays upper-case; only the non-acronym word is lowercased.
+      expect(getByText('APM services')).toBeInTheDocument();
+    });
+
+    it('sentence-cases collapsible category labels too', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+        collapsible: true,
+        euiIconType: 'apps' as const,
+      };
+      const navLinks = [
+        makeLink({
+          id: 'agents',
+          title: 'Agents',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      expect(getByText('Agent monitoring')).toBeInTheDocument();
+      expect(queryByText('Agent Monitoring')).not.toBeInTheDocument();
+    });
+
+    it('does NOT sentence-case nav link row titles', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'anomalyDetection',
+          title: 'Anomaly Detection',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      // Link row title keeps its original Title Case.
+      expect(getByText('Anomaly Detection')).toBeInTheDocument();
+      expect(queryByText('Anomaly detection')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('collapsible category alwaysUseDefaultOpen', () => {
+    const makeStorage = (initial: Record<string, string> = {}): Storage => {
+      const store: Record<string, string> = { ...initial };
+      return {
+        getItem: (k: string) => (k in store ? store[k] : null),
+        setItem: (k: string, v: string) => {
+          store[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        },
+        clear: () => undefined,
+        key: () => null,
+        length: 0,
+      } as Storage;
+    };
+
+    const makeCategory = (overrides = {}) => ({
+      id: 'manageWorkspace',
+      label: 'Manage Workspace',
+      collapsible: true,
+      euiIconType: 'gear' as const,
+      defaultOpen: true,
+      alwaysUseDefaultOpen: true,
+      ...overrides,
+    });
+
+    it('ignores a stored collapsed state on first render (opens to default)', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      // Stored state says "closed" (false), but the flag forces the default (open).
+      const storage = makeStorage({ 'core.navGroup.manageWorkspace': 'false' });
+      const { container } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      // defaultOpen=true -> default collapsed=false, stored state ignored.
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('false');
+    });
+
+    it('does NOT persist to storage on toggle when alwaysUseDefaultOpen is true', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      const storage = makeStorage();
+      const setItem = jest.spyOn(storage, 'setItem');
+      const { getByTestId } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      fireEvent.click(getByTestId('obsNavSection-Manage Workspace'));
+      expect(setItem).not.toHaveBeenCalled();
+    });
+
+    it('still toggles within the session even though it does not persist', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      const storage = makeStorage();
+      const { getByTestId, container } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      // Starts open (defaultOpen=true).
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('false');
+      fireEvent.click(getByTestId('obsNavSection-Manage Workspace'));
+      // Toggled closed in-session.
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('true');
+    });
+  });
+
+  describe('hover popover', () => {
+    it('shows the registered content in a popover on hover', () => {
+      const navLinks = [
+        makeLink({
+          id: 'dashboards',
+          title: 'Dashboards',
+          euiIconType: 'dashboardApp',
+          navPopover: { render: () => <div data-test-subj="customPanel">Recent dashboards</div> },
+        }),
+      ];
+      const { getByTestId, queryByTestId } = render(
+        <ExpandedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      // Not visible until hovered.
+      expect(queryByTestId('customPanel')).not.toBeInTheDocument();
+      fireEvent.mouseEnter(getByTestId('obsNavItem-dashboards').parentElement!);
+      expect(getByTestId('customPanel')).toBeInTheDocument();
+    });
+
+    it('still navigates on direct row click', () => {
+      const navigateToApp = jest.fn();
+      const navLinks = [
+        makeLink({
+          id: 'dashboards',
+          title: 'Dashboards',
+          euiIconType: 'dashboardApp',
+          navPopover: { render: () => <div>content</div> },
+        }),
+      ];
+      const { getByTestId } = render(
+        <ExpandedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          navigateToApp={navigateToApp}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      fireEvent.click(getByTestId('obsNavItem-dashboards'));
+      expect(navigateToApp).toHaveBeenCalledWith('dashboards');
+    });
+
+    it('renders a plain link (no popover) when no navPopover is registered', () => {
+      const navLinks = [makeLink({ id: 'logs', title: 'Logs', euiIconType: 'logsApp' })];
+      const { getByTestId, queryByTestId } = render(
+        <ExpandedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      fireEvent.mouseEnter(getByTestId('obsNavItem-logs').parentElement!);
+      expect(queryByTestId('obsNavPopover')).not.toBeInTheDocument();
+    });
   });
 });

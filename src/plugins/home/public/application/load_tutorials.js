@@ -33,6 +33,7 @@ import { getServices } from './opensearch_dashboards_services';
 import { i18n } from '@osd/i18n';
 
 const baseUrl = getServices().addBasePath('/api/opensearch-dashboards/home/tutorials');
+// eslint-disable-next-line no-undef
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');

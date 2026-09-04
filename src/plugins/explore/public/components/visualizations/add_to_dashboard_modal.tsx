@@ -26,12 +26,15 @@ import { OnSaveProps } from './add_to_dashboard_button';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 import { useExistingDashboard } from '../../application/utils/hooks/use_existing_dashboard';
 import { DashboardAttributes } from './add_to_dashboard_button';
+import { ComplexQueryWarningCallout } from '../../helpers/complex_query_warning';
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
   onConfirm: (props: OnSaveProps) => void;
   onCancel: () => void;
   savedExploreId: string | undefined;
+  initialTitle?: string;
+  showComplexQueryWarning?: boolean;
 }
 
 export interface ExploreAttributes {
@@ -43,6 +46,8 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   savedObjectsClient,
   onConfirm,
   onCancel,
+  initialTitle,
+  showComplexQueryWarning,
 }) => {
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
   const [newDashboardName, setNewDashboardName] = useState<string>('');
@@ -105,7 +110,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
   const { savedExplore } = useSavedExplore(savedExploreId);
 
-  const [title, setTitle] = useState<string>('');
+  const [title, setTitle] = useState<string>(initialTitle ?? '');
 
   // Dashboard-related state managed by custom hook
   const {
@@ -201,6 +206,11 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           alignItems="flexStart"
           gutterSize="s"
         >
+          {showComplexQueryWarning && (
+            <EuiFlexItem grow={false} style={{ width: '100%' }}>
+              <ComplexQueryWarningCallout />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiRadio
               id="saveToExistingDashboard"

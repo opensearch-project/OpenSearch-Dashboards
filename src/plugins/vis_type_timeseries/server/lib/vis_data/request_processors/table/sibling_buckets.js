@@ -48,7 +48,7 @@ export function siblingBuckets(req, panel, opensearchQueryConfig, indexPatternOb
             try {
               const bucket = fn(metric, column.metrics, bucketSize);
               overwrite(doc, `${aggRoot}.${metric.id}`, bucket);
-            } catch (e) {
+            } catch {
               // meh
             }
           }

@@ -112,6 +112,7 @@ export function createSavedDashboardClass(
             // for BWC reasons we can't default dashboards that already exist without this setting to true.
             useMargins: !id,
             hidePanelTitles: false,
+            useSharedCrosshair: false,
           }),
           variablesJSON: undefined,
           version: 1,
@@ -135,5 +136,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
+  return SavedDashboard as unknown as new (id: string) => SavedObjectDashboard;
 }

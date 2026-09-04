@@ -207,6 +207,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
+      getPermissionControlEnabled: deps.savedObjects.getPermissionControlEnabled,
       setRepositoryFactoryProvider: deps.savedObjects.setRepositoryFactoryProvider,
       setStatus: deps.savedObjects.setStatus,
     },
@@ -258,6 +259,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       client: deps.opensearch.client,
       createClient: deps.opensearch.createClient,
       legacy: deps.opensearch.legacy,
+      getClientTransport: deps.opensearch.getClientTransport,
     },
     http: {
       auth: deps.http.auth,

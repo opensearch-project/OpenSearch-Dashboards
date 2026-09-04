@@ -61,7 +61,7 @@ describe('opensearchDashboards cli', function () {
 
           try {
             await cleanPrevious(settings, logger);
-          } catch (e) {
+          } catch {
             exceptionCatcher();
           }
 
@@ -80,7 +80,7 @@ describe('opensearchDashboards cli', function () {
 
           try {
             await cleanPrevious(settings, logger);
-          } catch (e) {
+          } catch {
             exceptionCatcher();
           }
 
@@ -94,7 +94,7 @@ describe('opensearchDashboards cli', function () {
 
           try {
             await cleanPrevious(settings, logger);
-          } catch (e) {
+          } catch {
             exceptionCatcher();
           }
 
@@ -114,7 +114,7 @@ describe('opensearchDashboards cli', function () {
 
           try {
             await cleanPrevious(settings, logger);
-          } catch (e) {
+          } catch {
             exceptionCatcher();
           }
 
@@ -127,7 +127,7 @@ describe('opensearchDashboards cli', function () {
 
           try {
             await cleanPrevious(settings, logger);
-          } catch (e) {
+          } catch {
             exceptionCatcher();
           }
 

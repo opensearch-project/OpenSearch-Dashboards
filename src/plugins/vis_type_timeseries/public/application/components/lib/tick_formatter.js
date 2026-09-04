@@ -65,13 +65,13 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
     } else {
       try {
         value = formatter.convert(val, 'text');
-      } catch (e) {
+      } catch {
         value = val;
       }
     }
     try {
       return render({ value });
-    } catch (e) {
+    } catch {
       return String(value);
     }
   };

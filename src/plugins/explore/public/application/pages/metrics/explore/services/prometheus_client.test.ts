@@ -15,7 +15,7 @@ const transform = (client: PrometheusClient, hits: unknown[]): any[] => {
 };
 
 const makeClient = (): PrometheusClient => {
-  return new PrometheusClient(({} as unknown) as ExploreServices, 'conn-1');
+  return new PrometheusClient({} as unknown as ExploreServices, 'conn-1');
 };
 
 interface MockResourceClient {
@@ -39,12 +39,12 @@ const makeClientWithResources = (
     getSeries: jest.fn().mockResolvedValue([{ __name__: 'up' }]),
   };
   const getTime = jest.fn(() => timeRange);
-  const services = ({
+  const services = {
     data: {
       resourceClientFactory: { get: () => rc },
       query: { timefilter: { timefilter: { getTime } } },
     },
-  } as unknown) as ExploreServices;
+  } as unknown as ExploreServices;
   return { client: new PrometheusClient(services, 'conn-1'), rc, getTime };
 };
 
@@ -222,7 +222,7 @@ describe('PrometheusClient.queryRange preserves data connection meta', () => {
     const queryState = { language: 'PROMQL', query: '', dataset };
     const dataView = { id: 'conn-1', type: 'PROMETHEUS' };
 
-    const services = ({
+    const services = {
       data: {
         query: {
           timefilter: { timefilter: { getTime: () => ({ from: 'now-1h', to: 'now' }) } },
@@ -236,7 +236,7 @@ describe('PrometheusClient.queryRange preserves data connection meta', () => {
         },
         search: { searchSource: { create: jest.fn().mockResolvedValue(searchSource) } },
       },
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
 
     const client = new PrometheusClient(services, 'conn-1');
     await client.queryRange('up');

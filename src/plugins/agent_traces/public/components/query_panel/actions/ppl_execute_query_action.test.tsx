@@ -76,8 +76,7 @@ describe('usePPLExecuteQueryAction', () => {
   let initialCallCount: number;
 
   beforeEach(() => {
-    // Use fake timers with legacy mode for React 18 compatibility
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
 
     // Track the initial call count (don't clear, just track)
     initialCallCount = mockUseAssistantAction.mock.calls.length;
@@ -166,7 +165,7 @@ describe('usePPLExecuteQueryAction', () => {
     });
 
     const resultPromise = handler(args);
-    jest.runAllTimers();
+    await jest.runAllTimersAsync();
     const result = await resultPromise;
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
@@ -201,7 +200,7 @@ describe('usePPLExecuteQueryAction', () => {
     });
 
     const resultPromise = handler(args);
-    jest.runAllTimers();
+    await jest.runAllTimersAsync();
     const result = await resultPromise;
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
@@ -245,7 +244,7 @@ describe('usePPLExecuteQueryAction', () => {
     });
 
     const resultPromise = handler(args);
-    jest.advanceTimersByTime(PPL_QUERY_EXECUTION_TIMEOUT_MS + 1000);
+    await jest.runAllTimersAsync();
     const result = await resultPromise;
 
     expect(result).toEqual({

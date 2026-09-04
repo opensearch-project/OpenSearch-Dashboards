@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ModalService ModalRef#close() can be called multiple times on the same ModalRef 1`] = `
 Array [

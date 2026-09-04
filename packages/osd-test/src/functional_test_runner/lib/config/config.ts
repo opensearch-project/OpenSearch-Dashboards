@@ -74,7 +74,7 @@ export class Config {
     try {
       const sub = schema.extract(path.join('.'));
       return !!sub;
-    } catch (e) {
+    } catch {
       // extract throws for unknown paths; also check if the value exists
       // in the validated values (for pattern-matched keys)
       return has(this[$values], path);

@@ -38,7 +38,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { CoreStart, Logos } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Container,
   ContainerInput,
@@ -79,6 +79,7 @@ export interface DashboardContainerInput extends ContainerInput {
   refreshConfig?: RefreshInterval;
   expandedPanelId?: string;
   useMargins: boolean;
+  useSharedCrosshair?: boolean;
   title: string;
   description?: string;
   isEmbeddedExternally?: boolean;
@@ -101,6 +102,7 @@ export interface InheritedChildInput extends IndexSignature {
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
+  useSharedCrosshair?: boolean;
   id: string;
 }
 
@@ -117,11 +119,11 @@ export interface DashboardContainerOptions {
   data?: DataPublicPluginStart;
   initialVariables?: Variable[];
   savedObjects?: CoreStart['savedObjects'];
+  telemetry?: CoreStart['telemetry'];
 }
 
-export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
-  DashboardContainerOptions
->;
+export type DashboardReactContextValue =
+  OpenSearchDashboardsReactContextValue<DashboardContainerOptions>;
 export type DashboardReactContext = OpenSearchDashboardsReactContext<DashboardContainerOptions>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
@@ -129,8 +131,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
   public updateAppStateUrl?:
-    | undefined
-    | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
+    undefined | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
   private readonly logos: Logos;
@@ -159,7 +160,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.variableService = new VariableService(
       options.data,
       initialInput.id,
-      options.savedObjects?.client
+      options.savedObjects?.client,
+      (event) => options.telemetry?.getPluginRecorder().recordEvent(event)
     );
 
     this.variableService.initialize(initialInput.variables);
@@ -232,7 +234,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
@@ -249,7 +251,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const originalPanelState = {
       type: PLACEHOLDER_EMBEDDABLE,
       explicitInput: {
-        id: uuid.v4(),
+        id: uuidv4(),
         disabledActions: [
           'ACTION_CUSTOMIZE_PANEL',
           'CUSTOM_TIME_RANGE',
@@ -286,7 +288,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     const finalPanels = { ...this.input.panels };
     delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuidv4();
     finalPanels[newPanelId] = {
       ...previousPanelState,
       ...newPanelState,
@@ -308,7 +310,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public async addOrUpdateEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
     const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {
@@ -316,7 +318,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: uuidv4(),
         },
       });
     } else {
@@ -371,10 +373,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      useSharedCrosshair,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
+      useSharedCrosshair,
       query,
       timeRange,
       refreshConfig,

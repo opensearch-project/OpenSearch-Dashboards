@@ -15,6 +15,7 @@ jest.mock('./use_query_panel_editor', () => ({
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   CodeEditor: ({ value, languageId, onChange, options, ...props }: any) => (
+    // eslint-disable-next-line react/no-unknown-property
     <div data-test-subj="code-editor" value={value} languageId={languageId} {...props}>
       Code Editor Mock
     </div>

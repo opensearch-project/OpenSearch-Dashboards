@@ -126,6 +126,6 @@ describe('<FeatureCards />', () => {
       />
     );
     fireEvent.click(getByTestId('landingPageFeature_1'));
-    expect(mockedNavigateToApp).toBeCalledWith('1');
+    expect(mockedNavigateToApp).toHaveBeenCalledWith('1');
   });
 });

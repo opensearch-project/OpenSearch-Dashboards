@@ -108,9 +108,9 @@ describe('SavedObjectsTable', () => {
   let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <SavedObjectsTable {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<
+    ) as unknown as ShallowWrapper<
       SavedObjectsTableProps,
       SavedObjectsTableState,
       SavedObjectsTable
@@ -852,7 +852,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await waitFor(() => {
-        expect(findObjectsMock).toBeCalledWith(
+        expect(findObjectsMock).toHaveBeenCalledWith(
           http,
           expect.objectContaining({
             workspaces: expect.arrayContaining(['workspace1']),
@@ -898,7 +898,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await waitFor(() => {
-        expect(findObjectsMock).toBeCalledWith(
+        expect(findObjectsMock).toHaveBeenCalledWith(
           http,
           expect.not.objectContaining({
             workspaces,

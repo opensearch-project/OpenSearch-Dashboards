@@ -7,6 +7,7 @@ import './metrics_query_panel.scss';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { isEqual } from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiButtonEmpty,
@@ -23,9 +24,10 @@ import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
-import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
@@ -36,22 +38,34 @@ import {
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { setQueryOptions } from '../../../application/utils/state_management/slices/query/query_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
 import { RootState } from '../../../application/utils/state_management/store';
-import { getQueryLabel } from '../../../../../data/common';
+import { getQueryLabel, Query } from '../../../../../data/common';
 import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
 import '../../../components/query_panel/query_panel.scss';
 
+import type {
+  PerQueryOptions,
+  PromQLQuery,
+  PromQLQueryOptions,
+} from '../../../../../query_enhancements/common';
 import {
   QueryRowComponent,
   QueryRow,
   RowMode,
   initRows,
   joinRows,
+  serializeRows,
   createPromQLSuggestionProvider,
+  MetricsQueryOptions,
+  formatStepSeconds,
+  useExecutedStepResolution,
+  useMetricsQuerySettings,
 } from './query_panel';
+import type { RowStepReadout } from './query_panel';
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -67,6 +81,7 @@ export const MetricsQueryPanel: React.FC = () => {
   const setEditorText = useSetEditorText();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+  usePPLLintFixAction(setEditorTextWithQuery);
 
   const handleRun = useCallback(() => {
     const editorText =
@@ -82,21 +97,30 @@ export const MetricsQueryPanel: React.FC = () => {
     return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
   }, [queryLanguage, services.data.query.queryString]);
 
-  const client = useMemo(() => new PrometheusClient(services, dataConnectionId), [
-    services,
-    dataConnectionId,
-  ]);
+  const client = useMemo(
+    () => new PrometheusClient(services, dataConnectionId),
+    [services, dataConnectionId]
+  );
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
 
-  const [rows, setRows] = useState<QueryRow[]>(() => initRows(reduxQuery, nextRowId));
+  const reduxPerQueryOptions = useSelector(
+    (state: RootState) =>
+      (state.query.queryOptions as PromQLQueryOptions | undefined)?.perQueryOptions
+  );
+  const perQueryOptionsRef = useRef(reduxPerQueryOptions);
+  perQueryOptionsRef.current = reduxPerQueryOptions;
+
+  const [rows, setRows] = useState<QueryRow[]>(() =>
+    initRows(reduxQuery, nextRowId, reduxPerQueryOptions)
+  );
   const lastDispatchedRef = useRef(reduxQuery);
 
   useEffect(() => {
     if (reduxQuery !== lastDispatchedRef.current) {
       lastDispatchedRef.current = reduxQuery;
-      setRows(initRows(reduxQuery, nextRowId));
+      setRows(initRows(reduxQuery, nextRowId, perQueryOptionsRef.current));
     }
   }, [reduxQuery, nextRowId]);
 
@@ -105,15 +129,48 @@ export const MetricsQueryPanel: React.FC = () => {
   const { queryString } = services.data.query;
   const syncEditorText = useCallback(
     (updatedRows: QueryRow[]) => {
-      const combined = joinRows(updatedRows);
+      const { query: combined, perQueryOptions } = serializeRows(updatedRows);
+      const currentQuery = queryString.getQuery() as PromQLQuery;
+      queryString.setQuery({
+        query: combined,
+        queryOptions: { ...currentQuery.queryOptions, perQueryOptions },
+      } as Partial<Query>);
+      if (!isEqual(perQueryOptions, perQueryOptionsRef.current)) {
+        dispatch(setQueryOptions({ perQueryOptions }));
+      }
+      dispatch(setIsQueryEditorDirty(true));
       if (combined === lastDispatchedRef.current) return;
       lastDispatchedRef.current = combined;
       setEditorText(combined);
-      const currentQuery = queryString.getQuery();
-      queryString.setQuery({ ...currentQuery, query: combined });
-      dispatch(setIsQueryEditorDirty(true));
     },
     [setEditorText, dispatch, queryString]
+  );
+
+  const { maxDataPoints, onMaxDataPointsChange, getResolvedStep } =
+    useMetricsQuerySettings(services);
+
+  // Server-reported steps only line up with the rows by position, so trust them
+  // only while the rows still serialize to the query that produced them.
+  const executedSteps = useExecutedStepResolution();
+  const executedStepsMatchRows = !!executedSteps && executedSteps.query === joinRows(rows);
+
+  const stepReadoutFor = useCallback(
+    (label: string, minStep?: string): RowStepReadout => {
+      const candidate = executedStepsMatchRows ? executedSteps?.byLabel[label] : undefined;
+      // The server resolved these steps against the min step in effect at run
+      // time, so a since-edited min step must fall back to a fresh estimate.
+      const executed =
+        candidate && (candidate.minStep ?? undefined) === (minStep ?? undefined)
+          ? candidate
+          : undefined;
+      const resolved = executed ?? getResolvedStep(minStep);
+      return {
+        stepLabel: formatStepSeconds(resolved?.stepSec),
+        rateIntervalLabel: formatStepSeconds(resolved?.rateIntervalSec),
+        isFromLastRun: !!executed,
+      };
+    },
+    [executedSteps, executedStepsMatchRows, getResolvedStep]
   );
 
   const updateRow = useCallback(
@@ -125,6 +182,13 @@ export const MetricsQueryPanel: React.FC = () => {
       });
     },
     [syncEditorText]
+  );
+
+  const onOptionsChange = useCallback(
+    (rowId: string, options: PerQueryOptions) => {
+      updateRow(rowId, { minStep: options.minStep, legendFormat: options.legendFormat });
+    },
+    [updateRow]
   );
 
   const onBuilderChange = useCallback(
@@ -219,6 +283,11 @@ export const MetricsQueryPanel: React.FC = () => {
     return () => cancelAnimationFrame(rafId);
   }, [isPromptMode, editorRef]);
 
+  // Server steps are keyed by the labels of active (non-empty) rows only, so an
+  // empty row must not borrow a neighbor's label when reading its step back.
+  let activeRowSeen = 0;
+  const readoutLabels = rows.map((row) => (row.query.trim() ? getQueryLabel(activeRowSeen++) : ''));
+
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
@@ -229,7 +298,7 @@ export const MetricsQueryPanel: React.FC = () => {
 
       {isPromptMode ? (
         <div className="exploreQueryPanel__editorsWrapper">
-          <QueryPanelEditor />
+          <ExploreQueryPanelEditor />
           <QueryPanelGeneratedQuery />
         </div>
       ) : (
@@ -255,11 +324,13 @@ export const MetricsQueryPanel: React.FC = () => {
                       onCodeChange={onCodeChange}
                       onModeChange={onModeChange}
                       onRemove={removeRow}
+                      onOptionsChange={onOptionsChange}
                       onRun={handleRun}
                       languageTitle={languageTitle}
                       canRemove={rows.length > 1}
                       isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
+                      stepReadout={stepReadoutFor(readoutLabels[idx], row.minStep)}
                     />
                   )}
                 </EuiDraggable>
@@ -279,6 +350,13 @@ export const MetricsQueryPanel: React.FC = () => {
                   defaultMessage: 'Add query',
                 })}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MetricsQueryOptions
+                maxDataPoints={maxDataPoints}
+                onMaxDataPointsChange={onMaxDataPointsChange}
+                resolvedMaxDataPoints={executedSteps?.maxDataPoints}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

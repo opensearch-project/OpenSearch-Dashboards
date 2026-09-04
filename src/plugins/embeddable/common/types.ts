@@ -37,7 +37,7 @@ export enum ViewMode {
   VIEW = 'view',
 }
 
-export type EmbeddableInput = {
+export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
   /**
@@ -79,4 +79,4 @@ export type EmbeddableInput = {
    * Visualization filters used to narrow down results.
    */
   filters?: Filter[];
-};
+}

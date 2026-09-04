@@ -79,10 +79,7 @@ export interface EditDataSourceState {
   auth: {
     type: AuthType | string;
     credentials:
-      | UsernamePasswordTypedContent
-      | SigV4Content
-      | { [key: string]: string }
-      | undefined;
+      UsernamePasswordTypedContent | SigV4Content | { [key: string]: string } | undefined;
   };
   showUpdatePasswordModal: boolean;
   showUpdateAwsCredentialModal: boolean;
@@ -405,7 +402,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         await this.props.handleSubmit(formValues);
         this.setState({ showUpdateOptions: false });
         this.setFormValuesForEditMode();
-      } catch (e) {
+      } catch {
         this.props.displayToastMessage({
           message: i18n.translate('dataSourcesManagement.editDataSource.editDataSourceFailMsg', {
             defaultMessage: 'Updating the Data Source failed with some errors.',
@@ -482,7 +479,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         }),
         success: true,
       });
-    } catch (e) {
+    } catch {
       this.props.displayToastMessage({
         message: i18n.translate('dataSourcesManagement.editDataSource.testConnectionFailMsg', {
           defaultMessage:
@@ -535,7 +532,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         }),
         success: true,
       });
-    } catch (e) {
+    } catch {
       this.props.displayToastMessage({
         message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
           defaultMessage: 'Updating the stored password failed with some errors.',
@@ -571,7 +568,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         }),
         success: true,
       });
-    } catch (e) {
+    } catch {
       this.props.displayToastMessage({
         message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
           defaultMessage: 'Updating the stored password failed with some errors.',
@@ -585,9 +582,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
-      authType
-    );
+    const registeredAuthMethod =
+      this.authenticationMethodRegistry.getAuthenticationMethod(authType);
     const authCredentialForm = registeredAuthMethod?.credentialForm;
 
     if (authCredentialForm !== undefined) {

@@ -4,19 +4,18 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
-import { calculateTraceTimeRange } from '../../utils/span_timerange_utils';
+import { calculateTraceTimeRange, TraceTimeRange } from '../../utils/span_timerange_utils';
 import { Span, SpanTableProps } from './types';
 import { HierarchySpanCell } from './hierarchy_span_cell';
 import { SpanCell } from './span_cell';
 import { parseHits, applySpanFilters } from './utils';
 import { ServiceLegendButton } from './service_legend_button';
 import { getSpanHierarchyTableColumns } from './span_table_columns';
-import { SpanStatusFilter } from './span_status_filter';
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const { availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
@@ -26,8 +25,25 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
+  // Visible time window driven by the timeline brush (undefined = full range).
+  const [visibleRange, setVisibleRange] = useState<TraceTimeRange | undefined>(undefined);
+  // User column-resize widths, persisted so they survive columns being recomputed
+  // on zoom (EUI resets column widths to initialWidth whenever the columns array
+  // reference changes). Reset per trace so one trace's sizing doesn't leak to the
+  // next. Fed back as initialWidth in the columns memo below.
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const handleColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) =>
+      setColumnWidths((prev) => ({ ...prev, [columnId]: width })),
+    []
+  );
 
   const traceTimeRange = useMemo(() => calculateTraceTimeRange(allSpans), [allSpans]);
+
+  const handleVisibleRangeChange = useCallback(
+    (range: TraceTimeRange | null) => setVisibleRange(range ?? undefined),
+    []
+  );
 
   useEffect(() => {
     if (!props.payloadData) return;
@@ -51,6 +67,15 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
       setIsSpansTableDataLoading(false);
     }
   }, [props.payloadData, props.DSL, props.filters]);
+
+  // Reset the zoom window and any column resizing only when the trace itself
+  // changes (identified by traceId). Filter changes re-fetch/re-filter the same
+  // trace, so they must not wipe the user's zoom or column widths.
+  const traceId = allSpans[0]?.traceId;
+  useEffect(() => {
+    setVisibleRange(undefined);
+    setColumnWidths({});
+  }, [traceId]);
 
   type SpanMap = Record<string, Span>;
 
@@ -101,9 +126,28 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getSpanHierarchyTableColumns(traceTimeRange, availableWidth), [
+  // Keep the latest flattened rows in a ref so the expand/collapse toolbar
+  // handlers can stay stable (identity-wise) yet always read current rows —
+  // avoids a stale-closure no-op on the first click after a re-render.
+  const flattenedItemsRef = useRef(flattenedItems);
+  flattenedItemsRef.current = flattenedItems;
+
+  const columns = useMemo(() => {
+    const base = getSpanHierarchyTableColumns(traceTimeRange, availableWidth, {
+      visibleRange,
+      brush: { spans: allSpans, colorMap, onChange: handleVisibleRangeChange },
+    });
+    return base.map((col) =>
+      columnWidths[col.id] != null ? { ...col, initialWidth: columnWidths[col.id] } : col
+    );
+  }, [
     traceTimeRange,
     availableWidth,
+    visibleRange,
+    allSpans,
+    colorMap,
+    handleVisibleRangeChange,
+    columnWidths,
   ]);
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
@@ -119,6 +163,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           setCellProps={setCellProps}
           setExpandedRows={setExpandedRows}
           expandedRows={expandedRows}
+          colorMap={colorMap}
         />
       ) : (
         <SpanCell
@@ -131,46 +176,170 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           setCellProps={setCellProps}
           traceTimeRange={traceTimeRange}
           colorMap={colorMap}
+          visibleRange={visibleRange}
         />
       );
     },
-    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap]
+    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap, visibleRange]
+  );
+
+  // Expand the whole tree by one more level: expand every currently-visible
+  // parent that isn't already expanded (reveals the next level everywhere).
+  const expandOneLevel = useCallback(() => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      flattenedItemsRef.current.forEach((span) => {
+        if (span.children?.length && !next.has(span.spanId)) next.add(span.spanId);
+      });
+      return next;
+    });
+  }, []);
+
+  // Collapse the deepest currently-visible level across the whole tree. We
+  // target the deepest spans that actually have a *visible* child (derived from
+  // parentSpanId), so it's guaranteed to hide rows regardless of stale/cyclic
+  // child refs in the data.
+  const collapseOneLevel = useCallback(() => {
+    setExpandedRows((prev) => {
+      const rows = flattenedItemsRef.current;
+      const parentsOfVisibleRows = new Set(
+        rows.map((span) => span.parentSpanId).filter(Boolean) as string[]
+      );
+      let deepest = -1;
+      rows.forEach((span) => {
+        if (parentsOfVisibleRows.has(span.spanId)) deepest = Math.max(deepest, span.level ?? 0);
+      });
+      if (deepest < 0) return prev;
+      const next = new Set(prev);
+      rows.forEach((span) => {
+        if ((span.level ?? 0) === deepest && parentsOfVisibleRows.has(span.spanId)) {
+          next.delete(span.spanId);
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  const canExpandMore = useMemo(
+    () => flattenedItems.some((span) => span.children?.length && !expandedRows.has(span.spanId)),
+    [flattenedItems, expandedRows]
+  );
+  const canCollapseMore = useMemo(
+    () => flattenedItems.some((span) => (span.level ?? 0) > 0),
+    [flattenedItems]
   );
 
   const toolbarButtons = useMemo(() => {
+    const expandAllLabel = i18n.translate('explore.spanDetailTable.button.expandAll', {
+      defaultMessage: 'Expand all',
+    });
+    const collapseAllLabel = i18n.translate('explore.spanDetailTable.button.collapseAll', {
+      defaultMessage: 'Collapse all',
+    });
+    const expandOneLabel = i18n.translate('explore.spanDetailTable.button.expandOneLevel', {
+      defaultMessage: 'Expand one level',
+    });
+    const collapseOneLabel = i18n.translate('explore.spanDetailTable.button.collapseOneLevel', {
+      defaultMessage: 'Collapse one level',
+    });
+    // When disabled, explain WHY (otherwise the greyed icon reads as broken).
+    const expandOneTooltip = canExpandMore
+      ? expandOneLabel
+      : i18n.translate('explore.spanDetailTable.button.expandOneLevelDisabled', {
+          defaultMessage: 'Tree is fully expanded',
+        });
+    const collapseOneTooltip = canCollapseMore
+      ? collapseOneLabel
+      : i18n.translate('explore.spanDetailTable.button.collapseOneLevelDisabled', {
+          defaultMessage: 'Tree is fully collapsed',
+        });
     return [
-      <EuiButtonEmpty
-        size="xs"
-        onClick={() => setExpandedRows(new Set(spans.map((span) => span.spanId)))}
-        key="expandAll"
-        color="text"
-        iconType="expand"
-        data-test-subj="treeExpandAll"
-      >
-        {i18n.translate('explore.spanDetailTable.button.expandAll', {
-          defaultMessage: 'Expand all',
-        })}
-      </EuiButtonEmpty>,
-      <EuiButtonEmpty
-        size="xs"
-        onClick={() => setExpandedRows(new Set())}
-        key="collapseAll"
-        color="text"
-        iconType="minimize"
-        data-test-subj="treeCollapseAll"
-      >
-        {i18n.translate('explore.spanDetailTable.button.collapseAll', {
-          defaultMessage: 'Collapse all',
-        })}
-      </EuiButtonEmpty>,
+      <EuiToolTip key="expandAll" content={expandAllLabel}>
+        <EuiButtonIcon
+          size="xs"
+          onClick={() => setExpandedRows(new Set(spans.map((span) => span.spanId)))}
+          color="text"
+          display="empty"
+          iconType="expand"
+          aria-label={expandAllLabel}
+          data-test-subj="treeExpandAll"
+        />
+      </EuiToolTip>,
+      <EuiToolTip key="collapseAll" content={collapseAllLabel}>
+        <EuiButtonIcon
+          size="xs"
+          onClick={() => setExpandedRows(new Set())}
+          color="text"
+          display="empty"
+          iconType="minimize"
+          aria-label={collapseAllLabel}
+          data-test-subj="treeCollapseAll"
+        />
+      </EuiToolTip>,
+      <EuiToolTip key="expandOne" content={expandOneTooltip}>
+        {/* span wrapper so the tooltip still shows while the button is disabled */}
+        <span>
+          <EuiButtonIcon
+            size="xs"
+            onClick={expandOneLevel}
+            color="text"
+            display="empty"
+            iconType="menuDown"
+            isDisabled={!canExpandMore}
+            aria-label={expandOneLabel}
+            data-test-subj="treeExpandOneLevel"
+          />
+        </span>
+      </EuiToolTip>,
+      <EuiToolTip key="collapseOne" content={collapseOneTooltip}>
+        <span>
+          <EuiButtonIcon
+            size="xs"
+            onClick={collapseOneLevel}
+            color="text"
+            display="empty"
+            iconType="menuUp"
+            isDisabled={!canCollapseMore}
+            aria-label={collapseOneLabel}
+            data-test-subj="treeCollapseOneLevel"
+          />
+        </span>
+      </EuiToolTip>,
     ];
-  }, [spans]);
+  }, [spans, expandOneLevel, collapseOneLevel, canExpandMore, canCollapseMore]);
 
+  // Timeline-grid controls only. Cross-tab filters (status / duration / attribute)
+  // live in the trace view's filter bar, since they apply across all span tabs.
   const secondaryToolbar = [
-    <SpanStatusFilter
-      spanFilters={props.filters}
-      setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
-    />,
+    <EuiToolTip
+      key="resetZoomTip"
+      content={
+        visibleRange
+          ? i18n.translate('explore.spanDetailTable.resetZoom.enabledTooltip', {
+              defaultMessage: 'Reset the timeline zoom to the full trace',
+            })
+          : i18n.translate('explore.spanDetailTable.resetZoom.disabledTooltip', {
+              defaultMessage: 'Drag the timeline slider to zoom, then reset here',
+            })
+      }
+    >
+      {/* span wrapper so the tooltip still shows while the button is disabled */}
+      <span>
+        <EuiButtonEmpty
+          size="xs"
+          // Blue when actionable (a zoom is applied); greyed when disabled.
+          color="primary"
+          iconType="editorUndo"
+          isDisabled={!visibleRange}
+          onClick={() => setVisibleRange(undefined)}
+          data-test-subj="timelineResetZoom"
+        >
+          {i18n.translate('explore.spanDetailTable.resetZoom.label', {
+            defaultMessage: 'Reset zoom',
+          })}
+        </EuiButtonEmpty>
+      </span>
+    </EuiToolTip>,
     <ServiceLegendButton
       key="serviceLegend"
       servicesInOrder={servicesInOrder}
@@ -198,6 +367,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
         visibleColumns,
         isTableDataLoading: isSpansTableDataLoading,
         defaultHeight: tableHeight,
+        onColumnResize: handleColumnResize,
       })}
     </div>
   );

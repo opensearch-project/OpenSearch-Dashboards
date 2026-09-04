@@ -29,6 +29,9 @@ import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
 import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
+import { HumanInputService } from './services/human_input_service';
+import { createAskUserAction } from './services/ask_user_action';
+import { AssistantActionService } from '../../context_provider/public';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 import { ChatMountService } from './services/chat_mount_service';
 
@@ -53,9 +56,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private suggestedActionsService = new SuggestedActionsService();
   private commandRegistryService = new CommandRegistryService();
   private confirmationService = new ConfirmationService();
+  private humanInputService = new HumanInputService();
   private chatMountService?: ChatMountService;
   private paddingSizeSubscription?: Subscription;
   private windowStateChangeSubscription?: Subscription;
+  private autoFocusWindowOpenSubscription?: () => void;
+  private autoFocusWindowCloseSubscription?: () => void;
   private coreSetup?: CoreSetup;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -78,9 +84,30 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       // eslint-disable-next-line no-empty
     } catch {}
 
+    // Chat-input auto-focus wiring (UI concern, kept local to this plugin —
+    // see ChatService#shouldAutoFocusInput$ for the rationale). `onWindowOpen`
+    // fires synchronously off the underlying BehaviorSubject, so bracketing
+    // both bootstrap branches below (restore, and first-visit default open)
+    // with `isBootstrapping` lets us tell them apart from every other
+    // (explicit) open: the header "Ask AI" button, workspace quick-start, and
+    // sendMessageWithWindow all go through `core.chat.openWindow()`, never
+    // through this bootstrap path.
+    let isBootstrapping = false;
+    this.autoFocusWindowOpenSubscription = chat.onWindowOpen(() => {
+      this.chatService?.setShouldAutoFocusInput(!isBootstrapping);
+    });
+    this.autoFocusWindowCloseSubscription = chat.onWindowClose(() => {
+      this.chatService?.setShouldAutoFocusInput(false);
+    });
+
+    isBootstrapping = true;
     if (isValidChatWindowState(storeState)) {
       chat.setWindowState(storeState);
+    } else {
+      // First visit or no stored state — open chat by default
+      chat.setWindowState({ isWindowOpen: true });
     }
+    isBootstrapping = false;
 
     this.paddingSizeSubscription = overlays.sidecar
       .getSidecarConfig$()
@@ -151,6 +178,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+        setSessionDataSourceList: (dataSourceId: string | undefined) => {
+          this.chatService?.setSessionDataSourceList(dataSourceId);
+        },
       });
     }
 
@@ -169,6 +199,16 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       }
     }
 
+    // Register the `ask_user` human-in-the-loop tool eagerly, before any
+    // conversation replay can run. The AssistantActionService is a
+    // process-wide singleton, so registering here (rather than in a React
+    // effect) guarantees `hasAction('ask_user')` is true when
+    // `injectUnfinishedToolCallEvents` decides whether to replay an unfinished
+    // question on reload — closing the effect-ordering race.
+    AssistantActionService.getInstance().registerAction(
+      createAskUserAction(this.humanInputService)
+    );
+
     this.chatMountService = new ChatMountService();
 
     this.chatMountService.start({
@@ -178,6 +218,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       charts: deps.charts,
       suggestedActionsService: this.suggestedActionsService!,
       confirmationService: this.confirmationService,
+      humanInputService: this.humanInputService,
     });
 
     // Register chat button in header with conditional visibility
@@ -203,27 +244,43 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       },
     });
 
+    const sendGlobalSearchMessage = async (content: string) => {
+      await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+    };
+
     core.chrome.globalSearch.registerSearchCommand({
       id: 'AI_CHATBOT_COMMAND',
       type: 'ACTIONS',
       inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
         defaultMessage: 'Search or chat with AI',
       }),
-      run: async () => [
-        React.createElement(
-          EuiText,
+      run: async (query: string) => {
+        if (!query) {
+          return [];
+        }
+
+        return [
           {
-            size: 'xs',
-            color: 'subdued',
+            id: 'chat-with-ai',
+            label: i18n.translate('chat.globalSearch.chatWithAI.actionLabel', {
+              defaultMessage: 'Chat with AI',
+            }),
+            content: React.createElement(
+              EuiText,
+              {
+                size: 'xs',
+                color: 'subdued',
+              },
+              i18n.translate('chat.globalSearch.chatWithAI.hints', {
+                defaultMessage: 'Press Enter to chat with AI',
+              })
+            ),
+            placement: 'trailing',
+            execute: () => sendGlobalSearchMessage(query),
           },
-          i18n.translate('chat.globalSearch.chatWithAI.hints', {
-            defaultMessage: 'Press Enter to chat with AI',
-          })
-        ),
-      ],
-      action: async ({ content }: { content: string }) => {
-        await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
+        ];
       },
+      action: ({ content }: { content: string }) => sendGlobalSearchMessage(content),
     });
 
     this.setupChatbotWindowState(core);
@@ -237,7 +294,11 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.chatMountService?.stop();
     this.paddingSizeSubscription?.unsubscribe();
     this.windowStateChangeSubscription?.unsubscribe();
+    this.autoFocusWindowOpenSubscription?.();
+    this.autoFocusWindowCloseSubscription?.();
     this.chatService?.destroy();
     this.confirmationService.cleanAll();
+    this.humanInputService.cleanAll();
+    AssistantActionService.getInstance().unregisterAction('ask_user');
   }
 }

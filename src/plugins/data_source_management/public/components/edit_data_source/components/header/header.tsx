@@ -55,8 +55,8 @@ export const Header = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDefaultDataSourceState, setIsDefaultDataSourceState] = useState(isDefault);
 
-  const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
-    .docTitle.change;
+  const changeTitle =
+    useOpenSearchDashboards<DataSourceManagementContext>().services.chrome.docTitle.change;
 
   changeTitle(dataSourceName);
 

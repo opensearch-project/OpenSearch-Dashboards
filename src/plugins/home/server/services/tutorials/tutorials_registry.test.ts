@@ -122,7 +122,7 @@ describe('TutorialsRegistry', () => {
     test('registerTutorial registers a tutorial with a valid schema', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
       testProvider = ({}) => validTutorialProvider;
-      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+      expect(() => setup.registerTutorial(testProvider)).not.toThrow();
     });
 
     test('addScopedTutorialContextFactory throws when given a scopedTutorialContextFactory that is not a function', () => {
@@ -140,7 +140,7 @@ describe('TutorialsRegistry', () => {
       testScopedTutorialContextFactory = ({}) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

@@ -79,8 +79,6 @@ import {
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
-const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
-
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: IIndexPattern[];
@@ -130,7 +128,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -244,11 +243,20 @@ export class VisualizeEmbeddable
         this.visCustomizations = visCustomizations;
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
-        this.vis.uiState.clearAllKeys();
+        // Reset back to the saved viz defaults before re-applying. clearAllKeys
+        // would null _mergedState entries for any key in _changedState, dropping
+        // saved siblings (e.g. custom slice colors when the dashboard panel only
+        // overrides legendOpen).
+        this.resetUiStateChanges();
         if (visCustomizations.vis) {
-          this.vis.uiState.set('vis', visCustomizations.vis);
-          getKeys(visCustomizations).forEach((key) => {
-            this.vis.uiState.set(key, visCustomizations[key]);
+          // Apply each property of input.vis individually. set('vis', input.vis)
+          // would replace the entire 'vis' subtree in _mergedState and lose any
+          // saved sibling keys not present in input.vis.
+          Object.keys(visCustomizations.vis).forEach((subKey) => {
+            this.vis.uiState.set(
+              `vis.${subKey}`,
+              (visCustomizations.vis as Record<string, unknown>)[subKey]
+            );
           });
         }
         if (visCustomizations.table) {
@@ -257,8 +265,23 @@ export class VisualizeEmbeddable
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
-      this.vis.uiState.clearAllKeys();
+      this.resetUiStateChanges();
     }
+  }
+
+  private resetUiStateChanges() {
+    Object.keys(this.vis.uiState.getChanges()).forEach((key) => {
+      const before = this.vis.uiState.get(key);
+      this.vis.uiState.reset(key);
+      // PersistedState.reset() restores a key to its saved default, but it cannot
+      // clear a top-level key that has no saved default (its cleanPath is a no-op
+      // for top-level keys). When there is nothing to restore, reset() leaves the
+      // dashboard override in place, so explicitly null the key out to fall back
+      // to the saved/auto defaults (mirrors the previous clearAllKeys behavior).
+      if (_.isEqual(before, this.vis.uiState.get(key))) {
+        this.vis.uiState.set(key, null);
+      }
+    });
   }
 
   public async handleChanges() {

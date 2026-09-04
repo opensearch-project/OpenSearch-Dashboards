@@ -30,3 +30,29 @@
 .noScrollByDevTools {
   overflow: hidden;
 }
+
+// Match the collapsed icon-side-nav rail geometry so the hover label popover
+// anchors and renders identically to the nav leaf icons (flush, connected) —
+// the footer nav-control slot otherwise centers a ~28px button, which shifts
+// EUI's rightUp anchor and makes the shared `--rail` panel float detached.
+// The EuiPopover anchor wrapper shrinks to its content by default; the popover
+// is rendered with display="block" so the anchor fills its parent, and this
+// wrapper spans the full 48px rail width and centers the button within it.
+.devToolsNavAnchor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $euiSizeXL + $euiSizeS; // 48px — same as the collapsed sidebar rail
+
+  // When the hover popover is open, paint the same full-rail grey as the nav
+  // leaf icons so the icon and its flush popover read as one connected grey
+  // surface (no white gap between the icon and the panel). Mirrors
+  // `.obsCollapsedNav .obsSimplePopover-anchor--open` in the chrome SCSS.
+  &.devToolsNavAnchor--open {
+    // Theme-aware surface matching the nav rows: light keeps the original subtle
+    // grey (6% mix ≈ #eff2f4); dark uses the lightest-shade token for contrast.
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: lightOrDarkTheme(mix($euiTextColor, $euiColorEmptyShade, 6%), $euiColorLightestShade);
+    border-radius: 3px 0 0 3px;
+  }
+}

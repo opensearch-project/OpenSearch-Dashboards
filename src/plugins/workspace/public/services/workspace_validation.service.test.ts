@@ -42,9 +42,9 @@ describe('WorkspaceValidationService', () => {
       const service = new WorkspaceValidationService();
       await service.setup(core, 'test-workspace-123');
 
-      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
       expect(core.workspaces.setClient).toHaveBeenCalled();
-      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(1);
+      expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(1);
     });
 
     it('should not enter workspace it workspace id is not set', async () => {
@@ -52,9 +52,9 @@ describe('WorkspaceValidationService', () => {
       const service = new WorkspaceValidationService();
       await service.setup(core, '');
 
-      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
       expect(core.workspaces.setClient).toHaveBeenCalled();
-      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+      expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(0);
     });
   });
 

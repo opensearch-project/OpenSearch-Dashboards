@@ -43,7 +43,7 @@ describe('SecurityService', () => {
       setupContext.registerReadonlyService(readonlyServiceMock);
       setupContext.readonlyService().isReadonly(request);
 
-      expect(readonlyServiceMock.isReadonly).toBeCalledTimes(1);
+      expect(readonlyServiceMock.isReadonly).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -55,7 +55,7 @@ describe('SecurityService', () => {
       setupContext.registerIdentitySourceHandler = registerIdentitySourceHandlerMock;
       setupContext.registerIdentitySourceHandler('source1', mockIdentitySourceHandler);
 
-      expect(registerIdentitySourceHandlerMock).toBeCalledTimes(1);
+      expect(registerIdentitySourceHandlerMock).toHaveBeenCalledTimes(1);
       expect(registerIdentitySourceHandlerMock).toHaveBeenCalledWith(
         'source1',
         mockIdentitySourceHandler

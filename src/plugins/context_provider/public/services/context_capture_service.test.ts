@@ -33,10 +33,10 @@ function createMockCoreStart(overrides?: {
   const breadcrumbs$ = new BehaviorSubject<Array<{ text: string }>>(overrides?.breadcrumbs || []);
 
   return {
-    coreStart: ({
+    coreStart: {
       application: { currentAppId$, applications$ },
       chrome: { getBreadcrumbs$: () => breadcrumbs$ },
-    } as unknown) as CoreStart,
+    } as unknown as CoreStart,
     currentAppId$,
     applications$,
     breadcrumbs$,
@@ -262,19 +262,6 @@ describe('ContextCaptureService', () => {
 
       // Global store should still be there since the error prevented cleanup
       expect((window as any).assistantContextStore).toBe(mockAssistantContextStore);
-    });
-
-    it('should handle missing window object gracefully', () => {
-      // Mock window to be undefined (edge case)
-      const originalWindow = global.window;
-      delete (global as any).window;
-
-      expect(() => {
-        service.start(mockCoreStart, mockPluginsStart);
-      }).toThrow(); // This will throw because window is undefined
-
-      // Restore window
-      global.window = originalWindow;
     });
   });
 

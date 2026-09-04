@@ -32,18 +32,18 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     application: { capabilities: { dataSource: { canManage: true } } },
   };
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   describe('should get direct query connections failed', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.reject());
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -64,19 +64,19 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
 
   describe('should get direct query connections successful', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
-        Promise.resolve(getMappedDataSources)
-      );
-      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue(false);
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -126,8 +126,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
 
     it('should delete confirm modal confirm button work normally', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.resolve({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -145,8 +145,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
 
     it('should delete datasources & fail', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.reject({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -169,7 +169,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
 
   describe('fetch security lake, cloudwatch, and AWS Prometheus direct query connections', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataConnections').and.returnValue(
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(
         Promise.resolve([
           {
             type: 'data-connection',
@@ -204,8 +204,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -280,8 +280,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -326,12 +326,14 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
           },
         },
       ];
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
-        Promise.resolve(getMappedDataSources)
-      );
-      spyOn(utils, 'getDataConnections').and.returnValue(Promise.resolve(mockedDataConnections));
-      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(mockedDataConnections));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue(false);
 
       const context = {
         ...mockedContext,
@@ -370,8 +372,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
             <ManageDirectQueryDataConnectionsTable
               featureFlagStatus={true}
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -419,7 +421,7 @@ describe('FetchDirectQueryConnections', () => {
           type: obj.attributes.type,
           objectType: 'data-connection',
         }));
-      } catch (error) {
+      } catch {
         return [];
       }
     };
@@ -437,9 +439,9 @@ describe('FetchDirectQueryConnections', () => {
       },
     ];
 
-    mockSavedObjectsClient = ({
+    mockSavedObjectsClient = {
       find: jest.fn().mockResolvedValue({ savedObjects: mockSavedObjects }),
-    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+    } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
     (utils.getDataConnections as jest.Mock).mockResolvedValue(mockSavedObjects);
 
@@ -463,9 +465,9 @@ describe('FetchDirectQueryConnections', () => {
   });
 
   it('should return an empty array when there is an error', async () => {
-    mockSavedObjectsClient = ({
+    mockSavedObjectsClient = {
       find: jest.fn().mockRejectedValue(new Error('Failed to fetch data connections')),
-    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+    } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
     (utils.getDataConnections as jest.Mock).mockRejectedValue(
       new Error('Failed to fetch data connections')
@@ -502,11 +504,11 @@ describe('GetDataConnections', () => {
       },
     ];
 
-    const mockSavedObjectsClient = ({
+    const mockSavedObjectsClient = {
       find: jest.fn().mockResolvedValue({
         savedObjects: mockSavedObjects,
       }),
-    } as unknown) as SavedObjectsClientContract;
+    } as unknown as SavedObjectsClientContract;
 
     (utils.getDataConnections as jest.Mock).mockResolvedValue(mockSavedObjects);
 
@@ -517,9 +519,9 @@ describe('GetDataConnections', () => {
   });
 
   it('should handle errors when fetching data connections', async () => {
-    const mockSavedObjectsClient = ({
+    const mockSavedObjectsClient = {
       find: jest.fn().mockRejectedValue(new Error('Failed to fetch data connections')),
-    } as unknown) as SavedObjectsClientContract;
+    } as unknown as SavedObjectsClientContract;
 
     (utils.getDataConnections as jest.Mock).mockRejectedValue(
       new Error('Failed to fetch data connections')

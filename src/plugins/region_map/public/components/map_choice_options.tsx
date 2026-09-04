@@ -48,9 +48,10 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   const vectorLayers = vis.type.editorConfig.collections.vectorLayers;
   const customVectorLayers = vis.type.editorConfig.collections.customVectorLayers;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
-  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
-    customVectorLayers,
-  ]);
+  const customVectorLayerOptions = useMemo(
+    () => customVectorLayers.map(mapLayerForOption),
+    [customVectorLayers]
+  );
 
   const fieldOptions = useMemo(
     () =>

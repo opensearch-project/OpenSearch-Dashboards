@@ -270,6 +270,13 @@ jobs:
           - group: 23Explore
             config: explore
             test_location: source
+          - group: 24Explore
+            config: explore
+            test_location: source
+          # Dashboard tests that require workspace and data source support
+          - group: Dashboards
+            config: explore
+            test_location: source
           # Observability tests (Traces, Metrics)
           - group: 1Observability
             config: observability
@@ -284,7 +291,7 @@ jobs:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
         matrix.config == 'explore' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --explore.logsDrilldown.enabled=true --explore.logsQueryBuilder.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true --dashboard.variables.enabled=true' ||
         matrix.config == 'observability' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
         matrix.config == 'dashboard' &&
@@ -457,7 +464,7 @@ jobs:
         shell: bash
 
       - name: Start Prometheus
-        if: matrix.group == '2Observability'
+        if: matrix.group == '2Observability' || matrix.group == 'Dashboards'
         run: |
           PROM_VERSION="3.8.1"
           curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
@@ -496,6 +503,11 @@ jobs:
           start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+        env:
+          # Only the Dashboards group starts Prometheus (see "Start Prometheus"); wiring
+          # this enables the PromQL query-type variable tests. Other groups get an empty
+          # value, so their specs that read PROMETHEUS auto-skip.
+          PROMETHEUS_CONNECTION_URL: ${{ matrix.group == 'Dashboards' && 'http://localhost:9090' || '' }}
 
       - name: Run OSD Cypress observability tests (traces)
         if: matrix.test_location == 'source' && matrix.config == 'observability' && matrix.group == '1Observability'

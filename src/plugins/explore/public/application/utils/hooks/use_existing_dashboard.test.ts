@@ -9,9 +9,9 @@ import { SavedObjectsClientContract } from 'src/core/public';
 import { DashboardInterface } from '../../../components/visualizations/add_to_dashboard_button';
 
 // Mock saved objects client
-const mockSavedObjectsClient = ({
+const mockSavedObjectsClient = {
   find: jest.fn(),
-} as unknown) as SavedObjectsClientContract;
+} as unknown as SavedObjectsClientContract;
 
 const mockDashboards: DashboardInterface[] = [
   // @ts-expect-error TS2352 TODO(ts-error): fixme

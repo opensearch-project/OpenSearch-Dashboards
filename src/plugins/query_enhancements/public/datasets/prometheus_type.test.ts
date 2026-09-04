@@ -15,9 +15,9 @@ import { DATASET } from '../../common';
 import { prometheusTypeConfig } from './prometheus_type';
 
 describe('prometheusTypeConfig', () => {
-  const mockSavedObjectsClient = ({
+  const mockSavedObjectsClient = {
     find: jest.fn(),
-  } as unknown) as SavedObjectsClientContract;
+  } as unknown as SavedObjectsClientContract;
   const mockServices = {
     savedObjects: { client: mockSavedObjectsClient },
   };
@@ -197,7 +197,7 @@ describe('prometheusTypeConfig', () => {
       expect(prometheusTypeConfig.meta).toEqual({
         icon: expect.objectContaining({ type: expect.any(String) }),
         tooltip: 'Prometheus',
-        supportedAppNames: ['explore'],
+        supportedAppNames: ['explore', 'dashboard'],
       });
     });
   });

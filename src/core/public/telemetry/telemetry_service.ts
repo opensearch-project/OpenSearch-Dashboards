@@ -66,8 +66,10 @@ function createPluginTelemetryRecorder(
  * - During start, the service exposes telemetry APIs that delegate to the provider
  * - If no provider is registered, telemetry calls are no-ops
  */
-export class TelemetryCoreService
-  implements CoreService<TelemetryServiceSetup, TelemetryServiceStart> {
+export class TelemetryCoreService implements CoreService<
+  TelemetryServiceSetup,
+  TelemetryServiceStart
+> {
   private provider?: TelemetryProvider;
   private recorderCache = new Map<string, PluginTelemetryRecorder>();
 

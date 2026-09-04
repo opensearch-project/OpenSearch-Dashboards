@@ -14,6 +14,7 @@ import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from '../bar/bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type HistogramVisStyleControlsProps = StyleControlsProps<HistogramChartStyle>;
 
@@ -47,7 +48,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {hasMappingSelected && (
@@ -59,12 +60,25 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               onChange={(bucket) => updateStyleOption('bucket', bucket)}
             />
           </EuiFlexItem>
-
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -87,6 +101,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               barBorderWidth={styleOptions.barBorderWidth}
               barBorderColor={styleOptions.barBorderColor}
               useThresholdColor={styleOptions?.useThresholdColor}
+              showValues={styleOptions?.showValue}
               onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
@@ -102,10 +117,9 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               onUseThresholdColorChange={(useThresholdColor) =>
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
-              shouldDisableUseThresholdColor={hasColorMapping}
+              onShowValuesChange={(showValue) => updateStyleOption('showValue', showValue)}
             />
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel
               tooltipOptions={styleOptions.tooltipOptions}

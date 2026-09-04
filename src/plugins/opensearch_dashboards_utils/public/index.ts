@@ -46,6 +46,7 @@ export {
   createGetterSetter,
 } from '../common';
 export * from './core';
+export { useOpenOnUrlMarker } from './react/use_open_on_url_marker';
 export * from '../common/errors';
 export * from './render_complete';
 export * from './resize_checker';

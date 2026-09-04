@@ -305,7 +305,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
       partialRows: args.partialRows,
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
+      abortSignal: abortSignal as unknown as AbortSignal,
     });
 
     const table: OpenSearchDashboardsDatatable = {

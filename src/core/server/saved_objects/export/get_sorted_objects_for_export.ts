@@ -195,10 +195,13 @@ export async function exportSavedObjectsToStream({
       };
       const hasCredentials = auth && auth.credentials;
       const updatedCredentials = hasCredentials
-        ? Object.keys(auth.credentials).reduce((acc, key) => {
-            acc[key] = DATA_SOURCE_CREDENTIALS_PLACEHOLDER;
-            return acc;
-          }, {} as { [key: string]: any })
+        ? Object.keys(auth.credentials).reduce(
+            (acc, key) => {
+              acc[key] = DATA_SOURCE_CREDENTIALS_PLACEHOLDER;
+              return acc;
+            },
+            {} as { [key: string]: any }
+          )
         : undefined;
       return {
         ...object,

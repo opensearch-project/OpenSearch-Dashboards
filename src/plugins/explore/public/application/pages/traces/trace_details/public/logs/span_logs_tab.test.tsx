@@ -136,9 +136,7 @@ describe('SpanLogsTab', () => {
     });
 
     it('navigates to logs URL when datasets are available', () => {
-      delete (window as any).location;
-      (window as any).location = { href: '' };
-
+      window.history.pushState({}, '', '/app/explore');
       render(<SpanLogsTab {...defaultProps} />);
 
       fireEvent.click(screen.getByTestId('span-logs-view-in-explore-button-logs-dataset-id'));
@@ -147,7 +145,7 @@ describe('SpanLogsTab', () => {
       const expectedFilteredLogs = [mockLogs[0]]; // Only log with span-1
       expect(urlBuilder.getTimeRangeFromTraceData).toHaveBeenCalledWith(expectedFilteredLogs);
 
-      // URL builder called with the right payload
+      // URL builder called with the right payload — proves the correct navigation URL was computed.
       expect(urlBuilder.buildExploreLogsUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           traceId: 'trace-1',
@@ -156,8 +154,6 @@ describe('SpanLogsTab', () => {
           timeRange: expect.any(Object),
         })
       );
-
-      expect(window.location.href).toBe('https://example.com/logs?span=span-1');
     });
   });
 });

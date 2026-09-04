@@ -36,9 +36,12 @@ import {
   NavigationPublicPluginStart,
 } from './types';
 
-export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
-  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry = new TopNavMenuExtensionsRegistry();
+export class NavigationPublicPlugin implements Plugin<
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart
+> {
+  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
+    new TopNavMenuExtensionsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 

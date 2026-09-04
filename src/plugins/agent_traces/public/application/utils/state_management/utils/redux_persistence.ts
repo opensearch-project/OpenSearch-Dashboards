@@ -14,12 +14,7 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import {
-  Dataset,
-  DataStructure,
-  DEFAULT_DATA,
-  CORE_SIGNAL_TYPES,
-} from '../../../../../../data/common';
+import { Dataset, DataStructure, CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { AGENT_TRACES_DEFAULT_LANGUAGE } from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
@@ -45,7 +40,7 @@ export const persistReduxState = (state: RootState, services: AgentTracesService
       },
       { replace: true }
     );
-  } catch (err) {
+  } catch {
     return;
   }
 };
@@ -135,7 +130,7 @@ export const loadReduxState = async (services: AgentTracesServices): Promise<Roo
       queryEditor: finalQueryEditorState,
       meta: finalMetaState,
     };
-  } catch (err) {
+  } catch {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
@@ -198,43 +193,28 @@ const fetchFirstAvailableDataset = async (
         typeConfig.toDataset([pattern])
       ) ?? [];
 
-    // Filter by SignalType compatibility
-    if (fetchedDatasets.length > 0) {
-      for (const dataset of fetchedDatasets) {
-        try {
-          const dataView = await services.data?.dataViews?.get(
-            dataset.id,
-            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-          );
+    // Filter by SignalType compatibility. toDataset populates each dataset's signalType
+    // (from the index-pattern saved object, or set directly for Prometheus), so a
+    // compatible dataset can be selected without any per-dataset lookup.
+    for (const dataset of fetchedDatasets) {
+      const effectiveSignalType = dataset.signalType;
 
-          // Get effective signal type from dataView or dataset
-          const effectiveSignalType = dataView?.signalType || dataset.signalType;
-
-          // If requiredSignalType is specified, dataset must match it
-          if (requiredSignalType) {
-            if (effectiveSignalType === requiredSignalType) {
-              return dataset;
-            }
-          } else {
-            // If requiredSignalType is not specified (i.e., Logs flavor),
-            // dataset should not have signalType equal to Traces or Metrics
-            if (
-              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
-            ) {
-              return dataset;
-            }
-          }
-        } catch (error) {
-          // Continue to next dataset if this one fails
-          continue;
+      if (requiredSignalType) {
+        // Traces/Metrics flavors require an exact signal-type match.
+        if (effectiveSignalType === requiredSignalType) {
+          return dataset;
         }
+      } else if (
+        // Logs flavor accepts any dataset that is not a Traces or Metrics signal type.
+        effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+        effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+      ) {
+        return dataset;
       }
-      return undefined; // No compatible dataset found
     }
 
-    return undefined;
-  } catch (error) {
+    return undefined; // No compatible dataset found
+  } catch {
     return undefined;
   }
 };
@@ -254,26 +234,14 @@ const resolveDataset = async (
   // @ts-expect-error TS2339 TODO(ts-error): fixme
   const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
-  // If we have an existing dataset, validate SignalType compatibility
+  // If we have an existing dataset, validate SignalType compatibility.
+  // signalType is persisted in URL/query state, so read it directly from the Dataset.
   if (existingDataset) {
-    try {
-      const dataView = await services.data?.dataViews?.get(
-        existingDataset.id,
-        existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      );
+    const effectiveSignalType = existingDataset.signalType || preferredDataset?.signalType;
 
-      // Get effective signal type from dataView or preferredDataset
-      const effectiveSignalType = dataView?.signalType || preferredDataset?.signalType;
-
-      // Dataset must match required signal type (TRACES)
-      if (requiredSignalType) {
-        if (effectiveSignalType === requiredSignalType) {
-          return existingDataset;
-        }
-      }
-    } catch (error) {
-      // Silently continue to fetch a new dataset if validation fails
-      // This is expected behavior when datasets are incompatible with current flavor
+    // Dataset must match required signal type (TRACES)
+    if (effectiveSignalType === requiredSignalType) {
+      return existingDataset;
     }
   }
 

@@ -73,7 +73,7 @@ export const createMockIndexPattern = (overrides: any = {}): Dataset =>
     isTimeBased: jest.fn().mockReturnValue(true),
     toDataset: jest.fn().mockReturnValue({}),
     ...overrides,
-  } as any);
+  }) as any;
 
 /**
  * Creates a mock DataPublicPluginStart for testing
@@ -81,4 +81,4 @@ export const createMockIndexPattern = (overrides: any = {}): Dataset =>
 export const createMockDataPublicPluginStart = () =>
   ({
     // Mock DataPublicPluginStart properties as needed
-  } as any);
+  }) as any;

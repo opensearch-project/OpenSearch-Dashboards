@@ -28,8 +28,8 @@ describe('BaseConnectionManager', () => {
 
   beforeEach(() => {
     manager = new TestConnectionManager();
-    mockContext = ({} as unknown) as RequestHandlerContext;
-    mockRequest = ({} as unknown) as OpenSearchDashboardsRequest;
+    mockContext = {} as unknown as RequestHandlerContext;
+    mockRequest = {} as unknown as OpenSearchDashboardsRequest;
   });
 
   describe('query', () => {
@@ -67,9 +67,9 @@ describe('BaseConnectionManager', () => {
 
   describe('getClient', () => {
     it('should return client from factory', () => {
-      const mockClient = ({
+      const mockClient = {
         getResources: jest.fn(),
-      } as unknown) as BaseConnectionClient<unknown>;
+      } as unknown as BaseConnectionClient<unknown>;
       const clientFactory = jest.fn().mockReturnValue(mockClient);
 
       manager.setClientFactory(clientFactory);

@@ -22,13 +22,13 @@ jest.mock('../../../../../../saved_objects/public', () => ({
   showSaveModal: jest.fn(),
 }));
 
-const mockServices = ({
+const mockServices = {
   core: {
     i18n: {
       Context: React.Fragment,
     },
   },
-} as unknown) as ExploreServices;
+} as unknown as ExploreServices;
 
 const mockSearchContext: ExecutionContextSearch = {
   query: { query: 'test', language: 'PPL' },
@@ -57,7 +57,7 @@ const mockSaveStateProps = {
   activeTabId: 'logs',
 };
 
-const mockSavedExplore = ({
+const mockSavedExplore = {
   id: 'test-id',
   title: 'Test Explore',
   type: 'logs',
@@ -70,7 +70,7 @@ const mockSavedExplore = ({
   isSaved: jest.fn(() => true),
   getFullPath: jest.fn(),
   getOpenSearchType: jest.fn(),
-} as unknown) as SavedExplore;
+} as unknown as SavedExplore;
 
 describe('top_nav_save', () => {
   beforeEach(() => {
@@ -79,11 +79,14 @@ describe('top_nav_save', () => {
 
   describe('saveTopNavData', () => {
     it('has correct configuration', () => {
-      expect(saveTopNavData.tooltip).toBeDefined();
-      expect(saveTopNavData.ariaLabel).toBeDefined();
+      expect(saveTopNavData.tooltip).toBe('Save search');
+      // Tooltip and aria-label are deliberately the same string.
+      expect(saveTopNavData.ariaLabel).toBe(saveTopNavData.tooltip);
       expect(saveTopNavData.testId).toBe('discoverSaveButton');
       expect(saveTopNavData.iconType).toBe('save');
-      expect(saveTopNavData.controlType).toBe('icon');
+      // Labeled button (shows "Save search" at wide widths); the label collapses via CSS at narrow.
+      expect(saveTopNavData.controlType).toBe('button');
+      expect(saveTopNavData.label).toBe('Save search');
     });
   });
 

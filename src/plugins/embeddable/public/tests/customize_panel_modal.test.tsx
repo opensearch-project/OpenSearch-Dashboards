@@ -118,7 +118,7 @@ test('Calls updateTitle with a new title', async () => {
 
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
 
-  expect(updateTitle).toBeCalledWith('new title', undefined);
+  expect(updateTitle).toHaveBeenCalledWith('new title', undefined);
 });
 
 test('Input value shows custom title if one given', async () => {
@@ -180,7 +180,7 @@ test('Reset calls updateTitle with undefined', async () => {
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
 
-  expect(updateTitle).toBeCalledWith(undefined, undefined);
+  expect(updateTitle).toHaveBeenCalledWith(undefined, undefined);
 });
 
 test('Can set title to an empty string', async () => {
@@ -196,5 +196,5 @@ test('Can set title to an empty string', async () => {
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
   const inputFieldAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput');
   expect(inputFieldAfter.props().value).toBe('');
-  expect(updateTitle).toBeCalledWith('', undefined);
+  expect(updateTitle).toHaveBeenCalledWith('', undefined);
 });

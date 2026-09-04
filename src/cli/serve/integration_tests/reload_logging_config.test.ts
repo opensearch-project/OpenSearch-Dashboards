@@ -74,7 +74,7 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
           Fs.unwatchFile(path);
           resolve(contents);
         }
-      } catch (e) {
+      } catch {
         // noop
       }
     });

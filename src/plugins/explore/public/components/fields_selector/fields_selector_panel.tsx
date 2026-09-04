@@ -38,7 +38,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const query = useSelector(selectQuery);
   const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
   const metadata = useSelector((state: any) => state.results[cacheKey]);
-  const rawResults = metadata ? resultsCache.get(cacheKey) ?? null : null;
+  const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const { dataset } = useDatasetContext();
 
   // Process raw results to get field counts and rows

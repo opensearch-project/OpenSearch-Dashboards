@@ -30,7 +30,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { EventEmitter } from 'events';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import { i18n } from '@osd/i18n';
 
 import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
@@ -71,7 +71,7 @@ export const useSavedVisInstance = (
       try {
         let savedVisInstance: SavedVisInstance;
         if (history.location.pathname === '/create') {
-          const searchParams = parse(history.location.search);
+          const searchParams = qs.parse(history.location.search);
           const visTypes = services.visualizations.all();
           const visType = visTypes.find(({ name }) => name === searchParams.type);
 

@@ -9,13 +9,15 @@ import {
   AxisRole,
   VisFieldType,
   VisColumn,
-  AxisColumnMappings,
   Threshold,
   AxisConfig,
   ThresholdOptions,
   ThresholdMode,
+  StackMode,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
+import { BaseChartStyle, PipelineFn } from './echarts_spec';
+import { resolveStackMode, formatDecimal } from './data_transformation';
 
 export const applyAxisStyling = ({
   axis,
@@ -28,7 +30,7 @@ export const applyAxisStyling = ({
   disableGrid?: boolean;
   defaultAxisTitle?: string;
 }): AxisConfig => {
-  const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
+  const gridEnabled = disableGrid ? false : (axisStyle?.grid.showLines ?? true);
 
   const fullAxisConfig: AxisConfig = {
     // Grid settings
@@ -107,11 +109,9 @@ export const getAxisConfig = (styles: { standardAxes?: StandardAxes[] }): AxisSt
   return { xAxisStyle, yAxisStyle, y2AxisStyle };
 };
 
-export const getColumnsFromAxisColumnMapping = (
-  axisColumnMappings: {
-    [K in AxisRole]?: VisColumn | VisColumn[];
-  }
-) => {
+export const getColumnsFromAxisColumnMapping = (axisColumnMappings: {
+  [K in AxisRole]?: VisColumn | VisColumn[];
+}) => {
   const allColumns = [
     ...Object.values(axisColumnMappings ?? {}).flatMap((cols) =>
       Array.isArray(cols) ? cols.map((col) => col.column) : [cols.column]
@@ -312,4 +312,118 @@ export const getValueColorByThreshold = (value: number, thresholdOptions: Thresh
     }
   }
   return color;
+};
+
+const getFirstColumn = (axis?: VisColumn | VisColumn[]): VisColumn | undefined =>
+  Array.isArray(axis) ? axis[0] : axis;
+
+/**
+ * apply percentage range to axis
+ */
+export const applyPercentageAxis =
+  <T extends BaseChartStyle>(styles: { stackMode?: StackMode | undefined }): PipelineFn<T> =>
+  (state) => {
+    if (resolveStackMode(styles) !== 'percentage') return state;
+
+    const { transformedData = [], axisColumnMappings, xAxisConfig, yAxisConfig } = state;
+    const [, ...rows] = transformedData;
+    const xSchema = getFirstColumn(axisColumnMappings?.[AxisRole.X])?.schema;
+    const ySchema = getFirstColumn(axisColumnMappings?.[AxisRole.Y])?.schema;
+    const isXNumerical = xSchema === VisFieldType.Numerical && ySchema !== VisFieldType.Numerical;
+
+    const hasNegativeValue = rows.some((row: any[]) =>
+      row.some((data) => typeof data === 'number' && data < 0)
+    );
+
+    const toPercentageAxis = (axisConfig: any) => ({
+      ...axisConfig,
+      // Respect a user-set min/max
+      min: axisConfig?.min ?? (hasNegativeValue ? -1 : 0),
+      max: axisConfig?.max ?? 1,
+      axisLabel: {
+        ...axisConfig?.axisLabel,
+        formatter: (value: unknown) => formatSeriesValueLabel(value, true),
+      },
+    });
+
+    // multi y series
+    const toPercentageAxes = (axisConfig: any) =>
+      Array.isArray(axisConfig) ? axisConfig.map(toPercentageAxis) : toPercentageAxis(axisConfig);
+
+    const toPercentageTooltip = (baseConfig: any) => ({
+      ...baseConfig,
+      tooltip: {
+        ...baseConfig?.tooltip,
+        valueFormatter: (value: unknown) =>
+          Array.isArray(value)
+            ? value.map((item) => formatSeriesValueLabel(item, true)).join(' ')
+            : formatSeriesValueLabel(value, true),
+      },
+    });
+
+    const baseConfig = toPercentageTooltip(state.baseConfig);
+
+    return isXNumerical
+      ? { ...state, baseConfig, xAxisConfig: toPercentageAxes(xAxisConfig) }
+      : { ...state, baseConfig, yAxisConfig: toPercentageAxes(yAxisConfig) };
+  };
+
+/**
+ * Format a series value for display as a label drawn on a mark (e.g. on a bar).
+ */
+export const formatSeriesValueLabel = (
+  value: unknown,
+  isPercentage = false,
+  decimals?: number
+): string => {
+  if (value === null || value === undefined || value === '') return '';
+
+  const numericValue = Number(value);
+  // Non numeric values are shown as-is rather than as `NaN`
+  if (!Number.isFinite(numericValue)) return String(value);
+
+  const valueWithDecimals = formatDecimal(
+    isPercentage ? numericValue * 100 : numericValue,
+    decimals
+  );
+
+  return isPercentage ? `${valueWithDecimals}%` : valueWithDecimals;
+};
+
+export const getNormalizedAxisConfig = (
+  axisColumnMappings:
+    | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+) => {
+  let categoryField = '';
+  let categoryFieldName = '';
+  let seriesFields: string[] = [];
+  let seriesFieldNames: string[] = [];
+  let categoryEncode: 'x' | 'y' = 'x';
+  let seriesEncode: 'x' | 'y' = 'y';
+
+  if (!Array.isArray(axisColumnMappings.y) && Array.isArray(axisColumnMappings.x)) {
+    categoryField = axisColumnMappings.y.column;
+    categoryFieldName = axisColumnMappings.y.name;
+    seriesFields = axisColumnMappings.x.map((col) => col.column);
+    seriesFieldNames = axisColumnMappings.x.map((col) => col.name);
+    categoryEncode = 'y';
+    seriesEncode = 'x';
+  }
+  if (Array.isArray(axisColumnMappings.y) && !Array.isArray(axisColumnMappings.x)) {
+    categoryField = axisColumnMappings.x.column;
+    categoryFieldName = axisColumnMappings.x.name;
+    seriesFields = axisColumnMappings.y.map((col) => col.column);
+    seriesFieldNames = axisColumnMappings.y.map((col) => col.name);
+    categoryEncode = 'x';
+    seriesEncode = 'y';
+  }
+  return {
+    categoryField,
+    categoryFieldName,
+    categoryEncode,
+    seriesFields,
+    seriesFieldNames,
+    seriesEncode,
+  };
 };

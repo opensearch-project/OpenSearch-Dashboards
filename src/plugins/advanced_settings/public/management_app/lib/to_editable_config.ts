@@ -52,6 +52,8 @@ export function toEditableConfig({
   isOverridden,
   isPermissionControlled,
   userSettingsEnabled,
+  isUserProvided,
+  inheritedValue,
 }: {
   def: PublicUiSettingsParams & UserProvidedValues<any>;
   name: string;
@@ -60,6 +62,8 @@ export function toEditableConfig({
   isOverridden: boolean;
   isPermissionControlled: boolean;
   userSettingsEnabled: boolean;
+  isUserProvided?: boolean;
+  inheritedValue?: unknown;
 }) {
   if (!def) {
     def = {};
@@ -76,8 +80,11 @@ export function toEditableConfig({
     isCustom,
     isOverridden,
     isPermissionControlled,
+    isUserProvided,
+    inheritedValue,
     readonly: !!def.readonly,
     defVal: def.value,
+    scope: def.scope,
     type: getValType(def, value),
     description: def.description,
     deprecation: def.deprecation,

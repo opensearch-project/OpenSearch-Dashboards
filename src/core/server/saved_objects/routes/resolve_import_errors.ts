@@ -35,6 +35,7 @@ import { IRouter } from '../../http';
 import { resolveSavedObjectsImportErrors } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
+import { CapabilitiesResolver, resolveCanImportConfig } from './import';
 
 interface FileStream extends Readable {
   hapi: {
@@ -42,7 +43,11 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedObjectConfig) => {
+export const registerResolveImportErrorsRoute = (
+  router: IRouter,
+  config: SavedObjectConfig,
+  getCapabilities?: () => CapabilitiesResolver | undefined
+) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -125,6 +130,8 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         workspaces = [workspaces];
       }
 
+      const canImportConfig = await resolveCanImportConfig(getCapabilities, req);
+
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
@@ -135,6 +142,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         workspaces,
         dataSourceId,
         dataSourceTitle,
+        canImportConfig,
       });
 
       return res.ok({ body: result });

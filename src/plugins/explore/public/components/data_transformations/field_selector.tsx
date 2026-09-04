@@ -43,7 +43,9 @@ export const FieldSelector = ({
 }: FieldSelectorProps) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
 
-  const selectedSet = new Set(supportMulti ? configFields ?? [] : configField ? [configField] : []);
+  const selectedSet = new Set(
+    supportMulti ? (configFields ?? []) : configField ? [configField] : []
+  );
 
   const fieldOptions: EuiSelectableOption[] = availableFields.map((field) => ({
     label: field.name,

@@ -1,0 +1,2 @@
+fix:
+- [Workspace] Combine the workspace switcher and manage-workspace links in the footer menu so it is never empty and offers workspace navigation outside a workspace ([#12327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12327))

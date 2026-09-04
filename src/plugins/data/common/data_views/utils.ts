@@ -69,7 +69,7 @@ export const getDataViewTitle = async (
         error,
       } = await getDataSource(dataSourceId);
       dataSourceTitle = error ? dataSourceId : title;
-    } catch (e) {
+    } catch {
       dataSourceTitle = dataSourceId;
     }
     return concatDataSourceWithDataView(dataSourceTitle, dataViewTitle);

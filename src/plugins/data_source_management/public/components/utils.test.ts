@@ -89,8 +89,8 @@ describe('DataSourceManagement: Utils.ts', () => {
     test('should send warning when data source fetch failed', () => {
       const changeStateMock = jest.fn();
       handleDataSourceFetchError(changeStateMock, toasts);
-      expect(changeStateMock).toBeCalledWith({ showError: true });
-      expect(toasts.add).toBeCalledTimes(1);
+      expect(changeStateMock).toHaveBeenCalledWith({ showError: true });
+      expect(toasts.add).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -123,8 +123,8 @@ describe('DataSourceManagement: Utils.ts', () => {
           notifications: toasts,
           incompatibleDataSourcesExist,
         });
-        expect(toasts.add).toBeCalledTimes(1);
-        expect(toasts.add).toBeCalledWith(expect.objectContaining({ title: defaultMessage }));
+        expect(toasts.add).toHaveBeenCalledTimes(1);
+        expect(toasts.add).toHaveBeenCalledWith(expect.objectContaining({ title: defaultMessage }));
       }
     );
   });

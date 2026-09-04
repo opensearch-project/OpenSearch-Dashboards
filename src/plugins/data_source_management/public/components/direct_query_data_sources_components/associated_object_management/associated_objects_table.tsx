@@ -184,7 +184,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           enabled: () => {
             try {
               return getUiSettings().get('query:enhancements:enabled');
-            } catch (e) {
+            } catch {
               return false;
             }
           },

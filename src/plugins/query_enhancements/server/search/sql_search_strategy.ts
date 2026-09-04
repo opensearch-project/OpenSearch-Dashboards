@@ -20,7 +20,8 @@ export const sqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  legacyEsCompatEnabled: boolean = false
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
   const sqlFacet = new Facet({
     client,
@@ -28,6 +29,7 @@ export const sqlSearchStrategyProvider = (
     endpoint: 'enhancements.sqlQuery',
     useJobs: false,
     shimResponse: true,
+    legacyEsCompatEnabled,
   });
 
   return {

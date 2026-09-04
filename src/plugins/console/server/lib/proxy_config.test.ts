@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env mocha */
-
 import expect from '@osd/expect';
 import sinon from 'sinon';
 import https, { Agent as HttpsAgent } from 'https';

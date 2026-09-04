@@ -105,7 +105,7 @@ describe('SearchInterceptor', () => {
         await response.toPromise();
       } catch (e) {
         expect(e).toBeInstanceOf(SearchTimeoutError);
-        expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+        expect(mockCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       }
     });
 
@@ -127,7 +127,7 @@ describe('SearchInterceptor', () => {
         try {
           await searchInterceptor.search(mockRequest).toPromise();
         } catch (e2) {
-          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
         }
       }
     });
@@ -184,7 +184,7 @@ describe('SearchInterceptor', () => {
 
       const next = jest.fn();
       const error = (e: any) => {
-        expect(next).not.toBeCalled();
+        expect(next).not.toHaveBeenCalled();
         expect(e).toBeInstanceOf(AbortError);
       };
       response.subscribe({ next, error });
@@ -204,7 +204,7 @@ describe('SearchInterceptor', () => {
 
       const error = (e: any) => {
         expect(e).toBeInstanceOf(AbortError);
-        expect(mockCoreSetup.http.fetch).not.toBeCalled();
+        expect(mockCoreSetup.http.fetch).not.toHaveBeenCalled();
         done();
       };
       response.subscribe({ error });
@@ -220,7 +220,7 @@ describe('SearchInterceptor', () => {
 
       await response.toPromise();
 
-      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
         expect.objectContaining({
           path: `/internal/search/${OPENSEARCH_SEARCH_STRATEGY}`,
         })
@@ -239,7 +239,7 @@ describe('SearchInterceptor', () => {
 
       await response.toPromise();
 
-      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
         expect.objectContaining({
           path: `/internal/search/${OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY}`,
         })
@@ -258,7 +258,7 @@ describe('SearchInterceptor', () => {
 
       await response.toPromise();
 
-      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
         expect.objectContaining({
           path: `/internal/search/${strategy}`,
         })
@@ -280,7 +280,7 @@ describe('SearchInterceptor', () => {
 
       await response.toPromise();
 
-      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
         expect.objectContaining({
           path: `/internal/search/${strategy}`,
         })

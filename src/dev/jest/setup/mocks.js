@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 /**
  * READ THIS BEFORE ADDING NEW MOCKS TO THIS FILE!
  *
@@ -65,17 +63,43 @@ jest.mock('@elastic/eui/lib/services/react', () => {
   };
 });
 
-// Mock window.matchMedia for Monaco editor
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// jest-location-mock uses process.env.HOST as the base URL for its window.location mock.
+// Set it to match testEnvironmentOptions.url so window.location.origin is 'http://localhost:5601'
+// in all jsdom tests, consistent with the rest of the suite.
+if (typeof window !== 'undefined') {
+  process.env.HOST = 'http://localhost:5601';
+}
+
+// The following mocks rely on `window` which only exists in jsdom (browser) environments.
+// Tests using `@jest-environment node` do not have a `window` global, so guard here.
+if (typeof window !== 'undefined') {
+  // Mock window.matchMedia for Monaco editor
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // Deprecated
+      removeListener: jest.fn(), // Deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+
+  // jsdom 26 marks window.localStorage and window.sessionStorage as non-configurable.
+  // Re-declare them as configurable once here so individual tests can override them
+  // with Object.defineProperty without hitting "Cannot redefine property" errors.
+  ['localStorage', 'sessionStorage'].forEach((key) => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, key);
+    if (descriptor && !descriptor.configurable) {
+      Object.defineProperty(window, key, {
+        configurable: true,
+        writable: true,
+        value: descriptor.value,
+      });
+    }
+  });
+}

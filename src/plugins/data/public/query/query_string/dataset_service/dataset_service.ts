@@ -22,11 +22,19 @@ import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
+export type DatasetFilter = (dataset: Dataset) => boolean;
+
+interface AppDatasetFilter {
+  appId: string;
+  filter: DatasetFilter;
+}
+
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
+  private datasetFilters: AppDatasetFilter[] = [];
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -56,6 +64,15 @@ export class DatasetService {
 
   public registerType(handlerConfig: DatasetTypeConfig): void {
     this.typesRegistry.set(handlerConfig.id, handlerConfig);
+  }
+
+  public registerDatasetFilter(appId: string, filter: DatasetFilter): void {
+    this.datasetFilters.push({ appId, filter });
+  }
+
+  public isDatasetAllowed(dataset: Dataset, appId?: string): boolean {
+    if (!appId) return true;
+    return this.datasetFilters.filter((f) => f.appId === appId).every((f) => f.filter(dataset));
   }
 
   public getType(type: string): DatasetTypeConfig | undefined {

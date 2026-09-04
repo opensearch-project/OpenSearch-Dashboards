@@ -23,6 +23,8 @@ interface ChartProps {
   series?: SeriesData[];
   yMin?: number;
   yMax?: number;
+  timeFrom?: number;
+  timeTo?: number;
   isDarkMode?: boolean;
   onTimeRangeChange?: (from: string, to: string) => void;
 }
@@ -70,6 +72,8 @@ export const SparklineChart: React.FC<ChartProps> = ({
   series: multiSeries,
   yMin,
   yMax,
+  timeFrom,
+  timeTo,
   isDarkMode = false,
   onTimeRangeChange,
 }) => {
@@ -180,6 +184,8 @@ export const SparklineChart: React.FC<ChartProps> = ({
       },
       xAxis: {
         type: 'time',
+        min: timeFrom,
+        max: timeTo,
         axisLabel: { fontSize: 10, color: textColor },
         axisLine: { show: false },
         axisTick: { show: false },
@@ -217,7 +223,18 @@ export const SparklineChart: React.FC<ChartProps> = ({
     }
 
     return baseOption;
-  }, [hasData, parsed, allSeries, isDarkMode, yMin, yMax, getColor, onTimeRangeChange]);
+  }, [
+    hasData,
+    parsed,
+    allSeries,
+    isDarkMode,
+    yMin,
+    yMax,
+    getColor,
+    onTimeRangeChange,
+    timeFrom,
+    timeTo,
+  ]);
 
   // Init / dispose
   useEffect(() => {
@@ -329,9 +346,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
 
       const xValue = timestamps[idx];
       const xyPx = inst.convertToPixel({ gridIndex: 0 }, [xValue, 0]) as
-        | [number, number]
-        | null
-        | undefined;
+        [number, number] | null | undefined;
       if (!xyPx) return;
       const xPx = xyPx[0];
       const yPx = plotTop + yRatio * (plotBot - plotTop);
@@ -354,9 +369,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
           return;
         }
         const px = inst.convertToPixel({ gridIndex: 0 }, [pt[0], pt[1]]) as
-          | [number, number]
-          | null
-          | undefined;
+          [number, number] | null | undefined;
         if (!px) {
           dot.attr({ invisible: true });
           return;
@@ -382,9 +395,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
       }
 
       const pt = inst.convertFromPixel({ gridIndex: 0 }, [x, y]) as
-        | [number, number]
-        | null
-        | undefined;
+        [number, number] | null | undefined;
       if (!pt || pt[0] == null) return;
       const xValue = pt[0];
 

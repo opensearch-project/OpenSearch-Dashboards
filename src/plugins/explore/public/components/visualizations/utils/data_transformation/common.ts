@@ -20,11 +20,11 @@
  * const adults = rowMapper(data).filter(Boolean); // Remove null entries
  */
 
-export const map = (mapConditionFn: (row: Record<string, any>) => Record<string, any>) => (
-  data: Array<Record<string, any>>
-): Array<Record<string, any>> => {
-  return data.map(mapConditionFn);
-};
+export const map =
+  (mapConditionFn: (row: Record<string, any>) => Record<string, any>) =>
+  (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+    return data.map(mapConditionFn);
+  };
 
 // Helper to create column selection
 export const pick = (columns: string[]) => (row: Record<string, any>) => {

@@ -50,8 +50,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: () => ({
-    hash:
-      '#?traceId=test-trace-id&dataset={"id":"test-dataset-id","title":"test-index-*","type":"INDEX_PATTERN","timeFieldName":"endTime"}',
+    hash: '#?traceId=test-trace-id&dataset={"id":"test-dataset-id","title":"test-index-*","type":"INDEX_PATTERN","timeFieldName":"startTime"}',
   }),
 }));
 
@@ -153,9 +152,9 @@ jest.mock('./public/top_nav_buttons', () => ({
   ),
 }));
 
-jest.mock('./public/services/service_map', () => ({
-  ServiceMap: ({ hits }: any) => (
-    <div data-testid="service-map">
+jest.mock('./public/services/trace_service_flow', () => ({
+  TraceServiceFlow: ({ hits }: any) => (
+    <div data-testid="trace-service-flow">
       <span data-testid="service-hits-count">{hits?.length || 0}</span>
     </div>
   ),
@@ -280,8 +279,9 @@ describe('TraceDetails', () => {
   });
 
   it('handles color map generation errors', async () => {
-    const generateColorMap = jest.requireMock('./public/traces/generate_color_map')
-      .generateColorMap;
+    const generateColorMap = jest.requireMock(
+      './public/traces/generate_color_map'
+    ).generateColorMap;
     generateColorMap.mockImplementation(() => {
       throw new Error('Color map generation failed');
     });
@@ -584,13 +584,14 @@ describe('TraceDetails', () => {
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toBeInTheDocument();
 
-    // Add filter
+    // Add filter — renders as an editable chip (field · operator · value segments)
     fireEvent.click(screen.getByTestId('addSpanFilterButton'));
-    expect(screen.getByText('spanId: span-1')).toBeInTheDocument();
+    expect(screen.getByText('spanId')).toBeInTheDocument();
+    expect(screen.getByText('span-1')).toBeInTheDocument();
 
     // Remove filter
     fireEvent.click(screen.getByLabelText('Remove filter'));
-    expect(screen.queryByText('spanId: span-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {
@@ -889,6 +890,8 @@ describe('TraceDetails', () => {
     if (serviceMapButton) fireEvent.click(serviceMapButton);
 
     expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
+    // Trace map tab renders the CelestialMap-based service flow.
+    expect(document.querySelector('[data-testid="trace-service-flow"]')).toBeInTheDocument();
   });
 
   it('handles state subscription changes', async () => {

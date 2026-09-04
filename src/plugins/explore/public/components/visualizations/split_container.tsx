@@ -5,16 +5,17 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { SplitLayout } from './visualization_builder.types';
-import { SplitGroup } from './utils/group_data_by_split';
 import { SplitChartInstance } from './split_chart_instance';
 
 import './split_container.scss';
 
 interface SplitContainerProps {
-  groups: SplitGroup[];
+  groups: string[];
   layout: SplitLayout;
   showLabel?: boolean;
-  renderChart: (groupData: Array<Record<string, any>>, groupKey: string) => React.ReactNode;
+  verticalItemMinHeight?: number;
+  horizontalItemMinWidth?: number;
+  renderChart: (groupKey: string) => React.ReactNode;
 }
 
 /**
@@ -28,10 +29,14 @@ export function getColumnCount(width: number): number {
   return 1;
 }
 
+const DEFAULT_HORIZONTAL_ITEM_MIN_WIDTH = 300;
+
 export const SplitContainer: React.FC<SplitContainerProps> = ({
   groups,
   layout,
   showLabel = false,
+  verticalItemMinHeight = 200,
+  horizontalItemMinWidth = DEFAULT_HORIZONTAL_ITEM_MIN_WIDTH,
   renderChart,
 }) => {
   const [columns, setColumns] = useState(1);
@@ -61,10 +66,10 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
 
   const itemStyles = useMemo((): React.CSSProperties[] => {
     if (layout === 'horizontal') {
-      return groups.map(() => ({ flex: 1, minWidth: 300 }));
+      return groups.map(() => ({ flex: 1, minWidth: horizontalItemMinWidth }));
     }
     if (layout === 'vertical') {
-      return groups.map(() => ({ flex: 1, minHeight: 200 }));
+      return groups.map(() => ({ flex: 1, minHeight: verticalItemMinHeight }));
     }
     const span = SUB_COLUMNS / columns;
     const itemsInLastRow = groups.length % columns || columns;
@@ -76,7 +81,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       }
       return { gridColumn: `span ${span}` };
     });
-  }, [layout, columns, groups]);
+  }, [layout, columns, groups, verticalItemMinHeight, horizontalItemMinWidth]);
 
   const layoutClass = `splitContainer--${layout || 'auto'}`;
 
@@ -85,9 +90,8 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       <div ref={containerRef} className={`splitContainer ${layoutClass}`} style={containerStyle}>
         {groups.map((group, index) => (
           <SplitChartInstance
-            key={group.key}
-            label={group.key}
-            data={group.data}
+            key={group}
+            label={group}
             style={itemStyles[index]}
             showLabel={showLabel}
             scrollRoot={containerRef}

@@ -24,10 +24,13 @@
   z-index: 10000;
 }
 
-// Container for the grid when full‐screen
+// Container for the grid when full‐screen. Pad the top so the grid toolbar
+// (which right-aligns the Service legend / reset-zoom controls) starts below the
+// absolutely-positioned close ✕ instead of colliding with it.
 .exploreCustomDataGrid__fullScreenContent {
   flex: 1 1 auto;
   overflow: auto;
+  padding-top: $euiSizeXL;
 }
 
 // Wrapper for non‐fullscreen layout
@@ -58,14 +61,77 @@
   z-index: 2;
 }
 
-// Secondary toolbar positioned on the right side
-.exploreCustomDataGrid__secondaryToolbar {
-  position: absolute;
-  top: -4px;
-  right: 0;
-  z-index: 1000;
+// Unified toolbar: let the grid's left-controls region fill the bar so the
+// single space-between row can push the view/meta controls to the far right.
+.exploreCustomDataGrid--unifiedToolbar {
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiDataGrid__controls {
+    width: 100%;
+
+    // Tighter than the default so the toolbar row hugs the bar.
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    // Drop the toolbar's own bottom rule — it sits directly above the gantt
+    // header's underline, doubling the separators. The header underline is the
+    // one intentional line between the chrome and the rows.
+    border-bottom: none;
+  }
+
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiDataGrid__leftControls {
+    flex: 1 1 auto;
+  }
+}
+
+.exploreCustomDataGrid__toolbarRow {
   display: flex;
   align-items: center;
-  height: 40px;
-  padding: 0 12px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+// Flat span-list table: no caller controls, so push full screen + density to
+// the far right of the toolbar (Columns / Sort keep their natural left spot).
+.exploreCustomDataGrid--viewControlsRight {
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiDataGrid__controls {
+    display: flex;
+    align-items: center;
+  }
+
+  .exploreCustomDataGrid__viewControlsRight {
+    order: 1;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeS;
+  }
+}
+
+// Right-hand view/meta controls (full screen, density, reset zoom, legend).
+.exploreCustomDataGrid__toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
+}
+
+// Connected icon cluster for the tree action buttons (expand/collapse ± one
+// level): a single bordered, segmented group with dividers between buttons.
+.exploreCustomDataGrid__actionCluster {
+  display: inline-flex;
+  align-items: center;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  overflow: hidden;
+
+  > * + * {
+    border-left: $euiBorderThin;
+  }
+
+  // Square off the individual buttons so only the cluster has rounded corners.
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiButtonIcon {
+    border-radius: 0;
+  }
 }

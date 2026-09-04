@@ -6,7 +6,7 @@ import { createDataSourceSelector } from './create_data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 
-import { getByText, render } from '@testing-library/react';
+import { getByText, queryByText, render } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   mockDataSourcePluginSetupWithHideLocalCluster,
@@ -36,7 +36,7 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceSelector(
       uiSettings,
@@ -44,7 +44,7 @@ describe('create data source selector', () => {
     );
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -56,10 +56,10 @@ describe('create data source selector', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
-  it('should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false', () => {
+  it('lets an explicit props.hideLocalCluster=true win over the data_source config (hides local cluster)', () => {
     const props = {
       savedObjectsClient: client,
       notifications: toasts,
@@ -69,14 +69,36 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
+    // Global config says SHOW local cluster, but the caller explicitly passes hideLocalCluster=true.
     const TestComponent = createDataSourceSelector(
       uiSettings,
       mockDataSourcePluginSetupWithShowLocalCluster
     );
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
+    // The explicit prop wins → the synthetic "Local cluster" option is not rendered.
+    expect(queryByText(component.container, 'Local cluster')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the data_source config when the caller omits hideLocalCluster', () => {
+    const props = {
+      savedObjectsClient: client,
+      notifications: toasts,
+      onSelectedDataSource: jest.fn(),
+      disabled: false,
+      fullWidth: false,
+    };
+    const dataSourceSelection = new DataSourceSelectionService();
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+
+    // No hideLocalCluster prop → uses the config value (here: show local cluster).
+    const TestComponent = createDataSourceSelector(
+      uiSettings,
+      mockDataSourcePluginSetupWithShowLocalCluster
+    );
+    const component = render(<TestComponent {...(props as any)} />);
     expect(getByText(component.container, 'Local cluster')).toBeInTheDocument();
   });
 });

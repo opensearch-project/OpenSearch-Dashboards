@@ -47,7 +47,7 @@ describe('ServiceCardNode', () => {
       zIndex: 0,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-    } as any);
+    }) as any;
 
   it('renders title and subtitle', () => {
     render(<ServiceCardNode {...createNodeProps()} />);
@@ -146,7 +146,8 @@ describe('ServiceCardNode', () => {
     const shell = container.querySelector(
       '[data-test-subj="serviceCardNode-svc-1"]'
     ) as HTMLElement;
-    expect(shell.style.borderColor).toBe('#6366f1');
+    // jsdom converts hex to rgb
+    expect(shell.style.borderColor).toBe('rgb(99, 102, 241)');
     expect(shell.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
   });
 

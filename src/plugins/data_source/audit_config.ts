@@ -6,7 +6,6 @@
 import { schema } from '@osd/config-schema';
 import os from 'os';
 import path from 'path';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { DateConversion } from '../../../src/core/server/logging/layouts/conversions';
 
 const patternSchema = schema.string({

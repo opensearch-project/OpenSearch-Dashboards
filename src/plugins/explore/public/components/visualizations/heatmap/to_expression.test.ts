@@ -21,16 +21,12 @@ describe('Heatmap to_expression', () => {
       name: 'Category1',
       schema: VisFieldType.Categorical,
       column: 'category1',
-      validValuesCount: 4,
-      uniqueValuesCount: 2,
     },
     {
       id: 2,
       name: 'Category2',
       schema: VisFieldType.Categorical,
       column: 'category2',
-      validValuesCount: 4,
-      uniqueValuesCount: 2,
     },
   ];
 
@@ -40,8 +36,6 @@ describe('Heatmap to_expression', () => {
       name: 'Value',
       schema: VisFieldType.Numerical,
       column: 'value',
-      validValuesCount: 4,
-      uniqueValuesCount: 4,
     },
   ];
 

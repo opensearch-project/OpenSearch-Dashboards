@@ -79,6 +79,8 @@ interface SuggestionItem {
   text: string;
   prompt?: string;
   action?: () => void;
+  /** When set, this suggestion is only shown if the named tool is registered. */
+  requiredTool?: string;
 }
 
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
@@ -93,6 +95,7 @@ const STARTER_SUGGESTIONS: SuggestionItem[] = [
     iconColor: 'danger',
     text: '/investigate an issue',
     prompt: '/investigate ',
+    requiredTool: 'create_investigation',
   },
   {
     icon: 'help',
@@ -106,15 +109,18 @@ interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
   timeline: Message[];
   isStreaming: boolean;
+  isValidating?: boolean;
   onResendMessage?: (message: Message) => void;
   onResendToolResult?: (params: {
     messageId: string;
     toolCallId: string;
     toolResult: any;
   }) => Promise<void>;
-  onApproveConfirmation?: () => void;
+  onApproveConfirmation?: (modifiedArgs?: any) => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  onRemoveInput?: (content: string) => void;
+  inputValue?: string;
   startResponse?: boolean;
   threadId?: string;
   onShowHistory?: () => void;
@@ -195,6 +201,13 @@ export const convertTimelineToMessageRows = (
     return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
   };
 
+  // Helper: Check if every tool call renders its card below the assistant message
+  const rendersBelowMessage = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    const service = AssistantActionService.getInstance();
+    return toolCalls.every((tc) => service.getRenderPlacement(tc.function.name) === 'below');
+  };
+
   // Helper: Find next message that closes a tool call batch
   // (non-assistant message or assistant with content)
   const findBatchEndIndex = (startIndex: number): number => {
@@ -207,20 +220,45 @@ export const convertTimelineToMessageRows = (
     return -1; // No closing message found
   };
 
+  // A tool call yields exactly one row, however many messages reference it: rows are keyed by tool
+  // call id, and each row renders the tool's own card.
+  const emittedToolCallIds = new Set<string>();
+  const takeUnemitted = (toolCalls: ToolCall[]): ToolCall[] =>
+    toolCalls.filter((tc) => {
+      if (emittedToolCallIds.has(tc.id)) return false;
+      emittedToolCallIds.add(tc.id);
+      return true;
+    });
+
   // Helper: Add tool calls as individual rows
   const addIndividualToolCalls = (toolCalls?: ToolCall[]) => {
     if (!toolCalls?.length) return;
-    toolCalls.forEach((tc) => {
+    takeUnemitted(toolCalls).forEach((tc) => {
       result.push({ role: 'toolCall', toolCall: toTimelineToolCall(tc) });
     });
+  };
+
+  // Helper: Add tool calls as individual rows ABOVE the assistant message that
+  // was just pushed. Custom-renderer tools (e.g. the PPL lint-fix approve/reject
+  // card) read better at the top of the turn than buried under the model's
+  // explanatory text, so we splice their rows in front of the current message.
+  const addIndividualToolCallsBeforeCurrentMessage = (toolCalls?: ToolCall[]) => {
+    if (!toolCalls?.length) return;
+    const insertAt = Math.max(0, result.length - 1); // before the just-pushed message
+    const rows = takeUnemitted(toolCalls).map(
+      (tc) => ({ role: 'toolCall', toolCall: toTimelineToolCall(tc) }) as const
+    );
+    result.splice(insertAt, 0, ...rows);
   };
 
   // Helper: Add tool calls as a group
   const addToolCallGroup = (toolCalls: ToolCall[]) => {
     if (!toolCalls.length) return;
+    const fresh = takeUnemitted(toolCalls);
+    if (!fresh.length) return;
     result.push({
       role: 'toolCallGroup',
-      toolCalls: toolCalls.map(toTimelineToolCall),
+      toolCalls: fresh.map(toTimelineToolCall),
     });
   };
 
@@ -238,15 +276,26 @@ export const convertTimelineToMessageRows = (
     // No tool calls to process
     if (!toolCalls?.length) continue;
 
-    // If any tool is running, show individually and continue processing
+    // If any tool is running, show individually and continue processing.
+    // Custom-renderer tools render above the message text unless they opt into
+    // renderPlacement: 'below'; others stay below.
     if (hasRunningTool(toolCalls)) {
-      addIndividualToolCalls(toolCalls);
+      if (hasCustomRendererTool(toolCalls) && !rendersBelowMessage(toolCalls)) {
+        addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      } else {
+        addIndividualToolCalls(toolCalls);
+      }
       continue;
     }
 
-    // If any tool has custom renderer, show individually (don't group)
+    // If any tool has custom renderer, show individually (don't group). The action
+    // chooses its placement: 'above' (default) tops the turn, 'below' follows the text.
     if (hasCustomRendererTool(toolCalls)) {
-      addIndividualToolCalls(toolCalls);
+      if (rendersBelowMessage(toolCalls)) {
+        addIndividualToolCalls(toolCalls);
+      } else {
+        addIndividualToolCallsBeforeCurrentMessage(toolCalls);
+      }
       continue;
     }
 
@@ -294,11 +343,14 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   isStreaming,
+  isValidating,
   onResendMessage,
   onResendToolResult,
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  onRemoveInput,
+  inputValue,
   startResponse,
   threadId,
   onShowHistory,
@@ -324,6 +376,29 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
     toolCallStates$,
     assistantActionService.getCurrentState().toolCallStates
   );
+
+  // Subscribe to tool definitions to conditionally show/hide suggestion cards
+  const toolDefinitions$ = useMemo(
+    () => assistantActionService.getState$().pipe(map((state) => state.toolDefinitions)),
+    [assistantActionService]
+  );
+  const toolDefinitions = useObservable(
+    toolDefinitions$,
+    assistantActionService.getCurrentState().toolDefinitions
+  );
+
+  // Filter starter suggestions based on tool availability
+  const visibleSuggestions = useMemo(() => {
+    return STARTER_SUGGESTIONS.filter((suggestion) => {
+      if (suggestion.requiredTool) {
+        if (!toolDefinitions) {
+          return false;
+        }
+        return toolDefinitions.some((tool) => tool.name === suggestion.requiredTool);
+      }
+      return true;
+    });
+  }, [toolDefinitions]);
 
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
@@ -418,10 +493,10 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
-  const messageRows = useMemo(() => convertTimelineToMessageRows(timeline, toolCallStates), [
-    timeline,
-    toolCallStates,
-  ]);
+  const messageRows = useMemo(
+    () => convertTimelineToMessageRows(timeline, toolCallStates),
+    [timeline, toolCallStates]
+  );
 
   const lastAssistantMessageIndex = useMemo(
     () => messageRows.findLastIndex((message) => message.role === 'assistant'),
@@ -498,7 +573,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
               </EuiText>
             </div>
             <div className="chatMessages__suggestions">
-              {STARTER_SUGGESTIONS.map((suggestion, index) => (
+              {visibleSuggestions.map((suggestion, index) => (
                 <EuiPanel
                   key={index}
                   paddingSize="m"
@@ -588,7 +663,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 {renderAssistantContent()}
 
                 {suggestionsEnabled && lastAssistantMessageIndex === index && (
-                  <ChatSuggestions messages={timeline} currentMessage={message} />
+                  <ChatSuggestions
+                    messages={timeline}
+                    currentMessage={message}
+                    onFillInput={onFillInput}
+                    onRemoveInput={onRemoveInput}
+                    inputValue={inputValue}
+                  />
                 )}
               </div>
             );
@@ -644,6 +725,23 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 />
               ))}
             </EuiListGroup>
+          </div>
+        )}
+
+        {isValidating && (
+          <div className="chatMessages__loadingIndicator">
+            <div className="messageRow">
+              <div className="messageRow__icon">
+                <EuiIcon type="console" size="m" color="success" />
+              </div>
+              <div className="messageRow__content">
+                <div className="chatMessages__thinkingText">
+                  {i18n.translate('chat.messages.connecting', {
+                    defaultMessage: 'Connecting...',
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

@@ -10,27 +10,31 @@ import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { useClearEditors } from '../../../../application/hooks';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 
+// One label for both the tooltip and the aria-label, so the icon strip reads as a set of
+// search actions rather than four bare verbs.
+const newSearchLabel = i18n.translate('explore.topNav.newAriaLabel', {
+  defaultMessage: 'New search',
+});
+
 export const newTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('explore.topNav.newTitle', {
-    defaultMessage: 'New',
-  }),
-  ariaLabel: i18n.translate('explore.topNav.newAriaLabel', {
-    defaultMessage: `New Search`,
-  }),
+  tooltip: newSearchLabel,
+  ariaLabel: newSearchLabel,
   testId: 'discoverNewButton',
   iconType: 'plusInCircle',
   controlType: 'icon',
 };
 
-export const getNewButtonRun = (
-  services: ExploreServices,
-  clearEditors: ReturnType<typeof useClearEditors>
-): TopNavMenuIconRun => () => {
-  const visBuilder = getVisualizationBuilder();
-  visBuilder.clearUrl();
-  services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
+export const getNewButtonRun =
+  (
+    services: ExploreServices,
+    clearEditors: ReturnType<typeof useClearEditors>
+  ): TopNavMenuIconRun =>
+  () => {
+    const visBuilder = getVisualizationBuilder();
+    visBuilder.clearUrl();
+    services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
 
-  if (services.scopedHistory) {
-    services.scopedHistory.push('/');
-  }
-};
+    if (services.scopedHistory) {
+      services.scopedHistory.push('/');
+    }
+  };

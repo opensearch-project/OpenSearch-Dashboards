@@ -40,7 +40,10 @@ test('allows empty strings', () => {
 
 test('is required by default', () => {
   expect(() => schema.string().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [undefined]"`
+    `
+"expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
   );
 });
 
@@ -48,7 +51,10 @@ test('includes namespace in failure', () => {
   expect(() =>
     schema.string().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [string] but got [undefined]"`
+    `
+"[foo-namespace]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
   );
 });
 
@@ -61,13 +67,19 @@ describe('#minLength', () => {
     expect(() =>
       schema.string({ minLength: 4 }).validate('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [3] but it must have a minimum length of [4]."`
+      `
+"value has length [3] but it must have a minimum length of [4].
+Cause: value has length [3] but it must have a minimum length of [4]."
+`
     );
   });
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ minLength: 2 }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [0] but it must have a minimum length of [2]."`
+      `
+"value has length [0] but it must have a minimum length of [2].
+Cause: value has length [0] but it must have a minimum length of [2]."
+`
     );
   });
 });
@@ -81,7 +93,10 @@ describe('#maxLength', () => {
     expect(() =>
       schema.string({ maxLength: 2 }).validate('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [3] but it must have a maximum length of [2]."`
+      `
+"value has length [3] but it must have a maximum length of [2].
+Cause: value has length [3] but it must have a maximum length of [2]."
+`
     );
   });
 });
@@ -95,7 +110,10 @@ describe('#minLength and #maxLength combined', () => {
     expect(() =>
       schema.string({ minLength: 1, maxLength: 200000 }).validate('')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [0] but it must have a minimum length of [1]."`
+      `
+"value has length [0] but it must have a minimum length of [1].
+Cause: value has length [0] but it must have a minimum length of [1]."
+`
     );
   });
 
@@ -103,7 +121,10 @@ describe('#minLength and #maxLength combined', () => {
     expect(() =>
       schema.string({ minLength: 1, maxLength: 5 }).validate('toolong')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [7] but it must have a maximum length of [5]."`
+      `
+"value has length [7] but it must have a maximum length of [5].
+Cause: value has length [7] but it must have a maximum length of [5]."
+`
     );
   });
 
@@ -153,27 +174,45 @@ describe('#hostname', () => {
     const hostNameSchema = schema.string({ hostname: true });
 
     expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
+      `
+"value must be a valid hostname (see RFC 1123).
+Cause: value must be a valid hostname (see RFC 1123)."
+`
     );
     expect(() => hostNameSchema.validate('localhost:5601')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
+      `
+"value must be a valid hostname (see RFC 1123).
+Cause: value must be a valid hostname (see RFC 1123)."
+`
     );
     expect(() => hostNameSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
+      `
+"value must be a valid hostname (see RFC 1123).
+Cause: value must be a valid hostname (see RFC 1123)."
+`
     );
     expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
+      `
+"value must be a valid hostname (see RFC 1123).
+Cause: value must be a valid hostname (see RFC 1123)."
+`
     );
 
     const tooLongHostName = 'a'.repeat(256);
     expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
+      `
+"value must be a valid hostname (see RFC 1123).
+Cause: value must be a valid hostname (see RFC 1123)."
+`
     );
   });
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"string.empty"`
+      `
+"string.empty
+Cause: string.empty"
+`
     );
   });
 
@@ -181,7 +220,10 @@ describe('#hostname', () => {
     expect(() =>
       schema.string({ hostname: true, maxLength: 3 }).validate('www.example.com')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [15] but it must have a maximum length of [3]."`
+      `
+"value has length [15] but it must have a maximum length of [3].
+Cause: value has length [15] but it must have a maximum length of [3]."
+`
     );
   });
 });
@@ -229,7 +271,10 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() => schema.string({ validate }).validate('foo')).toThrowErrorMatchingInlineSnapshot(
-      `"validator failure"`
+      `
+"validator failure
+Cause: validator failure"
+`
     );
   });
 
@@ -237,21 +282,33 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() => schema.string({ validate }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"validator failure"`
+      `
+"validator failure
+Cause: validator failure"
+`
     );
   });
 });
 
 test('returns error when not string', () => {
   expect(() => schema.string().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
+    `
+"expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
   );
 
   expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [Array]"`
+    `
+"expected value of type [string] but got [Array]
+Cause: expected value of type [string] but got [Array]"
+`
   );
 
   expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [RegExp]"`
+    `
+"expected value of type [string] but got [RegExp]
+Cause: expected value of type [string] but got [RegExp]"
+`
   );
 });

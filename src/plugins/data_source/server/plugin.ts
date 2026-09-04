@@ -27,8 +27,6 @@ import { DataSourceService, DataSourceServiceSetup } from './data_source_service
 import { dataConnection, dataSource, DataSourceSavedObjectsClientWrapper } from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
 import { registerTestConnectionRoute } from './routes/test_connection';
@@ -73,9 +71,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       },
     };
 
-    const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
-      config
-    );
+    const cryptographyServiceSetup: CryptographyServiceSetup =
+      this.cryptographyService.setup(config);
 
     const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
@@ -152,7 +149,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       customApiSchemaRegistryPromise,
       this.logger.get('test-connection'),
       endpointDeniedIPs,
-      config.endpointAllowlistedSuffixes
+      config.endpointAllowlistedSuffixes,
+      () => this.internalSavedObjects
     );
     registerFetchDataSourceMetaDataRoute(
       router,
@@ -162,7 +160,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       customApiSchemaRegistryPromise,
       this.logger.get('fetch-data-source-metadata'),
       endpointDeniedIPs,
-      config.endpointAllowlistedSuffixes
+      config.endpointAllowlistedSuffixes,
+      () => this.internalSavedObjects
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
@@ -190,6 +189,12 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.internalSavedObjects = core.savedObjects.createInternalRepository([
       DATA_SOURCE_SAVED_OBJECT_TYPE,
     ]);
+    // backendCompatibility (when enabled) registers a custom Transport on core's client.
+    // Apply the same Transport to modern data-source clients so legacy ES (6.x/7.x)
+    // connections get identical request/response interception (e.g. /_resolve/index
+    // synthesis). Undefined when no Transport is registered → data-source clients are
+    // built exactly as before (no behavior change).
+    this.dataSourceService.setCustomTransport(core.opensearch.getClientTransport?.());
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
       getCustomApiSchemaRegistry: () => this.customApiSchemaRegistry,

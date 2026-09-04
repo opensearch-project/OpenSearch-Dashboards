@@ -25,16 +25,17 @@ import {
   ThresholdOptions,
   AxisRole,
   VisColumn,
+  StandardOptions,
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
-import { ColorMap } from './color_map';
-import { getColors } from '../theme/default_colors';
+import { LegendItem } from './legend';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
 /**
  * Base style interface that all chart styles should extend
  */
-export interface BaseChartStyle {
+export interface BaseChartStyle extends StandardOptions {
   tooltipOptions?: {
     mode: string;
   };
@@ -76,11 +77,14 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   timeRange?: { from: string; to: string };
 }
 
+export type AxisType = 'category' | 'value' | 'time';
+
 /**
  * State object that flows through the pipeline
  */
-export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
-  extends EChartsSpecInput<T> {
+export interface EChartsSpecState<
+  T extends BaseChartStyle = BaseChartStyle,
+> extends EChartsSpecInput<T> {
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
@@ -97,6 +101,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
     | HeatmapSeriesOption
   >;
   visualMap?: EChartsOption['visualMap'];
+  legendItems?: LegendItem[];
   // Final output
   spec?: EChartsOption;
 }
@@ -120,7 +125,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | Axis[] | undefined): AxisType {
   const effectiveAxis = Array.isArray(axis) ? axis[0] : axis;
   if (!effectiveAxis) return 'value';
 
@@ -138,37 +143,47 @@ export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'valu
 /**
  * Create base configuration (tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>({
-  addTrigger = true,
-  legend,
-}: {
-  addTrigger?: boolean;
-  legend?: EChartsOption['legend'];
-} = {}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-  const { styles, axisConfig } = state;
+export const createBaseConfig =
+  <T extends BaseChartStyle>({
+    addTrigger = true,
+    legend,
+  }: {
+    addTrigger?: boolean;
+    legend?: EChartsOption['legend'];
+  } = {}) =>
+  (state: EChartsSpecState<T>): EChartsSpecState<T> => {
+    const { styles, axisConfig } = state;
 
-  const baseConfig = {
-    tooltip: {
-      extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
-      enterable: true, // for y direction overflow
-      confine: true, // for x direction
-      show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
-      axisPointer: { type: 'shadow' as const },
-    },
-    legend: {
-      show: false,
-      type: 'scroll',
-      ...legend,
-      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' as const }
-        : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
-    },
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+
+    const baseConfig = {
+      tooltip: {
+        extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
+        enterable: true, // for y direction overflow
+        confine: true, // for x direction
+        show: styles.tooltipOptions?.mode !== 'hidden',
+        ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
+        axisPointer: { type: 'line' as const },
+        ...(hasUnit && {
+          valueFormatter: (value: unknown) =>
+            typeof value === 'number'
+              ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
+              : String(value ?? ''),
+        }),
+      },
+      legend: {
+        show: false,
+        type: 'scroll',
+        ...legend,
+        ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+          ? { orient: 'vertical' as const }
+          : {}),
+        [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
+      },
+    };
+
+    return { ...state, baseConfig };
   };
-
-  return { ...state, baseConfig };
-};
 
 /**
  * Build axis configurations
@@ -180,15 +195,39 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 
   const hasY2 = axisColumnMappings.y2 !== undefined;
 
+  const { styles } = state;
+  const hasUnit = !!styles.unitId || styles.decimals != null || !!styles?.unitSuffix;
+
+  // when both x and y are numerical, prefer Y
+  const yIsValueAxis = getAxisType(axisColumnMappings.y) === 'value';
+  const xIsValueAxis = getAxisType(axisColumnMappings.x) === 'value' && !yIsValueAxis;
+
+  // TODO apply data range
+  const isMinMaxInValid = styles.min != null && styles.max != null && styles.min >= styles.max;
+
   const getConfig = (
     axis: Axis | Axis[] | undefined,
     axisStyle: StandardAxes | undefined,
+    isValueAxis: boolean = false,
     addSplitLineStyle: boolean = false
   ) => {
+    const axisType = getAxisType(axis);
+    const axisStyling = applyAxisStyling({ axisType, axisStyle, addSplitLineStyle });
     return {
-      type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
+      type: axisType,
+      ...axisStyling,
       nameGap: 8,
+      ...(isValueAxis &&
+        hasUnit && {
+          axisLabel: {
+            ...axisStyling.axisLabel,
+            formatter: (value: number) =>
+              formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix),
+          },
+        }),
+      // if min and max are not valid, ignore
+      ...(isValueAxis && !isMinMaxInValid && { min: styles.min }),
+      ...(isValueAxis && !isMinMaxInValid && { max: styles.max }),
     };
   };
 
@@ -196,11 +235,17 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  const xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle);
-  let yAxisConfig: any = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle);
+  const xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle, xIsValueAxis);
+  let yAxisConfig: any = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle, yIsValueAxis);
 
   if (hasY2) {
-    const y2AxisConfig = getConfig(axisColumnMappings.y2, axisConfig.y2AxisStyle, true);
+    const y2IsValueAxis = getAxisType(axisColumnMappings.y2) === 'value';
+    const y2AxisConfig = getConfig(
+      axisColumnMappings.y2,
+      axisConfig.y2AxisStyle,
+      y2IsValueAxis,
+      true
+    );
     yAxisConfig = [yAxisConfig, y2AxisConfig];
   }
 
@@ -242,17 +287,22 @@ const POSITION_MAP = {
 };
 
 export const applyAxisStyling = ({
+  axisType,
   axisStyle,
   addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
   addSplitLineStyle?: boolean;
+  axisType?: AxisType;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
     axisLine: { show: true },
+    axisPointer: {
+      snap: axisType === 'time' ? false : true,
+    },
   };
 
   // Apply axis visibility
@@ -266,9 +316,10 @@ export const applyAxisStyling = ({
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
       ...(addSplitLineStyle && {
+        // only for y2
         lineStyle: {
           type: 'dotted',
-          opacity: DEFAULT_OPACITY / 2,
+          opacity: DEFAULT_OPACITY,
         },
       }),
     };
@@ -305,15 +356,7 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildVisMap = ({
-  seriesFields,
-}: {
-  seriesFields: (headers?: string[]) => string[];
-}) => (state: EChartsSpecState) => {
-  const { styles, transformedData = [] } = state;
-
-  if (!styles.useThresholdColor) return state;
-
+export const buildThresholds = (styles: BaseChartStyle) => {
   const completeThreshold =
     styles.thresholdOptions && styles?.thresholdOptions.thresholds
       ? [
@@ -322,29 +365,38 @@ export const buildVisMap = ({
         ]
       : [];
 
-  const convertedThresholds = convertThresholds(completeThreshold);
-  const pieces = convertedThresholds.map((t) => ({
+  return convertThresholds(completeThreshold).map((t) => ({
     gte: t.min,
     lt: t.max,
     color: t.color,
   }));
-
-  const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
-    const originalIndex = transformedData[0]?.indexOf(c);
-    return {
-      type: 'piecewise',
-      show: false,
-      seriesIndex: index,
-      dimension: originalIndex,
-      pieces,
-    };
-  });
-
-  return {
-    ...state,
-    visualMap,
-  };
 };
+
+export const buildVisMap =
+  ({ seriesFields }: { seriesFields: (headers?: string[]) => string[] }) =>
+  (state: EChartsSpecState) => {
+    const { styles, transformedData = [] } = state;
+
+    if (!styles.useThresholdColor) return state;
+
+    const pieces = buildThresholds(styles);
+
+    const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
+      const originalIndex = transformedData[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
+
+    return {
+      ...state,
+      visualMap,
+    };
+  };
 
 /**
  * Apply time range to axis if showFullTimeRange is enabled
@@ -415,57 +467,4 @@ export const applyTimeRange = <T extends BaseChartStyle>(
     xAxisConfig: updatedXAxisConfig,
     yAxisConfig: updatedYAxisConfig,
   };
-};
-
-/**
- * Collect legend data from series and notify via callback.
- * Read-only: does not assign colors. Each series builder must set itemStyle.color explicitly.
- * For scatter unfilled mode (color: 'transparent'), uses borderColor instead.
- */
-export const collectLegend = <T extends BaseChartStyle>(
-  onLegend?: (legend: ColorMap) => void
-): PipelineFn<T> => (state) => {
-  const { series } = state;
-  if (!series || !onLegend) return state;
-
-  const legend: ColorMap = {};
-  series.forEach((s) => {
-    const name = typeof s.name === 'string' ? s.name : undefined;
-    if (!name) return;
-    const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
-    const color = itemStyle?.color;
-    const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
-    if (legendColor && typeof legendColor === 'string') {
-      legend[name] = legendColor;
-    }
-  });
-
-  onLegend(legend);
-
-  return state;
-};
-
-/**
- * Collect legend data for pie charts from the series data items.
- * Pie assigns colors per data item (not per series), so we read from series[0].data.
- */
-export const collectPieLegend = <T extends BaseChartStyle>(
-  onLegend?: (legend: ColorMap) => void
-): PipelineFn<T> => (state) => {
-  const { series } = state;
-  if (!series || !onLegend) return state;
-
-  const legend: ColorMap = {};
-  const pieSeries = series[0] as any;
-  if (pieSeries?.data) {
-    pieSeries.data.forEach((item: any) => {
-      if (item?.name && item?.itemStyle?.color) {
-        legend[item.name] = item.itemStyle.color;
-      }
-    });
-  }
-
-  onLegend(legend);
-
-  return state;
 };

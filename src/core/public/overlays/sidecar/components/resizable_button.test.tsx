@@ -225,7 +225,11 @@ test('it should handle window resize events correctly for different docked modes
   let component = mount(<ResizableButton {...takeoverProps} />);
 
   await act(async () => {
-    Object.defineProperty(window, 'innerHeight', { value: 600 });
+    Object.defineProperty(window, 'innerHeight', {
+      value: 600,
+      writable: true,
+      configurable: true,
+    });
     window.dispatchEvent(new Event('resize'));
   });
 
@@ -244,7 +248,7 @@ test('it should handle window resize events correctly for different docked modes
   component = mount(<ResizableButton {...rightProps} />);
 
   await act(async () => {
-    Object.defineProperty(window, 'innerWidth', { value: 800 });
+    Object.defineProperty(window, 'innerWidth', { value: 800, writable: true, configurable: true });
     window.dispatchEvent(new Event('resize'));
   });
 

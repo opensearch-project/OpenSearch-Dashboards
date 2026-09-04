@@ -40,13 +40,13 @@ describe('RecentSessions', () => {
     },
   ];
 
-  const mockConversationHistoryService = ({
+  const mockConversationHistoryService = {
     getConversations: jest.fn().mockResolvedValue({
       conversations: mockConversations,
       hasMore: false,
       total: 3,
     }),
-  } as unknown) as ConversationHistoryService;
+  } as unknown as ConversationHistoryService;
 
   const mockOnSelectConversation = jest.fn();
   const mockOnViewAll = jest.fn();
@@ -56,7 +56,7 @@ describe('RecentSessions', () => {
   });
 
   it('should render loading state with EuiLoadingContent', async () => {
-    const slowService = ({
+    const slowService = {
       getConversations: jest.fn().mockImplementation(
         () =>
           new Promise((resolve) =>
@@ -71,7 +71,7 @@ describe('RecentSessions', () => {
             )
           )
       ),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     render(
       <RecentSessions
@@ -147,13 +147,13 @@ describe('RecentSessions', () => {
   });
 
   it('should not render when conversations list is empty', async () => {
-    const emptyService = ({
+    const emptyService = {
       getConversations: jest.fn().mockResolvedValue({
         conversations: [],
         hasMore: false,
         total: 0,
       }),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     const { container } = render(
       <RecentSessions
@@ -171,9 +171,9 @@ describe('RecentSessions', () => {
   });
 
   it('should not render when there is an error', async () => {
-    const errorService = ({
+    const errorService = {
       getConversations: jest.fn().mockRejectedValue(new Error('Failed to load')),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     const { container } = render(
       <RecentSessions
@@ -205,8 +205,9 @@ describe('RecentSessions', () => {
 
     // moment.fromNow() returns formats like "30 minutes ago", "2 hours ago", "a day ago"
     // Just verify that relative time text is present for at least one conversation
-    const allText = screen.getByText('First conversation').closest('.recentSessions__item')
-      ?.textContent;
+    const allText = screen
+      .getByText('First conversation')
+      .closest('.recentSessions__item')?.textContent;
     expect(allText).toContain('ago');
   });
 
@@ -222,13 +223,13 @@ describe('RecentSessions', () => {
       },
     ];
 
-    const serviceWithLongTitle = ({
+    const serviceWithLongTitle = {
       getConversations: jest.fn().mockResolvedValue({
         conversations: longTitleConversations,
         hasMore: false,
         total: 1,
       }),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     render(
       <RecentSessions
@@ -268,13 +269,13 @@ describe('RecentSessions', () => {
       },
     ];
 
-    const serviceWithInvalidTimestamp = ({
+    const serviceWithInvalidTimestamp = {
       getConversations: jest.fn().mockResolvedValue({
         conversations: conversationsWithInvalid,
         hasMore: false,
         total: 2,
       }),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     render(
       <RecentSessions
@@ -304,7 +305,7 @@ describe('RecentSessions', () => {
   it('should not update state after component unmounts', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const delayedService = ({
+    const delayedService = {
       getConversations: jest.fn().mockImplementation(
         () =>
           new Promise((resolve) =>
@@ -319,7 +320,7 @@ describe('RecentSessions', () => {
             )
           )
       ),
-    } as unknown) as ConversationHistoryService;
+    } as unknown as ConversationHistoryService;
 
     const { unmount } = render(
       <RecentSessions

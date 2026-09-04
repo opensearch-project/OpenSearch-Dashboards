@@ -29,6 +29,7 @@
  */
 
 export * from './constants';
+export * from './data_source_engine_capabilities';
 export * from './opensearch_query';
 export * from './data_views';
 export * from './data_frames';

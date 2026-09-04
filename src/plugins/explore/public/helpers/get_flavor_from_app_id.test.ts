@@ -15,7 +15,7 @@ const createMockServices = (): ExploreServices =>
         currentAppId$: of('explore/discover'),
       },
     },
-  } as ExploreServices);
+  }) as ExploreServices;
 
 describe('getFlavorFromAppId', () => {
   it('should extract flavor from valid app ID', () => {

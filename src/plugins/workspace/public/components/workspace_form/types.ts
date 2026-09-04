@@ -29,11 +29,11 @@ export interface WorkspaceUserGroupPermissionSetting {
 }
 
 export type WorkspacePermissionSetting =
-  | WorkspaceUserPermissionSetting
-  | WorkspaceUserGroupPermissionSetting;
+  WorkspaceUserPermissionSetting | WorkspaceUserGroupPermissionSetting;
 
 export interface WorkspaceFormSubmitData {
   name: string;
+  customId?: string;
   description?: string;
   features: string[];
   color?: string;
@@ -45,6 +45,7 @@ export interface WorkspaceFormSubmitData {
 export enum WorkspaceFormErrorCode {
   InvalidWorkspaceName,
   WorkspaceNameMissing,
+  InvalidWorkspaceId,
   UseCaseMissing,
   InvalidDataSource,
   DuplicateDataSource,
@@ -57,10 +58,12 @@ export interface WorkspaceFormError {
 }
 
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<
-    WorkspaceFormSubmitData,
-    'permissionSettings' | 'description' | 'selectedDataSourceConnections'
-  >]?: WorkspaceFormError;
+  [
+    key in keyof Omit<
+      WorkspaceFormSubmitData,
+      'permissionSettings' | 'description' | 'selectedDataSourceConnections'
+    >
+  ]?: WorkspaceFormError;
 } & {
   permissionSettings?: {
     overall?: WorkspaceFormError;
@@ -84,16 +87,17 @@ export interface WorkspaceFormProps {
   onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
-export interface AvailableUseCaseItem
-  extends Pick<
-    WorkspaceUseCase,
-    'id' | 'title' | 'features' | 'description' | 'systematic' | 'icon'
-  > {
+export interface AvailableUseCaseItem extends Pick<
+  WorkspaceUseCase,
+  'id' | 'title' | 'features' | 'description' | 'systematic' | 'icon'
+> {
   disabled?: boolean;
 }
 
-export interface WorkspaceFormDataState
-  extends Omit<WorkspaceFormSubmitData, 'name' | 'permissionSettings'> {
+export interface WorkspaceFormDataState extends Omit<
+  WorkspaceFormSubmitData,
+  'name' | 'permissionSettings'
+> {
   name: string;
   useCase: string | undefined;
   selectedDataSourceConnections: DataSourceConnection[];

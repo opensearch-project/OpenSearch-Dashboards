@@ -6,7 +6,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
-import { take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { DashboardTopNav } from '../components/dashboard_top_nav';
 import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
@@ -15,18 +14,19 @@ import { useSavedDashboardInstance } from '../utils/use/use_saved_dashboard_inst
 import { DashboardServices } from '../../types';
 import { useDashboardAppAndGlobalState } from '../utils/use/use_dashboard_app_state';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
-import {
-  DEFAULT_NAV_GROUPS,
-  HeaderVariant,
-  isNavGroupInFeatureConfigs,
-} from '../../../../../core/public';
+import { HeaderVariant } from '../../../../../core/public';
 import { ViewMode } from '../../../../embeddable/public';
 import { DashboardVariables } from './dashboard_variables';
 
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings, keyboardShortcut, workspaces } = services;
+  const { chrome, uiSettings, keyboardShortcut, chat } = services;
+  // Master switch for the Dashboard Variables feature (dashboard.variables.enabled, default false).
+  const variablesEnabled =
+    services.pluginInitializerContext.config.get<{ variables?: { enabled?: boolean } }>()?.variables
+      ?.enabled ?? false;
+  const exploreEnabled = services.application.capabilities.explore?.show === true;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -56,6 +56,18 @@ export const DashboardEditor = () => {
   });
 
   useEffect(() => {
+    chat?.screenshot?.configure({
+      enabled: true,
+      title: i18n.translate('dashboard.editor.chat.addScreenshot', {
+        defaultMessage: 'Add dashboard screenshot',
+      }),
+    });
+    return () => {
+      chat?.screenshot.configure({ enabled: false });
+    };
+  }, [chat]);
+
+  useEffect(() => {
     if (showActionsInGroup) setHeaderVariant?.(HeaderVariant.APPLICATION);
 
     return () => {
@@ -82,20 +94,6 @@ export const DashboardEditor = () => {
     execute: handleFullScreen,
   });
 
-  const [isExploreWorkspace, setIsExploreWorkspace] = useState(false);
-  useEffect(() => {
-    workspaces.currentWorkspace$
-      .pipe(take(1))
-      .toPromise()
-      .then((ws) => {
-        const features = ws?.features;
-        setIsExploreWorkspace(
-          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
-            false
-        );
-      });
-  }, [workspaces.currentWorkspace$]);
-
   return (
     <div>
       <div>
@@ -113,8 +111,8 @@ export const DashboardEditor = () => {
               dashboardIdFromUrl={dashboardIdFromUrl}
               eventEmitter={eventEmitter}
             />
-            {/* Variables are only available in explore-enabled workspaces (observability / analytics) */}
-            {isExploreWorkspace && currentContainer.variableService && (
+            {/* Dashboard Variables are controlled by dashboard.variables.enabled and require Explore. */}
+            {variablesEnabled && exploreEnabled && currentContainer.variableService && (
               <DashboardVariables
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}

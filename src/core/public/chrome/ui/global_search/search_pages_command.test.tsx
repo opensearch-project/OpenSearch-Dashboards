@@ -80,14 +80,17 @@ describe('<SearchPagesCommand />', () => {
     },
   };
 
-  const callbackFn = jest.fn();
+  it('returns no results for an empty query', async () => {
+    await expect(
+      searchPages('', coreStartMock.chrome.navGroup, coreStartMock.application as any)
+    ).resolves.toEqual([]);
+  });
 
   it('search return empty result', async () => {
     const searchResult = await searchPages(
       'bar',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     expect(searchResult).toHaveLength(0);
@@ -97,8 +100,7 @@ describe('<SearchPagesCommand />', () => {
     const searchResult = await searchPages(
       'foo',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     expect(searchResult).toHaveLength(2);
@@ -108,8 +110,7 @@ describe('<SearchPagesCommand />', () => {
     const searchResult = await searchPages(
       'data',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     expect(searchResult).toHaveLength(2);
@@ -119,37 +120,35 @@ describe('<SearchPagesCommand />', () => {
     const searchResult = await searchPages(
       'hello',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     expect(searchResult).toHaveLength(0);
   });
 
-  it('search handle search callback', async () => {
+  it('executes page navigation', async () => {
     const searchResult = await searchPages(
       'data',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
-    (searchResult[0] as any).props?.callback();
+    searchResult[0].execute();
 
-    expect(callbackFn).toBeCalledTimes(1);
-    expect(coreStartMock.application.navigateToApp).toBeCalledWith('dataAdministration-link1');
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith(
+      'dataAdministration-link1'
+    );
   });
 
   it('renders default breadcrumbs for regular nav groups', async () => {
     const searchResult = await searchPages(
       'foo',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     const breadcrumbs = [{ text: 'Some breadcrumb' }];
-    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+    const result = (searchResult[0].content as any).props.renderBreadcrumbs(breadcrumbs);
 
     expect(result).toEqual(breadcrumbs);
   });
@@ -158,12 +157,11 @@ describe('<SearchPagesCommand />', () => {
     const searchResult = await searchPages(
       'data',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     const breadcrumbs = [{ text: 'Some breadcrumb' }];
-    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+    const result = (searchResult[0].content as any).props.renderBreadcrumbs(breadcrumbs);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
@@ -176,12 +174,11 @@ describe('<SearchPagesCommand />', () => {
     const searchResult = await searchPages(
       'settings',
       coreStartMock.chrome.navGroup,
-      coreStartMock.application as any,
-      callbackFn
+      coreStartMock.application as any
     );
 
     const breadcrumbs = [{ text: 'Some breadcrumb' }];
-    const result = (searchResult[0] as any).props.renderBreadcrumbs(breadcrumbs);
+    const result = (searchResult[0].content as any).props.renderBreadcrumbs(breadcrumbs);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({

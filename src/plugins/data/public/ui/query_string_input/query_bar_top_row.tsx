@@ -95,14 +95,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const {
-    uiSettings,
-    notifications,
-    storage,
-    appName,
-    docLinks,
-    keyboardShortcut,
-  } = opensearchDashboards.services;
+  const { uiSettings, notifications, storage, appName, docLinks, keyboardShortcut } =
+    opensearchDashboards.services;
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {

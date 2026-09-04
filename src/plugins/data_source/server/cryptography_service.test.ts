@@ -37,7 +37,7 @@ describe('Cryptography Service', () => {
 
       expect(() => {
         service.setup(config);
-      }).toThrowError(new Error(expectedErrorMsg));
+      }).toThrow(new Error(expectedErrorMsg));
     });
 
     test('exposes proper contract', () => {

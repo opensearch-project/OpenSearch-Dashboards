@@ -4,7 +4,37 @@
  */
 
 import { CoreSetup } from 'opensearch-dashboards/public';
-import { PollQueryResultsParams, TimeRange } from '../../data/common';
+import { PollQueryResultsParams, Query, TimeRange } from '../../data/common';
+
+export interface PerQueryOptions {
+  minStep?: string;
+  legendFormat?: string;
+}
+
+export interface PromQLQueryOptions {
+  maxDataPoints?: number;
+  perQueryOptions?: PerQueryOptions[];
+}
+
+export interface PromQLQuery extends Query {
+  queryOptions?: PromQLQueryOptions;
+}
+
+export interface PromQLSearchOptions extends PromQLQueryOptions {
+  queryType?: string;
+  time?: string;
+  step?: number;
+}
+
+export interface PromQLStepResolution {
+  maxDataPoints: number;
+  queries: Array<{
+    label: string;
+    stepSec: number;
+    rateIntervalSec: number;
+    minStep?: string;
+  }>;
+}
 
 export interface QueryAggConfig {
   [key: string]: {

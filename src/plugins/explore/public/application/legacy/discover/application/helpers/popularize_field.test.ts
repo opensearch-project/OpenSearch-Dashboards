@@ -33,21 +33,21 @@ import { popularizeField } from './popularize_field';
 
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
-    const dataView = ({} as unknown) as DataView;
+    const dataView = {} as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewService = ({} as unknown) as DataViewsService;
+    const dataViewService = {} as unknown as DataViewsService;
     const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });
 
   test('returns undefined if field not found', async () => {
-    const dataView = ({
+    const dataView = {
       fields: {
         getByName: () => {},
       },
-    } as unknown) as DataView;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewService = ({} as unknown) as DataViewsService;
+    const dataViewService = {} as unknown as DataViewsService;
     const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });
@@ -56,16 +56,16 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const dataView = ({
+    const dataView = {
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as DataView;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewService = ({
+    const dataViewService = {
       updateSavedObject: async () => {},
-    } as unknown) as DataViewsService;
+    } as unknown as DataViewsService;
     const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
     expect(field.count).toEqual(1);
@@ -75,18 +75,18 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const dataView = ({
+    const dataView = {
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as DataView;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const dataViewService = ({
+    const dataViewService = {
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown) as DataViewsService;
+    } as unknown as DataViewsService;
     const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });

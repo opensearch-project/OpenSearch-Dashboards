@@ -32,11 +32,10 @@ export const saveStateToSavedObject = (
   return obj;
 };
 
-export interface VisBuilderSavedVis
-  extends Pick<
-    VisBuilderSavedObjectAttributes,
-    'id' | 'title' | 'description' | 'searchSourceFields'
-  > {
+export interface VisBuilderSavedVis extends Pick<
+  VisBuilderSavedObjectAttributes,
+  'id' | 'title' | 'description' | 'searchSourceFields'
+> {
   state: RenderState;
 }
 

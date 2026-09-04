@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 import expect from '@osd/expect';
 import { Agent as HttpsAgent } from 'https';
 

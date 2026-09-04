@@ -86,9 +86,8 @@ const filterPlaceholder = i18n.translate(
 );
 
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
-  const { uiSettings, indexPatternManagementStart, docLinks } = useOpenSearchDashboards<
-    IndexPatternManagmentContext
-  >().services;
+  const { uiSettings, indexPatternManagementStart, docLinks } =
+    useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
@@ -282,15 +281,11 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
 
   useEffect(() => {
-    const {
-      startSyncingState,
-      stopSyncingState,
-      setCurrentTab,
-      getCurrentTab,
-    } = createEditIndexPatternPageStateContainer({
-      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
-      defaultTab: TAB_INDEXED_FIELDS,
-    });
+    const { startSyncingState, stopSyncingState, setCurrentTab, getCurrentTab } =
+      createEditIndexPatternPageStateContainer({
+        useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
+        defaultTab: TAB_INDEXED_FIELDS,
+      });
 
     startSyncingState();
     setSyncingStateFunc({

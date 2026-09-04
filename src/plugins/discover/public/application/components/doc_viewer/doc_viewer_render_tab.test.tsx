@@ -48,5 +48,5 @@ test('Mounting and unmounting DocViewerRenderTab', () => {
 
   wrapper.unmount();
 
-  expect(unmountFn).toBeCalled();
+  expect(unmountFn).toHaveBeenCalled();
 });

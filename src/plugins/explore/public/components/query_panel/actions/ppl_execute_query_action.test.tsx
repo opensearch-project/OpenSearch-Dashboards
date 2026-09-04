@@ -8,7 +8,7 @@ import { act } from 'react';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import {
   usePPLExecuteQueryAction,
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+  APPLY_PPL_QUERY_TOOL_DEFINITION,
   registerDisabledPPLExecuteQueryAction,
 } from './ppl_execute_query_action';
 
@@ -85,7 +85,7 @@ describe('usePPLExecuteQueryAction', () => {
           [TEST_CACHE_KEY]: { status, error },
         },
       },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -116,7 +116,7 @@ describe('usePPLExecuteQueryAction', () => {
     renderAndGetHandler();
     const latestCall =
       mockRegisterAssistantAction.mock.calls[mockRegisterAssistantAction.mock.calls.length - 1][0];
-    expect(latestCall.name).toBe('execute_ppl_query');
+    expect(latestCall.name).toBe('apply_ppl_query');
     expect(latestCall.parameters.required).toContain('query');
     expect(latestCall.handler).toBeInstanceOf(Function);
   });
@@ -352,18 +352,18 @@ describe('usePPLExecuteQueryAction', () => {
   });
 });
 
-describe('EXECUTE_PPL_QUERY_TOOL_DEFINITION', () => {
+describe('APPLY_PPL_QUERY_TOOL_DEFINITION', () => {
   it('should have the correct tool name', () => {
-    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.name).toBe('execute_ppl_query');
+    expect(APPLY_PPL_QUERY_TOOL_DEFINITION.name).toBe('apply_ppl_query');
   });
 
   it('should have a description', () => {
-    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('PPL query');
-    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('time range');
+    expect(APPLY_PPL_QUERY_TOOL_DEFINITION.description).toContain('PPL query');
+    expect(APPLY_PPL_QUERY_TOOL_DEFINITION.description).toContain('time range');
   });
 
   it('should have correct parameter properties', () => {
-    const { parameters } = EXECUTE_PPL_QUERY_TOOL_DEFINITION;
+    const { parameters } = APPLY_PPL_QUERY_TOOL_DEFINITION;
 
     expect(parameters.type).toBe('object');
     expect(parameters.properties).toHaveProperty('query');
@@ -375,18 +375,16 @@ describe('EXECUTE_PPL_QUERY_TOOL_DEFINITION', () => {
   });
 
   it('should have query parameter as string type', () => {
-    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.query.type).toBe('string');
+    expect(APPLY_PPL_QUERY_TOOL_DEFINITION.parameters.properties.query.type).toBe('string');
   });
 
   it('should have autoExecute parameter as boolean type', () => {
-    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.autoExecute.type).toBe(
-      'boolean'
-    );
+    expect(APPLY_PPL_QUERY_TOOL_DEFINITION.parameters.properties.autoExecute.type).toBe('boolean');
   });
 
   it('should have time range parameters with descriptions', () => {
-    const fromParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.from;
-    const toParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.to;
+    const fromParam = APPLY_PPL_QUERY_TOOL_DEFINITION.parameters.properties.from;
+    const toParam = APPLY_PPL_QUERY_TOOL_DEFINITION.parameters.properties.to;
 
     expect(fromParam.type).toBe('string');
     expect(fromParam.description).toContain('Start time');
@@ -408,7 +406,7 @@ describe('registerDisabledPPLExecuteQueryAction', () => {
     expect(mockRegisterAction).toHaveBeenCalledTimes(1);
     const registeredAction = mockRegisterAction.mock.calls[0][0];
 
-    expect(registeredAction.name).toBe('execute_ppl_query');
+    expect(registeredAction.name).toBe('apply_ppl_query');
     expect(registeredAction.available).toBe('disabled');
     expect(registeredAction.handler).toBeDefined();
     expect(typeof registeredAction.handler).toBe('function');
@@ -420,8 +418,8 @@ describe('registerDisabledPPLExecuteQueryAction', () => {
     registerDisabledPPLExecuteQueryAction(mockRegisterAction);
 
     const registeredAction = mockRegisterAction.mock.calls[0][0];
-    expect(registeredAction.description).toBe(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description);
-    expect(registeredAction.parameters).toEqual(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters);
+    expect(registeredAction.description).toBe(APPLY_PPL_QUERY_TOOL_DEFINITION.description);
+    expect(registeredAction.parameters).toEqual(APPLY_PPL_QUERY_TOOL_DEFINITION.parameters);
   });
 
   it('should return error when handler is called', async () => {

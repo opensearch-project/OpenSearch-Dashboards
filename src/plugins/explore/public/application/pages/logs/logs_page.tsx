@@ -5,14 +5,32 @@
 
 import '../explore_page.scss';
 
-import React from 'react';
-import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiErrorBoundary,
+  EuiLoadingSpinner,
+  EuiPage,
+  EuiPageBody,
+  EuiText,
+} from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { RootState } from '../../utils/state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanel } from '../../../components/query_panel';
+import { useAnalyzePanelState } from '../../../components/query_panel/query_panel_widgets';
+import {
+  PPLAnalyzePanel,
+  getPPLAnalyzeResult$,
+  runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
+  clearPPLAnalyzeResult,
+  setPPLAnalyzeOpen,
+} from '../../../../../data/public';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
@@ -28,6 +46,9 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { selectDataset } from '../../utils/state_management/selectors';
+import { LogsQueryPanel } from './logs_query_panel';
+import { useBuilderOnlyMode } from './use_builder_only_mode';
 
 /**
  * Main application component for the Explore plugin
@@ -84,6 +105,59 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
+  const { isOpen, setIsOpen, hasResult, isLoading: isAnalyzeLoading } = useAnalyzePanelState();
+  const [analyzeResult, setAnalyzeResult] = useState(() => getPPLAnalyzeResult$().getValue());
+  useEffect(() => {
+    const sub = getPPLAnalyzeResult$().subscribe(setAnalyzeResult);
+    return () => {
+      sub.unsubscribe();
+      // Cancel any in-flight analysis and clear the stored result when leaving the
+      // page, so a stale result can't reappear on the next mount.
+      cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
+    };
+  }, []);
+  const queryState = useSelector((state: RootState) => state.query);
+
+  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
+
+  // Workspace-level setting: when on, the logs editor allows only the visual builder.
+  const builderOnlyMode = useBuilderOnlyMode(queryBuilderEnabled);
+
+  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
+  const dataset = useSelector(selectDataset);
+
+  // When the logs query builder is active, analyze is only available while the
+  // builder is showing its code editor (not the visual builder). The builder
+  // reports its live mode up via onModeChange; default to true for the classic
+  // editor, which is always "code mode".
+  const [isBuilderCodeMode, setIsBuilderCodeMode] = useState(true);
+
+  const isPPLAnalyzeEnabled = services.pplAnalyzeEnabled;
+
+  // Analyze is available in the classic editor and in the builder's code mode,
+  // but never while the visual builder is on screen.
+  const isAnalyzeAvailable = isPPLAnalyzeEnabled && (!queryBuilderEnabled || isBuilderCodeMode);
+
+  const handleToggleAnalyze = useCallback(() => {
+    if (!isOpen) {
+      runPPLAnalyzeInBackground({
+        query: queryState,
+        http: services.http,
+        timefilter: services.data.query.timefilter.timefilter,
+      });
+      setIsOpen(true);
+      setPPLAnalyzeOpen(true);
+    } else {
+      // Closing the panel abandons any in-flight analysis — cancel it server-side
+      // and clear the stored result so it doesn't flash back on reopen.
+      cancelPPLAnalyze();
+      clearPPLAnalyzeResult();
+      setIsOpen(false);
+      setPPLAnalyzeOpen(false);
+    }
+  }, [isOpen, queryState, services, setIsOpen]);
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -92,9 +166,81 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <ResizableQueryContainer queryPanel={<QueryPanel />}>
-              {/* Main content area with resizable panels under QueryPanel */}
-              <BottomContainer />
+            <ResizableQueryContainer
+              queryPanel={
+                queryBuilderEnabled ? (
+                  <LogsQueryPanel
+                    key={dataset?.id}
+                    analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
+                    onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
+                    hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
+                    onModeChange={setIsBuilderCodeMode}
+                    builderOnlyMode={builderOnlyMode}
+                  />
+                ) : (
+                  <QueryPanel
+                    analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
+                    onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
+                    hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
+                  />
+                )
+              }
+              builderActive={queryBuilderEnabled && !isBuilderCodeMode}
+            >
+              {isAnalyzeAvailable && isOpen && (isAnalyzeLoading || analyzeResult) ? (
+                isAnalyzeLoading ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      gap: 12,
+                    }}
+                  >
+                    <EuiLoadingSpinner size="xl" />
+                    <EuiText size="s" color="subdued">
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.running"
+                        defaultMessage="Running query analysis…"
+                      />
+                    </EuiText>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="danger"
+                      iconType="cross"
+                      onClick={() => {
+                        cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
+                        setIsOpen(false);
+                        setPPLAnalyzeOpen(false);
+                      }}
+                      data-test-subj="analyzeCancelButton"
+                    >
+                      <FormattedMessage
+                        id="explore.logsPage.analyze.cancel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </div>
+                ) : (
+                  <div style={{ overflowY: 'auto', height: '100%' }}>
+                    <PPLAnalyzePanel
+                      analyzeResult={analyzeResult!}
+                      onClose={() => {
+                        cancelPPLAnalyze();
+                        clearPPLAnalyzeResult();
+                        setIsOpen(false);
+                        setPPLAnalyzeOpen(false);
+                      }}
+                    />
+                  </div>
+                )
+              ) : (
+                /* Main content area with resizable panels under QueryPanel */
+                <BottomContainer />
+              )}
             </ResizableQueryContainer>
           </EuiPageBody>
         </EuiPage>

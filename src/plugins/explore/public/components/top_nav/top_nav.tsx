@@ -8,7 +8,12 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { useSyncQueryStateWithUrl } from '../../../../data/public';
+import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
+import {
+  useSyncQueryStateWithUrl,
+  runPPLAnalyzeInBackground,
+  cancelPPLAnalyze,
+} from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -162,12 +167,25 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         editorRef.current?.getValue() ?? String(queryString.getQuery().query || '');
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
+
+      // Refresh the analyze panel (if open) with the freshly-executed query text.
+      // Sourced from the editor rather than the query bar's own state so it stays
+      // in sync with what actually ran.
+      const currentQuery = queryString.getQuery();
+      runPPLAnalyzeInBackground({
+        query: { ...currentQuery, query: editorText },
+        http: services.http,
+        timefilter: timefilter.timefilter,
+        onlyIfOpen: true,
+      });
     },
-    [dispatch, services, editorRef, queryString]
+    [dispatch, services, editorRef, queryString, timefilter]
   );
 
   const handleQueryCancel = useCallback(() => {
     abortAllActiveQueries();
+    // Also cancel any in-flight PPL analyze request tied to this query.
+    cancelPPLAnalyze();
     dispatch(setHasUserInitiatedQuery(false));
     // Clear all cached results to ensure refresh works properly after cancel
     dispatch(clearResults());
@@ -186,6 +204,20 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     const openButtonRun = getOpenButtonRun(services);
     openButtonRun({} as HTMLElement);
   }, [services]);
+
+  // The side-nav "Browse saved searches" popover action navigates here with a
+  // `_openSaved=true` hash marker (it can't open the flyout itself — popover
+  // actions only get navigateToApp, not `overlays`). useOpenOnUrlMarker reads
+  // the marker on mount + window `hashchange` and opens the flyout once per
+  // marker arrival (edge-triggered), then strips it.
+  //
+  // We intentionally do NOT key on the react-router location here. The app
+  // re-serializes the hash via silent `history.replace` on ordinary actions
+  // (e.g. running a query), which would otherwise re-trigger the check and
+  // reopen the flyout if a stale marker momentarily reappeared. Same-app
+  // re-clicks of the popover action are still handled: core dispatches a
+  // synthetic window `hashchange` for same-app popover navigations.
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut);
 
   const handleSaveShortcut = useCallback(() => {
     if (savedExplore) {
@@ -295,6 +327,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       onQueryChange={handleQueryChange}
       customSubmitButton={customSubmitButton}
       groupActions={true}
+      groupedActionsBeforeDatePicker={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
       showQueryBar={true}

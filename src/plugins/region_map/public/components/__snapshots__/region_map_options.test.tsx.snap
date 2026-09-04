@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`region_map_options renders the RegionMapOptions with custom option if custom vector maps are found 1`] = `
 <div

@@ -86,6 +86,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
+    ...(context.body?.options && { options: context.body.options }),
     ...(highlight && { highlight }),
     ...(context.body?.queryId && { queryId: context.body.queryId }),
   });
@@ -179,6 +180,43 @@ export const buildQueryStatusConfig = (response: any) => {
 export const queryEndsWithHead = (queryString: string): boolean => {
   const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
   return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);
+};
+
+/**
+ * PPL commands that collapse rows into aggregate buckets, so their output row count is a bucket
+ * count rather than a document count. Row-preserving commands that merely append fields or a summary
+ * row (e.g. `eventstats`, `addtotals`, `addcoltotals`) are intentionally excluded: they return
+ * roughly one row per source document, so the document sample size is the correct bound for them.
+ */
+const PPL_AGGREGATING_COMMANDS = [
+  'stats',
+  'timechart',
+  'chart',
+  'top',
+  'rare',
+  'transpose',
+  'xyseries',
+  'timewrap',
+  // `patterns` only aggregates in `mode=aggregation`; its default mode comes from a cluster
+  // setting the front end cannot see, so the mode is not knowable from the query text. Listed
+  // unconditionally: skipping the cap on a row-preserving `patterns` shows some extra rows,
+  // whereas capping an aggregating one silently deletes buckets.
+  'patterns',
+];
+
+/**
+ * Detects whether a PPL query aggregates, i.e. its result rows are buckets rather than documents.
+ *
+ * A row limit such as `discover:sampleSize` is a document sample, so applying it to an aggregating
+ * query silently drops whole buckets. Bucket counts also scale with the selected time range when a
+ * `span()` grouping key is present, so no fixed limit is safe here.
+ *
+ * Subquery brackets `[...]` are masked out (mirroring the masking in {@link queryEndsWithHead}) so
+ * an aggregating command nested in a subquery does not count toward the outer query.
+ */
+export const isPPLAggregationQuery = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return new RegExp(`\\|\\s*(${PPL_AGGREGATING_COMMANDS.join('|')})\\b`, 'i').test(masked);
 };
 
 /**

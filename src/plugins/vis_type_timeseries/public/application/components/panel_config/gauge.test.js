@@ -46,7 +46,7 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
 
     wrapper.find('EuiTab').first().simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 
   it('call onChange={handleChange}', () => {
@@ -58,6 +58,6 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
 
     wrapper.simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 });

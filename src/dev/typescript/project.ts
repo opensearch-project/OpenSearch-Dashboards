@@ -74,7 +74,11 @@ export class Project {
   ) {
     this.config = parseTsConfig(tsConfigPath);
 
-    const { files, include, exclude = [] } = this.config as {
+    const {
+      files,
+      include,
+      exclude = [],
+    } = this.config as {
       files?: string[];
       include?: string[];
       exclude?: string[];

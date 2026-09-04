@@ -31,38 +31,31 @@
 const { ESLint } = require('eslint');
 
 async function run() {
-  // Parse command line arguments manually since ESLint 8.x doesn't export options parser
+  // Parse command line arguments
   const args = process.argv.slice(2);
   const hasPrintConfig = args.includes('--print-config');
-  const hasCache = !args.includes('--no-cache');
+  const hasNoCache = args.includes('--no-cache');
   const hasFix = args.includes('--fix');
-  const extIndex = args.indexOf('--ext');
-  const hasExt = extIndex !== -1;
 
   process.env.OPENSEARCH_DASHBOARDS_RESOLVER_HARD_CACHE = 'true';
 
-  // Parse --ext value (e.g. --ext .js,.ts,.tsx)
-  let extensions = ['.js', '.mjs', '.ts', '.tsx'];
-  if (hasExt && extIndex + 1 < args.length) {
-    extensions = args[extIndex + 1].split(',').map((ext) => ext.trim());
-  }
-
-  // Build ESLint options
   const options = {
-    cache: hasCache,
-    extensions,
+    cache: !hasNoCache,
+    concurrency: 'auto',
     fix: hasFix,
   };
 
-  // Determine what to lint — filter out flags and their values
-  const flagsWithValues = new Set(['--ext', '--print-config']);
+  // Determine what to lint — filter out flags
+  const skipArgs = new Set(['--print-config', '--no-cache', '--fix', '--ext']);
   let filesToLint = ['.'];
   const fileArgs = [];
   for (let i = 0; i < args.length; i++) {
-    if (flagsWithValues.has(args[i])) {
-      i++; // skip the flag's value
+    // --ext was ESLint 8 only; skip it and its value so old callers don't break
+    if (args[i] === '--ext') {
+      i++;
       continue;
     }
+    if (skipArgs.has(args[i])) continue;
     if (args[i].startsWith('-')) continue;
     fileArgs.push(args[i]);
   }
@@ -103,6 +96,11 @@ async function run() {
       process.exit(1);
     }
   } catch (error) {
+    // ESLintIgnoreWarning is a non-fatal deprecation notice, not a real error
+    if (error.name === 'ESLintIgnoreWarning') {
+      console.warn('Warning:', error.message);
+      return;
+    }
     console.error('ESLint error:', error.message);
     process.exit(1);
   }

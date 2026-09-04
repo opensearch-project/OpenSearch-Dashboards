@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
@@ -136,7 +136,7 @@ const ExtractFieldsEditor = ({
 
 export function createExtractFieldsTransformation(): TransformationInstance<ExtractFieldsConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'extract_fields',
     config: {
       field: undefined,
@@ -173,15 +173,16 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
   };
 }
 
-export const extractFieldsTransformationDefinition: TransformationDefinition<ExtractFieldsConfig> = {
-  id: 'extract_fields',
-  type: 'transform',
-  label: i18n.translate('explore.transformations.extractFields.label', {
-    defaultMessage: 'Extract Fields',
-  }),
-  description: i18n.translate('explore.transformations.extractFields.description', {
-    defaultMessage: 'Flatten a nested object or JSON string field into top-level columns',
-  }),
-  iconType: 'unlink',
-  createInstance: createExtractFieldsTransformation,
-};
+export const extractFieldsTransformationDefinition: TransformationDefinition<ExtractFieldsConfig> =
+  {
+    id: 'extract_fields',
+    type: 'transform',
+    label: i18n.translate('explore.transformations.extractFields.label', {
+      defaultMessage: 'Extract Fields',
+    }),
+    description: i18n.translate('explore.transformations.extractFields.description', {
+      defaultMessage: 'Flatten a nested object or JSON string field into top-level columns',
+    }),
+    iconType: 'unlink',
+    createInstance: createExtractFieldsTransformation,
+  };

@@ -74,14 +74,12 @@ export interface VisualizeEmbeddableFactoryDeps {
   >;
 }
 
-export class VisualizeEmbeddableFactory
-  implements
-    EmbeddableFactoryDefinition<
-      VisualizeInput,
-      VisualizeOutput | EmbeddableOutput,
-      VisualizeEmbeddable | DisabledLabEmbeddable,
-      VisualizationAttributes
-    > {
+export class VisualizeEmbeddableFactory implements EmbeddableFactoryDefinition<
+  VisualizeInput,
+  VisualizeOutput | EmbeddableOutput,
+  VisualizeEmbeddable | DisabledLabEmbeddable,
+  VisualizationAttributes
+> {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   private attributeService?: AttributeService<
@@ -224,7 +222,7 @@ export class VisualizeEmbeddableFactory
       savedVis.copyOnSave = false;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
-      const serializedVis = ((visObj as unknown) as Vis).serialize();
+      const serializedVis = (visObj as unknown as Vis).serialize();
       const { params, data } = serializedVis;
       savedVis.visState = {
         title,

@@ -13,15 +13,15 @@ import {
 import { GenericMLRouter } from './generic_ml_router';
 
 // Mock dependencies
-const mockLogger = ({
+const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-} as unknown) as Logger;
+} as unknown as Logger;
 
-const mockResponse = ({
+const mockResponse = {
   custom: jest.fn(),
   customError: jest.fn(),
-} as unknown) as OpenSearchDashboardsResponseFactory;
+} as unknown as OpenSearchDashboardsResponseFactory;
 
 const mockRequest = {
   body: { message: 'test message' },
@@ -43,14 +43,14 @@ describe('GenericMLRouter - ML Client Creation', () => {
     router = new GenericMLRouter();
 
     // Mock OpenSearch client
-    mockOpenSearchClient = ({
+    mockOpenSearchClient = {
       transport: {
         request: jest.fn(),
       },
-    } as unknown) as OpenSearchClient;
+    } as unknown as OpenSearchClient;
 
     // Mock context
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -63,7 +63,7 @@ describe('GenericMLRouter - ML Client Creation', () => {
           getClient: jest.fn().mockResolvedValue(mockOpenSearchClient),
         },
       },
-    } as unknown) as RequestHandlerContext & {
+    } as unknown as RequestHandlerContext & {
       dataSource?: {
         opensearch: {
           getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
@@ -103,7 +103,7 @@ describe('GenericMLRouter - ML Client Creation', () => {
     });
 
     it('should use dataSource client when dataSourceId is provided', async () => {
-      const mockDataSourceClient = ({
+      const mockDataSourceClient = {
         transport: {
           request: jest.fn().mockResolvedValue({
             statusCode: 200,
@@ -111,7 +111,7 @@ describe('GenericMLRouter - ML Client Creation', () => {
             body: { response: 'datasource response' },
           }),
         },
-      } as unknown) as OpenSearchClient;
+      } as unknown as OpenSearchClient;
 
       (mockContext.dataSource!.opensearch.getClient as jest.Mock).mockResolvedValue(
         mockDataSourceClient
@@ -388,13 +388,13 @@ describe('GenericMLRouter - ML Client Creation', () => {
     });
 
     it('should use dataSource client when dataSourceId is provided', async () => {
-      const mockDataSourceClient = ({
+      const mockDataSourceClient = {
         transport: {
           request: jest.fn().mockResolvedValue({
             body: { result: 'datasource response' },
           }),
         },
-      } as unknown) as OpenSearchClient;
+      } as unknown as OpenSearchClient;
 
       (mockContext.dataSource!.opensearch.getClient as jest.Mock).mockResolvedValue(
         mockDataSourceClient

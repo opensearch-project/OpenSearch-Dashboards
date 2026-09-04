@@ -40,10 +40,8 @@ export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
   const panelDataSourceId = panel.data_source_id;
 
-  const {
-    searchStrategy,
-    capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
+  const { searchStrategy, capabilities } =
+    await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
   const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 

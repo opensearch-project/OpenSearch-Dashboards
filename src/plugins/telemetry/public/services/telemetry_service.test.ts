@@ -56,16 +56,33 @@ jest.mock('moment', () => {
 });
 
 describe('TelemetryService', () => {
+  // `reportOptInStatus` performs a real `fetch` call. Stub it so the tests that exercise it
+  // resolve immediately instead of hanging on a network request until the Jest timeout.
+  let originalFetch: (typeof window)['fetch'];
+
+  beforeAll(() => {
+    originalFetch = window.fetch;
+  });
+
+  // @ts-ignore
+  beforeEach(() => (window.fetch = jest.fn().mockResolvedValue({})));
+
+  // @ts-ignore
+  afterAll(() => (window.fetch = originalFetch));
+
   // TODO: enable this unit test when fetchTelemtry function is restored
   describe.skip('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
       const telemetryService = mockTelemetryService();
       await telemetryService.fetchTelemetry();
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false, timeRange: {} }),
-      });
-      expect(mockClone).toBeCalled();
-      expect(mockSubtract).toBeCalledWith(20, 'minutes');
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(
+        '/api/telemetry/v2/clusters/_stats',
+        {
+          body: JSON.stringify({ unencrypted: false, timeRange: {} }),
+        }
+      );
+      expect(mockClone).toHaveBeenCalled();
+      expect(mockSubtract).toHaveBeenCalledWith(20, 'minutes');
     });
   });
 
@@ -74,7 +91,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({ unencrypted: true });
+      expect(telemetryService.fetchTelemetry).toHaveBeenCalledWith({ unencrypted: true });
     });
   });
 
@@ -86,7 +103,7 @@ describe('TelemetryService', () => {
       });
       expect(await telemetryService.setOptIn(true)).toBe(false);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(0);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(0);
     });
 
     it('calls api if canChangeOptInStatus', async () => {
@@ -96,7 +113,7 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('sends enabled true if optedIn: true', async () => {
@@ -107,7 +124,7 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -120,7 +137,7 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -132,8 +149,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(0);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('calls reportOptInStatus if reportOptInStatusChange is true', async () => {
@@ -143,8 +160,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
     });
 
     it('adds an error toast on api error', async () => {
@@ -159,9 +176,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(0);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
     });
 
     // This one should not happen because the entire method is fully caught but hey! :)
@@ -176,9 +193,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post).toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus']).toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -202,7 +219,7 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
+      expect(telemetryService['http'].put).toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(true);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
     });
@@ -221,8 +238,8 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].put).toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError).toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(false);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
     });

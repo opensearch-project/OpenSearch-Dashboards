@@ -21,6 +21,7 @@
     "explore": "plugins/explore",
     "embeddableApi": "plugins/embeddable",
     "expressions": "plugins/expressions",
+    "grokDebugger": "plugins/grok_debugger",
     "home": "plugins/home",
     "indexPatternManagement": "plugins/index_pattern_management",
     "inputControl": "plugins/input_control_vis",

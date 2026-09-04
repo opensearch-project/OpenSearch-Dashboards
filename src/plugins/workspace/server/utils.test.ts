@@ -12,6 +12,7 @@ import { PermissionModeId, UiSettingScope } from '../../../core/server';
 import {
   generateRandomId,
   getPermissionMode,
+  translatePermissionsToRole,
   updateDashboardAdminStateForRequest,
   transferCurrentUserInPermissions,
   getDataSourcesList,
@@ -95,6 +96,120 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
+  it('should handle configUsers as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configGroups as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['admin_group'];
+    const users: string[] = [];
+    const configGroups = 'admin_group' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configUsers as wildcard string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = OSD_ADMIN_WILDCARD_MATCH_ALL as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not grant admin when configUsers string is a substring match', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['a'];
+    const configGroups: string[] = [];
+    const configUsers = 'admin' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should split configUsers string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1,user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1 user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1,group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1 group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1\tuser2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1\tgroup2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not crash when configUsers or configGroups is null or undefined', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    updateDashboardAdminStateForRequest(
+      mockRequest,
+      groups,
+      users,
+      null as unknown as string[],
+      undefined as unknown as string[]
+    );
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
@@ -163,7 +278,7 @@ describe('workspace utils', () => {
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue(dataSources[0]);
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
-    expect(uiSettingsClient.set).not.toBeCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
   });
 
   it('should check then set first data sources as default if needed when checking', async () => {
@@ -245,6 +360,120 @@ describe('getPermissionMode', () => {
       permissionControlClient: mockPermissionControlClient,
       permissions: { read: { users: ['user1'] } },
     });
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+});
+
+describe('translatePermissionsToRole', () => {
+  it('should return Owner when permission control is disabled', () => {
+    const result = translatePermissionsToRole(
+      false,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return Read when permission control is enabled but permissions are undefined', () => {
+    const result = translatePermissionsToRole(true, undefined, { users: ['user1'], groups: [] });
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should return Owner when the user matches both write and library_write permissions', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return ReadAndWrite when the user only matches library_write permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.ReadAndWrite);
+  });
+
+  it('should return Read when the user only matches read permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { read: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should return Read when none of the principals match any permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user2'], groups: ['group2'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should match when a permission uses the "*" wildcard for users', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['*'] }, library_write: { users: ['*'] } },
+      { users: ['anyUser'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match when a permission uses the "*" wildcard for groups', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { groups: ['*'] }, library_write: { groups: ['*'] } },
+      { users: [], groups: ['anyGroup'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match against any of the principal groups, not only the first one', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { groups: ['group2'] }, library_write: { groups: ['group2'] } },
+      { users: [], groups: ['group1', 'group2'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match against any of the principal users, not only the first one', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user2'] }, library_write: { users: ['user2'] } },
+      { users: ['user1', 'user2'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match via group permission when the user does not match directly', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { library_write: { groups: ['group1'] } },
+      { users: ['user1'], groups: ['group1'] }
+    );
+
+    expect(result).toBe(PermissionModeId.ReadAndWrite);
+  });
+
+  it('should handle undefined principals gracefully', () => {
+    const result = translatePermissionsToRole(true, { write: { users: ['user1'] } }, undefined);
 
     expect(result).toBe(PermissionModeId.Read);
   });

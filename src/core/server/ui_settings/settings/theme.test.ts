@@ -43,12 +43,14 @@ describe('theme settings', () => {
     it('should only accept boolean values', () => {
       expect(() => validate(true)).not.toThrow();
       expect(() => validate(false)).not.toThrow();
-      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [string]"`
-      );
-      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [number]"`
-      );
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [boolean] but got [string]
+        Cause: expected value of type [boolean] but got [string]"
+      `);
+      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [boolean] but got [number]
+        Cause: expected value of type [boolean] but got [number]"
+      `);
     });
   });
 
@@ -60,9 +62,10 @@ describe('theme settings', () => {
       expect(() => validate('v8')).not.toThrow();
       expect(() => validate('v9')).not.toThrow();
       expect(() => validate('Next (preview)')).not.toThrow();
-      expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(
-        `"SchemaTypeError: expected value to equal [Next (preview)]"`
-      );
+      expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
+        "SchemaTypeError: expected value to equal [Next (preview)]
+        Cause: SchemaTypeError: expected value to equal [Next (preview)]"
+      `);
     });
   });
 });

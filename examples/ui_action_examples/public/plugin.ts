@@ -51,9 +51,12 @@ declare module '../../../src/plugins/ui_actions/public' {
   }
 }
 
-export class UiActionExamplesPlugin
-  implements
-    Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
+export class UiActionExamplesPlugin implements Plugin<
+  void,
+  void,
+  UiActionExamplesSetupDependencies,
+  UiActionExamplesStartDependencies
+> {
   public setup(
     core: CoreSetup<UiActionExamplesStartDependencies>,
     { uiActions }: UiActionExamplesSetupDependencies

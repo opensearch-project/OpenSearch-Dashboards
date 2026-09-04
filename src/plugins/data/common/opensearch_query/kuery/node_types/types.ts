@@ -37,15 +37,7 @@ import { JsonValue } from '../../../../../opensearch_dashboards_utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =
-  | 'is'
-  | 'and'
-  | 'or'
-  | 'not'
-  | 'range'
-  | 'exists'
-  | 'geoBoundingBox'
-  | 'geoPolygon'
-  | 'nested';
+  'is' | 'and' | 'or' | 'not' | 'range' | 'exists' | 'geoBoundingBox' | 'geoPolygon' | 'nested';
 
 interface FunctionType {
   buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;

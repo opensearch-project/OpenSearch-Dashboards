@@ -101,7 +101,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter);
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if there is no value', () => {
@@ -109,7 +109,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs);
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if value is "custom" metric', () => {
@@ -117,7 +117,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, 'custom');
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if value is selected metric is still available', () => {
@@ -125,7 +125,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, '2');
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
     });
 
@@ -135,7 +135,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, '7');
         });
 
-        expect(setValue).toBeCalledWith(undefined);
+        expect(setValue).toHaveBeenCalledWith(undefined);
       });
 
       test('called with fallback value', () => {
@@ -143,7 +143,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, '7', '_key');
         });
 
-        expect(setValue).toBeCalledWith('_key');
+        expect(setValue).toHaveBeenCalledWith('_key');
       });
     });
   });
@@ -210,7 +210,7 @@ describe('Aggregations utils', () => {
         useValidation(setValidity, false);
       });
 
-      expect(setValidity).toBeCalledWith(false);
+      expect(setValidity).toHaveBeenCalledWith(false);
     });
 
     test('should call setValidity with true on component unmount', () => {
@@ -220,8 +220,8 @@ describe('Aggregations utils', () => {
 
       testComp.unmount();
 
-      expect(setValidity).lastCalledWith(true);
-      expect(setValidity).toBeCalledTimes(2);
+      expect(setValidity).toHaveBeenLastCalledWith(true);
+      expect(setValidity).toHaveBeenCalledTimes(2);
     });
   });
 

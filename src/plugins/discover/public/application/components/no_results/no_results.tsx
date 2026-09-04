@@ -47,15 +47,23 @@ import {
   SavedQuery,
   SavedQueryService,
 } from '../../../../../data/public/';
+import { AskErrorButton } from '../ask_error_button/ask_error_button';
 
 interface Props {
   queryString: QueryStringContract;
   savedQuery: SavedQueryService;
   query: Query | undefined;
   timeFieldName?: string;
+  getQueryError?: () => string | undefined;
 }
 
-export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldName }: Props) => {
+export const DiscoverNoResults = ({
+  queryString,
+  query,
+  savedQuery,
+  timeFieldName,
+  getQueryError,
+}: Props) => {
   // Commented out due to no usage in code
   // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
   //
@@ -183,7 +191,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         setSavedQueries(
           savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
         );
-      } catch (error) {
+      } catch {
         setSavedQueries([]);
       }
     };
@@ -195,8 +203,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     // Samples for the language
     const newSampleQueries: any = [];
     if (query?.language) {
-      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
-        ?.sampleQueries;
+      const languageSampleQueries = queryString
+        .getLanguageService()
+        ?.getLanguage(query.language)?.sampleQueries;
       if (Array.isArray(languageSampleQueries)) {
         newSampleQueries.push(...languageSampleQueries);
       }
@@ -302,7 +311,11 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
                 {i18n.translate('discover.emptyPrompt.body', {
                   defaultMessage:
                     'Try selecting a different data source, expanding your time range or modifying the query & filters.',
-                })}
+                })}{' '}
+                <AskErrorButton
+                  getError={getQueryError}
+                  testSource="discoverNoResultsAskAiForHelp"
+                />
               </p>
             </EuiText>
           }

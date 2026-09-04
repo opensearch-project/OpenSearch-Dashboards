@@ -40,9 +40,8 @@ export const DataSourceMultiSelectableExample = ({
   dataSourceManagement,
 }: DataSourceMultiSelectableExampleProps) => {
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
-  const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<
-    DataSourceMultiSelectableConfig
-  >();
+  const DataSourceMenu =
+    dataSourceManagement.ui.getDataSourceMenu<DataSourceMultiSelectableConfig>();
   const data: ComponentProp[] = [
     {
       name: 'savedObjects',

@@ -13,8 +13,6 @@ describe('createGauge', () => {
     name: 'value',
     column: 'value',
     schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockData = [{ value: 10 }, { value: 20 }, { value: 30 }];
@@ -24,21 +22,114 @@ describe('createGauge', () => {
   };
 
   it('creates an ECharts gauge spec with series and dataset', () => {
-    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
+    const gauge = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
-    expect(spec).toHaveProperty('dataset');
-    expect(spec).toHaveProperty('series');
-    expect(spec).toHaveProperty('polar');
-    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
-    expect(Array.isArray(spec.series)).toBe(true);
+    expect(gauge.spec).toHaveProperty('dataset');
+    expect(gauge.spec).toHaveProperty('series');
+    expect(gauge.text).toMatchObject({
+      value: '30',
+      title: {
+        valueFieldName: 'value',
+      },
+    });
+    expect(Array.isArray(gauge.spec.series)).toBe(true);
   });
 
-  it('produces gauge-type series', () => {
-    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
+  it('produces arc-only gauge-type series', () => {
+    const gauge = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
-    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
-    const gaugeSeries = spec.series.filter((s: any) => s.type === 'gauge');
-    expect(gaugeSeries.length).toBeGreaterThanOrEqual(1);
+    const gaugeSeries = (gauge.spec.series as any[]).filter((s: any) => s.type === 'gauge');
+    const customSeries = (gauge.spec.series as any[]).filter((s: any) => s.type === 'custom');
+    expect(gaugeSeries).toHaveLength(2);
+    expect(customSeries).toHaveLength(0);
+  });
+
+  it('adds internal padding around gauge arcs', () => {
+    const gauge = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
+
+    const gaugeSeries = (gauge.spec.series as any[]).filter((s: any) => s.type === 'gauge');
+    expect(gaugeSeries.every((series: any) => series.radius === '92%')).toBe(true);
+  });
+
+  it('renders zero as a valid value', () => {
+    const gauge = createGauge([{ value: 0 }], defaultGaugeChartStyles, mockAxisColumnMappings);
+
+    expect(gauge.text).toMatchObject({
+      value: '0',
+    });
+  });
+
+  it('splits formatted units from value text when unit formatter provides segments', () => {
+    const gauge = createGauge(
+      mockData,
+      { ...defaultGaugeChartStyles, unitId: 'millisecond' },
+      mockAxisColumnMappings
+    );
+
+    expect(gauge.text).toMatchObject({
+      value: '30',
+      unit: 'milliseconds',
+      unitFirst: false,
+    });
+  });
+
+  it('supports prefix units', () => {
+    const gauge = createGauge(
+      mockData,
+      { ...defaultGaugeChartStyles, unitId: 'dollars' },
+      mockAxisColumnMappings
+    );
+
+    expect(gauge.text).toMatchObject({
+      value: '30',
+      unit: '$',
+      unitFirst: true,
+    });
+  });
+
+  it('preserves decimal formatting and custom unit suffixes', () => {
+    const gauge = createGauge(
+      mockData,
+      {
+        ...defaultGaugeChartStyles,
+        unitId: 'dollars',
+        decimals: 2,
+        unitSuffix: '/sec',
+      },
+      mockAxisColumnMappings
+    );
+
+    expect(gauge.text).toMatchObject({
+      value: '30.00',
+      unit: '$',
+      unitSuffix: '/sec',
+      unitFirst: true,
+    });
+  });
+
+  it('keeps custom title separate from auto title for renderer-level title composition', () => {
+    const gauge = createGauge(
+      mockData,
+      { ...defaultGaugeChartStyles, title: 'Custom title' },
+      mockAxisColumnMappings
+    );
+
+    expect(gauge.text).toMatchObject({
+      title: {
+        valueFieldName: 'value',
+        customTitle: 'Custom title',
+      },
+    });
+  });
+
+  it('omits title render data when show title is disabled', () => {
+    const gauge = createGauge(
+      mockData,
+      { ...defaultGaugeChartStyles, showTitle: false },
+      mockAxisColumnMappings
+    );
+
+    expect(gauge.text).not.toHaveProperty('title');
   });
 
   it('throws when no value column is provided', () => {

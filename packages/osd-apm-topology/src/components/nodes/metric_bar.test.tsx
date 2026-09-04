@@ -36,6 +36,34 @@ describe('MetricBar', () => {
     const labelSpans = container.querySelectorAll('.osd\\:text-right');
     expect(labelSpans).toHaveLength(0);
   });
+
+  it('applies marginLeft when offset is provided', () => {
+    const { container } = render(<MetricBar value={50} max={100} offset={25} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.marginLeft).toBe('25%');
+    expect(fillBar.style.width).toBe('50%');
+  });
+
+  it('defaults offset to 0 when not provided', () => {
+    const { container } = render(<MetricBar value={50} max={100} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.marginLeft).toBe('0%');
+  });
+
+  it('applies a minimum width so tiny nonzero values stay visible', () => {
+    const { container } = render(<MetricBar value={1} max={10000} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    // Real percentage stays honest (sub-pixel), but a minWidth floor keeps it visible.
+    expect(fillBar.style.width).toBe('0.01%');
+    expect(fillBar.style.minWidth).toBe('2px');
+  });
+
+  it('does not apply a minimum width floor when value is 0', () => {
+    const { container } = render(<MetricBar value={0} max={10000} />);
+    const fillBar = container.querySelector('.osd\\:h-full') as HTMLElement;
+    expect(fillBar.style.width).toBe('0%');
+    expect(fillBar.style.minWidth).toBe('');
+  });
 });
 
 describe('MetricBarGroup', () => {

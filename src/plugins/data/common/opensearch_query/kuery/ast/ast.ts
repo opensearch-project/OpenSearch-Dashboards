@@ -106,7 +106,7 @@ export const toOpenSearchQuery = (
     return toOpenSearchQuery(nodeTypes.function.buildNode('and', []), indexPattern);
   }
 
-  const nodeType = (nodeTypes[node.type] as unknown) as any;
+  const nodeType = nodeTypes[node.type] as unknown as any;
 
   return nodeType.toOpenSearchQuery(node, indexPattern, config, context);
 };

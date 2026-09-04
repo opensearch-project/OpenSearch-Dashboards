@@ -15,12 +15,7 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import {
-  Dataset,
-  DataStructure,
-  DEFAULT_DATA,
-  CORE_SIGNAL_TYPES,
-} from '../../../../../../data/common';
+import { Dataset, DataStructure, CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -56,7 +51,7 @@ export const persistReduxState = (
       },
       { replace }
     );
-  } catch (err) {
+  } catch {
     return;
   }
 };
@@ -146,7 +141,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       queryEditor: finalQueryEditorState,
       meta: finalMetaState,
     };
-  } catch (err) {
+  } catch {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
@@ -209,43 +204,28 @@ export const fetchFirstAvailableDataset = async (
         typeConfig.toDataset([pattern])
       ) ?? [];
 
-    // Filter by SignalType compatibility
-    if (fetchedDatasets.length > 0) {
-      for (const dataset of fetchedDatasets) {
-        try {
-          const dataView = await services.data?.dataViews?.get(
-            dataset.id,
-            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-          );
+    // Filter by SignalType compatibility. toDataset populates each dataset's signalType
+    // (from the index-pattern saved object, or set directly for Prometheus), so a
+    // compatible dataset can be selected without any per-dataset lookup.
+    for (const dataset of fetchedDatasets) {
+      const effectiveSignalType = dataset.signalType;
 
-          // Get effective signal type from dataView or dataset (for Prometheus which sets signalType directly)
-          const effectiveSignalType = dataView?.signalType || dataset.signalType;
-
-          // If requiredSignalType is specified, dataset must match it
-          if (requiredSignalType) {
-            if (effectiveSignalType === requiredSignalType) {
-              return dataset;
-            }
-          } else {
-            // If requiredSignalType is not specified (i.e., Logs flavor),
-            // dataset should not have signalType equal to Traces or Metrics
-            if (
-              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
-            ) {
-              return dataset;
-            }
-          }
-        } catch (error) {
-          // Continue to next dataset if this one fails
-          continue;
+      if (requiredSignalType) {
+        // Traces/Metrics flavors require an exact signal-type match.
+        if (effectiveSignalType === requiredSignalType) {
+          return dataset;
         }
+      } else if (
+        // Logs flavor accepts any dataset that is not a Traces or Metrics signal type.
+        effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+        effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+      ) {
+        return dataset;
       }
-      return undefined; // No compatible dataset found
     }
 
-    return undefined;
-  } catch (error) {
+    return undefined; // No compatible dataset found
+  } catch {
     return undefined;
   }
 };
@@ -263,8 +243,8 @@ const resolveDataset = async (
     flavorFromAppId === ExploreFlavor.Traces
       ? CORE_SIGNAL_TYPES.TRACES
       : flavorFromAppId === ExploreFlavor.Metrics
-      ? CORE_SIGNAL_TYPES.METRICS
-      : undefined;
+        ? CORE_SIGNAL_TYPES.METRICS
+        : undefined;
 
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
@@ -295,7 +275,7 @@ const resolveDataset = async (
           return existingDataset;
         }
       }
-    } catch (error) {
+    } catch {
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
     }
@@ -438,8 +418,8 @@ export const getPreloadedLegacyState = async (services: ExploreServices): Promis
     flavorFromAppId === ExploreFlavor.Traces
       ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
       : flavorFromAppId === ExploreFlavor.Logs
-      ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
-      : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
+        ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
+        : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
 
   return {
     // Fields that exist in data_explorer + discover
@@ -486,7 +466,7 @@ const getColumnsForDataset = async (
     ];
 
     return isTracesFlavor ? tracesDefaultColumns : logsDefaultColumns;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

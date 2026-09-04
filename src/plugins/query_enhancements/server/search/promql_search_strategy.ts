@@ -12,17 +12,17 @@ import {
   IDataFrame,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-  ParsedQuery,
   Query,
   splitMultiQueries,
 } from '../../../data/common';
+import { interpolateLegendFormat, PromQLSearchOptions, PromQLStepResolution } from '../../common';
+import { DEFAULT_RESOLUTION, interpolatePromQLMacros, resolveStep } from '../../common/metrics';
 import {
   MetricResult,
   prometheusManager,
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
-import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
 function normalizeResult(
   resultType: string | undefined,
@@ -64,6 +64,7 @@ interface LabeledQueryResult {
   label: string;
   response?: PromQLQueryResponse;
   error?: string;
+  legendFormat?: string;
 }
 
 export const promqlSearchStrategyProvider = (
@@ -78,50 +79,64 @@ export const promqlSearchStrategyProvider = (
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
-        const requestOptions = requestBody.options as
-          | { queryType?: string; time?: string; step?: number }
-          | undefined;
+        const requestOptions = requestBody.options as PromQLSearchOptions | undefined;
+        const { maxDataPoints, perQueryOptions } = requestOptions ?? {};
         const isInstantQuery = requestOptions?.queryType?.toUpperCase() === 'INSTANT';
 
         const parsedQueries = splitMultiQueries(query as string);
         const isSingleQuery = parsedQueries.length === 1;
+        const maxResults = Math.floor(MAX_DATAPOINTS / parsedQueries.length);
+        const resolution = maxDataPoints && maxDataPoints > 0 ? maxDataPoints : DEFAULT_RESOLUTION;
 
-        let queryOptions: ExecuteQueryOptions;
+        let shared: SharedExecOptions;
+        let rangeMs = 0;
 
         if (isInstantQuery) {
-          const parsedTime = parseTimeValue(requestOptions?.time);
-          queryOptions = {
+          shared = {
             language,
-            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
+            maxResults,
             timeout: 30,
-            queryType: 'instant' as const,
-            time: parsedTime,
+            queryType: 'instant',
+            time: parseTimeValue(requestOptions?.time).toString(),
           };
         } else {
-          const parsedFrom = parseTimeValue(requestBody.timeRange?.from);
-          const parsedTo = parseTimeValue(requestBody.timeRange?.to, { roundUp: true });
-          const timeRange = {
-            start: parsedFrom,
-            end: parsedTo,
-          };
-          queryOptions = {
+          const start = parseTimeValue(requestBody.timeRange?.from);
+          const end = parseTimeValue(requestBody.timeRange?.to, { roundUp: true });
+          rangeMs = (end - start) * 1000;
+          shared = {
             language,
-            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
+            maxResults,
             timeout: 30,
-            queryType: 'range' as const,
-            timeRange,
-            step: (
-              requestOptions?.step ?? calculateStep((timeRange.end - timeRange.start) * 1000)
-            ).toString(),
+            queryType: 'range',
+            start: start.toString(),
+            end: end.toString(),
           };
         }
 
-        // Execute all queries uniformly
+        const plans: QueryPlan[] = parsedQueries.map((parsed, i) => {
+          const opt = perQueryOptions?.[i];
+          const { stepSec, scrapeSec, rateIntervalSec } = resolveStep({
+            rangeMs,
+            resolution,
+            minStep: opt?.minStep,
+            stepOverrideSec: requestOptions?.step,
+          });
+          return {
+            label: parsed.label,
+            query: interpolatePromQLMacros(parsed.query, { stepSec, rangeMs, scrapeSec }),
+            step: stepSec.toString(),
+            stepSec,
+            rateIntervalSec,
+            legendFormat: opt?.legendFormat,
+            minStep: opt?.minStep,
+          };
+        });
+
         const queryResults = await executeMultipleQueries(
           context,
           request,
-          parsedQueries,
-          queryOptions,
+          plans,
+          shared,
           datasetId,
           logger
         );
@@ -131,7 +146,19 @@ export const promqlSearchStrategyProvider = (
           throw new Error(queryResults[0].error);
         }
 
-        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery);
+        const stepResolution: PromQLStepResolution | undefined = isInstantQuery
+          ? undefined
+          : {
+              maxDataPoints: resolution,
+              queries: plans.map(({ label, stepSec, rateIntervalSec, minStep }) => ({
+                label,
+                stepSec,
+                rateIntervalSec,
+                minStep,
+              })),
+            };
+
+        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery, stepResolution);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -147,24 +174,31 @@ export const promqlSearchStrategyProvider = (
   };
 };
 
-/**
- * Options for executing queries — discriminated union on queryType
- */
-type ExecuteQueryOptions =
+interface QueryPlan {
+  label: string;
+  query: string;
+  step: string;
+  stepSec: number;
+  rateIntervalSec: number;
+  legendFormat?: string;
+  minStep?: string;
+}
+
+type SharedExecOptions =
   | {
       language: string;
       maxResults: number;
       timeout: number;
       queryType: 'range';
-      timeRange: { start: number; end: number };
-      step: string;
+      start: string;
+      end: string;
     }
   | {
       language: string;
       maxResults: number;
       timeout: number;
       queryType: 'instant';
-      time: number;
+      time: string;
     };
 
 /**
@@ -173,71 +207,70 @@ type ExecuteQueryOptions =
 async function executeMultipleQueries(
   context: any,
   request: any,
-  queries: ParsedQuery[],
-  options: ExecuteQueryOptions,
+  plans: QueryPlan[],
+  shared: SharedExecOptions,
   datasetId: string,
   logger: Logger
 ): Promise<LabeledQueryResult[]> {
-  const promises = queries.map(
-    async (parsedQuery): Promise<LabeledQueryResult> => {
-      const queryOptions: PromQLQueryParams['body']['options'] =
-        options.queryType === 'instant'
-          ? { queryType: 'instant', time: options.time.toString() }
-          : {
-              queryType: 'range',
-              start: options.timeRange.start.toString(),
-              end: options.timeRange.end.toString(),
-              step: options.step,
-            };
+  const promises = plans.map(async (plan): Promise<LabeledQueryResult> => {
+    const queryOptions: PromQLQueryParams['body']['options'] =
+      shared.queryType === 'instant'
+        ? { queryType: 'instant', time: shared.time }
+        : {
+            queryType: 'range',
+            start: shared.start,
+            end: shared.end,
+            step: plan.step,
+          };
 
-      const params: PromQLQueryParams = {
-        body: {
-          query: parsedQuery.query,
-          language: options.language,
-          maxResults: options.maxResults,
-          timeout: options.timeout,
-          options: queryOptions,
-        },
-        dataconnection: datasetId,
+    const params: PromQLQueryParams = {
+      body: {
+        query: plan.query,
+        language: shared.language,
+        maxResults: shared.maxResults,
+        timeout: shared.timeout,
+        options: queryOptions,
+      },
+      dataconnection: datasetId,
+    };
+
+    try {
+      const queryRes = await prometheusManager.query(context, request, params);
+
+      return {
+        label: plan.label,
+        response: queryRes,
+        legendFormat: plan.legendFormat,
       };
+    } catch (error) {
+      let errorMessage = `Query ${plan.label} failed`;
 
-      try {
-        const queryRes = await prometheusManager.query(context, request, params);
-
-        return {
-          label: parsedQuery.label,
-          response: queryRes,
-        };
-      } catch (error) {
-        let errorMessage = `Query ${parsedQuery.label} failed`;
-
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-
-        // Try to extract detailed error from response body from SQL plugin
-        const responseBody = (error as any)?.body ?? (error as any)?.response;
-        if (responseBody) {
-          try {
-            const parsed =
-              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
-            errorMessage =
-              parsed?.error?.details ??
-              parsed?.error?.reason ??
-              parsed?.error?.message ??
-              errorMessage;
-          } catch {
-            // error might come from other places, use original message if failed
-          }
-        }
-
-        return {
-          label: parsedQuery.label,
-          error: errorMessage,
-        };
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
+
+      // Try to extract detailed error from response body from SQL plugin
+      const responseBody = (error as any)?.body ?? (error as any)?.response;
+      if (responseBody) {
+        try {
+          const parsed = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+          errorMessage =
+            parsed?.error?.details ??
+            parsed?.error?.reason ??
+            parsed?.error?.message ??
+            errorMessage;
+        } catch {
+          // error might come from other places, use original message if failed
+        }
+      }
+
+      return {
+        label: plan.label,
+        error: errorMessage,
+        legendFormat: plan.legendFormat,
+      };
     }
-  );
+  });
 
   return Promise.all(promises);
 }
@@ -255,6 +288,33 @@ function formatMetricLabels(metric: Record<string, string>): string {
   return `{${labelParts.join(', ')}}`;
 }
 
+function distinguishingLabelKeysByTemplatedName(
+  series: MetricResult[],
+  legendTemplate: string
+): Map<string, string[]> {
+  const groups = new Map<string, Array<Record<string, string>>>();
+  series.forEach((metricResult, seriesIndex) => {
+    if (seriesIndex >= MAX_SERIES_TABLE) return;
+    const name = interpolateLegendFormat(legendTemplate, metricResult.metric).trim();
+    if (!name) return;
+    const group = groups.get(name);
+    if (group) group.push(metricResult.metric);
+    else groups.set(name, [metricResult.metric]);
+  });
+
+  const distinguishing = new Map<string, string[]>();
+  groups.forEach((members, name) => {
+    if (members.length < 2) return;
+    const keys = new Set<string>();
+    members.forEach((labels) => Object.keys(labels).forEach((key) => keys.add(key)));
+    distinguishing.set(
+      name,
+      Array.from(keys).filter((key) => new Set(members.map((labels) => labels[key] ?? '')).size > 1)
+    );
+  });
+  return distinguishing;
+}
+
 /**
  * Unified DataFrame creation for single and multi-query results.
  * - Single query: uses `Value` column, simpler series names
@@ -263,7 +323,8 @@ function formatMetricLabels(metric: Record<string, string>): string {
 function createDataFrame(
   queryResults: LabeledQueryResult[],
   datasetId: string,
-  isSingleQuery: boolean
+  isSingleQuery: boolean,
+  stepResolution?: PromQLStepResolution
 ): IDataFrame {
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
@@ -308,6 +369,11 @@ function createDataFrame(
 
     const queryResult = result.response.results[datasetId];
     const series = normalizeResult(queryResult?.resultType, queryResult?.result);
+    const legendTemplate = result.legendFormat?.trim() ? result.legendFormat : undefined;
+
+    const distinguishingKeys = legendTemplate
+      ? distinguishingLabelKeysByTemplatedName(series, legendTemplate)
+      : new Map<string, string[]>();
 
     series.forEach((metricResult, seriesIndex) => {
       if (seriesIndex >= MAX_SERIES_TABLE) return;
@@ -317,8 +383,25 @@ function createDataFrame(
       const labelsWithoutName = { ...metricResult.metric };
       delete labelsWithoutName.__name__;
 
-      const formattedLabels = formatMetricLabels(metricResult.metric);
-      const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
+      const fallbackName = `${metricName}${formatMetricLabels(labelsWithoutName)}`;
+      const templatedName = legendTemplate
+        ? interpolateLegendFormat(legendTemplate, metricResult.metric).trim()
+        : '';
+      let baseName = fallbackName;
+      if (templatedName) {
+        const differing = distinguishingKeys.get(templatedName);
+        if (differing?.length) {
+          const distinguishing: Record<string, string> = {};
+          differing.forEach((key) => {
+            if (metricResult.metric[key] !== undefined)
+              distinguishing[key] = metricResult.metric[key];
+          });
+          baseName = `${templatedName} ${formatMetricLabels(distinguishing)}`;
+        } else {
+          baseName = templatedName;
+        }
+      }
+      const seriesName = isSingleQuery ? baseName : `${result.label}: ${baseName}`;
       // TODO: remove escaping if not using vega
       // Escape brackets in series name to prevent Vega's splitAccessPath from
       // interpreting them as array index notation when used as field names
@@ -420,6 +503,10 @@ function createDataFrame(
       rows: allInstantRows,
     },
   };
+
+  if (stepResolution) {
+    meta.stepResolution = stepResolution;
+  }
 
   const tableTruncated = totalSeriesCount > MAX_SERIES_TABLE;
   if (tableTruncated || totalSeriesCount > 0) {

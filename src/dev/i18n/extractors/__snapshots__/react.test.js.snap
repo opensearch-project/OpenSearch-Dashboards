@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`dev/i18n/extractors/react extractFormattedMessages extracts messages from "<FormattedMessage>" element 1`] = `
 Array [
@@ -20,8 +20,8 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"description value should be a string or template literal (\\"message-id\\")."`;
-
 exports[`dev/i18n/extractors/react extractIntlMessages throws if defaultMessage value is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
+
+exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"description value should be a string or template literal (\\"message-id\\")."`;
 
 exports[`dev/i18n/extractors/react extractIntlMessages throws if message id is not a string literal 1`] = `"Message id should be a string literal."`;

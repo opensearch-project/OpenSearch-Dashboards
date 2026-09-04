@@ -25,11 +25,11 @@
     "simple-git": "^3.36.0",
     "tar-fs": "^2.1.4",
     "tree-kill": "^1.2.2",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.4.0"
   },
   "devDependencies": {
     "@osd/babel-preset": "1.0.0",
-    "@babel/cli": "^7.22.9",
+    "@babel/cli": "^7.29.7",
     "del": "^6.1.1"
   }
 }

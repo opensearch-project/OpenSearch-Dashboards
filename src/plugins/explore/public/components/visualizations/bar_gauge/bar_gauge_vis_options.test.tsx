@@ -14,8 +14,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 const mockCategoricalColumns: VisColumn[] = [
@@ -24,8 +22,6 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     column: 'category',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   },
 ];
 

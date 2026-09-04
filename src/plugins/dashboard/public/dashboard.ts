@@ -23,6 +23,7 @@ export interface SerializedDashboard {
   options?: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    useSharedCrosshair?: boolean;
   };
   uiState?: string;
   lastSavedTitle: string;

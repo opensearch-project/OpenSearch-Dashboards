@@ -132,6 +132,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
           optionalRef,
         }}
         showSaveQuery={showSaveQuery}
+        resultsCount={rows?.length ?? 0}
       />
 
       {indexPattern ? (
@@ -142,6 +143,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               query={data.query.queryString.getQuery()}
               savedQuery={data.query.savedQueries}
               timeFieldName={timeField}
+              getQueryError={() => data$.getValue().actualError}
             />
           )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (

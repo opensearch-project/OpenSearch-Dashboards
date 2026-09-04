@@ -71,9 +71,10 @@ export function toPromise(signal: AbortSignal): { promise: Promise<never>; clean
  *
  * @param signals
  */
-export function getCombinedSignal(
-  signals: AbortSignal[]
-): { signal: AbortSignal; cleanup: () => void } {
+export function getCombinedSignal(signals: AbortSignal[]): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
   const controller = new AbortController();
   let cleanup = () => {};
 

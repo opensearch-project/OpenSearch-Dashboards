@@ -62,14 +62,8 @@ export class CorrelationsClient {
    * Create a new correlation
    */
   async create(data: CreateCorrelationData): Promise<CorrelationSavedObject> {
-    const {
-      traceDatasetId,
-      traceDatasetTitle,
-      logDatasetIds,
-      correlationType,
-      version,
-      title,
-    } = data;
+    const { traceDatasetId, traceDatasetTitle, logDatasetIds, correlationType, version, title } =
+      data;
 
     // Build references array
     const references: SavedObjectReference[] = [

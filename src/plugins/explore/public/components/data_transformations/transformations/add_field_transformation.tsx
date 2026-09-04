@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -486,7 +486,7 @@ const AddFieldEditor = ({
 
 export function createAddFieldTransformation(): TransformationInstance<AddFieldConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'add_field',
     config: {
       mode: 'binary',

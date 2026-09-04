@@ -15,6 +15,7 @@ import {
   AggregationType,
   BucketOptions,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
@@ -22,7 +23,7 @@ import { getColors } from '../theme/default_colors';
 import { createNumericalHistogramChart, createSingleHistogramChart } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
-export interface HistogramChartStyleOptions {
+export interface HistogramChartStyleOptions extends StandardOptions {
   // Basic controls
   tooltipOptions?: TooltipOptions;
 
@@ -42,9 +43,13 @@ export interface HistogramChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
+  showValue?: boolean;
 }
 
-export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+export type HistogramChartStyle = Required<
+  Omit<HistogramChartStyleOptions, 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'>
+> &
+  Pick<HistogramChartStyleOptions, 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'>;
 
 export const defaultHistogramChartStyles: HistogramChartStyle = {
   tooltipOptions: {
@@ -77,6 +82,7 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   bucket: {
     aggregationType: AggregationType.SUM,
   },
+  showValue: false,
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
@@ -98,7 +104,7 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y) throw Error('Missing axis config for histogram');
 
-          const spec = createNumericalHistogramChart(props.transformedData, props.styleOptions, {
+          const spec = createNumericalHistogramChart(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
           });
@@ -116,7 +122,7 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
           const x = props.axisColumnMappings.x?.[0];
           if (!x) throw Error('Missing axis config for histogram');
 
-          const spec = createSingleHistogramChart(props.transformedData, props.styleOptions, {
+          const spec = createSingleHistogramChart(props.data, props.styleOptions, {
             [AxisRole.X]: x,
           });
           return <EchartsRender spec={spec} />;

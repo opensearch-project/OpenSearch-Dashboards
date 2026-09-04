@@ -128,7 +128,7 @@ export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorag
  */
 export function syncState<
   State extends BaseState,
-  StateStorage extends IStateStorage = IStateStorage
+  StateStorage extends IStateStorage = IStateStorage,
 >({
   storageKey,
   stateStorage,

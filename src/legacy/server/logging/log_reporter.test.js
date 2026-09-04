@@ -143,6 +143,6 @@ describe('getLoggerStream', () => {
 
     expect(() => {
       onFinished(error);
-    }).toThrowError('non-ENOSPC error');
+    }).toThrow('non-ENOSPC error');
   });
 });

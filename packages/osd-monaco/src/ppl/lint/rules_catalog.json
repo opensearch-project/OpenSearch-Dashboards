@@ -1,0 +1,232 @@
+[
+  {
+    "id": "head-without-sort",
+    "detector": "head-without-sort",
+    "enabled": false,
+    "severity": "info",
+    "message": "Without sort, head can return different rows each time the query runs.",
+    "howToFix": "Add `sort` before `head` when you need stable top or bottom results.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/#example-3-retrieving-the-first-n-results-after-an-offset-m",
+    "appliesTo": {}
+  },
+  {
+    "id": "division-by-zero",
+    "detector": "division-by-zero",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Dividing by zero returns no value (null) instead of an error.",
+    "howToFix": "Check your divisor, or handle zero values using a conditional, such as `if(total = 0, 0, errors / total)`.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+    "appliesTo": {}
+  },
+  {
+    "id": "unsupported-window-function-in-eventstats",
+    "detector": "unsupported-window-function-in-eventstats",
+    "enabled": true,
+    "severity": "error",
+    "message": "This window function cannot be used within `eventstats` or `streamstats`.",
+    "howToFix": "Use `row_number()`, or switch to a supported aggregation function like `avg()`.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/#aggregation-functions",
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "multisearch-min-subsearch",
+    "detector": "multisearch-min-subsearch",
+    "enabled": true,
+    "severity": "error",
+    "message": "`multisearch` requires at least two subsearches.",
+    "howToFix": "Add another subsearch block, or run the single query without `multisearch`.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/#syntax",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "disabled-join-type",
+    "detector": "disabled-join-type",
+    "enabled": false,
+    "severity": "warning",
+    "message": "This join type is disabled by default.",
+    "howToFix": "Use an `inner` or `left` join when it preserves the intended result. Otherwise, ask an administrator to enable `plugins.calcite.all_join_types.allowed`.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/#limitations",
+    "appliesTo": {}
+  },
+  {
+    "id": "dedup-consecutive-unsupported",
+    "detector": "dedup-consecutive-unsupported",
+    "enabled": false,
+    "severity": "warning",
+    "message": "consecutive=true uses an older query engine and may make this query slower.",
+    "howToFix": "Remove `consecutive=true` to use regular deduplication. No equivalent option preserves consecutive-only behavior.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/#example-4-deduplicating-consecutive-documents",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "union-min-datasets",
+    "detector": "union-min-datasets",
+    "enabled": true,
+    "severity": "error",
+    "message": "`union` requires at least two datasets.",
+    "howToFix": "Add another dataset to the command, or remove `union` if querying a single dataset.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/index/#ppl-commands",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "replace-wildcard-asymmetry",
+    "detector": "replace-wildcard-asymmetry",
+    "enabled": true,
+    "severity": "error",
+    "message": "Mismatch between wildcards (`*`) in search pattern and replacement string.",
+    "howToFix": "Use an equal number of `*` wildcards in both the search and replacement patterns.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/#parameters",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.4.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "field-validation",
+    "detector": "field-validation",
+    "enabled": true,
+    "severity": "error",
+    "message": "Field `'<field_name>'` is not defined or recognized in the current schema.",
+    "howToFix": "Check for typos, or use `eval` to define new fields before referencing them in downstream commands.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/#parameters",
+    "sourceScoped": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "agg-on-text",
+    "detector": "agg-on-text",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Numeric aggregations cannot be applied directly to text fields.",
+    "howToFix": "Aggregate a numeric field instead, cast this field to a number, or update its index mapping.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/#limitations",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "flat-object-subfield",
+    "detector": "flat-object-subfield",
+    "enabled": false,
+    "severity": "error",
+    "message": "PPL cannot search a field stored inside a flat_object field.",
+    "howToFix": "Use another field or query this data with DQL or the Search API. To use it in PPL, map and reindex it as a regular object field.",
+    "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/flat-object/",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.8.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "type-mismatch-numeric",
+    "detector": "type-mismatch-numeric",
+    "enabled": true,
+    "severity": "warning",
+    "message": "This numeric field is compared to a text value, which prevents matching records.",
+    "howToFix": "Compare against a numeric value (e.g., 500), or select a text field instead.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#basic-predicate-operators",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "invalid-capture-group-name",
+    "detector": "invalid-capture-group-name",
+    "enabled": true,
+    "severity": "error",
+    "message": "Invalid regex capture group name.",
+    "howToFix": "Name groups using `(?<name>...)`. Group names must start with a letter and contain only alphanumeric characters.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "operation-not-pushed",
+    "detector": "operation-not-pushed",
+    "enabled": false,
+    "severity": "warning",
+    "message": "This operation runs after the index scan, so OpenSearch must read and return its input rows first.",
+    "howToFix": "Rewrite the highlighted operation with indexed fields and supported functions so the PPL engine can include it in the index request.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
+  },
+  {
+    "id": "operation-pushed-as-script",
+    "detector": "operation-pushed-as-script",
+    "enabled": false,
+    "severity": "info",
+    "message": "OpenSearch evaluates this operation as a script for every candidate document instead of using a native index query.",
+    "howToFix": "Use a direct field comparison or sort on an indexed field so OpenSearch can use a native query or field sort.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#performance",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
+  },
+  {
+    "id": "enabled-false-object",
+    "detector": "enabled-false-object",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Cannot query fields inside an object mapped with `enabled: false`.",
+    "howToFix": "Remove the field filter, or update the index mapping to enable parsing for this object.",
+    "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "wildcard-source-zero-match",
+    "detector": "wildcard-source-zero-match",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Wildcard source pattern matches no known index.",
+    "howToFix": "Correct the `source=` pattern or choose an existing index.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/#example-6-using-wildcards",
+    "needsContext": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "rex-scan-cost",
+    "detector": "rex-scan-cost",
+    "enabled": true,
+    "severity": "info",
+    "message": "Pattern extraction runs against every input row from the text field, even when it finds no match.",
+    "howToFix": "Filter out rows that cannot match the pattern before extraction, using time or an indexed field.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#example-3-replacing-text-using-sed-mode",
+    "appliesTo": {},
+    "needsContext": true,
+    "sourceScoped": true
+  }
+]

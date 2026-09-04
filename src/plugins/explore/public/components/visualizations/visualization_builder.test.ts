@@ -11,11 +11,7 @@ import { VisualizationRegistryService } from '../../services/visualization_regis
 // Register all built-in visualizations into the singleton registry
 new VisualizationRegistryService();
 
-const createMockVisColumns = (
-  size: number,
-  type: VisFieldType,
-  options = { validValuesCount: 1, uniqueValuesCount: 1 }
-) => {
+const createMockVisColumns = (size: number, type: VisFieldType) => {
   const result: VisColumn[] = [];
   for (let i = 0; i < size; i++) {
     result.push({
@@ -23,7 +19,6 @@ const createMockVisColumns = (
       name: `name-${type}-${i}`,
       schema: type,
       column: `field-${type}-${i}`,
-      ...options,
     });
   }
   return result;
@@ -322,10 +317,7 @@ describe('VisualizationBuilder', () => {
 
         // Multi data points won't work with metric
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -357,10 +349,7 @@ describe('VisualizationBuilder', () => {
         });
 
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -392,10 +381,7 @@ describe('VisualizationBuilder', () => {
       });
 
       builder.onDataChange({
-        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-          validValuesCount: 2,
-          uniqueValuesCount: 2,
-        }),
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
@@ -569,29 +555,25 @@ describe('VisualizationBuilder', () => {
     expect(builder.data$.value).toEqual({
       categoricalColumns: [
         {
-          column: 'field-1',
+          column: 'name',
           id: 1,
           name: 'name',
           schema: 'categorical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       dateColumns: [],
       numericalColumns: [
         {
-          column: 'field-0',
+          column: 'age',
           id: 0,
           name: 'age',
           schema: 'numerical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       transformedData: [
         {
-          'field-0': 10,
-          'field-1': 'name',
+          age: 10,
+          name: 'name',
         },
       ],
       unknownColumns: [],
@@ -627,6 +609,21 @@ describe('VisualizationBuilder', () => {
     });
   });
 
+  test('should update panel settings and mark the visualization dirty', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({ type: 'table' });
+
+    builder.updatePanelSettings({ title: 'Panel title' });
+    builder.updatePanelSettings({ description: 'Panel description' });
+
+    expect(builder.visConfig$.value).toEqual({
+      type: 'table',
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+    expect(builder.isVisDirty$.value).toBe(true);
+  });
+
   test('should set axes mapping', () => {
     const builder = new VisualizationBuilder({});
     // initial vis config
@@ -641,6 +638,20 @@ describe('VisualizationBuilder', () => {
     expect(builder.visConfig$.value?.type).toBe(undefined);
     builder.setCurrentChartType('heatmap');
     expect(builder.visConfig$.value?.type).toBe('heatmap');
+  });
+
+  test('should preserve panel settings when chart type changes', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({
+      type: 'bar',
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+
+    builder.setCurrentChartType('line');
+
+    expect(builder.visConfig$.value?.title).toBe('Panel title');
+    expect(builder.visConfig$.value?.description).toBe('Panel description');
   });
 
   test('should reset vis state', () => {
@@ -705,6 +716,21 @@ describe('VisualizationBuilder', () => {
       expect(builder.visConfig$.value?.splitField).toBe('category');
       expect(builder.visConfig$.value?.splitLayout).toBe('horizontal');
       expect(builder.visConfig$.value?.showSplitLabel).toBe(true);
+    });
+
+    test('should preserve panel settings', () => {
+      const builder = new VisualizationBuilder({});
+      builder.visConfig$.next({
+        type: 'bar',
+        title: 'Panel title',
+        description: 'Panel description',
+      });
+
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, false);
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.title).toBe('Panel title');
+      expect(builder.visConfig$.value?.description).toBe('Panel description');
     });
 
     test('should preserve styles when preserveStyles is true', () => {

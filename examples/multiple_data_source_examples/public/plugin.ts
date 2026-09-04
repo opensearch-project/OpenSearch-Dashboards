@@ -19,8 +19,10 @@ import {
   MultipleDataSourceExamplesPluginStartDependencies,
 } from './types';
 
-export class MultipleDataSourceExamplesPlugin
-  implements Plugin<MultipleDataSourceExamplesPluginSetup, void> {
+export class MultipleDataSourceExamplesPlugin implements Plugin<
+  MultipleDataSourceExamplesPluginSetup,
+  void
+> {
   public setup(
     core: CoreSetup,
     {
@@ -54,8 +56,7 @@ export class MultipleDataSourceExamplesPlugin
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/data_source_management/README.md',
+          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/data_source_management/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

@@ -174,7 +174,7 @@ export class ServiceSettings {
     try {
       const fileLayers = await this._emsClient.getFileLayers();
       return fileLayers.map(this._backfillSettings);
-    } catch (e) {
+    } catch {
       return [];
     }
   }
@@ -198,7 +198,7 @@ export class ServiceSettings {
       let servicesFromManifest = [];
       try {
         servicesFromManifest = await this._emsClient.getTMSServices();
-      } catch (e) {
+      } catch {
         return DEFAULT_SERVICE;
       }
       const strippedServiceFromManifest = await Promise.all(
@@ -240,7 +240,7 @@ export class ServiceSettings {
         const hasIdById = fileLayer.hasId(fileLayerConfig.id);
         return hasIdByName || hasIdById;
       });
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -261,7 +261,7 @@ export class ServiceSettings {
     let tmsServices = [];
     try {
       tmsServices = await this._emsClient.getTMSServices();
-    } catch (e) {
+    } catch {
       return DEFAULT_SERVICE;
     }
     const emsTileLayerId = this._mapConfig.emsTileLayerId;

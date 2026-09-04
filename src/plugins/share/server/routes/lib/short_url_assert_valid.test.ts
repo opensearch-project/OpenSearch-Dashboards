@@ -54,7 +54,7 @@ describe('shortUrlAssertValid()', () => {
 
   invalid.forEach(([desc, url, error]) => {
     it(`fails when url has ${desc as string}`, () => {
-      expect(() => shortUrlAssertValid(url as string)).toThrowError(error);
+      expect(() => shortUrlAssertValid(url as string)).toThrow(error);
     });
   });
 

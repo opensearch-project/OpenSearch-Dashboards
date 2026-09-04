@@ -30,14 +30,15 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { pipeline } from 'stream/promises';
 
 import execa from 'execa';
 import { REPO_ROOT, standardize } from '@osd/cross-platform';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
-import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
+import { openPromise } from 'yauzl';
 
 const OPENSEARCH_DASHBOARDS_VERSION = '1.0.0';
 const OPENSEARCH_DASHBOARDS_VERSION_X = '1.0.0.x';
@@ -58,8 +59,34 @@ expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
+// Test helper: extract a zip archive into targetDir without stripping any leading path segment.
+// Unlike the production decompressZip in packages/osd-opensearch/src/utils/decompress.js,
+// no root-directory segment is stripped here — the archive's full internal structure
+// (e.g. opensearch-dashboards/fooTestPlugin/…) is preserved under targetDir, which matches
+// the snapshot expectations in the tests below.
+async function extractZip(archive: string, targetDir: string): Promise<void> {
+  const resolvedTarget = Path.resolve(targetDir);
+  Fs.mkdirSync(resolvedTarget, { recursive: true });
+  const zipfile = await openPromise(archive);
+  for await (const entry of zipfile.eachEntry()) {
+    const entryPath = Path.resolve(resolvedTarget, entry.fileName);
+    // Guard against zip-slip for both files and directories
+    if (entryPath !== resolvedTarget && !entryPath.startsWith(resolvedTarget + Path.sep)) {
+      throw new Error(`Zip slip detected: ${entry.fileName}`);
+    }
+    if (entry.fileName.endsWith('/')) {
+      Fs.mkdirSync(entryPath, { recursive: true });
+    } else {
+      Fs.mkdirSync(Path.dirname(entryPath), { recursive: true });
+      const readStream = await zipfile.openReadStreamPromise(entry);
+      await pipeline(readStream, Fs.createWriteStream(entryPath));
+    }
+  }
+}
+
 const processProcOutput = (all: string | undefined) => {
-  const regexp = /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
+  const regexp =
+    /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
   return all?.replace(regexp, '');
 };
 
@@ -114,7 +141,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info cleaning up compression temporary artifacts"
   `);
 
-  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
+  await extractZip(PLUGIN_ARCHIVE, TMP_DIR);
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
@@ -202,7 +229,7 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
      info cleaning up compression temporary artifacts"
   `);
 
-  await extract(PLUGIN_ARCHIVE_X, { dir: TMP_DIR }, () => {});
+  await extractZip(PLUGIN_ARCHIVE_X, TMP_DIR);
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));

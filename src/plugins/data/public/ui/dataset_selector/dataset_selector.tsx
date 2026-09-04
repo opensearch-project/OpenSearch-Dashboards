@@ -95,10 +95,11 @@ export const DatasetSelector = ({
 
       const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
 
-      const fetchedDatasets =
+      const fetchedDatasets = (
         fetchedIndexPatternDataStructures.children?.map((pattern) =>
           typeConfig.toDataset([pattern])
-        ) ?? [];
+        ) ?? []
+      ).filter((ds) => datasetService.isDatasetAllowed(ds, services.appName));
       setIndexPatterns(fetchedDatasets);
 
       // If no dataset is selected, select the first one
@@ -117,7 +118,9 @@ export const DatasetSelector = ({
   }, [datasetService]);
 
   const recentDatasets = useMemo(() => {
-    return datasetService.getRecentDatasets();
+    return datasetService
+      .getRecentDatasets()
+      .filter((ds) => datasetService.isDatasetAllowed(ds, services.appName));
     // NOTE: Intentionally adding dependencies to ensure that we have the latest recentDatasets
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, datasetService]);

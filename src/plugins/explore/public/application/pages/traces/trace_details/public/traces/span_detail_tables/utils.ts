@@ -5,6 +5,10 @@
 
 import { ParsedHit } from './types';
 import { isSpanError, extractStatusCode } from '../ppl_resolve_helpers';
+import { extractSpanDuration } from '../../utils/span_data_utils';
+
+/** Client-side filter field for a minimum span duration (value in nanoseconds). */
+export const DURATION_MIN_FILTER_FIELD = 'durationMin';
 
 export const parseHits = (payloadData: string): ParsedHit[] => {
   try {
@@ -27,19 +31,29 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
 
 export const applySpanFilters = (
   spans: ParsedHit[],
-  filters: Array<{ field: string; value: any }>
+  filters: Array<{ field: string; value: any; operator?: '=' | '!=' }>
 ): ParsedHit[] => {
   if (filters.length === 0) return spans;
 
   return spans.filter((span) => {
-    return filters.every(({ field, value }) => {
+    return filters.every(({ field, value, operator }) => {
       if (field === 'isError' || field === 'status.code') {
         return isStatusMatch(span, field, value);
+      }
+      if (field === DURATION_MIN_FILTER_FIELD) {
+        return extractSpanDuration(span) >= (value as number);
       }
       const spanValue = field.includes('.')
         ? field.split('.').reduce((obj, key) => obj?.[key], span)
         : span[field];
-      return spanValue === value;
+      // A missing field satisfies neither "=" nor "!=", matching server-side PPL
+      // (`where field = value` / `field != value` both exclude null/absent rows),
+      // so client-side and server-side filtering keep the same spans.
+      if (spanValue === undefined || spanValue === null) return false;
+      // Coerce both sides to strings so a numeric field value (e.g. 200) still
+      // matches a value coming from a text input; honor the != operator.
+      const matches = String(spanValue) === String(value);
+      return operator === '!=' ? !matches : matches;
     });
   });
 };

@@ -4,6 +4,8 @@
  */
 
 import {
+  Background,
+  BackgroundVariant,
   Edge,
   EdgeProps,
   MarkerType,
@@ -81,6 +83,7 @@ interface MapContainerProps {
   legend?: ReactNode | false;
   /** Show the ReactFlow minimap overlay. Default: false */
   showMinimap?: boolean;
+  showGridBackground?: boolean;
   /** Show SLI/SLO entries in the default legend. Default: false */
   showSliSlo?: boolean;
   /** Whether the host page is in dark mode */
@@ -113,6 +116,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   edgeTypes: consumerEdgeTypes,
   legend,
   showMinimap,
+  showGridBackground,
   showSliSlo,
   isDarkMode,
   showLayoutControls,
@@ -123,12 +127,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 }) => {
   const { viewLock } = useCelestialStateContext();
   const reactFlowInstance = useReactFlow();
-  const mergedNodeTypes = useMemo(() => ({ ...defaultNodeTypes, ...consumerNodeTypes }), [
-    consumerNodeTypes,
-  ]);
-  const mergedEdgeTypes = useMemo(() => ({ ...defaultEdgeTypes, ...consumerEdgeTypes }), [
-    consumerEdgeTypes,
-  ]);
+  const mergedNodeTypes = useMemo(
+    () => ({ ...defaultNodeTypes, ...consumerNodeTypes }),
+    [consumerNodeTypes]
+  );
+  const mergedEdgeTypes = useMemo(
+    () => ({ ...defaultEdgeTypes, ...consumerEdgeTypes }),
+    [consumerEdgeTypes]
+  );
   const resolvedEdges = useMemo(() => resolveEdgeMarkers(edges), [edges]);
 
   const renderLegend = () => {
@@ -281,6 +287,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           proOptions={{ hideAttribution: true }}
           className="osd:w-full osd:h-full osd:z-1"
         >
+          {showGridBackground && (
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={16}
+              size={1}
+              color="var(--osd-color-map-dots, #d3dae6)"
+            />
+          )}
           {showMinimap && (
             <MiniMap
               nodeStrokeWidth={3}

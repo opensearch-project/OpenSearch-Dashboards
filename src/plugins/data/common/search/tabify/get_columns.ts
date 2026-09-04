@@ -36,7 +36,7 @@ const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
   let name = '';
   try {
     name = agg.makeLabel();
-  } catch (e) {
+  } catch {
     // skip the case when makeLabel throws an error (e.x. no appropriate field for an aggregation)
   }
 

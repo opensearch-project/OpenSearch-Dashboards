@@ -27,6 +27,8 @@ jest.mock('moment-timezone', () => {
 
 jest.mock('./utils', () => ({
   buildPPLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLHistogramQuery: jest.fn((queryString) => queryString),
+  buildSQLTopBreakdownQuery: jest.fn((queryString) => queryString),
   processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
   createHistogramConfigWithInterval: jest.fn(() => ({
     histogramConfigs: {
@@ -47,6 +49,7 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
+  queryHasStats: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -60,6 +63,7 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
@@ -316,9 +320,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultPrepareQueryString', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -397,9 +402,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('prepareHistogramCacheKey', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -670,9 +676,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         saveToCache: jest.fn(),
       },
     } as any;
-    const mockCreateHistogramConfigs = chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
-      typeof chartUtilsModule.createHistogramConfigs
-    >;
+    const mockCreateHistogramConfigs =
+      chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
+        typeof chartUtilsModule.createHistogramConfigs
+      >;
     const mockGetDimensions = chartUtilsModule.getDimensions as jest.MockedFunction<
       typeof chartUtilsModule.getDimensions
     >;
@@ -836,9 +843,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -904,9 +912,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -982,9 +991,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -1081,9 +1091,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeQueries', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -1197,6 +1208,60 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
     });
 
+    it('runs nothing at all for a blank SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: '   ', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue(''),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Neither the empty query nor the histogram's `FROM ()` reaches the cluster.
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks).toHaveLength(0);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/executeQueries/fulfilled' })
+      );
+    });
+
+    it('still runs a non-empty SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'SELECT * FROM logs', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue('SELECT * FROM logs'),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should skip histogram query when language is PROMQL', async () => {
       mockDispatch.mockClear();
 
@@ -1279,9 +1344,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeHistogramQuery', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockCreateHistogramConfigs = chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
-      typeof chartUtilsModule.createHistogramConfigs
-    >;
+    const mockCreateHistogramConfigs =
+      chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
+        typeof chartUtilsModule.createHistogramConfigs
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -1619,6 +1685,136 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(result.payload).toBeUndefined();
       expect(mockServices.data.search.showError).not.toHaveBeenCalled();
     });
+
+    describe('SQL breakdown two-pass flow', () => {
+      const utilsMock = jest.requireMock('./utils');
+      const histogramRows = { hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 };
+
+      const useSQLWithBreakdown = () => {
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: 'status', queryStatusMap: {} },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+          breakdownField: 'status',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+      };
+
+      const runHistogram = () =>
+        executeHistogramQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'SELECT * FROM logs',
+          interval: '5m',
+        })(mockDispatch, mockGetState, undefined);
+
+      it('keeps the breakdown when the top-N pass returns values', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({
+            hits: { hits: [{ _source: { breakdown: 'ok' } }], total: 1 },
+          })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: 'status' }),
+          ['ok']
+        );
+      });
+
+      // Without a top-N list the breakdown expression is the bare field, which
+      // would emit one series per distinct value.
+      it('drops the breakdown when the top-N pass comes back empty', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockResolvedValueOnce({ hits: { hits: [], total: 0 } })
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
+
+      it.each([
+        ['3.9.0', true],
+        ['3.10.2', true],
+        ['3.8.0', false],
+        ['2.19.1', false],
+        [undefined, true],
+        ['not-a-version', true],
+      ])('data source version %s -> histogram built: %s', async (version, built) => {
+        useSQLWithBreakdown();
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+        // The engine and version are read off the dataset convertToDataset returns, not off state.
+        (mockServices.data.dataViews.convertToDataset as jest.Mock).mockReturnValue({
+          id: 'test',
+          type: 'INDEX_PATTERN',
+          dataSource: { type: 'OpenSearch', engineType: 'OpenSearch', version },
+        });
+        utilsMock.createHistogramConfigWithInterval.mockReturnValue({
+          histogramConfigs: { toDsl: jest.fn().mockReturnValue({}), aggs: [{}, {}] },
+          aggs: {},
+          effectiveInterval: 'auto',
+          finalInterval: '5m',
+          fromDate: 'now-1h',
+          toDate: 'now',
+          timeFieldName: 'endTime',
+        });
+        utilsMock.buildSQLHistogramQuery.mockClear();
+        mockSearchSource.fetch.mockReset();
+        mockSearchSource.fetch.mockResolvedValue(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledTimes(built ? 1 : 0);
+      });
+
+      it('drops the breakdown when the top-N pass fails', async () => {
+        useSQLWithBreakdown();
+        mockSearchSource.fetch
+          .mockRejectedValueOnce(new Error('pass 1 exploded'))
+          .mockResolvedValueOnce(histogramRows);
+
+        await runHistogram();
+
+        expect(utilsMock.buildSQLHistogramQuery).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ breakdownField: undefined }),
+          undefined
+        );
+      });
+    });
   });
 
   describe('executeDataTableQuery', () => {
@@ -1778,6 +1974,42 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    // A tab whose prepareQuery cannot yet build a query returns '' -- see the patterns
+    // tab, whose field is derived from logs results that are gone after a page reload.
+    it('does not run anything when the cache key is empty', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: '',
+        queryString: '',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).not.toHaveBeenCalled();
+      expect(setResults).not.toHaveBeenCalled();
+      // The tab must stay uninitialized rather than stuck on a spinner.
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            status: expect.objectContaining({ status: QueryExecutionStatus.LOADING }),
+          }),
+        })
+      );
+    });
+
+    // The BRAIN retry in register_tabs deliberately passes a queryString that
+    // differs from its cacheKey, so the guard must not key off queryString.
+    it('still runs when only the query string differs from the cache key', async () => {
+      const thunk = executeTabQuery({
+        services: mockServices,
+        cacheKey: 'some-key',
+        queryString: 'source=logs',
+      });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+    });
+
     it('should handle missing services gracefully', async () => {
       const params = {
         services: undefined as any,
@@ -1828,6 +2060,49 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockSearchSource.setFields).toHaveBeenCalledWith(
         expect.objectContaining({ size: customSize })
       );
+    });
+
+    describe('query profiling gate (PPL only)', () => {
+      const runAndGetQuery = async () => {
+        const thunk = executeTabQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'source=logs',
+        });
+        await thunk(mockDispatch, mockGetState, undefined);
+        const call = (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query);
+        return call?.[0]?.query;
+      };
+
+      it('sends profile:true for a PPL query when profiling is enabled', async () => {
+        mockServices.queryProfilingEnabled = true;
+        // executeTabQuery mock state defaults to language: 'PPL'
+        const query = await runAndGetQuery();
+        expect(query).toEqual(expect.objectContaining({ profile: true }));
+      });
+
+      it('does not send profile for a non-PPL (SQL) query even when profiling is enabled', async () => {
+        mockServices.queryProfilingEnabled = true;
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
+
+      it('does not send profile when profiling is disabled', async () => {
+        mockServices.queryProfilingEnabled = false;
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
     });
 
     it('should handle non-default dataView in time filter logic', async () => {
@@ -2032,9 +2307,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('Integration Tests', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     it('should handle full query execution flow', async () => {
       mockDefaultPreparePplQuery.mockReturnValue({
@@ -2100,6 +2376,41 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(3);
       expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('shouldSkipQueryExecution', () => {
+    const queryFor = (language: string, queryText: unknown): Query =>
+      ({
+        language,
+        query: queryText,
+        dataset: { id: 'd', title: 't', type: 'INDEX_PATTERN' },
+      }) as Query;
+
+    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY ('').
+    it.each([
+      ['', 'empty'],
+      ['   ', 'whitespace only'],
+    ])('skips a %s SQL query (%s)', (queryText) => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', queryText))).toBe(true);
+    });
+
+    it('skips a SQL query whose text is not a string', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', undefined))).toBe(true);
+    });
+
+    it('runs a non-empty SQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', 'SELECT * FROM idx'))).toBe(false);
+    });
+
+    it('still skips a blank PromQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', ''))).toBe(true);
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', 'up'))).toBe(false);
+    });
+
+    // defaultPreparePplQuery turns a blank PPL editor into `source = <table>`.
+    it('runs a blank PPL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PPL', ''))).toBe(false);
     });
   });
 });

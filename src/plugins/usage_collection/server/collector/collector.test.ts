@@ -38,7 +38,7 @@ describe('collector', () => {
   describe('options validations', () => {
     it('should not accept an empty object', () => {
       // @ts-expect-error
-      expect(() => new Collector(logger, {})).toThrowError(
+      expect(() => new Collector(logger, {})).toThrow(
         'Collector must be instantiated with a options.type string property'
       );
     });
@@ -51,7 +51,7 @@ describe('collector', () => {
             // @ts-expect-error
             init: 1,
           })
-      ).toThrowError(
+      ).toThrow(
         'If init property is passed, Collector must be instantiated with a options.init as a function property'
       );
     });
@@ -64,7 +64,7 @@ describe('collector', () => {
             type: 'my_test_collector',
             isReady: () => false,
           })
-      ).toThrowError('Collector must be instantiated with a options.fetch function property');
+      ).toThrow('Collector must be instantiated with a options.fetch function property');
     });
 
     it('should fail if fetch is not a function', () => {
@@ -76,7 +76,7 @@ describe('collector', () => {
             // @ts-expect-error
             fetch: 1,
           })
-      ).toThrowError('Collector must be instantiated with a options.fetch function property');
+      ).toThrow('Collector must be instantiated with a options.fetch function property');
     });
 
     it('should be OK with all mandatory properties', () => {

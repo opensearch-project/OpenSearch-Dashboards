@@ -13,6 +13,7 @@ import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 import { ChatEventHandler } from '../services/chat_event_handler';
 
 // Create mock observable before using it in mocks
@@ -29,6 +30,8 @@ jest.mock('../../../context_provider/public', () => {
     AssistantActionService: {
       getInstance: jest.fn(() => assistantActionsInstance),
     },
+    // Actions registered via this hook (e.g. switch_data_source) are no-ops in these tests
+    useAssistantAction: jest.fn(),
   };
 });
 
@@ -63,6 +66,7 @@ describe('ChatWindow - Conversation Name', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockSuggestedActionsService: jest.Mocked<SuggestedActionsService>;
   let mockConfirmationService: jest.Mocked<ConfirmationService>;
+  let mockHumanInputService: jest.Mocked<HumanInputService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,6 +115,14 @@ describe('ChatWindow - Conversation Name', () => {
       reject: jest.fn(),
       cancel: jest.fn(),
     } as any;
+    mockHumanInputService = {
+      getPending$: jest.fn().mockReturnValue(of([])),
+      getPending: jest.fn().mockReturnValue([]),
+      hasPending: jest.fn().mockReturnValue(false),
+      ask: jest.fn(),
+      answer: jest.fn(),
+      cleanAll: jest.fn(),
+    } as any;
   });
 
   const renderWithContext = (component: React.ReactElement) => {
@@ -122,6 +134,7 @@ describe('ChatWindow - Conversation Name', () => {
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
           confirmationService={mockConfirmationService}
+          humanInputService={mockHumanInputService}
         >
           {component}
         </ChatProvider>

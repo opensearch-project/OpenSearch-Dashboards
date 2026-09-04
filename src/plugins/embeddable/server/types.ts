@@ -38,13 +38,15 @@ import { EmbeddableInput } from '../common/types';
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
 
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
-  extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<
+  P extends SerializableState = SerializableState,
+> extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
-  extends PersistableState<P> {
+export interface EnhancementRegistryItem<
+  P extends SerializableState = SerializableState,
+> extends PersistableState<P> {
   id: string;
 }
 

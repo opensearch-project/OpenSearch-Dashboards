@@ -83,7 +83,7 @@ describe('graphite_helper', function () {
   it('denylist should be checked if denylist is enabled', async function () {
     jest.spyOn(helper, 'isDeniedURL').mockResolvedValueOnce(false);
     await helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org');
-    expect(helper.isDeniedURL).toBeCalled();
+    expect(helper.isDeniedURL).toHaveBeenCalled();
   });
 
   it('denylist should be checked it both allowlist and denylist are enabled', async function () {
@@ -93,7 +93,7 @@ describe('graphite_helper', function () {
       ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       'https://opensearch.org'
     );
-    expect(helper.isDeniedURL).toBeCalled();
+    expect(helper.isDeniedURL).toHaveBeenCalled();
   });
 
   it('with only allowlist, isValidConfig should return false for Url not in the allowlist', async function () {

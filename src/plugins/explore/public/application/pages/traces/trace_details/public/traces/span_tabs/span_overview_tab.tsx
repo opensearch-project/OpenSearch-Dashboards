@@ -62,7 +62,7 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
                   defaultMessage: 'Copy to clipboard',
                 })}
                 onClick={copy}
-                iconType="copyClipboard"
+                iconType="copy"
               />
             )}
           </EuiCopy>
@@ -121,16 +121,8 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     );
   }
 
-  const {
-    spanId,
-    operation,
-    duration,
-    startTime,
-    hasError,
-    httpMethod,
-    httpUrl,
-    httpStatusCode,
-  } = spanData;
+  const { spanId, operation, duration, startTime, hasError, httpMethod, httpUrl, httpStatusCode } =
+    spanData;
 
   return (
     <div>
@@ -244,7 +236,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                           defaultMessage: 'Copy to clipboard',
                         })}
                         onClick={copy}
-                        iconType="copyClipboard"
+                        iconType="copy"
                       />
                     )}
                   </EuiCopy>

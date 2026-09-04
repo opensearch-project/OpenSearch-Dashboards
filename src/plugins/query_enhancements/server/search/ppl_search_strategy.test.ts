@@ -30,23 +30,26 @@ describe('pplSearchStrategyProvider', () => {
 
   beforeEach(() => {
     config$ = of({} as SharedGlobalConfig);
-    logger = ({
+    logger = {
       error: jest.fn(),
-    } as unknown) as Logger;
+    } as unknown as Logger;
     client = {} as ILegacyClusterClient;
     usage = {
       trackSuccess: jest.fn(),
       trackError: jest.fn(),
     } as SearchUsage;
-    mockRequestHandlerContext = ({
+    mockRequestHandlerContext = {
       core: {
         uiSettings: {
           client: {
-            get: jest.fn().mockResolvedValue(500),
+            // Return distinct values per setting so tests can tell the two sample sizes apart.
+            get: jest.fn((setting: string) =>
+              Promise.resolve(setting === 'discover:aggregationSampleSize' ? 2000 : 500)
+            ),
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
   });
 
   it('should return an object with a search method', () => {
@@ -70,9 +73,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 100,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -82,9 +85,9 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -113,18 +116,18 @@ describe('pplSearchStrategyProvider', () => {
       data: { cause: 'Query failed' },
       took: 50,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         mockRequestHandlerContext,
-        ({
+        {
           body: { query: { query: 'source = table' } },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow();
@@ -132,18 +135,18 @@ describe('pplSearchStrategyProvider', () => {
 
   it('should handle exceptions', async () => {
     const mockError = new Error('Something went wrong');
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockRejectedValue(mockError),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         mockRequestHandlerContext,
-        ({
+        {
           body: { query: { query: 'source = table' } },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow(mockError);
@@ -153,21 +156,21 @@ describe('pplSearchStrategyProvider', () => {
 
   it('should throw error when describeQuery success is false', async () => {
     const mockError = new Error('Something went wrong');
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue({ success: false, data: mockError }),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         mockRequestHandlerContext,
-        ({
+        {
           body: { query: { query: 'source = table' } },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(mockError.message));
     expect(usage.trackError).toHaveBeenCalled();
   });
@@ -182,18 +185,18 @@ describe('pplSearchStrategyProvider', () => {
       took: 100,
     };
     const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: mockDescribeQuery,
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = table | head 600', dataset: { id: 'test-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -213,23 +216,23 @@ describe('pplSearchStrategyProvider', () => {
       took: 100,
     };
     const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: mockDescribeQuery,
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: {
           query: {
             query: 'source = table | head 600 | sort name ASC',
             dataset: { id: 'test-dataset' },
           },
         },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -251,16 +254,16 @@ describe('pplSearchStrategyProvider', () => {
       took: 100,
     };
     const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: mockDescribeQuery,
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: {
           query: {
             query:
@@ -269,7 +272,7 @@ describe('pplSearchStrategyProvider', () => {
             dataset: { id: 'test-dataset' },
           },
         },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -291,18 +294,18 @@ describe('pplSearchStrategyProvider', () => {
       took: 100,
     };
     const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: mockDescribeQuery,
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -311,6 +314,118 @@ describe('pplSearchStrategyProvider', () => {
     );
     const requestArg = mockDescribeQuery.mock.calls[0][1];
     expect(requestArg.body.fetchSize).toBe(200);
+  });
+
+  it.each([
+    ['stats', 'source = table | stats count() by span(`@timestamp`, 1h), extension'],
+    ['timechart', 'source = table | timechart span=1h count() by extension'],
+    ['top', 'source = table | top 5 extension'],
+    ['rare', 'source = table | rare extension'],
+  ])(
+    'should send the aggregation sample size for an aggregating query (%s)',
+    async (_name, pplQuery) => {
+      const mockResponse = {
+        success: true,
+        data: {
+          schema: [{ name: 'field1', type: 'long' }],
+          datarows: [[1]],
+        },
+        took: 100,
+      };
+      const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+      const mockFacet = {
+        describeQuery: mockDescribeQuery,
+      } as unknown as facet.Facet;
+      jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+      (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+      const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+      await strategy.search(
+        mockRequestHandlerContext,
+        {
+          body: { query: { query: pplQuery, dataset: { id: 'test-dataset' } } },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      expect(mockRequestHandlerContext.core.uiSettings.client.get).toHaveBeenCalledWith(
+        'discover:aggregationSampleSize'
+      );
+      const requestArg = mockDescribeQuery.mock.calls[0][1];
+      expect(requestArg.body.fetchSize).toBe(2000);
+    }
+  );
+
+  it('should still send fetchSize when stats appears only inside a subquery', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(500);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: {
+          query: {
+            query: 'source = table | where id in [source = other | stats count() by id]',
+            dataset: { id: 'test-dataset' },
+          },
+        },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(500);
+  });
+
+  it('should give the histogram aggregation queries the aggregation sample size', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = {
+      describeQuery: mockDescribeQuery,
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: {
+          query: { query: 'source = table', dataset: { id: 'test-dataset' } },
+          aggConfig: {
+            qs: { '1': 'source = table | stats count() by span(`@timestamp`, 1h)' },
+          },
+        },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    // The primary document search keeps the document sample cap ...
+    expect(mockDescribeQuery.mock.calls[0][1].body.fetchSize).toBe(500);
+    // ... while the bucket-producing histogram query uses the larger aggregation size, not the
+    // document cap it would otherwise inherit from the primary search's body.
+    expect(mockDescribeQuery.mock.calls[1][1].body.fetchSize).toBe(2000);
   });
 
   it('should attach highlights to dataFrame meta when rawResponse contains _highlight column', async () => {
@@ -330,9 +445,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 100,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -342,9 +457,9 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -369,9 +484,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 100,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -381,9 +496,9 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -403,9 +518,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 10,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -415,9 +530,9 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: { query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -455,9 +570,9 @@ describe('pplSearchStrategyProvider', () => {
       },
       took: 10,
     };
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -467,7 +582,7 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: {
           query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } },
           aggConfig: {
@@ -482,7 +597,7 @@ describe('pplSearchStrategyProvider', () => {
             },
           },
         },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -536,12 +651,12 @@ describe('pplSearchStrategyProvider', () => {
       took: 10,
     };
     const mockError = new Error('Something went wrong');
-    const mockFacet = ({
+    const mockFacet = {
       describeQuery: jest
         .fn()
         .mockResolvedValueOnce(mockResponse)
         .mockResolvedValue({ success: false, data: mockError }),
-    } as unknown) as facet.Facet;
+    } as unknown as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -551,7 +666,7 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       mockRequestHandlerContext,
-      ({
+      {
         body: {
           query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } },
           aggConfig: {
@@ -566,7 +681,7 @@ describe('pplSearchStrategyProvider', () => {
             },
           },
         },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 

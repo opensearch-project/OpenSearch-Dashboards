@@ -55,9 +55,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
       http,
     },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<
-    WorkspaceFormSubmitData
-  >();
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] =
+    useState<WorkspaceFormSubmitData>();
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;

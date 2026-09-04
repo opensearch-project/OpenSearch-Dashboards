@@ -17,10 +17,11 @@ import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { getAxisConfigByColumnMapping } from './utils/axis';
-import { groupDataBySplitField } from './utils/group_data_by_split';
+import { filterDataBySplitField, getSplitKeysBySplitField } from './utils/group_data_by_split';
 import { SplitContainer } from './split_container';
-import { ColorMap } from './utils/color_map';
 import { CustomLegend } from './custom_legend';
+import type { VisualizationRenderContext } from './utils/use_visualization_types';
+import { LegendItem, LegendTarget } from './utils/legend';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -29,6 +30,7 @@ interface Props {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 interface CommonProps {
@@ -38,6 +40,7 @@ interface CommonProps {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -48,6 +51,10 @@ const defaultStyleOptions: TableChartStyle = {
   globalAlignment: 'left',
 };
 
+const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
+const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
+
 export const CommonVisualizationRender = ({
   visualizationData,
   visConfig,
@@ -55,30 +62,33 @@ export const CommonVisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: CommonProps) => {
   const { from, to } = inputTimeRange || {};
   const legendSelected$ = useRef(new BehaviorSubject<Record<string, boolean>>({})).current;
-  const highlightedSeries$ = useRef(new BehaviorSubject<string | undefined>(undefined)).current;
-  const legend$ = useRef(new BehaviorSubject<Record<string, ColorMap>>({})).current;
+  const highlightedLegendTarget$ = useRef(
+    new BehaviorSubject<LegendTarget | undefined>(undefined)
+  ).current;
+  const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
+  const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
+  const horizontalSplitMinWidth = COMPACT_HORIZONTAL_SPLIT_CHART_TYPES.includes(
+    visConfig?.type ?? ''
+  )
+    ? COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH
+    : undefined;
 
   useEffect(() => {
-    const visSupportCustomLegend = [
-      'area',
-      'line',
-      'bar',
-      'pie',
-      'scatter',
-      'state_timeline',
-    ].includes(visConfig?.type ?? '');
-    if (!visSupportCustomLegend) {
+    if (!supportsCustomLegend) {
       legend$.next({});
     }
-  }, [visConfig?.type, legend$]);
+  }, [supportsCustomLegend, legend$]);
 
   const timeRange = useMemo(() => {
     return {
-      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
-      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+      from: from ? (dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '') : '',
+      to: to
+        ? (dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '')
+        : '',
     };
   }, [from, to]);
 
@@ -101,11 +111,11 @@ export const CommonVisualizationRender = ({
   ]);
 
   const onLegend = useCallback(
-    (key: string, legend: ColorMap, validKeys?: string[]) => {
+    (key: string, legendItems: LegendItem[], validKeys?: string[]) => {
       const current = legend$.getValue();
-      let next = { ...current, [key]: legend };
+      let next = { ...current, [key]: legendItems };
       if (validKeys) {
-        const pruned: Record<string, ColorMap> = {};
+        const pruned: Record<string, LegendItem[]> = {};
         validKeys.forEach((k) => {
           if (next[k]) pruned[k] = next[k];
         });
@@ -156,11 +166,12 @@ export const CommonVisualizationRender = ({
   const isLegendAfter = legendPosition === Positions.BOTTOM || legendPosition === Positions.RIGHT;
 
   const renderLegend = () =>
+    supportsCustomLegend &&
     showLegend && (
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
         position={legendPosition}
       />
     );
@@ -170,7 +181,7 @@ export const CommonVisualizationRender = ({
   if (visConfig?.splitField) {
     const splitColumn = columns.find((col) => col.name === visConfig.splitField);
     if (splitColumn) {
-      const groups = groupDataBySplitField(rows, splitColumn.column);
+      const groups = getSplitKeysBySplitField(rows, splitColumn.column);
 
       return (
         <div
@@ -186,21 +197,22 @@ export const CommonVisualizationRender = ({
               groups={groups}
               layout={visConfig.splitLayout ?? 'auto'}
               showLabel={visConfig.showSplitLabel}
-              renderChart={(groupData, groupKey) => (
+              verticalItemMinHeight={visConfig.type === 'metric' ? 60 : undefined}
+              horizontalItemMinWidth={horizontalSplitMinWidth}
+              renderChart={(groupKey) => (
                 <ChartRender
-                  data={{ ...visualizationData, transformedData: groupData }}
+                  data={{ ...visualizationData }}
+                  dataFilter={(data) => filterDataBySplitField(data, splitColumn.column, groupKey)}
                   config={visConfig}
-                  onLegend={(legend) =>
-                    onLegend(
-                      groupKey,
-                      legend,
-                      groups.map((g) => g.key)
-                    )
-                  }
+                  renderContext={{
+                    seriesName: groupKey,
+                    crosshairGroup,
+                  }}
+                  onLegend={(legend) => onLegend(groupKey, legend, groups)}
                   timeRange={timeRange}
                   onSelectTimeRange={onSelectTimeRange}
                   legendSelected$={legendSelected$}
-                  highlightedSeries$={highlightedSeries$}
+                  highlightedLegendTarget$={highlightedLegendTarget$}
                 />
               )}
             />
@@ -227,11 +239,12 @@ export const CommonVisualizationRender = ({
           <ChartRender
             data={visualizationData}
             config={visConfig}
+            renderContext={{ crosshairGroup }}
             onLegend={(legend) => onLegend('__default__', legend, ['__default__'])}
             timeRange={timeRange}
             onSelectTimeRange={onSelectTimeRange}
             legendSelected$={legendSelected$}
-            highlightedSeries$={highlightedSeries$}
+            highlightedLegendTarget$={highlightedLegendTarget$}
           />
         </div>
         {isLegendAfter && renderLegend()}
@@ -249,6 +262,7 @@ export const VisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
@@ -261,26 +275,31 @@ export const VisualizationRender = ({
       timeRange={inputTimeRange}
       onSelectTimeRange={onSelectTimeRange}
       onStyleChange={onStyleChange}
+      crosshairGroup={crosshairGroup}
     />
   );
 };
 
 const ChartRender = ({
   data,
+  dataFilter,
   config,
+  renderContext,
   onLegend,
   timeRange,
   onSelectTimeRange,
   legendSelected$,
-  highlightedSeries$,
+  highlightedLegendTarget$,
 }: {
   data?: VisData;
+  dataFilter?: (data: Array<Record<string, any>>) => Array<Record<string, any>>;
   config?: RenderChartConfig;
-  onLegend?: (legend: ColorMap) => void;
+  renderContext?: VisualizationRenderContext;
+  onLegend?: (legendItems: LegendItem[]) => void;
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;
-  highlightedSeries$?: BehaviorSubject<string | undefined>;
+  highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
 }) => {
   if (!data) {
     return null;
@@ -291,9 +310,9 @@ const ChartRender = ({
   }
 
   const columns = [
-    ...(data?.numericalColumns ?? []),
-    ...(data?.categoricalColumns ?? []),
-    ...(data?.dateColumns ?? []),
+    ...(data.numericalColumns ?? []),
+    ...(data.categoricalColumns ?? []),
+    ...(data.dateColumns ?? []),
   ];
 
   const rule = visualizationRegistry.findRuleByAxesMapping(
@@ -305,19 +324,21 @@ const ChartRender = ({
     return null;
   }
   const standardAxes = 'standardAxes' in config.styles ? config.styles.standardAxes : [];
-  const axisColumnMappings = convertStringsToMappings(config?.axesMapping ?? {}, columns);
-  // initialize axis config
+  const axisColumnMappings = convertStringsToMappings(config.axesMapping ?? {}, columns);
   const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
   const styles = { ...config.styles, standardAxes: allAxisConfig };
+  const visibleData = dataFilter ? dataFilter(data.transformedData) : data.transformedData;
 
   return rule.render({
-    transformedData: data.transformedData,
+    data: visibleData,
+    allData: data.transformedData,
     styleOptions: styles,
     axisColumnMappings,
     timeRange,
+    renderContext,
     onSelectTimeRange,
     onLegend,
     legendSelected$,
-    highlightedSeries$,
+    highlightedLegendTarget$,
   });
 };

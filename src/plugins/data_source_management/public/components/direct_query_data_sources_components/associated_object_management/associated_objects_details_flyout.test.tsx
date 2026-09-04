@@ -104,8 +104,7 @@ describe('AssociatedObjectsDetailsFlyout', () => {
     fireEvent.click(screen.getAllByRole('button')[0]);
     await waitFor(() => {
       expect(mockApplication.navigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path:
-          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'',meta:(name:testDatasource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'::testDatasource.testDatabase.testTable',title:testDatasource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDatasource.testDatabase.testTable%20LIMIT%2010'))",
+        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'',meta:(name:testDatasource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'::testDatasource.testDatabase.testTable',title:testDatasource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDatasource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });

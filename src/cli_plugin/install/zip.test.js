@@ -87,13 +87,34 @@ describe('opensearchDashboards cli', function () {
           ]
         `);
       });
+
+      it('does not extract entries whose names merely start with the strip prefix (suffix-safety)', async () => {
+        // prefix_confusion.zip contains:
+        //   opensearch-dashboards/test-plugin-evil/malware.js  <- must be skipped
+        //   opensearch-dashboards/test-plugin/safe.txt         <- must be extracted
+        const archive = path.resolve(repliesPath, 'prefix_confusion.zip');
+        await extractArchive(archive, tempPath, 'opensearch-dashboards/test-plugin');
+
+        const extracted = glob.sync('**/*', { cwd: tempPath });
+        expect(extracted).toEqual(['safe.txt']);
+        expect(extracted).not.toContain('malware.js');
+      });
+
+      it('rejects zip-slip path traversal attempts', async () => {
+        const archive = path.resolve(repliesPath, 'zip_slip.zip');
+        // yauzl v3 may itself reject traversal paths before our guard fires;
+        // either rejection is acceptable — both protect against zip-slip.
+        await expect(
+          extractArchive(archive, tempPath, 'opensearch-dashboards/test-plugin')
+        ).rejects.toThrow(/Zip slip detected|invalid relative path/i);
+      });
     });
 
     it('handles a corrupt zip archive', async () => {
       await expect(
         extractArchive(path.resolve(repliesPath, 'corrupt.zip'))
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"end of central directory record signature not found"`
+        `"End of central directory record signature not found. Either not a zip file, or file is truncated."`
       );
     });
   });

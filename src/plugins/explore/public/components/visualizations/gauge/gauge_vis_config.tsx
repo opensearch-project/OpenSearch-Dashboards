@@ -6,17 +6,15 @@
 import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { GaugeVisStyleControls } from './gauge_vis_options';
-import { ThresholdOptions, AxisRole, VisFieldType, Threshold } from '../types';
+import { ThresholdOptions, AxisRole, VisFieldType, Threshold, StandardOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { createGauge } from './to_expression';
-import { EchartsRender } from '../echarts_render';
+import { GaugeChartRender } from './gauge_component';
 
-export interface GaugeChartStyleOptions {
+export interface GaugeChartStyleOptions extends StandardOptions {
   showTitle?: boolean;
   title?: string;
-  min?: number;
-  max?: number;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -27,15 +25,17 @@ export interface GaugeChartStyleOptions {
    */
   thresholds?: Threshold[];
   valueCalculation?: CalculationMethod;
-  unitId?: string;
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
 }
 
 export type GaugeChartStyle = Required<
-  Omit<GaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'baseColor' | 'thresholds'>
+  Omit<
+    GaugeChartStyleOptions,
+    'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals' | 'baseColor' | 'thresholds'
+  >
 > &
-  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
+  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultGaugeChartStyles: GaugeChartStyle = {
   showTitle: true,
@@ -64,10 +64,16 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
         render(props) {
           const value = props.axisColumnMappings.value?.[0];
           if (!value) throw Error('Missing axis config for gauge chart');
-          const spec = createGauge(props.transformedData, props.styleOptions, {
+          const gauge = createGauge(props.data, props.styleOptions, {
             [AxisRole.Value]: value,
           });
-          return <EchartsRender spec={spec ?? {}} />;
+          return (
+            <GaugeChartRender
+              spec={gauge.spec}
+              text={gauge.text}
+              seriesName={props.renderContext?.seriesName}
+            />
+          );
         },
       },
     ];

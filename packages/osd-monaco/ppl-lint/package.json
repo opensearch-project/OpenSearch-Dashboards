@@ -1,0 +1,4 @@
+{
+  "main": "../target/ppl/lint/index.js",
+  "types": "../target/ppl/lint/index.d.ts"
+}
