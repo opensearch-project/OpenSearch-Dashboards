@@ -370,6 +370,21 @@ export interface CoreStart {
 }
 
 export {
+  AddSavedObjectAnnotationToObjectInput,
+  CreateSavedObjectAnnotationInput,
+  DeleteSavedObjectAnnotationInput,
+  FindSavedObjectAnnotationsOptions,
+  GetSavedObjectAnnotationsForObjectInput,
+  RemoveSavedObjectAnnotationFromObjectInput,
+  SavedObjectAnnotation,
+  SavedObjectAnnotationService,
+  SavedObjectAnnotationTarget,
+  SAVED_OBJECT_ANNOTATION_TYPE,
+  SetSavedObjectAnnotationsForObjectInput,
+  UpdateSavedObjectAnnotationInput,
+} from '../types';
+
+export {
   Capabilities,
   ChromeBadge,
   ChromeBreadcrumb,

@@ -218,6 +218,7 @@ export class LegacyService implements CoreService {
         getServerInfo: startDeps.core.http.getServerInfo,
       },
       savedObjects: {
+        annotations: startDeps.core.savedObjects.annotations,
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
@@ -283,6 +284,7 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },
       savedObjects: {
+        annotations: setupDeps.core.savedObjects.annotations,
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,

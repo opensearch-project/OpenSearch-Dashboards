@@ -33,6 +33,7 @@ import { InternalCoreStart } from './internal_types';
 import { OpenSearchDashboardsRequest } from './http/router';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { InternalSavedObjectsServiceStart, ISavedObjectTypeRegistry } from './saved_objects';
+import { SavedObjectAnnotationService } from '../types';
 import {
   InternalOpenSearchServiceStart,
   IScopedClusterClient,
@@ -80,6 +81,7 @@ class CoreSavedObjectsRouteHandlerContext {
     private readonly request: OpenSearchDashboardsRequest
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
+  #scopedSavedObjectAnnotationClient?: SavedObjectAnnotationService;
   #typeRegistry?: ISavedObjectTypeRegistry;
 
   public get client() {
@@ -87,6 +89,15 @@ class CoreSavedObjectsRouteHandlerContext {
       this.#scopedSavedObjectsClient = this.savedObjectsStart.getScopedClient(this.request);
     }
     return this.#scopedSavedObjectsClient;
+  }
+
+  public get annotations() {
+    if (this.#scopedSavedObjectAnnotationClient == null) {
+      this.#scopedSavedObjectAnnotationClient = this.savedObjectsStart.annotations.getClient(
+        this.request
+      );
+    }
+    return this.#scopedSavedObjectAnnotationClient;
   }
 
   public get typeRegistry() {

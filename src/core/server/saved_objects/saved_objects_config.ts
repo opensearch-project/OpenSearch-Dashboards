@@ -65,6 +65,9 @@ export const savedObjectsConfig = {
     permission: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    annotations: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
     storage: schema.object({
       backend: schema.oneOf([schema.literal('opensearch'), schema.literal('sqlite')], {
         defaultValue: 'opensearch',
@@ -84,6 +87,9 @@ export class SavedObjectConfig {
   public permission: {
     enabled: boolean;
   };
+  public annotations: {
+    enabled: boolean;
+  };
   public storage: {
     backend: 'opensearch' | 'sqlite';
     sqlite: { path: string };
@@ -98,6 +104,9 @@ export class SavedObjectConfig {
     this.migration = rawMigrationConfig;
     this.permission = {
       enabled: rawConfig.permission.enabled,
+    };
+    this.annotations = {
+      enabled: rawConfig.annotations.enabled,
     };
     this.storage = {
       backend: rawConfig.storage.backend,

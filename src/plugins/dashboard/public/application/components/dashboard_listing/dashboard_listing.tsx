@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import {
   useOpenSearchDashboards,
   TableListView,
@@ -35,6 +36,7 @@ export const DashboardListing = () => {
       data: { query },
       osdUrlStateStorage,
       navigation,
+      savedObjectTags,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
@@ -42,8 +44,10 @@ export const DashboardListing = () => {
   const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
   const initialFiltersFromURL = queryParameters.get('filter');
   const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
+  const [selectedTagId, setSelectedTagId] = useState<string>();
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
+  const TagSelector = savedObjectTags?.ui.TagSelector;
   const { setAppRightControls } = application;
 
   useEffect(() => {
@@ -96,10 +100,40 @@ export const DashboardListing = () => {
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
 
-  const tableColumns = useMemo(
-    () => getTableColumns(application, history, uiSettings),
-    [application, history, uiSettings]
-  );
+  const tableColumns = useMemo(() => {
+    const columns = getTableColumns(application, history, uiSettings);
+    if (!savedObjectTags) {
+      return columns;
+    }
+
+    const { TagList } = savedObjectTags.ui;
+    return [
+      ...columns,
+      {
+        field: 'id',
+        name: i18n.translate('dashboard.listing.table.tagsColumnName', {
+          defaultMessage: 'Tags',
+        }),
+        sortable: false,
+        ['data-test-subj']: 'dashboard-tags',
+        render: (
+          id: string,
+          record: {
+            savedObjectType: string;
+          }
+        ) => (
+          <TagList
+            target={{
+              objectType: record.savedObjectType,
+              objectId: id,
+            }}
+            loadingContent={<EuiLoadingSpinner size="s" />}
+            emptyContent="-"
+          />
+        ),
+      },
+    ];
+  }, [application, history, uiSettings, savedObjectTags]);
 
   const createItem = useCallback(() => {
     history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
@@ -122,6 +156,7 @@ export const DashboardListing = () => {
       id: obj.id,
       appId: provider.appId,
       type: provider.savedObjectsName,
+      savedObjectType: obj.type,
       ...obj.attributes,
       updated_at: obj.updated_at,
       viewUrl: provider.viewUrlPathFn(obj),
@@ -138,6 +173,12 @@ export const DashboardListing = () => {
       page: 1,
       searchFields: ['title^3', 'type', 'description'],
       defaultSearchOperator: 'AND',
+      ...(selectedTagId && {
+        hasReference: {
+          type: 'saved-object-annotation',
+          id: selectedTagId,
+        },
+      }),
     });
     const list = res.savedObjects?.map(mapListAttributesToDashboardProvider) || [];
 
@@ -237,6 +278,20 @@ export const DashboardListing = () => {
         })}
         toastNotifications={notifications.toasts}
         showUpdatedUx={showUpdatedUx}
+        refreshKey={savedObjectTags ? selectedTagId : undefined}
+        hasActiveFilters={Boolean(savedObjectTags && selectedTagId)}
+        tableFilters={
+          TagSelector ? (
+            <>
+              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                <EuiFlexItem grow={false} className="dshTagSelector">
+                  <TagSelector selectedTagId={selectedTagId} onChange={setSelectedTagId} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          ) : undefined
+        }
       />
     </>
   );

@@ -33,6 +33,7 @@ import { Dashboard } from '../../../dashboard';
 import { DashboardContainer } from '../../embeddable';
 import { createDashboardServicesMock } from '../../utils/mocks';
 import { mount } from 'enzyme';
+import { act } from 'react';
 import { TopNavMenu, TopNavControls as HeaderControl } from 'src/plugins/navigation/public';
 import { dashboardAppStateStub } from '../../utils/stubs';
 import { ViewMode } from 'src/plugins/embeddable/public';
@@ -52,13 +53,16 @@ jest.mock('react-router-dom', () => ({
 function wrapDashboardTopNavInContext(
   mockServices: any,
   currentState: DashboardAppState,
-  includeKeyboardShortcut = false
+  includeKeyboardShortcut = false,
+  dashboardIdFromUrl = '',
+  isChromeVisible = false
 ) {
   const { keyboardShortcut, ...servicesWithoutKeyboardShortcut } = mockServices;
 
   const services = {
     ...servicesWithoutKeyboardShortcut,
     dashboardCapabilities: {
+      ...servicesWithoutKeyboardShortcut.dashboardCapabilities,
       saveQuery: true,
     },
     navigation: {
@@ -72,7 +76,7 @@ function wrapDashboardTopNavInContext(
   };
 
   const topNavProps = {
-    isChromeVisible: false,
+    isChromeVisible,
     savedDashboardInstance: {},
     appState: {
       getState: () => currentState,
@@ -82,7 +86,7 @@ function wrapDashboardTopNavInContext(
     isEmbeddableRendered: true,
     currentContainer: {} as DashboardContainer,
     indexPatterns: [],
-    dashboardIdFromUrl: '',
+    dashboardIdFromUrl,
   };
 
   return (
@@ -177,6 +181,95 @@ describe('Dashboard top nav', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('shows tags in the saved dashboard view header and opens the assignment modal', async () => {
+    mockServices.dashboardCapabilities = {
+      showWriteControls: true,
+    };
+    mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
+    const component = mount(
+      wrapDashboardTopNavInContext(
+        mockServices,
+        { ...currentState, fullScreenMode: false, viewMode: ViewMode.VIEW },
+        false,
+        'dashboard-1',
+        true
+      )
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => process.nextTick(resolve));
+    });
+    component.update();
+
+    const config = component.find(TopNavMenu).prop('config') as any[];
+    const tagAction = config.find(({ testId }) => testId === 'dashboardTagsMenuItem');
+    expect(tagAction).toBeDefined();
+    expect(tagAction.tooltip.props).toEqual(
+      expect.objectContaining({
+        refreshKey: 0,
+        target: {
+          objectType: 'dashboard',
+          objectId: 'dashboard-1',
+        },
+      })
+    );
+
+    act(() => {
+      tagAction.run();
+    });
+
+    expect(mockServices.overlays.openModal).toHaveBeenCalledTimes(1);
+  });
+
+  test('hides the tag mutation control when write controls are disabled', async () => {
+    mockServices.dashboardCapabilities = {
+      showWriteControls: false,
+    };
+    mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
+    const component = mount(
+      wrapDashboardTopNavInContext(
+        mockServices,
+        { ...currentState, fullScreenMode: false, viewMode: ViewMode.VIEW },
+        false,
+        'dashboard-1',
+        true
+      )
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => process.nextTick(resolve));
+    });
+    component.update();
+
+    const config = component.find(TopNavMenu).prop('config') as any[];
+    expect(config.map(({ testId }) => testId)).not.toContain('dashboardTagsMenuItem');
+  });
+
+  test('hides tags when the tags plugin is disabled', async () => {
+    mockServices.savedObjectTags = undefined;
+    mockServices.dashboardCapabilities = {
+      showWriteControls: true,
+    };
+    mockServices.uiSettings.get.mockImplementation((key: string) => key === 'home:useNewHomePage');
+    const component = mount(
+      wrapDashboardTopNavInContext(
+        mockServices,
+        { ...currentState, fullScreenMode: false, viewMode: ViewMode.VIEW },
+        false,
+        'dashboard-1',
+        true
+      )
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => process.nextTick(resolve));
+    });
+    component.update();
+
+    const config = component.find(TopNavMenu).prop('config') as any[];
+    expect(config.map(({ testId }) => testId)).not.toContain('dashboardTagsMenuItem');
   });
 
   describe('Keyboard Shortcuts Integration', () => {
