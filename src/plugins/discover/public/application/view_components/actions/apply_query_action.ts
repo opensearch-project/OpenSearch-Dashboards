@@ -30,7 +30,7 @@ export const LANGUAGE_TOOLS: LanguageToolConfig[] = [
   { languageKey: 'kuery', displayName: 'DQL', toolName: 'apply_dql_query' },
   { languageKey: 'lucene', displayName: 'Lucene', toolName: 'apply_lucene_query' },
   { languageKey: 'PPL', displayName: 'PPL', toolName: 'apply_ppl_query' },
-  { languageKey: 'SQL', displayName: 'OpenSearch SQL', toolName: 'apply_sql_query' },
+  { languageKey: 'SQL', displayName: 'SQL', toolName: 'apply_sql_query' },
 ];
 
 export const buildToolDefinition = (cfg: LanguageToolConfig) => {
