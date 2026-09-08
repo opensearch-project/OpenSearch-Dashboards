@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { CSSProperties, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
@@ -20,6 +20,30 @@ interface BarGaugeRenderProps {
   styles: BarGaugeChartStyle;
   isHorizontal: boolean;
 }
+
+interface BarGaugeContainerStyle extends CSSProperties {
+  '--bar-gauge-value-width': string;
+}
+
+const DEFAULT_VALUE_FONT_SIZE = 14;
+const VALUE_WIDTH_BUFFER = 2;
+const DEFAULT_VALUE_FONT_FAMILY =
+  'Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+
+let measurementContext: CanvasRenderingContext2D | null = null;
+
+const measureTextWidth = (text: string, fontSize: number, fontFamily: string): number => {
+  if (!measurementContext && typeof document !== 'undefined') {
+    measurementContext = document.createElement('canvas').getContext('2d');
+  }
+
+  if (!measurementContext) {
+    return text.length * fontSize * 0.6;
+  }
+
+  measurementContext.font = `400 ${fontSize}px ${fontFamily}`;
+  return measurementContext.measureText(text).width;
+};
 
 // Build thresholds for each bar
 const buildItemThresholds = (
@@ -45,6 +69,7 @@ const buildItemThresholds = (
 export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderProps) => {
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [valueFontFamily, setValueFontFamily] = useState(DEFAULT_VALUE_FONT_FAMILY);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const handlerRef = useRef(
     debounce((entries: ResizeObserverEntry[]) => {
@@ -58,6 +83,8 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
+
+    setValueFontFamily(getComputedStyle(element).fontFamily || DEFAULT_VALUE_FONT_FAMILY);
 
     const handler = handlerRef.current;
     const resizeObserver = new ResizeObserver(handler);
@@ -198,10 +225,30 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     return Math.min(24, fontSize);
   }, [containerDimensions, data.length, isHorizontal, items]);
 
+  const valueColumnWidth = useMemo(() => {
+    if (!isHorizontal || styles.exclusive.valueDisplay === 'hidden' || items.length === 0) {
+      return 0;
+    }
+
+    const fontSize = valueFontSize ?? DEFAULT_VALUE_FONT_SIZE;
+    const widestValue = items.reduce(
+      (maxWidth, item) =>
+        Math.max(maxWidth, measureTextWidth(item.displayValue, fontSize, valueFontFamily)),
+      0
+    );
+
+    return Math.ceil(widestValue) + VALUE_WIDTH_BUFFER;
+  }, [isHorizontal, items, styles.exclusive.valueDisplay, valueFontFamily, valueFontSize]);
+
+  const containerStyle: BarGaugeContainerStyle | undefined = isHorizontal
+    ? { '--bar-gauge-value-width': `${valueColumnWidth}px` }
+    : undefined;
+
   return (
     <div
       ref={containerRef}
       className={`main-bar-gauge-container ${isHorizontal ? 'horizontal' : 'vertical'}`}
+      style={containerStyle}
     >
       {items.map((item, index) => (
         <BarGaugeItem

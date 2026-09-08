@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 
 import { ChatHeaderButton } from './chat_header_button';
 import { coreMock } from '../../../../core/public/mocks';
@@ -87,6 +88,77 @@ describe('ChatHeaderButton', () => {
       button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
       expect(mockCore.chat.closeWindow).toHaveBeenCalled();
+    });
+  });
+
+  describe('open state data-test-subj', () => {
+    it('should expose the open-window test subj when the window is closed', () => {
+      mockCore.chat.getWindowState$.mockReturnValue(
+        new BehaviorSubject({
+          isWindowOpen: false,
+          windowMode: 'sidecar' as const,
+          paddingSize: 400,
+        })
+      );
+
+      const { container } = render(<ChatHeaderButton core={mockCore} />);
+
+      expect(
+        container.querySelector('[data-test-subj="chatHeaderButtonOpenChatWindow"]')
+      ).toBeTruthy();
+      expect(
+        container.querySelector('[data-test-subj="chatHeaderButtonCloseChatWindow"]')
+      ).toBeNull();
+    });
+
+    it('should expose the close-window test subj when the window is open', () => {
+      mockCore.chat.getWindowState$.mockReturnValue(
+        new BehaviorSubject({
+          isWindowOpen: true,
+          windowMode: 'sidecar' as const,
+          paddingSize: 400,
+        })
+      );
+
+      const { container } = render(<ChatHeaderButton core={mockCore} />);
+
+      expect(
+        container.querySelector('[data-test-subj="chatHeaderButtonCloseChatWindow"]')
+      ).toBeTruthy();
+      expect(
+        container.querySelector('[data-test-subj="chatHeaderButtonOpenChatWindow"]')
+      ).toBeNull();
+    });
+
+    it('should replace the button node (not mutate in place) when the window state changes', () => {
+      const windowState$ = new BehaviorSubject({
+        isWindowOpen: false,
+        windowMode: 'sidecar' as const,
+        paddingSize: 400,
+      });
+      mockCore.chat.getWindowState$.mockReturnValue(windowState$);
+
+      const { container } = render(<ChatHeaderButton core={mockCore} />);
+
+      const openButton = container.querySelector(
+        '[data-test-subj="chatHeaderButtonOpenChatWindow"]'
+      );
+      expect(openButton).toBeTruthy();
+
+      act(() => {
+        windowState$.next({ isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 });
+      });
+
+      const closeButton = container.querySelector(
+        '[data-test-subj="chatHeaderButtonCloseChatWindow"]'
+      );
+      expect(closeButton).toBeTruthy();
+      // The rendered node is a brand-new element (state-derived key forces a
+      // remount), not the same node with a mutated attribute.
+      expect(closeButton).not.toBe(openButton);
+      // The old node is detached but keeps its original (pre-click) test subj,
+      // which is what click telemetry reads from the clicked element.
+      expect(openButton?.getAttribute('data-test-subj')).toBe('chatHeaderButtonOpenChatWindow');
     });
   });
 

@@ -20,12 +20,27 @@ export interface QueryProfile {
   isComplex?: boolean;
 }
 
+/**
+ * A non-fatal notice attached to an otherwise-successful query response by the backend (e.g. a
+ * partial result returned over a subset of indices). Surfaced to the user so a correct-but-partial
+ * result is never mistaken for a complete one.
+ */
+export interface QueryWarning {
+  // Machine-readable category, e.g. 'PARTIAL_RESULT'.
+  type: string;
+  // Short human-readable summary.
+  message: string;
+  // Optional longer explanation with specifics and remedy.
+  detail?: string;
+}
+
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
   profile?: QueryProfile;
   /** Data frame meta as the search strategy returned it; keys belong to the strategy. */
   frameMeta?: Record<string, unknown>;
+  warnings?: QueryWarning[];
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
@@ -48,6 +63,7 @@ export interface ResultMetadata {
   instantFieldSchema?: Array<Partial<IFieldType>>;
   hasResults: boolean;
   profile?: QueryProfile;
+  warnings?: QueryWarning[];
 }
 
 export type ResultsState = Record<string, ResultMetadata>;
@@ -74,6 +90,7 @@ const extractMetadata = (result: ISearchResult): ResultMetadata => ({
   instantFieldSchema: (result as IPrometheusSearchResult).instantFieldSchema,
   hasResults: (result.hits?.hits?.length ?? 0) > 0,
   profile: result.profile,
+  warnings: result.warnings,
 });
 
 const initialState: ResultsState = {};

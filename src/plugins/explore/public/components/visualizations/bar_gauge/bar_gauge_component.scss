@@ -9,8 +9,8 @@ $bar-gauge-radius: 2px;
 
   &.horizontal {
     flex-direction: column;
-    padding: 4% 2%;
-    gap: 40px; // fixed to 40px, min height for horizontal bar
+    padding: 20px;
+    gap: 20px; // fixed to 20px, min height for horizontal bar
   }
 
   &.vertical {
@@ -30,7 +30,7 @@ $bar-gauge-radius: 2px;
   }
 
   .horizontal & {
-    min-height: 40px;
+    min-height: 64px;
   }
 }
 
@@ -40,10 +40,12 @@ $bar-gauge-radius: 2px;
   flex: 1;
 
   &.horizontal {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
     width: 100%;
-    min-height: 40px; // don't shrink below this — container scrolls
+    min-height: 64px; // don't shrink below this — container scrolls
+    overflow: visible;
   }
 
   &.vertical {
@@ -57,22 +59,33 @@ $bar-gauge-radius: 2px;
 // bar gauge label
 .bar-gauge-label {
   font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 
   .horizontal & {
-    width: 80px;
-    min-width: 80px;
-    padding-right: 8px;
-    text-align: right;
+    font-size: 18px;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .vertical & {
     width: 100%;
     padding-top: 8px;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+}
+
+.bar-gauge-bar-row {
+  display: flex;
+  align-items: stretch;
+  column-gap: 16px;
+  flex: 1;
+  width: 100%;
+  min-height: 40px;
 }
 
 // unfilled area background
@@ -82,6 +95,7 @@ $bar-gauge-radius: 2px;
   border-radius: $bar-gauge-radius;
 
   .horizontal & {
+    min-width: 0;
     height: 100%;
   }
 
@@ -144,12 +158,19 @@ $bar-gauge-radius: 2px;
 .bar-gauge-value {
   font-weight: 400;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  .horizontal & {
+    flex: 0 0 var(--bar-gauge-value-width);
+    width: var(--bar-gauge-value-width);
+    align-self: center;
+    text-align: right;
+  }
 
   .vertical & {
     font-size: 14px;
     text-align: center;
     margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

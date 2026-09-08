@@ -15,6 +15,8 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
+import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
+import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -104,25 +106,6 @@ export function fillMissingTimestamps(
 }
 
 /**
- * Masks subquery brackets and quoted string literals in a PPL query so that command-detection
- * regexes only match top-level pipes.
- *
- * - Brackets: `[...]` content is replaced with NUL characters. Uses [\s\S]*? to cross newlines.
- * - Quotes: single- and double-quoted strings are replaced with NUL characters so that
- *   `| stats` inside a string literal (e.g. `where msg = '| stats count()'`) is not matched.
- *
- * Shared by queryEndsWithHead and queryHasStats.
- */
-const maskPPLSubqueriesAndStrings = (queryString: string): string => {
-  // First mask quoted strings (handles escaped quotes within)
-  let masked = queryString.replace(/'(?:[^'\\]|\\.)*'/g, (match) => '\0'.repeat(match.length));
-  masked = masked.replace(/"(?:[^"\\]|\\.)*"/g, (match) => '\0'.repeat(match.length));
-  // Then mask bracket subqueries ([\s\S]*? crosses newlines)
-  masked = masked.replace(/\[[\s\S]*?\]/g, (match) => '\0'.repeat(match.length));
-  return masked;
-};
-
-/**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
  * Subquery brackets and quoted strings are masked so that head inside them is ignored.
  */
@@ -132,17 +115,16 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a `stats` command, whose output rows are aggregation
- * buckets rather than documents. Subquery brackets and quoted strings are masked so that
- * `stats` inside them is ignored.
+ * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
+ * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
+ * brackets and quoted strings are masked so that a command inside them is ignored.
  *
- * Used to detect queries where the hit counter should show bucket count separately from
- * document count. Other aggregating commands (chart, timechart, top, rare, etc.) will be
- * added in a follow-up PR once stripStatsFromQuery is extended to handle them.
+ * Used to detect queries where the hit counter should show bucket count separately from document
+ * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
  */
-export const queryHasStats = (queryString: string): boolean => {
+export const queryHasAggregation = (queryString: string): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return /\|\s*stats\b/i.test(masked);
+  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
 };
 
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {

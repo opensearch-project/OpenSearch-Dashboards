@@ -25,6 +25,7 @@ import {
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
+import { ConversationDataSourceStore } from './conversation_data_source_store';
 
 export interface DataSourceInfo {
   id: string;
@@ -48,6 +49,10 @@ export interface CurrentChatState {
  * {@link ChatService.waitBeforeContinuation}.
  */
 export const CONTINUATION_DISPATCH_DELAY_MS = 3000;
+
+export const AVAILABLE_DATA_SOURCES_CONTEXT_ID = 'available-data-sources-context';
+export const AVAILABLE_DATA_SOURCES_CONTEXT_DES =
+  'Context for available data sources in this conversation';
 
 export class ChatService {
   private agent: AgUiAgent;
@@ -79,10 +84,12 @@ export class ChatService {
 
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
-
-  // Data source explicitly selected by user in this session
-  private cachedDataSourceId?: string;
-
+  // User-confirmed conversation-level data source override.
+  private confirmedDataSourceId?: string;
+  // Data source ids that have appeared in this conversation.
+  private sessionDataSourceList: string[] = [];
+  // Persists confirmedDataSourceId + sessionDataSourceList per threadId
+  private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
 
@@ -267,7 +274,7 @@ export class ChatService {
   public async sendMessageWithWindow(
     content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -282,6 +289,10 @@ export class ChatService {
     // Reset chat window UI to a fresh chat panel
     if (options?.clearConversation) {
       chatWindowInstance.startNewChat();
+    }
+
+    if (options?.dataSourceId) {
+      this.setDataSourceId(options.dataSourceId);
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -303,6 +314,7 @@ export class ChatService {
 
   private getDataSourceFromPageContext() {
     const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+    this.setSessionDataSourceList(dsId);
     return dsId;
   }
 
@@ -366,7 +378,8 @@ export class ChatService {
       // Try to get data source from page context first
       const pageDataSourceId = this.getDataSourceFromPageContext();
       if (pageDataSourceId) {
-        this.cachedDataSourceId = pageDataSourceId;
+        // update cache data source and add new session data source
+        this.setDataSourceId(pageDataSourceId);
         return pageDataSourceId;
       }
 
@@ -394,8 +407,7 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-
-      this.cachedDataSourceId = dataSourceId || undefined;
+      this.setDataSourceId(dataSourceId || undefined);
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -406,13 +418,111 @@ export class ChatService {
 
   /**
    * Get the current data source ID from all resolution sources.
+   *
+   * Priority (highest to lowest):
+   *   1. getDataSourceFromPageContext() — data source inferred from the current page/panel context
+   *   2. confirmedDataSourceId    — explicit conversation-level override confirmed or selected by the user
+   *   3. getWorkspaceAwareDataSourceId() — workspace default
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return (
+    const ds =
       this.getDataSourceFromPageContext() ||
-      this.cachedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId())
-    );
+      this.confirmedDataSourceId ||
+      (await this.getWorkspaceAwareDataSourceId());
+
+    return ds;
+  }
+
+  public getConfirmedDataSourceId(): string | undefined {
+    return this.confirmedDataSourceId;
+  }
+
+  public clearSessionDataSourceAndContext(): void {
+    this.confirmedDataSourceId = undefined;
+    this.sessionDataSourceList = [];
+    this.clearDynamicContextFromStore(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+  }
+
+  public setSessionDataSourceList(id: string | undefined): void {
+    if (!id || this.sessionDataSourceList.includes(id)) {
+      return;
+    }
+
+    this.sessionDataSourceList = [...this.sessionDataSourceList, id];
+    this.persistDataSourceState();
+  }
+
+  public getSessionDataSourceList(): string[] {
+    return [...this.sessionDataSourceList];
+  }
+
+  private clearConversationDataSourceState(): void {
+    this.confirmedDataSourceId = undefined;
+    this.sessionDataSourceList = [];
+    this.cachedAvailableDataSources = undefined;
+  }
+
+  private persistDataSourceState(): void {
+    const threadId = this.getThreadId();
+    if (!threadId) return;
+    this.conversationDataSourceStore.set(threadId, {
+      sessionDataSourceList: this.sessionDataSourceList,
+      confirmedDataSourceId: this.confirmedDataSourceId,
+    });
+  }
+
+  /**
+   * Restore a conversation's data source state from the store
+   */
+  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
+    const stored = this.conversationDataSourceStore.get(threadId);
+    if (!stored) return;
+
+    const [validIds, confirmedValid] = await Promise.all([
+      Promise.all(
+        (stored.sessionDataSourceList ?? []).map((id) =>
+          this.validateDataSourceId(id)
+            .then(({ valid }) => (valid ? id : undefined))
+            .catch(() => undefined)
+        )
+      ),
+      stored.confirmedDataSourceId
+        ? this.validateDataSourceId(stored.confirmedDataSourceId)
+            .then(({ valid }) => valid)
+            .catch(() => false)
+        : Promise.resolve(false),
+    ]);
+
+    if (this.getThreadId() !== threadId) return;
+
+    this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
+    this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
+
+    this.persistDataSourceState();
+  }
+
+  /**
+   * Check a data source id against the available data source list.
+   */
+  public async validateDataSourceId(id: string): Promise<{
+    valid: boolean;
+    dataSource?: DataSourceInfo;
+    availableDataSources: DataSourceInfo[];
+  }> {
+    let available = await this.getAvailableDataSources();
+    let dataSource = available.find((ds) => ds.id === id);
+
+    // A data source created after the cache warmed would be rejected — refresh once.
+    if (!dataSource && available.length > 0) {
+      available = await this.getAvailableDataSources(true);
+      dataSource = available.find((ds) => ds.id === id);
+    }
+
+    if (available.length === 0) {
+      return { valid: true, availableDataSources: available };
+    }
+
+    return { valid: !!dataSource, dataSource, availableDataSources: available };
   }
 
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
@@ -421,6 +531,59 @@ export class ChatService {
     const availableDs = await this.getAvailableDataSources();
     const title = availableDs.find((ds) => ds.id === id)?.title;
     return { id, title };
+  }
+
+  private async buildAvailableDsContext(dataSourceId?: string) {
+    const contextStore = (window as any).assistantContextStore;
+
+    const sessionDataSourceList = this.getSessionDataSourceList();
+
+    if (contextStore && sessionDataSourceList.length > 1) {
+      const availableDataSources = await this.getAvailableDataSources();
+      const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
+
+      const activeDsLabel = activeDatasource
+        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
+        : `id: ${dataSourceId}`;
+      const sessionDsLabel = sessionDataSourceList
+        .map((id) => {
+          const sessionDataSource = availableDataSources.find((ds) => ds.id === id);
+          return sessionDataSource
+            ? `"${sessionDataSource.title}" (id: ${sessionDataSource.id})`
+            : `id: ${id}`;
+        })
+        .join(', ');
+
+      contextStore.addContext({
+        id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
+        description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+        value: [
+          `Currently active data source: ${activeDsLabel}`,
+          `Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): ${sessionDsLabel}`,
+          `IMPORTANT — this conversation involves MORE THAN ONE data source.`,
+          `Before ANY data-source-aware action (inspecting fields, querying data, or creating a`,
+          `visualization), you MUST have the USER pick which data source to use for the current`,
+          `request by calling the ask_user tool with inputType 'select'. Build ONE option per data`,
+          `source listed above: set each option's label to the data source's NAME/title (this is what`,
+          `the user sees — NEVER show the raw id to the user) and its value to that data source's id`,
+          `(used internally to switch, not displayed). Example: ask_user({ inputType: 'select', prompt:`,
+          `'This conversation uses multiple data sources. Which one should I use?', options: [{ label:`,
+          `'<data source name>', value: '<data source id>' }, ...] }).`,
+          `A data source being currently active or previously confirmed does NOT satisfy this`,
+          `requirement — you MUST still call ask_user whenever the user has not explicitly chosen one`,
+          `for the current request. Do NOT silently reuse the current/last data source, do NOT guess,`,
+          `and do NOT ask which data source to use in free-form text.`,
+          `Once the user answers, call switch_data_source with the chosen id to apply it, then proceed`,
+          `using that data source for the rest of the current request.`,
+        ].join('\n'),
+      });
+    } else if (contextStore) {
+      contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+    }
+
+    // Build the per-run context from the store (static + dynamic + the datasource context above),
+    // filtering out categories the model must never receive (e.g. the PPL quick-fix request id).
+    return this.getAgentContexts();
   }
 
   public async sendMessage(
@@ -457,8 +620,8 @@ export class ChatService {
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
-    const context = this.getAgentContexts();
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -541,10 +704,10 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
-
-    const context = this.getAgentContexts();
+    // try the confirmed conversation override first; getCurrentDataSourceId still falls back
+    // to getWorkspaceAwareDataSourceId
+    const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =
@@ -721,14 +884,8 @@ export class ChatService {
 
     if (signal?.aborted) return skip('aborted');
 
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
-
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
     const includeFullHistory =
       this.conversationHistoryService.getMemoryProvider().includeFullHistory;
@@ -783,12 +940,16 @@ export class ChatService {
     }
   }
 
-  private clearDynamicContextFromStore(): void {
+  private clearDynamicContextFromStore(id?: string): void {
     const contextStore = (window as any).assistantContextStore;
     if (!contextStore) {
       return;
     }
 
+    if (id) {
+      contextStore.removeContextById(id);
+      return;
+    }
     // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
     const dynamicContexts = allContexts.filter(
@@ -808,8 +969,7 @@ export class ChatService {
     this.coreChatService.newThread();
 
     // Clear data source selection and cache for new session
-    this.cachedDataSourceId = undefined;
-    this.cachedAvailableDataSources = undefined;
+    this.clearConversationDataSourceState();
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
@@ -952,6 +1112,9 @@ export class ChatService {
         this.coreChatService.setThreadId(latestConversationSummary.threadId);
       }
 
+      // Restore the per-conversation data source state
+      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
+
       return this.injectUnfinishedToolCallEvents(events);
     }
 
@@ -975,7 +1138,17 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
+    await this.restoreDataSourceStateFromStore(threadId);
+
     return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /**
+   * Delete a conversation and its persisted data source state.
+   */
+  public async deleteConversation(threadId: string): Promise<void> {
+    await this.conversationHistoryService.deleteConversation(threadId);
+    this.conversationDataSourceStore.delete(threadId);
   }
 
   /**
@@ -1002,15 +1175,20 @@ export class ChatService {
   /**
    * Explicitly set the data source ID (e.g., after user selection)
    */
-  public setDataSourceId(id: string): void {
-    this.cachedDataSourceId = id;
+  public setDataSourceId(id: string | undefined): void {
+    this.confirmedDataSourceId = id;
+    if (!id) return;
+    this.setSessionDataSourceList(id);
+    this.persistDataSourceState();
   }
 
   /**
    * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
    */
-  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
-    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+  public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
+    // The cache lives until newThread(), so a data source created mid-session is invisible
+    // to it. forceRefresh lets validateDataSourceId() re-check.
+    if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 
     try {

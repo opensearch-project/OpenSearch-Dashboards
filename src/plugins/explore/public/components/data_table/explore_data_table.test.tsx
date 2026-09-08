@@ -49,6 +49,7 @@ jest.mock('../../application/hooks', () => ({
   useChangeQueryEditor: jest.fn(() => ({
     onAddFilter: jest.fn(),
   })),
+  useRerunWithoutPartialResults: jest.fn(() => jest.fn()),
 }));
 
 jest.mock('../../application/context', () => ({
