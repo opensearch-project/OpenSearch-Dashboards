@@ -134,7 +134,7 @@ describe('SpanOverviewTab', () => {
   });
 
   describe('start time and span status display', () => {
-    it('renders formatted start time with duration', () => {
+    it('renders start time and duration as separate fields', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -146,8 +146,12 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
+      // Start time no longer carries the duration inline.
       expect(screen.getByText('Start time')).toBeInTheDocument();
-      expect(screen.getByText('Jan 15 @ 14:30:45.123 (5000000 ns)')).toBeInTheDocument();
+      expect(screen.getByText('Jan 15 @ 14:30:45.123')).toBeInTheDocument();
+      // Duration is its own field, formatted with the shared ladder.
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getByText('5000000 ns')).toBeInTheDocument();
     });
 
     it('renders dash when start time is missing', () => {
@@ -518,7 +522,9 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
-      expect(screen.getByText('Jan 15 @ 14:30:45.123 (0 ns)')).toBeInTheDocument();
+      // Start time renders without an inline duration; zero duration shows "-".
+      expect(screen.getByText('Jan 15 @ 14:30:45.123')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
     });
 
     it('handles span with only HTTP URL but no method', () => {

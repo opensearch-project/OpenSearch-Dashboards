@@ -162,7 +162,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
               startTime
                 ? `${moment(startTime).format('MMM D')} @ ${moment(startTime).format(
                     'HH:mm:ss.SSS'
-                  )} (${formatSpanDuration(duration || 0)})`
+                  )}`
                 : '-'
             }
           />
@@ -201,6 +201,20 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
             }
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
+          <OverviewField
+            label={i18n.translate('explore.spanOverviewTab.duration', {
+              defaultMessage: 'Duration',
+            })}
+            value={duration ? formatSpanDuration(duration) : '-'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
