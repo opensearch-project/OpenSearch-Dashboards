@@ -581,6 +581,55 @@ describe('PPLSearchInterceptor', () => {
       );
     });
 
+    it('mirrors an explicitly passed time range rather than the global picker', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: { queries: [mockQuery] },
+            // The histogram query passes its own range; the hint must describe the same window the
+            // appended clause filters on, not whatever the global picker happens to hold.
+            timeRange: { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
+          },
+        },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.time_range).toEqual({
+        field: '@timestamp',
+        from: '2024-05-05 00:00:00.000',
+        to: '2024-05-06 00:00:00.000',
+      });
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalledWith(
+        '@timestamp',
+        { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
+        undefined
+      );
+    });
+
+    it('omits the time range hint for a dataset with no time field', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.time_range).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+    });
+
     it('omits the time range hint when no time filter is appended', async () => {
       const mockQuery = {
         language: 'PPL',
