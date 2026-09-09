@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 .visMapLegend {
   @include fontSize(11px);
   @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: 0.1);
