@@ -102,6 +102,40 @@ describe('Facet', () => {
       });
     });
 
+    it('forwards the time range so the engine can prune indices that cannot match it', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_range = {
+        field: '@timestamp',
+        from: '2026-01-01 00:00:00.000',
+        to: '2026-01-01 00:30:00.000',
+      };
+
+      await facet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+        body: {
+          query: 'test query',
+          datasource: 'test-name',
+          sessionId: 'test-session',
+          lang: 'sql',
+          time_range: {
+            field: '@timestamp',
+            from: '2026-01-01 00:00:00.000',
+            to: '2026-01-01 00:30:00.000',
+          },
+        },
+        format: 'jdbc',
+      });
+    });
+
+    it('omits the time range when the client did not send one', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      await facet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('time_range');
+    });
+
     it('should not include fetch_size when fetchSize is not provided', async () => {
       mockClient.mockResolvedValue({ result: 'success' });
 

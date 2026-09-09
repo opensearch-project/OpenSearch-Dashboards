@@ -11,6 +11,7 @@ import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
   Query,
+  TimeRangeHint,
   UI_SETTINGS,
 } from '../../../data/common';
 import {
@@ -168,6 +169,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     // Check if skipTimeFilter is set in the search request fields
     const skipTimeFilter = request.params?.body?.skipTimeFilter;
 
+    let timeRangeHint: TimeRangeHint | undefined;
+
     if (
       dataset &&
       dataset.timeFieldName &&
@@ -176,12 +179,19 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
       // Prefer an explicit time range passed and fall back to the global timefilter.
+      const timeRange =
+        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime();
       const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
-        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime(),
+        timeRange,
         dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
       whereCommands.push(timeFilter);
+      // Send the same bounds out of band as well. The engine resolves an index pattern's schema
+      // before it parses the appended `where`, so this is its only chance to skip indices that
+      // cannot hold data in the picked range. Derived from the clause's own helper so the two can
+      // never disagree, and purely a hint -- the clause above still does the filtering.
+      timeRangeHint = PPLFilterUtils.getTimeFilterBounds(dataset.timeFieldName, timeRange);
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
 
@@ -193,6 +203,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return {
       ...query,
       query: finalQuery,
+      ...(timeRangeHint && { time_range: timeRangeHint }),
     };
   }
 

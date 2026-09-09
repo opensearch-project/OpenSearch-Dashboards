@@ -311,4 +311,18 @@ describe('getTimeFilterCommand', () => {
       "WHERE `timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
     );
   });
+  it('reports bounds that match the literals in the where clause', () => {
+    const bounds = FilterUtils.getTimeFilterBounds('timestamp', timeRange);
+
+    expect(bounds).toEqual({
+      field: 'timestamp',
+      from: '2023-01-01 00:00:00.000',
+      to: '2023-01-02 00:00:00.000',
+    });
+    // The engine prunes indices with these bounds while the clause does the filtering, so a
+    // disagreement between them could drop an index the filter would have matched.
+    const clause = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'OpenSearch');
+    expect(clause).toContain(`>= '${bounds.from}'`);
+    expect(clause).toContain(`<= '${bounds.to}'`);
+  });
 });

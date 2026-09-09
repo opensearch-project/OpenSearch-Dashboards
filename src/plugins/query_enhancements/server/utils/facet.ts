@@ -116,6 +116,10 @@ export class Facet {
           ...(query.partial_result !== undefined && {
             partial_result: query.partial_result,
           }),
+          // Bounds of the time filter the client appended to the query text. The engine resolves an
+          // index pattern's schema before parsing that filter, so it needs the range out of band to
+          // skip indices that cannot match it. Ignored by engines that do not read it.
+          ...(query.time_range && { time_range: query.time_range }),
         },
         ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),

@@ -30,6 +30,8 @@ jest.mock('./filters', () => ({
     convertFiltersToWhereClause: jest.fn(),
     getTimeFilterWhereClause: jest.fn(),
     insertWhereCommand: jest.requireActual('./filters').PPLFilterUtils.insertWhereCommand,
+    // Real implementation: the assertions below compare the hint it produces against the clause.
+    getTimeFilterBounds: jest.requireActual('./filters').PPLFilterUtils.getTimeFilterBounds,
   },
 }));
 
@@ -506,6 +508,11 @@ describe('PPLSearchInterceptor', () => {
       mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue(
         'WHERE @timestamp >= "2023-01-01"'
       );
+      // A real time range: buildQuery derives the time range hint from it with the real helper.
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
 
       // Ensure application currentAppId$ is set to 'dashboards' by default
       (mockCoreStart.application.currentAppId$ as BehaviorSubject<string>).next('dashboards');
@@ -537,6 +544,60 @@ describe('PPLSearchInterceptor', () => {
 
       expect(result).toEqual(mockQuery);
       expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+    });
+
+    it('carries the picked time range as a hint alongside the appended where clause', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // The engine prunes indices with these bounds, so they must be the same ones the appended
+      // where clause filters on -- hence the shared helper rather than a second formatting path.
+      expect(result.time_range).toEqual({
+        field: '@timestamp',
+        from: '2023-01-01 00:00:00.000',
+        to: '2023-01-02 00:00:00.000',
+      });
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalledWith(
+        '@timestamp',
+        { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
+        undefined
+      );
+    });
+
+    it('omits the time range hint when no time filter is appended', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] }, skipTimeFilter: true } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.time_range).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
     });
 

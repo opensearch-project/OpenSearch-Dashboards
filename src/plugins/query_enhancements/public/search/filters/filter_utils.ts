@@ -38,13 +38,37 @@ export class FilterUtils {
     timeRange: TimeRange,
     engineType?: string
   ): string {
-    const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
+    const { field, from, to } = FilterUtils.getTimeFilterBounds(timeFieldName, timeRange);
     const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
       ? (literal: string) => `TIMESTAMP('${literal}')`
       : (literal: string) => `'${literal}'`;
-    return `WHERE \`${timeFieldName}\` >= ${wrap(formatDate(fromDate))} AND \`${timeFieldName}\` <= ${wrap(
-      formatDate(toDate)
-    )}`;
+    return `WHERE \`${field}\` >= ${wrap(from)} AND \`${field}\` <= ${wrap(to)}`;
+  }
+
+  /**
+   * The absolute bounds behind the where clause {@link getTimeFilterWhereClause} builds, in the same
+   * format and with the same inclusive semantics on both ends.
+   *
+   * Sent alongside the query so the engine can skip indices that cannot hold data in the range --
+   * something it cannot infer from the query text alone, because it resolves an index pattern's
+   * schema before it ever parses the appended `where`. Both the clause and these bounds must be
+   * derived here: were they to disagree, the engine could skip an index the filter would have
+   * matched.
+   *
+   * @param timeFieldName Time field name
+   * @param timeRange Time range from the time picker
+   * @returns the time field with its inclusive lower and upper bound
+   */
+  public static getTimeFilterBounds(
+    timeFieldName: string,
+    timeRange: TimeRange
+  ): { field: string; from: string; to: string } {
+    const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
+    return {
+      field: timeFieldName,
+      from: formatDate(fromDate),
+      to: formatDate(toDate),
+    };
   }
 
   /**

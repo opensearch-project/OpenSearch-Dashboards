@@ -40,4 +40,18 @@ export type Query = {
   profile?: boolean;
   /** Ask the engine to return a partial result over the aggregatable indices on a mapping conflict. */
   partial_result?: boolean;
+  /**
+   * Absolute bounds of the time filter appended to the query, so the engine can skip indices that
+   * cannot hold data in that range. A hint only: the filter itself still travels in the query text,
+   * so results are unchanged whether or not the engine acts on it.
+   */
+  time_range?: TimeRangeHint;
 };
+
+/** Inclusive bounds of a time filter, in `YYYY-MM-DD HH:mm:ss.SSS`. */
+export interface TimeRangeHint {
+  /** Time field the bounds apply to, as configured on the dataset. */
+  field: string;
+  from: string;
+  to: string;
+}
