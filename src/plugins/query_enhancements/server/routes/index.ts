@@ -112,11 +112,16 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               // Bounds of the time filter already present in the query text, forwarded so the
               // engine can skip indices that cannot hold data in the range.
               time_range: schema.maybe(
-                schema.object({
-                  field: schema.string(),
-                  from: schema.string(),
-                  to: schema.string(),
-                })
+                schema.object(
+                  {
+                    field: schema.string(),
+                    from: schema.string(),
+                    to: schema.string(),
+                  },
+                  // Forward compatible, like every other object in this schema: a client newer than
+                  // the server it talks to must not be rejected for sending a field it added.
+                  { unknowns: 'allow' }
+                )
               ),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),

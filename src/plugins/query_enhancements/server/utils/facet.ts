@@ -36,14 +36,15 @@ const OPEN_DISTRO_ACTION_BY_DEFAULT_ACTION: Record<string, string> = {
 
 /**
  * Endpoints whose request body tolerates fields they do not know, so an optional hint can ride
- * along. This body builder is shared with the async direct-query endpoints, which parse their body
- * strictly and fail the whole query on an unexpected field. Legacy Open Distro actions are left out
- * too: they would tolerate it, but no engine behind them reads it.
+ * along. PPL parses its body field by field and ignores the rest; everything else here is stricter,
+ * and this body builder is shared with all of them:
+ *
+ * - the async direct-query endpoints fail the query outright ("Unknown field: ...");
+ * - `_plugins/_sql` allowlists its body fields and, on anything unexpected, silently routes the
+ *   query to the legacy V1 engine instead -- a different dialect and response shape, with no error;
+ * - legacy Open Distro actions would tolerate it, but no engine behind them reads it.
  */
-const TIME_RANGE_ENDPOINTS = new Set<string>([
-  DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl,
-  DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.sql,
-]);
+const TIME_RANGE_ENDPOINTS = new Set<string>([DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl]);
 
 export class Facet {
   private defaultClient: any;

@@ -134,6 +134,26 @@ describe('Facet', () => {
       });
     });
 
+    it('omits the time range for the SQL action, whose parser allowlists body fields', async () => {
+      // An unexpected field makes _plugins/_sql fall back to the legacy V1 engine with no error, so
+      // the hint must not ride along there either.
+      const sqlFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.sqlQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_range = {
+        field: '@timestamp',
+        from: '2026-01-01 00:00:00.000',
+        to: '2026-01-01 00:30:00.000',
+      };
+
+      await sqlFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('time_range');
+    });
+
     it('omits the time range for an endpoint whose body parser rejects unknown fields', async () => {
       // This body builder is shared with the async direct-query endpoint, which fails the query on
       // an unexpected field ("Unknown field: ..."), so the hint must not ride along there.

@@ -181,17 +181,18 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Prefer an explicit time range passed and fall back to the global timefilter.
       const timeRange =
         request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime();
-      const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
+      // One call for both: a relative range such as `now-15m` resolves to a different millisecond on
+      // every parse, so asking twice would let the clause and the hint describe different windows.
+      const { clause, bounds } = PPLFilterUtils.getTimeFilter(
         dataset.timeFieldName,
         timeRange,
         dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
-      whereCommands.push(timeFilter);
+      whereCommands.push(clause);
       // Send the same bounds out of band as well. The engine resolves an index pattern's schema
       // before it parses the appended `where`, so this is its only chance to skip indices that
-      // cannot hold data in the picked range. Derived from the clause's own helper so the two
-      // describe the same window, and purely a hint -- the clause above still does the filtering.
-      timeRangeHint = PPLFilterUtils.getTimeFilterBounds(dataset.timeFieldName, timeRange);
+      // cannot hold data in the picked range. Purely a hint -- the clause above still filters.
+      timeRangeHint = bounds;
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
 

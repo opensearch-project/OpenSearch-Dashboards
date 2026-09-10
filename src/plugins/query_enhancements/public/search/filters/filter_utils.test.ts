@@ -327,13 +327,29 @@ describe('getTimeFilterCommand', () => {
   it.each([['OpenSearch'], ['Elasticsearch'], [undefined]])(
     'embeds exactly the reported bounds in the clause for engine %s',
     (engineType) => {
-      const bounds = FilterUtils.getTimeFilterBounds('timestamp', timeRange)!;
-      const clause = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, engineType);
+      const { clause, bounds } = FilterUtils.getTimeFilter('timestamp', timeRange, engineType);
 
-      expect(clause).toContain(bounds.from);
-      expect(clause).toContain(bounds.to);
+      expect(bounds).toBeDefined();
+      expect(clause).toContain(bounds?.from);
+      expect(clause).toContain(bounds?.to);
     }
   );
+
+  it('resolves a relative range once, so the clause and the bounds cannot disagree', () => {
+    // `now-15m` lands on a different millisecond every parse. Asking separately for the clause and
+    // the bounds used to produce windows a millisecond apart, with the bounds the narrower of the
+    // two -- an engine pruning on them would drop rows the clause would have matched.
+    for (let i = 0; i < 200; i++) {
+      const { clause, bounds } = FilterUtils.getTimeFilter('timestamp', {
+        from: 'now-15m',
+        to: 'now',
+      });
+
+      expect(bounds).toBeDefined();
+      expect(clause).toContain(bounds?.from);
+      expect(clause).toContain(bounds?.to);
+    }
+  });
 
   it('reports no bounds when the range does not parse, rather than NaN text', () => {
     // An unparseable range does not fail loudly: datemath yields either '' or an invalid moment
@@ -348,8 +364,10 @@ describe('getTimeFilterCommand', () => {
   });
 
   it('keeps a bound that falls inside a DST spring-forward gap', () => {
-    // formatTimePickerDate emits UTC. Re-parsing that as local time shifted a bound an hour when
-    // the wall-clock value does not exist locally (02:30 on a US spring-forward morning).
+    // Documents the intent; it cannot fail under the jest preset's TZ=UTC, where re-parsing a UTC
+    // bound as local time is an identity. What actually prevents the regression is that the
+    // local-time formatter this used to go through no longer exists. Run with
+    // `TZ=America/New_York` to exercise it for real.
     const bounds = FilterUtils.getTimeFilterBounds('timestamp', {
       from: '2026-03-08T02:30:00Z',
       to: '2026-03-08T03:30:00Z',
