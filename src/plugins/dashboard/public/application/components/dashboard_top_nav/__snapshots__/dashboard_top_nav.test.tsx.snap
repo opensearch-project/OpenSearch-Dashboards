@@ -90,6 +90,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -1299,6 +1300,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -2508,6 +2510,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -3717,6 +3720,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -4926,6 +4930,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -6135,6 +6140,7 @@ exports[`Dashboard top nav render with all components 1`] = `
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,

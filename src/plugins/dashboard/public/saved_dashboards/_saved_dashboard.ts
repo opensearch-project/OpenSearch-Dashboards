@@ -20,6 +20,7 @@ export const convertToSerializedDashboard = (
     panelsJSON,
     optionsJSON,
     variablesJSON,
+    layoutJSON,
     uiStateJSON,
     searchSource,
     lastSavedTitle,
@@ -37,6 +38,7 @@ export const convertToSerializedDashboard = (
     variables: variablesJSON
       ? normalizePersistedVariables(JSON.parse(variablesJSON).variables)
       : undefined,
+    layout: layoutJSON ? JSON.parse(layoutJSON) : undefined,
     uiState: JSON.parse(uiStateJSON || '{}'),
     lastSavedTitle,
     searchSource,

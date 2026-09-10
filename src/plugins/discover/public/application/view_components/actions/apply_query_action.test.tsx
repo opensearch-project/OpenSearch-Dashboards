@@ -81,7 +81,7 @@ describe('LANGUAGE_TOOLS / buildToolDefinition', () => {
   it('omits from/to params and time-filter guidance for SQL', () => {
     const sql = buildToolDefinition({
       languageKey: 'SQL',
-      displayName: 'OpenSearch SQL',
+      displayName: 'SQL',
       toolName: 'apply_sql_query',
     });
     // SQL has no global time picker, so it exposes only query + description.

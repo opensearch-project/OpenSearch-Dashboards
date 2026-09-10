@@ -52,6 +52,13 @@ export function updateSavedDashboard(
       ? JSON.stringify({ variables: appState.variables })
       : undefined;
 
+  // Persist only non-empty SectionLayouts; every other value uses GridLayout.
+  const persistedLayout =
+    appState.layout && appState.layout.type === 'SectionLayout' && appState.layout.items.length > 0
+      ? appState.layout
+      : undefined;
+  savedDashboard.layoutJSON = persistedLayout ? JSON.stringify(persistedLayout) : undefined;
+
   const timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
     : undefined;
@@ -86,6 +93,7 @@ export function updateSavedDashboard(
     panels: appState.panels,
     options: appState.options,
     variables: appState.variables,
+    layout: persistedLayout,
     timeFrom,
     timeTo,
     refreshInterval,

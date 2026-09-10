@@ -140,7 +140,7 @@ const s3DatasetTestSuite = () => {
           cy.getElementByTestId('datasetSelectorNext').click();
           cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-          cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
+          cy.getElementByTestId('advancedSelectorLanguageSelect').select('SQL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
 
           // Need to wait a bit for initial query to start
