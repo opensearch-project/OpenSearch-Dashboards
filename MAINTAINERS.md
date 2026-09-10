@@ -39,6 +39,7 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Qianxi Yang               | [Qxisylolo](https://github.com/Qxisylolo)           | Amazon      |
 | Yubo Luo                  | [yubonluo](https://github.com/yubonluo)             | Amazon      |
 | Owen Wang                 | [FriedhelmWS](https://github.com/FriedhelmWS)       | Amazon      |
+| Jialiang Liang            | [RyanL1997](https://github.com/RyanL1997)           | Amazon      |
 
 ## Emeritus
 
