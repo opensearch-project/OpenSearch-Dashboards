@@ -29,10 +29,24 @@
  */
 
 if (process.noProcessWarnings !== true) {
-  var ignore = ['MaxListenersExceededWarning', 'NodeDeprecationWarning'];
+  var ignore = [
+    'MaxListenersExceededWarning',
+    'NodeDeprecationWarning',
+    // Emitted by Node.js >=20.10 when a `.js` file is resolved as ESM from a
+    // `package.json` that declares no `type` field. Advisory only.
+    'MODULE_TYPELESS_PACKAGE_JSON',
+    // DEP0180, added in Node.js 22. Arrives with `name` of `DeprecationWarning`,
+    // so it can only be matched on its message.
+    'fs.Stats constructor is deprecated.',
+  ];
 
   process.on('warning', function (warn) {
-    if (ignore.includes(warn.name)) return;
+    // Warnings are matched on all three fields because Node.js is inconsistent
+    // about where the identifying string lands: `name` for the historical
+    // entries above, `code` for `MODULE_TYPELESS_PACKAGE_JSON`, and `message`
+    // for deprecations, which all share the generic `DeprecationWarning` name.
+    if (ignore.includes(warn.name) || ignore.includes(warn.code) || ignore.includes(warn.message))
+      return;
 
     if (process.traceProcessWarnings === true) {
       console.error('Node.js process-warning detected - Terminating process...');
