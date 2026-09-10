@@ -8,7 +8,6 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | ------------------------- | --------------------------------------------------- | ----------- |
 | Anan Zhuang               | [ananzh](https://github.com/ananzh)                 | Amazon      |
 | Kawika (Rocky) Avilla     | [kavilla](https://github.com/kavilla)               | Amazon      |
-| Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)           | Amazon      |
 | Ashwin P Chandran         | [ashwin-pc](https://github.com/ashwin-pc)           | Amazon      |
 | Abby Hu                   | [abbyhu2000](https://github.com/abbyhu2000)         | Amazon      |
 | Yan Zeng                  | [zengyan-amazon](https://github.com/zengyan-amazon) | Amazon      |
@@ -22,7 +21,6 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Ella Zhu                  | [zhyuanqi](https://github.com/zhyuanqi)             | Amazon      |
 | Eric Wei                  | [mengweieric](https://github.com/mengweieric)       | Amazon      |
 | Suchit Sahoo              | [LDrago27](https://github.com/LDrago27)             | Amazon      |
-| Viraj Sanghvi             | [virajsanghvi](https://github.com/virajsanghvi)     | Amazon      |
 | Sean Li                   | [sejli](https://github.com/sejli)                   | Amazon      |
 | Joshua Li                 | [joshuali925](https://github.com/joshuali925)       | Amazon      |
 | Huy Nguyen                | [huyaboo](https://github.com/huyaboo)               | Amazon      |
@@ -35,7 +33,6 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Adam Tackett              | [TackAdam](https://github.com/TackAdam)             | Amazon      |
 | Ruchi Sharma              | [ruchidh](https://github.com/ruchidh)               | Amazon      |
 | Sumukh Swamy              | [sumukhswamy](https://github.com/sumukhswamy)       | Amazon      |
-| Paul Sebastian            | [paulstn](https://github.com/paulstn)               | Amazon      |
 | Qianxi Yang               | [Qxisylolo](https://github.com/Qxisylolo)           | Amazon      |
 | Yubo Luo                  | [yubonluo](https://github.com/yubonluo)             | Amazon      |
 | Owen Wang                 | [FriedhelmWS](https://github.com/FriedhelmWS)       | Amazon      |
@@ -43,19 +40,22 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 
 ## Emeritus
 
-| Maintainer    | GitHub ID                                     | Affiliation |
-| ------------- |-----------------------------------------------|-------------|
-| Tommy Markley | [tmarkley](https://github.com/tmarkley)       | Amazon      |
-| Mihir Soni    | [mihirsoni](https://github.com/mihirsoni)     | Amazon      |
-| Bishoy Boktor | [boktorbb](https://github.com/boktorbb)       | Amazon      |
-| Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |
-| Kristen Tian  | [kristenTian](https://github.com/kristenTian) | Amazon      |
-| Matt Provost  | [BSFishy](https://github.com/BSFishy)         | Amazon      |
-| Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)         | Amazon      |
-| Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
-| Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
-| Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
-| Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
+| Maintainer                | GitHub ID                                       | Affiliation          |
+|---------------------------|-------------------------------------------------|----------------------|
+| Tommy Markley             | [tmarkley](https://github.com/tmarkley)         | Amazon               |
+| Mihir Soni                | [mihirsoni](https://github.com/mihirsoni)       | Amazon               |
+| Bishoy Boktor             | [boktorbb](https://github.com/boktorbb)         | Amazon               |
+| Sean Neumann              | [seanneumann](https://github.com/seanneumann)   | Contributor          |
+| Kristen Tian              | [kristenTian](https://github.com/kristenTian)   | Amazon               |
+| Matt Provost              | [BSFishy](https://github.com/BSFishy)           | Amazon               |
+| Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)     | Amazon               |
+| Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)   | Amazon               |
+| Sirazh Gabdullin          | [curq](https://github.com/curq)                 | External contributor |
+| Lu Yu                     | [BionIT](https://github.com/BionIT)             | Amazon               |
+| Tianyu Gao                | [raintygao](https://github.com/raintygao)       | Amazon               |
+| Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)       | Amazon               |
+| Viraj Sanghvi             | [virajsanghvi](https://github.com/virajsanghvi) | Amazon               |
+| Paul Sebastian            | [paulstn](https://github.com/paulstn)           | Amazon               |
 
 ## Responsibilities
 
