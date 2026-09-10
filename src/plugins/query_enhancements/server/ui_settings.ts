@@ -103,3 +103,34 @@ export function getPplLintRuleSettings(
     },
   };
 }
+
+/**
+ * Build the time-range-hint uiSetting. Adds WORKSPACE scope when the workspace feature is on, like
+ * its sibling above, so a workspace can opt out without touching the rest of the deployment.
+ */
+export function getTimeRangeHintSettings(
+  workspaceEnabled: boolean
+): Record<string, UiSettingsParams<unknown>> {
+  const scope = workspaceEnabled
+    ? [UiSettingScope.USER, UiSettingScope.WORKSPACE, UiSettingScope.GLOBAL]
+    : [UiSettingScope.USER, UiSettingScope.GLOBAL];
+
+  return {
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT]: {
+      name: 'Send the picked time range alongside the query',
+      value: true,
+      description:
+        'The date picker already writes a time filter into the query text, but the engine resolves ' +
+        'the queried index pattern -- merging the mapping of every index it matches -- before it ' +
+        'parses that filter. When enabled, the same bounds are also sent as a separate field so an ' +
+        'engine that supports it can skip indices that cannot hold data in the range. Results are ' +
+        'the same either way, since the filter in the query text still does the filtering. Disable ' +
+        'this if skipping those indices is unwanted: a narrower set of indices means a narrower ' +
+        'merged mapping, so a field that only the skipped indices map stops resolving. Has no ' +
+        'effect unless the cluster also sets plugins.query.pruning.enabled.',
+      category: ['search'],
+      scope,
+      schema: schema.boolean(),
+    },
+  };
+}

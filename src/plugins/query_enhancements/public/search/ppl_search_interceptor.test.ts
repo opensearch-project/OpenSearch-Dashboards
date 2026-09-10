@@ -12,6 +12,7 @@ import {
   ISearchOptions,
   SearchInterceptorDeps,
 } from '../../../data/public';
+import { UI_SETTINGS } from '../../../data/common';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
@@ -677,6 +678,40 @@ describe('PPLSearchInterceptor', () => {
       expect(result.time_range).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['off', false, false],
+      ['on', true, true],
+      ['unset', undefined, true],
+    ])(
+      'sends the hint only when the time-range-hint setting is not off (%s)',
+      async (_label, setting, expectHint) => {
+        const mockQuery = {
+          language: 'PPL',
+          query: 'source=test_index',
+          dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        };
+        const mockRequest: IOpenSearchDashboardsSearchRequest = {
+          params: { body: { query: { queries: [mockQuery] } } },
+        };
+        mockIsPPLSearchQuery.mockReturnValue(true);
+        (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-02T00:00:00Z',
+        });
+        (mockCoreStart.uiSettings.get as jest.Mock).mockImplementation(
+          (key: string, fallback?: unknown) =>
+            key === UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT ? (setting ?? fallback) : true
+        );
+
+        const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+        // Turning the hint off must not touch the filter itself, or the setting would change
+        // results rather than only which indices are read.
+        expect(result.query).toContain('WHERE @timestamp >=');
+        expect(result.time_range === undefined).toBe(!expectHint);
+      }
+    );
 
     it('omits the time range hint when no time filter is appended', async () => {
       const mockQuery = {

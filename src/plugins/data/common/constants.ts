@@ -118,6 +118,7 @@ export const UI_SETTINGS = {
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
   QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR: 'query:enhancements:runtimePplGrammar',
   QUERY_ENHANCEMENTS_PPL_LINT_RULES: 'query:enhancements:pplLint:rules',
+  QUERY_ENHANCEMENTS_TIME_RANGE_HINT: 'query:enhancements:timeRangeHint',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',

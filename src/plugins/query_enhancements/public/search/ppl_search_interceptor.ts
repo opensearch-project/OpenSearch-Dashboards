@@ -192,7 +192,15 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Send the same bounds out of band as well. The engine resolves an index pattern's schema
       // before it parses the appended `where`, so this is its only chance to skip indices that
       // cannot hold data in the picked range. Purely a hint -- the clause above still filters.
-      timeRangeHint = bounds;
+      //
+      // Off switch, defaulting to on: skipping indices narrows the merged mapping too, so a field
+      // only the skipped indices map stops resolving. That is the point when it removes a conflict
+      // and a regression when a panel depended on the field, and the breakage surfaces here rather
+      // than on the cluster. Fail open when uiSettings has not resolved yet -- the hint is inert
+      // unless the cluster opted in.
+      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT, true) ?? true) {
+        timeRangeHint = bounds;
+      }
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
 
