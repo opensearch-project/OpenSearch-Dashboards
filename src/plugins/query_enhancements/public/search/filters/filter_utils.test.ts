@@ -319,10 +319,46 @@ describe('getTimeFilterCommand', () => {
       from: '2023-01-01 00:00:00.000',
       to: '2023-01-02 00:00:00.000',
     });
-    // The engine prunes indices with these bounds while the clause does the filtering, so a
-    // disagreement between them could drop an index the filter would have matched.
-    const clause = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'OpenSearch');
-    expect(clause).toContain(`>= '${bounds.from}'`);
-    expect(clause).toContain(`<= '${bounds.to}'`);
+  });
+
+  // The engine prunes indices with these bounds while the clause does the filtering, so the two
+  // describing different windows could drop an index the filter would have matched. Both engine
+  // flavors reach this code, and they quote the literals differently.
+  it.each([['OpenSearch'], ['Elasticsearch'], [undefined]])(
+    'embeds exactly the reported bounds in the clause for engine %s',
+    (engineType) => {
+      const bounds = FilterUtils.getTimeFilterBounds('timestamp', timeRange)!;
+      const clause = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, engineType);
+
+      expect(clause).toContain(bounds.from);
+      expect(clause).toContain(bounds.to);
+    }
+  );
+
+  it('reports no bounds when the range does not parse, rather than NaN text', () => {
+    // An unparseable range does not fail loudly: datemath yields either '' or an invalid moment
+    // that formats as the literal 'Invalid date'. Formatting that as a date used to yield
+    // 'NaN-aN-aN aN:aN:aN.NaN', which would then be shipped as a bound.
+    expect(
+      FilterUtils.getTimeFilterBounds('timestamp', { from: 'nonsense', to: 'now' })
+    ).toBeUndefined();
+    expect(
+      FilterUtils.getTimeFilterBounds('timestamp', { from: 'now-15m', to: 'nonsense' })
+    ).toBeUndefined();
+  });
+
+  it('keeps a bound that falls inside a DST spring-forward gap', () => {
+    // formatTimePickerDate emits UTC. Re-parsing that as local time shifted a bound an hour when
+    // the wall-clock value does not exist locally (02:30 on a US spring-forward morning).
+    const bounds = FilterUtils.getTimeFilterBounds('timestamp', {
+      from: '2026-03-08T02:30:00Z',
+      to: '2026-03-08T03:30:00Z',
+    });
+
+    expect(bounds).toEqual({
+      field: 'timestamp',
+      from: '2026-03-08 02:30:00.000',
+      to: '2026-03-08 03:30:00.000',
+    });
   });
 });

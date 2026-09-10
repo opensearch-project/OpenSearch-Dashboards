@@ -48,7 +48,11 @@ export type Query = {
   time_range?: TimeRangeHint;
 };
 
-/** Inclusive bounds of a time filter, in `YYYY-MM-DD HH:mm:ss.SSS`. */
+/**
+ * Inclusive bounds of a time filter, as UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` with no zone
+ * designator -- the same literals the filter itself carries, so an engine reading these interprets
+ * them exactly as it interprets the filter.
+ */
 export interface TimeRangeHint {
   /** Time field the bounds apply to, as configured on the dataset. */
   field: string;

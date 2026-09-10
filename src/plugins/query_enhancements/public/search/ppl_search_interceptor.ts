@@ -189,8 +189,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       whereCommands.push(timeFilter);
       // Send the same bounds out of band as well. The engine resolves an index pattern's schema
       // before it parses the appended `where`, so this is its only chance to skip indices that
-      // cannot hold data in the picked range. Derived from the clause's own helper so the two can
-      // never disagree, and purely a hint -- the clause above still does the filtering.
+      // cannot hold data in the picked range. Derived from the clause's own helper so the two
+      // describe the same window, and purely a hint -- the clause above still does the filtering.
       timeRangeHint = PPLFilterUtils.getTimeFilterBounds(dataset.timeFieldName, timeRange);
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);

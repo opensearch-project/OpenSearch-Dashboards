@@ -12,8 +12,14 @@ import {
   IIndexPattern,
   isFilterDisabled,
   TimeRange,
+  TimeRangeHint,
 } from '../../../../data/common';
-import { formatDate } from '../../../common';
+
+/** Format of the time bounds in both the appended where clause and {@link TimeRangeHint}, in UTC. */
+const TIME_BOUND_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
+
+/** TIME_BOUND_FORMAT as a shape check, to tell a real bound from datemath's failure output. */
+const TIME_BOUND_PATTERN = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$/;
 
 export class FilterUtils {
   /**
@@ -38,36 +44,51 @@ export class FilterUtils {
     timeRange: TimeRange,
     engineType?: string
   ): string {
-    const { field, from, to } = FilterUtils.getTimeFilterBounds(timeFieldName, timeRange);
+    const { fromDate, toDate } = formatTimePickerDate(timeRange, TIME_BOUND_FORMAT);
     const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
       ? (literal: string) => `TIMESTAMP('${literal}')`
       : (literal: string) => `'${literal}'`;
-    return `WHERE \`${field}\` >= ${wrap(from)} AND \`${field}\` <= ${wrap(to)}`;
+    // formatTimePickerDate already emits TIME_BOUND_FORMAT in UTC. Re-parsing that through a
+    // local-time formatter used to be a no-op except inside a DST spring-forward gap, where it
+    // shifted the bound an hour (`2026-03-08 02:30` -> `03:30` in America/New_York) and dropped an
+    // hour of matching rows. Use the values as they come, so the clause and
+    // {@link getTimeFilterBounds} cannot describe different windows either.
+    return `WHERE \`${timeFieldName}\` >= ${wrap(fromDate)} AND \`${timeFieldName}\` <= ${wrap(
+      toDate
+    )}`;
   }
 
   /**
-   * The absolute bounds behind the where clause {@link getTimeFilterWhereClause} builds, in the same
-   * format and with the same inclusive semantics on both ends.
+   * The absolute bounds of the where clause {@link getTimeFilterWhereClause} builds: the same UTC
+   * wall-clock instants, in the same format, inclusive on both ends.
    *
    * Sent alongside the query so the engine can skip indices that cannot hold data in the range --
    * something it cannot infer from the query text alone, because it resolves an index pattern's
-   * schema before it ever parses the appended `where`. Both the clause and these bounds must be
-   * derived here: were they to disagree, the engine could skip an index the filter would have
-   * matched.
+   * schema before it ever parses the appended `where`. The two must describe the same window: were
+   * the bounds wider or narrower than the clause, an engine acting on them could skip an index the
+   * filter would have matched.
    *
    * @param timeFieldName Time field name
    * @param timeRange Time range from the time picker
-   * @returns the time field with its inclusive lower and upper bound
+   * @returns the time field with its inclusive bounds, or undefined when the range does not parse,
+   *   in which case there is nothing meaningful to prune on
    */
   public static getTimeFilterBounds(
     timeFieldName: string,
     timeRange: TimeRange
-  ): { field: string; from: string; to: string } {
-    const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
+  ): TimeRangeHint | undefined {
+    const { fromDate, toDate } = formatTimePickerDate(timeRange, TIME_BOUND_FORMAT);
+    // A range datemath cannot parse (a malformed `_g` in a shared URL, say) does not fail loudly:
+    // it yields '' when datemath returns nothing, and the literal 'Invalid date' when it returns an
+    // invalid moment. Neither is a bound worth pruning on, so report none and let the clause carry
+    // its existing behaviour for such input.
+    if (!TIME_BOUND_PATTERN.test(fromDate) || !TIME_BOUND_PATTERN.test(toDate)) {
+      return undefined;
+    }
     return {
       field: timeFieldName,
-      from: formatDate(fromDate),
-      to: formatDate(toDate),
+      from: fromDate,
+      to: toDate,
     };
   }
 

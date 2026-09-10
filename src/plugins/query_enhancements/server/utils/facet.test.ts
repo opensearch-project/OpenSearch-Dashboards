@@ -103,6 +103,12 @@ describe('Facet', () => {
     });
 
     it('forwards the time range so the engine can prune indices that cannot match it', async () => {
+      // Endpoint matters: the hint only rides along on the SQL/PPL actions (see TIME_RANGE_ENDPOINTS).
+      const pplFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.pplQuery',
+      });
       mockClient.mockResolvedValue({ result: 'success' });
       mockRequest.body.query.time_range = {
         field: '@timestamp',
@@ -110,9 +116,9 @@ describe('Facet', () => {
         to: '2026-01-01 00:30:00.000',
       };
 
-      await facet.describeQuery(mockContext, mockRequest);
+      await pplFacet.describeQuery(mockContext, mockRequest);
 
-      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+      expect(mockClient).toHaveBeenCalledWith('enhancements.pplQuery', {
         body: {
           query: 'test query',
           datasource: 'test-name',
@@ -128,10 +134,22 @@ describe('Facet', () => {
       });
     });
 
-    it('omits the time range when the client did not send one', async () => {
+    it('omits the time range for an endpoint whose body parser rejects unknown fields', async () => {
+      // This body builder is shared with the async direct-query endpoint, which fails the query on
+      // an unexpected field ("Unknown field: ..."), so the hint must not ride along there.
+      const asyncFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.runDirectQuery',
+      });
       mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_range = {
+        field: '@timestamp',
+        from: '2026-01-01 00:00:00.000',
+        to: '2026-01-01 00:30:00.000',
+      };
 
-      await facet.describeQuery(mockContext, mockRequest);
+      await asyncFacet.describeQuery(mockContext, mockRequest);
 
       expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('time_range');
     });

@@ -581,7 +581,10 @@ describe('PPLSearchInterceptor', () => {
       );
     });
 
-    it('mirrors an explicitly passed time range rather than the global picker', async () => {
+    // Defensive: nothing in this repo currently reaches buildQuery with body.timeRange set (the one
+    // writer, search(), sets it only for hideDatePicker === false datasets, which this branch skips),
+    // but the clause already honours it, so the hint must describe the same window it does.
+    it('mirrors a caller-supplied time range rather than the global picker', async () => {
       const mockQuery = {
         language: 'PPL',
         query: 'source=test_index',
@@ -591,8 +594,7 @@ describe('PPLSearchInterceptor', () => {
         params: {
           body: {
             query: { queries: [mockQuery] },
-            // The histogram query passes its own range; the hint must describe the same window the
-            // appended clause filters on, not whatever the global picker happens to hold.
+            // The clause reads this in preference to the global picker; the hint must follow it.
             timeRange: { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
           },
         },
@@ -611,6 +613,28 @@ describe('PPLSearchInterceptor', () => {
         { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
         undefined
       );
+    });
+
+    it('omits the time range hint when the picked range does not parse', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'nonsense',
+        to: 'now',
+      });
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // The clause is still appended -- only the hint, which would be meaningless, is dropped.
+      expect(result.time_range).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalled();
     });
 
     it('omits the time range hint for a dataset with no time field', async () => {

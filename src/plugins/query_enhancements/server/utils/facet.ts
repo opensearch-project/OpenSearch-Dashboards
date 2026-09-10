@@ -34,6 +34,17 @@ const OPEN_DISTRO_ACTION_BY_DEFAULT_ACTION: Record<string, string> = {
   [DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.sql]: 'sql',
 };
 
+/**
+ * Endpoints whose request body tolerates fields they do not know, so an optional hint can ride
+ * along. This body builder is shared with the async direct-query endpoints, which parse their body
+ * strictly and fail the whole query on an unexpected field. Legacy Open Distro actions are left out
+ * too: they would tolerate it, but no engine behind them reads it.
+ */
+const TIME_RANGE_ENDPOINTS = new Set<string>([
+  DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl,
+  DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.sql,
+]);
+
 export class Facet {
   private defaultClient: any;
   private logger: Logger;
@@ -118,8 +129,12 @@ export class Facet {
           }),
           // Bounds of the time filter the client appended to the query text. The engine resolves an
           // index pattern's schema before parsing that filter, so it needs the range out of band to
-          // skip indices that cannot match it. Ignored by engines that do not read it.
-          ...(query.time_range && { time_range: query.time_range }),
+          // skip indices that cannot match it. The SQL/PPL APIs ignore body fields they do not
+          // know, but the async direct-query API rejects them outright ("Unknown field: ..."), and
+          // this body builder is shared with it -- so only send it to the endpoints that tolerate
+          // it.
+          ...(query.time_range &&
+            TIME_RANGE_ENDPOINTS.has(resolvedEndpoint) && { time_range: query.time_range }),
         },
         ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
