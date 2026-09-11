@@ -126,8 +126,9 @@ export function getTimeRangeHintSettings(
         'engine that supports it can skip indices that cannot hold data in the range. Results are ' +
         'the same either way, since the filter in the query text still does the filtering. Disable ' +
         'this if skipping those indices is unwanted: a narrower set of indices means a narrower ' +
-        'merged mapping, so a field that only the skipped indices map stops resolving. Has no ' +
-        'effect unless the cluster also sets plugins.query.pruning.enabled.',
+        'merged mapping, so a field that only the skipped indices map stops resolving. The cluster ' +
+        'decides whether to act on the bounds, via plugins.query.pruning.enabled; turning this off ' +
+        'stops sending them regardless, so either side can opt out.',
       category: ['search'],
       scope,
       schema: schema.boolean(),
