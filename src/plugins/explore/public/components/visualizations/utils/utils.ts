@@ -326,12 +326,17 @@ export const applyPercentageAxis =
     if (resolveStackMode(styles) !== 'percentage') return state;
 
     const { transformedData = [], axisColumnMappings, xAxisConfig, yAxisConfig } = state;
-    const [, ...rows] = transformedData;
+
     const xSchema = getFirstColumn(axisColumnMappings?.[AxisRole.X])?.schema;
     const ySchema = getFirstColumn(axisColumnMappings?.[AxisRole.Y])?.schema;
     const isXNumerical = xSchema === VisFieldType.Numerical && ySchema !== VisFieldType.Numerical;
 
-    const hasNegativeValue = rows.some((row: any[]) =>
+    const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
+    const valueRows = hasMultiDatasets
+      ? transformedData.flatMap((ds) => (Array.isArray(ds) ? ds.slice(1) : []))
+      : transformedData.slice(1);
+
+    const hasNegativeValue = valueRows.some((row: any[]) =>
       row.some((data) => typeof data === 'number' && data < 0)
     );
 

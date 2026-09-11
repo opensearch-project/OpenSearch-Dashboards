@@ -20,3 +20,6 @@ export { getDecimalPrecision, roundToPrecision, formatDecimal } from './utils/nu
 
 export { map, pick } from './common';
 export * from './normalize_percentage';
+
+export * from './group_series';
+export * from './connection';
