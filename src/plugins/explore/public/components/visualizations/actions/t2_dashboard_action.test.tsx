@@ -518,7 +518,13 @@ describe('save to dashboard', () => {
     ]);
     expect(appState.viewMode).toBe('edit');
     expect(appState.panels[0]).toEqual(
-      expect.objectContaining({ type: 'explore', panelIndex: '1', version: '3.0.0' })
+      expect.objectContaining({
+        type: 'explore',
+        id: 'id-Chart A',
+        panelIndex: 'id-Chart A',
+        version: '3.0.0',
+        gridData: expect.objectContaining({ i: 'id-Chart A' }),
+      })
     );
   });
 

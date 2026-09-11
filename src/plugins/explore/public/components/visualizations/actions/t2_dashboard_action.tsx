@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import rison from 'rison-node';
 import {
   EuiPanel,
@@ -277,19 +278,23 @@ function TextToDashboardRenderer({
     }
 
     // two columns dashboard
-    const panels = savedIds.map((id, i) => ({
-      type: 'explore',
-      id,
-      panelIndex: String(i + 1),
-      gridData: {
-        x: (i % 2) * PANEL_WIDTH,
-        y: Math.floor(i / 2) * PANEL_HEIGHT,
-        w: PANEL_WIDTH,
-        h: PANEL_HEIGHT,
-        i: String(i + 1),
-      },
-      version,
-    }));
+    const panels = savedIds.map((id, i) => {
+      const panelIndex = id || uuidv4();
+
+      return {
+        type: 'explore',
+        id,
+        panelIndex,
+        gridData: {
+          x: (i % 2) * PANEL_WIDTH,
+          y: Math.floor(i / 2) * PANEL_HEIGHT,
+          w: PANEL_WIDTH,
+          h: PANEL_HEIGHT,
+          i: panelIndex,
+        },
+        version,
+      };
+    });
 
     const appState = {
       panels,
