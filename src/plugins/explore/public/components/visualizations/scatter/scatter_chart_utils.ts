@@ -15,7 +15,7 @@ import {
 import { generateThresholdLines } from '../utils/utils';
 import { normalizeEmptyValue } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
-import { PointShape, Positions } from '../types';
+import { PointShape, Positions, DataRange } from '../types';
 import { DEFAULT_GRID } from '../constants';
 import {
   createSeriesLegendItem,
@@ -173,7 +173,7 @@ export const createScatterSeries =
     yField: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
+    const { transformedData = [], axisColumnMappings, dataRange } = state;
     const newState = { ...state };
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
@@ -182,7 +182,7 @@ export const createScatterSeries =
       return newState;
     }
 
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+    const thresholdLines = generateThresholdLines(styles.thresholdOptions, dataRange);
     const series = [
       {
         type: 'scatter',
@@ -236,7 +236,7 @@ export const createCategoryScatterSeries =
     allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [] } = state;
+    const { transformedData = [], dataRange } = state;
     const newState = { ...state };
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
@@ -252,7 +252,7 @@ export const createCategoryScatterSeries =
     // Extract categories (skip the first column which is xField)
     const categories = pivotHeader.slice(1);
 
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+    const thresholdLines = generateThresholdLines(styles.thresholdOptions, dataRange);
     const palette = getColors().categories;
     const sortedCategories = getLegendNameDomain({
       data: allData,
@@ -339,10 +339,10 @@ const buildSizeVisualMap = (
 });
 
 // for size-only scatter, build a second threshold visualMap alongside the size one
-const buildThresholdColorVisualMap = (styles: ScatterChartStyle) => {
+const buildThresholdColorVisualMap = (styles: ScatterChartStyle, dataRange?: DataRange) => {
   if (!styles.useThresholdColor) return undefined;
 
-  const pieces = buildThresholds(styles);
+  const pieces = buildThresholds(styles, dataRange);
   if (pieces.length === 0) return undefined;
 
   return {
@@ -357,21 +357,22 @@ const buildThresholdColorVisualMap = (styles: ScatterChartStyle) => {
 const buildSizeVisualMaps = (
   styles: ScatterChartStyle,
   sizeRange: { min: number; max: number },
-  allowThresholdColor: boolean
+  allowThresholdColor: boolean,
+  dataRange?: DataRange
 ) => {
   const sizeVisualMap = buildSizeVisualMap(styles, sizeRange);
   const thresholdColorVisualMap = allowThresholdColor
-    ? buildThresholdColorVisualMap(styles)
+    ? buildThresholdColorVisualMap(styles, dataRange)
     : undefined;
 
   return thresholdColorVisualMap ? [sizeVisualMap, thresholdColorVisualMap] : [sizeVisualMap];
 };
 
-const buildSizeSeriesBase = (styles: ScatterChartStyle) => ({
+const buildSizeSeriesBase = (styles: ScatterChartStyle, dataRange?: DataRange) => ({
   type: 'scatter',
   symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
   symbolRotate: styles.exclusive?.angle || 0,
-  ...generateThresholdLines(styles.thresholdOptions),
+  ...generateThresholdLines(styles.thresholdOptions, dataRange),
 });
 
 /**
@@ -394,7 +395,7 @@ export const createSizeScatterSeries =
     allData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
+    const { transformedData = [], axisColumnMappings, dataRange } = state;
     const newState = { ...state };
 
     if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
@@ -413,7 +414,7 @@ export const createSizeScatterSeries =
 
       newState.series = [
         {
-          ...buildSizeSeriesBase(styles),
+          ...buildSizeSeriesBase(styles, dataRange),
           name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
           data: seriesData,
           itemStyle: styles.exclusive?.filled
@@ -433,7 +434,7 @@ export const createSizeScatterSeries =
         },
       ] as ScatterSeriesOption[];
 
-      newState.visualMap = buildSizeVisualMaps(styles, sizeRange, true);
+      newState.visualMap = buildSizeVisualMaps(styles, sizeRange, true, dataRange);
       newState.legendItems = [];
 
       return newState;
@@ -463,7 +464,7 @@ export const createSizeScatterSeries =
       const color = getLegendColor(name, palette, sortedCategories);
       legendItems.push(createSeriesLegendItem(name, color));
       return {
-        ...buildSizeSeriesBase(styles),
+        ...buildSizeSeriesBase(styles, dataRange),
         name,
         data: seriesData[category],
         itemStyle: styles.exclusive?.filled
