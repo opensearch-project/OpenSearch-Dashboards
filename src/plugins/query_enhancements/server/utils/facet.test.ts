@@ -103,18 +103,16 @@ describe('Facet', () => {
     });
 
     it('forwards the time range so the engine can prune indices that cannot match it', async () => {
-      // Endpoint matters: the hint only rides along on the SQL/PPL actions (see TIME_RANGE_ENDPOINTS).
+      // Endpoint matters: the bounds only ride along on the PPL action (see TIME_RANGE_ENDPOINTS).
       const pplFacet = new Facet({
         client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
         logger: mockLogger,
         endpoint: 'enhancements.pplQuery',
       });
       mockClient.mockResolvedValue({ result: 'success' });
-      mockRequest.body.query.time_range = {
-        field: '@timestamp',
-        from: '2026-01-01 00:00:00.000',
-        to: '2026-01-01 00:30:00.000',
-      };
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
 
       await pplFacet.describeQuery(mockContext, mockRequest);
 
@@ -124,11 +122,9 @@ describe('Facet', () => {
           datasource: 'test-name',
           sessionId: 'test-session',
           lang: 'sql',
-          time_range: {
-            field: '@timestamp',
-            from: '2026-01-01 00:00:00.000',
-            to: '2026-01-01 00:30:00.000',
-          },
+          time_field: '@timestamp',
+          start_time: '2026-01-01 00:00:00.000',
+          end_time: '2026-01-01 00:30:00.000',
         },
         format: 'jdbc',
       });
@@ -143,15 +139,13 @@ describe('Facet', () => {
         endpoint: 'enhancements.sqlQuery',
       });
       mockClient.mockResolvedValue({ result: 'success' });
-      mockRequest.body.query.time_range = {
-        field: '@timestamp',
-        from: '2026-01-01 00:00:00.000',
-        to: '2026-01-01 00:30:00.000',
-      };
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
 
       await sqlFacet.describeQuery(mockContext, mockRequest);
 
-      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('time_range');
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
     });
 
     it('omits the time range for an endpoint whose body parser rejects unknown fields', async () => {
@@ -163,15 +157,13 @@ describe('Facet', () => {
         endpoint: 'enhancements.runDirectQuery',
       });
       mockClient.mockResolvedValue({ result: 'success' });
-      mockRequest.body.query.time_range = {
-        field: '@timestamp',
-        from: '2026-01-01 00:00:00.000',
-        to: '2026-01-01 00:30:00.000',
-      };
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
 
       await asyncFacet.describeQuery(mockContext, mockRequest);
 
-      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('time_range');
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
     });
 
     it('should not include fetch_size when fetchSize is not provided', async () => {

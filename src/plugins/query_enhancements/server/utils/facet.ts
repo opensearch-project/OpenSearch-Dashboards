@@ -134,8 +134,13 @@ export class Facet {
           // know, but the async direct-query API rejects them outright ("Unknown field: ..."), and
           // this body builder is shared with it -- so only send it to the endpoints that tolerate
           // it.
-          ...(query.time_range &&
-            TIME_RANGE_ENDPOINTS.has(resolvedEndpoint) && { time_range: query.time_range }),
+          ...(query.start_time &&
+            query.end_time &&
+            TIME_RANGE_ENDPOINTS.has(resolvedEndpoint) && {
+              ...(query.time_field && { time_field: query.time_field }),
+              start_time: query.start_time,
+              end_time: query.end_time,
+            }),
         },
         ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),

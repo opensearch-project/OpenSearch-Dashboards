@@ -105,10 +105,10 @@ export function getPplLintRuleSettings(
 }
 
 /**
- * Build the time-range-hint uiSetting. Adds WORKSPACE scope when the workspace feature is on, like
+ * Build the time-bounds uiSetting. Adds WORKSPACE scope when the workspace feature is on, like
  * its sibling above, so a workspace can opt out without touching the rest of the deployment.
  */
-export function getTimeRangeHintSettings(
+export function getTimeBoundsSettings(
   workspaceEnabled: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   const scope = workspaceEnabled
@@ -116,7 +116,7 @@ export function getTimeRangeHintSettings(
     : [UiSettingScope.USER, UiSettingScope.GLOBAL];
 
   return {
-    [UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT]: {
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS]: {
       name: 'Send the picked time range alongside the query',
       value: true,
       description:

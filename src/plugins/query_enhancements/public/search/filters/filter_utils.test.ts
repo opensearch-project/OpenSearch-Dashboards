@@ -315,9 +315,9 @@ describe('getTimeFilterCommand', () => {
     const bounds = FilterUtils.getTimeFilterBounds('timestamp', timeRange);
 
     expect(bounds).toEqual({
-      field: 'timestamp',
-      from: '2023-01-01 00:00:00.000',
-      to: '2023-01-02 00:00:00.000',
+      timeField: 'timestamp',
+      start: '2023-01-01 00:00:00.000',
+      end: '2023-01-02 00:00:00.000',
     });
   });
 
@@ -330,8 +330,8 @@ describe('getTimeFilterCommand', () => {
       const { clause, bounds } = FilterUtils.getTimeFilter('timestamp', timeRange, engineType);
 
       expect(bounds).toBeDefined();
-      expect(clause).toContain(bounds?.from);
-      expect(clause).toContain(bounds?.to);
+      expect(clause).toContain(bounds?.start);
+      expect(clause).toContain(bounds?.end);
     }
   );
 
@@ -346,8 +346,8 @@ describe('getTimeFilterCommand', () => {
       });
 
       expect(bounds).toBeDefined();
-      expect(clause).toContain(bounds?.from);
-      expect(clause).toContain(bounds?.to);
+      expect(clause).toContain(bounds?.start);
+      expect(clause).toContain(bounds?.end);
     }
   });
 
@@ -374,9 +374,9 @@ describe('getTimeFilterCommand', () => {
     });
 
     expect(bounds).toEqual({
-      field: 'timestamp',
-      from: '2026-03-08 02:30:00.000',
-      to: '2026-03-08 03:30:00.000',
+      timeField: 'timestamp',
+      start: '2026-03-08 02:30:00.000',
+      end: '2026-03-08 03:30:00.000',
     });
   });
 });

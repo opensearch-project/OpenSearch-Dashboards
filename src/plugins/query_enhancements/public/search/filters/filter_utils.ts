@@ -12,10 +12,10 @@ import {
   IIndexPattern,
   isFilterDisabled,
   TimeRange,
-  TimeRangeHint,
+  TimeBounds,
 } from '../../../../data/common';
 
-/** Format of the time bounds in both the appended where clause and {@link TimeRangeHint}, in UTC. */
+/** Format of the time bounds in both the appended where clause and {@link TimeBounds}, in UTC. */
 const TIME_BOUND_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
 
 /** TIME_BOUND_FORMAT as a shape check, to tell a real bound from datemath's failure output. */
@@ -65,7 +65,7 @@ export class FilterUtils {
     timeFieldName: string,
     timeRange: TimeRange,
     engineType?: string
-  ): { clause: string; bounds?: TimeRangeHint } {
+  ): { clause: string; bounds?: TimeBounds } {
     const { fromDate, toDate } = formatTimePickerDate(timeRange, TIME_BOUND_FORMAT);
     const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
       ? (literal: string) => `TIMESTAMP('${literal}')`
@@ -84,7 +84,7 @@ export class FilterUtils {
     const valid = TIME_BOUND_PATTERN.test(fromDate) && TIME_BOUND_PATTERN.test(toDate);
     return {
       clause,
-      ...(valid && { bounds: { field: timeFieldName, from: fromDate, to: toDate } }),
+      ...(valid && { bounds: { timeField: timeFieldName, start: fromDate, end: toDate } }),
     };
   }
 
@@ -98,7 +98,7 @@ export class FilterUtils {
   public static getTimeFilterBounds(
     timeFieldName: string,
     timeRange: TimeRange
-  ): TimeRangeHint | undefined {
+  ): TimeBounds | undefined {
     return FilterUtils.getTimeFilter(timeFieldName, timeRange).bounds;
   }
 

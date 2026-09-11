@@ -40,22 +40,31 @@ export type Query = {
   profile?: boolean;
   /** Ask the engine to return a partial result over the aggregatable indices on a mapping conflict. */
   partial_result?: boolean;
-  /**
-   * Absolute bounds of the time filter appended to the query, so the engine can skip indices that
-   * cannot hold data in that range. A hint only: the filter itself still travels in the query text,
-   * so results are unchanged whether or not the engine acts on it.
-   */
-  time_range?: TimeRangeHint;
+  /** @see TimeBounds */
+  time_field?: string;
+  /** @see TimeBounds */
+  start_time?: string;
+  /** @see TimeBounds */
+  end_time?: string;
 };
 
 /**
- * Inclusive bounds of a time filter, as UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` with no zone
- * designator -- the same literals the filter itself carries, so an engine reading these interprets
- * them exactly as it interprets the filter.
+ * Inclusive bounds of a time filter already written into the query text, reported alongside it as
+ * `time_field` / `start_time` / `end_time` so the engine has the window before it resolves the
+ * queried index pattern -- it merges the mapping of every index that pattern matches before it parses
+ * the filter, and nothing after that can narrow it.
+ *
+ * Bounds are UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` with no zone designator, the same literals
+ * the filter itself carries. The engine also accepts date math and ISO-8601 here, but sending the
+ * clause's own literals is what guarantees the two describe the same window: a relative range
+ * resolves to a different instant on every parse.
+ *
+ * Purely a hint -- the filter in the query text still does the filtering, so a request is answered
+ * identically whether or not the engine acts on these.
  */
-export interface TimeRangeHint {
-  /** Time field the bounds apply to, as configured on the dataset. */
-  field: string;
-  from: string;
-  to: string;
+export interface TimeBounds {
+  /** Time field the bounds constrain; the dataset's configured field, not necessarily `@timestamp`. */
+  timeField: string;
+  start: string;
+  end: string;
 }

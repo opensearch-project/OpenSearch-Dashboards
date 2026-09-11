@@ -11,7 +11,7 @@ import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
   Query,
-  TimeRangeHint,
+  TimeBounds,
   UI_SETTINGS,
 } from '../../../data/common';
 import {
@@ -169,7 +169,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     // Check if skipTimeFilter is set in the search request fields
     const skipTimeFilter = request.params?.body?.skipTimeFilter;
 
-    let timeRangeHint: TimeRangeHint | undefined;
+    let timeBounds: TimeBounds | undefined;
 
     if (
       dataset &&
@@ -198,8 +198,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // and a regression when a panel depended on the field, and the breakage surfaces here rather
       // than on the cluster. Fail open when uiSettings has not resolved yet -- the hint is inert
       // unless the cluster opted in.
-      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT, true) ?? true) {
-        timeRangeHint = bounds;
+      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS, true) ?? true) {
+        timeBounds = bounds;
       }
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
@@ -212,7 +212,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return {
       ...query,
       query: finalQuery,
-      ...(timeRangeHint && { time_range: timeRangeHint }),
+      ...(timeBounds && {
+        time_field: timeBounds.timeField,
+        start_time: timeBounds.start,
+        end_time: timeBounds.end,
+      }),
     };
   }
 

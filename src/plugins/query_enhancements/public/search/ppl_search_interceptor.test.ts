@@ -571,10 +571,14 @@ describe('PPLSearchInterceptor', () => {
 
       // The engine prunes indices with these bounds, so they must be the same ones the appended
       // where clause filters on -- hence the shared helper rather than a second formatting path.
-      expect(result.time_range).toEqual({
-        field: '@timestamp',
-        from: '2023-01-01 00:00:00.000',
-        to: '2023-01-02 00:00:00.000',
+      expect({
+        time_field: result.time_field,
+        start_time: result.start_time,
+        end_time: result.end_time,
+      }).toEqual({
+        time_field: '@timestamp',
+        start_time: '2023-01-01 00:00:00.000',
+        end_time: '2023-01-02 00:00:00.000',
       });
       expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalledWith(
         '@timestamp',
@@ -605,10 +609,14 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(result.time_range).toEqual({
-        field: '@timestamp',
-        from: '2024-05-05 00:00:00.000',
-        to: '2024-05-06 00:00:00.000',
+      expect({
+        time_field: result.time_field,
+        start_time: result.start_time,
+        end_time: result.end_time,
+      }).toEqual({
+        time_field: '@timestamp',
+        start_time: '2024-05-05 00:00:00.000',
+        end_time: '2024-05-06 00:00:00.000',
       });
       expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalledWith(
         '@timestamp',
@@ -636,7 +644,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(result.time_range).toBeUndefined();
+      expect(result.start_time).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
     });
 
@@ -658,7 +666,7 @@ describe('PPLSearchInterceptor', () => {
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
       // The clause is still appended -- only the hint, which would be meaningless, is dropped.
-      expect(result.time_range).toBeUndefined();
+      expect(result.start_time).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalled();
     });
 
@@ -675,7 +683,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(result.time_range).toBeUndefined();
+      expect(result.start_time).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
     });
 
@@ -684,7 +692,7 @@ describe('PPLSearchInterceptor', () => {
       ['on', true, true],
       ['unset', undefined, true],
     ])(
-      'sends the hint only when the time-range-hint setting is not off (%s)',
+      'sends the bounds only when the time-bounds setting is not off (%s)',
       async (_label, setting, expectHint) => {
         const mockQuery = {
           language: 'PPL',
@@ -701,7 +709,7 @@ describe('PPLSearchInterceptor', () => {
         });
         (mockCoreStart.uiSettings.get as jest.Mock).mockImplementation(
           (key: string, fallback?: unknown) =>
-            key === UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_RANGE_HINT ? (setting ?? fallback) : true
+            key === UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS ? (setting ?? fallback) : true
         );
 
         const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
@@ -709,7 +717,7 @@ describe('PPLSearchInterceptor', () => {
         // Turning the hint off must not touch the filter itself, or the setting would change
         // results rather than only which indices are read.
         expect(result.query).toContain('WHERE @timestamp >=');
-        expect(result.time_range === undefined).toBe(!expectHint);
+        expect(result.start_time === undefined).toBe(!expectHint);
       }
     );
 
@@ -729,7 +737,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(result.time_range).toBeUndefined();
+      expect(result.start_time).toBeUndefined();
       expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
     });
 
