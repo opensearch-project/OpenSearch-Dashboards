@@ -1,0 +1,2 @@
+feat:
+- Auto-refresh index pattern fields in the background, with TTL-based stale-while-revalidate, an info toast on new fields, server-side `_field_caps` cache + in-flight dedupe and client-side write coalescing ([#11939](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11939))
