@@ -30,9 +30,10 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
-import { DashboardPanelState } from '../embeddable';
+import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -80,31 +81,14 @@ export class ReplacePanelFlyout extends React.Component<Props> {
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
     const { panelToRemove, container } = this.props;
-    const { w, h, x, y } = (container.getInput().panels[panelToRemove.id] as DashboardPanelState)
-      .gridData;
+    const dashboard = container as unknown as DashboardContainer;
+    const panelToReplace = dashboard.getInput().panels[panelToRemove.id] as DashboardPanelState;
 
-    const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
-      savedObjectId,
+    // replacePanel preserves grid position and section membership.
+    dashboard.replacePanel(panelToReplace, {
+      type,
+      explicitInput: { savedObjectId, id: uuidv4() } as SavedObjectEmbeddableInput,
     });
-
-    const { [panelToRemove.id]: omit, ...panels } = container.getInput().panels;
-
-    container.updateInput({
-      panels: {
-        ...panels,
-        [id]: {
-          ...panels[id],
-          gridData: {
-            ...(panels[id] as DashboardPanelState).gridData,
-            w,
-            h,
-            x,
-            y,
-          },
-        } as DashboardPanelState,
-      },
-    });
-    container.reload();
 
     this.showToast(name);
     this.props.onClose();

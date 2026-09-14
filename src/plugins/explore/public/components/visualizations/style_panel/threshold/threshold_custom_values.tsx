@@ -22,8 +22,8 @@ import { DebouncedFieldNumber } from '../utils';
 export interface RangeProps {
   id: number;
   value: Threshold;
-  onChange: (index: number, value: Threshold) => void;
-  onDelete: (index: number) => void;
+  onChange: (id: number, value: Threshold) => void;
+  onDelete: (id: number) => void;
 }
 
 const colors = getColors();
@@ -95,25 +95,34 @@ export interface ThresholdCustomValuesProps {
   onBaseColorChange: (color: string) => void;
 }
 
+interface ThresholdRange {
+  id: number;
+  threshold: Threshold;
+}
+
 export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   thresholds,
   onThresholdValuesChange,
   baseColor,
   onBaseColorChange,
 }) => {
-  const [ranges, setRanges] = useState<Threshold[]>(thresholds || []);
+  const initialThresholds = thresholds || [];
+  const nextIdRef = useRef(initialThresholds.length);
+  const [ranges, setRanges] = useState<ThresholdRange[]>(() =>
+    initialThresholds.map((threshold, id) => ({ id, threshold }))
+  );
 
   const debouncedSortTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const debouncedSort = useCallback(
-    (updatedRanges: Threshold[]) => {
+    (updatedRanges: ThresholdRange[]) => {
       if (debouncedSortTimeoutRef.current) {
         clearTimeout(debouncedSortTimeoutRef.current);
       }
       debouncedSortTimeoutRef.current = setTimeout(() => {
-        const sorted = [...updatedRanges].sort((a, b) => a.value - b.value);
+        const sorted = [...updatedRanges].sort((a, b) => a.threshold.value - b.threshold.value);
         setRanges(sorted);
-        onThresholdValuesChange(sorted);
+        onThresholdValuesChange(sorted.map((range) => range.threshold));
       }, 300);
     },
     [onThresholdValuesChange]
@@ -128,9 +137,8 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   }, []);
 
   const handleRangeChange = useCallback(
-    (index: number, value: Threshold) => {
-      const updated = [...ranges];
-      updated[index] = value;
+    (id: number, threshold: Threshold) => {
+      const updated = ranges.map((range) => (range.id === id ? { ...range, threshold } : range));
       debouncedSort(updated);
     },
     [ranges, debouncedSort]
@@ -138,12 +146,16 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 
   const handleAddRange = useCallback(() => {
     const curRangeLength = ranges.length;
-    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 100 : 0;
-    const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
+    const newDefaultValue =
+      curRangeLength > 0 ? Number(ranges[curRangeLength - 1].threshold.value) + 100 : 0;
+    const newRange = {
+      id: nextIdRef.current++,
+      threshold: { value: newDefaultValue, color: getNextColor(curRangeLength + 1) },
+    };
 
     const updated = [...ranges, newRange];
     setRanges(updated);
-    onThresholdValuesChange(updated);
+    onThresholdValuesChange(updated.map((range) => range.threshold));
   }, [ranges, onThresholdValuesChange]);
 
   const getNextColor = (rangesLength: number): string => {
@@ -152,10 +164,10 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   };
 
   const handleDeleteRange = useCallback(
-    (index: number) => {
-      const updated = ranges.filter((_, i) => i !== index);
+    (id: number) => {
+      const updated = ranges.filter((range) => range.id !== id);
       setRanges(updated);
-      onThresholdValuesChange(updated);
+      onThresholdValuesChange(updated.map((range) => range.threshold));
     },
     [onThresholdValuesChange, ranges]
   );
@@ -211,12 +223,12 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {ranges.map((range, index) => {
+      {ranges.map((range) => {
         return (
           <Range
-            key={`${range.color}-${range.value}-${index}`}
-            id={index}
-            value={range}
+            key={range.id}
+            id={range.id}
+            value={range.threshold}
             onChange={handleRangeChange}
             onDelete={handleDeleteRange}
           />

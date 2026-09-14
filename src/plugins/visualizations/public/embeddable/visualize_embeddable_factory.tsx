@@ -189,15 +189,16 @@ export class VisualizeEmbeddableFactory implements EmbeddableFactoryDefinition<
         parent
       );
     } else {
-      const container =
-        parent && parent.getInput().id && parent.getTitle()
-          ? {
-              containerInfo: {
-                containerId: parent.getInput().id,
-                containerName: parent.getTitle() ?? '',
-              },
-            }
-          : {};
+      const containerData = parent?.getStateTransferContainerInfoData?.();
+      const container = parent
+        ? {
+            containerInfo: {
+              containerId: parent.getInput().id,
+              containerName: parent.getTitle() ?? '',
+              containerData,
+            },
+          }
+        : {};
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
         outsideVisualizeApp: true,

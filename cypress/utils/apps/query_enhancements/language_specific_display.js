@@ -49,7 +49,7 @@ export const getLanguageReferenceTestText = (language) => {
     case QueryLanguages.Lucene.name:
       return 'Lucene';
     case QueryLanguages.SQL.name:
-      return 'OpenSearch SQL';
+      return 'SQL';
     case QueryLanguages.PPL.name:
       return 'Piped Processing Language';
     default:

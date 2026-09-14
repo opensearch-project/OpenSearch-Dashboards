@@ -89,7 +89,39 @@ describe('PromQLSearchInterceptor', () => {
     expect(context.body?.timeRange).toEqual({ from: 'now-1h', to: 'now' });
   });
 
-  it('drops per-query options when executing a different query than the global state', () => {
+  it('reads the options off the requested query rather than the global query state', () => {
+    // A dashboard embeddable executes its own saved query while the global query state belongs
+    // to the dashboard's query bar.
+    const request = {
+      params: {
+        body: {
+          query: {
+            queries: [
+              {
+                query: 'rate(x[5m])',
+                language: 'PROMQL',
+                queryOptions: {
+                  maxDataPoints: 120,
+                  perQueryOptions: [{ minStep: '5m', legendFormat: '{{instance}}' }],
+                },
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as IOpenSearchDashboardsSearchRequest;
+
+    interceptor.search(request, options);
+
+    const [context, query] = mockFetch.mock.calls[0];
+    expect(query).toEqual({ query: 'rate(x[5m])', language: 'PROMQL' });
+    expect(context.body?.options).toEqual({
+      maxDataPoints: 120,
+      perQueryOptions: [{ minStep: '5m', legendFormat: '{{instance}}' }],
+    });
+  });
+
+  it('forwards no options when the requested query carries none', () => {
     const request = {
       params: {
         body: { query: { queries: [{ query: 'rate(x[5m])', language: 'PROMQL' }] } },
@@ -101,7 +133,7 @@ describe('PromQLSearchInterceptor', () => {
     const [context, query] = mockFetch.mock.calls[0];
     expect(query).toEqual({ query: 'rate(x[5m])', language: 'PROMQL' });
     expect(context.body?.options).toEqual({
-      maxDataPoints: 500,
+      maxDataPoints: undefined,
       perQueryOptions: undefined,
     });
   });

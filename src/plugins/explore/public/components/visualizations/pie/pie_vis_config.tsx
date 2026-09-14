@@ -7,7 +7,7 @@ import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { AxisRole, Positions, TooltipOptions, VisFieldType } from '../types';
+import { AxisRole, Positions, TooltipOptions, VisFieldType, StandardOptions } from '../types';
 import { createPieSpec } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
@@ -20,7 +20,7 @@ export interface PieExclusiveStyleOptions {
   showTopLevelOnly?: boolean;
 }
 
-export interface PieChartStyleOptions {
+export interface PieChartStyleOptions extends StandardOptions {
   // Basic controls
   addTooltip?: boolean;
   addLegend?: boolean;
@@ -33,8 +33,10 @@ export interface PieChartStyleOptions {
   exclusive?: PieExclusiveStyleOptions;
 }
 
-export type PieChartStyle = Required<Omit<PieChartStyleOptions, 'legendTitle'>> &
-  Pick<PieChartStyleOptions, 'legendTitle'>;
+export type PieChartStyle = Required<
+  Omit<PieChartStyleOptions, 'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'>
+> &
+  Pick<PieChartStyleOptions, 'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
@@ -78,7 +80,8 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
               [AxisRole.SIZE]: size,
               [AxisRole.COLOR]: color,
             },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

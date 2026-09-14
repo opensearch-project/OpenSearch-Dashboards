@@ -19,6 +19,7 @@ interface BarGaugeRenderProps {
   data: Array<{ category: string; value: number | null }>;
   styles: BarGaugeChartStyle;
   isHorizontal: boolean;
+  seriesDisplayNames?: Record<string, string>;
 }
 
 interface BarGaugeContainerStyle extends CSSProperties {
@@ -66,7 +67,12 @@ const buildItemThresholds = (
   return [base, ...applicable, { value, color: lastColor }];
 };
 
-export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderProps) => {
+export const BarGaugeRender = ({
+  data,
+  styles,
+  isHorizontal,
+  seriesDisplayNames,
+}: BarGaugeRenderProps) => {
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [valueFontFamily, setValueFontFamily] = useState(DEFAULT_VALUE_FONT_FAMILY);
@@ -79,6 +85,8 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
       }
     }, 100)
   );
+
+  const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
 
   useEffect(() => {
     const element = containerRef.current;
@@ -128,6 +136,13 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     [selectedUnit, styles.decimals, styles.unitSuffix]
   );
 
+  const formatDisplayValue = useCallback(
+    (category: string): string => {
+      if (!hasDisplayNames) return category;
+      return seriesDisplayNames?.[category] ?? category;
+    },
+    [hasDisplayNames, seriesDisplayNames]
+  );
   const getFontColor = useCallback(
     (value: number | null): string => {
       if (styles.exclusive.valueDisplay === 'textColor') return getColors().text;
@@ -151,7 +166,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
       // only show unfilled area shadow shows if turn on showUnfilledArea
       if (value === null || isInvalid) {
         return {
-          category,
+          category: formatDisplayValue(category),
           value,
           displayValue: formatValue(value),
           fontColor: DEFAULT_GREY,
@@ -185,7 +200,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
       }
 
       return {
-        category,
+        category: formatDisplayValue(category),
         value,
         displayValue: formatValue(value),
         fontColor: getFontColor(value),
@@ -204,6 +219,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     styles.exclusive.displayMode,
     formatValue,
     getFontColor,
+    formatDisplayValue,
   ]);
 
   // scale font size  with bar thickness

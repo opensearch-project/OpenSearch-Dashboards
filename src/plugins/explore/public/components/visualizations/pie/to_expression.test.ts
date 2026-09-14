@@ -116,6 +116,41 @@ describe('Pie Chart to_expression', () => {
     expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
   });
 
+  it('formats slice labels with display names and units', () => {
+    const { spec } = createPieSpec(
+      mockData,
+      {
+        ...mockStyles,
+        unitSuffix: 'ms',
+        exclusive: { ...mockStyles.exclusive, showLabels: true, showValues: true },
+      },
+      mockAxisMappings,
+      undefined,
+      { A: 'Alpha' }
+    );
+
+    // @ts-expect-error TS2339 TODO(ts-upgrade): fixme
+    const pieSeries = spec?.series?.find((s: any) => s.type === 'pie');
+    expect(pieSeries.label.formatter({ name: 'A', value: 100 })).toBe('Alpha: 100 ms');
+  });
+
+  it('formats label-only slice labels with display names', () => {
+    const { spec } = createPieSpec(
+      mockData,
+      {
+        ...mockStyles,
+        exclusive: { ...mockStyles.exclusive, showLabels: true, showValues: false },
+      },
+      mockAxisMappings,
+      undefined,
+      { A: 'Alpha' }
+    );
+
+    // @ts-expect-error TS2339 TODO(ts-upgrade): fixme
+    const pieSeries = spec?.series?.find((s: any) => s.type === 'pie');
+    expect(pieSeries.label.formatter({ name: 'A', value: 100 })).toBe('Alpha');
+  });
+
   it('normalizes empty values from full data when assigning slice colors', () => {
     const palette = getColors().categories;
     const result = createPieSpec(

@@ -11,6 +11,7 @@ import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyle>;
 
@@ -42,6 +43,16 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
             <PieExclusiveVisOptions
               styles={styleOptions.exclusive}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
             />
           </EuiFlexItem>
           <LegendOptionsWrapper
