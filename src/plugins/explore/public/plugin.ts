@@ -107,6 +107,12 @@ import {
   registerAutoVisualizationAction,
   AUTO_VISUALIZATION_TOOL_NAME,
 } from './components/visualizations/actions/auto_visualization_action';
+import { registerGetTransformationSchemaAction } from './components/visualizations/actions/get_transformation_schema_action';
+import {
+  GET_TRANSFORMATION_SCHEMA_TOOL_NAME,
+  T2_DASHBOARD_TOOL_NAME,
+} from './components/visualizations/actions/utils';
+import { registerT2DashboardAction } from './components/visualizations/actions/t2_dashboard_action';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -934,9 +940,21 @@ export class ExplorePlugin implements Plugin<
               plugins.data,
               plugins.contextProvider
             );
+            // Register transformation schema lookup tool
+            registerGetTransformationSchemaAction(registerAssistantAction);
+
+            // Register t2-dashboard tool for creating multi-panel dashboards from chat
+            registerT2DashboardAction(
+              registerAssistantAction,
+              core,
+              plugins.data,
+              savedExploreLoader
+            );
           } else {
             // Leaving the workspace must take the tool back out of availableTools
             unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+            unregisterAssistantAction(T2_DASHBOARD_TOOL_NAME);
+            unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
           }
         }
       );
@@ -944,6 +962,8 @@ export class ExplorePlugin implements Plugin<
       this.unregisterVisualizationTools = () => {
         this.visualizationToolsWorkspaceSubscription?.unsubscribe();
         unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+        unregisterAssistantAction(T2_DASHBOARD_TOOL_NAME);
+        unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
       };
 
       // Inject contextProvider action helpers into PanelDataService

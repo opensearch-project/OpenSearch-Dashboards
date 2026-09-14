@@ -314,7 +314,9 @@ export class ChatService {
 
   private getDataSourceFromPageContext() {
     const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
-    this.setSessionDataSourceList(dsId);
+    if (dsId) {
+      this.setDataSourceId(dsId);
+    }
     return dsId;
   }
 

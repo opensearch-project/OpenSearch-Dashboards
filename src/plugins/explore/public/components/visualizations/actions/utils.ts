@@ -35,12 +35,45 @@ function buildChartTypeGuide(): string {
 const CHART_GUIDE =
   '\n\nCHART TYPE GUIDE (choose based on user intent and data shape):' + buildChartTypeGuide();
 
+/**
+ * Brief one-liner per transformation type — enough to pick the right one.
+ * Full config schema is available on demand via get_transformation_schema.
+ */
+const TRANSFORMATION_BRIEF: Record<string, string> = {
+  limit: 'keep only the first N rows',
+  sort_by: 'sort rows by a field ascending or descending',
+  filter: 'filter rows where a field matches a condition',
+  filter_fields: 'include or exclude specific columns from every row',
+  convert_field_type: 'cast one or more fields to a different type',
+  group_by: 'group rows by a field and aggregate other fields per group',
+  extract_fields: 'flatten a nested object or JSON-string field into top-level columns',
+  add_field: 'create a new computed column from existing numerical fields',
+};
+
+function buildTransformationIdList(): string {
+  return Object.keys(TRANSFORMATION_BRIEF)
+    .map((id) => `"${id}"`)
+    .join(', ');
+}
+
+function buildTransformationBrief(): string {
+  return Object.entries(TRANSFORMATION_BRIEF)
+    .map(([id, desc]) => `\n"${id}" — ${desc}`)
+    .join('');
+}
+
+const CHART_AND_TRANSFORMATION_GUIDE =
+  '\n\nCHART TYPE GUIDE (choose based on user intent and data shape):' +
+  buildChartTypeGuide() +
+  '\n\nAVAILABLE TRANSFORMATION TYPES (pick needed types, then call get_transformation_schema for details):' +
+  buildTransformationBrief();
+
 const VIS_SPEC_PROPERTIES = {
   query: {
     type: 'string',
     description:
       'The PPL query to visualize (e.g. "source=flights | stats avg(delay) by carrier"). ' +
-      'This must be the same query previously run via ppl_execute.',
+      'This must be the same query previously run via pplQueryTool.',
   },
   indexName: {
     type: 'string',
@@ -82,7 +115,37 @@ const VIS_SPEC_PROPERTIES = {
     description:
       'The time field name of the index (e.g. "@timestamp", "timestamp"). ' +
       'Get this from the index mapping. ' +
-      'Required whenever you pass from/to - a time range without it is rejected.',
+      'Do not pass from/to unless you already have timeFieldName. ',
+  },
+  transformations: {
+    type: 'array',
+    description:
+      'Optional data transformation pipeline applied to query results before rendering. ' +
+      `Each step runs in order. You MUST call ${GET_TRANSFORMATION_SCHEMA_TOOL_NAME} first to ` +
+      'get the exact config shape for every transformation type you want to use. ' +
+      'Do NOT guess config keys or reuse shapes from other APIs: invalid transformation configs ' +
+      'are rejected.',
+    items: {
+      type: 'object',
+      properties: {
+        definitionId: {
+          type: 'string',
+          description: `Transformation type id. One of: ${buildTransformationIdList()}.`,
+        },
+        config: {
+          type: 'object',
+          description:
+            `Config object for this step. You MUST obtain this shape from ` +
+            `${GET_TRANSFORMATION_SCHEMA_TOOL_NAME} for the chosen definitionId. ` +
+            'Only schema-defined keys are accepted.',
+        },
+        hide: {
+          type: 'boolean',
+          description: 'Set to true to disable this step without removing it. Default false.',
+        },
+      },
+      required: ['definitionId', 'config'],
+    },
   },
 };
 
@@ -136,7 +199,13 @@ export const AutoVisMeta = {
     '\n3. Call the pplQueryTool tool with the PPL query to run it and obtain the result column schema.' +
     '\n4. the query must NOT contain time filters — use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.' +
     '\n5. from, to and timeFieldName go together: passing a time range without timeFieldName is rejected.' +
-    CHART_GUIDE,
+    CHART_GUIDE +
+    '\n6. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
+    `decide which transformation types fit, call ${GET_TRANSFORMATION_SCHEMA_TOOL_NAME} with all ` +
+    'needed type ids at once, then pass the filled-in transformations array to this tool. ' +
+    `You MUST do this before sending any transformations. Do NOT invent config keys. ` +
+    '\n\nAVAILABLE TRANSFORMATION TYPES (pick one, then call get_transformation_schema for details):' +
+    buildTransformationBrief(),
 
   parameters: {
     type: 'object',
@@ -145,5 +214,104 @@ export const AutoVisMeta = {
       ...buildTimeRangeProperties('visualization'),
     },
     required: VIS_SPEC_REQUIRED,
+  },
+};
+
+export const GetTransformationSchemaMeta = {
+  name: GET_TRANSFORMATION_SCHEMA_TOOL_NAME,
+  description:
+    'Returns the complete config schema for one or more transformation types. ' +
+    'Call this after deciding which transformations you need from the AVAILABLE TRANSFORMATION TYPES ' +
+    'list in auto_create_visualization. You can request multiple schemas in one call — ' +
+    'pass all the types you plan to use at once to minimise round trips. ' +
+    'Each schema tells you exactly which config fields are required, what values are valid, ' +
+    'and how field type affects available options (e.g. filter operators). ' +
+    'Use the returned schemas to construct the config objects for the transformations array. ' +
+    'Do not guess or rename fields.',
+  parameters: {
+    type: 'object',
+    properties: {
+      definitionIds: {
+        type: 'array',
+        description:
+          'One or more transformation type ids to fetch schemas for. ' +
+          `Valid values: ${buildTransformationIdList()}.`,
+        items: {
+          type: 'string',
+        },
+        minItems: 1,
+      },
+    },
+    required: ['definitionIds'],
+  },
+};
+
+export const T2_DASHBOARD_TOOL_NAME = 'text_to_dashboard';
+
+export const TextToDashboardMeta = {
+  name: T2_DASHBOARD_TOOL_NAME,
+  description:
+    'Creates multiple visualizations from an array of PPL queries and use them to build an ad-hoc dashboard.' +
+    'Use this when the user asks for a dashboard or several charts at once.' +
+    'WORKFLOW (follow in order):\n' +
+    '1. Call the index mapping tool to get timeFieldName for each relevant index.\n' +
+    '2. Call pplQueryTool for each query to obtain the column schema.\n' +
+    '3. Call this tool with all visualization columns in a single call.\n' +
+    '4. Time range is TOP-LEVEL and SHARED: pass from/to AND timeFieldName at the top level (NOT ' +
+    'inside the visualizations array) — one range and one time field apply to every panel. Pass ' +
+    'the same from/to you passed to pplQueryTool, and the query itself must NOT contain time ' +
+    'filters.\n' +
+    '5. from, to and timeFieldName travel together. If you pass from/to you MUST also pass a ' +
+    'timeFieldName — put it at the top level for the shared case. Only set a per-visualization ' +
+    'timeFieldName to OVERRIDE it when that panel queries a different index with a different time ' +
+    'field. A spec that ends up with from/to but no timeFieldName (neither top-level nor its own) ' +
+    'is rejected.\n' +
+    '6. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
+    `decide which transformation types fit, call ${GET_TRANSFORMATION_SCHEMA_TOOL_NAME} with all ` +
+    'needed type ids at once, then pass the filled-in transformations array to this tool. ' +
+    `You MUST do this before sending any transformations. Do NOT invent config keys. ` +
+    CHART_AND_TRANSFORMATION_GUIDE,
+  parameters: {
+    type: 'object',
+    properties: {
+      visualizations: {
+        type: 'array',
+        description:
+          'Array of visualization specs. Each spec produces one chart panel on the dashboard. ' +
+          'Minimum 1 item. Each item has the same fields as auto_create_visualization except ' +
+          'from/to (those are top-level, since the dashboard has one shared time range), plus ' +
+          'a required title.',
+        minItems: 1,
+        items: {
+          type: 'object',
+          properties: {
+            ...VIS_SPEC_PROPERTIES,
+            timeFieldName: {
+              type: 'string',
+              description:
+                'Optional per-panel OVERRIDE of the top-level timeFieldName. Only set this when ' +
+                "this panel's query targets a different index whose time field differs from the " +
+                'shared one. Otherwise omit it and rely on the top-level timeFieldName.',
+            },
+            title: {
+              type: 'string',
+              description: 'Human-readable chart title.',
+            },
+          },
+          required: [...VIS_SPEC_REQUIRED, 'title'],
+        },
+      },
+      ...buildTimeRangeProperties('dashboard'),
+      timeFieldName: {
+        type: 'string',
+        description:
+          'The SHARED time field name (e.g. "@timestamp", "timestamp") used to apply the top-level ' +
+          'from/to range to every panel. Get it from the index mapping tool. You MUST pass this ' +
+          'whenever you pass from/to. When panels query different indices whose time fields differ, ' +
+          "set this to the common one and override the odd ones via that visualization's own " +
+          'timeFieldName.',
+      },
+    },
+    required: ['visualizations'],
   },
 };
