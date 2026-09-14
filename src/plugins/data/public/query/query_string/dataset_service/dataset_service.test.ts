@@ -462,14 +462,29 @@ describe('DatasetService', () => {
         id: 'id',
         title: 'my-index-*',
         type: DEFAULT_DATA.SET_TYPES.INDEX,
+        dataSourceRef: { id: 'datasource-id' },
       }),
-      getDataSource: jest.fn().mockResolvedValue(undefined),
+      getDataSource: jest.fn().mockResolvedValue({
+        id: 'datasource-id',
+        attributes: {
+          title: 'DataSource',
+          dataSourceEngineType: 'OpenSearch',
+          dataSourceVersion: '2.17.0',
+        },
+      }),
     } as unknown as IndexPatternsContract;
     service.init(indexPatterns);
 
     await waitFor(() => {
       const def = service.getDefault();
       expect(def?.type).toBe(DEFAULT_DATA.SET_TYPES.INDEX);
+      expect(def?.dataSource).toMatchObject({
+        id: 'datasource-id',
+        title: 'DataSource',
+        type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
+      });
     });
   });
 

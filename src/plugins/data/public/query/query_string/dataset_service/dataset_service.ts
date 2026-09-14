@@ -402,7 +402,14 @@ export class DatasetService {
             ? {
                 id: dataSource.id,
                 title: dataSource.attributes?.title,
-                type: dataSource.attributes?.dataSourceEngineType || '',
+                type:
+                  dataSource.attributes?.dataSourceEngineType ||
+                  DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+                meta: {
+                  type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                  dataSourceEngineType: dataSource.attributes?.dataSourceEngineType,
+                  dataSourceVersion: dataSource.attributes?.dataSourceVersion,
+                },
               }
             : undefined,
         },

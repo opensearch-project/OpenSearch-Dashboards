@@ -16,6 +16,7 @@ import {
   ResultStatus,
 } from '../utils/use_search';
 import { extractQueryError } from '../../../../../data/common';
+import { readResultsCount } from '../utils/read_query_outcome';
 
 export interface LanguageToolConfig {
   /** Language key stored on the query bar (matches query.language in page context). */
@@ -203,9 +204,7 @@ const createApplyHandler =
         }
 
         const noResults = status === ResultStatus.NO_RESULTS;
-        const resultsCount = noResults
-          ? 0
-          : (finalData.hits ?? finalData.rows?.length ?? undefined);
+        const resultsCount = noResults ? 0 : readResultsCount(finalData);
         return {
           success: true,
           executed: true,
