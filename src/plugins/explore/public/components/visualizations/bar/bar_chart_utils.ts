@@ -136,7 +136,7 @@ export const createBarSeries =
       const seriesConfig = {
         type: 'bar',
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         name,
         encode: {
