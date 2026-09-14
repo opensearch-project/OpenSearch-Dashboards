@@ -148,6 +148,24 @@ describe('Facet', () => {
       expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
     });
 
+    it('omits the bounds when the time field is missing, rather than letting the engine guess', async () => {
+      // The engine defaults an absent time_field to @timestamp, so sending bounds without it would
+      // prune on a field the dataset does not use -- a wrong answer, not a missed optimization.
+      const pplFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.pplQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('end_time');
+    });
+
     it('omits the time range for an endpoint whose body parser rejects unknown fields', async () => {
       // This body builder is shared with the async direct-query endpoint, which fails the query on
       // an unexpected field ("Unknown field: ..."), so the hint must not ride along there.

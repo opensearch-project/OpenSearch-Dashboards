@@ -44,7 +44,7 @@ const OPEN_DISTRO_ACTION_BY_DEFAULT_ACTION: Record<string, string> = {
  *   query to the legacy V1 engine instead -- a different dialect and response shape, with no error;
  * - legacy Open Distro actions would tolerate it, but no engine behind them reads it.
  */
-const TIME_RANGE_ENDPOINTS = new Set<string>([DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl]);
+const TIME_BOUNDS_ENDPOINTS = new Set<string>([DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl]);
 
 export class Facet {
   private defaultClient: any;
@@ -130,14 +130,17 @@ export class Facet {
           }),
           // Bounds of the time filter the client appended to the query text. The engine resolves an
           // index pattern's schema before parsing that filter, so it needs the range out of band to
-          // skip indices that cannot match it. The SQL/PPL APIs ignore body fields they do not
-          // know, but the async direct-query API rejects them outright ("Unknown field: ..."), and
-          // this body builder is shared with it -- so only send it to the endpoints that tolerate
-          // it.
-          ...(query.start_time &&
+          // skip indices that cannot match it. PPL ignores body fields it does not know, but the
+          // async direct-query API rejects them outright ("Unknown field: ..."), and this body
+          // builder is shared with it -- so only send them to endpoints that tolerate them.
+          //
+          // All three or none: without time_field the engine falls back to @timestamp, which for a
+          // dataset configured on another field means pruning on the wrong one.
+          ...(query.time_field &&
+            query.start_time &&
             query.end_time &&
-            TIME_RANGE_ENDPOINTS.has(resolvedEndpoint) && {
-              ...(query.time_field && { time_field: query.time_field }),
+            TIME_BOUNDS_ENDPOINTS.has(resolvedEndpoint) && {
+              time_field: query.time_field,
               start_time: query.start_time,
               end_time: query.end_time,
             }),
