@@ -71,10 +71,9 @@ describe('CorrelationService', () => {
             id: 'correlation-1',
             type: 'correlations',
             attributes: {
-              entities: [
-                { tracesDataset: { meta: { correlatedFields: {} } } },
-                { logsDataset: { meta: { correlatedFields: {} } } },
-              ],
+              correlations: {
+                entities: [{ id: 'test-dataset-id' }],
+              },
             },
             references: [{ id: 'test-dataset-id', type: 'index-pattern' }],
           },
@@ -90,8 +89,7 @@ describe('CorrelationService', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: 'correlations',
-        fields: ['entities'],
-        hasReference: { type: 'index-pattern', id: 'test-dataset-id' },
+        fields: ['correlations', 'references'],
         perPage: 10,
       });
 
@@ -99,38 +97,33 @@ describe('CorrelationService', () => {
       expect(result.savedObjects[0].id).toBe('correlation-1');
     });
 
-    it('filters server-side on the dataset reference and returns the response as-is', async () => {
+    it('should filter correlations by reference ID', async () => {
       const mockCorrelations = {
         savedObjects: [
           {
             id: 'correlation-1',
             type: 'correlations',
-            attributes: {
-              entities: [
-                { tracesDataset: { meta: { correlatedFields: {} } } },
-                { logsDataset: { meta: { correlatedFields: {} } } },
-              ],
-            },
+            attributes: {},
             references: [{ id: 'test-dataset-id', type: 'index-pattern' }],
           },
+          {
+            id: 'correlation-2',
+            type: 'correlations',
+            attributes: {},
+            references: [{ id: 'other-dataset-id', type: 'index-pattern' }],
+          },
         ],
-        total: 1,
+        total: 2,
         perPage: 10,
         page: 1,
       };
 
       mockSavedObjectsClient.find.mockResolvedValue(mockCorrelations);
 
-      const result = await correlationService.findCorrelationsByDataset('test-dataset-id', 25);
+      const result = await correlationService.findCorrelationsByDataset('test-dataset-id');
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          hasReference: { type: 'index-pattern', id: 'test-dataset-id' },
-          perPage: 25,
-        })
-      );
-      // Filtering is delegated to the query; the service no longer filters client-side.
-      expect(result).toBe(mockCorrelations);
+      expect(result.savedObjects).toHaveLength(1);
+      expect(result.savedObjects[0].id).toBe('correlation-1');
     });
 
     it('should handle errors gracefully', async () => {
