@@ -370,7 +370,7 @@ function TextToDashboardRenderer({
     const appState = {
       panels,
       viewMode: 'edit',
-      resetLayout: true,
+      layout: { type: 'GridLayout', items: [] },
     };
 
     const gParam = timeRange

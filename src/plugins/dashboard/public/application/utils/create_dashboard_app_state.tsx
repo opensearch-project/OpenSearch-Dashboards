@@ -180,7 +180,7 @@ export const hydrateDashboardAppState = (
     return stateDefaults;
   }
 
-  const { variables, panels, layout, resetLayout, ...urlStateWithoutDerivedState } = urlState;
+  const { variables, panels, layout, ...urlStateWithoutDerivedState } = urlState;
   const baseVariables = currentVariables ?? stateDefaults.variables;
 
   return {
@@ -188,7 +188,7 @@ export const hydrateDashboardAppState = (
     ...urlStateWithoutDerivedState,
     panels: panels ?? currentPanels ?? stateDefaults.panels,
     variables: hydrateVariablesFromUrl(baseVariables, variables),
-    layout: resetLayout ? stateDefaults.layout : (layout ?? currentLayout ?? stateDefaults.layout),
+    layout: layout ?? currentLayout ?? stateDefaults.layout,
   };
 };
 

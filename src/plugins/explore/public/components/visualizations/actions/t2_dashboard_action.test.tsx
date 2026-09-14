@@ -550,7 +550,7 @@ describe('save to dashboard', () => {
       'id-Chart C',
     ]);
     expect(appState.viewMode).toBe('edit');
-    expect(appState.resetLayout).toBe(true);
+    expect(appState.layout).toEqual(expect.objectContaining({ type: 'GridLayout', items: [] }));
     expect(appState.panels[0]).toEqual(
       expect.objectContaining({
         type: 'explore',
