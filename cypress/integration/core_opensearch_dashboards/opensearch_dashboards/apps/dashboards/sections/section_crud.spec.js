@@ -237,15 +237,25 @@ describe('Dashboard Sections', () => {
   });
 
   describe('Discard changes reverts section layout', () => {
-    // Support both dashboard navigation variants.
-    const exitEditMode = () => {
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="dashboardEditSwitch"]').length) {
-          cy.getElementByTestId('dashboardEditSwitch').click();
-        } else {
-          cy.getElementByTestId('dashboardEditMode').click();
-        }
-      });
+    // Two nav variants. The new nav (home:useNewHomePage) renders one `dashboardEditSwitch` for
+    // both directions -- unchecked enters edit, checked exits -- so gate on aria-checked rather
+    // than mere presence, or we may toggle the stale switch the wrong way. The legacy nav
+    // renders direction-specific buttons instead: `dashboardEditMode` to enter,
+    // `dashboardViewOnlyMode` to exit; neither carries aria-checked. One retrying multi-subj
+    // query covers both -- the post-save redirect (/create -> /view/<id>) remounts the editor
+    // and briefly empties the top nav, so the query has to retry rather than snapshot the DOM.
+    const setEditMode = (enabled) => {
+      cy.getElementsByTestIds(
+        ['dashboardEditSwitch', enabled ? 'dashboardEditMode' : 'dashboardViewOnlyMode'],
+        { timeout: 30000 }
+      )
+        .should('be.visible')
+        .and(($el) => {
+          if ($el.attr('data-test-subj') === 'dashboardEditSwitch') {
+            expect($el).to.have.attr('aria-checked', String(!enabled));
+          }
+        })
+        .click();
     };
 
     it('should revert a newly-added section when discarding on a flat-grid dashboard', () => {
@@ -253,18 +263,12 @@ describe('Dashboard Sections', () => {
       const dashName = `${DASHBOARD_NAME_PREFIX} DiscardFlat ${Date.now()}`;
       saveDashboard(dashName);
 
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="dashboardEditSwitch"]').length) {
-          cy.getElementByTestId('dashboardEditSwitch').click();
-        } else {
-          cy.getElementByTestId('dashboardEditMode').click();
-        }
-      });
+      setEditMode(true);
 
       addSection();
       cy.get('[data-test-subj^="dashboardSection-"]').should('have.length.gte', 1);
 
-      exitEditMode();
+      setEditMode(false);
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModal').find('button').contains('Discard changes').click();
 
@@ -281,18 +285,12 @@ describe('Dashboard Sections', () => {
       const dashName = `${DASHBOARD_NAME_PREFIX} DiscardSections ${Date.now()}`;
       saveDashboard(dashName);
 
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="dashboardEditSwitch"]').length) {
-          cy.getElementByTestId('dashboardEditSwitch').click();
-        } else {
-          cy.getElementByTestId('dashboardEditMode').click();
-        }
-      });
+      setEditMode(true);
 
       addSection();
       cy.get('[data-test-subj^="dashboardSection-"]').should('have.length.gte', 2);
 
-      exitEditMode();
+      setEditMode(false);
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModal').find('button').contains('Discard changes').click();
 

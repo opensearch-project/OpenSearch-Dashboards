@@ -91,6 +91,9 @@ const createCore = () =>
     uiSettings: { get: jest.fn() },
     http: {},
     savedObjects: {},
+    overlays: {
+      openConfirm: jest.fn().mockResolvedValue(true),
+    },
     notifications: {
       toasts: { addDanger: jest.fn(), addWarning: jest.fn(), addSuccess: jest.fn() },
     },
@@ -144,6 +147,7 @@ const decodeAppState = (core: any): any => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  window.location.hash = '';
   mockGetDashboardVersion.mockReturnValue({ version: '3.0.0' });
   mockGetAbsoluteTimeRange.mockReturnValue(undefined);
   mockChartPreviewError = undefined;
@@ -490,6 +494,19 @@ describe('save to dashboard', () => {
     expect(opts.path).toContain('#/create?_a=');
   });
 
+  it('asks for confirmation before replacing an existing create-dashboard draft', async () => {
+    window.location.hash =
+      "#/create?_a=(panels:!((panelIndex:'draft-panel',gridData:(x:0,y:0,w:24,h:15))),viewMode:edit)";
+
+    const core = createCore();
+    core.overlays.openConfirm.mockResolvedValue(false);
+    const { saved } = await renderAndSave([generatedVis('Chart A')], { core });
+
+    expect(core.overlays.openConfirm).toHaveBeenCalledTimes(1);
+    expect(saved).toHaveLength(0);
+    expect(core.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
   it('serializes the vis config into the saved explore', async () => {
     const transformations = [{ definitionId: 'limit', config: { limit: 5 }, hide: false }] as any;
     const vis = { ...generatedVis('Chart A'), transformations };
@@ -533,6 +550,7 @@ describe('save to dashboard', () => {
       'id-Chart C',
     ]);
     expect(appState.viewMode).toBe('edit');
+    expect(appState.layout).toEqual(expect.objectContaining({ type: 'GridLayout', items: [] }));
     expect(appState.panels[0]).toEqual(
       expect.objectContaining({
         type: 'explore',

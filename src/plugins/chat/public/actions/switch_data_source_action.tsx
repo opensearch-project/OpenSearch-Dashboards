@@ -143,8 +143,12 @@ export function useSwitchDataSourceAction(chatService: ChatService, enabled: boo
       'Set which data source the conversation uses for any subsequent data-source-aware tool that ' +
       'inspects fields, queries data, or creates a visualization. Call it with dataSourceId — the ' +
       'id of the data source to use. ' +
-      'When more than one data source has appeared in this conversation, before running any such ' +
-      'tool you MUST determine the data source for the CURRENT request: ' +
+      'PRECONDITION — call this tool ONLY when MORE THAN ONE distinct data source has appeared in ' +
+      'available-data-sources-context. If zero or exactly one data source has appeared, do NOT call it at all: ' +
+      'with one, that data source is already the active one and calling this tool is redundant; ' +
+      'with none, there is nothing to select. ' +
+      'When the precondition IS met, before running any data-source-aware tool you MUST determine the data ' +
+      'source for the CURRENT request: ' +
       '(1) if the user explicitly named one in the current request (by name or by position, e.g. ' +
       '"the first one"), call this tool with that id; ' +
       "(2) otherwise you MUST FIRST call the ask_user tool (inputType 'select'; one option per data " +
