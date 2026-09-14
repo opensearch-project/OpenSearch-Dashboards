@@ -5,10 +5,16 @@
 
 import {
   extractSerializableDataset,
+  fetchFirstAvailableDataset,
   getPreloadedState,
   loadReduxState,
   persistReduxState,
 } from './redux_persistence';
+import { ExploreFlavor } from '../../../../../common';
+import { DATA_STRUCTURE_META_TYPES } from '../../../../../../data/common';
+// Deep import of the real INDEX_PATTERN converter: toDataset is pure and is the exact function
+// fetchFirstAvailableDataset maps over, so this proves dataSource survives the fresh-load path.
+import { indexPatternTypeConfig } from '../../../../../../data/public/query/query_string/dataset_service/lib/index_pattern_type';
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
 import {
@@ -88,6 +94,71 @@ describe('extractSerializableDataset', () => {
 
     expect(extractSerializableDataset(instance)).not.toHaveProperty('toDataset');
     expect(extractSerializableDataset(instance)).not.toHaveProperty('toSpec');
+  });
+});
+
+describe('fetchFirstAvailableDataset dataSource hydration (fresh load fallback)', () => {
+  // Proves the fresh-load path that resolveDataset falls through to hydrates dataSource: fetch()
+  // populates each index pattern's `parent` from its data-source reference, and the real toDataset
+  // turns that parent into dataset.dataSource — so a data-source-bound dataset is never serialized
+  // without a cluster to query.
+  const buildServices = () =>
+    ({
+      storage: {},
+      data: {
+        query: {
+          queryString: {
+            getDatasetService: () => ({
+              getType: () => ({
+                // fetch() returns children with `parent` set (as the real fetchIndexPatterns does
+                // for a data-source-bound index pattern).
+                fetch: () =>
+                  Promise.resolve({
+                    children: [
+                      {
+                        id: 'trace-pattern',
+                        title: 'otel-v1-apm-span*',
+                        type: 'INDEX_PATTERN',
+                        meta: {
+                          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                          timeFieldName: 'startTime',
+                          signalType: CORE_SIGNAL_TYPES.TRACES,
+                        },
+                        parent: {
+                          id: 'ds-1',
+                          title: 'dcloud-logs',
+                          type: 'OpenSearch',
+                          meta: {
+                            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                            dataSourceVersion: '2.19.0',
+                          },
+                        },
+                      },
+                    ],
+                  }),
+                // The real converter — not a stub — so the assertion reflects production behavior.
+                toDataset: indexPatternTypeConfig.toDataset,
+              }),
+            }),
+          },
+        },
+      },
+    }) as unknown as ExploreServices;
+
+  it('resolves a traces dataset carrying dataSource, and persistence keeps it', async () => {
+    const dataset = await fetchFirstAvailableDataset(
+      buildServices(),
+      ExploreFlavor.Traces,
+      CORE_SIGNAL_TYPES.TRACES
+    );
+
+    expect(dataset?.signalType).toBe(CORE_SIGNAL_TYPES.TRACES);
+    expect(dataset?.dataSource).toEqual(
+      expect.objectContaining({ id: 'ds-1', title: 'dcloud-logs', type: 'OpenSearch' })
+    );
+
+    // The serialized shape retains the resolved data source.
+    expect(extractSerializableDataset(dataset!).dataSource).toEqual(dataset!.dataSource);
   });
 });
 
