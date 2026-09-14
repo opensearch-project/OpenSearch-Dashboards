@@ -46,8 +46,6 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
       ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
       ...(patternMeta?.description && { description: patternMeta.description }),
-      // schemaMappings carries the dataset's correlation/field-mapping config.
-      ...(patternMeta?.schemaMappings && { schemaMappings: patternMeta.schemaMappings }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {

@@ -397,10 +397,13 @@ export class DatasetService {
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
-            // Carry signalType and schemaMappings through meta so toDataset produces a fully
-            // hydrated default dataset (signal-type routing + correlation config).
+            // toDataset reads the dataset type from meta.datasetType; without it a non-standard
+            // index pattern (e.g. a rollup) is flattened back to INDEX_PATTERN in the default
+            // dataset.
+            datasetType: actualType,
+            // Carry signalType through meta so toDataset produces a default dataset with the
+            // signal-type routing consumers like Explore need.
             ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
-            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {

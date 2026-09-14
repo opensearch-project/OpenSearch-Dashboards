@@ -49,9 +49,6 @@ export interface CorrelationEntity {
 
 export interface CorrelationAttributes {
   entities?: CorrelationEntity[];
-  correlations?: {
-    entities?: Array<{ id: string }>;
-  };
 }
 
 export interface SavedObjectCorrelation {
@@ -85,29 +82,17 @@ export class CorrelationService {
    */
   async findCorrelationsByDataset(datasetId: string, size: number = 10) {
     try {
-      const allCorrelationsResponse = await this.savedObjectsClient.find({
+      // Filter server-side on the dataset reference so pagination can't drop the matching
+      // correlation (a client-side filter over the first `size` results would miss it in a
+      // workspace with more correlations than that). `entities` holds the traces<->logs linkage
+      // read in checkCorrelationsForLogs and must be requested explicitly; `references` is a
+      // top-level saved-object property and is always returned regardless of `fields`.
+      return await this.savedObjectsClient.find({
         type: 'correlations',
-        // `entities` holds the traces<->logs linkage read in checkCorrelationsForLogs and must be
-        // requested explicitly. `references` is a top-level saved-object property and is always
-        // returned regardless of `fields`.
         fields: ['entities'],
+        hasReference: { type: 'index-pattern', id: datasetId },
         perPage: size,
       });
-
-      const filteredCorrelations = allCorrelationsResponse.savedObjects.filter((correlation) => {
-        const correlationAttrs = correlation.attributes as CorrelationAttributes;
-        const hasReference = correlation.references?.some((ref) => ref.id === datasetId);
-        const hasEntityReference = correlationAttrs?.correlations?.entities?.some(
-          (entity: { id: string }) => entity.id === datasetId
-        );
-
-        return hasReference || hasEntityReference;
-      });
-
-      return {
-        ...allCorrelationsResponse,
-        savedObjects: filteredCorrelations,
-      };
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to find correlations:', error);

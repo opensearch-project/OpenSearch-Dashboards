@@ -43,6 +43,8 @@ describe('extractSerializableDataset', () => {
       dataSource: { id: 'f5f4ca1c', title: 'dcloud-logs', type: 'OpenSearch' },
       displayName: 'Trace Dataset - dcloud-logs',
       signalType: 'traces',
+      sourceDatasetRef: { id: 'table-dataset', type: 'INDEX_PATTERN' },
+      // schemaMappings is intentionally not persisted into query state.
       schemaMappings: { logTraceIdField: { type: 'keyword' } },
     } as any;
 
@@ -54,11 +56,25 @@ describe('extractSerializableDataset', () => {
       language: 'PPL',
       dataSource: { id: 'f5f4ca1c', title: 'dcloud-logs', type: 'OpenSearch' },
       signalType: 'traces',
-      isRemoteDataset: undefined,
+      sourceDatasetRef: { id: 'table-dataset', type: 'INDEX_PATTERN' },
       displayName: 'Trace Dataset - dcloud-logs',
-      description: undefined,
-      schemaMappings: { logTraceIdField: { type: 'keyword' } },
     });
+    expect('schemaMappings' in extractSerializableDataset(dataset)).toBe(false);
+  });
+
+  it('drops undefined keys so it matches a dataset read back from the URL', () => {
+    const dataset = {
+      id: 'id',
+      title: 'title',
+      type: 'INDEX_PATTERN',
+      // dataSource, signalType, displayName, etc. are undefined
+    } as any;
+
+    const extracted = extractSerializableDataset(dataset);
+
+    expect(Object.keys(extracted).sort()).toEqual(['id', 'title', 'type']);
+    expect('signalType' in extracted).toBe(false);
+    expect('dataSource' in extracted).toBe(false);
   });
 
   it('does not carry class methods into serialized state', () => {

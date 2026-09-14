@@ -32,24 +32,33 @@ import { DEFAULT_EDITOR_MODE } from '../constants';
  * Copies every serializable hydration field from a dataset into a plain object suitable for
  * persisting into query/URL state.
  *
- * This is the single place Explore reduces a dataset for persistence. All hydration fields
- * (dataSource, displayName, signalType, schemaMappings, ...) must be carried through so consumers
- * receive a complete dataset from the persisted state. Fields are copied explicitly (rather than
- * spreading) so a class instance's methods never leak into serialized state.
+ * This is the single place Explore reduces a dataset for persistence. Fields are listed explicitly
+ * (rather than spreading) so a class instance's methods never leak into serialized state.
+ *
+ * `schemaMappings` is intentionally excluded: no query-state consumer reads it (the correlation /
+ * logs paths re-resolve the referenced dataset by id), and persisting it only lengthens the URL.
+ *
+ * `undefined` values are dropped: rison omits undefined keys when serializing to the URL, so a
+ * dataset read back from `_q` has fewer keys than a freshly-extracted one. Keeping undefined keys
+ * here would make `isEqual` comparisons (e.g. the dataset-change middleware) report a spurious
+ * change on the first comparison after load.
  */
-export const extractSerializableDataset = (dataset: Dataset): Dataset => ({
-  id: dataset.id,
-  title: dataset.title,
-  type: dataset.type,
-  timeFieldName: dataset.timeFieldName,
-  language: dataset.language,
-  dataSource: dataset.dataSource,
-  signalType: dataset.signalType,
-  isRemoteDataset: dataset.isRemoteDataset,
-  displayName: dataset.displayName,
-  description: dataset.description,
-  schemaMappings: dataset.schemaMappings,
-});
+export const extractSerializableDataset = (dataset: Dataset): Dataset =>
+  Object.fromEntries(
+    Object.entries({
+      id: dataset.id,
+      title: dataset.title,
+      type: dataset.type,
+      timeFieldName: dataset.timeFieldName,
+      language: dataset.language,
+      dataSource: dataset.dataSource,
+      signalType: dataset.signalType,
+      sourceDatasetRef: dataset.sourceDatasetRef,
+      isRemoteDataset: dataset.isRemoteDataset,
+      displayName: dataset.displayName,
+      description: dataset.description,
+    }).filter(([, value]) => value !== undefined)
+  ) as Dataset;
 
 /**
  * Persists Redux state to URL
