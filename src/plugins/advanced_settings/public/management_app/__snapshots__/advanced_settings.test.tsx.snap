@@ -162,7 +162,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
         },
         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
         "ppl": Object {
-          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
         },
         "reIndex": Object {
           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -195,7 +195,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
         },
         "sql": Object {
-          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
         },
         "sqlPplLimitation": Object {
           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -859,7 +859,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
             },
             "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
             "ppl": Object {
-              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+              "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
             },
             "reIndex": Object {
               "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -892,7 +892,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
             },
             "sql": Object {
-              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+              "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
             },
             "sqlPplLimitation": Object {
               "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -1902,7 +1902,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -1935,7 +1935,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -2322,7 +2322,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -2355,7 +2355,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -2742,7 +2742,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -2775,7 +2775,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3162,7 +3162,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -3195,7 +3195,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3637,7 +3637,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -3670,7 +3670,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -4059,7 +4059,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                         "ppl": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
                         },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -4092,7 +4092,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                         },
                         "sql": Object {
-                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",

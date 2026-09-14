@@ -631,12 +631,12 @@ export class DocLinksService {
             base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/query-string/`,
           },
           ppl: {
-            // https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/
-            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/ppl/syntax/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/ppl/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/ppl/index/`,
           },
           sql: {
-            // https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/
-            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/sql/basic/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/sql/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/sql/index/`,
           },
           sqlPplLimitation: {
             // https://opensearch.org/docs/latest/search-plugins/sql/limitation/
