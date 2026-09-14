@@ -29,7 +29,7 @@
  */
 
 import { upperFirst, isFunction } from 'lodash';
-import { MouseEvent } from 'react';
+import { MouseEvent, ReactNode } from 'react';
 import classNames from 'classnames';
 import {
   EuiToolTip,
@@ -54,9 +54,9 @@ function TopNavMenuLegacyItem(props: TopNavMenuLegacyData) {
     return val ?? false;
   }
 
-  function getTooltip(): string {
+  function getTooltip(): ReactNode {
     const val = isFunction(props.tooltip) ? props.tooltip() : props.tooltip;
-    return val ?? '';
+    return val;
   }
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {

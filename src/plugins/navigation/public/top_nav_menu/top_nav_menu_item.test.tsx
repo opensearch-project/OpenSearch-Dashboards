@@ -174,6 +174,20 @@ describe('TopNavMenu', () => {
     expect(wrapper.find(EuiButtonIcon).length).toBe(1);
   });
 
+  it('Should render React tooltip content', () => {
+    const tooltip = <span data-test-subj="tooltipContent">Tooltip content</span>;
+    const props = {
+      ...defaultProps,
+      controlType: 'icon',
+      iconType: 'tag',
+      tooltip,
+      ariaLabel: 'Tags',
+    } as TopNavMenuIconData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+
+    expect(wrapper.find(EuiToolTip).prop('content')).toBe(tooltip);
+  });
+
   it('Should render a switch', () => {
     const props = { ...defaultProps, controlType: 'switch', checked: true } as TopNavMenuSwitchData;
     const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
