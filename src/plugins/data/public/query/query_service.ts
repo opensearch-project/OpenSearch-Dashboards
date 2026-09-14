@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Subscription } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
@@ -56,6 +57,8 @@ export class QueryService {
   queryStringManager!: QueryStringContract;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
+  private currentAppId: string | undefined;
+  private currentAppIdSubscription?: Subscription;
 
   public setup({
     uiSettings,
@@ -77,7 +80,8 @@ export class QueryService {
       sessionStorage,
       uiSettings,
       defaultSearchInterceptor,
-      notifications
+      notifications,
+      () => this.currentAppId
     );
 
     this.state$ = createQueryStateObservable({
@@ -101,19 +105,25 @@ export class QueryService {
     indexPatterns,
     application,
   }: QueryServiceStartDependencies): IQueryStart {
-    const preInitDefault = this.queryStringManager.getDefaultQuery();
-    this.queryStringManager
-      .getDatasetService()
-      .init(indexPatterns)
-      .then(() => {
-        this.queryStringManager.refreshDefaultQuery(preInitDefault);
-      });
+    // QueryStringManager is created during setup, before ApplicationStart is available. Keep the
+    // current app here so default-language resolution can reject stale languages from another app.
+    this.currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
+      this.currentAppId = currentAppId;
+    });
+
+    // Dataset readiness is exposed to applications instead of refreshing the shared query here.
+    // Applying the default dataset centrally used to overwrite queries already restored by Dashboard.
+    const datasetInitialization = this.queryStringManager.getDatasetService().init(indexPatterns);
     return {
       addToQueryLog: createAddToQueryLog({
         storage,
         uiSettings,
       }),
       filterManager: this.filterManager,
+      getDefaultDataset: async () => {
+        await datasetInitialization;
+        return this.queryStringManager.getDatasetService().getDefault();
+      },
       queryString: this.queryStringManager,
       savedQueries: createSavedQueryService(
         savedObjectsClient,
@@ -136,7 +146,7 @@ export class QueryService {
   }
 
   public stop() {
-    // nothing to do here yet
+    this.currentAppIdSubscription?.unsubscribe();
   }
 }
 

@@ -41,7 +41,6 @@ const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
   const defaultQuery: Query = {
     query: '',
     language: 'kuery',
-    ...(isEnhancementsEnabled ? { dataset: datasetService.getDefault() } : {}),
   };
 
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {

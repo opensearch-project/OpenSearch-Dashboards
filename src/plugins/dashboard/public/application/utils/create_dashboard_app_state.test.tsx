@@ -111,6 +111,47 @@ describe('createDashboardGlobalAndAppState', () => {
     expect(mockStartStateSync).toHaveBeenCalled();
   });
 
+  test('normalizes an unsupported saved dashboard query before initializing state', () => {
+    const stateWithPplQuery: DashboardAppState = {
+      ...dashboardAppStateStub,
+      query: {
+        language: 'PPL',
+        query: 'source = opensearch_dashboards_sample_data_logs',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'opensearch_dashboards_sample_data_logs',
+          type: 'INDEXES',
+          dataSource: {
+            id: '',
+            title: 'Default Cluster',
+            type: 'DATA_SOURCE',
+          },
+        },
+      },
+    };
+
+    createDashboardGlobalAndAppState({
+      stateDefaults: stateWithPplQuery,
+      osdUrlStateStorage,
+      services: mockServices,
+      savedDashboardInstance,
+    });
+
+    expect(createStateContainer).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      expect.any(Object)
+    );
+    expect(osdUrlStateStorage.set).toHaveBeenLastCalledWith(
+      '_a',
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      { replace: true }
+    );
+  });
+
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
     expect(stateContainer).toBe('stateContainer');
     stopStateSync();

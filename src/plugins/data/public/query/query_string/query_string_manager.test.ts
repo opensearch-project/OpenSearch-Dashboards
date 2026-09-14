@@ -32,25 +32,15 @@ import { QueryStringManager } from './query_string_manager';
 import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
-import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
-
-// Mock the services module
-jest.mock('../../services', () => ({
-  getApplication: jest.fn().mockReturnValue({
-    currentAppId$: {
-      subscribe: jest.fn((callback) => {
-        callback('test-app-id');
-        return { unsubscribe: jest.fn() };
-      }),
-    },
-  }),
-}));
+import { DataStorage, DEFAULT_DATA, UI_SETTINGS } from 'src/plugins/data/common';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
   let storage: DataStorage;
   let sessionStorage: DataStorage;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
+  let currentAppId: string | undefined;
+  let uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
 
   const advanceTimersByMs = async (ms: number = 100) => {
     jest.advanceTimersByTime(ms);
@@ -71,8 +61,9 @@ describe('QueryStringManager', () => {
     mockSearchInterceptor = {
       search: jest.fn(),
     } as unknown as jest.Mocked<ISearchInterceptor>;
+    currentAppId = 'test-app-id';
 
-    const uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings = coreMock.createSetup().uiSettings;
 
     // Add default UI settings for tests
     uiSettings.get.mockImplementation((key) => {
@@ -86,7 +77,8 @@ describe('QueryStringManager', () => {
       sessionStorage,
       uiSettings,
       mockSearchInterceptor,
-      coreMock.createStart().notifications
+      coreMock.createStart().notifications,
+      () => currentAppId
     );
   });
 
@@ -122,6 +114,21 @@ describe('QueryStringManager', () => {
     expect(service.getQuery()).toEqual(newQuery);
   });
 
+  test('getQuery does not rewrite a query that is unsupported by the current app', () => {
+    service.getLanguageService().registerLanguage({
+      id: 'PPL',
+      title: 'PPL',
+      supportedAppNames: ['discover'],
+      getQueryString: jest.fn(),
+    } as any);
+    service.setQuery({ query: 'source = logs', language: 'PPL' });
+
+    expect(service.getQuery()).toEqual({
+      query: 'source = logs',
+      language: 'PPL',
+    });
+  });
+
   test('clearQuery resets to default query', () => {
     const newQuery: Query = {
       query: 'test query',
@@ -143,10 +150,16 @@ describe('QueryStringManager', () => {
   });
 
   test('formatQuery handles different input types', () => {
+    service.getDatasetService().getDefault = jest.fn().mockReturnValue({
+      id: 'default-dataset',
+      title: 'Default Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+    });
     const stringQuery = 'test query';
     const formattedStringQuery = service.formatQuery(stringQuery);
     expect(formattedStringQuery).toHaveProperty('query', stringQuery);
     expect(formattedStringQuery).toHaveProperty('language');
+    expect(formattedStringQuery.dataset).toBeUndefined();
 
     const objectQuery = { query: 'object query', language: 'sql' };
     const formattedObjectQuery = service.formatQuery(objectQuery);
@@ -213,90 +226,106 @@ describe('QueryStringManager', () => {
       type: DEFAULT_DATA.SET_TYPES.INDEX,
     };
 
-    test('clamps language to the first supportedLanguages entry when default language is unsupported', () => {
-      service.getDatasetService().getDefault = jest.fn().mockReturnValue(datasetWithSqlPplOnly);
+    test('uses the supplied dataset and clamps to its first supported language', () => {
       service.getDatasetService().getType = jest.fn().mockReturnValue({
         supportedLanguages: jest.fn().mockReturnValue(['PPL', 'SQL']),
       });
       service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
-        getQueryString: jest.fn().mockReturnValue(''),
+        getQueryString: jest
+          .fn()
+          .mockImplementation((query: Query) => `source = ${query.dataset?.title}`),
       });
 
-      const defaultQuery = service.getDefaultQuery();
+      const defaultQuery = service.getDefaultQuery(datasetWithSqlPplOnly);
 
       expect(defaultQuery.language).toBe('PPL');
       expect(defaultQuery.dataset).toEqual(datasetWithSqlPplOnly);
+      expect(defaultQuery.query).toBe('source = Test Dataset');
     });
 
-    test('keeps the default language when it is in the dataset supportedLanguages', () => {
+    test('does not implicitly use the DatasetService default', () => {
       service.getDatasetService().getDefault = jest.fn().mockReturnValue(datasetWithSqlPplOnly);
-      service.getDatasetService().getType = jest.fn().mockReturnValue({
-        supportedLanguages: jest.fn().mockReturnValue(['kuery', 'PPL', 'SQL']),
-      });
-      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
-        getQueryString: jest.fn().mockReturnValue(''),
-      });
 
       const defaultQuery = service.getDefaultQuery();
 
       expect(defaultQuery.language).toBe('kuery');
-      expect(defaultQuery.dataset).toEqual(datasetWithSqlPplOnly);
+      expect(defaultQuery.dataset).toBeUndefined();
     });
 
-    test('keeps the default language when dataset type reports no supportedLanguages', () => {
-      service.getDatasetService().getDefault = jest.fn().mockReturnValue(datasetWithSqlPplOnly);
-      service.getDatasetService().getType = jest.fn().mockReturnValue({
-        supportedLanguages: jest.fn().mockReturnValue(undefined),
+    test('reuses the stored query when the user language is supported by the current app', () => {
+      storage.set('userQueryLanguage', 'PPL');
+      storage.set('userQueryString', 'source = logs');
+      service.getLanguageService().registerLanguage({
+        id: 'PPL',
+        title: 'PPL',
+        supportedAppNames: ['test-app-id'],
+        getQueryString: jest.fn(),
+      } as any);
+
+      const defaultQuery = service.getDefaultQuery();
+
+      expect(defaultQuery).toEqual({
+        language: 'PPL',
+        query: 'source = logs',
       });
-      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
-        getQueryString: jest.fn().mockReturnValue(''),
+    });
+
+    test('supports a stored language registered for the parent of a namespaced app ID', () => {
+      currentAppId = 'explore/logs';
+      storage.set('userQueryLanguage', 'PPL');
+      storage.set('userQueryString', 'source = logs');
+      service.getLanguageService().registerLanguage({
+        id: 'PPL',
+        title: 'PPL',
+        supportedAppNames: ['explore'],
+        getQueryString: jest.fn(),
+      } as any);
+
+      expect(service.getDefaultQuery()).toEqual({
+        language: 'PPL',
+        query: 'source = logs',
+      });
+    });
+
+    test('uses an empty query when the user language is unsupported by the current app', () => {
+      storage.set('userQueryLanguage', 'PPL');
+      storage.set('userQueryString', 'source = logs');
+      service.getLanguageService().registerLanguage({
+        id: 'PPL',
+        title: 'PPL',
+        supportedAppNames: ['discover'],
+        getQueryString: jest.fn(),
+      } as any);
+
+      const defaultQuery = service.getDefaultQuery();
+
+      expect(defaultQuery).toEqual({
+        language: 'kuery',
+        query: '',
+      });
+    });
+
+    test('falls back to kuery when the configured language is unsupported by the current app', () => {
+      storage.set('userQueryLanguage', 'PPL');
+      storage.set('userQueryString', 'source = logs');
+      service.getLanguageService().registerLanguage({
+        id: 'PPL',
+        title: 'PPL',
+        supportedAppNames: ['discover'],
+        getQueryString: jest.fn(),
+      } as any);
+      uiSettings.get.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) return 'PPL';
+        if (key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) return true;
+        return undefined;
       });
 
       const defaultQuery = service.getDefaultQuery();
 
-      expect(defaultQuery.language).toBe('kuery');
-    });
-  });
-
-  describe('refreshDefaultQuery', () => {
-    const stalePreInitDefault = { query: '', language: 'kuery' };
-    const datasetAfterInit = {
-      id: 'test-dataset',
-      title: 'Test Dataset',
-      type: DEFAULT_DATA.SET_TYPES.INDEX,
-    };
-
-    beforeEach(() => {
-      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
-        getQueryString: jest.fn().mockReturnValue(''),
+      expect(defaultQuery).toEqual({
+        language: 'kuery',
+        query: '',
       });
-    });
-
-    test('re-seeds query$ from the dataset-aware default when user has not touched it', () => {
-      service.getDatasetService().getDefault = jest.fn().mockReturnValue(datasetAfterInit);
-      service.getDatasetService().getType = jest.fn().mockReturnValue({
-        supportedLanguages: jest.fn().mockReturnValue(['PPL', 'SQL']),
-      });
-
-      service.refreshDefaultQuery(stalePreInitDefault);
-
-      const refreshed = service.getQuery();
-      expect(refreshed.dataset).toEqual(datasetAfterInit);
-      expect(refreshed.language).toBe('PPL');
-    });
-
-    test('does not overwrite a query the user has already set', () => {
-      const userQuery = { query: 'SELECT *', language: 'SQL' };
-      service.setQuery(userQuery);
-
-      service.getDatasetService().getDefault = jest.fn().mockReturnValue(datasetAfterInit);
-      service.getDatasetService().getType = jest.fn().mockReturnValue({
-        supportedLanguages: jest.fn().mockReturnValue(['PPL', 'SQL']),
-      });
-
-      service.refreshDefaultQuery(stalePreInitDefault);
-
-      expect(service.getQuery()).toEqual(userQuery);
     });
   });
 

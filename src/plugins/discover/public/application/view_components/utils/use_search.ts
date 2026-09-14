@@ -600,7 +600,9 @@ export const useSearch = (services: DiscoverViewServices) => {
     const loadSavedSearch = async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       const dataQuery = data.query.queryString.getQuery();
-      const defaultQuery = data.query.queryString.getDefaultQuery();
+      // Include the active dataset so the generated query text and language are comparable to the
+      // current query; a dataset-less default can make Discover restore the wrong saved query.
+      const defaultQuery = data.query.queryString.getDefaultQuery(dataQuery.dataset);
       const isDataQueryDefault = dataQuery.query === defaultQuery.query;
       const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 

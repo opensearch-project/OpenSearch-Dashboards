@@ -30,6 +30,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
+import { getGlobalQueryUrlState } from '../../data/public';
 import { VisTypeAlias } from '../../visualizations/public';
 import {
   ExploreFlavor,
@@ -328,10 +329,7 @@ export class ExplorePlugin implements Plugin<
                 (value: Record<string, unknown>) =>
                   !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
               ),
-              map((value: Record<string, unknown>) => ({
-                ...(value.state as Record<string, unknown>),
-                // Note: We don't use data plugin's filterManager, filters are managed in Redux
-              }))
+              map(({ state }) => getGlobalQueryUrlState(state))
             ),
           },
         ],
@@ -427,6 +425,14 @@ export class ExplorePlugin implements Plugin<
 
           // Register tabs with the tab registry
           registerTabs(services, flavor);
+
+          // Logs opts in to the dataset-generated query before its URL state is restored. Other
+          // flavors resolve their own dataset and query during preload.
+          if (flavor === ExploreFlavor.Logs) {
+            const defaultDataset = await services.data.query.getDefaultDataset();
+            const defaultQuery = services.data.query.queryString.getDefaultQuery(defaultDataset);
+            services.data.query.queryString.setQuery(defaultQuery, false, false);
+          }
 
           // Instantiate the store
           const {
@@ -539,10 +545,7 @@ export class ExplorePlugin implements Plugin<
                 (value: Record<string, unknown>) =>
                   !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
               ),
-              map((value: Record<string, unknown>) => ({
-                ...(value.state as Record<string, unknown>),
-                // Note: We don't use data plugin's filterManager, filters are managed in Redux
-              }))
+              map(({ state }) => getGlobalQueryUrlState(state))
             ),
           },
         ],
