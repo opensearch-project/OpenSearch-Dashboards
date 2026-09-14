@@ -1295,6 +1295,13 @@ describe('PPLSearchInterceptor', () => {
       'source=test_index | fields age, name',
       'source=test_index |stats count()',
       'source=test_index |   sort   age',
+      // Charting commands emit their own time column -- `timechart` always `@timestamp`, `chart`
+      // whatever its `over` argument was -- which need not be the field the dataset is configured
+      // on. Appending a sort on the dataset's field then fails to resolve.
+      'source=test_index | chart count() over @timestamp by host',
+      'source=test_index | timechart span=1m count() by host',
+      'source=test_index |chart count() over ts by host',
+      'source=test_index |   timechart   count()',
     ])('does not append a sort when the query already customizes it: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',

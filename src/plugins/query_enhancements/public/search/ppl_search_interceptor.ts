@@ -39,7 +39,25 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
-const DEFAULT_SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+// Commands after which a trailing `sort - <dataset time field>` must not be appended: either the
+// user already ordered or limited the result (sort, head), or the command replaces the row type so
+// the dataset's time field may no longer be in it.
+//
+// `chart` and `timechart` do emit a time column, but their own: `timechart` always names it
+// `@timestamp`, and `chart` names it whatever its `over` argument was. Neither is necessarily the
+// field the dataset is configured on, and the client cannot tell -- so appending a sort on the
+// dataset's field turns a working query into `Field [<field>] not found`. Listed for the same
+// defensive reason as `rename`, which also keeps the field unless it happens to rename it away.
+const DEFAULT_SORT_BLOCKING_COMMANDS = [
+  'sort',
+  'stats',
+  'head',
+  'rare',
+  'top',
+  'rename',
+  'chart',
+  'timechart',
+];
 const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
   `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
   'i'
