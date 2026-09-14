@@ -29,6 +29,29 @@ import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available
 import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
+ * Copies every serializable hydration field from a dataset into a plain object suitable for
+ * persisting into query/URL state.
+ *
+ * This is the single place Explore reduces a dataset for persistence. All hydration fields
+ * (dataSource, displayName, signalType, schemaMappings, ...) must be carried through so consumers
+ * receive a complete dataset from the persisted state. Fields are copied explicitly (rather than
+ * spreading) so a class instance's methods never leak into serialized state.
+ */
+export const extractSerializableDataset = (dataset: Dataset): Dataset => ({
+  id: dataset.id,
+  title: dataset.title,
+  type: dataset.type,
+  timeFieldName: dataset.timeFieldName,
+  language: dataset.language,
+  dataSource: dataset.dataSource,
+  signalType: dataset.signalType,
+  isRemoteDataset: dataset.isRemoteDataset,
+  displayName: dataset.displayName,
+  description: dataset.description,
+  schemaMappings: dataset.schemaMappings,
+});
+
+/**
  * Persists Redux state to URL
  */
 export const persistReduxState = (
@@ -73,16 +96,8 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     // Query state handling - always resolve dataset to ensure SignalType validation
     let urlDataset: Dataset | undefined;
     if (queryState?.dataset) {
-      // Extract minimal dataset from URL state
-      urlDataset = {
-        id: queryState.dataset.id,
-        title: queryState.dataset.title,
-        type: queryState.dataset.type,
-        language: queryState.dataset.language,
-        timeFieldName: queryState.dataset.timeFieldName,
-        dataSource: queryState.dataset.dataSource,
-        signalType: queryState.dataset.signalType,
-      };
+      // Rehydrate the dataset from URL state, preserving every hydration field it carries.
+      urlDataset = extractSerializableDataset(queryState.dataset);
     }
 
     // Always call getPreloadedQueryState to ensure SignalType validation runs
@@ -302,15 +317,7 @@ const getPreloadedQueryState = async (
     if (typeof (selectedDataset as any).toDataset === 'function') {
       minimalDataset = (selectedDataset as any).toDataset();
     } else {
-      minimalDataset = {
-        id: selectedDataset.id,
-        title: selectedDataset.title,
-        type: selectedDataset.type,
-        language: selectedDataset.language,
-        timeFieldName: selectedDataset.timeFieldName,
-        dataSource: selectedDataset.dataSource,
-        signalType: selectedDataset.signalType,
-      };
+      minimalDataset = extractSerializableDataset(selectedDataset);
     }
   }
 

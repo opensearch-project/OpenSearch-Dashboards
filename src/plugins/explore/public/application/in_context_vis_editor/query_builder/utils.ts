@@ -8,7 +8,10 @@ import { ToastsStart } from 'opensearch-dashboards/public';
 import { ExploreServices } from '../../../types';
 import { Dataset, DEFAULT_DATA, CORE_SIGNAL_TYPES } from '../../../../../data/common';
 import { ExploreFlavor } from '../../../../../explore/common';
-import { fetchFirstAvailableDataset } from '../../../application/utils/state_management/utils/redux_persistence';
+import {
+  extractSerializableDataset,
+  fetchFirstAvailableDataset,
+} from '../../../application/utils/state_management/utils/redux_persistence';
 import {
   QueryState,
   QueryEditorState,
@@ -92,15 +95,7 @@ export const getPreloadedQueryState = async (
     if (typeof (selectedDataset as any).toDataset === 'function') {
       minimalDataset = (selectedDataset as any).toDataset();
     } else {
-      minimalDataset = {
-        id: selectedDataset.id,
-        title: selectedDataset.title,
-        type: selectedDataset.type,
-        language: selectedDataset.language,
-        timeFieldName: selectedDataset.timeFieldName,
-        dataSource: selectedDataset.dataSource,
-        signalType: selectedDataset.signalType,
-      };
+      minimalDataset = extractSerializableDataset(selectedDataset);
     }
   }
 

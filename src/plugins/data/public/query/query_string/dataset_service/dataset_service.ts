@@ -397,6 +397,10 @@ export class DatasetService {
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+            // Carry signalType and schemaMappings through meta so toDataset produces a fully
+            // hydrated default dataset (signal-type routing + correlation config).
+            ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
+            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {

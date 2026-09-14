@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
+import {
+  extractSerializableDataset,
+  getPreloadedState,
+  loadReduxState,
+  persistReduxState,
+} from './redux_persistence';
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
 import {
@@ -26,6 +31,49 @@ jest.mock('../../../../components/visualizations/metric/metric_vis_config', () =
     colorSchema: 'blues',
   },
 }));
+
+describe('extractSerializableDataset', () => {
+  it('preserves dataSource, displayName, signalType and schemaMappings', () => {
+    const dataset = {
+      id: '3cda6900',
+      title: 'otel-v1-apm-span*',
+      type: 'INDEX_PATTERN',
+      timeFieldName: 'startTime',
+      language: 'PPL',
+      dataSource: { id: 'f5f4ca1c', title: 'dcloud-logs', type: 'OpenSearch' },
+      displayName: 'Trace Dataset - dcloud-logs',
+      signalType: 'traces',
+      schemaMappings: { logTraceIdField: { type: 'keyword' } },
+    } as any;
+
+    expect(extractSerializableDataset(dataset)).toEqual({
+      id: '3cda6900',
+      title: 'otel-v1-apm-span*',
+      type: 'INDEX_PATTERN',
+      timeFieldName: 'startTime',
+      language: 'PPL',
+      dataSource: { id: 'f5f4ca1c', title: 'dcloud-logs', type: 'OpenSearch' },
+      signalType: 'traces',
+      isRemoteDataset: undefined,
+      displayName: 'Trace Dataset - dcloud-logs',
+      description: undefined,
+      schemaMappings: { logTraceIdField: { type: 'keyword' } },
+    });
+  });
+
+  it('does not carry class methods into serialized state', () => {
+    const instance = {
+      id: 'id',
+      title: 'title',
+      type: 'INDEX_PATTERN',
+      toDataset: () => ({}),
+      toSpec: () => ({}),
+    } as any;
+
+    expect(extractSerializableDataset(instance)).not.toHaveProperty('toDataset');
+    expect(extractSerializableDataset(instance)).not.toHaveProperty('toSpec');
+  });
+});
 
 describe('redux_persistence', () => {
   let mockServices: ExploreServices;

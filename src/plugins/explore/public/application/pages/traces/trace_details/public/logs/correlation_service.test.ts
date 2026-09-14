@@ -89,7 +89,7 @@ describe('CorrelationService', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: 'correlations',
-        fields: ['correlations', 'references'],
+        fields: ['entities'],
         perPage: 10,
       });
 

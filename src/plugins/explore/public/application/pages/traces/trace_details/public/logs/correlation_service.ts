@@ -87,7 +87,10 @@ export class CorrelationService {
     try {
       const allCorrelationsResponse = await this.savedObjectsClient.find({
         type: 'correlations',
-        fields: ['correlations', 'references'],
+        // `entities` holds the traces<->logs linkage read in checkCorrelationsForLogs and must be
+        // requested explicitly. `references` is a top-level saved-object property and is always
+        // returned regardless of `fields`.
+        fields: ['entities'],
         perPage: size,
       });
 
