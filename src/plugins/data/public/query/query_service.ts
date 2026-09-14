@@ -122,7 +122,7 @@ export class QueryService {
       filterManager: this.filterManager,
       getDefaultDataset: async () => {
         await datasetInitialization;
-        return this.queryStringManager.getDatasetService().getDefault();
+        return this.queryStringManager.getDatasetService().refreshDefault();
       },
       queryString: this.queryStringManager,
       savedQueries: createSavedQueryService(

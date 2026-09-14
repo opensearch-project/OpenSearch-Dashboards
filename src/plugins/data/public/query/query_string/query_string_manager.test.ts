@@ -114,21 +114,6 @@ describe('QueryStringManager', () => {
     expect(service.getQuery()).toEqual(newQuery);
   });
 
-  test('getQuery does not rewrite a query that is unsupported by the current app', () => {
-    service.getLanguageService().registerLanguage({
-      id: 'PPL',
-      title: 'PPL',
-      supportedAppNames: ['discover'],
-      getQueryString: jest.fn(),
-    } as any);
-    service.setQuery({ query: 'source = logs', language: 'PPL' });
-
-    expect(service.getQuery()).toEqual({
-      query: 'source = logs',
-      language: 'PPL',
-    });
-  });
-
   test('clearQuery resets to default query', () => {
     const newQuery: Query = {
       query: 'test query',

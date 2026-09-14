@@ -59,7 +59,7 @@ export class DatasetService {
 
   public async init(indexPatterns: IndexPatternsContract): Promise<void> {
     this.indexPatterns = indexPatterns;
-    this.defaultDataset = await this.fetchDefaultDataset();
+    await this.refreshDefault();
   }
 
   public registerType(handlerConfig: DatasetTypeConfig): void {
@@ -84,6 +84,13 @@ export class DatasetService {
   }
 
   public getDefault(): Dataset | undefined {
+    return this.defaultDataset;
+  }
+
+  public async refreshDefault(): Promise<Dataset | undefined> {
+    // defaultIndex can change after the Data plugin starts. Applications initializing a fresh
+    // query must resolve the current setting instead of reusing the startup snapshot.
+    this.defaultDataset = await this.fetchDefaultDataset();
     return this.defaultDataset;
   }
 

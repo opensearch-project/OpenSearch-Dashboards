@@ -515,6 +515,34 @@ describe('DatasetService', () => {
     });
   });
 
+  test('refreshDefault resolves a default index pattern changed after initialization', async () => {
+    let defaultIndex = 'logs';
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) return 4;
+      if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) return true;
+      if (setting === 'defaultIndex') return defaultIndex;
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    service = new DatasetService(uiSettings, sessionStorage);
+    indexPatterns = {
+      ...dataPluginMock.createStartContract().indexPatterns,
+      get: jest.fn().mockImplementation(async (id: string) => ({
+        id,
+        title: id,
+        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      })),
+    } as unknown as IndexPatternsContract;
+
+    await service.init(indexPatterns);
+    expect(service.getDefault()?.id).toBe('logs');
+
+    defaultIndex = 'ecommerce';
+    await service.refreshDefault();
+
+    expect(service.getDefault()?.id).toBe('ecommerce');
+  });
+
   test('test get default dataset ', async () => {
     jest.clearAllMocks();
     uiSettings = coreMock.createSetup().uiSettings;

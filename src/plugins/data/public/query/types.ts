@@ -33,8 +33,9 @@ export interface IQueryStart {
   addToQueryLog: ReturnType<typeof createAddToQueryLog>;
   filterManager: FilterManager;
   /**
-   * Returns the default dataset after DatasetService initialization completes. Applications decide
-   * whether to adopt the dataset and its generated query before restoring their own query state.
+   * Resolves the current default dataset after DatasetService initialization completes.
+   * Applications decide whether to adopt the dataset and its generated query before restoring
+   * their own query state.
    */
   getDefaultDataset: () => Promise<Dataset | undefined>;
   queryString: QueryStringContract;

@@ -55,7 +55,7 @@ describe('QueryService', () => {
     queryService.stop();
   });
 
-  test('returns the default dataset after dataset initialization finishes', async () => {
+  test('refreshes the default dataset after dataset initialization finishes', async () => {
     const datasetService = queryService.queryStringManager.getDatasetService();
     const defaultDataset: Dataset = {
       id: 'default-dataset',
@@ -67,7 +67,9 @@ describe('QueryService', () => {
       resolveDatasetInitialization = resolve;
     });
     jest.spyOn(datasetService, 'init').mockReturnValue(datasetInitialization);
-    const getDefault = jest.spyOn(datasetService, 'getDefault').mockReturnValue(defaultDataset);
+    const refreshDefault = jest
+      .spyOn(datasetService, 'refreshDefault')
+      .mockResolvedValue(defaultDataset);
 
     const queryStart = queryService.start({
       savedObjectsClient: start.savedObjects.client,
@@ -79,12 +81,12 @@ describe('QueryService', () => {
     });
 
     const defaultDatasetPromise = queryStart.getDefaultDataset();
-    expect(getDefault).not.toHaveBeenCalled();
+    expect(refreshDefault).not.toHaveBeenCalled();
 
     resolveDatasetInitialization();
 
     await expect(defaultDatasetPromise).resolves.toEqual(defaultDataset);
-    expect(getDefault).toHaveBeenCalledTimes(1);
+    expect(refreshDefault).toHaveBeenCalledTimes(1);
   });
 
   test('uses the current application when resolving the default language', () => {
