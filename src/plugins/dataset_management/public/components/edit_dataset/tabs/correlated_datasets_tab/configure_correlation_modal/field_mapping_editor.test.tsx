@@ -5,7 +5,7 @@
 
 import { shallow } from 'enzyme';
 import { IndexPatternField } from '../../../../../../../data/public';
-import { FieldMappingEditor } from './field_mapping_editor';
+import { FieldMappingEditor, getCorrelationFieldOptions } from './field_mapping_editor';
 
 // Mock EUI components
 jest.mock('@elastic/eui', () => ({
@@ -155,6 +155,50 @@ describe('FieldMappingEditor - FieldSelector Field Type Filtering', () => {
     expect(serviceNameField).toBeDefined();
     expect(serviceNameField?.name).toBe('serviceName');
     expect(serviceNameField?.type).toBe('string');
+  });
+
+  describe('getCorrelationFieldOptions', () => {
+    const makeField = (name: string, type: string, multiParent?: string) =>
+      new IndexPatternField(
+        {
+          name,
+          type,
+          searchable: true,
+          aggregatable: true,
+          ...(multiParent && { subType: { multi: { parent: multiParent } } }),
+        } as any,
+        name
+      );
+
+    it('excludes .keyword multi-field sub-fields from string field options', () => {
+      const fields = [
+        makeField('log_processed.trace_id', 'string'),
+        makeField('log_processed.trace_id.keyword', 'string', 'log_processed.trace_id'),
+      ];
+
+      const labels = getCorrelationFieldOptions(fields, 'traceId').map((o) => o.label);
+
+      expect(labels).toEqual(['log_processed.trace_id']);
+      expect(labels).not.toContain('log_processed.trace_id.keyword');
+    });
+
+    it('keeps base string fields and filters out non-string types', () => {
+      const fields = [makeField('traceId', 'string'), makeField('count', 'number')];
+
+      expect(getCorrelationFieldOptions(fields, 'spanId').map((o) => o.label)).toEqual(['traceId']);
+    });
+
+    it('filters timestamp options to date fields and still excludes multi-fields', () => {
+      const fields = [
+        makeField('@timestamp', 'date'),
+        makeField('traceId', 'string'),
+        makeField('@timestamp.keyword', 'date', '@timestamp'),
+      ];
+
+      expect(getCorrelationFieldOptions(fields, 'timestamp').map((o) => o.label)).toEqual([
+        '@timestamp',
+      ]);
+    });
   });
 
   test('should have correct field type constants defined', () => {
