@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { RenderProps } from '../../../../../context_provider/public';
 import { DataPublicPluginStart, TimeRange } from '../../../../../data/public';
@@ -82,6 +83,30 @@ interface TextToDashboardResult {
   visualizations: GeneratedVis[];
   resolvedTimeRange?: TimeRange;
 }
+
+const isUnsavedDashboard = () => {
+  const { hash } = window.location;
+  if (!hash.startsWith('#/create')) {
+    return false;
+  }
+
+  const search = hash.split('?')[1];
+  if (!search) {
+    return false;
+  }
+
+  const appStateParam = new URLSearchParams(search).get('_a');
+  if (!appStateParam) {
+    return false;
+  }
+
+  try {
+    const appState = rison.decode(appStateParam) as { panels?: unknown[] };
+    return Array.isArray(appState.panels) && appState.panels.length > 0;
+  } catch {
+    return false;
+  }
+};
 
 function VisualizationCard({
   vis,
@@ -205,6 +230,37 @@ function TextToDashboardRenderer({
 
   const handleSaveToDashboard = async () => {
     if (isSaving) return;
+
+    if (isUnsavedDashboard()) {
+      const confirmed = await core.overlays.openConfirm(
+        i18n.translate('explore.t2DashboardAction.replaceCreateDashboardConfirm.description', {
+          defaultMessage:
+            'This draft dashboard already contains unsaved panels. Continuing will replace the current draft with the generated dashboard panels.',
+        }),
+        {
+          title: i18n.translate('explore.t2DashboardAction.replaceCreateDashboardConfirm.title', {
+            defaultMessage: 'Replace current draft dashboard?',
+          }),
+          confirmButtonText: i18n.translate(
+            'explore.t2DashboardAction.replaceCreateDashboardConfirm.confirmButton',
+            {
+              defaultMessage: 'Replace draft',
+            }
+          ),
+          cancelButtonText: i18n.translate(
+            'explore.t2DashboardAction.replaceCreateDashboardConfirm.cancelButton',
+            {
+              defaultMessage: 'Keep editing',
+            }
+          ),
+        }
+      );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSaving(true);
     setSaveErrors({ messages: [], partial: false });
 
@@ -314,6 +370,7 @@ function TextToDashboardRenderer({
     const appState = {
       panels,
       viewMode: 'edit',
+      resetLayout: true,
     };
 
     const gParam = timeRange

@@ -150,6 +150,7 @@ export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels' | 'variabl
   panels?: SavedDashboardPanel[];
   variables?: DashboardVariableUrlState[];
   layout?: DashboardLayout;
+  resetLayout?: boolean;
 };
 
 export interface DashboardAppStateTransitions {
