@@ -232,6 +232,37 @@ describe('indexTypeConfig', () => {
       });
     });
 
+    test('uses the leaf parent when the path does not contain a DATA_SOURCE node', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: DEFAULT_DATA.SET_TYPES.INDEX,
+          parent: {
+            id: 'datasource1',
+            title: 'DataSource 1',
+            type: 'OpenSearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceEngineType: 'OpenSearch',
+              dataSourceVersion: '2.17.0',
+            },
+          },
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
+      });
+    });
+
     test('falls back to LOCAL_DATASOURCE when there is no DATA_SOURCE node in path', () => {
       const mockPath: DataStructure[] = [
         {

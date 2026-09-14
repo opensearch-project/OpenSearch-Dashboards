@@ -64,6 +64,7 @@ const savedObjectType = 'index-pattern';
 export interface IndexPatternSavedObjectAttrs {
   title: string;
   displayName?: string;
+  type?: string;
 }
 
 interface IndexPatternsServiceDeps {
@@ -121,7 +122,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title', 'displayName'],
+      fields: ['title', 'displayName', 'type'],
       perPage: 10000,
     });
 
@@ -229,14 +230,32 @@ export class IndexPatternsService {
     }
   };
 
-  getCache = async (options?: { excludeEngineTypes?: readonly string[] }) => {
+  getCache = async (options?: {
+    excludeEngineTypes?: readonly string[];
+    excludeDatasetTypes?: readonly string[];
+  }) => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
     }
-    if (!options?.excludeEngineTypes?.length || !this.savedObjectsCache) {
+    if (!this.savedObjectsCache) {
       return this.savedObjectsCache;
     }
-    return this.applyEngineTypeFilter(this.savedObjectsCache, options.excludeEngineTypes);
+
+    let filteredSavedObjects = this.savedObjectsCache;
+    const excludeDatasetTypes = options?.excludeDatasetTypes;
+    if (excludeDatasetTypes?.length) {
+      filteredSavedObjects = filteredSavedObjects.filter(
+        (savedObject) => !excludeDatasetTypes.includes(savedObject.attributes.type ?? '')
+      );
+    }
+    if (options?.excludeEngineTypes?.length) {
+      filteredSavedObjects = await this.applyEngineTypeFilter(
+        filteredSavedObjects,
+        options.excludeEngineTypes
+      );
+    }
+
+    return filteredSavedObjects;
   };
 
   // Excludes saved objects whose backing data source's `dataSourceEngineType` is in
