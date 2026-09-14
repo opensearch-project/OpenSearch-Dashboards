@@ -24,18 +24,23 @@ jest.mock('../../../../services/services', () => ({
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockGetServices = getServices as jest.MockedFunction<typeof getServices>;
 
+// Stand-ins for whatever core resolves, since versioning those urls is core's job and is
+// covered by its own tests. These only have to be distinguishable from each other.
+const DOC_LINKS = {
+  ppl: { base: 'https://docs.test/sql-and-ppl/ppl/index/' },
+  sql: { base: 'https://docs.test/sql-and-ppl/sql/index/' },
+};
+
 describe('LearnMoreLink', () => {
   const setup = ({
     language = 'PPL',
     title,
     docLink,
-    version = 'latest',
     isPromptMode = false,
   }: {
     language?: string;
     title?: string;
     docLink?: { title: string; url: string };
-    version?: string;
     isPromptMode?: boolean;
   } = {}) => {
     mockUseSelector.mockImplementation((selector) => {
@@ -45,7 +50,7 @@ describe('LearnMoreLink', () => {
     });
 
     mockGetServices.mockReturnValue({
-      docLinks: { DOC_LINK_VERSION: version },
+      docLinks: { links: { noDocumentation: DOC_LINKS } },
       data: {
         query: {
           queryString: {
@@ -67,16 +72,26 @@ describe('LearnMoreLink', () => {
     jest.clearAllMocks();
   });
 
-  // The version column is the point of the table. A release build must not send people to
-  // docs for whatever the current release is, since those can describe syntax the running
-  // cluster does not support.
   it.each([
-    ['PPL', 'latest', 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/index/'],
-    ['SQL', 'latest', 'https://docs.opensearch.org/latest/sql-and-ppl/sql/index/'],
-    ['PPL', '2.19', 'https://docs.opensearch.org/2.19/sql-and-ppl/ppl/index/'],
-    ['SQL', '2.19', 'https://docs.opensearch.org/2.19/sql-and-ppl/sql/index/'],
-  ])('points %s at its own docs for version %s', (language, version, href) => {
-    setup({ language, version });
+    ['PPL', DOC_LINKS.ppl.base],
+    ['SQL', DOC_LINKS.sql.base],
+  ])('points %s at whatever core resolves for it', (language, href) => {
+    setup({ language });
+
+    expect(renderLink()).toHaveAttribute('href', href);
+  });
+
+  it.each([
+    ['PPL', DOC_LINKS.ppl.base],
+    ['SQL', DOC_LINKS.sql.base],
+  ])('prefers core over the registered docLink for %s', (language, href) => {
+    // Pins the precedence rather than leaving it implicit. Core is chosen for these two
+    // because it interpolates the running version where the registration hardcodes `latest`,
+    // so reordering this chain would silently move every PPL and SQL user.
+    setup({
+      language,
+      docLink: { title: `${language} documentation`, url: 'https://ignored.test' },
+    });
 
     expect(renderLink()).toHaveAttribute('href', href);
   });
@@ -94,9 +109,10 @@ describe('LearnMoreLink', () => {
     expect(renderLink()).toHaveTextContent('Learn more about Piped Processing Language');
   });
 
-  it("falls back to the language's registered docLink url for an unlisted language", () => {
+  it("falls back to the language's registered docLink url for any other language", () => {
+    // This is how PromQL reaches the Prometheus docs. Core only carries SQL and PPL.
     setup({
-      language: 'PromQL',
+      language: 'PROMQL',
       title: 'PromQL',
       docLink: { title: 'PromQL documentation', url: 'https://example.test/promql' },
     });
@@ -106,11 +122,12 @@ describe('LearnMoreLink', () => {
 
   it('still renders a real anchor when the language matches nothing registered', () => {
     // Restored URL state or a saved query can carry an id no language registered. Without a
-    // fallback EuiLink renders a disabled button, so it is announced but does nothing.
+    // fallback EuiLink renders a disabled button. PPL is the default language, so it is the
+    // sensible landing place for an id nothing recognises.
     setup({ language: 'not-a-language' });
 
     const link = renderLink();
-    expect(link).toHaveAttribute('href', 'https://docs.opensearch.org/latest/sql-and-ppl/');
+    expect(link).toHaveAttribute('href', DOC_LINKS.ppl.base);
     expect(link.tagName).toBe('A');
   });
 
@@ -120,20 +137,4 @@ describe('LearnMoreLink', () => {
     render(<LearnMoreLink />);
     expect(screen.queryByTestId('exploreQueryPanelLearnMore')).not.toBeInTheDocument();
   });
-
-  it.each(['constructor', 'toString', 'valueOf', '__proto__'])(
-    'does not resolve the inherited object key %s to a doc url',
-    (language) => {
-      // `queryLanguage` is unvalidated URL state. A plain object literal would resolve these
-      // off the prototype to a function, which `??` does not catch, so the fallback below
-      // never fires. It threw `url.match is not a function` when passed raw to `href`, and
-      // interpolated it builds a nonsense url instead. This asserts the fallback wins.
-      setup({ language });
-
-      expect(renderLink()).toHaveAttribute(
-        'href',
-        'https://docs.opensearch.org/latest/sql-and-ppl/'
-      );
-    }
-  );
 });

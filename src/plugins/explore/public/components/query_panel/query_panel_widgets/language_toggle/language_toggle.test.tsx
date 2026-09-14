@@ -53,7 +53,14 @@ let mockSqlSupportEnabled = true;
 jest.mock('../../../../services/services', () => ({
   getServices: () => ({
     sqlSupportEnabled: mockSqlSupportEnabled,
-    docLinks: { DOC_LINK_VERSION: 'latest' },
+    docLinks: {
+      links: {
+        noDocumentation: {
+          ppl: { base: 'https://docs.test/sql-and-ppl/ppl/index/' },
+          sql: { base: 'https://docs.test/sql-and-ppl/sql/index/' },
+        },
+      },
+    },
     tabRegistry: {
       getTab: mockGetTab,
     },
