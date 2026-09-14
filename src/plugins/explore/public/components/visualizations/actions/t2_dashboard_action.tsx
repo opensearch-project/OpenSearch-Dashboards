@@ -66,6 +66,8 @@ export interface GeneratedVis {
   error?: string;
 }
 
+type PreviewState = 'loading' | 'ready' | 'error';
+
 type RenderableVis = GeneratedVis & {
   visConfig: RenderChartConfig;
   preparedQuery: PreparedQuery;
@@ -89,6 +91,7 @@ function VisualizationCard({
   data,
   hasRenderError,
   onToggle,
+  onReady,
   onRenderError,
 }: {
   vis: GeneratedVis;
@@ -98,6 +101,7 @@ function VisualizationCard({
   data: DataPublicPluginStart;
   hasRenderError: boolean;
   onToggle: (index: number) => void;
+  onReady: (index: number) => void;
   onRenderError: (index: number, message: string) => void;
 }) {
   const renderable = isRenderable(vis);
@@ -130,6 +134,7 @@ function VisualizationCard({
             data={data}
             timeRange={vis.resolvedTimeRange}
             transformations={vis.transformations}
+            onReady={() => onReady(index)}
             onError={(message) => onRenderError(index, message)}
           />
         </div>
@@ -157,19 +162,25 @@ function TextToDashboardRenderer({
 
   const [selected, setSelected] = useState<boolean[]>(() => visualizations.map(isRenderable));
   const [isSaving, setIsSaving] = useState(false);
-
-  // Runtime rendering errors
-  const [renderErrors, setRenderErrors] = useState<Record<number, string>>({});
+  const [previewState, setPreviewState] = useState<Record<number, PreviewState>>(() =>
+    Object.fromEntries(
+      visualizations.map((vis, index) => [index, isRenderable(vis) ? 'loading' : 'error'])
+    )
+  );
 
   const [saveErrors, setSaveErrors] = useState<{ messages: string[]; partial: boolean }>({
     messages: [],
     partial: false,
   });
 
-  const isSavable = (index: number) => isRenderable(visualizations[index]) && !renderErrors[index];
+  const isSavable = (index: number) =>
+    selected[index] && isRenderable(visualizations[index]) && previewState[index] === 'ready';
 
   const hasSuccess = visualizations.some(isRenderable);
-  const hasSelected = selected.some((s, i) => s && isSavable(i));
+  const hasSelected = visualizations.some((_, i) => isSavable(i));
+  const hasLoadingSelected = visualizations.some(
+    (_, i) => selected[i] && isRenderable(visualizations[i]) && previewState[i] === 'loading'
+  );
 
   const handleToggle = (index: number) => {
     setSelected((prev) => prev.map((s, i) => (i === index ? !s : s)));
@@ -179,10 +190,14 @@ function TextToDashboardRenderer({
     setSelected((prev) => (prev[index] ? prev.map((s, i) => (i === index ? false : s)) : prev));
   }, []);
 
+  const handlePreviewReady = useCallback((index: number) => {
+    setPreviewState((prev) => ({ ...prev, [index]: 'ready' }));
+  }, []);
+
   const handleRenderError = useCallback(
     (index: number, message: string) => {
       if (!message) return;
-      setRenderErrors((prev) => (prev[index] ? prev : { ...prev, [index]: message }));
+      setPreviewState((prev) => (prev[index] === 'error' ? prev : { ...prev, [index]: 'error' }));
       unselect(index);
     },
     [unselect]
@@ -194,7 +209,7 @@ function TextToDashboardRenderer({
     setSaveErrors({ messages: [], partial: false });
 
     const selectedVis = visualizations
-      .filter((_, i) => selected[i] && !renderErrors[i])
+      .filter((_, i) => selected[i] && previewState[i] === 'ready')
       .filter(isRenderable);
     const { version } = getDashboardVersion();
     const PANEL_WIDTH = 24;
@@ -346,8 +361,9 @@ function TextToDashboardRenderer({
             vis={vis}
             index={i}
             checked={selected[i]}
-            hasRenderError={Boolean(renderErrors[i])}
+            hasRenderError={previewState[i] === 'error'}
             onToggle={handleToggle}
+            onReady={handlePreviewReady}
             onRenderError={handleRenderError}
             core={core}
             data={data}
@@ -361,7 +377,7 @@ function TextToDashboardRenderer({
           <EuiButton
             size="s"
             fill
-            disabled={!hasSelected || isSaving}
+            disabled={!hasSelected || hasLoadingSelected || isSaving}
             isLoading={isSaving}
             onClick={handleSaveToDashboard}
           >

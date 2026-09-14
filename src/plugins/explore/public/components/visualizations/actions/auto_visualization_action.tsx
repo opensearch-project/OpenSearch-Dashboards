@@ -205,6 +205,22 @@ function resolveChartFromSchema(
   return { chartType: best.chartType, axesMapping: best.axesMapping };
 }
 
+const QUERY_REQUIRED_TRANSFORMS = new Set([
+  'add_field',
+  'group_by',
+  'extract_fields',
+  'filter_fields',
+  'convert_field_type',
+]);
+
+function produceNewSchema(transformations?: UrlTransformationState[]): boolean {
+  if (!transformations?.length) return false;
+
+  return transformations.some(
+    (step) => !step.hide && QUERY_REQUIRED_TRANSFORMS.has(step.definitionId)
+  );
+}
+
 /**
  * Build the dataset manually + prepared query object from the tool args. The dataset is
  * built manually and will not be created.
@@ -399,7 +415,9 @@ export async function buildVisConfig(
 
   // with transformations, execute query once to get the transformed columns
   const schema =
-    args.transformations && args.transformations.length > 0
+    args.transformations &&
+    args.transformations.length > 0 &&
+    produceNewSchema(args.transformations)
       ? await deriveSchemaAfterTransformations(
           preparedQueryObject,
           args.transformations,
@@ -449,6 +467,7 @@ export function ChartPreview({
   data,
   timeRange,
   onError,
+  onReady,
   transformations,
 }: {
   query: PreparedQuery;
@@ -457,6 +476,7 @@ export function ChartPreview({
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
   onError?: (message: string) => void;
+  onReady?: () => void;
   transformations?: UrlTransformationState[];
 }) {
   const [visData, setVisData] = useState<VisData | null>(null);
@@ -493,6 +513,7 @@ export function ChartPreview({
           transformations
         );
         setVisData(normalizeResultRows(transformedRows, finalSchema));
+        onReady?.();
       })
       .catch((e) => {
         if (!cancelled && !abortController.signal.aborted) {

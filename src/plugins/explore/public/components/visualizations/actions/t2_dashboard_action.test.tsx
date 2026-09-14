@@ -14,7 +14,7 @@ const mockCheckTimeRangeArgsUsable = jest.fn();
 let mockChartPreviewError: string | undefined;
 // Per-title overrides so a single render can mix healthy and failing previews.
 let mockChartPreviewErrorByTitle: Record<string, string> = {};
-let mockChartPreviewEmptyTitles: string[] = [];
+let mockChartPreviewDelayedReadyTitles: string[] = [];
 
 jest.mock('./auto_visualization_action', () => ({
   buildVisConfig: (...args: any[]) => mockBuildVisConfig(...args),
@@ -22,7 +22,7 @@ jest.mock('./auto_visualization_action', () => ({
   checkTimeRangeArgsUsable: (...args: any[]) => mockCheckTimeRangeArgsUsable(...args),
   ChartPreview: (props: any) => {
     const { useEffect } = jest.requireActual('react') as typeof import('react');
-    const { onError, onEmpty, visConfig } = props;
+    const { onError, onReady, visConfig } = props;
     // The card does not pass a title down, so key the fixtures off the chart config.
     const title = visConfig?.title;
 
@@ -35,9 +35,11 @@ jest.mock('./auto_visualization_action', () => ({
         onError?.(error);
         return;
       }
-      if (title && mockChartPreviewEmptyTitles.includes(title)) {
-        onEmpty?.();
+      if (title && mockChartPreviewDelayedReadyTitles.includes(title)) {
+        setTimeout(() => onReady?.(), 0);
+        return;
       }
+      onReady?.();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -146,7 +148,7 @@ beforeEach(() => {
   mockGetAbsoluteTimeRange.mockReturnValue(undefined);
   mockChartPreviewError = undefined;
   mockChartPreviewErrorByTitle = {};
-  mockChartPreviewEmptyTitles = [];
+  mockChartPreviewDelayedReadyTitles = [];
   // clearAllMocks wipes recorded calls but keeps implementations, so reset the
   // validator to a no-op or a test that makes it throw would leak into later ones.
   mockCheckTimeRangeArgsUsable.mockImplementation(() => undefined);
@@ -390,10 +392,21 @@ describe('render', () => {
     renderAction(completeWith([generatedVis('Chart A')]));
 
     const saveButton = screen.getByText('Save to Dashboard').closest('button')!;
-    expect(saveButton).toBeEnabled();
+    await waitFor(() => expect(saveButton).toBeEnabled());
 
     await userEvent.click(screen.getByLabelText('Include "Chart A" in the dashboard'));
     expect(saveButton).toBeDisabled();
+  });
+
+  it('keeps the save button disabled while a selected preview is still loading', async () => {
+    mockChartPreviewDelayedReadyTitles = ['Chart A'];
+
+    renderAction(completeWith([generatedVis('Chart A')]));
+
+    const saveButton = screen.getByText('Save to Dashboard').closest('button')!;
+    expect(saveButton).toBeDisabled();
+
+    await waitFor(() => expect(saveButton).toBeEnabled());
   });
 
   it('keeps the save button visible when only chart preview rendering fails', async () => {
@@ -449,6 +462,9 @@ describe('save to dashboard', () => {
           resolvedTimeRange: overrides.resolvedTimeRange,
         },
       })
+    );
+    await waitFor(() =>
+      expect(screen.getByText('Save to Dashboard').closest('button')).toBeEnabled()
     );
     await userEvent.click(screen.getByText('Save to Dashboard'));
     return { core, data, loader, saved };
