@@ -45,6 +45,7 @@ export const CopySource: Task = {
       dot: false,
       select: [
         'src/**',
+        'src/.i18nrc.json',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
         '!src/**/{target,__tests__,__snapshots__,__mocks__}/**',
