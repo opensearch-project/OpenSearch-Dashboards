@@ -81,7 +81,7 @@ describe('LANGUAGE_TOOLS / buildToolDefinition', () => {
   it('omits from/to params and time-filter guidance for SQL', () => {
     const sql = buildToolDefinition({
       languageKey: 'SQL',
-      displayName: 'OpenSearch SQL',
+      displayName: 'SQL',
       toolName: 'apply_sql_query',
     });
     // SQL has no global time picker, so it exposes only query + description.
@@ -284,6 +284,35 @@ describe('useApplyQueryAction', () => {
     const result = await promise;
     expect(result.success).toBe(true);
     expect(result.resultsCount).toBe(0);
+  });
+
+  it('counts the fetched rows when a PPL response carries a zero hit total', async () => {
+    const h = setup({ currentLanguage: 'PPL' });
+    const action = lastEnabled(h.registered);
+
+    const promise = action.handler({ query: 'source=logs' });
+    h.queryComplete$.next({
+      data: { status: READY, hits: 0, rows: [{}, {}, {}] },
+      query: { query: 'source=logs', language: 'PPL' },
+    });
+
+    const result = await promise;
+    expect(result.resultsCount).toBe(3);
+    expect(result.message).toContain('returned 3 result(s)');
+  });
+
+  it('prefers a positive hit total over the sampled rows', async () => {
+    const h = setup({ currentLanguage: 'PPL' });
+    const action = lastEnabled(h.registered);
+
+    const promise = action.handler({ query: 'source=logs' });
+    h.queryComplete$.next({
+      data: { status: READY, hits: 1204, rows: new Array(500).fill({}) },
+      query: { query: 'source=logs', language: 'PPL' },
+    });
+
+    const result = await promise;
+    expect(result.resultsCount).toBe(1204);
   });
 
   it('reports a genuine empty result set as success with zero results', async () => {

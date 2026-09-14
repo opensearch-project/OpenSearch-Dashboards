@@ -110,6 +110,9 @@ import {
   ACTION_LIBRARY_NOTIFICATION,
   LibraryNotificationActionContext,
   LibraryNotificationAction,
+  ACTION_MOVE_PANEL_TO_SECTION,
+  MovePanelToSectionAction,
+  MovePanelToSectionActionContext,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -141,6 +144,7 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  allowDashboardSections: boolean;
   variables: { enabled: boolean };
 }
 
@@ -204,6 +208,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [ACTION_MOVE_PANEL_TO_SECTION]: MovePanelToSectionActionContext;
   }
 }
 
@@ -290,6 +295,7 @@ export class DashboardPlugin implements Plugin<
         uiActions: deps.uiActions,
         data: deps.data,
         telemetry: coreStart.telemetry,
+        allowDashboardSections: this.dashboardFeatureFlagConfig?.allowDashboardSections ?? false,
       };
     };
 
@@ -428,6 +434,7 @@ export class DashboardPlugin implements Plugin<
           }),
           core: coreStart,
           dashboardConfig,
+          allowDashboardSections: this.dashboardFeatureFlagConfig?.allowDashboardSections ?? false,
           navigateToDefaultApp,
           navigateToLegacyOpenSearchDashboardsUrl,
           navigation,
@@ -638,6 +645,12 @@ export class DashboardPlugin implements Plugin<
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    if (this.dashboardFeatureFlagConfig?.allowDashboardSections) {
+      const movePanelToSectionAction = new MovePanelToSectionAction(core);
+      uiActions.registerAction(movePanelToSectionAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, movePanelToSectionAction.id);
+    }
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
       const addToLibraryAction = new AddToLibraryAction();

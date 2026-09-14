@@ -35,3 +35,42 @@ export interface GridData {
   y: number;
   i: string;
 }
+
+/**
+ * Section member coordinates are relative to their section and stored in
+ * `layoutJSON`. Panel definitions and GridLayout coordinates remain in
+ * `panelsJSON`.
+ */
+export interface SectionMemberGridData {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface SectionLayoutMember {
+  idRef: string;
+  type: 'panel';
+  /** Coordinates within the section grid. */
+  gridData: SectionMemberGridData;
+}
+
+export interface DashboardSection {
+  id: string;
+  type: 'section';
+  name: string;
+  collapsed: boolean;
+  members: SectionLayoutMember[];
+}
+
+export type DashboardLayoutType = 'GridLayout' | 'SectionLayout';
+
+/**
+ * `GridLayout` renders one panel grid. `SectionLayout` renders sections in
+ * `items` order, each with its own member grid. An empty `SectionLayout` is
+ * treated as `GridLayout`.
+ */
+export interface DashboardLayout {
+  type: DashboardLayoutType;
+  items: DashboardSection[];
+}

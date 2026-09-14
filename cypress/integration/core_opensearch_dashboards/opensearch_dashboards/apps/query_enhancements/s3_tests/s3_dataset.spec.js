@@ -118,12 +118,12 @@ const s3DatasetTestSuite = () => {
           cy.getElementByTestId('datasetSelectorNext').click();
           cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-          cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
+          cy.getElementByTestId('advancedSelectorLanguageSelect').select('SQL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
           cy.osd.waitForLoader(true);
           cy.waitForSearch();
 
-          cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'OpenSearch SQL');
+          cy.getElementByTestId('queryEditorLanguageSelector').should('contain', 'SQL');
           cy.get(`[data-test-subj="queryResultCompleteMsg"]`).should('be.visible');
           cy.getElementByTestId('docTable').should('be.visible');
           cy.getElementByTestId('docTable').find('tr').should('have.length', 11);
@@ -165,7 +165,7 @@ const s3DatasetTestSuite = () => {
           cy.getElementByTestId('datasetSelectorNext').click();
           cy.get(`[class="euiModalHeader__title"]`).should('contain', 'Step 2: Configure data');
 
-          cy.getElementByTestId('advancedSelectorLanguageSelect').select('OpenSearch SQL');
+          cy.getElementByTestId('advancedSelectorLanguageSelect').select('SQL');
           cy.getElementByTestId('advancedSelectorConfirmButton').click();
 
           // Need to wait a bit for initial query to start

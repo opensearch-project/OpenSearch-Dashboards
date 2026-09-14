@@ -16,6 +16,7 @@ import {
   ResultStatus,
 } from '../utils/use_search';
 import { extractQueryError } from '../../../../../data/common';
+import { readResultsCount } from '../utils/read_query_outcome';
 
 export interface LanguageToolConfig {
   /** Language key stored on the query bar (matches query.language in page context). */
@@ -30,7 +31,7 @@ export const LANGUAGE_TOOLS: LanguageToolConfig[] = [
   { languageKey: 'kuery', displayName: 'DQL', toolName: 'apply_dql_query' },
   { languageKey: 'lucene', displayName: 'Lucene', toolName: 'apply_lucene_query' },
   { languageKey: 'PPL', displayName: 'PPL', toolName: 'apply_ppl_query' },
-  { languageKey: 'SQL', displayName: 'OpenSearch SQL', toolName: 'apply_sql_query' },
+  { languageKey: 'SQL', displayName: 'SQL', toolName: 'apply_sql_query' },
 ];
 
 export const buildToolDefinition = (cfg: LanguageToolConfig) => {
@@ -203,9 +204,7 @@ const createApplyHandler =
         }
 
         const noResults = status === ResultStatus.NO_RESULTS;
-        const resultsCount = noResults
-          ? 0
-          : (finalData.hits ?? finalData.rows?.length ?? undefined);
+        const resultsCount = noResults ? 0 : readResultsCount(finalData);
         return {
           success: true,
           executed: true,

@@ -27,6 +27,7 @@ import {
   DashboardEmptyScreen,
   DashboardEmptyScreenProps,
 } from '../embeddable';
+import { claimPanelIntoSection } from '../embeddable/section_create_target';
 import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
@@ -113,10 +114,17 @@ export const createDashboardContainer = async ({
         incomingEmbeddable &&
         !dashboardContainerEmbeddable?.getInput().panels[incomingEmbeddable.embeddableId!]
       ) {
-        dashboardContainerEmbeddable?.addNewEmbeddable<EmbeddableInput>(
-          incomingEmbeddable.type,
-          incomingEmbeddable.input
-        );
+        const addedEmbeddable =
+          await dashboardContainerEmbeddable?.addNewEmbeddable<EmbeddableInput>(
+            incomingEmbeddable.type,
+            incomingEmbeddable.input
+          );
+        // Restore the section selected before entering the editor.
+        const targetSectionId = incomingEmbeddable.containerInfo?.containerData?.sectionId as
+          string | undefined;
+        if (targetSectionId && addedEmbeddable && !isErrorEmbeddable(addedEmbeddable)) {
+          claimPanelIntoSection(dashboardContainerEmbeddable, targetSectionId, addedEmbeddable.id);
+        }
       }
 
       return dashboardContainerEmbeddable;
@@ -387,6 +395,7 @@ const getDashboardInputFromAppState = (
     expandedPanelId: appStateData.expandedPanelId,
     timeRestore: appStateData.timeRestore,
     variables: appStateData.variables,
+    layout: appStateData.layout,
   };
 };
 
@@ -506,6 +515,10 @@ const handleDashboardContainerChanges = (
   // Sync variables from container input to appState
   if (!isEqual(input.variables, appStateData.variables)) {
     newAppState.variables = input.variables;
+    dashboard.setIsDirty(true);
+  }
+  if (!isEqual(input.layout, appStateData.layout)) {
+    newAppState.layout = input.layout;
     dashboard.setIsDirty(true);
   }
 
