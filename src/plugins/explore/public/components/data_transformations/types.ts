@@ -247,3 +247,55 @@ export const modeToggleOptions = [
     }),
   },
 ];
+
+export interface ConfigEnumOption {
+  value: string;
+  label?: string;
+}
+
+/** Config field types */
+export type ConfigFieldKind =
+  | 'number' // numeric input
+  | 'string' // free-text input
+  | 'enum' // fixed set of string values
+  | 'boolean' // true / false
+  | 'field_name' // references a column name from the result schema
+  | 'field_name[]' // array of column names
+  | 'object[]'; // array of sub-objects (described by nestedSchema)
+
+export interface ConfigFieldSpec {
+  /** Human-readable description of this field */
+  description: string;
+  /** Data kind — determines what values are valid */
+  kind: ConfigFieldKind;
+  /** Default value used when the transformation is first created */
+  defaultValue?: unknown;
+  /** Whether this field is required for the transformation to execute */
+  required?: boolean;
+  /**
+   * Allowed enum values when kind === 'enum'.
+   * If the available values depend on the field type (e.g. filter operators),
+   * use `byFieldType` instead and leave this undefined.
+   */
+  enumOptions?: ConfigEnumOption[];
+  /**
+   * Field-type-specific enum values (kind === 'enum' only).
+   */
+  byFieldType?: {
+    base: ConfigEnumOption[]; // available for every field type
+    numerical?: ConfigEnumOption[]; // additional for numerical fields
+    date?: ConfigEnumOption[]; // additional for date fields
+  };
+  /**
+   * Schema for items when kind === 'object[]'.
+   * Keys are sub-field names; values are nested ConfigFieldSpec.
+   */
+  nestedSchema?: Record<string, ConfigFieldSpec>;
+  /**
+   * For kind === 'enum' fields that act as a discriminator: lists the other
+   * config field names whose presence/shape changes depending on this field's value.
+   */
+  discriminates?: string[];
+}
+
+export type TransformationConfigSchema = Record<string, ConfigFieldSpec>;

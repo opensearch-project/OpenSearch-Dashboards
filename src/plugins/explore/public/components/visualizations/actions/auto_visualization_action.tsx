@@ -33,6 +33,11 @@ import { isValidMapping } from '../../../components/visualizations/visualization
 import { visualizationRegistry } from '../../../components/visualizations/visualization_registry';
 import { SAMPLE_SIZE_SETTING, VISUALIZATION_EDITOR_APP_ID } from '../../../../common';
 import { VisEditorNoResults } from '../../../application/in_context_vis_editor/component/vis_editor_no_results';
+import {
+  TransformationService,
+  registerAllTransformations,
+  UrlTransformationState,
+} from '../../../components/data_transformations';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { AutoVisMeta } from './utils';
 
@@ -56,6 +61,8 @@ export interface AutoVisualizationArgs {
   // the time range the llm passed
   from?: string;
   to?: string;
+  // Optional transformation pipeline applied to raw query results before rendering
+  transformations?: UrlTransformationState[];
 }
 
 export interface PreparedQuery {
@@ -80,7 +87,8 @@ function buildEditorPath(
   timeRange?: TimeRange,
   dashboardId?: string,
   dashboardName?: string,
-  originatingApp?: string
+  originatingApp?: string,
+  transformations?: UrlTransformationState[]
 ): string {
   const visState: Record<string, any> = {
     chartType: visConfig.type,
@@ -113,7 +121,13 @@ function buildEditorPath(
       )}`
     : '';
 
-  return `#/?_v=${encodeURIComponent(vParam)}&_eq=${encodeURIComponent(eqParam)}${gParam}${cParam}`;
+  // Encode transformations into _t so initUrlSync restores them directly.
+  const tParam =
+    transformations && transformations.length > 0
+      ? `&_t=${encodeURIComponent(rison.encode(transformations as any))}`
+      : '';
+
+  return `#/?_v=${encodeURIComponent(vParam)}&_eq=${encodeURIComponent(eqParam)}${gParam}${cParam}${tParam}`;
 }
 
 /**
@@ -189,6 +203,22 @@ function resolveChartFromSchema(
   // 5. No potential chart, use the chart with highest-priority
   const best = candidates.reduce((a, b) => (b.priority > a.priority ? b : a));
   return { chartType: best.chartType, axesMapping: best.axesMapping };
+}
+
+const QUERY_REQUIRED_TRANSFORMS = new Set([
+  'add_field',
+  'group_by',
+  'extract_fields',
+  'filter_fields',
+  'convert_field_type',
+]);
+
+function produceNewSchema(transformations?: UrlTransformationState[]): boolean {
+  if (!transformations?.length) return false;
+
+  return transformations.some(
+    (step) => !step.hide && QUERY_REQUIRED_TRANSFORMS.has(step.definitionId)
+  );
 }
 
 /**
@@ -320,18 +350,84 @@ async function executePPLQuery(
 }
 
 /**
+ * Apply a UrlTransformationState[] pipeline to raw rows and return the result.
+ */
+function applyTransformationPipeline(
+  rawRows: OpenSearchSearchHit[],
+  rawSchema: Array<{ name?: string; type?: string }>,
+  transformations: UrlTransformationState[] | undefined
+): { rows: OpenSearchSearchHit[]; finalSchema: Array<{ name?: string; type?: string }> } {
+  if (!transformations || transformations.length === 0) {
+    return { rows: rawRows, finalSchema: rawSchema };
+  }
+  const service = new TransformationService();
+  registerAllTransformations(service);
+  service.restoreFromState(transformations);
+  return service.applyPipeline(rawRows, rawSchema);
+}
+
+/**
+ * A transformation pipeline can rename, drop or add columns, so the column list the LLM passed no longer describes what the chart will actually render.
+ * Run the query once here purely to obtain the post-transformation schema.
+ */
+async function deriveSchemaAfterTransformations(
+  preparedQueryObject: PreparedQuery,
+  transformations: UrlTransformationState[],
+  core: CoreStart,
+  data: DataPublicPluginStart,
+  timeRange?: TimeRange
+): Promise<Array<{ name?: string; type?: string }>> {
+  const { rawRows, rawSchema } = await executePPLQuery(preparedQueryObject, core, data, timeRange);
+
+  const { rows: transformedRows, finalSchema } = applyTransformationPipeline(
+    rawRows,
+    rawSchema,
+    transformations
+  );
+
+  if (transformedRows.length === 0) {
+    const activeSteps = transformations
+      .filter((step) => !step.hide)
+      .map((step) => step.definitionId)
+      .join(', ');
+    throw new Error(
+      `The transformation pipeline [${activeSteps}] dropped every row, so the post-transformation ` +
+        'columns cannot be resolved. Loosen the filter/limit steps or widen the time range.'
+    );
+  }
+
+  return finalSchema;
+}
+
+/**
  * resolve the chart config from ppl execution columns results.
  */
-export function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult {
+export async function buildVisConfig(
+  args: AutoVisualizationArgs,
+  core: CoreStart,
+  data: DataPublicPluginStart,
+  resolvedTimeRange?: TimeRange
+): Promise<VisualizationConfigResult> {
   const preparedQueryObject = buildPreparedQuery(args);
 
   // 1. get normalized schema — use post-transformation schema when available
   const originalSchema = (args.columns || []).map((col) => ({ name: col.name, type: col.type }));
 
-  const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows(
-    [],
-    originalSchema
-  );
+  // with transformations, execute query once to get the transformed columns
+  const schema =
+    args.transformations &&
+    args.transformations.length > 0 &&
+    produceNewSchema(args.transformations)
+      ? await deriveSchemaAfterTransformations(
+          preparedQueryObject,
+          args.transformations,
+          core,
+          data,
+          resolvedTimeRange
+        )
+      : originalSchema;
+
+  const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows([], schema);
 
   // 2. resolve axes mapping and chart type
   const matchChart = resolveChartFromSchema(
@@ -371,6 +467,8 @@ export function ChartPreview({
   data,
   timeRange,
   onError,
+  onReady,
+  transformations,
 }: {
   query: PreparedQuery;
   visConfig: RenderChartConfig;
@@ -378,6 +476,8 @@ export function ChartPreview({
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
   onError?: (message: string) => void;
+  onReady?: () => void;
+  transformations?: UrlTransformationState[];
 }) {
   const [visData, setVisData] = useState<VisData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -406,8 +506,14 @@ export function ChartPreview({
     executePPLQuery(query, core, data, timeRange, abortController.signal)
       .then(({ rawRows, rawSchema }) => {
         if (cancelled) return;
-
-        setVisData(normalizeResultRows(rawRows, rawSchema));
+        // Apply transformation pipeline before normalizing into VisData columns.
+        const { rows: transformedRows, finalSchema } = applyTransformationPipeline(
+          rawRows,
+          rawSchema,
+          transformations
+        );
+        setVisData(normalizeResultRows(transformedRows, finalSchema));
+        onReady?.();
       })
       .catch((e) => {
         if (!cancelled && !abortController.signal.aborted) {
@@ -567,6 +673,7 @@ export function registerAutoVisualizationAction(
             core={core}
             data={data}
             timeRange={result.resolvedTimeRange}
+            transformations={result.transformations}
           />
           <EuiSpacer size="s" />
           <EuiButton size="s" onClick={() => openVisualizationEditor(core, result.editorPath)}>
@@ -585,9 +692,13 @@ export function registerAutoVisualizationAction(
     handler: async (args: AutoVisualizationArgs) => {
       try {
         checkTimeRangeArgsUsable(args);
-
-        const { visConfig, query, resolvedChartType, resolvedAxesMapping } = buildVisConfig(args);
         const resolvedTimeRange = getAbsoluteTimeRange(data, args);
+        const { visConfig, query, resolvedChartType, resolvedAxesMapping } = await buildVisConfig(
+          args,
+          core,
+          data,
+          resolvedTimeRange
+        );
         const { originatingApp, dashboardId } = getCurrentDashboardContext(contextProvider);
 
         const dashboardName = dashboardId ? await getDashboardName(core, dashboardId) : undefined;
@@ -597,7 +708,8 @@ export function registerAutoVisualizationAction(
           resolvedTimeRange,
           dashboardId,
           dashboardName,
-          originatingApp
+          originatingApp,
+          args.transformations
         );
 
         return {
@@ -610,6 +722,7 @@ export function registerAutoVisualizationAction(
           visConfig,
           preparedQuery: query,
           resolvedTimeRange,
+          transformations: args.transformations,
           message: `Created ${resolvedChartType} visualization for ${args.indexName}`,
         };
       } catch (error) {
