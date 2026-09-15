@@ -1,0 +1,2 @@
+fix:
+- Remove misleading loading bar in Vis Builder metrics when no data ([#11557](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11557))
