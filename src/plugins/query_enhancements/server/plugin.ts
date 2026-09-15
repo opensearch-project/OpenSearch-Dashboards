@@ -36,7 +36,7 @@ import { resourceManagerService } from './connections/resource_manager_service';
 import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
-import { getPplLintRuleSettings, getTimeBoundsSettings } from './ui_settings';
+import { getIndexPruningSettings, getPplLintRuleSettings } from './ui_settings';
 
 export class QueryEnhancementsPlugin implements Plugin<
   QueryEnhancementsPluginSetup,
@@ -99,7 +99,7 @@ export class QueryEnhancementsPlugin implements Plugin<
     });
 
     core.uiSettings.register(getPplLintRuleSettings(core.workspace.isWorkspaceEnabled()));
-    core.uiSettings.register(getTimeBoundsSettings(core.workspace.isWorkspaceEnabled()));
+    core.uiSettings.register(getIndexPruningSettings(core.workspace.isWorkspaceEnabled()));
 
     const router = core.http.createRouter();
     // Register server side APIs

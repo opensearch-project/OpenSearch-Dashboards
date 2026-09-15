@@ -105,10 +105,10 @@ export function getPplLintRuleSettings(
 }
 
 /**
- * Build the time-bounds uiSetting. Adds WORKSPACE scope when the workspace feature is on, like
+ * Build the index-pruning uiSetting. Adds WORKSPACE scope when the workspace feature is on, like
  * its sibling above, so a workspace can opt out without touching the rest of the deployment.
  */
-export function getTimeBoundsSettings(
+export function getIndexPruningSettings(
   workspaceEnabled: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   const scope = workspaceEnabled
@@ -116,19 +116,17 @@ export function getTimeBoundsSettings(
     : [UiSettingScope.USER, UiSettingScope.GLOBAL];
 
   return {
-    [UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS]: {
-      name: 'Send the picked time range alongside the query',
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING]: {
+      name: 'Send the picked time range so the cluster can prune indices',
       value: true,
       description:
-        'The date picker already writes a time filter into the query text, but the engine resolves ' +
-        'the queried index pattern -- merging the mapping of every index it matches -- before it ' +
-        'parses that filter. When enabled, the same bounds are also sent as a separate field so an ' +
-        'engine that supports it can skip indices that cannot hold data in the range. Results are ' +
-        'the same either way, since the filter in the query text still does the filtering. Disable ' +
-        'this if skipping those indices is unwanted: a narrower set of indices means a narrower ' +
-        'merged mapping, so a field that only the skipped indices map stops resolving. The cluster ' +
-        'decides whether to act on the bounds, via plugins.query.pruning.enabled; this setting ' +
-        'governs only what is sent, not what the server accepts, so either side can opt out.',
+        'The date picker writes a time filter into the query text. When enabled, the same range is ' +
+        'also sent as separate fields, which is what lets the cluster skip indices that cannot hold ' +
+        'data in it. Results are the same either way, since the filter in the query text still does ' +
+        'the filtering. Disable this if skipping those indices is unwanted: fewer indices means a ' +
+        'narrower merged mapping, so a field that only the skipped indices map stops resolving. The ' +
+        'cluster decides whether to prune, via plugins.query.pruning.enabled; this setting governs ' +
+        'only what is sent, not what the server accepts, so either side can opt out.',
       category: ['search'],
       scope,
       schema: schema.boolean(),

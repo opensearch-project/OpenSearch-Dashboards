@@ -206,7 +206,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // hint only -- the clause above still filters. Off switch because skipping indices narrows the
       // merged mapping, so a field only the skipped indices map stops resolving. Fail open: the hint
       // is inert unless the cluster opted in.
-      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS, true) ?? true) {
+      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING, true) ?? true) {
         timeBounds = bounds;
       }
     }

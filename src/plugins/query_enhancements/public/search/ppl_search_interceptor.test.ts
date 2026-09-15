@@ -709,7 +709,7 @@ describe('PPLSearchInterceptor', () => {
         });
         (mockCoreStart.uiSettings.get as jest.Mock).mockImplementation(
           (key: string, fallback?: unknown) =>
-            key === UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS ? (setting ?? fallback) : true
+            key === UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING ? (setting ?? fallback) : true
         );
 
         const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
