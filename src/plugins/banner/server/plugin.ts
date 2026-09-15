@@ -13,7 +13,13 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { BannerPluginSetup, BannerPluginStart } from './types';
 import { BannerPluginConfigType } from './config';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 import { defineRoutes } from './routes/get_config';
 import { BannerConfig } from '../common';
 import { getDefaultBannerSettings } from './ui_settings';
@@ -21,9 +27,11 @@ import { getDefaultBannerSettings } from './ui_settings';
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly config$: Observable<BannerPluginConfigType>;
   private pluginConfig!: BannerPluginConfigType;
+  private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<BannerPluginConfigType>();
+    this.logger = this.initializerContext.logger.get('banner');
   }
 
   public async setup(core: CoreSetup<BannerPluginStart>) {
@@ -57,6 +65,7 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
       getConfig: (): BannerConfig => ({
         ...this.pluginConfig,
       }),
+      logger: this.logger,
     };
 
     // Register server routes
