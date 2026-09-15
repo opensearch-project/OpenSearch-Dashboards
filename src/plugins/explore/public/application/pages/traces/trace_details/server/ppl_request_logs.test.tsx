@@ -203,6 +203,30 @@ describe('ppl_request_logs', () => {
       );
     });
 
+    it('strips a .keyword suffix from the mapped traceId field so PPL targets the base field', async () => {
+      const mockExecuteQuery = jest.fn().mockResolvedValue({ body: { fields: [] } });
+      (PPLService as jest.Mock).mockImplementation(() => ({
+        executeQuery: mockExecuteQuery,
+      }));
+
+      const datasetWithKeywordMapping = {
+        ...createMockDataset(),
+        schemaMappings: {
+          otelLogs: {
+            traceId: 'log_processed.trace_id.keyword',
+          },
+        },
+      };
+      const params = { ...defaultParams, dataset: datasetWithKeywordMapping };
+
+      await fetchTraceLogsByTraceId(mockDataService, params);
+
+      expect(mockExecuteQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        'source = test-logs-index | where log_processed.trace_id = "test-trace-id-123" | head 1000'
+      );
+    });
+
     it('falls back to default traceId when no schema mappings contain traceId', async () => {
       const mockExecuteQuery = jest.fn().mockResolvedValue({ body: { fields: [] } });
       (PPLService as jest.Mock).mockImplementation(() => ({

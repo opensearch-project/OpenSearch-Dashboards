@@ -6,7 +6,7 @@
 import moment from 'moment';
 import { Dataset } from '../../../../../../../../data/common';
 import { extractSpanDuration } from '../utils/span_data_utils';
-import { LogHit } from '../../server/ppl_request_logs';
+import { LogHit, toPplFieldName } from '../../server/ppl_request_logs';
 
 export interface TimeRange {
   from: string;
@@ -27,9 +27,12 @@ export function buildExploreLogsUrl(params: {
   const basePathMatch = pathname.match(/^(.*?)\/app/);
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
-  // Use schema mappings for field names, with fallbacks to default field names
-  const traceIdFieldName = logDataset.schemaMappings?.otelLogs?.traceId || 'traceId';
-  const spanIdFieldName = logDataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+  // Use schema mappings for field names, with fallbacks to default field names.
+  // Strip any `.keyword` suffix so the generated PPL query targets the base field.
+  const traceIdFieldName = toPplFieldName(
+    logDataset.schemaMappings?.otelLogs?.traceId || 'traceId'
+  );
+  const spanIdFieldName = toPplFieldName(logDataset.schemaMappings?.otelLogs?.spanId || 'spanId');
 
   let pplQuery = `%7C%20where%20${traceIdFieldName}%20%3D%20!'${traceId}!'`;
 
@@ -115,8 +118,9 @@ export function getTimeRangeFromTraceData(traceData: any[]): TimeRange {
 }
 
 export function filterLogsBySpanId(logs: LogHit[], spanId: string, dataset: Dataset): LogHit[] {
-  // Use schema mappings for spanId field name, with fallback to default
-  const spanIdFieldName = dataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+  // Use schema mappings for spanId field name, with fallback to default. The base field (not the
+  // `.keyword` sub-field) is what the PPL response returns, so strip the suffix to match.
+  const spanIdFieldName = toPplFieldName(dataset.schemaMappings?.otelLogs?.spanId || 'spanId');
 
   return logs.filter((log) => {
     // Check both the mapped field name and the default spanId property for compatibility
