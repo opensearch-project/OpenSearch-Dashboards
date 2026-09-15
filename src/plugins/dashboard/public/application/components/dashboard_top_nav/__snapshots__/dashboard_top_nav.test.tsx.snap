@@ -644,6 +644,11 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                   },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                  },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
@@ -1853,6 +1858,11 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3064,6 +3074,11 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                   },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                  },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
@@ -4273,6 +4288,11 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -5484,6 +5504,11 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                   },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                  },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                   },
@@ -6693,6 +6718,11 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",

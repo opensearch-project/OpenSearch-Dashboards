@@ -20,6 +20,7 @@ import { useEditorFocus } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { getServices } from '../../../../services/services';
+import { LearnMoreLink } from '../learn_more_link';
 import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -320,6 +321,7 @@ export const LanguageToggle = ({ hideAI = false }: LanguageToggleProps) => {
               {languageChips}
               {aiChip}
             </div>
+            <LearnMoreLink />
           </div>
         </div>
       </EuiPopover>
