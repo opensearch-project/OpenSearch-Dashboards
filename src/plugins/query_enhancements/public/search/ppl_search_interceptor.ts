@@ -39,15 +39,10 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
-// Commands after which a trailing `sort - <dataset time field>` must not be appended: either the
-// user already ordered or limited the result (sort, head), or the command replaces the row type so
-// the dataset's time field may no longer be in it.
-//
-// `chart` and `timechart` do emit a time column, but their own: `timechart` always names it
-// `@timestamp`, and `chart` names it whatever its `over` argument was. Neither is necessarily the
-// field the dataset is configured on, and the client cannot tell -- so appending a sort on the
-// dataset's field turns a working query into `Field [<field>] not found`. Listed for the same
-// defensive reason as `rename`, which also keeps the field unless it happens to rename it away.
+// Commands after which `sort - <dataset time field>` must not be appended: the user already ordered
+// or limited the result, or the command replaced the row type. chart and timechart emit a time
+// column of their own naming (`@timestamp`, or chart's `over` argument), so sorting on the dataset's
+// field turns a working query into `Field [<field>] not found`.
 const DEFAULT_SORT_BLOCKING_COMMANDS = [
   'sort',
   'stats',
@@ -207,15 +202,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
       whereCommands.push(clause);
-      // Send the same bounds out of band as well. The engine resolves an index pattern's schema
-      // before it parses the appended `where`, so this is its only chance to skip indices that
-      // cannot hold data in the picked range. Purely a hint -- the clause above still filters.
-      //
-      // Off switch, defaulting to on: skipping indices narrows the merged mapping too, so a field
-      // only the skipped indices map stops resolving. That is the point when it removes a conflict
-      // and a regression when a panel depended on the field, and the breakage surfaces here rather
-      // than on the cluster. Fail open when uiSettings has not resolved yet -- the hint is inert
-      // unless the cluster opted in.
+      // The same window out of band, so the engine can skip indices that cannot hold data in it. A
+      // hint only -- the clause above still filters. Off switch because skipping indices narrows the
+      // merged mapping, so a field only the skipped indices map stops resolving. Fail open: the hint
+      // is inert unless the cluster opted in.
       if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_TIME_BOUNDS, true) ?? true) {
         timeBounds = bounds;
       }

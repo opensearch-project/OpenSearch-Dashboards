@@ -48,18 +48,9 @@ export class FilterUtils {
   }
 
   /**
-   * The where clause for the picked time range, together with the bounds it filters on.
-   *
-   * Both come from a single parse of `timeRange`. That matters for a relative range: `now-15m`
-   * resolves to a different millisecond on every call, so parsing twice would let the clause and the
-   * bounds describe slightly different windows -- and an engine pruning indices on bounds narrower
-   * than the clause would drop rows the filter would have matched.
-   *
-   * @param timeFieldName Time field name
-   * @param timeRange Time range from the time picker
-   * @param engineType Engine type of the target data source (`engineType ?? type`), used to decide
-   *   whether the time literals need to be wrapped in `TIMESTAMP('...')`.
-   * @returns the clause, and the bounds unless the range does not parse
+   * The where clause for the picked time range, plus the bounds it filters on, from a single parse:
+   * `now-15m` resolves to a different millisecond on every call, so parsing twice would let the two
+   * describe different windows. Bounds are absent when the range does not parse.
    */
   public static getTimeFilter(
     timeFieldName: string,
@@ -70,17 +61,14 @@ export class FilterUtils {
     const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
       ? (literal: string) => `TIMESTAMP('${literal}')`
       : (literal: string) => `'${literal}'`;
-    // formatTimePickerDate already emits TIME_BOUND_FORMAT in UTC. Re-parsing that through a
-    // local-time formatter used to be a no-op except inside a DST spring-forward gap, where it
-    // shifted the bound an hour (`2026-03-08 02:30` -> `03:30` in America/New_York) and dropped an
-    // hour of matching rows. Use the values as they come.
+    // Used as they come: formatTimePickerDate already emits TIME_BOUND_FORMAT in UTC. Re-parsing it
+    // through a local-time formatter was a no-op except in a DST spring-forward gap, which shifted
+    // the bound an hour.
     const clause = `WHERE \`${timeFieldName}\` >= ${wrap(fromDate)} AND \`${timeFieldName}\` <= ${wrap(
       toDate
     )}`;
-    // A range datemath cannot parse (a malformed `_g` in a shared URL, say) does not fail loudly: it
-    // yields '' when datemath returns nothing, and the literal 'Invalid date' when it returns an
-    // invalid moment. The clause keeps carrying that -- the engine rejects it, which is visible --
-    // but there is nothing meaningful to prune on, so report no bounds.
+    // datemath yields '' or 'Invalid date' rather than throwing. The clause keeps carrying that, so
+    // the engine still rejects it visibly, but there is nothing to prune on.
     const valid = TIME_BOUND_PATTERN.test(fromDate) && TIME_BOUND_PATTERN.test(toDate);
     return {
       clause,
@@ -89,11 +77,8 @@ export class FilterUtils {
   }
 
   /**
-   * The bounds of the where clause {@link getTimeFilterWhereClause} builds: the same UTC wall-clock
-   * instants, in the same format, inclusive on both ends. Undefined when the range does not parse.
-   *
-   * Callers that need both the clause and the bounds must use {@link getTimeFilter} instead, so a
-   * relative range is resolved once for the two of them.
+   * The bounds {@link getTimeFilterWhereClause} filters on. Callers needing both must use {@link
+   * getTimeFilter}, so a relative range is resolved once for the two.
    */
   public static getTimeFilterBounds(
     timeFieldName: string,

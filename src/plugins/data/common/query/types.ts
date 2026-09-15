@@ -49,18 +49,11 @@ export type Query = {
 };
 
 /**
- * Inclusive bounds of a time filter already written into the query text, reported alongside it as
- * `time_field` / `start_time` / `end_time` so the engine has the window before it resolves the
- * queried index pattern -- it merges the mapping of every index that pattern matches before it parses
- * the filter, and nothing after that can narrow it.
+ * Inclusive bounds of the time filter already written into the query text, reported alongside it as
+ * `time_field` / `start_time` / `end_time` so an engine can skip indices outside the window.
  *
- * Bounds are UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` with no zone designator, the same literals
- * the filter itself carries. The engine also accepts date math and ISO-8601 here, but sending the
- * clause's own literals is what guarantees the two describe the same window: a relative range
- * resolves to a different instant on every parse.
- *
- * Purely a hint -- the filter in the query text still does the filtering, so a request is answered
- * identically whether or not the engine acts on these.
+ * UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` -- the same literals the filter carries, so the two
+ * cannot describe different windows. A hint only: the filter still does the filtering.
  */
 export interface TimeBounds {
   /** Time field the bounds constrain; the dataset's configured field, not necessarily `@timestamp`. */
