@@ -73,6 +73,7 @@ import { VisualizationRegistryService } from './services/visualization_registry_
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
+  ExploreServices,
   ExploreSetupDependencies,
   ExploreStartDependencies,
 } from './types';
@@ -113,6 +114,24 @@ import {
   T2_DASHBOARD_TOOL_NAME,
 } from './components/visualizations/actions/utils';
 import { registerT2DashboardAction } from './components/visualizations/actions/t2_dashboard_action';
+
+export const initializeLogsDefaultQuery = async (services: ExploreServices): Promise<void> => {
+  const queryState = services.osdUrlStateStorage?.get<{ query?: unknown }>('_q');
+  if (queryState && Object.prototype.hasOwnProperty.call(queryState, 'query')) {
+    return;
+  }
+
+  try {
+    const defaultDataset = await services.data.query.getDefaultDataset();
+    const defaultQuery = services.data.query.queryString.getDefaultQuery(defaultDataset);
+    services.data.query.queryString.setQuery(defaultQuery, false, false);
+  } catch (error) {
+    // A default-dataset lookup failure should not prevent Logs from mounting; preload can still
+    // resolve URL state or render the no-dataset experience.
+    // eslint-disable-next-line no-console
+    console.warn('Failed to initialize the Logs default dataset query', error);
+  }
+};
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -435,9 +454,7 @@ export class ExplorePlugin implements Plugin<
           // Logs opts in to the dataset-generated query before its URL state is restored. Other
           // flavors resolve their own dataset and query during preload.
           if (flavor === ExploreFlavor.Logs) {
-            const defaultDataset = await services.data.query.getDefaultDataset();
-            const defaultQuery = services.data.query.queryString.getDefaultQuery(defaultDataset);
-            services.data.query.queryString.setQuery(defaultQuery, false, false);
+            await initializeLogsDefaultQuery(services);
           }
 
           // Instantiate the store

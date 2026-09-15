@@ -117,6 +117,19 @@ export class QueryStringManager {
     return query;
   }
 
+  /**
+   * @deprecated Applications should explicitly resolve and apply their default dataset.
+   *
+   * Kept for third-party plugin compatibility. The Data plugin no longer calls this during
+   * startup because doing so can overwrite query state already restored by an application.
+   */
+  public refreshDefaultQuery(previousDefault: Query): void {
+    const currentQuery = this.query$.getValue();
+    if (isEqual(currentQuery, previousDefault)) {
+      this.query$.next(this.getDefaultQuery(this.datasetService.getDefault()));
+    }
+  }
+
   public formatQuery(query: Query | string | undefined): Query {
     if (!query) {
       return this.getDefaultQuery();
@@ -198,7 +211,9 @@ export class QueryStringManager {
   public clearQuery = () => {
     const force = false;
     const mergeCurrentQuery = false;
-    this.setQuery(this.getDefaultQuery(), force, mergeCurrentQuery);
+    // Preserve the historical clear behavior without making default-dataset loading mutate query
+    // state asynchronously. This reads only the dataset already cached by DatasetService.
+    this.setQuery(this.getDefaultQuery(this.datasetService.getDefault()), force, mergeCurrentQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset

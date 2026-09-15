@@ -42,12 +42,17 @@ const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
     query: '',
     language: 'kuery',
   };
+  const currentQuery: Query = {
+    ...defaultQuery,
+    ...(isEnhancementsEnabled ? { dataset: datasetService.getDefault() } : {}),
+  };
 
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
-    getQuery: jest.fn().mockReturnValue(defaultQuery),
+    getQuery: jest.fn().mockReturnValue(currentQuery),
     setQuery: jest.fn(),
-    getUpdates$: jest.fn().mockReturnValue(of(defaultQuery)),
+    getUpdates$: jest.fn().mockReturnValue(of(currentQuery)),
     getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
+    refreshDefaultQuery: jest.fn(),
     formatQuery: jest.fn(),
     clearQuery: jest.fn(),
     addToQueryHistory: jest.fn(),

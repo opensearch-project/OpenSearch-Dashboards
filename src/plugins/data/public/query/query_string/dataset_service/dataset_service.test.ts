@@ -536,11 +536,16 @@ describe('DatasetService', () => {
 
     await service.init(indexPatterns);
     expect(service.getDefault()?.id).toBe('logs');
+    expect(indexPatterns.get).toHaveBeenCalledTimes(1);
+
+    await service.refreshDefault();
+    expect(indexPatterns.get).toHaveBeenCalledTimes(1);
 
     defaultIndex = 'ecommerce';
     await service.refreshDefault();
 
     expect(service.getDefault()?.id).toBe('ecommerce');
+    expect(indexPatterns.get).toHaveBeenCalledTimes(2);
   });
 
   test('test get default dataset ', async () => {

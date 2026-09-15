@@ -115,6 +115,11 @@ describe('QueryStringManager', () => {
   });
 
   test('clearQuery resets to default query', () => {
+    const defaultDataset = {
+      id: 'default-dataset',
+      title: 'Default Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+    };
     const newQuery: Query = {
       query: 'test query',
       language: 'SQL',
@@ -124,6 +129,7 @@ describe('QueryStringManager', () => {
         type: DEFAULT_DATA.SET_TYPES.INDEX,
       },
     };
+    service.getDatasetService().getDefault = jest.fn().mockReturnValue(defaultDataset);
     service.setQuery(newQuery);
     expect(service.getQuery()).toEqual(newQuery);
 
@@ -131,7 +137,7 @@ describe('QueryStringManager', () => {
     const defaultQuery = service.getQuery();
     expect(defaultQuery).not.toEqual(newQuery);
     expect(defaultQuery.query).toBe('');
-    expect(defaultQuery.dataset).toBe(undefined);
+    expect(defaultQuery.dataset).toEqual(defaultDataset);
   });
 
   test('formatQuery handles different input types', () => {
@@ -311,6 +317,46 @@ describe('QueryStringManager', () => {
         language: 'kuery',
         query: '',
       });
+    });
+  });
+
+  describe('refreshDefaultQuery', () => {
+    const previousDefault = { query: '', language: 'kuery' };
+    const defaultDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+    };
+
+    beforeEach(() => {
+      service.getDatasetService().getDefault = jest.fn().mockReturnValue(defaultDataset);
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn().mockReturnValue(['PPL', 'SQL']),
+      });
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        getQueryString: jest
+          .fn()
+          .mockImplementation((query: Query) => `source = ${query.dataset?.title}`),
+      });
+    });
+
+    test('preserves the deprecated dataset-aware refresh behavior', () => {
+      service.refreshDefaultQuery(previousDefault);
+
+      expect(service.getQuery()).toEqual({
+        dataset: defaultDataset,
+        language: 'PPL',
+        query: 'source = Test Dataset',
+      });
+    });
+
+    test('does not overwrite an explicitly changed query', () => {
+      const explicitQuery = { query: 'status:200', language: 'kuery' };
+      service.setQuery(explicitQuery);
+
+      service.refreshDefaultQuery(previousDefault);
+
+      expect(service.getQuery()).toEqual(explicitQuery);
     });
   });
 

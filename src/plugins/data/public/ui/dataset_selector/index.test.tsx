@@ -23,7 +23,6 @@ describe('ConnectedDatasetSelector', () => {
   const mockSetUserQueryLanguage = jest.fn();
   const mockQueryString = {
     getQuery: jest.fn().mockReturnValue({}),
-    getDefaultQuery: jest.fn().mockReturnValue({}),
     getInitialQuery: jest.fn().mockReturnValue({}),
     setQuery: jest.fn(),
     getDatasetService: jest.fn().mockReturnValue({

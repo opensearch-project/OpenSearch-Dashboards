@@ -4,7 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ExplorePlugin } from './plugin';
+import { ExplorePlugin, initializeLogsDefaultQuery } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
@@ -14,7 +14,12 @@ import {
   DEFAULT_NAV_GROUPS,
   getUseCaseFeatureConfig,
 } from 'opensearch-dashboards/public';
-import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
+import {
+  ExplorePluginStart,
+  ExploreServices,
+  ExploreSetupDependencies,
+  ExploreStartDependencies,
+} from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
@@ -774,5 +779,72 @@ describe('ExplorePlugin', () => {
 
       expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('initializeLogsDefaultQuery', () => {
+  const defaultDataset = {
+    id: 'logs',
+    title: 'Logs',
+    type: 'INDEXES',
+  };
+  const defaultQuery = {
+    dataset: defaultDataset,
+    language: 'PPL',
+    query: 'source = Logs',
+  };
+
+  const createServices = (queryState: unknown = null) =>
+    ({
+      osdUrlStateStorage: {
+        get: jest.fn().mockReturnValue(queryState),
+      },
+      data: {
+        query: {
+          getDefaultDataset: jest.fn().mockResolvedValue(defaultDataset),
+          queryString: {
+            getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
+            setQuery: jest.fn(),
+          },
+        },
+      },
+    }) as unknown as ExploreServices;
+
+  test('initializes the default query when URL state has no explicit query', async () => {
+    const services = createServices();
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
+    expect(services.data.query.queryString.getDefaultQuery).toHaveBeenCalledWith(defaultDataset);
+    expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(
+      defaultQuery,
+      false,
+      false
+    );
+  });
+
+  test('preserves an explicit URL query', async () => {
+    const services = createServices({ query: '' });
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).not.toHaveBeenCalled();
+    expect(services.data.query.queryString.setQuery).not.toHaveBeenCalled();
+  });
+
+  test('does not reject the Logs mount when default dataset resolution fails', async () => {
+    const services = createServices();
+    const error = new Error('default dataset unavailable');
+    (services.data.query.getDefaultDataset as jest.Mock).mockRejectedValue(error);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await expect(initializeLogsDefaultQuery(services)).resolves.toBeUndefined();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Failed to initialize the Logs default dataset query',
+      error
+    );
+
+    consoleWarn.mockRestore();
   });
 });
