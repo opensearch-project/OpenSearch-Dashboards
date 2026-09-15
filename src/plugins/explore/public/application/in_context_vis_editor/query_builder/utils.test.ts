@@ -35,6 +35,7 @@ jest.mock('@osd/i18n', () => ({
 
 jest.mock('../../../application/utils/state_management/utils/redux_persistence', () => ({
   fetchFirstAvailableDataset: jest.fn(),
+  extractSerializableDataset: jest.fn((dataset) => dataset),
 }));
 
 jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({

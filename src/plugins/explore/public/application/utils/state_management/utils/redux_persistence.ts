@@ -29,6 +29,38 @@ import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available
 import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
+ * Copies every serializable hydration field from a dataset into a plain object suitable for
+ * persisting into query/URL state.
+ *
+ * This is the single place Explore reduces a dataset for persistence. Fields are listed explicitly
+ * (rather than spreading) so a class instance's methods never leak into serialized state.
+ *
+ * `schemaMappings` is intentionally excluded: no query-state consumer reads it (the correlation /
+ * logs paths re-resolve the referenced dataset by id), and persisting it only lengthens the URL.
+ *
+ * `undefined` values are dropped: rison omits undefined keys when serializing to the URL, so a
+ * dataset read back from `_q` has fewer keys than a freshly-extracted one. Keeping undefined keys
+ * here would make `isEqual` comparisons (e.g. the dataset-change middleware) report a spurious
+ * change on the first comparison after load.
+ */
+export const extractSerializableDataset = (dataset: Dataset): Dataset =>
+  Object.fromEntries(
+    Object.entries({
+      id: dataset.id,
+      title: dataset.title,
+      type: dataset.type,
+      timeFieldName: dataset.timeFieldName,
+      language: dataset.language,
+      dataSource: dataset.dataSource,
+      signalType: dataset.signalType,
+      sourceDatasetRef: dataset.sourceDatasetRef,
+      isRemoteDataset: dataset.isRemoteDataset,
+      displayName: dataset.displayName,
+      description: dataset.description,
+    }).filter(([, value]) => value !== undefined)
+  ) as Dataset;
+
+/**
  * Persists Redux state to URL
  */
 export const persistReduxState = (
@@ -73,16 +105,8 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     // Query state handling - always resolve dataset to ensure SignalType validation
     let urlDataset: Dataset | undefined;
     if (queryState?.dataset) {
-      // Extract minimal dataset from URL state
-      urlDataset = {
-        id: queryState.dataset.id,
-        title: queryState.dataset.title,
-        type: queryState.dataset.type,
-        language: queryState.dataset.language,
-        timeFieldName: queryState.dataset.timeFieldName,
-        dataSource: queryState.dataset.dataSource,
-        signalType: queryState.dataset.signalType,
-      };
+      // Rehydrate the dataset from URL state, preserving every hydration field it carries.
+      urlDataset = extractSerializableDataset(queryState.dataset);
     }
 
     // Always call getPreloadedQueryState to ensure SignalType validation runs
@@ -302,15 +326,7 @@ const getPreloadedQueryState = async (
     if (typeof (selectedDataset as any).toDataset === 'function') {
       minimalDataset = (selectedDataset as any).toDataset();
     } else {
-      minimalDataset = {
-        id: selectedDataset.id,
-        title: selectedDataset.title,
-        type: selectedDataset.type,
-        language: selectedDataset.language,
-        timeFieldName: selectedDataset.timeFieldName,
-        dataSource: selectedDataset.dataSource,
-        signalType: selectedDataset.signalType,
-      };
+      minimalDataset = extractSerializableDataset(selectedDataset);
     }
   }
 
