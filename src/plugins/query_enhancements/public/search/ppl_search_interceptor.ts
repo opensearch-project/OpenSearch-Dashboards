@@ -11,6 +11,7 @@ import {
   formatTimePickerDate,
   getDataSourceEngineCapabilities,
   Query,
+  TimeBounds,
   UI_SETTINGS,
 } from '../../../data/common';
 import {
@@ -38,7 +39,20 @@ import { PPLFilterUtils } from './filters';
 
 export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
-const DEFAULT_SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+// Commands after which `sort - <dataset time field>` must not be appended: the user already ordered
+// or limited the result, or the command replaced the row type. chart and timechart emit a time
+// column of their own naming (`@timestamp`, or chart's `over` argument), so sorting on the dataset's
+// field turns a working query into `Field [<field>] not found`.
+const DEFAULT_SORT_BLOCKING_COMMANDS = [
+  'sort',
+  'stats',
+  'head',
+  'rare',
+  'top',
+  'rename',
+  'chart',
+  'timechart',
+];
 const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
   `\\|\\s*(${DEFAULT_SORT_BLOCKING_COMMANDS.join('|')})\\b`,
   'i'
@@ -168,6 +182,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     // Check if skipTimeFilter is set in the search request fields
     const skipTimeFilter = request.params?.body?.skipTimeFilter;
 
+    let timeBounds: TimeBounds | undefined;
+
     if (
       dataset &&
       dataset.timeFieldName &&
@@ -176,12 +192,23 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
       // Prefer an explicit time range passed and fall back to the global timefilter.
-      const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
+      const timeRange =
+        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime();
+      // One call for both: a relative range such as `now-15m` resolves to a different millisecond on
+      // every parse, so asking twice would let the clause and the hint describe different windows.
+      const { clause, bounds } = PPLFilterUtils.getTimeFilter(
         dataset.timeFieldName,
-        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime(),
+        timeRange,
         dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
-      whereCommands.push(timeFilter);
+      whereCommands.push(clause);
+      // The same window out of band, so the engine can skip indices that cannot hold data in it. A
+      // hint only -- the clause above still filters. Off switch because skipping indices narrows the
+      // merged mapping, so a field only the skipped indices map stops resolving. Fail open: the hint
+      // is inert unless the cluster opted in.
+      if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING, true) ?? true) {
+        timeBounds = bounds;
+      }
     }
     const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
 
@@ -193,6 +220,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return {
       ...query,
       query: finalQuery,
+      ...(timeBounds && {
+        time_field: timeBounds.timeField,
+        start_time: timeBounds.start,
+        end_time: timeBounds.end,
+      }),
     };
   }
 
