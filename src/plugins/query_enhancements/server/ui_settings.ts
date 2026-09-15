@@ -127,8 +127,8 @@ export function getTimeBoundsSettings(
         'the same either way, since the filter in the query text still does the filtering. Disable ' +
         'this if skipping those indices is unwanted: a narrower set of indices means a narrower ' +
         'merged mapping, so a field that only the skipped indices map stops resolving. The cluster ' +
-        'decides whether to act on the bounds, via plugins.query.pruning.enabled; turning this off ' +
-        'stops sending them regardless, so either side can opt out.',
+        'decides whether to act on the bounds, via plugins.query.pruning.enabled; this setting ' +
+        'governs only what is sent, not what the server accepts, so either side can opt out.',
       category: ['search'],
       scope,
       schema: schema.boolean(),

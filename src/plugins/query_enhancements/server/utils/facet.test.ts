@@ -103,7 +103,7 @@ describe('Facet', () => {
     });
 
     it('forwards the time range so the engine can prune indices that cannot match it', async () => {
-      // Endpoint matters: the bounds only ride along on the PPL action (see TIME_RANGE_ENDPOINTS).
+      // Endpoint matters: the bounds only ride along on the PPL action (see TIME_BOUNDS_ENDPOINTS).
       const pplFacet = new Facet({
         client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
         logger: mockLogger,

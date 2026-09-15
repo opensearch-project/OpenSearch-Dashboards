@@ -1237,7 +1237,7 @@ describe('PPLSearchInterceptor', () => {
         });
         mockIsPPLSearchQuery.mockReturnValue(true);
         mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
-        mockPPLFilterUtils.getTimeFilter.mockReturnValue('');
+        mockPPLFilterUtils.getTimeFilter.mockReturnValue({ clause: '' } as any);
 
         return mockRequest;
       };
