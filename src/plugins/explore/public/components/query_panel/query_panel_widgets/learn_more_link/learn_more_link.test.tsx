@@ -27,8 +27,11 @@ const mockGetServices = getServices as jest.MockedFunction<typeof getServices>;
 // Stand-ins for whatever core resolves, since versioning those urls is core's job and is
 // covered by its own tests. These only have to be distinguishable from each other.
 const DOC_LINKS = {
-  ppl: { base: 'https://docs.test/sql-and-ppl/ppl/index/' },
-  sql: { base: 'https://docs.test/sql-and-ppl/sql/index/' },
+  sqlPplIndex: {
+    base: 'https://docs.test/sql-and-ppl/',
+    ppl: 'https://docs.test/sql-and-ppl/ppl/index/',
+    sql: 'https://docs.test/sql-and-ppl/sql/index/',
+  },
 };
 
 describe('LearnMoreLink', () => {
@@ -73,8 +76,8 @@ describe('LearnMoreLink', () => {
   });
 
   it.each([
-    ['PPL', DOC_LINKS.ppl.base],
-    ['SQL', DOC_LINKS.sql.base],
+    ['PPL', DOC_LINKS.sqlPplIndex.ppl],
+    ['SQL', DOC_LINKS.sqlPplIndex.sql],
   ])('points %s at whatever core resolves for it', (language, href) => {
     setup({ language });
 
@@ -82,8 +85,8 @@ describe('LearnMoreLink', () => {
   });
 
   it.each([
-    ['PPL', DOC_LINKS.ppl.base],
-    ['SQL', DOC_LINKS.sql.base],
+    ['PPL', DOC_LINKS.sqlPplIndex.ppl],
+    ['SQL', DOC_LINKS.sqlPplIndex.sql],
   ])('prefers core over the registered docLink for %s', (language, href) => {
     // Pins the precedence rather than leaving it implicit. Core is chosen for these two
     // because it interpolates the running version where the registration hardcodes `latest`,
@@ -122,12 +125,11 @@ describe('LearnMoreLink', () => {
 
   it('still renders a real anchor when the language matches nothing registered', () => {
     // Restored URL state or a saved query can carry an id no language registered. Without a
-    // fallback EuiLink renders a disabled button. PPL is the default language, so it is the
-    // sensible landing place for an id nothing recognises.
+    // fallback EuiLink renders a disabled button.
     setup({ language: 'not-a-language' });
 
     const link = renderLink();
-    expect(link).toHaveAttribute('href', DOC_LINKS.ppl.base);
+    expect(link).toHaveAttribute('href', DOC_LINKS.sqlPplIndex.base);
     expect(link.tagName).toBe('A');
   });
 

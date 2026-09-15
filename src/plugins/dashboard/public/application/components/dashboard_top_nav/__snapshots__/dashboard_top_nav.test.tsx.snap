@@ -609,7 +609,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -642,7 +642,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -1819,7 +1824,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -1852,7 +1857,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3029,7 +3039,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -3062,7 +3072,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -4239,7 +4254,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -4272,7 +4287,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -5449,7 +5469,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -5482,7 +5502,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -6659,7 +6684,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                   "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
                   "ppl": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
                   },
                   "reIndex": Object {
                     "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
@@ -6692,7 +6717,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
                   },
                   "sql": Object {
-                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                    "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",

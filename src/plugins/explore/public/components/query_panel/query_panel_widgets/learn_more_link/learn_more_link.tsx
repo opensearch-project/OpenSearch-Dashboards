@@ -27,13 +27,17 @@ export const LearnMoreLink = () => {
 
   // PPL and SQL go through core because it interpolates `DOC_LINK_VERSION` where the urls
   // they register hardcode `latest`. That leaves `docLink` uneven for now, editing PromQL's
-  // registration moves this link and editing PPL's does not. The `ppl.base` tail is the
-  // default language, and matters because EuiLink renders a disabled button with no `href`.
-  const { ppl, sql } = docLinks.links.noDocumentation;
+  // registration moves this link and editing PPL's does not. The `base` tail matters because
+  // EuiLink renders a disabled button with no `href`.
+  const { sqlPplIndex } = docLinks.links.noDocumentation;
   const url =
-    (queryLanguage === 'SQL' ? sql.base : queryLanguage === 'PPL' ? ppl.base : undefined) ??
+    (queryLanguage === 'SQL'
+      ? sqlPplIndex.sql
+      : queryLanguage === 'PPL'
+        ? sqlPplIndex.ppl
+        : undefined) ??
     langConfig?.docLink?.url ??
-    ppl.base;
+    sqlPplIndex.base;
 
   // `title` not the raw id, so the label matches the chip above it.
   const label = i18n.translate('explore.queryPanel.learnMoreLabel', {

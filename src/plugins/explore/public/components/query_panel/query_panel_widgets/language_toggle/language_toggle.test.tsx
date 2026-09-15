@@ -56,8 +56,11 @@ jest.mock('../../../../services/services', () => ({
     docLinks: {
       links: {
         noDocumentation: {
-          ppl: { base: 'https://docs.test/sql-and-ppl/ppl/index/' },
-          sql: { base: 'https://docs.test/sql-and-ppl/sql/index/' },
+          sqlPplIndex: {
+            base: 'https://docs.test/sql-and-ppl/',
+            ppl: 'https://docs.test/sql-and-ppl/ppl/index/',
+            sql: 'https://docs.test/sql-and-ppl/sql/index/',
+          },
         },
       },
     },

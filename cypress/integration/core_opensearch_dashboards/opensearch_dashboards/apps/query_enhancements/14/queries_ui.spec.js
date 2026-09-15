@@ -161,10 +161,10 @@ export const runQueryTests = () => {
                         expect(href).to.match(/\/query-dsl\/full-text\/query-string\/$/);
                         break;
                       case 'SQL':
-                        expect(href).to.match(/\/sql-and-ppl\/sql\/index\/$/);
+                        expect(href).to.match(/\/search-plugins\/sql\/sql\/basic\/$/);
                         break;
                       case 'PPL':
-                        expect(href).to.match(/\/sql-and-ppl\/ppl\/index\/$/);
+                        expect(href).to.match(/\/search-plugins\/sql\/ppl\/syntax\/$/);
                         break;
                       default:
                         throw new Error(`Unexpected language: ${language}`);
