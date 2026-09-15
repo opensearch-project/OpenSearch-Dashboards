@@ -13,7 +13,8 @@ import { createDataExplorerServicesMock } from '../../../../../data_explorer/pub
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
 import { ResultStatus, useSearch } from './use_search';
-import { ISearchSource, UI_SETTINGS } from '../../../../../data/common';
+import { Filter, ISearchSource, UI_SETTINGS } from '../../../../../data/common';
+import { opensearchFilters } from 'src/plugins/data/public';
 
 jest.mock('./use_index_pattern', () => ({
   useIndexPattern: jest.fn().mockReturnValue(true),
@@ -22,6 +23,18 @@ jest.mock('./use_index_pattern', () => ({
 jest.mock('../../helpers/validate_time_range', () => ({
   validateTimeRange: jest.fn().mockReturnValue(true),
 }));
+
+const mockFilterA: Filter = {
+  meta: { disabled: false, negate: false, alias: 'test filter A' },
+  query: {},
+  $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
+};
+
+const mockFilterB: Filter = {
+  meta: { disabled: false, negate: false, alias: 'test filter B' },
+  query: {},
+  $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
+};
 
 const mockQuery = {
   query: 'test query',
@@ -41,7 +54,7 @@ const mockSavedSearch = {
     getField: jest.fn().mockReturnValue(mockQuery),
     fetch: jest.fn(),
     getSearchRequestBody: jest.fn().mockResolvedValue({}),
-    getOwnField: jest.fn(),
+    getOwnField: jest.fn().mockReturnValue(mockFilterB),
     getDataFrame: jest.fn(() => ({ name: 'test-pattern' })),
   },
   getFullPath: jest.fn(),
@@ -79,6 +92,7 @@ const createMockServices = (): DiscoverViewServices => {
     pause: false,
     value: 10,
   });
+  (services.filterManager.getAppFilters as jest.Mock).mockReturnValue([mockFilterA]);
   services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearch);
   return services;
 };
@@ -266,6 +280,9 @@ describe('useSearch', () => {
     });
 
     expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+    expect(services.filterManager.setAppFilters).toBeCalledWith(
+      expect.arrayContaining([mockFilterA, mockFilterB])
+    );
   });
 
   it('if no saved search, use get query', async () => {
