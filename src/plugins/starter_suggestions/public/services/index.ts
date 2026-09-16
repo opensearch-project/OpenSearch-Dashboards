@@ -4,6 +4,7 @@
  */
 
 export type {
+  StarterSuggestionAttach,
   StarterSuggestionItem,
   StarterSuggestionsContext,
   StarterSuggestionsProvider,

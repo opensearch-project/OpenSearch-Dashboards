@@ -54,5 +54,7 @@ export const renderApp = ({ element }: AppMountParameters, services: DashboardSe
   const root = createRoot(element);
   root.render(app);
 
-  return () => root.unmount();
+  return () => {
+    root.unmount();
+  };
 };
