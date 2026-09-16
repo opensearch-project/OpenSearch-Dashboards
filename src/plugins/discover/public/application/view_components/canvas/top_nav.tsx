@@ -87,8 +87,11 @@ export const TopNav = ({
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
       skipAppFiltersFromMemory: true,
+      // Discover resolves URL or default-dataset state before this component mounts. Preserve
+      // that app-owned query when `_q` has not been created yet.
+      initialQuery: data.query.queryString.getQuery(),
     };
-  }, []);
+  }, [data.query.queryString]);
 
   useConnectStorageToQueryState(services.data.query, osdUrlStateStorage, syncConfig);
 

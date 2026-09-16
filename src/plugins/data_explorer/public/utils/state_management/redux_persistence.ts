@@ -9,6 +9,32 @@ import { DataExplorerServices } from '../../types';
 import { getPreloadedState } from './preload';
 import { RootState } from './store';
 
+const initializeDefaultDatasetQuery = async (services: DataExplorerServices) => {
+  if (!services.uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING)) {
+    return;
+  }
+
+  const queryState = services.osdUrlStateStorage.get<{ query?: unknown }>('_q');
+  if (queryState && Object.prototype.hasOwnProperty.call(queryState, 'query')) {
+    return;
+  }
+
+  try {
+    const defaultDataset = await services.data.query.getDefaultDataset();
+    if (!defaultDataset) {
+      return;
+    }
+
+    const defaultQuery = services.data.query.queryString.getDefaultQuery(defaultDataset);
+    // Query-enhanced Discover owns dataset selection through query state. Initialize it here,
+    // after checking URL state, so a fresh app gets the default dataset without overwriting an
+    // explicitly restored query, including an intentionally empty one.
+    services.data.query.queryString.setQuery(defaultQuery, false, false);
+  } catch {
+    // Discover can still render its empty state if the default dataset cannot be resolved.
+  }
+};
+
 export const loadReduxState = async (services: DataExplorerServices) => {
   try {
     const serializedState = services.osdUrlStateStorage.get<RootState>('_a');
@@ -47,6 +73,8 @@ export const loadReduxState = async (services: DataExplorerServices) => {
         });
 
         delete serializedState.metadata.indexPattern;
+      } else {
+        await initializeDefaultDatasetQuery(services);
       }
 
       return serializedState;
@@ -57,6 +85,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
   }
 
   // If state is not found, load the default state
+  await initializeDefaultDatasetQuery(services);
   return await getPreloadedState(services);
 };
 
