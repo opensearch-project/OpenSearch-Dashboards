@@ -506,6 +506,70 @@ describe('pplSearchStrategyProvider', () => {
     expect(result.body.meta?.highlights).toBeUndefined();
   });
 
+  it('should attach warnings to dataFrame meta when rawResponse contains warnings', async () => {
+    const mockWarnings = [
+      {
+        type: 'PARTIAL_RESULT',
+        message: 'Results exclude 1 of 2 indices due to a mapping conflict.',
+        detail: 'Field [env] is mapped inconsistently. Excluded indices: [logs-text].',
+      },
+    ];
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+        warnings: mockWarnings,
+      },
+      took: 100,
+    };
+    const mockFacet = {
+      describeQuery: jest.fn().mockResolvedValue(mockResponse),
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    expect(result.body.meta.warnings).toEqual(mockWarnings);
+  });
+
+  it('should not have warnings in meta when rawResponse has no warnings', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockFacet = {
+      describeQuery: jest.fn().mockResolvedValue(mockResponse),
+    } as unknown as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      mockRequestHandlerContext,
+      {
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    expect(result.body.meta?.warnings).toBeUndefined();
+  });
+
   it('should handle empty search response', async () => {
     const mockResponse = {
       success: true,

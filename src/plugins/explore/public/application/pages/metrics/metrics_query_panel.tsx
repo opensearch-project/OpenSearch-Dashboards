@@ -318,7 +318,7 @@ export const MetricsQueryPanel: React.FC = () => {
                   {(provided, snapshot) => (
                     <QueryRowComponent
                       row={row}
-                      label={getQueryLabel(idx)}
+                      label={readoutLabels[idx]}
                       client={client}
                       onBuilderChange={onBuilderChange}
                       onCodeChange={onCodeChange}

@@ -61,6 +61,16 @@ describe('detectAndSetOptimalTab', () => {
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
     });
 
+    it('switches to Statistics when query contains | top', async () => {
+      const tab = await runDetect('source = idx | top 10 category', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('switches to Statistics when query contains | rare', async () => {
+      const tab = await runDetect('source = idx | rare 10 category', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
     it('switches to Visualization when query contains | chart', async () => {
       const tab = await runDetect('source = idx | chart count() by cat', EXPLORE_LOGS_TAB_ID);
       expect(tab).toBe(EXPLORE_VISUALIZATION_TAB_ID);
@@ -158,6 +168,37 @@ describe('detectAndSetOptimalTab', () => {
     it('stays on Visualization when query is empty', async () => {
       const tab = await runDetect('', EXPLORE_VISUALIZATION_TAB_ID);
       expect(tab).toBe(EXPLORE_VISUALIZATION_TAB_ID);
+    });
+  });
+
+  // =========================================================================
+  // Rule 4: commands inside quoted strings or subqueries must not route the tab
+  // =========================================================================
+  describe('Rule 4 — commands inside strings/subqueries are masked', () => {
+    it('stays on Logs when | stats appears only inside a quoted string', async () => {
+      const tab = await runDetect('source = idx | where msg="a | stats b"', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+
+    it('stays on Logs when | chart appears only inside a quoted string', async () => {
+      const tab = await runDetect('source = idx | where msg="a | chart b"', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+
+    it('stays on Logs when | stats appears only inside a bracketed subquery', async () => {
+      const tab = await runDetect(
+        'source = idx | where id in [ source = other | stats count() ]',
+        EXPLORE_LOGS_TAB_ID
+      );
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+
+    it('still switches to Statistics for a real | stats after a masked one', async () => {
+      const tab = await runDetect(
+        'source = idx | where msg="| stats x" | stats count() by y',
+        EXPLORE_LOGS_TAB_ID
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
     });
   });
 });

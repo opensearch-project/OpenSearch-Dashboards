@@ -240,5 +240,49 @@ describe('AskAIVisualizeEmbeddableAction', () => {
         expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalled();
       });
     });
+
+    describe('data source message options', () => {
+      const withIndexPattern = (indexPattern: Record<string, unknown>) =>
+        ({
+          ...mockEmbeddable,
+          vis: {
+            ...mockEmbeddable.vis,
+            data: { ...mockEmbeddable.vis.data, indexPattern },
+          },
+        }) as unknown as VisualizeEmbeddable;
+
+      it('should pass the panel data source from the index pattern dataSourceRef', async () => {
+        await action.execute({
+          embeddable: withIndexPattern({
+            id: 'ip-on-remote-cluster',
+            title: 'test-index',
+            dataSourceRef: { id: 'remote-ds-id', type: 'data-source' },
+          }),
+        });
+
+        await waitFor(() => {
+          expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(expect.any(Array), [], {
+            dataSourceId: 'remote-ds-id',
+          });
+        });
+      });
+
+      // Regression: a local-cluster index pattern id is itself a UUID, which the old
+      // "find a 36-char segment" fallback mistook for a data source id.
+      it('should not pass a data source for a local index pattern with a UUID id', async () => {
+        await action.execute({
+          embeddable: withIndexPattern({
+            id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+            title: 'opensearch_dashboards_sample_data_flights',
+          }),
+        });
+
+        await waitFor(() => {
+          expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(expect.any(Array), [], {
+            dataSourceId: undefined,
+          });
+        });
+      });
+    });
   });
 });

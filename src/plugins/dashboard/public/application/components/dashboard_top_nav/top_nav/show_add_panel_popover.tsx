@@ -34,12 +34,14 @@ const PanelPopover = ({
   onClose,
   button,
   onAddExistingPanelFlyout,
+  onAddSection,
   uiActions,
   containerInfo,
 }: {
   onClose: () => void;
   button: HTMLElement;
   onAddExistingPanelFlyout: () => void;
+  onAddSection?: () => void;
   uiActions: UiActionsStart;
   containerInfo?: ContainerInfo;
 }) => {
@@ -50,12 +52,45 @@ const PanelPopover = ({
   const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
 
   const panels = useAsync(() => {
-    return buildContextMenuForActions({
-      actions: actionsRef.current.map((action) => ({
-        action,
+    const actions = actionsRef.current.map((action) => ({
+      action,
+      context: triggerContext,
+      trigger: DASHBOARD_ADD_PANEL_TRIGGER as any,
+    }));
+
+    // Keep Section immediately after Metrics without assuming fixed action orders.
+    const metricsAction = actionsRef.current.find(
+      (a) => a.id === 'add_vis_action_MetricsVisualization'
+    );
+    const existingOrders = actionsRef.current.map((a) => a.order ?? 0);
+    const sectionOrder = metricsAction
+      ? (metricsAction.order ?? 0) - 1
+      : (existingOrders.length ? Math.min(...existingOrders) : 0) - 1;
+    if (onAddSection) {
+      const addSectionAction = {
+        id: 'addDashboardSection',
+        order: sectionOrder,
+        type: 'addDashboardSection',
+        getDisplayName: () =>
+          i18n.translate('dashboard.addPanel.addSectionMenuItem', {
+            defaultMessage: 'Section',
+          }),
+        getIconType: () => 'list',
+        isCompatible: async () => true,
+        execute: async () => {
+          onAddSection();
+          onClose();
+        },
+      };
+      actions.push({
+        action: addSectionAction as any,
         context: triggerContext,
         trigger: DASHBOARD_ADD_PANEL_TRIGGER as any,
-      })),
+      });
+    }
+
+    return buildContextMenuForActions({
+      actions,
       closeMenu: onClose,
       title: '',
       autoWrapItems: false,
@@ -92,11 +127,13 @@ const PanelPopover = ({
 export function showAddPanelPopover({
   anchorElement,
   onAddExistingPanelFlyout,
+  onAddSection,
   uiActions,
   containerInfo,
 }: {
   anchorElement: HTMLElement;
   onAddExistingPanelFlyout: () => void;
+  onAddSection?: () => void;
   uiActions: UiActionsStart;
   containerInfo?: ContainerInfo;
 }) {
@@ -112,6 +149,7 @@ export function showAddPanelPopover({
   root.render(
     <PanelPopover
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
+      onAddSection={onAddSection}
       button={anchorElement}
       onClose={unmount}
       uiActions={uiActions}

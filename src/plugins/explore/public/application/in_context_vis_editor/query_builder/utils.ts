@@ -219,12 +219,7 @@ export const queryExecution = async ({
       query: queryString,
     };
 
-    const searchSource = await createSearchSourceWithQuery(
-      preparedQueryObject,
-      dataView,
-      services,
-      false // No histogram
-    );
+    const searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services);
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
@@ -257,6 +252,7 @@ export const queryExecution = async ({
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
     };
 
     updateResultFn(rawResultsWithMeta);

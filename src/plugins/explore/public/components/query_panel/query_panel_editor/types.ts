@@ -20,6 +20,7 @@ import {
   QueryEditorState,
 } from '../../../application/in_context_vis_editor/query_builder/query_builder';
 import { EditorMode } from '../../../application/utils/state_management/types';
+import { ContextProviderStart } from '../../../../../context_provider/public';
 
 export type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
@@ -56,6 +57,8 @@ export interface QueryPanelRequiredServices {
   capabilities: Capabilities;
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
+  core: CoreStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export interface QueryEditorProps {

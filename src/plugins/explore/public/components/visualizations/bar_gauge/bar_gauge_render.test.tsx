@@ -14,6 +14,16 @@ global.ResizeObserver = class MockResizeObserver {
   unobserve = jest.fn();
 };
 
+const mockMeasureText = jest.fn((text: string) => ({ width: text.length * 8 }));
+
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  configurable: true,
+  value: jest.fn(() => ({
+    font: '',
+    measureText: mockMeasureText,
+  })),
+});
+
 jest.mock('./bar_gauge_component.scss', () => ({}));
 
 // Mock BarGaugeItem to isolate render logic from item rendering details
@@ -43,6 +53,10 @@ jest.mock('../style_panel/unit/collection', () => ({
 const defaultStyles = defaultBarGaugeChartStyles;
 
 describe('BarGaugeRender', () => {
+  beforeEach(() => {
+    mockMeasureText.mockImplementation((text: string) => ({ width: text.length * 8 }));
+  });
+
   describe('rendering items', () => {
     it('renders one BarGaugeItem per data entry', () => {
       const data = [
@@ -146,6 +160,33 @@ describe('BarGaugeRender', () => {
         <BarGaugeRender data={[]} styles={defaultStyles} isHorizontal={false} />
       );
       expect(container.querySelector('.main-bar-gauge-container')).toHaveClass('vertical');
+    });
+
+    it('sizes the horizontal value column to the widest formatted display value', () => {
+      mockMeasureText.mockImplementation((text: string) => ({
+        width: text === '888 °C' ? 72.4 : 54.1,
+      }));
+      const styles = {
+        ...defaultStyles,
+        decimals: 0,
+        unitSuffix: '°C',
+      };
+      const { container } = render(
+        <BarGaugeRender
+          data={[
+            { category: 'A', value: 111 },
+            { category: 'B', value: 888 },
+          ]}
+          styles={styles}
+          isHorizontal={true}
+        />
+      );
+
+      expect(mockMeasureText).toHaveBeenCalledWith('111 °C');
+      expect(mockMeasureText).toHaveBeenCalledWith('888 °C');
+
+      const mainContainer = container.querySelector('.main-bar-gauge-container') as HTMLElement;
+      expect(mainContainer.style.getPropertyValue('--bar-gauge-value-width')).toBe('75px');
     });
   });
 

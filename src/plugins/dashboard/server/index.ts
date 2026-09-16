@@ -35,6 +35,7 @@ import { configSchema, ConfigSchema } from '../config';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     allowByValueEmbeddables: true,
+    allowDashboardSections: true,
     variables: true,
   },
   schema: configSchema,

@@ -14,6 +14,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
+import { QueryWarningsCallout } from './query_warnings_callout';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';
 import {
@@ -23,7 +24,7 @@ import {
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { resultsCache } from '../../application/utils/state_management/slices';
-import { useChangeQueryEditor } from '../../application/hooks';
+import { useChangeQueryEditor, useRerunWithoutPartialResults } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 import { useFlavorId } from '../../helpers/use_flavor_id';
@@ -34,6 +35,7 @@ const ExploreDataTableComponent = () => {
   const { uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
+  const rerunWithoutPartialResults = useRerunWithoutPartialResults();
   const savedSearch = useSelector(selectSavedSearch);
   const wrapCellText = useSelector(selectWrapCellText);
   const { dataset } = useDatasetContext();
@@ -46,6 +48,7 @@ const ExploreDataTableComponent = () => {
   const metadata = useSelector((state: RootState) => state.results[cacheKey]);
   const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const rows = rawResults?.hits?.hits || [];
+  const warnings = metadata?.warnings ?? [];
 
   const flavorId = useFlavorId();
   const expandedTableHeader = useMemo(() => {
@@ -97,6 +100,10 @@ const ExploreDataTableComponent = () => {
       className="explore-table-container eui-xScrollWithShadows"
       ref={containerRef}
     >
+      <QueryWarningsCallout
+        warnings={warnings}
+        onRerunWithoutPartialResults={rerunWithoutPartialResults}
+      />
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"

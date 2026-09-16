@@ -297,11 +297,9 @@ function distinguishingLabelKeysByTemplatedName(
     if (seriesIndex >= MAX_SERIES_TABLE) return;
     const name = interpolateLegendFormat(legendTemplate, metricResult.metric).trim();
     if (!name) return;
-    const labels = { ...metricResult.metric };
-    delete labels.__name__;
     const group = groups.get(name);
-    if (group) group.push(labels);
-    else groups.set(name, [labels]);
+    if (group) group.push(metricResult.metric);
+    else groups.set(name, [metricResult.metric]);
   });
 
   const distinguishing = new Map<string, string[]>();
@@ -366,6 +364,8 @@ function createDataFrame(
 
   const labelKeys = Array.from(allLabelKeys).sort();
 
+  const seriesDisplayNames: Record<string, string> = {};
+
   queryResults.forEach((result) => {
     if (!result.response || result.error) return;
 
@@ -389,24 +389,16 @@ function createDataFrame(
       const templatedName = legendTemplate
         ? interpolateLegendFormat(legendTemplate, metricResult.metric).trim()
         : '';
-      let baseName = fallbackName;
-      if (templatedName) {
-        const differing = distinguishingKeys.get(templatedName);
-        if (differing?.length) {
-          const distinguishing: Record<string, string> = {};
-          differing.forEach((key) => {
-            if (labelsWithoutName[key] !== undefined) distinguishing[key] = labelsWithoutName[key];
-          });
-          baseName = `${templatedName} ${formatMetricLabels(distinguishing)}`;
-        } else {
-          baseName = templatedName;
-        }
-      }
-      const seriesName = isSingleQuery ? baseName : `${result.label}: ${baseName}`;
+
+      const seriesName = isSingleQuery ? fallbackName : `${result.label}: ${fallbackName}`;
       // TODO: remove escaping if not using vega
       // Escape brackets in series name to prevent Vega's splitAccessPath from
       // interpreting them as array index notation when used as field names
       const escapedSeriesName = seriesName.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+
+      if (templatedName) {
+        seriesDisplayNames[escapedSeriesName] = templatedName;
+      }
 
       const dataPoints = metricResult.values ?? (metricResult.value ? [metricResult.value] : []);
 
@@ -504,6 +496,10 @@ function createDataFrame(
       rows: allInstantRows,
     },
   };
+
+  if (Object.keys(seriesDisplayNames).length > 0) {
+    meta.seriesDisplayNames = seriesDisplayNames;
+  }
 
   if (stepResolution) {
     meta.stepResolution = stepResolution;

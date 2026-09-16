@@ -49,10 +49,16 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
       <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorGuard">
         <EuiIcon type="alert" size="xl" color="red" />
         <EuiTitle size="l">
-          <h1>{error.message.reason || errorDefaultTitle}</h1>
+          {/* Stable, user-facing headline. The raw backend reason (which can be a
+              verbose engine exception, e.g. a java.sql.SQLException) is shown in
+              the Details block below rather than as the title. */}
+          <h1>{errorDefaultTitle}</h1>
         </EuiTitle>
         <div className="exploreErrorGuard__errorsSection">
-          <ErrorCodeBlock title={detailsText} text={error.message.details} />
+          <ErrorCodeBlock
+            title={detailsText}
+            text={error.message.details || error.message.reason}
+          />
           {error.message.type ? (
             <ErrorCodeBlock title={typeText} text={error.message.type} />
           ) : null}

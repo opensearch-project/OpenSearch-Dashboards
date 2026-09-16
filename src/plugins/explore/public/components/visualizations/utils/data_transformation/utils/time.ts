@@ -37,3 +37,36 @@ export const roundToTimeUnit = (timestamp: Date, unit: TimeUnit): Date => {
       return d;
   }
 };
+
+/**
+ * Round timestamp up to the nearest time bucket boundary.
+ */
+export const ceilToTimeUnit = (timestamp: Date, unit: TimeUnit): Date => {
+  const bucketStart = roundToTimeUnit(timestamp, unit);
+  if (bucketStart.getTime() === timestamp.getTime()) {
+    return bucketStart;
+  }
+
+  switch (unit) {
+    case TimeUnit.YEAR:
+      bucketStart.setFullYear(bucketStart.getFullYear() + 1);
+      break;
+    case TimeUnit.MONTH:
+      bucketStart.setMonth(bucketStart.getMonth() + 1);
+      break;
+    case TimeUnit.DATE:
+      bucketStart.setDate(bucketStart.getDate() + 1);
+      break;
+    case TimeUnit.HOUR:
+      bucketStart.setHours(bucketStart.getHours() + 1);
+      break;
+    case TimeUnit.MINUTE:
+      bucketStart.setMinutes(bucketStart.getMinutes() + 1);
+      break;
+    case TimeUnit.SECOND:
+      bucketStart.setSeconds(bucketStart.getSeconds() + 1);
+      break;
+  }
+
+  return bucketStart;
+};

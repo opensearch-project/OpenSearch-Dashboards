@@ -14,7 +14,12 @@ import {
   Capabilities,
   OpenSearchClient,
 } from '../../../../core/server';
-import { getPrincipalsFromRequest } from '../../../../core/server/utils';
+import {
+  getPrincipalsFromRequest,
+  getWorkspaceState,
+  isRequestWorkspaceAuthorized,
+} from '../../../../core/server/utils';
+import { WorkspacePluginStart } from '../../../workspace/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
@@ -243,7 +248,8 @@ export function defineRoutes(
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
   forwardCredentials?: boolean,
-  getHttpAuth?: () => HttpAuth | undefined
+  getHttpAuth?: () => HttpAuth | undefined,
+  getWorkspace?: () => WorkspacePluginStart | undefined
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -361,6 +367,23 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       const dataSourceId = request.query?.dataSourceId;
+
+      // If given workspaceId, then ensure user can access the workspace, and
+      // forwardedProps.workspaceId is consistent. Otherwise no ACL check and
+      // no forwardedProps.workspaceId.
+      const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
+      const mutableBody = request.body as { forwardedProps?: Record<string, unknown> };
+      const forwardedProps = (mutableBody.forwardedProps ?? {}) as Record<string, unknown>;
+      if (requestWorkspaceId) {
+        if (!(await isRequestWorkspaceAuthorized(getWorkspace?.(), request, logger))) {
+          logger.warn('Chat proxy rejected: caller lacks access to the requested workspace');
+          return response.forbidden({ body: { message: 'Access to this workspace is denied' } });
+        }
+        forwardedProps.workspaceId = requestWorkspaceId;
+      } else {
+        delete forwardedProps.workspaceId;
+      }
+      mutableBody.forwardedProps = forwardedProps;
 
       try {
         // Inject server-side system prompt if present

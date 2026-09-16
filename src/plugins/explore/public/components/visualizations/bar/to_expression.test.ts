@@ -11,7 +11,14 @@ import {
   createDoubleNumericalBarChart,
 } from './to_expression';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
-import { VisColumn, VisFieldType, AxisRole, ThresholdMode, AggregationType } from '../types';
+import {
+  VisColumn,
+  VisFieldType,
+  AxisRole,
+  ThresholdMode,
+  AggregationType,
+  TimeUnit,
+} from '../types';
 import { getColors } from '../theme/default_colors';
 
 describe('bar to_expression', () => {
@@ -290,6 +297,34 @@ describe('bar to_expression', () => {
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });
 
+    test('aligns the full time range to the visualization bucket boundaries', () => {
+      const from = new Date(2023, 0, 1, 12);
+      const to = new Date(2023, 0, 2, 12);
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        bucket: {
+          ...defaultBarChartStyles.bucket,
+          bucketTimeUnit: TimeUnit.DATE,
+        },
+      };
+
+      const { spec } = createTimeBarChart(
+        mockData,
+        styles,
+        {
+          [AxisRole.X]: mockDateColumn,
+          [AxisRole.Y]: [mockNumericalColumn],
+        },
+        {
+          from: from.toISOString(),
+          to: to.toISOString(),
+        }
+      );
+
+      expect(spec.xAxis.min).toEqual(new Date(2023, 0, 1));
+      expect(spec.xAxis.max).toEqual(new Date(2023, 0, 3));
+    });
+
     describe('bucketing vs skip bucketing', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
@@ -328,6 +363,32 @@ describe('bar to_expression', () => {
 
         // No bucketing: all 3 raw data points preserved (header + 3 data rows)
         expect(noBucketSpec.dataset.source.length).toBe(4);
+      });
+
+      test('includes query-produced bucket starts outside the full time range', () => {
+        const noBucketStyles: BarChartStyle = {
+          ...defaultBarChartStyles,
+          bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
+        };
+        const queryBucketData = [
+          { count: 10, date: '2026-09-05T12:00:00.000Z' },
+          { count: 91, date: '2026-09-05T16:00:00.000Z' },
+          { count: 75, date: '2026-09-05T20:00:00.000Z' },
+        ];
+        const timeRange = {
+          from: '2026-09-05T15:19:52.000Z',
+          to: '2026-09-07T15:19:52.000Z',
+        };
+
+        const { spec } = createTimeBarChart(
+          queryBucketData,
+          noBucketStyles,
+          axisMappings,
+          timeRange
+        );
+
+        expect(spec.xAxis.min).toEqual(new Date(queryBucketData[0].date));
+        expect(spec.xAxis.max).toEqual(new Date(timeRange.to));
       });
     });
   });
@@ -404,6 +465,24 @@ describe('bar to_expression', () => {
       expect(result.legendItems.map((item) => item.color)).toEqual([palette[0], palette[2]]);
     });
 
+    test('aligns the full time range to the auto-inferred bucket boundaries', () => {
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+      const from = new Date(2023, 0, 1, 12);
+      const to = new Date(2023, 0, 2, 12);
+
+      const { spec } = createGroupedTimeBarChart(mockData, defaultBarChartStyles, axisMappings, {
+        from: from.toISOString(),
+        to: to.toISOString(),
+      });
+
+      expect(spec.xAxis.min).toEqual(new Date(2023, 0, 1));
+      expect(spec.xAxis.max).toEqual(new Date(2023, 0, 3));
+    });
+
     describe('bucketing vs skip bucketing', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
@@ -435,14 +514,21 @@ describe('bar to_expression', () => {
           bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
         };
 
+        const timeRange = {
+          from: '2023-01-01T08:00:00.150Z',
+          to: '2023-01-01T08:00:00.250Z',
+        };
         const { spec: noBucketSpec } = createGroupedTimeBarChart(
           sameBucketData,
           noBucketStyles,
-          axisMappings
+          axisMappings,
+          timeRange
         );
 
         // No bucketing: pivot groups by raw timestamp strings (3 unique = header + 3 data rows)
         expect(noBucketSpec.dataset.source.length).toBe(4);
+        expect(noBucketSpec.xAxis.min).toEqual(new Date(sameBucketData[0].date));
+        expect(noBucketSpec.xAxis.max).toEqual(new Date(sameBucketData[2].date));
       });
     });
   });

@@ -499,7 +499,10 @@ export class ChatEventHandler {
 
       if (result.userRejected) {
         // Buffer the rejection as this member's result.
-        this.batchResults.set(toolCallId, result);
+        this.batchResults.set(
+          toolCallId,
+          result.data ?? this.getAssistantToolResultPayload(result)
+        );
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'failed',
         });
@@ -530,10 +533,11 @@ export class ChatEventHandler {
         this.maybeFlushBatch();
       } else {
         // Executed locally (includes `declined`): buffer for batch dispatch.
-        this.batchResults.set(toolCallId, result.data);
+        const assistantResult = this.getAssistantToolResultPayload(result);
+        this.batchResults.set(toolCallId, assistantResult);
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
-          result: result.data,
+          result: assistantResult,
         });
         // Record tool execution telemetry
         this.recordToolExecuted(
@@ -647,6 +651,17 @@ export class ChatEventHandler {
       this.recordToolExecuted(toolCallId, pendingTool?.name ?? 'unknown', 'success', 'agent');
       this.toolExecutor.clearPendingTool(toolCallId);
     }
+  }
+
+  private getAssistantToolResultPayload(result: { success?: boolean; data?: any; error?: string }) {
+    if (result.data !== undefined) {
+      return result.data;
+    }
+    if (result.success) return { success: true };
+    return {
+      success: false,
+      error: result.error || 'Unknown error occurred',
+    };
   }
 
   /**

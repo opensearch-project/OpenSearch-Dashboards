@@ -101,16 +101,17 @@ export const createDashboardGlobalAndAppState = ({
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
           if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
-          // In VIEW mode, toUrlState() excludes panels from URL to keep URLs clean.
-          // When syncing URL back to state, preserve current panels if URL state doesn't include them.
-          // This prevents panels from being reset to stateDefaults after variable changes in VIEW mode.
+          // In VIEW mode, toUrlState() excludes panels and layout from the URL.
+          // Preserve their current values when syncing URL state back so unrelated
+          // URL changes do not reset the dashboard to its initial saved state.
           const currentState = stateContainer.getState();
           stateContainer.set(
             hydrateDashboardAppState(
               stateDefaults,
               state,
               currentState.panels,
-              currentState.variables
+              currentState.variables,
+              currentState.layout
             )
           );
         } else {
@@ -172,20 +173,22 @@ export const hydrateDashboardAppState = (
   stateDefaults: DashboardAppState,
   urlState?: Partial<DashboardAppStateInUrl> | null,
   currentPanels?: DashboardAppState['panels'],
-  currentVariables?: Variable[]
+  currentVariables?: Variable[],
+  currentLayout?: DashboardAppState['layout']
 ): DashboardAppState => {
   if (!urlState) {
     return stateDefaults;
   }
 
-  const { variables, panels, ...urlStateWithoutVariablesAndPanels } = urlState;
+  const { variables, panels, layout, ...urlStateWithoutDerivedState } = urlState;
   const baseVariables = currentVariables ?? stateDefaults.variables;
 
   return {
     ...stateDefaults,
-    ...urlStateWithoutVariablesAndPanels,
+    ...urlStateWithoutDerivedState,
     panels: panels ?? currentPanels ?? stateDefaults.panels,
     variables: hydrateVariablesFromUrl(baseVariables, variables),
+    layout: layout ?? currentLayout ?? stateDefaults.layout,
   };
 };
 
@@ -231,7 +234,7 @@ const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
   const variableUrlState = variables?.map(({ id, current }) => ({ id, current }));
 
   if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...rest } = stateWithoutVariables;
+    const { panels, layout, ...rest } = stateWithoutVariables;
     return hasVariables ? { ...rest, variables: variableUrlState } : rest;
   }
   return hasVariables

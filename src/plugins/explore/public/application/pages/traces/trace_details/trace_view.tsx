@@ -13,6 +13,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -173,6 +174,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
+  // Set when the span fetch itself fails (e.g. a backend query error). Kept
+  // distinct from "no matching spans" so we don't mislabel a failed query as an
+  // invalid/not-found trace.
+  const [fetchError, setFetchError] = useState<Error | null>(null);
   // Filterable fields resolved from the dataset (data view) field list. Resolved
   // only when the dataset changes (the data-view lookup is async/expensive), then
   // merged UI-side with the current result's fields in the datasetFields memo.
@@ -279,6 +284,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       }
 
       try {
+        setFetchError(null);
         // Separate client-side filters from server-side filters
         const serverFilters = filters.filter((filter) => !isClientSideFilter(filter));
 
@@ -292,6 +298,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch trace data:', err);
+        setFetchError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsBackgroundLoading(false);
         setPrevTraceId(traceId);
@@ -620,6 +627,28 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
             <div className="exploreTraceView__loadingContainer">
               <EuiLoadingSpinner size="xl" />
             </div>
+          </EuiPanel>
+        ) : fetchError ? (
+          <EuiPanel paddingSize="l">
+            <EuiCallOut
+              title={i18n.translate('explore.traceView.fetchError.title', {
+                defaultMessage: 'Error loading trace {traceId}',
+                values: { traceId },
+              })}
+              color="danger"
+              iconType="alert"
+              data-test-subj="traceViewFetchError"
+            >
+              <p>
+                {i18n.translate('explore.traceView.fetchError.description', {
+                  defaultMessage:
+                    'The query to load this trace failed. This is a query error, not a missing trace. Please try again.',
+                })}
+              </p>
+              <EuiText size="s" color="subdued">
+                {fetchError.message}
+              </EuiText>
+            </EuiCallOut>
           </EuiPanel>
         ) : fieldValidation && !fieldValidation.isValid ? (
           <MissingFieldsEmptyState
