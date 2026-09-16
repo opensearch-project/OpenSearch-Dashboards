@@ -41,6 +41,7 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
     getType: jest.fn().mockReturnValue(mockIndexPatternType),
     getTypes: jest.fn().mockReturnValue([mockIndexPatternType]),
     getDefault: jest.fn().mockReturnValue(defaultDataset),
+    refreshDefault: jest.fn().mockResolvedValue(defaultDataset),
     cacheDataset: jest.fn(),
     fetchOptions: jest.fn(),
     getRecentDatasets: jest.fn(),
