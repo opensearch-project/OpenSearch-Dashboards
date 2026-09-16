@@ -1,2 +1,0 @@
-feat:
-- Send the picked time range alongside PPL queries so the cluster can prune indices ([#12722](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12722))
