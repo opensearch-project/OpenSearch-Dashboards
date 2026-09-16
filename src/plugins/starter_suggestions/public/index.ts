@@ -12,6 +12,7 @@ export function plugin() {
 export { StarterSuggestionsPlugin };
 export type { StarterSuggestionsPluginSetup, StarterSuggestionsPluginStart } from './types';
 export type {
+  StarterSuggestionAttach,
   StarterSuggestionItem,
   StarterSuggestionsContext,
   StarterSuggestionsProvider,

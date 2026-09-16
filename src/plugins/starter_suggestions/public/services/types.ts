@@ -6,6 +6,15 @@
 import { AssistantContextOptions } from '../../../context_provider/public';
 
 /**
+ * Chat-side extras a card can ask for alongside its prompt. Chat owns
+ * whether it is available on the current page and how it is produced,
+ * and ignores the ones it cannot honour.
+ */
+export interface StarterSuggestionAttach {
+  captureScreenshot?: boolean;
+}
+
+/**
  * A single starter suggestion card shown on the chat empty screen.
  */
 export interface StarterSuggestionItem {
@@ -16,8 +25,10 @@ export interface StarterSuggestionItem {
   text: string;
   /** Prompt text filled into the chat input when this suggestion is clicked. */
   prompt?: string;
-  /** Optional custom action invoked instead of filling the input. */
+  /** Optional side effect, run after the prompt and attachments are applied. */
   action?: () => void;
+  /** Chat-side extras to send with the prompt. Ones this page cannot provide are ignored. */
+  attach?: StarterSuggestionAttach;
 }
 
 /**

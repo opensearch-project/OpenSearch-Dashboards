@@ -150,6 +150,7 @@ interface ChatMessagesProps {
   onApproveConfirmation?: (modifiedArgs?: any) => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  onAttachScreenshot?: (attach: boolean) => void;
   onRemoveInput?: (content: string) => void;
   inputValue?: string;
   startResponse?: boolean;
@@ -380,6 +381,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  onAttachScreenshot,
   onRemoveInput,
   inputValue,
   startResponse,
@@ -702,11 +704,11 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   className="chatMessages__suggestionCard"
                   data-test-subj={buildSuggestionTestSubj(visibleSuggestions, suggestion, index)}
                   onClick={() => {
-                    if (suggestion.action) {
-                      suggestion.action();
-                    } else if (suggestion.prompt) {
+                    if (suggestion.prompt) {
                       onFillInput?.(suggestion.prompt);
                     }
+                    onAttachScreenshot?.(Boolean(suggestion.attach?.captureScreenshot));
+                    suggestion.action?.();
                   }}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
