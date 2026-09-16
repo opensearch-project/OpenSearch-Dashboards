@@ -221,6 +221,8 @@ export interface PromQLQueryRequest {
   url: UrlObject;
   datasource: string;
   useContext: boolean;
+  maxDataPoints?: number;
+  step?: number;
 }
 
 export interface ContextVarsObject {

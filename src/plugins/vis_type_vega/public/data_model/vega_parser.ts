@@ -687,9 +687,12 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
         ppl: new PPLQueryParser(this.timeCache, this.searchAPI),
-        ...(this.searchAPI.http
-          ? { prometheus: new PromQLQueryParser(this.timeCache, this.searchAPI.http) }
-          : {}),
+        prometheus: new PromQLQueryParser(
+          this.timeCache,
+          this.searchAPI.http,
+          onWarn,
+          this.searchAPI.abortSignal
+        ),
       };
     }
     const pending: PendingType = {};
