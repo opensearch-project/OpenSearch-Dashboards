@@ -183,7 +183,7 @@ export const createAreaSeries =
           y: item,
         },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         itemStyle: {
           color,

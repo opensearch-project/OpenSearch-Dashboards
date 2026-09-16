@@ -64,6 +64,9 @@ describe('Scatter Chart to_expression', () => {
 
       expect(result.spec).toHaveProperty('dataset');
       expect(result.spec).toHaveProperty('series');
+      result.spec.series.forEach((series: any) => {
+        expect(series.emphasis).toEqual({ focus: 'series', scale: 1.2 });
+      });
       expect(result.spec).toHaveProperty('xAxis');
       expect(result.spec).toHaveProperty('yAxis');
       expect(result.legendItems).toEqual([]);
@@ -205,6 +208,9 @@ describe('Scatter Chart to_expression', () => {
       expect(result.spec).toHaveProperty('dataset');
       expect(result.spec).toHaveProperty('series');
       expect(result.spec).toHaveProperty('visualMap');
+      result.spec.series.forEach((series: any) => {
+        expect(series.emphasis).toEqual({ focus: 'series', scale: 1.2 });
+      });
     });
 
     it('emits category legend items while preserving size visualMap', () => {
