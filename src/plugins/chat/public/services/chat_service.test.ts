@@ -2526,6 +2526,24 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
+    it('should not confirm workspace-resolved data source when called in read-only mode', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.peekCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+      expect(service.getSessionDataSourceList()).toEqual([]);
+    });
+
     it('should return data source ID even if not in available data sources', async () => {
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-invalid');
@@ -2608,6 +2626,31 @@ describe('ChatService', () => {
       const result = await service.getCurrentDataSourceId();
 
       expect(result).toBe('ds-1');
+    });
+
+    it('should not confirm page-context data source when called in read-only mode', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.peekCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+      expect(service.getConfirmedDataSourceId()).toBeUndefined();
+      expect(service.getSessionDataSourceList()).toEqual([]);
     });
 
     it('should return page context data source even if not in available list', async () => {
