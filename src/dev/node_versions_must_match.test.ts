@@ -35,21 +35,42 @@ import { promisify } from 'util';
 const readFile = promisify(fs.readFile);
 import expect from '@osd/expect';
 
-// ToDo: `.node-version` seems to exist for no good reason; find out if we can get rid of it and this test.
-describe('All configs should use a single version of Node', () => {
-  it('should compare .node-version and .nvmrc', async () => {
+/*
+ * The build-time and runtime versions of Node.js are deliberately decoupled:
+ *
+ *   `.nvmrc`         major version used to *build* (CI, `actions/setup-node`, local dev)
+ *   `.node-version`  exact version of the Node.js binary *bundled into the distributable*,
+ *                    i.e. what actually runs OpenSearch Dashboards for end users
+ *
+ * They are allowed to differ, but both must fall within `engines.node`, because
+ * `src/setup_node_env/node_version_validator.js` enforces that range at startup
+ * against whichever runtime is in use.
+ */
+describe('Node versions must be within the supported range', () => {
+  it('should have a .nvmrc that satisfies engines.node from package.json', async () => {
+    const nvmrc = (await readFile('./.nvmrc', { encoding: 'utf-8' })).trim();
+
+    // `.nvmrc` holds a bare major (e.g. `18`), which is not a complete semver version
+    const coerced = semver.coerce(nvmrc);
+    expect(coerced === null).to.be(false);
+    expect(semver.satisfies(coerced!.version, engines.node)).to.be(true);
+  });
+
+  it('should have a .node-version that satisfies engines.node from package.json', async () => {
+    const nodeVersion = (await readFile('./.node-version', { encoding: 'utf-8' })).trim();
+
+    expect(semver.valid(nodeVersion) === null).to.be(false);
+    expect(semver.satisfies(nodeVersion, engines.node)).to.be(true);
+  });
+
+  it('should not bundle a runtime older than the version used to build', async () => {
     const [nodeVersion, nvmrc] = await Promise.all([
       readFile('./.node-version', { encoding: 'utf-8' }),
       readFile('./.nvmrc', { encoding: 'utf-8' }),
     ]);
 
-    expect(semver.major(nodeVersion.trim())).to.be(Number(nvmrc.trim()));
-  });
-
-  it('should compare .node-version and engines.node from package.json', async () => {
-    const nodeVersion = await readFile('./.node-version', {
-      encoding: 'utf-8',
-    });
-    expect(semver.satisfies(nodeVersion.trim(), engines.node)).to.be(true);
+    // Transpiled output targets the build-time Node.js; running it on an older
+    // runtime is not safe, while running it on a newer one is.
+    expect(semver.major(nodeVersion.trim()) >= Number(nvmrc.trim())).to.be(true);
   });
 });
