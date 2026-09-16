@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, act, waitFor } from '@testing-library/react';
+import { render, act, waitFor, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
@@ -624,6 +624,98 @@ describe('ChatMessages', () => {
         notifyContextStore();
       });
       expect(getSuggestions).toHaveBeenCalledTimes(1);
+    });
+
+    describe('clicking a card', () => {
+      const PROMPT = 'Summarize this dashboard, using the attached screenshot.';
+
+      const clickCard = async (
+        card: Record<string, unknown>,
+        props: Partial<React.ComponentProps<typeof ChatMessages>>
+      ) => {
+        registerProvider(jest.fn().mockReturnValue([card]));
+        const { findByText } = render(<ChatMessages {...defaultProps} {...props} />);
+
+        fireEvent.click(await findByText(card.text as string));
+      };
+
+      it('fills the prompt and asks for a screenshot for a card that wants one', async () => {
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(true);
+      });
+
+      it('drops any attached screenshot for a card that wants none', async () => {
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          { icon: 'help', text: PROVIDER_CARD_TEXT, prompt: PROMPT },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(false);
+      });
+
+      it('still fills the prompt where this page cannot capture', async () => {
+        const onFillInput = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot: undefined }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+      });
+
+      it("runs a card's own action on top of the prompt and the attachments", async () => {
+        const action = jest.fn();
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            action,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(true);
+        expect(action).toHaveBeenCalledTimes(1);
+      });
+
+      it('runs an action-only card without touching the input', async () => {
+        const action = jest.fn();
+        const onFillInput = jest.fn();
+
+        await clickCard({ icon: 'help', text: PROVIDER_CARD_TEXT, action }, { onFillInput });
+
+        expect(action).toHaveBeenCalledTimes(1);
+        expect(onFillInput).not.toHaveBeenCalled();
+      });
     });
   });
 
