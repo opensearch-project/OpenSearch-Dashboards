@@ -137,6 +137,8 @@ import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
 import { VariablesBar } from './application/components/dashboard_variables';
 import { dashboardNavPopover } from './dashboard_nav_popover';
+import { StarterSuggestionsPluginSetup } from '../../starter_suggestions/public';
+import { registerDashboardStarterSuggestions } from './starter_suggestions';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -161,6 +163,7 @@ interface SetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  starterSuggestions?: StarterSuggestionsPluginSetup;
 }
 
 interface StartDependencies {
@@ -232,13 +235,27 @@ export class DashboardPlugin implements Plugin<
 
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
+  private starterSuggestions?: ReturnType<typeof registerDashboardStarterSuggestions>;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
-    { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
+    {
+      share,
+      uiActions,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      starterSuggestions,
+    }: SetupDependencies
   ): DashboardSetup {
     // bootstrap UI Actions
     bootstrap(uiActions);
+
+    if (starterSuggestions) {
+      this.starterSuggestions = registerDashboardStarterSuggestions(starterSuggestions);
+    }
 
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -467,9 +484,11 @@ export class DashboardPlugin implements Plugin<
         await dataStart.indexPatterns.clearCache();
         params.element.classList.add('dshAppContainer');
         const { renderApp } = await import('./application');
+        this.starterSuggestions?.setHistory(history);
         const unmount = renderApp(params, services);
         return () => {
           params.element.classList.remove('dshAppContainer');
+          this.starterSuggestions?.clearHistory();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -702,5 +721,6 @@ export class DashboardPlugin implements Plugin<
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.starterSuggestions?.registration.unregister();
   }
 }
