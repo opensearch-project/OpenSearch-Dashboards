@@ -203,9 +203,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       );
       whereCommands.push(clause);
       // The same window out of band, so the engine can skip indices that cannot hold data in it. A
-      // hint only -- the clause above still filters. Off switch because skipping indices narrows the
-      // merged mapping, so a field only the skipped indices map stops resolving. Fail open: the hint
-      // is inert unless the cluster opted in.
+      // hint only -- the clause above still filters, and the engine narrows just the outermost
+      // source, which is the one this clause constrains. Off switch because skipping indices narrows
+      // the merged mapping too, so a field only the skipped indices map stops resolving; both this
+      // and the cluster's plugins.query.pruning.enabled default on.
       if (this.uiSettings?.get(UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING, true) ?? true) {
         timeBounds = bounds;
       }
