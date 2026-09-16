@@ -63,17 +63,17 @@ export interface SearchAPIDependencies {
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
   savedObjectsClient: SavedObjectsClientContract;
-  http?: CoreSetup['http'];
+  http: CoreSetup['http'];
 }
 
 export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
-    private readonly abortSignal?: AbortSignal,
+    public readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
 
-  public get http(): CoreSetup['http'] | undefined {
+  public get http(): CoreSetup['http'] {
     return this.dependencies.http;
   }
 

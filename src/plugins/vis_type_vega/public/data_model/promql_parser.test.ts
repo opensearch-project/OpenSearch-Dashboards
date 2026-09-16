@@ -7,10 +7,10 @@ import { timefilterServiceMock } from '../../../data/public/query/timefilter/tim
 import { PromQLQueryParser } from './promql_parser';
 import { TimeCache } from './time_cache';
 
-const makeHttpMock = (fields = defaultFields()) => ({
+const makeHttpMock = (fields = defaultFields(), meta?: unknown) => ({
   post: jest.fn(() =>
     Promise.resolve({
-      body: { fields },
+      body: { fields, ...(meta ? { meta } : {}) },
     })
   ),
 });
@@ -24,19 +24,22 @@ function defaultFields() {
   ];
 }
 
-function makeParser(httpMock = makeHttpMock()) {
+function makeParser(httpMock = makeHttpMock(), onWarn = jest.fn(), abortSignal?: AbortSignal) {
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  return { parser: new PromQLQueryParser(timeCache, httpMock), timeCache, httpMock };
+  return {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    parser: new PromQLQueryParser(timeCache, httpMock, onWarn, abortSignal),
+    timeCache,
+    httpMock,
+    onWarn,
+  };
 }
 
 test('it should throw if query is missing', () => {
   const { parser } = makeParser();
   expect(() => parser.parseUrl({}, { '%datasource%': 'myds' })).toThrow();
   expect(() => parser.parseUrl({}, { '%datasource%': 'myds', body: {} })).toThrow();
-  expect(() =>
-    parser.parseUrl({}, { '%datasource%': 'myds', body: { query: 123 } })
-  ).toThrow();
+  expect(() => parser.parseUrl({}, { '%datasource%': 'myds', body: { query: 123 } })).toThrow();
 });
 
 test('it should throw if %datasource% is missing', () => {
@@ -46,10 +49,7 @@ test('it should throw if %datasource% is missing', () => {
 
 test('it should parse url object and strip %datasource%', () => {
   const { parser } = makeParser();
-  const result = parser.parseUrl(
-    {},
-    { '%datasource%': 'promql_source', body: { query: 'up' } }
-  );
+  const result = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
   expect(result.dataObject).toEqual({});
   expect(result.datasource).toBe('promql_source');
   expect(result.useContext).toBe(false);
@@ -111,10 +111,7 @@ test('it should omit timeRange when %context% is false', async () => {
   const { parser, timeCache, httpMock } = makeParser();
   timeCache.setTimeRange({ from: 'now-1h', to: 'now' });
 
-  const request = parser.parseUrl(
-    {},
-    { '%datasource%': 'promql_source', body: { query: 'up' } }
-  );
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
 
   await parser.populateData([request]);
 
@@ -125,10 +122,7 @@ test('it should omit timeRange when %context% is false', async () => {
 test('it should handle empty fields in response gracefully', async () => {
   const httpMock = makeHttpMock([]);
   const { parser } = makeParser(httpMock);
-  const request = parser.parseUrl(
-    {},
-    { '%datasource%': 'promql_source', body: { query: 'up' } }
-  );
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
 
   await parser.populateData([request]);
 
@@ -148,4 +142,84 @@ test('it should populate multiple requests in parallel', async () => {
   expect(httpMock.post).toHaveBeenCalledTimes(2);
   expect(JSON.parse(httpMock.post.mock.calls[0][1].body).query.dataset.id).toBe('ds1');
   expect(JSON.parse(httpMock.post.mock.calls[1][1].body).query.dataset.id).toBe('ds2');
+});
+
+test('it should parse %maxdatapoints% and %step% into request options and strip them', async () => {
+  const { parser, httpMock } = makeParser();
+  const request = parser.parseUrl(
+    {},
+    { '%datasource%': 'promql_source', '%maxdatapoints%': 500, '%step%': 30, body: { query: 'up' } }
+  );
+
+  expect(request.maxDataPoints).toBe(500);
+  expect(request.step).toBe(30);
+  expect(request.url['%maxdatapoints%']).toBeUndefined();
+  expect(request.url['%step%']).toBeUndefined();
+
+  await parser.populateData([request]);
+
+  const body = JSON.parse(httpMock.post.mock.calls[0][1].body);
+  expect(body.options).toEqual({ maxDataPoints: 500, step: 30 });
+});
+
+test('it should omit options when %maxdatapoints% and %step% are absent', async () => {
+  const { parser, httpMock } = makeParser();
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
+
+  expect(request.maxDataPoints).toBeUndefined();
+  expect(request.step).toBeUndefined();
+
+  await parser.populateData([request]);
+
+  expect(JSON.parse(httpMock.post.mock.calls[0][1].body).options).toBeUndefined();
+});
+
+test('it should ignore non-positive or non-numeric %maxdatapoints% and %step%', () => {
+  const { parser } = makeParser();
+  const request = parser.parseUrl(
+    {},
+    {
+      '%datasource%': 'promql_source',
+      '%maxdatapoints%': 0,
+      '%step%': 'abc',
+      body: { query: 'up' },
+    }
+  );
+
+  expect(request.maxDataPoints).toBeUndefined();
+  expect(request.step).toBeUndefined();
+});
+
+test('it should pass the abort signal to the http request', async () => {
+  const controller = new AbortController();
+  const { parser, httpMock } = makeParser(makeHttpMock(), jest.fn(), controller.signal);
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
+
+  await parser.populateData([request]);
+
+  expect(httpMock.post.mock.calls[0][1].signal).toBe(controller.signal);
+});
+
+test('it should warn when the response reports truncation', async () => {
+  const truncation = { tableTruncated: true, totalSeriesCount: 5000, displayedSeriesCount: 2000 };
+  const httpMock = makeHttpMock(defaultFields(), { truncation });
+  const { parser, onWarn } = makeParser(httpMock);
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
+
+  await parser.populateData([request]);
+
+  expect(onWarn).toHaveBeenCalledTimes(1);
+  expect(onWarn.mock.calls[0][0]).toContain('2000');
+  expect(onWarn.mock.calls[0][0]).toContain('5000');
+});
+
+test('it should not warn when truncation is not flagged', async () => {
+  const truncation = { tableTruncated: false, totalSeriesCount: 10, displayedSeriesCount: 10 };
+  const httpMock = makeHttpMock(defaultFields(), { truncation });
+  const { parser, onWarn } = makeParser(httpMock);
+  const request = parser.parseUrl({}, { '%datasource%': 'promql_source', body: { query: 'up' } });
+
+  await parser.populateData([request]);
+
+  expect(onWarn).not.toHaveBeenCalled();
 });
