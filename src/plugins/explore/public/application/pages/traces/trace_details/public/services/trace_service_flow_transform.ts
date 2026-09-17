@@ -6,6 +6,13 @@
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
+import {
+  classifyDependencyByAttributes,
+  resolveExternalName,
+  normalizeSpanKind,
+  dependencyTypeLabel,
+  DependencyInfo,
+} from './dependency_classifier';
 
 /**
  * Largest `valueOf(item)` across an iterable, folded pairwise (no `Math.max(...spread)`,
@@ -51,6 +58,10 @@ export interface ServiceFlowNode {
     hasError: boolean;
     errorLabel?: string;
     metrics: ServiceMetric[];
+    /** Set on synthesized dependency nodes: 'database' | 'messaging' | 'external'. */
+    dependencyType?: string;
+    /** Human-readable subtitle for dependency nodes (e.g. "Database"). */
+    subtitle?: string;
   };
 }
 
@@ -192,6 +203,130 @@ export const spansToServiceFlow = (
         label: `${count} call${count === 1 ? '' : 's'}`,
       },
     };
+  });
+
+  // ---- Synthesize dependency nodes (database / messaging / external) --------
+  // Mirrors the aggregated APM service map: represent DB/broker/external targets
+  // the calling spans reach, using attributes the trace already carries. These
+  // are additive to the service-to-service topology above.
+
+  // Which spans have a child from a different service? Such a CLIENT span reached
+  // a traced service (a normal edge) and must NOT also be synthesized as external.
+  const spanHasCrossServiceChild = new Set<string>();
+  hits.forEach((hit) => {
+    if (hit.parentSpanId && id2svc.has(hit.parentSpanId)) {
+      const parentService = id2svc.get(hit.parentSpanId)!;
+      if (parentService !== serviceOf(hit)) spanHasCrossServiceChild.add(hit.parentSpanId);
+    }
+  });
+
+  const depNodeId = (dep: DependencyInfo) => `dep::${dep.type}::${dep.name}`;
+  interface DepAgg {
+    type: DependencyInfo['type'];
+    name: string;
+    count: number;
+    errors: number;
+    durationNanos: number;
+  }
+  const depAgg = new Map<string, DepAgg>();
+  const depEdgeCounts = new Map<string, number>();
+  const depEdgeHasError = new Set<string>();
+
+  hits.forEach((hit) => {
+    const kind = normalizeSpanKind(hit.kind);
+    let dep = classifyDependencyByAttributes(hit);
+    if (!dep && kind === 'CLIENT' && !spanHasCrossServiceChild.has(hit.spanId)) {
+      const ext = resolveExternalName(hit);
+      if (ext) dep = { type: 'external', name: ext };
+    }
+    if (!dep) return;
+
+    const service = serviceOf(hit);
+    const nodeId = depNodeId(dep);
+    const agg = depAgg.get(nodeId) || {
+      type: dep.type,
+      name: dep.name,
+      count: 0,
+      errors: 0,
+      durationNanos: 0,
+    };
+    agg.count += 1;
+    if (hit.status?.code === 2) agg.errors += 1;
+    agg.durationNanos += extractSpanDuration(hit);
+    depAgg.set(nodeId, agg);
+
+    // CONSUMER: broker -> service; PRODUCER / CLIENT (db, external): service -> dependency.
+    const key = kind === 'CONSUMER' ? `${nodeId}->${service}` : `${service}->${nodeId}`;
+    depEdgeCounts.set(key, (depEdgeCounts.get(key) || 0) + 1);
+    if (hit.status?.code === 2) depEdgeHasError.add(key);
+  });
+
+  const maxDepCount = maxBy(depAgg.values(), (d) => d.count, maxSpanCount);
+  const maxDepDurationMs = maxBy(
+    depAgg.values(),
+    (d) => nanoToMilliSec(d.durationNanos),
+    maxDurationMs
+  );
+
+  depAgg.forEach((agg, nodeId) => {
+    const totalMs = nanoToMilliSec(agg.durationNanos);
+    const errorRate = agg.count > 0 ? (agg.errors / agg.count) * 100 : 0;
+    nodes.push({
+      id: nodeId,
+      type: 'metricsCard',
+      position: { x: 0, y: 0 },
+      data: {
+        id: nodeId,
+        title: agg.name,
+        hasError: agg.errors > 0,
+        dependencyType: agg.type,
+        subtitle: dependencyTypeLabel(agg.type),
+        errorLabel:
+          agg.errors > 0
+            ? `${agg.errors} error${agg.errors === 1 ? '' : 's'} (${errorRate.toFixed(0)}%)`
+            : undefined,
+        metrics: [
+          {
+            label: 'Requests',
+            value: agg.count,
+            max: maxDepCount,
+            color: COUNT_COLOR,
+            formattedValue: `${agg.count}`,
+          },
+          {
+            label: 'Errors',
+            value: agg.errors,
+            max: agg.count || 1,
+            color: agg.errors > 0 ? ERROR_COLOR : OK_COLOR,
+            formattedValue: agg.errors > 0 ? `${agg.errors} (${errorRate.toFixed(0)}%)` : '0',
+          },
+          {
+            label: 'Duration',
+            value: totalMs,
+            max: maxDepDurationMs,
+            color: DURATION_COLOR,
+            formattedValue: formatDuration(totalMs),
+          },
+        ],
+      },
+    });
+  });
+
+  const maxDepVolume = maxBy(depEdgeCounts.values(), (v) => v, maxVolume);
+  depEdgeCounts.forEach((count, key) => {
+    const [source, target] = key.split('->');
+    edges.push({
+      id: key,
+      source,
+      target,
+      type: 'volumeEdge',
+      data: {
+        volume: count,
+        maxVolume: maxDepVolume,
+        hasError: depEdgeHasError.has(key),
+        label: `${count} call${count === 1 ? '' : 's'}`,
+      },
+    });
   });
 
   return { map: { root: { nodes, edges } } };

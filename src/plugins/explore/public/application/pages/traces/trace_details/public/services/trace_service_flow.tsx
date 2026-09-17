@@ -144,7 +144,10 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         nodesDraggable
         topN={Infinity}
         onDashboardClick={(node?: { id?: string }) => {
-          if (node?.id) onFilterService?.(node.id);
+          // Synthesized dependency nodes (id "dep::<type>::<name>") are not real
+          // services, so filtering the trace by their id as a serviceName matches
+          // nothing ("No services found"). Ignore clicks on them.
+          if (node?.id && !node.id.startsWith('dep::')) onFilterService?.(node.id);
         }}
       />
     </div>
