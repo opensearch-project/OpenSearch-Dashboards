@@ -47,7 +47,7 @@ export const validateDataViewDataSourceReference = (
 ) => {
   const references = dataView.references;
   if (dataSourceId) {
-    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
+    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
   } else {
     return references.length === 0;
   }

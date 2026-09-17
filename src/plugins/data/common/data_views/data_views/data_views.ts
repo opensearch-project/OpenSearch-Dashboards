@@ -633,11 +633,18 @@ export class DataViewsService {
    * @param override Overwrite if existing data view exists
    * @param skipFetchFields
    */
-  async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
+  async createAndSave(
+    spec: DataViewSpec,
+    override = false,
+    skipFetchFields = false,
+    reuseExisting = false
+  ) {
     const dataView = await this.create(spec, skipFetchFields);
-    await this.createSavedObject(dataView, override);
-    await this.setDefault(dataView.id as string);
-    return dataView;
+    // createSavedObject returns the existing view when reuseExisting hits a duplicate.
+    const savedDataView =
+      (await this.createSavedObject(dataView, override, reuseExisting)) ?? dataView;
+    await this.setDefault(savedDataView.id as string);
+    return savedDataView;
   }
 
   /**
@@ -646,7 +653,7 @@ export class DataViewsService {
    * @param override Overwrite if existing data view exists
    */
 
-  async createSavedObject(dataView: DataView, override = false) {
+  async createSavedObject(dataView: DataView, override = false, reuseExisting = false) {
     const dupe = await findByTitle(
       this.savedObjectsClient,
       dataView.title,
@@ -655,6 +662,10 @@ export class DataViewsService {
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
+      } else if (reuseExisting) {
+        // Idempotent path: an equivalent data view (same title + data source) already exists,
+        // so reuse it instead of erroring. Used by selector flows that re-select a dataset.
+        return this.get(dupe.id);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }

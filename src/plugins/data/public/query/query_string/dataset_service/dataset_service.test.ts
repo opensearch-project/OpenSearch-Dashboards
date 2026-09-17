@@ -297,7 +297,8 @@ describe('DatasetService', () => {
         schemaMappings: { otelLogs: { spanId: 'span.id' } },
       }),
       undefined,
-      false
+      false,
+      true
     );
 
     // Should update the dataset with the generated UUID
@@ -358,7 +359,8 @@ describe('DatasetService', () => {
         },
       }),
       undefined,
-      false
+      false,
+      true
     );
 
     // Should update the dataset with the generated UUID
