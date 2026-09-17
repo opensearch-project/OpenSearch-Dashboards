@@ -114,8 +114,13 @@ export const concatDataSourceWithIndexPattern = (
   return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(indexPatternTitle);
 };
 
+// Match by reference name as well as type, tolerating datasets whose reference `type`
+// was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+export const isDataSourceReference = (ref: SavedObjectReference) =>
+  ref.name === 'dataSource' || ref.type === 'data-source';
+
 export const getDataSourceReference = (references: SavedObjectReference[]) => {
-  return references.find((ref) => ref.type === 'data-source');
+  return references.find(isDataSourceReference);
 };
 
 /**
@@ -133,7 +138,7 @@ export const getDataSourceIdFromIndexPattern = (indexPattern: {
   id: string;
   references?: SavedObjectReference[];
 }): string | undefined => {
-  const refId = (indexPattern.references || []).find((ref) => ref.type === 'data-source')?.id;
+  const refId = (indexPattern.references || []).find(isDataSourceReference)?.id;
   if (refId) {
     return refId;
   }

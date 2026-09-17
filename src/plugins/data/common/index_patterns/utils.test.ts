@@ -150,4 +150,13 @@ describe('test getDataSourceIdFromIndexPattern', () => {
       })
     ).toBeUndefined();
   });
+
+  test('resolves a reference named "dataSource" even when its type is the engine type', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: 'ds-4', type: 'OpenSearch', name: 'dataSource' }],
+      })
+    ).toBe('ds-4');
+  });
 });

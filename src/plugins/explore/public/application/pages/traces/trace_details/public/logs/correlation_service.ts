@@ -87,7 +87,9 @@ export class CorrelationService {
     try {
       const allCorrelationsResponse = await this.savedObjectsClient.find({
         type: 'correlations',
-        fields: ['correlations', 'references'],
+        // 'entities' is required: checkCorrelationsForLogs reads attributes.entities to
+        // identify the linked log datasets. Omitting it returns empty log-dataset lists.
+        fields: ['correlations', 'entities', 'references'],
         perPage: size,
       });
 

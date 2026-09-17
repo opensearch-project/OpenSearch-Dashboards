@@ -79,6 +79,9 @@ type FormatFieldFn = (
 ) => any;
 
 const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
+// Registered saved-object type for a data source (distinct from the engine type
+// 'OpenSearch'/'S3_GLUE' that dataSourceRef.type may carry post-initialization).
+const DATA_SOURCE_SAVED_OBJECT_TYPE = 'data-source';
 export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
@@ -397,11 +400,13 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getSaveObjectReference = () => {
+    // Always persist the registered saved-object type, never the engine type that
+    // dataSourceRef.type may hold after initialization (engine type belongs in Dataset.dataSource).
     return this.dataSourceRef
       ? [
           {
             id: this.dataSourceRef.id,
-            type: this.dataSourceRef.type,
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             name: DATA_SOURCE_REFERNECE_NAME,
           },
         ]
