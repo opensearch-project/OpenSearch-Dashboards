@@ -43,6 +43,7 @@ describe('redux_persistence', () => {
       },
       data: {
         query: {
+          getDefaultDataset: jest.fn().mockResolvedValue(undefined),
           queryString: {
             setQuery: jest.fn(),
             addToQueryHistory: jest.fn(),
@@ -557,6 +558,71 @@ describe('redux_persistence', () => {
         buildServicesWithDatasetSignalType('explore/logs', CORE_SIGNAL_TYPES.TRACES)
       );
       expect(result.query.dataset).toBeUndefined();
+    });
+  });
+
+  describe('configured default dataset fallback', () => {
+    const createTracesServices = (defaultDataset: object) => {
+      const fetch = jest.fn(() => Promise.resolve({ children: [{ id: 'first-traces-dataset' }] }));
+      const services = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+        data: {
+          ...mockServices.data,
+          query: {
+            ...mockServices.data.query,
+            getDefaultDataset: jest.fn().mockResolvedValue(defaultDataset),
+            queryString: {
+              ...mockServices.data.query.queryString,
+              getQuery: jest.fn(() => ({ dataset: undefined })),
+              getDatasetService: jest.fn(() => ({
+                getType: jest.fn(() => ({
+                  fetch,
+                  toDataset: jest.fn(() => ({
+                    id: 'first-traces-dataset',
+                    title: 'First traces dataset',
+                    type: 'INDEX_PATTERN',
+                    signalType: CORE_SIGNAL_TYPES.TRACES,
+                  })),
+                })),
+              })),
+            },
+          },
+        },
+      } as any;
+
+      return { services, fetch };
+    };
+
+    it('should prefer a compatible configured default over the first available dataset', async () => {
+      const defaultDataset = {
+        id: 'default-traces-dataset',
+        title: 'Default traces dataset',
+        type: 'INDEX_PATTERN',
+        signalType: CORE_SIGNAL_TYPES.TRACES,
+      };
+      const { services, fetch } = createTracesServices(defaultDataset);
+
+      const result = await getPreloadedState(services);
+
+      expect(result.query.dataset?.id).toBe(defaultDataset.id);
+      expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('should fall back when the configured default is incompatible', async () => {
+      const defaultDataset = {
+        id: 'default-logs-dataset',
+        title: 'Default logs dataset',
+        type: 'INDEX_PATTERN',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      };
+      const { services, fetch } = createTracesServices(defaultDataset);
+
+      const result = await getPreloadedState(services);
+
+      expect(result.query.dataset?.id).toBe('first-traces-dataset');
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
   });
 

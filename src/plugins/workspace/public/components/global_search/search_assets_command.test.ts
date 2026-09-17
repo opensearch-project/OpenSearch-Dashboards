@@ -90,7 +90,7 @@ describe('searchAssets', () => {
       {
         query: {
           type: SUPPORTED_ASSET_TYPES,
-          search: '*dashboard*',
+          search: 'dashboard*',
           perPage: 10,
           workspaces: [],
         },
@@ -120,7 +120,7 @@ describe('searchAssets', () => {
       {
         query: {
           type: SUPPORTED_ASSET_TYPES,
-          search: '*test*',
+          search: 'test*',
           perPage: 10,
           workspaces: [currentWorkspaceId],
         },
