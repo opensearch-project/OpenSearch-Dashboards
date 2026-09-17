@@ -14,7 +14,6 @@ import {
   IIndexPattern,
   DATA_STRUCTURE_META_TYPES,
   DataStructureCustomMeta,
-  getDataSourceIdFromIndexPattern,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
@@ -46,7 +45,6 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       timeFieldName: patternMeta?.timeFieldName,
       // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
       ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
-      ...(patternMeta?.schemaMappings && { schemaMappings: patternMeta.schemaMappings }),
       ...(patternMeta?.description && { description: patternMeta.description }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
@@ -138,7 +136,28 @@ const fetchIndexPatterns = async (
   const datasourceIds = Array.from(
     new Set(
       resp.savedObjects
-        .map((savedObject) => getDataSourceIdFromIndexPattern(savedObject))
+        .map((savedObject) => {
+          // First try to get from references
+          const refDataSourceId = savedObject.references.find(
+            (ref) => ref.type === 'data-source'
+          )?.id;
+          if (refDataSourceId) {
+            return refDataSourceId;
+          }
+          // If not in references, check if the ID contains :: (namespaced format)
+          if (savedObject.id.includes('::')) {
+            return savedObject.id.split('::')[0];
+          }
+          // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+          const uIdx = savedObject.id.indexOf('_');
+          if (uIdx > 0) {
+            const prefix = savedObject.id.substring(0, uIdx);
+            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+              return prefix;
+            }
+          }
+          return undefined;
+        })
         .filter(Boolean)
     )
   ) as string[];
@@ -155,7 +174,24 @@ const fetchIndexPatterns = async (
   }
 
   const dataStructures = resp.savedObjects.map((savedObject): DataStructure => {
-    const dataSourceId = getDataSourceIdFromIndexPattern(savedObject);
+    // First try to get dataSourceId from references
+    let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+
+    // If not in references, check if the ID contains :: (namespaced format)
+    if (!dataSourceId && savedObject.id.includes('::')) {
+      dataSourceId = savedObject.id.split('::')[0];
+    }
+    // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+    if (!dataSourceId) {
+      const uIdx = savedObject.id.indexOf('_');
+      if (uIdx > 0) {
+        const prefix = savedObject.id.substring(0, uIdx);
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+          dataSourceId = prefix;
+        }
+      }
+    }
+
     const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
     const indexPatternDataStructure: DataStructure = {

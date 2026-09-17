@@ -82,7 +82,6 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
         timeFieldName: queryState.dataset.timeFieldName,
         dataSource: queryState.dataset.dataSource,
         signalType: queryState.dataset.signalType,
-        schemaMappings: queryState.dataset.schemaMappings,
       };
     }
 
@@ -317,7 +316,6 @@ const getPreloadedQueryState = async (
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
         signalType: selectedDataset.signalType,
-        schemaMappings: selectedDataset.schemaMappings,
       };
     }
   }

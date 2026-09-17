@@ -415,10 +415,7 @@ export class DatasetService {
           type: actualType,
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            timeFieldName: indexPattern.timeFieldName,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
-            ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
-            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {

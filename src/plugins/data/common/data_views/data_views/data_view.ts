@@ -203,7 +203,6 @@ export class DataView extends IndexPattern implements IDataView {
       timeFieldName: this.timeFieldName,
       displayName: this.displayName,
       description: this.description,
-      signalType: this.signalType,
       schemaMappings: this.schemaMappings,
       dataSource,
     };

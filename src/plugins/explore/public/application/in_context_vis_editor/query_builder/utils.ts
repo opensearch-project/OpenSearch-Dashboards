@@ -109,7 +109,6 @@ export const getPreloadedQueryState = async (
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
         signalType: selectedDataset.signalType,
-        schemaMappings: selectedDataset.schemaMappings,
       };
     }
   }
