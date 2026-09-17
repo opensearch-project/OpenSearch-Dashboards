@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 interface SplitChartInstanceProps {
   label: string;
+  displayName: string;
   style?: React.CSSProperties;
   showLabel?: boolean;
   scrollRoot?: React.RefObject<HTMLElement>;
@@ -15,6 +16,7 @@ interface SplitChartInstanceProps {
 
 export const SplitChartInstance: React.FC<SplitChartInstanceProps> = ({
   label,
+  displayName,
   style,
   showLabel = false,
   scrollRoot,
@@ -52,8 +54,8 @@ export const SplitChartInstance: React.FC<SplitChartInstanceProps> = ({
   return (
     <div ref={instanceRef} className="splitChartInstance" style={style}>
       {showLabel && (
-        <div className="splitChartInstance__label" title={label}>
-          {label}
+        <div className="splitChartInstance__label" title={displayName}>
+          {displayName}
         </div>
       )}
       <div className="splitChartInstance__chart">{isVisible ? renderChart(label) : null}</div>
