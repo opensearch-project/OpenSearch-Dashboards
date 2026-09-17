@@ -250,22 +250,40 @@ describe('SessionsTab', () => {
       expect(await screen.findByText('No conversation content')).toBeInTheDocument();
     });
 
-    it('surfaces a truncation notice when the span cap is hit', async () => {
+    const spanFixtures = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        traceId: `trace-${i}`,
+        startTime: '2026-09-16T10:00:00.000Z',
+        endTime: '2026-09-16T10:00:01.000Z',
+        attributes: {
+          'gen_ai.input.messages': `msg ${i}`,
+          'gen_ai.output.messages': `reply ${i}`,
+        },
+      }));
+
+    it('surfaces a truncation notice when the span cap is exceeded', async () => {
       mockExecutePPLQuery.mockResolvedValue({});
-      mockTransform.mockReturnValue(
-        Array.from({ length: 1000 }, (_, i) => ({
-          traceId: `trace-${i}`,
-          startTime: '2026-09-16T10:00:00.000Z',
-          endTime: '2026-09-16T10:00:01.000Z',
-          attributes: { 'gen_ai.input.messages': `msg ${i}` },
-        }))
-      );
+      // The query fetches cap + 1 rows; a genuine overflow returns > cap hits.
+      mockTransform.mockReturnValue(spanFixtures(1001));
       openFlyout();
       expect(
         await screen.findByText(
           'Showing the first 1000 spans of this conversation. Later spans are not displayed.'
         )
       ).toBeInTheDocument();
+    });
+
+    it('does not flag truncation when the conversation has exactly the span cap', async () => {
+      mockExecutePPLQuery.mockResolvedValue({});
+      mockTransform.mockReturnValue(spanFixtures(1000));
+      openFlyout();
+      // Wait for content to render, then assert the truncation notice is absent.
+      expect((await screen.findAllByTestId('agentTracesTurn-user')).length).toBeGreaterThan(0);
+      expect(
+        screen.queryByText(
+          'Showing the first 1000 spans of this conversation. Later spans are not displayed.'
+        )
+      ).not.toBeInTheDocument();
     });
 
     it('builds a deep link and opens the trace when "View trace" is clicked', async () => {

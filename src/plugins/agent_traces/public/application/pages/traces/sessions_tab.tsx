@@ -349,7 +349,10 @@ const useConversationExchanges = (conversationId: string | null) => {
       `source = ${dataset.title}` +
       ` | where \`${CONVERSATION_ID_FIELD}\` = ${escapePPLValue(conversationId)}` +
       ` | sort + startTime` +
-      ` | head ${MAX_CONVERSATION_SPANS}`;
+      // Fetch one more than the display cap so a conversation with exactly the
+      // cap number of spans is not falsely flagged as truncated; only a genuine
+      // overflow (> cap) trips the notice.
+      ` | head ${MAX_CONVERSATION_SPANS + 1}`;
 
     const run = async () => {
       try {
@@ -357,8 +360,10 @@ const useConversationExchanges = (conversationId: string | null) => {
         const response = await executePPLQuery(services.data, request, abortController.signal);
         if (cancelled) return;
         const hits = transformPPLDataToTraceHits(response);
-        setExchanges(turnsToExchanges(spansToTurns(hits)));
-        setTruncated(hits.length >= MAX_CONVERSATION_SPANS);
+        const overflowed = hits.length > MAX_CONVERSATION_SPANS;
+        const capped = overflowed ? hits.slice(0, MAX_CONVERSATION_SPANS) : hits;
+        setExchanges(turnsToExchanges(spansToTurns(capped)));
+        setTruncated(overflowed);
       } catch (e) {
         if (cancelled) return;
         setError(
