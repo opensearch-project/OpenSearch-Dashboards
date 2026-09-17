@@ -1,0 +1,2 @@
+feat:
+- Add a Sessions tab to `agent_traces` that derives multi-turn conversations at query time from OpenTelemetry Gen-AI trace spans (keyed on `gen_ai.conversation.id`), with a message-forward session list and a chat flyout ([#12777](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12777))
