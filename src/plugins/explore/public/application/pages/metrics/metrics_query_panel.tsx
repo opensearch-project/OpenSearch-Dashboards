@@ -319,6 +319,7 @@ export const MetricsQueryPanel: React.FC = () => {
                     <QueryRowComponent
                       row={row}
                       label={readoutLabels[idx]}
+                      positionLabel={getQueryLabel(idx)}
                       client={client}
                       onBuilderChange={onBuilderChange}
                       onCodeChange={onCodeChange}
