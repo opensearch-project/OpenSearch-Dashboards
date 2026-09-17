@@ -42,6 +42,8 @@ export const CelestialCard = (props: CelestialCardProps) => {
   const isSelected = id === selectedNodeId;
   const onViewDashboardClick = useCallback(
     (event: React.MouseEvent) => {
+      // Stop the card-level click from also firing (avoids a double action).
+      event.stopPropagation();
       // Selection state is handled by context now
       onDashboardClick?.(event, props);
     },
@@ -55,6 +57,37 @@ export const CelestialCard = (props: CelestialCardProps) => {
       }
     },
     [onGroupToggle, isGroup, props]
+  );
+
+  // Make the whole card clickable (not just the "View insights" text): a group
+  // card expands/collapses, a leaf card triggers its dashboard action. Inner
+  // interactive elements stopPropagation so they don't double-fire this.
+  const onCardClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (isGroup) {
+        onGroupToggle?.(event, props);
+      } else {
+        onDashboardClick?.(event, props);
+      }
+    },
+    [isGroup, onGroupToggle, onDashboardClick, props]
+  );
+
+  // Keyboard equivalent of the whole-card click (Enter/Space) so the card is
+  // operable without a mouse. The action handlers are typed for mouse events
+  // but only read the target props and call stopPropagation, which a keyboard
+  // event also supports.
+  const onCardKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      if (isGroup) {
+        onGroupToggle?.(event as unknown as React.MouseEvent, props);
+      } else {
+        onDashboardClick?.(event as unknown as React.MouseEvent, props);
+      }
+    },
+    [isGroup, onGroupToggle, onDashboardClick, props]
   );
 
   const customColorStyle: React.CSSProperties =
@@ -85,9 +118,13 @@ export const CelestialCard = (props: CelestialCardProps) => {
                     ? 'osd:outline-2 osd:outline-blue-500 osd:outline-offset-4 osd:shadow-node-selected'
                     : ''
                 } 
-                ${isFaded ? 'osd:opacity-30' : 'osd:opacity-100'} 
-                osd:transition-all osd:duration-200`}
+                ${isFaded ? 'osd:opacity-30' : 'osd:opacity-100'}
+                osd:transition-all osd:duration-200 osd:cursor-pointer`}
+      onClick={onCardClick}
+      onKeyDown={onCardKeyDown}
       onDoubleClick={onDoubleClick}
+      role="button"
+      tabIndex={0}
     >
       <div>
         <div className="osd:grid osd:grid-cols-58">
@@ -117,7 +154,10 @@ export const CelestialCard = (props: CelestialCardProps) => {
               // eslint-disable-next-line jsx-a11y/click-events-have-key-events
               <div
                 className="osd:flex osd:items-center osd:group osd:hover:cursor-pointer osd:pl-1"
-                onClick={(e) => onGroupToggle?.(e, props)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGroupToggle?.(e, props);
+                }}
               >
                 <button
                   className="osd-resetFocusState osd:text-group-caret osd:transition-colors osd:mr-0 osd:bg-transparent osd:border-0 osd:p-0"

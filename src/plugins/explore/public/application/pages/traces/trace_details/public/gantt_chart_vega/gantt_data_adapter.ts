@@ -11,6 +11,12 @@ import {
   hasNanosecondPrecision,
 } from '../traces/ppl_resolve_helpers';
 import { parseHighPrecisionTimestamp } from '../utils/span_timerange_utils';
+import {
+  classifyDependencyByAttributes,
+  resolveExternalName,
+  normalizeSpanKind,
+  dependencyTypeLabel,
+} from '../services/dependency_classifier';
 
 interface SpanSource {
   traceId: string;
@@ -70,6 +76,8 @@ interface VegaSpan {
   level: number;
   hasError: boolean;
   color: string;
+  /** 'Database' | 'Messaging' | 'External' for dependency-targeting spans, else ''. */
+  dependencyLabel: string;
 }
 
 interface VegaGanttData {
@@ -219,6 +227,22 @@ export function convertToVegaGanttData(
       colorIndex++;
     }
 
+    // Classify the span's downstream dependency (database / messaging / external)
+    // so the waterfall can annotate DB/broker/external calls. External is only
+    // applied to leaf CLIENT spans (no children) to avoid mislabeling calls that
+    // reach another traced service.
+    let dependencyLabel = '';
+    const depByAttr = classifyDependencyByAttributes(span);
+    if (depByAttr) {
+      dependencyLabel = dependencyTypeLabel(depByAttr.type);
+    } else if (
+      normalizeSpanKind(source.kind) === 'CLIENT' &&
+      (span.children?.length ?? 0) === 0 &&
+      resolveExternalName(span)
+    ) {
+      dependencyLabel = dependencyTypeLabel('external');
+    }
+
     return {
       spanId: source.spanId,
       parentSpanId: source.parentSpanId || '',
@@ -229,6 +253,7 @@ export function convertToVegaGanttData(
       level,
       hasError: isSpanError(source),
       color: serviceColorMap[serviceName],
+      dependencyLabel,
     };
   });
 
