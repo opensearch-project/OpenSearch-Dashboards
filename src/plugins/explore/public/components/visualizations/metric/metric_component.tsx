@@ -278,7 +278,12 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';
-  const displayName = seriesName ?? name;
+  const customTitle = styles.title || undefined;
+  const displayName = seriesName
+    ? customTitle
+      ? `${seriesName} ${customTitle}`
+      : seriesName
+    : (customTitle ?? name);
 
   const valueColumn = axisColumnMappings[AxisRole.Value];
   const numericField = valueColumn?.column;

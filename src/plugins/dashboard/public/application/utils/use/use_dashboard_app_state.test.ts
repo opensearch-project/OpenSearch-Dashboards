@@ -93,9 +93,20 @@ describe('useDashboardAppAndGlobalState', () => {
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       dashboardAppStateStub.filters
     );
+    expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(
+      dashboardAppStateStub.query,
+      false,
+      false
+    );
     expect(connectToQueryState).toHaveBeenCalledWith(mockServices.data.query, expect.any(Object), {
       filters: 'appState',
       query: true,
+    });
+    const queryStateAdapter = (connectToQueryState as jest.Mock).mock.calls[0][1];
+    queryStateAdapter.set({ filters: [], query: undefined });
+    expect(stateContainer.transitions.set).toHaveBeenCalledWith('query', {
+      language: 'kuery',
+      query: '',
     });
     expect(result.current).toEqual({
       appState: stateContainer,

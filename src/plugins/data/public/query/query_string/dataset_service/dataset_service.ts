@@ -32,6 +32,7 @@ interface AppDatasetFilter {
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
+  private defaultDatasetId?: string;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
   private datasetFilters: AppDatasetFilter[] = [];
@@ -59,7 +60,10 @@ export class DatasetService {
 
   public async init(indexPatterns: IndexPatternsContract): Promise<void> {
     this.indexPatterns = indexPatterns;
-    this.defaultDataset = await this.fetchDefaultDataset();
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
   }
 
   public registerType(handlerConfig: DatasetTypeConfig): void {
@@ -84,6 +88,20 @@ export class DatasetService {
   }
 
   public getDefault(): Dataset | undefined {
+    return this.defaultDataset;
+  }
+
+  public async refreshDefault(): Promise<Dataset | undefined> {
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    if (defaultDatasetId === this.defaultDatasetId) {
+      return this.defaultDataset;
+    }
+
+    // defaultIndex can change after the Data plugin starts. Re-fetch only when its ID changes so
+    // application initialization sees the current default without repeating the startup request.
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
     return this.defaultDataset;
   }
 
@@ -368,8 +386,9 @@ export class DatasetService {
     this.sessionStorage.set('lastCacheTime', time);
   }
 
-  private async fetchDefaultDataset(): Promise<Dataset | undefined> {
-    const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
+  private async fetchDefaultDataset(
+    defaultIndexPatternId: string | undefined
+  ): Promise<Dataset | undefined> {
     if (!defaultIndexPatternId) {
       return undefined;
     }
