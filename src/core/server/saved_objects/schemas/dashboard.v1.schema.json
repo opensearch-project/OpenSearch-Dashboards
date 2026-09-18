@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensearch.org/schemas/saved-objects/dashboard.v1.schema.json",
+  "title": "OpenSearch Dashboards Dashboard Saved Object v1",
+  "description": "Schema for a dashboard saved object, representing a collection of visualization panels with layout, time range, and query configuration.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title of the dashboard."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the dashboard."
+    },
+    "hits": {
+      "type": "integer",
+      "description": "Number of hits (usage tracking counter).",
+      "minimum": 0
+    },
+    "version": {
+      "type": "integer",
+      "description": "Saved object schema version for migration tracking."
+    },
+    "panelsJSON": {
+      "type": "string",
+      "description": "JSON-serialized array of dashboard panel objects. When parsed, conforms to the panelsArray schema.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/panelsArray"
+      }
+    },
+    "optionsJSON": {
+      "type": "string",
+      "description": "JSON-serialized dashboard display options. When parsed, conforms to the dashboardOptions schema.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/dashboardOptions"
+      }
+    },
+    "kibanaSavedObjectMeta": {
+      "$ref": "common.schema.json#/$defs/kibanaSavedObjectMeta"
+    },
+    "refreshInterval": {
+      "$ref": "common.schema.json#/$defs/refreshInterval"
+    },
+    "timeFrom": {
+      "type": "string",
+      "description": "Start of the saved time range (e.g. 'now-15m', absolute ISO datetime)."
+    },
+    "timeTo": {
+      "type": "string",
+      "description": "End of the saved time range (e.g. 'now', absolute ISO datetime)."
+    },
+    "timeRestore": {
+      "type": "boolean",
+      "description": "Whether to restore the saved time range when the dashboard is opened."
+    },
+    "references": {
+      "$ref": "common.schema.json#/$defs/references"
+    }
+  },
+  "required": ["title"],
+  "additionalProperties": false,
+  "$defs": {
+    "panelsArray": {
+      "type": "array",
+      "description": "Array of panel objects representing embeddables on the dashboard.",
+      "items": {
+        "$ref": "#/$defs/panel"
+      }
+    },
+    "panel": {
+      "type": "object",
+      "description": "A single panel on the dashboard, representing an embeddable visualization, search, or other content.",
+      "properties": {
+        "panelIndex": {
+          "type": "string",
+          "description": "Unique identifier for this panel within the dashboard. Must match gridData.i."
+        },
+        "type": {
+          "type": "string",
+          "description": "The embeddable type identifier (e.g. 'visualization', 'search', 'lens', 'map')."
+        },
+        "id": {
+          "type": "string",
+          "description": "Saved object ID of the backing saved object. Optional for by-value embeddables."
+        },
+        "gridData": {
+          "$ref": "common.schema.json#/$defs/gridData"
+        },
+        "embeddableConfig": {
+          "type": "object",
+          "description": "Configuration object passed directly to the embeddable. Schema depends on the panel type.",
+          "additionalProperties": true
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of OpenSearch Dashboards that created this panel."
+        },
+        "title": {
+          "type": "string",
+          "description": "Custom title override for the panel. If omitted, the embeddable's own title is used."
+        },
+        "panelRefName": {
+          "type": "string",
+          "description": "Reference name linking this panel to an entry in the top-level references array."
+        }
+      },
+      "required": ["panelIndex", "type", "gridData"],
+      "additionalProperties": false
+    },
+    "dashboardOptions": {
+      "type": "object",
+      "description": "Display and layout options for the dashboard.",
+      "properties": {
+        "useMargins": {
+          "type": "boolean",
+          "description": "Whether to display margins between panels.",
+          "default": true
+        },
+        "hidePanelTitles": {
+          "type": "boolean",
+          "description": "Whether to hide all panel titles on the dashboard.",
+          "default": false
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
