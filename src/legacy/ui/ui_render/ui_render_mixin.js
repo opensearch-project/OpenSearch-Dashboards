@@ -187,7 +187,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
       return h
         .response(body)
-        .header('cache-control', 'must-revalidate')
+        .header('cache-control', 'no-cache')
         .header('content-type', 'application/javascript')
         .etag(etag);
     },
@@ -287,7 +287,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
       return h
         .response(body)
-        .header('cache-control', 'must-revalidate')
+        .header('cache-control', 'no-cache')
         .header('content-type', 'application/javascript')
         .etag(etag);
     },
