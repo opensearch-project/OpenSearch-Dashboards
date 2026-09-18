@@ -30,6 +30,7 @@ export { default as EventBridgeIcon } from './eventbridge.svg';
 export { default as FargateIcon } from './fargate.svg';
 export { default as GlacierIcon } from './glacier.svg';
 export { default as K8sIcon } from './k8s.svg';
+export { default as KafkaIcon } from './kafka.svg';
 export { default as KinesisFirehoseIcon } from './kinesisfirehose.svg';
 export { default as KinesisIcon } from './kinesis.svg';
 export { default as KmsIcon } from './kms.svg';
