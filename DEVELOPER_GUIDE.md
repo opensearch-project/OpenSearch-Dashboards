@@ -74,7 +74,7 @@ The project uses multiple files to manage the Node.js version for different purp
 
 | File | Format | Purpose | When to update |
 |------|--------|---------|----------------|
-| `.node-version` | Exact version (e.g. `22.23.0`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
+| `.node-version` | Exact version (e.g. `22.23.2`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
 | `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
 | `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
 
