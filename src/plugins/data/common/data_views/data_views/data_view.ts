@@ -201,6 +201,8 @@ export class DataView extends IndexPattern implements IDataView {
       title: this.title,
       type: datasetType,
       timeFieldName: this.timeFieldName,
+      // signalType (traces/metrics/logs) drives flavor routing in consumers like Explore.
+      signalType: this.signalType,
       displayName: this.displayName,
       description: this.description,
       schemaMappings: this.schemaMappings,
