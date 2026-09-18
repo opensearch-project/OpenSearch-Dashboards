@@ -19,7 +19,6 @@ import { of } from 'rxjs';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
-    showTitle: true,
     title: '',
     fontSize: 60,
     useColor: false,
@@ -205,7 +204,6 @@ describe('redux_persistence', () => {
           logs: {},
           visualizations: {
             styleOptions: {
-              showTitle: true,
               title: '',
               fontSize: 60,
               useColor: false,
@@ -408,7 +406,6 @@ describe('redux_persistence', () => {
           logs: {},
           visualizations: {
             styleOptions: {
-              showTitle: true,
               title: '',
               fontSize: 60,
               useColor: false,
@@ -453,7 +450,6 @@ describe('redux_persistence', () => {
           logs: {},
           visualizations: {
             styleOptions: {
-              showTitle: true,
               title: '',
               fontSize: 60,
               useColor: false,
