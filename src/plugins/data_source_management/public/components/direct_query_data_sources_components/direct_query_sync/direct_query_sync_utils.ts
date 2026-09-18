@@ -94,7 +94,11 @@ export async function fetchDirectQuerySyncInfo({
           'index-pattern',
           selectedIndexPatternId
         );
-        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        // Match by reference name as well as type, tolerating datasets whose reference `type`
+        // was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+        const dataSourceRef = indexPattern.references.find(
+          (ref) => ref.name === 'dataSource' || ref.type === 'data-source'
+        );
         localMdsId = dataSourceRef?.id;
         indexTitle = indexPattern.attributes.title || null;
       }

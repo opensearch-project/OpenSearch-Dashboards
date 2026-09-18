@@ -147,7 +147,11 @@ export class CorrelationService {
 
       // Extract datasource information from the log dataset's references if it exists
       if (indexPattern.references && indexPattern.references.length > 0) {
-        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        // Match by reference name as well as type, tolerating datasets whose reference `type`
+        // was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+        const dataSourceRef = indexPattern.references.find(
+          (ref) => ref.name === 'dataSource' || ref.type === 'data-source'
+        );
         if (dataSourceRef) {
           try {
             // Fetch the actual data source details

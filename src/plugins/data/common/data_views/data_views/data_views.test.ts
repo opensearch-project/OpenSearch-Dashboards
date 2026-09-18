@@ -671,7 +671,9 @@ describe('DataViews', () => {
       expect(dataset.dataSource).toEqual({
         id: 'ds-1',
         title: 'dataSource',
-        type: 'data-source',
+        // The reference type is the registered SO type 'data-source', not an engine type, so the
+        // fetch-failure fallback must not echo it as the engine type — it defaults to OpenSearch.
+        type: 'OpenSearch',
         version: '',
       });
     });

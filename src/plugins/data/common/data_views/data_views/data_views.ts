@@ -691,6 +691,18 @@ export class DataViewsService {
           err.body?.message?.includes('document already exists') ||
           err.body?.message?.includes('version conflict'))
       ) {
+        // If a concurrent create won the race, honor reuseExisting by returning the now-existing
+        // view instead of throwing (mirrors the findByTitle pre-check reuse path).
+        if (reuseExisting) {
+          const existing = await findByTitle(
+            this.savedObjectsClient,
+            dataView.title,
+            dataView.dataSourceRef?.id
+          );
+          if (existing) {
+            return this.get(existing.id);
+          }
+        }
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
       throw err;
@@ -854,7 +866,13 @@ export class DataViewsService {
       return {
         id: dataSourceRef.id,
         title: dataSourceRef.name || dataSourceRef.id,
-        type: dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        // dataSourceRef.type may be the registered saved-object type ('data-source') rather than
+        // an engine type, so only use it as the engine type when it isn't that SO type; otherwise
+        // default to OpenSearch (the real engine type comes from the data-source SO on success).
+        type:
+          dataSourceRef.type && dataSourceRef.type !== 'data-source'
+            ? dataSourceRef.type
+            : DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
         version: dataSourceRef.version || '',
       };
     }
