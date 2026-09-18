@@ -45,6 +45,7 @@ export enum AuthType {
   NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
   SigV4 = 'sigv4',
+  JWT = 'jwt',
 }
 
 // src/plugins/workspace/public/utils.ts Workspace plugin depends on this to do use case limitation.

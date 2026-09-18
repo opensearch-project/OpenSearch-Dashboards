@@ -11,6 +11,7 @@ import {
   mockManagementPlugin,
   existingDatasourceNamesList,
   mockDataSourceAttributesWithNoAuth,
+  mockDataSourceAttributesWithJwtAuth,
   mockDataSourceAttributesWithRegisteredAuth,
   mockDataSourceAttributesWithSigV4Auth,
 } from '../../../../mocks';
@@ -19,6 +20,7 @@ import { EditDataSourceForm } from './edit_data_source_form';
 import { act } from 'react';
 import {
   AuthType,
+  jwtAuthMethod,
   noAuthCredentialAuthMethod,
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
@@ -575,6 +577,76 @@ describe('Datasource Management: Edit Datasource Form', () => {
           resolve();
         }, 100)
       );
+    });
+  });
+
+  describe('Case 3b: With JWT', () => {
+    const jwtContext = mockManagementPlugin.createDataSourceManagementContext();
+    jwtContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    jwtContext.authenticationMethodRegistry.registerAuthenticationMethod(jwtAuthMethod);
+    jwtContext.authenticationMethodRegistry.registerAuthenticationMethod(
+      usernamePasswordAuthMethod
+    );
+
+    beforeEach(async () => {
+      mockFn.mockClear();
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithJwtAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleSubmit={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+            />
+          ),
+          {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: jwtContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
+      component.update();
+    });
+
+    test('should render the JWT description instead of any credential fields', () => {
+      expect(component.find(authTypeSelectIdentifier).first().prop('valueOfSelected')).toBe(
+        AuthType.JWT
+      );
+      expect(component.find('JwtAuthDescription').exists()).toBe(true);
+      expect(component.find(usernameFormRowIdentifier).exists()).toBe(false);
+      expect(component.find(passwordFieldIdentifier).exists()).toBe(false);
+    });
+
+    test('should test connection without any credentials', () => {
+      // @ts-ignore
+      component.find('Header').first().prop('onClickTestConnection')();
+      component.update();
+
+      expect(mockFn).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          auth: { type: AuthType.JWT, credentials: undefined },
+        })
+      );
+    });
+
+    test("should show username & password fields when switching to 'Username & Password'", () => {
+      setAuthTypeValue(authTypeSelectIdentifier, AuthType.UsernamePasswordType);
+      component.update();
+
+      expect(component.find('JwtAuthDescription').exists()).toBe(false);
+      expect(component.find(usernameFormRowIdentifier).exists()).toBe(true);
+      expect(component.find(passwordFieldIdentifier).exists()).toBe(true);
     });
   });
 

@@ -28,6 +28,7 @@ import {
   getDataSourceInternal,
   getAuthenticationMethod,
   generateCacheKey,
+  getJwtAuthorizationHeader,
 } from './configure_client_utils';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
 
@@ -208,6 +209,25 @@ const getQueryClient = async (
       addClientToPool(cacheKey, type, rootClient);
 
       return getAWSChildClient(rootClient, credential);
+
+    case AuthType.JWT:
+      if (!config.authTypes.JWT.enabled) {
+        throw Error(
+          `Auth type '${AuthType.JWT}' is disabled. Set 'data_source.authTypes.JWT.enabled: true' to use it.`
+        );
+      }
+
+      // Read the token before pooling the root client so a token-less request fails
+      // without leaving an unused client in the pool.
+      const authorization = getJwtAuthorizationHeader(request);
+
+      // The root client carries no credentials (as for NoAuth) and is pooled by endpoint
+      // only, so it is safely shared across users. The per-user token is applied on the
+      // child client below and must never be baked into the pooled root.
+      if (!rootClient) rootClient = new Client(clientOptions);
+      addClientToPool(cacheKey, type, rootClient);
+
+      return rootClient.child({ headers: { authorization } });
 
     default:
       throw Error(`${type} is not a supported auth type for data source`);

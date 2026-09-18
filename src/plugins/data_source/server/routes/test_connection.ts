@@ -64,14 +64,19 @@ export const registerTestConnectionRoute = async (
                   }),
                 }),
                 schema.object({
+                  type: schema.literal(AuthType.JWT),
+                  credentials: schema.nullable(schema.any()),
+                }),
+                schema.object({
                   type: schema.string({
                     validate: (value) => {
                       if (
                         value === AuthType.NoAuth ||
                         value === AuthType.UsernamePasswordType ||
-                        value === AuthType.SigV4
+                        value === AuthType.SigV4 ||
+                        value === AuthType.JWT
                       ) {
-                        return `Must not be no_auth or username_password or sigv4 for registered auth types`;
+                        return `Must not be no_auth or username_password or sigv4 or jwt for registered auth types`;
                       }
                     },
                   }),

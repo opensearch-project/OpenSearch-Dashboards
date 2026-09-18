@@ -9,6 +9,7 @@ export interface DataSourcePluginSetup {
   noAuthenticationTypeEnabled: boolean;
   usernamePasswordAuthEnabled: boolean;
   awsSigV4AuthEnabled: boolean;
+  jwtAuthEnabled: boolean;
 }
 
 export interface DataSourcePluginStart {
@@ -17,4 +18,5 @@ export interface DataSourcePluginStart {
   noAuthenticationTypeEnabled: boolean;
   usernamePasswordAuthEnabled: boolean;
   awsSigV4AuthEnabled: boolean;
+  jwtAuthEnabled: boolean;
 }
