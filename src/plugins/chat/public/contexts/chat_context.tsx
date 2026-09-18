@@ -35,7 +35,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   return (
     <ChatContext.Provider
-      value={{ chatService, suggestedActionsService, confirmationService, humanInputService }}
+      value={{
+        chatService,
+        suggestedActionsService,
+        confirmationService,
+        humanInputService,
+      }}
     >
       {children}
     </ChatContext.Provider>

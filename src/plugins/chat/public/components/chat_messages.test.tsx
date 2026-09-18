@@ -3,13 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, act } from '@testing-library/react';
+import { render, act, waitFor, fireEvent } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
 import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import { convertTimelineToMessageRows } from './chat_messages';
-import { AssistantActionService, ToolCallState } from '../../../context_provider/public';
+import {
+  AssistantActionService,
+  AssistantContextOptions,
+  ToolCallState,
+} from '../../../context_provider/public';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useChatContext } from '../contexts/chat_context';
+import { StarterSuggestionsService } from '../../../starter_suggestions/public';
+
+jest.mock('../../../opensearch_dashboards_react/public', () => ({
+  ...jest.requireActual('../../../opensearch_dashboards_react/public'),
+  useOpenSearchDashboards: jest.fn(),
+}));
+
+jest.mock('../contexts/chat_context', () => ({
+  ...jest.requireActual('../contexts/chat_context'),
+  useChatContext: jest.fn(),
+}));
+
+const useOpenSearchDashboardsMock = useOpenSearchDashboards as jest.Mock;
+const useChatContextMock = useChatContext as jest.Mock;
 
 // Mock the child components
 jest.mock('./message_row', () => ({
@@ -36,7 +57,14 @@ jest.mock('./chat_suggestions', () => ({
 Element.prototype.scrollIntoView = jest.fn();
 
 describe('ChatMessages', () => {
-  const defaultProps = {
+  let starterSuggestionsService: StarterSuggestionsService;
+  let agentVisibleContexts: AssistantContextOptions[];
+  let notifyContextStore: () => void;
+  let subscribeToContextStore: jest.Mock;
+  let currentAppId$: BehaviorSubject<string | undefined>;
+  let getCurrentDataSourceId: jest.Mock;
+
+  const defaultProps: React.ComponentProps<typeof ChatMessages> = {
     layoutMode: ChatLayoutMode.SIDECAR,
     timeline: [] as Message[],
     isStreaming: false,
@@ -47,6 +75,35 @@ describe('ChatMessages', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    starterSuggestionsService = new StarterSuggestionsService();
+    agentVisibleContexts = [];
+    notifyContextStore = () => {};
+    currentAppId$ = new BehaviorSubject<string | undefined>('explore');
+    getCurrentDataSourceId = jest.fn().mockResolvedValue('ds-1');
+
+    subscribeToContextStore = jest.fn((callback: () => void) => {
+      notifyContextStore = callback;
+      return () => {
+        notifyContextStore = () => {};
+      };
+    });
+    const contextStore = { subscribe: subscribeToContextStore };
+
+    useChatContextMock.mockReturnValue({
+      chatService: {
+        getAgentVisibleContexts: () => agentVisibleContexts,
+        getCurrentDataSourceId,
+      },
+    });
+
+    useOpenSearchDashboardsMock.mockReturnValue({
+      services: {
+        core: { application: { currentAppId$ } },
+        contextProvider: { getAssistantContextStore: () => contextStore },
+        starterSuggestions: starterSuggestionsService,
+      },
+    });
   });
 
   describe('rendering', () => {
@@ -167,6 +224,480 @@ describe('ChatMessages', () => {
       // RecentSessions should render with required props
       expect(await findByText('RECENT')).toBeTruthy();
       expect(await findByText('Test conversation')).toBeTruthy();
+    });
+  });
+
+  describe('page-aware starter suggestions', () => {
+    const PROVIDER_CARD_TEXT = 'Summarize this dashboard';
+
+    const registerProvider = (getSuggestions: jest.Mock, appId: string | string[] = 'explore') =>
+      starterSuggestionsService.registerProvider({ id: 'test', appId, getSuggestions });
+
+    it('keeps the defaults when no provider is registered for the app', async () => {
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() => expect(getByText('Ask questions about your data')).toBeTruthy());
+      expect(getByText('Explain a concept')).toBeTruthy();
+    });
+
+    it('does not watch the context store on an app with no provider', async () => {
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() => expect(getByText('Ask questions about your data')).toBeTruthy());
+      expect(subscribeToContextStore).not.toHaveBeenCalled();
+    });
+
+    it('watches the context store once an app has a provider', async () => {
+      registerProvider(jest.fn().mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]));
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      expect(subscribeToContextStore).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the defaults when a provider is registered for a different app', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions, 'dashboards');
+
+      const { getByText, queryByText } = render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() => expect(getByText('Ask questions about your data')).toBeTruthy());
+      expect(queryByText(PROVIDER_CARD_TEXT)).toBeNull();
+      expect(getSuggestions).not.toHaveBeenCalled();
+    });
+
+    it('swaps the defaults out for the cards the provider returns', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const { findByText, queryByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      expect(queryByText('Ask questions about your data')).toBeNull();
+    });
+
+    it("marks the built-in cards with the app id and a 'default' provider segment", async () => {
+      const { getByTestId } = render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() =>
+        expect(getByTestId('chatbotStarterSuggestion-explore-default-askData')).toHaveTextContent(
+          'Ask questions about your data'
+        )
+      );
+      // 'explain' sits at index 1 or 2 depending on whether the tool-gated
+      // /investigate card is present; the subj must not move with it.
+      expect(getByTestId('chatbotStarterSuggestion-explore-default-explain')).toHaveTextContent(
+        'Explain a concept'
+      );
+    });
+
+    it('names the answering provider in the card test subj', async () => {
+      const getSuggestions = jest.fn().mockReturnValue([
+        { id: 'fixQueryError', icon: 'alert', text: 'Fix this query error' },
+        { id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT },
+      ]);
+      starterSuggestionsService.registerProvider({
+        id: 'explore',
+        appId: 'explore',
+        getSuggestions,
+      });
+
+      const { findByTestId, getByTestId, queryByTestId } = render(
+        <ChatMessages {...defaultProps} />
+      );
+
+      expect(
+        await findByTestId('chatbotStarterSuggestion-explore-explore-fixQueryError')
+      ).toHaveTextContent('Fix this query error');
+      expect(
+        getByTestId('chatbotStarterSuggestion-explore-explore-summarizeResults')
+      ).toHaveTextContent(PROVIDER_CARD_TEXT);
+      expect(queryByTestId('chatbotStarterSuggestion-explore-default-askData')).toBeNull();
+    });
+
+    it('labels a card with the appId it was fetched for, not the live one', async () => {
+      // The provider answers for 'explore'; the service echoes that appId back,
+      // so the subj cannot pair a newer app id with this provider's cards.
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      starterSuggestionsService.registerProvider({
+        id: 'explore',
+        appId: 'explore',
+        getSuggestions,
+      });
+
+      const { findByTestId } = render(<ChatMessages {...defaultProps} />);
+
+      expect(
+        await findByTestId('chatbotStarterSuggestion-explore-explore-summarizeResults')
+      ).toHaveTextContent(PROVIDER_CARD_TEXT);
+    });
+
+    it('does not call the provider once the conversation has messages', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const timeline: Message[] = [{ id: 'u1', role: 'user', content: 'hi' }];
+      const { queryByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      await waitFor(() => expect(queryByText('Ask questions about your data')).toBeNull());
+      expect(getSuggestions).not.toHaveBeenCalled();
+    });
+
+    it('does not call the provider while a response is streaming', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      render(<ChatMessages {...defaultProps} isStreaming={true} />);
+
+      await waitFor(() => expect(getSuggestions).not.toHaveBeenCalled());
+    });
+
+    it('calls the provider again when the screen goes back to empty', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const timeline: Message[] = [{ id: 'u1', role: 'user', content: 'hi' }];
+      const { rerender, findByText } = render(
+        <ChatMessages {...defaultProps} timeline={timeline} />
+      );
+      expect(getSuggestions).not.toHaveBeenCalled();
+
+      rerender(<ChatMessages {...defaultProps} timeline={[]} />);
+
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      expect(getSuggestions).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores an invalidate raised while the conversation has messages', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ id: 'summarizeResults', icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      const registration = registerProvider(getSuggestions);
+
+      const timeline: Message[] = [{ id: 'u1', role: 'user', content: 'hi' }];
+      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      registration.invalidate();
+
+      await waitFor(() => expect(getSuggestions).not.toHaveBeenCalled());
+    });
+
+    it('falls back to the card position when a provider card has no id', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const { findByTestId } = render(<ChatMessages {...defaultProps} />);
+
+      expect(await findByTestId('chatbotStarterSuggestion-explore-test-0')).toHaveTextContent(
+        PROVIDER_CARD_TEXT
+      );
+    });
+
+    it('hands the provider the current appId, pathname, contexts and defaults', async () => {
+      agentVisibleContexts = [{ description: 'Page', value: { appId: 'explore' }, label: 'Page' }];
+      const getSuggestions = jest.fn().mockReturnValue([]);
+      registerProvider(getSuggestions);
+
+      render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() => expect(getSuggestions).toHaveBeenCalled());
+      expect(getSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          appId: 'explore',
+          pathname: window.location.pathname,
+          contexts: agentVisibleContexts,
+          defaults: expect.arrayContaining([
+            expect.objectContaining({ text: 'Ask questions about your data' }),
+          ]),
+        })
+      );
+    });
+
+    it('does not re-query the provider when an unrelated tool registers', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+      const service = AssistantActionService.getInstance();
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      getSuggestions.mockClear();
+
+      act(() => {
+        service.registerAction({
+          name: 'unrelated_tool',
+          description: 'Not gating any built-in card',
+          parameters: { type: 'object', properties: {}, required: [] },
+          handler: async () => ({}),
+        });
+      });
+
+      await waitFor(() => expect(getSuggestions).not.toHaveBeenCalled());
+      service.unregisterAction('unrelated_tool');
+    });
+
+    it('wires getDataSourceId through to the chat service, resolved lazily', async () => {
+      const getSuggestions = jest.fn().mockReturnValue([]);
+      registerProvider(getSuggestions);
+
+      render(<ChatMessages {...defaultProps} />);
+      await waitFor(() => expect(getSuggestions).toHaveBeenCalled());
+
+      expect(getCurrentDataSourceId).not.toHaveBeenCalled();
+      const { getDataSourceId } = getSuggestions.mock.calls[0][0];
+      await expect(getDataSourceId()).resolves.toBe('ds-1');
+      expect(getCurrentDataSourceId).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps showing the defaults when the provider fails', async () => {
+      const getSuggestions = jest.fn().mockRejectedValue(new Error('provider blew up'));
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      registerProvider(getSuggestions);
+
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      await waitFor(() => expect(getSuggestions).toHaveBeenCalled());
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+    });
+
+    it('recomputes when the provider calls invalidate()', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValueOnce([{ icon: 'help', text: 'First render' }])
+        .mockReturnValue([{ icon: 'help', text: 'After invalidate' }]);
+      const registration = registerProvider(getSuggestions);
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+      expect(await findByText('First render')).toBeTruthy();
+
+      act(() => {
+        registration.invalidate();
+      });
+
+      expect(await findByText('After invalidate')).toBeTruthy();
+    });
+
+    it('recomputes when the assistant contexts change', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValueOnce([{ icon: 'help', text: 'First render' }])
+        .mockReturnValue([{ icon: 'help', text: 'After context change' }]);
+      registerProvider(getSuggestions);
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+      expect(await findByText('First render')).toBeTruthy();
+
+      agentVisibleContexts = [
+        { description: 'Page', value: { dashboardId: 'next' }, label: 'Page' },
+      ];
+      act(() => {
+        notifyContextStore();
+      });
+
+      expect(await findByText('After context change')).toBeTruthy();
+    });
+
+    it('ignores a store notification that leaves the contexts unchanged', async () => {
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      expect(getSuggestions).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        notifyContextStore();
+      });
+
+      expect(getSuggestions).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-resolves the provider when the current app changes', async () => {
+      const exploreProvider = jest.fn().mockReturnValue([{ icon: 'help', text: 'Explore card' }]);
+      starterSuggestionsService.registerProvider({
+        id: 'explore',
+        appId: 'explore',
+        getSuggestions: exploreProvider,
+      });
+      const dashboardProvider = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: 'Dashboard card' }]);
+      starterSuggestionsService.registerProvider({
+        id: 'dashboards',
+        appId: 'dashboards',
+        getSuggestions: dashboardProvider,
+      });
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+      expect(await findByText('Explore card')).toBeTruthy();
+
+      act(() => {
+        currentAppId$.next('dashboards');
+      });
+
+      expect(await findByText('Dashboard card')).toBeTruthy();
+    });
+
+    it('lets the newest result win when an earlier async call settles last', async () => {
+      const settlers: Array<(items: Array<{ icon: string; text: string }>) => void> = [];
+      const getSuggestions = jest.fn(
+        () =>
+          new Promise<Array<{ icon: string; text: string }>>((resolve) => {
+            settlers.push(resolve);
+          })
+      );
+      const registration = registerProvider(getSuggestions as jest.Mock);
+
+      const { findByText, queryByText } = render(<ChatMessages {...defaultProps} />);
+      await waitFor(() => expect(settlers).toHaveLength(1));
+
+      act(() => {
+        registration.invalidate();
+      });
+      await waitFor(() => expect(settlers).toHaveLength(2));
+
+      await act(async () => {
+        settlers[1]([{ icon: 'help', text: 'Newest result' }]);
+      });
+      await act(async () => {
+        settlers[0]([{ icon: 'help', text: 'Stale result' }]);
+      });
+
+      expect(await findByText('Newest result')).toBeTruthy();
+      expect(queryByText('Stale result')).toBeNull();
+    });
+
+    it('still resolves the provider when the context provider is unavailable', async () => {
+      useOpenSearchDashboardsMock.mockReturnValue({
+        services: {
+          core: { application: { currentAppId$ } },
+          starterSuggestions: starterSuggestionsService,
+        },
+      });
+      const getSuggestions = jest
+        .fn()
+        .mockReturnValue([{ icon: 'help', text: PROVIDER_CARD_TEXT }]);
+      registerProvider(getSuggestions);
+
+      const { findByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(await findByText(PROVIDER_CARD_TEXT)).toBeTruthy();
+      expect(getSuggestions).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        notifyContextStore();
+      });
+      expect(getSuggestions).toHaveBeenCalledTimes(1);
+    });
+
+    describe('clicking a card', () => {
+      const PROMPT = 'Summarize this dashboard, using the attached screenshot.';
+
+      const clickCard = async (
+        card: Record<string, unknown>,
+        props: Partial<React.ComponentProps<typeof ChatMessages>>
+      ) => {
+        registerProvider(jest.fn().mockReturnValue([card]));
+        const { findByText } = render(<ChatMessages {...defaultProps} {...props} />);
+
+        fireEvent.click(await findByText(card.text as string));
+      };
+
+      it('fills the prompt and asks for a screenshot for a card that wants one', async () => {
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(true);
+      });
+
+      it('drops any attached screenshot for a card that wants none', async () => {
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          { icon: 'help', text: PROVIDER_CARD_TEXT, prompt: PROMPT },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(false);
+      });
+
+      it('still fills the prompt where this page cannot capture', async () => {
+        const onFillInput = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot: undefined }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+      });
+
+      it("runs a card's own action on top of the prompt and the attachments", async () => {
+        const action = jest.fn();
+        const onFillInput = jest.fn();
+        const onAttachScreenshot = jest.fn();
+
+        await clickCard(
+          {
+            icon: 'help',
+            text: PROVIDER_CARD_TEXT,
+            prompt: PROMPT,
+            action,
+            attach: { captureScreenshot: true },
+          },
+          { onFillInput, onAttachScreenshot }
+        );
+
+        expect(onFillInput).toHaveBeenCalledWith(PROMPT);
+        expect(onAttachScreenshot).toHaveBeenCalledWith(true);
+        expect(action).toHaveBeenCalledTimes(1);
+      });
+
+      it('runs an action-only card without touching the input', async () => {
+        const action = jest.fn();
+        const onFillInput = jest.fn();
+
+        await clickCard({ icon: 'help', text: PROVIDER_CARD_TEXT, action }, { onFillInput });
+
+        expect(action).toHaveBeenCalledTimes(1);
+        expect(onFillInput).not.toHaveBeenCalled();
+      });
     });
   });
 
