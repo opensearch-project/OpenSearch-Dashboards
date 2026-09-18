@@ -205,7 +205,7 @@ export const createScatterSeries =
           y: yField,
         },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
           scale: 1.2,
         },
         ...thresholdLines,
@@ -427,7 +427,7 @@ export const createSizeScatterSeries =
                 borderWidth: 2,
               },
           emphasis: {
-            focus: 'self',
+            focus: 'series',
             scale: 1.2,
           },
         },

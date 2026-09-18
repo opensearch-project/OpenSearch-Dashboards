@@ -99,22 +99,83 @@ describe('span_transforms', () => {
       expect(span.output).toBe('—');
     });
 
-    it('falls back through input attribute hierarchy', () => {
-      const hitWithPrompt: any = {
+    it('ignores message fields outside the current OTel GenAI schema', () => {
+      const hitWithLegacyFields: any = {
         attributes: {
-          gen_ai: { prompt: 'test prompt' },
+          'gen_ai.prompt.name': 'analyze-code',
+          'gen_ai.prompt.version': '1.0.0',
+          'gen_ai.completion': 'legacy completion',
+          'input.value': 'non-OTel input',
+          'output.value': 'non-OTel output',
         },
       };
-      const span = traceHitToAgentSpan(hitWithPrompt, 0);
-      expect(span.input).toBe('test prompt');
 
-      const hitWithInputValue: any = {
+      const span = traceHitToAgentSpan(hitWithLegacyFields, 0);
+
+      expect(span.input).toBe('—');
+      expect(span.output).toBe('—');
+    });
+
+    it('treats empty message objects from PPL responses as missing content', () => {
+      const hitWithEmptyMessages: any = {
         attributes: {
-          input: { value: 'input value' },
+          gen_ai: {
+            input: { messages: {} },
+            output: { messages: {} },
+          },
         },
       };
-      const span2 = traceHitToAgentSpan(hitWithInputValue, 0);
-      expect(span2.input).toBe('input value');
+
+      const span = traceHitToAgentSpan(hitWithEmptyMessages, 0);
+
+      expect(span.input).toBe('—');
+      expect(span.output).toBe('—');
+    });
+
+    it('preserves empty message arrays as valid structured values', () => {
+      const hitWithEmptyMessageArrays: any = {
+        attributes: {
+          gen_ai: {
+            input: { messages: [] },
+            output: { messages: [] },
+          },
+        },
+      };
+
+      const span = traceHitToAgentSpan(hitWithEmptyMessageArrays, 0);
+
+      expect(span.input).toBe('[]');
+      expect(span.output).toBe('[]');
+    });
+
+    it('serializes structured message values before rendering', () => {
+      const hitWithStructuredMessages: any = {
+        attributes: {
+          gen_ai: {
+            input: {
+              messages: [
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: 'hello' }],
+                },
+              ],
+            },
+            output: {
+              messages: [
+                {
+                  role: 'assistant',
+                  parts: [{ type: 'text', content: 'hi' }],
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const span = traceHitToAgentSpan(hitWithStructuredMessages, 0);
+
+      expect(span.input).toBe('[{"role":"user","parts":[{"type":"text","content":"hello"}]}]');
+      expect(span.output).toBe('[{"role":"assistant","parts":[{"type":"text","content":"hi"}]}]');
     });
 
     it('handles flat dotted attribute keys', () => {

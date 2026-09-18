@@ -114,7 +114,7 @@ export const createLineSeries =
         // per-column datasets are [timeField, valueColumn] and encoded by position
         encode: perSeriesDatasets ? { x: 0, y: 1 } : { x: categoryField, y: item },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         ...generateLineStyles(styles, item),
         ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
@@ -184,7 +184,7 @@ export const createLineBarSeries =
             y: field,
           },
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),
@@ -214,7 +214,7 @@ export const createLineBarSeries =
             chartType: 'bar',
           }),
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),
