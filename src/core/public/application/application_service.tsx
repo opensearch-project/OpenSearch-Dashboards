@@ -228,6 +228,21 @@ export class ApplicationService {
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
         registerStatusUpdater(allApplicationsFilter, appUpdater$),
+      createAsyncUpdater: (asyncCheck: () => Promise<boolean>): Observable<AppUpdater> => {
+        const updater$ = new BehaviorSubject<AppUpdater>(() => ({
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        }));
+        asyncCheck().then((isVisible) => {
+          if (isVisible) {
+            updater$.next(() => ({
+              status: AppStatus.accessible,
+              navLinkStatus: AppNavLinkStatus.visible,
+            }));
+          }
+        });
+        return updater$;
+      },
     };
   }
 
