@@ -148,10 +148,13 @@ export class DatasetService {
           id: dataset.id,
           type: dataset.type,
           title: dataset.title,
+          displayName: dataset.displayName,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
           fieldsLoading: asyncType,
-          signalType,
+          // Fall back to the dataset's own signalType so cache-hydrated views (e.g. the default
+          // dataset, where no signalType arg is passed) keep it instead of showing Type: N/A.
+          signalType: signalType ?? dataset.signalType,
           schemaMappings: dataset.schemaMappings,
           dataSourceRef: dataset.dataSource
             ? {
@@ -255,13 +258,16 @@ export class DatasetService {
         // Consider fetching fields after createAndSave and updating the saved object:
         //   const dataView = await createAndSave(...);
         //   if (asyncType) { await type.fetchFields(...); await dataViews.updateSavedObject(dataView); }
+        // reuseExisting=true: re-selecting a dataset that already exists (same title + data
+        // source) reuses it instead of throwing DuplicateDataViewError and dropping the selection.
         const createdDataView = await services.data?.dataViews.createAndSave(
           spec,
           undefined,
-          asyncType
+          asyncType,
+          true
         );
 
-        // Update the dataset with the new UUID generated during save
+        // Update the dataset with the id of the saved (or reused) data view.
         if (createdDataView?.id) {
           dataset.id = createdDataView.id;
         }
@@ -416,6 +422,8 @@ export class DatasetService {
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+            ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
+            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {

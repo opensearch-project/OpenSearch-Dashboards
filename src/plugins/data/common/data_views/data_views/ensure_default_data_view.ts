@@ -6,6 +6,7 @@
 import { includes } from 'lodash';
 import { DataViewsContract } from './data_views';
 import { DataViewSavedObjectsClientCommon, DataViewUiSettingsCommon } from '../types';
+import { isDataSourceReference } from '../utils';
 
 export type EnsureDefaultDataView = () => Promise<unknown | void> | undefined;
 
@@ -64,7 +65,7 @@ export const createEnsureDefaultDataView = (
             const existDataSources = datasources.map((item) => item.id);
             patterns = [];
             dataViews.forEach((item) => {
-              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const sourceRef = item.references?.find(isDataSourceReference);
               let isDataSourceReferenceValid = false;
               /**
                * The reference is valid when either:
