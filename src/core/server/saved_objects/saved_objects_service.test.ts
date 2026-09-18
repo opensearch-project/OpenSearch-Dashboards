@@ -52,6 +52,12 @@ import { NodesVersionCompatibility } from '../opensearch/version_check/ensure_op
 import { SavedObjectsRepository } from './service/lib/repository';
 import { SavedObjectRepositoryFactoryProvider } from './service/lib/scoped_client_provider';
 import { ServiceStatusLevels } from '../status';
+import {
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+  ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+  annotationReferencePreservationWrapper,
+  savedObjectAnnotationType,
+} from './annotations';
 
 jest.mock('./service/lib/repository');
 
@@ -59,7 +65,8 @@ describe('SavedObjectsService', () => {
   const createCoreContext = ({
     skipMigration = true,
     env,
-  }: { skipMigration?: boolean; env?: Env } = {}) => {
+    annotationsEnabled = false,
+  }: { skipMigration?: boolean; env?: Env; annotationsEnabled?: boolean } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
     configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
@@ -69,6 +76,7 @@ describe('SavedObjectsService', () => {
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: new ByteSizeValue(0),
         permission: { enabled: false },
+        annotations: { enabled: annotationsEnabled },
         storage: {
           backend: 'opensearch',
           sqlite: { path: ':memory:' },
@@ -140,7 +148,7 @@ describe('SavedObjectsService', () => {
 
     describe('#addClientWrapper', () => {
       it('registers the wrapper to the clientProvider', async () => {
-        const coreContext = createCoreContext();
+        const coreContext = createCoreContext({ annotationsEnabled: true });
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -152,7 +160,12 @@ describe('SavedObjectsService', () => {
 
         await soService.start(createStartDeps());
 
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(3);
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+          annotationReferencePreservationWrapper
+        );
         expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
           1,
           'A',
@@ -162,6 +175,20 @@ describe('SavedObjectsService', () => {
           2,
           'B',
           wrapperB
+        );
+      });
+
+      it('does not register the annotation wrapper when annotations are disabled', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        expect(clientProviderInstanceMock.addClientWrapperFactory).not.toHaveBeenCalledWith(
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_PRIORITY,
+          ANNOTATION_REFERENCE_PRESERVATION_WRAPPER_ID,
+          annotationReferencePreservationWrapper
         );
       });
     });
@@ -182,6 +209,44 @@ describe('SavedObjectsService', () => {
 
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+      });
+
+      it('registers the annotation saved object type when annotations are enabled', async () => {
+        const coreContext = createCoreContext({ annotationsEnabled: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setupDeps = createSetupDeps();
+        const setup = await soService.setup(setupDeps);
+
+        expect(setup.annotations.enabled).toBe(true);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(
+          savedObjectAnnotationType
+        );
+        expect(setupDeps.http.createRouter).toHaveBeenCalledWith(
+          '/internal/saved_object_annotations'
+        );
+      });
+
+      it('does not register annotation persistence when annotations are disabled', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setupDeps = createSetupDeps();
+        const setup = await soService.setup(setupDeps);
+
+        expect(setup.annotations.enabled).toBe(false);
+        expect(typeRegistryInstanceMock.registerType).not.toHaveBeenCalledWith(
+          savedObjectAnnotationType
+        );
+        expect(setupDeps.http.createRouter).not.toHaveBeenCalledWith(
+          '/internal/saved_object_annotations'
+        );
+        expect(() =>
+          setup.annotations.registerAnnotationType({
+            type: 'tag',
+            supportedObjectTypes: ['dashboard'],
+          })
+        ).toThrow(
+          'Saved object annotations are disabled. Set `savedObjects.annotations.enabled` to `true` to register annotation types.'
+        );
       });
     });
 
@@ -343,6 +408,15 @@ describe('SavedObjectsService', () => {
         });
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`registerType\` after service startup."`
+      );
+
+      expect(() => {
+        setup.annotations.registerAnnotationType({
+          type: 'tag',
+          supportedObjectTypes: ['dashboard'],
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`registerAnnotationType\` after service startup."`
       );
 
       const customRpository: SavedObjectRepositoryFactoryProvider = () =>
