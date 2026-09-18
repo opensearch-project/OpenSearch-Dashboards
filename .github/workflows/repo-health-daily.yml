@@ -1,0 +1,43 @@
+name: "Repo Health: Daily Check"
+
+on:
+  schedule:
+    # Run daily at 8:00 UTC
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      days_stale:
+        description: "Days before an issue is considered stale"
+        default: "30"
+      dry_run:
+        description: "Dry run (no labels/comments applied)"
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run health check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAYS_STALE: ${{ inputs.days_stale || '30' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          chmod +x scripts/repo_health/health_check.sh
+          bash scripts/repo_health/health_check.sh
+
+      - name: Upload stale report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stale-issues-report
+          path: tmp/stale-issues-report.md
+          retention-days: 30
