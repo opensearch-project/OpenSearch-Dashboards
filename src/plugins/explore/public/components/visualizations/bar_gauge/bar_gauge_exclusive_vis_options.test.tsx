@@ -18,12 +18,30 @@ describe('BarGaugeExclusiveVisOptions', () => {
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
     showUnfilledArea: true,
+    orientation: 'vertical',
   };
 
   const mockOnChange = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should call onChange when orientation is changed', () => {
+    const { getByText } = render(
+      <BarGaugeExclusiveVisOptions
+        styles={defaultStyles}
+        onChange={mockOnChange}
+        isXaxisNumerical={false}
+      />
+    );
+
+    fireEvent.click(getByText('Horizontal'));
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      ...defaultStyles,
+      orientation: 'horizontal',
+    });
   });
 
   it('should call onChange when display style is changed', () => {
