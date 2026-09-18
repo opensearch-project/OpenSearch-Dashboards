@@ -109,6 +109,11 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               format: schema.string(),
               profile: schema.maybe(schema.boolean()),
               partial_result: schema.maybe(schema.boolean()),
+              // Bounds of the time filter already present in the query text, forwarded so the
+              // engine can skip indices that cannot hold data in the range.
+              time_field: schema.maybe(schema.string()),
+              start_time: schema.maybe(schema.string()),
+              end_time: schema.maybe(schema.string()),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             pollQueryResultsParams: schema.maybe(
