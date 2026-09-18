@@ -64,6 +64,7 @@ import {
   OpenSearchDashboards,
 } from './types';
 import { PPLQueryParser } from './ppl_parser';
+import { PromQLQueryParser } from './promql_parser';
 import { validateVegaExpression } from './vega_validation';
 
 // Set default single color to match other OpenSearch Dashboards visualizations
@@ -686,6 +687,12 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
         ppl: new PPLQueryParser(this.timeCache, this.searchAPI),
+        prometheus: new PromQLQueryParser(
+          this.timeCache,
+          this.searchAPI.http,
+          onWarn,
+          this.searchAPI.abortSignal
+        ),
       };
     }
     const pending: PendingType = {};

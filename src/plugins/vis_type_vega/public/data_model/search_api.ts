@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
+import { CoreSetup, CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import {
@@ -63,14 +63,19 @@ export interface SearchAPIDependencies {
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
   savedObjectsClient: SavedObjectsClientContract;
+  http: CoreSetup['http'];
 }
 
 export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
-    private readonly abortSignal?: AbortSignal,
+    public readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
+
+  public get http(): CoreSetup['http'] {
+    return this.dependencies.http;
+  }
 
   async search(searchRequests: SearchRequest[], options?: { strategy?: string }) {
     const { search } = this.dependencies.search;

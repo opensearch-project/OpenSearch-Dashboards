@@ -216,6 +216,14 @@ export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
 export type PPLQueryRequest = Requests;
+export interface PromQLQueryRequest {
+  dataObject: Data;
+  url: UrlObject;
+  datasource: string;
+  useContext: boolean;
+  maxDataPoints?: number;
+  step?: number;
+}
 
 export interface ContextVarsObject {
   [index: string]: any;
