@@ -578,18 +578,15 @@ describe('indexPatternTypeConfig', () => {
 
       expect(result.children).toHaveLength(3);
 
-      // Traditional method
-      expect(result.children![0].parent).toEqual({
-        id: 'datasource-1',
-        title: 'Data Source 1',
-        type: 'OpenSearch',
-        meta: {
-          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-          dataSourceVersion: undefined,
-        },
-      });
+      // Results are sorted alphabetically by title:
+      // local-only, namespaced-pattern, traditional-pattern
+
+      // No data source
+      expect(result.children![0].title).toEqual('local-only');
+      expect(result.children![0].parent).toBeUndefined();
 
       // Namespaced method
+      expect(result.children![1].title).toEqual('namespaced-pattern');
       expect(result.children![1].parent).toEqual({
         id: 'datasource-2',
         title: 'Data Source 2',
@@ -600,8 +597,83 @@ describe('indexPatternTypeConfig', () => {
         },
       });
 
-      // No data source
-      expect(result.children![2].parent).toBeUndefined();
+      // Traditional method
+      expect(result.children![2].title).toEqual('traditional-pattern');
+      expect(result.children![2].parent).toEqual({
+        id: 'datasource-1',
+        title: 'Data Source 1',
+        type: 'OpenSearch',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          dataSourceVersion: undefined,
+        },
+      });
+    });
+
+    test('should sort index patterns alphabetically by title regardless of fetch order', async () => {
+      const client = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'pattern-zebra',
+              type: 'index-pattern',
+              attributes: { title: 'Zebra-pattern' },
+              references: [],
+            },
+            {
+              id: 'pattern-apple',
+              type: 'index-pattern',
+              attributes: { title: 'apple-pattern' },
+              references: [],
+            },
+            {
+              id: 'pattern-mango',
+              type: 'index-pattern',
+              attributes: { title: 'mango-pattern' },
+              references: [],
+            },
+          ],
+        }),
+        bulkGet: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      } as unknown as SavedObjectsClientContract;
+
+      // @ts-expect-error - Partial mock for testing
+      const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
+
+      expect(result.children!.map((child) => child.title)).toEqual([
+        'apple-pattern',
+        'mango-pattern',
+        'Zebra-pattern',
+      ]);
+    });
+
+    test('should sort by displayName rather than title when a displayName is set', async () => {
+      const client = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'pattern-1',
+              type: 'index-pattern',
+              // title alone would sort this first, but its displayName sorts it last
+              attributes: { title: 'aaa-title', displayName: 'Zebra Display Name' },
+              references: [],
+            },
+            {
+              id: 'pattern-2',
+              type: 'index-pattern',
+              // title alone would sort this last, but its displayName sorts it first
+              attributes: { title: 'zzz-title', displayName: 'Apple Display Name' },
+              references: [],
+            },
+          ],
+        }),
+        bulkGet: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      } as unknown as SavedObjectsClientContract;
+
+      // @ts-expect-error - Partial mock for testing
+      const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
+
+      expect(result.children!.map((child) => child.id)).toEqual(['pattern-2', 'pattern-1']);
     });
   });
 });

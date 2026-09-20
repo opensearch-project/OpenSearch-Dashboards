@@ -539,6 +539,13 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
       );
 
+      // Sort alphabetically by display label, matching the label shown in the selector
+      deduplicatedDatasets.sort((a, b) =>
+        (a.displayName || a.title).localeCompare(b.displayName || b.title, undefined, {
+          sensitivity: 'base',
+        })
+      );
+
       // Read the default dataset id from settings rather than building a full DataView just to
       // read its id. A stale id simply means no "Default" badge and the first-available fallback,
       // which is the same behavior the previous getDefault() failure path had.

@@ -304,6 +304,11 @@ export class DatasetService {
     }
 
     const fetchedDataStructure = await type.fetch(services, path, options);
+    // Sort children alphabetically so every dataset type presents options in a
+    // predictable order
+    fetchedDataStructure.children?.sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+    );
     if (type.meta.cacheOptions) {
       this.cacheDataStructure(dataType, fetchedDataStructure);
     }
