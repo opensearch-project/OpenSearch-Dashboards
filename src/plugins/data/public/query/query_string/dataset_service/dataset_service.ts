@@ -12,6 +12,7 @@ import {
   Dataset,
   DataStorage,
   DataStructure,
+  DataStructureCustomMeta,
   DEFAULT_DATA,
   IndexPatternFieldMap,
   IndexPatternSpec,
@@ -304,11 +305,13 @@ export class DatasetService {
     }
 
     const fetchedDataStructure = await type.fetch(services, path, options);
-    // Sort children alphabetically so every dataset type presents options in a
-    // predictable order
-    fetchedDataStructure.children?.sort((a, b) =>
-      a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
-    );
+    // Sort children alphabetically by their displayed label (falling back to title) so every
+    // dataset type presents options in a predictable order that matches what's rendered
+    fetchedDataStructure.children?.sort((a, b) => {
+      const aLabel = (a.meta as DataStructureCustomMeta)?.displayName || a.title;
+      const bLabel = (b.meta as DataStructureCustomMeta)?.displayName || b.title;
+      return aLabel.localeCompare(bLabel, undefined, { sensitivity: 'base' });
+    });
     if (type.meta.cacheOptions) {
       this.cacheDataStructure(dataType, fetchedDataStructure);
     }

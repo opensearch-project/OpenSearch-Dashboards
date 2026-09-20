@@ -83,6 +83,31 @@ describe('DataSetTable', () => {
     expect(screen.getByText('Load more')).toBeInTheDocument();
   });
 
+  it('renders a child using its displayName when set, falling back to title when absent', () => {
+    const pathWithDisplayName: DataStructure[] = [
+      ...mockPath.slice(0, 2),
+      {
+        ...mockPath[2],
+        children: [
+          {
+            id: 'child1',
+            title: 'raw-title',
+            description: 'Description 1',
+            type: 'index',
+            meta: { displayName: 'Friendly Name' },
+          },
+          { id: 'child2', title: 'Child 2', description: 'Description 2', type: 'index' },
+        ],
+      },
+    ];
+
+    renderWithIntl(<DatasetTable {...mockProps} path={pathWithDisplayName} />);
+
+    expect(screen.getByText('Friendly Name')).toBeInTheDocument();
+    expect(screen.queryByText('raw-title')).not.toBeInTheDocument();
+    expect(screen.getByText('Child 2')).toBeInTheDocument();
+  });
+
   it('calls selectDataStructure when an index is selected', async () => {
     renderWithIntl(<DatasetTable {...mockProps} />);
 

@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useRef, useState } from 'react';
 import { IDataPluginServices } from '../..';
-import { DataStructureCreatorProps, DataStructure } from '../../../common';
+import { DataStructureCreatorProps, DataStructure, DataStructureCustomMeta } from '../../../common';
 import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
 import { getQueryService } from '../../services';
 
@@ -82,10 +82,11 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
             name: 'Name',
             textOnly: true,
             render: (title: string, item: DataStructure) => {
+              const displayLabel = (item.meta as DataStructureCustomMeta)?.displayName || title;
               return (
                 <>
                   <EuiText size="s" className="datasetTable__itemTitle">
-                    {title}
+                    {displayLabel}
                   </EuiText>
                   {item.description && (
                     <EuiText size="xs" className="eui-textTruncate">

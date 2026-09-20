@@ -261,14 +261,18 @@ export const DatasetExplorer = ({
                   />
                 ) : (
                   <EuiSelectable
-                    options={(current.children || []).map((child) => ({
-                      label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
-                      value: child.id,
-                      prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
-                        child.meta?.icon && <EuiIcon {...child.meta.icon} />,
-                      append: appendIcon(child),
-                      checked: isChecked(child, index, path, explorerDataset),
-                    }))}
+                    options={(current.children || []).map((child) => {
+                      const childLabel =
+                        (child.meta as DataStructureCustomMeta)?.displayName || child.title;
+                      return {
+                        label: child.parent ? `${child.parent.title}::${childLabel}` : childLabel,
+                        value: child.id,
+                        prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
+                          child.meta?.icon && <EuiIcon {...child.meta.icon} />,
+                        append: appendIcon(child),
+                        checked: isChecked(child, index, path, explorerDataset),
+                      };
+                    })}
                     onChange={(options) => {
                       const selected = options.find((option) => option.checked);
                       if (selected) {

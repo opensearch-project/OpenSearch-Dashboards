@@ -110,6 +110,38 @@ describe('DatasetService', () => {
     expect(result.children?.map((child) => child.title)).toEqual(['apple', 'mango', 'Zebra']);
   });
 
+  test('fetchOptions sorts children by displayName when present, falling back to title', async () => {
+    const unsortedType = {
+      ...mockType,
+      fetch: jest.fn().mockResolvedValue({
+        id: 'test-structure',
+        title: 'Test Structure',
+        type: 'test-type',
+        children: [
+          // title alone would sort this first, but its displayName sorts it last
+          {
+            id: 'child-1',
+            title: 'aaa-title',
+            type: 'test-type',
+            meta: { displayName: 'Zebra Label' },
+          },
+          // title alone would sort this last, but its displayName sorts it first
+          {
+            id: 'child-2',
+            title: 'zzz-title',
+            type: 'test-type',
+            meta: { displayName: 'Apple Label' },
+          },
+        ],
+      }),
+    };
+    service.registerType(unsortedType);
+
+    const result = await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
+
+    expect(result.children?.map((child) => child.id)).toEqual(['child-2', 'child-1']);
+  });
+
   test('fetchOptions respects cacheOptions', async () => {
     const mockDataStructure = {
       id: 'root',
