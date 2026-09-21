@@ -86,6 +86,8 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { SourceTypeRegistryService, setSourceTypeRegistry } from './services/source_type_registry';
+import { abortAllStreamingQueries } from './application/utils/streaming/streaming_abort_registry';
+import { releaseInFlightJobs } from './application/utils/streaming/release_jobs_on_unload';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
@@ -481,8 +483,23 @@ export class ExplorePlugin implements Plugin<
           // Call renderApp with params, services, and store
           const unmount = renderApp(params, services, store, flavor);
 
+          // Closing the tab destroys the only holder of the streaming job ids, so release them while
+          // the store still exists. `pagehide` rather than `beforeunload`: it fires for cases
+          // `beforeunload` misses, and does not risk blocking navigation.
+          const releaseStreamingJobs = () =>
+            releaseInFlightJobs({
+              state: store.getState(),
+              prependBasePath: (jobPath) => core.http.basePath.prepend(jobPath),
+            });
+          window.addEventListener('pagehide', releaseStreamingJobs);
+
           return () => {
+            window.removeEventListener('pagehide', releaseStreamingJobs);
             abortAllActiveQueries();
+            // Streaming runs are not tied to component lifetime, so leaving the app would otherwise
+            // leave them polling into a store that has been reset. Aborting also releases the
+            // server-side job, which holds its whole result until `keep_alive` lapses.
+            abortAllStreamingQueries();
             services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
             appUnMounted();
             unmount();

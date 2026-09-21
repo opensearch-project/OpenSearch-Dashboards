@@ -54,6 +54,12 @@ jest.mock('../../../../../data/public', () => ({
   },
 }));
 
+// `useStreamingStatus` needs only this helper, and importing it for real pulls in the same
+// createHistogramConfigs chain the PPLBuilder stub below exists to avoid.
+jest.mock('../../utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: (query: { query: string }) => query.query,
+}));
+
 // Keep the real parsePPL/types (mode decision depends on parsePPL) but stub the
 // heavy PPLBuilder, whose module pulls in the data plugin via
 // createHistogramConfigs. Re-export from the leaf modules to avoid that chain.
@@ -150,6 +156,24 @@ const makeStore = (
     preloadedState: {
       query: { query, language, dataset },
       legacy: { savedSearch },
+    } as any,
+  });
+
+/** Mirrors the shape `useStreamingStatus` reads: streaming progress under the results cacheKey. */
+const makeStreamingStore = (streaming?: Record<string, unknown>, loading = true) =>
+  configureStore({
+    reducer: { query: queryReducer, queryEditor: queryEditorReducer, legacy: legacyReducer },
+    preloadedState: {
+      query: { query: 'source = logs', language: 'PPL', dataset: { id: '1', title: 'logs' } },
+      queryEditor: {
+        queryStatusMap: streaming ? { 'source = logs': { status: 'loading', streaming } } : {},
+        overallQueryStatus: { status: loading ? 'loading' : 'ready' },
+        promptModeIsAvailable: false,
+        promptToQueryIsLoading: false,
+        editorMode: 'single-query',
+        lastExecutedPrompt: '',
+      },
+      legacy: {},
     } as any,
   });
 
@@ -392,6 +416,66 @@ describe('LogsQueryPanel', () => {
       // Switch into the visual builder, where analyze props are gated to undefined.
       fireEvent.click(screen.getByTestId('pplBuilderModeToggle-builder'));
       expect(screen.queryByTestId('widgets-analyze-enabled')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('loading indicator', () => {
+    it('replaces the generic loading bar with streaming progress while polling', () => {
+      render(
+        <Provider
+          store={makeStreamingStore({
+            isPolling: true,
+            fractionDone: 0.42,
+            total: 100,
+            rowsFetched: 10,
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+    });
+
+    it('keeps the streaming bar when the engine reports no fraction', () => {
+      render(
+        <Provider
+          store={makeStreamingStore({
+            isPolling: true,
+            fractionDone: -1,
+            total: 100,
+            rowsFetched: 10,
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelStreamingProgress')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+    });
+
+    it('uses the generic loading bar when no streaming query is in flight', () => {
+      render(
+        <Provider store={makeStreamingStore(undefined, true)}>
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelStreamingProgress')).not.toBeInTheDocument();
+    });
+
+    it('shows no bar at all once nothing is loading', () => {
+      render(
+        <Provider store={makeStreamingStore(undefined, false)}>
+          <LogsQueryPanel />
+        </Provider>
+      );
+
+      expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryPanelStreamingProgress')).not.toBeInTheDocument();
     });
   });
 });

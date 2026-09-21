@@ -19,6 +19,7 @@ import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
 import { registerPPLCancelRoute } from './ppl_cancel';
+import { registerPPLStreamRoutes } from './ppl_stream';
 import { registerPPLAnalyzeRoute } from './ppl_analyze';
 import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
 import { definePPLExplainRoute } from './ppl_explain';
@@ -226,6 +227,7 @@ export function defineRoutes(
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
   registerPPLCancelRoute(router, logger);
+  registerPPLStreamRoutes(router, logger);
   registerPPLAnalyzeRoute(router, logger);
 
   definePPLBundleRoute(logger, router);

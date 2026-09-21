@@ -15,6 +15,7 @@ import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
+import { useStreamingStatus } from '../../../components/streaming/use_streaming_status';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
@@ -100,6 +101,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
+  const { streaming, isPolling: isStreaming } = useStreamingStatus();
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
   const queryProgress = useSelector(selectQueryProgress);
@@ -374,27 +376,41 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
         )}
       </EuiFlexGroup>
 
-      {isLoading && (
-        <>
-          {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
-          <EuiProgress
-            size="xs"
-            color="accent"
-            position="absolute"
-            data-test-subj="exploreQueryPanelIsLoading"
-          />
-          {scanProgress && (
-            <EuiText
+      {isStreaming ? (
+        /* Determinate, because a streaming job reports a fraction; falls back to indeterminate when
+           the engine reports none. */
+        <EuiProgress
+          size="xs"
+          color="primary"
+          position="absolute"
+          {...(typeof streaming?.fractionDone === 'number' && streaming.fractionDone >= 0
+            ? { value: streaming.fractionDone, max: 1 }
+            : {})}
+          data-test-subj="exploreQueryPanelStreamingProgress"
+        />
+      ) : (
+        isLoading && (
+          <>
+            {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
+            <EuiProgress
               size="xs"
-              color="subdued"
-              role="status"
-              aria-live="polite"
-              data-test-subj="exploreQueryPanelScanProgress"
-            >
-              {scanProgress}
-            </EuiText>
-          )}
-        </>
+              color="accent"
+              position="absolute"
+              data-test-subj="exploreQueryPanelIsLoading"
+            />
+            {scanProgress && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                role="status"
+                aria-live="polite"
+                data-test-subj="exploreQueryPanelScanProgress"
+              >
+                {scanProgress}
+              </EuiText>
+            )}
+          </>
+        )
       )}
     </EuiPanel>
   );
