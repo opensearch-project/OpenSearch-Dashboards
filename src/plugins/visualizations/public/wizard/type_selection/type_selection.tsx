@@ -41,7 +41,6 @@ import {
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiModalHeader,
@@ -190,16 +189,11 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
             buttonContent={
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiPanel
-                    className="visNewVisDialog__legacyIcon"
-                    hasBorder
-                    hasShadow={false}
-                    paddingSize="s"
-                  >
-                    <EuiIcon type="grid" color="primary" />
-                  </EuiPanel>
+                  <div className="visNewVisDialog__optionIcon">
+                    <VisTypeIcon icon="grid" />
+                  </div>
                 </EuiFlexItem>
-                <EuiFlexItem className="visNewVisDialog__legacyCopy">
+                <EuiFlexItem className="visNewVisDialog__legacyText">
                   <EuiText size="s">
                     <strong>
                       <FormattedMessage
@@ -254,7 +248,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           >
             {isLegacyOpen && (
               <EuiPanel
-                borderRadius="none"
+                hasBorder={false}
                 className="visNewVisDialog__legacyContent"
                 color="plain"
                 data-test-subj="legacyVisTypesContent"
@@ -290,7 +284,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     >
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive>
         <EuiFlexItem grow={false}>
-          <div className="visNewVisDialog__recommendedIcon">
+          <div className="visNewVisDialog__optionIcon">
             <VisTypeIcon icon={recommendedType.icon} />
           </div>
         </EuiFlexItem>

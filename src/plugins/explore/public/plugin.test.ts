@@ -591,23 +591,52 @@ describe('ExplorePlugin', () => {
       expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
     });
 
-    it('keeps the visualization editor alias visible outside Explore-enabled workspaces', async () => {
-      currentWorkspace$.next(null);
-      const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
-      const metricsAlias = { name: 'MetricsVisualization', hidden: false };
-      const editorAlias = { name: 'VisualizationEditor', hidden: false };
-      (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
-        discoverAlias,
-        metricsAlias,
-        editorAlias,
-      ]);
+    it.each(['use-case-essentials', 'use-case-search'])(
+      'groups classic visualizations and keeps the editor visible in %s workspaces',
+      async (workspaceFeature) => {
+        currentWorkspace$.next({ features: [workspaceFeature] });
+        const classicVis = { name: 'area', isClassic: true };
+        const controlsVis = { name: 'input_control_vis', isClassic: true };
+        const nonClassicVis = { name: 'markdown' };
+        const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
+        const metricsAlias = { name: 'MetricsVisualization', hidden: false };
+        const editorAlias = { name: 'VisualizationEditor', hidden: false };
+        const classicAction = { id: 'add_vis_action_area', grouping: [] as any[] };
+        const controlsAction = {
+          id: 'add_vis_action_input_control_vis',
+          grouping: [] as any[],
+        };
+        const nonClassicAction = { id: 'add_vis_action_markdown', grouping: [] as any[] };
+        (startDeps.visualizations.all as jest.Mock).mockReturnValue([
+          classicVis,
+          controlsVis,
+          nonClassicVis,
+        ]);
+        (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
+          discoverAlias,
+          metricsAlias,
+          editorAlias,
+        ]);
+        (startDeps.uiActions.getTriggerActions as jest.Mock).mockReturnValue([
+          classicAction,
+          controlsAction,
+          nonClassicAction,
+        ]);
 
-      await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
+        await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
 
-      expect(discoverAlias.hidden).toBe(true);
-      expect(metricsAlias.hidden).toBe(true);
-      expect(editorAlias.hidden).toBe(false);
-    });
+        expect(classicAction.grouping).toHaveLength(1);
+        expect(classicAction.grouping[0].id).toBe('others');
+        expect(classicAction.grouping[0].getDisplayName()).toBe('More');
+        expect(classicAction.grouping[0].getIconType()).toBe('boxesHorizontal');
+        expect(controlsAction.grouping).toHaveLength(1);
+        expect(controlsAction.grouping[0].id).toBe('others');
+        expect(nonClassicAction.grouping).toEqual([]);
+        expect(discoverAlias.hidden).toBe(true);
+        expect(metricsAlias.hidden).toBe(true);
+        expect(editorAlias.hidden).toBe(false);
+      }
+    );
   });
 
   describe('stop', () => {

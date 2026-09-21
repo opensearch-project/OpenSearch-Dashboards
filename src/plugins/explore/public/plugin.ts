@@ -1154,23 +1154,23 @@ export class ExplorePlugin implements Plugin<
     core: CoreStart,
     plugins: ExploreStartDependencies
   ) {
+    const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
+    const visTypes = plugins.visualizations.all();
+    const aliasTypes = plugins.visualizations.getAliases();
+    const allVisTypes = [...visTypes, ...aliasTypes];
+    dashboardVisActions.forEach((action) => {
+      const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
+      if (visOfAction && visOfAction.isClassic) {
+        action.grouping?.push({
+          id: 'others',
+          getDisplayName: () => 'More',
+          getIconType: () => 'boxesHorizontal',
+        });
+      }
+    });
+
     const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(core);
-    if (isExploreEnabledWorkspace) {
-      const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
-      const visTypes = plugins.visualizations.all();
-      const aliasTypes = plugins.visualizations.getAliases();
-      const allVisTypes = [...visTypes, ...aliasTypes];
-      dashboardVisActions.forEach((action) => {
-        const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
-        if (visOfAction && visOfAction.isClassic) {
-          action.grouping?.push({
-            id: 'others',
-            getDisplayName: () => 'More',
-            getIconType: () => 'boxesHorizontal',
-          });
-        }
-      });
-    } else {
+    if (!isExploreEnabledWorkspace) {
       plugins.visualizations
         .getAliases()
         .filter(

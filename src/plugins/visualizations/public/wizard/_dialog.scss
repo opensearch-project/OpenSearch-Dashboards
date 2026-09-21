@@ -29,7 +29,7 @@
   border-color: $ouiColorPrimary;
 }
 
-.visNewVisDialog__recommendedIcon {
+.visNewVisDialog__optionIcon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,16 +66,9 @@
   width: 100%;
 }
 
-.visNewVisDialog__legacyIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-}
-
-.visNewVisDialog__legacyCopy {
+.visNewVisDialog__legacyText {
   min-width: 0;
+  padding-left: 10px;
 }
 
 .visNewVisDialog__legacyTypeCount,
@@ -147,7 +140,7 @@
 }
 
 @media only screen and (max-width: 420px) {
-  .visNewVisDialog__legacyIcon,
+  .visNewVisDialog__legacyPanel .visNewVisDialog__optionIcon,
   .visNewVisDialog__legacyTypeCount {
     display: none;
   }
