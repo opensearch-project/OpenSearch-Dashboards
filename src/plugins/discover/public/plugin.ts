@@ -78,6 +78,11 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExplorePluginSetup } from '../../explore/public';
+import {
+  StarterSuggestionsPluginSetup,
+  StarterSuggestionsRegistration,
+} from '../../starter_suggestions/public';
+import { registerDiscoverStarterSuggestions } from './starter_suggestions';
 import { ContextProviderStart } from '../../context_provider/public';
 import {
   APPLY_QUERY_TOOL_DEFINITIONS,
@@ -138,6 +143,7 @@ export interface DiscoverSetupPlugins {
   dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
   explore?: ExplorePluginSetup;
+  starterSuggestions?: StarterSuggestionsPluginSetup;
 }
 
 /**
@@ -177,9 +183,14 @@ export class DiscoverPlugin implements Plugin<
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
   private unregisterApplyQueryAction?: () => void;
+  private starterSuggestions?: StarterSuggestionsRegistration;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
+
+    if (plugins.starterSuggestions) {
+      this.starterSuggestions = registerDiscoverStarterSuggestions(plugins.starterSuggestions);
+    }
 
     if (plugins.share) {
       this.urlGenerator = plugins.share.urlGenerators.registerUrlGenerator(
@@ -496,6 +507,7 @@ export class DiscoverPlugin implements Plugin<
       this.stopUrlTracking();
     }
     this.unregisterApplyQueryAction?.();
+    this.starterSuggestions?.unregister();
   }
 
   /**
