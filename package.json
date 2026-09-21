@@ -136,7 +136,7 @@
     "**/@langchain/**/uuid": "^11.1.1",
     "**/istanbul-lib-processinfo/uuid": "^11.1.1",
     "**/node-jose/uuid": "^11.1.1",
-    "**/@langchain/core/langsmith": "~0.6.0",
+    "**/@langchain/core/langsmith": "^0.10.4",
     "**/@types/node": "~22.19.0",
     "**/@types/hapi__cookie/joi": "^18.2.8",
     "**/@types/hapi__h2o2/joi": "^18.2.8",
