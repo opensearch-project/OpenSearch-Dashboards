@@ -32,7 +32,12 @@ import {
   IAuthenticationMethodRegistry,
   AuthenticationMethodRegistry,
 } from './auth_registry';
-import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
+import {
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+  oauth2AuthMethod,
+} from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
@@ -40,6 +45,7 @@ import {
   setApplication,
   setWorkspaces,
   setHideLocalCluster,
+  setOAuth2AuthEnabled,
   setUiSettings,
   setDataSourceSelection,
   getDefaultDataSourceId,
@@ -199,6 +205,13 @@ export class DataSourceManagementPlugin implements Plugin<
       },
     ]);
 
+    // Published before the feature-flag return below. The direct query connection forms build
+    // their auth method dropdown directly rather than from the auth registry, and they render
+    // whether or not MDS is on, so setting this afterwards would leave the module default of
+    // true in place and keep offering OAuth2 with the setting turned off. Defaults to true -
+    // the config schema default - when the data_source plugin is absent.
+    setOAuth2AuthEnabled(dataSource?.oauth2AuthEnabled ?? true);
+
     // when the feature flag is disabled, we don't need to register any of the mds components
     if (!this.featureFlagStatus) {
       // @ts-expect-error TS2322 TODO(ts-error): fixme
@@ -223,6 +236,9 @@ export class DataSourceManagementPlugin implements Plugin<
     }
     if (dataSource!.awsSigV4AuthEnabled) {
       registerAuthenticationMethod(sigV4AuthMethod);
+    }
+    if (dataSource!.oauth2AuthEnabled ?? true) {
+      registerAuthenticationMethod(oauth2AuthMethod);
     }
 
     setHideLocalCluster({ enabled: dataSource!.hideLocalCluster });

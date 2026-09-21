@@ -599,6 +599,22 @@ export interface HideLocalCluster {
 export const [getHideLocalCluster, setHideLocalCluster] =
   createGetterSetter<HideLocalCluster>('HideLocalCluster');
 
+/**
+ * Mirrors data_source.authTypes.OAuth2.enabled so the direct query connection forms can hide
+ * the OAuth2 option, the same way the auth registry hides it for data sources.
+ *
+ * A plain defaulted variable rather than createGetterSetter: that helper throws when read
+ * before it is set, and these form components are rendered in tests without the plugin's
+ * setup having run. The default matches the config schema default.
+ */
+let oauth2AuthEnabled = true;
+
+export const setOAuth2AuthEnabled = (enabled: boolean) => {
+  oauth2AuthEnabled = enabled;
+};
+
+export const getOAuth2AuthEnabled = () => oauth2AuthEnabled;
+
 // This will maintain an unified data source selection instance among components and export it to other plugin.
 const [getDataSourceSelectionInstance, setDataSourceSelection] =
   createGetterSetter<DataSourceSelectionService>('DataSourceSelectionService');

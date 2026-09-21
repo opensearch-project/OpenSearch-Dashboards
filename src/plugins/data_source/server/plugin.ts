@@ -33,6 +33,9 @@ import { registerTestConnectionRoute } from './routes/test_connection';
 import { registerFetchDataSourceMetaDataRoute } from './routes/fetch_data_source_metadata';
 import { AuthenticationMethodRegistry, IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
+import { createOAuth2AuthMethod } from './auth_registry/oauth2_auth_method';
+import { OAuth2TokenCache } from './auth_registry/oauth2_token_cache';
+import { AuthType } from '../common/data_sources';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
@@ -43,6 +46,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private customApiSchemaRegistry = new CustomApiSchemaRegistry();
+  private oauth2TokenCache = new OAuth2TokenCache();
   private internalSavedObjects: ISavedObjectsRepository | undefined;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
@@ -164,25 +168,65 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       () => this.internalSavedObjects
     );
 
+    let builtInOAuth2Registered = false;
+
     const registerCredentialProvider = (method: AuthenticationMethod) => {
       this.logger.debug(`Registered Credential Provider for authType = ${method.name}`);
       if (this.started) {
         throw new Error('cannot call `registerCredentialProvider` after service startup.');
       }
+      // A plugin registering its own OAuth2 provider replaces the built-in one. Checking the
+      // registry before registering ours cannot work - this contract is only handed out once
+      // setup() returns, so nothing else can have registered yet - and leaving the built-in in
+      // place would make the registry's duplicate-name check throw during the other plugin's
+      // setup and take down startup.
+      if (method.name === AuthType.OAuth2 && builtInOAuth2Registered) {
+        this.logger.info(
+          'Replacing the built-in OAuth2 credential provider with the one registered by another plugin'
+        );
+        this.authMethodsRegistry.removeAuthenticationMethod(AuthType.OAuth2);
+        builtInOAuth2Registered = false;
+      }
       this.authMethodsRegistry.registerAuthenticationMethod(method);
     };
+
+    // Initialize OAuth2 token cache cleanup scheduler immediately after creation
+    // This prevents race condition where requests between setup() and start() would use uninitialized cache
+    this.oauth2TokenCache.initialize();
+
+    // Register the built-in OAuth2 authentication method.
+    //
+    // authTypes.OAuth2.enabled is honoured here as well as in the browser. The browser flag
+    // only hides the option in the data source form; without this check a deployment that
+    // turned OAuth2 off would still mint tokens for any OAuth2 data source already stored,
+    // so the setting would not actually be a kill switch.
+    if (config.authTypes.OAuth2.enabled) {
+      const oauth2AuthMethod = createOAuth2AuthMethod(
+        this.oauth2TokenCache,
+        // Use the same computed list as the routes above: config.endpointDeniedIPs is
+        // optional, and endpoint_validator skips the check entirely when it is undefined,
+        // so passing the raw value would let OAuth2 token URLs reach link-local and
+        // cloud-metadata addresses that the routes reject.
+        endpointDeniedIPs,
+        config.endpointAllowlistedSuffixes
+      );
+      registerCredentialProvider(oauth2AuthMethod);
+      builtInOAuth2Registered = true;
+    }
 
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),
       registerCredentialProvider,
       registerCustomApiSchema: (schema: any) => this.customApiSchemaRegistry.register(schema),
       dataSourceEnabled: () => config.enabled,
+      oauth2AuthEnabled: () => config.authTypes.OAuth2.enabled,
     };
   }
 
   public start(core: CoreStart) {
     this.logger.debug('dataSource: Started');
     this.started = true;
+
     // Create an internal repository that bypasses the credential-stripping SavedObjects wrapper.
     // Used exclusively by getClient / getLegacyClient to read encrypted credentials after the
     // scoped client has already confirmed the calling user has access to the data source.
@@ -202,6 +246,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   }
 
   public stop() {
+    // Clean up OAuth2 token cache and scheduler
+    this.oauth2TokenCache.dispose();
     this.dataSourceService!.stop();
   }
 

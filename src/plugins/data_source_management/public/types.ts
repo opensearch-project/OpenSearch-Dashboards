@@ -146,10 +146,37 @@ export const sigV4AuthMethod = {
   credentialFormField: sigV4CredentialField,
 };
 
+export const oauth2CredentialOption = {
+  value: AuthType.OAuth2,
+  inputDisplay: i18n.translate('dataSourcesManagement.credentialSourceOptions.OAuth2', {
+    defaultMessage: 'OAuth2 / OIDC',
+  }),
+};
+
+export const oauth2CredentialField = {
+  clientId: '',
+  clientSecret: '',
+  tokenUrl: '',
+  scopes: '',
+  audience: '',
+  grantType: 'client_credentials',
+};
+
+// Import OAuth2 credential form component
+import { OAuth2CredentialForm } from './components/auth_registry/oauth2_credential_form';
+
+export const oauth2AuthMethod = {
+  name: AuthType.OAuth2,
+  credentialSourceOption: oauth2CredentialOption,
+  credentialFormField: oauth2CredentialField,
+  credentialForm: OAuth2CredentialForm,
+};
+
 export const credentialSourceOptions = [
   noAuthCredentialOption,
   usernamePasswordCredentialOption,
   sigV4CredentialOption,
+  oauth2CredentialOption,
 ];
 
 export interface MenuPanelItem {
@@ -170,7 +197,7 @@ export type DirectQueryDatasourceType = 'S3GLUE' | 'PROMETHEUS';
 
 export type DirectQueryDatasourceStatus = 'ACTIVE' | 'DISABLED';
 
-export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
+export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4' | 'oauth2';
 
 export type Role = EuiComboBoxOptionOption;
 
