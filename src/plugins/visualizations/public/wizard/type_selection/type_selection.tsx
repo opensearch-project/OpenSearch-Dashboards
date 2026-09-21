@@ -277,7 +277,6 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     <EuiPanel
       key={recommendedType.name}
       color="primary"
-      hasBorder
       hasShadow={false}
       paddingSize="m"
       className="visNewVisDialog__recommendedPanel"

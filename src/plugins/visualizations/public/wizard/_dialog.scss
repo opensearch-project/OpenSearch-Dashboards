@@ -25,10 +25,6 @@
   gap: $ouiSizeM;
 }
 
-.visNewVisDialog__recommendedPanel {
-  border-color: $ouiColorPrimary;
-}
-
 .visNewVisDialog__optionIcon {
   display: flex;
   align-items: center;
@@ -47,17 +43,10 @@
 }
 
 .visNewVisDialog__legacyAccordionButton {
-  width: 100%;
   padding: $ouiSizeM;
-  background: transparent;
-  text-align: left;
-  text-decoration: none;
 }
 
-.visNewVisDialog__legacyAccordionButton:hover {
-  text-decoration: none;
-}
-
+.visNewVisDialog__legacyAccordionButton:hover,
 .visNewVisDialog__legacyAccordionButton:focus {
   text-decoration: none;
 }
@@ -68,7 +57,6 @@
 
 .visNewVisDialog__legacyText {
   min-width: 0;
-  padding-left: 10px;
 }
 
 .visNewVisDialog__legacyTypeCount,
@@ -130,10 +118,6 @@
     width: auto;
   }
 
-  .visNewVisDialog__workflows {
-    margin-left: 0;
-  }
-
   .visNewVisDialog__legacyToggleLabel {
     display: none;
   }
@@ -147,10 +131,6 @@
 }
 
 @include euiBreakpoint("xs", "s") {
-  .visNewVisDialog {
-    background-image: none;
-  }
-
   .visNewVisDialog__typesWrapper {
     max-width: none;
   }
