@@ -29,6 +29,7 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { EuiToolTip } from '@elastic/eui';
 import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
@@ -91,7 +92,7 @@ describe('NewVisModal', () => {
     title: 'VisBuilder',
     description: 'Create a visualization with VisBuilder',
     icon: 'visBuilder',
-    stage: 'production',
+    stage: 'beta',
     aliasApp: 'vis-builder',
     aliasPath: '#/',
     isClassic: true,
@@ -166,7 +167,14 @@ describe('NewVisModal', () => {
         savedObjects={{} as SavedObjectsStart}
       />
     );
-    expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
+    const visType = wrapper.find('[data-test-subj="visType-vis"]').first();
+    expect(visType.exists()).toBe(true);
+    expect(visType.prop('aria-describedby')).toBe('visTypeDescription-vis');
+
+    visType.simulate('focus');
+    wrapper.update();
+
+    expect(wrapper.find('#visTypeDescription-vis').exists()).toBe(true);
   });
 
   it('should show the recommended editor before workflows and legacy types', () => {
@@ -222,6 +230,25 @@ describe('NewVisModal', () => {
         .exists()
     ).toBe(false);
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="visType-vis"]').first().prop('aria-describedby')
+    ).toBeUndefined();
+    const legacyTooltip = wrapper
+      .find(EuiToolTip)
+      .filterWhere((tooltip) => tooltip.find('[data-test-subj="visType-visBuilder"]').exists())
+      .first();
+    expect(legacyTooltip.exists()).toBe(true);
+    const legacyTooltipContent = mountWithIntl(<div>{legacyTooltip.prop('content')}</div>);
+    expect(legacyTooltipContent.find('div').first().text()).toContain(
+      'Create a visualization with VisBuilder'
+    );
+    expect(legacyTooltipContent.find('br').exists()).toBe(true);
+    expect(legacyTooltipContent.find('em').first().text()).toContain(
+      'This visualization is in beta'
+    );
+    expect(
+      wrapper.find('[data-test-subj="visType-visBuilder"]').first().prop('betaBadgeTooltipContent')
+    ).toBeUndefined();
     expect(wrapper.find('[data-test-subj="visType-visBuilder"]').exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="visType-discoverWorkflow"]').exists()).toBe(false);
   });

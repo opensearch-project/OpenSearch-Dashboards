@@ -50,6 +50,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
@@ -89,6 +90,8 @@ interface VisTypeGroups {
   recommendedTypes: VisTypeAlias[];
   workflowTypes: VisTypeAlias[];
 }
+
+type DescriptionMode = 'panel' | 'tooltip';
 
 function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
   return 'aliasPath' in type;
@@ -263,7 +266,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   i18n.translate('visualizations.newVisWizard.selectLegacyVisType', {
                     defaultMessage: 'Select a legacy visualization type',
                   }),
-                  false
+                  'tooltip'
                 )}
               </EuiPanel>
             )}
@@ -345,13 +348,14 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     visTypes: VisTypeListEntry[],
     filterPlaceholder: string,
     helpTitle: string,
-    showDescription = true
+    descriptionMode: DescriptionMode = 'panel'
   ) {
     const { highlightedType, query } = this.state;
+    const showDescriptionPanel = descriptionMode === 'panel';
 
     return (
       <EuiFlexGroup
-        className={showDescription ? undefined : 'visNewVisDialog__typeSelector--fullWidth'}
+        className={showDescriptionPanel ? undefined : 'visNewVisDialog__typeSelector--fullWidth'}
         gutterSize="xl"
       >
         <EuiFlexItem>
@@ -391,12 +395,12 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                 </span>
               </EuiScreenReaderOnly>
               <EuiKeyPadMenu className="visNewVisDialog__types" data-test-subj="visNewDialogTypes">
-                {visTypes.map(this.renderVisType)}
+                {visTypes.map((visType) => this.renderVisType(visType, descriptionMode))}
               </EuiKeyPadMenu>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {showDescription && (
+        {showDescriptionPanel && (
           <EuiFlexItem className="visNewVisDialog__description" grow={false}>
             {highlightedType ? (
               <VisHelpText {...highlightedType} />
@@ -470,18 +474,23 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     return orderBy(entries, ['highlighted', 'type.title'], ['desc', 'asc']);
   }
 
-  private renderVisType = (visType: VisTypeListEntry) => {
-    let stage = {};
+  private renderVisType = (visType: VisTypeListEntry, descriptionMode: DescriptionMode) => {
+    let stageTooltipContent: string | undefined;
+    let stage: {
+      betaBadgeLabel?: string;
+      betaBadgeTooltipContent?: string;
+    } = {};
     let highlightMsg;
     if (visType.type.stage === 'experimental') {
+      stageTooltipContent = i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
+        defaultMessage:
+          'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+      });
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
         }),
-        betaBadgeTooltipContent: i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
-          defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-        }),
+        betaBadgeTooltipContent: stageTooltipContent,
       };
       highlightMsg = i18n.translate('visualizations.newVisWizard.experimentalDescription', {
         defaultMessage:
@@ -498,6 +507,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         }),
         betaBadgeTooltipContent: aliasDescription,
       };
+      stageTooltipContent = aliasDescription;
       highlightMsg = aliasDescription;
     }
 
@@ -511,7 +521,18 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       highlightMsg,
     };
 
-    return (
+    const tooltipContent =
+      visType.type.description || stageTooltipContent ? (
+        <>
+          {visType.type.description}
+          {visType.type.description && stageTooltipContent && <br />}
+          {stageTooltipContent && <em>{stageTooltipContent}</em>}
+        </>
+      ) : undefined;
+    const itemStage =
+      descriptionMode === 'tooltip' ? { betaBadgeLabel: stage.betaBadgeLabel } : stage;
+
+    const item = (
       <EuiKeyPadMenuItem
         key={visType.type.name}
         label={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
@@ -524,8 +545,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-test-subj={`visType-${visType.type.name}`}
         data-vis-stage={!isVisTypeAlias(visType.type) ? visType.type.stage : 'alias'}
         disabled={isDisabled}
-        aria-describedby={`visTypeDescription-${visType.type.name}`}
-        {...stage}
+        aria-describedby={
+          descriptionMode === 'panel' ? `visTypeDescription-${visType.type.name}` : undefined
+        }
+        {...itemStage}
       >
         <VisTypeIcon
           icon={visType.type.icon}
@@ -533,6 +556,16 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         />
       </EuiKeyPadMenuItem>
     );
+
+    if (descriptionMode === 'tooltip' && tooltipContent) {
+      return (
+        <EuiToolTip key={visType.type.name} content={tooltipContent}>
+          {item}
+        </EuiToolTip>
+      );
+    }
+
+    return item;
   };
 
   private setHighlightType(highlightedType: HighlightedType | null) {
