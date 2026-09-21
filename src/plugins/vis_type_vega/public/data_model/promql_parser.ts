@@ -13,6 +13,9 @@ const CONTEXT = '%context%';
 const MAXDATAPOINTS = '%maxdatapoints%';
 const STEP = '%step%';
 
+// supports 20 series of 60s steps for 24 hours
+const CLIENT_ROW_CAP = 30_000;
+
 interface PromQLHttpResponse {
   body: {
     fields: Array<{
@@ -65,6 +68,16 @@ export class PromQLQueryParser {
       );
     }
 
+    if (!useContext) {
+      throw new Error(
+        i18n.translate('visTypeVega.promqlQueryParser.dataUrl.contextRequired', {
+          defaultMessage:
+            '{dataUrlParam} must set {contextParam} to provide the dashboard time range',
+          values: { dataUrlParam: '"data.url"', contextParam: '"%context%: true"' },
+        })
+      );
+    }
+
     return { dataObject, url, datasource, useContext, maxDataPoints, step };
   }
 
@@ -91,6 +104,8 @@ export class PromQLQueryParser {
               type: 'PROMETHEUS',
               language: 'PROMQL',
               timeFieldName: 'Time',
+              // Routes to the local cluster's direct-query Prometheus endpoint.
+              // Remote MDS data sources are not supported.
               dataSource: {},
             },
             format: 'jdbc',
@@ -113,12 +128,31 @@ export class PromQLQueryParser {
         const labelsValues = fields.find((f) => f.name === 'Labels')?.values ?? [];
         const valueValues = fields.find((f) => f.name === 'Value')?.values ?? [];
 
-        request.dataObject.values = timeValues.map((t, i) => ({
+        const totalRows = timeValues.length;
+        const cappedTimeValues =
+          totalRows > CLIENT_ROW_CAP ? timeValues.slice(0, CLIENT_ROW_CAP) : timeValues;
+
+        request.dataObject.values = cappedTimeValues.map((t, i) => ({
           Time: t,
           Series: seriesValues[i],
           Labels: labelsValues[i],
           Value: valueValues[i],
         }));
+
+        if (totalRows > CLIENT_ROW_CAP) {
+          this.onWarning(
+            i18n.translate('visTypeVega.promqlQueryParser.rowCapWarning', {
+              defaultMessage:
+                'PromQL result was truncated client-side: showing {cap} of {total} data points. Use {maxDataPoints} or {step} to reduce the result size.',
+              values: {
+                cap: CLIENT_ROW_CAP,
+                total: totalRows,
+                maxDataPoints: '%maxdatapoints%',
+                step: '%step%',
+              },
+            })
+          );
+        }
 
         const truncation = response.body?.meta?.truncation;
         if (truncation?.tableTruncated) {
