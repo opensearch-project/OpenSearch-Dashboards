@@ -1034,6 +1034,12 @@ export class ExplorePlugin implements Plugin<
   private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
     const sqlSupportEnabled =
       this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    const visualizationEditorDescription = i18n.translate(
+      'explore.visualization.editor.description',
+      {
+        defaultMessage: 'Create and refine visualizations in one editor.',
+      }
+    );
     const appExtensions: VisTypeAlias['appExtensions'] = {
       visualizations: {
         docTypes: [SAVED_OBJECT_TYPE],
@@ -1129,11 +1135,15 @@ export class ExplorePlugin implements Plugin<
       aliasPath: '#/edit/',
       aliasApp: VISUALIZATION_EDITOR_APP_ID,
       title: i18n.translate('explore.visualization.editor.title', {
-        defaultMessage: 'Add visualization',
+        defaultMessage: 'Visualization editor',
       }),
-      description: i18n.translate('explore.visualization.editor.description', {
-        defaultMessage: 'Create visualization with visualization editor',
-      }),
+      description: visualizationEditorDescription,
+      promotion: {
+        description: visualizationEditorDescription,
+        buttonText: i18n.translate('explore.visualization.editor.promotionButton', {
+          defaultMessage: 'Create visualization',
+        }),
+      },
       icon: 'visualizeApp',
       stage: 'production',
       appExtensions,

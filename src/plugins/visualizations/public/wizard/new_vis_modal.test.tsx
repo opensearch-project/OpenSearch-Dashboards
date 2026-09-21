@@ -45,7 +45,7 @@ describe('NewVisModal', () => {
     requestHandler: 'none',
     responseHandler: 'none',
   };
-  const _visTypes = [
+  const visTypeDefinitions = [
     { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams },
     { name: 'visExp', title: 'Experimental Vis', stage: 'experimental', ...defaultVisTypeParams },
     {
@@ -54,6 +54,8 @@ describe('NewVisModal', () => {
       stage: 'production',
       ...defaultVisTypeParams,
     },
+  ];
+  const aliasDefinitions = [
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
@@ -61,27 +63,67 @@ describe('NewVisModal', () => {
       aliasApp: 'otherApp',
       aliasPath: '#/aliasUrl',
     },
-    {
-      name: 'visAliasWithPromotion',
-      title: 'Vis alias with promotion',
-      stage: 'production',
-      aliasApp: 'anotherApp',
-      aliasPath: '#/anotherUrl',
-      promotion: {
-        description: 'promotion description',
-        buttonText: 'another app',
-      },
-    },
   ];
-  const visTypes: TypesStart = {
-    get<T>(id: string): VisType<T> {
-      return _visTypes.find((vis) => vis.name === id) as unknown as VisType<T>;
+  const promotedAlias = {
+    name: 'visAliasWithPromotion',
+    title: 'Visualization editor',
+    description: 'promotion description',
+    icon: 'visualizeApp',
+    stage: 'production',
+    aliasApp: 'anotherApp',
+    aliasPath: '#/anotherUrl',
+    promotion: {
+      description: 'promotion description',
+      buttonText: 'Create visualization',
     },
-    all: () => {
-      return _visTypes as unknown as VisType[];
-    },
-    getAliases: () => [],
   };
+  const workflowAlias = {
+    name: 'discoverWorkflow',
+    title: 'Visualize with Discover',
+    description: 'Create a visualization with Discover',
+    icon: 'discoverApp',
+    stage: 'production',
+    aliasApp: 'discover',
+    aliasPath: '#/',
+  };
+  const classicAlias = {
+    name: 'visBuilder',
+    title: 'VisBuilder',
+    description: 'Create a visualization with VisBuilder',
+    icon: 'visBuilder',
+    stage: 'production',
+    aliasApp: 'vis-builder',
+    aliasPath: '#/',
+    isClassic: true,
+  };
+
+  const createVisTypes = (aliases = aliasDefinitions): TypesStart => ({
+    get<T>(id: string): VisType<T> {
+      return [...visTypeDefinitions, ...aliases].find(
+        (vis) => vis.name === id
+      ) as unknown as VisType<T>;
+    },
+    all: () => visTypeDefinitions as unknown as VisType[],
+    getAliases: () => aliases as any,
+  });
+
+  const visTypes = createVisTypes();
+  const recommendedVisTypes = createVisTypes([
+    ...aliasDefinitions,
+    promotedAlias,
+    workflowAlias,
+    classicAlias,
+    {
+      name: 'hiddenWorkflow',
+      title: 'Hidden workflow',
+      description: 'Hidden workflow',
+      icon: 'discoverApp',
+      stage: 'production',
+      aliasApp: 'hidden',
+      aliasPath: '#/',
+      hidden: true,
+    },
+  ]);
   const addBasePath = (url: string) => `testbasepath${url}`;
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
@@ -127,13 +169,13 @@ describe('NewVisModal', () => {
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
   });
 
-  it('should sort promoted visualizations first', () => {
+  it('should show the recommended editor before workflows and legacy types', () => {
     const wrapper = mountWithIntl(
       // @ts-expect-error TS2741 TODO(ts-error): fixme
       <NewVisModal
         isOpen={true}
         onClose={() => null}
-        visTypesRegistry={visTypes}
+        visTypesRegistry={recommendedVisTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
@@ -141,15 +183,68 @@ describe('NewVisModal', () => {
       />
     );
     expect(
+      wrapper.find('[data-test-subj="recommendedVisType-visAliasWithPromotion"]').exists()
+    ).toBe(true);
+    expect(wrapper.find('.visNewVisDialog__recommendedPanel').first().prop('color')).toBe(
+      'primary'
+    );
+    expect(wrapper.find('[data-test-subj="workflowVisType-discoverWorkflow"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="workflowVisType-hiddenWorkflow"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="legacyVisTypesAccordion"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="legacyVisTypesCount"]').first().text()).toContain(
+      '3 types'
+    );
+    expect(wrapper.find('[data-test-subj="legacyVisTypesToggleLabel"]').first().text()).toContain(
+      'Show types'
+    );
+    expect(wrapper.find('[data-test-subj="legacyVisTypesContent"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(false);
+
+    wrapper.find('button[aria-controls="legacyVisualizationTypes"]').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find('[data-test-subj="legacyVisTypesToggleLabel"]').first().text()).toContain(
+      'Hide types'
+    );
+    expect(wrapper.find('[data-test-subj="legacyVisTypesContent"]').exists()).toBe(true);
+    expect(
       wrapper
-        .find('button[data-test-subj^="visType-"]')
-        .map((button) => button.prop('data-test-subj'))
-    ).toEqual([
-      'visType-visAliasWithPromotion',
-      'visType-vis',
-      'visType-visWithAliasUrl',
-      'visType-visWithSearch',
-    ]);
+        .find('[data-test-subj="legacyVisTypesContent"]')
+        .first()
+        .find('.visNewVisDialog__typeSelector--fullWidth')
+        .exists()
+    ).toBe(true);
+    expect(
+      wrapper
+        .find('[data-test-subj="legacyVisTypesContent"]')
+        .first()
+        .find('.visNewVisDialog__description')
+        .exists()
+    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visType-visBuilder"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visType-discoverWorkflow"]').exists()).toBe(false);
+  });
+
+  it('should keep the flat selector when no recommended editor is available', () => {
+    const wrapper = mountWithIntl(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
+      <NewVisModal
+        isOpen={true}
+        onClose={() => null}
+        visTypesRegistry={createVisTypes([{ ...promotedAlias, hidden: true }])}
+        addBasePath={addBasePath}
+        uiSettings={uiSettings}
+        application={{} as ApplicationStart}
+        savedObjects={{} as SavedObjectsStart}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="recommendedVisType-visAliasWithPromotion"]').exists()
+    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="legacyVisTypesAccordion"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
   });
 
   describe('open editor', () => {
@@ -241,6 +336,31 @@ describe('NewVisModal', () => {
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
       expect(navigateToApp).toHaveBeenCalledWith('otherApp', { path: '#/aliasUrl' });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('opens the recommended visualization editor through the existing alias navigation', () => {
+      const onClose = jest.fn();
+      const navigateToApp = jest.fn();
+      const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
+        <NewVisModal
+          isOpen={true}
+          onClose={onClose}
+          visTypesRegistry={recommendedVisTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+          application={{ navigateToApp } as unknown as ApplicationStart}
+          savedObjects={{} as SavedObjectsStart}
+        />
+      );
+
+      wrapper
+        .find('[data-test-subj="recommendedVisType-visAliasWithPromotion"]')
+        .first()
+        .simulate('click');
+
+      expect(navigateToApp).toHaveBeenCalledWith('anotherApp', { path: '#/anotherUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });

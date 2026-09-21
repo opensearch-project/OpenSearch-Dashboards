@@ -374,7 +374,12 @@ describe('ExplorePlugin', () => {
         expect.objectContaining({
           name: 'VisualizationEditor',
           aliasApp: 'visualization-editor',
-          title: expect.any(String),
+          title: 'Visualization editor',
+          description: 'Create and refine visualizations in one editor.',
+          promotion: {
+            buttonText: 'Create visualization',
+            description: 'Create and refine visualizations in one editor.',
+          },
         })
       );
 
