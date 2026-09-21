@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parseInlineSuggestions, stripInlineSuggestions } from './parse_inline_suggestions';
+import {
+  parseInlineSuggestions,
+  parseInlineTitle,
+  stripInlineSuggestions,
+} from './parse_inline_suggestions';
 
 describe('parseInlineSuggestions', () => {
   it('should parse SUGGESTIONS line from end of content', () => {
@@ -86,5 +90,65 @@ describe('stripInlineSuggestions', () => {
   it('should not strip text that merely contains the word SUGGESTIONS', () => {
     const content = 'Here are my SUGGESTIONS: use a pie chart';
     expect(stripInlineSuggestions(content)).toBe(content);
+  });
+});
+
+describe('parseInlineTitle', () => {
+  it('should parse CONVERSATION_TITLE from end of content', () => {
+    const content = 'Here is your answer.\nCONVERSATION_TITLE: Cluster Health Summary';
+    const result = parseInlineTitle(content);
+    expect(result.cleanContent).toBe('Here is your answer.');
+    expect(result.title).toBe('Cluster Health Summary');
+  });
+
+  it('should handle title without space after colon', () => {
+    const content = 'Answer text\nCONVERSATION_TITLE:My Title';
+    const result = parseInlineTitle(content);
+    expect(result.cleanContent).toBe('Answer text');
+    expect(result.title).toBe('My Title');
+  });
+
+  it('should return undefined when no CONVERSATION_TITLE line', () => {
+    const content = 'Just a normal response';
+    const result = parseInlineTitle(content);
+    expect(result.cleanContent).toBe(content);
+    expect(result.title).toBeUndefined();
+  });
+
+  it('should return undefined for empty title', () => {
+    const content = 'Answer\nCONVERSATION_TITLE:   ';
+    const result = parseInlineTitle(content);
+    expect(result.cleanContent).toBe(content);
+    expect(result.title).toBeUndefined();
+  });
+
+  it('should reject titles longer than 100 characters', () => {
+    const longTitle = 'A'.repeat(101);
+    const content = `Answer\nCONVERSATION_TITLE: ${longTitle}`;
+    const result = parseInlineTitle(content);
+    expect(result.title).toBeUndefined();
+  });
+
+  it('should handle empty string', () => {
+    const result = parseInlineTitle('');
+    expect(result.cleanContent).toBe('');
+    expect(result.title).toBeUndefined();
+  });
+});
+
+describe('stripInlineSuggestions with title', () => {
+  it('should strip both SUGGESTIONS and CONVERSATION_TITLE', () => {
+    const content = 'Hello world\nCONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]';
+    expect(stripInlineSuggestions(content)).toBe('Hello world');
+  });
+
+  it('should strip CONVERSATION_TITLE alone', () => {
+    const content = 'Answer text\nCONVERSATION_TITLE: Query Results';
+    expect(stripInlineSuggestions(content)).toBe('Answer text');
+  });
+
+  it('should strip incomplete CONVERSATION_TITLE during streaming', () => {
+    const content = 'Answer text\nCONVERSATION_TITLE: Partial ti';
+    expect(stripInlineSuggestions(content)).toBe('Answer text');
   });
 });

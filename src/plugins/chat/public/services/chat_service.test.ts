@@ -1412,7 +1412,8 @@ describe('ChatService', () => {
 
       expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
         expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        messages
+        messages,
+        undefined
       );
     });
   });

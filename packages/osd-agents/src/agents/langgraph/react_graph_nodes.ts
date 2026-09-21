@@ -128,6 +128,30 @@ export class ReactGraphNodes {
         '\n\n**CRITICAL: This is your FINAL response turn. You MUST provide a complete answer to the user WITHOUT calling any tools. Synthesize all previous tool results and provide a comprehensive final answer.**';
     }
 
+    // On the first turn of a new conversation (exactly one user message),
+    // ask the LLM to emit an inline title at the end of its response.
+    // This avoids a separate LLM call -- the title is parsed from the
+    // streamed response and emitted as a CUSTOM event by the adapter.
+    //
+    // NOTE: this is intentionally NOT gated on `iterations === 0`. When the
+    // first turn requires backend (MCP) tool rounds, iteration 0 produces a
+    // tool call rather than the final answer, and the answer is produced on a
+    // later iteration. Injecting the instruction on every iteration of the
+    // first turn ensures the final answer carries the title. The adapter
+    // parses the LAST `CONVERSATION_TITLE:` line at end-of-buffer, so any
+    // premature title emitted on an intermediate tool-calling turn is harmless
+    // (later text is appended after it, so it no longer matches the end anchor).
+    const isFirstTurn = messages.filter((m) => m.role === 'user').length === 1;
+    if (isFirstTurn) {
+      // Emit a short conversation title on its own line. Place it immediately
+      // BEFORE the trailing SUGGESTIONS: line (or as the last line when there
+      // are no suggestions) so the base prompt's "SUGGESTIONS on the LAST line"
+      // rule is preserved and the two instructions no longer conflict. The
+      // adapter parses the CONVERSATION_TITLE: line wherever it appears.
+      finalSystemPrompt +=
+        '\n\nAdditionally, output a short conversation title (max 8 words, no quotes, no period) on its own line prefixed with CONVERSATION_TITLE:. Place this line immediately BEFORE the SUGGESTIONS: line (or as the very last line if there are no suggestions), so the SUGGESTIONS: line always stays last. Example:\nCONVERSATION_TITLE: Cluster Health Check Summary\nSUGGESTIONS:["Check cluster health","Show index mapping"]\nOmit the CONVERSATION_TITLE line only if the message is just a greeting.';
+    }
+
     // Resolve model ID using priority: request -> default -> hardcoded
     const resolvedModelId = ModelConfigManager.resolveModelId(modelId);
 

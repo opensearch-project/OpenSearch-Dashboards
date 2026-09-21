@@ -945,13 +945,13 @@ export class ChatService {
   /**
    * Save messages to conversation history
    */
-  public async saveConversation(messages: Message[]): Promise<void> {
+  public async saveConversation(messages: Message[], title?: string): Promise<void> {
     if (messages.length > 0) {
       const threadId = this.getThreadId();
       if (!threadId) {
         throw new Error('Thread ID is required to save conversation');
       }
-      await this.conversationHistoryService.saveConversation(threadId, messages);
+      await this.conversationHistoryService.saveConversation(threadId, messages, title);
     }
   }
 
