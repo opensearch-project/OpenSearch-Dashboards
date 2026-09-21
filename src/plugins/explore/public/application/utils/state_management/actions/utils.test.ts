@@ -340,6 +340,85 @@ describe('Utils - Histogram Breakdown Support', () => {
       const result = utils.buildPPLHistogramQuery(query, histogramConfig);
       expect(result).toBe('source=logs | head 200 | stats count() by span(@timestamp, 1h)');
     });
+
+    const withAggs = () => createBaseHistogramConfig({ aggs: { 2: { date_histogram: {} } } });
+
+    it('drops a fields projection that would hide the time field', () => {
+      // Without this the appended aggregation references a field the projection discarded, and PPL
+      // rejects the whole query with "Field [@timestamp] not found."
+      expect(utils.buildPPLHistogramQuery('source=logs | fields event_id, email', withAggs())).toBe(
+        'source=logs | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('drops a fields projection that is not the last stage', () => {
+      expect(
+        utils.buildPPLHistogramQuery('source=logs | fields event_id | sort event_id', withAggs())
+      ).toBe('source=logs | sort event_id | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('drops every fields projection, not just the first', () => {
+      expect(
+        utils.buildPPLHistogramQuery(
+          'source=logs | fields a, b | where a > 1 | fields a',
+          withAggs()
+        )
+      ).toBe('source=logs | where a > 1 | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('drops a projection that does include the time field, since it is then redundant', () => {
+      expect(
+        utils.buildPPLHistogramQuery('source=logs | fields @timestamp, event_id', withAggs())
+      ).toBe('source=logs | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('preserves row-set commands, which the histogram must reflect', () => {
+      expect(
+        utils.buildPPLHistogramQuery(
+          'source=logs | where status_code = 500 | dedup email | head 50 | fields email',
+          withAggs()
+        )
+      ).toBe(
+        'source=logs | where status_code = 500 | dedup email | head 50 | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('preserves rex, which only adds columns and may feed a later stage', () => {
+      expect(
+        utils.buildPPLHistogramQuery(
+          'source=logs | rex field=email "(?<domain>.+)" | where domain = \'x\' | fields domain',
+          withAggs()
+        )
+      ).toBe(
+        'source=logs | rex field=email "(?<domain>.+)" | where domain = \'x\' | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('is not fooled by the word fields inside a quoted string', () => {
+      expect(
+        utils.buildPPLHistogramQuery(`source=logs | where msg = '| fields a'`, withAggs())
+      ).toBe(`source=logs | where msg = '| fields a' | stats count() by span(@timestamp, 1h)`);
+    });
+
+    it('builds no aggregation when a remaining stats may have consumed the time field', () => {
+      const query = 'source=logs | stats count() by service';
+      expect(utils.buildPPLHistogramQuery(query, withAggs())).toBe(query);
+    });
+
+    it('builds no aggregation when a rename may have moved the time field', () => {
+      const query = 'source=logs | rename @timestamp as ts';
+      expect(utils.buildPPLHistogramQuery(query, withAggs())).toBe(query);
+    });
+
+    it('drops projections for the breakdown form too', () => {
+      const config = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+        breakdownField: 'status',
+      });
+      expect(utils.buildPPLHistogramQuery('source=logs | fields event_id', config)).toBe(
+        'source=logs | rename @timestamp as @timestamp | timechart span=1h limit=4 count() by status'
+      );
+    });
   });
 
   describe('processRawResultsForHistogram', () => {
