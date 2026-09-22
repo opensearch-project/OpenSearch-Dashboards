@@ -29,7 +29,7 @@
  */
 
 import moment from 'moment';
-import { EuiFormControlLayoutDelimited } from '@elastic/eui';
+import { EuiDatePickerRange, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 
@@ -57,7 +57,8 @@ function RangeValueInputUI(props: Props) {
   const tzConfig = opensearchDashboards.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') return value;
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string') return value;
 
     const momentParsedValue = moment(value).tz(tzConfig);
     if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
@@ -79,45 +80,62 @@ function RangeValueInputUI(props: Props) {
     props.onChange({ from: get(props, 'value.from'), to: value });
   };
 
+  const rangeInputLabel = props.intl.formatMessage({
+    id: 'data.filter.filterEditor.rangeInputLabel',
+    defaultMessage: 'Range',
+  });
+  const startControl = (
+    <ValueInputType
+      controlOnly
+      fullWidth={type === 'date'}
+      type={type}
+      value={props.value ? props.value.from : undefined}
+      onChange={onFromChange}
+      onBlur={(value) => {
+        onFromChange(formatDateChange(value));
+      }}
+      placeholder={props.intl.formatMessage({
+        id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
+        defaultMessage: 'Start of the range',
+      })}
+    />
+  );
+  const endControl = (
+    <ValueInputType
+      controlOnly
+      fullWidth={type === 'date'}
+      type={type}
+      value={props.value ? props.value.to : undefined}
+      onChange={onToChange}
+      onBlur={(value) => {
+        onToChange(formatDateChange(value));
+      }}
+      placeholder={props.intl.formatMessage({
+        id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
+        defaultMessage: 'End of the range',
+      })}
+    />
+  );
+
   return (
     <div>
-      <EuiFormControlLayoutDelimited
-        fullWidth={true}
-        aria-label={props.intl.formatMessage({
-          id: 'data.filter.filterEditor.rangeInputLabel',
-          defaultMessage: 'Range',
-        })}
-        startControl={
-          <ValueInputType
-            controlOnly
-            type={type}
-            value={props.value ? props.value.from : undefined}
-            onChange={onFromChange}
-            onBlur={(value) => {
-              onFromChange(formatDateChange(value));
-            }}
-            placeholder={props.intl.formatMessage({
-              id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
-              defaultMessage: 'Start of the range',
-            })}
-          />
-        }
-        endControl={
-          <ValueInputType
-            controlOnly
-            type={type}
-            value={props.value ? props.value.to : undefined}
-            onChange={onToChange}
-            onBlur={(value) => {
-              onToChange(formatDateChange(value));
-            }}
-            placeholder={props.intl.formatMessage({
-              id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
-              defaultMessage: 'End of the range',
-            })}
-          />
-        }
-      />
+      {type === 'date' ? (
+        <EuiDatePickerRange
+          isCustom
+          compressed
+          fullWidth
+          aria-label={rangeInputLabel}
+          startDateControl={startControl}
+          endDateControl={endControl}
+        />
+      ) : (
+        <EuiFormControlLayoutDelimited
+          fullWidth
+          aria-label={rangeInputLabel}
+          startControl={startControl}
+          endControl={endControl}
+        />
+      )}
     </div>
   );
 }

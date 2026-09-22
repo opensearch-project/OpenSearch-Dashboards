@@ -32,9 +32,12 @@ import {
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
   EuiCompressedSelect,
+  EuiDatePicker,
 } from '@elastic/eui';
+import dateMath from '@elastic/datemath';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
+import moment, { Moment } from 'moment';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
 
@@ -87,14 +90,18 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'date':
         inputElement = (
-          <EuiCompressedFieldText
+          <EuiDatePicker
+            compressed
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={value}
-            onChange={this.onChange}
+            value={typeof value === 'string' ? value : undefined}
+            selected={this.getSelectedDate(value)}
+            onChange={this.onDatePickerChange}
+            onChangeRaw={this.onDateInputChange}
             onBlur={this.onBlur}
+            showTimeSelect
+            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
-            controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
         );
@@ -167,10 +174,36 @@ class ValueInputTypeUI extends Component<Props> {
     this.props.onChange(params);
   };
 
-  private onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onDateInputChange = (event: React.FocusEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    this.props.onChange(event.target.value);
+  };
+
+  private onDatePickerChange = (date: Moment | null) => {
+    if (date) {
+      // Keep picker output unambiguous while manual input remains available for custom formats.
+      this.props.onChange(date.valueOf());
+    }
+  };
+
+  private getSelectedDate = (value?: string | number) => {
+    if (typeof value === 'number') {
+      const selectedDate = moment(value);
+      return selectedDate.isValid() ? selectedDate : undefined;
+    }
+
+    if (value) {
+      const selectedDate = dateMath.parse(value);
+      return selectedDate?.isValid() ? selectedDate : undefined;
+    }
+  };
+
+  private onBlur = (event?: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.onBlur) {
-      const params = event.target.value;
-      this.props.onBlur(params);
+      const params = this.props.value ?? event?.target.value;
+      if (params !== undefined) {
+        this.props.onBlur(params);
+      }
     }
   };
 }

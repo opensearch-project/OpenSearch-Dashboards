@@ -149,9 +149,9 @@ describe('Filter editor utils', () => {
   });
 
   describe('validateParams', () => {
-    it('should return false if date is not string', () => {
+    it('should return true for picker-generated epoch milliseconds', () => {
       const isValidParams = validateParams(1234, 'date');
-      expect(isValidParams).toBe(false);
+      expect(isValidParams).toBe(true);
     });
 
     it('should return false if date is not valid string', () => {

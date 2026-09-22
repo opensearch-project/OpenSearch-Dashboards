@@ -38,7 +38,7 @@ import { ValueInputType } from './value_input_type';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
 interface Props extends PhraseSuggestorProps {
-  value?: string;
+  value?: string | number;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
 }

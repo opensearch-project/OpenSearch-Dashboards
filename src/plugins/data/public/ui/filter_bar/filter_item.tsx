@@ -74,6 +74,7 @@ export type FilterLabelStatus =
 
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isEditorActive, setIsEditorActive] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
   const { id, filter, indexPatterns } = props;
 
@@ -94,16 +95,23 @@ export function FilterItem(props: Props) {
     }
   }, [props.filter.meta.index]);
 
+  function closePopover() {
+    setIsPopoverOpen(false);
+    setIsEditorActive(false);
+  }
+
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
     if (e.shiftKey) {
       onToggleDisabled();
+    } else if (isPopoverOpen) {
+      closePopover();
     } else {
-      setIsPopoverOpen(!isPopoverOpen);
+      setIsPopoverOpen(true);
     }
   }
 
   function onSubmit(f: Filter) {
-    setIsPopoverOpen(false);
+    closePopover();
     props.onUpdate(f);
   }
 
@@ -174,7 +182,7 @@ export function FilterItem(props: Props) {
                 }),
             icon: 'pin',
             onClick: () => {
-              setIsPopoverOpen(false);
+              closePopover();
               onTogglePinned();
             },
             'data-test-subj': 'pinFilter',
@@ -200,7 +208,7 @@ export function FilterItem(props: Props) {
                 }),
             icon: negate ? 'plusInCircle' : 'minusInCircle',
             onClick: () => {
-              setIsPopoverOpen(false);
+              closePopover();
               onToggleNegated();
             },
             'data-test-subj': 'negateFilter',
@@ -217,7 +225,7 @@ export function FilterItem(props: Props) {
                 }),
             icon: `${disabled ? 'eye' : 'eyeClosed'}`,
             onClick: () => {
-              setIsPopoverOpen(false);
+              closePopover();
               onToggleDisabled();
             },
             'data-test-subj': 'disableFilter',
@@ -229,7 +237,7 @@ export function FilterItem(props: Props) {
             }),
             icon: 'trash',
             onClick: () => {
-              setIsPopoverOpen(false);
+              closePopover();
               props.onRemove();
             },
             'data-test-subj': 'deleteFilter',
@@ -245,9 +253,7 @@ export function FilterItem(props: Props) {
               filter={filter}
               indexPatterns={indexPatterns}
               onSubmit={onSubmit}
-              onCancel={() => {
-                setIsPopoverOpen(false);
-              }}
+              onCancel={closePopover}
             />
           </div>
         ),
@@ -352,14 +358,25 @@ export function FilterItem(props: Props) {
       className={`globalFilterItem__popover`}
       anchorClassName={`globalFilterItem__popoverAnchor`}
       isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
+      closePopover={closePopover}
       button={badge}
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} size="s" />
+      <EuiContextMenu
+        className={classNames('globalFilterItem__contextMenu', {
+          'globalFilterItem__contextMenu--editorActive': isEditorActive,
+        })}
+        initialPanelId={0}
+        onFocusCapture={(event) => {
+          const target = event.target as Element;
+          if (!isEditorActive && target.closest('.globalFilterItem__editorForm')) {
+            setIsEditorActive(true);
+          }
+        }}
+        panels={getPanels()}
+        size="s"
+      />
     </EuiPopover>
   );
 }

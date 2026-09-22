@@ -62,9 +62,13 @@ export function getOperatorOptions(field: IFieldType) {
 
 export function validateParams(params: any, type: string) {
   switch (type) {
-    case 'date':
+    case 'date': {
+      if (typeof params === 'number') {
+        return Number.isFinite(params);
+      }
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
       return Boolean(typeof params === 'string' && moment && moment.isValid());
+    }
     case 'ip':
       try {
         return params.includes('/')

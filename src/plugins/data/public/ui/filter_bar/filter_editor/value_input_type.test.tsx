@@ -4,6 +4,7 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import moment from 'moment';
 import { ValueInputType } from './value_input_type';
 
 let onChangeMock: any;
@@ -51,17 +52,47 @@ describe('Value input type', () => {
     expect(component.find('EuiSelect').prop('value')).toBe('true');
   });
 
-  it('is date', async () => {
+  it('offers a date picker while preserving manual date input', async () => {
+    const onChange = jest.fn();
     const valueInputProps = {
-      value: 'Jun 18, 2024 @ 12:01:55.000',
+      value: 'now-15m',
       type: 'date',
-      onChange: () => {},
+      onChange,
       onBlur: () => {},
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component.find('EuiFieldText').exists()).toBeTruthy();
-    expect(component.find('EuiFieldText').prop('value')).toBe('Jun 18, 2024 @ 12:01:55.000');
+    const datePicker = component.find('EuiDatePicker');
+
+    expect(datePicker.exists()).toBeTruthy();
+    expect(datePicker.prop('value')).toBe('now-15m');
+
+    component.find('input').simulate('change', { target: { value: 'now/d' } });
+    expect(onChange).toHaveBeenCalledWith('now/d');
+  });
+
+  it('returns picker-selected dates as epoch milliseconds', async () => {
+    const onChange = jest.fn();
+    const component = mountWithIntl(
+      <ValueInputType value="" type="date" onChange={onChange} placeholder="" />
+    );
+    const selectedDate = moment('2026-09-16T10:15:30.000Z');
+    const datePicker = component.find('EuiDatePicker');
+
+    datePicker.prop('onChange')?.(selectedDate);
+
+    expect(onChange).toHaveBeenCalledWith(selectedDate.valueOf());
+  });
+
+  it('handles date picker blur without a DOM event', async () => {
+    const onBlur = jest.fn();
+    const component = mountWithIntl(
+      <ValueInputType type="date" onChange={jest.fn()} onBlur={onBlur} placeholder="" />
+    );
+    const datePicker = component.find('EuiDatePicker');
+
+    expect(() => (datePicker.prop('onBlur') as () => void)()).not.toThrow();
+    expect(onBlur).not.toHaveBeenCalled();
   });
 
   it('is ip', async () => {
