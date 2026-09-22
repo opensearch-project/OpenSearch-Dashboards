@@ -201,7 +201,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     <strong>
                       <FormattedMessage
                         id="visualizations.newVisWizard.legacyTypesTitle"
-                        defaultMessage="Legacy visualization types"
+                        defaultMessage="Classic visualization types"
                       />
                     </strong>
                   </EuiText>
@@ -261,7 +261,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                 {this.renderTypeSelector(
                   filteredLegacyTypes,
                   i18n.translate('visualizations.newVisWizard.filterLegacyTypesPlaceholder', {
-                    defaultMessage: 'Filter legacy visualization types',
+                    defaultMessage: 'Filter classic visualization types',
                   }),
                   i18n.translate('visualizations.newVisWizard.selectLegacyVisType', {
                     defaultMessage: 'Select a legacy visualization type',
