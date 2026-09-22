@@ -288,3 +288,53 @@ test('it should cap rows client-side and warn when response exceeds CLIENT_ROW_C
   expect(onWarn.mock.calls[0][0]).toContain('30000');
   expect(onWarn.mock.calls[0][0]).toContain('30001');
 });
+
+test('it should warn and continue when one of multiple requests fails', async () => {
+  let callCount = 0;
+  const mixedHttpMock = {
+    post: jest.fn(() => {
+      callCount++;
+      if (callCount === 1) return Promise.reject(new Error('network error'));
+      return Promise.resolve({ body: { fields: defaultFields() } });
+    }),
+  };
+  const { parser, onWarn } = makeParser(mixedHttpMock as any);
+  const r1 = parser.parseUrl(
+    { name: 'r1' },
+    { '%datasource%': 'ds1', '%context%': true, body: { query: 'up' } }
+  );
+  const r2 = parser.parseUrl(
+    { name: 'r2' },
+    { '%datasource%': 'ds2', '%context%': true, body: { query: 'node_load1' } }
+  );
+
+  await parser.populateData([r1, r2]);
+
+  // r2 should still have data despite r1 failing
+  expect(r2.dataObject.values).toHaveLength(2);
+  // r1 should be left without values
+  expect(r1.dataObject.values).toBeUndefined();
+  // a warning should identify the failing request by index
+  expect(onWarn).toHaveBeenCalledTimes(1);
+  expect(onWarn.mock.calls[0][0]).toContain('1');
+  expect(onWarn.mock.calls[0][0]).toContain('network error');
+});
+
+test('it should warn for every failed request when all requests fail', async () => {
+  const failingHttpMock = {
+    post: jest.fn(() => Promise.reject(new Error('timeout'))),
+  };
+  const { parser, onWarn } = makeParser(failingHttpMock as any);
+  const r1 = parser.parseUrl(
+    {},
+    { '%datasource%': 'ds1', '%context%': true, body: { query: 'up' } }
+  );
+  const r2 = parser.parseUrl(
+    {},
+    { '%datasource%': 'ds2', '%context%': true, body: { query: 'node_load1' } }
+  );
+
+  await parser.populateData([r1, r2]);
+
+  expect(onWarn).toHaveBeenCalledTimes(2);
+});
