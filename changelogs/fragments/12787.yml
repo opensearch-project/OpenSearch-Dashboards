@@ -1,2 +1,0 @@
-fix:
-- Keep the time field available to the histogram query so a `fields` projection does not silently remove the chart ([#12787](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12787))
