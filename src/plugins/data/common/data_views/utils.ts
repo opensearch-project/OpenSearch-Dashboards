@@ -47,7 +47,8 @@ export const validateDataViewDataSourceReference = (
 ) => {
   const references = dataView.references;
   if (dataSourceId) {
-    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
+    // Strict by design: drives create/save dedup — must not match legacy engine-typed refs.
+    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
   } else {
     return references.length === 0;
   }
@@ -84,10 +85,9 @@ export const concatDataSourceWithDataView = (dataSourceTitle: string, dataViewTi
   return dataSourceTitle.concat(DATA_SOURCE_DATA_VIEW_DELIMITER).concat(dataViewTitle);
 };
 
-// Match by reference name as well as type, tolerating datasets whose reference `type`
-// was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+// Match by name or type (tolerating legacy engine-typed refs); require a non-empty id.
 export const isDataSourceReference = (ref: DataViewSavedObjectReference) =>
-  ref.name === 'dataSource' || ref.type === 'data-source';
+  !!ref.id && (ref.name === 'dataSource' || ref.type === 'data-source');
 
 export const getDataSourceReference = (references: DataViewSavedObjectReference[]) => {
   return references.find(isDataSourceReference);

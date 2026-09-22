@@ -126,6 +126,7 @@ const fetchIndexPatterns = async (
       'timeFieldName',
       'references',
       'signalType',
+      'schemaMappings',
       'description',
       'type',
     ],
@@ -158,6 +159,10 @@ const fetchIndexPatterns = async (
     const dataSourceId = getDataSourceIdFromIndexPattern(savedObject);
     const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
+    // schemaMappings is stored as a JSON string; parse it so toDataset emits an object.
+    const rawSchemaMappings = (savedObject.attributes as { schemaMappings?: string })
+      .schemaMappings;
+
     const indexPatternDataStructure: DataStructure = {
       id: savedObject.id,
       title: savedObject.attributes.title,
@@ -167,6 +172,7 @@ const fetchIndexPatterns = async (
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
         signalType: savedObject.attributes.signalType,
+        ...(rawSchemaMappings && { schemaMappings: JSON.parse(rawSchemaMappings) }),
         description: savedObject.attributes.description,
         // Saved-object `type` attribute (distinct from the CUSTOM meta discriminator above),
         // carried so toDataset can preserve a non-INDEX_PATTERN dataset type.

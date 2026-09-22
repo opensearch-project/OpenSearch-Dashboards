@@ -69,7 +69,8 @@ export const validateDataSourceReference = (
 ) => {
   const references = indexPattern.references;
   if (dataSourceId) {
-    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
+    // Strict by design: drives create/save dedup — must not match legacy engine-typed refs.
+    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
   } else {
     // No datasource id passed as input meaning we are getting index pattern from default cluster,
     // and it's supposed to be an empty array
@@ -114,10 +115,9 @@ export const concatDataSourceWithIndexPattern = (
   return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(indexPatternTitle);
 };
 
-// Match by reference name as well as type, tolerating datasets whose reference `type`
-// was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+// Match by name or type (tolerating legacy engine-typed refs); require a non-empty id.
 export const isDataSourceReference = (ref: SavedObjectReference) =>
-  ref.name === 'dataSource' || ref.type === 'data-source';
+  !!ref.id && (ref.name === 'dataSource' || ref.type === 'data-source');
 
 export const getDataSourceReference = (references: SavedObjectReference[]) => {
   return references.find(isDataSourceReference);

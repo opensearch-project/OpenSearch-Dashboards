@@ -220,7 +220,10 @@ export class DatasetService {
   public async saveDataset(
     dataset: Dataset,
     services: Partial<IDataPluginServices>,
-    signalType?: string
+    signalType?: string,
+    // Re-selection flows set this to reuse an existing dataset; creates leave it false so a
+    // real conflict still surfaces.
+    reuseExisting: boolean = false
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
@@ -258,13 +261,11 @@ export class DatasetService {
         // Consider fetching fields after createAndSave and updating the saved object:
         //   const dataView = await createAndSave(...);
         //   if (asyncType) { await type.fetchFields(...); await dataViews.updateSavedObject(dataView); }
-        // reuseExisting=true: re-selecting a dataset that already exists (same title + data
-        // source) reuses it instead of throwing DuplicateDataViewError and dropping the selection.
         const createdDataView = await services.data?.dataViews.createAndSave(
           spec,
           undefined,
           asyncType,
-          true
+          reuseExisting
         );
 
         // Update the dataset with the id of the saved (or reused) data view.

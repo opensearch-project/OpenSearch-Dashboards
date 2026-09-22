@@ -400,9 +400,8 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getSaveObjectReference = () => {
-    // Always persist the registered saved-object type, never the engine type that
-    // dataSourceRef.type may hold after initialization (engine type belongs in Dataset.dataSource).
-    return this.dataSourceRef
+    // Persist the registered SO type; skip empty-id refs (e.g. local-cluster default).
+    return this.dataSourceRef?.id
       ? [
           {
             id: this.dataSourceRef.id,

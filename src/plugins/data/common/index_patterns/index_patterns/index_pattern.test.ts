@@ -343,6 +343,12 @@ describe('IndexPatternWithDataSource', () => {
       expect(indexPattern.getSaveObjectReference()[0]?.type).toEqual('data-source');
       expect(indexPattern.getSaveObjectReference()[0]?.name).toEqual('dataSource');
     });
+
+    test('does not persist a reference for an empty-id dataSourceRef', function () {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
+      indexPattern.dataSourceRef = { id: '', type: 'DATA_SOURCE', name: 'dataSource' };
+      expect(indexPattern.getSaveObjectReference()).toEqual([]);
+    });
   });
 
   describe('flattenHit', () => {

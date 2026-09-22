@@ -159,4 +159,13 @@ describe('test getDataSourceIdFromIndexPattern', () => {
       })
     ).toBe('ds-4');
   });
+
+  test('ignores a data-source reference with an empty id', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: '', type: 'DATA_SOURCE', name: 'dataSource' }],
+      })
+    ).toBeUndefined();
+  });
 });
