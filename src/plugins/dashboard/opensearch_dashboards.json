@@ -11,8 +11,13 @@
     "uiActions",
     "savedObjects"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "starterSuggestions"],
+  "optionalPlugins": ["home", "share", "usageCollection", "starterSuggestions", "contextProvider"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home", "contextProvider"]
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact",
+    "home",
+    "contextProvider"
+  ]
 }
