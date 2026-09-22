@@ -46,6 +46,7 @@ import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder, RequestStatistics } from '../../../inspector/public';
 import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
+import { PromQLHttpResponse } from './types';
 
 interface RawPPLStrategySearchResponse {
   rawResponse: {
@@ -165,6 +166,28 @@ export class SearchAPI {
       searchFields: ['title'],
       fields: ['id', 'title', 'dataSourceEngineType'],
     });
+  }
+
+  async searchPromQL(name: string, requestBody: object): Promise<PromQLHttpResponse> {
+    let requestResponder: RequestResponder | undefined;
+    if (this.inspectorAdapters) {
+      requestResponder = this.inspectorAdapters.requests.start(name, { name });
+      requestResponder.json(requestBody);
+    }
+    try {
+      const response = await this.dependencies.http.post<PromQLHttpResponse>(
+        '/api/enhancements/search/promql',
+        {
+          body: JSON.stringify(requestBody),
+          signal: this.abortSignal,
+        }
+      );
+      requestResponder?.ok({ json: response });
+      return response;
+    } catch (error) {
+      requestResponder?.error({ json: { error } });
+      throw error;
+    }
   }
 
   public resetSearchStats() {

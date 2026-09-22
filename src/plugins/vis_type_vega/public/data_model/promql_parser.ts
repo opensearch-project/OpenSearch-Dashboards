@@ -4,9 +4,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup } from 'opensearch-dashboards/public';
-import { Data, UrlObject, PromQLQueryRequest } from './types';
+import { Data, UrlObject, PromQLQueryRequest, PromQLHttpResponse } from './types';
 import { TimeCache } from './time_cache';
+import { SearchAPI } from './search_api';
 
 const DATASOURCE = '%datasource%';
 const CONTEXT = '%context%';
@@ -16,28 +16,18 @@ const STEP = '%step%';
 // supports 20 series of 60s steps for 24 hours
 const CLIENT_ROW_CAP = 30_000;
 
-interface PromQLHttpResponse {
-  body: {
-    fields: Array<{
-      name: string;
-      values: unknown[];
-    }>;
-    meta?: {
-      truncation?: {
-        tableTruncated: boolean;
-        totalSeriesCount: number;
-        displayedSeriesCount: number;
-      };
-    };
-  };
-}
+const getRequestName = (request: PromQLQueryRequest, index: number) =>
+  (request.dataObject.name as string | undefined) ||
+  i18n.translate('visTypeVega.promqlQueryParser.unnamedRequest', {
+    defaultMessage: 'Unnamed request #{index}',
+    values: { index },
+  });
 
 export class PromQLQueryParser {
   constructor(
     private readonly timeCache: TimeCache,
-    private readonly http: CoreSetup['http'],
-    private readonly onWarning: (...args: string[]) => void,
-    private readonly abortSignal?: AbortSignal
+    private readonly searchAPI: SearchAPI,
+    private readonly onWarning: (...args: string[]) => void
   ) {}
 
   parseUrl(dataObject: Data, url: UrlObject): PromQLQueryRequest {
@@ -85,7 +75,7 @@ export class PromQLQueryParser {
     const timeRange = this.timeCache._timeRange;
 
     const results = await Promise.allSettled(
-      requests.map(async (request) => {
+      requests.map(async (request, index) => {
         const options: { maxDataPoints?: number; step?: number } = {};
         if (request.maxDataPoints !== undefined) {
           options.maxDataPoints = request.maxDataPoints;
@@ -114,12 +104,9 @@ export class PromQLQueryParser {
           ...(request.useContext && timeRange ? { timeRange } : {}),
         };
 
-        const response = await this.http.post<PromQLHttpResponse>(
-          '/api/enhancements/search/promql',
-          {
-            body: JSON.stringify(requestBody),
-            signal: this.abortSignal,
-          }
+        const response = await this.searchAPI.searchPromQL(
+          getRequestName(request, index),
+          requestBody
         );
 
         const fields = response.body?.fields ?? [];
