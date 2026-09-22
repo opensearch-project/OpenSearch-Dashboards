@@ -181,6 +181,15 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
     gap: $ouiSizeS;
   }
 
+  &__learnMore {
+    // `block` for `margin-top`, which is ignored on the anchor's default `inline`.
+    // `fit-content` so the click target stops at the label, not the whole column.
+    display: block;
+    font-size: $ouiFontSizeXS;
+    margin-top: $ouiSizeM;
+    width: fit-content;
+  }
+
   &__chip {
     background: $ouiColorEmptyShade;
     border: 1px solid $ouiBorderColor;
