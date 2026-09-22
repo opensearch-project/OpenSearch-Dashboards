@@ -139,6 +139,11 @@ import { VariablesBar } from './application/components/dashboard_variables';
 import { dashboardNavPopover } from './dashboard_nav_popover';
 import { StarterSuggestionsPluginSetup } from '../../starter_suggestions/public';
 import { registerDashboardStarterSuggestions } from './starter_suggestions';
+import { ContextProviderStart } from '../../context_provider/public';
+import {
+  registerListDashboardsAction,
+  LIST_DASHBOARDS_TOOL_DEFINITION,
+} from './actions/list_dashboards_action';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -177,6 +182,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
@@ -236,6 +242,7 @@ export class DashboardPlugin implements Plugin<
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
   private starterSuggestions?: ReturnType<typeof registerDashboardStarterSuggestions>;
+  private unregisterAssistantAction?: ContextProviderStart['actions']['unregisterAssistantAction'];
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -685,6 +692,12 @@ export class DashboardPlugin implements Plugin<
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
+    this.unregisterAssistantAction = plugins.contextProvider?.actions.unregisterAssistantAction;
+    registerListDashboardsAction(plugins.contextProvider?.actions.registerAssistantAction, {
+      savedObjectsClient: core.savedObjects.client,
+      getDashboardTypes: () => Object.keys(this.dashboardProviders || {}),
+    });
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
@@ -722,5 +735,6 @@ export class DashboardPlugin implements Plugin<
       this.stopUrlTracking();
     }
     this.starterSuggestions?.registration.unregister();
+    this.unregisterAssistantAction?.(LIST_DASHBOARDS_TOOL_DEFINITION.name);
   }
 }
