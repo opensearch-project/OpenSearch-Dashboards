@@ -84,7 +84,7 @@ export class PromQLQueryParser {
   async populateData(requests: PromQLQueryRequest[]) {
     const timeRange = this.timeCache._timeRange;
 
-    await Promise.all(
+    const results = await Promise.allSettled(
       requests.map(async (request) => {
         const options: { maxDataPoints?: number; step?: number } = {};
         if (request.maxDataPoints !== undefined) {
@@ -169,6 +169,21 @@ export class PromQLQueryParser {
         }
       })
     );
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        this.onWarning(
+          i18n.translate('visTypeVega.promqlQueryParser.requestFailedWarning', {
+            defaultMessage: 'PromQL request {index} failed: {message}',
+            values: {
+              index: index + 1,
+              message:
+                result.reason instanceof Error ? result.reason.message : String(result.reason),
+            },
+          })
+        );
+      }
+    });
   }
 
   private parsePositiveNumber(value: unknown): number | undefined {
