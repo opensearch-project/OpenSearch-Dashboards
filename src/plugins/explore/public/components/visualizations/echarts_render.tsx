@@ -6,6 +6,8 @@
 import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
@@ -32,6 +34,16 @@ interface SharedAxisPointerEvent {
 
 const sharedCrosshairGroups = new Map<string, Set<echarts.ECharts>>();
 let activePointerChart: echarts.ECharts | undefined;
+
+const getRenderErrorMessage = (error: unknown) => {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return i18n.translate('explore.visualizations.renderError.unknownError', {
+    defaultMessage: 'An unknown rendering error occurred.',
+  });
+};
 
 /**
  * Converts the shared axis value into coordinates local to the target chart.
@@ -147,6 +159,7 @@ const hideSharedCrosshair = (group: string, source: echarts.ECharts) => {
 export const EchartsRender = React.memo(
   ({ spec, group, onSelectTimeRange, legendSelected$, highlightedLegendTarget$ }: Props) => {
     const [instance, setInstance] = useState<echarts.ECharts | null>(null);
+    const [renderError, setRenderError] = useState<string>();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const instanceRef = useRef<echarts.ECharts | null>(null);
 
@@ -292,21 +305,26 @@ export const EchartsRender = React.memo(
           }
         }
 
-        instance.setOption(option, { notMerge: true });
-        instance.setTheme(DEFAULT_THEME);
+        try {
+          instance.setOption(option, { notMerge: true });
+          instance.setTheme(DEFAULT_THEME);
 
-        if (
-          (xAxis?.type === 'time' && !xAxis.silent) ||
-          (yAxis?.type === 'time' && !yAxis.silent)
-        ) {
-          instance.dispatchAction({
-            type: 'takeGlobalCursor',
-            key: 'brush',
-            brushOption: {
-              brushType: xAxis?.type === 'time' ? 'lineX' : 'lineY',
-              brushMode: 'single',
-            },
-          });
+          if (
+            (xAxis?.type === 'time' && !xAxis.silent) ||
+            (yAxis?.type === 'time' && !yAxis.silent)
+          ) {
+            instance.dispatchAction({
+              type: 'takeGlobalCursor',
+              key: 'brush',
+              brushOption: {
+                brushType: xAxis?.type === 'time' ? 'lineX' : 'lineY',
+                brushMode: 'single',
+              },
+            });
+          }
+          setRenderError(undefined);
+        } catch (error) {
+          setRenderError(getRenderErrorMessage(error));
         }
       }
     }, [spec, instance, onSelectTimeRange, legendSelected$]);
@@ -346,11 +364,57 @@ export const EchartsRender = React.memo(
       <div
         style={{
           height: '100%',
-          overflowX: 'auto',
-          ...(shouldScroll && { width: widthPercentage }),
+          position: 'relative',
         }}
-        ref={containerRef}
-      />
+      >
+        <div
+          style={{
+            height: '100%',
+            overflowX: 'auto',
+            visibility: renderError ? 'hidden' : 'visible',
+            ...(shouldScroll && { width: widthPercentage }),
+          }}
+          ref={containerRef}
+        />
+        {renderError && (
+          <div
+            role="alert"
+            data-test-subj="echartsRenderError"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'auto',
+            }}
+          >
+            <EuiEmptyPrompt
+              iconType="alert"
+              color="danger"
+              title={
+                <h2>
+                  {i18n.translate('explore.visualizations.renderError.title', {
+                    defaultMessage: 'Unable to render visualization',
+                  })}
+                </h2>
+              }
+              body={
+                <>
+                  <p>
+                    {i18n.translate('explore.visualizations.renderError.body', {
+                      defaultMessage: 'Check the selected fields and data, then try again.',
+                    })}
+                  </p>
+                  <p>
+                    <EuiTextColor color="subdued">{renderError}</EuiTextColor>
+                  </p>
+                </>
+              }
+            />
+          </div>
+        )}
+      </div>
     );
   }
 );

@@ -11,6 +11,7 @@
   - [Pie](#pie)
   - [Scatter](#scatter)
   - [Heatmap](#heatmap)
+  - [Sankey](#sankey)
   - [Metric](#metric)
   - [Gauge](#gauge)
   - [Bar Gauge](#bar-gauge)
@@ -27,7 +28,7 @@ Each chart type registers one or more `VisRule` objects. A rule declares:
 - **mappings** — one or more axis-role-to-field-type maps; a rule matches if any mapping is compatible with the input columns
 - **render** — produces the chart React element
 
-Axis roles: `x`, `y`, `y2`, `color`, `facet`, `size`, `value`, `time`
+Axis roles: `x`, `y`, `y2`, `source`, `target`, `color`, `facet`, `size`, `value`, `time`
 Field types: `numerical`, `categorical`, `date`
 
 ## Rules Summary by Chart Type
@@ -40,6 +41,7 @@ Field types: `numerical`, `categorical`, `date`
 | Pie            | 2       | Num×Cat (size×color), Num×Num (size×color)                                                                                                     |
 | Scatter        | 3       | Num×Num, Num×Num×Cat, Num×Num×Cat×Num(size)                                                                                                    |
 | Heatmap        | 1       | Cat×Cat×Num (x×y×color)                                                                                                                        |
+| Sankey         | 1       | Cat×Cat×Num (source×target×value)                                                                                                              |
 | Metric         | 4       | Num(value), Num×Date(value×time), Num×Cat(value×facet), Num×Date×Cat(value×time×facet)                                                         |
 | Gauge          | 1       | Num(value)                                                                                                                                     |
 | Bar Gauge      | 1       | Num×Cat (y×x or x×y)                                                                                                                           |
@@ -117,6 +119,13 @@ Note: Many bar rules include a swapped mapping variant (x↔y) to support horizo
 <table>
   <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
   <tr><td>90</td><td><code>x: categorical, y: categorical, color: numerical</code></td><td>Regular heatmap</td></tr>
+</table>
+
+### Sankey
+
+<table>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>80</td><td><code>source: categorical, target: categorical, value: numerical</code></td><td>Sankey flow chart</td></tr>
 </table>
 
 ### Metric

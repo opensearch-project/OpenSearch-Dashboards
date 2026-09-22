@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, render } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { EchartsRender } from './echarts_render';
 import { LegendTarget } from './utils/legend';
@@ -71,6 +71,90 @@ describe('EchartsRender', () => {
       observe: jest.fn(),
       disconnect: jest.fn(),
     }));
+  });
+
+  it('shows a local error state when ECharts cannot render the visualization', () => {
+    const instance = createMockEchartsInstance();
+    instance.setOption.mockImplementationOnce(() => {
+      throw new Error('Sankey is a DAG, the original data has cycle!');
+    });
+    jest.requireMock('echarts').init.mockImplementationOnce(() => {
+      mockEchartsInstances.push(instance);
+      return instance;
+    });
+
+    render(
+      <EchartsRender
+        spec={{
+          series: [
+            {
+              type: 'sankey',
+              data: [{ name: 'A' }, { name: 'B' }],
+              links: [
+                { source: 'A', target: 'B', value: 1 },
+                { source: 'B', target: 'A', value: 1 },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('echartsRenderError')).toBeInTheDocument();
+    expect(screen.getByText('Unable to render visualization')).toBeInTheDocument();
+    expect(
+      screen.getByText('Check the selected fields and data, then try again.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Sankey is a DAG, the original data has cycle!')).toBeInTheDocument();
+  });
+
+  it('retries rendering when the visualization spec changes after an error', async () => {
+    const instance = createMockEchartsInstance();
+    instance.setOption.mockImplementationOnce(() => {
+      throw new Error('Sankey is a DAG, the original data has cycle!');
+    });
+    jest.requireMock('echarts').init.mockImplementationOnce(() => {
+      mockEchartsInstances.push(instance);
+      return instance;
+    });
+
+    const { rerender } = render(
+      <EchartsRender
+        spec={{
+          series: [
+            {
+              type: 'sankey',
+              data: [{ name: 'A' }, { name: 'B' }],
+              links: [
+                { source: 'A', target: 'B', value: 1 },
+                { source: 'B', target: 'A', value: 1 },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('echartsRenderError')).toBeInTheDocument();
+
+    rerender(
+      <EchartsRender
+        spec={{
+          series: [
+            {
+              type: 'sankey',
+              data: [{ name: 'A' }, { name: 'B' }],
+              links: [{ source: 'A', target: 'B', value: 1 }],
+            },
+          ],
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('echartsRenderError')).not.toBeInTheDocument();
+    });
+    expect(instance.setOption).toHaveBeenCalledTimes(2);
   });
 
   it('highlights series targets by seriesName', () => {
