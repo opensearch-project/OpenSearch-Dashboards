@@ -69,6 +69,7 @@ describe('bar to_expression', () => {
       expect(spec).toHaveProperty('yAxis');
       expect(spec.series.length).toBeGreaterThanOrEqual(1);
       expect(spec.series[0].type).toBe('bar');
+      expect(spec.series[0].emphasis).toEqual({ focus: 'series' });
       expect(legendItems).toEqual([
         {
           label: 'Count',

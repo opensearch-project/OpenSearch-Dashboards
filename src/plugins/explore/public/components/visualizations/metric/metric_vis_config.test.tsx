@@ -30,7 +30,7 @@ describe('createMetrictmapeConfig', () => {
     const config = createMetricConfig();
     const defaults = config.ui.style.defaults;
     // Verify basic controls
-    expect(defaults.showTitle).toBe(true);
+    expect(defaults).not.toHaveProperty('showTitle');
     expect(defaults.title).toBe('');
     expect(defaults.fontSize).toBe(undefined);
     expect(defaults.thresholdOptions).toMatchObject({
@@ -46,7 +46,6 @@ describe('createMetrictmapeConfig', () => {
     const mockProps = {
       styleOptions: {
         ...config.ui.style.defaults,
-        showTitle: true,
         title: '',
         fontSize: 60,
         useThresholdColor: false,

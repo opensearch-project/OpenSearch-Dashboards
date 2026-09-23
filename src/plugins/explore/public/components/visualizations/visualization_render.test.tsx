@@ -19,8 +19,8 @@ const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Ren
 const mockFindRuleByAxesMapping = jest.fn();
 const mockSplitContainer = jest.fn(({ groups, renderChart }) => (
   <div data-test-subj="splitContainer">
-    {groups.map((group: string) => (
-      <div key={group}>{renderChart(group)}</div>
+    {groups.map((group: { original: string; displayName: string }) => (
+      <div key={group.original}>{renderChart(group.original)}</div>
     ))}
   </div>
 ));
@@ -430,6 +430,136 @@ describe('VisualizationRender', () => {
         }),
       })
     );
+  });
+
+  describe('series display names', () => {
+    const splitConfig: RenderChartConfig = {
+      type: 'pie',
+      styles: {},
+      axesMapping: { size: 'count', color: 'field1' },
+      splitField: 'split',
+      showSplitLabel: true,
+    };
+
+    it('renders split groups with their display name while keying off the original value', () => {
+      const splitRender = jest.fn((_props: any) => (
+        <div data-test-subj="splitChart">Split Chart</div>
+      ));
+      mockFindRuleByAxesMapping.mockReturnValue({ render: splitRender });
+
+      render(
+        <CommonVisualizationRender
+          visualizationData={{
+            ...mockSplitVisData,
+            seriesDisplayNames: { one: 'Group One', two: 'Group Two' },
+          }}
+          visConfig={splitConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(mockSplitContainer.mock.calls[0][0].groups).toEqual([
+        { original: 'one', displayName: 'Group One' },
+        { original: 'two', displayName: 'Group Two' },
+      ]);
+
+      // The display name is what the chart shows as its title...
+      expect(splitRender.mock.calls[0][0].renderContext.seriesName).toBe('Group One');
+      expect(splitRender.mock.calls[1][0].renderContext.seriesName).toBe('Group Two');
+      // ...while the data is still filtered by the original split value.
+      expect(splitRender.mock.calls[0][0].data).toEqual([
+        { field1: 'A', split: 'one', count: 10 },
+        { field1: 'C', split: 'one', count: 20 },
+      ]);
+      expect(splitRender.mock.calls[1][0].data).toEqual([
+        { field1: 'B', split: 'two', count: 30 },
+        { field1: 'C', split: 'two', count: 40 },
+      ]);
+    });
+
+    it('falls back to the original value for split groups without a display name', () => {
+      const splitRender = jest.fn((_props: any) => (
+        <div data-test-subj="splitChart">Split Chart</div>
+      ));
+      mockFindRuleByAxesMapping.mockReturnValue({ render: splitRender });
+
+      render(
+        <CommonVisualizationRender
+          visualizationData={{
+            ...mockSplitVisData,
+            seriesDisplayNames: { one: 'Group One' },
+          }}
+          visConfig={splitConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(mockSplitContainer.mock.calls[0][0].groups).toEqual([
+        { original: 'one', displayName: 'Group One' },
+        { original: 'two', displayName: 'two' },
+      ]);
+      expect(splitRender.mock.calls[0][0].renderContext.seriesName).toBe('Group One');
+      expect(splitRender.mock.calls[1][0].renderContext.seriesName).toBe('two');
+    });
+
+    it('uses the split value when no display names are available', () => {
+      const splitRender = jest.fn((_props: any) => (
+        <div data-test-subj="splitChart">Split Chart</div>
+      ));
+      mockFindRuleByAxesMapping.mockReturnValue({ render: splitRender });
+
+      render(
+        <CommonVisualizationRender
+          visualizationData={mockSplitVisData}
+          visConfig={splitConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(mockSplitContainer.mock.calls[0][0].groups).toEqual([
+        { original: 'one', displayName: 'one' },
+        { original: 'two', displayName: 'two' },
+      ]);
+      expect(splitRender.mock.calls[0][0].renderContext.seriesName).toBe('one');
+      expect(splitRender.mock.calls[1][0].renderContext.seriesName).toBe('two');
+    });
+
+    it('forwards the display name map to every split chart', () => {
+      const splitRender = jest.fn((_props: any) => (
+        <div data-test-subj="splitChart">Split Chart</div>
+      ));
+      mockFindRuleByAxesMapping.mockReturnValue({ render: splitRender });
+      const seriesDisplayNames = { one: 'Group One', two: 'Group Two' };
+
+      render(
+        <CommonVisualizationRender
+          visualizationData={{ ...mockSplitVisData, seriesDisplayNames }}
+          visConfig={splitConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(splitRender.mock.calls[0][0].seriesDisplayNames).toEqual(seriesDisplayNames);
+      expect(splitRender.mock.calls[1][0].seriesDisplayNames).toEqual(seriesDisplayNames);
+    });
+
+    it('does not set a series name when the chart is not split', () => {
+      const chartRender = jest.fn((_props: any) => <div data-test-subj="chart">Chart</div>);
+      mockFindRuleByAxesMapping.mockReturnValue({ render: chartRender });
+
+      render(
+        <CommonVisualizationRender
+          visualizationData={{
+            ...mockVisData,
+            seriesDisplayNames: { value1: 'Display One' },
+          }}
+          visConfig={mockChartConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(chartRender.mock.calls[0][0].renderContext.seriesName).toBeUndefined();
+    });
   });
 
   it('does not use compact split panel height for non-metric charts', () => {
