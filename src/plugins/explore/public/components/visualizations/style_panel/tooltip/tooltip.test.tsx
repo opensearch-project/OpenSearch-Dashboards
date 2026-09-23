@@ -21,11 +21,13 @@ describe('TooltipOptionsPanel', () => {
         onTooltipOptionsChange={mockOnTooltipChange}
       />
     );
-    const toolTip = screen.getByTestId('tooltipModeSwitch');
-    expect(toolTip).toBeInTheDocument();
+    expect(screen.getByTestId('tooltipModeButtonGroup')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltipModeAll')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltipModeSingle')).toBeInTheDocument();
+    expect(screen.getByTestId('tooltipModeHidden')).toBeInTheDocument();
   });
 
-  it('update tooltip mode', () => {
+  it('updates tooltip mode to single', () => {
     render(
       <TooltipOptionsPanel
         tooltipOptions={mockTooltip}
@@ -33,9 +35,21 @@ describe('TooltipOptionsPanel', () => {
       />
     );
 
-    const tooltipSwitch = screen.getByTestId('tooltipModeSwitch');
+    fireEvent.click(screen.getByTestId('tooltipModeSingle'));
+    expect(mockOnTooltipChange).toHaveBeenLastCalledWith({
+      mode: 'single',
+    });
+  });
 
-    fireEvent.click(tooltipSwitch);
+  it('updates tooltip mode to hidden', () => {
+    render(
+      <TooltipOptionsPanel
+        tooltipOptions={mockTooltip}
+        onTooltipOptionsChange={mockOnTooltipChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('tooltipModeHidden'));
     expect(mockOnTooltipChange).toHaveBeenLastCalledWith({
       mode: 'hidden',
     });
