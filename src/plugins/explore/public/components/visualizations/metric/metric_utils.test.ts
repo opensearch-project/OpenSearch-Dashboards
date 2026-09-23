@@ -43,7 +43,6 @@ describe('metric_utils', () => {
       it('should create basic metric series structure', () => {
         const styles: MetricChartStyle = {
           ...defaultMetricChartStyles,
-          showTitle: true,
           title: 'Test Title',
         };
 
@@ -68,7 +67,6 @@ describe('metric_utils', () => {
 
         const styles: MetricChartStyle = {
           ...defaultMetricChartStyles,
-          showTitle: true,
           title: 'Test Metric',
         };
 
