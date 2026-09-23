@@ -31,6 +31,7 @@
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
+import { isDataSourceReference } from '../utils';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
@@ -89,7 +90,7 @@ export const createEnsureDefaultIndexPattern = (
             const existDataSources = datasources.map((item) => item.id);
             patterns = [];
             indexPatterns.forEach((item) => {
-              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const sourceRef = item.references?.find(isDataSourceReference);
               let isDataSourceReferenceValid = false;
               /**
                * The reference is valid when either:

@@ -297,6 +297,7 @@ describe('DatasetService', () => {
         schemaMappings: { otelLogs: { spanId: 'span.id' } },
       }),
       undefined,
+      false,
       false
     );
 
@@ -358,6 +359,7 @@ describe('DatasetService', () => {
         },
       }),
       undefined,
+      false,
       false
     );
 

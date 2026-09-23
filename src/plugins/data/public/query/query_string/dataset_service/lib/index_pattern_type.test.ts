@@ -374,6 +374,7 @@ describe('indexPatternTypeConfig', () => {
           'timeFieldName',
           'references',
           'signalType',
+          'schemaMappings',
           'description',
           'type',
         ],
