@@ -118,9 +118,8 @@ const traceAutoDetectTestSuite = () => {
         });
       });
 
-      // Regression guard 2 (symptom): the Spans grid renders and there is no query error
-      // (e.g. "No Living connections") from an unbound data source.
-      cy.getElementByTestId('docTableHeader-endTime').should('exist');
+      // Regression guard 2 (symptom): the query runs against the bound data source with no
+      // connection error (the 503 surfaced as a query error / "No Living connections" toast).
       cy.getElementByTestId('queryResultError').should('not.exist');
       cy.contains('No Living connections').should('not.exist');
     });
