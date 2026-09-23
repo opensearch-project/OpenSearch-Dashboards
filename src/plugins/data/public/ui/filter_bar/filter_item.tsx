@@ -74,7 +74,6 @@ export type FilterLabelStatus =
 
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [isEditorActive, setIsEditorActive] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
   const { id, filter, indexPatterns } = props;
 
@@ -97,7 +96,6 @@ export function FilterItem(props: Props) {
 
   function closePopover() {
     setIsPopoverOpen(false);
-    setIsEditorActive(false);
   }
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
@@ -364,16 +362,8 @@ export function FilterItem(props: Props) {
       panelPaddingSize="none"
     >
       <EuiContextMenu
-        className={classNames('globalFilterItem__contextMenu', {
-          'globalFilterItem__contextMenu--editorActive': isEditorActive,
-        })}
+        className="globalFilterItem__contextMenu"
         initialPanelId={0}
-        onFocusCapture={(event) => {
-          const target = event.target as Element;
-          if (!isEditorActive && target.closest('.globalFilterItem__editorForm')) {
-            setIsEditorActive(true);
-          }
-        }}
         panels={getPanels()}
         size="s"
       />

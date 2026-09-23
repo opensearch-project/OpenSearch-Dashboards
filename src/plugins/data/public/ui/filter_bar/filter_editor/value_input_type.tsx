@@ -33,6 +33,7 @@ import {
   EuiCompressedFieldText,
   EuiCompressedSelect,
   EuiDatePicker,
+  EuiPortal,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
@@ -57,6 +58,12 @@ interface Props {
 interface State {
   isEditingDateInput: boolean;
 }
+
+const DatePickerPortal = ({ children }: { children: React.ReactNode[] }) => (
+  <EuiPortal>
+    <div className="euiDatePicker euiDatePicker--shadow">{children}</div>
+  </EuiPortal>
+);
 
 class ValueInputTypeUI extends Component<Props, State> {
   public state = {
@@ -110,6 +117,7 @@ class ValueInputTypeUI extends Component<Props, State> {
             onChangeRaw={this.onDateInputChange}
             onBlur={this.onBlur}
             showTimeSelect
+            popperContainer={DatePickerPortal}
             dateFormat={this.props.dateFormat}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
             className={this.props.className}
