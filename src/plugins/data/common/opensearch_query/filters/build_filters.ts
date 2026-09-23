@@ -42,28 +42,19 @@ import {
   RangeFilterParams,
 } from '.';
 
-const DATE_PICKER_QUERY_FORMAT = 'strict_date_optional_time';
+const DATE_QUERY_FORMAT = 'strict_date_optional_time';
 
-// Manual date input remains a string; only picker selections are emitted as epoch milliseconds.
-const isPickerDateValue = (field: IFieldType, value: unknown): value is number =>
-  field.type === 'date' &&
-  typeof value === 'number' &&
-  Number.isFinite(value) &&
-  !Number.isNaN(new Date(value).getTime());
-
-const toISOString = (value: number) => new Date(value).toISOString();
-
-const normalizeDateRangeValue = (value?: string | number) => {
+const getAbsoluteDateValue = (value?: string | number) => {
   if (typeof value === 'number') {
-    return toISOString(value);
+    return Number.isFinite(value) && !Number.isNaN(new Date(value).getTime())
+      ? new Date(value).toISOString()
+      : undefined;
   }
 
   if (typeof value === 'string' && !value.startsWith('now')) {
     const parsedValue = dateMath.parse(value);
-    return parsedValue?.isValid() ? parsedValue.toISOString() : value;
+    return parsedValue?.isValid() ? parsedValue.toISOString() : undefined;
   }
-
-  return value;
 };
 
 export function buildFilter(
@@ -112,14 +103,14 @@ function buildBaseFilter(
 ): Filter {
   switch (type) {
     case 'phrase': {
-      if (isPickerDateValue(field, params)) {
-        const value = toISOString(params);
+      const absoluteDateValue = field.type === 'date' ? getAbsoluteDateValue(params) : undefined;
+      if (absoluteDateValue) {
         const filter = buildRangeFilter(
           field,
           {
-            gte: value,
-            lte: value,
-            format: DATE_PICKER_QUERY_FORMAT,
+            gte: absoluteDateValue,
+            lte: absoluteDateValue,
+            format: DATE_QUERY_FORMAT,
           },
           indexPattern
         );
@@ -132,15 +123,15 @@ function buildBaseFilter(
     case 'phrases':
       return buildPhrasesFilter(field, params, indexPattern);
     case 'range': {
-      const containsPickerDateValue =
-        isPickerDateValue(field, params.from) || isPickerDateValue(field, params.to);
-      const newParams: RangeFilterParams = containsPickerDateValue
-        ? {
-            gte: normalizeDateRangeValue(params.from),
-            lt: normalizeDateRangeValue(params.to),
-            format: DATE_PICKER_QUERY_FORMAT,
-          }
-        : { gte: params.from, lt: params.to };
+      const absoluteFrom = field.type === 'date' ? getAbsoluteDateValue(params.from) : undefined;
+      const absoluteTo = field.type === 'date' ? getAbsoluteDateValue(params.to) : undefined;
+      const newParams: RangeFilterParams = {
+        gte: absoluteFrom ?? params.from,
+        lt: absoluteTo ?? params.to,
+      };
+      if (absoluteFrom || absoluteTo) {
+        newParams.format = DATE_QUERY_FORMAT;
+      }
       return buildRangeFilter(field, newParams, indexPattern);
     }
     case 'exists':

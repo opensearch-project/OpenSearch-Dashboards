@@ -38,21 +38,21 @@ describe('Range value input', () => {
 
     datePickers.at(0).prop('onChange')?.(selectedDate);
     expect(onChange).toHaveBeenCalledWith({
-      from: selectedDate.valueOf(),
+      from: selectedDate.toISOString(),
       to: value.to,
     });
 
     datePickers.at(1).prop('onChange')?.(selectedDate);
     expect(onChange).toHaveBeenCalledWith({
       from: value.from,
-      to: selectedDate.valueOf(),
+      to: selectedDate.toISOString(),
     });
   });
 
-  it('preserves picker-generated epoch milliseconds on blur', () => {
+  it('preserves picker-generated ISO strings on blur', () => {
     const onChange = jest.fn();
     const selectedDate = moment('2026-09-16T10:15:30.000Z');
-    const value = { from: selectedDate.valueOf(), to: 'now' };
+    const value = { from: selectedDate.toISOString(), to: 'now' };
     const component = mountWithIntl(
       <OpenSearchDashboardsContextProvider services={{ uiSettings: { get: () => 'UTC' } } as any}>
         <RangeValueInput field={{ type: 'date' } as IFieldType} value={value} onChange={onChange} />

@@ -54,7 +54,15 @@ interface Props {
   dateFormat?: string;
 }
 
-class ValueInputTypeUI extends Component<Props> {
+interface State {
+  isEditingDateInput: boolean;
+}
+
+class ValueInputTypeUI extends Component<Props, State> {
+  public state = {
+    isEditingDateInput: false,
+  };
+
   public render() {
     const value = this.props.value;
     let inputElement: React.ReactNode;
@@ -89,14 +97,15 @@ class ValueInputTypeUI extends Component<Props> {
           />
         );
         break;
-      case 'date':
+      case 'date': {
+        const selectedDate = this.getSelectedDate(value);
         inputElement = (
           <EuiDatePicker
             compressed
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={typeof value === 'string' ? value : undefined}
-            selected={this.getSelectedDate(value)}
+            value={this.getDateInputValue(value, selectedDate)}
+            selected={selectedDate}
             onChange={this.onDatePickerChange}
             onChangeRaw={this.onDateInputChange}
             onBlur={this.onBlur}
@@ -107,6 +116,7 @@ class ValueInputTypeUI extends Component<Props> {
           />
         );
         break;
+      }
       case 'ip':
         inputElement = (
           <EuiCompressedFieldText
@@ -177,14 +187,25 @@ class ValueInputTypeUI extends Component<Props> {
 
   private onDateInputChange = (event: React.FocusEvent<HTMLInputElement>) => {
     event.preventDefault();
+    this.setState({ isEditingDateInput: true });
     this.props.onChange(event.target.value);
   };
 
   private onDatePickerChange = (date: Moment | null) => {
     if (date) {
-      // Keep picker output unambiguous while manual input remains available for custom formats.
-      this.props.onChange(date.valueOf());
+      this.setState({ isEditingDateInput: false });
+      this.props.onChange(date.toISOString());
     }
+  };
+
+  private getDateInputValue = (value: string | number | undefined, selectedDate?: Moment) => {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+
+    return this.state.isEditingDateInput || value.startsWith('now') || !selectedDate
+      ? value
+      : undefined;
   };
 
   private getSelectedDate = (value?: string | number) => {
@@ -200,8 +221,11 @@ class ValueInputTypeUI extends Component<Props> {
   };
 
   private onBlur = (event?: React.FocusEvent<HTMLInputElement>) => {
+    const params = this.state.isEditingDateInput
+      ? (event?.target.value ?? this.props.value)
+      : (this.props.value ?? event?.target.value);
+    this.setState({ isEditingDateInput: false });
     if (this.props.onBlur) {
-      const params = event?.target.value ?? this.props.value;
       if (params !== undefined) {
         this.props.onBlur(params);
       }

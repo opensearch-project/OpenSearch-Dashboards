@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { EuiDatePickerRange, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
@@ -55,18 +54,7 @@ interface Props {
 function RangeValueInputUI(props: Props) {
   const opensearchDashboards = useOpenSearchDashboards();
   const type = props.field ? props.field.type : 'string';
-  const tzConfig = opensearchDashboards.services.uiSettings!.get(UI_SETTINGS.DATE_FORMAT_TIMEZONE);
   const dateFormat = opensearchDashboards.services.uiSettings!.get(UI_SETTINGS.DATE_FORMAT);
-
-  const formatDateChange = (value: string | number | boolean) => {
-    if (typeof value === 'number') return value;
-    if (typeof value !== 'string') return value;
-
-    const momentParsedValue = moment(value).tz(tzConfig);
-    if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-
-    return value;
-  };
 
   const onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
@@ -93,9 +81,7 @@ function RangeValueInputUI(props: Props) {
       type={type}
       value={props.value ? props.value.from : undefined}
       onChange={onFromChange}
-      onBlur={(value) => {
-        onFromChange(formatDateChange(value));
-      }}
+      onBlur={onFromChange}
       dateFormat={dateFormat}
       placeholder={props.intl.formatMessage({
         id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
@@ -110,9 +96,7 @@ function RangeValueInputUI(props: Props) {
       type={type}
       value={props.value ? props.value.to : undefined}
       onChange={onToChange}
-      onBlur={(value) => {
-        onToChange(formatDateChange(value));
-      }}
+      onBlur={onToChange}
       dateFormat={dateFormat}
       placeholder={props.intl.formatMessage({
         id: 'data.filter.filterEditor.rangeEndInputPlaceholder',

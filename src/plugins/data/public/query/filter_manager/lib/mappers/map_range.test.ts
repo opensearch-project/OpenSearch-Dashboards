@@ -48,7 +48,7 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should preserve phrase metadata for exact picker-generated date ranges', () => {
+    test('should preserve phrase metadata for numeric exact date ranges', () => {
       const epochMillis = Date.parse('2026-09-16T10:15:30.000Z');
       const filter = {
         meta: {
@@ -73,6 +73,33 @@ describe('filter manager utilities', () => {
         type: FILTERS.PHRASE,
       });
       expect(result.value()).toBe(epochMillis);
+    });
+
+    test('should preserve phrase metadata for string exact date ranges', () => {
+      const value = '2026-09-16T10:15:30Z';
+      const filter = {
+        meta: {
+          index: 'logstash-*',
+          type: FILTERS.PHRASE,
+          params: { query: value },
+        } as FilterMeta,
+        range: {
+          '@timestamp': {
+            gte: '2026-09-16T10:15:30.000Z',
+            lte: '2026-09-16T10:15:30.000Z',
+            format: 'strict_date_optional_time',
+          },
+        },
+      } as RangeFilter;
+
+      const result = mapRange(filter);
+
+      expect(result).toMatchObject({
+        key: '@timestamp',
+        params: { query: value },
+        type: FILTERS.PHRASE,
+      });
+      expect(result.value()).toBe(value);
     });
 
     test('should return undefined for none matching', (done) => {

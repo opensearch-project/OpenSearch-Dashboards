@@ -59,15 +59,15 @@ const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range'
 function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
-  const pickerDateValue =
+  const exactDateValue =
     filter.meta.type === FILTERS.PHRASE ? filter.meta.params?.query : undefined;
 
-  if (typeof pickerDateValue === 'number') {
+  if (exactDateValue !== undefined) {
     return {
       type: FILTERS.PHRASE,
       key,
-      value: getFormattedPhraseValueFn(pickerDateValue),
-      params: { query: pickerDateValue },
+      value: getFormattedPhraseValueFn(exactDateValue),
+      params: { query: exactDateValue },
     };
   }
 

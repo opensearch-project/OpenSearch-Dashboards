@@ -5,6 +5,7 @@
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import moment from 'moment';
+import { act } from 'react';
 import { ValueInputType } from './value_input_type';
 
 let onChangeMock: any;
@@ -73,7 +74,7 @@ describe('Value input type', () => {
     expect(onChange).toHaveBeenCalledWith('now/d');
   });
 
-  it('returns picker-selected dates as epoch milliseconds', async () => {
+  it('returns picker-selected dates as ISO strings', async () => {
     const onChange = jest.fn();
     const component = mountWithIntl(
       <ValueInputType value="" type="date" onChange={onChange} placeholder="" />
@@ -83,7 +84,23 @@ describe('Value input type', () => {
 
     datePicker.prop('onChange')?.(selectedDate);
 
-    expect(onChange).toHaveBeenCalledWith(selectedDate.valueOf());
+    expect(onChange).toHaveBeenCalledWith('2026-09-16T10:15:30.000Z');
+  });
+
+  it('displays absolute dates using the configured date format', async () => {
+    const dateFormat = 'YYYY-MM-DD HH:mm:ss';
+    const selectedDate = moment('2026-09-16 10:15:30');
+    const component = mountWithIntl(
+      <ValueInputType
+        value={selectedDate.toISOString()}
+        type="date"
+        dateFormat={dateFormat}
+        onChange={jest.fn()}
+        placeholder=""
+      />
+    );
+
+    expect(component.find('input').prop('value')).toBe(selectedDate.format(dateFormat));
   });
 
   it('handles date picker blur without a DOM event', async () => {
@@ -97,7 +114,28 @@ describe('Value input type', () => {
     expect(onBlur).not.toHaveBeenCalled();
   });
 
-  it('uses the current input value when a date input emits a blur event', async () => {
+  it('preserves the canonical absolute date when the formatted picker input blurs', async () => {
+    const onBlur = jest.fn();
+    const value = '2026-09-16T10:15:30.000Z';
+    const component = mountWithIntl(
+      <ValueInputType
+        value={value}
+        type="date"
+        dateFormat="YYYY-MM-DD HH:mm:ss"
+        onChange={jest.fn()}
+        onBlur={onBlur}
+        placeholder=""
+      />
+    );
+
+    component.find('EuiDatePicker').prop('onBlur')?.({
+      target: { value: '2026-09-16 10:15:30' },
+    } as React.FocusEvent<HTMLInputElement>);
+
+    expect(onBlur).toHaveBeenCalledWith(value);
+  });
+
+  it('uses the current manually edited value when a date input blurs', async () => {
     const onBlur = jest.fn();
     const component = mountWithIntl(
       <ValueInputType
@@ -109,9 +147,18 @@ describe('Value input type', () => {
       />
     );
 
-    component.find('EuiDatePicker').prop('onBlur')?.({
-      target: { value: 'current value' },
-    } as React.FocusEvent<HTMLInputElement>);
+    act(() => {
+      component.find('EuiDatePicker').prop('onChangeRaw')?.({
+        preventDefault: jest.fn(),
+        target: { value: 'current value' },
+      } as any);
+    });
+    component.update();
+    act(() => {
+      component.find('EuiDatePicker').prop('onBlur')?.({
+        target: { value: 'current value' },
+      } as React.FocusEvent<HTMLInputElement>);
+    });
 
     expect(onBlur).toHaveBeenCalledWith('current value');
   });
