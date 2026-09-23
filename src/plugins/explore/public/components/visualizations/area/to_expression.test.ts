@@ -92,6 +92,7 @@ describe('Area Chart to_expression', () => {
       const mainSeries = result.spec.series[0];
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
+      expect(mainSeries.emphasis).toEqual({ focus: 'series' });
     });
 
     it('emits series-target legend items while assigning metric colors', () => {
