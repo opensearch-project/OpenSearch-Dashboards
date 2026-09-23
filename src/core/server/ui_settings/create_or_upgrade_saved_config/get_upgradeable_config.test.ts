@@ -95,4 +95,48 @@ describe('getUpgradeableConfig', () => {
     const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
     expect(result).toBe(undefined);
   });
+
+  // The find() above sorts on buildNum, which is mapped as a keyword and so
+  // orders bytewise. These cases pin the ordering to the config version
+  // instead, so the result no longer depends on what buildNum held.
+  describe('ordering', () => {
+    const findInOrder = async (ids: string[], version: string) => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: ids.map((id) => ({ id })),
+      } as any);
+      const result = await getUpgradeableConfig({ savedObjectsClient, version });
+      return result?.id;
+    };
+
+    it('picks the newest upgradeable config regardless of the order returned', async () => {
+      expect(await findInOrder(['1.3.0', '3.1.0', '2.19.0'], '3.5.0')).toBe('3.1.0');
+      expect(await findInOrder(['3.1.0', '2.19.0', '1.3.0'], '3.5.0')).toBe('3.1.0');
+    });
+
+    it('compares versions numerically rather than bytewise', async () => {
+      // '9' > '1' bytewise, so a string sort would pick 2.9.0 over 2.19.0.
+      expect(await findInOrder(['2.9.0', '2.19.0'], '3.5.0')).toBe('2.19.0');
+    });
+
+    it('prefers a current-line config over a higher-numbered pre-fork one', async () => {
+      // 7.10.2 is upgradeable into OSD 3.x and outranks 2.19.0 in semver, but
+      // it is from the pre-fork line so it is the worse upgrade source.
+      expect(await findInOrder(['7.10.2', '2.19.0'], '3.5.0')).toBe('2.19.0');
+      expect(await findInOrder(['2.19.0', '7.10.2'], '3.5.0')).toBe('2.19.0');
+    });
+
+    it('falls back to a pre-fork config when it is the only candidate', async () => {
+      expect(await findInOrder(['7.10.2', '6.8.0'], '3.5.0')).toBe('7.10.2');
+    });
+
+    it('ranks a release above its own release candidates', async () => {
+      expect(await findInOrder(['3.4.0-rc1', '3.4.0', '3.4.0-rc2'], '3.5.0')).toBe('3.4.0');
+    });
+
+    it('ignores candidates that are not upgradeable', async () => {
+      // Higher than the target, and ids that are not versions at all.
+      expect(await findInOrder(['3.7.0', 'dashboard-admin', '3.1.0'], '3.5.0')).toBe('3.1.0');
+    });
+  });
 });
