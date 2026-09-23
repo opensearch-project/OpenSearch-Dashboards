@@ -15,6 +15,7 @@ import {
 } from './state_timeline_utils';
 import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
+import { stateTimelineTooltipFormatter } from '../utils/tooltip';
 import {
   convertTo2DArray,
   transform,
@@ -142,6 +143,9 @@ export const createNumericalStateTimeline = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: false },
+      tooltipFormatter: stateTimelineTooltipFormatter({
+        groupField: yCol.column,
+      }),
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({
@@ -196,6 +200,9 @@ export const createCategoricalStateTimeline = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: false },
+      tooltipFormatter: stateTimelineTooltipFormatter({
+        groupField: yCol.column,
+      }),
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({
@@ -245,6 +252,9 @@ export const createSingleCategoricalStateTimeline = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: false },
+      tooltipFormatter: stateTimelineTooltipFormatter({
+        groupField: undefined,
+      }),
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({
@@ -304,6 +314,9 @@ export const createSingleNumericalStateTimeline = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: false },
+      tooltipFormatter: stateTimelineTooltipFormatter({
+        groupField: undefined,
+      }),
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({

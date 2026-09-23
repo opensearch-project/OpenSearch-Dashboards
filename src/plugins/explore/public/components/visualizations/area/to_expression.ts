@@ -18,7 +18,6 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
-  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
@@ -31,7 +30,6 @@ import {
   transformStackPercentage,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
-import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -127,7 +125,6 @@ export const createMultiAreaChart = (
     buildAxisConfigs,
     applyPercentageAxis(styles),
     applyTimeRange,
-    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
@@ -182,7 +179,6 @@ export const createCategoryAreaChart = (
     }),
     buildAxisConfigs,
     applyPercentageAxis(styles),
-    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     createAreaSeries({
       styles,
       categoryField,

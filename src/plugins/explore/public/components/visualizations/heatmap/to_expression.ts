@@ -16,6 +16,7 @@ import {
   buildVisMap,
 } from '../utils/echarts_spec';
 import { convertTo2DArray, aggregateByGroups, transform } from '../utils/data_transformation';
+import { heatmapTooltipFormatter } from '../utils/tooltip';
 
 export const createRegularHeatmap = (
   transformedData: Array<Record<string, any>>,
@@ -43,6 +44,7 @@ export const createRegularHeatmap = (
     createBaseConfig({
       addTrigger: false,
       legend: { show: styles.addLegend },
+      tooltipFormatter: heatmapTooltipFormatter,
     }),
     buildAxisConfigs,
     buildVisMap({

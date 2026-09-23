@@ -12,7 +12,7 @@ import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
 
-import { escapeTooltipText, sanitizeTooltipHtml } from '../utils/utils';
+import { escapeTooltipText, sanitizeTooltipHtml } from '../utils/tooltip';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -537,57 +537,6 @@ export const createStateTimeLineSpec =
         formatter: (value: string) => seriesDisplayNames?.[value] ?? value,
       };
       newState.yAxisConfig = newyAxisConfig;
-    }
-
-    if (groupField) {
-      const tooltipFormatter = (params: any) => {
-        const dims: string[] = params.dimensionNames ?? [];
-        const valueOfIndex = (field: string) => params.value?.[dims.indexOf(field)];
-        const groupValue = valueOfIndex(groupField);
-        const groupLabel = seriesDisplayNames?.[groupValue] ?? groupValue;
-
-        return sanitizeTooltipHtml(
-          [
-            `<strong>${escapeTooltipText(params.seriesName)}</strong>`,
-            groupLabel && `${params.marker ?? ''}${escapeTooltipText(groupLabel)}`,
-            `start: ${escapeTooltipText(valueOfIndex('start'))}`,
-            `end: ${escapeTooltipText(valueOfIndex('end'))}`,
-            `duration: ${escapeTooltipText(valueOfIndex('duration'))}`,
-            `count: ${escapeTooltipText(valueOfIndex('mergedCount'))}`,
-          ]
-            .filter(Boolean)
-            .join('<br/>')
-        );
-      };
-
-      newState.baseConfig = {
-        ...newState.baseConfig,
-        tooltip: { ...newState.baseConfig?.tooltip, formatter: tooltipFormatter },
-      };
-    }
-
-    if (!groupField) {
-      const tooltipFormatter = (params: any) => {
-        const dims: string[] = params.dimensionNames ?? [];
-        const valueOfIndex = (field: string) => params.value?.[dims.indexOf(field)];
-        const seriesName = seriesDisplayNames?.[params.seriesName] ?? params.seriesName;
-        return sanitizeTooltipHtml(
-          [
-            `${params.marker ?? ''}<strong>${escapeTooltipText(seriesName)}</strong>`,
-            `start: ${escapeTooltipText(valueOfIndex('start'))}`,
-            `end: ${escapeTooltipText(valueOfIndex('end'))}`,
-            `duration: ${escapeTooltipText(valueOfIndex('duration'))}`,
-            `count: ${escapeTooltipText(valueOfIndex('mergedCount'))}`,
-          ]
-            .filter(Boolean)
-            .join('<br/>')
-        );
-      };
-
-      newState.baseConfig = {
-        ...newState.baseConfig,
-        tooltip: { ...newState.baseConfig?.tooltip, formatter: tooltipFormatter },
-      };
     }
 
     const palette = getColors().categories;
