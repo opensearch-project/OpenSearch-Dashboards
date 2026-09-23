@@ -155,8 +155,8 @@ describe('Filter editor utils', () => {
       expect(validateParams(epochMillis, 'date')).toBe(true);
     });
 
-    it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
-      'should return false for a non-finite numeric date value: %s',
+    it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.MAX_VALUE])(
+      'should return false for a numeric value outside the supported date range: %s',
       (value) => {
         expect(validateParams(value, 'date')).toBe(false);
       }

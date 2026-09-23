@@ -60,12 +60,14 @@ describe('Value input type', () => {
       onChange,
       onBlur: () => {},
       placeholder: '',
+      dateFormat: 'YYYY-MM-DD HH:mm:ss',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
     const datePicker = component.find('EuiDatePicker');
 
     expect(datePicker.exists()).toBeTruthy();
     expect(datePicker.prop('value')).toBe('now-15m');
+    expect(datePicker.prop('dateFormat')).toBe(valueInputProps.dateFormat);
 
     component.find('input').simulate('change', { target: { value: 'now/d' } });
     expect(onChange).toHaveBeenCalledWith('now/d');
@@ -93,6 +95,25 @@ describe('Value input type', () => {
 
     expect(() => (datePicker.prop('onBlur') as () => void)()).not.toThrow();
     expect(onBlur).not.toHaveBeenCalled();
+  });
+
+  it('uses the current input value when a date input emits a blur event', async () => {
+    const onBlur = jest.fn();
+    const component = mountWithIntl(
+      <ValueInputType
+        value="previous value"
+        type="date"
+        onChange={jest.fn()}
+        onBlur={onBlur}
+        placeholder=""
+      />
+    );
+
+    component.find('EuiDatePicker').prop('onBlur')?.({
+      target: { value: 'current value' },
+    } as React.FocusEvent<HTMLInputElement>);
+
+    expect(onBlur).toHaveBeenCalledWith('current value');
   });
 
   it('is ip', async () => {

@@ -14,8 +14,15 @@ describe('Range value input', () => {
     const onChange = jest.fn();
     const field = { type: 'date' } as IFieldType;
     const value = { from: 'now-1d', to: 'now' };
+    const dateFormat = 'YYYY-MM-DD HH:mm:ss';
     const component = mountWithIntl(
-      <OpenSearchDashboardsContextProvider services={{ uiSettings: { get: () => 'UTC' } } as any}>
+      <OpenSearchDashboardsContextProvider
+        services={
+          {
+            uiSettings: { get: (key: string) => (key === 'dateFormat' ? dateFormat : 'UTC') },
+          } as any
+        }
+      >
         <RangeValueInput field={field} value={value} onChange={onChange} />
       </OpenSearchDashboardsContextProvider>
     );
@@ -26,6 +33,8 @@ describe('Range value input', () => {
     expect(datePickers).toHaveLength(2);
     expect(datePickers.at(0).prop('value')).toBe(value.from);
     expect(datePickers.at(1).prop('value')).toBe(value.to);
+    expect(datePickers.at(0).prop('dateFormat')).toBe(dateFormat);
+    expect(datePickers.at(1).prop('dateFormat')).toBe(dateFormat);
 
     datePickers.at(0).prop('onChange')?.(selectedDate);
     expect(onChange).toHaveBeenCalledWith({
@@ -50,9 +59,7 @@ describe('Range value input', () => {
       </OpenSearchDashboardsContextProvider>
     );
 
-    component.find('EuiDatePicker').at(0).prop('onBlur')?.({
-      target: { value: 'Sep 16, 2026 @ 10:15:30.000' },
-    } as any);
+    (component.find('EuiDatePicker').at(0).prop('onBlur') as () => void)();
 
     expect(onChange).toHaveBeenCalledWith(value);
   });

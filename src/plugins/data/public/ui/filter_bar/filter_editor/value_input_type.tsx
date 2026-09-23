@@ -51,6 +51,7 @@ interface Props {
   intl: InjectedIntl;
   controlOnly?: boolean;
   className?: string;
+  dateFormat?: string;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -100,7 +101,7 @@ class ValueInputTypeUI extends Component<Props> {
             onChangeRaw={this.onDateInputChange}
             onBlur={this.onBlur}
             showTimeSelect
-            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+            dateFormat={this.props.dateFormat}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
             className={this.props.className}
           />
@@ -200,7 +201,7 @@ class ValueInputTypeUI extends Component<Props> {
 
   private onBlur = (event?: React.FocusEvent<HTMLInputElement>) => {
     if (this.props.onBlur) {
-      const params = this.props.value ?? event?.target.value;
+      const params = event?.target.value ?? this.props.value;
       if (params !== undefined) {
         this.props.onBlur(params);
       }

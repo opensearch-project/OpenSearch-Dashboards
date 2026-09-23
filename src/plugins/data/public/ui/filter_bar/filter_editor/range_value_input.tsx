@@ -35,6 +35,7 @@ import { get } from 'lodash';
 
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IFieldType } from '../../..';
+import { UI_SETTINGS } from '../../../../common';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -54,7 +55,8 @@ interface Props {
 function RangeValueInputUI(props: Props) {
   const opensearchDashboards = useOpenSearchDashboards();
   const type = props.field ? props.field.type : 'string';
-  const tzConfig = opensearchDashboards.services.uiSettings!.get('dateFormat:tz');
+  const tzConfig = opensearchDashboards.services.uiSettings!.get(UI_SETTINGS.DATE_FORMAT_TIMEZONE);
+  const dateFormat = opensearchDashboards.services.uiSettings!.get(UI_SETTINGS.DATE_FORMAT);
 
   const formatDateChange = (value: string | number | boolean) => {
     if (typeof value === 'number') return value;
@@ -94,6 +96,7 @@ function RangeValueInputUI(props: Props) {
       onBlur={(value) => {
         onFromChange(formatDateChange(value));
       }}
+      dateFormat={dateFormat}
       placeholder={props.intl.formatMessage({
         id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
         defaultMessage: 'Start of the range',
@@ -110,6 +113,7 @@ function RangeValueInputUI(props: Props) {
       onBlur={(value) => {
         onToChange(formatDateChange(value));
       }}
+      dateFormat={dateFormat}
       placeholder={props.intl.formatMessage({
         id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
         defaultMessage: 'End of the range',

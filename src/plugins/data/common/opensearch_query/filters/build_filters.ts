@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { IIndexPattern, IFieldType } from '../..';
 import {
   Filter,
@@ -38,7 +39,32 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   buildExistsFilter,
+  RangeFilterParams,
 } from '.';
+
+const DATE_PICKER_QUERY_FORMAT = 'strict_date_optional_time';
+
+// Manual date input remains a string; only picker selections are emitted as epoch milliseconds.
+const isPickerDateValue = (field: IFieldType, value: unknown): value is number =>
+  field.type === 'date' &&
+  typeof value === 'number' &&
+  Number.isFinite(value) &&
+  !Number.isNaN(new Date(value).getTime());
+
+const toISOString = (value: number) => new Date(value).toISOString();
+
+const normalizeDateRangeValue = (value?: string | number) => {
+  if (typeof value === 'number') {
+    return toISOString(value);
+  }
+
+  if (typeof value === 'string' && !value.startsWith('now')) {
+    const parsedValue = dateMath.parse(value);
+    return parsedValue?.isValid() ? parsedValue.toISOString() : value;
+  }
+
+  return value;
+};
 
 export function buildFilter(
   indexPattern: IIndexPattern,
@@ -85,13 +111,38 @@ function buildBaseFilter(
   params: any
 ): Filter {
   switch (type) {
-    case 'phrase':
+    case 'phrase': {
+      if (isPickerDateValue(field, params)) {
+        const value = toISOString(params);
+        const filter = buildRangeFilter(
+          field,
+          {
+            gte: value,
+            lte: value,
+            format: DATE_PICKER_QUERY_FORMAT,
+          },
+          indexPattern
+        );
+        filter.meta.type = FILTERS.PHRASE;
+        filter.meta.params = { query: params };
+        return filter;
+      }
       return buildPhraseFilter(field, params, indexPattern);
+    }
     case 'phrases':
       return buildPhrasesFilter(field, params, indexPattern);
-    case 'range':
-      const newParams = { gte: params.from, lt: params.to };
+    case 'range': {
+      const containsPickerDateValue =
+        isPickerDateValue(field, params.from) || isPickerDateValue(field, params.to);
+      const newParams: RangeFilterParams = containsPickerDateValue
+        ? {
+            gte: normalizeDateRangeValue(params.from),
+            lt: normalizeDateRangeValue(params.to),
+            format: DATE_PICKER_QUERY_FORMAT,
+          }
+        : { gte: params.from, lt: params.to };
       return buildRangeFilter(field, newParams, indexPattern);
+    }
     case 'exists':
       return buildExistsFilter(field, indexPattern);
     default:

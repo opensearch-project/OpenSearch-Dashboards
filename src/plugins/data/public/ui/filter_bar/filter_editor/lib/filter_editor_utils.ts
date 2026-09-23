@@ -64,7 +64,7 @@ export function validateParams(params: any, type: string) {
   switch (type) {
     case 'date': {
       if (typeof params === 'number') {
-        return Number.isFinite(params);
+        return Number.isFinite(params) && !Number.isNaN(new Date(params).getTime());
       }
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
       return Boolean(typeof params === 'string' && moment && moment.isValid());
