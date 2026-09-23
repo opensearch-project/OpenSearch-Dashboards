@@ -34,30 +34,25 @@ import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
- * Upper bound of the pre-fork Kibana line that isConfigVersionUpgradeable
- * still accepts as an upgrade source. Those versions are numerically higher
- * than every OpenSearch Dashboards version, so they are ranked as a separate,
- * lower lineage rather than by semver alone.
+ *  Rank a candidate's lineage relative to the version being upgraded to. A
+ *  candidate above the target can only have got past isConfigVersionUpgradeable
+ *  through its pre-fork allowance -- 6.8.0-7.10.2 is upgradeable into
+ *  OpenSearch Dashboards 1.x-3.x even though 7.10.2 sorts above 3.5.0 in
+ *  semver. A config from the target's own line is the better source, so
+ *  pre-fork ones rank below it. Note this is relative to the target: when
+ *  upgrading within the legacy line (e.g. to 7.0.0) nothing is demoted,
+ *  because there every candidate is below the target already.
  */
-const PREFORK_RANGE = { min: '6.8.0', max: '7.10.2' };
-
-/**
- *  Rank a config's lineage. A config written by the current product line is
- *  always a better upgrade source than a pre-fork Kibana one, even though
- *  7.10.2 sorts above 3.5.0 in semver.
- */
-function lineageRank(releaseVersion: string): number {
-  const isPrefork =
-    semver.gte(releaseVersion, PREFORK_RANGE.min) && semver.lte(releaseVersion, PREFORK_RANGE.max);
-  return isPrefork ? 0 : 1;
+function lineageRank(candidate: string, version: string): number {
+  return semver.gt(candidate, version) ? 0 : 1;
 }
 
 /**
  *  Order two upgradeable config ids newest-first. Both ids are known to be
  *  valid semver because isConfigVersionUpgradeable rejects anything else.
  */
-function compareConfigsDesc(a: string, b: string): number {
-  const lineageDiff = lineageRank(b) - lineageRank(a);
+function compareConfigsDesc(a: string, b: string, version: string): number {
+  const lineageDiff = lineageRank(b, version) - lineageRank(a, version);
   if (lineageDiff !== 0) {
     return lineageDiff;
   }
@@ -102,5 +97,5 @@ export async function getUpgradeableConfig({
   // the newest upgradeable config no matter what buildNum happened to hold.
   return savedConfigs
     .filter((savedConfig) => isConfigVersionUpgradeable(savedConfig.id, version))
-    .sort((a, b) => compareConfigsDesc(a.id, b.id))[0];
+    .sort((a, b) => compareConfigsDesc(a.id, b.id, version))[0];
 }

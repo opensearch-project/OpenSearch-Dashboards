@@ -126,6 +126,13 @@ describe('getUpgradeableConfig', () => {
       expect(await findInOrder(['2.19.0', '7.10.2'], '3.5.0')).toBe('2.19.0');
     });
 
+    it('does not demote a pre-fork version when it is the target line', async () => {
+      // Upgrading within the legacy line, 7.0.0-rc1 is that line's newest
+      // config, not a cross-lineage candidate to be ranked down.
+      expect(await findInOrder(['5.4.1', '7.0.0-rc1'], '7.0.0')).toBe('7.0.0-rc1');
+      expect(await findInOrder(['7.0.0-rc1', '5.4.1'], '7.0.0')).toBe('7.0.0-rc1');
+    });
+
     it('falls back to a pre-fork config when it is the only candidate', async () => {
       expect(await findInOrder(['7.10.2', '6.8.0'], '3.5.0')).toBe('7.10.2');
     });
