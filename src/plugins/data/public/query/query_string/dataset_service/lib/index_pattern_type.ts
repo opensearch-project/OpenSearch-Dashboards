@@ -160,8 +160,18 @@ const fetchIndexPatterns = async (
     const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
     // schemaMappings is stored as a JSON string; parse it so toDataset emits an object.
+    // Guarded: a malformed value degrades to "no mappings" for that dataset instead of
+    // throwing and taking down the whole dataset-list build.
     const rawSchemaMappings = (savedObject.attributes as { schemaMappings?: string })
       .schemaMappings;
+    let schemaMappings: Record<string, unknown> | undefined;
+    if (rawSchemaMappings) {
+      try {
+        schemaMappings = JSON.parse(rawSchemaMappings);
+      } catch {
+        schemaMappings = undefined;
+      }
+    }
 
     const indexPatternDataStructure: DataStructure = {
       id: savedObject.id,
@@ -172,7 +182,7 @@ const fetchIndexPatterns = async (
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
         signalType: savedObject.attributes.signalType,
-        ...(rawSchemaMappings && { schemaMappings: JSON.parse(rawSchemaMappings) }),
+        ...(schemaMappings && { schemaMappings }),
         description: savedObject.attributes.description,
         // Saved-object `type` attribute (distinct from the CUSTOM meta discriminator above),
         // carried so toDataset can preserve a non-INDEX_PATTERN dataset type.

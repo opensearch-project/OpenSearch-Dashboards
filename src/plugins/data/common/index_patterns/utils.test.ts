@@ -41,6 +41,14 @@ describe('test validateDataSourceReference', () => {
     expect(validateDataSourceReference(indexPatternSavedObjectMock)).toBe(false);
     expect(validateDataSourceReference(indexPatternSavedObjectMock, dataSourceId)).toBe(true);
   });
+
+  test('should match a legacy engine-typed reference (name "dataSource") so it is reused, not duplicated', () => {
+    indexPatternSavedObjectMock = getIndexPatternSavedObjectMock({
+      references: [{ type: 'OpenSearch', name: 'dataSource', id: dataSourceId }],
+    });
+
+    expect(validateDataSourceReference(indexPatternSavedObjectMock, dataSourceId)).toBe(true);
+  });
 });
 
 describe('test getIndexPatternTitle', () => {

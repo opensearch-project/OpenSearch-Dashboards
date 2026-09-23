@@ -47,8 +47,9 @@ export const validateDataViewDataSourceReference = (
 ) => {
   const references = dataView.references;
   if (dataSourceId) {
-    // Strict by design: drives create/save dedup — must not match legacy engine-typed refs.
-    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
+    // Name-tolerant so a legacy engine-typed ref is recognized as the same dataset (reused, not
+    // duplicated); the id must still match, so this can't cross data sources.
+    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
   } else {
     return references.length === 0;
   }

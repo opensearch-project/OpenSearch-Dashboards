@@ -135,14 +135,21 @@ export class CorrelationService {
 
       // Format the dataset object using the actual fields from the response
       const attributes = indexPattern.attributes as IndexPatternAttributes;
+      // Guarded parse: a malformed stored value degrades to "no mappings" instead of throwing.
+      let schemaMappings;
+      try {
+        schemaMappings = attributes?.schemaMappings
+          ? JSON.parse(attributes.schemaMappings)
+          : undefined;
+      } catch {
+        schemaMappings = undefined;
+      }
       const logDataset: Dataset = {
         id: indexPattern.id,
         timeFieldName: attributes?.timeFieldName || 'time',
         title: attributes?.title || 'Unknown Title',
         type: attributes?.type || 'INDEX_PATTERN',
-        schemaMappings: attributes?.schemaMappings
-          ? JSON.parse(attributes.schemaMappings)
-          : undefined,
+        schemaMappings,
       };
 
       // Extract datasource information from the log dataset's references if it exists
