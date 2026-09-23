@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { defaultSankeyChartStyles } from './sankey_vis_config';
 import { SankeyExclusiveVisOptions } from './sankey_exclusive_vis_options';
 
@@ -17,36 +18,23 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../style_panel/utils', () => ({
-  DebouncedFieldNumber: jest.fn(
-    ({
-      value,
-      onChange,
-      defaultValue: _defaultValue,
-      append: _append,
-      compressed: _compressed,
-      ...props
-    }) => (
-      <input {...props} value={value} onChange={(event) => onChange(Number(event.target.value))} />
-    )
-  ),
-  DebouncedFieldRange: jest.fn(
-    ({
-      value,
-      onChange,
-      defaultValue: _defaultValue,
-      min: _min,
-      max: _max,
-      step: _step,
-      ...props
-    }) => (
-      <input {...props} value={value} onChange={(event) => onChange(Number(event.target.value))} />
-    )
-  ),
-}));
-
 describe('SankeyExclusiveVisOptions', () => {
-  it('updates orientation and node alignment from the Sankey group', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  const advanceDebounce = () => {
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+  };
+
+  it('updates orientation without exposing node alignment', () => {
     const onChange = jest.fn();
     render(
       <SankeyExclusiveVisOptions styles={defaultSankeyChartStyles.exclusive} onChange={onChange} />
@@ -61,17 +49,10 @@ describe('SankeyExclusiveVisOptions', () => {
       ...defaultSankeyChartStyles.exclusive,
       orient: 'vertical',
     });
-
-    fireEvent.change(screen.getByTestId('sankeyNodeAlign'), {
-      target: { value: 'left' },
-    });
-    expect(onChange).toHaveBeenCalledWith({
-      ...defaultSankeyChartStyles.exclusive,
-      nodeAlign: 'left',
-    });
+    expect(screen.queryByTestId('sankeyNodeAlign')).not.toBeInTheDocument();
   });
 
-  it('updates node width and gap', () => {
+  it('updates node width without exposing node gap', () => {
     const onChange = jest.fn();
     render(
       <SankeyExclusiveVisOptions styles={defaultSankeyChartStyles.exclusive} onChange={onChange} />
@@ -80,18 +61,12 @@ describe('SankeyExclusiveVisOptions', () => {
     fireEvent.change(screen.getByTestId('sankeyNodeWidth'), {
       target: { value: '30' },
     });
+    advanceDebounce();
     expect(onChange).toHaveBeenCalledWith({
       ...defaultSankeyChartStyles.exclusive,
       nodeWidth: 30,
     });
-
-    fireEvent.change(screen.getByTestId('sankeyNodeGap'), {
-      target: { value: '12' },
-    });
-    expect(onChange).toHaveBeenCalledWith({
-      ...defaultSankeyChartStyles.exclusive,
-      nodeGap: 12,
-    });
+    expect(screen.queryByTestId('sankeyNodeGap')).not.toBeInTheDocument();
   });
 
   it('updates node labels, link labels, color, and opacity', () => {
@@ -123,6 +98,7 @@ describe('SankeyExclusiveVisOptions', () => {
     fireEvent.change(screen.getByTestId('sankeyLinkOpacity'), {
       target: { value: '60' },
     });
+    advanceDebounce();
     expect(onChange).toHaveBeenCalledWith({
       ...defaultSankeyChartStyles.exclusive,
       linkOpacity: 0.6,
@@ -144,6 +120,101 @@ describe('SankeyExclusiveVisOptions', () => {
     });
   });
 
+  it('preserves focus when a level depth update is persisted', () => {
+    const onChange = jest.fn();
+    const styles = {
+      ...defaultSankeyChartStyles.exclusive,
+      levels: [{ depth: 0, color: '#111111', opacity: 1 }],
+    };
+    const { rerender } = render(<SankeyExclusiveVisOptions styles={styles} onChange={onChange} />);
+    act(() => {
+      screen.getByTestId('sankeyLevelDepth-0').focus();
+    });
+
+    rerender(
+      <SankeyExclusiveVisOptions
+        styles={{
+          ...styles,
+          levels: [{ depth: 2, color: '#111111', opacity: 1 }],
+        }}
+        onChange={onChange}
+      />
+    );
+
+    expect(screen.getByTestId('sankeyLevelDepth-0')).toHaveFocus();
+  });
+
+  it('keeps the surviving level values when an earlier level is removed', () => {
+    const TestHarness = () => {
+      const [styles, setStyles] = useState({
+        ...defaultSankeyChartStyles.exclusive,
+        levels: [
+          { depth: 0, color: '#111111', opacity: 0.2 },
+          { depth: 1, color: '#222222', opacity: 0.8 },
+        ],
+      });
+
+      return <SankeyExclusiveVisOptions styles={styles} onChange={setStyles} />;
+    };
+
+    render(<TestHarness />);
+
+    expect(screen.getByTestId('sankeyLevelDepth-0')).toHaveValue(0);
+    expect(screen.getByTestId('sankeyLevelDepth-1')).toHaveValue(1);
+
+    fireEvent.click(screen.getByTestId('sankeyRemoveLevelStyle-0'));
+
+    expect(screen.getByTestId('sankeyLevelDepth-0')).toHaveValue(1);
+    expect(screen.queryByTestId('sankeyLevelDepth-1')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['fractional', '1.5', 1],
+    ['negative', '-1', 0],
+  ])('normalizes %s level depths to non-negative integers', (_, value, expectedDepth) => {
+    const onChange = jest.fn();
+    const styles = {
+      ...defaultSankeyChartStyles.exclusive,
+      levels: [{ depth: 2, color: '#111111', opacity: 1 }],
+    };
+    render(<SankeyExclusiveVisOptions styles={styles} onChange={onChange} />);
+
+    fireEvent.change(screen.getByTestId('sankeyLevelDepth-0'), {
+      target: { value },
+    });
+    advanceDebounce();
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...styles,
+      levels: [{ depth: expectedDepth, color: '#111111', opacity: 1 }],
+    });
+  });
+
+  it('allows duplicate level depths', () => {
+    const onChange = jest.fn();
+    const styles = {
+      ...defaultSankeyChartStyles.exclusive,
+      levels: [
+        { depth: 0, color: '#111111', opacity: 1 },
+        { depth: 2, color: '#222222', opacity: 1 },
+      ],
+    };
+    render(<SankeyExclusiveVisOptions styles={styles} onChange={onChange} />);
+
+    fireEvent.change(screen.getByTestId('sankeyLevelDepth-1'), {
+      target: { value: '0' },
+    });
+    advanceDebounce();
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...styles,
+      levels: [
+        { depth: 0, color: '#111111', opacity: 1 },
+        { depth: 0, color: '#222222', opacity: 1 },
+      ],
+    });
+  });
+
   it('updates and removes a per-level node style', () => {
     const onChange = jest.fn();
     const styles = {
@@ -155,6 +226,7 @@ describe('SankeyExclusiveVisOptions', () => {
     fireEvent.change(screen.getByTestId('sankeyLevelDepth-0'), {
       target: { value: '2' },
     });
+    advanceDebounce();
     expect(onChange).toHaveBeenCalledWith({
       ...styles,
       levels: [{ depth: 2, color: '#111111', opacity: 1 }],
@@ -171,6 +243,7 @@ describe('SankeyExclusiveVisOptions', () => {
     fireEvent.change(screen.getByTestId('sankeyLevelOpacity-0'), {
       target: { value: '50' },
     });
+    advanceDebounce();
     expect(onChange).toHaveBeenCalledWith({
       ...styles,
       levels: [{ depth: 0, color: '#111111', opacity: 0.5 }],

@@ -11,7 +11,6 @@ import { createSankeySpec } from './to_expression';
 import { SankeyVisStyleControls } from './sankey_vis_options';
 
 export type SankeyOrientation = 'horizontal' | 'vertical';
-export type SankeyNodeAlign = 'justify' | 'left' | 'right';
 export type SankeyLinkColor = 'source' | 'target' | 'gradient';
 
 export interface SankeyLevelStyle {
@@ -22,9 +21,7 @@ export interface SankeyLevelStyle {
 
 export interface SankeyExclusiveStyleOptions {
   orient: SankeyOrientation;
-  nodeAlign: SankeyNodeAlign;
   nodeWidth: number;
-  nodeGap: number;
   showNodeLabels: boolean;
   showLinkLabels: boolean;
   linkColor: SankeyLinkColor;
@@ -48,9 +45,7 @@ export const defaultSankeyChartStyles: SankeyChartStyle = {
   },
   exclusive: {
     orient: 'horizontal',
-    nodeAlign: 'justify',
     nodeWidth: 20,
-    nodeGap: 8,
     showNodeLabels: true,
     showLinkLabels: false,
     linkColor: 'gradient',

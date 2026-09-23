@@ -22,7 +22,6 @@ import {
   SankeyChartStyle,
   SankeyLevelStyle,
   SankeyLinkColor,
-  SankeyNodeAlign,
   SankeyOrientation,
 } from './sankey_vis_config';
 import { DebouncedFieldNumber, DebouncedFieldRange } from '../style_panel/utils';
@@ -39,6 +38,9 @@ interface SankeyOpacityRangeProps {
   onChange: (opacity: number) => void;
   testSubj: string;
 }
+
+const normalizeLevelDepth = (depth?: number) =>
+  depth == null || !Number.isFinite(depth) ? 0 : Math.max(0, Math.floor(depth));
 
 const SankeyOpacityRange = ({
   label,
@@ -67,6 +69,15 @@ const SankeyOpacityRange = ({
 };
 
 export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveVisOptionsProps) => {
+  const levelRowIds = React.useRef<number[]>([]);
+  const nextLevelRowId = React.useRef(0);
+
+  // Depth is editable and duplicate depths are valid, so it cannot identify a level row.
+  // Keep UI-only IDs aligned with the list so each row retains its debounced control state.
+  while (levelRowIds.current.length < styles.levels.length) {
+    levelRowIds.current.push(nextLevelRowId.current++);
+  }
+
   const updateStyle = <K extends keyof SankeyChartStyle['exclusive']>(
     key: K,
     value: SankeyChartStyle['exclusive'][K]
@@ -83,7 +94,6 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
     while (configuredDepths.has(depth)) {
       depth += 1;
     }
-
     updateStyle('levels', [...styles.levels, { depth, opacity: 1 }]);
   };
 
@@ -97,6 +107,7 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
   };
 
   const removeLevelStyle = (index: number) => {
+    levelRowIds.current.splice(index, 1);
     updateStyle(
       'levels',
       styles.levels.filter((_, levelIndex) => levelIndex !== index)
@@ -139,39 +150,6 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
       </EuiFormRow>
 
       <EuiFormRow
-        label={i18n.translate('explore.stylePanel.sankey.nodeAlign', {
-          defaultMessage: 'Node alignment',
-        })}
-      >
-        <EuiSelect
-          compressed
-          options={[
-            {
-              value: 'left',
-              text: i18n.translate('explore.stylePanel.sankey.nodeAlign.start', {
-                defaultMessage: 'Start',
-              }),
-            },
-            {
-              value: 'right',
-              text: i18n.translate('explore.stylePanel.sankey.nodeAlign.end', {
-                defaultMessage: 'End',
-              }),
-            },
-            {
-              value: 'justify',
-              text: i18n.translate('explore.stylePanel.sankey.nodeAlign.justify', {
-                defaultMessage: 'Justify',
-              }),
-            },
-          ]}
-          value={styles.nodeAlign}
-          onChange={(event) => updateStyle('nodeAlign', event.target.value as SankeyNodeAlign)}
-          data-test-subj="sankeyNodeAlign"
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
         label={i18n.translate('explore.stylePanel.sankey.nodeWidth', {
           defaultMessage: 'Node width',
         })}
@@ -185,23 +163,6 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
             defaultMessage: 'px',
           })}
           data-test-subj="sankeyNodeWidth"
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.sankey.nodeGap', {
-          defaultMessage: 'Node gap',
-        })}
-      >
-        <DebouncedFieldNumber
-          value={styles.nodeGap}
-          min={0}
-          defaultValue={8}
-          onChange={(nodeGap) => updateStyle('nodeGap', nodeGap ?? 8)}
-          append={i18n.translate('explore.stylePanel.sankey.pixels', {
-            defaultMessage: 'px',
-          })}
-          data-test-subj="sankeyNodeGap"
         />
       </EuiFormRow>
 
@@ -273,7 +234,7 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
       />
 
       {styles.levels.map((level, index) => (
-        <React.Fragment key={`${level.depth}-${index}`}>
+        <React.Fragment key={levelRowIds.current[index]}>
           <EuiSpacer size="s" />
           <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
             <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -286,8 +247,13 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
                   <DebouncedFieldNumber
                     value={level.depth}
                     min={0}
+                    step={1}
                     defaultValue={0}
-                    onChange={(depth) => updateLevelStyle(index, { depth: depth ?? 0 })}
+                    onChange={(depth) =>
+                      updateLevelStyle(index, {
+                        depth: normalizeLevelDepth(depth),
+                      })
+                    }
                     data-test-subj={`sankeyLevelDepth-${index}`}
                   />
                 </EuiFormRow>
@@ -332,22 +298,23 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
         </React.Fragment>
       ))}
 
-      <EuiFormRow
+      {/* <EuiFormRow
         label={i18n.translate('explore.stylePanel.sankey.levelStyles', {
           defaultMessage: 'Level styles',
         })}
+      > */}
+      <EuiSpacer size="s" />
+      <EuiButton
+        size="s"
+        iconType="plusInCircle"
+        onClick={addLevelStyle}
+        data-test-subj="sankeyAddLevelStyle"
       >
-        <EuiButton
-          size="s"
-          iconType="plusInCircle"
-          onClick={addLevelStyle}
-          data-test-subj="sankeyAddLevelStyle"
-        >
-          {i18n.translate('explore.stylePanel.sankey.addLevelStyle', {
-            defaultMessage: 'Add level style',
-          })}
-        </EuiButton>
-      </EuiFormRow>
+        {i18n.translate('explore.stylePanel.sankey.addLevelStyle', {
+          defaultMessage: 'Add level style',
+        })}
+      </EuiButton>
+      {/* </EuiFormRow> */}
     </StyleAccordion>
   );
 };

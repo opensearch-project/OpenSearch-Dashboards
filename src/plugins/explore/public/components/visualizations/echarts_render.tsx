@@ -4,7 +4,7 @@
  */
 
 import * as echarts from 'echarts';
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -163,14 +163,38 @@ export const EchartsRender = React.memo(
     const containerRef = useRef<HTMLDivElement | null>(null);
     const instanceRef = useRef<echarts.ECharts | null>(null);
 
+    // ECharts can leave its internal model corrupted when rendering throws.
+    // Dispose it so resize and interaction handlers cannot re-enter the failed model.
+    const handleRenderFailure = useCallback((failedInstance: echarts.ECharts, error: unknown) => {
+      if (!failedInstance.isDisposed()) {
+        failedInstance.dispose();
+      }
+      if (instanceRef.current === failedInstance) {
+        instanceRef.current = null;
+      }
+      setInstance((currentInstance) =>
+        currentInstance === failedInstance ? null : currentInstance
+      );
+      setRenderError(getRenderErrorMessage(error));
+    }, []);
+
     const containerResizeObserver = useMemo(
       () =>
         new ResizeObserver(() => {
-          if (instanceRef.current) {
-            instanceRef.current.resize();
+          const currentInstance = instanceRef.current;
+          if (!currentInstance || currentInstance.isDisposed()) {
+            return;
+          }
+
+          try {
+            currentInstance.resize();
+          } catch (error) {
+            // A resize can surface an earlier layout failure, so use the same
+            // recovery path as a failed setOption call.
+            handleRenderFailure(currentInstance, error);
           }
         }),
-      []
+      [handleRenderFailure]
     );
 
     const gridArray = Array.isArray(spec?.grid) ? spec.grid : [];
@@ -179,10 +203,7 @@ export const EchartsRender = React.memo(
 
     useEffect(() => {
       if (containerRef.current) {
-        const echartsInstance = echarts.init(containerRef.current);
-        instanceRef.current = echartsInstance;
         containerResizeObserver.observe(containerRef.current);
-        setInstance(echartsInstance);
       }
 
       return () => {
@@ -262,8 +283,17 @@ export const EchartsRender = React.memo(
       };
     }, [instance, onSelectTimeRange]);
 
+    // Rendering is driven by spec changes, not instance state changes. Clearing a
+    // failed instance therefore cannot retry the same invalid spec in a loop; a
+    // later spec change creates a fresh instance below.
     useEffect(() => {
-      if (instance && spec) {
+      let currentInstance = instanceRef.current;
+      if (!currentInstance && containerRef.current) {
+        currentInstance = echarts.init(containerRef.current);
+        instanceRef.current = currentInstance;
+      }
+
+      if (currentInstance && spec) {
         const xAxis = Array.isArray(spec.xAxis) ? spec.xAxis[0] : spec.xAxis;
         const yAxis = Array.isArray(spec.yAxis) ? spec.yAxis[0] : spec.yAxis;
         let option = { ...spec };
@@ -306,14 +336,14 @@ export const EchartsRender = React.memo(
         }
 
         try {
-          instance.setOption(option, { notMerge: true });
-          instance.setTheme(DEFAULT_THEME);
+          currentInstance.setOption(option, { notMerge: true });
+          currentInstance.setTheme(DEFAULT_THEME);
 
           if (
             (xAxis?.type === 'time' && !xAxis.silent) ||
             (yAxis?.type === 'time' && !yAxis.silent)
           ) {
-            instance.dispatchAction({
+            currentInstance.dispatchAction({
               type: 'takeGlobalCursor',
               key: 'brush',
               brushOption: {
@@ -322,16 +352,18 @@ export const EchartsRender = React.memo(
               },
             });
           }
+          // Only expose successfully rendered instances to interaction effects.
+          setInstance(currentInstance);
           setRenderError(undefined);
         } catch (error) {
-          setRenderError(getRenderErrorMessage(error));
+          handleRenderFailure(currentInstance, error);
         }
       }
-    }, [spec, instance, onSelectTimeRange, legendSelected$]);
+    }, [spec, legendSelected$, handleRenderFailure]);
 
     // Subscribe to legendSelected$ changes and update legend.selected without full re-render
     useEffect(() => {
-      if (!instance || !legendSelected$) return;
+      if (!instance || !legendSelected$ || instanceRef.current !== instance) return;
       const sub = legendSelected$.subscribe((selected) => {
         instance.setOption({ legend: { selected } });
       });
@@ -340,7 +372,7 @@ export const EchartsRender = React.memo(
 
     // Subscribe to highlightedLegendTarget$ for hover highlight/downplay
     useEffect(() => {
-      if (!instance || !highlightedLegendTarget$) return;
+      if (!instance || !highlightedLegendTarget$ || instanceRef.current !== instance) return;
       const sub = highlightedLegendTarget$.subscribe((target) => {
         if (target) {
           if (target.type === 'data') {
