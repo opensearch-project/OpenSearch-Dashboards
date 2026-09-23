@@ -143,7 +143,12 @@ export const DatasetSelector = ({
           isGroupLabel: true,
         },
       ];
-      ds.forEach(({ id, title, type, dataSource, displayName }) => {
+      const sortedDs = [...ds].sort((a, b) =>
+        (a.displayName || a.title).localeCompare(b.displayName || b.title, undefined, {
+          sensitivity: 'base',
+        })
+      );
+      sortedDs.forEach(({ id, title, type, dataSource, displayName }) => {
         const displayLabel = displayName || title;
         const label = dataSource ? `${dataSource.title}::${displayLabel}` : displayLabel;
         datasetOptions.push({

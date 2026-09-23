@@ -226,14 +226,6 @@ const fetchIndexPatterns = async (
     return indexPatternDataStructure;
   });
 
-  // Sort by display label (falling back to title), matching the label the dataset selector
-  // dropdown renders for these patterns.
-  dataStructures.sort((a, b) => {
-    const aLabel = (a.meta as DataStructureCustomMeta)?.displayName || a.title;
-    const bLabel = (b.meta as DataStructureCustomMeta)?.displayName || b.title;
-    return aLabel.localeCompare(bLabel, undefined, { sensitivity: 'base' });
-  });
-
   // Query-editor extension meta (e.g. available languages) can trigger per-data-source network
   // calls; skip it for callers that only need core dataset metadata (e.g. the dataset selector
   // list), which would otherwise block on those lookups.

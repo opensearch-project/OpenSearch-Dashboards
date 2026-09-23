@@ -108,6 +108,34 @@ describe('DataSetTable', () => {
     expect(screen.getByText('Child 2')).toBeInTheDocument();
   });
 
+  it('renders children sorted alphabetically by display label, case-insensitively', () => {
+    const unsortedPath: DataStructure[] = [
+      ...mockPath.slice(0, 2),
+      {
+        ...mockPath[2],
+        children: [
+          { id: 'child-z', title: 'Zebra', type: 'index' },
+          { id: 'child-a', title: 'apple', type: 'index' },
+          // Its title would sort last, but its displayName should sort it in the middle.
+          {
+            id: 'child-friendly',
+            title: 'zzz-raw-title',
+            type: 'index',
+            meta: { displayName: 'Mango Display Name' },
+          },
+        ],
+      },
+    ];
+
+    const { container } = renderWithIntl(<DatasetTable {...mockProps} path={unsortedPath} />);
+
+    const renderedTitles = Array.from(container.querySelectorAll('.datasetTable__itemTitle')).map(
+      (el) => el.textContent
+    );
+
+    expect(renderedTitles).toEqual(['apple', 'Mango Display Name', 'Zebra']);
+  });
+
   it('calls selectDataStructure when an index is selected', async () => {
     renderWithIntl(<DatasetTable {...mockProps} />);
 

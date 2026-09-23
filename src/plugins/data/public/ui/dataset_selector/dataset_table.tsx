@@ -21,7 +21,11 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  const dataStructures = props.path[props.index].children || [];
+  const dataStructures = [...(props.path[props.index].children || [])].sort((a, b) => {
+    const aLabel = (a.meta as DataStructureCustomMeta)?.displayName || a.title;
+    const bLabel = (b.meta as DataStructureCustomMeta)?.displayName || b.title;
+    return aLabel.localeCompare(bLabel, undefined, { sensitivity: 'base' });
+  });
   const paginationToken = props.path[props.index].paginationToken;
 
   const onTableChange = async (options: DataStructureFetchOptions) => {
