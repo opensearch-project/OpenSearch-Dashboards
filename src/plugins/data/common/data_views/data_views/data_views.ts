@@ -810,6 +810,9 @@ export class DataViewsService {
       title: dataView.title,
       type: dataView.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: dataView.timeFieldName,
+      // signalType drives flavor routing; keep this fallback consistent with the DataView.toDataset
+      // branch above so a non-DataView index pattern isn't stripped of it.
+      signalType: dataView.signalType,
       displayName: dataView.displayName,
       description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
