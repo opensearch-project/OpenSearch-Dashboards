@@ -779,3 +779,81 @@ test('getStateTransferContainerInfoData is inert when the sections flag is off',
 
   container.destroy();
 });
+
+test('getInheritedInput tolerates options being unset (base-constructor emission)', () => {
+  // The base Container constructor emits input (creating children, which calls
+  // getInputForChild -> getInheritedInput) before DashboardContainer assigns
+  // this.options. Reading this.options.allowDashboardSections there throws, so
+  // getInheritedInput must tolerate an undefined options.
+  const stub = {
+    input: {
+      viewMode: ViewMode.VIEW,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      timeRange: { from: 'now-15m', to: 'now' },
+      layout: undefined,
+    },
+    // options intentionally left unset.
+  };
+  const getInheritedInput = (DashboardContainer.prototype as any).getInheritedInput;
+
+  let result: any;
+  expect(() => {
+    result = getInheritedInput.call(stub, 'panel-1');
+  }).not.toThrow();
+  expect(result.isVisible).toBe(true);
+  expect(result.id).toBe('panel-1');
+});
+
+describe('getInheritedInput isVisible', () => {
+  const getInheritedInput = (DashboardContainer.prototype as any).getInheritedInput;
+  const member = (idRef: string) => ({
+    idRef,
+    type: 'panel' as const,
+    gridData: { x: 0, y: 0, w: 24, h: 10 },
+  });
+  // s1 is collapsed (a, b), s2 is expanded (c); d is unclaimed (Ungrouped).
+  const sectionLayout = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 's1',
+        type: 'section',
+        name: 'S1',
+        collapsed: true,
+        members: [member('a'), member('b')],
+      },
+      { id: 's2', type: 'section', name: 'S2', collapsed: false, members: [member('c')] },
+    ],
+  };
+  const makeStub = (layout: unknown, allowDashboardSections: boolean) => ({
+    input: {
+      viewMode: ViewMode.VIEW,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      timeRange: { from: 'now-15m', to: 'now' },
+      layout,
+    },
+    options: { allowDashboardSections },
+  });
+  const visibility = (stub: unknown, id: string) => getInheritedInput.call(stub, id).isVisible;
+
+  test('marks members of a collapsed section not visible and everything else visible', () => {
+    const stub = makeStub(sectionLayout, true);
+    expect(visibility(stub, 'a')).toBe(false);
+    expect(visibility(stub, 'b')).toBe(false);
+    expect(visibility(stub, 'c')).toBe(true);
+    expect(visibility(stub, 'd')).toBe(true);
+  });
+
+  test('treats every panel as visible when dashboard sections are disabled', () => {
+    const stub = makeStub(sectionLayout, false);
+    expect(visibility(stub, 'a')).toBe(true);
+    expect(visibility(stub, 'c')).toBe(true);
+  });
+
+  test('treats every panel as visible in a GridLayout', () => {
+    const stub = makeStub({ type: 'GridLayout', items: [] }, true);
+    expect(visibility(stub, 'a')).toBe(true);
+  });
+});
