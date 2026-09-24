@@ -15,6 +15,10 @@ const createHit = (source: Record<string, unknown>) => ({
 
 describe('filter_fields_transformation', () => {
   const instance = createFilterFieldsTransformation();
+  type TestHit = ReturnType<typeof createHit>;
+  type TestConfig = Parameters<typeof instance.transformationMethod>[1];
+  const transform = (data: TestHit[], config: TestConfig) =>
+    instance.transformationMethod(data, config).rows;
 
   describe('transformationMethod', () => {
     const data = [
@@ -22,37 +26,32 @@ describe('filter_fields_transformation', () => {
       createHit({ name: 'Bob', age: 25, city: 'LA' }),
     ];
 
-    it('returns original data when no fields are selected', () => {
-      const result = instance.transformationMethod(data, {
-        mode: 'include',
-        fieldOptions: [],
-      });
-      expect(result).toEqual(data);
-    });
-
     it('includes only specified fields', () => {
       const result = instance.transformationMethod(data, {
         mode: 'include',
-        fieldOptions: [{ name: 'name', visFieldType: VisFieldType.String }],
+        fieldOptions: [{ name: 'name', visFieldType: VisFieldType.Categorical }],
       });
-      expect(result[0]._source).toEqual({ name: 'Alice' });
-      expect(result[1]._source).toEqual({ name: 'Bob' });
+      expect(result).toEqual({
+        rows: [createHit({ name: 'Alice' }), createHit({ name: 'Bob' })],
+        status: 'applied',
+        issues: [],
+      });
     });
 
     it('excludes specified fields', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         mode: 'exclude',
-        fieldOptions: [{ name: 'city', visFieldType: VisFieldType.String }],
+        fieldOptions: [{ name: 'city', visFieldType: VisFieldType.Categorical }],
       });
       expect(result[0]._source).toEqual({ name: 'Alice', age: 30 });
       expect(result[1]._source).toEqual({ name: 'Bob', age: 25 });
     });
 
     it('includes multiple fields', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         mode: 'include',
         fieldOptions: [
-          { name: 'name', visFieldType: VisFieldType.String },
+          { name: 'name', visFieldType: VisFieldType.Categorical },
           { name: 'age', visFieldType: VisFieldType.Numerical },
         ],
       });
@@ -60,31 +59,62 @@ describe('filter_fields_transformation', () => {
     });
   });
 
-  describe('validateConfig', () => {
-    it('returns config unchanged when all fields exist', () => {
+  describe('execution diagnostics', () => {
+    it.each([
+      {
+        mode: 'include' as const,
+        fieldOptions: [
+          { name: 'name', visFieldType: VisFieldType.Categorical },
+          { name: 'removed', visFieldType: VisFieldType.Categorical },
+        ],
+      },
+      {
+        mode: 'exclude' as const,
+        fieldOptions: [
+          { name: 'age', visFieldType: VisFieldType.Numerical },
+          { name: 'removed', visFieldType: VisFieldType.Categorical },
+        ],
+      },
+    ])(
+      'filters available fields in $mode mode without reporting absent configured fields',
+      (config) => {
+        const data = [createHit({ name: 'Alice', age: 30 })];
+        const result = instance.transformationMethod(data, config);
+
+        expect(result).toEqual({
+          rows: [createHit({ name: 'Alice' })],
+          status: 'applied',
+          issues: [],
+        });
+      }
+    );
+
+    it('applies independently to rows with different fields', () => {
       const config = {
         mode: 'include' as const,
         fieldOptions: [
-          { name: 'name', visFieldType: VisFieldType.String },
+          { name: 'name', visFieldType: VisFieldType.Categorical },
           { name: 'age', visFieldType: VisFieldType.Numerical },
         ],
       };
-      const fields = [{ name: 'name' }, { name: 'age' }, { name: 'city' }];
-      expect(instance.validateConfig!(config, fields)).toEqual(config);
+      const data = [createHit({ name: 'Alice', city: 'NYC' }), createHit({ age: 30, city: 'LA' })];
+
+      expect(instance.transformationMethod(data, config)).toEqual({
+        rows: [createHit({ name: 'Alice' }), createHit({ age: 30 })],
+        status: 'applied',
+        issues: [],
+      });
     });
 
-    it('removes fields that no longer exist', () => {
-      const config = {
-        mode: 'include' as const,
-        fieldOptions: [
-          { name: 'name', visFieldType: VisFieldType.String },
-          { name: 'removed', visFieldType: VisFieldType.String },
-        ],
-      };
-      const fields = [{ name: 'name' }, { name: 'age' }];
-      const result = instance.validateConfig!(config, fields);
-      expect(result.fieldOptions).toHaveLength(1);
-      expect(result.fieldOptions[0].name).toBe('name');
+    it('skips and reports an invalid config when no fields are configured', () => {
+      const config = { mode: 'include' as const, fieldOptions: [] };
+      const data = [createHit({ name: 'Alice' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'invalid_config' }],
+      });
     });
   });
 

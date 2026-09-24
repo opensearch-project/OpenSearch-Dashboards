@@ -7,13 +7,19 @@ import { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  getRowFieldValue,
+  rowHasField,
+} from '../transformation_utils';
 
 type ParseFormat = 'json' | 'object';
 
@@ -146,10 +152,20 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
     },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: ExtractFieldsConfig) => {
-      if (!isConfigComplete(config)) return data;
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Extract Fields configuration is incomplete.');
+      }
+      let applicableRows = 0;
+      let hasMissingRows = false;
 
-      return data.map((row) => {
-        const raw = get(row, `_source.${config.field}`);
+      const transformed = data.map((row) => {
+        if (!rowHasField(row, config.field!)) {
+          hasMissingRows = true;
+          return row;
+        }
+        applicableRows++;
+
+        const raw = getRowFieldValue(row, config.field!);
         if (raw == null) return row;
 
         const extracted =
@@ -162,13 +178,15 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
           _source: { ...(row._source as Record<string, unknown>), ...extracted },
         };
       });
-    },
-    validateConfig: (config: ExtractFieldsConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      if (config.field && !fieldNames.has(config.field)) {
-        return { ...config, field: undefined };
+
+      if (!hasMissingRows && data.length > 0) {
+        return createAppliedResult(transformed);
       }
-      return config;
+      return createMissingFieldsResult(
+        applicableRows > 0 ? transformed : data,
+        [config.field!],
+        applicableRows > 0 ? 'partially_applied' : 'skipped'
+      );
     },
     Editor: ExtractFieldsEditor,
   };

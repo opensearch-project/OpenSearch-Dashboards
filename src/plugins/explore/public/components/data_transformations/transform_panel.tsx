@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { useObservable } from 'react-use';
 import { isEqual } from 'lodash';
 import {
@@ -25,8 +25,6 @@ import { i18n } from '@osd/i18n';
 import { TransformSelectorButton } from './transform_selector_overlay';
 import { TransformationInstance, FieldSchema } from './types';
 import { TransformationService } from './transformation_service';
-import { FIELD_TYPE_MAP } from '../visualizations/constants';
-import { VisFieldType } from '../visualizations/types';
 
 const DROPPABLE_ID = 'transformationPipelineDroppable';
 
@@ -40,30 +38,10 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
     transformationService.pipeline$.getValue()
   );
 
-  const stageSchemasMap = useObservable(
-    transformationService.stageSchemas$,
-    transformationService.stageSchemas$.getValue()
+  const stageFieldsMap = useObservable(
+    transformationService.stageFields$,
+    transformationService.stageFields$.getValue()
   );
-
-  // stageSchemas$ is updated asynchronously via handleData
-  // among this gap, each editor still use its last own stage schemas
-  const availableFieldsForInstanceId = useMemo(() => {
-    const result = new Map<string, FieldSchema[]>();
-    stageSchemasMap.forEach((raw, instanceId) => {
-      result.set(
-        instanceId,
-        raw.map((field) => ({
-          name: field.name || '',
-          visFieldType: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
-        }))
-      );
-    });
-    return result;
-  }, [stageSchemasMap]);
-
-  const getAvailableFieldsForInstance = (instanceId: string): FieldSchema[] => {
-    return availableFieldsForInstanceId.get(instanceId) ?? [];
-  };
 
   const onSelectTransformation = (id: string) => {
     transformationService.addInstance(id);
@@ -144,7 +122,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
                       onConfigChange={onConfigChange}
                       onToggleHide={onToggleHide}
                       dragHandleProps={provided.dragHandleProps}
-                      availableFields={getAvailableFieldsForInstance(instance.instance_id)}
+                      availableFields={stageFieldsMap.get(instance.instance_id) ?? []}
                     />
                   )}
                 </EuiDraggable>

@@ -418,6 +418,10 @@ export class VisualizationBuilder {
     this.lastSchema = schema;
     this.seriesDisplayNames = seriesDisplayNames;
 
+    // TODO: Normalize results(OpenSearchSearchHit) into plain rows before running the
+    // transformation pipeline. The pipeline currently operates on OpenSearchSearchHit._source,
+    // coupling every transformation to the OpenSearch response shape. Split row normalization
+    // from visualization column inference, then run normalization before applyPipeline.
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rows,
       schema
