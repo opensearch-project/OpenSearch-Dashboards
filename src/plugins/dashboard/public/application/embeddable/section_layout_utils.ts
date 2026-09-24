@@ -117,6 +117,21 @@ export const getClaimedMemberIds = (items: DashboardSection[]): Set<string> => {
 };
 
 /**
+ * Ids of all member panels that live in a collapsed section. Panels in a
+ * collapsed section are not visible to the user, so their embeddables should
+ * pause data fetching (see the `dataFetchPaused` embeddable input). Membership
+ * is what matters here, not persistence, so the read-only "Ungrouped" virtual
+ * section (always expanded) contributes nothing.
+ */
+export const getCollapsedMemberIds = (items: DashboardSection[]): Set<string> => {
+  const ids = new Set<string>();
+  items.forEach((section) => {
+    if (section.collapsed) section.members.forEach((m) => ids.add(m.idRef));
+  });
+  return ids;
+};
+
+/**
  * Panels not claimed by an explicit section render in the read-only,
  * non-persisted "Ungrouped" section.
  */

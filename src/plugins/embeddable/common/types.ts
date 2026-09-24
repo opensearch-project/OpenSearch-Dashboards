@@ -51,6 +51,14 @@ export interface EmbeddableInput {
   hidePanelActions?: boolean;
 
   /**
+   * When `true`, the embeddable is not visible to the user (for example it is in
+   * a collapsed dashboard section) and SHOULD skip fetching data, then perform a
+   * single refresh when this returns to `false`. The embeddable is not destroyed,
+   * so honoring this is optional and adoption can be incremental.
+   */
+  dataFetchPaused?: boolean;
+
+  /**
    * Reserved key for enhancements added by other plugins.
    */
   enhancements?: SerializableState;
