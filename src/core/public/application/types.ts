@@ -689,6 +689,12 @@ export interface ApplicationSetup {
   registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 
   /**
+   * Helper utility to create an async updater that initially hides an app,
+   * runs the provided async check, and reveals the app if it resolves to true.
+   */
+  createAsyncUpdater(asyncCheck: () => Promise<boolean>): Observable<AppUpdater>;
+
+  /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
@@ -703,7 +709,8 @@ export interface ApplicationSetup {
 }
 
 /** @internal */
-export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'registerAppUpdater'> {
+export interface InternalApplicationSetup
+  extends Pick<ApplicationSetup, 'registerAppUpdater' | 'createAsyncUpdater'> {
   /**
    * Register an mountable application to the system.
    * @param plugin - opaque ID of the plugin that registers this application
