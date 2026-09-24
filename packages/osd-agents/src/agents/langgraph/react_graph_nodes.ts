@@ -11,6 +11,7 @@ import { ToolExecutor } from './tool_executor';
 import { ModelConfigManager } from '../../config/model_config';
 import { getPrometheusMetricsEmitter } from '../../utils/metrics_emitter';
 import { LLMRequestLogger } from '../../utils/llm_request_logger';
+import { isFirstRunOfTurn } from '../../utils/conversation_title';
 
 export class ReactGraphNodes {
   private logger: Logger;
@@ -128,28 +129,23 @@ export class ReactGraphNodes {
         '\n\n**CRITICAL: This is your FINAL response turn. You MUST provide a complete answer to the user WITHOUT calling any tools. Synthesize all previous tool results and provide a comprehensive final answer.**';
     }
 
-    // On the first turn of a new conversation (exactly one user message),
-    // ask the LLM to emit an inline title at the end of its response.
-    // This avoids a separate LLM call -- the title is parsed from the
-    // streamed response and emitted as a CUSTOM event by the adapter.
-    //
-    // NOTE: this is intentionally NOT gated on `iterations === 0`. When the
-    // first turn requires backend (MCP) tool rounds, iteration 0 produces a
-    // tool call rather than the final answer, and the answer is produced on a
-    // later iteration. Injecting the instruction on every iteration of the
-    // first turn ensures the final answer carries the title. The adapter
-    // parses the LAST `CONVERSATION_TITLE:` line at end-of-buffer, so any
-    // premature title emitted on an intermediate tool-calling turn is harmless
-    // (later text is appended after it, so it no longer matches the end anchor).
-    const isFirstTurn = messages.filter((m) => m.role === 'user').length === 1;
-    if (isFirstTurn) {
-      // Emit a short conversation title on its own line. Place it immediately
-      // BEFORE the trailing SUGGESTIONS: line (or as the last line when there
-      // are no suggestions) so the base prompt's "SUGGESTIONS on the LAST line"
-      // rule is preserved and the two instructions no longer conflict. The
-      // adapter parses the CONVERSATION_TITLE: line wherever it appears.
+    // Ask the LLM for an inline conversation title exactly once: on the first
+    // LLM call (iterations === 0) of the first run of the conversation's first
+    // human turn. At iteration 0 the graph's messages are still the request
+    // payload (tool rounds have not been appended yet), so isFirstRunOfTurn
+    // gives the same answer here as the adapter's emit gate: true for the
+    // initial request, false for a frontend-tool continuation (which carries the
+    // prior assistant toolUse message) and for any later human turn. Later
+    // backend tool rounds (iterations > 0) are not asked again, so the title
+    // comes only from the first response.
+    const shouldGenerateTitle = iterations === 0 && isFirstRunOfTurn(messages);
+    if (shouldGenerateTitle) {
+      // Emit the title as the LEADING line of the response -- the very first
+      // line, before any prose and before any tool call -- so it rides the first
+      // response even when that response is only a tool call. SUGGESTIONS still
+      // ends up last since the title is at the top.
       finalSystemPrompt +=
-        '\n\nAdditionally, output a short conversation title (max 8 words, no quotes, no period) on its own line prefixed with CONVERSATION_TITLE:. Place this line immediately BEFORE the SUGGESTIONS: line (or as the very last line if there are no suggestions), so the SUGGESTIONS: line always stays last. Example:\nCONVERSATION_TITLE: Cluster Health Check Summary\nSUGGESTIONS:["Check cluster health","Show index mapping"]\nOmit the CONVERSATION_TITLE line only if the message is just a greeting.';
+        '\n\nAdditionally, begin your response with a short conversation title (max 8 words, no quotes, no period) on its own line prefixed with CONVERSATION_TITLE:. Output this as the VERY FIRST line of your response, before any other text and before any tool call -- emit it even when your response is only a tool call with no other prose. Placing it first keeps the trailing SUGGESTIONS: line (when present) last.\nExample of a direct answer:\nCONVERSATION_TITLE: Cluster Health Check Summary\n<your answer here>\nSUGGESTIONS:["Check cluster health","Show index mapping"]\nExample when you are calling a tool:\nCONVERSATION_TITLE: List Cluster Indices\n<tool call>\nOmit the CONVERSATION_TITLE line only if the message is just a greeting.';
     }
 
     // Resolve model ID using priority: request -> default -> hardcoded

@@ -75,6 +75,7 @@ import { MCPServerConfig } from '../types/mcp_types';
 import { Logger } from '../utils/logger';
 import { AGUIAuditLogger } from '../utils/ag_ui_audit_logger';
 import { TextMessageManager } from './managers/text_message_manager';
+import { isFirstRunOfTurn } from '../utils/conversation_title';
 
 export interface BaseAGUIConfig {
   port?: number;
@@ -221,12 +222,17 @@ export class BaseAGUIAdapter {
    * Parse an inline CONVERSATION_TITLE: from the accumulated assistant text
    * and emit it as a CUSTOM event. This avoids a separate LLM call -- the title
    * instruction is appended to the system prompt for first-turn messages only,
-   * and the LLM emits it as a trailing line in its normal response.
+   * and the LLM emits it as the leading line of its first response.
    */
   private maybeEmitConversationTitle(input: RunAgentInput, observer: any): void {
-    // Only on the first turn (exactly one user message in history)
-    const userMessages = (input.messages || []).filter((m: any) => m.role === 'user');
-    if (userMessages.length !== 1) {
+    // Emit the title exactly once, on the FIRST run of the conversation's first
+    // human turn -- the initial request, before any assistant turn exists in the
+    // payload. This matches the inject gate in react_graph_nodes.ts, which asks
+    // for the title only on that run's first LLM call. It is FALSE on a
+    // frontend-tool continuation request (which carries the prior assistant
+    // toolUse message) and on any later human turn, so a stray title written
+    // there is never emitted.
+    if (!isFirstRunOfTurn(input.messages)) {
       return;
     }
 
@@ -235,11 +241,10 @@ export class BaseAGUIAdapter {
       return;
     }
 
-    // Parse the inline title from the accumulated response. The title line is
-    // emitted just before the trailing SUGGESTIONS: line, so it is NOT anchored
-    // to the end of the buffer. Match a CONVERSATION_TITLE: line anywhere and
-    // take the LAST occurrence, so a premature title emitted on an intermediate
-    // tool-calling turn is superseded by the one on the final answer.
+    // Parse the inline title from the accumulated response. The title is
+    // requested only as the leading line of the first LLM call, so normally
+    // there is exactly one. Match a CONVERSATION_TITLE: line anywhere and take
+    // the LAST occurrence as a defensive tie-break if the model writes more.
     const titleMatches = [
       ...assistantText.matchAll(/^[ \t]*CONVERSATION_TITLE:[ \t]*(.+?)[ \t]*$/gim),
     ];
@@ -318,7 +323,7 @@ export class BaseAGUIAdapter {
 
       // Parse inline conversation title from the response (first turn only).
       // The title instruction is appended to the system prompt for first-turn
-      // messages, so the LLM emits CONVERSATION_TITLE: as a trailing line.
+      // messages, so the LLM emits CONVERSATION_TITLE: as its leading line.
       this.maybeEmitConversationTitle(input, observer);
 
       // Emit run finished event

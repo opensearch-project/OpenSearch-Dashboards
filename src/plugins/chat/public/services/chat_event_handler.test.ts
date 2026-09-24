@@ -2436,3 +2436,62 @@ describe('ChatEventHandler', () => {
     });
   });
 });
+
+describe('ChatEventHandler - CUSTOM conversation_title event', () => {
+  let handler: ChatEventHandler;
+  let onConversationTitle: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    onConversationTitle = jest.fn();
+    handler = new ChatEventHandler({
+      assistantActionService: mockAssistantActionService,
+      chatService: mockChatService,
+      // @ts-expect-error TS2740 partial confirmation service mock
+      confirmationService: mockConfirmationService,
+      callbacks: {
+        onTimelineUpdate: jest.fn(),
+        onStreamingStateChange: jest.fn(),
+        onStartResponse: jest.fn(),
+        getTimeline: jest.fn(() => []),
+        onConversationTitle,
+      },
+    });
+  });
+
+  it('routes a conversation_title event to the onConversationTitle callback (trimmed)', async () => {
+    await handler.handleEvent({
+      type: EventType.CUSTOM,
+      name: 'conversation_title',
+      data: '  Cluster Health Summary  ',
+    } as any);
+
+    expect(onConversationTitle).toHaveBeenCalledTimes(1);
+    expect(onConversationTitle).toHaveBeenCalledWith('Cluster Health Summary');
+  });
+
+  it('ignores CUSTOM events with a different name', async () => {
+    await handler.handleEvent({
+      type: EventType.CUSTOM,
+      name: 'something_else',
+      data: 'Not a title',
+    } as any);
+
+    expect(onConversationTitle).not.toHaveBeenCalled();
+  });
+
+  it('ignores a conversation_title event with non-string or empty data', async () => {
+    await handler.handleEvent({
+      type: EventType.CUSTOM,
+      name: 'conversation_title',
+      data: 42,
+    } as any);
+    await handler.handleEvent({
+      type: EventType.CUSTOM,
+      name: 'conversation_title',
+      data: '   ',
+    } as any);
+
+    expect(onConversationTitle).not.toHaveBeenCalled();
+  });
+});

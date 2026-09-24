@@ -5,8 +5,8 @@
 
 import {
   parseInlineSuggestions,
-  parseInlineTitle,
   stripInlineSuggestions,
+  isBlankAfterStrip,
 } from './parse_inline_suggestions';
 
 describe('parseInlineSuggestions', () => {
@@ -93,49 +93,6 @@ describe('stripInlineSuggestions', () => {
   });
 });
 
-describe('parseInlineTitle', () => {
-  it('should parse CONVERSATION_TITLE from end of content', () => {
-    const content = 'Here is your answer.\nCONVERSATION_TITLE: Cluster Health Summary';
-    const result = parseInlineTitle(content);
-    expect(result.cleanContent).toBe('Here is your answer.');
-    expect(result.title).toBe('Cluster Health Summary');
-  });
-
-  it('should handle title without space after colon', () => {
-    const content = 'Answer text\nCONVERSATION_TITLE:My Title';
-    const result = parseInlineTitle(content);
-    expect(result.cleanContent).toBe('Answer text');
-    expect(result.title).toBe('My Title');
-  });
-
-  it('should return undefined when no CONVERSATION_TITLE line', () => {
-    const content = 'Just a normal response';
-    const result = parseInlineTitle(content);
-    expect(result.cleanContent).toBe(content);
-    expect(result.title).toBeUndefined();
-  });
-
-  it('should return undefined for empty title', () => {
-    const content = 'Answer\nCONVERSATION_TITLE:   ';
-    const result = parseInlineTitle(content);
-    expect(result.cleanContent).toBe(content);
-    expect(result.title).toBeUndefined();
-  });
-
-  it('should reject titles longer than 100 characters', () => {
-    const longTitle = 'A'.repeat(101);
-    const content = `Answer\nCONVERSATION_TITLE: ${longTitle}`;
-    const result = parseInlineTitle(content);
-    expect(result.title).toBeUndefined();
-  });
-
-  it('should handle empty string', () => {
-    const result = parseInlineTitle('');
-    expect(result.cleanContent).toBe('');
-    expect(result.title).toBeUndefined();
-  });
-});
-
 describe('stripInlineSuggestions with title', () => {
   it('should strip both SUGGESTIONS and CONVERSATION_TITLE', () => {
     const content = 'Hello world\nCONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]';
@@ -150,5 +107,37 @@ describe('stripInlineSuggestions with title', () => {
   it('should strip incomplete CONVERSATION_TITLE during streaming', () => {
     const content = 'Answer text\nCONVERSATION_TITLE: Partial ti';
     expect(stripInlineSuggestions(content)).toBe('Answer text');
+  });
+});
+
+describe('isBlankAfterStrip', () => {
+  it('is true while a leading title prefix is streaming before its colon', () => {
+    expect(isBlankAfterStrip('CONVERSATI')).toBe(true);
+    expect(isBlankAfterStrip('CONVERSATION_TITLE')).toBe(true);
+  });
+
+  it('keeps normal text that is not a title prefix', () => {
+    expect(stripInlineSuggestions('CONVERSATION is fine')).toBe('CONVERSATION is fine');
+    expect(stripInlineSuggestions('Hello')).toBe('Hello');
+  });
+  it('is true for empty/undefined/whitespace content', () => {
+    expect(isBlankAfterStrip('')).toBe(true);
+    expect(isBlankAfterStrip(undefined)).toBe(true);
+    expect(isBlankAfterStrip(null)).toBe(true);
+    expect(isBlankAfterStrip('   \n  ')).toBe(true);
+  });
+
+  it('is true when the only content is a CONVERSATION_TITLE line (tool-call round)', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Apply PPL Query for 404s')).toBe(true);
+  });
+
+  it('is true when only a title and suggestions remain', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]')).toBe(true);
+  });
+
+  it('is false when real answer text remains after stripping', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Yellow Status\n\nYour cluster is yellow.')).toBe(
+      false
+    );
   });
 });
