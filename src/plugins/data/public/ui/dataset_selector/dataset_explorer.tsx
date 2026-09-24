@@ -272,6 +272,10 @@ export const DatasetExplorer = ({
                           (child.meta as DataStructureCustomMeta)?.displayName || child.title;
                         return {
                           label: child.parent ? `${child.parent.title}::${childLabel}` : childLabel,
+                          // Always allow searching by title even if displayName is shown
+                          searchableLabel: [child.parent?.title, childLabel, child.title]
+                            .filter(Boolean)
+                            .join(' '),
                           value: child.id,
                           prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
                             child.meta?.icon && <EuiIcon {...child.meta.icon} />,
