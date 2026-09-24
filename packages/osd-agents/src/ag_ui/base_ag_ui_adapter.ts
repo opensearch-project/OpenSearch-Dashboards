@@ -75,6 +75,7 @@ import { MCPServerConfig } from '../types/mcp_types';
 import { Logger } from '../utils/logger';
 import { AGUIAuditLogger } from '../utils/ag_ui_audit_logger';
 import { TextMessageManager } from './managers/text_message_manager';
+import { isFirstRunOfTurn, createLeadingTitleScanner } from '../utils/conversation_title';
 
 export interface BaseAGUIConfig {
   port?: number;
@@ -218,53 +219,6 @@ export class BaseAGUIAdapter {
   }
 
   /**
-   * Parse an inline CONVERSATION_TITLE: from the accumulated assistant text
-   * and emit it as a CUSTOM event. This avoids a separate LLM call -- the title
-   * instruction is appended to the system prompt for first-turn messages only,
-   * and the LLM emits it as a trailing line in its normal response.
-   */
-  private maybeEmitConversationTitle(input: RunAgentInput, observer: any): void {
-    // Only on the first turn (exactly one user message in history)
-    const userMessages = (input.messages || []).filter((m: any) => m.role === 'user');
-    if (userMessages.length !== 1) {
-      return;
-    }
-
-    const assistantText = this.textMessageManager.getAccumulatedText() || '';
-    if (!assistantText.trim()) {
-      return;
-    }
-
-    // Parse the inline title from the accumulated response. The title line is
-    // emitted just before the trailing SUGGESTIONS: line, so it is NOT anchored
-    // to the end of the buffer. Match a CONVERSATION_TITLE: line anywhere and
-    // take the LAST occurrence, so a premature title emitted on an intermediate
-    // tool-calling turn is superseded by the one on the final answer.
-    const titleMatches = [
-      ...assistantText.matchAll(/^[ \t]*CONVERSATION_TITLE:[ \t]*(.+?)[ \t]*$/gim),
-    ];
-    if (titleMatches.length === 0) {
-      return;
-    }
-
-    const title = titleMatches[titleMatches.length - 1][1].trim();
-    if (title && title.length > 0 && title.length <= 100) {
-      this.emitAndAuditEvent(
-        {
-          type: EventType.CUSTOM,
-          name: 'conversation_title',
-          data: title,
-          timestamp: Date.now(),
-        } as CustomEvent,
-        observer,
-        input.threadId,
-        input.runId
-      );
-      this.logger.info('Emitted conversation title from inline response', { title });
-    }
-  }
-
-  /**
    * Process agent request and emit events through observer
    */
   private async processAgentRequestWithEvents(
@@ -288,7 +242,6 @@ export class BaseAGUIAdapter {
     );
 
     this.stateHistory.push(input.state || {});
-    this.textMessageManager.resetAccumulatedText();
 
     try {
       // Validate that we have messages
@@ -315,11 +268,6 @@ export class BaseAGUIAdapter {
       if (this.textMessageManager.isMessageActive()) {
         this.textMessageManager.endMessage(observer, input.threadId, input.runId);
       }
-
-      // Parse inline conversation title from the response (first turn only).
-      // The title instruction is appended to the system prompt for first-turn
-      // messages, so the LLM emits CONVERSATION_TITLE: as a trailing line.
-      this.maybeEmitConversationTitle(input, observer);
 
       // Emit run finished event
       this.emitAndAuditEvent(
@@ -466,15 +414,41 @@ export class BaseAGUIAdapter {
     // Track accumulated text to detect multi-line PPL queries
     let accumulatedText = '';
 
+    // Detect the leading CONVERSATION_TITLE: line inline, as the response
+    // streams, and emit it once as a CUSTOM event. Gated on the first run of the
+    // conversation's first human turn -- the only run for which the title is
+    // requested (react_graph_nodes.ts asks for it only when iterations === 0 &&
+    // isFirstRunOfTurn). The scanner is a request-local closure that buffers only
+    // the leading line, so it needs no turn-scoped buffer in the message manager
+    // and cannot interleave with a concurrent request's title.
+    const scanForTitle = isFirstRunOfTurn(messages)
+      ? createLeadingTitleScanner((title) => {
+          this.emitAndAuditEvent(
+            {
+              type: EventType.CUSTOM,
+              name: 'conversation_title',
+              data: title,
+              timestamp: Date.now(),
+            } as CustomEvent,
+            observer,
+            threadId,
+            runId
+          );
+          this.logger.info('Emitted conversation title from inline response', { title });
+        })
+      : undefined;
+
     try {
       // Create callbacks to convert agent events to AG UI events
       const callbacks: StreamingCallbacks = {
         onTextStart: (text: string) => {
           accumulatedText = text; // Start accumulating text
+          scanForTitle?.(text);
           this.textMessageManager.emitContent(text, observer, threadId, runId);
         },
         onTextDelta: (delta: string) => {
           accumulatedText += delta; // Continue accumulating text
+          scanForTitle?.(delta);
 
           // Check for PPL query in accumulated text (for multi-line queries)
           const pplQuery = this.detectPPLQuery(accumulatedText);
@@ -499,6 +473,14 @@ export class BaseAGUIAdapter {
           this.textMessageManager.emitContent(delta, observer, threadId, runId);
         },
         onToolUseStart: (toolName: string, toolUseId: string, input: any) => {
+          // A tool call ends the current text block. On a tool-calling turn the
+          // model streams the leading CONVERSATION_TITLE: line with no trailing
+          // newline and then goes straight to the tool call, so feed the scanner
+          // a newline here to close the title line at the block boundary --
+          // otherwise it would fuse with the post-tool answer block and never
+          // match. (No-op once the title has already been captured.)
+          scanForTitle?.('\n');
+
           // Track tool execution count
           this.toolCallsPending++;
 
@@ -614,6 +596,12 @@ export class BaseAGUIAdapter {
           );
         },
         onTurnComplete: () => {
+          // Close the title line at the end of the turn, covering the rare case
+          // of a title with no trailing newline and no tool call (a newline
+          // otherwise arrives naturally once the answer body streams). No-op if
+          // the title was already captured.
+          scanForTitle?.('\n');
+
           // Turn completed - emit any pending state deltas before message ends
           if (this.pendingStateDeltas.length > 0) {
             this.logger.debug('Emitting pending STATE_DELTA events', {
