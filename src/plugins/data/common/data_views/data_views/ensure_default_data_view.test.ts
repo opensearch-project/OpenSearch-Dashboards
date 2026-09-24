@@ -338,8 +338,10 @@ describe('ensureDefaultDataView', () => {
       return [] as Array<SavedObject<unknown>>;
     });
 
+    // An empty-id data-source reference is treated as the local cluster (not a real binding),
+    // so pattern1 is a valid candidate and, being first, becomes the default.
     await ensureDefaultDataView.call(indexPatterns);
-    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern2');
+    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
     uiSettings.set.mockClear();
 
     savedObjectsClient.find.mockImplementation(async (params) => {

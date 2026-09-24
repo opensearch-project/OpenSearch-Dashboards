@@ -31,6 +31,14 @@ describe('test validateDataViewDataSourceReference', () => {
     expect(validateDataViewDataSourceReference(dataViewSavedObjectMock)).toBe(false);
     expect(validateDataViewDataSourceReference(dataViewSavedObjectMock, dataSourceId)).toBe(true);
   });
+
+  test('should match a legacy engine-typed reference (name "dataSource") so it is reused, not duplicated', () => {
+    dataViewSavedObjectMock = getDataViewSavedObjectMock({
+      references: [{ type: 'OpenSearch', name: 'dataSource', id: dataSourceId }],
+    });
+
+    expect(validateDataViewDataSourceReference(dataViewSavedObjectMock, dataSourceId)).toBe(true);
+  });
 });
 
 describe('test getDataViewTitle', () => {

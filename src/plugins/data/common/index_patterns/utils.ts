@@ -69,7 +69,9 @@ export const validateDataSourceReference = (
 ) => {
   const references = indexPattern.references;
   if (dataSourceId) {
-    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
+    // Name-tolerant so a legacy engine-typed ref is recognized as the same dataset (reused, not
+    // duplicated); the id must still match, so this can't cross data sources.
+    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
   } else {
     // No datasource id passed as input meaning we are getting index pattern from default cluster,
     // and it's supposed to be an empty array
@@ -114,8 +116,12 @@ export const concatDataSourceWithIndexPattern = (
   return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(indexPatternTitle);
 };
 
+// Match by name or type (tolerating legacy engine-typed refs); require a non-empty id.
+export const isDataSourceReference = (ref: SavedObjectReference) =>
+  !!ref.id && (ref.name === 'dataSource' || ref.type === 'data-source');
+
 export const getDataSourceReference = (references: SavedObjectReference[]) => {
-  return references.find((ref) => ref.type === 'data-source');
+  return references.find(isDataSourceReference);
 };
 
 /**
@@ -133,7 +139,7 @@ export const getDataSourceIdFromIndexPattern = (indexPattern: {
   id: string;
   references?: SavedObjectReference[];
 }): string | undefined => {
-  const refId = (indexPattern.references || []).find((ref) => ref.type === 'data-source')?.id;
+  const refId = (indexPattern.references || []).find(isDataSourceReference)?.id;
   if (refId) {
     return refId;
   }

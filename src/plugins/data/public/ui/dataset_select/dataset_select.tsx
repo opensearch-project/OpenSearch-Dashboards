@@ -747,7 +747,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                           await datasetService.saveDataset(
                             query.dataset,
                             services,
-                            (typeof signalType === 'string' && signalType) || undefined
+                            (typeof signalType === 'string' && signalType) || undefined,
+                            // Re-selection: reuse an existing dataset instead of failing on a dup.
+                            true
                           );
                         } else {
                           await datasetService.cacheDataset(
