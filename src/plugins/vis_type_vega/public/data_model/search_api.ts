@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
+import { CoreSetup, CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import {
@@ -46,6 +46,7 @@ import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder, RequestStatistics } from '../../../inspector/public';
 import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
+import { PromQLHttpResponse } from './types';
 
 interface RawPPLStrategySearchResponse {
   rawResponse: {
@@ -63,14 +64,19 @@ export interface SearchAPIDependencies {
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
   savedObjectsClient: SavedObjectsClientContract;
+  http: CoreSetup['http'];
 }
 
 export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
-    private readonly abortSignal?: AbortSignal,
+    public readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
+
+  public get http(): CoreSetup['http'] {
+    return this.dependencies.http;
+  }
 
   async search(searchRequests: SearchRequest[], options?: { strategy?: string }) {
     const { search } = this.dependencies.search;
@@ -160,6 +166,28 @@ export class SearchAPI {
       searchFields: ['title'],
       fields: ['id', 'title', 'dataSourceEngineType'],
     });
+  }
+
+  async searchPromQL(name: string, requestBody: object): Promise<PromQLHttpResponse> {
+    let requestResponder: RequestResponder | undefined;
+    if (this.inspectorAdapters) {
+      requestResponder = this.inspectorAdapters.requests.start(name, { name });
+      requestResponder.json(requestBody);
+    }
+    try {
+      const response = await this.dependencies.http.post<PromQLHttpResponse>(
+        '/api/enhancements/search/promql',
+        {
+          body: JSON.stringify(requestBody),
+          signal: this.abortSignal,
+        }
+      );
+      requestResponder?.ok({ json: response });
+      return response;
+    } catch (error) {
+      requestResponder?.error({ json: { error } });
+      throw error;
+    }
   }
 
   public resetSearchStats() {
