@@ -27,12 +27,16 @@ import {
   VisColumn,
   StandardOptions,
 } from '../types';
+import { convertThresholds } from './utils';
 import {
-  convertThresholds,
-  valueUnitFormatter,
+  createTooltipValueFormatter,
+  renderTooltipContent,
+  resolveDisplayName,
+  TooltipFormatContext,
   TooltipFormatFn,
-  getNormalizedAxisConfig,
-} from './utils';
+  getTooltipAxesMappingEncode,
+  seriesDisplayNameTooltipFormatter,
+} from './tooltip';
 import { DEFAULT_OPACITY } from '../constants';
 import { LegendItem } from './legend';
 import { formatUnitValue } from '../style_panel/unit/collection';
@@ -129,6 +133,60 @@ export function pipe<T extends BaseChartStyle>(
   return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
 
+const createTooltipFormatContext = <T extends BaseChartStyle>({
+  state,
+  formatValue,
+}: {
+  state: EChartsSpecState<T>;
+  formatValue: (value: unknown) => string;
+}): TooltipFormatContext<T> => {
+  const { styles, seriesDisplayNames, axisColumnMappings } = state;
+
+  return {
+    styles,
+    seriesDisplayNames,
+    axesMappingEncode: getTooltipAxesMappingEncode(axisColumnMappings),
+    formatValue,
+    getDisplayName: resolveDisplayName(seriesDisplayNames), // resolve display name from metadata seriesDisplayNames
+    renderTooltipContent,
+  };
+};
+
+const buildTooltip = <T extends BaseChartStyle>({
+  state,
+  addTrigger,
+  tooltipFormatter,
+}: {
+  state: EChartsSpecState<T>;
+  addTrigger: boolean;
+  tooltipFormatter?: TooltipFormatFn;
+}): EChartsOption['tooltip'] => {
+  const { styles, axisConfig } = state;
+  const tooltipMode = styles.tooltipOptions?.mode ?? 'all';
+  // handle unit & percentage axes value format
+  const valueFormatter = createTooltipValueFormatter({
+    styles,
+  });
+
+  return {
+    extraCssText: 'overflow: auto; max-height: 50%; max-width: 80%;',
+    enterable: true,
+    confine: true,
+    show: tooltipMode !== 'hidden',
+    trigger: tooltipMode === 'single' || !axisConfig || !addTrigger ? 'item' : 'axis',
+    axisPointer: { type: 'line' as const },
+    valueFormatter,
+    ...(tooltipFormatter && {
+      formatter: tooltipFormatter(
+        createTooltipFormatContext({
+          state,
+          formatValue: valueFormatter,
+        })
+      ),
+    }),
+  };
+};
+
 /**
  * Get ECharts axis type from VisColumn schema
  */
@@ -154,29 +212,21 @@ export const createBaseConfig =
   <T extends BaseChartStyle>({
     addTrigger = true,
     legend,
+    tooltipFormatter = seriesDisplayNameTooltipFormatter, // default for all Cartesian chart
   }: {
     addTrigger?: boolean;
     legend?: EChartsOption['legend'];
+    tooltipFormatter?: TooltipFormatFn;
   } = {}) =>
   (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-    const { styles, axisConfig } = state;
-
-    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
-
-    const formatValue = valueUnitFormatter(styles, hasUnit);
+    const { styles } = state;
 
     const baseConfig = {
-      tooltip: {
-        extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
-        enterable: true, // for y direction overflow
-        confine: true, // for x direction
-        show: styles.tooltipOptions?.mode !== 'hidden',
-        ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
-        axisPointer: { type: 'line' as const },
-        ...(hasUnit && {
-          valueFormatter: formatValue,
-        }),
-      },
+      tooltip: buildTooltip({
+        state,
+        addTrigger,
+        tooltipFormatter,
+      }),
       legend: {
         show: false,
         type: 'scroll',
@@ -189,56 +239,6 @@ export const createBaseConfig =
     };
 
     return { ...state, baseConfig };
-  };
-
-/**
- * Let each chart own its tooltip rendering, must run after createBaseConfig.
- */
-
-export const addTooltipFormatter =
-  <T extends BaseChartStyle>(formatFn: TooltipFormatFn) =>
-  (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-    const { styles, seriesDisplayNames, baseConfig, axisColumnMappings } = state;
-
-    if (!seriesDisplayNames || Object.keys(seriesDisplayNames).length < 1) return state;
-    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
-
-    const tooltipConfig = Array.isArray(baseConfig?.tooltip)
-      ? baseConfig.tooltip[0]
-      : baseConfig?.tooltip;
-
-    // percentage mode already define valueFormatter, use it directly
-    const formatValue =
-      typeof tooltipConfig?.valueFormatter === 'function'
-        ? (tooltipConfig.valueFormatter as any)
-        : valueUnitFormatter(styles, hasUnit);
-
-    const { categoryEncode, seriesEncode } = getNormalizedAxisConfig(
-      axisColumnMappings as
-        | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-        | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
-    );
-
-    const formatter = formatFn({
-      styles,
-      seriesDisplayNames,
-      formatValue,
-      axesMappingEncode: {
-        categoryEncode,
-        valueEncode: seriesEncode,
-      },
-    });
-
-    return {
-      ...state,
-      baseConfig: {
-        ...baseConfig,
-        tooltip: {
-          ...baseConfig?.tooltip,
-          formatter,
-        },
-      },
-    };
   };
 
 /**

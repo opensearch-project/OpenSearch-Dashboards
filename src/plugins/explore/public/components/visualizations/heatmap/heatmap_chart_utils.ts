@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import DOMPurify from 'dompurify';
 import { HeatmapSeriesOption } from 'echarts';
 import { Positions, ColorSchemas, ScaleType } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
-import { getSeriesDisplayName } from '../utils/series';
 import { formatUnitValue } from '../style_panel/unit/collection';
 import { DEFAULT_GRID } from '../constants';
 
@@ -85,7 +83,7 @@ export const createHeatmapSeries =
     seriesField: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { transformedData = [], visualMap, axisColumnMappings } = state;
+    const { transformedData = [], visualMap } = state;
 
     const seriesIndex = transformedData[0].indexOf(seriesField);
 
@@ -167,45 +165,6 @@ export const createHeatmapSeries =
             return typeof v === 'number'
               ? formatUnitValue(v, styles.unitId, styles.decimals, styles.unitSuffix)
               : v;
-          },
-        },
-        tooltip: {
-          formatter: (params) => {
-            if (!params.value || !Array.isArray(params.value)) {
-              return '';
-            }
-
-            const seriesDisplayName = getSeriesDisplayName(
-              seriesField,
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryDisplayName = getSeriesDisplayName(
-              categoryFields[0],
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryDisplayName2 = getSeriesDisplayName(
-              categoryFields[1],
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
-            const category2Index = transformedData[0].indexOf(categoryFields[1]);
-
-            const rawSeriesValue = params.value[seriesIndex];
-            const seriesValue =
-              typeof rawSeriesValue === 'number'
-                ? formatUnitValue(rawSeriesValue, styles.unitId, styles.decimals, styles.unitSuffix)
-                : (rawSeriesValue ?? '');
-
-            const message = `<strong>${categoryDisplayName}</strong>: ${
-              params.value[categoryIndex] ?? ''
-            }<br/><strong>${categoryDisplayName2}</strong>: ${
-              params.value[category2Index] ?? ''
-            }<br/><strong>${seriesDisplayName}</strong>: ${seriesValue}`;
-
-            return DOMPurify.sanitize(message);
           },
         },
         itemStyle: {
