@@ -13,6 +13,7 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   area: { type: 'area', name: 'Area', icon: 'visArea' },
   pie: { type: 'pie', name: 'Pie', icon: 'visPie' },
   heatmap: { type: 'heatmap', name: 'Heatmap', icon: 'heatmap' },
+  sankey: { type: 'sankey', name: 'Sankey', icon: 'graphApp' },
   metric: { type: 'metric', name: 'Metric', icon: 'visMetric' },
   scatter: { type: 'scatter', name: 'Scatter', icon: '' },
   table: { type: 'table', name: 'Table', icon: 'visTable' },

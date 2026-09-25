@@ -30,6 +30,7 @@ export const RightStyleOptionsPanel = React.memo(() => {
         borderRadius="none"
         hasShadow={false}
         color="transparent"
+        className="visualizationEditorStylePanel"
       >
         <StylePanelEmptyState />
       </EuiPanel>
@@ -44,6 +45,7 @@ export const RightStyleOptionsPanel = React.memo(() => {
       style={{ height: '100%', overflow: 'auto' }}
       borderRadius="none"
       hasShadow={false}
+      className="visualizationEditorStylePanel"
     >
       {isLoading && <StylePanelLoadingState />}
       <div style={{ display: isLoading ? 'none' : 'block' }}>

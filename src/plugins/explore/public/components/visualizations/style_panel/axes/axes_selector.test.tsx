@@ -174,6 +174,48 @@ describe('AxesSelectPanel', () => {
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
 
+  it('uses semantic field labels for Sankey mappings', () => {
+    const targetColumn = {
+      ...mockCategoricalColumns[0],
+      id: 5,
+      name: 'target',
+      column: 'target',
+    };
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [
+        {
+          visType: 'sankey',
+          rules: [
+            {
+              priority: 80,
+              mappings: [
+                {
+                  [AxisRole.SOURCE]: { type: VisFieldType.Categorical },
+                  [AxisRole.TARGET]: { type: VisFieldType.Categorical },
+                  [AxisRole.Value]: { type: VisFieldType.Numerical },
+                },
+              ],
+              render: jest.fn(),
+            },
+          ],
+        },
+      ],
+      exact: [],
+    });
+
+    render(
+      <AxesSelectPanel
+        {...defaultProps}
+        chartType="sankey"
+        categoricalColumns={[...mockCategoricalColumns, targetColumn]}
+      />
+    );
+
+    expect(screen.getByText('Source')).toBeInTheDocument();
+    expect(screen.getByText('Target')).toBeInTheDocument();
+    expect(screen.getByText('Value')).toBeInTheDocument();
+  });
+
   it('handles multiple axis roles correctly', () => {
     mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
       all: [
