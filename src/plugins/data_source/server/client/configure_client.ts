@@ -13,6 +13,7 @@ import {
   SigV4Content,
   SigV4ServiceName,
   UsernamePasswordTypedContent,
+  OAuth2Content,
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -61,7 +62,8 @@ export const configureClient = async (
       if (
         dataSourceId &&
         ((type === AuthType.UsernamePasswordType && !credentials?.password) ||
-          (type === AuthType.SigV4 && !credentials?.accessKey && !credentials?.secretKey))
+          (type === AuthType.SigV4 && !credentials?.accessKey && !credentials?.secretKey) ||
+          (type === AuthType.OAuth2 && !credentials?.clientSecret))
       ) {
         // Verify user can access the data source (scoped client enforces tenant/workspace permissions),
         // then fetch with credentials via internal repository to avoid the credential-stripping wrapper.
@@ -91,6 +93,9 @@ export const configureClient = async (
         dataSourceAttr: dataSource,
         request,
         cryptography,
+        // Test connection on an unsaved data source supplies plain text credentials, so the
+        // provider has to know not to decrypt them.
+        requireDecryption,
       });
     }
     const rootClient = getRootClient(
@@ -209,6 +214,13 @@ const getQueryClient = async (
 
       return getAWSChildClient(rootClient, credential);
 
+    case AuthType.OAuth2:
+      if (!credential) {
+        throw new Error('OAuth2 credentials not provided by authentication registry');
+      }
+      if (!rootClient) rootClient = new Client(clientOptions);
+      addClientToPool(cacheKey, type, rootClient);
+      return getOAuth2Client(rootClient, credential as OAuth2Content);
     default:
       throw Error(`${type} is not a supported auth type for data source`);
   }
@@ -228,6 +240,22 @@ const getBasicAuthClient = (
     // so logic in child() can rebuild the auth header based on the auth input.
     // See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2182 for details
     headers: { authorization: null },
+  });
+};
+
+const getOAuth2Client = (rootClient: Client, credential: OAuth2Content): Client => {
+  // Check if we have the actual Bearer token
+  if (!credential.token) {
+    throw new Error(
+      'OAuth2 Bearer token not available in credentials. Please ensure the data source is properly configured.'
+    );
+  }
+
+  // Return client with Bearer token attached to all requests
+  return rootClient.child({
+    headers: {
+      Authorization: `Bearer ${credential.token}`,
+    },
   });
 };
 

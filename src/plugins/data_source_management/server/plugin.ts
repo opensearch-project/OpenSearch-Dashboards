@@ -137,10 +137,23 @@ export class DataSourceManagementPlugin implements Plugin<
       }
     );
 
+    // Defaults to true when the data_source plugin is absent: direct query Prometheus
+    // connections mint their tokens in the SQL backend, so OAuth2 still works without it, and
+    // true matches the config schema default.
+    //
+    // The cast works around the declared dependency type, which nests
+    // DataSourcePluginSetup one level deeper than the contract core actually injects. Existing
+    // code only ever did `!!dataSource`, so the mismatch went unnoticed.
+    const dataSourceSetup = dataSource as unknown as DataSourcePluginSetup | undefined;
+    const oauth2AuthEnabled = dataSourceSetup?.oauth2AuthEnabled
+      ? dataSourceSetup.oauth2AuthEnabled()
+      : true;
+
     setupRoutes({
       router,
       client: openSearchDataSourceManagementClient,
       dataSourceEnabled,
+      oauth2AuthEnabled,
       logger: this.logger,
     });
 

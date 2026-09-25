@@ -27,6 +27,8 @@ export const registerTestConnectionRoute = async (
   logger: Logger,
   endpointDeniedIPs?: string[],
   endpointAllowlistedSuffixes?: string[],
+  // A getter, not the repository itself: routes are registered in setup() but the internal
+  // repository is only created in start(), so it has to be resolved per request.
   getInternalSavedObjects?: () => ISavedObjectsRepository | undefined
 ) => {
   const authRegistry = await authRegistryPromise;
@@ -111,6 +113,10 @@ export const registerTestConnectionRoute = async (
         const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
           {
             savedObjects: context.core.savedObjects.client,
+            // Without this, testing a *saved* data source whose credential field was left
+            // blank re-reads through the credential-stripping wrapper and sees no credentials
+            // at all, so the test fails as "credentials are incomplete" even though the stored
+            // secret is fine. Affects username_password and sigv4 the same way.
             internalSavedObjects: getInternalSavedObjects?.(),
             cryptography,
             dataSourceId,
