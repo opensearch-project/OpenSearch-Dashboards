@@ -15,6 +15,7 @@ export interface SpanMetadataTabProps {
 }
 
 interface CategorizedAttributes {
+  dependency: Array<[string, any]>;
   http: Array<[string, any]>;
   infrastructure: Array<[string, any]>;
   application: Array<[string, any]>;
@@ -34,6 +35,7 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     const sortedAttributes = sortAttributes(attributes);
 
     const categorized: CategorizedAttributes = {
+      dependency: [],
       http: [],
       infrastructure: [],
       application: [],
@@ -43,7 +45,18 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     sortedAttributes.forEach(([key, value]) => {
       const lowerKey = key.toLowerCase();
 
+      // Dependency attributes (database / messaging / peer) take precedence so
+      // e.g. `peer.service` is not swallowed by the "service" application rule.
       if (
+        lowerKey.startsWith('db.') ||
+        lowerKey.includes('db_system') ||
+        lowerKey.startsWith('messaging.') ||
+        lowerKey.includes('peer.service') ||
+        lowerKey.startsWith('net.peer') ||
+        lowerKey.startsWith('network.peer')
+      ) {
+        categorized.dependency.push([key, value]);
+      } else if (
         lowerKey.includes('http') ||
         lowerKey.includes('url') ||
         lowerKey.includes('method') ||
@@ -194,6 +207,13 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
   return (
     <div data-test-subj="span-metadata-tab">
+      {renderSection(
+        i18n.translate('explore.spanMetadataTab.section.dependency', {
+          defaultMessage: 'Dependency',
+        }),
+        categorizedAttributes.dependency
+      )}
+
       {renderSection(
         i18n.translate('explore.spanMetadataTab.section.http', {
           defaultMessage: 'HTTP',

@@ -7,6 +7,15 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elasti
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
+import {
+  classifyDependencyByAttributes,
+  resolveExternalName,
+  normalizeSpanKind,
+  dependencyTypeLabel,
+  dependencyIconType,
+  DependencyInfo,
+} from '../../services/dependency_classifier';
+import { getDependencyBrandIcon } from '../../services/dependency_icons';
 import { ParsedHit, SpanTableProps } from './types';
 
 export const HierarchySpanCell = ({
@@ -46,6 +55,20 @@ export const HierarchySpanCell = ({
   const serviceName = resolveServiceNameFromSpan(item);
   const operationName = item?.name;
   const hasError = isSpanError(item);
+
+  // Annotate spans that target an inferred dependency (database / messaging /
+  // external) so DB/broker/external calls are recognizable in the waterfall.
+  // External applies only to leaf CLIENT spans (no children reaching a service).
+  let dependency: DependencyInfo | null = item ? classifyDependencyByAttributes(item) : null;
+  if (
+    !dependency &&
+    item &&
+    normalizeSpanKind(item.kind) === 'CLIENT' &&
+    (item.children?.length ?? 0) === 0
+  ) {
+    const ext = resolveExternalName(item);
+    if (ext) dependency = { type: 'external', name: ext };
+  }
   const level = item?.level || 0;
   const serviceColor = (serviceName && colorMap?.[serviceName]) || undefined;
 
@@ -114,6 +137,25 @@ export const HierarchySpanCell = ({
         <span className="exploreSpanDetailTable__operationName">
           {operationName || (showService ? '' : serviceName) || '-'}
         </span>
+        {dependency && (
+          <EuiToolTip
+            content={`${dependencyTypeLabel(dependency.type)}${
+              dependency.system ? `: ${dependency.system}` : ''
+            }`}
+          >
+            <EuiIcon
+              type={
+                getDependencyBrandIcon(dependency.system) ||
+                dependencyIconType(dependency.type, dependency.system)
+              }
+              size="s"
+              color="subdued"
+              style={{ marginInlineStart: 6, flexShrink: 0 }}
+              data-test-subj="spanDependencyIcon"
+              aria-label={dependencyTypeLabel(dependency.type)}
+            />
+          </EuiToolTip>
+        )}
       </span>
     </EuiToolTip>
   );
