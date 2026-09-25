@@ -35,6 +35,7 @@ export class TextMessageManager {
   private currentMessageId?: string;
   private isActive = false;
   private auditLogger?: AGUIAuditLogger;
+  private accumulatedText = '';
 
   constructor(auditLogger?: AGUIAuditLogger) {
     this.auditLogger = auditLogger;
@@ -44,6 +45,18 @@ export class TextMessageManager {
    * Start a new text message stream
    */
   startMessage(observer: any, threadId: string, runId: string): string {
+    // Separate consecutive text blocks in the accumulated buffer with a newline.
+    // Across a run's tool rounds the LLM emits multiple text blocks (e.g. a
+    // leading CONVERSATION_TITLE: line on a tool-calling round, then the final
+    // answer on the next round). They are distinct UI message bubbles, but
+    // getAccumulatedText() concatenates them for title parsing -- without a
+    // separator a title line with no trailing newline would fuse with the next
+    // block's first line and the title regex would swallow both. This only
+    // touches the parse buffer; per-bubble streamed content is unaffected.
+    if (this.accumulatedText && !this.accumulatedText.endsWith('\n')) {
+      this.accumulatedText += '\n';
+    }
+
     const messageId = uuidv4();
     this.currentMessageId = messageId;
     this.isActive = true;
@@ -66,6 +79,8 @@ export class TextMessageManager {
     if (!this.isActive || !this.currentMessageId) {
       throw new Error('No active text message to emit content for');
     }
+
+    this.accumulatedText += content;
 
     const event: TextMessageContentEvent = {
       type: EventType.TEXT_MESSAGE_CONTENT,
@@ -122,6 +137,21 @@ export class TextMessageManager {
    */
   isMessageActive(): boolean {
     return this.isActive;
+  }
+
+  /**
+   * Get all accumulated text content emitted across all messages in this turn.
+   * Used for conversation title generation.
+   */
+  getAccumulatedText(): string {
+    return this.accumulatedText;
+  }
+
+  /**
+   * Reset accumulated text for a new request.
+   */
+  resetAccumulatedText(): void {
+    this.accumulatedText = '';
   }
 
   /**

@@ -64,6 +64,7 @@ import {
   StateDeltaEvent,
   StepStartedEvent,
   StepFinishedEvent,
+  CustomEvent,
   Message,
   Tool,
   RunAgentInput,
@@ -74,6 +75,7 @@ import { MCPServerConfig } from '../types/mcp_types';
 import { Logger } from '../utils/logger';
 import { AGUIAuditLogger } from '../utils/ag_ui_audit_logger';
 import { TextMessageManager } from './managers/text_message_manager';
+import { isFirstRunOfTurn } from '../utils/conversation_title';
 
 export interface BaseAGUIConfig {
   port?: number;
@@ -217,6 +219,57 @@ export class BaseAGUIAdapter {
   }
 
   /**
+   * Parse an inline CONVERSATION_TITLE: from the accumulated assistant text
+   * and emit it as a CUSTOM event. This avoids a separate LLM call -- the title
+   * instruction is appended to the system prompt for first-turn messages only,
+   * and the LLM emits it as the leading line of its first response.
+   */
+  private maybeEmitConversationTitle(input: RunAgentInput, observer: any): void {
+    // Emit the title exactly once, on the FIRST run of the conversation's first
+    // human turn -- the initial request, before any assistant turn exists in the
+    // payload. This matches the inject gate in react_graph_nodes.ts, which asks
+    // for the title only on that run's first LLM call. It is FALSE on a
+    // frontend-tool continuation request (which carries the prior assistant
+    // toolUse message) and on any later human turn, so a stray title written
+    // there is never emitted.
+    if (!isFirstRunOfTurn(input.messages)) {
+      return;
+    }
+
+    const assistantText = this.textMessageManager.getAccumulatedText() || '';
+    if (!assistantText.trim()) {
+      return;
+    }
+
+    // Parse the inline title from the accumulated response. The title is
+    // requested only as the leading line of the first LLM call, so normally
+    // there is exactly one. Match a CONVERSATION_TITLE: line anywhere and take
+    // the LAST occurrence as a defensive tie-break if the model writes more.
+    const titleMatches = [
+      ...assistantText.matchAll(/^[ \t]*CONVERSATION_TITLE:[ \t]*(.+?)[ \t]*$/gim),
+    ];
+    if (titleMatches.length === 0) {
+      return;
+    }
+
+    const title = titleMatches[titleMatches.length - 1][1].trim();
+    if (title && title.length > 0 && title.length <= 100) {
+      this.emitAndAuditEvent(
+        {
+          type: EventType.CUSTOM,
+          name: 'conversation_title',
+          data: title,
+          timestamp: Date.now(),
+        } as CustomEvent,
+        observer,
+        input.threadId,
+        input.runId
+      );
+      this.logger.info('Emitted conversation title from inline response', { title });
+    }
+  }
+
+  /**
    * Process agent request and emit events through observer
    */
   private async processAgentRequestWithEvents(
@@ -240,6 +293,7 @@ export class BaseAGUIAdapter {
     );
 
     this.stateHistory.push(input.state || {});
+    this.textMessageManager.resetAccumulatedText();
 
     try {
       // Validate that we have messages
@@ -266,6 +320,11 @@ export class BaseAGUIAdapter {
       if (this.textMessageManager.isMessageActive()) {
         this.textMessageManager.endMessage(observer, input.threadId, input.runId);
       }
+
+      // Parse inline conversation title from the response (first turn only).
+      // The title instruction is appended to the system prompt for first-turn
+      // messages, so the LLM emits CONVERSATION_TITLE: as its leading line.
+      this.maybeEmitConversationTitle(input, observer);
 
       // Emit run finished event
       this.emitAndAuditEvent(

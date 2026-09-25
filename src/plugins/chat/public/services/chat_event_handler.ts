@@ -17,6 +17,7 @@ import type {
   ToolCallEndEvent,
   ToolCallResultEvent,
   MessagesSnapshotEvent,
+  CustomEvent,
 } from '../../common/events';
 import type {
   Message,
@@ -44,6 +45,7 @@ export interface ChatEventHandlerConfig {
     onStreamingStateChange: (isStreaming: boolean) => void;
     onStartResponse: (flag: boolean) => void;
     getTimeline: () => Message[];
+    onConversationTitle?: (title: string) => void;
   };
 }
 
@@ -64,6 +66,7 @@ export class ChatEventHandler {
   private onStreamingStateChange: (isStreaming: boolean) => void;
   private onStartResponse: (flag: boolean) => void;
   private getTimeline: () => Message[];
+  private onConversationTitle?: (title: string) => void;
   private toolResultSubscription: Subscription | null = null;
 
   // Controls the currently in-flight tool result send (polling + agent stream).
@@ -95,6 +98,7 @@ export class ChatEventHandler {
     this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
     this.onStartResponse = config.callbacks.onStartResponse;
     this.getTimeline = config.callbacks.getTimeline;
+    this.onConversationTitle = config.callbacks.onConversationTitle;
     this.toolExecutor = new ToolExecutor(config.assistantActionService, config.confirmationService);
   }
 
@@ -145,6 +149,10 @@ export class ChatEventHandler {
 
       case EventType.RUN_ERROR:
         this.handleRunError(event);
+        break;
+
+      case EventType.CUSTOM:
+        this.handleCustomEvent(event as CustomEvent);
         break;
     }
   }
@@ -712,6 +720,20 @@ export class ChatEventHandler {
           chatToolCallSource: source,
         },
       });
+    }
+  }
+
+  /**
+   * Handle custom events from the agent backend.
+   * Currently supports 'conversation_title' for auto-generated conversation titles.
+   */
+  private handleCustomEvent(event: CustomEvent): void {
+    if (
+      event.name === 'conversation_title' &&
+      typeof event.data === 'string' &&
+      event.data.trim()
+    ) {
+      this.onConversationTitle?.(event.data.trim());
     }
   }
 

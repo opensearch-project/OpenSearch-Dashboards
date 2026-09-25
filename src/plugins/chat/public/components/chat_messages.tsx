@@ -22,6 +22,7 @@ import { TimelineToolCall, ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
+import { isBlankAfterStrip } from '../../common/parse_inline_suggestions';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
@@ -628,7 +629,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
               if (Array.isArray(assistantMsg.content)) {
                 return assistantMsg.content
-                  .filter((content) => content.text?.trim())
+                  .filter((content) => !isBlankAfterStrip(content.text))
                   .map((content, contentIndex) => (
                     <MessageRow
                       key={`${assistantMsg.id}-${contentIndex}`}
@@ -644,7 +645,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   ));
               }
 
-              if (assistantMsg.content.trim()) {
+              if (!isBlankAfterStrip(assistantMsg.content)) {
                 return (
                   <MessageRow
                     message={assistantMsg}

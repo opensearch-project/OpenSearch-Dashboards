@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parseInlineSuggestions, stripInlineSuggestions } from './parse_inline_suggestions';
+import {
+  parseInlineSuggestions,
+  stripInlineSuggestions,
+  isBlankAfterStrip,
+} from './parse_inline_suggestions';
 
 describe('parseInlineSuggestions', () => {
   it('should parse SUGGESTIONS line from end of content', () => {
@@ -86,5 +90,54 @@ describe('stripInlineSuggestions', () => {
   it('should not strip text that merely contains the word SUGGESTIONS', () => {
     const content = 'Here are my SUGGESTIONS: use a pie chart';
     expect(stripInlineSuggestions(content)).toBe(content);
+  });
+});
+
+describe('stripInlineSuggestions with title', () => {
+  it('should strip both SUGGESTIONS and CONVERSATION_TITLE', () => {
+    const content = 'Hello world\nCONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]';
+    expect(stripInlineSuggestions(content)).toBe('Hello world');
+  });
+
+  it('should strip CONVERSATION_TITLE alone', () => {
+    const content = 'Answer text\nCONVERSATION_TITLE: Query Results';
+    expect(stripInlineSuggestions(content)).toBe('Answer text');
+  });
+
+  it('should strip incomplete CONVERSATION_TITLE during streaming', () => {
+    const content = 'Answer text\nCONVERSATION_TITLE: Partial ti';
+    expect(stripInlineSuggestions(content)).toBe('Answer text');
+  });
+});
+
+describe('isBlankAfterStrip', () => {
+  it('is true while a leading title prefix is streaming before its colon', () => {
+    expect(isBlankAfterStrip('CONVERSATI')).toBe(true);
+    expect(isBlankAfterStrip('CONVERSATION_TITLE')).toBe(true);
+  });
+
+  it('keeps normal text that is not a title prefix', () => {
+    expect(stripInlineSuggestions('CONVERSATION is fine')).toBe('CONVERSATION is fine');
+    expect(stripInlineSuggestions('Hello')).toBe('Hello');
+  });
+  it('is true for empty/undefined/whitespace content', () => {
+    expect(isBlankAfterStrip('')).toBe(true);
+    expect(isBlankAfterStrip(undefined)).toBe(true);
+    expect(isBlankAfterStrip(null)).toBe(true);
+    expect(isBlankAfterStrip('   \n  ')).toBe(true);
+  });
+
+  it('is true when the only content is a CONVERSATION_TITLE line (tool-call round)', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Apply PPL Query for 404s')).toBe(true);
+  });
+
+  it('is true when only a title and suggestions remain', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Greeting\nSUGGESTIONS:["Say more"]')).toBe(true);
+  });
+
+  it('is false when real answer text remains after stripping', () => {
+    expect(isBlankAfterStrip('CONVERSATION_TITLE: Yellow Status\n\nYour cluster is yellow.')).toBe(
+      false
+    );
   });
 });
