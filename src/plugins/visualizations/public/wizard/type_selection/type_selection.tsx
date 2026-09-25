@@ -34,6 +34,10 @@ import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,13 +45,14 @@ import {
   EuiKeyPadMenuItem,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { memoizeLast } from '../../legacy/memoize';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
@@ -75,8 +80,18 @@ interface HighlightedType {
 
 interface TypeSelectionState {
   highlightedType: HighlightedType | null;
+  isLegacyOpen: boolean;
   query: string;
 }
+
+interface VisTypeGroups {
+  flatTypes: Array<VisType | VisTypeAlias>;
+  legacyTypes: Array<VisType | VisTypeAlias>;
+  recommendedTypes: VisTypeAlias[];
+  workflowTypes: VisTypeAlias[];
+}
+
+type DescriptionMode = 'panel' | 'tooltip';
 
 function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
   return 'aliasPath' in type;
@@ -85,14 +100,14 @@ function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
 class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public state: TypeSelectionState = {
     highlightedType: null,
+    isLegacyOpen: false,
     query: '',
   };
 
-  private readonly getFilteredVisTypes = memoizeLast(this.filteredVisTypes);
-
   public render() {
-    const { query, highlightedType } = this.state;
-    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
+    const visTypeGroups = this.getVisTypeGroups(this.props.visTypesRegistry);
+    const hasRecommendedTypes = visTypeGroups.recommendedTypes.length > 0;
+
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -101,92 +116,310 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
               <h2>
                 <FormattedMessage
                   id="visualizations.newVisWizard.title"
-                  defaultMessage="New Visualization"
+                  defaultMessage="Create visualization"
                 />
               </h2>
             </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
-        <div className="visNewVisDialog__body">
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                className="visNewVisDialog__list"
-                direction="column"
-                gutterSize="none"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
-                  <EuiCompressedFieldSearch
-                    placeholder="Filter"
-                    value={query}
-                    onChange={this.onQueryChange}
-                    fullWidth
-                    data-test-subj="filterVisType"
-                    aria-label={i18n.translate(
-                      'visualizations.newVisWizard.filterVisTypeAriaLabel',
-                      {
-                        defaultMessage: 'Filter for a visualization type',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
-                  <EuiScreenReaderOnly>
-                    <span aria-live="polite">
-                      {query && (
-                        <FormattedMessage
-                          id="visualizations.newVisWizard.resultsFound"
-                          defaultMessage="{resultCount} {resultCount, plural,
-                            one {type}
-                            other {types}
-                          } found"
-                          values={{
-                            resultCount: visTypes.filter((type) => type.highlighted).length,
-                          }}
-                        />
-                      )}
-                    </span>
-                  </EuiScreenReaderOnly>
-                  <EuiKeyPadMenu
-                    className="visNewVisDialog__types"
-                    data-test-subj="visNewDialogTypes"
-                  >
-                    {visTypes.map(this.renderVisType)}
-                  </EuiKeyPadMenu>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem className="visNewVisDialog__description" grow={false}>
-              {highlightedType ? (
-                <VisHelpText {...highlightedType} />
-              ) : (
-                <React.Fragment>
-                  <EuiTitle size="s">
-                    <h2>
-                      <FormattedMessage
-                        id="visualizations.newVisWizard.selectVisType"
-                        defaultMessage="Select a visualization type"
-                      />
-                    </h2>
-                  </EuiTitle>
-                  <EuiSpacer size="m" />
-                  <NewVisHelp
-                    promotedTypes={visTypes
-                      .map((t) => t.type)
-                      .filter((t): t is VisTypeAlias => isVisTypeAlias(t) && Boolean(t.promotion))}
-                    onPromotionClicked={this.props.onVisTypeSelected}
-                  />
-                </React.Fragment>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        {hasRecommendedTypes
+          ? this.renderRecommendedSelection(visTypeGroups)
+          : this.renderFlatSelection(visTypeGroups.flatTypes)}
       </React.Fragment>
     );
   }
 
-  private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
+  private renderRecommendedSelection({
+    legacyTypes,
+    recommendedTypes,
+    workflowTypes,
+  }: VisTypeGroups) {
+    const { isLegacyOpen, query } = this.state;
+    const filteredLegacyTypes = this.filterVisTypes(legacyTypes, query);
+
+    return (
+      <div className="visNewVisDialog__body visNewVisDialog__body--recommended">
+        <div className="visNewVisDialog__recommendedTypes">
+          {recommendedTypes.map(this.renderRecommendedType)}
+        </div>
+
+        {workflowTypes.length > 0 && (
+          <EuiFlexGroup
+            className="visNewVisDialog__workflows"
+            alignItems="center"
+            gutterSize="s"
+            responsive
+            wrap
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="visualizations.newVisWizard.workflowPrompt"
+                  defaultMessage="Or begin from a focused workflow:"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            {workflowTypes.map((workflowType) => (
+              <EuiFlexItem key={workflowType.name} grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="left"
+                  iconType="popout"
+                  iconSide="right"
+                  onClick={() => this.props.onVisTypeSelected(workflowType)}
+                  data-test-subj={`workflowVisType-${workflowType.name}`}
+                >
+                  {workflowType.title}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        )}
+
+        <EuiPanel
+          className="visNewVisDialog__legacyPanel"
+          color="plain"
+          hasBorder
+          hasShadow={false}
+          paddingSize="none"
+        >
+          <EuiAccordion
+            id="legacyVisualizationTypes"
+            data-test-subj="legacyVisTypesAccordion"
+            arrowDisplay="right"
+            buttonClassName="visNewVisDialog__legacyAccordionButton"
+            buttonContentClassName="visNewVisDialog__legacyAccordionButtonContent"
+            buttonContent={
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <div className="visNewVisDialog__optionIcon">
+                    <VisTypeIcon icon="grid" />
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem className="visNewVisDialog__legacyText">
+                  <EuiText size="s">
+                    <strong>
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.legacyTypesTitle"
+                        defaultMessage="Classic visualization types"
+                      />
+                    </strong>
+                  </EuiText>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="visualizations.newVisWizard.legacyTypesDescription"
+                      defaultMessage="Use the classic editor for existing workflows and specialized chart types."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="visNewVisDialog__legacyTypeCount"
+                  grow={false}
+                  data-test-subj="legacyVisTypesCount"
+                >
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="visualizations.newVisWizard.legacyTypesCount"
+                      defaultMessage="{typeCount} {typeCount, plural, one {type} other {types}}"
+                      values={{ typeCount: legacyTypes.length }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="visNewVisDialog__legacyToggleLabel"
+                  grow={false}
+                  data-test-subj="legacyVisTypesToggleLabel"
+                >
+                  <EuiText size="xs" color="subdued">
+                    {isLegacyOpen ? (
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.hideLegacyTypes"
+                        defaultMessage="Hide types"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.showLegacyTypes"
+                        defaultMessage="Show types"
+                      />
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            forceState={isLegacyOpen ? 'open' : 'closed'}
+            onToggle={this.onLegacyToggle}
+          >
+            {isLegacyOpen && (
+              <EuiPanel
+                hasBorder={false}
+                className="visNewVisDialog__legacyContent"
+                color="plain"
+                data-test-subj="legacyVisTypesContent"
+                hasShadow={false}
+                paddingSize="m"
+              >
+                {this.renderTypeSelector(
+                  filteredLegacyTypes,
+                  i18n.translate('visualizations.newVisWizard.filterLegacyTypesPlaceholder', {
+                    defaultMessage: 'Filter classic visualization types',
+                  }),
+                  i18n.translate('visualizations.newVisWizard.selectLegacyVisType', {
+                    defaultMessage: 'Select a legacy visualization type',
+                  }),
+                  'tooltip'
+                )}
+              </EuiPanel>
+            )}
+          </EuiAccordion>
+        </EuiPanel>
+      </div>
+    );
+  }
+
+  private renderRecommendedType = (recommendedType: VisTypeAlias) => (
+    <EuiPanel
+      key={recommendedType.name}
+      color="primary"
+      hasShadow={false}
+      paddingSize="m"
+      className="visNewVisDialog__recommendedPanel"
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="l" responsive>
+        <EuiFlexItem grow={false}>
+          <div className="visNewVisDialog__optionIcon">
+            <VisTypeIcon icon={recommendedType.icon} />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>{recommendedType.title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="primary">
+                <FormattedMessage
+                  id="visualizations.newVisWizard.recommendedBadge"
+                  defaultMessage="Recommended"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>{recommendedType.promotion!.description}</p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="arrowRight"
+            iconSide="right"
+            onClick={() => this.props.onVisTypeSelected(recommendedType)}
+            data-test-subj={`recommendedVisType-${recommendedType.name}`}
+          >
+            {recommendedType.promotion!.buttonText}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  private renderFlatSelection(visTypes: Array<VisType | VisTypeAlias>) {
+    const filteredVisTypes = this.filterVisTypes(visTypes, this.state.query);
+
+    return (
+      <div className="visNewVisDialog__body">
+        {this.renderTypeSelector(
+          filteredVisTypes,
+          i18n.translate('visualizations.newVisWizard.filterTypesPlaceholder', {
+            defaultMessage: 'Filter',
+          }),
+          i18n.translate('visualizations.newVisWizard.selectVisType', {
+            defaultMessage: 'Select a visualization type',
+          })
+        )}
+      </div>
+    );
+  }
+
+  private renderTypeSelector(
+    visTypes: VisTypeListEntry[],
+    filterPlaceholder: string,
+    helpTitle: string,
+    descriptionMode: DescriptionMode = 'panel'
+  ) {
+    const { highlightedType, query } = this.state;
+    const showDescriptionPanel = descriptionMode === 'panel';
+
+    return (
+      <EuiFlexGroup
+        className={showDescriptionPanel ? undefined : 'visNewVisDialog__typeSelector--fullWidth'}
+        gutterSize="xl"
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup
+            className="visNewVisDialog__list"
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
+              <EuiCompressedFieldSearch
+                placeholder={filterPlaceholder}
+                value={query}
+                onChange={this.onQueryChange}
+                fullWidth
+                data-test-subj="filterVisType"
+                aria-label={i18n.translate('visualizations.newVisWizard.filterVisTypeAriaLabel', {
+                  defaultMessage: 'Filter for a visualization type',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
+              <EuiScreenReaderOnly>
+                <span aria-live="polite">
+                  {query && (
+                    <FormattedMessage
+                      id="visualizations.newVisWizard.resultsFound"
+                      defaultMessage="{resultCount} {resultCount, plural,
+                        one {type}
+                        other {types}
+                      } found"
+                      values={{
+                        resultCount: visTypes.filter((type) => type.highlighted).length,
+                      }}
+                    />
+                  )}
+                </span>
+              </EuiScreenReaderOnly>
+              <EuiKeyPadMenu className="visNewVisDialog__types" data-test-subj="visNewDialogTypes">
+                {visTypes.map((visType) => this.renderVisType(visType, descriptionMode))}
+              </EuiKeyPadMenu>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {showDescriptionPanel && (
+          <EuiFlexItem className="visNewVisDialog__description" grow={false}>
+            {highlightedType ? (
+              <VisHelpText {...highlightedType} />
+            ) : (
+              <React.Fragment>
+                <EuiTitle size="s">
+                  <h2>{helpTitle}</h2>
+                </EuiTitle>
+                <EuiSpacer size="m" />
+                <NewVisHelp />
+              </React.Fragment>
+            )}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+
+  private getVisTypeGroups(visTypes: TypesStart): VisTypeGroups {
     const filterExperimental = (type: VisType | VisTypeAlias): boolean => {
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -202,41 +435,62 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       .getAliases()
       .filter(filterExperimental)
       .filter((type) => !type.hidden);
-    const allTypes = [...types, ...aliasedTypes];
+    const recommendedTypes = aliasedTypes.filter((type) => Boolean(type.promotion));
+    const hasRecommendedTypes = recommendedTypes.length > 0;
 
-    let entries: VisTypeListEntry[];
-    if (!query) {
-      entries = allTypes.map((type) => ({ type, highlighted: false }));
-    } else {
-      const q = query.toLowerCase();
-      entries = allTypes.map((type) => {
-        const matchesQuery =
-          type.name.toLowerCase().includes(q) ||
-          type.title.toLowerCase().includes(q) ||
-          (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
-        return { type, highlighted: matchesQuery };
-      });
-    }
-
-    return orderBy(
-      entries,
-      ['highlighted', 'type.promotion', 'type.title'],
-      ['desc', 'asc', 'asc']
-    );
+    return {
+      flatTypes: orderBy([...types, ...aliasedTypes], ['title'], ['asc']),
+      legacyTypes: hasRecommendedTypes
+        ? orderBy([...types, ...aliasedTypes.filter((type) => type.isClassic)], ['title'], ['asc'])
+        : [],
+      recommendedTypes: orderBy(recommendedTypes, ['title'], ['asc']),
+      workflowTypes: hasRecommendedTypes
+        ? orderBy(
+            aliasedTypes.filter((type) => !type.promotion && !type.isClassic),
+            ['title'],
+            ['asc']
+          )
+        : [],
+    };
   }
 
-  private renderVisType = (visType: VisTypeListEntry) => {
-    let stage = {};
+  private filterVisTypes(
+    visTypes: Array<VisType | VisTypeAlias>,
+    query: string
+  ): VisTypeListEntry[] {
+    const q = query.toLowerCase();
+    const entries = visTypes.map((type) => {
+      const matchesQuery =
+        type.name.toLowerCase().includes(q) ||
+        type.title.toLowerCase().includes(q) ||
+        (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
+
+      return {
+        type,
+        highlighted: query !== '' && matchesQuery,
+      };
+    });
+
+    return orderBy(entries, ['highlighted', 'type.title'], ['desc', 'asc']);
+  }
+
+  private renderVisType = (visType: VisTypeListEntry, descriptionMode: DescriptionMode) => {
+    let stageTooltipContent: string | undefined;
+    let stage: {
+      betaBadgeLabel?: string;
+      betaBadgeTooltipContent?: string;
+    } = {};
     let highlightMsg;
     if (visType.type.stage === 'experimental') {
+      stageTooltipContent = i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
+        defaultMessage:
+          'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+      });
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
         }),
-        betaBadgeTooltipContent: i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
-          defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-        }),
+        betaBadgeTooltipContent: stageTooltipContent,
       };
       highlightMsg = i18n.translate('visualizations.newVisWizard.experimentalDescription', {
         defaultMessage:
@@ -253,6 +507,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         }),
         betaBadgeTooltipContent: aliasDescription,
       };
+      stageTooltipContent = aliasDescription;
       highlightMsg = aliasDescription;
     }
 
@@ -266,7 +521,18 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       highlightMsg,
     };
 
-    return (
+    const tooltipContent =
+      visType.type.description || stageTooltipContent ? (
+        <>
+          {visType.type.description}
+          {visType.type.description && stageTooltipContent && <br />}
+          {stageTooltipContent && <em>{stageTooltipContent}</em>}
+        </>
+      ) : undefined;
+    const itemStage =
+      descriptionMode === 'tooltip' ? { betaBadgeLabel: stage.betaBadgeLabel } : stage;
+
+    const item = (
       <EuiKeyPadMenuItem
         key={visType.type.name}
         label={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
@@ -279,8 +545,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-test-subj={`visType-${visType.type.name}`}
         data-vis-stage={!isVisTypeAlias(visType.type) ? visType.type.stage : 'alias'}
         disabled={isDisabled}
-        aria-describedby={`visTypeDescription-${visType.type.name}`}
-        {...stage}
+        aria-describedby={
+          descriptionMode === 'panel' ? `visTypeDescription-${visType.type.name}` : undefined
+        }
+        {...itemStage}
       >
         <VisTypeIcon
           icon={visType.type.icon}
@@ -288,6 +556,16 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         />
       </EuiKeyPadMenuItem>
     );
+
+    if (descriptionMode === 'tooltip' && tooltipContent) {
+      return (
+        <EuiToolTip key={visType.type.name} content={tooltipContent}>
+          {item}
+        </EuiToolTip>
+      );
+    }
+
+    return item;
   };
 
   private setHighlightType(highlightedType: HighlightedType | null) {
@@ -295,6 +573,13 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       highlightedType,
     });
   }
+
+  private onLegacyToggle = (isLegacyOpen: boolean) => {
+    this.setState({
+      highlightedType: null,
+      isLegacyOpen,
+    });
+  };
 
   private onQueryChange = (ev: ChangeEvent<HTMLInputElement>) => {
     this.setState({
