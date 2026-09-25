@@ -4,10 +4,46 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { DatasetExplorer } from './dataset_explorer';
 import { DataStructure } from '../../../common';
+// EuiSelectable's real list is virtualized and renders no rows in jsdom, so stub it with a
+// minimal search input + substring filter to exercise typing. Other EUI components stay real.
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+  return {
+    ...original,
+    EuiSelectable: ({ options, searchable }: any) => {
+      const [searchValue, setSearchValue] = ReactActual.useState('');
+      const normalizedSearch = searchValue.trim().toLowerCase();
+      const visibleOptions = options.filter((option: any) => {
+        if (option.isGroupLabel) return false;
+        if (!normalizedSearch) return true;
+        const searchableText = (option.searchableLabel || option.label || '').toLowerCase();
+        return searchableText.includes(normalizedSearch);
+      });
+      return (
+        <div>
+          {searchable && (
+            <input
+              data-test-subj="mockSelectableSearch"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+            />
+          )}
+          <ul data-test-subj="mockSelectableOptions">
+            {visibleOptions.map((option: any) => (
+              <li key={option.value ?? option.label} data-test-subj={`option-${option.value}`}>
+                <span data-test-subj="option-label">{option.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    },
+  };
+});
 
 // Capture the props the custom DataStructureCreator receives so we can assert seeding.
 let lastCreatorProps: any;
@@ -162,5 +198,60 @@ describe('DatasetExplorer initial-selection props', () => {
     );
     await waitFor(() => expect(lastCreatorProps).toBeDefined());
     expect(lastCreatorProps.initialSelectedItems).toBeUndefined();
+  });
+});
+
+describe('DatasetExplorer search behavior', () => {
+  it('keeps a pattern searchable by its title even when a displayName is shown', () => {
+    const path: DataStructure[] = [
+      {
+        id: 'root',
+        title: 'Select data',
+        type: 'root',
+        columnHeader: 'Select data',
+        hasNext: false,
+        children: [
+          {
+            id: 'pattern-1',
+            title: 'logs-prod-*',
+            type: 'INDEX_PATTERN',
+            meta: { displayName: 'Production Logs' },
+            parent: { id: 'ds-1', title: 'Cluster 1', type: 'DATA_SOURCE' },
+          },
+          {
+            id: 'pattern-2',
+            title: 'metrics-*',
+            type: 'INDEX_PATTERN',
+          },
+        ],
+      },
+    ];
+
+    render(
+      <I18nProvider>
+        <DatasetExplorer
+          services={services}
+          queryString={makeQueryString()}
+          path={path}
+          setPath={jest.fn()}
+          onNext={jest.fn()}
+          onCancel={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    // The displayed label shows the friendly name...
+    expect(
+      within(screen.getByTestId('option-pattern-1')).getByTestId('option-label')
+    ).toHaveTextContent('Cluster 1::Production Logs');
+
+    // ...but typing the pattern's raw title into the filter still finds it, and doesn't match
+    // the unrelated pattern
+    fireEvent.change(screen.getByTestId('mockSelectableSearch'), {
+      target: { value: 'logs-prod' },
+    });
+
+    expect(screen.getByTestId('option-pattern-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('option-pattern-2')).not.toBeInTheDocument();
   });
 });
