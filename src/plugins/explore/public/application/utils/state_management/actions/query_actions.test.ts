@@ -2028,6 +2028,89 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it('lets a superseded run for the same key leave its successor untouched', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let rejectFirst: (error: Error) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((_resolve, reject) => (rejectFirst = reject)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const statusesFor = () =>
+        mockDispatch.mock.calls
+          .map(([action]) => action)
+          .filter(
+            (action) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload.cacheKey === 'tab-key'
+          )
+          .map((action) => action.payload.status.status);
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const abortError = new Error('Aborted');
+      abortError.name = 'AbortError';
+      rejectFirst(abortError);
+      await first;
+      expect(statusesFor()).not.toContain(QueryExecutionStatus.UNINITIALIZED);
+
+      resolveSecond({ hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 });
+      await second;
+      expect(statusesFor()).toEqual([
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.READY,
+      ]);
+    });
+
+    it('drops the results of a superseded run whose fetch resolves after it was replaced', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let resolveFirst: (value: unknown) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const staleHits = { hits: { hits: [{ _id: 'stale', _source: {} }], total: 1 }, took: 1 };
+      const freshHits = { hits: { hits: [{ _id: 'fresh', _source: {} }], total: 1 }, took: 1 };
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      resolveFirst(staleHits);
+      await first;
+      expect(setResults).not.toHaveBeenCalled();
+
+      resolveSecond(freshHits);
+      await second;
+      expect(setResults).toHaveBeenCalledTimes(1);
+      expect(setResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheKey: 'tab-key',
+          results: expect.objectContaining({ hits: freshHits.hits }),
+        })
+      );
+    });
+
     // A tab whose prepareQuery cannot yet build a query returns '' -- see the patterns
     // tab, whose field is derived from logs results that are gone after a page reload.
     it('does not run anything when the cache key is empty', async () => {
