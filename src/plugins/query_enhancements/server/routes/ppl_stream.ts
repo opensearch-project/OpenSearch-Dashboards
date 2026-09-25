@@ -7,6 +7,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter, Logger } from '../../../../core/server';
 import { API, URI } from '../../common';
 import { coerceStatusCode, DATASOURCE_UNAVAILABLE_MESSAGE, resolveOpenSearchClient } from '.';
+import { resolvePPLFetchSize } from '../utils';
 
 /**
  * Proxy routes for the asynchronous PPL partial-results API
@@ -78,6 +79,10 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           return res.custom({ statusCode: 400, body: DATASOURCE_UNAVAILABLE_MESSAGE });
         }
 
+        // The same row limit as the synchronous path, so a streamed query returns the rows the
+        // non-streaming one would and can stop as early.
+        const fetchSize = await resolvePPLFetchSize(context.core.uiSettings.client, req.body.query);
+
         const result = await client.transport.request({
           method: 'POST',
           path: URI.PPL,
@@ -85,6 +90,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           querystring: { format: 'jdbc' },
           body: {
             query: req.body.query,
+            ...(fetchSize !== undefined && { fetch_size: fetchSize }),
             // Sending either field is what selects the async path. The default is deliberately
             // tiny so a job id comes back instead of the request blocking to completion; a query
             // that finishes anyway returns its final result with no id.

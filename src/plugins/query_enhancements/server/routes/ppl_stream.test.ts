@@ -33,10 +33,22 @@ describe('registerPPLStreamRoutes', () => {
     };
   };
 
-  const contextWith = (request: jest.Mock, getClient?: jest.Mock) =>
+  const SAMPLE_SIZES: Record<string, number> = {
+    'discover:sampleSize': 500,
+    'discover:aggregationSampleSize': 10000,
+  };
+
+  const contextWith = (request: jest.Mock, getClient?: jest.Mock, uiSettingsGet?: jest.Mock) =>
     ({
       ...(getClient ? { dataSource: { opensearch: { getClient } } } : {}),
-      core: { opensearch: { client: { asCurrentUser: { transport: { request } } } } },
+      core: {
+        opensearch: { client: { asCurrentUser: { transport: { request } } } },
+        uiSettings: {
+          client: {
+            get: uiSettingsGet ?? jest.fn(async (key: string) => SAMPLE_SIZES[key]),
+          },
+        },
+      },
     }) as any;
 
   describe('submit', () => {
@@ -57,11 +69,56 @@ describe('registerPPLStreamRoutes', () => {
         querystring: { format: 'jdbc' },
         body: {
           query: 'source=logs',
+          fetch_size: 500,
           wait_for_completion_timeout: '1ms',
           keep_alive: '5m',
         },
       });
       expect(res.ok).toHaveBeenCalledWith({ body: { id: 'job-1', status: 'RUNNING' } });
+    });
+
+    describe('row limit', () => {
+      const submitBody = async (query: string, uiSettingsGet?: jest.Mock) => {
+        const { submit } = setup();
+        const request = jest.fn().mockResolvedValue({ body: {} });
+        await submit.handler(
+          contextWith(request, undefined, uiSettingsGet),
+          { query: {}, body: { query } } as any,
+          createResponse()
+        );
+        return request.mock.calls[0][0].body;
+      };
+
+      it('caps a document search at discover:sampleSize', async () => {
+        const get = jest.fn(async (key: string) => SAMPLE_SIZES[key]);
+        const body = await submitBody('source=logs | where level = "ERROR"', get);
+        expect(get).toHaveBeenCalledWith('discover:sampleSize');
+        expect(body.fetch_size).toBe(500);
+      });
+
+      it('caps an aggregation at discover:aggregationSampleSize, since its rows are buckets', async () => {
+        const get = jest.fn(async (key: string) => SAMPLE_SIZES[key]);
+        const body = await submitBody('source=logs | stats count() by span(@timestamp, 1h)', get);
+        expect(get).toHaveBeenCalledWith('discover:aggregationSampleSize');
+        expect(body.fetch_size).toBe(10000);
+      });
+
+      it('sends no limit when the query already ends with head', async () => {
+        const get = jest.fn(async (key: string) => SAMPLE_SIZES[key]);
+        const body = await submitBody('source=logs | head 20', get);
+        expect(get).not.toHaveBeenCalled();
+        expect(body).not.toHaveProperty('fetch_size');
+      });
+
+      it('still limits when head appears only inside a subquery', async () => {
+        const body = await submitBody('source=logs | where id in [ source=other | head 5 ]');
+        expect(body.fetch_size).toBe(500);
+      });
+
+      it('follows a changed sample size', async () => {
+        const body = await submitBody('source=logs', jest.fn().mockResolvedValue(250));
+        expect(body.fetch_size).toBe(250);
+      });
     });
 
     it('forwards caller-supplied lifecycle durations', async () => {
