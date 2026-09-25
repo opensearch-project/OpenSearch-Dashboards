@@ -24,7 +24,7 @@ import {
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { resultsCache } from '../../application/utils/state_management/slices';
-import { useChangeQueryEditor, useRerunWithoutPartialResults } from '../../application/hooks';
+import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 import { useFlavorId } from '../../helpers/use_flavor_id';
@@ -35,7 +35,6 @@ const ExploreDataTableComponent = () => {
   const { uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
-  const rerunWithoutPartialResults = useRerunWithoutPartialResults();
   const savedSearch = useSelector(selectSavedSearch);
   const wrapCellText = useSelector(selectWrapCellText);
   const { dataset } = useDatasetContext();
@@ -100,10 +99,7 @@ const ExploreDataTableComponent = () => {
       className="explore-table-container eui-xScrollWithShadows"
       ref={containerRef}
     >
-      <QueryWarningsCallout
-        warnings={warnings}
-        onRerunWithoutPartialResults={rerunWithoutPartialResults}
-      />
+      <QueryWarningsCallout warnings={warnings} />
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"

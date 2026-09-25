@@ -20,9 +20,7 @@ jest.mock('../../application/utils/hooks/use_tab_results', () => ({
 
 // The rerun action dispatches, which needs a store. This suite covers the tab's rendering; the
 // banner's own tests cover the action.
-jest.mock('../../application/hooks', () => ({
-  useRerunWithoutPartialResults: () => jest.fn(),
-}));
+jest.mock('../../application/hooks', () => ({}));
 
 const createResults = (
   hits: Array<Record<string, any>> = [],
