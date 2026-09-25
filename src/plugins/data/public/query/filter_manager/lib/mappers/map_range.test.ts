@@ -29,7 +29,7 @@
  */
 
 import { mapRange } from './map_range';
-import { FilterMeta, RangeFilter, Filter } from '../../../../../common';
+import { FilterMeta, RangeFilter, Filter, FILTERS } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {
@@ -46,6 +46,60 @@ describe('filter manager utilities', () => {
         const displayName = result.value();
         expect(displayName).toBe('1024 to 2048');
       }
+    });
+
+    test('should preserve phrase metadata for numeric exact date ranges', () => {
+      const epochMillis = Date.parse('2026-09-16T10:15:30.000Z');
+      const filter = {
+        meta: {
+          index: 'logstash-*',
+          type: FILTERS.PHRASE,
+          params: { query: epochMillis },
+        } as FilterMeta,
+        range: {
+          '@timestamp': {
+            gte: '2026-09-16T10:15:30.000Z',
+            lte: '2026-09-16T10:15:30.000Z',
+            format: 'strict_date_optional_time',
+          },
+        },
+      } as RangeFilter;
+
+      const result = mapRange(filter);
+
+      expect(result).toMatchObject({
+        key: '@timestamp',
+        params: { query: epochMillis },
+        type: FILTERS.PHRASE,
+      });
+      expect(result.value()).toBe(epochMillis);
+    });
+
+    test('should preserve phrase metadata for string exact date ranges', () => {
+      const value = '2026-09-16T10:15:30Z';
+      const filter = {
+        meta: {
+          index: 'logstash-*',
+          type: FILTERS.PHRASE,
+          params: { query: value },
+        } as FilterMeta,
+        range: {
+          '@timestamp': {
+            gte: '2026-09-16T10:15:30.000Z',
+            lte: '2026-09-16T10:15:30.000Z',
+            format: 'strict_date_optional_time',
+          },
+        },
+      } as RangeFilter;
+
+      const result = mapRange(filter);
+
+      expect(result).toMatchObject({
+        key: '@timestamp',
+        params: { query: value },
+        type: FILTERS.PHRASE,
+      });
+      expect(result.value()).toBe(value);
     });
 
     test('should return undefined for none matching', (done) => {

@@ -149,9 +149,21 @@ describe('Filter editor utils', () => {
   });
 
   describe('validateParams', () => {
-    it('should return false if date is not string', () => {
-      const isValidParams = validateParams(1234, 'date');
-      expect(isValidParams).toBe(false);
+    it('should return true for a finite epoch-millisecond date value', () => {
+      const epochMillis = Date.parse('2026-09-16T10:15:30.000Z');
+
+      expect(validateParams(epochMillis, 'date')).toBe(true);
+    });
+
+    it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.MAX_VALUE])(
+      'should return false for a numeric value outside the supported date range: %s',
+      (value) => {
+        expect(validateParams(value, 'date')).toBe(false);
+      }
+    );
+
+    it('should return false if date is not a number or string', () => {
+      expect(validateParams({}, 'date')).toBe(false);
     });
 
     it('should return false if date is not valid string', () => {
