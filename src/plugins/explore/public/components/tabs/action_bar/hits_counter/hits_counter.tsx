@@ -34,6 +34,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
+import { formatDuration } from './format_duration';
 
 export interface HitsCounterProps {
   /**
@@ -57,7 +58,7 @@ export interface HitsCounterProps {
    */
   rows?: OpenSearchSearchHit[];
   /**
-   * query ran time in ms
+   * query run time in milliseconds
    */
   elapsedMs?: number;
   /**
@@ -76,6 +77,13 @@ export function HitsCounter({
   rowsCountOverride,
 }: HitsCounterProps) {
   const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
+  const duration = formatDuration(elapsedMs);
+  const durationSegment = duration ? (
+    <>
+      {' · '}
+      <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>
+    </>
+  ) : null;
 
   return (
     <I18nProvider>
@@ -92,7 +100,7 @@ export function HitsCounter({
             {hits && bucketCount ? (
               <FormattedMessage
                 id="explore.discover.hitsAggregationResultTitle"
-                defaultMessage="{rowsCount} / {bucketCount} {bucketCountRaw, plural, one {bucket} other {buckets}} · {hits} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {bucketCount} {bucketCountRaw, plural, one {bucket} other {buckets}} · {hits} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -106,17 +114,13 @@ export function HitsCounter({
                     </strong>
                   ),
                   bucketCountRaw: bucketCount,
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             ) : hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
-                defaultMessage="{rowsCount} / {hits} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {hits} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -124,28 +128,20 @@ export function HitsCounter({
                     </strong>
                   ),
                   hits: <strong data-test-subj="discoverQueryHits">{hits.toLocaleString()}</strong>,
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             ) : (
               <FormattedMessage
                 id="explore.discover.noHitsResultTitle"
-                defaultMessage="{rowsCount} hits · {elapsedMs} ms"
+                defaultMessage="{rowsCount} hits{duration}"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
                       {rowsCount.toLocaleString()}
                     </strong>
                   ),
-                  elapsedMs: (
-                    <strong data-test-subj="discoverQueryElapsedMs">
-                      {elapsedMs ? elapsedMs.toLocaleString() : elapsedMs}
-                    </strong>
-                  ),
+                  duration: durationSegment,
                 }}
               />
             )}

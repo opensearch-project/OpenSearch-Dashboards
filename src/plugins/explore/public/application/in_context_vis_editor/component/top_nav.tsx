@@ -37,12 +37,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   } = services;
 
   const queryStatus = queryEditorState.queryStatus;
-  const isQueryRunning = queryEditorState.queryStatus.status === QueryExecutionStatus.LOADING;
   const dataset = datasetView.dataView;
-
-  const shouldShowCancelButton =
-    queryEditorState.userInitiatedQuery &&
-    queryEditorState.queryStatus.status === QueryExecutionStatus.LOADING;
 
   const [screenTitle, setScreenTitle] = useState<string>('');
 
@@ -137,9 +132,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
-      showCancelButton={shouldShowCancelButton}
-      onQueryCancel={handleQueryCancel}
-      isQueryRunning={isQueryRunning}
     />
   );
 };

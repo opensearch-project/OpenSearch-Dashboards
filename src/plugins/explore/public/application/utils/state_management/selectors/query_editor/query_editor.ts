@@ -80,12 +80,8 @@ export const selectHasUserInitiatedQuery = createSelector([selectState], (state)
   return state.hasUserInitiatedQuery;
 });
 
-export const selectShouldShowCancelButton = createSelector(
-  [selectIsLoading, selectHasUserInitiatedQuery, selectOverallQueryStatus],
-  (isLoading, hasUserInitiatedQuery, _overallQueryStatus) => {
-    // Check if query is loading
-
-    const shouldShow = isLoading && hasUserInitiatedQuery;
-    return shouldShow;
-  }
+/** A query the user started is still running, so the run control offers Stop. */
+export const selectIsUserQueryRunning = createSelector(
+  [selectIsLoading, selectHasUserInitiatedQuery],
+  (isLoading, hasUserInitiatedQuery) => isLoading && hasUserInitiatedQuery
 );
