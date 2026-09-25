@@ -71,7 +71,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { DashboardLayout } from '../../../common';
-import { removeMemberFromLayout } from './section_layout_utils';
+import { removeMemberFromLayout, getCollapsedMemberIds } from './section_layout_utils';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -106,6 +106,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   useSharedCrosshair?: boolean;
+  dataFetchPaused?: boolean;
   id: string;
 }
 
@@ -498,7 +499,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       filters,
       useSharedCrosshair,
+      layout,
     } = this.input;
+    // Panels inside a collapsed section are not visible, so pause their data
+    // fetching. Data embeddables honor this by skipping fetches and refreshing
+    // once on resume. Only meaningful for SectionLayout; a plain GridLayout has
+    // none. `this.options` may be undefined here: the base Container constructor
+    // emits input (creating children) before this subclass assigns options.
+    const collapsedMemberIds =
+      this.options?.allowDashboardSections && layout?.type === 'SectionLayout'
+        ? getCollapsedMemberIds(layout.items)
+        : undefined;
     return {
       filters,
       hidePanelTitles,
@@ -507,6 +518,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       timeRange,
       refreshConfig,
       viewMode,
+      dataFetchPaused: collapsedMemberIds ? collapsedMemberIds.has(id) : false,
       id,
     };
   }
