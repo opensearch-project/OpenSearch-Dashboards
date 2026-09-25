@@ -4,3 +4,4 @@
  */
 
 export { QueryExecutionButton } from './query_execution_button';
+export { QueryRunStopButton, QueryRunStopButtonProps } from './query_run_stop_button';

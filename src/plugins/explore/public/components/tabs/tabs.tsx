@@ -29,6 +29,7 @@ import {
 import { DEFAULT_DATA } from '../../../../data/common';
 import { DiscoverUninitialized } from '../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { DiscoverNoResults } from '../../application/legacy/discover/application/components/no_results/no_results';
+import { LoadingSpinner } from '../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { useDatasetContext } from '../../application/context';
 import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_mode_context';
@@ -53,6 +54,7 @@ export const ExploreTabs = () => {
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
+  const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
 
   const onTabClick = useCallback(
     (tabId: string) => {
@@ -66,7 +68,9 @@ export const ExploreTabs = () => {
       // An empty key means the tab cannot build a query yet.
       if (!newTabCacheKey) return;
 
-      const needsExecution = !results[newTabCacheKey];
+      const needsExecution =
+        !results[newTabCacheKey] &&
+        queryStatusMap[newTabCacheKey]?.status !== QueryExecutionStatus.LOADING;
 
       if (needsExecution) {
         dispatch(clearQueryStatusMapByKey(newTabCacheKey));
@@ -80,7 +84,7 @@ export const ExploreTabs = () => {
         );
       }
     },
-    [query, results, dispatch, services]
+    [query, results, queryStatusMap, dispatch, services]
   );
 
   const filteredTabs = useMemo(() => {
@@ -124,6 +128,20 @@ export const ExploreTabs = () => {
     return null;
   }
 
+  const isActiveTabQueryLoading = () => {
+    let cacheKey: string;
+    try {
+      cacheKey = (activeRegistryTab.prepareQuery || defaultPrepareQueryString)(query);
+    } catch {
+      return false;
+    }
+    return (
+      !!cacheKey &&
+      !results[cacheKey] &&
+      queryStatusMap[cacheKey]?.status === QueryExecutionStatus.LOADING
+    );
+  };
+
   const renderTabPanel = () => {
     const isMetricsExploreTab = activeRegistryTab.id === EXPLORE_METRICS_EXPLORE_TAB_ID;
 
@@ -144,6 +162,12 @@ export const ExploreTabs = () => {
           }}
         />
       );
+    }
+
+    // Each tab runs its own query, which can still be loading after the overall status has
+    // settled. Until it returns, the tab has nothing to show, so it would render as empty.
+    if (!isMetricsExploreTab && isActiveTabQueryLoading()) {
+      return <LoadingSpinner />;
     }
 
     if (status === QueryExecutionStatus.NO_RESULTS && !isMetricsExploreTab) {

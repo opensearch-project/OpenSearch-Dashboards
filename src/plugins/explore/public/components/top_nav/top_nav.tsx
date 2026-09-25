@@ -24,8 +24,6 @@ import {
   selectTabState,
   selectActiveTabId,
   selectQueryStatus,
-  selectIsQueryRunning,
-  selectShouldShowCancelButton,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
@@ -70,8 +68,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const activeTabId = useNewStateSelector(selectActiveTabId);
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
-  const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
-  const shouldShowCancelButton = useNewStateSelector(selectShouldShowCancelButton);
 
   const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
@@ -292,15 +288,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   }, [handleQuerySubmit]);
 
   const customSubmitButton = useMemo(() => {
-    return (
-      <QueryExecutionButton
-        onClick={handleCustomButtonClick}
-        showCancelButton={shouldShowCancelButton}
-        onCancel={handleQueryCancel}
-        isQueryRunning={isQueryRunning}
-      />
-    );
-  }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
+    return <QueryExecutionButton onClick={handleCustomButtonClick} onCancel={handleQueryCancel} />;
+  }, [handleCustomButtonClick, handleQueryCancel]);
 
   // When chrome is hidden (e.g. `?embed=true`) the header portal isn't
   // rendered, so render the search bar + date picker inline instead.
@@ -333,9 +322,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
-      showCancelButton={shouldShowCancelButton}
-      onQueryCancel={handleQueryCancel}
-      isQueryRunning={isQueryRunning}
     />
   );
 };

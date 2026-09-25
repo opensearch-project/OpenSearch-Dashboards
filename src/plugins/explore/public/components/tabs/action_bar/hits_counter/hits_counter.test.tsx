@@ -90,10 +90,49 @@ describe('hits counter', () => {
     expect(hits.text()).toBe(props.hits?.toString());
   });
 
-  it('expect to render the number of elapsedMs', () => {
+  it('renders a sub-second duration in milliseconds', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedMs = findTestSubject(component, 'discoverQueryElapsedMs');
-    expect(elapsedMs.text()).toBe(props.elapsedMs?.toString());
+    expect(elapsedMs.text()).toBe('200 ms');
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain('10 hits · 200 ms');
+  });
+
+  it('renders a duration of a second or more in seconds', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={42282} />);
+    expect(findTestSubject(component, 'discoverQueryElapsedMs').text()).toBe('42.282 s');
+    expect(findTestSubject(component, 'dscResultCount').text()).not.toContain('ms');
+  });
+
+  it('renders the duration in the no-hits format', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={undefined} elapsedMs={1500} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain('2 hits · 1.500 s');
+  });
+
+  it('omits the duration segment entirely when there is no duration', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={undefined} />);
+    expect(findTestSubject(component, 'discoverQueryElapsedMs').length).toBe(0);
+    const text = findTestSubject(component, 'dscResultCount').text();
+    expect(text).toContain('2 / 10 hits');
+    expect(text).not.toContain('·');
+    expect(text).not.toContain('ms');
+  });
+
+  it('omits the duration segment in the aggregation and no-hits formats too', () => {
+    component = mountWithIntl(
+      <HitsCounter
+        {...props}
+        showResetButton={false}
+        hits={2540}
+        bucketCount={849}
+        elapsedMs={undefined}
+      />
+    );
+    expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2,540 hits$/);
+
+    component = mountWithIntl(
+      <HitsCounter {...props} showResetButton={false} hits={undefined} elapsedMs={undefined} />
+    );
+    expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2 hits$/);
   });
 
   it('expect to render 1,899 hits if 1899 hits given', () => {
@@ -168,7 +207,14 @@ describe('hits counter - aggregation format', () => {
   it('should render elapsedMs in aggregation format', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedEl = findTestSubject(component, 'discoverQueryElapsedMs');
-    expect(elapsedEl.text()).toBe('66');
+    expect(elapsedEl.text()).toBe('66 ms');
+  });
+
+  it('should render a long duration in seconds in aggregation format', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={3456} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain(
+      '500 / 849 buckets · 2,540 hits · 3.456 s'
+    );
   });
 
   it('should render formatted large numbers in aggregation format', () => {
