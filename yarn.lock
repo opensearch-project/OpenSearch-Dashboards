@@ -4101,21 +4101,21 @@
     picocolors "^1.1.1"
     source-map "^0.7.6"
 
-"@rsdoctor/client@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/client/-/client-1.5.13.tgz#5ac34c06c0edc7405a8e95e80a22a3a893127c58"
-  integrity sha512-pGc+Y6irGROjPBOAt7fMAiZwwtzS7dS5txcrioP8Q5MvJPGtcHxQ56IiUPl5i5faHBo0RSCwBESnslQPwjRGcg==
+"@rsdoctor/client@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/client/-/client-1.5.16.tgz#30dec02bdf4db7a3d92bbcc5798cbb576063f424"
+  integrity sha512-SskR2c06w+QTCrrhlN5wIjpVzJgqscQlMlYT3e/rSc2lH09lA1VBkKlgh2jy0OkE7FTZIO+9n6hdXM4qCAFOOA==
 
-"@rsdoctor/core@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/core/-/core-1.5.13.tgz#d6e808cc9f67d54d57fd41c8a83d7ebe3933eaeb"
-  integrity sha512-ZeJMUidUYAxA+Y48A+aAEyo0Pe1aIezv452y/z+eweI0V/MF4/uMcNTxaHuWYItKzP0XNr0/QStJTsfLSORzxQ==
+"@rsdoctor/core@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/core/-/core-1.5.16.tgz#ea347e76a612a46b219bcae7afe366e596a4ec5d"
+  integrity sha512-Sj9bJO3yRYvTn111pNFzADLrE9WJ8ZgOJertzeST4ueOSw4yeUkM9oMgj21p7NWYsM44C2vDuBIcerAHuxIkBA==
   dependencies:
     "@rsbuild/plugin-check-syntax" "^1.6.1"
-    "@rsdoctor/graph" "1.5.13"
-    "@rsdoctor/sdk" "1.5.13"
-    "@rsdoctor/types" "1.5.13"
-    "@rsdoctor/utils" "1.5.13"
+    "@rsdoctor/graph" "1.5.16"
+    "@rsdoctor/sdk" "1.5.16"
+    "@rsdoctor/types" "1.5.16"
+    "@rsdoctor/utils" "1.5.16"
     "@rspack/resolver" "^0.2.8"
     browserslist-load-config "^1.0.2"
     es-toolkit "^1.47.0"
@@ -4124,59 +4124,59 @@
     semver "^7.7.4"
     source-map "^0.7.6"
 
-"@rsdoctor/graph@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/graph/-/graph-1.5.13.tgz#fe9e34725b449d81d3c4a9a4925d08db02f657a4"
-  integrity sha512-sImaFcLTg27m7PO5WOaH3ati3Vw64fvszBANae3ONXqb6F9EqpyLzyXTw7djqyvfVZsNObw+9LLmKJNevEmuyg==
+"@rsdoctor/graph@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/graph/-/graph-1.5.16.tgz#87e63afa6c80d6022e9001d5c4d458463eba7053"
+  integrity sha512-Uzq5n5Za30z2CW6V9j6Bl4x8Bbek1YHJyhKEXyF1P3UoQIQ2qpdYu1B//krlDV2YmwB7ENwqaV5D0D+LoB690g==
   dependencies:
-    "@rsdoctor/types" "1.5.13"
-    "@rsdoctor/utils" "1.5.13"
+    "@rsdoctor/types" "1.5.16"
+    "@rsdoctor/utils" "1.5.16"
     es-toolkit "^1.47.0"
     path-browserify "1.0.1"
     source-map "^0.7.6"
 
-"@rsdoctor/rspack-plugin@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/rspack-plugin/-/rspack-plugin-1.5.13.tgz#642c5611493fdffd4608722b2ad5f8b4c5edc07d"
-  integrity sha512-eYSrfW+8+A5BXynHryWizbwvTKXpItpANi3Mf8+XhCaxdi6zVDaND9RWt9vj4IBBaTMNH9M7j2TCsiP9TfcLCg==
+"@rsdoctor/rspack-plugin@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/rspack-plugin/-/rspack-plugin-1.5.16.tgz#5ee2391fb389d64d621a7d9d582af0e52e493fd1"
+  integrity sha512-CoFLPpJF+XU96sVZ8EWbbQh4ZjihmZAv3hlyQzrn+HO8VBa0BRI/k+oyRAPwg7fI0/Uc1OHDtgL7D8IST3vbTw==
   dependencies:
-    "@rsdoctor/core" "1.5.13"
-    "@rsdoctor/graph" "1.5.13"
-    "@rsdoctor/sdk" "1.5.13"
-    "@rsdoctor/types" "1.5.13"
-    "@rsdoctor/utils" "1.5.13"
+    "@rsdoctor/core" "1.5.16"
+    "@rsdoctor/graph" "1.5.16"
+    "@rsdoctor/sdk" "1.5.16"
+    "@rsdoctor/types" "1.5.16"
+    "@rsdoctor/utils" "1.5.16"
 
-"@rsdoctor/sdk@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/sdk/-/sdk-1.5.13.tgz#152ec6e4b233343fb677b812840afc3879bf57ad"
-  integrity sha512-KCcKSR9B6cKUj3J0+EqzYf4up34WldD2MP2iUfUzGR+9OI/OSGzuirFMlGzV9cSFHWj0iJ5ydGSrXFvWDwmLkg==
+"@rsdoctor/sdk@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/sdk/-/sdk-1.5.16.tgz#c3b60ca3bb1802c0901d060ba59562109cd2b8b8"
+  integrity sha512-t2ghEUCUKFwP12QeeLX3VvI5b+Z+SI9rwUiE8VHa+gOFi8oHkceEi0rlBf1k9BexMpQf3zP3RNTZtzo09mxpCw==
   dependencies:
-    "@rsdoctor/client" "1.5.13"
-    "@rsdoctor/graph" "1.5.13"
-    "@rsdoctor/types" "1.5.13"
-    "@rsdoctor/utils" "1.5.13"
+    "@rsdoctor/client" "1.5.16"
+    "@rsdoctor/graph" "1.5.16"
+    "@rsdoctor/types" "1.5.16"
+    "@rsdoctor/utils" "1.5.16"
     launch-editor "^2.13.2"
     safer-buffer "2.1.2"
     socket.io "4.8.1"
     tapable "2.3.3"
 
-"@rsdoctor/types@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/types/-/types-1.5.13.tgz#031870ba3dc3d2460232d8d0365ef1b016c1ccc6"
-  integrity sha512-XBrxFQ45eB3QsF1B2P3AMowUis2cbDmFLOu8brtDovGTYypEiUlMAmVsdIhXKJrljkv47+j7GgTmUSUBarLM1g==
+"@rsdoctor/types@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/types/-/types-1.5.16.tgz#e2fe52fc8c67462cf98e840eaf1c2e34b037913f"
+  integrity sha512-J9yqQu1VNFgLJpkgzAucjA1AkVnrg6kRyMhAzj05uYyPM6FQgFmi3NlQFDxRPLAfTuwSXC72xhSi7LYd6MuVvA==
   dependencies:
     "@types/connect" "3.4.38"
     "@types/estree" "1.0.5"
     "@types/tapable" "2.3.0"
     source-map "^0.7.6"
 
-"@rsdoctor/utils@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@rsdoctor/utils/-/utils-1.5.13.tgz#796bf115d14393b0aa63b4fdfc25bce1ec537e75"
-  integrity sha512-Z3O+92uRl6XrYJBDt2s0YAgkDszgjut85+kmM5wx+Z10Ha2o3ZmGp3FVLYBPz7TbKsay5RYxb2OLuJ39lrUQKg==
+"@rsdoctor/utils@1.5.16":
+  version "1.5.16"
+  resolved "https://registry.yarnpkg.com/@rsdoctor/utils/-/utils-1.5.16.tgz#82a04020411f823f4c9df2bc9578f074de775b91"
+  integrity sha512-aFhv9gzDjJ5qyODO1Uno1NAfl/7WDhmJASJ5lQj1Qo8FV1VgtnYKFbbYdQYSpsowhxgklNISxVs905HdiBp6yg==
   dependencies:
     "@babel/code-frame" "7.26.2"
-    "@rsdoctor/types" "1.5.13"
+    "@rsdoctor/types" "1.5.16"
     "@types/estree" "1.0.5"
     acorn "^8.10.0"
     acorn-import-attributes "^1.9.5"
