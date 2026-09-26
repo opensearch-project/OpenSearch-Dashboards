@@ -18,6 +18,7 @@ export const AGENT_TRACES_DEFAULT_LANGUAGE = 'PPL';
 export const AGENT_TRACES_TRACES_TAB_ID = 'traces';
 export const AGENT_TRACES_SPANS_TAB_ID = 'spans';
 export const AGENT_TRACES_VISUALIZATION_TAB_ID = 'visualization';
+export const AGENT_TRACES_SESSIONS_TAB_ID = 'sessions';
 
 export enum AgentTracesFlavor {
   Traces = 'traces',
