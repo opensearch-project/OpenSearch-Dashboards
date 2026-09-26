@@ -68,6 +68,31 @@ const REQUIRED_FIELDS: Array<keyof FieldMappings> = [
   'timestamp',
 ];
 
+/**
+ * Builds the combo-box options for a correlation field selector.
+ *
+ * Excludes `.keyword` (and other) multi-field sub-fields: they can't be referenced in a PPL
+ * `where` clause (it throws an AssertionError), so they must not be selectable for correlation.
+ * Exported for unit testing.
+ */
+export const getCorrelationFieldOptions = (
+  fields: IndexPatternField[],
+  fieldName: keyof FieldMappings
+): Array<EuiComboBoxOptionOption<string>> => {
+  const isTimestamp = fieldName === 'timestamp';
+  const isStringField = ['traceId', 'spanId', 'serviceName'].includes(fieldName);
+
+  const selectableFields = fields.filter((field) => !field.subType?.multi);
+
+  const filteredFields = isTimestamp
+    ? selectableFields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
+    : isStringField
+      ? selectableFields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
+      : selectableFields;
+
+  return filteredFields.map((field) => ({ label: field.name }));
+};
+
 // Separate component for the field selector to avoid re-render issues
 const FieldSelector: React.FC<{
   datasetId: string;
@@ -77,18 +102,7 @@ const FieldSelector: React.FC<{
   onChange: (datasetId: string, fieldName: keyof FieldMappings, value: string | undefined) => void;
   isInvalid?: boolean;
 }> = React.memo(({ datasetId, fieldName, fields, selectedValue, onChange, isInvalid }) => {
-  const isTimestamp = fieldName === 'timestamp';
-  const isStringField = ['traceId', 'spanId', 'serviceName'].includes(fieldName);
-
-  const filteredFields = isTimestamp
-    ? fields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
-    : isStringField
-      ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
-      : fields;
-
-  const options: Array<EuiComboBoxOptionOption<string>> = filteredFields.map((field) => ({
-    label: field.name,
-  }));
+  const options = getCorrelationFieldOptions(fields, fieldName);
 
   const selectedOptions = selectedValue ? [{ label: selectedValue }] : [];
 
