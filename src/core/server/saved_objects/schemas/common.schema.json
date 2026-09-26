@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensearch.org/schemas/saved-objects/common.schema.json",
+  "title": "OpenSearch Dashboards Saved Objects - Common Definitions",
+  "description": "Shared type definitions used across all saved object resource schemas.",
+  "$defs": {
+    "references": {
+      "type": "array",
+      "description": "Array of saved object references used for relationship tracking.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Reference name used to map back into the saved object attributes."
+          },
+          "type": {
+            "type": "string",
+            "description": "The saved object type of the referenced object (e.g. index-pattern, visualization, search)."
+          },
+          "id": {
+            "type": "string",
+            "description": "The saved object id of the referenced object."
+          }
+        },
+        "required": ["name", "type", "id"],
+        "additionalProperties": false
+      }
+    },
+    "kibanaSavedObjectMeta": {
+      "type": "object",
+      "description": "Metadata for the saved object, including the search source configuration.",
+      "properties": {
+        "searchSourceJSON": {
+          "type": "string",
+          "description": "JSON-serialized search source configuration including index, query, and filter."
+        }
+      },
+      "additionalProperties": false
+    },
+    "gridData": {
+      "type": "object",
+      "description": "Grid layout positioning data for a panel within a dashboard.",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "Horizontal grid position (column index, 0-based).",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "description": "Vertical grid position (row index, 0-based).",
+          "minimum": 0
+        },
+        "w": {
+          "type": "integer",
+          "description": "Width of the panel in grid units.",
+          "minimum": 1,
+          "maximum": 48
+        },
+        "h": {
+          "type": "integer",
+          "description": "Height of the panel in grid units.",
+          "minimum": 1
+        },
+        "i": {
+          "type": "string",
+          "description": "Unique panel identifier within the dashboard, must match panelIndex."
+        }
+      },
+      "required": ["x", "y", "w", "h", "i"],
+      "additionalProperties": false
+    },
+    "refreshInterval": {
+      "type": "object",
+      "description": "Dashboard auto-refresh interval configuration.",
+      "properties": {
+        "display": {
+          "type": "string",
+          "description": "Human-readable display label for the interval (e.g. '10 seconds')."
+        },
+        "pause": {
+          "type": "boolean",
+          "description": "Whether auto-refresh is currently paused."
+        },
+        "section": {
+          "type": "integer",
+          "description": "Section index grouping the interval in the UI picker."
+        },
+        "value": {
+          "type": "integer",
+          "description": "Refresh interval in milliseconds.",
+          "minimum": 0
+        }
+      },
+      "required": ["pause", "value"],
+      "additionalProperties": false
+    },
+    "labels": {
+      "type": "object",
+      "description": "Visualization label configuration for axes and legends.",
+      "properties": {
+        "show": {
+          "type": "boolean",
+          "description": "Whether to display labels."
+        },
+        "rotate": {
+          "type": "number",
+          "description": "Label rotation angle in degrees."
+        },
+        "filter": {
+          "type": "boolean",
+          "description": "Whether to filter overlapping labels."
+        },
+        "truncate": {
+          "type": ["integer", "null"],
+          "description": "Maximum label length before truncation, or null for no truncation."
+        }
+      },
+      "additionalProperties": true
+    },
+    "annotations": {
+      "type": "array",
+      "description": "Time-based annotation layers overlaid on visualizations.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Annotation type identifier (e.g. 'manual', 'event').",
+            "default": "manual"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the annotation."
+          },
+          "indexPatternId": {
+            "type": "string",
+            "description": "Index pattern ID used to query annotation events."
+          },
+          "color": {
+            "type": "string",
+            "description": "Display color for the annotation marker."
+          },
+          "fields": {
+            "type": "string",
+            "description": "Comma-separated field names used for the annotation."
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon identifier for the annotation marker."
+          },
+          "query_string": {
+            "type": "object",
+            "description": "Query string filter for annotation events.",
+            "properties": {
+              "query": {
+                "type": "string"
+              },
+              "language": {
+                "type": "string",
+                "enum": ["lucene", "kuery"]
+              }
+            },
+            "additionalProperties": false
+          },
+          "time_field": {
+            "type": "string",
+            "description": "Timestamp field used to place annotations on the time axis."
+          },
+          "template": {
+            "type": "string",
+            "description": "Mustache template for the annotation tooltip."
+          }
+        },
+        "required": ["id"],
+        "additionalProperties": true
+      }
+    }
+  }
+}
