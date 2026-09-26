@@ -75,6 +75,9 @@ export interface TableListViewProps {
   tableColumns: Column[];
   tableListTitle: string;
   toastNotifications: ToastsStart;
+  tableFilters?: React.ReactNode;
+  refreshKey?: string;
+  hasActiveFilters?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -143,7 +146,13 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     this.fetchItems();
   }
 
-  debouncedFetch = debounce(async (filter: string) => {
+  componentDidUpdate(previousProps: TableListViewProps) {
+    if (previousProps.refreshKey !== this.props.refreshKey) {
+      this.fetchItems();
+    }
+  }
+
+  debouncedFetch = debounce(async (filter: string, refreshKey?: string) => {
     try {
       const response = await this.props.findItems(filter);
 
@@ -154,7 +163,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       // We need this check to handle the case where search results come back in a different
       // order than they were sent out. Only load results for the most recent search.
       // Also, in case filter is empty, items are being pre-sorted alphabetically.
-      if (filter === this.state.filter) {
+      if (filter === this.state.filter && refreshKey === this.props.refreshKey) {
         this.setState({
           hasInitialFetchReturned: true,
           isFetchingItems: false,
@@ -181,7 +190,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         isFetchingItems: true,
         fetchError: undefined,
       },
-      this.debouncedFetch.bind(null, this.state.filter)
+      this.debouncedFetch.bind(null, this.state.filter, this.props.refreshKey)
     );
   };
 
@@ -235,7 +244,12 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   hasNoItems() {
-    return !this.state.isFetchingItems && this.state.items.length === 0 && !this.state.filter;
+    return (
+      !this.state.isFetchingItems &&
+      this.state.items.length === 0 &&
+      !this.state.filter &&
+      !this.props.hasActiveFilters
+    );
   }
 
   renderConfirmDeleteModal() {
@@ -546,6 +560,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
         {this.renderListingLimitWarning()}
         {this.renderFetchError()}
+        {this.props.tableFilters}
 
         {this.renderTable()}
       </div>
