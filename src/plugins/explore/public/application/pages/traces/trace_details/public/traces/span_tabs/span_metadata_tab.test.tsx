@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { SpanMetadataTab } from './span_metadata_tab';
 
 describe('SpanMetadataTab', () => {
@@ -570,6 +570,72 @@ describe('SpanMetadataTab', () => {
       expect(screen.getByText('HTTP')).toBeInTheDocument();
       expect(screen.getByText('Application')).toBeInTheDocument();
       expect(screen.getByText('Attributes')).toBeInTheDocument();
+    });
+  });
+
+  describe('Dependency section', () => {
+    it('groups db, messaging and peer attributes under Dependency, listed first', () => {
+      const span = {
+        spanId: 'dep-span',
+        attributes: {
+          db_system: 'postgresql',
+          'db.statement': 'SELECT 1',
+          'messaging.system': 'kafka',
+          'peer.service': 'billing',
+          'net.peer.name': 'postgresql',
+          'service.version': '1.0',
+          'http.method': 'GET',
+        },
+      };
+      const { container } = render(
+        <SpanMetadataTab selectedSpan={span} addSpanFilter={mockAddSpanFilter} />
+      );
+      const section = container.querySelector('#section-dependency');
+      expect(section).not.toBeNull();
+      const dependency = within(section!.closest('.euiAccordion') as HTMLElement);
+      ['db_system', 'db.statement', 'messaging.system', 'peer.service', 'net.peer.name'].forEach(
+        (key) => expect(dependency.getByText(key)).toBeInTheDocument()
+      );
+      // peer.service is a dependency, not swallowed by the Application "service" rule.
+      expect(dependency.queryByText('service.version')).not.toBeInTheDocument();
+      expect(dependency.queryByText('http.method')).not.toBeInTheDocument();
+      const titles = Array.from(container.querySelectorAll('strong')).map((el) => el.textContent);
+      expect(titles[0]).toBe('Dependency');
+    });
+
+    it('treats the peer address of outbound spans as Dependency, but not a server listener', () => {
+      const attributes = { 'server.address': 'api.openai.com', 'server.port': 443 };
+      const { container, unmount } = render(
+        <SpanMetadataTab
+          selectedSpan={{ spanId: 'c', kind: 'SPAN_KIND_CLIENT', attributes }}
+          addSpanFilter={mockAddSpanFilter}
+        />
+      );
+      const section = container.querySelector('#section-dependency');
+      expect(section).not.toBeNull();
+      const dependency = within(section!.closest('.euiAccordion') as HTMLElement);
+      expect(dependency.getByText('server.address')).toBeInTheDocument();
+      expect(dependency.getByText('server.port')).toBeInTheDocument();
+      unmount();
+
+      render(
+        <SpanMetadataTab
+          selectedSpan={{ spanId: 's', kind: 'SPAN_KIND_SERVER', attributes }}
+          addSpanFilter={mockAddSpanFilter}
+        />
+      );
+      expect(screen.queryByText('Dependency')).not.toBeInTheDocument();
+      expect(screen.getByText('server.address')).toBeInTheDocument();
+    });
+
+    it('omits the Dependency section for spans without dependency attributes', () => {
+      render(
+        <SpanMetadataTab
+          selectedSpan={{ spanId: 's', attributes: { 'http.method': 'GET' } }}
+          addSpanFilter={mockAddSpanFilter}
+        />
+      );
+      expect(screen.queryByText('Dependency')).not.toBeInTheDocument();
     });
   });
 });

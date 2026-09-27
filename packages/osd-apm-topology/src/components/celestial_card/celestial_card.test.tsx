@@ -158,4 +158,124 @@ describe('CelestialCard', () => {
       expect(healthDonut).not.toBeInTheDocument();
     });
   });
+
+  describe('Whole-card click and keyboard', () => {
+    const onDashboardClick = jest.fn();
+    const ClickProviders = ({ children }: PropsWithChildren) => (
+      <CelestialStateProvider
+        mocks={{
+          selectedNodeId: undefined,
+          setSelectedNodeId: mockSetActiveNodeId,
+          unstackedAggregateNodeIds: [],
+          setUnstackedAggregateNodeIds: mockSetUnstackedAggregateNodeIds,
+          activeMenuNodeId: null,
+          setActiveMenuNodeId: mockSetActiveMenuNodeId,
+          viewLock: { lock: jest.fn(), isLocked: jest.fn().mockReturnValue(false) },
+        }}
+      >
+        <CelestialNodeActionsProvider
+          onDataFetch={onDataFetch}
+          addBreadcrumb={addBreadcrumb}
+          onDashboardClick={onDashboardClick}
+        >
+          {children}
+        </CelestialNodeActionsProvider>
+      </CelestialStateProvider>
+    );
+    const groupProps = { ...defaultProps, isGroup: true, numberOfServices: 3 };
+    const getCard = (container: HTMLElement) => container.firstChild as HTMLElement;
+
+    it('is a focusable button', () => {
+      const { container } = render(<CelestialCard {...defaultProps} />, {
+        wrapper: ClickProviders,
+      });
+      expect(getCard(container)).toHaveAttribute('role', 'button');
+      expect(getCard(container)).toHaveAttribute('tabindex', '0');
+    });
+
+    it('fires the dashboard action once when a leaf card body is clicked', () => {
+      const { container } = render(<CelestialCard {...defaultProps} />, {
+        wrapper: ClickProviders,
+      });
+      fireEvent.click(getCard(container));
+      expect(onDashboardClick).toHaveBeenCalledTimes(1);
+      expect(onDashboardClick).toHaveBeenCalledWith(defaultProps);
+      expect(addBreadcrumb).not.toHaveBeenCalled();
+    });
+
+    it('does not double-fire when "View insights" is clicked', () => {
+      render(<CelestialCard {...defaultProps} />, { wrapper: ClickProviders });
+      fireEvent.click(screen.getByRole('button', { name: 'View insights' }));
+      expect(onDashboardClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('toggles a group card on body click, and only once on the group header', () => {
+      const { container } = render(<CelestialCard {...groupProps} />, {
+        wrapper: ClickProviders,
+      });
+      fireEvent.click(getCard(container));
+      expect(addBreadcrumb).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByText('Test Title').parentElement!);
+      expect(addBreadcrumb).toHaveBeenCalledTimes(2);
+      expect(onDashboardClick).not.toHaveBeenCalled();
+    });
+
+    it('toggles a group card once on double-click', () => {
+      const { container } = render(<CelestialCard {...groupProps} />, {
+        wrapper: ClickProviders,
+      });
+      const card = getCard(container);
+      // A browser double-click dispatches click (detail 1), click (detail 2), dblclick.
+      fireEvent.click(card, { detail: 1 });
+      fireEvent.click(card, { detail: 2 });
+      fireEvent.doubleClick(card, { detail: 2 });
+      expect(addBreadcrumb).toHaveBeenCalledTimes(1);
+      expect(onDataFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('toggles once on a double-click of the group header', () => {
+      render(<CelestialCard {...groupProps} />, { wrapper: ClickProviders });
+      const header = screen.getByText('Test Title').parentElement!;
+      fireEvent.click(header, { detail: 1 });
+      fireEvent.click(header, { detail: 2 });
+      fireEvent.doubleClick(header, { detail: 2 });
+      expect(addBreadcrumb).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires the dashboard action once on a double-click of "View insights"', () => {
+      render(<CelestialCard {...defaultProps} />, { wrapper: ClickProviders });
+      const insights = screen.getByRole('button', { name: 'View insights' });
+      fireEvent.click(insights, { detail: 1 });
+      fireEvent.click(insights, { detail: 2 });
+      fireEvent.doubleClick(insights, { detail: 2 });
+      expect(onDashboardClick).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['Enter', ' '])('activates a focused card with %p', (key) => {
+      const { container } = render(<CelestialCard {...defaultProps} />, {
+        wrapper: ClickProviders,
+      });
+      fireEvent.keyDown(getCard(container), { key });
+      expect(onDashboardClick).toHaveBeenCalledWith(defaultProps);
+    });
+
+    it('ignores other keys', () => {
+      const { container } = render(<CelestialCard {...groupProps} />, {
+        wrapper: ClickProviders,
+      });
+      fireEvent.keyDown(getCard(container), { key: 'a' });
+      expect(addBreadcrumb).not.toHaveBeenCalled();
+      expect(onDashboardClick).not.toHaveBeenCalled();
+    });
+
+    it('leaves Enter on an inner button to that button', () => {
+      render(<CelestialCard {...groupProps} />, { wrapper: ClickProviders });
+      const insights = screen.getByRole('button', { name: 'View insights' });
+      const notPrevented = fireEvent.keyDown(insights, { key: 'Enter' });
+      // The card must not hijack the key (toggling the group) or cancel the
+      // button's native Enter -> click activation.
+      expect(notPrevented).toBe(true);
+      expect(addBreadcrumb).not.toHaveBeenCalled();
+    });
+  });
 });

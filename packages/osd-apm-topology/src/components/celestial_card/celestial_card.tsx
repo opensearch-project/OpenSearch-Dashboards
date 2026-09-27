@@ -44,26 +44,22 @@ export const CelestialCard = (props: CelestialCardProps) => {
     (event: React.MouseEvent) => {
       // Stop the card-level click from also firing (avoids a double action).
       event.stopPropagation();
+      // Later clicks of a double-click (detail > 1) must not re-fire the action.
+      if (event.detail > 1) return;
       // Selection state is handled by context now
       onDashboardClick?.(event, props);
     },
     [onDashboardClick, props]
   );
 
-  const onDoubleClick = useCallback(
-    (event: React.MouseEvent) => {
-      if (isGroup) {
-        onGroupToggle?.(event, props);
-      }
-    },
-    [onGroupToggle, isGroup, props]
-  );
-
   // Make the whole card clickable (not just the "View insights" text): a group
   // card expands/collapses, a leaf card triggers its dashboard action. Inner
-  // interactive elements stopPropagation so they don't double-fire this.
+  // interactive elements stopPropagation so they don't double-fire this. This
+  // replaces the former group double-click toggle; the later clicks of a
+  // multi-click (detail > 1) are ignored so a double-click toggles once.
   const onCardClick = useCallback(
     (event: React.MouseEvent) => {
+      if (event.detail > 1) return;
       if (isGroup) {
         onGroupToggle?.(event, props);
       } else {
@@ -74,17 +70,17 @@ export const CelestialCard = (props: CelestialCardProps) => {
   );
 
   // Keyboard equivalent of the whole-card click (Enter/Space) so the card is
-  // operable without a mouse. The action handlers are typed for mouse events
-  // but only read the target props and call stopPropagation, which a keyboard
-  // event also supports.
+  // operable without a mouse. Keys pressed on an inner control (e.g. "View
+  // insights") are left to that control's own activation.
   const onCardKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
+      if (event.target !== event.currentTarget) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       if (isGroup) {
-        onGroupToggle?.(event as unknown as React.MouseEvent, props);
+        onGroupToggle?.(event, props);
       } else {
-        onDashboardClick?.(event as unknown as React.MouseEvent, props);
+        onDashboardClick?.(event, props);
       }
     },
     [isGroup, onGroupToggle, onDashboardClick, props]
@@ -122,7 +118,6 @@ export const CelestialCard = (props: CelestialCardProps) => {
                 osd:transition-all osd:duration-200 osd:cursor-pointer`}
       onClick={onCardClick}
       onKeyDown={onCardKeyDown}
-      onDoubleClick={onDoubleClick}
       role="button"
       tabIndex={0}
     >
@@ -156,6 +151,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
                 className="osd:flex osd:items-center osd:group osd:hover:cursor-pointer osd:pl-1"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (e.detail > 1) return;
                   onGroupToggle?.(e, props);
                 }}
               >

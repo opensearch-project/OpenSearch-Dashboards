@@ -14,6 +14,7 @@ import {
   dependencyTypeLabel,
   dependencyIconType,
   DependencyInfo,
+  hasCrossServiceChild,
 } from '../../services/dependency_classifier';
 import { getDependencyBrandIcon } from '../../services/dependency_icons';
 import { ParsedHit, SpanTableProps } from './types';
@@ -58,13 +59,19 @@ export const HierarchySpanCell = ({
 
   // Annotate spans that target an inferred dependency (database / messaging /
   // external) so DB/broker/external calls are recognizable in the waterfall.
-  // External applies only to leaf CLIENT spans (no children reaching a service).
+  // External applies only to CLIENT spans that do not reach another traced
+  // service (no child in a different service), matching the trace map.
   let dependency: DependencyInfo | null = item ? classifyDependencyByAttributes(item) : null;
   if (
     !dependency &&
     item &&
     normalizeSpanKind(item.kind) === 'CLIENT' &&
-    (item.children?.length ?? 0) === 0
+    !hasCrossServiceChild(
+      item,
+      (s) => s.children,
+      resolveServiceNameFromSpan,
+      (s) => s.kind
+    )
   ) {
     const ext = resolveExternalName(item);
     if (ext) dependency = { type: 'external', name: ext };

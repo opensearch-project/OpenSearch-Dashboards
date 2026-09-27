@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { isEmpty } from '../../utils/helper_functions';
 import { formatSpanAttributes, sortAttributes } from '../../utils/span_data_utils';
 import { FlyoutListItem } from '../flyout_list_item';
+import { normalizeSpanKind } from '../../services/dependency_classifier';
 
 export interface SpanMetadataTabProps {
   selectedSpan?: any;
@@ -33,6 +34,11 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
     const attributes = formatSpanAttributes(selectedSpan);
     const sortedAttributes = sortAttributes(attributes);
+    // On outbound spans server.* names the peer (the dependency); on SERVER spans
+    // it is the service's own listener, so it stays uncategorized there.
+    const isOutbound = ['CLIENT', 'PRODUCER', 'CONSUMER'].includes(
+      normalizeSpanKind(selectedSpan.kind)
+    );
 
     const categorized: CategorizedAttributes = {
       dependency: [],
@@ -47,13 +53,17 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
       // Dependency attributes (database / messaging / peer) take precedence so
       // e.g. `peer.service` is not swallowed by the "service" application rule.
+      // Span attributes arrive flattened as "attributes.<key>", so match on the
+      // key without that prefix.
+      const attrKey = lowerKey.replace(/^attributes\./, '');
       if (
-        lowerKey.startsWith('db.') ||
-        lowerKey.includes('db_system') ||
-        lowerKey.startsWith('messaging.') ||
-        lowerKey.includes('peer.service') ||
-        lowerKey.startsWith('net.peer') ||
-        lowerKey.startsWith('network.peer')
+        attrKey.startsWith('db.') ||
+        attrKey.includes('db_system') ||
+        attrKey.startsWith('messaging.') ||
+        attrKey.includes('peer.service') ||
+        attrKey.startsWith('net.peer') ||
+        attrKey.startsWith('network.peer') ||
+        (isOutbound && (attrKey === 'server.address' || attrKey === 'server.port'))
       ) {
         categorized.dependency.push([key, value]);
       } else if (

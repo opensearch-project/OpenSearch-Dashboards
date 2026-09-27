@@ -196,4 +196,61 @@ describe('HierarchySpanCell', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  describe('dependency icon', () => {
+    const renderItem = (overrides: Partial<ParsedHit>) =>
+      render(<HierarchySpanCell {...defaultProps} items={[createMockItem(overrides)]} />);
+
+    it('marks a database span', () => {
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { db_system: 'redis', 'server.address': 'valkey-cart' },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'Database');
+    });
+
+    it('marks a messaging span', () => {
+      renderItem({
+        kind: 'SPAN_KIND_PRODUCER',
+        attributes: { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'Messaging');
+    });
+
+    it('marks a leaf CLIENT span to a named external peer', () => {
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'server.address': 'api.openai.com', 'server.port': 443 },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'External');
+    });
+
+    it('marks an external CLIENT span whose children stay in the same service', () => {
+      // e.g. an LLM client span with nested tool/transport spans of its own service.
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'server.address': 'api.openai.com', 'server.port': 443 },
+        children: [createMockItem({ spanId: 'tool', serviceName: 'test-service' })],
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'External');
+    });
+
+    it('does not mark service spans, CLIENT spans reaching another service, or raw-IP peers', () => {
+      const { unmount } = renderItem({ kind: 'SPAN_KIND_SERVER' });
+      expect(screen.queryByTestId('spanDependencyIcon')).not.toBeInTheDocument();
+      unmount();
+      const withChild = renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'http.url': 'http://frontend-proxy:8080/api' },
+        children: [createMockItem({ spanId: 'child', serviceName: 'frontend-proxy' })],
+      });
+      expect(screen.queryByTestId('spanDependencyIcon')).not.toBeInTheDocument();
+      withChild.unmount();
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'server.address': '172.18.0.4', 'server.port': 8003 },
+      });
+      expect(screen.queryByTestId('spanDependencyIcon')).not.toBeInTheDocument();
+    });
+  });
 });

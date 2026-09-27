@@ -12,6 +12,7 @@ import {
   normalizeSpanKind,
   dependencyTypeLabel,
   DependencyInfo,
+  getSpanAttr,
 } from './dependency_classifier';
 
 /**
@@ -210,15 +211,45 @@ export const spansToServiceFlow = (
   // the calling spans reach, using attributes the trace already carries. These
   // are additive to the service-to-service topology above.
 
-  // Which spans have a child from a different service? Such a CLIENT span reached
-  // a traced service (a normal edge) and must NOT also be synthesized as external.
+  const spanById = new Map<string, ServiceFlowHit>();
+  hits.forEach((hit) => spanById.set(hit.spanId, hit));
+  const parentOf = (hit: ServiceFlowHit) =>
+    hit.parentSpanId ? spanById.get(hit.parentSpanId) : undefined;
+  const isClient = (hit: ServiceFlowHit) => normalizeSpanKind(hit.kind) === 'CLIENT';
+
+  // Which spans reached a traced service? A span with a child from a different
+  // service did, and so did the same-service CLIENT spans wrapping it (an SDK
+  // span over its transport span), as in the backend. Such a CLIENT span is a
+  // normal edge and must NOT also be synthesized as external.
   const spanHasCrossServiceChild = new Set<string>();
   hits.forEach((hit) => {
-    if (hit.parentSpanId && id2svc.has(hit.parentSpanId)) {
-      const parentService = id2svc.get(hit.parentSpanId)!;
-      if (parentService !== serviceOf(hit)) spanHasCrossServiceChild.add(hit.parentSpanId);
+    let cur = parentOf(hit);
+    if (!cur || serviceOf(cur) === serviceOf(hit)) return;
+    spanHasCrossServiceChild.add(cur.spanId);
+    for (let up = parentOf(cur); isClient(cur) && up && serviceOf(up) === serviceOf(cur);) {
+      // Already marked: the chain above is done (also stops on a parent-id cycle).
+      if (spanHasCrossServiceChild.has(up.spanId)) break;
+      spanHasCrossServiceChild.add(up.spanId);
+      cur = up;
+      up = parentOf(cur);
     }
   });
+
+  const isDependencyCandidate = (hit: ServiceFlowHit) =>
+    classifyDependencyByAttributes(hit) !== null || (isClient(hit) && !!resolveExternalName(hit));
+  // A CLIENT span nested in a same-service CLIENT dependency call, or in a
+  // messaging publish/receive span, is the transport of that one call; only the
+  // outer span is counted (backend isSynthesizedDependencyTarget).
+  const isNestedTransport = (hit: ServiceFlowHit) => {
+    const parent = parentOf(hit);
+    if (!isClient(hit) || !parent || serviceOf(parent) !== serviceOf(hit)) return false;
+    if (isClient(parent)) return isDependencyCandidate(parent);
+    if (getSpanAttr(parent, 'messaging.system') === undefined) return false;
+    const parentKind = normalizeSpanKind(parent.kind);
+    const operation =
+      getSpanAttr(parent, 'messaging.operation.type') ?? getSpanAttr(parent, 'messaging.operation');
+    return parentKind === 'PRODUCER' || (parentKind === 'CONSUMER' && operation !== 'process');
+  };
 
   const depNodeId = (dep: DependencyInfo) => `dep::${dep.type}::${dep.name}`;
   interface DepAgg {
@@ -229,11 +260,14 @@ export const spansToServiceFlow = (
     durationNanos: number;
   }
   const depAgg = new Map<string, DepAgg>();
-  const depEdgeCounts = new Map<string, number>();
+  // Keyed by edge id; endpoints are kept alongside rather than re-split from the
+  // id, since service and dependency names may themselves contain "->".
+  const depEdges = new Map<string, { source: string; target: string; count: number }>();
   const depEdgeHasError = new Set<string>();
 
   hits.forEach((hit) => {
     const kind = normalizeSpanKind(hit.kind);
+    if (isNestedTransport(hit)) return;
     let dep = classifyDependencyByAttributes(hit);
     if (!dep && kind === 'CLIENT' && !spanHasCrossServiceChild.has(hit.spanId)) {
       const ext = resolveExternalName(hit);
@@ -256,8 +290,11 @@ export const spansToServiceFlow = (
     depAgg.set(nodeId, agg);
 
     // CONSUMER: broker -> service; PRODUCER / CLIENT (db, external): service -> dependency.
-    const key = kind === 'CONSUMER' ? `${nodeId}->${service}` : `${service}->${nodeId}`;
-    depEdgeCounts.set(key, (depEdgeCounts.get(key) || 0) + 1);
+    const [source, target] = kind === 'CONSUMER' ? [nodeId, service] : [service, nodeId];
+    const key = `${source}->${target}`;
+    const edge = depEdges.get(key) || { source, target, count: 0 };
+    edge.count += 1;
+    depEdges.set(key, edge);
     if (hit.status?.code === 2) depEdgeHasError.add(key);
   });
 
@@ -312,9 +349,8 @@ export const spansToServiceFlow = (
     });
   });
 
-  const maxDepVolume = maxBy(depEdgeCounts.values(), (v) => v, maxVolume);
-  depEdgeCounts.forEach((count, key) => {
-    const [source, target] = key.split('->');
+  const maxDepVolume = maxBy(depEdges.values(), (e) => e.count, maxVolume);
+  depEdges.forEach(({ source, target, count }, key) => {
     edges.push({
       id: key,
       source,

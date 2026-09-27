@@ -16,6 +16,7 @@ import {
   resolveExternalName,
   normalizeSpanKind,
   dependencyTypeLabel,
+  hasCrossServiceChild,
 } from '../services/dependency_classifier';
 
 interface SpanSource {
@@ -229,15 +230,20 @@ export function convertToVegaGanttData(
 
     // Classify the span's downstream dependency (database / messaging / external)
     // so the waterfall can annotate DB/broker/external calls. External is only
-    // applied to leaf CLIENT spans (no children) to avoid mislabeling calls that
-    // reach another traced service.
+    // applied to CLIENT spans with no child in another service, to avoid
+    // mislabeling calls that reach a traced service (same rule as the trace map).
     let dependencyLabel = '';
     const depByAttr = classifyDependencyByAttributes(span);
     if (depByAttr) {
       dependencyLabel = dependencyTypeLabel(depByAttr.type);
     } else if (
       normalizeSpanKind(source.kind) === 'CLIENT' &&
-      (span.children?.length ?? 0) === 0 &&
+      !hasCrossServiceChild(
+        span,
+        (s) => s.children,
+        (s) => resolveServiceNameFromSpan(s) || getSpanSource(s).serviceName,
+        (s) => getSpanSource(s).kind
+      ) &&
       resolveExternalName(span)
     ) {
       dependencyLabel = dependencyTypeLabel('external');
