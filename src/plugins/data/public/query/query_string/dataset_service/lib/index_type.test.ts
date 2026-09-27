@@ -87,6 +87,25 @@ describe('indexTypeConfig', () => {
     });
   });
 
+  test('toDataset carries displayName from meta when present', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'index1',
+        title: 'otel-v1*',
+        type: 'INDEX',
+        meta: {
+          timeFieldName: 'startTime',
+          displayName: 'My Trace Dataset',
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        },
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    expect(result.displayName).toBe('My Trace Dataset');
+  });
+
   test('toDataset handles multi-index selection with comma-separated titles', () => {
     const mockPath: DataStructure[] = [
       {

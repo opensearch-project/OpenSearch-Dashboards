@@ -531,6 +531,13 @@ const executeQueryBase = async (
   const query = getState().query;
 
   const queryStartTime = Date.now();
+  let abortController: AbortController | undefined;
+  // A newer run for the same key replaces this run's controller. A superseded run must leave the
+  // key's results, status and controller to its successor.
+  const isSuperseded = () => {
+    const current = activeQueryAbortControllers.get(cacheKey);
+    return abortController !== undefined && current !== undefined && current !== abortController;
+  };
 
   try {
     dispatch(
@@ -554,8 +561,7 @@ const executeQueryBase = async (
     // Don't auto-abort other queries - let them complete unless explicitly cancelled
     // This prevents data loading issues when multiple queries are running concurrently
 
-    // Create abort controller for this specific query
-    const abortController = new AbortController();
+    abortController = new AbortController();
 
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
@@ -696,6 +702,10 @@ const executeQueryBase = async (
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
     });
 
+    if (isSuperseded()) {
+      return;
+    }
+
     // Add response stats to inspector
     inspectorRequest
       .stats(getResponseInspectorStats(rawResults, searchSource))
@@ -746,6 +756,10 @@ const executeQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
+    if (isSuperseded()) {
+      return;
+    }
+
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 

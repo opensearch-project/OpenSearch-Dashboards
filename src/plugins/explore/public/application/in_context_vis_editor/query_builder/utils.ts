@@ -104,6 +104,7 @@ export const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,

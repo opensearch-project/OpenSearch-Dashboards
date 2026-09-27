@@ -77,6 +77,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       urlDataset = {
         id: queryState.dataset.id,
         title: queryState.dataset.title,
+        displayName: queryState.dataset.displayName,
         type: queryState.dataset.type,
         language: queryState.dataset.language,
         timeFieldName: queryState.dataset.timeFieldName,
@@ -311,6 +312,7 @@ const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
