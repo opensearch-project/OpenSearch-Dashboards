@@ -389,7 +389,7 @@ describe('useHiddenColumnCount', () => {
     // out of the same code path the table uses rather than a stubbed number.
     mockFilterColumns.mockImplementation((rawColumns: any) => rawColumns);
     mockGetLegacyDisplayedColumns.mockImplementation(
-      (cols: any) => cols.map((name: string) => ({ name } as any)) as any
+      (cols: any) => cols.map((name: string) => ({ name }) as any) as any
     );
 
     return renderHook(() => useHiddenColumnCount());

@@ -194,17 +194,15 @@ describe('hits counter', () => {
 
     it('uses the singular when only one column is hidden', () => {
       component = mountWithIntl(<HitsCounter {...props} hiddenColumnCount={1} />);
-      expect(findTestSubject(component, 'exploreHiddenColumnsCount').text()).toBe('1 column hidden');
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').text()).toBe(
+        '1 column hidden'
+      );
     });
 
     it('asks to show the hidden columns when clicked', () => {
       const onShowHiddenColumns = jest.fn();
       component = mountWithIntl(
-        <HitsCounter
-          {...props}
-          hiddenColumnCount={2}
-          onShowHiddenColumns={onShowHiddenColumns}
-        />
+        <HitsCounter {...props} hiddenColumnCount={2} onShowHiddenColumns={onShowHiddenColumns} />
       );
       findTestSubject(component, 'exploreHiddenColumnsCount').simulate('click');
       expect(onShowHiddenColumns).toHaveBeenCalled();

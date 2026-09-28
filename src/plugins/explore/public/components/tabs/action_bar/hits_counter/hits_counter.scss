@@ -8,7 +8,7 @@
     margin-left: $euiSizeXS;
 
     // Reads as part of the surrounding sentence rather than a call to action, matching the mock.
-    .euiLink {
+    &Link {
       font-weight: $euiFontWeightRegular;
     }
   }

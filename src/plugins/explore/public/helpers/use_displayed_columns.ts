@@ -52,9 +52,7 @@ const filterEmptyColumns = (
 
   const remaining = columns.filter(
     (column) =>
-      column === '_source' ||
-      column === dataset?.timeFieldName ||
-      nonEmptyFieldCounts[column] > 0
+      column === '_source' || column === dataset?.timeFieldName || nonEmptyFieldCounts[column] > 0
   );
 
   // Never hide the whole table: an all-empty result set falls back to the original columns.
@@ -209,8 +207,13 @@ export const useHiddenColumnCount = (): number => {
       processedResults,
       true
     ).length;
-    const all = processDisplayedColumns(columns, dataset, uiSettings, processedResults, false)
-      .length;
+    const all = processDisplayedColumns(
+      columns,
+      dataset,
+      uiSettings,
+      processedResults,
+      false
+    ).length;
 
     return Math.max(0, all - shown);
   }, [columns, dataset, uiSettings, processedResults, hideEmptyFields]);

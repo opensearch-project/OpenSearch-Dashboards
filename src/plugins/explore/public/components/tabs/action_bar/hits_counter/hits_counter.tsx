@@ -166,6 +166,7 @@ export function HitsCounter({
               {'· '}
               <EuiLink
                 onClick={onShowHiddenColumns}
+                className="dscResultCount__hiddenColumnsLink"
                 data-test-subj="exploreHiddenColumnsCount"
                 aria-label={i18n.translate('explore.discover.hiddenColumnsAriaLabel', {
                   defaultMessage:
