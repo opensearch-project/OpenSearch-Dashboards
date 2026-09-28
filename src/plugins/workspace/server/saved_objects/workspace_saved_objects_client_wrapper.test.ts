@@ -1061,6 +1061,27 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         }
         expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
       });
+      it('should throw permission error when non admin associates an object it cannot write', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.addToWorkspaces('dashboard', 'not-permitted-dashboard', ['workspace-1']);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
+        expect(clientMock.addToWorkspaces).not.toHaveBeenCalled();
+      });
+      it('should call client.addToWorkspaces when permitted on both object and target workspaces', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        await wrapper.addToWorkspaces('dashboard', 'foo', ['workspace-1'], {});
+        expect(clientMock.addToWorkspaces).toHaveBeenCalledWith(
+          'dashboard',
+          'foo',
+          ['workspace-1'],
+          {}
+        );
+      });
     });
 
     describe('deleteFromWorkspaces', () => {
@@ -1087,6 +1108,29 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           errorCatch = e;
         }
         expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
+      });
+      it('should throw permission error when non admin dissociates an object it cannot write', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.deleteFromWorkspaces('dashboard', 'not-permitted-dashboard', [
+            'workspace-1',
+          ]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
+        expect(clientMock.deleteFromWorkspaces).not.toHaveBeenCalled();
+      });
+      it('should call client.deleteFromWorkspaces when permitted on both object and target workspaces', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        await wrapper.deleteFromWorkspaces('dashboard', 'foo', ['workspace-1'], {});
+        expect(clientMock.deleteFromWorkspaces).toHaveBeenCalledWith(
+          'dashboard',
+          'foo',
+          ['workspace-1'],
+          {}
+        );
       });
     });
   });

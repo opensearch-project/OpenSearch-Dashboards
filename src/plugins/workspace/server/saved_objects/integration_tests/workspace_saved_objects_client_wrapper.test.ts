@@ -782,6 +782,74 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     });
   });
 
+  describe('addToWorkspaces', () => {
+    it('should throw forbidden error when user not permitted on the object', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.addToWorkspaces(
+          'dashboard',
+          'inner-workspace-dashboard-1',
+          ['workspace-1']
+        );
+      } catch (e) {
+        error = e;
+      }
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
+
+    it('should associate the object into the target workspace when permitted on both', async () => {
+      const createResult = await repositoryKit.create(
+        internalSavedObjectsRepository,
+        'dashboard',
+        {},
+        { workspaces: ['workspace-1'] }
+      );
+      let error;
+      try {
+        await permittedSavedObjectedClient.addToWorkspaces('dashboard', createResult.id, [
+          'workspace-2',
+        ]);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeUndefined();
+    });
+  });
+
+  describe('deleteFromWorkspaces', () => {
+    it('should throw forbidden error when user not permitted on the object', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.deleteFromWorkspaces(
+          'dashboard',
+          'inner-workspace-dashboard-1',
+          ['workspace-1']
+        );
+      } catch (e) {
+        error = e;
+      }
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
+
+    it('should dissociate the object from the target workspace when permitted on both', async () => {
+      const createResult = await repositoryKit.create(
+        internalSavedObjectsRepository,
+        'dashboard',
+        {},
+        { workspaces: ['workspace-1', 'workspace-2'] }
+      );
+      let error;
+      try {
+        await permittedSavedObjectedClient.deleteFromWorkspaces('dashboard', createResult.id, [
+          'workspace-2',
+        ]);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeUndefined();
+    });
+  });
+
   describe('Dashboard admin', () => {
     it('should return consistent dashboard after get called', async () => {
       expect(
