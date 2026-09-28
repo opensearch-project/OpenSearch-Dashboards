@@ -294,6 +294,7 @@ describe('redux_persistence', () => {
       expect(result.ui).toEqual({
         activeTabId: '',
         showHistogram: true,
+        hideEmptyFields: false,
       });
       expect(result.query.language).toBe(EXPLORE_DEFAULT_LANGUAGE);
       expect(result.query.query).toBe(''); // Should be empty string

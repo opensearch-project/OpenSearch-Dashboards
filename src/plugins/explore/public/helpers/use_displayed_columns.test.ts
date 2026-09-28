@@ -30,7 +30,12 @@ jest.mock('../../../data/public', () => ({
 
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
-import { useDisplayedColumns, useDisplayedColumnNames } from './use_displayed_columns';
+import {
+  useDisplayedColumns,
+  useDisplayedColumnNames,
+  useHiddenColumnCount,
+  processDisplayedColumns,
+} from './use_displayed_columns';
 import { filterColumns } from './view_component_utils/filter_columns';
 import { getLegacyDisplayedColumns } from './data_table_helper';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
@@ -47,9 +52,18 @@ jest.mock('../application/utils/state_management/actions/query_actions', () => (
 // Mock the selectors module
 jest.mock('../application/utils/state_management/selectors', () => ({
   selectColumns: jest.fn(),
+  selectHideEmptyFields: jest.fn(),
 }));
 
-import { selectColumns } from '../application/utils/state_management/selectors';
+import {
+  selectColumns,
+  selectHideEmptyFields,
+} from '../application/utils/state_management/selectors';
+import { resultsCache } from '../application/utils/state_management/slices';
+import {
+  defaultPrepareQueryString,
+  defaultResultsProcessor,
+} from '../application/utils/state_management/actions/query_actions';
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockFilterColumns = filterColumns as jest.MockedFunction<typeof filterColumns>;
@@ -211,6 +225,70 @@ describe('useDisplayedColumns', () => {
   });
 });
 
+describe('processDisplayedColumns hideEmptyFields', () => {
+  // `empty_field` is mapped by the dataset but no document carries it, so its key never appears
+  // in _source and it lands in neither count — the shape a wide-schema index actually produces.
+  // `sparse_field` is populated on one row out of three.
+  const processedResults = {
+    hits: { hits: [{}, {}, {}] },
+    fieldCounts: { app: 3, sparse_field: 1 },
+    nonEmptyFieldCounts: { app: 3, sparse_field: 1 },
+  };
+
+  const run = (columns: string[], hideEmptyFields: boolean, results: any = processedResults) => {
+    mockFilterColumns.mockReturnValue(columns);
+    mockGetLegacyDisplayedColumns.mockReturnValue([]);
+    processDisplayedColumns(
+      columns,
+      mockDataset,
+      mockServices.uiSettings,
+      results,
+      hideEmptyFields
+    );
+    return mockGetLegacyDisplayedColumns.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockServices.uiSettings.get.mockReturnValue(false);
+  });
+
+  it('drops columns that are empty across the whole result set', () => {
+    expect(run(['app', 'empty_field'], true)).toEqual(['app']);
+  });
+
+  it('keeps sparsely populated columns', () => {
+    expect(run(['app', 'sparse_field', 'empty_field'], true)).toEqual(['app', 'sparse_field']);
+  });
+
+  it('keeps every column when the toggle is off', () => {
+    expect(run(['app', 'empty_field'], false)).toEqual(['app', 'empty_field']);
+  });
+
+  it('keeps _source and the time field regardless', () => {
+    expect(run(['_source', '@timestamp', 'empty_field'], true)).toEqual(['_source', '@timestamp']);
+  });
+
+  it('drops mapped-but-never-populated columns absent from both counts', () => {
+    // The regression that shipped first: keying off "absent from fieldCounts" kept every
+    // mapping-only field, which is the bulk of what the toggle exists to hide.
+    expect(run(['app', 'not_in_results'], true)).toEqual(['app']);
+  });
+
+  it('falls back to all columns when every one would be hidden', () => {
+    expect(run(['empty_field'], true)).toEqual(['empty_field']);
+  });
+
+  it('keeps every column when the result set has no rows to judge from', () => {
+    const noRows = { ...processedResults, hits: { hits: [] } };
+    expect(run(['app', 'empty_field'], true, noRows)).toEqual(['app', 'empty_field']);
+  });
+
+  it('is a no-op without processed results', () => {
+    expect(run(['app', 'empty_field'], true, null)).toEqual(['app', 'empty_field']);
+  });
+});
+
 describe('useDisplayedColumnNames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -266,5 +344,99 @@ describe('useDisplayedColumnNames', () => {
     const { result } = renderHook(() => useDisplayedColumnNames());
 
     expect(result.current).toEqual([]);
+  });
+});
+
+describe('useHiddenColumnCount', () => {
+  const CACHE_KEY = 'cache-key';
+  // `empty_field` and `also_empty` are mapped but never populated, so they appear in neither count.
+  const processedResults = {
+    hits: { hits: [{}, {}, {}] },
+    fieldCounts: { app: 3 },
+    nonEmptyFieldCounts: { app: 3 },
+  };
+
+  const setup = ({
+    columns,
+    hideEmptyFields,
+    hasResults = true,
+  }: {
+    columns: string[];
+    hideEmptyFields: boolean;
+    hasResults?: boolean;
+  }) => {
+    mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
+    mockUseDatasetContext.mockReturnValue({ dataset: mockDataset } as any);
+    mockServices.uiSettings.get.mockReturnValue(false);
+
+    (defaultPrepareQueryString as jest.Mock).mockReturnValue(CACHE_KEY);
+    (defaultResultsProcessor as jest.Mock).mockReturnValue(processedResults);
+    resultsCache.clear();
+    if (hasResults) resultsCache.set(CACHE_KEY, {} as any);
+
+    const state = {
+      query: { query: 'source=logs', language: 'PPL' },
+      results: hasResults ? { [CACHE_KEY]: { status: 'READY' } } : {},
+    };
+
+    mockUseSelector.mockImplementation((selector: any) => {
+      if (selector === selectColumns) return columns;
+      if (selector === selectHideEmptyFields) return hideEmptyFields;
+      return selector(state);
+    });
+
+    // Let the real empty-column filtering run between the two mocked helpers, so the count comes
+    // out of the same code path the table uses rather than a stubbed number.
+    mockFilterColumns.mockImplementation((rawColumns: any) => rawColumns);
+    mockGetLegacyDisplayedColumns.mockImplementation(
+      (cols: any) => cols.map((name: string) => ({ name } as any)) as any
+    );
+
+    return renderHook(() => useHiddenColumnCount());
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('counts the columns the filter is hiding', () => {
+    const { result } = setup({
+      columns: ['app', 'empty_field', 'also_empty'],
+      hideEmptyFields: true,
+    });
+
+    expect(result.current).toBe(2);
+  });
+
+  it('is 0 when every chosen column is populated', () => {
+    const { result } = setup({ columns: ['app'], hideEmptyFields: true });
+
+    expect(result.current).toBe(0);
+  });
+
+  it('is 0 while the setting is off, even with empty columns on screen', () => {
+    const { result } = setup({
+      columns: ['app', 'empty_field'],
+      hideEmptyFields: false,
+    });
+
+    expect(result.current).toBe(0);
+  });
+
+  it('is 0 before any results have come back', () => {
+    const { result } = setup({
+      columns: ['app', 'empty_field'],
+      hideEmptyFields: true,
+      hasResults: false,
+    });
+
+    expect(result.current).toBe(0);
+  });
+
+  it('does not count the all-empty fallback as hidden columns', () => {
+    // Everything would be hidden, so the filter keeps the original set — nothing is actually gone.
+    const { result } = setup({ columns: ['empty_field'], hideEmptyFields: true });
+
+    expect(result.current).toBe(0);
   });
 });

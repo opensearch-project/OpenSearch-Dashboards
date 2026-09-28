@@ -160,10 +160,55 @@ describe('hits counter', () => {
     expect(component.exists('[data-test-subj="discoverQueryHits"]')).toBeFalsy();
   });
 
+  it('renders the count and elapsed time on one line as "N / M hits · T ms"', () => {
+    component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toBe('2 / 10 hits · 200 ms');
+  });
+
   it('should reset query', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     findTestSubject(component, 'resetSavedSearch').simulate('click');
     expect(props.onResetQuery).toHaveBeenCalled();
+  });
+
+  describe('hidden column disclosure', () => {
+    it('says nothing when no columns are hidden', () => {
+      component = mountWithIntl(<HitsCounter {...props} hiddenColumnCount={0} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').length).toBe(0);
+    });
+
+    it('says nothing when the count is not supplied at all', () => {
+      component = mountWithIntl(<HitsCounter {...props} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').length).toBe(0);
+    });
+
+    it('discloses the hidden columns alongside the counts', () => {
+      component = mountWithIntl(
+        <HitsCounter {...props} showResetButton={false} hiddenColumnCount={2} />
+      );
+      // The space before the separator is a CSS margin, so it is absent from the text content.
+      expect(findTestSubject(component, 'dscResultCount').text()).toBe(
+        '2 / 10 hits · 200 ms· 2 columns hidden'
+      );
+    });
+
+    it('uses the singular when only one column is hidden', () => {
+      component = mountWithIntl(<HitsCounter {...props} hiddenColumnCount={1} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').text()).toBe('1 column hidden');
+    });
+
+    it('asks to show the hidden columns when clicked', () => {
+      const onShowHiddenColumns = jest.fn();
+      component = mountWithIntl(
+        <HitsCounter
+          {...props}
+          hiddenColumnCount={2}
+          onShowHiddenColumns={onShowHiddenColumns}
+        />
+      );
+      findTestSubject(component, 'exploreHiddenColumnsCount').simulate('click');
+      expect(onShowHiddenColumns).toHaveBeenCalled();
+    });
   });
 });
 

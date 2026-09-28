@@ -52,6 +52,7 @@ import {
   queryHasAggregation,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import { hasFieldValue } from '../../../../utils/has_field_value';
 import { ExploreFlavor } from '../../../../../common';
 import { TRACES_CHART_BAR_TARGET } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
@@ -145,11 +146,20 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   dataset: DataView
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
+  // Counts only occurrences that carry an actual value. Tabular responses (e.g. PPL)
+  // include every field of the schema on every row, with null for the ones a document
+  // doesn't populate, so fieldCounts alone can't tell a populated field from an empty
+  // one. Kept separate from fieldCounts because the fields sidebar relies on the
+  // latter's "present in the response" meaning.
+  const nonEmptyFieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
-      const fields = Object.keys(dataset.flattenHit(hit));
-      for (const fieldName of fields) {
+      const flattened = dataset.flattenHit(hit);
+      for (const fieldName of Object.keys(flattened)) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+        if (hasFieldValue(flattened[fieldName])) {
+          nonEmptyFieldCounts[fieldName] = (nonEmptyFieldCounts[fieldName] || 0) + 1;
+        }
       }
     }
 
@@ -160,6 +170,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
+    nonEmptyFieldCounts,
     dataset,
     elapsedMs: rawResults.elapsedMs,
   };

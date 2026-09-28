@@ -352,6 +352,7 @@ const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: '',
     showHistogram: true,
+    hideEmptyFields: false,
   };
 };
 
