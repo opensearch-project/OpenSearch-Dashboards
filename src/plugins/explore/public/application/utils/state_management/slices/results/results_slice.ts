@@ -22,7 +22,7 @@ export interface QueryProfile {
 
 /**
  * A non-fatal notice attached to an otherwise-successful query response by the backend (e.g. a
- * partial result returned over a subset of indices). Surfaced to the user so a correct-but-partial
+ * search that reached only some of its shards). Surfaced to the user so a correct-but-partial
  * result is never mistaken for a complete one.
  */
 export interface QueryWarning {

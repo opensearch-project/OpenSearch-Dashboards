@@ -70,8 +70,8 @@ describe('StatisticsTab', () => {
         warnings: [
           {
             type: 'PARTIAL_RESULT',
-            message: 'Results exclude 1 of 2 indices due to a mapping conflict.',
-            detail: 'Excluded indices: [logs-text].',
+            message: 'Results are partial: 1 of 2 shards did not return data.',
+            detail: 'Rows from the shards that did not respond are missing.',
           },
         ],
       },
@@ -81,7 +81,7 @@ describe('StatisticsTab', () => {
 
     expect(screen.getByTestId('queryWarningsCallout')).toBeInTheDocument();
     expect(
-      screen.getByText('Results exclude 1 of 2 indices due to a mapping conflict.')
+      screen.getByText('Results are partial: 1 of 2 shards did not return data.')
     ).toBeInTheDocument();
   });
 
