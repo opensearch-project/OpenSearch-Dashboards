@@ -543,8 +543,66 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           field2: 1,
           field3: 1,
         },
+        nonEmptyFieldCounts: {
+          field1: 2,
+          field2: 1,
+          field3: 1,
+        },
         dataset: mockDataView,
         elapsedMs: 100,
+      });
+    });
+
+    it('should exclude empty values from nonEmptyFieldCounts but not fieldCounts', () => {
+      // Tabular responses (e.g. PPL) put every schema field on every row, using null for the
+      // ones a document doesn't populate.
+      const rawResults = {
+        hits: {
+          hits: [
+            {
+              _id: '1',
+              _source: {
+                populated: 'value1',
+                empty: null,
+                sparse: null,
+                falsy: 0,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+            {
+              _id: '2',
+              _source: {
+                populated: 'value2',
+                empty: null,
+                sparse: 'value3',
+                falsy: false,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+          ],
+          total: 2,
+        },
+        elapsedMs: 100,
+      } as any;
+
+      const result = defaultResultsProcessor(rawResults, mockDataView);
+
+      // Every field is "present" on both rows
+      expect(result.fieldCounts).toEqual({
+        populated: 2,
+        empty: 2,
+        sparse: 2,
+        falsy: 2,
+        empty_array: 2,
+        null_array: 2,
+      });
+      // Only fields carrying real values are counted; 0 and false count, nulls don't
+      expect(result.nonEmptyFieldCounts).toEqual({
+        populated: 2,
+        sparse: 1,
+        falsy: 2,
       });
     });
 

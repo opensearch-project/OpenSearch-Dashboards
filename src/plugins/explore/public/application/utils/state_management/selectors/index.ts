@@ -47,6 +47,13 @@ export const selectWrapCellText = createSelector(
   (uiState) => uiState.wrapCellText
 );
 
+// Defaults to false so state persisted before this setting existed keeps every column until the
+// user opts in.
+export const selectHideEmptyFields = createSelector(
+  [selectUIState],
+  (uiState) => uiState.hideEmptyFields ?? false
+);
+
 export const selectPatternsField = createSelector(
   [selectTabState],
   (tabState) => tabState.patterns.patternsField
