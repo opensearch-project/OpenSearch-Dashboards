@@ -6,6 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, Logger } from '../../../../core/server';
 import { API, URI } from '../../common';
+import { requireFeature } from './require_feature';
 import { coerceStatusCode, DATASOURCE_UNAVAILABLE_MESSAGE, resolveOpenSearchClient } from '.';
 import { resolvePPLFetchSize } from '../utils';
 
@@ -72,7 +73,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         query: schema.object({ dataSourceId: schema.maybe(schema.string()) }),
       },
     },
-    async (context, req, res) => {
+    requireFeature('pplStreaming', logger, async (context, req, res) => {
       try {
         const client = await resolveOpenSearchClient(context, req.query.dataSourceId);
         if (!client) {
@@ -106,7 +107,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         logger.debug(`PPL stream submit error: ${message}`);
         return res.custom({ statusCode: coerceStatusCode(statusOf(err)), body: message });
       }
-    }
+    })
   );
 
   router.get(
@@ -125,7 +126,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         }),
       },
     },
-    async (context, req, res) => {
+    requireFeature('pplStreaming', logger, async (context, req, res) => {
       const { id } = req.params;
       try {
         const { offset, count, waitForCompletionTimeout, keepAlive, dataSourceId } = req.query;
@@ -158,7 +159,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         logger.debug(`PPL stream poll error for ${id}: ${message}`);
         return res.custom({ statusCode: coerceStatusCode(status), body: message });
       }
-    }
+    })
   );
 
   router.delete(
@@ -169,7 +170,7 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         query: schema.object({ dataSourceId: schema.maybe(schema.string()) }),
       },
     },
-    async (context, req, res) => {
+    requireFeature('pplStreaming', logger, async (context, req, res) => {
       const { id } = req.params;
       try {
         const client = await resolveOpenSearchClient(context, req.query.dataSourceId);
@@ -193,6 +194,6 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         logger.debug(`PPL stream cancel error for ${id}: ${message}`);
         return res.custom({ statusCode: coerceStatusCode(status), body: message });
       }
-    }
+    })
   );
 }

@@ -48,6 +48,13 @@ describe('registerPPLStreamRoutes', () => {
             get: uiSettingsGet ?? jest.fn(async (key: string) => SAMPLE_SIZES[key]),
           },
         },
+        // These routes are gated on the pplStreaming feature flag, resolved per request.
+        dynamicConfig: {
+          client: {
+            getConfig: jest.fn().mockResolvedValue({ ppl: { streaming: { enabled: true } } }),
+          },
+          asyncLocalStore: undefined,
+        },
       },
     }) as any;
 

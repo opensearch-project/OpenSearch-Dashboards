@@ -311,7 +311,7 @@ const getStreamingConfig = async (
 > => {
   try {
     const query = state.query;
-    if (!isStreamingEligible(services.uiSettings, query.language)) {
+    if (!isStreamingEligible(services, query.language)) {
       return undefined;
     }
 

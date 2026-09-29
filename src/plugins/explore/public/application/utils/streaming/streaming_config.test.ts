@@ -1,0 +1,86 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Capabilities } from '../../../../../../core/types';
+import { STREAMING_RESULTS_SETTING } from '../../../../common';
+import { findDateHistogramAggId, isStreamingEligible } from './streaming_config';
+
+const capabilitiesWith = (pplStreaming: unknown): Capabilities =>
+  ({
+    navLinks: {},
+    management: {},
+    catalogue: {},
+    queryEnhancements: { pplStreaming },
+  }) as Capabilities;
+
+const uiSettingsWith = (enabled: unknown) => ({
+  get: jest.fn((key: string, fallback?: unknown) =>
+    key === STREAMING_RESULTS_SETTING ? enabled : fallback
+  ),
+});
+
+const deps = (pplStreaming: unknown, settingEnabled: unknown) => ({
+  uiSettings: uiSettingsWith(settingEnabled),
+  capabilities: capabilitiesWith(pplStreaming),
+});
+
+describe('isStreamingEligible', () => {
+  it('streams a PPL query when the flag and the user setting are both on', () => {
+    expect(isStreamingEligible(deps(true, true), 'PPL')).toBe(true);
+  });
+
+  it('does not stream when the deployment flag is off, whatever the user set', () => {
+    expect(isStreamingEligible(deps(false, true), 'PPL')).toBe(false);
+  });
+
+  it('does not stream when the user has not opted in', () => {
+    expect(isStreamingEligible(deps(true, false), 'PPL')).toBe(false);
+  });
+
+  it.each(['SQL', 'PROMQL', 'kuery', 'lucene', undefined])(
+    'does not stream %p, since the async API is a PPL endpoint',
+    (language) => {
+      expect(isStreamingEligible(deps(true, true), language)).toBe(false);
+    }
+  );
+
+  // Dynamic config writes are not schema-validated, so the capability can hold a non-boolean. The
+  // string 'false' is truthy and must not enable streaming.
+  it.each([['true'], ['false'], [1], [0], [null], [undefined], [{}]])(
+    'treats the non-boolean capability %p as off',
+    (pplStreaming) => {
+      expect(isStreamingEligible(deps(pplStreaming, true), 'PPL')).toBe(false);
+    }
+  );
+
+  it('does not stream when the capability is absent entirely', () => {
+    const capabilities = { navLinks: {}, management: {}, catalogue: {} } as unknown as Capabilities;
+    expect(isStreamingEligible({ uiSettings: uiSettingsWith(true), capabilities }, 'PPL')).toBe(
+      false
+    );
+  });
+
+  it('defaults the user setting to off when it has never been set', () => {
+    const uiSettings = { get: jest.fn((_key: string, fallback?: unknown) => fallback) };
+    expect(isStreamingEligible({ uiSettings, capabilities: capabilitiesWith(true) }, 'PPL')).toBe(
+      false
+    );
+    expect(uiSettings.get).toHaveBeenCalledWith(STREAMING_RESULTS_SETTING, false);
+  });
+});
+
+describe('findDateHistogramAggId', () => {
+  it('finds the id of the date histogram aggregation', () => {
+    expect(findDateHistogramAggId({ 1: { terms: {} }, 2: { date_histogram: {} } })).toBe('2');
+  });
+
+  it('has no id when no aggregation is a date histogram', () => {
+    expect(findDateHistogramAggId({ 1: { terms: {} } })).toBeUndefined();
+  });
+
+  it.each([[undefined], [{}]])('has no id for %p', (aggs) => {
+    expect(findDateHistogramAggId(aggs)).toBeUndefined();
+  });
+});

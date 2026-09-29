@@ -37,6 +37,7 @@ import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
 import { getIndexPruningSettings, getPplLintRuleSettings } from './ui_settings';
+import { defaultFeatureFlags, readFeatureFlags } from './utils/feature_flags';
 
 export class QueryEnhancementsPlugin implements Plugin<
   QueryEnhancementsPluginSetup,
@@ -57,39 +58,27 @@ export class QueryEnhancementsPlugin implements Plugin<
   ) {
     this.logger.debug('queryEnhancements: Setup');
 
-    // PPL lint capability — disabled by default. The public plugin reads
-    // capabilities.queryEnhancements.pplLint (see public/plugin.tsx) to decide
-    // whether to register the lint bridge. The switcher below overrides this
-    // default from DynamicConfigService.
+    // Feature capabilities — all disabled by default. Each is declared once in
+    // QUERY_ENHANCEMENTS_FEATURE_FLAGS; consumers read
+    // capabilities.queryEnhancements.<name>. The switcher below overrides these
+    // defaults from DynamicConfigService.
     core.capabilities.registerProvider(() => ({
-      queryEnhancements: { pplLint: false },
+      queryEnhancements: defaultFeatureFlags(),
     }));
 
-    // Override the default with the value from DynamicConfigService.
+    // Override the defaults with the values from DynamicConfigService.
     core.capabilities.registerSwitcher(async (request, capabilities) => {
       try {
         const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
         const client = dynamicConfigServiceStart.getClient();
         const store = dynamicConfigServiceStart.getAsyncLocalStore();
 
-        // Use pluginConfigPath, NOT { name: 'queryEnhancements' }: pathToString
-        // runs _.snakeCase on `name`, turning 'queryEnhancements' into
-        // 'query_enhancements' — the wrong namespace, which would throw, be
-        // swallowed here, and leave pplLint off forever. pluginConfigPath joins
-        // verbatim and matches configPath: ['queryEnhancements'] in the manifest.
-        const config = await client.getConfig(
-          { pluginConfigPath: ['queryEnhancements'] },
-          store ? { asyncLocalStorageContext: store } : undefined
-        );
-
         // Return only the changed subtree; recursiveApplyChanges merges it onto
-        // the resolved capabilities. `=== true` coerces explicitly — dynamic
-        // config writes are not schema-validated, so the stored value could be a
-        // non-boolean (e.g. the string 'true') that must not leak into the flag.
+        // the resolved capabilities.
         return {
           queryEnhancements: {
             ...(capabilities.queryEnhancements || {}),
-            pplLint: config.ppl?.lint?.enabled === true,
+            ...(await readFeatureFlags(client, store)),
           },
         };
       } catch (error) {
