@@ -22,6 +22,14 @@ import { defaultPrepareQueryString } from './utils/state_management/actions/quer
 import { buildPplSortClause, splitPplWhereAndTail } from './pages/traces/table_shared';
 import { prepareQueryForLanguage } from './utils/languages';
 
+/** Root agent spans (one per trace). Shared by Traces and Sessions so they share a cache key. */
+const prepareRootSpansQuery: NonNullable<TabDefinition['prepareQuery']> = (query, sort) => {
+  const baseQuery = defaultPrepareQueryString(query);
+  const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
+  const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
+  return `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
+};
+
 /**
  * Registers built-in tabs with the tab registry
  * Agent Traces only supports Traces
@@ -37,12 +45,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 10,
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
 
-    prepareQuery: (query, sort) => {
-      const baseQuery = defaultPrepareQueryString(query);
-      const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
-      const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
-      return `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
-    },
+    prepareQuery: prepareRootSpansQuery,
 
     component: TracesTab,
   };
@@ -71,8 +74,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
   tabRegistry.registerTab(spansTabDefinition);
 
   // Register Sessions Tab: traces grouped by gen_ai.conversation.id.
-  // No prepareQuery: the tab runs its own stats + root-span queries (see use_sessions.ts),
-  // since sessions are aggregates rather than span documents.
+  // The sessions list itself comes from its own stats queries (see use_sessions.ts). The
+  // root-span prepareQuery (same cache key as Traces) feeds the fields panel so facet
+  // filters work; a facet filter narrows sessions to those containing matching traces.
   tabRegistry.registerTab({
     id: AGENT_TRACES_SESSIONS_TAB_ID,
     label: i18n.translate('agentTraces.sessionsTab.label', {
@@ -81,6 +85,8 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     flavor: [AgentTracesFlavor.Traces],
     order: 25,
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
+    prepareQuery: prepareRootSpansQuery,
+    facetFields: ['serviceName', 'attributes.gen_ai.agent.name', 'status.code'],
     component: SessionsTab,
   });
 

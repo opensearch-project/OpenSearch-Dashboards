@@ -7,6 +7,7 @@ import {
   assembleSessionRows,
   buildRootSpansQuery,
   buildSessionSpansQuery,
+  buildMatchingSessionIdsQuery,
   buildSessionStatsQuery,
   buildTraceSessionMapQuery,
   formatSessionDuration,
@@ -53,10 +54,17 @@ const root = (
 
 describe('session_utils', () => {
   describe('query builders', () => {
-    it('builds the stats query grouped by conversation id', () => {
-      const q = buildSessionStatsQuery('source = otel-v1-apm-span-* | where serviceName = "a"', 50);
-      expect(q).toBe(
-        'source = otel-v1-apm-span-* | where serviceName = "a" | where isnotnull(`attributes.gen_ai.conversation.id`) | stats distinct_count(traceId) as total_traces, min(startTime) as start_time, max(endTime) as end_time by `attributes.gen_ai.conversation.id` | sort - start_time | head 50'
+    it('selects matching session ids with the user filter, most recent first', () => {
+      expect(
+        buildMatchingSessionIdsQuery('source = otel-v1-apm-span-* | where serviceName = "a"', 50)
+      ).toBe(
+        'source = otel-v1-apm-span-* | where serviceName = "a" | where isnotnull(`attributes.gen_ai.conversation.id`) | stats max(endTime) as last_seen by `attributes.gen_ai.conversation.id` | sort - last_seen | head 50'
+      );
+    });
+
+    it('computes unfiltered stats for the selected sessions', () => {
+      expect(buildSessionStatsQuery('source = otel-v1-apm-span-*', ['s1', 's2'])).toBe(
+        'source = otel-v1-apm-span-* | where `attributes.gen_ai.conversation.id` in ("s1", "s2") | stats distinct_count(traceId) as total_traces, min(startTime) as start_time, max(endTime) as end_time by `attributes.gen_ai.conversation.id` | sort - start_time'
       );
     });
 

@@ -80,11 +80,20 @@ export const pplResponseToRecords = (response: any): Array<Record<string, any>> 
 const inList = (values: string[]): string => values.map((v) => escapePPLValue(v)).join(', ');
 
 /**
- * Sessions list: one row per session id with trace count and time bounds.
- * `whereQuery` is the user's query (source + where clauses, no tail commands).
+ * Session ids matching the user's query (source + where clauses), most recent first.
+ * The user's filter selects which sessions are listed; their stats are computed unfiltered.
  */
-export const buildSessionStatsQuery = (whereQuery: string, limit = SESSIONS_PAGE_LIMIT): string =>
-  `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats distinct_count(traceId) as total_traces, min(startTime) as start_time, max(endTime) as end_time by ${SESSION_FIELD_PPL} | sort - start_time | head ${limit}`;
+export const buildMatchingSessionIdsQuery = (
+  whereQuery: string,
+  limit = SESSIONS_PAGE_LIMIT
+): string =>
+  `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats max(endTime) as last_seen by ${SESSION_FIELD_PPL} | sort - last_seen | head ${limit}`;
+
+/** Full (unfiltered) stats for the given sessions: trace count and time bounds. */
+export const buildSessionStatsQuery = (source: string, sessionIds: string[]): string =>
+  `${source} | where ${SESSION_FIELD_PPL} in (${inList(
+    sessionIds
+  )}) | stats distinct_count(traceId) as total_traces, min(startTime) as start_time, max(endTime) as end_time by ${SESSION_FIELD_PPL} | sort - start_time`;
 
 /** Maps each trace id to its session id. Any span in a trace may carry the session id. */
 export const buildTraceSessionMapQuery = (source: string, sessionIds: string[]): string =>

@@ -89,6 +89,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   return (
     <DiscoverSidebar
       columns={columns || []}
+      facetFields={services.tabRegistry.getTab(activeTabId)?.facetFields}
       fieldCounts={(fieldCounts as any) || {}}
       hits={rows || []}
       onAddField={(fieldName) => {

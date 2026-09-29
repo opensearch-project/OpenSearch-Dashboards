@@ -33,6 +33,12 @@ export interface TabDefinition {
   // Language-aware query handling
   supportedLanguages: string[];
 
+  /**
+   * Fields shown as "Faceted fields" in the fields panel while this tab is active.
+   * Defaults to the span-level facets when omitted.
+   */
+  facetFields?: string[];
+
   // Transform query string for cache key generation.
   // When sort is provided, it is appended as a PPL sort clause.
   prepareQuery?: (query: Query, sort?: SortOrder[]) => string;

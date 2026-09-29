@@ -28,6 +28,10 @@ export interface DiscoverSidebarProps {
    */
   columns: string[];
   /**
+   * Fields shown as faceted fields; defaults to the span-level facets
+   */
+  facetFields?: readonly string[];
+  /**
    * a statistics of the distribution of fields in the given hits
    */
   fieldCounts: Record<string, number>;
@@ -64,8 +68,15 @@ export interface DiscoverSidebarProps {
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const { columns, fieldCounts, hits, selectedDataSet, isEnhancementsEnabledOverride, onCollapse } =
-    props;
+  const {
+    columns,
+    fieldCounts,
+    hits,
+    selectedDataSet,
+    isEnhancementsEnabledOverride,
+    onCollapse,
+    facetFields,
+  } = props;
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const flavorId = useFlavorId();
   const shortDotsEnabled = useMemo(() => {
@@ -103,9 +114,10 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
       effectiveColumns,
       fieldCounts,
       fieldFilterState,
-      showFacetedFields
+      showFacetedFields,
+      facetFields
     );
-  }, [flavorId, fields, columns, fieldCounts, fieldFilterState, selectedDataSet]);
+  }, [flavorId, fields, columns, fieldCounts, fieldFilterState, selectedDataSet, facetFields]);
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];

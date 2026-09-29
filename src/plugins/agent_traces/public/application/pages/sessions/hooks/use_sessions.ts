@@ -15,6 +15,7 @@ import {
   SessionRow,
   assembleSessionRows,
   buildRootSpansQuery,
+  buildMatchingSessionIdsQuery,
   buildSessionStatsQuery,
   buildTraceSessionMapQuery,
   getSourceCommand,
@@ -33,9 +34,10 @@ export interface UseSessionsResult {
 /**
  * Fetch the sessions list for the current query and time range.
  *
- * 1. Stats query: one row per session id (trace count, start/end).
- * 2. Trace map: which traces belong to each session (any span may carry the id).
- * 3. Root spans of those traces: first/last message, tokens, user id.
+ * 1. Session ids matching the user's query (the filter selects sessions).
+ * 2. Unfiltered stats for those sessions (trace count, start/end).
+ * 3. Trace map: which traces belong to each session (any span may carry the id).
+ * 4. Root spans of those traces: first/last message, tokens, user id.
  */
 export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult => {
   const { services, pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
@@ -60,11 +62,23 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
       const { whereQuery } = splitPplWhereAndTail(baseQueryString);
       const source = getSourceCommand(whereQuery);
 
-      const statsResponse = await pplService.executeQuery(
+      // 1. Sessions matching the user's query; 2. their full stats (not narrowed by the filter).
+      const idsResponse = await pplService.executeQuery(
         datasetParam,
-        buildSessionStatsQuery(whereQuery)
+        buildMatchingSessionIdsQuery(whereQuery)
       );
-      const stats = parseSessionStats(pplResponseToRecords(statsResponse));
+      const sessionIds = pplResponseToRecords(idsResponse)
+        .map((r) => r[AGENT_TRACES_SESSION_ID_FIELD])
+        .filter((id): id is string => typeof id === 'string' && id !== '');
+
+      let stats: ReturnType<typeof parseSessionStats> = [];
+      if (sessionIds.length > 0) {
+        const statsResponse = await pplService.executeQuery(
+          datasetParam,
+          buildSessionStatsQuery(source, sessionIds)
+        );
+        stats = parseSessionStats(pplResponseToRecords(statsResponse));
+      }
 
       let rows: SessionRow[] = [];
       if (stats.length > 0) {
