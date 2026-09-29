@@ -110,6 +110,35 @@ describe('SearchPopoverMenu', () => {
     expect(options[0].onSelect).not.toHaveBeenCalled();
   });
 
+  it('does not apply the first match on an Enter that commits an IME composition', () => {
+    const options = makeOptions();
+    renderMenu(options);
+    open();
+    const searchBox = screen.getByTestId('menuSearch');
+    fireEvent.change(searchBox, { target: { value: '지표' } });
+    fireEvent.change(searchBox, { target: { value: 'su' } });
+    fireEvent.keyDown(searchBox, { key: 'Enter', keyCode: 229, isComposing: true });
+    expect(options[1].onSelect).not.toHaveBeenCalled();
+    expect(options[0].onSelect).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(searchBox, { key: 'Enter', keyCode: 13 });
+    expect(options[1].onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not create a value on an Enter that commits an IME composition', () => {
+    const onCreate = jest.fn();
+    renderMenu(makeOptions(), { allowCreate: { onCreate } });
+    open();
+    const searchBox = screen.getByTestId('menuSearch');
+    fireEvent.change(searchBox, { target: { value: '지표' } });
+    fireEvent.keyDown(searchBox, { key: 'Enter', keyCode: 229, isComposing: true });
+    expect(onCreate).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(searchBox, { key: 'Enter', keyCode: 13 });
+    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith('지표');
+  });
+
   it('closes the popover on Escape (clearing the search query)', () => {
     renderMenu(makeOptions());
     open();

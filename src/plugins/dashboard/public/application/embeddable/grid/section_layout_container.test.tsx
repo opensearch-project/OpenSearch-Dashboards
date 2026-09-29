@@ -238,6 +238,50 @@ describe('SectionLayoutContainer', () => {
       expect(layout.items[0].name).toBe('Renamed Section');
       expect(layout.items[1].name).toBe('Section 2');
     });
+
+    test('rename ignores Enter while an IME composition is active and commits on a plain Enter', async () => {
+      const { container, component } = setup();
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionMenuButton-s1').simulate('click');
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRename-s1').simulate('click');
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRenameInput').simulate('change', {
+          target: { value: '지표' },
+        });
+      });
+      updateAndWait(component);
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRenameInput').simulate('keydown', {
+          key: 'Enter',
+          keyCode: 229,
+          nativeEvent: { isComposing: true },
+        });
+      });
+      updateAndWait(component);
+
+      expect(findTestSubject(component, 'dashboardSectionRenameInput').length).toBe(1);
+      expect((container.getInput().layout as any).items[0].name).toBe('Section 1');
+
+      await act(async () => {
+        findTestSubject(component, 'dashboardSectionRenameInput').simulate('keydown', {
+          key: 'Enter',
+          keyCode: 13,
+        });
+      });
+      updateAndWait(component);
+
+      expect(findTestSubject(component, 'dashboardSectionRenameInput').length).toBe(0);
+      expect((container.getInput().layout as any).items[0].name).toBe('지표');
+    });
   });
 
   describe('add panel', () => {

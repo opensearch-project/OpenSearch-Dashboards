@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, RefObject } from 'react';
 import { slashCommandRegistry, SlashCommand } from '../services/slash_commands';
+import { isImeComposing } from '../../../../core/public/utils';
 
 interface UseCommandMenuKeyboardParams {
   input: string;
@@ -107,6 +108,9 @@ export const useCommandMenuKeyboard = ({
   }, [input, inputRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // While composing, Enter/Space/arrows/Escape belong to the IME, not to the menu or to sending.
+    if (isImeComposing(e)) return;
+
     // Handle Tab or Space for command autocomplete (only before space is typed)
     if (
       (e.key === 'Tab' || e.key === ' ') &&
