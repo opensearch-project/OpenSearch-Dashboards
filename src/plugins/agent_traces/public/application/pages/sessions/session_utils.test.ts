@@ -16,6 +16,8 @@ import {
   parseSessionStats,
   pplResponseToRecords,
   shortenId,
+  buildSessionFacetQuery,
+  parseFacetBuckets,
 } from './session_utils';
 import { BaseRow } from '../traces/hooks/tree_utils';
 
@@ -196,5 +198,29 @@ describe('session_utils', () => {
       expect(shortenId('short')).toBe('short');
       expect(shortenId('sess_4c6af3f740894eac', 12, 0)).toBe('sess_4c6af3f...');
     });
+  });
+});
+
+describe('session facets', () => {
+  it('counts distinct sessions per facet value under the user query', () => {
+    expect(buildSessionFacetQuery('source = spans | where a = 1', 'serviceName')).toBe(
+      'source = spans | where a = 1 | where isnotnull(`attributes.gen_ai.conversation.id`) and isnotnull(`serviceName`) | stats distinct_count(`attributes.gen_ai.conversation.id`) as sessions by `serviceName` | sort - sessions | head 10'
+    );
+  });
+
+  it('parses stats records into fields-panel buckets', () => {
+    expect(
+      parseFacetBuckets(
+        [
+          { serviceName: 'travel-planner', sessions: 3 },
+          { serviceName: 'weather-agent', sessions: 1 },
+          { serviceName: null, sessions: 5 },
+        ],
+        'serviceName'
+      )
+    ).toEqual([
+      { value: 'travel-planner', display: 'travel-planner', count: 3, percent: 75 },
+      { value: 'weather-agent', display: 'weather-agent', count: 1, percent: 25 },
+    ]);
   });
 });

@@ -18,10 +18,14 @@ import {
   buildMatchingSessionIdsQuery,
   buildSessionStatsQuery,
   buildTraceSessionMapQuery,
+  buildSessionFacetQuery,
+  parseFacetBuckets,
+  SESSION_FACET_FIELDS,
   getSourceCommand,
   parseSessionStats,
   pplResponseToRecords,
 } from '../session_utils';
+import { sessionFacetBuckets$ } from '../session_facets';
 
 export interface UseSessionsResult {
   sessions: SessionRow[];
@@ -61,6 +65,26 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
     try {
       const { whereQuery } = splitPplWhereAndTail(baseQueryString);
       const source = getSourceCommand(whereQuery);
+
+      // Fields panel facets, counted per session (runs alongside the list queries).
+      sessionFacetBuckets$.next(null);
+      void Promise.all(
+        SESSION_FACET_FIELDS.map(async (field) => {
+          try {
+            const response = await pplService.executeQuery(
+              datasetParam,
+              buildSessionFacetQuery(whereQuery, field)
+            );
+            return [field, parseFacetBuckets(pplResponseToRecords(response), field)] as const;
+          } catch {
+            return [field, []] as const; // e.g. the field is not mapped in this index
+          }
+        })
+      ).then((entries) => {
+        if (requestId === requestIdRef.current) {
+          sessionFacetBuckets$.next(Object.fromEntries(entries));
+        }
+      });
 
       // 1. Sessions matching the user's query; 2. their full stats (not narrowed by the filter).
       const idsResponse = await pplService.executeQuery(
@@ -127,6 +151,9 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions, refreshCounter, timeVersion, fetchVersion]);
+
+  // Drop session facets when the tab unmounts so they never outlive the Sessions view.
+  useEffect(() => () => sessionFacetBuckets$.next(null), []);
 
   const refresh = useCallback(() => setRefreshCounter((c) => c + 1), []);
 

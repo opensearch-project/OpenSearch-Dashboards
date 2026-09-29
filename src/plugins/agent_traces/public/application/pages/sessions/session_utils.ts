@@ -7,6 +7,7 @@ import moment from 'moment-timezone';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../common';
 import { escapePPLValue } from '../traces/trace_details/data_fetching/ppl_request_helpers';
 import { BaseRow } from '../traces/hooks/tree_utils';
+import { Bucket } from '../../../components/fields_selector/types';
 import { previewInputMessages, previewOutputMessages } from '../traces/hooks/genai_message_preview';
 
 /** Backtick-quoted session id field for use in PPL. */
@@ -88,6 +89,35 @@ export const buildMatchingSessionIdsQuery = (
   limit = SESSIONS_PAGE_LIMIT
 ): string =>
   `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats max(endTime) as last_seen by ${SESSION_FIELD_PPL} | sort - last_seen | head ${limit}`;
+
+/** Fields shown as facets on the Sessions tab. */
+export const SESSION_FACET_FIELDS = ['serviceName', 'attributes.gen_ai.agent.name', 'status.code'];
+export const SESSION_FACET_LIMIT = 10;
+
+/**
+ * Sessions per value of a facet field, under the user's query. A session counts toward a
+ * value when any of its spans has it, matching how filter-for narrows the session list.
+ */
+export const buildSessionFacetQuery = (
+  whereQuery: string,
+  field: string,
+  limit = SESSION_FACET_LIMIT
+): string =>
+  `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) and isnotnull(\`${field}\`) | stats distinct_count(${SESSION_FIELD_PPL}) as sessions by \`${field}\` | sort - sessions | head ${limit}`;
+
+/** Convert facet stats records into fields-panel buckets. */
+export const parseFacetBuckets = (records: Array<Record<string, any>>, field: string): Bucket[] => {
+  const rows = records
+    .map((r) => ({ value: r[field], count: Number(r.sessions ?? 0) }))
+    .filter((r) => r.value !== null && r.value !== undefined && r.count > 0);
+  const total = rows.reduce((sum, r) => sum + r.count, 0);
+  return rows.map((r) => ({
+    value: String(r.value),
+    display: String(r.value),
+    count: r.count,
+    percent: total ? (r.count / total) * 100 : 0,
+  }));
+};
 
 /** Full (unfiltered) stats for the given sessions: trace count and time bounds. */
 export const buildSessionStatsQuery = (source: string, sessionIds: string[]): string =>

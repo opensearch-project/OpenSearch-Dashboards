@@ -8,6 +8,8 @@ import { TracesTab } from './pages/traces/traces_tab';
 import { SpansTab } from './pages/traces/spans_tab';
 import { VisTab } from './pages/traces/vis_tab';
 import { SessionsTab } from './pages/sessions/sessions_tab';
+import { SESSION_FACET_FIELDS } from './pages/sessions/session_utils';
+import { sessionFacetBuckets$ } from './pages/sessions/session_facets';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { AgentTracesServices } from '../types';
 import {
@@ -86,7 +88,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 25,
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
     prepareQuery: prepareRootSpansQuery,
-    facetFields: ['serviceName', 'attributes.gen_ai.agent.name', 'status.code'],
+    facetFields: SESSION_FACET_FIELDS,
+    facetBuckets$: sessionFacetBuckets$,
+    fixedColumns: true,
     component: SessionsTab,
   });
 

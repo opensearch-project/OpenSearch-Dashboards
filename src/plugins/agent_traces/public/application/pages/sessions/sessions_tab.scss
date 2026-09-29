@@ -13,6 +13,10 @@ $agtSessionFlyoutChrome: 150px;
   cursor: pointer;
 }
 
+.agtSessionsTable__nowrap {
+  white-space: nowrap;
+}
+
 .agtSessionsTable__tooltipAnchor {
   display: block;
   max-width: 100%;

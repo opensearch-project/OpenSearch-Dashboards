@@ -244,7 +244,14 @@ export const SessionsTable: React.FC<SessionsTableProps> = ({
                 >
                   <div className="agentTracesDocTableCell__content">
                     <span className="agentTracesDocTableCell__dataField">
-                      {renderCell(session, column)}
+                      {column.wideText ? (
+                        renderCell(session, column)
+                      ) : (
+                        // Short values (time, ids, counts) never wrap, as in Traces/Spans
+                        <span className="agtSessionsTable__nowrap">
+                          {renderCell(session, column)}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </td>
