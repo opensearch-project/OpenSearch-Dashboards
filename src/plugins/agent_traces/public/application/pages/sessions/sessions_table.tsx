@@ -3,43 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiBadge,
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiProgress } from '@elastic/eui';
+import { TableHeaderColumn } from '../../../components/data_table/table_header/table_header_column';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
+import { SortOrder } from '../../../helpers/data_table_helper';
 import { SessionRow, formatSessionDuration } from './session_utils';
+
+/** Rows rendered per batch as the user scrolls (same as the Traces/Spans DataTable). */
+const LAZY_LOAD_BATCH_SIZE = 50;
+
+const DEFAULT_SORT: SortOrder[] = [['startTime', 'desc']];
 
 interface SessionsTableProps {
   sessions: SessionRow[];
   formatTs: (ts: string) => string;
   wrapCellText: boolean;
   onSessionClick: (session: SessionRow) => void;
+  /** Session currently open in the flyout; its row is highlighted. */
+  selectedSessionId?: string;
 }
 
-/** Text cell: single line with a tooltip, or full text when wrapping is on. */
-const TextCell: React.FC<{ text: string; wrap: boolean; mono?: boolean }> = ({
-  text,
-  wrap,
-  mono,
-}) => {
-  if (!text) return <>—</>;
-  const className = `agtSessionsTable__text${wrap ? ' agtSessionsTable__text--wrap' : ''}${
-    mono ? ' agtSessionsTable__text--mono' : ''
-  }`;
-  if (wrap) return <span className={className}>{text}</span>;
-  return (
-    <EuiToolTip content={text} position="top" anchorClassName="agtSessionsTable__tooltipAnchor">
-      <span className={className}>{text}</span>
-    </EuiToolTip>
-  );
-};
+type SessionColumnKey =
+  | 'startTime'
+  | 'sessionId'
+  | 'firstMessage'
+  | 'lastMessage'
+  | 'durationMs'
+  | 'userId'
+  | 'totalTraces'
+  | 'totalTokens';
+
+interface SessionColumn {
+  key: SessionColumnKey;
+  label: string;
+  sortable: boolean;
+  wideText?: boolean;
+}
 
 export const TokensBadge: React.FC<{ tokens: number | null }> = ({ tokens }) =>
   tokens === null ? (
@@ -50,111 +51,213 @@ export const TokensBadge: React.FC<{ tokens: number | null }> = ({ tokens }) =>
     </EuiBadge>
   );
 
+/** Show the full text as a native tooltip only when the cell is truncated (like DataTable). */
+const setTitleIfTruncated = (text: string) => (e: React.MouseEvent<HTMLSpanElement>) => {
+  const el = e.currentTarget;
+  el.title = el.scrollWidth > el.clientWidth ? text : '';
+};
+
+const compareSessions = (a: SessionRow, b: SessionRow, key: SessionColumnKey): number => {
+  const va = a[key];
+  const vb = b[key];
+  if (va === vb) return 0;
+  if (va === null || va === undefined) return 1; // missing values last
+  if (vb === null || vb === undefined) return -1;
+  if (typeof va === 'number' && typeof vb === 'number') return va - vb;
+  return String(va).localeCompare(String(vb)); // PPL timestamps sort lexicographically
+};
+
 export const SessionsTable: React.FC<SessionsTableProps> = ({
   sessions,
   formatTs,
   wrapCellText,
   onSessionClick,
+  selectedSessionId,
 }) => {
+  const [sortOrder, setSortOrder] = useState<SortOrder[]>(DEFAULT_SORT);
+
   // User ID comes from the optional `user.id` attribute; hide the column when no session has one.
   const hasUserIds = useMemo(() => sessions.some((s) => !!s.userId), [sessions]);
 
-  const columns: Array<EuiBasicTableColumn<SessionRow>> = useMemo(
-    () => [
+  const columns: SessionColumn[] = useMemo(() => {
+    const cols: SessionColumn[] = [
       {
-        field: 'startTime',
-        name: i18n.translate('agentTraces.sessions.column.time', { defaultMessage: 'Time' }),
+        key: 'startTime',
+        label: i18n.translate('agentTraces.sessions.column.time', { defaultMessage: 'Time' }),
         sortable: true,
-        width: '215px',
-        render: (startTime: string, session: SessionRow) => (
-          <EuiLink
-            onClick={() => onSessionClick(session)}
-            data-test-subj="agentTracesSessionTimeLink"
-          >
-            {formatTs(startTime)}
-          </EuiLink>
-        ),
       },
       {
-        field: 'sessionId',
-        name: i18n.translate('agentTraces.sessions.column.sessionId', {
+        key: 'sessionId',
+        label: i18n.translate('agentTraces.sessions.column.sessionId', {
           defaultMessage: 'Session ID',
         }),
-        width: '170px',
-        render: (id: string) => <TextCell text={id} wrap={wrapCellText} mono />,
+        sortable: true,
       },
       {
-        field: 'firstMessage',
-        name: i18n.translate('agentTraces.sessions.column.firstMessage', {
+        key: 'firstMessage',
+        label: i18n.translate('agentTraces.sessions.column.firstMessage', {
           defaultMessage: 'First Message',
         }),
-        render: (text: string) => <TextCell text={text} wrap={wrapCellText} />,
+        sortable: false,
+        wideText: true,
       },
       {
-        field: 'lastMessage',
-        name: i18n.translate('agentTraces.sessions.column.lastMessage', {
+        key: 'lastMessage',
+        label: i18n.translate('agentTraces.sessions.column.lastMessage', {
           defaultMessage: 'Last Message',
         }),
-        render: (text: string) => <TextCell text={text} wrap={wrapCellText} />,
+        sortable: false,
+        wideText: true,
       },
       {
-        field: 'durationMs',
-        name: i18n.translate('agentTraces.sessions.column.duration', {
+        key: 'durationMs',
+        label: i18n.translate('agentTraces.sessions.column.duration', {
           defaultMessage: 'Duration',
         }),
         sortable: true,
-        width: '100px',
-        render: (ms: number) => formatSessionDuration(ms),
       },
-      ...(hasUserIds
-        ? [
-            {
-              field: 'userId',
-              name: i18n.translate('agentTraces.sessions.column.userId', {
-                defaultMessage: 'User ID',
-              }),
-              width: '140px',
-              render: (id: string | null) => <TextCell text={id ?? ''} wrap={wrapCellText} mono />,
-            },
-          ]
-        : []),
+    ];
+    if (hasUserIds) {
+      cols.push({
+        key: 'userId',
+        label: i18n.translate('agentTraces.sessions.column.userId', { defaultMessage: 'User ID' }),
+        sortable: true,
+      });
+    }
+    cols.push(
       {
-        field: 'totalTraces',
-        name: i18n.translate('agentTraces.sessions.column.totalTraces', {
+        key: 'totalTraces',
+        label: i18n.translate('agentTraces.sessions.column.totalTraces', {
           defaultMessage: 'Total Traces',
         }),
         sortable: true,
-        width: '105px',
-        render: (n: number) => <EuiText size="s">{n.toLocaleString()}</EuiText>,
       },
       {
-        field: 'totalTokens',
-        name: i18n.translate('agentTraces.sessions.column.totalTokens', {
+        key: 'totalTokens',
+        label: i18n.translate('agentTraces.sessions.column.totalTokens', {
           defaultMessage: 'Total Tokens',
         }),
         sortable: true,
-        width: '120px',
-        render: (tokens: number | null) => <TokensBadge tokens={tokens} />,
-      },
-    ],
-    [formatTs, wrapCellText, onSessionClick, hasUserIds]
-  );
+      }
+    );
+    return cols;
+  }, [hasUserIds]);
+
+  const sortedSessions = useMemo(() => {
+    const [field, direction] = (sortOrder[0] ?? DEFAULT_SORT[0]) as [SessionColumnKey, string];
+    const sign = direction === 'asc' ? 1 : -1;
+    return [...sessions].sort((a, b) => sign * compareSessions(a, b, field));
+  }, [sessions, sortOrder]);
+
+  // Infinite-scroll lazy loading, mirroring the Traces/Spans DataTable.
+  const [renderedCount, setRenderedCount] = useState(LAZY_LOAD_BATCH_SIZE);
+  useEffect(() => setRenderedCount(LAZY_LOAD_BATCH_SIZE), [sessions, sortOrder]);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (node && typeof IntersectionObserver !== 'undefined') {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) setRenderedCount((c) => c + LAZY_LOAD_BATCH_SIZE);
+        },
+        { threshold: 0.1 }
+      );
+      observerRef.current.observe(node);
+    }
+  }, []);
+  useEffect(() => () => observerRef.current?.disconnect(), []);
+
+  const visible = sortedSessions.slice(0, renderedCount);
+
+  const renderCell = (session: SessionRow, column: SessionColumn) => {
+    switch (column.key) {
+      case 'startTime':
+        return (
+          <EuiLink
+            color="primary"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onSessionClick(session);
+            }}
+            data-test-subj="agentTracesSessionTimeLink"
+          >
+            {formatTs(session.startTime)}
+          </EuiLink>
+        );
+      case 'durationMs':
+        return formatSessionDuration(session.durationMs);
+      case 'totalTraces':
+        return session.totalTraces.toLocaleString();
+      case 'totalTokens':
+        return <TokensBadge tokens={session.totalTokens} />;
+      default: {
+        const text = (session[column.key] as string | null) ?? '';
+        return text ? (
+          <span onMouseEnter={wrapCellText ? undefined : setTitleIfTruncated(text)}>{text}</span>
+        ) : (
+          '—'
+        );
+      }
+    }
+  };
 
   return (
-    <EuiInMemoryTable<SessionRow>
-      items={sessions}
-      itemId="sessionId"
-      columns={columns}
-      sorting={{ sort: { field: 'startTime', direction: 'desc' } }}
-      pagination={{ initialPageSize: 25, pageSizeOptions: [25, 50, 100] }}
-      rowProps={(session: SessionRow) => ({
-        className: 'agtSessionsTable__row',
-        onClick: () => onSessionClick(session),
-        'data-test-subj': `agentTracesSessionRow-${session.sessionId}`,
-      })}
-      tableLayout="fixed"
-      className="agtSessionsTable"
-      data-test-subj="agentTracesSessionsTable"
-    />
+    <div className="agentTraces-table-container">
+      <table
+        data-test-subj="agentTracesSessionsTable"
+        className={`agentTraces-table table${wrapCellText ? ' agentTraces-table--wrap' : ''}`}
+      >
+        <thead>
+          <tr className="agentTracesDocTableHeader">
+            {columns.map((column) => (
+              <TableHeaderColumn
+                key={column.key}
+                name={column.key}
+                displayName={column.label}
+                isRemoveable={false}
+                isSortable={column.sortable}
+                sortOrder={sortOrder}
+                onChangeSortOrder={(next) => setSortOrder(next.length ? next : DEFAULT_SORT)}
+              />
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {visible.map((session) => (
+            <tr
+              key={session.sessionId}
+              className={`agtSessionsTable__row${
+                session.sessionId === selectedSessionId
+                  ? ' agentTracesDocTable__row--highlight'
+                  : ''
+              }`}
+              onClick={() => onSessionClick(session)}
+              data-test-subj={`agentTracesSessionRow-${session.sessionId}`}
+            >
+              {columns.map((column) => (
+                <td
+                  key={column.key}
+                  className={`agentTracesDocTableCell${
+                    column.wideText ? ' agentTracesDocTableCell--wideText' : ' eui-textNoWrap'
+                  }`}
+                >
+                  <div className="agentTracesDocTableCell__content">
+                    <span className="agentTracesDocTableCell__dataField">
+                      {renderCell(session, column)}
+                    </span>
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {renderedCount < sortedSessions.length && (
+        <div ref={sentinelRef}>
+          <EuiProgress size="xs" color="accent" data-test-subj="agentTracesSessionsMoreRows" />
+        </div>
+      )}
+    </div>
   );
 };

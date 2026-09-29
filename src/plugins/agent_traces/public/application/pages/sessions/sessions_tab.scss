@@ -1,14 +1,5 @@
-.agentTraces-sessions-tab {
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-}
-
-// Tab containers are column-flex; keep the info bar and table at their natural height.
-.agtSessionsTab__infoBar {
-  flex-grow: 0;
-  padding: $euiSizeS $euiSizeS 0;
-}
+// Flyout header height plus body padding; the overview fills the rest of the viewport.
+$agtSessionFlyoutChrome: 150px;
 
 // Match the Traces/Spans DataTable typography (data_table.scss): code font at XS size.
 .agtSessionsTable {
@@ -71,16 +62,37 @@
     gap: $euiSizeXS;
   }
 
+  // Overview fills the flyout body; the trace list stays put and only the
+  // conversation scrolls. Offset = flyout header + body padding.
+  &__overview {
+    height: calc(100vh - #{$agtSessionFlyoutChrome});
+  }
+
   &__traceList {
-    position: sticky;
-    top: 0;
+    height: 100%;
+    overflow-y: auto;
     border-right: $euiBorderThin;
     padding-right: $euiSizeM;
+  }
+
+  &__conversation {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: $euiSizeS;
   }
 
   // Flex items are column-flex; stop the panel headers from growing and centering.
   &__panelHeader {
     flex-grow: 0;
+  }
+
+  // Keep the "Session Conversation" title and its prev/next arrows visible while scrolling.
+  &__conversation > &__panelHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-bottom: $euiSizeS;
+    background: $euiColorEmptyShade;
   }
 
   &__traceItem {
@@ -104,8 +116,21 @@
     }
   }
 
+  &__traceItemLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
   &__turn {
-    scroll-margin-top: $euiSizeS;
+    scroll-margin-top: $euiSizeXXL; // clear the sticky conversation header
+    padding-left: $euiSizeS;
+    border-left: $euiBorderWidthThick solid transparent;
+    transition: border-color $euiAnimSpeedFast;
+
+    &--focused {
+      border-left-color: $euiColorPrimary;
+    }
   }
 
   &__stats {

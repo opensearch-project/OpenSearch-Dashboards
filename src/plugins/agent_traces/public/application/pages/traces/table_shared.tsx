@@ -297,7 +297,7 @@ interface DataTableInfoBarProps {
   hitsCount: number;
   totalCount: number;
   elapsedMs: number | undefined;
-  entityName: 'span' | 'trace';
+  entityName: 'span' | 'trace' | 'session';
   wrapCellText: boolean;
   onWrapCellTextChange: (v: boolean) => void;
 }
@@ -365,6 +365,17 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
     />
   );
 
+const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, elapsedMs }) => (
+  <FormattedMessage
+    id="agentTraces.sessionsDataTable.showingCount"
+    defaultMessage="{count} {count, plural, one {session} other {sessions}} in {elapsed} ms"
+    values={{
+      count: <strong>{hitsCount.toLocaleString()}</strong>,
+      elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+    }}
+  />
+);
+
 export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
   hasHead,
   hitsCount,
@@ -374,7 +385,12 @@ export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
   wrapCellText,
   onWrapCellTextChange,
 }) => {
-  const CountMessage = entityName === 'span' ? SpanCountMessage : TraceCountMessage;
+  const CountMessage =
+    entityName === 'span'
+      ? SpanCountMessage
+      : entityName === 'session'
+        ? SessionCountMessage
+        : TraceCountMessage;
 
   return (
     <EuiFlexGroup

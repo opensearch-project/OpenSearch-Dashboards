@@ -7,18 +7,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../types';
 import { formatTimestamp } from '../traces/hooks/tree_utils';
-import { TableLoadingState } from '../traces/table_shared';
+import { DataTableInfoBar, TableLoadingState } from '../traces/table_shared';
+import '../traces/traces_table.scss';
 import { useSessions } from './hooks/use_sessions';
 import { SessionsTable } from './sessions_table';
 import { SessionDetailsFlyout } from './session_details_flyout';
@@ -89,48 +83,32 @@ export const SessionsTab = () => {
     );
   } else {
     body = (
-      <SessionsTable
-        sessions={sessions}
-        formatTs={formatTs}
-        wrapCellText={wrapCellText}
-        onSessionClick={setSelected}
-      />
+      <div className="agentTracesTable__scrollContainer eui-xScrollWithShadows">
+        <SessionsTable
+          sessions={sessions}
+          formatTs={formatTs}
+          wrapCellText={wrapCellText}
+          onSessionClick={setSelected}
+          selectedSessionId={selected?.sessionId}
+        />
+      </div>
     );
   }
 
   return (
     <div className="agentTraces-sessions-tab tab-container" data-test-subj="agentTracesSessionsTab">
-      <EuiFlexGroup
-        className="agtSessionsTab__infoBar"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="m"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="agentTraces.sessions.count"
-              defaultMessage="{count} {count, plural, one {Session} other {Sessions}}{elapsed}"
-              values={{
-                count: sessions.length,
-                elapsed: elapsedMs != null ? ` in ${elapsedMs.toLocaleString()} ms` : '',
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('agentTraces.sessions.wrapCellText', {
-              defaultMessage: 'Wrap cell text',
-            })}
-            checked={wrapCellText}
-            onChange={(e) => setWrapCellText(e.target.checked)}
-            compressed
-            data-test-subj="agentTracesSessionsWrapSwitch"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {body}
+      <div className="agentTracesTable__container">
+        <DataTableInfoBar
+          hasHead={false}
+          hitsCount={sessions.length}
+          totalCount={sessions.length}
+          elapsedMs={elapsedMs ?? undefined}
+          entityName="session"
+          wrapCellText={wrapCellText}
+          onWrapCellTextChange={setWrapCellText}
+        />
+        {body}
+      </div>
       {selected && (
         <SessionDetailsFlyout
           session={selected}

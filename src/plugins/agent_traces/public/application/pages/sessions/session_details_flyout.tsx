@@ -7,7 +7,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
@@ -17,9 +16,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHealth,
   EuiIcon,
-  EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -28,13 +25,12 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { TraceRow } from '../traces/hooks/tree_utils';
 import { useTraceFlyout } from '../traces/flyout/trace_flyout_context';
-import { getCategoryMeta, getSpanCategory } from '../../../services/span_categorization';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SessionTrace, useSessionDetail } from './hooks/use_session_detail';
+import { SessionSpansTable } from './session_spans_table';
 import { previewInputMessages, previewOutputMessages } from '../traces/hooks/genai_message_preview';
 import { SessionRow, formatSessionDuration, shortenId } from './session_utils';
 
@@ -75,28 +71,6 @@ const LatencyAndTokens: React.FC<{ row: TraceRow }> = ({ row }) => {
     </span>
   );
 };
-
-const KindBadge: React.FC<{ row: TraceRow }> = ({ row }) => {
-  const meta = getCategoryMeta(getSpanCategory(row));
-  return (
-    <EuiBadge
-      className="agentTraces__categoryBadge"
-      color={meta.bgColor}
-      style={{ color: meta.textColor }}
-    >
-      {meta.label}
-    </EuiBadge>
-  );
-};
-
-const TruncatedText: React.FC<{ text: string }> = ({ text }) =>
-  text ? (
-    <EuiToolTip content={text} anchorClassName="agtSessionsTable__tooltipAnchor">
-      <span className="agtSessionsTable__text">{text}</span>
-    </EuiToolTip>
-  ) : (
-    <>—</>
-  );
 
 /** Human/AI turns for one trace in the session conversation. */
 const ConversationTurn: React.FC<{
@@ -187,53 +161,6 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
       turnRefs.current[index]?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     },
     [traces.length]
-  );
-
-  const drillColumns: Array<EuiBasicTableColumn<TraceRow>> = useMemo(
-    () => [
-      {
-        field: 'status',
-        name: i18n.translate('agentTraces.sessions.drill.status', { defaultMessage: 'Status' }),
-        width: '70px',
-        render: (status: string) => (
-          <EuiHealth color={status === 'success' ? 'success' : 'danger'} textSize="xs" />
-        ),
-      },
-      {
-        field: 'kind',
-        name: i18n.translate('agentTraces.sessions.drill.kind', { defaultMessage: 'Kind' }),
-        width: '110px',
-        render: (_: string, row: TraceRow) => <KindBadge row={row} />,
-      },
-      {
-        field: 'name',
-        name: i18n.translate('agentTraces.sessions.drill.name', { defaultMessage: 'Name' }),
-        width: '20%',
-        render: (name: string) => <TruncatedText text={name} />,
-      },
-      {
-        field: 'input',
-        name: i18n.translate('agentTraces.sessions.drill.input', { defaultMessage: 'Input' }),
-        render: (_: string, row: TraceRow) => <TruncatedText text={previewSpanInput(row)} />,
-      },
-      {
-        field: 'output',
-        name: i18n.translate('agentTraces.sessions.drill.output', { defaultMessage: 'Output' }),
-        render: (_: string, row: TraceRow) => <TruncatedText text={previewSpanOutput(row)} />,
-      },
-      {
-        field: 'latency',
-        name: i18n.translate('agentTraces.sessions.drill.latency', { defaultMessage: 'Latency' }),
-        width: '100px',
-        render: (latency: string) => (
-          <span className="agtSessionFlyout__stat">
-            <EuiIcon type="clock" size="s" color="danger" />
-            {latency}
-          </span>
-        ),
-      },
-    ],
-    []
   );
 
   const drillItems = useMemo(
@@ -363,18 +290,38 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
               </EuiFlexGroup>
               <EuiSpacer size="s" />
               {traces.map((trace, i) => (
-                <button
-                  type="button"
+                <div
+                  role="button"
+                  tabIndex={0}
                   key={trace.traceId}
                   className={`agtSessionFlyout__traceItem${
                     i === focusedIndex ? ' agtSessionFlyout__traceItem--focused' : ''
                   }`}
                   aria-current={i === focusedIndex}
                   onClick={() => focusTrace(i)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      focusTrace(i);
+                    }
+                  }}
                   data-test-subj={`agentTracesSessionTraceItem-${i + 1}`}
                 >
-                  <span>
-                    <EuiIcon type="arrowRight" size="s" />{' '}
+                  <span className="agtSessionFlyout__traceItemLabel">
+                    <EuiButtonIcon
+                      size="xs"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        openTrace(trace.root);
+                      }}
+                      aria-label={i18n.translate('agentTraces.sessions.flyout.openTrace', {
+                        defaultMessage: 'Open trace {index}',
+                        values: { index: i + 1 },
+                      })}
+                      data-test-subj={`agentTracesSessionOpenTrace-${i + 1}`}
+                    />
                     <strong>
                       {i18n.translate('agentTraces.sessions.flyout.traceLink', {
                         defaultMessage: 'Trace #{index}',
@@ -383,7 +330,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                     </strong>
                   </span>
                   <LatencyAndTokens row={trace.root} />
-                </button>
+                </div>
               ))}
             </EuiFlexItem>
 
@@ -492,19 +439,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
               </EuiTab>
             </EuiTabs>
             <EuiSpacer size="s" />
-            <EuiInMemoryTable<TraceRow>
-              key={drillTab}
-              items={drillItems}
-              columns={drillColumns}
-              pagination={{ initialPageSize: 25, pageSizeOptions: [25, 50, 100] }}
-              tableLayout="fixed"
-              className="agtSessionsTable"
-              rowProps={(row: TraceRow) => ({
-                className: 'agtSessionsTable__row',
-                onClick: () => openTrace(row),
-              })}
-              data-test-subj="agentTracesSessionDrillTable"
-            />
+            <SessionSpansTable key={drillTab} rows={drillItems} onRowClick={openTrace} />
           </>
         )}
       </EuiFlyoutBody>
