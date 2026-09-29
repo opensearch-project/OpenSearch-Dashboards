@@ -25,6 +25,13 @@ describe('isImeComposing', () => {
     expect(isImeComposing(keyDown({ key: 'Enter', keyCode: 229 }))).toBe(false);
   });
 
+  it('reads a native keydown passed directly', () => {
+    expect(
+      isImeComposing(new window.KeyboardEvent('keydown', { key: 'Escape', isComposing: true }))
+    ).toBe(true);
+    expect(isImeComposing(new window.KeyboardEvent('keydown', { key: 'Escape' }))).toBe(false);
+  });
+
   it('is false when the event has no native event', () => {
     expect(isImeComposing({} as unknown as KeyboardEvent)).toBe(false);
   });

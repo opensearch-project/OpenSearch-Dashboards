@@ -33,6 +33,7 @@ import { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Logos } from 'opensearch-dashboards/public';
+import { isImeComposing } from '../../../../core/public/utils';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
@@ -43,7 +44,7 @@ import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === keys.ESCAPE) {
+    if (e.key === keys.ESCAPE && !isImeComposing(e)) {
       this.props.onExitFullScreenMode();
     }
   };
