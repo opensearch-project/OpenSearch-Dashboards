@@ -31,6 +31,14 @@ import { useTraceFlyout } from '../traces/flyout/trace_flyout_context';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SessionTrace, useSessionDetail } from './hooks/use_session_detail';
 import { SessionSpansTable } from './session_spans_table';
+import {
+  CopyContentButton,
+  MessageContent,
+  MessageViewMode,
+  MessageViewModeToggle,
+  copyTextFor,
+} from '../traces/flyout/message_content_view';
+import '../traces/flyout/message_content_view.scss';
 import { previewInputMessages, previewOutputMessages } from '../traces/hooks/genai_message_preview';
 import { SessionRow, formatSessionDuration, shortenId } from './session_utils';
 
@@ -73,56 +81,80 @@ const LatencyAndTokens: React.FC<{ row: TraceRow }> = ({ row }) => {
 };
 
 /** Human/AI turns for one trace in the session conversation. */
+const MessagePanel: React.FC<{
+  kind: 'human' | 'ai';
+  value: unknown;
+  text: string;
+  mode: MessageViewMode;
+}> = ({ kind, value, text, mode }) => {
+  const label =
+    kind === 'human'
+      ? i18n.translate('agentTraces.sessions.flyout.human', { defaultMessage: 'Human' })
+      : i18n.translate('agentTraces.sessions.flyout.ai', { defaultMessage: 'AI' });
+  return (
+    <EuiPanel
+      paddingSize="none"
+      hasBorder
+      className={`agtSessionFlyout__message${kind === 'ai' ? ' agtSessionFlyout__message--ai' : ''}`}
+    >
+      <div className="agtSessionFlyout__messageHeader">
+        <EuiIcon type={kind === 'human' ? 'user' : 'compute'} size="s" />
+        <strong>{label}</strong>
+        <span className="agtSessionFlyout__messageActions">
+          <CopyContentButton
+            text={copyTextFor(value, mode, text)}
+            label={i18n.translate('agentTraces.sessions.flyout.copyMessage', {
+              defaultMessage: 'Copy {label} message',
+              values: { label },
+            })}
+          />
+        </span>
+      </div>
+      <div className="agtSessionFlyout__messageBody">
+        <MessageContent value={value} mode={mode} formattedText={text} emptyText="—" />
+      </div>
+    </EuiPanel>
+  );
+};
+
+/** Human/AI turns for one trace in the session conversation. */
 const ConversationTurn: React.FC<{
   index: number;
   trace: SessionTrace;
   focused: boolean;
+  mode: MessageViewMode;
   turnRef: (el: HTMLDivElement | null) => void;
   onOpenTrace: () => void;
-}> = ({ index, trace, focused, turnRef, onOpenTrace }) => {
-  const userText = previewInputMessages(trace.root.input);
-  const aiText = previewOutputMessages(trace.root.output);
-  return (
-    <div
-      ref={turnRef}
-      className={`agtSessionFlyout__turn${focused ? ' agtSessionFlyout__turn--focused' : ''}`}
-      data-test-subj={`agentTracesSessionTurn-${index}`}
-    >
-      <EuiLink onClick={onOpenTrace} data-test-subj={`agentTracesSessionTurnLink-${index}`}>
-        {i18n.translate('agentTraces.sessions.flyout.traceLink', {
-          defaultMessage: 'Trace #{index}',
-          values: { index },
-        })}{' '}
-        <EuiIcon type="arrowRight" size="s" />
-      </EuiLink>
-      <EuiSpacer size="xs" />
-      <EuiPanel paddingSize="none" hasBorder className="agtSessionFlyout__message">
-        <div className="agtSessionFlyout__messageHeader">
-          <EuiIcon type="user" size="s" />
-          <strong>
-            {i18n.translate('agentTraces.sessions.flyout.human', { defaultMessage: 'Human' })}
-          </strong>
-        </div>
-        <div className="agtSessionFlyout__messageBody">{userText || '—'}</div>
-      </EuiPanel>
-      <EuiSpacer size="s" />
-      <EuiPanel
-        paddingSize="none"
-        hasBorder
-        className="agtSessionFlyout__message agtSessionFlyout__message--ai"
-      >
-        <div className="agtSessionFlyout__messageHeader">
-          <EuiIcon type="compute" size="s" />
-          <strong>
-            {i18n.translate('agentTraces.sessions.flyout.ai', { defaultMessage: 'AI' })}
-          </strong>
-        </div>
-        <div className="agtSessionFlyout__messageBody">{aiText || '—'}</div>
-      </EuiPanel>
-      <EuiSpacer size="m" />
-    </div>
-  );
-};
+}> = ({ index, trace, focused, mode, turnRef, onOpenTrace }) => (
+  <div
+    ref={turnRef}
+    className={`agtSessionFlyout__turn${focused ? ' agtSessionFlyout__turn--focused' : ''}`}
+    data-test-subj={`agentTracesSessionTurn-${index}`}
+  >
+    <EuiLink onClick={onOpenTrace} data-test-subj={`agentTracesSessionTurnLink-${index}`}>
+      {i18n.translate('agentTraces.sessions.flyout.traceLink', {
+        defaultMessage: 'Trace #{index}',
+        values: { index },
+      })}{' '}
+      <EuiIcon type="arrowRight" size="s" />
+    </EuiLink>
+    <EuiSpacer size="xs" />
+    <MessagePanel
+      kind="human"
+      value={trace.root.input}
+      text={previewInputMessages(trace.root.input)}
+      mode={mode}
+    />
+    <EuiSpacer size="s" />
+    <MessagePanel
+      kind="ai"
+      value={trace.root.output}
+      text={previewOutputMessages(trace.root.output)}
+      mode={mode}
+    />
+    <EuiSpacer size="m" />
+  </div>
+);
 
 export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   session,
@@ -136,6 +168,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   const [drillTab, setDrillTab] = useState<DrillTab>('traces');
   /** Index of the trace in focus; the conversation arrows step through traces. */
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [messageMode, setMessageMode] = useState<MessageViewMode>('formatted');
   const turnRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const totalTokens = useMemo(() => {
@@ -351,7 +384,14 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" responsive={false}>
+                  <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <MessageViewModeToggle
+                        mode={messageMode}
+                        onChange={setMessageMode}
+                        idPrefix="agentTracesSessionMessages"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
                         iconType="arrowDown"
@@ -386,6 +426,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                   index={i + 1}
                   trace={trace}
                   focused={i === focusedIndex}
+                  mode={messageMode}
                   turnRef={(el) => {
                     turnRefs.current[i] = el;
                   }}
