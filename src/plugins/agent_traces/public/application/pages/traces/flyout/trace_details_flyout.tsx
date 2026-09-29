@@ -32,6 +32,7 @@ import {
   countSpans,
   flattenVisibleNodes,
   calculateTimelineRange,
+  collectExpandableIds,
 } from './tree_helpers';
 import { TraceTreeView } from './trace_tree_view';
 import { TimelineGantt } from './timeline_gantt';
@@ -102,19 +103,15 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
+  const expandAll = useCallback(
+    () => setExpandedNodes(collectExpandableIds(traceTreeData)),
+    [traceTreeData]
+  );
+  const collapseAll = useCallback(() => setExpandedNodes(new Set()), []);
+
   useEffect(() => {
-    const allExpandable = new Set<string>();
-    const collectExpandable = (nodes: TreeNode[]) => {
-      nodes.forEach((node) => {
-        if (node.children && node.children.length > 0) {
-          allExpandable.add(node.id);
-          collectExpandable(node.children);
-        }
-      });
-    };
-    collectExpandable(traceTreeData);
-    setExpandedNodes(allExpandable);
-  }, [traceTreeData]);
+    expandAll();
+  }, [expandAll]);
 
   const timelineVisibleSpans = useMemo(
     () => flattenVisibleNodes(traceTreeData, expandedNodes),
@@ -314,6 +311,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                           fullTreeError={fullTreeError}
                           onSelectNode={selectNode}
                           onToggleExpanded={toggleExpanded}
+                          onExpandAll={expandAll}
+                          onCollapseAll={collapseAll}
                         />
                       ),
                     },
