@@ -1,0 +1,2 @@
+fix:
+- Ignore Enter keydowns that belong to an IME composition in chat and other text inputs ([#12826](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12826))
