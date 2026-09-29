@@ -4,6 +4,7 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { getDataSourceEngineCapabilities } from '../../../../../data/common';
 import { Capabilities } from '../../../../../../core/types';
 import { STREAMING_RESULTS_SETTING } from '../../../../common';
 
@@ -12,10 +13,17 @@ interface StreamingEligibilityDeps {
   capabilities: Capabilities;
 }
 
+/** What is known about the query at the point the streaming decision is made. */
+export interface StreamingQueryDescriptor {
+  language?: string;
+  /** `dataset.dataSource.engineType ?? dataset.dataSource.type`. */
+  engineType?: string;
+}
+
 /**
  * Whether a query should run on the streaming path.
  *
- * Three conditions, all required:
+ * Four conditions, all required:
  *
  * - Only PPL is supported: the asynchronous partial-results API is a PPL endpoint, and its
  *   restrictions (Calcite execution, JDBC response format) do not apply to the other languages.
@@ -23,6 +31,9 @@ interface StreamingEligibilityDeps {
  *   runtime through DynamicConfig. It decides whether streaming is available at all, and the stream
  *   routes enforce it again per request, so a runtime change also stops jobs already in flight.
  * - `explore:enableStreamingResults` is the per-user opt-in beneath that flag.
+ * - The engine must serve the async PPL API. Open Distro and legacy Elasticsearch do not, and
+ *   unknown engines are assumed to (matching the rest of the engine capability table); a wrong
+ *   assumption costs one failed submit, which falls back to the non-streaming path.
  *
  * Note this cannot predict whether a query will actually produce partial results — that depends on
  * the plan, which only the engine knows. A query that turns out to sort or aggregate still runs
@@ -30,10 +41,11 @@ interface StreamingEligibilityDeps {
  */
 export const isStreamingEligible = (
   { uiSettings, capabilities }: StreamingEligibilityDeps,
-  language?: string
+  { language, engineType }: StreamingQueryDescriptor
 ): boolean =>
   language === 'PPL' &&
   capabilities.queryEnhancements?.pplStreaming === true &&
+  getDataSourceEngineCapabilities(engineType).supportsAsyncPplStreaming &&
   Boolean(uiSettings.get(STREAMING_RESULTS_SETTING, false));
 
 /**

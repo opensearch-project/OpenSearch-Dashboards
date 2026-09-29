@@ -13,7 +13,11 @@ import {
   isTerminalPPLStreamStatus,
   PPL_STREAM_UNKNOWN,
 } from '../../streaming/ppl_stream_constants';
-import { PPLStreamJobNotFoundError } from '../../streaming/ppl_stream_errors';
+import {
+  PPL_STREAM_UNAVAILABLE_ERROR_NAME,
+  PPLStreamJobNotFoundError,
+  PPLStreamUnavailableError,
+} from '../../streaming/ppl_stream_errors';
 import { PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
 import { QueryExecutionStatus, StreamingQueryStatus } from '../types';
@@ -324,8 +328,26 @@ export const executeStreamingQuery = createAsyncThunk<
         finalise();
         return;
       }
+      // Nothing reached the screen, so there is nothing to lose by starting over: report it as
+      // unavailable and let the caller re-run on the non-streaming path. Reporting an error here
+      // instead would leave the user with a failed query the standard path would have answered.
+      // `lastStreaming` is only set by `publish`, so it doubles as "something was rendered".
+      if (!lastStreaming && (!isCurrent || isCurrent())) {
+        throw new PPLStreamUnavailableError(error);
+      }
       failWith(error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
 );
+
+/**
+ * Whether a dispatched `executeStreamingQuery` ended without rendering anything, so the caller
+ * should re-run the query on the non-streaming path.
+ *
+ * `createAsyncThunk` resolves rather than rejects, serialising the thrown error onto the rejected
+ * action, so the outcome is read from `action.error.name`.
+ */
+export const isStreamUnavailable = (action: unknown): boolean =>
+  (action as { error?: { name?: string } } | undefined)?.error?.name ===
+  PPL_STREAM_UNAVAILABLE_ERROR_NAME;

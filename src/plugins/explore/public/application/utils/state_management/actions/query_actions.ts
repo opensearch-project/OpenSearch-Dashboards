@@ -34,7 +34,7 @@ import {
   Dimensions,
 } from '../../../../components/chart/utils';
 import { SAMPLE_SIZE_SETTING, ASYNC_QUERY_POLL_INTERVAL_SETTING } from '../../../../../common';
-import { executeStreamingQuery } from './streaming_query_actions';
+import { executeStreamingQuery, isStreamUnavailable } from './streaming_query_actions';
 import {
   isCurrentStreamingRun,
   registerStreamingAbort,
@@ -311,12 +311,12 @@ const getStreamingConfig = async (
 > => {
   try {
     const query = state.query;
-    if (!isStreamingEligible(services, query.language)) {
+    const engineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
+    if (!isStreamingEligible(services, { language: query.language, engineType })) {
       return undefined;
     }
 
     const timeFieldName = query.dataset?.timeFieldName;
-    const engineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
     const timeRange = services.data.query.timefilter.timefilter.getTime();
     const baseQuery = defaultPrepareQueryString(query);
 
@@ -441,7 +441,22 @@ export const executeQueries = createAsyncThunk<
       );
       registerStreamingAbort(dataTableCacheKey, () => run.abort(), tableToken);
       run.finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken));
-      promises.push(run);
+      // An engine that does not serve the async PPL API only reveals itself when the submit fails.
+      // Nothing was rendered in that case, so the query is simply re-run on the standard path.
+      promises.push(
+        run.then((outcome) =>
+          isStreamUnavailable(outcome)
+            ? dispatch(
+                executeDataTableQuery({
+                  services,
+                  disablePartialResults,
+                  cacheKey: dataTableCacheKey,
+                  queryString,
+                })
+              )
+            : outcome
+        )
+      );
 
       // Stream the histogram as its own job. On the progressive backend a composite aggregation
       // publishes REPLACE snapshots as pages complete, so the chart shows authoritative counts that
@@ -462,6 +477,21 @@ export const executeQueries = createAsyncThunk<
         );
         registerStreamingAbort(histogramKey, () => histogramRun.abort(), histogramToken);
         histogramRun.finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
+        // If its submit fails the chart has nothing, so let the standard histogram query run
+        // instead of leaving it blank.
+        histogramRun.then((outcome) => {
+          if (isStreamUnavailable(outcome)) {
+            dispatch(
+              executeHistogramQuery({
+                services,
+                disablePartialResults,
+                cacheKey: histogramCacheKey,
+                queryString,
+                interval: state.legacy?.interval,
+              })
+            );
+          }
+        });
         streamedHistogram = true;
       }
     } else {

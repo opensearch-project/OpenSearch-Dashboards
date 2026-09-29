@@ -6,7 +6,11 @@
 import { PPLStreamJobNotFoundError } from '../../streaming/ppl_stream_errors';
 import { setResults } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
-import { executeStreamingQuery, STREAMING_POLL_INTERVAL_MS } from './streaming_query_actions';
+import {
+  executeStreamingQuery,
+  isStreamUnavailable,
+  STREAMING_POLL_INTERVAL_MS,
+} from './streaming_query_actions';
 
 const mockSubmit = jest.fn();
 const mockPoll = jest.fn();
@@ -59,13 +63,15 @@ const run = async (args: Record<string, unknown> = {}) => {
     jest.advanceTimersByTime(STREAMING_POLL_INTERVAL_MS);
     await Promise.resolve();
   }
-  await promise;
+  // createAsyncThunk resolves with the fulfilled or rejected action rather than rejecting, so the
+  // action is what callers inspect.
+  const action = await promise;
 
   const results = dispatched.filter((a) => a?.type === setResults.type).map((a) => a.payload);
   const statuses = dispatched
     .filter((a) => a?.type === setIndividualQueryStatus.type)
     .map((a) => a.payload);
-  return { results, statuses };
+  return { action, results, statuses };
 };
 
 describe('executeStreamingQuery', () => {
@@ -455,6 +461,50 @@ describe('executeStreamingQuery', () => {
     expect(final?.status).toBe('error');
     expect(final?.streaming?.isPolling).toBe(false);
     expect(final?.error?.originalErrorMessage).toBe('network exploded');
+  });
+
+  describe('when nothing was ever rendered', () => {
+    // An engine without the async PPL API only reveals itself when the submit fails. Nothing is on
+    // screen at that point, so the caller re-runs on the non-streaming path instead of showing an
+    // error, and this run must not report one.
+    it('reports the run as unavailable when the submit fails', async () => {
+      mockSubmit.mockRejectedValue(new Error('no handler found for uri [/_plugins/_ppl]'));
+
+      const { action } = await run();
+
+      expect(isStreamUnavailable(action)).toBe(true);
+      expect((action as { error: { message: string } }).error.message).toBe(
+        'no handler found for uri [/_plugins/_ppl]'
+      );
+    });
+
+    it('does not report an error status, which the fallback would have to clear', async () => {
+      mockSubmit.mockRejectedValue(new Error('no handler'));
+
+      const { statuses } = await run();
+
+      expect(statuses.some((s: any) => s.status?.status === 'error')).toBe(false);
+    });
+
+    // A superseded run must stay silent: its successor owns the cache key.
+    it('does not claim unavailability when the run is no longer current', async () => {
+      mockSubmit.mockRejectedValue(new Error('no handler'));
+
+      const { action } = await run({ isCurrent: () => false });
+
+      expect(isStreamUnavailable(action)).toBe(false);
+    });
+  });
+
+  // Once rows are on screen, re-running would replace them, so the failure is surfaced instead.
+  it('reports an error rather than unavailability when a poll fails after rows arrived', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', total: 2 }));
+    mockPoll.mockRejectedValue(new Error('network exploded'));
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1]?.status;
+
+    expect(final?.status).toBe('error');
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {
