@@ -312,7 +312,13 @@ const getStreamingConfig = async (
   try {
     const query = state.query;
     const engineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
-    if (!isStreamingEligible(services, { language: query.language, engineType })) {
+    if (
+      !isStreamingEligible(services, {
+        language: query.language,
+        engineType,
+        datasetType: query.dataset?.type,
+      })
+    ) {
       return undefined;
     }
 

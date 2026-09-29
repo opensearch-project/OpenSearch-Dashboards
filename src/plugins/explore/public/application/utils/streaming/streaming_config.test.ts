@@ -29,7 +29,7 @@ const deps = (pplStreaming: unknown, settingEnabled: unknown = true) => ({
   capabilities: capabilitiesWith(pplStreaming),
 });
 
-const pplOn = { language: 'PPL', engineType: OPENSEARCH };
+const pplOn = { language: 'PPL', engineType: OPENSEARCH, datasetType: 'INDEX_PATTERN' };
 
 describe('isStreamingEligible', () => {
   it('streams a PPL query on OpenSearch when the flag and the user setting are both on', () => {
@@ -47,7 +47,7 @@ describe('isStreamingEligible', () => {
   it.each(['SQL', 'PROMQL', 'kuery', 'lucene', undefined])(
     'does not stream %p, since the async API is a PPL endpoint',
     (language) => {
-      expect(isStreamingEligible(deps(true), { language, engineType: OPENSEARCH })).toBe(false);
+      expect(isStreamingEligible(deps(true), { ...pplOn, language })).toBe(false);
     }
   );
 
@@ -55,9 +55,7 @@ describe('isStreamingEligible', () => {
     // Legacy Elasticsearch serves SQL/PPL from the Open Distro endpoints, which have no async
     // equivalent, so there is nothing to stream from.
     it('does not stream on legacy Elasticsearch', () => {
-      expect(isStreamingEligible(deps(true), { language: 'PPL', engineType: ELASTICSEARCH })).toBe(
-        false
-      );
+      expect(isStreamingEligible(deps(true), { ...pplOn, engineType: ELASTICSEARCH })).toBe(false);
     });
 
     // Matching the rest of the engine capability table, which fails open. A wrong guess costs one
@@ -65,9 +63,48 @@ describe('isStreamingEligible', () => {
     it.each([[undefined], ['Serverless'], ['AnalyticEngine'], ['something-new']])(
       'assumes the unmapped engine %p supports streaming',
       (engineType) => {
-        expect(isStreamingEligible(deps(true), { language: 'PPL', engineType })).toBe(true);
+        expect(isStreamingEligible(deps(true), { ...pplOn, engineType })).toBe(true);
       }
     );
+  });
+
+  describe('dataset type', () => {
+    it.each(['INDEX_PATTERN', 'INDEXES'])(
+      'streams the index-backed dataset type %s',
+      (datasetType) => {
+        expect(isStreamingEligible(deps(true), { ...pplOn, datasetType })).toBe(true);
+      }
+    );
+
+    // An S3 dataset routes to the pplasync strategy and its own job API, so streaming it through
+    // /_plugins/_ppl would send the query somewhere else entirely.
+    it('does not stream an S3 dataset, which has its own async path', () => {
+      expect(isStreamingEligible(deps(true), { ...pplOn, datasetType: 'S3' })).toBe(false);
+    });
+
+    it('does not stream a Prometheus dataset', () => {
+      expect(isStreamingEligible(deps(true), { ...pplOn, datasetType: 'PROMETHEUS' })).toBe(false);
+    });
+
+    // The allowlist is deliberate: an unrecognised type must not start streaming by default.
+    it.each([[undefined], [''], ['SOMETHING_NEW']])(
+      'does not stream the unrecognised dataset type %p',
+      (datasetType) => {
+        expect(isStreamingEligible(deps(true), { ...pplOn, datasetType })).toBe(false);
+      }
+    );
+  });
+
+  // Cross-cluster datasets are index-backed with an unmapped engine type, so they stream. Whether
+  // the engine's async PPL API actually spans remote clusters is unverified; if it does not, the
+  // submit fails and the query falls back to the non-streaming path.
+  it('streams a cross-cluster dataset', () => {
+    expect(
+      isStreamingEligible(deps(true), {
+        ...pplOn,
+        engineType: 'OpenSearch(Cross-cluster search)',
+      })
+    ).toBe(true);
   });
 
   // Dynamic config writes are not schema-validated, so the capability can hold a non-boolean. The
