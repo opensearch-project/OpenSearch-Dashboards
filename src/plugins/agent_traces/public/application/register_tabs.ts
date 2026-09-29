@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import { TracesTab } from './pages/traces/traces_tab';
 import { SpansTab } from './pages/traces/spans_tab';
 import { VisTab } from './pages/traces/vis_tab';
+import { SessionsTab } from './pages/sessions/sessions_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { AgentTracesServices } from '../types';
 import {
@@ -15,6 +16,7 @@ import {
   AGENT_TRACES_TRACES_TAB_ID,
   AGENT_TRACES_SPANS_TAB_ID,
   AGENT_TRACES_VISUALIZATION_TAB_ID,
+  AGENT_TRACES_SESSIONS_TAB_ID,
 } from '../../common';
 import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
 import { buildPplSortClause, splitPplWhereAndTail } from './pages/traces/table_shared';
@@ -67,6 +69,20 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     component: SpansTab,
   };
   tabRegistry.registerTab(spansTabDefinition);
+
+  // Register Sessions Tab: traces grouped by gen_ai.conversation.id.
+  // No prepareQuery: the tab runs its own stats + root-span queries (see use_sessions.ts),
+  // since sessions are aggregates rather than span documents.
+  tabRegistry.registerTab({
+    id: AGENT_TRACES_SESSIONS_TAB_ID,
+    label: i18n.translate('agentTraces.sessionsTab.label', {
+      defaultMessage: 'Sessions',
+    }),
+    flavor: [AgentTracesFlavor.Traces],
+    order: 25,
+    supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
+    component: SessionsTab,
+  });
 
   // Register Visualization Tab
   tabRegistry.registerTab({

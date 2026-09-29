@@ -1,0 +1,147 @@
+.agentTraces-sessions-tab {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+// Tab containers are column-flex; keep the info bar and table at their natural height.
+.agtSessionsTab__infoBar {
+  flex-grow: 0;
+  padding: $euiSizeS $euiSizeS 0;
+}
+
+// Match the Traces/Spans DataTable typography (data_table.scss): code font at XS size.
+.agtSessionsTable {
+  @include ouiCodeFont;
+
+  font-size: $euiFontSizeXS;
+  line-height: 18px;
+}
+
+.agtSessionsTable__row {
+  cursor: pointer;
+}
+
+.agtSessionsTable__tooltipAnchor {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.agtSessionsTable__text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &--mono {
+    @include ouiCodeFont;
+
+    font-size: $euiFontSizeXS;
+  }
+}
+
+.agtSessionFlyout {
+  &__metaRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $euiSizeL;
+    margin-top: $euiSizeS;
+  }
+
+  &__metaItem {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__metaLabel {
+    font-weight: $euiFontWeightSemiBold;
+    color: $euiTextSubduedColor;
+  }
+
+  &__metaValue {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__traceList {
+    position: sticky;
+    top: 0;
+    border-right: $euiBorderThin;
+    padding-right: $euiSizeM;
+  }
+
+  // Flex items are column-flex; stop the panel headers from growing and centering.
+  &__panelHeader {
+    flex-grow: 0;
+  }
+
+  &__traceItem {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: $euiSizeS;
+    border-radius: $euiBorderRadius;
+    text-align: left;
+    border-left: $euiBorderWidthThick solid transparent;
+
+    &:hover,
+    &:focus {
+      background: $euiColorLightestShade;
+    }
+
+    &--focused {
+      background: $euiColorLightShade;
+      border-left-color: $euiColorPrimary;
+    }
+  }
+
+  &__turn {
+    scroll-margin-top: $euiSizeS;
+  }
+
+  &__stats {
+    display: inline-flex;
+    gap: $euiSizeM;
+    color: $euiTextSubduedColor;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__message {
+    overflow: hidden;
+  }
+
+  &__messageHeader {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeS;
+    padding: $euiSizeS $euiSizeM;
+    background: $euiColorLightestShade;
+    border-bottom: $euiBorderThin;
+  }
+
+  &__message--ai &__messageHeader {
+    background: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+
+  &__messageBody {
+    padding: $euiSizeM;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: $euiFontSizeS;
+  }
+}
