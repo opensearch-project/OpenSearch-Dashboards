@@ -77,22 +77,51 @@ $agtSessionFlyoutChrome: 150px;
 
   &__conversation {
     height: 100%;
+    min-width: 0;
+  }
+
+  &__conversationScroll {
+    height: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
     padding-right: $euiSizeS;
   }
 
-  // Flex items are column-flex; stop the panel headers from growing and centering.
+  // Both panel headers share one height so "Trace list" and "Session Conversation"
+  // sit on the same line.
   &__panelHeader {
+    display: flex;
     flex-grow: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: $euiSizeS;
+    min-height: $euiSizeXXL;
+    margin-bottom: $euiSizeS;
   }
 
-  // Keep the "Session Conversation" title and its prev/next arrows visible while scrolling.
-  &__conversation > &__panelHeader {
+  &__panelActions {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  // Keep the "Session Conversation" title and its controls visible while scrolling.
+  &__conversationScroll > &__panelHeader {
     position: sticky;
     top: 0;
     z-index: 1;
-    padding-bottom: $euiSizeS;
     background: $euiColorEmptyShade;
+  }
+
+  // Full session id; ellipsis only when the flyout is too narrow.
+  &__titleItem {
+    min-width: 0;
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__traceItem {
@@ -123,7 +152,6 @@ $agtSessionFlyoutChrome: 150px;
   }
 
   &__turn {
-    scroll-margin-top: $euiSizeXXL; // clear the sticky conversation header
     padding-left: $euiSizeS;
     border-left: $euiBorderWidthThick solid transparent;
     transition: border-color $euiAnimSpeedFast;
@@ -163,7 +191,7 @@ $agtSessionFlyoutChrome: 150px;
     margin-left: auto;
   }
 
-  &__message--ai &__messageHeader {
+  &__message--output &__messageHeader {
     background: tintOrShade($euiColorPrimary, 90%, 70%);
   }
 
