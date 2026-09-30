@@ -119,6 +119,20 @@ export const parseFacetBuckets = (records: Array<Record<string, any>>, field: st
   }));
 };
 
+/** Number of sessions matching the user's query (the list itself is capped). */
+export const buildMatchingSessionCountQuery = (whereQuery: string): string =>
+  `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats distinct_count(${SESSION_FIELD_PPL}) as total_sessions`;
+
+/**
+ * The dataset without its time field, so a query is not limited to the picked time
+ * range. The time range selects which sessions appear; their totals cover the whole
+ * session, including turns before the range started.
+ */
+export const withoutTimeRange = <T extends { timeFieldName?: string }>(dataset: T): T => {
+  const { timeFieldName, ...rest } = dataset;
+  return rest as T;
+};
+
 /** Full (unfiltered) stats for the given sessions: trace count and time bounds. */
 export const buildSessionStatsQuery = (source: string, sessionIds: string[]): string =>
   `${source} | where ${SESSION_FIELD_PPL} in (${inList(

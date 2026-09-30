@@ -30,7 +30,8 @@ export const SessionsTab = () => {
   }, [uiSettings]);
   const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
 
-  const { sessions, loading, error, elapsedMs, ignoredCommands, hasFilter } = useSessions(formatTs);
+  const { sessions, loading, error, elapsedMs, ignoredCommands, hasFilter, totalSessions } =
+    useSessions(formatTs);
   const [wrapCellText, setWrapCellText] = useState(false);
   const [selected, setSelected] = useState<SessionRow | null>(null);
 
@@ -123,7 +124,7 @@ export const SessionsTab = () => {
         <DataTableInfoBar
           hasHead={false}
           hitsCount={sessions.length}
-          totalCount={sessions.length}
+          totalCount={totalSessions ?? sessions.length}
           elapsedMs={elapsedMs ?? undefined}
           entityName="session"
           wrapCellText={wrapCellText}

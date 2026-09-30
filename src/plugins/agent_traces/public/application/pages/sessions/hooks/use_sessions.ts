@@ -16,6 +16,8 @@ import {
   assembleSessionRows,
   buildRootSpansQuery,
   buildMatchingSessionIdsQuery,
+  buildMatchingSessionCountQuery,
+  withoutTimeRange,
   buildSessionStatsQuery,
   buildTraceSessionMapQuery,
   buildSessionFacetQuery,
@@ -37,6 +39,8 @@ export interface UseSessionsResult {
   ignoredCommands: string[];
   /** Whether the user's query filters spans (so an empty list means "no match"). */
   hasFilter: boolean;
+  /** Sessions matching the query and time range; the list shows at most SESSIONS_PAGE_LIMIT. */
+  totalSessions: number | null;
 }
 
 /**
@@ -59,6 +63,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [ignoredCommands, setIgnoredCommands] = useState<string[]>([]);
   const [hasFilter, setHasFilter] = useState(false);
+  const [totalSessions, setTotalSessions] = useState<number | null>(null);
   const requestIdRef = useRef(0);
 
   const fetchSessions = useCallback(async () => {
@@ -96,11 +101,18 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
         }
       });
 
-      // 1. Sessions matching the user's query; 2. their full stats (not narrowed by the filter).
-      const idsResponse = await pplService.executeQuery(
-        datasetParam,
-        buildMatchingSessionIdsQuery(whereQuery)
-      );
+      // 1. Sessions matching the user's query and time range (plus how many there are);
+      // 2-4. their full stats, not narrowed by the filter or the time range.
+      const [idsResponse, countResponse] = await Promise.all([
+        pplService.executeQuery(datasetParam, buildMatchingSessionIdsQuery(whereQuery)),
+        pplService
+          .executeQuery(datasetParam, buildMatchingSessionCountQuery(whereQuery))
+          .catch(() => null),
+      ]);
+      const total = countResponse
+        ? Number(pplResponseToRecords(countResponse)[0]?.total_sessions)
+        : NaN;
+      const wholeSession = withoutTimeRange(datasetParam);
       const sessionIds = pplResponseToRecords(idsResponse)
         .map((r) => r[AGENT_TRACES_SESSION_ID_FIELD])
         .filter((id): id is string => typeof id === 'string' && id !== '');
@@ -108,7 +120,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
       let stats: ReturnType<typeof parseSessionStats> = [];
       if (sessionIds.length > 0) {
         const statsResponse = await pplService.executeQuery(
-          datasetParam,
+          wholeSession,
           buildSessionStatsQuery(source, sessionIds)
         );
         stats = parseSessionStats(pplResponseToRecords(statsResponse));
@@ -117,7 +129,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
       let rows: SessionRow[] = [];
       if (stats.length > 0) {
         const mapResponse = await pplService.executeQuery(
-          datasetParam,
+          wholeSession,
           buildTraceSessionMapQuery(
             source,
             stats.map((s) => s.sessionId)
@@ -134,7 +146,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
         let rootRows: Array<ReturnType<typeof spanToRow>> = [];
         if (traceIds.length > 0) {
           const rootsResponse = await pplService.executeQuery(
-            datasetParam,
+            wholeSession,
             buildRootSpansQuery(source, traceIds)
           );
           rootRows = hitsToAgentSpans(transformPPLDataToTraceHits(rootsResponse)).map((span, i) =>
@@ -146,6 +158,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
 
       if (requestId !== requestIdRef.current) return; // a newer request superseded this one
       setSessions(rows);
+      setTotalSessions(Number.isFinite(total) ? Math.max(total, rows.length) : null);
       setElapsedMs(Date.now() - started);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
@@ -167,5 +180,14 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
 
   const refresh = useCallback(() => setRefreshCounter((c) => c + 1), []);
 
-  return { sessions, loading, error, elapsedMs, refresh, ignoredCommands, hasFilter };
+  return {
+    sessions,
+    loading,
+    error,
+    elapsedMs,
+    refresh,
+    ignoredCommands,
+    hasFilter,
+    totalSessions,
+  };
 };

@@ -17,6 +17,8 @@ import {
   pplResponseToRecords,
   shortenId,
   buildSessionFacetQuery,
+  buildMatchingSessionCountQuery,
+  withoutTimeRange,
   parseFacetBuckets,
 } from './session_utils';
 import { BaseRow } from '../traces/hooks/tree_utils';
@@ -222,5 +224,20 @@ describe('session facets', () => {
       { value: 'travel-planner', display: 'travel-planner', count: 3, percent: 75 },
       { value: 'weather-agent', display: 'weather-agent', count: 1, percent: 25 },
     ]);
+  });
+});
+
+describe('session totals', () => {
+  it('counts sessions matching the query', () => {
+    expect(buildMatchingSessionCountQuery('source = spans')).toBe(
+      'source = spans | where isnotnull(`attributes.gen_ai.conversation.id`) | stats distinct_count(`attributes.gen_ai.conversation.id`) as total_sessions'
+    );
+  });
+
+  it('drops only the time field from the dataset', () => {
+    expect(withoutTimeRange({ id: 'd', title: 't', timeFieldName: 'endTime' })).toEqual({
+      id: 'd',
+      title: 't',
+    });
   });
 });

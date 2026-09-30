@@ -413,16 +413,27 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
     />
   );
 
-const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, elapsedMs }) => (
-  <FormattedMessage
-    id="agentTraces.sessionsDataTable.showingCount"
-    defaultMessage="{count} {count, plural, one {session} other {sessions}} in {elapsed} ms"
-    values={{
-      count: <strong>{hitsCount.toLocaleString()}</strong>,
-      elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
-    }}
-  />
-);
+const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, totalCount, elapsedMs }) =>
+  totalCount > hitsCount ? (
+    <FormattedMessage
+      id="agentTraces.sessionsDataTable.showingCountOfTotal"
+      defaultMessage="{count} of {total} sessions in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        total: <strong>{totalCount.toLocaleString()}</strong>,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="agentTraces.sessionsDataTable.showingCount"
+      defaultMessage="{count} {count, plural, one {session} other {sessions}} in {elapsed} ms"
+      values={{
+        count: <strong>{hitsCount.toLocaleString()}</strong>,
+        elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
+      }}
+    />
+  );
 
 export const DataTableInfoBar: React.FC<DataTableInfoBarProps> = ({
   hasHead,
