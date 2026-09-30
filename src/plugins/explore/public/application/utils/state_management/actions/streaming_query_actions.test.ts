@@ -445,6 +445,30 @@ describe('executeStreamingQuery', () => {
     expect(final.error?.message.reason).toMatch(/failed/i);
   });
 
+  // The backend attaches the cause to the failed snapshot; it must reach the status rather than
+  // being replaced by a generic message, since the Traces charts read its type and details.
+  it('surfaces the cause the backend reported for a failed job', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValue(
+      snapshot({
+        id: 'job-1',
+        status: 'FAILED',
+        error: {
+          type: 'SemanticCheckException',
+          reason: 'Invalid Query',
+          details: "can't resolve Symbol(namespace=FIELD_NAME, name=status.code) in type env",
+        },
+      })
+    );
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
+
+    expect(final.error?.message.type).toBe('SemanticCheckException');
+    expect(final.error?.message.reason).toBe('Invalid Query');
+    expect(final.error?.message.details).toContain("can't resolve Symbol");
+  });
+
   it('treats a job cancelled elsewhere as stopped, keeping what was rendered', async () => {
     mockSubmit.mockResolvedValue(
       snapshot({

@@ -4,7 +4,6 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { i18n } from '@osd/i18n';
 import type {
   PPLStreamSnapshot,
   PPLStreamUpdateMode,
@@ -20,7 +19,7 @@ import {
 } from '../../streaming/ppl_stream_errors';
 import { PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
-import { QueryExecutionStatus, StreamingQueryStatus } from '../types';
+import { QueryExecutionStatus, QueryResultStatus, StreamingQueryStatus } from '../types';
 import { RootState } from '../store';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { setResults } from '../slices';
@@ -30,6 +29,7 @@ import {
   snapshotRowsToObjects,
   snapshotToSearchResult,
 } from '../../streaming/snapshot_to_result';
+import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
 
 /**
  * Interval between polls. A snapshot older than this is simply re-read; no work is lost.
@@ -206,7 +206,8 @@ export const executeStreamingQuery = createAsyncThunk<
      * Reports a terminal failure. Without this a failed run would either report READY, because
      * `isPolling` is false once polling stops, or leave `isPolling` true and freeze the progress UI.
      */
-    const failWith = (reason: string) => {
+    /** Reports the backend's own error, whose fields consumers such as the Traces charts read. */
+    const failWith = (error: NonNullable<QueryResultStatus['error']>) => {
       if (isCurrent && !isCurrent()) return;
       dispatch(
         setIndividualQueryStatus({
@@ -215,12 +216,7 @@ export const executeStreamingQuery = createAsyncThunk<
             status: QueryExecutionStatus.ERROR,
             elapsedMs: Date.now() - startedAt,
             startTime: startedAt,
-            error: {
-              statusCode: 500,
-              error: reason,
-              message: { details: reason, reason, type: 'PPLStreamError' },
-              originalErrorMessage: reason,
-            },
+            error,
             streaming: lastStreaming ? { ...lastStreaming, isPolling: false } : undefined,
           },
         })
@@ -299,11 +295,7 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         if (snapshot.status === 'FAILED') {
-          failWith(
-            i18n.translate('explore.streaming.queryFailed', {
-              defaultMessage: 'The streaming query failed on the server.',
-            })
-          );
+          failWith(streamJobError(snapshot.error));
           return;
         }
         if (snapshot.status === 'CANCELLED') {
@@ -347,7 +339,7 @@ export const executeStreamingQuery = createAsyncThunk<
       if (!lastStreaming && (!isCurrent || isCurrent())) {
         throw new PPLStreamUnavailableError(error);
       }
-      failWith(error instanceof Error ? error.message : String(error));
+      failWith(streamRequestError(error));
       throw error;
     }
   }
