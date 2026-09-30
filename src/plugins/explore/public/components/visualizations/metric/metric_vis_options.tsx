@@ -12,8 +12,9 @@ import {
   MetricChartStyle,
   TextMode,
   ColorMode,
+  shouldShowMetricName,
 } from './metric_vis_config';
-import { DebouncedFieldNumber } from '../style_panel/utils';
+import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
@@ -93,6 +94,22 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   data-test-subj="textModeSelect"
                 />
               </EuiFormRow>
+              {shouldShowMetricName(styleOptions.textMode) && (
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.name', {
+                    defaultMessage: 'Metric name',
+                  })}
+                >
+                  <DebouncedFieldText
+                    value={styleOptions.title}
+                    placeholder={i18n.translate('explore.vis.metric.name.auto', {
+                      defaultMessage: 'Auto',
+                    })}
+                    onChange={(text) => updateStyleOption('title', text)}
+                    data-test-subj="metricNameInput"
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow
                 label={i18n.translate('explore.vis.metric.colorMode', {
                   defaultMessage: 'Color mode',

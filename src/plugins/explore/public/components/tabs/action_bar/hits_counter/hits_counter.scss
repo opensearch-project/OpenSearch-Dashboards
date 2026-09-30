@@ -1,4 +1,15 @@
 .dscResultCount {
   padding: $euiSizeXS;
   text-wrap: nowrap;
+
+  // The counts and this disclosure are separate flex items in a gutterSize="none" row, so the
+  // space that would separate them in running text has to come from a margin.
+  &__hiddenColumns {
+    margin-left: $euiSizeXS;
+
+    // Reads as part of the surrounding sentence rather than a call to action, matching the mock.
+    &Link {
+      font-weight: $euiFontWeightRegular;
+    }
+  }
 }

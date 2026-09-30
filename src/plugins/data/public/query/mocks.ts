@@ -51,6 +51,7 @@ const createStartContractMock = (isEnhancementsEnabled: boolean = false) => {
   const startContract: jest.Mocked<QueryStart> = {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
+    getDefaultDataset: jest.fn().mockResolvedValue(undefined),
     queryString: queryStringManagerMock.createStartContract(isEnhancementsEnabled),
     savedQueries: jest.fn() as any,
     state$: new Observable(),

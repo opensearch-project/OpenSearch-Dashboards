@@ -53,6 +53,17 @@ let mockSqlSupportEnabled = true;
 jest.mock('../../../../services/services', () => ({
   getServices: () => ({
     sqlSupportEnabled: mockSqlSupportEnabled,
+    docLinks: {
+      links: {
+        noDocumentation: {
+          sqlPplIndex: {
+            base: 'https://docs.test/sql-and-ppl/',
+            ppl: 'https://docs.test/sql-and-ppl/ppl/index/',
+            sql: 'https://docs.test/sql-and-ppl/sql/index/',
+          },
+        },
+      },
+    },
     tabRegistry: {
       getTab: mockGetTab,
     },
@@ -167,6 +178,32 @@ describe('LanguageToggle', () => {
 
     const button = screen.getByTestId('queryPanelFooterLanguageToggle');
     expect(button).toBeInTheDocument();
+  });
+
+  it('renders the documentation link only once the picker is opened', () => {
+    mockSelectQueryLanguage.mockReturnValue('SQL');
+    mockGetLanguage.mockReturnValue({ title: 'SQL' });
+    renderWithProvider(<LanguageToggle />);
+
+    expect(screen.queryByTestId('exploreQueryPanelLearnMore')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+    // Which url it resolves to is the link's own concern, covered in its unit test.
+    expect(screen.getByTestId('exploreQueryPanelLearnMore')).toBeInTheDocument();
+  });
+
+  it('hides the documentation link in prompt mode, where no language chip is selected', () => {
+    mockSelectIsPromptEditorMode.mockReturnValue(true);
+    renderWithProvider(<LanguageToggle />);
+
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-AI')).toHaveAttribute(
+      'aria-current',
+      'true'
+    );
+    expect(screen.queryByTestId('exploreQueryPanelLearnMore')).not.toBeInTheDocument();
   });
 
   it('toggles popover visibility when button is clicked', () => {

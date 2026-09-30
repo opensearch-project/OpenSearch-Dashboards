@@ -110,6 +110,10 @@ export const CommonVisualizationRender = ({
     visualizationData?.unknownColumns,
   ]);
 
+  const seriesDisplayNames = useMemo(() => {
+    return visualizationData?.seriesDisplayNames ?? {};
+  }, [visualizationData?.seriesDisplayNames]);
+
   const onLegend = useCallback(
     (key: string, legendItems: LegendItem[], validKeys?: string[]) => {
       const current = legend$.getValue();
@@ -181,7 +185,10 @@ export const CommonVisualizationRender = ({
   if (visConfig?.splitField) {
     const splitColumn = columns.find((col) => col.name === visConfig.splitField);
     if (splitColumn) {
-      const groups = getSplitKeysBySplitField(rows, splitColumn.column);
+      const groups = getSplitKeysBySplitField(rows, splitColumn.column).map((item) => ({
+        original: item,
+        displayName: seriesDisplayNames?.[item] ?? item,
+      }));
 
       return (
         <div
@@ -205,10 +212,16 @@ export const CommonVisualizationRender = ({
                   dataFilter={(data) => filterDataBySplitField(data, splitColumn.column, groupKey)}
                   config={visConfig}
                   renderContext={{
-                    seriesName: groupKey,
+                    seriesName: seriesDisplayNames?.[groupKey] ?? groupKey,
                     crosshairGroup,
                   }}
-                  onLegend={(legend) => onLegend(groupKey, legend, groups)}
+                  onLegend={(legend) =>
+                    onLegend(
+                      groupKey,
+                      legend,
+                      groups.map((item) => item.original)
+                    )
+                  }
                   timeRange={timeRange}
                   onSelectTimeRange={onSelectTimeRange}
                   legendSelected$={legendSelected$}

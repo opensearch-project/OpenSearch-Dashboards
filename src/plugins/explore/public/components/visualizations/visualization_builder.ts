@@ -6,7 +6,7 @@
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { isValidMapping } from './visualization_builder_utils';
@@ -602,6 +602,27 @@ export class VisualizationBuilder {
     );
   }
 
+  private getVisualizationRenderConfig$(): Observable<RenderChartConfig | undefined> {
+    return this.getRenderConfig$().pipe(
+      map((config) => {
+        if (!config) {
+          return undefined;
+        }
+
+        // Panel metadata is persisted with the visualization but does not affect chart rendering.
+        return {
+          styles: config.styles,
+          type: config.type,
+          axesMapping: config.axesMapping,
+          splitField: config.splitField,
+          splitLayout: config.splitLayout,
+          showSplitLabel: config.showSplitLabel,
+        };
+      }),
+      distinctUntilChanged((previous, current) => isEqual(previous, current))
+    );
+  }
+
   renderVisualization({
     timeRange,
     onSelectTimeRange,
@@ -611,7 +632,7 @@ export class VisualizationBuilder {
   }) {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
-      config$: this.getRenderConfig$(),
+      config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
       timeRange,
       onSelectTimeRange,

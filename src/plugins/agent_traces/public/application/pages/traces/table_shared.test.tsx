@@ -221,6 +221,34 @@ describe('table_shared', () => {
       expect(row.isExpandable).toBe(false);
     });
 
+    it('normalizes object-valued messages before creating renderable table rows', () => {
+      const row = hitToBaseRow(
+        makeHit({
+          attributes: {
+            gen_ai: {
+              prompt: { name: 'analyze-code' },
+              input: { messages: {} },
+              output: {
+                messages: [
+                  {
+                    role: 'assistant',
+                    parts: [{ type: 'text', content: 'done' }],
+                  },
+                ],
+              },
+            },
+            input: { value: 'non-OTel input' },
+          },
+        }),
+        formatTs
+      );
+
+      expect(row.input).toBe('—');
+      expect(row.output).toBe('[{"role":"assistant","parts":[{"type":"text","content":"done"}]}]');
+      expect(typeof row.input).toBe('string');
+      expect(typeof row.output).toBe('string');
+    });
+
     it('handles missing _source gracefully', () => {
       const hit = { _index: '', _id: 'x', _score: null, _source: undefined as any };
       const row = hitToBaseRow(hit, formatTs);

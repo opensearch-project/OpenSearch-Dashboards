@@ -197,6 +197,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
         "sql": Object {
           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
         },
+        "sqlPplIndex": Object {
+          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+        },
         "sqlPplLimitation": Object {
           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
         },
@@ -893,6 +898,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
             },
             "sql": Object {
               "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+            },
+            "sqlPplIndex": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+              "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+              "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
             },
             "sqlPplLimitation": Object {
               "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -1937,6 +1947,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                         },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                        },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
@@ -2356,6 +2371,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -2777,6 +2797,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                         },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                        },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
@@ -3196,6 +3221,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3672,6 +3702,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
                         },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
+                        },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
@@ -4093,6 +4128,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "sql": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplIndex": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                          "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                          "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                         },
                         "sqlPplLimitation": Object {
                           "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",

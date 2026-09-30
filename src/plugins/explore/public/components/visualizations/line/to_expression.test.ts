@@ -88,6 +88,7 @@ describe('Line Chart to_expression', () => {
 
       expect(result.spec.series.length).toBeGreaterThanOrEqual(1);
       expect(result.spec.series[0].type).toBe('line');
+      expect(result.spec.series[0].emphasis).toEqual({ focus: 'series' });
     });
 
     it('emits series-target legend items while assigning metric colors', () => {
@@ -123,6 +124,9 @@ describe('Line Chart to_expression', () => {
       expect(result.spec).toHaveProperty('dataset');
       expect(result.spec).toHaveProperty('series');
       expect(result.spec.series.length).toBeGreaterThanOrEqual(2);
+      result.spec.series.forEach((series: any) => {
+        expect(series.emphasis).toEqual({ focus: 'series' });
+      });
     });
 
     it('emits legend items for line and bar series', () => {
