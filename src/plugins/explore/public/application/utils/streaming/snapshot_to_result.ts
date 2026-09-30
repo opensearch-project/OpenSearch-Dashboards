@@ -70,6 +70,11 @@ export interface SnapshotToSearchResultArgs {
   indexName?: string;
   elapsedMs: number;
   /**
+   * Distinguishes one generation of rows from the next, so synthesised `_id`s stay stable while rows
+   * append but change when a REPLACE snapshot supersedes them.
+   */
+  rowGeneration?: number;
+  /**
    * Histogram buckets, keyed by the aggregation id from the histogram config so the chart finds them
    * where it expects.
    */
@@ -88,6 +93,7 @@ export const snapshotToSearchResult = ({
   elapsedMs,
   histogram,
   totalOverride,
+  rowGeneration = 0,
 }: SnapshotToSearchResultArgs): ISearchResult => {
   const result = {
     took: snapshot.took ?? elapsedMs,
@@ -98,7 +104,15 @@ export const snapshotToSearchResult = ({
       // exist while showing only a window of them.
       total: totalOverride ?? snapshot.total ?? rows.length,
       max_score: 0,
-      hits: rows.map((source) => ({ _index: indexName, _source: source })),
+      // PPL hits carry no document id, and the table falls back to the row's position as its React
+      // key. While rows append that is stable, but a REPLACE snapshot puts a different document at
+      // the same position, so React would reuse the previous row's state — an expanded row would
+      // stay open over unrelated content. The generation makes the id change when that happens.
+      hits: rows.map((source, index) => ({
+        _id: `${rowGeneration}:${index}`,
+        _index: indexName,
+        _source: source,
+      })),
     },
     elapsedMs,
     fieldSchema: snapshotColumns(snapshot),

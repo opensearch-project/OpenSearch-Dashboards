@@ -21,7 +21,15 @@ import { resolvePPLFetchSize } from '../utils';
 const MAX_WAIT_FOR_COMPLETION_MS = 30_000;
 const MAX_KEEP_ALIVE_MS = 24 * 60 * 60 * 1000;
 
-const DEFAULT_WAIT_FOR_COMPLETION = '1ms';
+/**
+ * How long submit waits before giving up on an inline result and returning a job id.
+ *
+ * Sized so an interactive query that would have completed quickly on the synchronous path completes
+ * inline here too, instead of costing a job id plus a full poll interval before any rows appear. A
+ * slower query is not penalised: the backend returns its first snapshot alongside the job id when
+ * this elapses, so the wait buys a snapshot rather than just an id.
+ */
+const DEFAULT_WAIT_FOR_COMPLETION = '1s';
 const DEFAULT_KEEP_ALIVE = '5m';
 const DEFAULT_COUNT = 500;
 

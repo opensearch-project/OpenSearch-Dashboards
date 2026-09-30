@@ -182,7 +182,11 @@ describe('snapshotToSearchResult', () => {
       elapsedMs: 10,
     });
 
-    expect(result.hits.hits[0]).toEqual({ _index: 'ppl_logs_large', _source: { event_id: 1 } });
+    expect(result.hits.hits[0]).toEqual({
+      _id: '0:0',
+      _index: 'ppl_logs_large',
+      _source: { event_id: 1 },
+    });
   });
 
   it('exposes fieldSchema so the table can type columns', () => {
@@ -192,6 +196,46 @@ describe('snapshotToSearchResult', () => {
       { name: '@timestamp', type: 'date' },
       { name: 'event_id', type: 'int' },
     ]);
+  });
+
+  describe('row ids', () => {
+    // PPL hits carry no document id, and the table keys rows by position when _id is absent. An
+    // appended row set keeps earlier positions meaning the same document, but a REPLACE snapshot
+    // does not, so the id has to change with it.
+    it('assigns an id from the row position so appended rows keep their identity', () => {
+      const result = snapshotToSearchResult({
+        snapshot: snapshot(),
+        rows: [{ event_id: 1 }, { event_id: 2 }],
+        elapsedMs: 5,
+      });
+      expect(result.hits.hits.map((hit: any) => hit._id)).toEqual(['0:0', '0:1']);
+    });
+
+    it('changes every id when the generation advances, so replaced rows do not inherit state', () => {
+      const first = snapshotToSearchResult({
+        snapshot: snapshot(),
+        rows: [{ event_id: 1 }],
+        elapsedMs: 5,
+        rowGeneration: 0,
+      });
+      const second = snapshotToSearchResult({
+        snapshot: snapshot(),
+        rows: [{ event_id: 99 }],
+        elapsedMs: 5,
+        rowGeneration: 1,
+      });
+      expect((first.hits.hits[0] as any)._id).not.toBe((second.hits.hits[0] as any)._id);
+    });
+
+    it('keeps ids stable across publishes within one generation', () => {
+      const args = { snapshot: snapshot(), elapsedMs: 5, rowGeneration: 3 };
+      const first = snapshotToSearchResult({ ...args, rows: [{ event_id: 1 }] });
+      const grown = snapshotToSearchResult({
+        ...args,
+        rows: [{ event_id: 1 }, { event_id: 2 }],
+      });
+      expect((grown.hits.hits[0] as any)._id).toBe((first.hits.hits[0] as any)._id);
+    });
   });
 
   it('prefers the backend took over measured elapsed time when present', () => {

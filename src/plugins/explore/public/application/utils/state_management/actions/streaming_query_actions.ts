@@ -112,6 +112,7 @@ export const executeStreamingQuery = createAsyncThunk<
     let formatter: FieldValueFormatter | undefined;
 
     let heldRows: Array<Record<string, unknown>> = [];
+    let rowGeneration = 0;
     let offset = 0;
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
@@ -144,7 +145,13 @@ export const executeStreamingQuery = createAsyncThunk<
         dispatch(
           setResults({
             cacheKey,
-            results: snapshotToSearchResult({ snapshot, rows: heldRows, indexName, elapsedMs }),
+            results: snapshotToSearchResult({
+              snapshot,
+              rows: heldRows,
+              indexName,
+              elapsedMs,
+              rowGeneration,
+            }),
           })
         );
       }
@@ -227,8 +234,11 @@ export const executeStreamingQuery = createAsyncThunk<
     const absorb = (snapshot: PPLStreamSnapshot) => {
       const rows = snapshotRowsToObjects(snapshot, formatter);
       if (snapshot.update_mode === 'REPLACE') {
-        // Prior rows are provisional and may have been revised; adopt this view wholesale.
+        // Prior rows are provisional and may have been revised; adopt this view wholesale. The
+        // generation advances so the replaced rows get new ids rather than inheriting the previous
+        // rows' React state.
         heldRows = rows.slice(0, STREAMING_MAX_HELD_ROWS);
+        rowGeneration += 1;
         return;
       }
       // APPEND rows are a stable prefix, so accumulate and advance past them.

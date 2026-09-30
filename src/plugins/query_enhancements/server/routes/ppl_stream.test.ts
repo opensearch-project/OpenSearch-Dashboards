@@ -77,7 +77,9 @@ describe('registerPPLStreamRoutes', () => {
         body: {
           query: 'source=logs',
           fetch_size: 500,
-          wait_for_completion_timeout: '1ms',
+          // Long enough that an interactive query completes inline rather than costing a job
+          // id plus a poll interval before any rows appear.
+          wait_for_completion_timeout: '1s',
           keep_alive: '5m',
         },
       });
