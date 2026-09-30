@@ -366,9 +366,10 @@ const SpanCountMessage: React.FC<InfoBarCountProps> = ({
   hasHead ? (
     <FormattedMessage
       id="agentTraces.spansDataTable.showingCountHeadOnly"
-      defaultMessage="{count} {count, plural, one {span} other {spans}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {span} other {spans}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
         elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
       }}
     />
@@ -394,9 +395,10 @@ const TraceCountMessage: React.FC<InfoBarCountProps> = ({
   hasHead ? (
     <FormattedMessage
       id="agentTraces.tracesDataTable.showingCountHeadOnly"
-      defaultMessage="{count} {count, plural, one {trace} other {traces}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {trace} other {traces}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
         elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
       }}
     />
@@ -427,9 +429,10 @@ const SessionCountMessage: React.FC<InfoBarCountProps> = ({ hitsCount, totalCoun
   ) : (
     <FormattedMessage
       id="agentTraces.sessionsDataTable.showingCount"
-      defaultMessage="{count} {count, plural, one {session} other {sessions}} in {elapsed} ms"
+      defaultMessage="{count} {hitsCount, plural, one {session} other {sessions}} in {elapsed} ms"
       values={{
         count: <strong>{hitsCount.toLocaleString()}</strong>,
+        hitsCount,
         elapsed: <strong>{elapsedMs != null ? elapsedMs.toLocaleString() : '—'}</strong>,
       }}
     />

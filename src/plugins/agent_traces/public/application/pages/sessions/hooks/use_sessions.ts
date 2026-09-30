@@ -5,28 +5,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 import { RootState } from '../../../utils/state_management/store';
 import { usePPLQueryDeps, useTimeVersion } from '../../traces/hooks/use_ppl_query_deps';
-import { extractSpanFilterQuery, splitPplCommands } from '../../traces/table_shared';
-import { transformPPLDataToTraceHits } from '../../traces/trace_details/traces/ppl_to_trace_hits';
-import { hitsToAgentSpans, spanToRow } from '../../traces/hooks/tree_utils';
+import { SessionRow } from '../session_utils';
 import {
-  SessionRow,
-  assembleSessionRows,
-  buildRootSpansQuery,
-  buildMatchingSessionIdsQuery,
-  buildMatchingSessionCountQuery,
-  withoutTimeRange,
-  buildSessionStatsQuery,
-  buildTraceSessionMapQuery,
-  buildSessionFacetQuery,
-  parseFacetBuckets,
-  SESSION_FACET_FIELDS,
-  getSourceCommand,
-  parseSessionStats,
-  pplResponseToRecords,
-} from '../session_utils';
+  fetchSessionFacets,
+  fetchSessions as fetchSessionRows,
+  sessionFilterFor,
+} from '../fetch_sessions';
 import { sessionFacetBuckets$ } from '../session_facets';
 
 export interface UseSessionsResult {
@@ -43,14 +29,7 @@ export interface UseSessionsResult {
   totalSessions: number | null;
 }
 
-/**
- * Fetch the sessions list for the current query and time range.
- *
- * 1. Session ids matching the user's query (the filter selects sessions).
- * 2. Unfiltered stats for those sessions (trace count, start/end).
- * 3. Trace map: which traces belong to each session (any span may carry the id).
- * 4. Root spans of those traces: first/last message, tokens, user id.
- */
+/** Sessions list for the current query and time range (see `fetchSessions`). */
 export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult => {
   const { services, pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const fetchVersion = useSelector((state: RootState) => state.queryEditor.fetchVersion);
@@ -74,91 +53,24 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
     setError(null);
 
     try {
-      // Row-level filters select which spans (and so which sessions) match.
-      const { filterQuery: whereQuery, ignoredCommands: ignored } =
-        extractSpanFilterQuery(baseQueryString);
+      const {
+        whereQuery,
+        ignoredCommands: ignored,
+        hasFilter: filtered,
+      } = sessionFilterFor(baseQueryString);
       setIgnoredCommands(ignored);
-      setHasFilter(splitPplCommands(whereQuery).length > 1);
-      const source = getSourceCommand(whereQuery);
+      setHasFilter(filtered);
 
       // Fields panel facets, counted per session (runs alongside the list queries).
       sessionFacetBuckets$.next(null);
-      void Promise.all(
-        SESSION_FACET_FIELDS.map(async (field) => {
-          try {
-            const response = await pplService.executeQuery(
-              datasetParam,
-              buildSessionFacetQuery(whereQuery, field)
-            );
-            return [field, parseFacetBuckets(pplResponseToRecords(response), field)] as const;
-          } catch {
-            return [field, []] as const; // e.g. the field is not mapped in this index
-          }
-        })
-      ).then((entries) => {
-        if (requestId === requestIdRef.current) {
-          sessionFacetBuckets$.next(Object.fromEntries(entries));
-        }
+      void fetchSessionFacets(pplService, datasetParam, whereQuery).then((buckets) => {
+        if (requestId === requestIdRef.current) sessionFacetBuckets$.next(buckets);
       });
 
-      // 1. Sessions matching the user's query and time range (plus how many there are);
-      // 2-4. their full stats, not narrowed by the filter or the time range.
-      const [idsResponse, countResponse] = await Promise.all([
-        pplService.executeQuery(datasetParam, buildMatchingSessionIdsQuery(whereQuery)),
-        pplService
-          .executeQuery(datasetParam, buildMatchingSessionCountQuery(whereQuery))
-          .catch(() => null),
-      ]);
-      const total = countResponse
-        ? Number(pplResponseToRecords(countResponse)[0]?.total_sessions)
-        : NaN;
-      const wholeSession = withoutTimeRange(datasetParam);
-      const sessionIds = pplResponseToRecords(idsResponse)
-        .map((r) => r[AGENT_TRACES_SESSION_ID_FIELD])
-        .filter((id): id is string => typeof id === 'string' && id !== '');
-
-      let stats: ReturnType<typeof parseSessionStats> = [];
-      if (sessionIds.length > 0) {
-        const statsResponse = await pplService.executeQuery(
-          wholeSession,
-          buildSessionStatsQuery(source, sessionIds)
-        );
-        stats = parseSessionStats(pplResponseToRecords(statsResponse));
-      }
-
-      let rows: SessionRow[] = [];
-      if (stats.length > 0) {
-        const mapResponse = await pplService.executeQuery(
-          wholeSession,
-          buildTraceSessionMapQuery(
-            source,
-            stats.map((s) => s.sessionId)
-          )
-        );
-        const traceToSession = new Map<string, string>();
-        for (const rec of pplResponseToRecords(mapResponse)) {
-          const traceId = rec.traceId;
-          const sessionId = rec[AGENT_TRACES_SESSION_ID_FIELD];
-          if (traceId && sessionId) traceToSession.set(String(traceId), String(sessionId));
-        }
-
-        const traceIds = [...traceToSession.keys()];
-        let rootRows: Array<ReturnType<typeof spanToRow>> = [];
-        if (traceIds.length > 0) {
-          const rootsResponse = await pplService.executeQuery(
-            wholeSession,
-            buildRootSpansQuery(source, traceIds)
-          );
-          rootRows = hitsToAgentSpans(transformPPLDataToTraceHits(rootsResponse)).map((span, i) =>
-            spanToRow(span, i, formatTs)
-          );
-        }
-        rows = assembleSessionRows(stats, traceToSession, rootRows);
-      }
-
+      const result = await fetchSessionRows(pplService, datasetParam, baseQueryString, formatTs);
       if (requestId !== requestIdRef.current) return; // a newer request superseded this one
-      setSessions(rows);
-      setTotalSessions(Number.isFinite(total) ? Math.max(total, rows.length) : null);
+      setSessions(result.sessions);
+      setTotalSessions(result.totalSessions);
       setElapsedMs(Date.now() - started);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
