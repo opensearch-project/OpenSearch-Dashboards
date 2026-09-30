@@ -41,13 +41,13 @@ export function DocViewTableRowBtnCopy({ onClick }: Props) {
     <EuiToolTip
       content={
         <FormattedMessage
-          id="explore.docViews.table.copyValueButtonTooltip"
+          id="explore.legacyDiscover.docViews.table.copyValueButtonTooltip"
           defaultMessage="Copy value"
         />
       }
     >
       <EuiButtonIcon
-        aria-label={i18n.translate('explore.docViews.table.copyValueButtonAriaLabel', {
+        aria-label={i18n.translate('explore.legacyDiscover.docViews.table.copyValueButtonAriaLabel', {
           defaultMessage: 'Copy value',
         })}
         className="osdDocViewer__actionButton"

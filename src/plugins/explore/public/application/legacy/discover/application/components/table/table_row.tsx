@@ -77,14 +77,19 @@ export function DocViewTableRow({
     if (valueRaw === null || valueRaw === undefined) {
       return;
     }
-    const textToCopy =
-      typeof valueRaw === 'string'
-        ? valueRaw
-        : typeof valueRaw === 'object'
+    let textToCopy: string;
+    try {
+      textToCopy =
+        typeof valueRaw === 'string'
+          ? valueRaw
+          : typeof valueRaw === 'object'
           ? JSON.stringify(valueRaw, null, 2)
           : String(valueRaw);
+    } catch {
+      textToCopy = String(valueRaw);
+    }
     if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(textToCopy);
+      Promise.resolve(navigator.clipboard.writeText(textToCopy)).catch(() => {});
     }
   };
 
