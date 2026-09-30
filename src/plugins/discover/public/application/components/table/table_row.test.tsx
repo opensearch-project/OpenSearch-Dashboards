@@ -70,4 +70,42 @@ describe('DocViewTableRow', () => {
     expect(html).not.toContain('alert("xss")');
     expect(html).toContain('Safe content');
   });
+
+  it('renders copy button and copies string value to clipboard when clicked', () => {
+    const mockWriteText = jest.fn();
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: mockWriteText,
+      },
+    });
+
+    const mockOnFilter = jest.fn();
+    const wrapper = shallow(
+      <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw="test string raw" />
+    );
+    const copyBtn = wrapper.find('DocViewTableRowBtnCopy');
+    expect(copyBtn.exists()).toBe(true);
+
+    copyBtn.prop('onClick')();
+    expect(mockWriteText).toHaveBeenCalledWith('test string raw');
+  });
+
+  it('copies object value formatted as JSON to clipboard when clicked', () => {
+    const mockWriteText = jest.fn();
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: mockWriteText,
+      },
+    });
+
+    const mockOnFilter = jest.fn();
+    const objValue = { key: 'val' };
+    const wrapper = shallow(
+      <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={objValue} />
+    );
+    const copyBtn = wrapper.find('DocViewTableRowBtnCopy');
+
+    copyBtn.prop('onClick')();
+    expect(mockWriteText).toHaveBeenCalledWith(JSON.stringify(objValue, null, 2));
+  });
 });
