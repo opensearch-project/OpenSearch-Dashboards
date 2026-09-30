@@ -25,6 +25,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { TraceRow } from '../traces/hooks/tree_utils';
 import { useTraceFlyout } from '../traces/flyout/trace_flyout_context';
@@ -57,6 +58,10 @@ type DrillTab = 'traces' | 'spans';
 const tokensOf = (row: TraceRow): number | null =>
   typeof row.totalTokens === 'number' ? row.totalTokens : null;
 
+/** Number of spans in a trace that ended in error. */
+export const errorSpanCount = (trace: SessionTrace): number =>
+  trace.spans.filter((span) => span.status === 'error').length;
+
 const MetaItem: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="agtSessionFlyout__metaItem">
     <EuiText size="xs" className="agtSessionFlyout__metaLabel">
@@ -73,7 +78,7 @@ const LatencyAndTokens: React.FC<{ row: TraceRow }> = ({ row }) => {
   return (
     <span className="agtSessionFlyout__stats">
       <span className="agtSessionFlyout__stat">
-        <EuiIcon type="clock" size="s" color="danger" />
+        <EuiIcon type="clock" size="s" color="subdued" />
         {row.latency}
       </span>
       <span className="agtSessionFlyout__stat">
@@ -300,7 +305,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
               defaultMessage: 'Total Duration',
             })}
           >
-            <EuiIcon type="clock" size="s" color="danger" />{' '}
+            <EuiIcon type="clock" size="s" color="subdued" />{' '}
             {formatSessionDuration(session.durationMs)}
           </MetaItem>
           <MetaItem
@@ -406,6 +411,25 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
                         values: { index: i + 1 },
                       })}
                     </strong>
+                    {errorSpanCount(trace) > 0 && (
+                      <EuiToolTip
+                        content={i18n.translate('agentTraces.sessions.flyout.traceErrors', {
+                          defaultMessage:
+                            '{count, plural, one {# span} other {# spans}} with errors',
+                          values: { count: errorSpanCount(trace) },
+                        })}
+                      >
+                        <EuiIcon
+                          type="alert"
+                          color="danger"
+                          size="s"
+                          aria-label={i18n.translate('agentTraces.sessions.flyout.traceHasErrors', {
+                            defaultMessage: 'Trace has errors',
+                          })}
+                          data-test-subj={`agentTracesSessionTraceError-${i + 1}`}
+                        />
+                      </EuiToolTip>
+                    )}
                   </span>
                   <LatencyAndTokens row={trace.root} />
                 </div>
