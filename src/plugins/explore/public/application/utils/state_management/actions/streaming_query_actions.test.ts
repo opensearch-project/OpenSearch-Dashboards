@@ -26,7 +26,21 @@ jest.mock('../../streaming/ppl_stream_service', () => ({
     .PPLStreamJobNotFoundError,
 }));
 
-const services = { http: {} } as any;
+// The thunk resolves the PPL language formatter to render date values as the non-streaming path
+// does, so the mock has to supply the language service.
+const pplFormatter = jest.fn((value: any) => value);
+const services = {
+  http: {},
+  data: {
+    query: {
+      queryString: {
+        getLanguageService: () => ({
+          getLanguage: () => ({ fields: { formatter: pplFormatter } }),
+        }),
+      },
+    },
+  },
+} as any;
 
 const snapshot = (overrides: Record<string, unknown> = {}) => ({
   status: 'RUNNING',

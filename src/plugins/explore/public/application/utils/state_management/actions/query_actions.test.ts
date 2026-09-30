@@ -1222,6 +1222,11 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           data: {
             query: {
               timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } },
+              queryString: {
+                getLanguageService: () => ({
+                  getLanguage: () => ({ fields: { formatter: (value: any) => value } }),
+                }),
+              },
             },
             dataViews: { get: jest.fn().mockResolvedValue(undefined) },
           },

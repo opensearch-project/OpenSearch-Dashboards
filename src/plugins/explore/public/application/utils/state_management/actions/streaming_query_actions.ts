@@ -25,7 +25,11 @@ import { RootState } from '../store';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { setResults } from '../slices';
 import { snapshotToHistogramBuckets } from '../../streaming/snapshot_to_histogram';
-import { snapshotRowsToObjects, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
+import {
+  FieldValueFormatter,
+  snapshotRowsToObjects,
+  snapshotToSearchResult,
+} from '../../streaming/snapshot_to_result';
 
 /**
  * Interval between polls. A snapshot older than this is simply re-read; no work is lost.
@@ -105,6 +109,7 @@ export const executeStreamingQuery = createAsyncThunk<
   ) => {
     const stream = new PPLStreamService(services.http);
     const startedAt = Date.now();
+    let formatter: FieldValueFormatter | undefined;
 
     let heldRows: Array<Record<string, unknown>> = [];
     let offset = 0;
@@ -224,7 +229,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
     /** Absorbs one snapshot's rows according to its update mode. */
     const absorb = (snapshot: PPLStreamSnapshot) => {
-      const rows = snapshotRowsToObjects(snapshot);
+      const rows = snapshotRowsToObjects(snapshot, formatter);
       if (snapshot.update_mode === 'REPLACE') {
         // Prior rows are provisional and may have been revised; adopt this view wholesale.
         heldRows = rows.slice(0, STREAMING_MAX_HELD_ROWS);
@@ -238,6 +243,13 @@ export const executeStreamingQuery = createAsyncThunk<
     };
 
     try {
+      // The same formatter the non-streaming path hands to `convertResult`, so date values render
+      // identically. Streaming is PPL-only, so the language is known here. Resolved inside the try:
+      // if it fails, nothing has been published, so the run reports itself unavailable and the
+      // caller re-runs on the non-streaming path rather than rendering unformatted dates.
+      formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
+        ?.fields?.formatter;
+
       const submitted = await stream.submit({
         query: queryString,
         dataSourceId,
@@ -246,7 +258,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.
       if (!submitted.id) {
-        heldRows = snapshotRowsToObjects(submitted).slice(0, STREAMING_MAX_HELD_ROWS);
+        heldRows = snapshotRowsToObjects(submitted, formatter).slice(0, STREAMING_MAX_HELD_ROWS);
         publish(submitted, false);
         return;
       }

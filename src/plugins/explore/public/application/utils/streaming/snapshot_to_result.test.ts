@@ -4,7 +4,14 @@
  */
 
 import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
+import moment from 'moment';
+import { OSD_FIELD_TYPES } from '../../../../../data/common';
 import { snapshotRowsToObjects, snapshotToSearchResult } from './snapshot_to_result';
+
+// The formatter the PPL language config registers (see query_enhancements/public/plugin.tsx), so
+// these assertions pin the streaming path to what the non-streaming path produces.
+const pplFormatter = (value: any, type: OSD_FIELD_TYPES) =>
+  type === OSD_FIELD_TYPES.DATE ? moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ') : value;
 
 const snapshot = (overrides: Partial<PPLStreamSnapshot> = {}): PPLStreamSnapshot =>
   ({
@@ -26,28 +33,119 @@ describe('snapshotRowsToObjects', () => {
     ]);
   });
 
-  it('stringifies objects, matching the server-side shim', () => {
+  // `createDataFrame` maps the schema through `getFieldType` on the non-streaming path, so the
+  // streaming fieldSchema has to report the same mapped types.
+  it('maps schema types the way the non-streaming data frame does', () => {
+    const result = snapshotToSearchResult({
+      snapshot: {
+        schema: [
+          { name: 'when', type: 'timestamp' },
+          { name: 'payload', type: 'struct' },
+          { name: 'count', type: 'bigint' },
+        ],
+        datarows: [],
+      } as any,
+      rows: [],
+      elapsedMs: 1,
+    });
+    expect(result.fieldSchema).toEqual([
+      { name: 'when', type: 'date' },
+      { name: 'payload', type: 'object' },
+      { name: 'count', type: 'bigint' },
+    ]);
+  });
+
+  // The PPL search strategy explore uses builds a columnar data frame and never calls
+  // `shimSchemaRow`, so these values reach the table unmodified. Stringifying them here is what made
+  // structs, geo_point values and arrays render as JSON text.
+  it('passes structs through without stringifying them', () => {
     const result = snapshotRowsToObjects({
       schema: [{ name: 'payload', type: 'struct' }],
       datarows: [[{ a: 1 }]],
     } as any);
-    expect(result).toEqual([{ payload: '{"a":1}' }]);
+    expect(result).toEqual([{ payload: { a: 1 } }]);
   });
 
-  it('stringifies booleans, matching the server-side shim', () => {
+  it('passes arrays and geo_point values through', () => {
+    const result = snapshotRowsToObjects({
+      schema: [
+        { name: 'tags', type: 'array' },
+        { name: 'location', type: 'geo_point' },
+      ],
+      datarows: [[['a', 'b'], { lat: 1, lon: 2 }]],
+    } as any);
+    expect(result).toEqual([{ tags: ['a', 'b'], location: { lat: 1, lon: 2 } }]);
+  });
+
+  it('keeps booleans as booleans', () => {
     const result = snapshotRowsToObjects({
       schema: [{ name: 'ok', type: 'boolean' }],
       datarows: [[true], [false]],
     } as any);
-    expect(result).toEqual([{ ok: 'true' }, { ok: 'false' }]);
+    expect(result).toEqual([{ ok: true }, { ok: false }]);
   });
 
-  it('preserves null rather than stringifying it', () => {
+  it('preserves null', () => {
     const result = snapshotRowsToObjects({
       schema: [{ name: 'maybe', type: 'string' }],
       datarows: [[null]],
     } as any);
     expect(result).toEqual([{ maybe: null }]);
+  });
+
+  describe('date formatting', () => {
+    // PPL emits `YYYY-MM-DD HH:MM:SS` in UTC with no offset. Handed to the table raw, it is read as
+    // local time and every timestamp shifts by the browser's offset.
+    it('formats a timestamp column with an explicit UTC offset', () => {
+      const result = snapshotRowsToObjects(snapshot(), pplFormatter);
+      expect(result).toEqual([{ '@timestamp': '2026-09-15T10:00:00.000+00:00', event_id: 1 }]);
+    });
+
+    it('formats every date column, not just the time field', () => {
+      const result = snapshotRowsToObjects(
+        {
+          schema: [
+            { name: 'started', type: 'timestamp' },
+            { name: 'ended', type: 'date' },
+          ],
+          datarows: [['2026-09-15 10:00:00', '2026-09-15 11:30:00']],
+        } as any,
+        pplFormatter
+      );
+      expect(result).toEqual([
+        { started: '2026-09-15T10:00:00.000+00:00', ended: '2026-09-15T11:30:00.000+00:00' },
+      ]);
+    });
+
+    // `time` is a time of day with no date, so `getFieldType` leaves it alone on both paths and
+    // formatting it as a date would invent one.
+    it('does not format a time-of-day column', () => {
+      const result = snapshotRowsToObjects(
+        { schema: [{ name: 'at', type: 'time' }], datarows: [['10:00:00']] } as any,
+        pplFormatter
+      );
+      expect(result).toEqual([{ at: '10:00:00' }]);
+    });
+
+    it('leaves non-date columns untouched', () => {
+      const result = snapshotRowsToObjects(
+        {
+          schema: [
+            { name: 'count', type: 'bigint' },
+            { name: 'name', type: 'string' },
+          ],
+          datarows: [[5, '2026-09-15 10:00:00']],
+        } as any,
+        pplFormatter
+      );
+      expect(result).toEqual([{ count: 5, name: '2026-09-15 10:00:00' }]);
+    });
+
+    it('passes values through when no formatter is supplied', () => {
+      expect(snapshotRowsToObjects(snapshot())).toEqual([
+        { '@timestamp': '2026-09-15 10:00:00', event_id: 1 },
+      ]);
+    });
   });
 
   it('ignores values beyond the schema length', () => {
@@ -91,7 +189,7 @@ describe('snapshotToSearchResult', () => {
     const result = snapshotToSearchResult({ snapshot: snapshot(), rows: [], elapsedMs: 5 });
 
     expect(result.fieldSchema).toEqual([
-      { name: '@timestamp', type: 'timestamp' },
+      { name: '@timestamp', type: 'date' },
       { name: 'event_id', type: 'int' },
     ]);
   });

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getFieldType, OSD_FIELD_TYPES } from '../../../../../data/common';
 import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
 import { ISearchResult } from '../state_management/slices';
 import type { HistogramBucket } from './snapshot_to_histogram';
@@ -10,27 +11,52 @@ import type { HistogramBucket } from './snapshot_to_histogram';
 /**
  * Converts a streaming PPL snapshot into the `ISearchResult` the results table already renders.
  *
- * The synchronous path reaches the same shape via the server search strategy and
- * `convertResult`, but streaming bypasses `SearchSource` (which has no observable `fetch$`), so the
- * conversion happens here instead. Any change to the hit structure in
- * `data/common/data_frames/utils.ts` must be mirrored.
+ * The synchronous path reaches the same shape through the server search strategy (`createDataFrame`)
+ * and the client's `convertResult`, but streaming bypasses `SearchSource`, which has no observable
+ * `fetch$`. This reproduces that pipeline's two observable behaviours:
+ *
+ * - Field types are mapped with the same `getFieldType`, so `timestamp` becomes `date` and `struct`
+ *   becomes `object`.
+ * - Date values go through the language formatter, which renders the PPL wire format as an ISO
+ *   string with an explicit offset. Without it the table treats `2026-09-29 12:34:56` as local time
+ *   and shifts every timestamp by the browser's UTC offset.
+ *
+ * Values of other types are passed through untouched, exactly as `convertResult` does. Note the
+ * server's `shimSchemaRow` stringifies booleans and objects, but the PPL search strategy explore
+ * uses does not call it — mirroring it here is what made booleans, structs, `geo_point` values and
+ * arrays arrive as strings.
  */
 
-/** Mirrors the coercion `shimSchemaRow` applies server-side, so cells render identically. */
-const coerceCell = (value: unknown): unknown => {
-  if (value !== null && typeof value === 'object') return JSON.stringify(value);
-  if (typeof value === 'boolean') return value.toString();
-  return value;
-};
+/** Formats one field value, as `convertResult`'s `processField` does. */
+export type FieldValueFormatter = (value: any, type: OSD_FIELD_TYPES) => any;
+
+interface SnapshotColumn {
+  name: string;
+  /** Mapped through `getFieldType`, so it matches the non-streaming `fieldSchema`. */
+  type?: string;
+}
+
+/**
+ * Column metadata for a snapshot. Derived once per snapshot rather than per row, since the schema is
+ * constant for the lifetime of a job.
+ */
+export const snapshotColumns = (snapshot: Pick<PPLStreamSnapshot, 'schema'>): SnapshotColumn[] =>
+  (snapshot.schema ?? []).map((column) => ({
+    name: column.name,
+    type: getFieldType({ name: column.name, type: column.type }),
+  }));
 
 export const snapshotRowsToObjects = (
-  snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>
+  snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>,
+  formatter?: FieldValueFormatter
 ): Array<Record<string, unknown>> => {
-  const names = (snapshot.schema ?? []).map((column) => column.name);
+  const columns = snapshotColumns(snapshot);
   return (snapshot.datarows ?? []).map((row) =>
-    names.reduce<Record<string, unknown>>((record, name, index) => {
+    columns.reduce<Record<string, unknown>>((record, column, index) => {
       if (index < row.length) {
-        record[name] = coerceCell(row[index]);
+        const value = row[index];
+        record[column.name] =
+          formatter && column.type === 'date' ? formatter(value, OSD_FIELD_TYPES.DATE) : value;
       }
       return record;
     }, {})
@@ -75,10 +101,7 @@ export const snapshotToSearchResult = ({
       hits: rows.map((source) => ({ _index: indexName, _source: source })),
     },
     elapsedMs,
-    fieldSchema: (snapshot.schema ?? []).map((column) => ({
-      name: column.name,
-      type: column.type,
-    })),
+    fieldSchema: snapshotColumns(snapshot),
   } as ISearchResult;
 
   if (histogram) {
