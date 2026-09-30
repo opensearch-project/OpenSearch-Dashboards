@@ -1,0 +1,2 @@
+fix:
+- Prevent the hidden panel header from intercepting clicks on panel content when "Show panel title" is off ([#12812](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12812))
