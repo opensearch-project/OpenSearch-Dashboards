@@ -18,6 +18,16 @@ export interface SubmitStreamingQueryArgs {
   keepAlive?: string;
   dataSourceId?: string;
   signal?: AbortSignal;
+  /**
+   * Engine request fields the synchronous path also sends, so a streamed query is planned and
+   * reported the same way. Meaningful when false, so sent whenever defined.
+   */
+  partialResult?: boolean;
+  /** Asks the engine to report which worker pool ran the query, behind the profiling setting. */
+  profile?: boolean;
+  /** Search-highlight configuration; the engine returns matches in a `_highlight` column. */
+  highlight?: Record<string, unknown>;
+  withLongNumeralsSupport?: boolean;
 }
 
 export interface PollStreamingQueryArgs {
@@ -30,6 +40,7 @@ export interface PollStreamingQueryArgs {
   keepAlive?: string;
   dataSourceId?: string;
   signal?: AbortSignal;
+  withLongNumeralsSupport?: boolean;
 }
 
 const isNotFound = (error: unknown): boolean =>
@@ -51,12 +62,20 @@ export class PPLStreamService {
     keepAlive,
     dataSourceId,
     signal,
+    partialResult,
+    profile,
+    highlight,
+    withLongNumeralsSupport,
   }: SubmitStreamingQueryArgs): Promise<PPLStreamSnapshot> {
     return this.http.post<PPLStreamSnapshot>(PPL_STREAM_API.SUBMIT, {
       body: JSON.stringify({
         query,
         ...(waitForCompletionTimeout && { waitForCompletionTimeout }),
         ...(keepAlive && { keepAlive }),
+        ...(partialResult !== undefined && { partialResult }),
+        ...(profile && { profile }),
+        ...(highlight && { highlight }),
+        ...(withLongNumeralsSupport && { withLongNumeralsSupport }),
       }),
       ...(dataSourceId && { query: { dataSourceId } }),
       signal,
@@ -72,6 +91,7 @@ export class PPLStreamService {
     keepAlive,
     dataSourceId,
     signal,
+    withLongNumeralsSupport,
   }: PollStreamingQueryArgs): Promise<PPLStreamSnapshot> {
     try {
       return await this.http.get<PPLStreamSnapshot>(
@@ -83,6 +103,7 @@ export class PPLStreamService {
             ...(waitForCompletionTimeout && { waitForCompletionTimeout }),
             ...(keepAlive && { keepAlive }),
             ...(dataSourceId && { dataSourceId }),
+            ...(withLongNumeralsSupport && { withLongNumeralsSupport }),
           },
           signal,
         }

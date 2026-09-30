@@ -442,6 +442,8 @@ export const executeQueries = createAsyncThunk<
           queryString: streamingConfig.tableQuery,
           indexName: query.dataset?.title,
           dataSourceId: query.dataset?.dataSource?.id,
+          // The warning banner's rerun action overrides the partial-results setting for this run.
+          disablePartialResults,
           isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
         })
       );

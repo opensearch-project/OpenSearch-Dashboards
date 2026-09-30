@@ -67,6 +67,18 @@ export interface PPLStreamSnapshot {
   /** Total execution time, terminal snapshots only. */
   took?: number;
   error?: PPLStreamError;
+  /**
+   * Non-fatal warnings the engine attaches to a successful response, e.g. a partial result over a
+   * subset of indices. NOT YET PRESENT in the measured async envelope, unlike the synchronous
+   * response: declared so the client surfaces them as soon as the backend adds them, rather than
+   * needing a change on both sides.
+   */
+  warnings?: Array<{ message: string; detail?: string }>;
+  /**
+   * Query profile, requested with `profile: true`. `thread_pool` is what tells the UI the query ran
+   * on the complex worker pool. Also NOT YET PRESENT in the async envelope.
+   */
+  profile?: { thread_pool?: string };
 }
 
 const TERMINAL: ReadonlySet<PPLStreamStatus> = new Set<PPLStreamStatus>([

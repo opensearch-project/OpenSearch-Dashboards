@@ -19,6 +19,7 @@ import {
 } from '../../streaming/ppl_stream_errors';
 import { PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
+import { PARTIAL_RESULTS_SETTING } from '../../../../../common';
 import { QueryExecutionStatus, QueryResultStatus, StreamingQueryStatus } from '../types';
 import { RootState } from '../store';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -28,6 +29,7 @@ import {
   FieldValueFormatter,
   snapshotRowsToObjects,
   snapshotToSearchResult,
+  splitHighlightColumn,
 } from '../../streaming/snapshot_to_result';
 import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
 
@@ -74,6 +76,11 @@ export interface ExecuteStreamingQueryArgs {
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
+  /**
+   * Overrides the partial-results setting for this run only, as the warning banner's rerun action
+   * does on the synchronous path.
+   */
+  disablePartialResults?: boolean;
 }
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -104,7 +111,16 @@ export const executeStreamingQuery = createAsyncThunk<
 >(
   'query/executeStreamingQuery',
   async (
-    { services, cacheKey, queryString, indexName, asHistogram, dataSourceId, isCurrent },
+    {
+      services,
+      cacheKey,
+      queryString,
+      indexName,
+      asHistogram,
+      dataSourceId,
+      isCurrent,
+      disablePartialResults,
+    },
     { dispatch, signal }
   ) => {
     const stream = new PPLStreamService(services.http);
@@ -112,6 +128,7 @@ export const executeStreamingQuery = createAsyncThunk<
     let formatter: FieldValueFormatter | undefined;
 
     let heldRows: Array<Record<string, unknown>> = [];
+    let heldHighlights: unknown[] = [];
     let rowGeneration = 0;
     let offset = 0;
     let lastStreaming: StreamingQueryStatus | undefined;
@@ -151,6 +168,7 @@ export const executeStreamingQuery = createAsyncThunk<
               indexName,
               elapsedMs,
               rowGeneration,
+              highlights: heldHighlights,
             }),
           })
         );
@@ -233,17 +251,20 @@ export const executeStreamingQuery = createAsyncThunk<
     /** Absorbs one snapshot's rows according to its update mode. */
     const absorb = (snapshot: PPLStreamSnapshot) => {
       const rows = snapshotRowsToObjects(snapshot, formatter);
+      const { highlights = [] } = splitHighlightColumn(snapshot);
       if (snapshot.update_mode === 'REPLACE') {
         // Prior rows are provisional and may have been revised; adopt this view wholesale. The
         // generation advances so the replaced rows get new ids rather than inheriting the previous
         // rows' React state.
         heldRows = rows.slice(0, STREAMING_MAX_HELD_ROWS);
+        heldHighlights = highlights.slice(0, STREAMING_MAX_HELD_ROWS);
         rowGeneration += 1;
         return;
       }
       // APPEND rows are a stable prefix, so accumulate and advance past them.
       if (rows.length > 0) {
         heldRows = heldRows.concat(rows).slice(0, STREAMING_MAX_HELD_ROWS);
+        heldHighlights = heldHighlights.concat(highlights).slice(0, STREAMING_MAX_HELD_ROWS);
         offset += snapshot.size;
       }
     };
@@ -256,15 +277,33 @@ export const executeStreamingQuery = createAsyncThunk<
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
 
+      // The engine request fields the synchronous path also sends. An aggregation job has no
+      // highlights or partial-result preference to honour, so they are sent only for the table.
+      const withLongNumeralsSupport = Boolean(
+        await services.uiSettings.get('data:withLongNumerals')
+      );
       const submitted = await stream.submit({
         query: queryString,
         dataSourceId,
         signal,
+        withLongNumeralsSupport,
+        ...(asHistogram
+          ? {}
+          : {
+              partialResult:
+                !disablePartialResults &&
+                Boolean(services.uiSettings.get(PARTIAL_RESULTS_SETTING, false)),
+              profile: services.queryProfilingEnabled,
+            }),
       });
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.
       if (!submitted.id) {
         heldRows = snapshotRowsToObjects(submitted, formatter).slice(0, STREAMING_MAX_HELD_ROWS);
+        heldHighlights = (splitHighlightColumn(submitted).highlights ?? []).slice(
+          0,
+          STREAMING_MAX_HELD_ROWS
+        );
         publish(submitted, false);
         return;
       }
@@ -284,6 +323,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
         const snapshot = await stream.poll({
           id: jobId,
+          withLongNumeralsSupport,
           offset: updateMode === 'APPEND' ? offset : 0,
           count: ROWS_PER_POLL,
           dataSourceId,

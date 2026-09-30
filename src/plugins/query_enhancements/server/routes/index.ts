@@ -44,7 +44,13 @@ export const DATASOURCE_UNAVAILABLE_MESSAGE =
  */
 export async function resolveOpenSearchClient(
   context: RequestHandlerContext,
-  dataSourceId?: string
+  dataSourceId?: string,
+  /**
+   * Parses JSON preserving integers too large for a JS number, matching what the synchronous search
+   * strategy does when `data:withLongNumerals` is on. Ignored for a remote data source, whose client
+   * is configured elsewhere — the same limitation the synchronous path has.
+   */
+  withLongNumeralsSupport = false
 ): Promise<OpenSearchClient | null> {
   if (dataSourceId) {
     if (!context.dataSource?.opensearch?.getClient) {
@@ -52,7 +58,9 @@ export async function resolveOpenSearchClient(
     }
     return context.dataSource.opensearch.getClient(dataSourceId);
   }
-  return context.core.opensearch.client.asCurrentUser;
+  return withLongNumeralsSupport
+    ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
+    : context.core.opensearch.client.asCurrentUser;
 }
 
 /**

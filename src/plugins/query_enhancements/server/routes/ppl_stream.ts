@@ -77,13 +77,26 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           query: schema.string({ minLength: 1, maxLength: 65536 }),
           waitForCompletionTimeout: schema.maybe(waitForCompletionTimeoutSchema),
           keepAlive: schema.maybe(keepAliveSchema),
+          /**
+           * Forwarded verbatim to the engine so a streamed query is planned and reported the same
+           * way as the synchronous one. `partial_result` is meaningful when false — it overrides the
+           * cluster-side default — so it is sent whenever defined rather than only when true.
+           */
+          partialResult: schema.maybe(schema.boolean()),
+          profile: schema.maybe(schema.boolean()),
+          highlight: schema.maybe(schema.any()),
+          withLongNumeralsSupport: schema.maybe(schema.boolean()),
         }),
         query: schema.object({ dataSourceId: schema.maybe(schema.string()) }),
       },
     },
     requireFeature('pplStreaming', logger, async (context, req, res) => {
       try {
-        const client = await resolveOpenSearchClient(context, req.query.dataSourceId);
+        const client = await resolveOpenSearchClient(
+          context,
+          req.query.dataSourceId,
+          req.body.withLongNumeralsSupport
+        );
         if (!client) {
           return res.custom({ statusCode: 400, body: DATASOURCE_UNAVAILABLE_MESSAGE });
         }
@@ -106,6 +119,11 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
             wait_for_completion_timeout:
               req.body.waitForCompletionTimeout ?? DEFAULT_WAIT_FOR_COMPLETION,
             keep_alive: req.body.keepAlive ?? DEFAULT_KEEP_ALIVE,
+            ...(req.body.partialResult !== undefined && {
+              partial_result: req.body.partialResult,
+            }),
+            ...(req.body.profile && { profile: true }),
+            ...(req.body.highlight && { highlight: req.body.highlight }),
           },
         });
 
@@ -131,14 +149,27 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
           waitForCompletionTimeout: schema.maybe(waitForCompletionTimeoutSchema),
           keepAlive: schema.maybe(keepAliveSchema),
           dataSourceId: schema.maybe(schema.string()),
+          // Rows arrive here rather than at submit, so this matters on every poll.
+          withLongNumeralsSupport: schema.maybe(schema.boolean()),
         }),
       },
     },
     requireFeature('pplStreaming', logger, async (context, req, res) => {
       const { id } = req.params;
       try {
-        const { offset, count, waitForCompletionTimeout, keepAlive, dataSourceId } = req.query;
-        const client = await resolveOpenSearchClient(context, dataSourceId);
+        const {
+          offset,
+          count,
+          waitForCompletionTimeout,
+          keepAlive,
+          dataSourceId,
+          withLongNumeralsSupport,
+        } = req.query;
+        const client = await resolveOpenSearchClient(
+          context,
+          dataSourceId,
+          withLongNumeralsSupport
+        );
         if (!client) {
           return res.custom({ statusCode: 400, body: DATASOURCE_UNAVAILABLE_MESSAGE });
         }

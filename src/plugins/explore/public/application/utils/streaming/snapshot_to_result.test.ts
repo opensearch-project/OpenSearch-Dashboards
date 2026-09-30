@@ -6,7 +6,11 @@
 import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
 import moment from 'moment';
 import { OSD_FIELD_TYPES } from '../../../../../data/common';
-import { snapshotRowsToObjects, snapshotToSearchResult } from './snapshot_to_result';
+import {
+  snapshotRowsToObjects,
+  snapshotToSearchResult,
+  splitHighlightColumn,
+} from './snapshot_to_result';
 
 // The formatter the PPL language config registers (see query_enhancements/public/plugin.tsx), so
 // these assertions pin the streaming path to what the non-streaming path produces.
@@ -269,5 +273,118 @@ describe('snapshotToSearchResult', () => {
     });
 
     expect(result.aggregations).toEqual({ 2: { buckets } });
+  });
+});
+
+describe('splitHighlightColumn', () => {
+  // Highlights come back as an extra data column, not envelope metadata, so it has to be removed
+  // from the schema and rows or it renders as a field.
+  const withHighlight = {
+    schema: [
+      { name: 'event_id', type: 'int' },
+      { name: '_highlight', type: 'struct' },
+      { name: 'message', type: 'string' },
+    ],
+    datarows: [
+      [1, { message: ['<em>boom</em>'] }, 'boom'],
+      [2, { message: ['<em>bang</em>'] }, 'bang'],
+    ],
+  } as any;
+
+  it('removes the highlight column from the schema and rows', () => {
+    const { schema, datarows } = splitHighlightColumn(withHighlight);
+    expect(schema.map((column: any) => column.name)).toEqual(['event_id', 'message']);
+    expect(datarows).toEqual([
+      [1, 'boom'],
+      [2, 'bang'],
+    ]);
+  });
+
+  it('returns the highlights positionally aligned with the rows', () => {
+    expect(splitHighlightColumn(withHighlight).highlights).toEqual([
+      { message: ['<em>boom</em>'] },
+      { message: ['<em>bang</em>'] },
+    ]);
+  });
+
+  it('leaves a snapshot without highlights untouched', () => {
+    const result = splitHighlightColumn({
+      schema: [{ name: 'a', type: 'int' }],
+      datarows: [[1]],
+    } as any);
+    expect(result.highlights).toBeUndefined();
+    expect(result.datarows).toEqual([[1]]);
+  });
+
+  it('keeps the highlight column out of the converted rows and fieldSchema', () => {
+    expect(snapshotRowsToObjects(withHighlight)).toEqual([
+      { event_id: 1, message: 'boom' },
+      { event_id: 2, message: 'bang' },
+    ]);
+    const result = snapshotToSearchResult({
+      snapshot: withHighlight,
+      rows: [],
+      elapsedMs: 1,
+    });
+    expect(result.fieldSchema?.map((column: any) => column.name)).toEqual(['event_id', 'message']);
+  });
+
+  it('attaches each row its own highlight, as convertResult does', () => {
+    const { highlights } = splitHighlightColumn(withHighlight);
+    const result = snapshotToSearchResult({
+      snapshot: withHighlight,
+      rows: [{ event_id: 1 }, { event_id: 2 }],
+      elapsedMs: 1,
+      highlights,
+    });
+    expect((result.hits.hits[0] as any).highlight).toEqual({ message: ['<em>boom</em>'] });
+    expect((result.hits.hits[1] as any).highlight).toEqual({ message: ['<em>bang</em>'] });
+  });
+
+  it('omits highlight from a hit that has none', () => {
+    const result = snapshotToSearchResult({
+      snapshot: snapshot(),
+      rows: [{ event_id: 1 }],
+      elapsedMs: 1,
+      highlights: [undefined],
+    });
+    expect(result.hits.hits[0]).not.toHaveProperty('highlight');
+  });
+});
+
+describe('response metadata', () => {
+  // Not yet present in the async envelope, so these pin the mapping for when the backend adds it.
+  it('marks a query complex when it ran on the complex worker pool', () => {
+    const result = snapshotToSearchResult({
+      snapshot: snapshot({ profile: { thread_pool: 'sql-complex-worker' } } as any),
+      rows: [],
+      elapsedMs: 1,
+    });
+    expect(result.profile).toEqual({ queryPool: 'sql-complex-worker', isComplex: true });
+  });
+
+  it('does not mark an ordinary worker pool as complex', () => {
+    const result = snapshotToSearchResult({
+      snapshot: snapshot({ profile: { thread_pool: 'sql-worker' } } as any),
+      rows: [],
+      elapsedMs: 1,
+    });
+    expect(result.profile).toEqual({ queryPool: 'sql-worker', isComplex: false });
+  });
+
+  it('surfaces backend warnings when present', () => {
+    const warnings = [{ message: 'Partial result', detail: 'two indices were skipped' }];
+    const result = snapshotToSearchResult({
+      snapshot: snapshot({ warnings } as any),
+      rows: [],
+      elapsedMs: 1,
+    });
+    expect(result.warnings).toEqual(warnings);
+  });
+
+  it('omits profile and warnings when the envelope carries neither', () => {
+    const result = snapshotToSearchResult({ snapshot: snapshot(), rows: [], elapsedMs: 1 });
+    expect(result.profile).toBeUndefined();
+    expect(result.warnings).toBeUndefined();
   });
 });

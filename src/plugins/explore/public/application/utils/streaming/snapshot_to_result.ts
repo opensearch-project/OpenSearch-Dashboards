@@ -30,6 +30,34 @@ import type { HistogramBucket } from './snapshot_to_histogram';
 /** Formats one field value, as `convertResult`'s `processField` does. */
 export type FieldValueFormatter = (value: any, type: OSD_FIELD_TYPES) => any;
 
+/**
+ * Search highlights arrive as an extra `_highlight` data column rather than envelope metadata. The
+ * synchronous strategy splices it out of the schema and rows before building the data frame and
+ * attaches it per hit; the same is done here so the column does not render as a field.
+ */
+const HIGHLIGHT_COLUMN = '_highlight';
+
+interface SplitHighlights {
+  schema: PPLStreamSnapshot['schema'];
+  datarows: unknown[][];
+  highlights?: unknown[];
+}
+
+export const splitHighlightColumn = (
+  snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>
+): SplitHighlights => {
+  const schema = snapshot.schema ?? [];
+  const datarows = snapshot.datarows ?? [];
+  const index = schema.findIndex((column) => column.name === HIGHLIGHT_COLUMN);
+  if (index < 0) return { schema, datarows };
+
+  return {
+    schema: schema.filter((_, i) => i !== index),
+    datarows: datarows.map((row) => row.filter((_, i) => i !== index)),
+    highlights: datarows.map((row) => row[index]),
+  };
+};
+
 interface SnapshotColumn {
   name: string;
   /** Mapped through `getFieldType`, so it matches the non-streaming `fieldSchema`. */
@@ -41,7 +69,7 @@ interface SnapshotColumn {
  * constant for the lifetime of a job.
  */
 export const snapshotColumns = (snapshot: Pick<PPLStreamSnapshot, 'schema'>): SnapshotColumn[] =>
-  (snapshot.schema ?? []).map((column) => ({
+  splitHighlightColumn({ schema: snapshot.schema, datarows: [] }).schema.map((column) => ({
     name: column.name,
     type: getFieldType({ name: column.name, type: column.type }),
   }));
@@ -51,7 +79,8 @@ export const snapshotRowsToObjects = (
   formatter?: FieldValueFormatter
 ): Array<Record<string, unknown>> => {
   const columns = snapshotColumns(snapshot);
-  return (snapshot.datarows ?? []).map((row) =>
+  const { datarows } = splitHighlightColumn(snapshot);
+  return datarows.map((row) =>
     columns.reduce<Record<string, unknown>>((record, column, index) => {
       if (index < row.length) {
         const value = row[index];
@@ -74,6 +103,8 @@ export interface SnapshotToSearchResultArgs {
    * append but change when a REPLACE snapshot supersedes them.
    */
   rowGeneration?: number;
+  /** Per-row search highlights, positionally aligned with `rows`. */
+  highlights?: unknown[];
   /**
    * Histogram buckets, keyed by the aggregation id from the histogram config so the chart finds them
    * where it expects.
@@ -94,6 +125,7 @@ export const snapshotToSearchResult = ({
   histogram,
   totalOverride,
   rowGeneration = 0,
+  highlights,
 }: SnapshotToSearchResultArgs): ISearchResult => {
   const result = {
     took: snapshot.took ?? elapsedMs,
@@ -112,10 +144,20 @@ export const snapshotToSearchResult = ({
         _id: `${rowGeneration}:${index}`,
         _index: indexName,
         _source: source,
+        ...(highlights?.[index] ? { highlight: highlights[index] } : {}),
       })),
     },
     elapsedMs,
     fieldSchema: snapshotColumns(snapshot),
+    // Same mapping the synchronous strategy applies: 'sql-complex-worker' is what marks a complex
+    // query, which the save dialog warns about.
+    ...(snapshot.profile?.thread_pool && {
+      profile: {
+        queryPool: snapshot.profile.thread_pool,
+        isComplex: snapshot.profile.thread_pool === 'sql-complex-worker',
+      },
+    }),
+    ...(snapshot.warnings?.length ? { warnings: snapshot.warnings } : {}),
   } as ISearchResult;
 
   if (histogram) {

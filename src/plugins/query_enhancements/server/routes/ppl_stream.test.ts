@@ -38,11 +38,21 @@ describe('registerPPLStreamRoutes', () => {
     'discover:aggregationSampleSize': 10000,
   };
 
+  const longNumeralsRequest = jest
+    .fn()
+    .mockResolvedValue({ body: { id: 'ln', status: 'RUNNING' } });
+
   const contextWith = (request: jest.Mock, getClient?: jest.Mock, uiSettingsGet?: jest.Mock) =>
     ({
       ...(getClient ? { dataSource: { opensearch: { getClient } } } : {}),
       core: {
-        opensearch: { client: { asCurrentUser: { transport: { request } } } },
+        opensearch: {
+          client: {
+            asCurrentUser: { transport: { request } },
+            // Parses integers too large for a JS number; selected by withLongNumeralsSupport.
+            asCurrentUserWithLongNumeralsSupport: { transport: { request: longNumeralsRequest } },
+          },
+        },
         uiSettings: {
           client: {
             get: uiSettingsGet ?? jest.fn(async (key: string) => SAMPLE_SIZES[key]),
@@ -57,6 +67,72 @@ describe('registerPPLStreamRoutes', () => {
         },
       },
     }) as any;
+
+  describe('engine request fields', () => {
+    // The synchronous path forwards these, so the async one must too or the same query is planned
+    // and reported differently depending on whether streaming is on.
+    const submitWith = async (body: Record<string, unknown>) => {
+      const { submit } = setup();
+      const request = jest.fn().mockResolvedValue({ body: { id: 'job-1', status: 'RUNNING' } });
+      await submit.handler(
+        contextWith(request),
+        { body: { query: 'source=logs', ...body }, query: {} } as any,
+        createResponse() as any
+      );
+      return request.mock.calls[0][0].body;
+    };
+
+    it('forwards partial_result when false, which overrides the cluster default', async () => {
+      expect(await submitWith({ partialResult: false })).toMatchObject({ partial_result: false });
+    });
+
+    it('forwards partial_result when true', async () => {
+      expect(await submitWith({ partialResult: true })).toMatchObject({ partial_result: true });
+    });
+
+    it('omits partial_result when the client expressed no preference', async () => {
+      expect(await submitWith({})).not.toHaveProperty('partial_result');
+    });
+
+    it('asks the engine to profile only when requested', async () => {
+      expect(await submitWith({ profile: true })).toMatchObject({ profile: true });
+      expect(await submitWith({ profile: false })).not.toHaveProperty('profile');
+    });
+
+    it('forwards the highlight configuration', async () => {
+      const highlight = { fields: { message: {} } };
+      expect(await submitWith({ highlight })).toMatchObject({ highlight });
+    });
+
+    it('uses the long-numerals client on submit when asked', async () => {
+      const { submit } = setup();
+      longNumeralsRequest.mockClear();
+      const request = jest.fn().mockResolvedValue({ body: {} });
+      await submit.handler(
+        contextWith(request),
+        { body: { query: 'source=logs', withLongNumeralsSupport: true }, query: {} } as any,
+        createResponse() as any
+      );
+
+      expect(request).not.toHaveBeenCalled();
+      expect(longNumeralsRequest).toHaveBeenCalled();
+    });
+
+    // Rows arrive on polls, not at submit, so the poll path matters most here.
+    it('uses the long-numerals client on poll when asked', async () => {
+      const { poll } = setup();
+      longNumeralsRequest.mockClear();
+      const request = jest.fn().mockResolvedValue({ body: {} });
+      await poll.handler(
+        contextWith(request),
+        { params: { id: 'job-1' }, query: { withLongNumeralsSupport: true } } as any,
+        createResponse() as any
+      );
+
+      expect(request).not.toHaveBeenCalled();
+      expect(longNumeralsRequest).toHaveBeenCalled();
+    });
+  });
 
   describe('submit', () => {
     it('selects the async path with defaults and requests the JDBC format', async () => {

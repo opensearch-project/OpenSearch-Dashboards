@@ -31,6 +31,9 @@ jest.mock('../../streaming/ppl_stream_service', () => ({
 const pplFormatter = jest.fn((value: any) => value);
 const services = {
   http: {},
+  // The thunk reads the partial-results and long-numerals settings to forward them to the engine.
+  uiSettings: { get: jest.fn((_key: string, fallback?: unknown) => fallback) },
+  queryProfilingEnabled: false,
   data: {
     query: {
       queryString: {
@@ -543,6 +546,77 @@ describe('executeStreamingQuery', () => {
     const final = statuses[statuses.length - 1]?.status;
 
     expect(final?.status).toBe('error');
+  });
+
+  describe('engine request fields', () => {
+    // The synchronous path sends these, so a streamed query has to as well or it is planned and
+    // reported differently from the same query run without streaming.
+    it('forwards the partial-results preference from the setting', async () => {
+      services.uiSettings.get.mockImplementation((key: string) =>
+        key === 'explore:enablePartialResults' ? true : undefined
+      );
+      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
+
+      await run();
+
+      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ partialResult: true }));
+    });
+
+    // The rerun action behind the warning banner has to win over the setting for that one run.
+    it('lets disablePartialResults override the setting', async () => {
+      services.uiSettings.get.mockImplementation((key: string) =>
+        key === 'explore:enablePartialResults' ? true : undefined
+      );
+      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
+
+      await run({ disablePartialResults: true });
+
+      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ partialResult: false }));
+    });
+
+    it('asks the engine to profile only when profiling is enabled', async () => {
+      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
+
+      await run();
+      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ profile: false }));
+
+      services.queryProfilingEnabled = true;
+      mockSubmit.mockClear();
+      await run();
+      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ profile: true }));
+      services.queryProfilingEnabled = false;
+    });
+
+    it('requests long-numeral parsing when the setting is on, on submit and on every poll', async () => {
+      services.uiSettings.get.mockImplementation((key: string) =>
+        key === 'data:withLongNumerals' ? true : undefined
+      );
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      mockPoll.mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED' }));
+
+      await run();
+
+      expect(mockSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ withLongNumeralsSupport: true })
+      );
+      expect(mockPoll).toHaveBeenCalledWith(
+        expect.objectContaining({ withLongNumeralsSupport: true })
+      );
+    });
+
+    // An aggregation job returns buckets, so neither field applies to it.
+    it('sends neither preference for a histogram job', async () => {
+      services.uiSettings.get.mockImplementation((key: string) =>
+        key === 'explore:enablePartialResults' ? true : undefined
+      );
+      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
+
+      await run({ asHistogram: { aggId: '2' } });
+
+      const args = mockSubmit.mock.calls[0][0];
+      expect(args).not.toHaveProperty('partialResult');
+      expect(args).not.toHaveProperty('profile');
+    });
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {
