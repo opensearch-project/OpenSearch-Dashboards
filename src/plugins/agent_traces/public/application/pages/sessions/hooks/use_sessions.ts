@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 import { RootState } from '../../../utils/state_management/store';
 import { usePPLQueryDeps, useTimeVersion } from '../../traces/hooks/use_ppl_query_deps';
-import { splitPplWhereAndTail } from '../../traces/table_shared';
+import { extractSpanFilterQuery, splitPplCommands } from '../../traces/table_shared';
 import { transformPPLDataToTraceHits } from '../../traces/trace_details/traces/ppl_to_trace_hits';
 import { hitsToAgentSpans, spanToRow } from '../../traces/hooks/tree_utils';
 import {
@@ -33,6 +33,10 @@ export interface UseSessionsResult {
   error: string | null;
   elapsedMs: number | null;
   refresh: () => void;
+  /** Commands in the user's query that the Sessions view does not apply (stats, head, ...). */
+  ignoredCommands: string[];
+  /** Whether the user's query filters spans (so an empty list means "no match"). */
+  hasFilter: boolean;
 }
 
 /**
@@ -53,6 +57,8 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
   const [error, setError] = useState<string | null>(null);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [refreshCounter, setRefreshCounter] = useState(0);
+  const [ignoredCommands, setIgnoredCommands] = useState<string[]>([]);
+  const [hasFilter, setHasFilter] = useState(false);
   const requestIdRef = useRef(0);
 
   const fetchSessions = useCallback(async () => {
@@ -63,7 +69,11 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
     setError(null);
 
     try {
-      const { whereQuery } = splitPplWhereAndTail(baseQueryString);
+      // Row-level filters select which spans (and so which sessions) match.
+      const { filterQuery: whereQuery, ignoredCommands: ignored } =
+        extractSpanFilterQuery(baseQueryString);
+      setIgnoredCommands(ignored);
+      setHasFilter(splitPplCommands(whereQuery).length > 1);
       const source = getSourceCommand(whereQuery);
 
       // Fields panel facets, counted per session (runs alongside the list queries).
@@ -157,5 +167,5 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
 
   const refresh = useCallback(() => setRefreshCounter((c) => c + 1), []);
 
-  return { sessions, loading, error, elapsedMs, refresh };
+  return { sessions, loading, error, elapsedMs, refresh, ignoredCommands, hasFilter };
 };

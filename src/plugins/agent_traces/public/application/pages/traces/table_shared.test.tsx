@@ -14,6 +14,8 @@ import {
   TableEmptyState,
   hitToBaseRow,
   DataTableInfoBar,
+  extractSpanFilterQuery,
+  splitPplCommands,
 } from './table_shared';
 
 describe('table_shared', () => {
@@ -324,5 +326,30 @@ describe('table_shared', () => {
       fireEvent.click(switchEl);
       expect(onWrapChange).toHaveBeenCalledWith(true);
     });
+  });
+});
+
+describe('splitPplCommands', () => {
+  it('splits on top-level pipes only', () => {
+    expect(splitPplCommands("source = t | where name = 'a|b' | where `x|y` = 1")).toEqual([
+      'source = t',
+      "where name = 'a|b'",
+      'where `x|y` = 1',
+    ]);
+  });
+});
+
+describe('extractSpanFilterQuery', () => {
+  it('keeps row-level commands in order, including filters after eval', () => {
+    expect(extractSpanFilterQuery('source = t | eval x = 1 | where x = 2')).toEqual({
+      filterQuery: 'source = t | eval x = 1 | where x = 2',
+      ignoredCommands: [],
+    });
+  });
+
+  it('reports reshaping commands and drops sort silently', () => {
+    expect(
+      extractSpanFilterQuery('source = t | where a = 1 | sort - b | stats count() by c | head 5')
+    ).toEqual({ filterQuery: 'source = t | where a = 1', ignoredCommands: ['stats', 'head'] });
   });
 });

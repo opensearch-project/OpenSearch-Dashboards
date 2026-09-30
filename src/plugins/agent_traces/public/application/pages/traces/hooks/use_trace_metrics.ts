@@ -9,7 +9,7 @@ import { PPLService } from '../trace_details/data_fetching/ppl_request_helpers';
 import { Dataset } from '../../../../../../data/common';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
-import { splitPplWhereAndTail } from '../table_shared';
+import { extractSpanFilterQuery } from '../table_shared';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 
 export interface TraceMetrics {
@@ -71,7 +71,8 @@ const doFetchMetrics = async (
   filteredQuery: string
 ): Promise<TraceMetrics> => {
   const genAiFilter = `where isnotnull(\`attributes.gen_ai.operation.name\`)`;
-  const { whereQuery } = splitPplWhereAndTail(filteredQuery);
+  // Row-level filters only (where, eval, ...): a filter placed after eval still applies.
+  const { filterQuery: whereQuery } = extractSpanFilterQuery(filteredQuery);
 
   // Run all queries in parallel
   // Note: User non-where commands (head, sort, etc.) are intentionally excluded from stats queries.

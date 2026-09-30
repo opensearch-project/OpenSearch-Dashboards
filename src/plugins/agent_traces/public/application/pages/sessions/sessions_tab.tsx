@@ -30,7 +30,7 @@ export const SessionsTab = () => {
   }, [uiSettings]);
   const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
 
-  const { sessions, loading, error, elapsedMs } = useSessions(formatTs);
+  const { sessions, loading, error, elapsedMs, ignoredCommands, hasFilter } = useSessions(formatTs);
   const [wrapCellText, setWrapCellText] = useState(false);
   const [selected, setSelected] = useState<SessionRow | null>(null);
 
@@ -57,6 +57,28 @@ export const SessionsTab = () => {
       >
         {error}
       </EuiCallOut>
+    );
+  } else if (sessions.length === 0 && hasFilter) {
+    body = (
+      <EuiEmptyPrompt
+        iconType="search"
+        title={
+          <h3>
+            {i18n.translate('agentTraces.sessions.noMatchTitle', {
+              defaultMessage: 'No sessions match your query',
+            })}
+          </h3>
+        }
+        body={
+          <p>
+            {i18n.translate('agentTraces.sessions.noMatchBody', {
+              defaultMessage:
+                'No span in any session matches the current filter and time range. Try a broader filter or time range.',
+            })}
+          </p>
+        }
+        data-test-subj="agentTracesSessionsNoMatch"
+      />
     );
   } else if (sessions.length === 0) {
     body = (
@@ -107,6 +129,19 @@ export const SessionsTab = () => {
           wrapCellText={wrapCellText}
           onWrapCellTextChange={setWrapCellText}
         />
+        {ignoredCommands.length > 0 && !error && (
+          <EuiCallOut
+            size="s"
+            iconType="iInCircle"
+            className="agtSessionsTab__ignoredCallout"
+            data-test-subj="agentTracesSessionsIgnoredCommands"
+            title={i18n.translate('agentTraces.sessions.ignoredCommands', {
+              defaultMessage:
+                'Sessions applies only row filters (where, eval, parse). Not applied here: {commands}. Use the Traces or Visualization tab for these.',
+              values: { commands: ignoredCommands.join(', ') },
+            })}
+          />
+        )}
         {body}
       </div>
       {selected && (

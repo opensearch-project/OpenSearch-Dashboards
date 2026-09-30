@@ -92,6 +92,54 @@ export const splitPplWhereAndTail = (
   };
 };
 
+/** PPL commands that filter or annotate span rows without changing their shape. */
+const ROW_LEVEL_COMMANDS = new Set(['where', 'eval', 'parse', 'grok', 'regex', 'fillnull']);
+
+/** Split a PPL query on top-level pipes, ignoring pipes inside quotes or backticks. */
+export const splitPplCommands = (queryString: string): string[] => {
+  const parts: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  for (const ch of queryString) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      current += ch;
+    } else if (ch === "'" || ch === '"' || ch === '`') {
+      quote = ch;
+      current += ch;
+    } else if (ch === '|') {
+      parts.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  parts.push(current.trim());
+  return parts.filter(Boolean);
+};
+
+/**
+ * The span-level filter in a PPL query: the source plus every row-level command
+ * (where, eval, parse, ...), in order. Commands that reshape rows (stats, head, fields,
+ * dedup, ...) are returned separately so callers can tell the user they were not applied.
+ * `sort` is dropped silently since it never changes which rows match.
+ */
+export const extractSpanFilterQuery = (
+  queryString: string
+): { filterQuery: string; ignoredCommands: string[] } => {
+  const kept: string[] = [];
+  const ignored: string[] = [];
+  splitPplCommands(queryString).forEach((part, index) => {
+    const command = part.split(/\s+/)[0].toLowerCase();
+    if ((index === 0 && command.startsWith('source')) || ROW_LEVEL_COMMANDS.has(command)) {
+      kept.push(part);
+    } else if (command !== 'sort') {
+      ignored.push(command);
+    }
+  });
+  return { filterQuery: kept.join(' | '), ignoredCommands: [...new Set(ignored)] };
+};
+
 /**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
  * Subquery brackets [...] are masked so that head inside subqueries is ignored.
