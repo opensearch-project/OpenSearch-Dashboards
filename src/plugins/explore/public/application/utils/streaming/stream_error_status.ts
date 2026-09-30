@@ -3,6 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Maps a streaming failure onto the error shape the non-streaming path produces.
+ *
+ * The backend reports a failed job's cause under `error` on the snapshot, and an HTTP failure under
+ * `body` on the rejection. Both need the same shape, because consumers read specific fields from it:
+ * the Traces charts recognise a missing field by `message.type === 'SemanticCheckException'` and a
+ * `message.details` containing "can't resolve Symbol", and name the field. Collapsing every failure
+ * into one generic message hides that.
+ */
+
 import { i18n } from '@osd/i18n';
 import type { PPLStreamError } from '../../../../../query_enhancements/common';
 import { QueryResultStatus } from '../state_management/types';
@@ -15,13 +28,7 @@ const UNKNOWN_ERROR = i18n.translate('explore.streaming.error.unknown', {
 
 const DEFAULT_STATUS_CODE = 500;
 
-/**
- * The backend reports a failed job's cause under `error` on the snapshot, and an HTTP failure under
- * `body` on the rejection. Both are mapped onto the shape the non-streaming path produces, because
- * consumers read specific fields from it: the Traces charts, for example, recognise a missing field
- * by `message.type === 'SemanticCheckException'` and a `message.details` containing
- * "can't resolve Symbol". Collapsing every failure into one generic message hides that.
- */
+const errorName = (error: unknown): string | undefined => (error as { name?: string })?.name;
 
 /** The structured cause the backend attaches to a FAILED snapshot. */
 export const streamJobError = (error: PPLStreamError | undefined): QueryError => {
@@ -50,6 +57,15 @@ interface HttpErrorBody {
   message?: string;
 }
 
+const parseErrorBody = (message?: string): { type?: string; reason?: string; details?: string } => {
+  if (!message) return {};
+  try {
+    return JSON.parse(message)?.error ?? {};
+  } catch {
+    return {};
+  }
+};
+
 /**
  * A rejected request from the stream routes.
  *
@@ -61,24 +77,16 @@ export const streamRequestError = (error: unknown): QueryError => {
   const body = (error as { body?: HttpErrorBody })?.body;
   const fallbackMessage =
     body?.message || (error instanceof Error ? error.message : undefined) || UNKNOWN_ERROR;
+  const parsed = parseErrorBody(body?.message);
+  const reason = parsed.reason || fallbackMessage;
 
-  let parsed: { error?: { type?: string; reason?: string; details?: string } } | undefined;
-  if (body?.message) {
-    try {
-      parsed = JSON.parse(body.message);
-    } catch {
-      parsed = undefined;
-    }
-  }
-
-  const reason = parsed?.error?.reason || fallbackMessage;
   return {
     statusCode: body?.statusCode ?? DEFAULT_STATUS_CODE,
-    error: body?.error || (error as { name?: string })?.name || UNKNOWN_ERROR,
+    error: body?.error || errorName(error) || UNKNOWN_ERROR,
     message: {
-      details: parsed?.error?.details || reason,
+      details: parsed.details || reason,
       reason,
-      type: parsed?.error?.type ?? (error as { name?: string })?.name,
+      type: parsed.type ?? errorName(error),
     },
     originalErrorMessage: fallbackMessage,
   };

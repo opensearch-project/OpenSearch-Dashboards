@@ -32,18 +32,18 @@ type AsyncLocalStore = NonNullable<
 const readFlag = (config: unknown, path: readonly string[]): boolean =>
   path.reduce<any>((node, key) => (node == null ? undefined : node[key]), config) === true;
 
-/** Every flag off. The registered capability defaults, before the switcher overrides them. */
-export const defaultFeatureFlags = (): QueryEnhancementsFeatureFlags =>
-  QUERY_ENHANCEMENTS_FEATURES.reduce((flags, feature) => {
-    flags[feature] = false;
-    return flags;
-  }, {} as QueryEnhancementsFeatureFlags);
-
 export const resolveFeatureFlags = (config: unknown): QueryEnhancementsFeatureFlags =>
   QUERY_ENHANCEMENTS_FEATURES.reduce((flags, feature) => {
     flags[feature] = readFlag(config, QUERY_ENHANCEMENTS_FEATURE_FLAGS[feature]);
     return flags;
   }, {} as QueryEnhancementsFeatureFlags);
+
+/**
+ * Every flag off — the registered capability defaults, before the switcher overrides them. Resolved
+ * from no config at all, so it cannot drift from what an unreadable or empty config produces.
+ */
+export const defaultFeatureFlags = (): QueryEnhancementsFeatureFlags =>
+  resolveFeatureFlags(undefined);
 
 /**
  * Resolves every flag for the current request.

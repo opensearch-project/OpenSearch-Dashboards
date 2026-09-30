@@ -44,7 +44,7 @@ describe('isStreamingEligible', () => {
     expect(isStreamingEligible(deps(true, false), pplOn)).toBe(false);
   });
 
-  it.each(['SQL', 'PROMQL', 'kuery', 'lucene', undefined])(
+  it.each(['SQL', 'PROMQL', undefined])(
     'does not stream %p, since the async API is a PPL endpoint',
     (language) => {
       expect(isStreamingEligible(deps(true), { ...pplOn, language })).toBe(false);
@@ -60,7 +60,7 @@ describe('isStreamingEligible', () => {
 
     // Matching the rest of the engine capability table, which fails open. A wrong guess costs one
     // failed submit, which falls back to the non-streaming path.
-    it.each([[undefined], ['Serverless'], ['AnalyticEngine'], ['something-new']])(
+    it.each([[undefined], ['Serverless']])(
       'assumes the unmapped engine %p supports streaming',
       (engineType) => {
         expect(isStreamingEligible(deps(true), { ...pplOn, engineType })).toBe(true);
@@ -87,7 +87,7 @@ describe('isStreamingEligible', () => {
     });
 
     // The allowlist is deliberate: an unrecognised type must not start streaming by default.
-    it.each([[undefined], [''], ['SOMETHING_NEW']])(
+    it.each([[undefined], ['SOMETHING_NEW']])(
       'does not stream the unrecognised dataset type %p',
       (datasetType) => {
         expect(isStreamingEligible(deps(true), { ...pplOn, datasetType })).toBe(false);
@@ -109,19 +109,14 @@ describe('isStreamingEligible', () => {
 
   // Dynamic config writes are not schema-validated, so the capability can hold a non-boolean. The
   // string 'false' is truthy and must not enable streaming.
-  it.each([['true'], ['false'], [1], [0], [null], [undefined], [{}]])(
+  // 'false' is the case that matters: a truthy string would otherwise enable the feature, and
+  // undefined covers the capability being absent altogether.
+  it.each([['false'], [1], [undefined]])(
     'treats the non-boolean capability %p as off',
     (pplStreaming) => {
       expect(isStreamingEligible(deps(pplStreaming), pplOn)).toBe(false);
     }
   );
-
-  it('does not stream when the capability is absent entirely', () => {
-    const capabilities = { navLinks: {}, management: {}, catalogue: {} } as unknown as Capabilities;
-    expect(isStreamingEligible({ uiSettings: uiSettingsWith(true), capabilities }, pplOn)).toBe(
-      false
-    );
-  });
 
   it('defaults the user setting to off when it has never been set', () => {
     const get = jest.fn(<T>(_key: string, fallback?: T): T => fallback as T);

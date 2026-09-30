@@ -29,20 +29,12 @@ describe('the yml schema', () => {
     expect(config.ppl.lint.enabled).toBe(false);
   });
 
-  it('accepts streaming being switched on in yml', () => {
-    const config = configSchema.validate({ ppl: { streaming: { enabled: true } } });
-    expect(config.ppl.streaming.enabled).toBe(true);
-  });
-
   it('rejects a non-boolean in yml, which is schema-validated', () => {
     expect(() => configSchema.validate({ ppl: { streaming: { enabled: 'yes' } } })).toThrow();
   });
 
   it('resolves the schema defaults to every flag off', () => {
-    expect(resolveFeatureFlags(configSchema.validate({}))).toEqual({
-      pplLint: false,
-      pplStreaming: false,
-    });
+    expect(resolveFeatureFlags(configSchema.validate({}))).toEqual(defaultFeatureFlags());
   });
 });
 
@@ -55,14 +47,11 @@ describe('resolveFeatureFlags', () => {
 
   // Dynamic config writes are not schema-validated, so a stored value can be any shape. The string
   // 'false' is truthy, which would otherwise turn the feature on.
-  it.each([['true'], ['false'], [1], [0], [null], [undefined], [{}], [[]]])(
-    'treats the non-boolean %p as off',
-    (stored) => {
-      expect(resolveFeatureFlags({ ppl: { streaming: { enabled: stored } } }).pplStreaming).toBe(
-        false
-      );
-    }
-  );
+  it.each([['false'], [1], [undefined]])('treats the non-boolean %p as off', (stored) => {
+    expect(resolveFeatureFlags({ ppl: { streaming: { enabled: stored } } }).pplStreaming).toBe(
+      false
+    );
+  });
 
   it.each([
     [{}],

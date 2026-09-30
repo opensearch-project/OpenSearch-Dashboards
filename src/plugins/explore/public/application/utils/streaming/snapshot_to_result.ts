@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getFieldType, OSD_FIELD_TYPES } from '../../../../../data/common';
-import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
-import { ISearchResult } from '../state_management/slices';
-import type { HistogramBucket } from './snapshot_to_histogram';
-
-/**
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Converts a streaming PPL snapshot into the `ISearchResult` the results table already renders.
  *
  * The synchronous path reaches the same shape through the server search strategy (`createDataFrame`)
@@ -27,6 +25,11 @@ import type { HistogramBucket } from './snapshot_to_histogram';
  * arrays arrive as strings.
  */
 
+import { getFieldType, OSD_FIELD_TYPES } from '../../../../../data/common';
+import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
+import { ISearchResult } from '../state_management/slices';
+import type { HistogramBucket } from './snapshot_to_histogram';
+
 /** Formats one field value, as `convertResult`'s `processField` does. */
 export type FieldValueFormatter = (value: any, type: OSD_FIELD_TYPES) => any;
 
@@ -37,22 +40,18 @@ export type FieldValueFormatter = (value: any, type: OSD_FIELD_TYPES) => any;
  */
 const HIGHLIGHT_COLUMN = '_highlight';
 
-interface SplitHighlights {
-  schema: PPLStreamSnapshot['schema'];
-  datarows: unknown[][];
-  highlights?: unknown[];
-}
+const highlightIndex = (schema: PPLStreamSnapshot['schema'] = []): number =>
+  schema.findIndex((column) => column.name === HIGHLIGHT_COLUMN);
 
+/** Per-row highlights, and the rows with that column removed. */
 export const splitHighlightColumn = (
   snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>
-): SplitHighlights => {
-  const schema = snapshot.schema ?? [];
+): { datarows: unknown[][]; highlights?: unknown[] } => {
   const datarows = snapshot.datarows ?? [];
-  const index = schema.findIndex((column) => column.name === HIGHLIGHT_COLUMN);
-  if (index < 0) return { schema, datarows };
+  const index = highlightIndex(snapshot.schema);
+  if (index < 0) return { datarows };
 
   return {
-    schema: schema.filter((_, i) => i !== index),
     datarows: datarows.map((row) => row.filter((_, i) => i !== index)),
     highlights: datarows.map((row) => row[index]),
   };
@@ -65,14 +64,16 @@ interface SnapshotColumn {
 }
 
 /**
- * Column metadata for a snapshot. Derived once per snapshot rather than per row, since the schema is
- * constant for the lifetime of a job.
+ * Column metadata for a snapshot, aligned with the rows `splitHighlightColumn` returns. Derived once
+ * per snapshot rather than per row, since the schema is constant for the lifetime of a job.
  */
 export const snapshotColumns = (snapshot: Pick<PPLStreamSnapshot, 'schema'>): SnapshotColumn[] =>
-  splitHighlightColumn({ schema: snapshot.schema, datarows: [] }).schema.map((column) => ({
-    name: column.name,
-    type: getFieldType({ name: column.name, type: column.type }),
-  }));
+  (snapshot.schema ?? [])
+    .filter((column) => column.name !== HIGHLIGHT_COLUMN)
+    .map((column) => ({
+      name: column.name,
+      type: getFieldType({ name: column.name, type: column.type }),
+    }));
 
 export const snapshotRowsToObjects = (
   snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows'>,

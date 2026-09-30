@@ -291,10 +291,8 @@ describe('splitHighlightColumn', () => {
     ],
   } as any;
 
-  it('removes the highlight column from the schema and rows', () => {
-    const { schema, datarows } = splitHighlightColumn(withHighlight);
-    expect(schema.map((column: any) => column.name)).toEqual(['event_id', 'message']);
-    expect(datarows).toEqual([
+  it('removes the highlight column from the rows', () => {
+    expect(splitHighlightColumn(withHighlight).datarows).toEqual([
       [1, 'boom'],
       [2, 'bang'],
     ]);

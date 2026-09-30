@@ -20,6 +20,9 @@ import {
 import { PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
 import { PARTIAL_RESULTS_SETTING } from '../../../../../common';
+
+/** Core setting controlling whether integers too large for a JS number keep their precision. */
+const LONG_NUMERALS_SETTING = 'data:withLongNumerals';
 import { QueryExecutionStatus, QueryResultStatus, StreamingQueryStatus } from '../types';
 import { RootState } from '../store';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -277,10 +280,10 @@ export const executeStreamingQuery = createAsyncThunk<
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
 
-      // The engine request fields the synchronous path also sends. An aggregation job has no
-      // highlights or partial-result preference to honour, so they are sent only for the table.
+      // The engine request fields the synchronous path also sends. An aggregation job returns
+      // buckets, so the partial-result and profiling preferences apply only to the table.
       const withLongNumeralsSupport = Boolean(
-        await services.uiSettings.get('data:withLongNumerals')
+        services.uiSettings.get(LONG_NUMERALS_SETTING, false)
       );
       const submitted = await stream.submit({
         query: queryString,
@@ -299,11 +302,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.
       if (!submitted.id) {
-        heldRows = snapshotRowsToObjects(submitted, formatter).slice(0, STREAMING_MAX_HELD_ROWS);
-        heldHighlights = (splitHighlightColumn(submitted).highlights ?? []).slice(
-          0,
-          STREAMING_MAX_HELD_ROWS
-        );
+        absorb(submitted);
         publish(submitted, false);
         return;
       }
