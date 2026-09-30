@@ -4,7 +4,7 @@
  */
 
 import { of } from 'rxjs';
-import { agentTracesNavPopover, agentSpansNavPopover } from './nav_popover';
+import { agentTracesNavPopover, agentSessionsNavPopover } from './nav_popover';
 import { httpServiceMock } from '../../../core/public/mocks';
 import { NavPopoverServices } from '../../../core/public';
 
@@ -20,7 +20,7 @@ describe('agent_traces nav popovers', () => {
 
   describe.each([
     ['Traces', agentTracesNavPopover, 'agentTraces/traces', 'traces'],
-    ['Spans', agentSpansNavPopover, 'agentTraces/spans', 'spans'],
+    ['Sessions', agentSessionsNavPopover, 'agentTraces/sessions', 'sessions'],
   ])('%s popover', (_label, popover, appId, tab) => {
     it('declares exactly newSearch + browseSaved (no Logs action)', () => {
       expect((popover.actions ?? []).map((a) => a.id)).toEqual(['newSearch', 'browseSaved']);

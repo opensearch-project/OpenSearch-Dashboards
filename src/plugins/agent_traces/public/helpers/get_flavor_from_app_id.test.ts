@@ -10,6 +10,7 @@ import {
   PLUGIN_ID,
   AGENT_TRACES_NAV_ID,
   AGENT_SPANS_NAV_ID,
+  AGENT_SESSIONS_NAV_ID,
 } from '../../common';
 import { AgentTracesServices } from '../types';
 
@@ -33,6 +34,7 @@ describe('getFlavorFromAppId', () => {
 
   it('returns Traces for the agent spans nav ID', () => {
     expect(getFlavorFromAppId(AGENT_SPANS_NAV_ID)).toBe(AgentTracesFlavor.Traces);
+    expect(getFlavorFromAppId(AGENT_SESSIONS_NAV_ID)).toBe(AgentTracesFlavor.Traces);
   });
 
   it('extracts flavor from slash-separated app ID', () => {

@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { NavPopoverConfig } from '../../../core/public';
-import { AGENT_TRACES_NAV_ID, AGENT_SPANS_NAV_ID } from '../common';
+import { AGENT_TRACES_NAV_ID, AGENT_SESSIONS_NAV_ID } from '../common';
 
 /**
  * Hash path that lands the agent-traces app on the given tab and asks it to open
@@ -13,19 +13,20 @@ import { AGENT_TRACES_NAV_ID, AGENT_SPANS_NAV_ID } from '../common';
  * in the hash query). A nav-popover action only receives navigateToApp, so it
  * can't open the flyout itself — it navigates with this marker instead.
  */
-const openSavedPath = (tab: 'traces' | 'spans') =>
+type AgentNavTab = 'traces' | 'sessions';
+
+const openSavedPath = (tab: AgentNavTab) =>
   `#/?_openSaved=true&_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
 
 /** Hash path for a fresh search on the given tab. */
-const newSearchPath = (tab: 'traces' | 'spans') =>
-  `#/?_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
+const newSearchPath = (tab: AgentNavTab) => `#/?_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
 
 /**
- * Nav-popover config for an agent-monitoring flavor (Traces/Spans): quick
+ * Nav-popover config for an agent-monitoring entry (Traces/Sessions): quick
  * actions to start a new search or browse saved searches. The item still
  * navigates to the flavor on direct click.
  */
-function buildAgentNavPopover(appId: string, tab: 'traces' | 'spans'): NavPopoverConfig {
+function buildAgentNavPopover(appId: string, tab: AgentNavTab): NavPopoverConfig {
   return {
     actions: [
       {
@@ -54,7 +55,7 @@ export const agentTracesNavPopover: NavPopoverConfig = buildAgentNavPopover(
   'traces'
 );
 
-export const agentSpansNavPopover: NavPopoverConfig = buildAgentNavPopover(
-  AGENT_SPANS_NAV_ID,
-  'spans'
+export const agentSessionsNavPopover: NavPopoverConfig = buildAgentNavPopover(
+  AGENT_SESSIONS_NAV_ID,
+  'sessions'
 );
