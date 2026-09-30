@@ -33,7 +33,6 @@ import {
   PLUGIN_NAME,
   AGENT_TRACES_NAV_ID,
   AGENT_SPANS_NAV_ID,
-  AGENT_SESSIONS_NAV_ID,
 } from '../common';
 import {
   setDocViewsRegistry,
@@ -64,7 +63,8 @@ import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
 import { AgentTracesIcon } from './assets/agent_traces_icon';
-import { agentTracesNavPopover, agentSessionsNavPopover } from './nav_popover';
+import { AgentSpansIcon } from './assets/agent_spans_icon';
+import { agentTracesNavPopover, agentSpansNavPopover } from './nav_popover';
 import { SlotRegistryService } from './services/slot_registry';
 
 // Log Actions
@@ -300,20 +300,11 @@ export class AgentTracesPlugin implements Plugin<
           defaultPath: '#/?_a=(ui:(activeTabId:traces,showHistogram:!t))',
         })
       );
-      // Spans keeps its app (existing /app/agentTraces/spans links still work) but no
-      // longer has a nav entry; Spans stays one tab away from Traces and Sessions.
       core.application.register(
         createAgentTracesApp({
           id: AGENT_SPANS_NAV_ID,
           title: 'Agent Spans',
           defaultPath: '#/?_a=(ui:(activeTabId:spans,showHistogram:!t))',
-        })
-      );
-      core.application.register(
-        createAgentTracesApp({
-          id: AGENT_SESSIONS_NAV_ID,
-          title: 'Agent Sessions',
-          defaultPath: '#/?_a=(ui:(activeTabId:sessions,showHistogram:!t))',
         })
       );
 
@@ -327,12 +318,12 @@ export class AgentTracesPlugin implements Plugin<
           navPopover: agentTracesNavPopover,
         },
         {
-          id: AGENT_SESSIONS_NAV_ID,
-          title: 'Sessions',
+          id: AGENT_SPANS_NAV_ID,
+          title: 'Spans',
           category: DEFAULT_APP_CATEGORIES.agentMonitoring,
           order: 200,
-          euiIconType: 'navTicketing',
-          navPopover: agentSessionsNavPopover,
+          euiIconType: AgentSpansIcon,
+          navPopover: agentSpansNavPopover,
         },
       ]);
     }
@@ -386,8 +377,7 @@ export class AgentTracesPlugin implements Plugin<
         if (
           app.id === PLUGIN_ID ||
           app.id === AGENT_TRACES_NAV_ID ||
-          app.id === AGENT_SPANS_NAV_ID ||
-          app.id === AGENT_SESSIONS_NAV_ID
+          app.id === AGENT_SPANS_NAV_ID
         ) {
           return { navLinkStatus: agentTracesNavStatus };
         }

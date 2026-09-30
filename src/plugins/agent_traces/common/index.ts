@@ -7,7 +7,6 @@ export const PLUGIN_ID = 'agentTraces';
 export const PLUGIN_NAME = 'Agent Traces';
 export const AGENT_TRACES_NAV_ID = 'agentTraces/traces';
 export const AGENT_SPANS_NAV_ID = 'agentTraces/spans';
-export const AGENT_SESSIONS_NAV_ID = 'agentTraces/sessions';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';

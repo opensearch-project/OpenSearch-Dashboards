@@ -9,7 +9,6 @@ import {
   PLUGIN_ID,
   AGENT_TRACES_NAV_ID,
   AGENT_SPANS_NAV_ID,
-  AGENT_SESSIONS_NAV_ID,
 } from '../../common';
 import { AgentTracesServices } from '../types';
 
@@ -21,12 +20,7 @@ import { AgentTracesServices } from '../types';
 export const getFlavorFromAppId = (appId: string | undefined): AgentTracesFlavor | null => {
   // The base plugin and both sidebar entry points (traces/spans) belong to the
   // Traces flavor — they mount the same app with different initial tab state.
-  if (
-    appId === PLUGIN_ID ||
-    appId === AGENT_TRACES_NAV_ID ||
-    appId === AGENT_SPANS_NAV_ID ||
-    appId === AGENT_SESSIONS_NAV_ID
-  ) {
+  if (appId === PLUGIN_ID || appId === AGENT_TRACES_NAV_ID || appId === AGENT_SPANS_NAV_ID) {
     return AgentTracesFlavor.Traces;
   }
   const flavorFromAppId = appId?.split('/')?.[1];
