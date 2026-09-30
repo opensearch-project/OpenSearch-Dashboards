@@ -4,8 +4,7 @@
  */
 
 import { useState } from 'react';
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
@@ -64,20 +63,26 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
     await downloadCsvForOption(option);
   };
 
+  const buttonLabel = i18n.translate('explore.discover.downloadCsvButtonText', {
+    defaultMessage: 'Export',
+  });
+
   // Disable trap foucus, since it can break dismiss
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
-          size="s"
-          data-test-subj="dscDownloadCsvButton"
-          disabled={isLoading}
-          iconType="arrowDown"
-          iconSide="right"
-          onClick={openPopover}
-        >
-          <FormattedMessage id="explore.discover.downloadCsvButtonText" defaultMessage="Export" />
-        </EuiButtonEmpty>
+        // Icon-only with a hover tooltip carrying the name (Variant A, UXSO #3).
+        <EuiToolTip content={buttonLabel} delay="long">
+          <EuiButtonIcon
+            size="s"
+            data-test-subj="dscDownloadCsvButton"
+            disabled={isLoading}
+            iconType="download"
+            color="text"
+            aria-label={buttonLabel}
+            onClick={openPopover}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
