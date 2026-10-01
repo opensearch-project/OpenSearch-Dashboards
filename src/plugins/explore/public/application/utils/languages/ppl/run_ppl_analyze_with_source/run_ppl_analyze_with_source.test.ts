@@ -44,7 +44,7 @@ describe('runPPLAnalyzeWithSource', () => {
     expect(analyzedQuery().query).toBe('source = `logs-*` | where severityText = "ERROR"');
   });
 
-  it('adds the dataset source to an empty query, matching what Run executes', () => {
+  it('adds the dataset source to an empty query, as Run does', () => {
     runPPLAnalyzeWithSource({
       query: { query: '', language: 'PPL', dataset: indexPatternDataset },
       http,
