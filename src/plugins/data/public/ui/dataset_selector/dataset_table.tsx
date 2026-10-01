@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useRef, useState } from 'react';
 import { IDataPluginServices } from '../..';
-import { DataStructureCreatorProps, DataStructure } from '../../../common';
+import { DataStructureCreatorProps, DataStructure, DataStructureCustomMeta } from '../../../common';
 import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
 import { getQueryService } from '../../services';
 
@@ -21,7 +21,11 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  const dataStructures = props.path[props.index].children || [];
+  const dataStructures = [...(props.path[props.index].children || [])].sort((a, b) => {
+    const aLabel = (a.meta as DataStructureCustomMeta)?.displayName || a.title;
+    const bLabel = (b.meta as DataStructureCustomMeta)?.displayName || b.title;
+    return aLabel.localeCompare(bLabel, undefined, { sensitivity: 'base' });
+  });
   const paginationToken = props.path[props.index].paginationToken;
 
   const onTableChange = async (options: DataStructureFetchOptions) => {
@@ -82,10 +86,11 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
             name: 'Name',
             textOnly: true,
             render: (title: string, item: DataStructure) => {
+              const displayLabel = (item.meta as DataStructureCustomMeta)?.displayName || title;
               return (
                 <>
                   <EuiText size="s" className="datasetTable__itemTitle">
-                    {title}
+                    {displayLabel}
                   </EuiText>
                   {item.description && (
                     <EuiText size="xs" className="eui-textTruncate">
