@@ -41,6 +41,8 @@ import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
 import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
+import { TraceLogsTab } from '../../../../../../explore/public';
+import { useTraceLogs } from './use_trace_logs';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
 import './trace_details_flyout.scss';
@@ -79,6 +81,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
     if (fullTree && fullTree.length > 0) return fullTree[0];
     return trace;
   }, [fullTree, trace]);
+  // Logs correlated with this trace (trace-to-logs correlations, as in Explore traces).
+  const traceLogs = useTraceLogs(rootTrace.traceId);
 
   const traceTreeData = useMemo(() => {
     if (fullTree && fullTree.length > 0) {
@@ -400,6 +404,31 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                         />
                       ),
                     },
+                    {
+                      id: 'logs',
+                      name: (
+                        <span data-test-subj="agentTracesFlyoutLogsTab">
+                          {!traceLogs.isLoading && (
+                            <>
+                              <EuiBadge color="hollow">{traceLogs.logCount}</EuiBadge>{' '}
+                            </>
+                          )}
+                          {i18n.translate('agentTraces.flyout.tabRelatedLogs', {
+                            defaultMessage: 'Related logs',
+                          })}
+                        </span>
+                      ),
+                      content: (
+                        <TraceLogsTab
+                          traceId={rootTrace.traceId}
+                          logDatasets={traceLogs.logDatasets}
+                          datasetLogs={traceLogs.datasetLogs}
+                          isLoading={traceLogs.isLoading}
+                          onSpanClick={selectNode}
+                          traceDataset={traceLogs.traceDataset ?? undefined}
+                        />
+                      ),
+                    },
                   ];
                   return (
                     <EuiTabbedContent
@@ -419,6 +448,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                   selectedNode={selectedNode}
                   selectedTraceRow={selectedTraceRow}
                   onSelectNode={selectNode}
+                  traceLogs={traceLogs}
                 />
               </EuiResizablePanel>
             </>
