@@ -7,12 +7,8 @@ import { useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useDispatch } from 'react-redux';
-import {
-  Query,
-  RecentQueriesTable,
-  TimeRange,
-  runPPLAnalyzeInBackground,
-} from '../../../../../../data/public';
+import { Query, RecentQueriesTable, TimeRange } from '../../../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../../../application/utils/languages';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
@@ -61,7 +57,7 @@ export const RecentQueriesButton = () => {
       });
     }
     dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
-    runPPLAnalyzeInBackground({
+    runPPLAnalyzeWithSource({
       query: { ...selectedQuery, query: updatedQuery },
       http: services.http,
       timefilter: services.data.query.timefilter.timefilter,

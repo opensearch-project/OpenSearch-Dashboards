@@ -14,10 +14,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
-import {
-  getEffectiveLanguageForAutoComplete,
-  runPPLAnalyzeInBackground,
-} from '../../../../../../data/public';
+import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../../../application/utils/languages';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
@@ -626,7 +624,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
 
   const handleRun = useCallback(() => {
     onRun(editorTextRef.current);
-    runPPLAnalyzeInBackground({
+    runPPLAnalyzeWithSource({
       query: { query: editorTextRef.current, language: queryLanguage, dataset },
       http: services.http,
       timefilter: services.data.query.timefilter.timefilter,
