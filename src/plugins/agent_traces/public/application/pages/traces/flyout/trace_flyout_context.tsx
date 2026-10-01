@@ -2,87 +2,110 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import moment from 'moment-timezone';
 import { TraceDetailsFlyout } from './trace_details_flyout';
-import { TraceRow } from '../hooks/tree_utils';
+import { TraceRow, formatTimestamp } from '../hooks/tree_utils';
 import { useSidebarPanel } from '../../../../components/container/bottom_container/sidebar_panel_context';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { AgentTracesServices } from '../../../../types';
+import { SessionFlyoutHost } from '../../sessions/session_flyout_host';
+import { SessionRow } from '../../sessions/session_utils';
+import {
+  FlyoutView,
+  OpenTraceOptions,
+  TraceFlyoutContext,
+  TraceFlyoutContextValue,
+} from './trace_flyout_state';
 
-interface FlyoutState {
-  trace: TraceRow;
-  fullTree?: TraceRow[];
-  isLoadingFullTree?: boolean;
-  fullTreeError?: string;
-}
+export { useTraceFlyout } from './trace_flyout_state';
 
-interface TraceFlyoutContextValue {
-  /** Open the trace details flyout for a given trace/span row. */
-  openFlyout: (trace: TraceRow) => void;
-  /** Close the currently open flyout. */
-  closeFlyout: () => void;
-  /** Update the full tree and loading state after async fetch completes. */
-  updateFlyoutFullTree: (
-    fullTree: TraceRow[] | undefined,
-    isLoading: boolean,
-    error?: string
-  ) => void;
-}
-
-const TraceFlyoutContext = createContext<TraceFlyoutContextValue | null>(null);
-
-export const useTraceFlyout = (): TraceFlyoutContextValue => {
-  const ctx = useContext(TraceFlyoutContext);
-  if (!ctx) {
-    throw new Error('useTraceFlyout must be used within a TraceFlyoutProvider');
-  }
-  return ctx;
-};
-
+/**
+ * Hosts the single Agent Traces flyout. A trace and a session never stack: opening one
+ * replaces the other, and a trace opened from a session links back to it.
+ */
 export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
+  const [view, setView] = useState<FlyoutView | null>(null);
   const { collapseSidebar } = useSidebarPanel();
+  const { services } = useOpenSearchDashboards<AgentTracesServices>();
+
+  const timezone = useMemo(() => {
+    const tz = services?.uiSettings?.get('dateFormat:tz');
+    if (tz && tz !== 'Browser') return tz;
+    return moment.tz.guess() || moment().format('Z');
+  }, [services?.uiSettings]);
+  const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
 
   const openFlyout = useCallback(
-    (trace: TraceRow) => {
+    (trace: TraceRow, options?: OpenTraceOptions) => {
       collapseSidebar();
-      setFlyoutState({
+      setView({
+        kind: 'trace',
         trace,
         fullTree: undefined,
         isLoadingFullTree: true,
         fullTreeError: undefined,
+        fromSession: options?.fromSession,
       });
     },
     [collapseSidebar]
   );
 
+  const openSession = useCallback(
+    (session: SessionRow | string) => {
+      collapseSidebar();
+      setView(
+        typeof session === 'string'
+          ? { kind: 'session', sessionId: session }
+          : { kind: 'session', sessionId: session.sessionId, session }
+      );
+    },
+    [collapseSidebar]
+  );
+
   const closeFlyout = useCallback(() => {
-    setFlyoutState(null);
+    setView(null);
   }, []);
 
   const updateFlyoutFullTree = useCallback(
     (fullTree: TraceRow[] | undefined, isLoading: boolean, error?: string) => {
-      setFlyoutState((prev) => {
-        if (!prev) return prev;
+      setView((prev) => {
+        if (!prev || prev.kind !== 'trace') return prev;
         return { ...prev, fullTree, isLoadingFullTree: isLoading, fullTreeError: error };
       });
     },
     []
   );
 
-  const value = useMemo(
-    () => ({ openFlyout, closeFlyout, updateFlyoutFullTree }),
-    [openFlyout, closeFlyout, updateFlyoutFullTree]
+  const activeSessionId = view?.kind === 'session' ? view.sessionId : undefined;
+
+  const value = useMemo<TraceFlyoutContextValue>(
+    () => ({ openFlyout, openSession, closeFlyout, updateFlyoutFullTree, activeSessionId }),
+    [openFlyout, openSession, closeFlyout, updateFlyoutFullTree, activeSessionId]
   );
 
   return (
     <TraceFlyoutContext.Provider value={value}>
       {children}
-      {flyoutState && (
+      {view?.kind === 'trace' && (
         <TraceDetailsFlyout
-          trace={flyoutState.trace}
+          trace={view.trace}
           onClose={closeFlyout}
-          fullTree={flyoutState.fullTree}
-          isLoadingFullTree={flyoutState.isLoadingFullTree}
-          fullTreeError={flyoutState.fullTreeError}
+          fullTree={view.fullTree}
+          isLoadingFullTree={view.isLoadingFullTree}
+          fullTreeError={view.fullTreeError}
+          onOpenSession={openSession}
+          fromSession={view.fromSession}
+        />
+      )}
+      {view?.kind === 'session' && (
+        <SessionFlyoutHost
+          // A new session gets a fresh flyout (focused trace, view and tab reset).
+          key={view.sessionId}
+          sessionId={view.sessionId}
+          session={view.session}
+          formatTs={formatTs}
+          onClose={closeFlyout}
         />
       )}
     </TraceFlyoutContext.Provider>

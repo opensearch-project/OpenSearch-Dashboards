@@ -17,6 +17,16 @@ $agtSessionFlyoutChrome: 150px;
   white-space: nowrap;
 }
 
+.agtSessionsTable__sessionId {
+  display: inline-flex;
+  align-items: center;
+  gap: $euiSizeXS;
+}
+
+.agtSessionsTab__errorsSwitch {
+  margin: 0 $euiSizeS $euiSizeS;
+}
+
 .agtSessionsTable__tooltipAnchor {
   display: block;
   max-width: 100%;

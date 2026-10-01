@@ -20,6 +20,8 @@ import {
   EuiCopy,
   EuiResizableContainer,
   EuiBadge,
+  EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { TraceRow } from '../hooks/tree_utils';
 import { TraceFlowView } from '../flow/trace_flow_view';
@@ -38,6 +40,8 @@ import { TraceTreeView } from './trace_tree_view';
 import { TimelineGantt } from './timeline_gantt';
 import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
+import { readAttribute } from '../hooks/genai_message_preview';
+import { SessionRow } from '../../sessions/session_utils';
 import './trace_details_flyout.scss';
 
 export interface TraceDetailsProps {
@@ -46,7 +50,20 @@ export interface TraceDetailsProps {
   fullTree?: TraceRow[];
   isLoadingFullTree?: boolean;
   fullTreeError?: string;
+  /** Open this trace's session (replaces this flyout with the session flyout). */
+  onOpenSession?: (session: SessionRow | string) => void;
+  /** The session this trace was opened from: shows a "Back to session" link. */
+  fromSession?: SessionRow;
 }
+
+/** The trace's session id: the first span carrying gen_ai.conversation.id. */
+export const sessionIdOf = (rows: Array<TraceRow | undefined>): string | undefined => {
+  for (const row of rows) {
+    const value = readAttribute(row?.rawDocument, 'gen_ai.conversation.id');
+    if (typeof value === 'string' && value) return value;
+  }
+  return undefined;
+};
 
 export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   trace,
@@ -54,6 +71,8 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   fullTree,
   isLoadingFullTree,
   fullTreeError,
+  onOpenSession,
+  fromSession,
 }) => {
   const rootTrace = useMemo(() => {
     if (fullTree && fullTree.length > 0) return fullTree[0];
@@ -68,6 +87,10 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   }, [trace, fullTree]);
 
   const flatNodes = useMemo(() => flattenTree(traceTreeData), [traceTreeData]);
+  const sessionId = useMemo(
+    () => sessionIdOf([trace, ...flatNodes.map((node) => node.traceRow)]),
+    [trace, flatNodes]
+  );
 
   const initialIndex = flatNodes.findIndex((node) => node.id === trace.id);
   const [selectedNodeIndex, setSelectedNodeIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
@@ -185,6 +208,19 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       />
 
       <EuiFlyoutHeader hasBorder>
+        {fromSession && onOpenSession && (
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="arrowLeft"
+            onClick={() => onOpenSession(fromSession)}
+            data-test-subj="agentTracesFlyoutBackToSession"
+          >
+            {i18n.translate('agentTraces.flyout.backToSession', {
+              defaultMessage: 'Back to session',
+            })}
+          </EuiButtonEmpty>
+        )}
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
@@ -252,6 +288,26 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               </EuiCopy>
             )}
           </div>
+
+          {sessionId && onOpenSession && (
+            <div className="agentTracesFlyout__metaItem">
+              <EuiText size="xs" className="agentTracesFlyout__metaLabel">
+                {i18n.translate('agentTraces.flyout.sessionId', {
+                  defaultMessage: 'SESSION ID',
+                })}
+              </EuiText>
+              <EuiText size="xs" className="agentTracesFlyout__metaValue">
+                <EuiLink
+                  onClick={() =>
+                    onOpenSession(fromSession?.sessionId === sessionId ? fromSession : sessionId)
+                  }
+                  data-test-subj="agentTracesFlyoutSessionLink"
+                >
+                  <code>{sessionId}</code>
+                </EuiLink>
+              </EuiText>
+            </div>
+          )}
 
           <div className="agentTracesFlyout__metaItem">
             <EuiText size="xs" className="agentTracesFlyout__metaLabel">

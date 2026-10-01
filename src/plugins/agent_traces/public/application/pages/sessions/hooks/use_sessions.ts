@@ -30,10 +30,15 @@ export interface UseSessionsResult {
   totalSessions: number | null;
   /** Per-session details come from a subset of traces (see FetchSessionsResult.partial). */
   partial: boolean;
+  /** Only the most recent session traces were checked for errors. */
+  errorsPartial: boolean;
 }
 
 /** Sessions list for the current query and time range (see `fetchSessions`). */
-export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult => {
+export const useSessions = (
+  formatTs: (ts: string) => string,
+  onlyWithErrors = false
+): UseSessionsResult => {
   const { services, pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const query = useSelector((state: RootState) => state.query);
   // The base query has `stats ...` already stripped (for the data tabs); the notice reads
@@ -57,6 +62,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
   const [hasFilter, setHasFilter] = useState(false);
   const [totalSessions, setTotalSessions] = useState<number | null>(null);
   const [partial, setPartial] = useState(false);
+  const [errorsPartial, setErrorsPartial] = useState(false);
   const requestIdRef = useRef(0);
 
   const fetchSessions = useCallback(async () => {
@@ -77,11 +83,14 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
         if (requestId === requestIdRef.current) sessionFacetBuckets$.next(buckets);
       });
 
-      const result = await fetchSessionRows(pplService, datasetParam, baseQueryString, formatTs);
+      const result = await fetchSessionRows(pplService, datasetParam, baseQueryString, formatTs, {
+        onlyWithErrors,
+      });
       if (requestId !== requestIdRef.current) return; // a newer request superseded this one
       setSessions(result.sessions);
       setTotalSessions(result.totalSessions);
       setPartial(result.partial);
+      setErrorsPartial(result.errorsPartial);
       setElapsedMs(Date.now() - started);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
@@ -92,7 +101,7 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
     } finally {
       if (requestId === requestIdRef.current) setLoading(false);
     }
-  }, [pplService, datasetParam, baseQueryString, fullQueryString, formatTs]);
+  }, [pplService, datasetParam, baseQueryString, fullQueryString, formatTs, onlyWithErrors]);
 
   useEffect(() => {
     fetchSessions();
@@ -113,5 +122,6 @@ export const useSessions = (formatTs: (ts: string) => string): UseSessionsResult
     hasFilter,
     totalSessions,
     partial,
+    errorsPartial,
   };
 };

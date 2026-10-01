@@ -23,9 +23,14 @@ const mockSessionsResult = {
   hasFilter: false,
   totalSessions: 2,
   partial: false,
+  errorsPartial: false,
 };
+const mockUseSessions = jest.fn(
+  (_formatTs: unknown, _onlyWithErrors?: boolean) => mockSessionsResult
+);
 jest.mock('./hooks/use_sessions', () => ({
-  useSessions: () => mockSessionsResult,
+  useSessions: (formatTs: unknown, onlyWithErrors?: boolean) =>
+    mockUseSessions(formatTs, onlyWithErrors),
 }));
 
 jest.mock('./sessions_table', () => ({
@@ -46,24 +51,22 @@ jest.mock('./sessions_table', () => ({
   ),
 }));
 
-const mockMounts = jest.fn();
-jest.mock('./session_details_flyout', () => ({
-  SessionDetailsFlyout: ({ session: s }: { session: SessionRow }) => {
-    jest.requireActual('react').useEffect(() => {
-      mockMounts(s.sessionId);
-    }, []);
-    return <div data-test-subj="flyout">{s.sessionId}</div>;
-  },
+const mockOpenSession = jest.fn();
+jest.mock('../traces/flyout/trace_flyout_state', () => ({
+  useTraceFlyout: () => ({ openSession: mockOpenSession, activeSessionId: undefined }),
 }));
 
 describe('SessionsTab', () => {
-  it('opens a fresh flyout when another session is selected', () => {
+  it('opens sessions in the shared Agent Traces flyout', () => {
     render(<SessionsTab />);
-    fireEvent.click(screen.getByText('s1'));
     fireEvent.click(screen.getByText('s2'));
-    // Without a key the instance (and its focused trace / view state) would be reused.
-    expect(mockMounts).toHaveBeenCalledTimes(2);
-    expect(mockMounts).toHaveBeenLastCalledWith('s2');
-    expect(screen.getByTestId('flyout')).toHaveTextContent('s2');
+    expect(mockOpenSession).toHaveBeenCalledWith({ sessionId: 's2' });
+  });
+
+  it('lists only sessions with errors when the switch is on', () => {
+    render(<SessionsTab />);
+    expect(mockUseSessions).toHaveBeenLastCalledWith(expect.any(Function), false);
+    fireEvent.click(screen.getByTestId('agentTracesSessionsOnlyErrors'));
+    expect(mockUseSessions).toHaveBeenLastCalledWith(expect.any(Function), true);
   });
 });

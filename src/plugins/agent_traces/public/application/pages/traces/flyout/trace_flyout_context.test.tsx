@@ -9,12 +9,26 @@ import { TraceFlyoutProvider, useTraceFlyout } from './trace_flyout_context';
 import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('./trace_details_flyout', () => ({
-  TraceDetailsFlyout: ({ trace, onClose }: any) => (
+  TraceDetailsFlyout: ({ trace, onClose, onOpenSession, fromSession }: any) => (
     <div data-test-subj="mock-flyout">
       <span>{trace.name}</span>
       <button onClick={onClose}>Close</button>
+      <button onClick={() => onOpenSession('sess-from-trace')}>Session link</button>
+      {fromSession && (
+        <button onClick={() => onOpenSession(fromSession)}>Back to {fromSession.sessionId}</button>
+      )}
     </div>
   ),
+}));
+
+const mockSessionMounts = jest.fn();
+jest.mock('../../sessions/session_flyout_host', () => ({
+  SessionFlyoutHost: ({ sessionId }: { sessionId: string }) => {
+    jest.requireActual('react').useEffect(() => {
+      mockSessionMounts(sessionId);
+    }, []);
+    return <div data-test-subj="mock-session-flyout">{sessionId}</div>;
+  },
 }));
 
 // @ts-expect-error TS2739 TODO(ts-error): fixme
@@ -106,6 +120,55 @@ describe('TraceFlyoutContext', () => {
         screen.getByText('Close').click();
       });
       expect(screen.queryByTestId('mock-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('one flyout at a time', () => {
+    const Controls = () => {
+      const { openFlyout, openSession } = useTraceFlyout();
+      return (
+        <>
+          <button onClick={() => openFlyout(mockTrace)}>Open trace</button>
+          <button onClick={() => openSession({ sessionId: 'sess-a' } as any)}>Open A</button>
+          <button onClick={() => openSession('sess-b')}>Open B</button>
+          <button
+            onClick={() => openFlyout(mockTrace, { fromSession: { sessionId: 'sess-a' } as any })}
+          >
+            Trace from A
+          </button>
+        </>
+      );
+    };
+
+    beforeEach(() => mockSessionMounts.mockClear());
+
+    it('replaces the trace flyout with its session and back, never stacking', () => {
+      render(
+        <TraceFlyoutProvider>
+          <Controls />
+        </TraceFlyoutProvider>
+      );
+      act(() => screen.getByText('Open trace').click());
+      act(() => screen.getByText('Session link').click());
+      expect(screen.queryByTestId('mock-flyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-session-flyout')).toHaveTextContent('sess-from-trace');
+
+      act(() => screen.getByText('Trace from A').click());
+      expect(screen.queryByTestId('mock-session-flyout')).not.toBeInTheDocument();
+      act(() => screen.getByText('Back to sess-a').click());
+      expect(screen.getByTestId('mock-session-flyout')).toHaveTextContent('sess-a');
+      expect(screen.queryByTestId('mock-flyout')).not.toBeInTheDocument();
+    });
+
+    it('gives each session a fresh flyout', () => {
+      render(
+        <TraceFlyoutProvider>
+          <Controls />
+        </TraceFlyoutProvider>
+      );
+      act(() => screen.getByText('Open A').click());
+      act(() => screen.getByText('Open B').click());
+      expect(mockSessionMounts.mock.calls.map(([id]) => id)).toEqual(['sess-a', 'sess-b']);
     });
   });
 });

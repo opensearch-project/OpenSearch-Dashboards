@@ -44,6 +44,8 @@ export interface SessionRow {
   userId: string | null;
   /** Trace ids in the session, ordered earliest first. */
   traceIds: string[];
+  /** Traces in the session with at least one error span (any span, not just the root). */
+  errorTraces: number;
 }
 
 /** Session-level summary computed from the stats query. */
@@ -140,6 +142,22 @@ export const parseFacetBuckets = (records: PplRecord[], field: string): Bucket[]
   }));
 };
 
+const ERROR_STATUS = '`status.code` = 2';
+
+/** Traces (by id) that have an error span, among the given traces. */
+export const buildErrorTracesQuery = (source: string, traceIds: string[]): string =>
+  `${source} | where ${ERROR_STATUS} and traceId in (${inList(
+    traceIds
+  )}) | stats count() as error_spans by traceId | head ${Math.max(1, traceIds.length)}`;
+
+/**
+ * Traces carrying a session id under the user's query and time range, latest first. Used to
+ * find sessions with errors: the error check then runs on these traces only, so traces
+ * outside any session (most error traces, often) do not crowd out session traces.
+ */
+export const buildRecentSessionTracesQuery = (whereQuery: string, limit: number): string =>
+  `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats max(endTime) as last_seen by traceId, ${SESSION_FIELD_PPL} | sort - last_seen | head ${limit}`;
+
 /** Number of sessions matching the user's query (the list itself is capped). */
 export const buildMatchingSessionCountQuery = (whereQuery: string): string =>
   `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) | stats distinct_count(${SESSION_FIELD_PPL}) as total_sessions`;
@@ -219,7 +237,8 @@ const rowTokens = (row: BaseRow): number | null =>
 export const assembleSessionRows = (
   stats: SessionStats[],
   traceToSession: Map<string, string>,
-  rootRows: BaseRow[]
+  rootRows: BaseRow[],
+  errorTraceIds: Set<string> = new Set()
 ): SessionRow[] => {
   const rootsBySession = new Map<string, BaseRow[]>();
   for (const row of rootRows) {
@@ -248,6 +267,14 @@ export const assembleSessionRows = (
     const userRoot = roots.find((r) => readAttribute(r.rawDocument, 'user.id') != null);
     const start = toMs(s.startTime);
     const end = toMs(s.endTime);
+    // Every trace mapped to the session, not just those whose root span was found;
+    // traces with a root come first in start order.
+    const sessionTraceIds = [
+      ...new Set([
+        ...roots.map((r) => r.traceId),
+        ...(traceIdsBySession.get(s.sessionId) ?? []).filter((id) => !rootIds.has(id)),
+      ]),
+    ];
 
     return {
       sessionId: s.sessionId,
@@ -261,14 +288,8 @@ export const assembleSessionRows = (
         ? previewOutputMessages(withOutput[withOutput.length - 1].output)
         : '',
       userId: userRoot ? String(readAttribute(userRoot.rawDocument, 'user.id')) : null,
-      // Every trace mapped to the session, not just those whose root span was found;
-      // traces with a root come first in start order.
-      traceIds: [
-        ...new Set([
-          ...roots.map((r) => r.traceId),
-          ...(traceIdsBySession.get(s.sessionId) ?? []).filter((id) => !rootIds.has(id)),
-        ]),
-      ],
+      traceIds: sessionTraceIds,
+      errorTraces: sessionTraceIds.filter((id) => errorTraceIds.has(id)).length,
     };
   });
 };

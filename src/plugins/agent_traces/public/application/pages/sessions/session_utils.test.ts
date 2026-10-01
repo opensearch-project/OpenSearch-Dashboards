@@ -182,6 +182,7 @@ describe('session_utils', () => {
         userId: 'user-9',
         traceIds: ['t1', 't2'],
         durationMs: 9033,
+        errorTraces: 0,
       });
       // No tokens, no text, invalid end time
       expect(rows[1]).toMatchObject({

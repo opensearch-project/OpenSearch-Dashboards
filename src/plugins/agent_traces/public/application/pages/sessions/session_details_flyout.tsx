@@ -28,7 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { TraceRow } from '../traces/hooks/tree_utils';
-import { useTraceFlyout } from '../traces/flyout/trace_flyout_context';
+import { useTraceFlyout } from '../traces/flyout/trace_flyout_state';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SessionTrace, useSessionDetail } from './hooks/use_session_detail';
 import { SessionSpansTable } from './session_spans_table';
@@ -222,10 +222,11 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   const openTrace = useCallback(
     (row: TraceRow) => {
       const trace = traces.find((t) => t.traceId === row.traceId);
-      openFlyout(row);
+      // Replaces this flyout with the trace flyout, which links back to this session.
+      openFlyout(row, { fromSession: session });
       if (trace) updateFlyoutFullTree(trace.tree, false);
     },
-    [traces, openFlyout, updateFlyoutFullTree]
+    [traces, openFlyout, updateFlyoutFullTree, session]
   );
 
   /** Focus a trace: highlight it in the list and scroll its turn into view. */
