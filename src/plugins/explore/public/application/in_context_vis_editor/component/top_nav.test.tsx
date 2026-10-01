@@ -78,7 +78,7 @@ describe('TopNav', () => {
     expect(getByText('Edit My Explore')).toBeInTheDocument();
   });
 
-  it('passes shouldShowCancelButton=true when loading and user-initiated', () => {
+  it('leaves cancelling to the custom submit button rather than the search bar', () => {
     (useQueryBuilderState as jest.Mock).mockReturnValue(
       buildQueryBuilderState({
         queryEditorState: {
@@ -88,9 +88,10 @@ describe('TopNav', () => {
       })
     );
     render(<TopNav />);
-    expect(mockTopNavMenu).toHaveBeenCalledWith(
-      expect.objectContaining({ showCancelButton: true }),
-      expect.anything()
-    );
+    const props = mockTopNavMenu.mock.calls[mockTopNavMenu.mock.calls.length - 1][0];
+    expect(props.customSubmitButton).toBeDefined();
+    expect(props).not.toHaveProperty('showCancelButton');
+    expect(props).not.toHaveProperty('onQueryCancel');
+    expect(props).not.toHaveProperty('isQueryRunning');
   });
 });

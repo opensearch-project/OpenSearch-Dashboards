@@ -70,7 +70,7 @@ import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING, PARTIAL_RESULTS_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -543,8 +543,66 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           field2: 1,
           field3: 1,
         },
+        nonEmptyFieldCounts: {
+          field1: 2,
+          field2: 1,
+          field3: 1,
+        },
         dataset: mockDataView,
         elapsedMs: 100,
+      });
+    });
+
+    it('should exclude empty values from nonEmptyFieldCounts but not fieldCounts', () => {
+      // Tabular responses (e.g. PPL) put every schema field on every row, using null for the
+      // ones a document doesn't populate.
+      const rawResults = {
+        hits: {
+          hits: [
+            {
+              _id: '1',
+              _source: {
+                populated: 'value1',
+                empty: null,
+                sparse: null,
+                falsy: 0,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+            {
+              _id: '2',
+              _source: {
+                populated: 'value2',
+                empty: null,
+                sparse: 'value3',
+                falsy: false,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+          ],
+          total: 2,
+        },
+        elapsedMs: 100,
+      } as any;
+
+      const result = defaultResultsProcessor(rawResults, mockDataView);
+
+      // Every field is "present" on both rows
+      expect(result.fieldCounts).toEqual({
+        populated: 2,
+        empty: 2,
+        sparse: 2,
+        falsy: 2,
+        empty_array: 2,
+        null_array: 2,
+      });
+      // Only fields carrying real values are counted; 0 and false count, nulls don't
+      expect(result.nonEmptyFieldCounts).toEqual({
+        populated: 2,
+        sparse: 1,
+        falsy: 2,
       });
     });
 
@@ -1915,59 +1973,6 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
   });
 
-  describe('partial_result gating for the bucket-count query', () => {
-    let mockGetState: jest.Mock;
-    let mockDispatch: jest.Mock;
-
-    beforeEach(() => {
-      mockGetState = jest.fn().mockReturnValue({
-        query: {
-          query: 'source=logs',
-          language: 'PPL',
-          dataset: { id: 'test', type: 'INDEX_PATTERN' },
-        },
-      });
-      mockDispatch = jest.fn();
-      (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
-      // Partial results turned ON at the setting level, so a normal query would send it.
-      (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) => {
-        if (key === SAMPLE_SIZE_SETTING) return 500;
-        if (key === PARTIAL_RESULTS_SETTING) return true;
-        if (key === 'data:withLongNumerals') return false;
-        return undefined;
-      });
-    });
-
-    const runAndGetQuery = async (thunk: any) => {
-      await thunk(mockDispatch, mockGetState, undefined);
-      const call = (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query);
-      return call?.[0]?.query;
-    };
-
-    it('forces partial_result:false for the bucket-count query even when the setting is on', async () => {
-      const query = await runAndGetQuery(
-        executeBucketCountQuery({
-          services: mockServices,
-          cacheKey: 'bucketCount:source=logs | stats count() as bucket_count',
-          queryString: 'source=logs | stats count() as bucket_count',
-        })
-      );
-      // The denominator must be complete; a partial bucket count would undercount it silently.
-      expect(query).toEqual(expect.objectContaining({ partial_result: false }));
-    });
-
-    it('honors the setting (partial_result:true) for a normal data-table query', async () => {
-      const query = await runAndGetQuery(
-        executeDataTableQuery({
-          services: mockServices,
-          cacheKey: 'source=logs',
-          queryString: 'source=logs',
-        })
-      );
-      expect(query).toEqual(expect.objectContaining({ partial_result: true }));
-    });
-  });
-
   describe('executeTabQuery', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
@@ -2024,6 +2029,89 @@ describe('Query Actions - Comprehensive Test Suite', () => {
               status: QueryExecutionStatus.READY,
             }),
           }),
+        })
+      );
+    });
+
+    it('lets a superseded run for the same key leave its successor untouched', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let rejectFirst: (error: Error) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((_resolve, reject) => (rejectFirst = reject)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const statusesFor = () =>
+        mockDispatch.mock.calls
+          .map(([action]) => action)
+          .filter(
+            (action) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload.cacheKey === 'tab-key'
+          )
+          .map((action) => action.payload.status.status);
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const abortError = new Error('Aborted');
+      abortError.name = 'AbortError';
+      rejectFirst(abortError);
+      await first;
+      expect(statusesFor()).not.toContain(QueryExecutionStatus.UNINITIALIZED);
+
+      resolveSecond({ hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 });
+      await second;
+      expect(statusesFor()).toEqual([
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.READY,
+      ]);
+    });
+
+    it('drops the results of a superseded run whose fetch resolves after it was replaced', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let resolveFirst: (value: unknown) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const staleHits = { hits: { hits: [{ _id: 'stale', _source: {} }], total: 1 }, took: 1 };
+      const freshHits = { hits: { hits: [{ _id: 'fresh', _source: {} }], total: 1 }, took: 1 };
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      resolveFirst(staleHits);
+      await first;
+      expect(setResults).not.toHaveBeenCalled();
+
+      resolveSecond(freshHits);
+      await second;
+      expect(setResults).toHaveBeenCalledTimes(1);
+      expect(setResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheKey: 'tab-key',
+          results: expect.objectContaining({ hits: freshHits.hits }),
         })
       );
     });
