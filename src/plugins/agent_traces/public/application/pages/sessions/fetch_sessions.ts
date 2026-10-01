@@ -6,7 +6,10 @@
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../common';
 import { Dataset } from '../../../../../data/common';
 import { extractSpanFilterQuery, splitPplCommands } from '../traces/table_shared';
-import { transformPPLDataToTraceHits } from '../traces/trace_details/traces/ppl_to_trace_hits';
+import {
+  PPLResponse,
+  transformPPLDataToTraceHits,
+} from '../traces/trace_details/traces/ppl_to_trace_hits';
 import { hitsToAgentSpans, spanToRow } from '../traces/hooks/tree_utils';
 import { Bucket } from '../../../components/fields_selector/types';
 import {
@@ -21,6 +24,7 @@ import {
   buildSessionFacetQuery,
   parseFacetBuckets,
   SESSION_FACET_FIELDS,
+  SESSION_TRACES_LIMIT,
   getSourceCommand,
   parseSessionStats,
   pplResponseToRecords,
@@ -28,7 +32,7 @@ import {
 
 /** Anything that can run a PPL query against a dataset (PPLService in the app and embeddable). */
 export interface PPLQueryRunner {
-  executeQuery(dataset: Dataset, pplQuery: string): Promise<any>;
+  executeQuery(dataset: Dataset, pplQuery: string): Promise<unknown>;
 }
 
 export interface FetchSessionsResult {
@@ -39,6 +43,16 @@ export interface FetchSessionsResult {
   ignoredCommands: string[];
   /** Whether the query filters spans (so an empty list means "no match"). */
   hasFilter: boolean;
+  /**
+   * The listed sessions hold more traces than `maxTraces`: per-session details (first and
+   * last message, tokens, trace list) come from a subset of their traces.
+   */
+  partial: boolean;
+}
+
+export interface FetchSessionsOptions {
+  /** Max traces looked up across the listed sessions. */
+  maxTraces?: number;
 }
 
 /** The span-level filter a Sessions query applies, plus what it leaves out. */
@@ -82,7 +96,8 @@ export const fetchSessions = async (
   ppl: PPLQueryRunner,
   dataset: Dataset,
   baseQueryString: string,
-  formatTs: (ts: string) => string
+  formatTs: (ts: string) => string,
+  { maxTraces = SESSION_TRACES_LIMIT }: FetchSessionsOptions = {}
 ): Promise<FetchSessionsResult> => {
   const { whereQuery, ignoredCommands, hasFilter } = sessionFilterFor(baseQueryString);
   const source = getSourceCommand(whereQuery);
@@ -109,12 +124,17 @@ export const fetchSessions = async (
   }
 
   let sessions: SessionRow[] = [];
+  // Size the trace map from the sessions' own trace counts (plus one row of slack per
+  // session for traces that carry more than one session id), capped at maxTraces.
+  const tracesInSessions = stats.reduce((sum, s) => sum + s.totalTraces, 0);
+  const partial = tracesInSessions > maxTraces;
   if (stats.length > 0) {
     const mapResponse = await ppl.executeQuery(
       wholeSession,
       buildTraceSessionMapQuery(
         source,
-        stats.map((s) => s.sessionId)
+        stats.map((s) => s.sessionId),
+        Math.min(tracesInSessions + stats.length, maxTraces)
       )
     );
     const traceToSession = new Map<string, string>();
@@ -131,9 +151,9 @@ export const fetchSessions = async (
         wholeSession,
         buildRootSpansQuery(source, traceIds)
       );
-      rootRows = hitsToAgentSpans(transformPPLDataToTraceHits(rootsResponse)).map((span, i) =>
-        spanToRow(span, i, formatTs)
-      );
+      // The root-span query returns span rows in the PPL response shape.
+      const rootHits = transformPPLDataToTraceHits(rootsResponse as PPLResponse);
+      rootRows = hitsToAgentSpans(rootHits).map((span, i) => spanToRow(span, i, formatTs));
     }
     sessions = assembleSessionRows(stats, traceToSession, rootRows);
   }
@@ -143,5 +163,6 @@ export const fetchSessions = async (
     totalSessions: Number.isFinite(total) ? Math.max(total, sessions.length) : null,
     ignoredCommands,
     hasFilter,
+    partial,
   };
 };

@@ -98,8 +98,10 @@ jest.mock('./facet_list', () => ({
     getDetailsByField,
   }: {
     title: string;
-    fields: any[];
-    getDetailsByField: (field: any) => { buckets: Array<{ value: string; count: number }> };
+    fields: Array<{ name: string }>;
+    getDetailsByField: (field: { name: string }) => {
+      buckets: Array<{ value: string; count: number }>;
+    };
   }) => (
     <div data-test-subj="mocked-facet-list">
       <h3>{title}</h3>

@@ -82,6 +82,14 @@ describe('session_utils', () => {
       );
     });
 
+    it('maps every trace to its session with a sized limit', () => {
+      // One row per (trace, session) pair; the limit is sized by the caller, never a fixed head.
+      expect(buildTraceSessionMapQuery('source = x', ['s1'], 42)).toBe(
+        'source = x | where `attributes.gen_ai.conversation.id` in ("s1") | stats count() as spans by traceId, `attributes.gen_ai.conversation.id` | head 42'
+      );
+      expect(buildRootSpansQuery('source = x', ['t1', 't2'])).toContain('| head 2');
+    });
+
     it('extracts the source command', () => {
       expect(getSourceCommand('source = idx | where a = 1')).toBe('source = idx');
       expect(getSourceCommand('source = idx')).toBe('source = idx');
@@ -184,6 +192,24 @@ describe('session_utils', () => {
         userId: null,
         durationMs: 0,
       });
+    });
+  });
+
+  describe('assembleSessionRows trace ids', () => {
+    it('keeps traces without a root span, ordered by root start where known', () => {
+      const stats = parseSessionStats([
+        { [FIELD]: 's1', total_traces: 3, start_time: '2026-09-28 22:00:00', end_time: '' },
+      ]);
+      const traceToSession = new Map([
+        ['t-noroot', 's1'],
+        ['t2', 's1'],
+        ['t1', 's1'],
+      ]);
+      const rows = assembleSessionRows(stats, traceToSession, [
+        root('t2', '2026-09-28 22:00:05', {}),
+        root('t1', '2026-09-28 22:00:01', {}),
+      ]);
+      expect(rows[0].traceIds).toEqual(['t1', 't2', 't-noroot']);
     });
   });
 

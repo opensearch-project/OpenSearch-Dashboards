@@ -179,7 +179,13 @@ describe('ppl_request_helpers', () => {
     it('escapes string values', () => {
       expect(escapePPLValue('test')).toBe('"test"');
       expect(escapePPLValue('test"quote')).toBe('"test\\"quote"');
-      expect(escapePPLValue('test\\backslash')).toBe('"test\\backslash"');
+      // PPL string literals treat backslash as an escape, so it is escaped too.
+      expect(escapePPLValue('test\\backslash')).toBe('"test\\\\backslash"');
+    });
+
+    it('cannot be closed early by a trailing backslash or an embedded quote', () => {
+      expect(escapePPLValue('abc\\')).toBe('"abc\\\\"');
+      expect(escapePPLValue('x" or 1=1')).toBe('"x\\" or 1=1"');
     });
 
     it('handles number values', () => {

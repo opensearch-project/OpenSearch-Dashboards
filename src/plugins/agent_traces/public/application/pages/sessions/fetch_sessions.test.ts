@@ -22,7 +22,7 @@ describe('fetchSessions', () => {
   });
 
   it('selects sessions under the time range and totals them over the whole session', async () => {
-    const executeQuery = jest.fn(async (dataset: any, query: string) => {
+    const executeQuery = jest.fn(async (_dataset: { timeFieldName?: string }, query: string) => {
       if (query.includes('as total_sessions')) return ppl(['total_sessions'], [[7]]);
       if (query.includes('as last_seen')) return ppl([SESSION, 'last_seen'], [['s1', 'x']]);
       if (query.includes('as total_traces'))
@@ -37,7 +37,7 @@ describe('fetchSessions', () => {
 
     const result = await fetchSessions(
       { executeQuery },
-      dataset as any,
+      dataset as never,
       'source = spans',
       (t) => t
     );
@@ -47,7 +47,41 @@ describe('fetchSessions', () => {
     const byQuery = (part: string) =>
       executeQuery.mock.calls.find(([, q]) => q.includes(part))?.[0];
     // The matching query keeps the time range; per-session totals drop it.
-    expect(byQuery('as last_seen').timeFieldName).toBe('endTime');
-    expect(byQuery('as total_traces').timeFieldName).toBeUndefined();
+    expect(byQuery('as last_seen')?.timeFieldName).toBe('endTime');
+    expect(byQuery('as total_traces')?.timeFieldName).toBeUndefined();
+  });
+
+  it('sizes the trace map by the sessions trace counts and flags partial results', async () => {
+    const executeQuery = jest.fn(async (_dataset: unknown, query: string) => {
+      if (query.includes('as total_sessions')) return ppl(['total_sessions'], [[1]]);
+      if (query.includes('as last_seen')) return ppl([SESSION, 'last_seen'], [['s1', 'x']]);
+      if (query.includes('as total_traces'))
+        return ppl(
+          [SESSION, 'total_traces', 'start_time', 'end_time'],
+          [['s1', 30, '2026-09-29 10:00:00', '2026-09-29 10:01:00']]
+        );
+      if (query.includes('as spans by traceId')) return ppl(['traceId', SESSION], [['t1', 's1']]);
+      return ppl([], []);
+    });
+    const dataset = { id: 'd', title: 'spans', type: 'INDEX_PATTERN' };
+
+    const result = await fetchSessions(
+      { executeQuery },
+      dataset as never,
+      'source = spans',
+      (t) => t
+    );
+    const mapQuery = executeQuery.mock.calls.find(([, q]) => q.includes('as spans by traceId'));
+    expect(mapQuery?.[1]).toMatch(/\| head 31$/); // 30 traces + one per session of slack
+    expect(result.partial).toBe(false);
+
+    const capped = await fetchSessions(
+      { executeQuery },
+      dataset as never,
+      'source = spans',
+      (t) => t,
+      { maxTraces: 10 }
+    );
+    expect(capped.partial).toBe(true);
   });
 });

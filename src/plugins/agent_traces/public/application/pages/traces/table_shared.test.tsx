@@ -347,6 +347,29 @@ describe('extractSpanFilterQuery', () => {
     });
   });
 
+  it('stops at the first reshaping command so later filters never reference missing fields', () => {
+    // Fields made by stats/rename do not exist on span rows.
+    expect(extractSpanFilterQuery('source=t | stats count() as c by x | where c > 5')).toEqual({
+      filterQuery: 'source=t',
+      ignoredCommands: ['stats', 'where'],
+    });
+    expect(extractSpanFilterQuery('source=t | rename a as b | where b = 1')).toEqual({
+      filterQuery: 'source=t',
+      ignoredCommands: ['rename', 'where'],
+    });
+    expect(extractSpanFilterQuery('source=t | where a = 1 | fields a | where a = 2')).toEqual({
+      filterQuery: 'source=t | where a = 1',
+      ignoredCommands: ['fields', 'where'],
+    });
+  });
+
+  it('keeps filters across sort', () => {
+    expect(extractSpanFilterQuery('source=t | where a = 1 | sort - b | where c = 2')).toEqual({
+      filterQuery: 'source=t | where a = 1 | where c = 2',
+      ignoredCommands: [],
+    });
+  });
+
   it('reports reshaping commands and drops sort silently', () => {
     expect(
       extractSpanFilterQuery('source = t | where a = 1 | sort - b | stats count() by c | head 5')

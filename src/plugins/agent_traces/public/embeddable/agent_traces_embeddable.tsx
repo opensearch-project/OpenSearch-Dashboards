@@ -45,10 +45,14 @@ import { setStateToOsdUrl } from '../../../opensearch_dashboards_utils/public';
 import { PLUGIN_ID, AGENT_TRACES_SESSION_ID_FIELD } from '../../common';
 import { formatTimestamp, TraceRow } from '../application/pages/traces/hooks/tree_utils';
 import { hitToBaseRow } from '../application/pages/traces/table_shared';
-import { PPLService } from '../application/pages/traces/trace_details/data_fetching/ppl_request_helpers';
+import {
+  PPLService,
+  escapePPLValue,
+} from '../application/pages/traces/trace_details/data_fetching/ppl_request_helpers';
 import { fetchSessions } from '../application/pages/sessions/fetch_sessions';
 import { SessionRow } from '../application/pages/sessions/session_utils';
 import { AgentView, isAgentView } from './agent_view_panel';
+import { OpenSearchSearchHit } from '../types/doc_views_types';
 import { prepareAgentSpansQuery, prepareRootSpansQuery } from '../application/tab_queries';
 
 export interface SearchProps {
@@ -215,11 +219,12 @@ export class AgentTracesEmbeddable
       title: this.savedAgentTraces.title,
       visualizationBuilder: this.visualizationBuilder,
       formatTs: this.formatTs,
-      onOpenTrace: (row) => this.openInAgentTraces('traces', `| where traceId = "${row.traceId}"`),
+      onOpenTrace: (row) =>
+        this.openInAgentTraces('traces', `| where traceId = ${escapePPLValue(row.traceId)}`),
       onOpenSession: (session) =>
         this.openInAgentTraces(
           'sessions',
-          `| where \`${AGENT_TRACES_SESSION_ID_FIELD}\` = "${session.sessionId.replace(/"/g, '\\"')}"`
+          `| where \`${AGENT_TRACES_SESSION_ID_FIELD}\` = ${escapePPLValue(session.sessionId)}`
         ),
     };
     const timeRangeSearchSource = searchSource.create();
@@ -408,9 +413,9 @@ export class AgentTracesEmbeddable
       this.searchProps.agentError = undefined;
       this.searchProps.rows = result.sessions;
       this.searchProps.hits = result.sessions.length;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.searchProps.sessions = [];
-      this.searchProps.agentError = error?.message || String(error);
+      this.searchProps.agentError = error instanceof Error ? error.message : String(error);
     }
     this.searchProps.isLoading = false;
     this.updateOutput({ loading: false, error: undefined });
@@ -473,7 +478,8 @@ export class AgentTracesEmbeddable
     this.searchProps.rows = rows;
     if (this.agentView) {
       this.searchProps.agentRows = rows.map(
-        (hit: any) => hitToBaseRow(hit, this.formatTs) as TraceRow
+        (hit: OpenSearchSearchHit<Record<string, unknown>>) =>
+          hitToBaseRow(hit, this.formatTs) as TraceRow
       );
     }
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.

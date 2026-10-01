@@ -119,21 +119,27 @@ export const splitPplCommands = (queryString: string): string[] => {
 };
 
 /**
- * The span-level filter in a PPL query: the source plus every row-level command
- * (where, eval, parse, ...), in order. Commands that reshape rows (stats, head, fields,
- * dedup, ...) are returned separately so callers can tell the user they were not applied.
- * `sort` is dropped silently since it never changes which rows match.
+ * The span-level filter in a PPL query: the source plus the leading row-level commands
+ * (where, eval, parse, ...), in order. Scanning stops at the first command that reshapes
+ * rows (stats, rename, fields, dedup, head, ...): later filters may reference fields that
+ * only exist after it, so they cannot run against span rows. Commands from that point on
+ * are returned so callers can tell the user they were not applied. `sort` never changes
+ * which rows match, so it is skipped and scanning continues.
  */
 export const extractSpanFilterQuery = (
   queryString: string
 ): { filterQuery: string; ignoredCommands: string[] } => {
   const kept: string[] = [];
   const ignored: string[] = [];
+  let reshaped = false;
   splitPplCommands(queryString).forEach((part, index) => {
     const command = part.split(/\s+/)[0].toLowerCase();
-    if ((index === 0 && command.startsWith('source')) || ROW_LEVEL_COMMANDS.has(command)) {
+    if (reshaped) {
+      ignored.push(command);
+    } else if ((index === 0 && command.startsWith('source')) || ROW_LEVEL_COMMANDS.has(command)) {
       kept.push(part);
     } else if (command !== 'sort') {
+      reshaped = true;
       ignored.push(command);
     }
   });

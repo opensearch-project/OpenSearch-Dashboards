@@ -30,8 +30,16 @@ export const SessionsTab = () => {
   }, [uiSettings]);
   const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
 
-  const { sessions, loading, error, elapsedMs, ignoredCommands, hasFilter, totalSessions } =
-    useSessions(formatTs);
+  const {
+    sessions,
+    loading,
+    error,
+    elapsedMs,
+    ignoredCommands,
+    hasFilter,
+    totalSessions,
+    partial,
+  } = useSessions(formatTs);
   const [wrapCellText, setWrapCellText] = useState(false);
   const [selected, setSelected] = useState<SessionRow | null>(null);
 
@@ -143,10 +151,25 @@ export const SessionsTab = () => {
             })}
           />
         )}
+        {partial && !error && (
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            className="agtSessionsTab__ignoredCallout"
+            data-test-subj="agentTracesSessionsPartial"
+            title={i18n.translate('agentTraces.sessions.partial', {
+              defaultMessage:
+                'These sessions hold more traces than can be loaded at once. First and last message, tokens and trace lists come from a subset of their traces. Narrow the time range or filter to see complete details.',
+            })}
+          />
+        )}
         {body}
       </div>
       {selected && (
         <SessionDetailsFlyout
+          // A new session gets a fresh flyout (focused trace, view and tab reset).
+          key={selected.sessionId}
           session={selected}
           formatTs={formatTs}
           onClose={() => setSelected(null)}

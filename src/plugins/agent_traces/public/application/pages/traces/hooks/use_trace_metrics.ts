@@ -110,7 +110,7 @@ const doFetchMetrics = async (
         const response = await pplService.executeQuery(datasetParam, query);
         return parseStatsResponse(response);
       } catch {
-        return {} as Record<string, any>;
+        return {} as ReturnType<typeof parseStatsResponse>;
       }
     })(),
   ]);

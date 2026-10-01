@@ -4,6 +4,7 @@
  */
 
 import { errorSpanCount, turnRole } from './session_details_flyout';
+import { SessionTrace } from './hooks/use_session_detail';
 
 const msgs = (...roles: string[]) =>
   JSON.stringify(roles.map((role) => ({ role, parts: [{ type: 'text', content: role }] })));
@@ -28,8 +29,10 @@ describe('errorSpanCount', () => {
       root: { status: 'success' },
       tree: [],
       spans: [{ status: 'success' }, { status: 'error' }, { status: 'error' }],
-    } as any;
+    } as unknown as SessionTrace;
     expect(errorSpanCount(trace)).toBe(2);
-    expect(errorSpanCount({ ...trace, spans: [{ status: 'success' }] })).toBe(0);
+    expect(
+      errorSpanCount({ ...trace, spans: [{ status: 'success' }] } as unknown as SessionTrace)
+    ).toBe(0);
   });
 });

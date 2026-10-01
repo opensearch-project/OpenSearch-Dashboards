@@ -16,8 +16,12 @@ export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
 /** Max sessions listed in the Sessions tab. */
 export const SESSIONS_PAGE_LIMIT = 100;
 
-/** Max traces fetched for the root-span lookup behind the sessions list. */
-export const SESSION_ROOTS_LIMIT = 2000;
+/**
+ * Max traces looked up for the listed sessions (trace map and root spans). Above this the
+ * list still shows every session, but per-session details come from a subset and the tab
+ * says so, instead of silently dropping traces.
+ */
+export const SESSION_TRACES_LIMIT = 5000;
 
 /** Max spans fetched when opening a single session. */
 export const SESSION_SPANS_LIMIT = 5000;
@@ -50,25 +54,38 @@ interface SessionStats {
  * Convert a PPL response (JDBC `datarows` or `data_frame` fields format) to an
  * array of records keyed by column name.
  */
-export const pplResponseToRecords = (response: any): Array<Record<string, any>> => {
-  if (response?.datarows && response?.schema) {
-    const schema = response.schema as Array<{ name: string }>;
-    return (response.datarows as any[][]).map((row) => {
-      const record: Record<string, any> = {};
-      schema.forEach((col, idx) => {
-        record[col.name] = row[idx];
+/** A PPL query response row, keyed by column name. */
+export type PplRecord = Record<string, unknown>;
+
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+
+/**
+ * Rows of a PPL response as records keyed by column name. Accepts both the raw PPL shape
+ * (`schema` + `datarows`) and the data-frame shape returned by the search strategy.
+ */
+export const pplResponseToRecords = (response: unknown): PplRecord[] => {
+  if (!isObject(response)) return [];
+  const { schema, datarows } = response;
+  if (Array.isArray(schema) && Array.isArray(datarows)) {
+    const names = schema.map((col) => (isObject(col) ? String(col.name) : ''));
+    return datarows.map((row) => {
+      const record: PplRecord = {};
+      names.forEach((name, idx) => {
+        record[name] = Array.isArray(row) ? row[idx] : undefined;
       });
       return record;
     });
   }
 
-  const data = response?.type === 'data_frame' && response?.body ? response.body : response;
-  if (data?.fields && data?.size > 0) {
-    const records: Array<Record<string, any>> = [];
-    for (let i = 0; i < data.size; i++) {
-      const record: Record<string, any> = {};
-      data.fields.forEach((field: { name: string; values: any[] }) => {
-        record[field.name] = field.values?.[i];
+  const data = response.type === 'data_frame' && isObject(response.body) ? response.body : response;
+  const size = Number(data.size);
+  if (Array.isArray(data.fields) && size > 0) {
+    const records: PplRecord[] = [];
+    for (let i = 0; i < size; i++) {
+      const record: PplRecord = {};
+      data.fields.forEach((field) => {
+        if (!isObject(field)) return;
+        record[String(field.name)] = Array.isArray(field.values) ? field.values[i] : undefined;
       });
       records.push(record);
     }
@@ -106,7 +123,7 @@ export const buildSessionFacetQuery = (
   `${whereQuery} | where isnotnull(${SESSION_FIELD_PPL}) and isnotnull(\`${field}\`) | stats distinct_count(${SESSION_FIELD_PPL}) as sessions by \`${field}\` | sort - sessions | head ${limit}`;
 
 /** Convert facet stats records into fields-panel buckets. */
-export const parseFacetBuckets = (records: Array<Record<string, any>>, field: string): Bucket[] => {
+export const parseFacetBuckets = (records: PplRecord[], field: string): Bucket[] => {
   const rows = records
     .map((r) => ({ value: r[field], count: Number(r.sessions ?? 0) }))
     .filter((r) => r.value !== null && r.value !== undefined && r.count > 0);
@@ -139,17 +156,25 @@ export const buildSessionStatsQuery = (source: string, sessionIds: string[]): st
     sessionIds
   )}) | stats distinct_count(traceId) as total_traces, min(startTime) as start_time, max(endTime) as end_time by ${SESSION_FIELD_PPL} | sort - start_time`;
 
-/** Maps each trace id to its session id. Any span in a trace may carry the session id. */
-export const buildTraceSessionMapQuery = (source: string, sessionIds: string[]): string =>
+/**
+ * Maps each trace id to its session id: one row per (trace, session) pair. Any span in a
+ * trace may carry the session id. `limit` is sized by the caller from the sessions' trace
+ * counts, so no trace is dropped by an arbitrary cap.
+ */
+export const buildTraceSessionMapQuery = (
+  source: string,
+  sessionIds: string[],
+  limit = SESSION_TRACES_LIMIT
+): string =>
   `${source} | where ${SESSION_FIELD_PPL} in (${inList(
     sessionIds
-  )}) | dedup traceId | fields traceId, ${SESSION_FIELD_PPL} | head ${SESSION_ROOTS_LIMIT}`;
+  )}) | stats count() as spans by traceId, ${SESSION_FIELD_PPL} | head ${limit}`;
 
 /** Root spans of the given traces (they carry per-trace input, output and token totals). */
 export const buildRootSpansQuery = (source: string, traceIds: string[]): string =>
   `${source} | where parentSpanId = "" and traceId in (${inList(
     traceIds
-  )}) | sort startTime | head ${SESSION_ROOTS_LIMIT}`;
+  )}) | sort startTime | head ${Math.max(1, traceIds.length)}`;
 
 /** Every span in the given traces, for the session detail flyout. */
 export const buildSessionSpansQuery = (
@@ -169,7 +194,7 @@ const toMs = (ts: string): number => {
   return m.isValid() ? m.valueOf() : NaN;
 };
 
-export const parseSessionStats = (records: Array<Record<string, any>>): SessionStats[] =>
+export const parseSessionStats = (records: PplRecord[]): SessionStats[] =>
   records
     .map((r) => ({
       sessionId: String(r[AGENT_TRACES_SESSION_ID_FIELD] ?? ''),
@@ -180,14 +205,17 @@ export const parseSessionStats = (records: Array<Record<string, any>>): SessionS
     .filter((s) => s.sessionId !== '');
 
 /** Read a span attribute that may be stored as a flat dotted key or a nested object. */
-export const getSpanAttribute = (doc: Record<string, any> | undefined, key: string): unknown => {
+export const getSpanAttribute = (
+  doc: Record<string, unknown> | undefined,
+  key: string
+): unknown => {
   if (!doc) return undefined;
   const attrs = doc.attributes;
-  if (attrs && typeof attrs === 'object') {
+  if (isObject(attrs)) {
     if (key in attrs) return attrs[key];
-    let cur: any = attrs;
+    let cur: unknown = attrs;
     for (const part of key.split('.')) {
-      if (cur === null || cur === undefined || typeof cur !== 'object') return undefined;
+      if (!isObject(cur)) return undefined;
       cur = cur[part];
     }
     if (cur !== undefined) return cur;
@@ -217,6 +245,14 @@ export const assembleSessionRows = (
     rootsBySession.set(sessionId, list);
   }
 
+  const traceIdsBySession = new Map<string, string[]>();
+  for (const [traceId, sessionId] of traceToSession) {
+    const list = traceIdsBySession.get(sessionId) ?? [];
+    list.push(traceId);
+    traceIdsBySession.set(sessionId, list);
+  }
+  const rootIds = new Set(rootRows.map((r) => r.traceId));
+
   return stats.map((s) => {
     const roots = (rootsBySession.get(s.sessionId) ?? []).sort(
       (a, b) => toMs(rawStart(a)) - toMs(rawStart(b))
@@ -240,14 +276,20 @@ export const assembleSessionRows = (
         ? previewOutputMessages(withOutput[withOutput.length - 1].output)
         : '',
       userId: userRoot ? String(getSpanAttribute(userRoot.rawDocument, 'user.id')) : null,
-      traceIds: roots.map((r) => r.traceId),
+      // Every trace mapped to the session, not just those whose root span was found;
+      // traces with a root come first in start order.
+      traceIds: [
+        ...new Set([
+          ...roots.map((r) => r.traceId),
+          ...(traceIdsBySession.get(s.sessionId) ?? []).filter((id) => !rootIds.has(id)),
+        ]),
+      ],
     };
   });
 };
 
 /** Raw (unformatted) start time from a row's source document. */
-export const rawStart = (row: BaseRow): string =>
-  String((row.rawDocument as Record<string, any> | undefined)?.startTime ?? '');
+export const rawStart = (row: BaseRow): string => String(row.rawDocument?.startTime ?? '');
 
 /** Session duration in the mock's `2h:48m` style; short sessions use `42m:05s` or `3.2s`. */
 export const formatSessionDuration = (ms: number): string => {
