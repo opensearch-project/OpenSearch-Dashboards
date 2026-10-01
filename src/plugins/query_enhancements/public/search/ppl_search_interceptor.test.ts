@@ -309,6 +309,36 @@ describe('PPLSearchInterceptor', () => {
       );
     });
 
+    it('keeps an explicit request time range when hideDatePicker is false', () => {
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn().mockReturnValue({
+          getSearchOptions: jest.fn().mockReturnValue({ strategy: SEARCH_STRATEGY.PPL }),
+          languageOverrides: { PPL: { hideDatePicker: false } },
+        }),
+      });
+      const panelTimeRange = { from: 'now-24h', to: 'now' };
+      const request = {
+        ...mockRequest,
+        params: {
+          ...mockRequest.params,
+          body: { ...mockRequest.params?.body, timeRange: panelTimeRange },
+        },
+      };
+      const spy = jest.spyOn(pplSearchInterceptor as any, 'runSearch');
+
+      pplSearchInterceptor.search(request, mockOptions);
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({ timeRange: panelTimeRange }),
+          }),
+        }),
+        mockOptions.abortSignal,
+        SEARCH_STRATEGY.PPL
+      );
+    });
+
     it('should handle dataset without timeFieldName', () => {
       (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue({
         language: 'PPL',
