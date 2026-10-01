@@ -9,6 +9,7 @@ import {
   Operation,
   OperationGrouping,
   RANGE_FUNCTIONS,
+  emptyFilter,
   nextFilterId,
 } from './promql_parser';
 import { AGGREGATION_IDS } from './operation_categories';
@@ -44,13 +45,6 @@ export type BuilderAction =
   | { type: 'SET_RANGE'; range: string }
   | { type: 'REMOVE_RANGE' }
   | { type: 'RESET' };
-
-export const emptyFilter = (): LabelFilter => ({
-  id: nextFilterId(),
-  label: '',
-  op: '=',
-  value: undefined,
-});
 
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {

@@ -34,6 +34,8 @@ export interface LabelFilter {
 let filterIdCounter = 0;
 export const nextFilterId = (): string => `lf-${++filterIdCounter}`;
 
+export const emptyFilter = (): LabelFilter => ({ id: nextFilterId(), label: '', op: '=' });
+
 export interface OperationGrouping {
   mode: 'by' | 'without';
   labels: string[];
@@ -107,7 +109,7 @@ const BINARY_OP_ID_MAP: Record<number, string> = {
 
 const emptyState = (): BuilderState => ({
   metric: '',
-  labelFilters: [{ id: nextFilterId(), label: '', op: '=', value: undefined }],
+  labelFilters: [emptyFilter()],
   operations: [],
 });
 
@@ -149,10 +151,7 @@ export function parsePromQL(query: string): ParseResult {
           canBuild: true,
           state: {
             metric: visitor.metric,
-            labelFilters:
-              visitor.labelFilters.length > 0
-                ? visitor.labelFilters
-                : [{ id: nextFilterId(), label: '', op: '=', value: undefined }],
+            labelFilters: visitor.labelFilters.length > 0 ? visitor.labelFilters : [emptyFilter()],
             operations: visitor.operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },

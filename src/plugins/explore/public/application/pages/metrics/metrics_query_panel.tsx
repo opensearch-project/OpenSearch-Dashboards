@@ -139,9 +139,10 @@ export const MetricsQueryPanel: React.FC = () => {
   useEffect(() => {
     const queryChanged = reduxQuery !== previousReduxQueryRef.current;
     previousReduxQueryRef.current = reduxQuery;
-    // Local drafts can differ from the last executed query. Once a query is
-    // loaded or run, restore its rows and options even if its text is unchanged.
+    // Keep local drafts until a query is loaded or run, even if its text is unchanged.
     if (!queryChanged && isQueryEditorDirty) return;
+
+    lastDispatchedRef.current = reduxQuery;
 
     setRows((currentRows) => {
       const serialized = serializeRows(currentRows);
@@ -151,8 +152,6 @@ export const MetricsQueryPanel: React.FC = () => {
           options.legendFormat === reduxPerQueryOptions?.[index]?.legendFormat
       );
       if (serialized.query === reduxQuery && optionsMatch) return currentRows;
-
-      lastDispatchedRef.current = reduxQuery;
       return initRows(reduxQuery, nextRowId, reduxPerQueryOptions);
     });
   }, [reduxQuery, reduxPerQueryOptions, isQueryEditorDirty, nextRowId]);

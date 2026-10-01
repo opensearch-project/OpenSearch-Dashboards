@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { builderReducer, buildPromQL, emptyFilter, BuilderAction } from './build_promql';
+import { builderReducer, buildPromQL, BuilderAction } from './build_promql';
+import { emptyFilter } from './promql_parser';
 import { BuilderState } from './promql_parser';
 
 const baseState = (): BuilderState => ({

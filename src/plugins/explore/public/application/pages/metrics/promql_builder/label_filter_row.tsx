@@ -16,12 +16,13 @@ import { LabelFilter } from './promql_parser';
 import { BuilderAction } from './build_promql';
 import { OPERATORS } from './operation_categories';
 import { comboBoxWidth } from './measure_text';
+import { EMPTY_LABEL_VALUE, toLabelValueDisplay } from './use_metric_data';
 
 interface LabelFilterRowProps {
   filter: LabelFilter;
   idx: number;
   labelOptions: EuiComboBoxOptionOption[];
-  labelValueOptions: EuiComboBoxOptionOption[];
+  labelValueOptions: Array<EuiComboBoxOptionOption<string>>;
   canRemove: boolean;
   dispatch: React.Dispatch<BuilderAction>;
   loadLabelValues: (labelName: string) => void;
@@ -91,18 +92,17 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
         placeholder={i18n.translate('explore.promqlBuilder.labelValue', {
           defaultMessage: 'Label value',
         })}
-        options={labelValueOptions.map((option) => ({
-          label: option.label || '""',
-          value: option.label,
-        }))}
+        options={labelValueOptions}
         selectedOptions={
-          filter.value !== undefined ? [{ label: filter.value || '""', value: filter.value }] : []
+          filter.value !== undefined
+            ? [{ label: toLabelValueDisplay(filter.value), value: filter.value }]
+            : []
         }
         onChange={(selected) =>
           dispatch({
             type: 'SET_LABEL_FILTER',
             index: idx,
-            filter: { value: selected[0]?.value ?? selected[0]?.label },
+            filter: { value: selected[0]?.value },
           })
         }
         onCreateOption={(val) => {
@@ -111,7 +111,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
             dispatch({
               type: 'SET_LABEL_FILTER',
               index: idx,
-              filter: { value: v === '""' ? '' : v },
+              filter: { value: v === EMPTY_LABEL_VALUE ? '' : v },
             });
           }
         }}
@@ -120,7 +120,9 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
         }}
         className="pqbCombo--labelValue"
         style={{
-          width: comboBoxWidth(filter.value === undefined ? 'Label value' : filter.value || '""'),
+          width: comboBoxWidth(
+            filter.value === undefined ? 'Label value' : toLabelValueDisplay(filter.value)
+          ),
           flex: '0 0 auto',
         }}
       />

@@ -33,8 +33,6 @@ const restorePromQLQuery = (savedQuery: SavedQuery): SavedQuery => {
   };
 };
 
-// The shared saved-query service already serializes structured query values.
-// Keep PromQL text and options together without changing its schema or interfaces.
 export const createPrometheusSavedQueryService = (
   savedQueryService: SavedQueryService
 ): SavedQueryService => ({
