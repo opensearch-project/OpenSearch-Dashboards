@@ -55,7 +55,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
           dispatch({
             type: 'SET_LABEL_FILTER',
             index: idx,
-            filter: { label: labelName, value: '' },
+            filter: { label: labelName, value: undefined },
           });
           if (labelName) loadLabelValues(labelName);
         }}
@@ -65,7 +65,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
             dispatch({
               type: 'SET_LABEL_FILTER',
               index: idx,
-              filter: { label: labelName, value: '' },
+              filter: { label: labelName, value: undefined },
             });
             loadLabelValues(labelName);
           }
@@ -84,31 +84,45 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
         className="pqbOperatorSelect"
       />
       <div className="pqbSep" />
-      <EuiComboBox
+      <EuiComboBox<string>
         compressed
         singleSelection={{ asPlainText: true }}
         isClearable={false}
         placeholder={i18n.translate('explore.promqlBuilder.labelValue', {
           defaultMessage: 'Label value',
         })}
-        options={labelValueOptions}
-        selectedOptions={filter.value ? [{ label: filter.value }] : []}
+        options={labelValueOptions.map((option) => ({
+          label: option.label || '""',
+          value: option.label,
+        }))}
+        selectedOptions={
+          filter.value !== undefined ? [{ label: filter.value || '""', value: filter.value }] : []
+        }
         onChange={(selected) =>
           dispatch({
             type: 'SET_LABEL_FILTER',
             index: idx,
-            filter: { value: selected[0]?.label || '' },
+            filter: { value: selected[0]?.value ?? selected[0]?.label },
           })
         }
         onCreateOption={(val) => {
           const v = val.trim();
-          if (v) dispatch({ type: 'SET_LABEL_FILTER', index: idx, filter: { value: v } });
+          if (v) {
+            dispatch({
+              type: 'SET_LABEL_FILTER',
+              index: idx,
+              filter: { value: v === '""' ? '' : v },
+            });
+          }
         }}
         onFocus={() => {
           if (filter.label) loadLabelValues(filter.label);
         }}
         className="pqbCombo--labelValue"
-        style={{ width: comboBoxWidth(filter.value || 'Label value'), flex: '0 0 auto' }}
+        style={{
+          width: comboBoxWidth(filter.value === undefined ? 'Label value' : filter.value || '""'),
+          flex: '0 0 auto',
+        }}
       />
       <div className="pqbSep" />
       <EuiButtonIcon
@@ -124,7 +138,7 @@ export const LabelFilterRow: React.FC<LabelFilterRowProps> = ({
             : dispatch({
                 type: 'SET_LABEL_FILTER',
                 index: idx,
-                filter: { label: '', op: '=', value: '' },
+                filter: { label: '', op: '=', value: undefined },
               })
         }
       />

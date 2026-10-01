@@ -27,7 +27,8 @@ export interface LabelFilter {
   id: string;
   label: string;
   op: string;
-  value: string;
+  // An unfinished filter has no value; an empty string is a valid matcher.
+  value?: string;
 }
 
 let filterIdCounter = 0;
@@ -106,7 +107,7 @@ const BINARY_OP_ID_MAP: Record<number, string> = {
 
 const emptyState = (): BuilderState => ({
   metric: '',
-  labelFilters: [{ id: nextFilterId(), label: '', op: '=', value: '' }],
+  labelFilters: [{ id: nextFilterId(), label: '', op: '=', value: undefined }],
   operations: [],
 });
 
@@ -151,7 +152,7 @@ export function parsePromQL(query: string): ParseResult {
             labelFilters:
               visitor.labelFilters.length > 0
                 ? visitor.labelFilters
-                : [{ id: nextFilterId(), label: '', op: '=', value: '' }],
+                : [{ id: nextFilterId(), label: '', op: '=', value: undefined }],
             operations: visitor.operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },

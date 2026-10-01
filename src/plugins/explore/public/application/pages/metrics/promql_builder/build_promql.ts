@@ -49,7 +49,7 @@ export const emptyFilter = (): LabelFilter => ({
   id: nextFilterId(),
   label: '',
   op: '=',
-  value: '',
+  value: undefined,
 });
 
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
@@ -115,9 +115,9 @@ function groupingClause(op: Operation): string {
 export function buildPromQL(state: BuilderState): string {
   if (!state.metric) return '';
 
-  const matchers = state.labelFilters
-    .filter((f) => f.label && f.value)
-    .map((f) => `${f.label}${f.op}"${escapeLabelValue(f.value)}"`);
+  const matchers = state.labelFilters.flatMap(({ label, op, value }) =>
+    label && value !== undefined ? [`${label}${op}"${escapeLabelValue(value)}"`] : []
+  );
 
   let selector = state.metric;
   if (matchers.length > 0) {

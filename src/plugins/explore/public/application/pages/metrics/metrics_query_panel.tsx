@@ -21,7 +21,10 @@ import {
   DragDropContextProps,
 } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import {
+  OpenSearchDashboardsContextProvider,
+  useOpenSearchDashboards,
+} from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
 import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
@@ -33,6 +36,7 @@ import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_se
 import {
   selectIsLoading,
   selectIsPromptEditorMode,
+  selectIsQueryEditorDirty,
   selectPromptToQueryIsLoading,
   selectQueryLanguage,
   selectQueryString,
@@ -66,9 +70,22 @@ import {
   useMetricsQuerySettings,
 } from './query_panel';
 import type { RowStepReadout } from './query_panel';
+import { createPrometheusSavedQueryService } from './query_panel/prometheus_saved_query_service';
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const widgetServices = useMemo(
+    () => ({
+      data: {
+        ...services.data,
+        query: {
+          ...services.data.query,
+          savedQueries: createPrometheusSavedQueryService(services.data.query.savedQueries),
+        },
+      },
+    }),
+    [services.data]
+  );
   const dispatch = useDispatch();
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
@@ -76,6 +93,7 @@ export const MetricsQueryPanel: React.FC = () => {
   const dataConnectionId = useSelector((state: RootState) => state.query.dataset?.id || '');
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
+  const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
   const editorRef = useEditorRef();
   const setEditorText = useSetEditorText();
@@ -116,13 +134,28 @@ export const MetricsQueryPanel: React.FC = () => {
     initRows(reduxQuery, nextRowId, reduxPerQueryOptions)
   );
   const lastDispatchedRef = useRef(reduxQuery);
+  const previousReduxQueryRef = useRef(reduxQuery);
 
   useEffect(() => {
-    if (reduxQuery !== lastDispatchedRef.current) {
+    const queryChanged = reduxQuery !== previousReduxQueryRef.current;
+    previousReduxQueryRef.current = reduxQuery;
+    // Local drafts can differ from the last executed query. Once a query is
+    // loaded or run, restore its rows and options even if its text is unchanged.
+    if (!queryChanged && isQueryEditorDirty) return;
+
+    setRows((currentRows) => {
+      const serialized = serializeRows(currentRows);
+      const optionsMatch = serialized.perQueryOptions.every(
+        (options, index) =>
+          options.minStep === reduxPerQueryOptions?.[index]?.minStep &&
+          options.legendFormat === reduxPerQueryOptions?.[index]?.legendFormat
+      );
+      if (serialized.query === reduxQuery && optionsMatch) return currentRows;
+
       lastDispatchedRef.current = reduxQuery;
-      setRows(initRows(reduxQuery, nextRowId, perQueryOptionsRef.current));
-    }
-  }, [reduxQuery, nextRowId]);
+      return initRows(reduxQuery, nextRowId, reduxPerQueryOptions);
+    });
+  }, [reduxQuery, reduxPerQueryOptions, isQueryEditorDirty, nextRowId]);
 
   // Sync draft text to the QueryStringManager (NOT Redux) on every keystroke so
   // that handleQuerySubmit in TopNav can read it via queryString.getQuery().query.
@@ -292,7 +325,9 @@ export const MetricsQueryPanel: React.FC = () => {
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <QueryPanelWidgets />
+          <OpenSearchDashboardsContextProvider services={widgetServices}>
+            <QueryPanelWidgets />
+          </OpenSearchDashboardsContextProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -312,7 +347,6 @@ export const MetricsQueryPanel: React.FC = () => {
                   draggableId={row.id}
                   customDragHandle={true}
                   spacing="none"
-                  hasInteractiveChildren={true}
                   isDragDisabled={rows.length <= 1}
                 >
                   {(provided, snapshot) => (
