@@ -57,8 +57,10 @@ export const RecentQueriesButton = () => {
       });
     }
     dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
+    // Loading a recent query only replaces the query text; Run executes it against the current
+    // dataset, not the one the history entry was recorded on. Analyze the same thing.
     runPPLAnalyzeWithSource({
-      query: { ...selectedQuery, query: updatedQuery },
+      query: { ...services.data.query.queryString.getQuery(), query: updatedQuery },
       http: services.http,
       timefilter: services.data.query.timefilter.timefilter,
       onlyIfOpen: true,
