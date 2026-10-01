@@ -4,7 +4,7 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
-import { Dataset } from '../../../../../../../data/common';
+import { Dataset, TimeRange } from '../../../../../../../data/common';
 
 export interface PPLQueryParams {
   traceId: string;
@@ -34,6 +34,8 @@ export interface PPLQueryRequest {
         }>;
       };
       aggConfig?: any; // For external data source aggregations
+      /** Time range for the dataset's time field; the global timefilter when omitted. */
+      timeRange?: TimeRange;
     };
   };
 }
@@ -60,7 +62,8 @@ export const buildPPLDataset = (dataset: Dataset) => {
 export const buildPPLQueryRequest = (
   dataset: Dataset,
   pplQuery: string,
-  aggConfig?: any
+  aggConfig?: any,
+  timeRange?: TimeRange
 ): PPLQueryRequest => {
   const request: PPLQueryRequest = {
     params: {
@@ -81,6 +84,9 @@ export const buildPPLQueryRequest = (
 
   if (aggConfig) {
     request.params.body.aggConfig = aggConfig;
+  }
+  if (timeRange) {
+    request.params.body.timeRange = timeRange;
   }
 
   return request;
@@ -118,11 +124,20 @@ export const escapePPLValue = (value: any): string => {
   }
 };
 
+export interface PPLServiceOptions {
+  /** Time range to query instead of the global timefilter (e.g. a dashboard panel's own range). */
+  timeRange?: TimeRange;
+  /** Aborts the service's in-flight queries. */
+  signal?: AbortSignal;
+}
+
 export class PPLService {
   protected dataService: DataPublicPluginStart;
+  protected options: PPLServiceOptions;
 
-  constructor(dataService: DataPublicPluginStart) {
+  constructor(dataService: DataPublicPluginStart, options: PPLServiceOptions = {}) {
     this.dataService = dataService;
+    this.options = options;
   }
 
   async executeQuery(dataset: Dataset, pplQuery: string): Promise<any> {
@@ -131,8 +146,8 @@ export class PPLService {
     }
 
     try {
-      const request = buildPPLQueryRequest(dataset, pplQuery);
-      return await executePPLQuery(this.dataService, request);
+      const request = buildPPLQueryRequest(dataset, pplQuery, undefined, this.options.timeRange);
+      return await executePPLQuery(this.dataService, request, this.options.signal);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Query Error:', error);

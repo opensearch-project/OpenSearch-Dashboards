@@ -3,16 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiBadge, EuiLink, EuiProgress } from '@elastic/eui';
 import { TableHeaderColumn } from '../../../components/data_table/table_header/table_header_column';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SortOrder } from '../../../helpers/data_table_helper';
 import { SessionRow, formatSessionDuration } from './session_utils';
-
-/** Rows rendered per batch as the user scrolls (same as the Traces/Spans DataTable). */
-const LAZY_LOAD_BATCH_SIZE = 50;
+import { setTitleIfTruncated, useLazyRows } from './lazy_rows';
 
 const DEFAULT_SORT: SortOrder[] = [['startTime', 'desc']];
 
@@ -50,12 +48,6 @@ export const TokensBadge: React.FC<{ tokens: number | null }> = ({ tokens }) =>
       {tokens.toLocaleString()}
     </EuiBadge>
   );
-
-/** Show the full text as a native tooltip only when the cell is truncated (like DataTable). */
-const setTitleIfTruncated = (text: string) => (e: React.MouseEvent<HTMLSpanElement>) => {
-  const el = e.currentTarget;
-  el.title = el.scrollWidth > el.clientWidth ? text : '';
-};
 
 const compareSessions = (a: SessionRow, b: SessionRow, key: SessionColumnKey): number => {
   const va = a[key];
@@ -150,23 +142,7 @@ export const SessionsTable: React.FC<SessionsTableProps> = ({
   }, [sessions, sortOrder]);
 
   // Infinite-scroll lazy loading, mirroring the Traces/Spans DataTable.
-  const [renderedCount, setRenderedCount] = useState(LAZY_LOAD_BATCH_SIZE);
-  useEffect(() => setRenderedCount(LAZY_LOAD_BATCH_SIZE), [sessions, sortOrder]);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-    if (node && typeof IntersectionObserver !== 'undefined') {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) setRenderedCount((c) => c + LAZY_LOAD_BATCH_SIZE);
-        },
-        { threshold: 0.1 }
-      );
-      observerRef.current.observe(node);
-    }
-  }, []);
-  useEffect(() => () => observerRef.current?.disconnect(), []);
+  const { renderedCount, sentinelRef } = useLazyRows(sortedSessions);
 
   const visible = sortedSessions.slice(0, renderedCount);
 

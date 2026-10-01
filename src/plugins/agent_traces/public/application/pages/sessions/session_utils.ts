@@ -8,7 +8,11 @@ import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../common';
 import { escapePPLValue } from '../traces/trace_details/data_fetching/ppl_request_helpers';
 import { BaseRow } from '../traces/hooks/tree_utils';
 import { Bucket } from '../../../components/fields_selector/types';
-import { previewInputMessages, previewOutputMessages } from '../traces/hooks/genai_message_preview';
+import {
+  previewInputMessages,
+  previewOutputMessages,
+  readAttribute,
+} from '../traces/hooks/genai_message_preview';
 
 /** Backtick-quoted session id field for use in PPL. */
 export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
@@ -204,25 +208,6 @@ export const parseSessionStats = (records: PplRecord[]): SessionStats[] =>
     }))
     .filter((s) => s.sessionId !== '');
 
-/** Read a span attribute that may be stored as a flat dotted key or a nested object. */
-export const getSpanAttribute = (
-  doc: Record<string, unknown> | undefined,
-  key: string
-): unknown => {
-  if (!doc) return undefined;
-  const attrs = doc.attributes;
-  if (isObject(attrs)) {
-    if (key in attrs) return attrs[key];
-    let cur: unknown = attrs;
-    for (const part of key.split('.')) {
-      if (!isObject(cur)) return undefined;
-      cur = cur[part];
-    }
-    if (cur !== undefined) return cur;
-  }
-  return doc[`attributes.${key}`];
-};
-
 const rowTokens = (row: BaseRow): number | null =>
   typeof row.totalTokens === 'number' ? row.totalTokens : null;
 
@@ -260,7 +245,7 @@ export const assembleSessionRows = (
     const withInput = roots.filter((r) => previewInputMessages(r.input) !== '');
     const withOutput = roots.filter((r) => previewOutputMessages(r.output) !== '');
     const tokenValues = roots.map(rowTokens).filter((t): t is number => t !== null);
-    const userRoot = roots.find((r) => getSpanAttribute(r.rawDocument, 'user.id') != null);
+    const userRoot = roots.find((r) => readAttribute(r.rawDocument, 'user.id') != null);
     const start = toMs(s.startTime);
     const end = toMs(s.endTime);
 
@@ -275,7 +260,7 @@ export const assembleSessionRows = (
       lastMessage: withOutput.length
         ? previewOutputMessages(withOutput[withOutput.length - 1].output)
         : '',
-      userId: userRoot ? String(getSpanAttribute(userRoot.rawDocument, 'user.id')) : null,
+      userId: userRoot ? String(readAttribute(userRoot.rawDocument, 'user.id')) : null,
       // Every trace mapped to the session, not just those whose root span was found;
       // traces with a root come first in start order.
       traceIds: [

@@ -337,6 +337,25 @@ describe('splitPplCommands', () => {
       'where `x|y` = 1',
     ]);
   });
+
+  it('keeps escaped quotes inside string literals', () => {
+    expect(splitPplCommands('source = t | where msg = "a\\"| b" | head 5')).toEqual([
+      'source = t',
+      'where msg = "a\\"| b"',
+      'head 5',
+    ]);
+    expect(splitPplCommands("source = t | where msg = 'it\\'s | ok' | head 5")).toEqual([
+      'source = t',
+      "where msg = 'it\\'s | ok'",
+      'head 5',
+    ]);
+    // An escaped backslash does not escape the closing quote.
+    expect(splitPplCommands('source = t | where p = "c:\\\\" | head 5')).toEqual([
+      'source = t',
+      'where p = "c:\\\\"',
+      'head 5',
+    ]);
+  });
 });
 
 describe('extractSpanFilterQuery', () => {

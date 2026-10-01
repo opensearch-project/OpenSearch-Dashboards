@@ -95,14 +95,21 @@ export const splitPplWhereAndTail = (
 /** PPL commands that filter or annotate span rows without changing their shape. */
 const ROW_LEVEL_COMMANDS = new Set(['where', 'eval', 'parse', 'grok', 'regex', 'fillnull']);
 
-/** Split a PPL query on top-level pipes, ignoring pipes inside quotes or backticks. */
+/**
+ * Split a PPL query on top-level pipes, ignoring pipes inside quotes or backticks. Inside a
+ * string literal a backslash escapes the next character, so `"a\"| b"` stays one literal.
+ */
 export const splitPplCommands = (queryString: string): string[] => {
   const parts: string[] = [];
   let current = '';
   let quote: string | null = null;
+  let escaped = false;
   for (const ch of queryString) {
     if (quote) {
-      if (ch === quote) quote = null;
+      if (escaped) escaped = false;
+      // Backticks quote identifiers, which have no escapes.
+      else if (ch === '\\' && quote !== '`') escaped = true;
+      else if (ch === quote) quote = null;
       current += ch;
     } else if (ch === "'" || ch === '"' || ch === '`') {
       quote = ch;

@@ -12,7 +12,6 @@ import {
   buildTraceSessionMapQuery,
   formatSessionDuration,
   getSourceCommand,
-  getSpanAttribute,
   parseSessionStats,
   pplResponseToRecords,
   shortenId,
@@ -22,6 +21,7 @@ import {
   parseFacetBuckets,
 } from './session_utils';
 import { BaseRow } from '../traces/hooks/tree_utils';
+import { readAttribute } from '../traces/hooks/genai_message_preview';
 
 const FIELD = 'attributes.gen_ai.conversation.id';
 
@@ -136,12 +136,12 @@ describe('session_utils', () => {
     });
   });
 
-  describe('getSpanAttribute', () => {
+  describe('readAttribute (user id lookup)', () => {
     it('reads flat dotted, nested and top-level flattened keys', () => {
-      expect(getSpanAttribute({ attributes: { 'user.id': 'u1' } }, 'user.id')).toBe('u1');
-      expect(getSpanAttribute({ attributes: { user: { id: 'u2' } } }, 'user.id')).toBe('u2');
-      expect(getSpanAttribute({ 'attributes.user.id': 'u3' }, 'user.id')).toBe('u3');
-      expect(getSpanAttribute({ attributes: {} }, 'user.id')).toBeUndefined();
+      expect(readAttribute({ attributes: { 'user.id': 'u1' } }, 'user.id')).toBe('u1');
+      expect(readAttribute({ attributes: { user: { id: 'u2' } } }, 'user.id')).toBe('u2');
+      expect(readAttribute({ 'attributes.user.id': 'u3' }, 'user.id')).toBe('u3');
+      expect(readAttribute({ attributes: {} }, 'user.id')).toBeUndefined();
     });
   });
 

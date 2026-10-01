@@ -398,22 +398,32 @@ export class AgentTracesEmbeddable
   private fetchSessionsView = async () => {
     if (!this.searchProps) return;
     const dataset = this.savedQuery?.dataset;
+    // Like fetch(): a newer refresh cancels this one, so a slow response cannot overwrite it.
+    if (this.abortController) this.abortController.abort();
+    const abortController = new AbortController();
+    this.abortController = abortController;
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
     try {
       if (!dataset || !this.sessionsBaseQuery) throw new Error('Saved search has no dataset');
       const result = await fetchSessions(
-        new PPLService(this.services.data),
+        // The panel's time range (dashboard time or a per-panel override), as fetch() uses.
+        new PPLService(this.services.data, {
+          timeRange: this.input.timeRange,
+          signal: abortController.signal,
+        }),
         dataset,
         this.sessionsBaseQuery,
         this.formatTs
       );
+      if (abortController.signal.aborted) return;
       this.searchProps.sessions = result.sessions;
       this.searchProps.agentTotal = result.totalSessions;
       this.searchProps.agentError = undefined;
       this.searchProps.rows = result.sessions;
       this.searchProps.hits = result.sessions.length;
     } catch (error: unknown) {
+      if (abortController.signal.aborted) return;
       this.searchProps.sessions = [];
       this.searchProps.agentError = error instanceof Error ? error.message : String(error);
     }

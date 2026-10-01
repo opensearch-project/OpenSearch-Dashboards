@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiBadge, EuiHealth, EuiProgress } from '@elastic/eui';
 import { TableHeaderColumn } from '../../../components/data_table/table_header/table_header_column';
 import { getCategoryMeta, getSpanCategory } from '../../../services/span_categorization';
 import { TraceRow } from '../traces/hooks/tree_utils';
 import { previewSpanInput, previewSpanOutput } from '../traces/hooks/genai_message_preview';
-
-const LAZY_LOAD_BATCH_SIZE = 50;
+import { setTitleIfTruncated, useLazyRows } from './lazy_rows';
 
 export const KindBadge: React.FC<{ row: TraceRow }> = ({ row }) => {
   const meta = getCategoryMeta(getSpanCategory(row));
@@ -24,11 +23,6 @@ export const KindBadge: React.FC<{ row: TraceRow }> = ({ row }) => {
       {meta.label}
     </EuiBadge>
   );
-};
-
-const setTitleIfTruncated = (text: string) => (e: React.MouseEvent<HTMLSpanElement>) => {
-  const el = e.currentTarget;
-  el.title = el.scrollWidth > el.clientWidth ? text : '';
 };
 
 interface Column {
@@ -73,23 +67,7 @@ interface SessionSpansTableProps {
 
 /** Session-scoped traces/spans table, using the same markup and styles as the Traces tab. */
 export const SessionSpansTable: React.FC<SessionSpansTableProps> = ({ rows, onRowClick }) => {
-  const [renderedCount, setRenderedCount] = useState(LAZY_LOAD_BATCH_SIZE);
-  useEffect(() => setRenderedCount(LAZY_LOAD_BATCH_SIZE), [rows]);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-    if (node && typeof IntersectionObserver !== 'undefined') {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) setRenderedCount((c) => c + LAZY_LOAD_BATCH_SIZE);
-        },
-        { threshold: 0.1 }
-      );
-      observerRef.current.observe(node);
-    }
-  }, []);
-  useEffect(() => () => observerRef.current?.disconnect(), []);
+  const { renderedCount, sentinelRef } = useLazyRows(rows);
 
   const renderCell = (row: TraceRow, key: Column['key']) => {
     switch (key) {

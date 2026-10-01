@@ -273,5 +273,22 @@ describe('ppl_request_helpers', () => {
       const dataset = createMockDataset();
       await expect(pplService.executeQuery(dataset, 'source = test-index')).rejects.toThrow(error);
     });
+
+    it('uses the global timefilter unless given a time range', async () => {
+      await pplService.executeQuery(createMockDataset(), 'source = test-index');
+      const [request, options] = (mockDataService.search.search as jest.Mock).mock.calls[0];
+      expect(request.params.body.timeRange).toBeUndefined();
+      expect(options.abortSignal).toBeUndefined();
+    });
+
+    it('sends its time range and abort signal with every query', async () => {
+      const timeRange = { from: '2026-10-01T00:00:00.000Z', to: '2026-10-01T01:00:00.000Z' };
+      const controller = new AbortController();
+      const scoped = new PPLService(mockDataService, { timeRange, signal: controller.signal });
+      await scoped.executeQuery(createMockDataset(), 'source = test-index');
+      const [request, options] = (mockDataService.search.search as jest.Mock).mock.calls[0];
+      expect(request.params.body.timeRange).toEqual(timeRange);
+      expect(options.abortSignal).toBe(controller.signal);
+    });
   });
 });
