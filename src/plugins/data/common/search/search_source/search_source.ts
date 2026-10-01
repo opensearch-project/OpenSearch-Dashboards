@@ -479,6 +479,7 @@ export class SearchSource {
               throw new Error('Cannot poll results for undefined query status config');
             }
 
+            const { onPartialResults } = options;
             results = await handleQueryResults({
               pollQueryResults: async () =>
                 search(
@@ -486,6 +487,23 @@ export class SearchSource {
                   options
                 ) as Promise<FetchStatusResponse>,
               queryId: queryStatusConfig.queryId,
+              interval: options.pollInterval,
+              // A still-running poll response only carries a data frame when its source returns
+              // rows before completion; anything else (a bare status) has nothing to render.
+              ...(onPartialResults && {
+                onPollResponse: (pollResponse: FetchStatusResponse) => {
+                  const partialFrame = (pollResponse as { body?: IDataFrame }).body;
+                  if (!partialFrame?.fields) return;
+                  onPartialResults(
+                    convertResult({
+                      response: pollResponse as IDataFrameResponse,
+                      fields: this.getFields(),
+                      options,
+                    }),
+                    partialFrame
+                  );
+                },
+              }),
             });
           } else {
             throw new Error('Invalid query state');

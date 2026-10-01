@@ -390,4 +390,60 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
     });
   });
+
+  describe('#fetch() with a polling (async) external search', () => {
+    const frame = (size: number) => ({
+      name: 'lg',
+      schema: [{ name: 'msg', type: 'string' }],
+      fields: [{ name: 'msg', type: 'string', values: Array.from({ length: size }, (_, i) => i) }],
+      size,
+    });
+
+    beforeEach(() => {
+      // Route through fetchExternalSearch, the path async (non-DSL) languages take.
+      jest.spyOn(SearchSource.prototype as any, 'isUnsupportedRequest').mockReturnValue(true);
+      jest.spyOn(SearchSource.prototype, 'createDataFrame').mockResolvedValue(undefined as any);
+      jest.spyOn(SearchSource.prototype, 'setDataFrame').mockResolvedValue(undefined as any);
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    const pollingSearch = () =>
+      jest
+        .fn()
+        .mockResolvedValueOnce({
+          type: 'data_frame_polling',
+          status: 'started',
+          body: { queryStatusConfig: { queryId: 'q1' } },
+        })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'Running', body: frame(1) })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'Running' })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'success', body: frame(3) });
+
+    test('forwards still-running frames to onPartialResults and resolves with the final one', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+      const onPartialResults = jest.fn();
+
+      const response = await searchSource.fetch({ onPartialResults, pollInterval: 1 });
+
+      expect(search).toHaveBeenCalledTimes(4);
+      // Only the running response that carried a frame is forwarded; the bare status is not.
+      expect(onPartialResults).toHaveBeenCalledTimes(1);
+      const [partial, partialFrame] = onPartialResults.mock.calls[0];
+      expect(partial.hits.hits).toHaveLength(1);
+      expect(partialFrame.size).toBe(1);
+      expect(response.hits.hits).toHaveLength(3);
+    });
+
+    test('is unchanged for callers that do not pass onPartialResults', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+
+      const response = await searchSource.fetch({ pollInterval: 1 });
+
+      expect(search).toHaveBeenCalledTimes(4);
+      expect(response.hits.hits).toHaveLength(3);
+    });
+  });
 });
