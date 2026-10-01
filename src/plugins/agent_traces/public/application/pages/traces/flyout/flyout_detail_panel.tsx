@@ -32,6 +32,7 @@ import {
 } from './message_content_view';
 import { previewSpanInput, previewSpanOutput } from '../hooks/genai_message_preview';
 import './message_content_view.scss';
+import { GenAiAttributes } from './genai_attributes';
 
 export const formatJsonOrString = (value: string | undefined): string => {
   if (!value || value === '—')
@@ -225,6 +226,24 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiAccordion>
+
+      <EuiSpacer size="s" />
+
+      <EuiAccordion
+        id="genai-attributes-accordion"
+        buttonContent={
+          <strong>
+            {i18n.translate('agentTraces.detailPanel.genAiAttributes', {
+              defaultMessage: 'GenAI attributes',
+            })}
+          </strong>
+        }
+        initialIsOpen
+        paddingSize="m"
+        data-test-subj="agentTracesGenAiAttributesAccordion"
+      >
+        <GenAiAttributes doc={row?.rawDocument} />
       </EuiAccordion>
 
       <EuiSpacer size="s" />
