@@ -8,3 +8,4 @@ export * from './opacity_range';
 export * from './line_shared_options';
 export * from './point_size_options';
 export * from './value_label_options';
+export * from './connection_group';
