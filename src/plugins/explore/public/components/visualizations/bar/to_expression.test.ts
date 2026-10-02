@@ -70,6 +70,7 @@ describe('bar to_expression', () => {
       expect(spec.series.length).toBeGreaterThanOrEqual(1);
       expect(spec.series[0].type).toBe('bar');
       expect(spec.series[0].emphasis).toEqual({ focus: 'series' });
+      expect(spec.tooltip.trigger).toBe('axis');
       expect(legendItems).toEqual([
         {
           label: 'Count',
@@ -77,6 +78,23 @@ describe('bar to_expression', () => {
           target: { type: 'series', name: 'Count' },
         },
       ]);
+    });
+
+    test('uses item trigger when tooltip mode is item', () => {
+      const { spec } = createBarSpec(
+        mockData,
+        {
+          ...defaultBarChartStyles,
+          tooltipOptions: { mode: 'single' },
+        },
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: [mockNumericalColumn],
+        }
+      );
+
+      expect(spec.tooltip.trigger).toBe('item');
+      expect(spec.tooltip.show).toBe(true);
     });
 
     test('includes markLine for threshold when enabled', () => {

@@ -13,7 +13,6 @@ import {
   buildAxisConfigs,
   assembleSpec,
   applyTimeRange,
-  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
@@ -23,7 +22,6 @@ import {
   flatten,
 } from '../utils/data_transformation';
 import { LegendItem } from '../utils/legend';
-import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
 /**
  * Create a simple line chart with one metric and one date
@@ -143,7 +141,6 @@ export const createMultiLineChart = (
     createBaseConfig({
       legend: { show: false },
     }),
-    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildAxisConfigs,
     applyTimeRange,
     createLineSeries({
@@ -187,7 +184,6 @@ export const createCategoryLineChart = (
     createBaseConfig({
       legend: { show: false },
     }),
-    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildAxisConfigs,
     createLineSeries({
       styles,
