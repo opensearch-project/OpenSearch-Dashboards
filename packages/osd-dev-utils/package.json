@@ -24,7 +24,7 @@
     "getopts": "^2.2.5",
     "globby": "^11.1.0",
     "load-json-file": "^6.2.0",
-    "moment": "^2.24.0",
+    "moment": "^2.31.0",
     "normalize-path": "^3.0.0",
     "rxjs": "^6.5.5",
     "strip-ansi": "^6.0.0",
