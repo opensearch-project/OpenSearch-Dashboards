@@ -8,6 +8,19 @@ import { httpServerMock, httpServiceMock } from '../../../../../src/core/server/
 import { registerDataConnectionsRoute } from './data_connections_router';
 import { DataConnectionType } from '../../../data_source/common/data_connections';
 
+// Import the mapPrometheusProperties function for direct testing
+// Since it's not exported, we'll test it through the route handlers
+const mockLogger = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  trace: jest.fn(),
+  fatal: jest.fn(),
+  log: jest.fn(),
+  get: jest.fn(),
+};
+
 describe('data_connections_router', () => {
   let router: jest.Mocked<IRouter>;
   let mockContext: any;
@@ -48,7 +61,7 @@ describe('data_connections_router', () => {
 
   describe('POST /dataconnections', () => {
     beforeEach(() => {
-      registerDataConnectionsRoute(router, true);
+      registerDataConnectionsRoute(router, true, mockLogger);
     });
 
     it('should create Prometheus data connection with saved object', async () => {
@@ -144,14 +157,16 @@ describe('data_connections_router', () => {
 
       expect(mockResponse.custom).toHaveBeenCalledWith({
         statusCode: 500,
-        body: 'Internal Server Error',
+        // A string error body is wrapped so callers always get an object with a
+        // `message`, rather than sometimes a bare string and sometimes undefined.
+        body: { message: 'Internal Server Error' },
       });
     });
   });
 
   describe('POST /dataconnections with dataSourceEnabled=false', () => {
     beforeEach(() => {
-      registerDataConnectionsRoute(router, false);
+      registerDataConnectionsRoute(router, false, mockLogger);
     });
 
     it('should not create saved object for Prometheus when dataSourceEnabled is false', async () => {
@@ -197,7 +212,7 @@ describe('data_connections_router', () => {
 
   describe('DELETE /dataconnections/:name/dataSourceMDSId=:dataSourceMDSId', () => {
     beforeEach(() => {
-      registerDataConnectionsRoute(router, true);
+      registerDataConnectionsRoute(router, true, mockLogger);
     });
 
     it('should delete data connection from backend and saved object', async () => {
@@ -216,7 +231,9 @@ describe('data_connections_router', () => {
           {
             id: 'saved-object-id',
             type: 'data-connection',
-            attributes: {},
+            // The route matches on connectionId exactly, so a fuzzy `find` hit that is
+            // not the requested connection is skipped rather than deleted.
+            attributes: { connectionId: 'test-prometheus' },
             references: [],
             score: 0,
           },
@@ -236,6 +253,7 @@ describe('data_connections_router', () => {
         type: 'data-connection',
         search: 'test-prometheus',
         searchFields: ['connectionId'],
+        perPage: 10000,
       });
 
       expect(mockContext.core.savedObjects.client.delete).toHaveBeenCalledWith(
@@ -267,7 +285,9 @@ describe('data_connections_router', () => {
           {
             id: 'saved-object-id',
             type: 'data-connection',
-            attributes: {},
+            // The route matches on connectionId exactly, so a fuzzy `find` hit that is
+            // not the requested connection is skipped rather than deleted.
+            attributes: { connectionId: 'test-prometheus' },
             references: [],
             score: 0,
           },
@@ -330,7 +350,9 @@ describe('data_connections_router', () => {
           {
             id: 'saved-object-id',
             type: 'data-connection',
-            attributes: {},
+            // The route matches on connectionId exactly, so a fuzzy `find` hit that is
+            // not the requested connection is skipped rather than deleted.
+            attributes: { connectionId: 'test-prometheus' },
             references: [],
             score: 0,
           },
@@ -351,11 +373,302 @@ describe('data_connections_router', () => {
         },
       });
     });
+
+    describe('mapPrometheusProperties OAuth2 Integration', () => {
+      beforeEach(() => {
+        registerDataConnectionsRoute(router, true, mockLogger);
+      });
+
+      it('should map OAuth2 properties from prometheus.auth.* to prometheus.oauth2.*', async () => {
+        const mockCreateDataSourceResponse = { success: true, name: 'test-oauth2-prometheus' };
+
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-oauth2-prometheus',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: {
+              'prometheus.uri': 'http://localhost:9090',
+              'prometheus.auth.type': 'oauth2',
+              'prometheus.auth.client_id': 'test-client-id',
+              'prometheus.auth.client_secret': 'test-client-secret',
+              'prometheus.auth.token_url': 'https://auth.example.com/token',
+              'prometheus.auth.scopes': 'read write',
+              'prometheus.auth.audience': 'https://api.example.com',
+              'prometheus.auth.grant_type': 'client_credentials',
+            },
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+        mockContext.core.savedObjects.client.create.mockResolvedValue({});
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        // Verify that the properties were mapped correctly
+        expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+          body: {
+            name: 'test-oauth2-prometheus',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: expect.objectContaining({
+              'prometheus.uri': 'http://localhost:9090',
+              'prometheus.auth.type': 'oauth2',
+              'prometheus.oauth2.clientId': 'test-client-id',
+              'prometheus.oauth2.clientSecret': 'test-client-secret',
+              'prometheus.oauth2.tokenUrl': 'https://auth.example.com/token',
+              'prometheus.oauth2.scopes': 'read write',
+              'prometheus.oauth2.audience': 'https://api.example.com',
+              'prometheus.oauth2.grantType': 'client_credentials',
+              'prometheus.oauth2.enabled': 'true',
+            }),
+          },
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith('OAuth2 configuration mapped to properties');
+
+        // authMethod is how the wizard names the choice and is not part of the connector
+        // property set, so it must not reach the backend.
+        const sentProperties = mockCallAsCurrentUser.mock.calls[0][1].body.properties;
+        expect(sentProperties).not.toHaveProperty('authMethod');
+      });
+
+      it('should handle OAuth2 properties with authMethod instead of prometheus.auth.type', async () => {
+        const mockCreateDataSourceResponse = { success: true, name: 'test-oauth2-authmethod' };
+
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-oauth2-authmethod',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: {
+              'prometheus.uri': 'http://localhost:9090',
+              authMethod: 'oauth2',
+              'prometheus.auth.client_id': 'test-client-id',
+              'prometheus.auth.client_secret': 'test-client-secret',
+              'prometheus.auth.token_url': 'https://auth.example.com/token',
+            },
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+        mockContext.core.savedObjects.client.create.mockResolvedValue({});
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+          body: {
+            name: 'test-oauth2-authmethod',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: expect.objectContaining({
+              'prometheus.oauth2.clientId': 'test-client-id',
+              'prometheus.oauth2.clientSecret': 'test-client-secret',
+              'prometheus.oauth2.tokenUrl': 'https://auth.example.com/token',
+              'prometheus.oauth2.enabled': 'true',
+              'prometheus.auth.type': 'oauth2',
+            }),
+          },
+        });
+      });
+
+      it('should handle partial OAuth2 configuration (missing optional fields)', async () => {
+        const mockCreateDataSourceResponse = { success: true, name: 'test-oauth2-partial' };
+
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-oauth2-partial',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: {
+              'prometheus.uri': 'http://localhost:9090',
+              'prometheus.auth.type': 'oauth2',
+              'prometheus.auth.client_id': 'test-client-id',
+              'prometheus.auth.client_secret': 'test-client-secret',
+              'prometheus.auth.token_url': 'https://auth.example.com/token',
+              // Missing scopes, audience, grant_type
+            },
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+        mockContext.core.savedObjects.client.create.mockResolvedValue({});
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+          body: {
+            name: 'test-oauth2-partial',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: expect.objectContaining({
+              'prometheus.oauth2.clientId': 'test-client-id',
+              'prometheus.oauth2.clientSecret': 'test-client-secret',
+              'prometheus.oauth2.tokenUrl': 'https://auth.example.com/token',
+              'prometheus.oauth2.enabled': 'true',
+              'prometheus.auth.type': 'oauth2',
+            }),
+          },
+        });
+
+        // Should not have undefined values for missing optional fields
+        const calledProperties = mockCallAsCurrentUser.mock.calls[0][1].body.properties;
+        expect(calledProperties['prometheus.oauth2.scopes']).toBeUndefined();
+        expect(calledProperties['prometheus.oauth2.audience']).toBeUndefined();
+        expect(calledProperties['prometheus.oauth2.grantType']).toBeUndefined();
+      });
+
+      it('should not modify properties for non-OAuth2 Prometheus data sources', async () => {
+        const mockCreateDataSourceResponse = { success: true, name: 'test-basic-auth-prometheus' };
+
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-basic-auth-prometheus',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: {
+              'prometheus.uri': 'http://localhost:9090',
+              'prometheus.auth.type': 'basicauth',
+              'prometheus.auth.username': 'test-user',
+              'prometheus.auth.password': 'test-password',
+            },
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+        mockContext.core.savedObjects.client.create.mockResolvedValue({});
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        // Properties should remain unchanged for non-OAuth2 auth
+        expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+          body: {
+            name: 'test-basic-auth-prometheus',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: {
+              'prometheus.uri': 'http://localhost:9090',
+              'prometheus.auth.type': 'basicauth',
+              'prometheus.auth.username': 'test-user',
+              'prometheus.auth.password': 'test-password',
+            },
+          },
+        });
+
+        // Should not have OAuth2 properties
+        const calledProperties = mockCallAsCurrentUser.mock.calls[0][1].body.properties;
+        expect(calledProperties['prometheus.oauth2.enabled']).toBeUndefined();
+        expect(calledProperties['prometheus.oauth2.clientId']).toBeUndefined();
+      });
+
+      it('should not modify properties for non-Prometheus connectors', async () => {
+        const mockCreateDataSourceResponse = { success: true, name: 'test-s3-connector' };
+
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-s3-connector',
+            connector: 's3glue',
+            allowedRoles: ['admin'],
+            properties: {
+              'glue.indexstore.opensearch.uri': 'https://opensearch.example.com',
+              'glue.indexstore.opensearch.region': 'us-west-2',
+              'prometheus.auth.type': 'oauth2', // This should be ignored for non-Prometheus
+              'prometheus.auth.client_id': 'should-not-be-mapped',
+            },
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        // Properties should remain unchanged for non-Prometheus connectors
+        expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+          body: {
+            name: 'test-s3-connector',
+            connector: 's3glue',
+            allowedRoles: ['admin'],
+            properties: {
+              'glue.indexstore.opensearch.uri': 'https://opensearch.example.com',
+              'glue.indexstore.opensearch.region': 'us-west-2',
+              'prometheus.auth.type': 'oauth2',
+              'prometheus.auth.client_id': 'should-not-be-mapped',
+            },
+          },
+        });
+
+        // Should not have OAuth2 mapping
+        const calledProperties = mockCallAsCurrentUser.mock.calls[0][1].body.properties;
+        expect(calledProperties['prometheus.oauth2.enabled']).toBeUndefined();
+        expect(calledProperties['prometheus.oauth2.clientId']).toBeUndefined();
+      });
+
+      it('should reject a Prometheus data source with null properties', async () => {
+        mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+          body: {
+            name: 'test-null-properties',
+            connector: 'prometheus',
+            allowedRoles: ['admin'],
+            properties: null,
+          },
+        });
+
+        const mockCallAsCurrentUser = jest.fn();
+        mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+          {
+            callAsCurrentUser: mockCallAsCurrentUser,
+          }
+        );
+        mockContext.core.savedObjects.client.create.mockResolvedValue({});
+
+        const postHandler = router.post.mock.calls[0][1];
+        await postHandler(mockContext, mockRequest, mockResponse);
+
+        // A Prometheus connection has nowhere to put its URI without properties, so the
+        // mapping step rejects it up front instead of handing an unusable body to the
+        // backend.
+        expect(mockCallAsCurrentUser).not.toHaveBeenCalled();
+        expect(mockResponse.custom).toHaveBeenCalledWith({
+          statusCode: 400,
+          body: { message: 'Properties object is required for Prometheus mapping' },
+        });
+      });
+    });
   });
 
   describe('DELETE /dataconnections/:name with dataSourceEnabled=false', () => {
     beforeEach(() => {
-      registerDataConnectionsRoute(router, false);
+      registerDataConnectionsRoute(router, false, mockLogger);
     });
 
     it('should delete data connection but not attempt to delete saved object when dataSourceEnabled is false', async () => {

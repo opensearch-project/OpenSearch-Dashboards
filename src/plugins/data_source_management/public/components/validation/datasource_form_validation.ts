@@ -76,7 +76,11 @@ export const performDataSourceFormValidation = (
   formValues: CreateDataSourceState | EditDataSourceState,
   existingDatasourceNamesList: string[],
   existingTitle: string,
-  authenticationMethodRegistry: AuthenticationMethodRegistry
+  authenticationMethodRegistry: AuthenticationMethodRegistry,
+  // The auth type the data source is currently stored with, when editing an existing one.
+  // Credentials are stripped on read, so a stored secret arrives blank and must not be treated
+  // as missing - but only when there actually is a stored secret of that type to fall back on.
+  existingAuthType?: AuthType | string
 ) => {
   /* Title validation */
   const titleValid = isTitleValid(formValues?.title, existingDatasourceNamesList, existingTitle);
@@ -124,6 +128,39 @@ export const performDataSourceFormValidation = (
     if (!formValues.auth.credentials?.service) {
       return false;
     }
+  } else if (formValues?.auth?.type === AuthType.OAuth2) {
+    /* Credentials are stripped when a data source is read (stripCredentials sets
+     * auth.credentials to undefined, not just the secret), so in edit mode every OAuth2 field
+     * arrives blank. A blank field therefore means "keep the stored value" and must not fail
+     * validation, or Save and Test stay disabled for every existing OAuth2 data source before
+     * the user has touched anything. Switching an existing data source TO OAuth2 has nothing
+     * stored to keep, so there the fields are still required. */
+    const isStoredOAuth2 = existingAuthType === AuthType.OAuth2;
+
+    /* Client ID */
+    if (!isStoredOAuth2 && !formValues.auth.credentials?.clientId) {
+      return false;
+    }
+
+    /* Client Secret */
+    if (!isStoredOAuth2 && !formValues.auth.credentials?.clientSecret) {
+      return false;
+    }
+
+    /* Token URL - shape is checked whenever a value is present, the same way endpoint is, so a
+     * malformed value is not persisted only to fail later when the token is requested. */
+    const tokenUrl = formValues.auth.credentials?.tokenUrl as string | undefined;
+    if (!isStoredOAuth2 && !tokenUrl) {
+      return false;
+    }
+    if (tokenUrl && !isValidUrl(tokenUrl)) {
+      return false;
+    }
+
+    /* scopes, audience and grantType are optional and are intentionally not
+     * validated here. Falling through to the registry branch below would reject
+     * them when empty, because that branch requires every field declared in
+     * credentialFormField to be non-empty. */
   } else {
     const registeredCredentials = extractRegisteredAuthTypeCredentials(
       (formValues?.auth?.credentials ?? {}) as { [key: string]: string },

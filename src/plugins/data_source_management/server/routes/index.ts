@@ -35,11 +35,13 @@ export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  oauth2AuthEnabled,
   logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  oauth2AuthEnabled: boolean;
   logger: Logger;
 }) {
   registerPplRoute({ router, facet: new PPLFacet(client) });
@@ -52,7 +54,7 @@ export function setupRoutes({
   if (!dataSourceEnabled) {
     registerNonMdsDataConnectionsRoute(router);
   }
-  registerDataConnectionsRoute(router, dataSourceEnabled);
+  registerDataConnectionsRoute(router, dataSourceEnabled, logger, oauth2AuthEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
   registerLocalClusterVersionRoute(router, logger);
 }
