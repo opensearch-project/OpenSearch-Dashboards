@@ -6,7 +6,11 @@
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
-import { getDependencySystemIcon, isBrandDependencySystem } from '@osd/apm-topology';
+import {
+  getBrandIconClassName,
+  getDependencySystemIcon,
+  isBrandDependencySystem,
+} from '@osd/apm-topology';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
 import { dependencyTypeLabel, dependencyIconType } from '../../services/dependency_classifier';
 import { TraceDependencies } from '../../services/trace_dependencies';
@@ -142,7 +146,10 @@ export const HierarchySpanCell = ({
               color="subdued"
               className={
                 isBrandDependencySystem(dependency.system)
-                  ? 'exploreSpanDetailTable__dependencyBrandIcon'
+                  ? getBrandIconClassName(dependency.system).replace(
+                      /celBrandIcon/g,
+                      'exploreSpanDetailTable__dependencyBrandIcon'
+                    )
                   : undefined
               }
               style={{ marginInlineStart: 6, flexShrink: 0 }}

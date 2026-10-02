@@ -35,6 +35,7 @@ export {
   normalizeDependencySystem,
   isBrandDependencySystem,
   isBrandIconKey,
+  getBrandIconClassName,
 } from './shared/constants/dependency_icons.constants';
 
 // Provider icon utilities

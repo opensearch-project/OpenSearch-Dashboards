@@ -9,6 +9,7 @@ import {
   getDependencySystemIcon,
   isBrandDependencySystem,
   isBrandIconKey,
+  getBrandIconClassName,
   normalizeDependencySystem,
 } from './dependency_icons.constants';
 import { ICONS } from './icons.constants';
@@ -70,5 +71,16 @@ describe('dependency icons', () => {
     expect(isBrandIconKey('Dependency::database')).toBe(false);
     expect(isBrandIconKey('AWS::RDS')).toBe(false);
     expect(isBrandDependencySystem(undefined)).toBe(false);
+  });
+
+  it('renders a brand mark transparent in its color, in one color only where it is too faint', () => {
+    expect(getBrandIconClassName('postgresql')).toBe('celBrandIcon');
+    // Near-black marks turn white in dark mode; very light ones turn black in light mode.
+    expect(getBrandIconClassName('kafka')).toBe('celBrandIcon celBrandIcon--monoOnDark');
+    expect(getBrandIconClassName('sqlite')).toContain('celBrandIcon--monoOnDark');
+    expect(getBrandIconClassName('clickhouse')).toBe('celBrandIcon celBrandIcon--monoOnLight');
+    // Not brand marks: monochrome AWS icons and generic glyphs.
+    expect(getBrandIconClassName('aws_sqs')).toBe('');
+    expect(getBrandIconClassName('my_custom_db')).toBe('');
   });
 });

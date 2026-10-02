@@ -227,21 +227,24 @@
   filter: brightness(0) invert(1);
 }
 
-/* Brand marks (dependency icons such as PostgreSQL or Kafka) keep their official color in
-   every theme, as brand guidelines ask: they sit on a light chip and are never inverted.
-   These selectors outrank the dark-mode inversions of the icon containers above/elsewhere. */
-img.celBrandIcon {
-  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-  background-color: #fff;
-  border-radius: 3px;
-  padding: 1px;
-  box-sizing: border-box;
+/* Brand marks (dependency icons such as PostgreSQL or Kafka) are transparent and keep their
+   official color in both themes, so they are not inverted with the monochrome icons. A mark
+   too faint for a theme (see getBrandIconClassName) renders in one color there instead:
+   black on light, white on dark. These selectors outrank the containers' dark-mode inversion. */
+img.celBrandIcon--monoOnLight {
+  filter: brightness(0);
 }
 
 :root.celestial--dark .celDonutIcon img.celBrandIcon,
 :root.celestial--dark .celServiceCircle__interior img.celBrandIcon,
 :root.celestial--dark .celMetricsCard__icon img.celBrandIcon {
   filter: none;
+}
+
+:root.celestial--dark .celDonutIcon img.celBrandIcon--monoOnDark,
+:root.celestial--dark .celServiceCircle__interior img.celBrandIcon--monoOnDark,
+:root.celestial--dark .celMetricsCard__icon img.celBrandIcon--monoOnDark {
+  filter: brightness(0) invert(1);
 }
 
 /* Suppress the global EUI focus-ring animation inside the topology map.

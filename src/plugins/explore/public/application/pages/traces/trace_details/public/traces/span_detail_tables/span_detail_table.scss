@@ -76,12 +76,15 @@
   }
 }
 
-// Brand marks keep their official color in both themes, on a light chip (brand guidelines
-// ask not to recolor them).
-.exploreSpanDetailTable__dependencyBrandIcon {
-  // stylelint-disable-next-line @osd/stylelint/no_restricted_values
-  background-color: #fff;
-  border-radius: 2px;
-  padding: 1px;
-  box-sizing: content-box;
+// Brand marks are transparent and keep their official color; a mark too faint for the theme
+// (see @osd/apm-topology getBrandIconClassName) renders in one color: black on light, white
+// on dark.
+@if lightness($ouiTextColor) > 50 {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnDark {
+    filter: brightness(0) invert(1);
+  }
+} @else {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnLight {
+    filter: brightness(0);
+  }
 }

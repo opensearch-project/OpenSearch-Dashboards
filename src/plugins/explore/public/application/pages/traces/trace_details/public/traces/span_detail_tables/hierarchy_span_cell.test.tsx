@@ -257,7 +257,7 @@ describe('HierarchySpanCell', () => {
       expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'External');
     });
 
-    it('shows the brand mark on a light chip for known systems, else the category glyph', () => {
+    it('shows the brand mark for known systems, else the category glyph', () => {
       const brand = renderItem({
         kind: 'SPAN_KIND_CLIENT',
         attributes: { db_system: 'postgresql', 'server.address': 'pg' },

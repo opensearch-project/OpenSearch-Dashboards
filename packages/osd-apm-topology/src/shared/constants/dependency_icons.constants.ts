@@ -114,6 +114,16 @@ const SYSTEM_ICONS: Record<string, string> = {
 /** Systems whose icon is the package's monochrome AWS icon (inverted in dark mode), not a brand mark. */
 const MONOCHROME_SYSTEMS = new Set(['aws.dynamodb', 'aws.redshift', 'aws.sns', 'aws_sqs']);
 
+/**
+ * Brand marks whose official color is too faint against a theme's background (contrast below
+ * 2.5:1 with OUI's light #FFFFFF / dark #1D1E24 page colors); they render in one color there
+ * (black on light, white on dark), the one-color version brand guidelines allow. The marks
+ * always come with a text label (card title, tooltip), so this keeps them visible rather than
+ * carrying meaning alone.
+ */
+const MONO_ON_LIGHT = new Set(['clickhouse', 'hive', 'gcp_pubsub']);
+const MONO_ON_DARK = new Set(['mariadb', 'elasticsearch', 'h2database', 'sqlite', 'kafka']);
+
 /** Generic icon per dependency type, for a system without an icon. */
 const TYPE_ICONS: Record<string, string> = {
   database: GenericDatabaseIcon,
@@ -163,11 +173,29 @@ export const DEPENDENCY_ICONS: Record<string, string> = {
 
 /**
  * Whether a system's icon is a full-color brand mark. Brand marks keep their official color
- * in every theme (shown on a light chip), rather than being inverted like monochrome icons.
+ * (see getBrandIconClassName for the faint ones), rather than being inverted like monochrome
+ * icons.
  */
 export const isBrandDependencySystem = (system?: string): boolean => {
   const key = normalizeDependencySystem(system);
   return !!key && !!SYSTEM_ICONS[key] && !MONOCHROME_SYSTEMS.has(key);
+};
+
+/**
+ * CSS classes for a system's brand mark: `celBrandIcon`, plus `celBrandIcon--monoOnLight` /
+ * `celBrandIcon--monoOnDark` where its color is too faint for that theme. Empty for icons
+ * that are not brand marks.
+ */
+export const getBrandIconClassName = (system?: string): string => {
+  if (!isBrandDependencySystem(system)) return '';
+  const key = normalizeDependencySystem(system) as string;
+  return [
+    'celBrandIcon',
+    MONO_ON_LIGHT.has(key) ? 'celBrandIcon--monoOnLight' : '',
+    MONO_ON_DARK.has(key) ? 'celBrandIcon--monoOnDark' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 };
 
 /** Whether an ICONS key (see getDependencyIconKey) is a full-color brand mark. */
