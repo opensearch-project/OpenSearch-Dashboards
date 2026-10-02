@@ -44,7 +44,7 @@
     font-weight: 700;
     font-size: 12px;
     /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: var(--osd-color-text-default, #1a1c21);
+    color: var(--osd-color-body-default, #1a1c21);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -75,7 +75,7 @@
   &__subtitle {
     font-size: 11px;
     /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: var(--osd-color-text-secondary, #69707d);
+    color: var(--osd-color-body-secondary, #69707d);
     margin-top: -4px;
   }
 
@@ -92,13 +92,13 @@
     line-height: 1.2;
     margin-bottom: 2px;
     /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: var(--osd-color-text-secondary, #69707d);
+    color: var(--osd-color-body-secondary, #69707d);
   }
 
   &__metricValue {
     font-weight: 600;
     /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: var(--osd-color-text-default, #1a1c21);
+    color: var(--osd-color-body-default, #1a1c21);
   }
 }
 
