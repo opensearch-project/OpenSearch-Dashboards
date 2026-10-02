@@ -1,0 +1,177 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import {
+  ApachecassandraIcon,
+  ApachecouchdbIcon,
+  ApachehbaseIcon,
+  ApachehiveIcon,
+  ApachekafkaIcon,
+  ApachepulsarIcon,
+  ApacherocketmqIcon,
+  ClickhouseIcon,
+  CockroachlabsIcon,
+  CouchbaseIcon,
+  ElasticsearchIcon,
+  GenericDatabaseIcon,
+  GenericMessagingIcon,
+  GooglecloudspannerIcon,
+  GooglepubsubIcon,
+  H2databaseIcon,
+  InfluxdbIcon,
+  MariadbIcon,
+  MongodbIcon,
+  MysqlIcon,
+  Neo4jIcon,
+  OpensearchIcon,
+  PostgresqlIcon,
+  RabbitmqIcon,
+  RedisIcon,
+  SapIcon,
+  SqliteIcon,
+  TeradataIcon,
+  TrinoIcon,
+} from '../resources/dependencies';
+import { DynamodbIcon, RedShiftIcon, SnsIcon, SqsIcon } from '../resources/services';
+import { GlobeIcon } from '../resources';
+
+/**
+ * Icons for dependency nodes (databases, message brokers, external endpoints), keyed by the
+ * OTel system value: `db.system.name` (https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/)
+ * and `messaging.system` (https://opentelemetry.io/docs/specs/semconv/registry/attributes/messaging/).
+ *
+ * Brand marks are Simple Icons (CC0-1.0) in their official brand color, used unmodified. A
+ * system without an open-source mark (e.g. Microsoft SQL Server, Oracle Database, IBM Db2,
+ * Azure services, Valkey, Memcached) gets its type's generic glyph rather than a look-alike.
+ * AWS services use the package's AWS icons.
+ */
+
+/** Deprecated `db.system` values and spelling variants, mapped to the current OTel value. */
+const SYSTEM_ALIASES: Record<string, string> = {
+  // db.system (deprecated) -> db.system.name
+  adabas: 'softwareag.adabas',
+  cosmosdb: 'azure.cosmosdb',
+  db2: 'ibm.db2',
+  dynamodb: 'aws.dynamodb',
+  firebird: 'firebirdsql',
+  h2: 'h2database',
+  hanadb: 'sap.hana',
+  informix: 'ibm.informix',
+  ingres: 'actian.ingres',
+  intersystems_cache: 'intersystems.cache',
+  maxdb: 'sap.maxdb',
+  mssql: 'microsoft.sql_server',
+  netezza: 'ibm.netezza',
+  oracle: 'oracle.db',
+  redshift: 'aws.redshift',
+  spanner: 'gcp.spanner',
+  // messaging.system: the registry mixes `_` and `.` separators; accept both.
+  'aws.sqs': 'aws_sqs',
+  aws_sns: 'aws.sns',
+  'gcp.pubsub': 'gcp_pubsub',
+};
+
+/** Icon URL per current OTel system value. */
+const SYSTEM_ICONS: Record<string, string> = {
+  // Databases
+  'aws.dynamodb': DynamodbIcon,
+  'aws.redshift': RedShiftIcon,
+  cassandra: ApachecassandraIcon,
+  clickhouse: ClickhouseIcon,
+  cockroachdb: CockroachlabsIcon,
+  couchbase: CouchbaseIcon,
+  couchdb: ApachecouchdbIcon,
+  elasticsearch: ElasticsearchIcon,
+  'gcp.spanner': GooglecloudspannerIcon,
+  h2database: H2databaseIcon,
+  hbase: ApachehbaseIcon,
+  hive: ApachehiveIcon,
+  influxdb: InfluxdbIcon,
+  mariadb: MariadbIcon,
+  mongodb: MongodbIcon,
+  mysql: MysqlIcon,
+  neo4j: Neo4jIcon,
+  opensearch: OpensearchIcon,
+  postgresql: PostgresqlIcon,
+  redis: RedisIcon,
+  'sap.hana': SapIcon,
+  'sap.maxdb': SapIcon,
+  sqlite: SqliteIcon,
+  teradata: TeradataIcon,
+  trino: TrinoIcon,
+  // Message brokers
+  'aws.sns': SnsIcon,
+  aws_sqs: SqsIcon,
+  gcp_pubsub: GooglepubsubIcon,
+  kafka: ApachekafkaIcon,
+  pulsar: ApachepulsarIcon,
+  rabbitmq: RabbitmqIcon,
+  rocketmq: ApacherocketmqIcon,
+};
+
+/** Systems whose icon is the package's monochrome AWS icon (inverted in dark mode), not a brand mark. */
+const MONOCHROME_SYSTEMS = new Set(['aws.dynamodb', 'aws.redshift', 'aws.sns', 'aws_sqs']);
+
+/** Generic icon per dependency type, for a system without an icon. */
+const TYPE_ICONS: Record<string, string> = {
+  database: GenericDatabaseIcon,
+  messaging: GenericMessagingIcon,
+  external: GlobeIcon,
+};
+
+const ICON_KEY_PREFIX = 'Dependency::';
+
+/**
+ * The current OTel value for a system, lower-cased, with deprecated `db.system` values and
+ * separator variants mapped (e.g. `mssql` -> `microsoft.sql_server`, `aws.sqs` -> `aws_sqs`).
+ */
+export const normalizeDependencySystem = (system?: string): string | undefined => {
+  const key = (system || '').trim().toLowerCase();
+  if (!key) return undefined;
+  return SYSTEM_ALIASES[key] ?? key;
+};
+
+/** Icon URL for a dependency system, or undefined when it has no dedicated icon. */
+export const getDependencySystemIcon = (system?: string): string | undefined => {
+  const key = normalizeDependencySystem(system);
+  return key ? SYSTEM_ICONS[key] : undefined;
+};
+
+/**
+ * ICONS key for a dependency node: the system's icon when it has one (`Dependency::<system>`),
+ * else the type's generic glyph (`Dependency::database` / `messaging` / `external`).
+ *
+ * @param type - database / messaging / external (any other type gets the external globe)
+ * @param system - OTel `db.system.name` / `db.system` / `messaging.system` value, if known
+ */
+export const getDependencyIconKey = (type?: string, system?: string): string => {
+  const key = normalizeDependencySystem(system);
+  if (key && SYSTEM_ICONS[key]) return `${ICON_KEY_PREFIX}${key}`;
+  const t = (type || '').toLowerCase();
+  return `${ICON_KEY_PREFIX}${TYPE_ICONS[t] ? t : 'external'}`;
+};
+
+/** Entries merged into ICONS, so getIcon() resolves every getDependencyIconKey() result. */
+export const DEPENDENCY_ICONS: Record<string, string> = {
+  ...Object.fromEntries(
+    Object.entries(SYSTEM_ICONS).map(([k, v]) => [`${ICON_KEY_PREFIX}${k}`, v])
+  ),
+  ...Object.fromEntries(Object.entries(TYPE_ICONS).map(([k, v]) => [`${ICON_KEY_PREFIX}${k}`, v])),
+};
+
+/**
+ * Whether a system's icon is a full-color brand mark. Brand marks keep their official color
+ * in every theme (shown on a light chip), rather than being inverted like monochrome icons.
+ */
+export const isBrandDependencySystem = (system?: string): boolean => {
+  const key = normalizeDependencySystem(system);
+  return !!key && !!SYSTEM_ICONS[key] && !MONOCHROME_SYSTEMS.has(key);
+};
+
+/** Whether an ICONS key (see getDependencyIconKey) is a full-color brand mark. */
+export const isBrandIconKey = (iconKey?: string): boolean =>
+  !!iconKey &&
+  iconKey.startsWith(ICON_KEY_PREFIX) &&
+  isBrandDependencySystem(iconKey.slice(ICON_KEY_PREFIX.length));

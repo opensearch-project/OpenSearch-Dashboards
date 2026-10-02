@@ -323,7 +323,7 @@ describe('spansToServiceFlow dependency synthesis', () => {
     expect(ids.has(edges[0].target)).toBe(true);
   });
 
-  it('gives dependency nodes the aggregated map icon and a filter for their spans', () => {
+  it('gives dependency nodes their system icon and a filter for their spans', () => {
     const { nodes } = spansToServiceFlow([
       hit({ spanId: 'c', serviceName: 'cart', kind: 'SPAN_KIND_SERVER' }),
       hit({
@@ -349,16 +349,17 @@ describe('spansToServiceFlow dependency synthesis', () => {
       }),
     ]).map.root;
     const data = (id: string) => nodes.find((n) => n.id === id)!.data;
+    // The system's icon where the attributes name one, as on the aggregated map.
     expect(data('dep::database::redis:valkey-cart')).toMatchObject({
-      iconType: 'AWS::RDS',
+      iconType: 'Dependency::redis',
       dependencyFilter: { field: 'attributes.server.address', value: 'valkey-cart' },
     });
     expect(data('dep::messaging::kafka:orders')).toMatchObject({
-      iconType: 'Kafka',
+      iconType: 'Dependency::kafka',
       dependencyFilter: { field: 'attributes.messaging.destination.name', value: 'orders' },
     });
     // Named from the URL: no single attribute selects its spans, so the click is a no-op.
-    expect(data('dep::external::api.openai.com').iconType).toBe('AWS::CloudFront');
+    expect(data('dep::external::api.openai.com').iconType).toBe('Dependency::external');
     expect(data('dep::external::api.openai.com').dependencyFilter).toBeUndefined();
     // Service nodes keep their identity dot.
     expect(data('cart').iconType).toBeUndefined();

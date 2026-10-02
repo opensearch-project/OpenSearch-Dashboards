@@ -257,6 +257,25 @@ describe('HierarchySpanCell', () => {
       expect(screen.getByTestId('spanDependencyIcon')).toHaveAttribute('aria-label', 'External');
     });
 
+    it('shows the brand mark on a light chip for known systems, else the category glyph', () => {
+      const brand = renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { db_system: 'postgresql', 'server.address': 'pg' },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveClass(
+        'exploreSpanDetailTable__dependencyBrandIcon'
+      );
+      brand.unmount();
+      // No open-source mark for SQL Server: the database glyph, not a look-alike.
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'db.system': 'mssql', 'server.address': 'sql1' },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).not.toHaveClass(
+        'exploreSpanDetailTable__dependencyBrandIcon'
+      );
+    });
+
     it('does not mark service spans, CLIENT spans reaching another service, or raw-IP peers', () => {
       const { unmount } = renderItem({ kind: 'SPAN_KIND_SERVER' });
       expect(screen.queryByTestId('spanDependencyIcon')).not.toBeInTheDocument();

@@ -6,10 +6,11 @@
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
+import { getDependencySystemIcon, isBrandDependencySystem } from '@osd/apm-topology';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
 import { dependencyTypeLabel, dependencyIconType } from '../../services/dependency_classifier';
 import { TraceDependencies } from '../../services/trace_dependencies';
-import { getDependencyBrandIcon } from '../../services/dependency_icons';
+// @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 import { ParsedHit, SpanTableProps } from './types';
 
 export const HierarchySpanCell = ({
@@ -130,12 +131,20 @@ export const HierarchySpanCell = ({
         {dependency && (
           <EuiToolTip content={dependencyLabel}>
             <EuiIcon
+              // A full-color brand mark (e.g. PostgreSQL) when the system has one, else the
+              // theme-aware category glyph.
               type={
-                getDependencyBrandIcon(dependency.system) ||
-                dependencyIconType(dependency.type, dependency.system)
+                isBrandDependencySystem(dependency.system)
+                  ? getDependencySystemIcon(dependency.system)
+                  : dependencyIconType(dependency.type, dependency.system)
               }
               size="s"
               color="subdued"
+              className={
+                isBrandDependencySystem(dependency.system)
+                  ? 'exploreSpanDetailTable__dependencyBrandIcon'
+                  : undefined
+              }
               style={{ marginInlineStart: 6, flexShrink: 0 }}
               data-test-subj="spanDependencyIcon"
               // Carries the system too, which the hover tooltip shows.

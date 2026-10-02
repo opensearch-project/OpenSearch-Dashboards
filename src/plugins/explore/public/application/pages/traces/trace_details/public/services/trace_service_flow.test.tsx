@@ -9,6 +9,7 @@ import { TraceServiceFlow } from './trace_service_flow';
 import { ServiceFlowHit } from './trace_service_flow_transform';
 
 jest.mock('@osd/apm-topology', () => ({
+  getDependencyIconKey: (type: string, system?: string) => `Dependency::${system || type}`,
   MetricsCardNode: () => null,
   VolumeEdge: () => null,
   CelestialMap: (props: any) => {

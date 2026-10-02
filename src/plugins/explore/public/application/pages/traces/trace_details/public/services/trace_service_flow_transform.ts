@@ -4,24 +4,14 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { getDependencyIconKey } from '@osd/apm-topology';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
-import {
-  normalizeSpanKind,
-  dependencyTypeLabel,
-  DependencyInfo,
-  DependencyType,
-} from './dependency_classifier';
+import { normalizeSpanKind, dependencyTypeLabel, DependencyInfo } from './dependency_classifier';
 import { buildTraceDependencies, TraceDependencies } from './trace_dependencies';
 
-// The aggregated APM map's icons for each dependency type (dashboards-observability
-// platform_utils), so a dependency looks the same on both maps.
-const DEPENDENCY_ICON_TYPES: Record<DependencyType, string> = {
-  database: 'AWS::RDS',
-  messaging: 'Kafka',
-  external: 'AWS::CloudFront',
-};
+// @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 
 /**
  * Largest `valueOf(item)` across an iterable, folded pairwise (no `Math.max(...spread)`,
@@ -240,6 +230,8 @@ export const spansToServiceFlow = (
     name: string;
     /** Filters of the node's spans, as `field\u0000value`; one entry when they agree. */
     filters: Set<string>;
+    /** OTel system (db.system.name / messaging.system), which picks the icon. */
+    system?: string;
     count: number;
     errors: number;
     durationNanos: number;
@@ -261,6 +253,7 @@ export const spansToServiceFlow = (
       type: dep.type,
       name: dep.name,
       filters: new Set<string>(),
+      system: dep.system,
       count: 0,
       errors: 0,
       durationNanos: 0,
@@ -319,7 +312,9 @@ export const spansToServiceFlow = (
         hasError: agg.errors > 0,
         dependencyType: agg.type,
         subtitle: dependencyTypeLabel(agg.type),
-        iconType: DEPENDENCY_ICON_TYPES[agg.type],
+        // The system's icon (e.g. PostgreSQL, Kafka) or the type's generic glyph, as on the
+        // aggregated APM map.
+        iconType: getDependencyIconKey(agg.type, agg.system),
         ...(filter && { dependencyFilter: filter }),
         errorLabel:
           agg.errors > 0

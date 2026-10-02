@@ -227,6 +227,23 @@
   filter: brightness(0) invert(1);
 }
 
+/* Brand marks (dependency icons such as PostgreSQL or Kafka) keep their official color in
+   every theme, as brand guidelines ask: they sit on a light chip and are never inverted.
+   These selectors outrank the dark-mode inversions of the icon containers above/elsewhere. */
+img.celBrandIcon {
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  background-color: #fff;
+  border-radius: 3px;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+:root.celestial--dark .celDonutIcon img.celBrandIcon,
+:root.celestial--dark .celServiceCircle__interior img.celBrandIcon,
+:root.celestial--dark .celMetricsCard__icon img.celBrandIcon {
+  filter: none;
+}
+
 /* Suppress the global EUI focus-ring animation inside the topology map.
    OSD's _base.scss applies `animation: focusRingAnimate !important` to every
    :focus element that lacks an "eui" class prefix or `osd-resetFocusState`.
