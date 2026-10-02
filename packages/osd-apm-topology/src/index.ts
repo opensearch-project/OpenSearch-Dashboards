@@ -32,6 +32,7 @@ export type { AgentNodeKindConfig } from './shared/constants/agent.constants';
 export {
   getDependencyIconKey,
   getDependencySystemIcon,
+  getDependencySystemDarkIcon,
   normalizeDependencySystem,
   isBrandDependencySystem,
   isBrandIconKey,

@@ -235,6 +235,20 @@ img.celBrandIcon--monoOnLight {
   filter: brightness(0);
 }
 
+/* A mark with a vendor light version (see getDependencySystemDarkIcon) renders both; the theme
+   shows one. */
+img.celBrandIcon--darkTheme {
+  display: none;
+}
+
+:root.celestial--dark img.celBrandIcon--lightTheme {
+  display: none;
+}
+
+:root.celestial--dark img.celBrandIcon--darkTheme {
+  display: inline;
+}
+
 :root.celestial--dark .celDonutIcon img.celBrandIcon,
 :root.celestial--dark .celServiceCircle__interior img.celBrandIcon,
 :root.celestial--dark .celMetricsCard__icon img.celBrandIcon {

@@ -10,6 +10,7 @@ import {
   isBrandDependencySystem,
   isBrandIconKey,
   getBrandIconClassName,
+  getDependencySystemDarkIcon,
   normalizeDependencySystem,
 } from './dependency_icons.constants';
 import { ICONS } from './icons.constants';
@@ -36,16 +37,8 @@ describe('dependency icons', () => {
   });
 
   it('falls back to the generic type glyph, never another brand, when a system has no icon', () => {
-    // No open-source mark: Microsoft, Oracle, IBM, Azure; Valkey is not shown as Redis.
-    [
-      'microsoft.sql_server',
-      'oracle',
-      'ibm.db2',
-      'azure.cosmosdb',
-      'valkey',
-      'memcached',
-      'my_custom_db',
-    ].forEach((system) =>
+    // No open-source mark: IBM, Azure, Memcached, custom values.
+    ['ibm.db2', 'db2', 'azure.cosmosdb', 'memcached', 'my_custom_db'].forEach((system) =>
       expect(getDependencyIconKey('database', system)).toBe('Dependency::database')
     );
     ['activemq', 'servicebus', 'eventhubs', 'jms'].forEach((system) =>
@@ -82,5 +75,20 @@ describe('dependency icons', () => {
     // Not brand marks: monochrome AWS icons and generic glyphs.
     expect(getBrandIconClassName('aws_sqs')).toBe('');
     expect(getBrandIconClassName('my_custom_db')).toBe('');
+  });
+
+  it('uses the Dashboard Icons marks for Valkey, SQL Server and Oracle, by current or old name', () => {
+    expect(getDependencyIconKey('database', 'valkey')).toBe('Dependency::valkey');
+    expect(getDependencyIconKey('database', 'mssql')).toBe('Dependency::microsoft.sql_server');
+    expect(getDependencyIconKey('database', 'oracle')).toBe('Dependency::oracle.db');
+    // Valkey has its own mark, not Redis's.
+    expect(getDependencyIconKey('database', 'valkey')).not.toBe(
+      getDependencyIconKey('database', 'redis')
+    );
+    // The near-black Valkey mark turns white in dark mode; SQL Server has a vendor light version.
+    expect(getBrandIconClassName('valkey')).toContain('celBrandIcon--monoOnDark');
+    expect(getDependencySystemDarkIcon('microsoft.sql_server')).toBeDefined();
+    expect(getDependencySystemDarkIcon('mssql')).toBeDefined();
+    expect(getDependencySystemDarkIcon('postgresql')).toBeUndefined();
   });
 });

@@ -266,14 +266,24 @@ describe('HierarchySpanCell', () => {
         'exploreSpanDetailTable__dependencyBrandIcon'
       );
       brand.unmount();
-      // No open-source mark for SQL Server: the database glyph, not a look-alike.
-      renderItem({
+      // No open-source mark for IBM Db2: the database glyph, not a look-alike.
+      const db2 = renderItem({
         kind: 'SPAN_KIND_CLIENT',
-        attributes: { 'db.system': 'mssql', 'server.address': 'sql1' },
+        attributes: { 'db.system': 'db2', 'server.address': 'db2-1' },
       });
       expect(screen.getByTestId('spanDependencyIcon')).not.toHaveClass(
         'exploreSpanDetailTable__dependencyBrandIcon'
       );
+      db2.unmount();
+      // SQL Server ships a light version, rendered alongside for dark mode.
+      renderItem({
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'db.system': 'mssql', 'server.address': 'sql1' },
+      });
+      expect(screen.getByTestId('spanDependencyIcon')).toHaveClass(
+        'exploreSpanDetailTable__dependencyBrandIcon--hasDarkTheme'
+      );
+      expect(screen.getByTestId('spanDependencyIconDark')).toBeInTheDocument();
     });
 
     it('does not mark service spans, CLIENT spans reaching another service, or raw-IP peers', () => {

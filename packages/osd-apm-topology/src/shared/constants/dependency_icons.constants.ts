@@ -3,6 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Third-Party Attributions (dependency icons in ../resources/dependencies; only the icons
+ * listed below are included, each unmodified apart from a provenance comment and, for Simple
+ * Icons, the brand's official color):
+ * - Database and message-broker marks from Simple Icons (https://simpleicons.org)
+ *   License: CC0-1.0
+ *   Repository: https://github.com/simple-icons/simple-icons
+ * - Valkey, Microsoft SQL Server and Oracle marks from Dashboard Icons
+ *   Copyright (c) homarr-labs and contributors
+ *   License: Apache-2.0
+ *   Repository: https://github.com/homarr-labs/dashboard-icons
+ * - Generic database and queue glyphs from OUI (https://github.com/opensearch-project/oui)
+ *   License: Apache-2.0
+ * The marks are trademarks of their respective owners.
+ */
+
 import {
   ApachecassandraIcon,
   ApachecouchdbIcon,
@@ -22,10 +41,13 @@ import {
   H2databaseIcon,
   InfluxdbIcon,
   MariadbIcon,
+  MicrosoftSqlServerIcon,
+  MicrosoftSqlServerLightIcon,
   MongodbIcon,
   MysqlIcon,
   Neo4jIcon,
   OpensearchIcon,
+  OracleIcon,
   PostgresqlIcon,
   RabbitmqIcon,
   RedisIcon,
@@ -33,6 +55,7 @@ import {
   SqliteIcon,
   TeradataIcon,
   TrinoIcon,
+  ValkeyIcon,
 } from '../resources/dependencies';
 import { DynamodbIcon, RedShiftIcon, SnsIcon, SqsIcon } from '../resources/services';
 import { GlobeIcon } from '../resources';
@@ -42,9 +65,10 @@ import { GlobeIcon } from '../resources';
  * OTel system value: `db.system.name` (https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/)
  * and `messaging.system` (https://opentelemetry.io/docs/specs/semconv/registry/attributes/messaging/).
  *
- * Brand marks are Simple Icons (CC0-1.0) in their official brand color, used unmodified. A
- * system without an open-source mark (e.g. Microsoft SQL Server, Oracle Database, IBM Db2,
- * Azure services, Valkey, Memcached) gets its type's generic glyph rather than a look-alike.
+ * Brand marks are Simple Icons (CC0-1.0) in their official brand color, plus Valkey, Microsoft
+ * SQL Server and Oracle from Dashboard Icons (Apache-2.0), used unmodified. A system without an
+ * open-source mark (e.g. IBM Db2, Azure services, Memcached) gets its type's generic glyph
+ * rather than a look-alike.
  * AWS services use the package's AWS icons.
  */
 
@@ -90,10 +114,12 @@ const SYSTEM_ICONS: Record<string, string> = {
   hive: ApachehiveIcon,
   influxdb: InfluxdbIcon,
   mariadb: MariadbIcon,
+  'microsoft.sql_server': MicrosoftSqlServerIcon,
   mongodb: MongodbIcon,
   mysql: MysqlIcon,
   neo4j: Neo4jIcon,
   opensearch: OpensearchIcon,
+  'oracle.db': OracleIcon,
   postgresql: PostgresqlIcon,
   redis: RedisIcon,
   'sap.hana': SapIcon,
@@ -101,6 +127,7 @@ const SYSTEM_ICONS: Record<string, string> = {
   sqlite: SqliteIcon,
   teradata: TeradataIcon,
   trino: TrinoIcon,
+  valkey: ValkeyIcon,
   // Message brokers
   'aws.sns': SnsIcon,
   aws_sqs: SqsIcon,
@@ -122,7 +149,19 @@ const MONOCHROME_SYSTEMS = new Set(['aws.dynamodb', 'aws.redshift', 'aws.sns', '
  * carrying meaning alone.
  */
 const MONO_ON_LIGHT = new Set(['clickhouse', 'hive', 'gcp_pubsub']);
-const MONO_ON_DARK = new Set(['mariadb', 'elasticsearch', 'h2database', 'sqlite', 'kafka']);
+const MONO_ON_DARK = new Set([
+  'mariadb',
+  'elasticsearch',
+  'h2database',
+  'sqlite',
+  'kafka',
+  'valkey',
+]);
+
+/** Marks whose vendor ships a light version for dark backgrounds; used in dark mode. */
+const DARK_THEME_ICONS: Record<string, string> = {
+  'microsoft.sql_server': MicrosoftSqlServerLightIcon,
+};
 
 /** Generic icon per dependency type, for a system without an icon. */
 const TYPE_ICONS: Record<string, string> = {
@@ -141,6 +180,12 @@ export const normalizeDependencySystem = (system?: string): string | undefined =
   const key = (system || '').trim().toLowerCase();
   if (!key) return undefined;
   return SYSTEM_ALIASES[key] ?? key;
+};
+
+/** A system's dark-mode version of its mark, when the vendor ships one (e.g. SQL Server). */
+export const getDependencySystemDarkIcon = (system?: string): string | undefined => {
+  const key = normalizeDependencySystem(system);
+  return key ? DARK_THEME_ICONS[key] : undefined;
 };
 
 /** Icon URL for a dependency system, or undefined when it has no dedicated icon. */
