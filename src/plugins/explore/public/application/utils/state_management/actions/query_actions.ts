@@ -708,11 +708,7 @@ const executeQueryBase = async (
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
       // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
       // query cleared its key; writing them would bring the key back and keep the page loading.
-      if (
-        !streamsPartialRows ||
-        abortController?.signal.aborted ||
-        !getState().queryEditor.queryStatusMap[cacheKey]
-      ) {
+      if (abortController?.signal.aborted || !getState().queryEditor.queryStatusMap[cacheKey]) {
         return;
       }
       partialRowsShown = true;
@@ -750,7 +746,7 @@ const executeQueryBase = async (
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
-      onPartialResults,
+      ...(streamsPartialRows && { onPartialResults }),
       pollInterval: services.uiSettings.get(ASYNC_QUERY_POLL_INTERVAL_SETTING),
     });
 

@@ -494,14 +494,19 @@ export class SearchSource {
                 onPollResponse: (pollResponse: FetchStatusResponse) => {
                   const partialFrame = (pollResponse as { body?: IDataFrame }).body;
                   if (!partialFrame?.fields) return;
-                  onPartialResults(
-                    convertResult({
-                      response: pollResponse as IDataFrameResponse,
-                      fields: this.getFields(),
-                      options,
-                    }),
-                    partialFrame
-                  );
+                  // A partial that can't be converted or rendered is skipped; the query goes on.
+                  try {
+                    onPartialResults(
+                      convertResult({
+                        response: pollResponse as IDataFrameResponse,
+                        fields: this.getFields(),
+                        options,
+                      }),
+                      partialFrame
+                    );
+                  } catch {
+                    // The final result is converted and reported as usual.
+                  }
                 },
               }),
             });

@@ -436,6 +436,19 @@ describe('SearchSource', () => {
       expect(response.hits.hits).toHaveLength(3);
     });
 
+    test('still resolves with the final result when handling a partial throws', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+      const onPartialResults = jest.fn(() => {
+        throw new Error('render failed');
+      });
+
+      const response = await searchSource.fetch({ onPartialResults, pollInterval: 1 });
+
+      expect(onPartialResults).toHaveBeenCalledTimes(1);
+      expect(response.hits.hits).toHaveLength(3);
+    });
+
     test('is unchanged for callers that do not pass onPartialResults', async () => {
       const search = pollingSearch();
       const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });

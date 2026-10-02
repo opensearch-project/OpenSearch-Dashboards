@@ -372,7 +372,13 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             data-test-subj="exploreQueryPanelIsLoading"
           />
           {scanProgress && (
-            <EuiText size="xs" color="subdued" data-test-subj="exploreQueryPanelScanProgress">
+            <EuiText
+              size="xs"
+              color="subdued"
+              role="status"
+              aria-live="polite"
+              data-test-subj="exploreQueryPanelScanProgress"
+            >
               {scanProgress}
             </EuiText>
           )}

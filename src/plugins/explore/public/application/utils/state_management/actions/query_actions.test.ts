@@ -1992,7 +1992,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     const fetchWithOnePartial = (beforePartial?: () => void) =>
       mockSearchSource.fetch.mockImplementation(async (options: any) => {
         beforePartial?.();
-        options.onPartialResults(partialResults, partialFrame);
+        options.onPartialResults?.(partialResults, partialFrame);
         return finalResults;
       });
 
@@ -2055,6 +2055,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       await runDataTableQuery('source=logs | stats count() by host');
 
+      expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
       expect(setResults).toHaveBeenCalledTimes(1); // the final result only
       expect(progressDispatches()).toHaveLength(0);
     });

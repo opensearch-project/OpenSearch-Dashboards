@@ -245,6 +245,8 @@ describe('LogsQueryPanel', () => {
     renderLoading(progress);
 
     expect(screen.getByTestId('exploreQueryPanelScanProgress')).toHaveTextContent(label);
+    // Announced to screen readers as it updates.
+    expect(screen.getByRole('status')).toBe(screen.getByTestId('exploreQueryPanelScanProgress'));
   });
 
   it.each([
