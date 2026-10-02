@@ -211,10 +211,10 @@ export const ExploreTabs = () => {
             ))}
           </EuiTabs>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <div id={EXPLORE_ACTION_BAR_SLOT_ID} />
-        </EuiFlexItem>
       </EuiFlexGroup>
+      {/* The results summary and table actions get their own row beneath the tab strip so they
+          read as controls for the table below rather than as part of the tab navigation. */}
+      <div id={EXPLORE_ACTION_BAR_SLOT_ID} className="exploreTabs__actionBar" />
       <div role="tabpanel" className="exploreTabs__tabPanel">
         {renderTabPanel()}
       </div>

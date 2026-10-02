@@ -30,7 +30,7 @@
 
 import './hits_counter.scss';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
@@ -65,6 +65,14 @@ export interface HitsCounterProps {
    * optional override for the rows count display (useful for filtered results)
    */
   rowsCountOverride?: number;
+  /**
+   * how many columns the hide-empty-fields setting is currently hiding; 0 renders nothing
+   */
+  hiddenColumnCount?: number;
+  /**
+   * turns the setting off, so the hidden columns come back
+   */
+  onShowHiddenColumns?: () => void;
 }
 
 export function HitsCounter({
@@ -75,6 +83,8 @@ export function HitsCounter({
   rows,
   elapsedMs,
   rowsCountOverride,
+  hiddenColumnCount = 0,
+  onShowHiddenColumns,
 }: HitsCounterProps) {
   const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
   const duration = formatDuration(elapsedMs);
@@ -147,6 +157,32 @@ export function HitsCounter({
             )}
           </EuiText>
         </EuiFlexItem>
+        {/* Sits in the same sentence as the counts so the table's column set is disclosed where
+            the result summary already is, and offers the way back out of the filter. The gap is a
+            margin rather than a leading space, since the row's gutterSize="none" collapses one. */}
+        {hiddenColumnCount > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" className="dscResultCount__hiddenColumns">
+              {'· '}
+              <EuiLink
+                onClick={onShowHiddenColumns}
+                className="dscResultCount__hiddenColumnsLink"
+                data-test-subj="exploreHiddenColumnsCount"
+                aria-label={i18n.translate('explore.discover.hiddenColumnsAriaLabel', {
+                  defaultMessage:
+                    'Show {hiddenColumnCount, plural, one {# empty column} other {# empty columns}}',
+                  values: { hiddenColumnCount },
+                })}
+              >
+                <FormattedMessage
+                  id="explore.discover.hiddenColumnsCount"
+                  defaultMessage="{hiddenColumnCount, plural, one {# column hidden} other {# columns hidden}}"
+                  values={{ hiddenColumnCount }}
+                />
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {showResetButton && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

@@ -123,11 +123,6 @@ export class Facet {
           ...(highlight && { highlight }),
           ...(queryId && { queryId }),
           ...(query.profile && { profile: true }),
-          // Forward the partial-result preference when the client set it (false is meaningful --
-          // it overrides the cluster-side default -- so send it whenever it is defined).
-          ...(query.partial_result !== undefined && {
-            partial_result: query.partial_result,
-          }),
           // Bounds of the time filter the client appended to the query text. The engine resolves an
           // index pattern's schema before parsing that filter, so it needs the range out of band to
           // skip indices that cannot match it. PPL ignores body fields it does not know, but the
