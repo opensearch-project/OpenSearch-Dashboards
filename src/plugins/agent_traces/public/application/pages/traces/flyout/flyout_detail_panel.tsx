@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiTitle,
@@ -22,6 +22,16 @@ import {
 
 import { TraceRow } from '../hooks/tree_utils';
 import { TreeNode } from './tree_helpers';
+import {
+  CopyContentButton,
+  MessageContent,
+  MessageViewMode,
+  MessageViewModeToggle,
+  copyTextFor,
+  toDisplayMessages,
+} from './message_content_view';
+import { previewSpanInput, previewSpanOutput } from '../hooks/genai_message_preview';
+import './message_content_view.scss';
 
 export const formatJsonOrString = (value: string | undefined): string => {
   if (!value || value === '—')
@@ -47,7 +57,17 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
   selectedTraceRow,
   onSelectNode,
 }) => {
+  const [ioMode, setIoMode] = useState<MessageViewMode>('formatted');
+
   const row = selectedTraceRow;
+
+  // Message attributes first; execute_tool spans fall back to gen_ai.tool.call.* (semconv).
+  const ioSection = (value: unknown, toolPreview: string) =>
+    toDisplayMessages(value).length > 0 || !toolPreview
+      ? { value, formattedText: undefined }
+      : { value: toolPreview, formattedText: toolPreview };
+  const ioInput = ioSection(row?.input, row ? previewSpanInput(row) : '');
+  const ioOutput = ioSection(row?.output, row ? previewSpanOutput(row) : '');
 
   return (
     <EuiPanel
@@ -218,46 +238,59 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
             })}
           </strong>
         }
+        extraAction={
+          <MessageViewModeToggle mode={ioMode} onChange={setIoMode} idPrefix="agentTracesIo" />
+        }
         initialIsOpen
         paddingSize="m"
       >
-        <div>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate('agentTraces.detailPanel.input', {
-                defaultMessage: 'INPUT',
-              })}
-            </span>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock
-            language="json"
-            overflowHeight={200}
-            isCopyable={!!row?.input && row.input !== '—'}
-          >
-            {formatJsonOrString(row?.input)}
-          </EuiCodeBlock>
-        </div>
-
-        <EuiSpacer size="m" />
-
-        <div>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate('agentTraces.detailPanel.output', {
-                defaultMessage: 'OUTPUT',
-              })}
-            </span>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock
-            language="json"
-            overflowHeight={200}
-            isCopyable={!!row?.output && row.output !== '—'}
-          >
-            {formatJsonOrString(row?.output)}
-          </EuiCodeBlock>
-        </div>
+        {(
+          [
+            {
+              key: 'input',
+              label: i18n.translate('agentTraces.detailPanel.input', { defaultMessage: 'INPUT' }),
+              copyLabel: i18n.translate('agentTraces.detailPanel.copyInput', {
+                defaultMessage: 'Copy input',
+              }),
+              value: ioInput.value,
+              formattedText: ioInput.formattedText,
+            },
+            {
+              key: 'output',
+              label: i18n.translate('agentTraces.detailPanel.output', { defaultMessage: 'OUTPUT' }),
+              copyLabel: i18n.translate('agentTraces.detailPanel.copyOutput', {
+                defaultMessage: 'Copy output',
+              }),
+              value: ioOutput.value,
+              formattedText: ioOutput.formattedText,
+            },
+          ] as const
+        ).map((section, i) => (
+          <div key={section.key}>
+            {i > 0 && <EuiSpacer size="m" />}
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <span>{section.label}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <CopyContentButton
+                  text={copyTextFor(section.value, ioMode, section.formattedText)}
+                  label={section.copyLabel}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <div data-test-subj={`agentTracesIo-${section.key}`}>
+              <MessageContent
+                value={section.value}
+                mode={ioMode}
+                formattedText={section.formattedText}
+              />
+            </div>
+          </div>
+        ))}
       </EuiAccordion>
 
       <EuiSpacer size="s" />
