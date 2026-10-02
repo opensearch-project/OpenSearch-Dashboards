@@ -38,10 +38,14 @@ jest.mock('react-router-dom', () => ({
 }));
 
 import { mount } from 'enzyme';
+import { act } from 'react';
 
 import { DashboardListing } from './dashboard_listing';
 import { createDashboardServicesMock } from '../../utils/mocks';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import {
+  OpenSearchDashboardsContextProvider,
+  TableListView,
+} from 'src/plugins/opensearch_dashboards_react/public';
 import { I18nProvider } from '@osd/i18n/react';
 import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 
@@ -74,6 +78,142 @@ function wrapDashboardListingInContext(mockServices: any) {
     </I18nProvider>
   );
 }
+
+describe('dashboard tags', () => {
+  it('adds the selected tag as a saved object reference filter', async () => {
+    const mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          type: 'dashboard',
+          id: 'dashboard-1',
+          attributes: {
+            title: 'Dashboard',
+            description: '',
+            version: 1,
+            timeRestore: false,
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+    });
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
+    mockServices.navigation = {
+      ui: {
+        HeaderControl: () => null,
+      },
+    };
+    mockServices.savedObjectTags.ui.TagSelector = ({ onChange }: any) => (
+      <button data-test-subj="selectProductionTag" onClick={() => onChange('tag-production')} />
+    );
+
+    let component: ReturnType<typeof mount>;
+    await act(async () => {
+      component = mount(wrapDashboardListingInContext(mockServices));
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    await act(async () => {
+      component.find('[data-test-subj="selectProductionTag"]').simulate('click');
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    expect(mockServices.savedObjectsClient.find).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        hasReference: {
+          type: 'saved-object-annotation',
+          id: 'tag-production',
+        },
+      })
+    );
+  });
+
+  it('adds a Tags column after Last updated', async () => {
+    const mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          type: 'dashboard',
+          id: 'dashboard-1',
+          attributes: {
+            title: 'Dashboard',
+            description: '',
+          },
+          references: [],
+        },
+      ],
+      total: 1,
+    });
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
+    mockServices.navigation = {
+      ui: {
+        HeaderControl: () => null,
+      },
+    };
+    mockServices.savedObjectTags.ui.TagList = ({ target }: any) => (
+      <span data-test-subj="dashboardListingTags">
+        {target.objectType}:{target.objectId}
+      </span>
+    );
+
+    let component: ReturnType<typeof mount>;
+    await act(async () => {
+      component = mount(wrapDashboardListingInContext(mockServices));
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    const columns = component.find(TableListView).prop('tableColumns') as any[];
+    const updatedAtColumnIndex = columns.findIndex(
+      (column) => column['data-test-subj'] === 'updated-at'
+    );
+    const tagsColumn = columns[updatedAtColumnIndex + 1];
+    const tableListView = component.find(TableListView).instance() as any;
+    const dashboard = tableListView.state.items[0];
+
+    expect(tagsColumn.name).toBe('Tags');
+    expect(dashboard.savedObjectType).toBe('dashboard');
+
+    const renderedCell = mount(<>{tagsColumn.render(dashboard.id, dashboard)}</>);
+    expect(renderedCell.find('[data-test-subj="dashboardListingTags"]').text()).toBe(
+      'dashboard:dashboard-1'
+    );
+  });
+
+  it('hides tag controls when the tags plugin is disabled', async () => {
+    const mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find.mockResolvedValue({
+      savedObjects: [],
+      total: 0,
+    });
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
+    mockServices.navigation = {
+      ui: {
+        HeaderControl: () => null,
+      },
+    };
+    mockServices.savedObjectTags = undefined;
+
+    let component: ReturnType<typeof mount>;
+    await act(async () => {
+      component = mount(wrapDashboardListingInContext(mockServices));
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    component.update();
+
+    const tableListView = component.find(TableListView);
+    expect(tableListView.prop('tableFilters')).toBeUndefined();
+    expect((tableListView.prop('tableColumns') as any[]).map(({ name }) => name)).not.toContain(
+      'Tags'
+    );
+  });
+});
 
 // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7488
 // skipping because not sure why it even needs to keep state seems like it isn't being used

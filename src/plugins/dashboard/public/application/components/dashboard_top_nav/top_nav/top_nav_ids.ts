@@ -32,6 +32,7 @@ export const TopNavIds = {
   SHARE: 'share',
   OPTIONS: 'options',
   SAVE: 'save',
+  TAGS: 'tags',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode',
   CLONE: 'clone',

@@ -37,6 +37,7 @@ export * from './capabilities';
 export * from './app_category';
 export * from './ui_settings';
 export * from './saved_objects';
+export * from './saved_object_annotations';
 export * from './serializable';
 export * from './custom_branding';
 export * from './workspace';

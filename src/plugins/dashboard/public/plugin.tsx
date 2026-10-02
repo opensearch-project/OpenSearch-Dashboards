@@ -137,6 +137,7 @@ import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
 import { VariablesBar } from './application/components/dashboard_variables';
 import { dashboardNavPopover } from './dashboard_nav_popover';
+import type { SavedObjectTagsStart } from '../../saved_object_tags/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -174,6 +175,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectTags?: SavedObjectTagsStart;
 }
 
 export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
@@ -460,6 +462,7 @@ export class DashboardPlugin implements Plugin<
           scopedHistory: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsPublic: savedObjects,
+          savedObjectTags: pluginsStart.savedObjectTags,
           restorePreviousUrl,
           toastNotifications: coreStart.notifications.toasts,
         };
