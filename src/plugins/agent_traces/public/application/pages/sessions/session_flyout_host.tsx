@@ -18,22 +18,30 @@ import { usePPLQueryDeps } from '../traces/hooks/use_ppl_query_deps';
 import { escapePPLValue } from '../traces/trace_details/data_fetching/ppl_request_helpers';
 import { fetchSessions } from './fetch_sessions';
 import { SessionDetailsFlyout } from './session_details_flyout';
+import { FlyoutHistoryNav } from '../traces/flyout/flyout_history_nav';
+import { FlyoutNavigation } from '../traces/flyout/trace_flyout_state';
 import { SessionRow, getSourceCommand } from './session_utils';
 
 interface SessionFlyoutHostProps {
   sessionId: string;
   /** The session row when it is already loaded (sessions list); fetched by id otherwise. */
   session?: SessionRow;
+  /** Trace to focus first (the one the user came back from). */
+  focusTraceId?: string;
   formatTs: (ts: string) => string;
   onClose: () => void;
+  /** Back and Forward through the flyouts the user moved between. */
+  navigation?: FlyoutNavigation;
 }
 
 /** The session flyout, loading the session by id first when only the id is known. */
 export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
   sessionId,
   session,
+  focusTraceId,
   formatTs,
   onClose,
+  navigation,
 }) => {
   const { pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const [row, setRow] = useState<SessionRow | null>(session ?? null);
@@ -70,7 +78,15 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
   }, [sessionId, session, pplService, datasetParam, baseQueryString, formatTs]);
 
   if (row) {
-    return <SessionDetailsFlyout session={row} formatTs={formatTs} onClose={onClose} />;
+    return (
+      <SessionDetailsFlyout
+        session={row}
+        focusTraceId={focusTraceId}
+        formatTs={formatTs}
+        onClose={onClose}
+        navigation={navigation}
+      />
+    );
   }
 
   return (
@@ -82,6 +98,7 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
       data-test-subj="agentTracesSessionFlyoutLoading"
     >
       <EuiFlyoutHeader hasBorder>
+        <FlyoutHistoryNav navigation={navigation} />
         <EuiTitle size="s">
           <h2>
             {i18n.translate('agentTraces.sessions.flyout.title', {

@@ -20,7 +20,6 @@ import {
   EuiCopy,
   EuiResizableContainer,
   EuiBadge,
-  EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
 import { TraceRow } from '../hooks/tree_utils';
@@ -40,6 +39,8 @@ import { TraceTreeView } from './trace_tree_view';
 import { TimelineGantt } from './timeline_gantt';
 import { useFlyoutResize } from './use_flyout_resize';
 import { FlyoutDetailPanel } from './flyout_detail_panel';
+import { FlyoutHistoryNav } from './flyout_history_nav';
+import { FlyoutNavigation } from './trace_flyout_state';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
 import './trace_details_flyout.scss';
@@ -52,8 +53,8 @@ export interface TraceDetailsProps {
   fullTreeError?: string;
   /** Open this trace's session (replaces this flyout with the session flyout). */
   onOpenSession?: (session: SessionRow | string) => void;
-  /** The session this trace was opened from: shows a "Back to session" link. */
-  fromSession?: SessionRow;
+  /** Back and Forward through the flyouts the user moved between. */
+  navigation?: FlyoutNavigation;
 }
 
 /** The trace's session id: the first span carrying gen_ai.conversation.id. */
@@ -72,7 +73,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   isLoadingFullTree,
   fullTreeError,
   onOpenSession,
-  fromSession,
+  navigation,
 }) => {
   const rootTrace = useMemo(() => {
     if (fullTree && fullTree.length > 0) return fullTree[0];
@@ -208,19 +209,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
       />
 
       <EuiFlyoutHeader hasBorder>
-        {fromSession && onOpenSession && (
-          <EuiButtonEmpty
-            size="xs"
-            flush="left"
-            iconType="arrowLeft"
-            onClick={() => onOpenSession(fromSession)}
-            data-test-subj="agentTracesFlyoutBackToSession"
-          >
-            {i18n.translate('agentTraces.flyout.backToSession', {
-              defaultMessage: 'Back to session',
-            })}
-          </EuiButtonEmpty>
-        )}
+        <FlyoutHistoryNav navigation={navigation} />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
@@ -298,9 +287,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               </EuiText>
               <EuiText size="xs" className="agentTracesFlyout__metaValue">
                 <EuiLink
-                  onClick={() =>
-                    onOpenSession(fromSession?.sessionId === sessionId ? fromSession : sessionId)
-                  }
+                  onClick={() => onOpenSession(sessionId)}
                   data-test-subj="agentTracesFlyoutSessionLink"
                 >
                   <code>{sessionId}</code>

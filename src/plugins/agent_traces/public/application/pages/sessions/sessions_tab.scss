@@ -1,6 +1,3 @@
-// Flyout header height plus body padding; the overview fills the rest of the viewport.
-$agtSessionFlyoutChrome: 150px;
-
 // Match the Traces/Spans DataTable typography (data_table.scss): code font at XS size.
 .agtSessionsTable {
   @include ouiCodeFont;
@@ -51,35 +48,19 @@ $agtSessionFlyoutChrome: 150px;
   }
 }
 
+/* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+.agtSessionFlyout .euiFlyoutBody__overflowContent {
+  // Let the overview fill the body below the header, whatever the header's height
+  // (it grows when the Back/Forward row shows).
+  height: 100%;
+  box-sizing: border-box;
+}
+
 .agtSessionFlyout {
-  &__metaRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $euiSizeL;
-    margin-top: $euiSizeS;
-  }
-
-  &__metaItem {
-    display: flex;
-    align-items: center;
-    gap: $euiSizeXS;
-  }
-
-  &__metaLabel {
-    font-weight: $euiFontWeightSemiBold;
-    color: $euiTextSubduedColor;
-  }
-
-  &__metaValue {
-    display: inline-flex;
-    align-items: center;
-    gap: $euiSizeXS;
-  }
-
   // Overview fills the flyout body; the trace list stays put and only the
-  // conversation scrolls. Offset = flyout header + body padding.
+  // conversation scrolls.
   &__overview {
-    height: calc(100vh - #{$agtSessionFlyoutChrome});
+    height: 100%;
   }
 
   &__traceList {
