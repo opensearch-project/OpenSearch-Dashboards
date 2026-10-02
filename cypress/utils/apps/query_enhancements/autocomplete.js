@@ -283,6 +283,28 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
 };
 
 /**
+ * Selects the first field-value suggestion the editor offers and stores its text
+ * as the `@selectedFieldValue` alias for later assertions. Field-value suggestions
+ * are seeded from the most recent documents, so the exact set is not stable; select
+ * whatever value is present instead of a hard-coded one.
+ * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
+ */
+export const selectFirstValueSuggestion = (useKeyboard = false) => {
+  cy.get('.suggest-widget.visible', { timeout: 15000 })
+    .find('.monaco-list-row:has(.codicon-symbol-value) .monaco-icon-label-container .label-name', {
+      timeout: 15000,
+    })
+    .first()
+    .invoke('text')
+    .then((text) => {
+      const value = text.trim();
+      expect(value, 'a field value suggestion should be available').to.not.be.empty;
+      cy.wrap(value).as('selectedFieldValue');
+      selectSuggestion(value, useKeyboard);
+    });
+};
+
+/**
  * Shows suggestion widget and waits for hint to appear with retry logic
  * @param {number} maxAttempts - Maximum number of retry attempts
  * @returns {Cypress.Chainable}
@@ -385,7 +407,7 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('where', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Development', useKeyboard);
+        selectFirstValueSuggestion(useKeyboard);
       } else if (config.language === QueryLanguages.SQL.name) {
         selectSuggestion('SELECT', useKeyboard);
         selectSuggestion('*', useKeyboard);
@@ -394,10 +416,10 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Development', useKeyboard);
+        selectFirstValueSuggestion(useKeyboard);
       } else if (config.language === QueryLanguages.DQL.name) {
         selectSuggestion('unique_category', useKeyboard);
-        selectSuggestion('Development', useKeyboard);
+        selectFirstValueSuggestion(useKeyboard);
       }
     });
 };

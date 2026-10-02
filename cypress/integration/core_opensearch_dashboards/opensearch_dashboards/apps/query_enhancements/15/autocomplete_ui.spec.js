@@ -105,7 +105,9 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(1000);
-            validateQueryResults('unique_category', 'Development');
+            cy.get('@selectedFieldValue').then((value) => {
+              validateQueryResults('unique_category', value);
+            });
           });
 
           it('should build query using keyboard shortcuts', () => {
@@ -128,7 +130,9 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(2000);
-            validateQueryResults('unique_category', 'Development');
+            cy.get('@selectedFieldValue').then((value) => {
+              validateQueryResults('unique_category', value);
+            });
           });
         });
       }
