@@ -34,7 +34,7 @@ const addVisualizationInDashboard = () => {
   cy.getElementByTestId('newItemButton').click();
 
   cy.getElementByTestId('dashboardAddPanelButton').click();
-  cy.contains('span.euiContextMenuItem__text', 'Add visualization').click();
+  cy.getElementByTestId('embeddablePanelAction-add_vis_action_VisualizationEditor').click();
   cy.url().should('include', '/visualization-editor');
 };
 

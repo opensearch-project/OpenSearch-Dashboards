@@ -209,22 +209,17 @@ describe('createNewVisActions', () => {
     }
   });
 
-  test('registers special action for visualizations with alias and promotion', () => {
+  test('registers tooltip for visualizations with alias and promotion', () => {
     const services = setupServices();
     createNewVisActions(services);
 
-    // Find the call for the promoted alias app
-    const promotedActionCall = Array.from({
-      length: services.uiActions.addTriggerAction.mock.calls.length,
-    })
-      .map((_, i) => services.uiActions.addTriggerAction.mock.calls[i])
-      .find((call) => call[1].id === 'add_vis_action_aliasAppWithPromotion');
+    const promotedAction = getRegisteredAction(services, 'add_vis_action_aliasAppWithPromotion');
 
-    expect(promotedActionCall).toBeDefined();
-    if (promotedActionCall) {
-      expect(promotedActionCall[1]).toHaveProperty('MenuItem');
-      expect(promotedActionCall[1].execute).toEqual(expect.any(Function));
-    }
+    expect(promotedAction).not.toHaveProperty('MenuItem');
+    expect(promotedAction.getTooltip?.({} as ActionExecutionContext<{}>)).toBe(
+      'This is a promoted visualization'
+    );
+    expect(promotedAction.execute).toEqual(expect.any(Function));
   });
 
   test('registers regular action for visualizations with alias but no promotion', () => {
@@ -241,6 +236,7 @@ describe('createNewVisActions', () => {
     expect(aliasActionCall).toBeDefined();
     if (aliasActionCall) {
       expect(aliasActionCall[1]).not.toHaveProperty('MenuItem');
+      expect(aliasActionCall[1]).not.toHaveProperty('getTooltip');
       expect(aliasActionCall[1].execute).toEqual(expect.any(Function));
     }
   });

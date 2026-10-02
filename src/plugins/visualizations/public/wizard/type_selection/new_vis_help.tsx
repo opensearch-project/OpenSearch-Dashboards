@@ -29,16 +29,9 @@
  */
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { Fragment } from 'react';
-import { EuiText, EuiButton } from '@elastic/eui';
-import { VisTypeAlias } from '../../vis_types';
+import { EuiText } from '@elastic/eui';
 
-interface Props {
-  promotedTypes: VisTypeAlias[];
-  onPromotionClicked: (visType: VisTypeAlias) => void;
-}
-
-export function NewVisHelp(props: Props) {
+export function NewVisHelp() {
   return (
     <EuiText size="s">
       <p>
@@ -47,22 +40,6 @@ export function NewVisHelp(props: Props) {
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
-      {props.promotedTypes.map((t) => (
-        <Fragment key={t.name}>
-          <p>
-            <strong>{t.promotion!.description}</strong>
-          </p>
-          <EuiButton
-            onClick={() => props.onPromotionClicked(t)}
-            fill
-            size="s"
-            iconType="popout"
-            iconSide="right"
-          >
-            {t.promotion!.buttonText}
-          </EuiButton>
-        </Fragment>
-      ))}
     </EuiText>
   );
 }
