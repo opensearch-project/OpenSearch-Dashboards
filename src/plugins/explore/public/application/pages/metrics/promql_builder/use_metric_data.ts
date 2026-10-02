@@ -6,9 +6,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { PrometheusClient } from '../explore/services/prometheus_client';
-
-export const EMPTY_LABEL_VALUE = '""';
-export const toLabelValueDisplay = (value: string) => value || EMPTY_LABEL_VALUE;
+import { toLabelValueDisplay } from './operation_categories';
 
 export function useMetricData(client: PrometheusClient, metric: string) {
   const [metricOptions, setMetricOptions] = useState<EuiComboBoxOptionOption[]>([]);

@@ -14,9 +14,8 @@ import {
 } from '@elastic/eui';
 import { LabelFilter } from './promql_parser';
 import { BuilderAction } from './build_promql';
-import { OPERATORS } from './operation_categories';
+import { EMPTY_LABEL_VALUE, OPERATORS, toLabelValueDisplay } from './operation_categories';
 import { comboBoxWidth } from './measure_text';
-import { EMPTY_LABEL_VALUE, toLabelValueDisplay } from './use_metric_data';
 
 interface LabelFilterRowProps {
   filter: LabelFilter;
