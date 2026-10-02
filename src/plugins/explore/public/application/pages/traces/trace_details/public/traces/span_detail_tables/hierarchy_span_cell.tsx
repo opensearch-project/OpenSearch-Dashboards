@@ -8,12 +8,9 @@ import React, { useEffect } from 'react';
 import './span_detail_table.scss';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
 import {
-  classifyDependencyByAttributes,
-  resolveExternalName,
-  normalizeSpanKind,
+  classifySpanDependency,
   dependencyTypeLabel,
   dependencyIconType,
-  DependencyInfo,
   hasCrossServiceChild,
 } from '../../services/dependency_classifier';
 import { getDependencyBrandIcon } from '../../services/dependency_icons';
@@ -58,24 +55,19 @@ export const HierarchySpanCell = ({
   const hasError = isSpanError(item);
 
   // Annotate spans that target an inferred dependency (database / messaging /
-  // external) so DB/broker/external calls are recognizable in the waterfall.
-  // External applies only to CLIENT spans that do not reach another traced
-  // service (no child in a different service), matching the trace map.
-  let dependency: DependencyInfo | null = item ? classifyDependencyByAttributes(item) : null;
-  if (
-    !dependency &&
-    item &&
-    normalizeSpanKind(item.kind) === 'CLIENT' &&
-    !hasCrossServiceChild(
-      item,
-      (s) => s.children,
-      resolveServiceNameFromSpan,
-      (s) => s.kind
-    )
-  ) {
-    const ext = resolveExternalName(item);
-    if (ext) dependency = { type: 'external', name: ext };
-  }
+  // external) so DB/broker/external calls are recognizable in the waterfall, with
+  // the same rules as the trace map (a CLIENT call that reaches a traced service
+  // is not one).
+  const dependency = item
+    ? classifySpanDependency(item, {
+        reachesTracedService: hasCrossServiceChild(
+          item,
+          (s) => s.children,
+          resolveServiceNameFromSpan,
+          (s) => s.kind
+        ),
+      })
+    : null;
   const level = item?.level || 0;
   const serviceColor = (serviceName && colorMap?.[serviceName]) || undefined;
 

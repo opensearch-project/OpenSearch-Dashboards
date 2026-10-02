@@ -722,6 +722,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               onFilterService={(serviceName) =>
                                 addSpanFilter(SERVICE_NAME_FILTER_FIELD, serviceName)
                               }
+                              onFilterAttribute={(field, value) => addSpanFilter(field, value)}
+                              activeSpanFilters={spanFilters}
                               // The narrow flyout shows the whole graph fit-to-view,
                               // so the minimap would only cover nodes — hide it there.
                               showMinimap={!isFlyout}

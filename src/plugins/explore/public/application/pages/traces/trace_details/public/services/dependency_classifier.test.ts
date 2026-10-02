@@ -4,6 +4,7 @@
  */
 
 import {
+  classifySpanDependency,
   classifyDependencyByAttributes,
   dependencyIconType,
   dependencyTypeLabel,
@@ -78,7 +79,7 @@ describe('classifyDependencyByAttributes', () => {
           { kind: 'SPAN_KIND_PRODUCER' }
         )
       )
-    ).toEqual({ type: 'messaging', name: 'kafka:orders', system: 'kafka' });
+    ).toMatchObject({ type: 'messaging', name: 'kafka:orders', system: 'kafka' });
     // Legacy pre-1.17 destination key.
     expect(
       classifyDependencyByAttributes(
@@ -97,7 +98,7 @@ describe('classifyDependencyByAttributes', () => {
           'db.statement': 'HGET x',
         })
       )
-    ).toEqual({ type: 'database', name: 'redis:valkey-cart', system: 'redis' });
+    ).toMatchObject({ type: 'database', name: 'redis:valkey-cart', system: 'redis' });
     // product-reviews: legacy net.peer.name + db.name; host wins over namespace.
     expect(
       classifyDependencyByAttributes(
@@ -121,7 +122,7 @@ describe('classifyDependencyByAttributes', () => {
       classifyDependencyByAttributes(
         span({ db_system_name: 'postgresql', 'db.query.text': 'SELECT 1' })
       )
-    ).toEqual({ type: 'database', name: 'postgresql', system: 'postgresql' });
+    ).toMatchObject({ type: 'database', name: 'postgresql', system: 'postgresql' });
   });
 
   it('does not name a database after an IP-literal, loopback or per-instance host', () => {
@@ -137,7 +138,7 @@ describe('classifyDependencyByAttributes', () => {
       classifyDependencyByAttributes(
         span({ 'db.statement': 'SELECT 1', 'server.address': 'db1', 'server.port': 5432 })
       )
-    ).toEqual({ type: 'database', name: 'db1:5432', system: undefined });
+    ).toMatchObject({ type: 'database', name: 'db1:5432', system: undefined });
     expect(
       classifyDependencyByAttributes(span({ 'db.statement': 'SELECT 1', 'db.name': 'otel' }))?.name
     ).toBe('otel');
@@ -172,7 +173,7 @@ describe('classifyDependencyByAttributes', () => {
   it('keeps the system casing in the name (as the backend does) and lowercases `system`', () => {
     expect(
       classifyDependencyByAttributes(span({ 'db.system': 'PostgreSQL', 'server.address': 'pg-1' }))
-    ).toEqual({ type: 'database', name: 'PostgreSQL:pg-1', system: 'postgresql' });
+    ).toMatchObject({ type: 'database', name: 'PostgreSQL:pg-1', system: 'postgresql' });
   });
 
   it('does not fall through to a later host key when the first one is an IP (backend parity)', () => {
@@ -196,7 +197,7 @@ describe('classifyDependencyByAttributes', () => {
 });
 
 describe('resolveExternalName', () => {
-  it('prefers peer.service, then url host, then server.address[:port]', () => {
+  it('prefers peer.service, then the address/port pairs, then the url host (backend order)', () => {
     expect(
       resolveExternalName(span({ 'peer.service': 'billing', 'url.full': 'https://a.com/x' }))
     ).toBe('billing');
@@ -206,6 +207,36 @@ describe('resolveExternalName', () => {
     expect(resolveExternalName(span({ 'server.address': 'svc', 'server.port': 9000 }))).toBe(
       'svc:9000'
     );
+    // The address wins over the URL, as in the backend.
+    expect(
+      resolveExternalName(
+        span({ 'server.address': 'gateway', 'url.full': 'https://api.example.com/v1' })
+      )
+    ).toBe('gateway');
+    // Every address/port pair the backend reads, in its order.
+    expect(
+      resolveExternalName(span({ 'network.peer.address': 'mesh', 'network.peer.port': 81 }))
+    ).toBe('mesh:81');
+    expect(resolveExternalName(span({ 'net.sock.peer.addr': 'sock-peer' }))).toBe('sock-peer');
+  });
+
+  it('names AWS SDK, GraphQL and FaaS calls like the backend', () => {
+    expect(
+      resolveExternalName(
+        span({ 'rpc.system': 'aws-api', 'rpc.service': 'S3', 'server.address': 's3.amazonaws.com' })
+      )
+    ).toBe('AWS::S3');
+    expect(resolveExternalName(span({ 'rpc.system': 'aws-api', 'rpc.service': 'Lambda' }))).toBe(
+      'AWS::Lambda'
+    );
+    expect(resolveExternalName(span({ 'graphql.operation.type': 'query' }))).toBe('graphql');
+    expect(resolveExternalName(span({ 'faas.invoked_name': 'resize-image' }))).toBe('resize-image');
+    // A non-AWS RPC falls back to the network peer.
+    expect(
+      resolveExternalName(
+        span({ 'rpc.system': 'grpc', 'rpc.service': 'Cart', 'server.address': 'cart-svc' })
+      )
+    ).toBe('cart-svc');
   });
 
   it('drops scheme-default ports (api.openai.com, not api.openai.com:443)', () => {
@@ -322,5 +353,129 @@ describe('hasCrossServiceChild', () => {
         ],
       })
     ).toBe(false);
+  });
+});
+
+describe('classifySpanDependency (backend naming specification)', () => {
+  const NOT_REACHING = { reachesTracedService: false };
+
+  it('names dependencies only from CLIENT, PRODUCER and CONSUMER spans', () => {
+    const db = { db_system: 'redis', 'server.address': 'valkey-cart' };
+    expect(classifySpanDependency(span(db), NOT_REACHING)?.name).toBe('redis:valkey-cart');
+    ['SPAN_KIND_SERVER', 'SPAN_KIND_INTERNAL', 'INTERNAL', undefined].forEach((kind) =>
+      expect(classifySpanDependency(span(db, { kind }), NOT_REACHING)).toBeNull()
+    );
+  });
+
+  it('lets PRODUCER / CONSUMER spans name brokers only', () => {
+    const mq = { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' };
+    expect(
+      classifySpanDependency(span(mq, { kind: 'SPAN_KIND_CONSUMER' }), NOT_REACHING)?.name
+    ).toBe('kafka:orders');
+    expect(
+      classifySpanDependency(
+        span({ 'server.address': 'api.openai.com' }, { kind: 'SPAN_KIND_PRODUCER' }),
+        NOT_REACHING
+      )
+    ).toBeNull();
+  });
+
+  it('names no broker without a destination (metadata fetch, ack)', () => {
+    expect(classifyDependencyByAttributes(span({ 'messaging.system': 'kafka' }))).toBeNull();
+    expect(
+      classifySpanDependency(
+        span({ 'messaging.system': 'kafka' }, { kind: 'SPAN_KIND_PRODUCER' }),
+        NOT_REACHING
+      )
+    ).toBeNull();
+  });
+
+  it('names an AWS SDK database call after the service, unless peer.service is set', () => {
+    const dynamo = {
+      'db.system': 'dynamodb',
+      'rpc.system': 'aws-api',
+      'rpc.service': 'DynamoDBv2',
+      'server.address': 'dynamodb.us-east-1.amazonaws.com',
+    };
+    expect(classifySpanDependency(span(dynamo), NOT_REACHING)?.name).toBe('AWS::DynamoDB');
+    expect(
+      classifySpanDependency(span({ ...dynamo, 'peer.service': 'orders-table' }), NOT_REACHING)
+        ?.name
+    ).toBe('orders-table');
+  });
+
+  it('is not a dependency when a CLIENT call reaches a traced service', () => {
+    expect(
+      classifySpanDependency(span({ db_system: 'redis', 'server.address': 'proxy' }), {
+        reachesTracedService: true,
+      })
+    ).toBeNull();
+    // Messaging spans are not CLIENT calls, so the rule does not apply to them.
+    expect(
+      classifySpanDependency(
+        span(
+          { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+          { kind: 'SPAN_KIND_PRODUCER' }
+        ),
+        { reachesTracedService: true }
+      )?.name
+    ).toBe('kafka:orders');
+  });
+
+  it('suppresses an external peer named like a service traced in the trace', () => {
+    const known = new Set(['checkout']);
+    const ctx = { reachesTracedService: false, knownServerServices: known };
+    expect(classifySpanDependency(span({ 'peer.service': 'Checkout' }), ctx)).toBeNull();
+    expect(
+      classifySpanDependency(span({ 'server.address': 'checkout', 'server.port': 8080 }), ctx)
+    ).toBeNull();
+    // Kubernetes service DNS of a traced service.
+    expect(
+      classifySpanDependency(span({ 'server.address': 'checkout.shop.svc.cluster.local' }), ctx)
+    ).toBeNull();
+    expect(classifySpanDependency(span({ 'server.address': 'api.openai.com' }), ctx)?.name).toBe(
+      'api.openai.com'
+    );
+  });
+
+  it('needs an external signal key before naming an external peer', () => {
+    // network.peer.address alone is not an external signal (backend computeNodeType).
+    expect(
+      classifySpanDependency(span({ 'network.peer.address': 'mesh' }), NOT_REACHING)
+    ).toBeNull();
+    expect(
+      classifySpanDependency(
+        span({ 'http.request.method': 'GET', 'network.peer.address': 'mesh' }),
+        NOT_REACHING
+      )?.name
+    ).toBe('mesh');
+  });
+
+  it('reports the attribute that identifies the dependency, to filter its spans', () => {
+    const filterOf = (attrs: Record<string, unknown>, kind?: string) =>
+      classifySpanDependency(span(attrs, kind ? { kind } : {}), NOT_REACHING)?.filter;
+    expect(filterOf({ db_system: 'redis', 'server.address': 'valkey-cart' })).toEqual({
+      key: 'server.address',
+      value: 'valkey-cart',
+    });
+    expect(filterOf({ 'db.system.name': 'postgresql', 'db.namespace': 'otel' })).toEqual({
+      key: 'db.namespace',
+      value: 'otel',
+    });
+    expect(filterOf({ db_system_name: 'postgresql' })).toEqual({
+      key: 'db_system_name',
+      value: 'postgresql',
+    });
+    expect(
+      filterOf(
+        { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+        'SPAN_KIND_PRODUCER'
+      )
+    ).toEqual({ key: 'messaging.destination.name', value: 'orders' });
+    expect(filterOf({ 'url.full': 'https://api.openai.com/v1', 'peer.service': 'openai' })).toEqual(
+      { key: 'peer.service', value: 'openai' }
+    );
+    // Named from the URL only: no single attribute holds the name.
+    expect(filterOf({ 'url.full': 'https://api.openai.com/v1' })).toBeUndefined();
   });
 });

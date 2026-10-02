@@ -22,6 +22,13 @@ export interface TraceServiceFlowProps {
   /** Clicking a service card filters the trace by that service. */
   onFilterService?: (serviceName: string) => void;
   /**
+   * Clicking a dependency card filters the trace to that dependency's spans, by the span
+   * attribute that names it (e.g. `attributes.server.address`).
+   */
+  onFilterAttribute?: (field: string, value: string) => void;
+  /** Active span filters, used to highlight the dependency they select. */
+  activeSpanFilters?: Array<{ field: string; value: unknown }>;
+  /**
    * Show the overview minimap. Off in the narrow flyout, where the graph is
    * already fit-to-view and the minimap would only cover the nodes.
    */
@@ -39,6 +46,8 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   colorMap = {},
   activeServiceFilter,
   onFilterService,
+  onFilterAttribute,
+  activeSpanFilters,
   showMinimap = true,
 }) => {
   const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
@@ -53,12 +62,18 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
           ...node,
           data: {
             ...node.data,
-            isSelected: !!activeServiceFilter && node.id === activeServiceFilter,
+            isSelected: node.data.dependencyFilter
+              ? (activeSpanFilters || []).some(
+                  (f) =>
+                    f.field === node.data.dependencyFilter?.field &&
+                    f.value === node.data.dependencyFilter?.value
+                )
+              : !!activeServiceFilter && node.id === activeServiceFilter,
           },
         })),
       },
     }),
-    [map, activeServiceFilter]
+    [map, activeServiceFilter, activeSpanFilters]
   );
 
   // The package fits once (clamped zoom) and never re-fits on resize; remount on
@@ -143,11 +158,20 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         showGridBackground
         nodesDraggable
         topN={Infinity}
-        onDashboardClick={(node?: { id?: string }) => {
-          // Synthesized dependency nodes (id "dep::<type>::<name>") are not real
-          // services, so filtering the trace by their id as a serviceName matches
-          // nothing ("No services found"). Ignore clicks on them.
-          if (node?.id && !node.id.startsWith('dep::')) onFilterService?.(node.id);
+        onDashboardClick={(node?: {
+          id?: string;
+          dependencyFilter?: { field: string; value: string };
+        }) => {
+          if (!node?.id) return;
+          // Synthesized dependency nodes (id "dep::<type>::<name>") are not services:
+          // filter by the attribute that names the dependency instead (no-op when none).
+          if (node.id.startsWith('dep::')) {
+            if (node.dependencyFilter) {
+              onFilterAttribute?.(node.dependencyFilter.field, node.dependencyFilter.value);
+            }
+            return;
+          }
+          onFilterService?.(node.id);
         }}
       />
     </div>

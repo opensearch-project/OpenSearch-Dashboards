@@ -82,4 +82,16 @@ describe('MetricsCardNode', () => {
     // second arg is the node data
     expect(onDashboardClick.mock.calls[0][1].id).toBe('cart');
   });
+
+  it('shows the type icon in place of the identity dot when iconType is set', () => {
+    const { container } = render(<MetricsCardNode {...createProps({ iconType: 'AWS::RDS' })} />);
+    expect(screen.getByTestId('metricsCardNodeIcon').querySelector('img')).toBeInTheDocument();
+    expect(container.querySelector('.celMetricsCard__dot')).toBeNull();
+  });
+
+  it('keeps the identity dot without an iconType', () => {
+    const { container } = render(<MetricsCardNode {...createProps()} />);
+    expect(container.querySelector('.celMetricsCard__dot')).toBeInTheDocument();
+    expect(screen.queryByTestId('metricsCardNodeIcon')).toBeNull();
+  });
 });

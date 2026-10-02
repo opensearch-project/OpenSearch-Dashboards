@@ -12,9 +12,7 @@ import {
 } from '../traces/ppl_resolve_helpers';
 import { parseHighPrecisionTimestamp } from '../utils/span_timerange_utils';
 import {
-  classifyDependencyByAttributes,
-  resolveExternalName,
-  normalizeSpanKind,
+  classifySpanDependency,
   dependencyTypeLabel,
   hasCrossServiceChild,
 } from '../services/dependency_classifier';
@@ -229,25 +227,21 @@ export function convertToVegaGanttData(
     }
 
     // Classify the span's downstream dependency (database / messaging / external)
-    // so the waterfall can annotate DB/broker/external calls. External is only
-    // applied to CLIENT spans with no child in another service, to avoid
-    // mislabeling calls that reach a traced service (same rule as the trace map).
-    let dependencyLabel = '';
-    const depByAttr = classifyDependencyByAttributes(span);
-    if (depByAttr) {
-      dependencyLabel = dependencyTypeLabel(depByAttr.type);
-    } else if (
-      normalizeSpanKind(source.kind) === 'CLIENT' &&
-      !hasCrossServiceChild(
-        span,
-        (s) => s.children,
-        (s) => resolveServiceNameFromSpan(s) || getSpanSource(s).serviceName,
-        (s) => getSpanSource(s).kind
-      ) &&
-      resolveExternalName(span)
-    ) {
-      dependencyLabel = dependencyTypeLabel('external');
-    }
+    // so the waterfall can annotate DB/broker/external calls, with the same rules as
+    // the trace map (a CLIENT call that reaches a traced service is not one).
+    // The span itself carries the attributes (getSpanSource keeps only core fields).
+    const dependency = classifySpanDependency(
+      { ...span, kind: source.kind },
+      {
+        reachesTracedService: hasCrossServiceChild(
+          span,
+          (s) => s.children,
+          (s) => resolveServiceNameFromSpan(s) || getSpanSource(s).serviceName,
+          (s) => getSpanSource(s).kind
+        ),
+      }
+    );
+    const dependencyLabel = dependency ? dependencyTypeLabel(dependency.type) : '';
 
     return {
       spanId: source.spanId,

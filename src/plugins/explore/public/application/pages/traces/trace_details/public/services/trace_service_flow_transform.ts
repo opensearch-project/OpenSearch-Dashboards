@@ -7,13 +7,21 @@ import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
 import {
-  classifyDependencyByAttributes,
-  resolveExternalName,
+  classifySpanDependency,
   normalizeSpanKind,
   dependencyTypeLabel,
   DependencyInfo,
+  DependencyType,
   getSpanAttr,
 } from './dependency_classifier';
+
+// The aggregated APM map's icons for each dependency type (dashboards-observability
+// platform_utils), so a dependency looks the same on both maps.
+const DEPENDENCY_ICON_TYPES: Record<DependencyType, string> = {
+  database: 'AWS::RDS',
+  messaging: 'Kafka',
+  external: 'AWS::CloudFront',
+};
 
 /**
  * Largest `valueOf(item)` across an iterable, folded pairwise (no `Math.max(...spread)`,
@@ -63,6 +71,13 @@ export interface ServiceFlowNode {
     dependencyType?: string;
     /** Human-readable subtitle for dependency nodes (e.g. "Database"). */
     subtitle?: string;
+    /** Icon key for dependency nodes (see @osd/apm-topology ICONS). */
+    iconType?: string;
+    /**
+     * Span filter that selects this dependency's spans (e.g. `attributes.server.address` =
+     * `valkey-cart`), applied when the node is clicked. Absent when no attribute names it.
+     */
+    dependencyFilter?: { field: string; value: string };
   };
 }
 
@@ -220,30 +235,44 @@ export const spansToServiceFlow = (
   // Which spans reached a traced service? A span with a child from a different
   // service did, and so did the same-service CLIENT spans wrapping it (an SDK
   // span over its transport span), as in the backend. Such a CLIENT span is a
-  // normal edge and must NOT also be synthesized as external.
+  // normal edge, not a dependency call.
   const spanHasCrossServiceChild = new Set<string>();
   hits.forEach((hit) => {
-    let cur = parentOf(hit);
-    if (!cur || serviceOf(cur) === serviceOf(hit)) return;
-    spanHasCrossServiceChild.add(cur.spanId);
-    for (let up = parentOf(cur); isClient(cur) && up && serviceOf(up) === serviceOf(cur);) {
-      // Already marked: the chain above is done (also stops on a parent-id cycle).
-      if (spanHasCrossServiceChild.has(up.spanId)) break;
-      spanHasCrossServiceChild.add(up.spanId);
+    const immediateParent = parentOf(hit);
+    if (!immediateParent || serviceOf(immediateParent) === serviceOf(hit)) return;
+    let cur: ServiceFlowHit | undefined = immediateParent;
+    // Already marked: the chain above is done (also stops on a parent-id cycle).
+    while (cur && !spanHasCrossServiceChild.has(cur.spanId)) {
+      spanHasCrossServiceChild.add(cur.spanId);
+      const up = parentOf(cur);
+      if (!isClient(cur) || !up || serviceOf(up) !== serviceOf(cur)) break;
       cur = up;
-      up = parentOf(cur);
     }
   });
 
-  const isDependencyCandidate = (hit: ServiceFlowHit) =>
-    classifyDependencyByAttributes(hit) !== null || (isClient(hit) && !!resolveExternalName(hit));
+  // Services with a SERVER span in this trace: an external peer named like one of them is
+  // that service (its SERVER span missing from the call), not an external dependency.
+  const knownServerServices = new Set(
+    hits
+      .filter((hit) => normalizeSpanKind(hit.kind) === 'SERVER')
+      .map((hit) => serviceOf(hit).toLowerCase())
+      .filter(Boolean)
+  );
+  const dependencyOf = (hit: ServiceFlowHit) =>
+    classifySpanDependency(hit, {
+      reachesTracedService: spanHasCrossServiceChild.has(hit.spanId),
+      knownServerServices,
+    });
+
   // A CLIENT span nested in a same-service CLIENT dependency call, or in a
   // messaging publish/receive span, is the transport of that one call; only the
   // outer span is counted (backend isSynthesizedDependencyTarget).
   const isNestedTransport = (hit: ServiceFlowHit) => {
     const parent = parentOf(hit);
     if (!isClient(hit) || !parent || serviceOf(parent) !== serviceOf(hit)) return false;
-    if (isClient(parent)) return isDependencyCandidate(parent);
+    if (isClient(parent)) {
+      return classifySpanDependency(parent, { reachesTracedService: false }) !== null;
+    }
     if (getSpanAttr(parent, 'messaging.system') === undefined) return false;
     const parentKind = normalizeSpanKind(parent.kind);
     const operation =
@@ -255,6 +284,7 @@ export const spansToServiceFlow = (
   interface DepAgg {
     type: DependencyInfo['type'];
     name: string;
+    filter?: { field: string; value: string };
     count: number;
     errors: number;
     durationNanos: number;
@@ -268,11 +298,7 @@ export const spansToServiceFlow = (
   hits.forEach((hit) => {
     const kind = normalizeSpanKind(hit.kind);
     if (isNestedTransport(hit)) return;
-    let dep = classifyDependencyByAttributes(hit);
-    if (!dep && kind === 'CLIENT' && !spanHasCrossServiceChild.has(hit.spanId)) {
-      const ext = resolveExternalName(hit);
-      if (ext) dep = { type: 'external', name: ext };
-    }
+    const dep = dependencyOf(hit);
     if (!dep) return;
 
     const service = serviceOf(hit);
@@ -280,6 +306,10 @@ export const spansToServiceFlow = (
     const agg = depAgg.get(nodeId) || {
       type: dep.type,
       name: dep.name,
+      // The first span's identifying attribute selects the dependency's spans.
+      filter: dep.filter
+        ? { field: `attributes.${dep.filter.key}`, value: dep.filter.value }
+        : undefined,
       count: 0,
       errors: 0,
       durationNanos: 0,
@@ -318,6 +348,8 @@ export const spansToServiceFlow = (
         hasError: agg.errors > 0,
         dependencyType: agg.type,
         subtitle: dependencyTypeLabel(agg.type),
+        iconType: DEPENDENCY_ICON_TYPES[agg.type],
+        ...(agg.filter && { dependencyFilter: agg.filter }),
         errorLabel:
           agg.errors > 0
             ? `${agg.errors} error${agg.errors === 1 ? '' : 's'} (${errorRate.toFixed(0)}%)`

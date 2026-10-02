@@ -6,6 +6,7 @@
 import React, { useCallback } from 'react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
+import { getIcon } from '../../shared/utils/icons.utils';
 import { NodeShell } from './node_shell';
 import { MetricBar, MetricBarGroupItem } from './metric_bar';
 import './metrics_card_node.scss';
@@ -16,6 +17,11 @@ export interface MetricsCardData {
   subtitle?: string;
   /** Identity color (border/glow/dot) when not in error. */
   color?: string;
+  /**
+   * Icon key (see ICONS, e.g. `AWS::RDS`, `Kafka`) shown in place of the identity dot, so a
+   * card can show what kind of entity it is (a database, a message broker).
+   */
+  iconType?: string;
   /** When true, the card is styled as an error (red border, tint, badge). */
   hasError?: boolean;
   /** Tooltip/aria text for the error badge. Defaults to "Has errors". */
@@ -66,10 +72,16 @@ export const MetricsCardNode = ({ data }: NodeProps<MetricsCardCustomNode>) => {
     >
       <div className="celMetricsCard">
         <div className="celMetricsCard__header">
-          <span
-            className="celMetricsCard__dot"
-            style={{ backgroundColor: data.color || NEUTRAL_BORDER }}
-          />
+          {data.iconType ? (
+            <span className="celMetricsCard__icon" data-test-subj="metricsCardNodeIcon">
+              {getIcon(data.iconType)}
+            </span>
+          ) : (
+            <span
+              className="celMetricsCard__dot"
+              style={{ backgroundColor: data.color || NEUTRAL_BORDER }}
+            />
+          )}
           <span className="celMetricsCard__title">{data.title}</span>
           {data.hasError && (
             <span

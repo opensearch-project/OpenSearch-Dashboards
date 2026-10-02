@@ -321,4 +321,80 @@ describe('spansToServiceFlow dependency synthesis', () => {
     expect(ids.has(edges[0].source)).toBe(true);
     expect(ids.has(edges[0].target)).toBe(true);
   });
+
+  it('gives dependency nodes the aggregated map icon and a filter for their spans', () => {
+    const { nodes } = spansToServiceFlow([
+      hit({ spanId: 'c', serviceName: 'cart', kind: 'SPAN_KIND_SERVER' }),
+      hit({
+        spanId: 'h',
+        parentSpanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { db_system: 'redis', 'server.address': 'valkey-cart' },
+      }),
+      hit({
+        spanId: 'p',
+        parentSpanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_PRODUCER',
+        attributes: { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+      }),
+      hit({
+        spanId: 'x',
+        parentSpanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'url.full': 'https://api.openai.com/v1/chat' },
+      }),
+    ]).map.root;
+    const data = (id: string) => nodes.find((n) => n.id === id)!.data;
+    expect(data('dep::database::redis:valkey-cart')).toMatchObject({
+      iconType: 'AWS::RDS',
+      dependencyFilter: { field: 'attributes.server.address', value: 'valkey-cart' },
+    });
+    expect(data('dep::messaging::kafka:orders')).toMatchObject({
+      iconType: 'Kafka',
+      dependencyFilter: { field: 'attributes.messaging.destination.name', value: 'orders' },
+    });
+    // Named from the URL: no single attribute selects its spans, so the click is a no-op.
+    expect(data('dep::external::api.openai.com').iconType).toBe('AWS::CloudFront');
+    expect(data('dep::external::api.openai.com').dependencyFilter).toBeUndefined();
+    // Service nodes keep their identity dot.
+    expect(data('cart').iconType).toBeUndefined();
+  });
+
+  it('ignores dependency attributes on SERVER and INTERNAL spans', () => {
+    const ids = nodeIds([
+      hit({
+        spanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_SERVER',
+        attributes: { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+      }),
+      hit({
+        spanId: 'i',
+        parentSpanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_INTERNAL',
+        attributes: { db_system: 'redis', 'server.address': 'valkey-cart' },
+      }),
+    ]);
+    expect(ids).toEqual(['cart']);
+  });
+
+  it('does not add an external node for a peer named like a service traced in the trace', () => {
+    const ids = nodeIds([
+      hit({ spanId: 'f', serviceName: 'frontend', kind: 'SPAN_KIND_SERVER' }),
+      // The call to checkout lost its SERVER span child (sampling), but checkout is traced.
+      hit({
+        spanId: 'call',
+        parentSpanId: 'f',
+        serviceName: 'frontend',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'server.address': 'checkout', 'server.port': 8080 },
+      }),
+      hit({ spanId: 'k', serviceName: 'checkout', kind: 'SPAN_KIND_SERVER' }),
+    ]);
+    expect(ids).toEqual(['checkout', 'frontend']);
+  });
 });

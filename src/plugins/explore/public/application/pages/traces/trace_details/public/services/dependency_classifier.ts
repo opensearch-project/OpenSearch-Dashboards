@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 /**
- * Client-side classification of a span's downstream dependency, mirroring the
- * data-prepper otel-apm-service-map synthesis so the per-trace views (service
- * flow, waterfall) can represent databases, message brokers and external
- * endpoints the same way the aggregated APM service map does.
+ * Client-side classification of a span's downstream dependency, following the
+ * data-prepper otel-apm-service-map "Dependency naming specification" (README of
+ * that processor), so the per-trace views (trace map, waterfall) name databases,
+ * message brokers and external endpoints exactly as the aggregated APM service
+ * map does.
  *
  * Raw OTel spans already carry the identifying attributes (`db.*`,
  * `messaging.*`, `http`/`url`/`peer.service`), so no backend change is needed
@@ -15,6 +18,13 @@
  */
 
 export type DependencyType = 'database' | 'messaging' | 'external';
+
+/** A span attribute that identifies a dependency, used to filter a trace to its spans. */
+export interface DependencyFilter {
+  /** Attribute key as stored on the span, e.g. `server.address`. */
+  key: string;
+  value: string;
+}
 
 export interface DependencyInfo {
   type: DependencyType;
@@ -28,6 +38,8 @@ export interface DependencyInfo {
    * @see https://opentelemetry.io/docs/specs/semconv/database/
    */
   system?: string;
+  /** The attribute that identified the dependency on this span, when one did. */
+  filter?: DependencyFilter;
 }
 
 type Primitive = string | number | boolean;
@@ -71,17 +83,51 @@ export const getSpanAttr = (span: any, key: string): Primitive | undefined => {
   return lookupPath(source.attributes, key.split('.'));
 };
 
-const firstAttr = (span: any, keys: string[]): string | undefined => {
-  for (const k of keys) {
-    const v = getSpanAttr(span, k);
-    if (v !== undefined && v !== null && `${v}` !== '') return `${v}`;
+/** The first of `keys` with a non-empty value, with that key. */
+const firstEntry = (span: any, keys: string[]): DependencyFilter | undefined => {
+  for (const key of keys) {
+    const v = getSpanAttr(span, key);
+    if (v !== undefined && v !== null && `${v}` !== '') return { key, value: `${v}` };
   }
   return undefined;
 };
 
+const firstAttr = (span: any, keys: string[]): string | undefined => firstEntry(span, keys)?.value;
+
 /** Normalize kinds like "SPAN_KIND_CLIENT" / "client" / "CLIENT" -> "CLIENT". */
 export const normalizeSpanKind = (kind: any): string =>
   `${kind || ''}`.toUpperCase().replace(/^SPAN_KIND_/, '');
+
+/** Only these span kinds can name a dependency; SERVER / INTERNAL spans describe the service. */
+const DEPENDENCY_CANDIDATE_KINDS = new Set(['CLIENT', 'PRODUCER', 'CONSUMER']);
+
+/** Whether a span of this kind can target a dependency (CLIENT / PRODUCER / CONSUMER). */
+export const isDependencyCandidateKind = (kind: unknown): boolean =>
+  DEPENDENCY_CANDIDATE_KINDS.has(normalizeSpanKind(kind));
+
+// AWS SDK service names (rpc.service with rpc.system=aws-api) the backend maps explicitly
+// (data-prepper otel-proto-common aws_service_mappings); others become `AWS::{rpc.service}`.
+const AWS_SERVICE_MAPPINGS: Record<string, string> = {
+  AmazonDynamoDBv2: 'AWS::DynamoDB',
+  DynamoDb: 'AWS::DynamoDB',
+  dynamodb: 'AWS::DynamoDB',
+  DynamoDBv2: 'AWS::DynamoDB',
+  sns: 'AWS::SNS',
+  AmazonSNS: 'AWS::SNS',
+  SimpleNotificationService: 'AWS::SNS',
+  Kinesis: 'AWS::Kinesis',
+  AmazonKinesis: 'AWS::Kinesis',
+  'Amazon S3': 'AWS::S3',
+  S3: 'AWS::S3',
+  s3: 'AWS::S3',
+};
+
+/** `AWS::{service}` for an AWS SDK call (rpc.system=aws-api), else undefined. */
+const awsServiceName = (span: any): string | undefined => {
+  if (firstAttr(span, ['rpc.system']) !== 'aws-api') return undefined;
+  const service = firstAttr(span, ['rpc.service']);
+  return service ? (AWS_SERVICE_MAPPINGS[service] ?? `AWS::${service}`) : undefined;
+};
 
 // Mirrors the data-prepper otel-apm-service-map naming policy so the per-trace
 // map names a dependency the same way the aggregated service map does.
@@ -153,6 +199,9 @@ const isPublishableName = (name: string): boolean => {
 const databaseName = (span: any, dbSystem?: string): string | null => {
   const peer = firstAttr(span, ['peer.service']);
   if (peer) return isPublishableName(peer) ? peer : null;
+  // An AWS SDK call (e.g. DynamoDB) is named after the service, as in the backend.
+  const aws = awsServiceName(span);
+  if (aws) return aws;
   const rawHost = firstAttr(span, ['server.address', 'net.peer.name', 'network.peer.address']);
   const host = rawHost && isNameableHost(rawHost) ? rawHost : undefined;
   const namespace = firstAttr(span, ['db.namespace', 'db.name']);
@@ -177,11 +226,14 @@ export const classifyDependencyByAttributes = (span: any): DependencyInfo | null
   // Messaging (Kafka, RabbitMQ, SQS/SNS, ...).
   const messagingSystem = firstAttr(span, ['messaging.system']);
   if (messagingSystem) {
-    const destination = firstAttr(span, ['messaging.destination.name', 'messaging.destination']);
+    // Without a destination (a metadata fetch, an ack) no broker node is named.
+    const destination = firstEntry(span, ['messaging.destination.name', 'messaging.destination']);
+    if (!destination) return null;
     return {
       type: 'messaging',
-      name: destination ? `${messagingSystem}:${destination}` : messagingSystem,
+      name: `${messagingSystem}:${destination.value}`,
       system: messagingSystem.toLowerCase(),
+      filter: destination,
     };
   }
 
@@ -200,7 +252,25 @@ export const classifyDependencyByAttributes = (span: any): DependencyInfo | null
   if (hasDbSignal) {
     const name = databaseName(span, dbSystem);
     if (name === null) return null;
-    return { type: 'database', name, system: dbSystem ? dbSystem.toLowerCase() : undefined };
+    // The instance identifies a database best; else its namespace or system.
+    const host = firstEntry(span, ['server.address', 'net.peer.name', 'network.peer.address']);
+    const filter =
+      firstEntry(span, ['peer.service']) ||
+      (host && isNameableHost(host.value) ? host : undefined) ||
+      firstEntry(span, ['db.namespace', 'db.name']) ||
+      firstEntry(span, [
+        'db.system.name',
+        'db.system',
+        'db_system',
+        'db_system_name',
+        'db.system_name',
+      ]);
+    return {
+      type: 'database',
+      name,
+      system: dbSystem ? dbSystem.toLowerCase() : undefined,
+      filter,
+    };
   }
 
   return null;
@@ -228,33 +298,68 @@ export const dependencyIconType = (type: DependencyType, system?: string): strin
   }
 };
 
+// Address/port attribute pairs, in the order the backend tries them.
+const ADDRESS_PORT_KEYS: Array<[string, string]> = [
+  ['server.address', 'server.port'],
+  ['net.peer.name', 'net.peer.port'],
+  ['network.peer.address', 'network.peer.port'],
+  ['net.sock.peer.addr', 'net.sock.peer.port'],
+];
+
 /**
- * Resolve an external-endpoint identity for a CLIENT span (peer.service, then
- * url host, then server.address:port), with scheme-default ports dropped.
- * Returns null when nothing names the peer, or when it is a raw IP, loopback or
- * per-instance host (the backend suppresses those rather than minting a node
- * per address).
+ * The external peer a CLIENT span calls and the attribute that names it, following the
+ * backend: peer.service, else an AWS SDK service (`AWS::{service}`), GraphQL (`graphql`) or
+ * FaaS (`faas.invoked_name`) name; else the first address/port pair present as
+ * `host[:port]`, else the host and port of url.full / http.url. Scheme-default ports are
+ * dropped. Null when nothing names the peer, or when it is a raw IP, loopback or
+ * per-instance host (the backend suppresses those rather than minting a node per address).
  */
-export const resolveExternalName = (span: any): string | null => {
-  const peer = firstAttr(span, ['peer.service']);
-  if (peer) return normalizeExternalName(peer);
+const resolveExternalPeer = (span: any): { name: string; filter?: DependencyFilter } | null => {
+  const peer = firstEntry(span, ['peer.service']);
+  if (peer) {
+    const name = normalizeExternalName(peer.value);
+    return name ? { name, filter: peer } : null;
+  }
+  // Later rules override earlier ones, as the backend's extractors do.
+  let named: { name: string; filter?: DependencyFilter } | undefined;
+  const rpc = firstEntry(span, ['rpc.service', 'rpc.method']);
+  const faas = firstEntry(span, ['faas.invoked_name']);
+  const graphql = firstEntry(span, ['graphql.operation.type']);
+  if (faas) named = { name: faas.value, filter: faas };
+  if (graphql) named = { name: 'graphql', filter: graphql };
+  if (rpc) {
+    const aws = awsServiceName(span);
+    named = aws ? { name: aws, filter: firstEntry(span, ['rpc.service']) } : undefined;
+  }
+  if (named) return isPublishableName(named.name) ? named : null;
+
+  for (const [addressKey, portKey] of ADDRESS_PORT_KEYS) {
+    const address = firstEntry(span, [addressKey]);
+    if (address) {
+      const port = firstAttr(span, [portKey]);
+      const name = normalizeExternalName(port ? `${address.value}:${port}` : address.value);
+      return name ? { name, filter: address } : null;
+    }
+  }
 
   const url = firstAttr(span, ['url.full', 'http.url']);
   if (url) {
     try {
       const u = new URL(url);
+      if (!u.hostname) return null;
       // URL keeps IPv6 hosts bracketed and already omits the scheme-default port.
-      return normalizeExternalName(u.port ? `${u.hostname}:${u.port}` : u.hostname);
+      const name = normalizeExternalName(u.port ? `${u.hostname}:${u.port}` : u.hostname);
+      return name ? { name } : null;
     } catch {
-      // fall through to host/port
+      return null;
     }
   }
-
-  const host = firstAttr(span, ['server.address', 'net.peer.name']);
-  if (!host) return null;
-  const port = firstAttr(span, ['server.port', 'net.peer.port']);
-  return normalizeExternalName(port ? `${host}:${port}` : host);
+  return null;
 };
+
+/** The external peer name of a CLIENT span (see resolveExternalPeer), or null. */
+export const resolveExternalName = (span: any): string | null =>
+  resolveExternalPeer(span)?.name ?? null;
 
 /**
  * Whether a span's call reached a traced service (a normal service edge) rather
@@ -270,12 +375,15 @@ export const hasCrossServiceChild = <T>(
   kindOf: (s: T) => unknown
 ): boolean => {
   const own = serviceOf(span);
+  // Without its own service name a span cannot tell whether a child is in another service.
+  if (!own) return false;
   const pending: T[] = [span];
   const visited = new Set<T>(pending);
   while (pending.length > 0) {
     const current = pending.pop() as T;
     for (const child of childrenOf(current) || []) {
-      if (serviceOf(child) !== own) return true;
+      const childService = serviceOf(child);
+      if (childService && childService !== own) return true;
       if (normalizeSpanKind(kindOf(child)) === 'CLIENT' && !visited.has(child)) {
         visited.add(child);
         pending.push(child);
@@ -285,6 +393,92 @@ export const hasCrossServiceChild = <T>(
   return false;
 };
 
+/**
+ * Whether an external peer is named like a service traced in this trace (its SERVER span is
+ * missing from this call, e.g. sampling): it is that service, not an external dependency.
+ * Matches peer.service, the peer host and Kubernetes service DNS (`checkout.ns.svc...`),
+ * as the backend does.
+ */
+const namesKnownService = (
+  span: any,
+  externalName: string,
+  knownServerServices: ReadonlySet<string>
+): boolean => {
+  if (knownServerServices.size === 0) return false;
+  const host = /^(.*):(\d{1,5}|-1)$/.exec(externalName)?.[1] ?? externalName;
+  return [firstAttr(span, ['peer.service']), firstAttr(span, ['server.address']), host].some(
+    (candidate) => {
+      if (!candidate) return false;
+      const name = candidate.toLowerCase();
+      if (knownServerServices.has(name)) return true;
+      const firstDot = name.indexOf('.');
+      return (
+        firstDot > 0 &&
+        (name.endsWith('.svc') || name.includes('.svc.')) &&
+        knownServerServices.has(name.substring(0, firstDot))
+      );
+    }
+  );
+};
+
+// A CLIENT span is an external call only when one of these is set (backend computeNodeType).
+const EXTERNAL_SIGNAL_KEYS = [
+  'url.full',
+  'http.url',
+  'http.request.method',
+  'http.method',
+  'peer.service',
+  'rpc.system',
+  'server.address',
+  'net.peer.name',
+];
+
+export interface SpanDependencyContext {
+  /**
+   * Whether the span's call reached a traced service (see hasCrossServiceChild). A CLIENT
+   * span that did is a service-to-service edge, not a dependency.
+   */
+  reachesTracedService: boolean;
+  /** Lower-cased names of the services with a SERVER span in the trace, when known. */
+  knownServerServices?: ReadonlySet<string>;
+}
+
+/**
+ * The dependency a span targets, per the backend naming specification: only CLIENT,
+ * PRODUCER and CONSUMER spans name one; PRODUCER / CONSUMER spans name brokers only; a
+ * CLIENT span names one only when its call did not reach a traced service, and names an
+ * external peer only when that peer is not a service traced in the trace.
+ */
+export const classifySpanDependency = (
+  span: any,
+  context: SpanDependencyContext
+): DependencyInfo | null => {
+  if (!span) return null;
+  const kind = normalizeSpanKind(span.kind);
+  if (!isDependencyCandidateKind(kind)) return null;
+  if (kind !== 'CLIENT') {
+    const dep = classifyDependencyByAttributes(span);
+    return dep?.type === 'messaging' ? dep : null;
+  }
+  if (context.reachesTracedService) return null;
+  const dep = classifyDependencyByAttributes(span);
+  if (dep) return dep;
+  if (!firstAttr(span, EXTERNAL_SIGNAL_KEYS)) return null;
+  const peer = resolveExternalPeer(span);
+  if (!peer) return null;
+  if (
+    context.knownServerServices &&
+    namesKnownService(span, peer.name, context.knownServerServices)
+  ) {
+    return null;
+  }
+  return { type: 'external', name: peer.name, filter: peer.filter };
+};
+
 /** Human-readable label for a dependency type. */
 export const dependencyTypeLabel = (type: DependencyType): string =>
-  type === 'database' ? 'Database' : type === 'messaging' ? 'Messaging' : 'External';
+  type === 'database'
+    ? i18n.translate('explore.traceView.dependency.database', { defaultMessage: 'Database' })
+    : type === 'messaging'
+      ? i18n.translate('explore.traceView.dependency.messaging', { defaultMessage: 'Messaging' })
+      : i18n.translate('explore.traceView.dependency.external', { defaultMessage: 'External' });
