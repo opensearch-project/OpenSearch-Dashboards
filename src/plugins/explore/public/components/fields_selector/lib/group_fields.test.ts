@@ -241,6 +241,54 @@ describe('group_fields', function () {
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
   });
 
+  it('should exclude multi-fields (e.g. .keyword sub-fields) from all groups', function () {
+    const fields = [
+      {
+        name: 'message',
+        type: 'string',
+        esTypes: ['text'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: false,
+        readFromDocValues: false,
+        displayName: 'message',
+      },
+      {
+        name: 'message.keyword',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 0,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'message.keyword',
+        subType: { multi: { parent: 'message' } },
+      },
+    ];
+
+    const columns: string[] = [];
+    const fieldCounts = {
+      message: 1,
+    };
+
+    const fieldFilterState = getDefaultFieldFilter();
+    fieldFilterState.missing = false;
+
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+
+    const allFieldNames = [
+      ...actual.facetedFields,
+      ...actual.selectedFields,
+      ...actual.queryFields,
+      ...actual.discoveredFields,
+    ].map((f) => f.name);
+
+    expect(allFieldNames).toContain('message');
+    expect(allFieldNames).not.toContain('message.keyword');
+  });
+
   it('should handle empty or null fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
 
