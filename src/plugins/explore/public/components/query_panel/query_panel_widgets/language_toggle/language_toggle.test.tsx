@@ -10,12 +10,20 @@ jest.mock('@ag-ui/client', () => ({
 }));
 
 import React from 'react';
+import { Dataset } from '../../../../../../data/common';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { Subject } from 'rxjs';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { LanguageToggle } from './language_toggle';
 import { EditorMode } from '../../../../application/utils/state_management/types';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
+
+jest.mock('../../../../helpers/use_flavor_id', () => ({
+  useFlavorId: () => 'logs',
+}));
 
 // Mock all modules before importing the component
 const mockDispatch = jest.fn();
@@ -40,7 +48,9 @@ jest.mock('../../../../application/hooks', () => ({
 // Mock getServices to provide language title
 const mockGetLanguage = jest.fn();
 const mockGetTab = jest.fn();
-const mockGetQuery = jest.fn(() => ({ dataset: undefined }));
+const mockGetQuery = jest.fn((): { dataset?: { id: string; type: string } } => ({
+  dataset: undefined,
+}));
 const mockSetUserQueryLanguage = jest.fn();
 const mockSetQuery = jest.fn();
 const mockIsLanguageSupportedForDataset = jest.fn();
@@ -49,10 +59,18 @@ const mockUnsubscribe = jest.fn();
 let mockGetUpdates$ = jest.fn(() => ({
   subscribe: () => ({ unsubscribe: mockUnsubscribe }),
 }));
+// Dataset-type lookup. Default: no registered type (getType -> undefined), matching the base
+// panel. Tests override to declare a type's own supportedLanguages (the source of truth).
+let mockGetType: jest.Mock = jest.fn((_type?: string) => undefined);
+// The registered tabs' languages, used as the no-active-tab fallback base (the union of what
+// Explore exposes). Default mirrors the logs-flavor tabs.
+let mockGetAllTabs = jest.fn(() => [{ supportedLanguages: ['PPL', 'SQL', 'FakeQL'] }]);
 let mockSqlSupportEnabled = true;
+const mockAddWarning = jest.fn();
 jest.mock('../../../../services/services', () => ({
   getServices: () => ({
     sqlSupportEnabled: mockSqlSupportEnabled,
+    notifications: { toasts: { addWarning: mockAddWarning, addError: jest.fn() } },
     docLinks: {
       links: {
         noDocumentation: {
@@ -66,6 +84,7 @@ jest.mock('../../../../services/services', () => ({
     },
     tabRegistry: {
       getTab: mockGetTab,
+      getAllTabs: () => mockGetAllTabs(),
     },
     data: {
       query: {
@@ -78,6 +97,15 @@ jest.mock('../../../../services/services', () => ({
           getQuery: mockGetQuery,
           setQuery: mockSetQuery,
           getUpdates$: () => mockGetUpdates$(),
+          getDatasetService: () => ({
+            getType: (type?: string) => mockGetType(type),
+            getDefault: () => undefined,
+            cacheDataset: jest.fn(),
+          }),
+          getInitialQueryByDataset: (dataset: { language?: string }) => ({
+            language: dataset.language ?? 'PPL',
+            query: 'seeded query',
+          }),
         },
       },
     },
@@ -109,6 +137,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn(),
   selectQueryLanguage: jest.fn(),
   selectActiveTabId: jest.fn(),
+  selectDataset: jest.fn(),
 }));
 
 // Mock onEditorRunActionCreator
@@ -128,6 +157,7 @@ jest.mock('react-redux', () => ({
 // Import the mocked selectors
 import {
   selectActiveTabId,
+  selectDataset,
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
@@ -143,13 +173,18 @@ const mockSelectQueryLanguage = selectQueryLanguage as jest.MockedFunction<
   typeof selectQueryLanguage
 >;
 const mockSelectActiveTabId = selectActiveTabId as jest.MockedFunction<typeof selectActiveTabId>;
+const mockSelectDataset = selectDataset as jest.MockedFunction<typeof selectDataset>;
+const testDataset = (id: string, type: string): Dataset => ({ id, title: id, type });
 
 describe('LanguageToggle', () => {
   const renderWithProvider = (component: React.ReactElement) => {
     const mockStore = configureStore({
-      reducer: { mock: (state = {}) => state },
+      // A trivial reducer whose state object identity changes on any dispatched action,
+      // so tests can force `useSelector` to re-read the selector mocks (e.g. selectDataset)
+      // by dispatching a no-op — mirroring how a real dataset switch re-renders the toggle.
+      reducer: { mock: (state = {}, _action) => ({ ...state }) },
     });
-    return render(<Provider store={mockStore}>{component}</Provider>);
+    return { ...render(<Provider store={mockStore}>{component}</Provider>), mockStore };
   };
 
   beforeEach(() => {
@@ -160,6 +195,8 @@ describe('LanguageToggle', () => {
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
     mockSelectQueryLanguage.mockReturnValue('PPL');
     mockSelectActiveTabId.mockReturnValue('logs');
+    mockSelectDataset.mockReturnValue(undefined);
+    setSourceTypeRegistry(new SourceTypeRegistryService());
     mockGetLanguage.mockReturnValue({ title: 'PPL' });
     mockGetTab.mockReturnValue({ supportedLanguages: ['PPL'] });
     mockSqlSupportEnabled = true;
@@ -171,6 +208,9 @@ describe('LanguageToggle', () => {
     mockGetUpdates$ = jest.fn(() => ({
       subscribe: () => ({ unsubscribe: mockUnsubscribe }),
     }));
+    // Default: no dataset type registered.
+    mockGetType = jest.fn((_type?: string) => undefined);
+    mockGetAllTabs = jest.fn(() => [{ supportedLanguages: ['PPL', 'SQL', 'FakeQL'] }]);
   });
 
   it('renders the language toggle button', () => {
@@ -562,6 +602,83 @@ describe('LanguageToggle', () => {
       });
     });
 
+    it('falls back to the dataset type languages when no tab is active (post dataset switch)', async () => {
+      // dataset_change_middleware resets activeTabId to EXPLORE_NO_TAB_ID ('') on every dataset
+      // switch and never re-runs detectAndSetOptimalTab, so the toggle must not depend on a
+      // populated tab. It should reflect the active source via the dataset type's own languages.
+      mockSqlSupportEnabled = true;
+      mockSelectActiveTabId.mockReturnValue('');
+      mockGetTab.mockReturnValue(undefined);
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockGetQuery.mockReturnValue({ dataset: { id: 'fake-1', type: 'FAKE' } });
+      mockSelectDataset.mockReturnValue(testDataset('fake-1', 'FAKE'));
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+      // The registered source's dataset type declares only its own language.
+      mockGetType = jest.fn(() => ({
+        supportedLanguages: () => ['FakeQL'],
+      }));
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-FakeQL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-PPL')).not.toBeInTheDocument();
+    });
+
+    it('does not leak Explore-unsupported languages (DQL/Lucene) in the no-tab fallback', async () => {
+      // Index patterns declare DQL/Lucene/PPL/SQL, but Explore has no tab for DQL or Lucene.
+      // With no active tab, the fallback must intersect the dataset type's list with the tab
+      // union so only Explore-exposed languages appear.
+      mockSqlSupportEnabled = true;
+      mockSelectActiveTabId.mockReturnValue('');
+      mockGetTab.mockReturnValue(undefined);
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockGetQuery.mockReturnValue({ dataset: { id: 'os', type: 'INDEX_PATTERN' } });
+      mockSelectDataset.mockReturnValue(testDataset('os', 'INDEX_PATTERN'));
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+      mockGetType = jest.fn(() => ({
+        supportedLanguages: () => ['DQL', 'Lucene', 'PPL', 'SQL'],
+      }));
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-DQL')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-Lucene')).not.toBeInTheDocument();
+    });
+
+    it('shows PPL and SQL for an OpenSearch dataset right after a dataset switch', async () => {
+      // No active tab yet; with only OpenSearch registered, the list matches the Logs tab's.
+      mockSqlSupportEnabled = true;
+      mockSelectActiveTabId.mockReturnValue('');
+      mockGetTab.mockReturnValue(undefined);
+      mockGetAllTabs = jest.fn(() => [
+        { supportedLanguages: ['PPL', 'SQL'] },
+        { supportedLanguages: ['PPL'] },
+      ]);
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockSelectDataset.mockReturnValue(testDataset('os', 'INDEX_PATTERN'));
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+      mockGetType = jest.fn(() => ({
+        supportedLanguages: () => ['kuery', 'lucene', 'PPL', 'SQL'],
+      }));
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-kuery')).not.toBeInTheDocument();
+    });
+
     it('should keep SQL/PPL when the dataset supports them', async () => {
       mockSqlSupportEnabled = true;
       mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
@@ -597,19 +714,17 @@ describe('LanguageToggle', () => {
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
     });
 
-    it('should re-run the language gating when queryString emits an update', async () => {
+    it('should re-run the language gating when the active dataset changes', async () => {
       mockSqlSupportEnabled = true;
       mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
       mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
       mockGetQuery.mockReturnValue({ dataset: { id: 'os-cluster', type: 'INDEX_PATTERN' } });
-      // Wire a real Subject so emitting re-runs updateSupportedLanguages.
-      const updates$ = new Subject<void>();
-      mockGetUpdates$ = jest.fn(() => updates$);
+      mockSelectDataset.mockReturnValue(testDataset('os-cluster', 'INDEX_PATTERN'));
 
       // Initially every language is supported.
       mockIsLanguageSupportedForDataset.mockReturnValue(true);
 
-      renderWithProvider(<LanguageToggle />);
+      const { mockStore } = renderWithProvider(<LanguageToggle />);
       const button = screen.getByTestId('queryPanelFooterLanguageToggle');
       fireEvent.click(button);
 
@@ -617,12 +732,15 @@ describe('LanguageToggle', () => {
         expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
       });
 
-      // Switch the dataset to one that no longer supports SQL, then emit an update.
+      // Switch to a dataset that no longer supports SQL. The effect keys off the redux
+      // `selectDataset` value, so return a new dataset and dispatch to force useSelector to
+      // re-read — mirroring a real dataset switch.
       mockIsLanguageSupportedForDataset.mockImplementation((langConfig: { title: string }) => {
         return langConfig.title !== 'SQL';
       });
+      mockSelectDataset.mockReturnValue(testDataset('other-cluster', 'INDEX_PATTERN'));
       act(() => {
-        updates$.next();
+        mockStore.dispatch({ type: 'noop' });
       });
 
       await waitFor(() => {
@@ -715,6 +833,152 @@ describe('LanguageToggle', () => {
 
       fireEvent.click(trigger);
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
+  describe('Registered source types', () => {
+    const fakeDataset = { id: 'fake-1', title: 'fake-1', type: 'FAKE', language: 'FakeQL' };
+    const registerFakeSource = (
+      resolveDefaultDataset: () => Promise<typeof fakeDataset | undefined>,
+      flavors?: any[]
+    ) => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors,
+        resolveDefaultDataset,
+      });
+      setSourceTypeRegistry(registry);
+    };
+
+    it('lists every source type for the flavor as a selectable entry', () => {
+      registerFakeSource(async () => fakeDataset);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.getByTestId('queryPanelFooterSourceType-OpenSearch')).toHaveAttribute(
+        'aria-current',
+        'true'
+      );
+      expect(screen.getByTestId('queryPanelFooterSourceType-Fake')).not.toHaveAttribute(
+        'aria-current'
+      );
+    });
+
+    it('shows the OpenSearch logo while OpenSearch is active', () => {
+      registerFakeSource(async () => fakeDataset);
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterSourceTypeIcon')).toHaveAttribute(
+        'data-euiicon-type',
+        'logoOpenSearch'
+      );
+    });
+
+    it("shows the active dataset type's icon for a registered source", () => {
+      registerFakeSource(async () => fakeDataset);
+      mockGetQuery.mockReturnValue({ dataset: { id: 'fake-1', type: 'FAKE' } });
+      mockSelectDataset.mockReturnValue(testDataset('fake-1', 'FAKE'));
+      mockGetType = jest.fn(() => ({
+        meta: { icon: { type: 'logsApp' } },
+        supportedLanguages: () => ['FakeQL'],
+      }));
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterSourceTypeIcon')).toHaveAttribute(
+        'data-euiicon-type',
+        'logsApp'
+      );
+    });
+
+    it("prefers the source type's own icon", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        icon: 'cloudSunny',
+        datasetTypes: ['FAKE'],
+        resolveDefaultDataset: async () => fakeDataset,
+      });
+      setSourceTypeRegistry(registry);
+      mockGetQuery.mockReturnValue({ dataset: { id: 'fake-1', type: 'FAKE' } });
+      mockSelectDataset.mockReturnValue(testDataset('fake-1', 'FAKE'));
+      mockGetType = jest.fn(() => ({
+        meta: { icon: { type: 'logsApp' } },
+        supportedLanguages: () => ['FakeQL'],
+      }));
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterSourceTypeIcon')).toHaveAttribute(
+        'data-euiicon-type',
+        'cloudSunny'
+      );
+    });
+
+    it('hides source types registered for other flavors', () => {
+      registerFakeSource(async () => fakeDataset, ['traces']);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.queryByTestId('queryPanelFooterSourceType-Fake')).not.toBeInTheDocument();
+    });
+
+    it("switches to the source's default dataset with an empty editor", async () => {
+      const resolve = jest.fn(async () => fakeDataset);
+      registerFakeSource(resolve);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalledWith({
+          language: 'FakeQL',
+          query: '',
+          dataset: fakeDataset,
+        });
+      });
+      expect(resolve).toHaveBeenCalledWith({
+        data: expect.anything(),
+        flavor: 'logs',
+      });
+      // The editor and the stored user language follow the switch, as a dataset pick does.
+      expect(mockClearEditors).toHaveBeenCalled();
+      expect(mockSetUserQueryLanguage).toHaveBeenCalledWith('FakeQL');
+    });
+
+    it('offers only sources with visual builder support in a builder-only workspace', () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        resolveDefaultDataset: async () => fakeDataset,
+        languageSettings: { FakeQL: {} }, // code-only: no visual builder
+      });
+      setSourceTypeRegistry(registry);
+      renderWithProvider(<LanguageToggle builderOnly />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+      expect(screen.queryByTestId('queryPanelFooterSourceType-Fake')).not.toBeInTheDocument();
+      expect(screen.getByTestId('queryPanelFooterSourceType-OpenSearch')).toBeInTheDocument();
+    });
+
+    it('warns instead of switching when the source has no dataset', async () => {
+      registerFakeSource(async () => undefined);
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenCalledWith({
+          title: 'No Fake dataset found to query',
+        });
+      });
+      expect(mockSetQuery).not.toHaveBeenCalled();
     });
   });
 });

@@ -304,6 +304,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
             hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
             hideAskAI={builderOnlyMode}
+            builderOnly={builderOnlyMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
