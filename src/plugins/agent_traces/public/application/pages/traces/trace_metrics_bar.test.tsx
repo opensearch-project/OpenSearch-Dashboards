@@ -39,6 +39,7 @@ const mockMetrics: TraceMetrics = {
   latencyP99Nanos: 3_500_000_000,
   errorTraces: 23,
   errorSpans: 89,
+  totalSessions: 8,
 };
 
 describe('TraceMetricsBar', () => {
@@ -67,6 +68,17 @@ describe('TraceMetricsBar', () => {
     expect(screen.getByText('Total Tokens')).toBeInTheDocument();
     expect(screen.getByText('Latency P50')).toBeInTheDocument();
     expect(screen.getByText('Latency P99')).toBeInTheDocument();
+  });
+
+  it('renders Total Sessions', () => {
+    render(<TraceMetricsBar metrics={mockMetrics} />);
+    expect(screen.getByText('Total Sessions')).toBeInTheDocument();
+    expect(screen.getByTestId('agentTracesMetricsTotalSessions')).toHaveTextContent('8');
+  });
+
+  it('renders a dash when sessions are unavailable', () => {
+    render(<TraceMetricsBar metrics={{ ...mockMetrics, totalSessions: null }} />);
+    expect(screen.getByTestId('agentTracesMetricsTotalSessions')).toHaveTextContent('—');
   });
 
   it('renders error counts when present', () => {
