@@ -10,8 +10,11 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { AgentTracesServices } from '../../../../types';
 import { useDatasetContext } from '../../../context/dataset_context/dataset_context';
 
-/** Logs fetched per correlated logs dataset, as in Explore traces. */
-export const TRACE_LOGS_LIMIT = 10;
+/**
+ * Logs fetched per correlated logs dataset. Higher than Explore traces' 10: an agent trace
+ * spans several services and logs each step, so 10 cuts most traces short.
+ */
+export const TRACE_LOGS_LIMIT = 100;
 
 export interface TraceLogs {
   /** Logs datasets correlated with the traces dataset (trace-to-logs correlations). */
