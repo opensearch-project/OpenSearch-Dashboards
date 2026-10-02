@@ -779,3 +779,28 @@ test('getStateTransferContainerInfoData is inert when the sections flag is off',
 
   container.destroy();
 });
+
+test('getInheritedInput tolerates options being unset (base-constructor emission)', () => {
+  // The base Container constructor emits input (creating children, which calls
+  // getInputForChild -> getInheritedInput) before DashboardContainer assigns
+  // this.options. Reading this.options.allowDashboardSections there throws, so
+  // getInheritedInput must tolerate an undefined options.
+  const stub = {
+    input: {
+      viewMode: ViewMode.VIEW,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      timeRange: { from: 'now-15m', to: 'now' },
+      layout: undefined,
+    },
+    // options intentionally left unset.
+  };
+  const getInheritedInput = (DashboardContainer.prototype as any).getInheritedInput;
+
+  let result: any;
+  expect(() => {
+    result = getInheritedInput.call(stub, 'panel-1');
+  }).not.toThrow();
+  expect(result.dataFetchPaused).toBe(false);
+  expect(result.id).toBe('panel-1');
+});

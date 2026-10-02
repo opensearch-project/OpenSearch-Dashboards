@@ -135,6 +135,8 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  // A data fetch was requested while paused and must run once we resume.
+  private pendingFetchOnResume: boolean = false;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -307,6 +309,15 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    // Flush the fetch deferred while paused. pendingFetchOnResume is only set
+    // while dataFetchPaused was true, so seeing it here with fetching no longer
+    // paused is exactly the resume edge. The dirty checks above may report clean
+    // because inputs were already synced into this.timeRange/etc. while paused.
+    if (this.pendingFetchOnResume && !this.input.dataFetchPaused) {
+      this.pendingFetchOnResume = false;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
@@ -446,6 +457,16 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
+    // Non-destructive pause: while paused (collapsed section or, later, scrolled
+    // out of view) skip the data fetch and remember that one is owed, so it runs
+    // exactly once when fetching resumes. Read the input directly so the
+    // auto-refresh path (which calls updateHandler without going through
+    // handleChanges) also respects the pause.
+    if (this.input.dataFetchPaused) {
+      this.pendingFetchOnResume = true;
+      return;
+    }
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
