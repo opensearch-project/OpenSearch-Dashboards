@@ -55,6 +55,86 @@ describe('buildFilter', () => {
     }
   });
 
+  it('should build an exact formatted range for numeric absolute dates', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const epochMillis = Date.parse('2026-09-16T10:15:30.000Z');
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.PHRASE,
+      false,
+      false,
+      epochMillis,
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      meta: {
+        params: { query: epochMillis },
+        type: FILTERS.PHRASE,
+      },
+      range: {
+        [field.name]: {
+          gte: '2026-09-16T10:15:30.000Z',
+          lte: '2026-09-16T10:15:30.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('should build an exact formatted range for manually entered absolute dates', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const value = '2026-09-16T10:15:30Z';
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.PHRASE,
+      false,
+      false,
+      value,
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      meta: {
+        params: { query: value },
+        type: FILTERS.PHRASE,
+      },
+      range: {
+        [field.name]: {
+          gte: '2026-09-16T10:15:30.000Z',
+          lte: '2026-09-16T10:15:30.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('should preserve mapping-driven phrase queries for date math', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.PHRASE,
+      false,
+      false,
+      'now-15m',
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      query: {
+        match_phrase: {
+          [field.name]: 'now-15m',
+        },
+      },
+    });
+  });
+
   it('should build phrases filters', () => {
     const params = ['foo', 'bar'];
     const alias = 'bar';
@@ -98,6 +178,84 @@ describe('buildFilter', () => {
     if (filter.$state) {
       expect(filter.$state.store).toBe(state);
     }
+  });
+
+  it('should build formatted ISO ranges for numeric absolute date endpoints', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.RANGE,
+      false,
+      false,
+      {
+        from: Date.parse('2026-09-16T10:15:30.000Z'),
+        to: '2026-09-17T10:15:30.000Z',
+      },
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      range: {
+        [field.name]: {
+          gte: '2026-09-16T10:15:30.000Z',
+          lt: '2026-09-17T10:15:30.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('should build formatted ISO ranges for manually entered absolute dates', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.RANGE,
+      false,
+      false,
+      {
+        from: '2026-09-16T10:15:30Z',
+        to: '2026-09-17T10:15:30Z',
+      },
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      range: {
+        [field.name]: {
+          gte: '2026-09-16T10:15:30.000Z',
+          lt: '2026-09-17T10:15:30.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('should preserve mapping-driven ranges for date math', () => {
+    const field = stubFields.find(({ type }) => type === 'date')!;
+    const filter = buildFilter(
+      stubIndexPattern,
+      field,
+      FILTERS.RANGE,
+      false,
+      false,
+      { from: 'now-1d', to: 'now' },
+      null,
+      FilterStateStore.APP_STATE
+    );
+
+    expect(filter).toMatchObject({
+      range: {
+        [field.name]: {
+          gte: 'now-1d',
+          lt: 'now',
+        },
+      },
+    });
+    expect((filter as any).range[field.name]).not.toHaveProperty('format');
   });
 
   it('should build exists filters', () => {
