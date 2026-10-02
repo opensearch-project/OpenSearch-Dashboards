@@ -231,24 +231,6 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       <EuiSpacer size="s" />
 
       <EuiAccordion
-        id="genai-attributes-accordion"
-        buttonContent={
-          <strong>
-            {i18n.translate('agentTraces.detailPanel.genAiAttributes', {
-              defaultMessage: 'GenAI attributes',
-            })}
-          </strong>
-        }
-        initialIsOpen
-        paddingSize="m"
-        data-test-subj="agentTracesGenAiAttributesAccordion"
-      >
-        <GenAiAttributes doc={row?.rawDocument} />
-      </EuiAccordion>
-
-      <EuiSpacer size="s" />
-
-      <EuiAccordion
         id="io-accordion"
         buttonContent={
           <strong>
@@ -315,6 +297,23 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       <EuiSpacer size="s" />
 
       <EuiAccordion
+        id="genai-attributes-accordion"
+        buttonContent={
+          <strong>
+            {i18n.translate('agentTraces.detailPanel.genAiAttributes', {
+              defaultMessage: 'GenAI attributes',
+            })}
+          </strong>
+        }
+        paddingSize="m"
+        data-test-subj="agentTracesGenAiAttributesAccordion"
+      >
+        <GenAiAttributes doc={row?.rawDocument} />
+      </EuiAccordion>
+
+      <EuiSpacer size="s" />
+
+      <EuiAccordion
         id="raw-span-accordion"
         buttonContent={
           <strong>
@@ -323,7 +322,7 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
             })}
           </strong>
         }
-        initialIsOpen
+
         paddingSize="m"
       >
         <EuiCodeBlock language="json" overflowHeight={600} isCopyable>
