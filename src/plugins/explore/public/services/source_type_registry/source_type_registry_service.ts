@@ -156,6 +156,8 @@ export class SourceTypeRegistryService {
   ): SourceTypeLanguageSettings | undefined {
     if (!languageId) return undefined;
     if (dataset?.type) return this.getForDataset(dataset).languageSettings?.[languageId];
+    // A source's settings for a built-in language apply only on that source's own datasets.
+    if (BUILT_IN_LANGUAGES.includes(languageId)) return undefined;
     for (const sourceType of this.sourceTypes.values()) {
       const settings = sourceType.languageSettings?.[languageId];
       if (settings) return settings;
@@ -173,6 +175,14 @@ export class SourceTypeRegistryService {
   public supportsVisualBuilder(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);
     return settings ? !!settings.supportsVisualBuilder : true;
+  }
+
+  /** Whether Explore can run a language: a built-in one, or one a registered source lists. */
+  public isExploreLanguage(languageId?: string): boolean {
+    return (
+      !!languageId &&
+      (BUILT_IN_LANGUAGES.includes(languageId) || !!this.getLanguageSettings(languageId))
+    );
   }
 
   /** Whether any of a source's languages can use the visual builder (OpenSearch's can). */

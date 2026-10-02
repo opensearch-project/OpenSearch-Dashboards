@@ -210,6 +210,16 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
   // State for supported languages (async lookup required)
   const [supportedLanguages, setSupportedLanguages] = useState<string[]>(['PPL']);
 
+  // The dataset's data-source details (used for version gating) can arrive after the dataset is
+  // in redux, through a query-string update; re-run the language list when one comes in.
+  const [queryUpdates, setQueryUpdates] = useState(0);
+  useEffect(() => {
+    const subscription = getServices()
+      .data.query.queryString.getUpdates$()
+      .subscribe(() => setQueryUpdates((count) => count + 1));
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Get supported languages for the active tab
   useEffect(() => {
     const services = getServices();
@@ -218,7 +228,10 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
 
     const updateSupportedLanguages = () => {
       const activeTab = activeTabId ? services.tabRegistry?.getTab(activeTabId) : undefined;
-      const dataset = activeDataset;
+      // Redux's dataset decides which one is active; the query string's copy of the same dataset
+      // can carry newer data-source details. A different id there is a stale mid-switch read.
+      const latest = queryString.getQuery().dataset;
+      const dataset = latest && latest.id === activeDataset?.id ? latest : activeDataset;
 
       // What the active dataset's type can run, so one source's language never shows on another.
       const datasetTypeLanguages = dataset
@@ -263,8 +276,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     };
 
     updateSupportedLanguages();
-    // Redux only: query-string updates fire mid-switch with a stale dataset.
-  }, [activeTabId, activeDataset]);
+  }, [activeTabId, activeDataset, queryUpdates]);
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 

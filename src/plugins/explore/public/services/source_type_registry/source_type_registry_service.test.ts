@@ -207,6 +207,18 @@ describe('SourceTypeRegistryService', () => {
       ).toBe(true);
     });
 
+    it("ignores a source's settings for a built-in language when no dataset is active", () => {
+      expect(registry.getLanguageSettings('PPL')).toBeUndefined();
+      expect(registry.supportsHistogram('PPL')).toBe(true);
+      expect(registry.supportsVisualBuilder('PPL')).toBe(true);
+    });
+
+    it('knows which languages Explore can run', () => {
+      expect(registry.isExploreLanguage('PPL')).toBe(true);
+      expect(registry.isExploreLanguage('CloudQL')).toBe(true);
+      expect(registry.isExploreLanguage('kuery')).toBe(false);
+    });
+
     it('keeps built-in behavior for languages no source lists', () => {
       expect(registry.supportsHistogram('SQL', { type: 'INDEX_PATTERN' })).toBe(true);
       expect(registry.supportsHistogram('PROMQL')).toBe(false);

@@ -186,6 +186,7 @@ const registerFakeSource = (DatasetSelector?: any) => {
     datasetTypes: ['FAKE'],
     datasetSelector: DatasetSelector,
     resolveDefaultDataset: async () => undefined,
+    languageSettings: { FakeQL: {} },
   });
   setSourceTypeRegistry(registry);
 };
@@ -495,6 +496,28 @@ describe('DatasetSelectWidget', () => {
         expect(mockSetQuery).toHaveBeenCalledWith({
           query: '',
           language: 'FakeQL',
+          dataset: { id: 'fake-2', type: 'FAKE' },
+        });
+      });
+    });
+
+    it('falls back to PPL when the picked type offers no language Explore can run', async () => {
+      registerFakeSource(FakeSelector);
+      mockGetQuery.mockReturnValue({
+        query: '',
+        language: 'PPL',
+        dataset: { id: 'fake-1', type: 'FAKE' },
+      });
+      mockGetInitialQueryByDataset.mockReturnValue({ query: 'x', language: 'OtherQL' });
+      mockGetType = jest.fn(() => ({ supportedLanguages: () => ['kuery'] }));
+
+      renderWithStore();
+      fireEvent.click(screen.getByTestId('fake-selector'));
+
+      await waitFor(() => {
+        expect(mockSetQuery).toHaveBeenCalledWith({
+          query: '',
+          language: 'PPL',
           dataset: { id: 'fake-2', type: 'FAKE' },
         });
       });

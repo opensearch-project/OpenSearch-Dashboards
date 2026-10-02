@@ -57,18 +57,20 @@ export const DatasetSelectWidget = () => {
 
         const initialQuery = queryString.getInitialQueryByDataset(dataset);
 
-        // If the picked type can't run the current language, use PPL when it can, else its first
-        // language. The data plugin would otherwise pick the first one, which for index patterns
-        // is kuery, which Explore can't run.
+        // If the picked type can't run the current language, use PPL when it can, else the
+        // type's first language Explore can run. The data plugin would otherwise pick the first
+        // one, which for index patterns is kuery, which Explore can't run.
         const typeLanguages = queryString
           .getDatasetService()
           .getType(dataset.type)
           ?.supportedLanguages(dataset);
         const language =
-          typeLanguages && !typeLanguages.includes(initialQuery.language)
+          typeLanguages?.length && !typeLanguages.includes(initialQuery.language)
             ? typeLanguages.includes(EXPLORE_DEFAULT_LANGUAGE)
               ? EXPLORE_DEFAULT_LANGUAGE
-              : typeLanguages[0]
+              : (typeLanguages.find((languageId) =>
+                  getSourceTypeRegistry().isExploreLanguage(languageId)
+                ) ?? EXPLORE_DEFAULT_LANGUAGE)
             : initialQuery.language;
 
         queryString.setQuery({

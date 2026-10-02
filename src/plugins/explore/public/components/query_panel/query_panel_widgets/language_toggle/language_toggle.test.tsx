@@ -48,15 +48,17 @@ jest.mock('../../../../application/hooks', () => ({
 // Mock getServices to provide language title
 const mockGetLanguage = jest.fn();
 const mockGetTab = jest.fn();
-const mockGetQuery = jest.fn((): { dataset?: { id: string; type: string } } => ({
-  dataset: undefined,
-}));
+const mockGetQuery = jest.fn(
+  (): { dataset?: { id: string; type: string; dataSource?: { version?: string } } } => ({
+    dataset: undefined,
+  })
+);
 const mockSetUserQueryLanguage = jest.fn();
 const mockSetQuery = jest.fn();
 const mockIsLanguageSupportedForDataset = jest.fn();
 // Default getUpdates$ subscription is a no-op so existing tests are unaffected.
 const mockUnsubscribe = jest.fn();
-let mockGetUpdates$ = jest.fn(() => ({
+let mockGetUpdates$: jest.Mock = jest.fn(() => ({
   subscribe: () => ({ unsubscribe: mockUnsubscribe }),
 }));
 // Dataset-type lookup. Default: no registered type (getType -> undefined), matching the base
@@ -677,6 +679,42 @@ describe('LanguageToggle', () => {
       });
       expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-kuery')).not.toBeInTheDocument();
+    });
+
+    it('re-checks version gating when the same dataset gets data-source details later', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockSelectDataset.mockReturnValue(testDataset('legacy', 'INDEX_PATTERN'));
+      let notify: () => void = () => {};
+      mockGetUpdates$ = jest.fn(() => ({
+        subscribe: (callback: () => void) => {
+          notify = callback;
+          return { unsubscribe: mockUnsubscribe };
+        },
+      }));
+      // No version yet: every language is allowed.
+      mockGetQuery.mockReturnValue({ dataset: { id: 'legacy', type: 'INDEX_PATTERN' } });
+      mockIsLanguageSupportedForDataset.mockImplementation(
+        (langConfig: { title: string }, dataset: any) =>
+          !(langConfig.title === 'SQL' && dataset?.dataSource?.version === '6.8.0')
+      );
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+
+      // The query string's copy of the same dataset now carries an old engine version.
+      mockGetQuery.mockReturnValue({
+        dataset: { id: 'legacy', type: 'INDEX_PATTERN', dataSource: { version: '6.8.0' } },
+      });
+      act(() => notify());
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+      });
     });
 
     it('should keep SQL/PPL when the dataset supports them', async () => {
