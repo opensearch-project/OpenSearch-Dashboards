@@ -21,10 +21,7 @@ import {
   DragDropContextProps,
 } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
-import {
-  OpenSearchDashboardsContextProvider,
-  useOpenSearchDashboards,
-} from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
 import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
@@ -70,22 +67,9 @@ import {
   useMetricsQuerySettings,
 } from './query_panel';
 import type { RowStepReadout } from './query_panel';
-import { createPrometheusSavedQueryService } from './query_panel/prometheus_saved_query_service';
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const widgetServices = useMemo(
-    () => ({
-      data: {
-        ...services.data,
-        query: {
-          ...services.data.query,
-          savedQueries: createPrometheusSavedQueryService(services.data.query.savedQueries),
-        },
-      },
-    }),
-    [services.data]
-  );
   const dispatch = useDispatch();
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
@@ -324,9 +308,7 @@ export const MetricsQueryPanel: React.FC = () => {
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <OpenSearchDashboardsContextProvider services={widgetServices}>
-            <QueryPanelWidgets />
-          </OpenSearchDashboardsContextProvider>
+          <QueryPanelWidgets />
         </EuiFlexItem>
       </EuiFlexGroup>
 
