@@ -146,10 +146,26 @@ export const sigV4AuthMethod = {
   credentialFormField: sigV4CredentialField,
 };
 
+export const jwtCredentialOption = {
+  value: AuthType.JWT,
+  inputDisplay: i18n.translate('dataSourcesManagement.credentialSourceOptions.JWT', {
+    defaultMessage: "Current user's token",
+  }),
+};
+
+export const jwtCredentialField = {};
+
+export const jwtAuthMethod = {
+  name: AuthType.JWT,
+  credentialSourceOption: jwtCredentialOption,
+  credentialFormField: jwtCredentialField,
+};
+
 export const credentialSourceOptions = [
   noAuthCredentialOption,
   usernamePasswordCredentialOption,
   sigV4CredentialOption,
+  jwtCredentialOption,
 ];
 
 export interface MenuPanelItem {

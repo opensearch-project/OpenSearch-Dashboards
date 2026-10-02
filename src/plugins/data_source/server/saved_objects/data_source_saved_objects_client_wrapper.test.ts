@@ -587,4 +587,72 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       ).rejects.toThrow(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
   });
+
+  describe('JWT auth type', () => {
+    const jwtAttributes = (attribute?: any) =>
+      attributes({
+        auth: {
+          type: AuthType.JWT,
+        },
+        ...attribute,
+      });
+
+    beforeEach(() => {
+      mockedClient.create.mockClear();
+      mockedClient.update.mockClear();
+      cryptographyMock.encryptAndEncode.mockClear();
+    });
+
+    it('should create data source without storing or encrypting any credentials', async () => {
+      await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, jwtAttributes(), {});
+
+      expect(mockedClient.create).toHaveBeenCalledWith(
+        expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
+        expect.objectContaining({
+          auth: { type: AuthType.JWT, credentials: undefined },
+        }),
+        expect.anything()
+      );
+      expect(cryptographyMock.encryptAndEncode).not.toHaveBeenCalled();
+    });
+
+    it('should drop any credentials a caller supplies', async () => {
+      await wrapperClient.create(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        jwtAttributes({
+          auth: {
+            type: AuthType.JWT,
+            credentials: { username: 'test', password: 'test' },
+          },
+        }),
+        {}
+      );
+
+      expect(mockedClient.create).toHaveBeenCalledWith(
+        expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
+        expect.objectContaining({
+          auth: { type: AuthType.JWT, credentials: undefined },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should update an existing JWT data source without needing an encryption context', async () => {
+      const id = 'test1';
+      const { endpoint, ...updatedAttributes } = jwtAttributes({ title: 'updated-title' });
+      mockedClient.get.mockResolvedValue(getSavedObject({ id, attributes: jwtAttributes() }));
+
+      await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, updatedAttributes);
+
+      expect(mockedClient.update).toHaveBeenCalledWith(
+        expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
+        expect.stringMatching(id),
+        expect.objectContaining({
+          title: 'updated-title',
+          auth: { type: AuthType.JWT, credentials: null },
+        }),
+        expect.anything()
+      );
+    });
+  });
 });

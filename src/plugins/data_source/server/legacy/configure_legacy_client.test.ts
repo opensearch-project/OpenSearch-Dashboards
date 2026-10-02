@@ -4,7 +4,11 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   AuthType,
@@ -428,6 +432,152 @@ describe('configureLegacyClient', () => {
           service: 'aoss',
         },
       },
+    });
+  });
+
+  describe('auth.type == jwt', () => {
+    const AUTHORIZATION = 'Bearer user-a-token';
+
+    /* JWT is opt-in, so every test here needs it explicitly enabled. */
+    const jwtEnabledConfig = () =>
+      ({
+        ...config,
+        authTypes: { JWT: { enabled: true } },
+      }) as DataSourcePluginConfigType;
+
+    const requestWithToken = (authorization: string = AUTHORIZATION) =>
+      httpServerMock.createOpenSearchDashboardsRequest({ headers: { authorization } });
+
+    beforeEach(() => {
+      savedObjectsMock.get.mockReset().mockResolvedValue({
+        id: DATA_SOURCE_ID,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...dataSourceAttr,
+          auth: {
+            type: AuthType.JWT,
+            credentials: undefined,
+          },
+        },
+        references: [],
+      });
+      parseClientOptionsMock.mockReturnValue(configOptions);
+    });
+
+    test("forwards the incoming request's authorization header on the api call", async () => {
+      await configureLegacyClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        callApiParams,
+        clientPoolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+        headers: { authorization: AUTHORIZATION },
+      });
+    });
+
+    test('preserves any other client params passed by the caller', async () => {
+      await configureLegacyClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        { ...callApiParams, clientParams: { param: 'ping' } },
+        clientPoolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+        param: 'ping',
+        headers: { authorization: AUTHORIZATION },
+      });
+    });
+
+    test('pools a credential-free root client keyed on the bare endpoint', async () => {
+      const addClientToPool = jest.fn();
+
+      await configureLegacyClient(
+        { ...dataSourceClientParams, request: requestWithToken() },
+        callApiParams,
+        { getClientFromPool: jest.fn(), addClientToPool },
+        jwtEnabledConfig(),
+        logger
+      );
+
+      // The token must never be baked into the pooled root client or its cache key, which
+      // are shared across users.
+      expect(ClientMock).toHaveBeenCalledTimes(1);
+      expect(ClientMock).toHaveBeenCalledWith(configOptions);
+      expect(addClientToPool).toHaveBeenCalledWith(
+        dataSourceAttr.endpoint,
+        AuthType.JWT,
+        mockOpenSearchClientInstance
+      );
+    });
+
+    test('reuses one root client across users but sends each their own token', async () => {
+      const openSearchClientPool = new OpenSearchClientPool(logger);
+      const poolSetup = openSearchClientPool.setup(config);
+
+      await configureLegacyClient(
+        { ...dataSourceClientParams, request: requestWithToken('Bearer user-a-token') },
+        callApiParams,
+        poolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+      await configureLegacyClient(
+        { ...dataSourceClientParams, request: requestWithToken('Bearer user-b-token') },
+        callApiParams,
+        poolSetup,
+        jwtEnabledConfig(),
+        logger
+      );
+
+      expect(ClientMock).toHaveBeenCalledTimes(1);
+      expect(mockOpenSearchClientInstance.ping).toHaveBeenNthCalledWith(1, {
+        headers: { authorization: 'Bearer user-a-token' },
+      });
+      expect(mockOpenSearchClientInstance.ping).toHaveBeenNthCalledWith(2, {
+        headers: { authorization: 'Bearer user-b-token' },
+      });
+    });
+
+    test('throws when the request carries no authorization header', async () => {
+      await expect(
+        configureLegacyClient(
+          {
+            ...dataSourceClientParams,
+            request: httpServerMock.createOpenSearchDashboardsRequest(),
+          },
+          callApiParams,
+          clientPoolSetup,
+          jwtEnabledConfig(),
+          logger
+        )
+      ).rejects.toThrow(/requires an 'authorization' header/);
+
+      // Fail fast: no unauthenticated call is issued and no client is pooled.
+      expect(mockOpenSearchClientInstance.ping).not.toHaveBeenCalled();
+      expect(clientPoolSetup.addClientToPool).not.toHaveBeenCalled();
+    });
+
+    test('throws when the jwt auth type is disabled, neutralising already-saved data sources', async () => {
+      await expect(
+        configureLegacyClient(
+          { ...dataSourceClientParams, request: requestWithToken() },
+          callApiParams,
+          clientPoolSetup,
+          {
+            ...config,
+            authTypes: { JWT: { enabled: false } },
+          } as DataSourcePluginConfigType,
+          logger
+        )
+      ).rejects.toThrow(/is disabled/);
+
+      expect(ClientMock).not.toHaveBeenCalled();
+      expect(mockOpenSearchClientInstance.ping).not.toHaveBeenCalled();
     });
   });
 

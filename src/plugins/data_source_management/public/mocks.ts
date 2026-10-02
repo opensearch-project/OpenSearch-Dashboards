@@ -521,6 +521,17 @@ export const mockDataSourceAttributesWithNoAuth = {
   },
 };
 
+export const mockDataSourceAttributesWithJwtAuth = {
+  id: 'test123',
+  title: 'create-test-ds123',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: AuthType.JWT,
+    credentials: undefined,
+  },
+};
+
 export const mockDataSourceAttributesWithRegisteredAuth = {
   id: 'testRegisteredAuth',
   title: 'create-test-ds-registered-auth',
@@ -624,6 +635,8 @@ export const testDataSourceManagementPlugin = (
       noAuthenticationTypeEnabled: true,
       usernamePasswordAuthEnabled: true,
       awsSigV4AuthEnabled: true,
+      // JWT is opt-in; plugin.test.ts covers both enabled and disabled explicitly.
+      jwtAuthEnabled: false,
     },
   });
   const doStart = () => {
@@ -651,6 +664,7 @@ export const mockDataSourcePluginSetupWithShowLocalCluster: DataSourcePluginSetu
   noAuthenticationTypeEnabled: true,
   usernamePasswordAuthEnabled: true,
   awsSigV4AuthEnabled: true,
+  jwtAuthEnabled: false,
 };
 
 export const mockDataSourcePluginSetupWithHideLocalCluster: DataSourcePluginSetup = {

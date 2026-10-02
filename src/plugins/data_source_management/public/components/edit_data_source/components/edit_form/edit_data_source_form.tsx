@@ -55,6 +55,7 @@ import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
 import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
+import { JwtAuthDescription } from '../../../jwt_auth_description';
 
 export interface EditDataSourceProps {
   navigation: NavigationPublicPluginStart;
@@ -365,6 +366,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
       switch (this.state.auth.type) {
         case AuthType.NoAuth:
+        case AuthType.JWT:
           delete formValues.auth.credentials;
           break;
         case AuthType.SigV4:
@@ -446,6 +448,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         } as SigV4Content;
         break;
       case AuthType.NoAuth:
+      case AuthType.JWT:
         credentials = undefined;
         break;
 
@@ -949,6 +952,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     switch (type) {
       case AuthType.NoAuth:
         return null;
+      case AuthType.JWT:
+        return <JwtAuthDescription />;
       case AuthType.UsernamePasswordType:
         return this.renderUsernamePasswordFields();
       case AuthType.SigV4:
@@ -1185,7 +1190,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (
       currentAuth.type === AuthType.NoAuth ||
       currentAuth.type === AuthType.UsernamePasswordType ||
-      currentAuth.type === AuthType.SigV4
+      currentAuth.type === AuthType.SigV4 ||
+      currentAuth.type === AuthType.JWT
     ) {
       return false;
     }

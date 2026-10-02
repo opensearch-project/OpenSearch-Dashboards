@@ -36,6 +36,7 @@ import {
   getDataSourceInternal,
   getAuthenticationMethod,
   generateCacheKey,
+  getJwtAuthorizationHeader,
 } from '../client/configure_client_utils';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
 
@@ -180,6 +181,28 @@ const getQueryClient = async (
 
       return await getAWSChildClient(rootClient, { endpoint, clientParams, options }, credential);
 
+    case AuthType.JWT:
+      if (!config.authTypes.JWT.enabled) {
+        throw Error(
+          `Auth type '${AuthType.JWT}' is disabled. Set 'data_source.authTypes.JWT.enabled: true' to use it.`
+        );
+      }
+
+      // Read the token before pooling the root client so a token-less request fails
+      // without leaving an unused client in the pool.
+      const authorization = getJwtAuthorizationHeader(request);
+
+      // As for NoAuth, the pooled root client carries no credentials and is shared
+      // across users; the per-user token is attached to this call's headers only.
+      if (!rootClient) rootClient = new LegacyClient(clientOptions);
+      addClientToPool(cacheKey, type, rootClient);
+
+      return await getJwtPassthroughClient(
+        rootClient,
+        { endpoint, clientParams, options },
+        authorization
+      );
+
     default:
       throw Error(`${type} is not a supported auth type for data source`);
   }
@@ -242,6 +265,27 @@ const getBasicAuthClient = async (
   const headers: Headers = {
     authorization: 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64'),
   };
+  clientParams.headers = Object.assign({}, clientParams.headers, headers);
+
+  return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
+};
+
+/**
+ * Call the legacy client with the current user's `authorization` header forwarded to the
+ * data source, so the data source cluster evaluates that user's own permissions.
+ *
+ * @param rootClient Raw legacy client instance to use.
+ * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+ * @param clientParams - A dictionary of parameters that will be passed directly to the legacy JS client.
+ * @param options - Options that affect the way we call the API and process the result.
+ * @param authorization - The current user's `authorization` header value.
+ */
+const getJwtPassthroughClient = async (
+  rootClient: LegacyClient,
+  { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
+  authorization: string
+) => {
+  const headers: Headers = { authorization };
   clientParams.headers = Object.assign({}, clientParams.headers, headers);
 
   return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
