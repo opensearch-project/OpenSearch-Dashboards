@@ -35,6 +35,11 @@ This directory contains the visualization components for the OpenSearch Dashboar
     <td><strong>Histograms</strong></td>
     <td><strong>State Timelines</strong></td>
   </tr>
+  <tr>
+    <td><strong>Sankey Charts</strong></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table>
 
 ## Architecture
@@ -64,7 +69,7 @@ interface VisRule<T extends ChartType> {
 }
 ```
 
-Axis roles include: `x`, `y`, `color`, `facet`, `size`, `y2`, `value`, `time`.
+Axis roles include: `x`, `y`, `source`, `target`, `color`, `facet`, `size`, `y2`, `value`, `time`.
 
 Field types include: `numerical`, `categorical`, `date`.
 

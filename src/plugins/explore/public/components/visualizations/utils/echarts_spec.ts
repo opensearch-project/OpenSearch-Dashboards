@@ -14,6 +14,7 @@ import {
   PieSeriesOption,
   ScatterSeriesOption,
   HeatmapSeriesOption,
+  SankeySeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -106,6 +107,7 @@ export interface EChartsSpecState<
     | GaugeSeriesOption
     | ScatterSeriesOption
     | HeatmapSeriesOption
+    | SankeySeriesOption
   >;
   visualMap?: EChartsOption['visualMap'];
   legendItems?: LegendItem[];
