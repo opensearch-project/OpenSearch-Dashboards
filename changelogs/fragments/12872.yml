@@ -1,0 +1,2 @@
+feat:
+- Show correlated logs in the Agent Traces trace flyout and span details ([#12872](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12872))
