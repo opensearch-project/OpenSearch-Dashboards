@@ -40,10 +40,13 @@ export const CelestialCard = (props: CelestialCardProps) => {
 
   // Determine if this card is selected based on context
   const isSelected = id === selectedNodeId;
+  const isAggregated = (stackedNodeIds?.length ?? 0) > 0;
+
   const onViewDashboardClick = useCallback(
     (event: React.MouseEvent) => {
-      // Stop the card-level click from also firing (avoids a double action).
-      event.stopPropagation();
+      // Mark the click handled so the card-level handler skips it (no double action),
+      // while it still bubbles to the React Flow node (selection, click-to-zoom).
+      event.preventDefault();
       // Later clicks of a double-click (detail > 1) must not re-fire the action.
       if (event.detail > 1) return;
       // Selection state is handled by context now
@@ -52,21 +55,30 @@ export const CelestialCard = (props: CelestialCardProps) => {
     [onDashboardClick, props]
   );
 
-  // Make the whole card clickable (not just the "View insights" text): a group
-  // card expands/collapses, a leaf card triggers its dashboard action. Inner
-  // interactive elements stopPropagation so they don't double-fire this. This
-  // replaces the former group double-click toggle; the later clicks of a
-  // multi-click (detail > 1) are ignored so a double-click toggles once.
-  const onCardClick = useCallback(
-    (event: React.MouseEvent) => {
-      if (event.detail > 1) return;
+  // The card-level action: a group expands/collapses, a leaf opens its insights. An
+  // aggregated (stacked) leaf has no insights of its own, as before.
+  const activateCard = useCallback(
+    (event: React.SyntheticEvent) => {
       if (isGroup) {
         onGroupToggle?.(event, props);
-      } else {
+      } else if (!isAggregated) {
         onDashboardClick?.(event, props);
       }
     },
-    [isGroup, onGroupToggle, onDashboardClick, props]
+    [isGroup, isAggregated, onGroupToggle, onDashboardClick, props]
+  );
+
+  // Make the whole card clickable (not just the "View insights" text). Inner
+  // controls that already acted mark the event handled (or stop it), so they
+  // don't double-fire this. This replaces the former group double-click toggle;
+  // the later clicks of a multi-click (detail > 1) are ignored so a double-click
+  // toggles once.
+  const onCardClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (event.defaultPrevented || event.detail > 1) return;
+      activateCard(event);
+    },
+    [activateCard]
   );
 
   // Keyboard equivalent of the whole-card click (Enter/Space) so the card is
@@ -77,13 +89,14 @@ export const CelestialCard = (props: CelestialCardProps) => {
       if (event.target !== event.currentTarget) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      if (isGroup) {
-        onGroupToggle?.(event, props);
-      } else {
-        onDashboardClick?.(event, props);
-      }
+      // The React Flow node wrapper also reacts to Enter/Space (selection); the card
+      // handles the key, so it stops here.
+      event.stopPropagation();
+      // Holding the key auto-repeats keydown; activate once.
+      if (event.repeat) return;
+      activateCard(event);
     },
-    [isGroup, onGroupToggle, onDashboardClick, props]
+    [activateCard]
   );
 
   const customColorStyle: React.CSSProperties =
@@ -91,7 +104,6 @@ export const CelestialCard = (props: CelestialCardProps) => {
       ? ({ borderColor: color, '--osd-node-glow-color': color } as React.CSSProperties)
       : {};
 
-  const isAggregated = (stackedNodeIds?.length ?? 0) > 0;
   return (
     <div
       ref={nodeRef}
@@ -120,6 +132,12 @@ export const CelestialCard = (props: CelestialCardProps) => {
       onKeyDown={onCardKeyDown}
       role="button"
       tabIndex={0}
+      // The card is the one control; without a name, screen readers read its whole text.
+      aria-label={
+        isGroup
+          ? t('buttons.expandGroup', { title: title ?? '' })
+          : t('buttons.openNode', { title: title ?? '' })
+      }
     >
       <div>
         <div className="osd:grid osd:grid-cols-58">
@@ -158,6 +176,8 @@ export const CelestialCard = (props: CelestialCardProps) => {
                 <button
                   className="osd-resetFocusState osd:text-group-caret osd:transition-colors osd:mr-0 osd:bg-transparent osd:border-0 osd:p-0"
                   aria-expanded={false}
+                  // The card itself is the keyboard control for this action.
+                  tabIndex={-1}
                 >
                   <img
                     src={ActionsIcon}
@@ -199,7 +219,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
                 />
               ) : (
                 <div className="osd:flex osd:flex-row-reverse osd:flex-grow osd:text-xs osd:items-end">
-                  <ViewInsightsButton onClick={onViewDashboardClick} />
+                  <ViewInsightsButton onClick={onViewDashboardClick} tabIndex={-1} />
                 </div>
               )}
             </div>
@@ -207,7 +227,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
         )}
         {(isGroup || platform) && !isAggregated && (
           <div className="osd:flex osd:flex-row-reverse osd:text-xs">
-            <ViewInsightsButton onClick={onViewDashboardClick} />
+            <ViewInsightsButton onClick={onViewDashboardClick} tabIndex={-1} />
           </div>
         )}
       </div>

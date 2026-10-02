@@ -7,12 +7,8 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elasti
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
-import {
-  classifySpanDependency,
-  dependencyTypeLabel,
-  dependencyIconType,
-  hasCrossServiceChild,
-} from '../../services/dependency_classifier';
+import { dependencyTypeLabel, dependencyIconType } from '../../services/dependency_classifier';
+import { TraceDependencies } from '../../services/trace_dependencies';
 import { getDependencyBrandIcon } from '../../services/dependency_icons';
 import { ParsedHit, SpanTableProps } from './types';
 
@@ -25,6 +21,7 @@ export const HierarchySpanCell = ({
   expandedRows,
   setExpandedRows,
   colorMap,
+  dependencies,
 }: {
   rowIndex: number;
   items: ParsedHit[];
@@ -34,6 +31,8 @@ export const HierarchySpanCell = ({
   expandedRows: Set<string>;
   setExpandedRows: React.Dispatch<React.SetStateAction<Set<string>>>;
   colorMap?: Record<string, string>;
+  /** The trace's dependency calls (see buildTraceDependencies), keyed by spanId. */
+  dependencies?: TraceDependencies;
 }) => {
   const item = items[rowIndex];
   const isRowSelected =
@@ -54,20 +53,12 @@ export const HierarchySpanCell = ({
   const operationName = item?.name;
   const hasError = isSpanError(item);
 
-  // Annotate spans that target an inferred dependency (database / messaging /
-  // external) so DB/broker/external calls are recognizable in the waterfall, with
-  // the same rules as the trace map (a CLIENT call that reaches a traced service
-  // is not one).
-  const dependency = item
-    ? classifySpanDependency(item, {
-        reachesTracedService: hasCrossServiceChild(
-          item,
-          (s) => s.children,
-          resolveServiceNameFromSpan,
-          (s) => s.kind
-        ),
-      })
-    : null;
+  // Annotate spans that call an inferred dependency (database / messaging / external),
+  // as classified for the whole trace, so the waterfall matches the trace map.
+  const dependency = (item?.spanId && dependencies?.get(item.spanId)) || null;
+  const dependencyLabel = dependency
+    ? `${dependencyTypeLabel(dependency.type)}${dependency.system ? `: ${dependency.system}` : ''}`
+    : '';
   const level = item?.level || 0;
   const serviceColor = (serviceName && colorMap?.[serviceName]) || undefined;
 
@@ -137,11 +128,7 @@ export const HierarchySpanCell = ({
           {operationName || (showService ? '' : serviceName) || '-'}
         </span>
         {dependency && (
-          <EuiToolTip
-            content={`${dependencyTypeLabel(dependency.type)}${
-              dependency.system ? `: ${dependency.system}` : ''
-            }`}
-          >
+          <EuiToolTip content={dependencyLabel}>
             <EuiIcon
               type={
                 getDependencyBrandIcon(dependency.system) ||
@@ -151,7 +138,8 @@ export const HierarchySpanCell = ({
               color="subdued"
               style={{ marginInlineStart: 6, flexShrink: 0 }}
               data-test-subj="spanDependencyIcon"
-              aria-label={dependencyTypeLabel(dependency.type)}
+              // Carries the system too, which the hover tooltip shows.
+              aria-label={dependencyLabel}
             />
           </EuiToolTip>
         )}

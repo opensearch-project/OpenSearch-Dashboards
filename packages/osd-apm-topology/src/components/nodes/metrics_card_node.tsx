@@ -7,6 +7,7 @@ import React, { useCallback } from 'react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { getIcon } from '../../shared/utils/icons.utils';
+import { ICONS } from '../../shared/constants/icons.constants';
 import { NodeShell } from './node_shell';
 import { MetricBar, MetricBarGroupItem } from './metric_bar';
 import './metrics_card_node.scss';
@@ -72,7 +73,8 @@ export const MetricsCardNode = ({ data }: NodeProps<MetricsCardCustomNode>) => {
     >
       <div className="celMetricsCard">
         <div className="celMetricsCard__header">
-          {data.iconType ? (
+          {/* An unknown key keeps the identity dot rather than a generic "unknown" glyph. */}
+          {data.iconType && ICONS[data.iconType] ? (
             <span className="celMetricsCard__icon" data-test-subj="metricsCardNodeIcon">
               {getIcon(data.iconType)}
             </span>

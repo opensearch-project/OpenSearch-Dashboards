@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
 import {
-  classifySpanDependency,
   normalizeSpanKind,
   dependencyTypeLabel,
   DependencyInfo,
   DependencyType,
-  getSpanAttr,
 } from './dependency_classifier';
+import { buildTraceDependencies, TraceDependencies } from './trace_dependencies';
 
 // The aggregated APM map's icons for each dependency type (dashboards-observability
 // platform_utils), so a dependency looks the same on both maps.
@@ -121,7 +121,12 @@ export const formatDuration = (ms: number): string => {
  */
 export const spansToServiceFlow = (
   hits: ServiceFlowHit[],
-  colorMap: Record<string, string> = {}
+  colorMap: Record<string, string> = {},
+  /**
+   * The trace's dependency calls (buildTraceDependencies over the unfiltered trace). Pass it
+   * when `hits` is filtered; built from `hits` otherwise.
+   */
+  traceDependencies?: TraceDependencies
 ): ServiceFlowResult => {
   if (!hits || hits.length === 0) {
     return { map: { root: { nodes: [], edges: [] } } };
@@ -226,65 +231,15 @@ export const spansToServiceFlow = (
   // the calling spans reach, using attributes the trace already carries. These
   // are additive to the service-to-service topology above.
 
-  const spanById = new Map<string, ServiceFlowHit>();
-  hits.forEach((hit) => spanById.set(hit.spanId, hit));
-  const parentOf = (hit: ServiceFlowHit) =>
-    hit.parentSpanId ? spanById.get(hit.parentSpanId) : undefined;
-  const isClient = (hit: ServiceFlowHit) => normalizeSpanKind(hit.kind) === 'CLIENT';
-
-  // Which spans reached a traced service? A span with a child from a different
-  // service did, and so did the same-service CLIENT spans wrapping it (an SDK
-  // span over its transport span), as in the backend. Such a CLIENT span is a
-  // normal edge, not a dependency call.
-  const spanHasCrossServiceChild = new Set<string>();
-  hits.forEach((hit) => {
-    const immediateParent = parentOf(hit);
-    if (!immediateParent || serviceOf(immediateParent) === serviceOf(hit)) return;
-    let cur: ServiceFlowHit | undefined = immediateParent;
-    // Already marked: the chain above is done (also stops on a parent-id cycle).
-    while (cur && !spanHasCrossServiceChild.has(cur.spanId)) {
-      spanHasCrossServiceChild.add(cur.spanId);
-      const up = parentOf(cur);
-      if (!isClient(cur) || !up || serviceOf(up) !== serviceOf(cur)) break;
-      cur = up;
-    }
-  });
-
-  // Services with a SERVER span in this trace: an external peer named like one of them is
-  // that service (its SERVER span missing from the call), not an external dependency.
-  const knownServerServices = new Set(
-    hits
-      .filter((hit) => normalizeSpanKind(hit.kind) === 'SERVER')
-      .map((hit) => serviceOf(hit).toLowerCase())
-      .filter(Boolean)
-  );
-  const dependencyOf = (hit: ServiceFlowHit) =>
-    classifySpanDependency(hit, {
-      reachesTracedService: spanHasCrossServiceChild.has(hit.spanId),
-      knownServerServices,
-    });
-
-  // A CLIENT span nested in a same-service CLIENT dependency call, or in a
-  // messaging publish/receive span, is the transport of that one call; only the
-  // outer span is counted (backend isSynthesizedDependencyTarget).
-  const isNestedTransport = (hit: ServiceFlowHit) => {
-    const parent = parentOf(hit);
-    if (!isClient(hit) || !parent || serviceOf(parent) !== serviceOf(hit)) return false;
-    if (isClient(parent)) {
-      return classifySpanDependency(parent, { reachesTracedService: false }) !== null;
-    }
-    if (getSpanAttr(parent, 'messaging.system') === undefined) return false;
-    const parentKind = normalizeSpanKind(parent.kind);
-    const operation =
-      getSpanAttr(parent, 'messaging.operation.type') ?? getSpanAttr(parent, 'messaging.operation');
-    return parentKind === 'PRODUCER' || (parentKind === 'CONSUMER' && operation !== 'process');
-  };
+  // Classified against the whole trace (the caller passes it when `hits` is filtered).
+  const dependencies = traceDependencies ?? buildTraceDependencies(hits);
 
   const depNodeId = (dep: DependencyInfo) => `dep::${dep.type}::${dep.name}`;
   interface DepAgg {
     type: DependencyInfo['type'];
     name: string;
-    filter?: { field: string; value: string };
+    /** Filters of the node's spans, as `field\u0000value`; one entry when they agree. */
+    filters: Set<string>;
     count: number;
     errors: number;
     durationNanos: number;
@@ -297,8 +252,7 @@ export const spansToServiceFlow = (
 
   hits.forEach((hit) => {
     const kind = normalizeSpanKind(hit.kind);
-    if (isNestedTransport(hit)) return;
-    const dep = dependencyOf(hit);
+    const dep = dependencies.get(hit.spanId);
     if (!dep) return;
 
     const service = serviceOf(hit);
@@ -306,15 +260,13 @@ export const spansToServiceFlow = (
     const agg = depAgg.get(nodeId) || {
       type: dep.type,
       name: dep.name,
-      // The first span's identifying attribute selects the dependency's spans.
-      filter: dep.filter
-        ? { field: `attributes.${dep.filter.key}`, value: dep.filter.value }
-        : undefined,
+      filters: new Set<string>(),
       count: 0,
       errors: 0,
       durationNanos: 0,
     };
     agg.count += 1;
+    agg.filters.add(dep.filter ? `attributes.${dep.filter.key}\u0000${dep.filter.value}` : '');
     if (hit.status?.code === 2) agg.errors += 1;
     agg.durationNanos += extractSpanDuration(hit);
     depAgg.set(nodeId, agg);
@@ -335,7 +287,26 @@ export const spansToServiceFlow = (
     maxDurationMs
   );
 
+  // A node's click filter must select exactly its spans: all of them carry the same
+  // attribute, and no other dependency node in the trace shares it (e.g. one host on two
+  // ports, or one topic name on two brokers). Otherwise the click is a no-op.
+  const filterUse = new Map<string, number>();
+  depAgg.forEach((agg) => {
+    if (agg.filters.size === 1) {
+      const [f] = Array.from(agg.filters);
+      if (f) filterUse.set(f, (filterUse.get(f) || 0) + 1);
+    }
+  });
+  const nodeFilter = (agg: DepAgg) => {
+    if (agg.filters.size !== 1) return undefined;
+    const [f] = Array.from(agg.filters);
+    if (!f || filterUse.get(f) !== 1) return undefined;
+    const [field, value] = f.split('\u0000');
+    return { field, value };
+  };
+
   depAgg.forEach((agg, nodeId) => {
+    const filter = nodeFilter(agg);
     const totalMs = nanoToMilliSec(agg.durationNanos);
     const errorRate = agg.count > 0 ? (agg.errors / agg.count) * 100 : 0;
     nodes.push({
@@ -349,10 +320,13 @@ export const spansToServiceFlow = (
         dependencyType: agg.type,
         subtitle: dependencyTypeLabel(agg.type),
         iconType: DEPENDENCY_ICON_TYPES[agg.type],
-        ...(agg.filter && { dependencyFilter: agg.filter }),
+        ...(filter && { dependencyFilter: filter }),
         errorLabel:
           agg.errors > 0
-            ? `${agg.errors} error${agg.errors === 1 ? '' : 's'} (${errorRate.toFixed(0)}%)`
+            ? i18n.translate('explore.traceView.traceMap.dependencyErrorLabel', {
+                defaultMessage: '{count, plural, one {# error} other {# errors}} ({rate}%)',
+                values: { count: agg.errors, rate: errorRate.toFixed(0) },
+              })
             : undefined,
         metrics: [
           {

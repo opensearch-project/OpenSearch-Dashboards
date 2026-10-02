@@ -577,6 +577,7 @@ describe('SpanMetadataTab', () => {
     it('groups db, messaging and peer attributes under Dependency, listed first', () => {
       const span = {
         spanId: 'dep-span',
+        kind: 'SPAN_KIND_CLIENT',
         attributes: {
           db_system: 'postgresql',
           'db.statement': 'SELECT 1',
@@ -603,8 +604,12 @@ describe('SpanMetadataTab', () => {
       expect(titles[0]).toBe('Dependency');
     });
 
-    it('treats the peer address of outbound spans as Dependency, but not a server listener', () => {
-      const attributes = { 'server.address': 'api.openai.com', 'server.port': 443 };
+    it('treats peer addresses of outbound spans as Dependency, but not on SERVER spans', () => {
+      const attributes = {
+        'server.address': 'api.openai.com',
+        'server.port': 443,
+        'network.peer.address': '10.0.0.7',
+      };
       const { container, unmount } = render(
         <SpanMetadataTab
           selectedSpan={{ spanId: 'c', kind: 'SPAN_KIND_CLIENT', attributes }}
@@ -616,6 +621,7 @@ describe('SpanMetadataTab', () => {
       const dependency = within(section!.closest('.euiAccordion') as HTMLElement);
       expect(dependency.getByText('server.address')).toBeInTheDocument();
       expect(dependency.getByText('server.port')).toBeInTheDocument();
+      expect(dependency.getByText('network.peer.address')).toBeInTheDocument();
       unmount();
 
       render(
@@ -624,8 +630,10 @@ describe('SpanMetadataTab', () => {
           addSpanFilter={mockAddSpanFilter}
         />
       );
+      // On a SERVER span these are its own listener and its caller's address.
       expect(screen.queryByText('Dependency')).not.toBeInTheDocument();
       expect(screen.getByText('server.address')).toBeInTheDocument();
+      expect(screen.getByText('network.peer.address')).toBeInTheDocument();
     });
 
     it('omits the Dependency section for spans without dependency attributes', () => {

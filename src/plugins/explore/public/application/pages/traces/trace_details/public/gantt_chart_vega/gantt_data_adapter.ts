@@ -11,11 +11,8 @@ import {
   hasNanosecondPrecision,
 } from '../traces/ppl_resolve_helpers';
 import { parseHighPrecisionTimestamp } from '../utils/span_timerange_utils';
-import {
-  classifySpanDependency,
-  dependencyTypeLabel,
-  hasCrossServiceChild,
-} from '../services/dependency_classifier';
+import { dependencyTypeLabel } from '../services/dependency_classifier';
+import { buildTraceDependencies, TraceDependencies } from '../services/trace_dependencies';
 
 interface SpanSource {
   traceId: string;
@@ -165,7 +162,9 @@ function flattenHierarchy(hierarchicalSpans: HierarchicalSpan[]): HierarchicalSp
 
 export function convertToVegaGanttData(
   payloadData: SpanData[],
-  colorMap: Record<string, string> = {}
+  colorMap: Record<string, string> = {},
+  /** The trace's dependency calls over the unfiltered trace; built from payloadData otherwise. */
+  traceDependencies?: TraceDependencies | null
 ): VegaGanttData {
   if (!payloadData || payloadData.length === 0) {
     return {
@@ -173,6 +172,23 @@ export function convertToVegaGanttData(
       maxEndTime: 0,
     };
   }
+
+  // Spans may be search hits (fields under _source): classify on their source fields,
+  // keeping the hit for its attributes.
+  const dependencies =
+    traceDependencies ??
+    buildTraceDependencies(
+      payloadData.map((span) => {
+        const source = getSpanSource(span);
+        return {
+          ...span,
+          spanId: source.spanId,
+          parentSpanId: source.parentSpanId,
+          serviceName: source.serviceName,
+          kind: source.kind,
+        };
+      })
+    );
 
   const hierarchicalSpans = buildHierarchicalStructure(payloadData);
   const orderedSpans = flattenHierarchy(hierarchicalSpans).reverse();
@@ -226,21 +242,9 @@ export function convertToVegaGanttData(
       colorIndex++;
     }
 
-    // Classify the span's downstream dependency (database / messaging / external)
-    // so the waterfall can annotate DB/broker/external calls, with the same rules as
-    // the trace map (a CLIENT call that reaches a traced service is not one).
-    // The span itself carries the attributes (getSpanSource keeps only core fields).
-    const dependency = classifySpanDependency(
-      { ...span, kind: source.kind },
-      {
-        reachesTracedService: hasCrossServiceChild(
-          span,
-          (s) => s.children,
-          (s) => resolveServiceNameFromSpan(s) || getSpanSource(s).serviceName,
-          (s) => getSpanSource(s).kind
-        ),
-      }
-    );
+    // Annotate the span's downstream dependency (database / messaging / external), as
+    // classified for the whole trace (same result as the trace map and the table).
+    const dependency = dependencies.get(source.spanId);
     const dependencyLabel = dependency ? dependencyTypeLabel(dependency.type) : '';
 
     return {

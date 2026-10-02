@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 // @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 import { CelestialMap, MetricsCardNode, VolumeEdge } from '@osd/apm-topology';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
+import { TraceDependencies } from './trace_dependencies';
 import './trace_service_flow.scss';
 
 const NODE_TYPES = { metricsCard: MetricsCardNode };
@@ -29,6 +30,11 @@ export interface TraceServiceFlowProps {
   /** Active span filters, used to highlight the dependency they select. */
   activeSpanFilters?: Array<{ field: string; value: unknown }>;
   /**
+   * The trace's dependency calls, classified over the unfiltered trace (see
+   * buildTraceDependencies). Without it they are classified from `hits`.
+   */
+  traceDependencies?: TraceDependencies;
+  /**
    * Show the overview minimap. Off in the narrow flyout, where the graph is
    * already fit-to-view and the minimap would only cover the nodes.
    */
@@ -48,9 +54,13 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   onFilterService,
   onFilterAttribute,
   activeSpanFilters,
+  traceDependencies,
   showMinimap = true,
 }) => {
-  const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
+  const { map } = useMemo(
+    () => spansToServiceFlow(hits, colorMap, traceDependencies),
+    [hits, colorMap, traceDependencies]
+  );
 
   // Highlight the filtered service via node data (not selectedNodeId, which
   // would camera-focus a single node and chop the rest of the graph).

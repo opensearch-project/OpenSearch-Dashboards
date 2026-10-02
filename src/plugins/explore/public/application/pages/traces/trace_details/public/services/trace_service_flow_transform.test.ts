@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { buildTraceDependencies } from './trace_dependencies';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
 
 const hit = (over: Partial<ServiceFlowHit> & { spanId: string }): ServiceFlowHit => ({
@@ -396,5 +397,62 @@ describe('spansToServiceFlow dependency synthesis', () => {
       hit({ spanId: 'k', serviceName: 'checkout', kind: 'SPAN_KIND_SERVER' }),
     ]);
     expect(ids).toEqual(['checkout', 'frontend']);
+  });
+
+  describe('dependency click filter', () => {
+    const filterOf = (hits: ServiceFlowHit[], id: string) =>
+      spansToServiceFlow(hits).map.root.nodes.find((n) => n.id === id)?.data.dependencyFilter;
+    const root = hit({ spanId: 'r', serviceName: 'api', kind: 'SPAN_KIND_SERVER' });
+    const client = (spanId: string, attributes: Record<string, unknown>) =>
+      hit({ spanId, parentSpanId: 'r', serviceName: 'api', kind: 'SPAN_KIND_CLIENT', attributes });
+
+    it('is set when every span of the node carries the same attribute', () => {
+      const db = { db_system: 'postgresql', 'server.address': 'pg' };
+      expect(
+        filterOf([root, client('a', db), client('b', db)], 'dep::database::postgresql:pg')
+      ).toEqual({ field: 'attributes.server.address', value: 'pg' });
+    });
+
+    it('is omitted when the node spans name it with different keys (it would miss some)', () => {
+      expect(
+        filterOf(
+          [
+            root,
+            client('a', { db_system: 'postgresql', 'server.address': 'pg' }),
+            client('b', { db_system: 'postgresql', 'net.peer.name': 'pg' }),
+          ],
+          'dep::database::postgresql:pg'
+        )
+      ).toBeUndefined();
+    });
+
+    it('is omitted when another node shares it (one host on two ports, one topic on two brokers)', () => {
+      const hits = [
+        root,
+        client('a', { 'server.address': 'api.example.com', 'server.port': 8443 }),
+        client('b', { 'server.address': 'api.example.com', 'server.port': 9000 }),
+      ];
+      expect(filterOf(hits, 'dep::external::api.example.com:8443')).toBeUndefined();
+      expect(filterOf(hits, 'dep::external::api.example.com:9000')).toBeUndefined();
+    });
+  });
+
+  it('uses the trace-wide classification when given (filtered hits)', () => {
+    const all: ServiceFlowHit[] = [
+      hit({ spanId: 'f', serviceName: 'frontend', kind: 'SPAN_KIND_SERVER' }),
+      hit({
+        spanId: 'call',
+        parentSpanId: 'f',
+        serviceName: 'frontend',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'http.url': 'http://cart:8080/api' },
+      }),
+      hit({ spanId: 'c', parentSpanId: 'call', serviceName: 'cart', kind: 'SPAN_KIND_SERVER' }),
+    ];
+    const filtered = all.filter((h) => h.serviceName === 'frontend');
+    const ids = spansToServiceFlow(filtered, {}, buildTraceDependencies(all)).map.root.nodes.map(
+      (n) => n.id
+    );
+    expect(ids).toEqual(['frontend']);
   });
 });

@@ -101,3 +101,9 @@
     color: var(--osd-color-text-default, #1a1c21);
   }
 }
+
+/* Dark mode: the icons are fill="currentColor" SVGs, which render black inside <img>
+   (as for .celIcon in celestial.scss). */
+:root.celestial--dark .celMetricsCard__icon img {
+  filter: brightness(0) invert(1);
+}

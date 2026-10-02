@@ -34,8 +34,9 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
     const attributes = formatSpanAttributes(selectedSpan);
     const sortedAttributes = sortAttributes(attributes);
-    // On outbound spans server.* names the peer (the dependency); on SERVER spans
-    // it is the service's own listener, so it stays uncategorized there.
+    // On outbound spans server.* and the peer address keys name the peer (the
+    // dependency); on SERVER spans they are the service's own listener and its caller,
+    // so they stay uncategorized there.
     const isOutbound = ['CLIENT', 'PRODUCER', 'CONSUMER'].includes(
       normalizeSpanKind(selectedSpan.kind)
     );
@@ -61,9 +62,11 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
         attrKey.includes('db_system') ||
         attrKey.startsWith('messaging.') ||
         attrKey.includes('peer.service') ||
-        attrKey.startsWith('net.peer') ||
-        attrKey.startsWith('network.peer') ||
-        (isOutbound && (attrKey === 'server.address' || attrKey === 'server.port'))
+        (isOutbound &&
+          (attrKey.startsWith('net.peer') ||
+            attrKey.startsWith('network.peer') ||
+            attrKey === 'server.address' ||
+            attrKey === 'server.port'))
       ) {
         categorized.dependency.push([key, value]);
       } else if (

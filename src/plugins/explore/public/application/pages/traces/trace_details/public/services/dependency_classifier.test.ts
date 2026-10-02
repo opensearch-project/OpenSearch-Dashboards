@@ -9,7 +9,6 @@ import {
   dependencyIconType,
   dependencyTypeLabel,
   getSpanAttr,
-  hasCrossServiceChild,
   normalizeSpanKind,
   resolveExternalName,
 } from './dependency_classifier';
@@ -289,70 +288,6 @@ describe('dependencyIconType / dependencyTypeLabel', () => {
     expect(dependencyTypeLabel('database')).toBe('Database');
     expect(dependencyTypeLabel('messaging')).toBe('Messaging');
     expect(dependencyTypeLabel('external')).toBe('External');
-  });
-});
-
-describe('hasCrossServiceChild', () => {
-  interface S {
-    serviceName: string;
-    kind?: string;
-    children?: S[];
-  }
-  const svc = (s: S) => s.serviceName;
-  const kind = (s: S) => s.kind;
-  const kids = (s: S) => s.children;
-  const check = (s: S) => hasCrossServiceChild(s, kids, svc, kind);
-
-  it('is true only when a child belongs to another service', () => {
-    expect(check({ serviceName: 'agent' })).toBe(false);
-    expect(check({ serviceName: 'agent', children: [] })).toBe(false);
-    expect(check({ serviceName: 'agent', children: [{ serviceName: 'agent' }] })).toBe(false);
-    expect(
-      check({
-        serviceName: 'agent',
-        children: [{ serviceName: 'agent' }, { serviceName: 'weather' }],
-      })
-    ).toBe(true);
-  });
-
-  it('follows same-service CLIENT descendants (SDK span over its transport span)', () => {
-    expect(
-      check({
-        serviceName: 'frontend',
-        kind: 'SPAN_KIND_CLIENT',
-        children: [
-          {
-            serviceName: 'frontend',
-            kind: 'SPAN_KIND_CLIENT',
-            children: [{ serviceName: 'cart', kind: 'SPAN_KIND_SERVER' }],
-          },
-        ],
-      })
-    ).toBe(true);
-  });
-
-  it('does not follow non-CLIENT descendants (tool calls under an LLM client span)', () => {
-    // Live weather-agent shape: invoke_agent (CLIENT) > execute_tool (INTERNAL) >
-    // tools/call (CLIENT) > mcp-server (SERVER). The LLM call itself stays external.
-    expect(
-      check({
-        serviceName: 'weather-agent',
-        kind: 'SPAN_KIND_CLIENT',
-        children: [
-          {
-            serviceName: 'weather-agent',
-            kind: 'SPAN_KIND_INTERNAL',
-            children: [
-              {
-                serviceName: 'weather-agent',
-                kind: 'SPAN_KIND_CLIENT',
-                children: [{ serviceName: 'mcp-server', kind: 'SPAN_KIND_SERVER' }],
-              },
-            ],
-          },
-        ],
-      })
-    ).toBe(false);
   });
 });
 

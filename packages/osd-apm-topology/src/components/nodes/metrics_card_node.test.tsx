@@ -94,4 +94,10 @@ describe('MetricsCardNode', () => {
     expect(container.querySelector('.celMetricsCard__dot')).toBeInTheDocument();
     expect(screen.queryByTestId('metricsCardNodeIcon')).toBeNull();
   });
+
+  it('keeps the identity dot for an unknown iconType', () => {
+    const { container } = render(<MetricsCardNode {...createProps({ iconType: 'No::Such' })} />);
+    expect(container.querySelector('.celMetricsCard__dot')).toBeInTheDocument();
+    expect(screen.queryByTestId('metricsCardNodeIcon')).toBeNull();
+  });
 });

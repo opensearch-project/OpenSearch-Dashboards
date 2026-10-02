@@ -329,21 +329,27 @@ describe('gantt_data_adapter', () => {
       ).toEqual({ root: '', db: 'Database', mq: 'Messaging', ext: 'External', ip: '' });
     });
 
-    it('labels an external CLIENT span unless one of its children is another service', () => {
-      const client = (spanId: string) => ({
+    it('labels an external CLIENT span unless it reached a SERVER span (backend rule)', () => {
+      const client = (spanId: string, url: string) => ({
         spanId,
         parentSpanId: '',
         serviceName: 'agent',
         name: 'invoke',
         kind: 'SPAN_KIND_CLIENT',
-        attributes: { 'http.url': 'http://weather-agent:8000/invoke' },
+        attributes: { 'http.url': url },
       });
       expect(
         labels([
-          client('same'),
+          client('same', 'http://tools-api:8000/invoke'),
           { spanId: 'tool', parentSpanId: 'same', serviceName: 'agent', name: 'tool' },
-          client('cross'),
-          { spanId: 'srv', parentSpanId: 'cross', serviceName: 'weather-agent', name: 'POST' },
+          client('cross', 'http://weather-agent:8000/invoke'),
+          {
+            spanId: 'srv',
+            parentSpanId: 'cross',
+            serviceName: 'weather-agent',
+            name: 'POST',
+            kind: 'SPAN_KIND_SERVER',
+          },
         ])
       ).toMatchObject({ same: 'External', cross: '' });
     });

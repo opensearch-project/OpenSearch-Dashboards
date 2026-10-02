@@ -268,6 +268,65 @@ describe('CelestialCard', () => {
       expect(onDashboardClick).not.toHaveBeenCalled();
     });
 
+    it('names the card for its action, and keeps inner duplicates out of the tab order', () => {
+      const { container } = render(<CelestialCard {...groupProps} />, {
+        wrapper: ClickProviders,
+      });
+      expect(getCard(container)).toHaveAttribute('aria-label', 'Test Title, expand group');
+      container
+        .querySelectorAll('button')
+        .forEach((button) => expect(button).toHaveAttribute('tabindex', '-1'));
+    });
+
+    it('toggles a focused group card with Enter, once per key press', () => {
+      const { container } = render(<CelestialCard {...groupProps} />, {
+        wrapper: ClickProviders,
+      });
+      const card = getCard(container);
+      fireEvent.keyDown(card, { key: 'Enter' });
+      // A held key auto-repeats keydown.
+      fireEvent.keyDown(card, { key: 'Enter', repeat: true });
+      expect(addBreadcrumb).toHaveBeenCalledTimes(1);
+      expect(onDashboardClick).not.toHaveBeenCalled();
+    });
+
+    it('does not pass a handled key on to the React Flow node wrapper', () => {
+      const onWrapperKeyDown = jest.fn();
+      const { container } = render(
+        <div onKeyDown={onWrapperKeyDown}>
+          <CelestialCard {...defaultProps} />
+        </div>,
+        { wrapper: ClickProviders }
+      );
+      fireEvent.keyDown(container.firstChild!.firstChild as HTMLElement, { key: 'Enter' });
+      expect(onDashboardClick).toHaveBeenCalledTimes(1);
+      expect(onWrapperKeyDown).not.toHaveBeenCalled();
+    });
+
+    it('fires no dashboard action for an aggregated (stacked) leaf card', () => {
+      const { container } = render(
+        <CelestialCard {...defaultProps} stackedNodeIds={['a', 'b']} />,
+        { wrapper: ClickProviders }
+      );
+      fireEvent.click(getCard(container));
+      fireEvent.keyDown(getCard(container), { key: 'Enter' });
+      expect(onDashboardClick).not.toHaveBeenCalled();
+    });
+
+    it('lets a "View insights" click reach the React Flow node (selection, zoom)', () => {
+      const onWrapperClick = jest.fn();
+      render(
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div onClick={onWrapperClick}>
+          <CelestialCard {...defaultProps} />
+        </div>,
+        { wrapper: ClickProviders }
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'View insights' }));
+      expect(onDashboardClick).toHaveBeenCalledTimes(1);
+      expect(onWrapperClick).toHaveBeenCalledTimes(1);
+    });
+
     it('leaves Enter on an inner button to that button', () => {
       render(<CelestialCard {...groupProps} />, { wrapper: ClickProviders });
       const insights = screen.getByRole('button', { name: 'View insights' });

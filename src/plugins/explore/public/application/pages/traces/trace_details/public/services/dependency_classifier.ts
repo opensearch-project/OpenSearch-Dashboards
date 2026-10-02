@@ -94,6 +94,21 @@ const firstEntry = (span: any, keys: string[]): DependencyFilter | undefined => 
 
 const firstAttr = (span: any, keys: string[]): string | undefined => firstEntry(span, keys)?.value;
 
+/** Whether any of `keys` is present (possibly empty), as the backend's type detection reads it. */
+const hasAnyAttr = (span: any, keys: string[]): boolean =>
+  keys.some((key) => {
+    const v = getSpanAttr(span, key);
+    return v !== undefined && v !== null;
+  });
+
+const DB_SYSTEM_KEYS = [
+  'db.system.name',
+  'db.system',
+  'db_system',
+  'db_system_name',
+  'db.system_name',
+];
+
 /** Normalize kinds like "SPAN_KIND_CLIENT" / "client" / "CLIENT" -> "CLIENT". */
 export const normalizeSpanKind = (kind: any): string =>
   `${kind || ''}`.toUpperCase().replace(/^SPAN_KIND_/, '');
@@ -239,16 +254,15 @@ export const classifyDependencyByAttributes = (span: any): DependencyInfo | null
 
   // Database (current + legacy + flattened demo variants: db.system.name,
   // db.system, db_system, db_system_name).
-  const dbSystem = firstAttr(span, [
-    'db.system.name',
-    'db.system',
-    'db_system',
-    'db_system_name',
-    'db.system_name',
+  const dbSystem = firstAttr(span, DB_SYSTEM_KEYS);
+  // Type detection counts a key that is present even when empty, as the backend does.
+  const hasDbSignal = hasAnyAttr(span, [
+    ...DB_SYSTEM_KEYS,
+    'db.statement',
+    'db.query.text',
+    'db.name',
+    'db.namespace',
   ]);
-  const hasDbSignal =
-    dbSystem !== undefined ||
-    firstAttr(span, ['db.statement', 'db.query.text', 'db.name', 'db.namespace']) !== undefined;
   if (hasDbSignal) {
     const name = databaseName(span, dbSystem);
     if (name === null) return null;
@@ -362,38 +376,6 @@ export const resolveExternalName = (span: any): string | null =>
   resolveExternalPeer(span)?.name ?? null;
 
 /**
- * Whether a span's call reached a traced service (a normal service edge) rather
- * than an untraced endpoint: a direct child, or a child of a same-service CLIENT
- * descendant (an SDK span over its transport span), belongs to another service.
- * Other same-service descendants (e.g. tool calls under an LLM span) are not
- * followed. Mirrors the backend's hasClientDescendantWithServerChild.
- */
-export const hasCrossServiceChild = <T>(
-  span: T,
-  childrenOf: (s: T) => T[] | undefined,
-  serviceOf: (s: T) => string | undefined,
-  kindOf: (s: T) => unknown
-): boolean => {
-  const own = serviceOf(span);
-  // Without its own service name a span cannot tell whether a child is in another service.
-  if (!own) return false;
-  const pending: T[] = [span];
-  const visited = new Set<T>(pending);
-  while (pending.length > 0) {
-    const current = pending.pop() as T;
-    for (const child of childrenOf(current) || []) {
-      const childService = serviceOf(child);
-      if (childService && childService !== own) return true;
-      if (normalizeSpanKind(kindOf(child)) === 'CLIENT' && !visited.has(child)) {
-        visited.add(child);
-        pending.push(child);
-      }
-    }
-  }
-  return false;
-};
-
-/**
  * Whether an external peer is named like a service traced in this trace (its SERVER span is
  * missing from this call, e.g. sampling): it is that service, not an external dependency.
  * Matches peer.service, the peer host and Kubernetes service DNS (`checkout.ns.svc...`),
@@ -435,7 +417,7 @@ const EXTERNAL_SIGNAL_KEYS = [
 
 export interface SpanDependencyContext {
   /**
-   * Whether the span's call reached a traced service (see hasCrossServiceChild). A CLIENT
+   * Whether the span's call reached a traced service (see buildTraceDependencies). A CLIENT
    * span that did is a service-to-service edge, not a dependency.
    */
   reachesTracedService: boolean;
@@ -463,7 +445,7 @@ export const classifySpanDependency = (
   if (context.reachesTracedService) return null;
   const dep = classifyDependencyByAttributes(span);
   if (dep) return dep;
-  if (!firstAttr(span, EXTERNAL_SIGNAL_KEYS)) return null;
+  if (!hasAnyAttr(span, EXTERNAL_SIGNAL_KEYS)) return null;
   const peer = resolveExternalPeer(span);
   if (!peer) return null;
   if (
