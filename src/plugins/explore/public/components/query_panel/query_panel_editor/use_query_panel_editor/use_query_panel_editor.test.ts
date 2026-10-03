@@ -660,6 +660,21 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
+    it('does not open the suggestion list for a language without an autocomplete provider', () => {
+      mockServices.data.autocomplete.hasQuerySuggestions = jest.fn(() => false);
+      mockEditorRef.current = mockEditor;
+
+      renderHook(() => useQueryPanelEditor(buildProps()));
+
+      expect(mockServices.data.autocomplete.hasQuerySuggestions).toHaveBeenCalledWith('PPL');
+      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+      expect(mockEditor.trigger).not.toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
+    });
+
     it('should trigger autosuggestion immediately when text is empty', () => {
       mockEditorRef.current = mockEditor;
 
