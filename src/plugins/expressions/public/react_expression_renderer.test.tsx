@@ -172,6 +172,87 @@ describe('ExpressionRenderer', () => {
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
   });
 
+  it('sets isLoading to false when data$ emits', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject().asObservable().pipe(share()),
+        data$,
+        loading$,
+        update: jest.fn(),
+      };
+    });
+
+    const instance = mount(<ReactExpressionRenderer expression="" />);
+
+    act(() => {
+      loadingSubject.next();
+    });
+    instance.update();
+    expect(instance.find(EuiProgress)).toHaveLength(1);
+
+    act(() => {
+      dataSubject.next();
+    });
+    instance.update();
+    expect(instance.find(EuiProgress)).toHaveLength(0);
+  });
+
+  it('does not set isLoading to false via data$ when an error has been handled', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const renderSubject = new Subject();
+    const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+
+    let onRenderError: RenderErrorHandlerFnType;
+    (ExpressionLoader as jest.Mock).mockImplementation((...args) => {
+      const params = args[2];
+      onRenderError = params.onRenderError;
+      return {
+        render$,
+        data$,
+        loading$,
+        update: jest.fn(),
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer
+        expression=""
+        renderError={(message) => <div data-test-subj={'custom-error'}>{message}</div>}
+      />
+    );
+
+    // Trigger loading then render error
+    act(() => {
+      loadingSubject.next();
+      onRenderError!(instance.getDOMNode(), new Error('render error'), {
+        done: () => {},
+      } as any);
+    });
+    instance.update();
+
+    // Error should be displayed, loading bar should be gone
+    expect(instance.find(EuiProgress)).toHaveLength(0);
+    expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(1);
+
+    // data$ emitting should not interfere with the error state
+    act(() => {
+      dataSubject.next();
+    });
+    instance.update();
+
+    // Error should still be displayed, loading bar still hidden
+    expect(instance.find(EuiProgress)).toHaveLength(0);
+    expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(1);
+  });
+
   it('should fire onEvent prop on every events$ observable emission in loader', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
