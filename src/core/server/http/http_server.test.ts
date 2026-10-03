@@ -905,6 +905,21 @@ describe('conditional compression', () => {
 
       expect(response.header).not.toHaveProperty('content-encoding');
     });
+
+    test.each([
+      ['bare IP with port', '192.168.1.1:5601'],
+      ['hostname without protocol', 'intranet-server/dashboard'],
+      ['malformed protocol', 'http:///missing-host'],
+      ['empty string-like value', '://example.com'],
+    ])('disables compression for malformed referer (%s)', async (_label, referer) => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', referer);
+
+      expect(response.status).toBe(200);
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
   });
 
   describe('response headers', () => {
