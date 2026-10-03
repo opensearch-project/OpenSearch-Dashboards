@@ -20,6 +20,7 @@ import {
   selectDateRange,
   selectQueryExecutionButtonStatus,
   selectIsQueryEditorDirty,
+  selectQueryProgress,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -89,6 +90,30 @@ describe('query_editor selectors', () => {
       const result = selectQueryStatusMap(state);
 
       expect(result).toEqual({});
+    });
+  });
+
+  describe('selectQueryProgress', () => {
+    it('returns the progress of the query that is still streaming', () => {
+      const progress = { recordsMatched: 3, recordsScanned: 30 };
+      const state = createMockState({
+        queryStatusMap: {
+          histogram: { status: QueryExecutionStatus.LOADING },
+          rows: { status: QueryExecutionStatus.LOADING, progress },
+        },
+      });
+
+      expect(selectQueryProgress(state)).toEqual(progress);
+    });
+
+    it('returns undefined when no query reports progress', () => {
+      const state = createMockState({
+        queryStatusMap: {
+          rows: { status: QueryExecutionStatus.READY },
+        },
+      });
+
+      expect(selectQueryProgress(state)).toBeUndefined();
     });
   });
 
