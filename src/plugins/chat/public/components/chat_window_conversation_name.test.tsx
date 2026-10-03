@@ -43,6 +43,11 @@ jest.mock('../services/chat_event_handler', () => ({
       }
     }),
     clearState: jest.fn(),
+    cancelToolResultDispatch: jest.fn(),
+    handleStreamTermination: jest.fn(),
+    markStreamingMessageHalted: jest.fn(),
+    sendToolResultToAssistant: jest.fn(),
+    sendToolResultsToAssistant: jest.fn(),
   })),
 }));
 
@@ -114,6 +119,7 @@ describe('ChatWindow - Conversation Name', () => {
       approve: jest.fn(),
       reject: jest.fn(),
       cancel: jest.fn(),
+      cleanAll: jest.fn(),
     } as any;
     mockHumanInputService = {
       getPending$: jest.fn().mockReturnValue(of([])),
@@ -344,6 +350,77 @@ describe('ChatWindow - Conversation Name', () => {
       titleElement = rendered2.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('New conversation started');
+    });
+
+    it('should prefer generatedTitle over first user message when set via onConversationTitle', async () => {
+      // Simulates restoring a conversation from history: the timeline has user
+      // messages but generatedTitle is set from the saved conversation name.
+      // The header should show the generated title, not the first user message.
+      const MockedChatEventHandler = ChatEventHandler as jest.MockedClass<typeof ChatEventHandler>;
+
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Populate the timeline with messages
+      const messages = [
+        {
+          id: 'u1',
+          role: 'user' as const,
+          content: 'Give me a summary for the selected visualization',
+        },
+        { id: 'a1', role: 'assistant' as const, content: 'Here is a summary of flight delays...' },
+      ];
+      await sendMessageAndUpdateTimeline(messages, rendered);
+
+      // Verify: without generatedTitle, the header shows first user message
+      let titleElement = rendered.container.querySelector('.chatHeader__title');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement?.textContent).toBe('Give me a summary for the selected visualization');
+
+      // Now set the generated title via the onConversationTitle callback.
+      // This is what handleSelectConversation does when loading from history:
+      // setGeneratedTitle(conversation.name || '')
+      const config =
+        MockedChatEventHandler.mock.calls[MockedChatEventHandler.mock.calls.length - 1][0];
+      await act(async () => {
+        config.callbacks.onConversationTitle('Summary of Flight Delays');
+        await new Promise((r) => setTimeout(r, 10));
+      });
+
+      // The header should now show the generated title, not the first user message
+      titleElement = rendered.container.querySelector('.chatHeader__title');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement?.textContent).toBe('Summary of Flight Delays');
+    });
+
+    it('should clear generatedTitle when starting a new chat', async () => {
+      // After a conversation with a generated title, starting a new chat
+      // should clear the title so the next conversation starts fresh.
+      const MockedChatEventHandler = ChatEventHandler as jest.MockedClass<typeof ChatEventHandler>;
+
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Set a generated title
+      const config =
+        MockedChatEventHandler.mock.calls[MockedChatEventHandler.mock.calls.length - 1][0];
+      await act(async () => {
+        config.callbacks.onConversationTitle('Previous Conversation Title');
+        await new Promise((r) => setTimeout(r, 10));
+      });
+
+      let titleElement = rendered.container.querySelector('.chatHeader__title');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement?.textContent).toBe('Previous Conversation Title');
+
+      // Click "New chat" button
+      const newChatButton = rendered.getByLabelText('New chat');
+      await act(async () => {
+        newChatButton.click();
+        await new Promise((r) => setTimeout(r, 10));
+      });
+
+      // The title should be cleared (new chat resets generatedTitle to '')
+      titleElement = rendered.container.querySelector('.chatHeader__title');
+      expect(titleElement).not.toBeInTheDocument();
     });
   });
 });
