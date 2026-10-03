@@ -56,7 +56,11 @@ interface VegaRequestHandlerContext {
 }
 
 export function createVegaRequestHandler(
-  { plugins: { data }, core: { uiSettings }, getServiceSettings }: VegaVisualizationDependencies,
+  {
+    plugins: { data },
+    core: { uiSettings, http },
+    getServiceSettings,
+  }: VegaVisualizationDependencies,
   context: VegaRequestHandlerContext = {}
 ) {
   let searchAPI: SearchAPI;
@@ -77,6 +81,7 @@ export function createVegaRequestHandler(
           injectedMetadata: getInjectedMetadata(),
           dataSourceEnabled: getDataSourceEnabled().enabled,
           savedObjectsClient: getSavedObjectsClient().client,
+          http,
         },
         context.abortSignal,
         context.inspectorAdapters
