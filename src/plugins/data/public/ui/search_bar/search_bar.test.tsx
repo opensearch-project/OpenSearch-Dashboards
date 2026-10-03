@@ -38,6 +38,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { IIndexPattern } from '../..';
 
 const mockTimeHistory = {
@@ -276,6 +277,83 @@ describe('SearchBar', () => {
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(1);
     expect(component.find(QUERY_BAR).length).toBe(1);
+  });
+
+  describe('getDerivedStateFromProps', () => {
+    const mountSearchBar = () =>
+      mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+        })
+      );
+
+    it('Should keep the in-progress draft when re-rendered with an unchanged query prop (auto-refresh tick)', () => {
+      const component = mountSearchBar();
+      const instance = component.find('SearchBarUI').instance() as any;
+
+      // User types a draft without submitting
+      act(() => {
+        instance.onQueryBarChange({
+          query: { query: 'response:404', language: 'kuery' },
+          dateRange: { from: 'now-15m', to: 'now' },
+        });
+      });
+      component.update();
+      expect(instance.state.query.query).toBe('response:404');
+
+      // Auto-refresh re-renders the search bar with a new props object whose
+      // query is still the last submitted one
+      const derived = (instance.constructor as any).getDerivedStateFromProps(
+        { ...instance.props, query: { ...dqlQuery }, isQueryRunning: true },
+        instance.state
+      );
+
+      expect(derived.query).toBeUndefined();
+      expect(instance.state.query.query).toBe('response:404');
+    });
+
+    it('Should replace the draft when the query prop actually changes', () => {
+      const component = mountSearchBar();
+      const instance = component.find('SearchBarUI').instance() as any;
+
+      act(() => {
+        instance.onQueryBarChange({
+          query: { query: 'response:404', language: 'kuery' },
+          dateRange: { from: 'now-15m', to: 'now' },
+        });
+      });
+      component.update();
+
+      const derived = (instance.constructor as any).getDerivedStateFromProps(
+        { ...instance.props, query: { query: 'status:500', language: 'kuery' } },
+        instance.state
+      );
+
+      expect(derived.query).toEqual({
+        query: 'status:500',
+        language: 'kuery',
+        dataset: undefined,
+      });
+    });
+
+    it('Should reset the query when the language prop changes', () => {
+      const component = mountSearchBar();
+      const instance = component.find('SearchBarUI').instance() as any;
+
+      const derived = (instance.constructor as any).getDerivedStateFromProps(
+        { ...instance.props, query: { query: dqlQuery.query, language: 'lucene' } },
+        instance.state
+      );
+
+      expect(derived.query).toEqual({
+        query: '',
+        language: 'lucene',
+        dataset: undefined,
+      });
+    });
   });
 
   describe('Cancel Button Props', () => {
