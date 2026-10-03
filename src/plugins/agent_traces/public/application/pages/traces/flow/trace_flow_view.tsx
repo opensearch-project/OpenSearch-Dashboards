@@ -190,6 +190,10 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
           legend={false}
           breadcrumbs={[]}
           showMinimap
+          // Deep trace trees need to zoom out further than the default 60% floor to fit
+          // the flyout panel, and the panel is resizable.
+          fitViewOptions={{ minZoom: 0.1 }}
+          refitOnResize
           topN={Infinity}
         />
       </div>

@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
+import { TraceDetailsFlyout, TraceDetailsProps, sessionIdOf } from './trace_details_flyout';
 import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
@@ -130,5 +130,18 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
     expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
+  });
+});
+
+describe('sessionIdOf', () => {
+  it('returns the first span session id, flat or nested', () => {
+    expect(
+      sessionIdOf([
+        { rawDocument: { attributes: {} } } as any,
+        { rawDocument: { attributes: { gen_ai: { conversation: { id: 'sess-1' } } } } } as any,
+        { rawDocument: { attributes: { 'gen_ai.conversation.id': 'sess-2' } } } as any,
+      ])
+    ).toBe('sess-1');
+    expect(sessionIdOf([undefined, { rawDocument: {} } as any])).toBeUndefined();
   });
 });

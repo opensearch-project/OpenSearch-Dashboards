@@ -7,7 +7,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSwitch } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../types';
 import { formatTimestamp } from '../traces/hooks/tree_utils';
@@ -15,8 +15,8 @@ import { DataTableInfoBar, TableLoadingState } from '../traces/table_shared';
 import '../traces/traces_table.scss';
 import { useSessions } from './hooks/use_sessions';
 import { SessionsTable } from './sessions_table';
-import { SessionDetailsFlyout } from './session_details_flyout';
-import { SessionRow } from './session_utils';
+import { SESSION_TRACES_LIMIT } from './session_utils';
+import { useTraceFlyout } from '../traces/flyout/trace_flyout_state';
 import './sessions_tab.scss';
 
 export const SessionsTab = () => {
@@ -30,6 +30,7 @@ export const SessionsTab = () => {
   }, [uiSettings]);
   const formatTs = useCallback((ts: string) => formatTimestamp(ts, timezone), [timezone]);
 
+  const [onlyWithErrors, setOnlyWithErrors] = useState(false);
   const {
     sessions,
     loading,
@@ -39,9 +40,11 @@ export const SessionsTab = () => {
     hasFilter,
     totalSessions,
     partial,
-  } = useSessions(formatTs);
+    errorsPartial,
+  } = useSessions(formatTs, onlyWithErrors);
   const [wrapCellText, setWrapCellText] = useState(false);
-  const [selected, setSelected] = useState<SessionRow | null>(null);
+  // Sessions open in the shared Agent Traces flyout slot (no stacking with trace flyouts).
+  const { openSession, activeSessionId } = useTraceFlyout();
 
   let body: React.ReactNode;
   if (loading && sessions.length === 0) {
@@ -67,7 +70,7 @@ export const SessionsTab = () => {
         {error}
       </EuiCallOut>
     );
-  } else if (sessions.length === 0 && hasFilter) {
+  } else if (sessions.length === 0 && (hasFilter || onlyWithErrors)) {
     body = (
       <EuiEmptyPrompt
         iconType="search"
@@ -119,8 +122,8 @@ export const SessionsTab = () => {
           sessions={sessions}
           formatTs={formatTs}
           wrapCellText={wrapCellText}
-          onSessionClick={setSelected}
-          selectedSessionId={selected?.sessionId}
+          onSessionClick={openSession}
+          selectedSessionId={activeSessionId}
         />
       </div>
     );
@@ -137,6 +140,16 @@ export const SessionsTab = () => {
           entityName="session"
           wrapCellText={wrapCellText}
           onWrapCellTextChange={setWrapCellText}
+        />
+        <EuiSwitch
+          compressed
+          className="agtSessionsTab__errorsSwitch"
+          label={i18n.translate('agentTraces.sessions.onlyWithErrors', {
+            defaultMessage: 'Only sessions with errors',
+          })}
+          checked={onlyWithErrors}
+          onChange={(e) => setOnlyWithErrors(e.target.checked)}
+          data-test-subj="agentTracesSessionsOnlyErrors"
         />
         {ignoredCommands.length > 0 && !error && (
           <EuiCallOut
@@ -164,17 +177,22 @@ export const SessionsTab = () => {
             })}
           />
         )}
+        {onlyWithErrors && errorsPartial && !error && (
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            className="agtSessionsTab__ignoredCallout"
+            data-test-subj="agentTracesSessionsErrorsPartial"
+            title={i18n.translate('agentTraces.sessions.errorsPartial', {
+              defaultMessage:
+                'Checked the most recent {count} session traces for errors. Narrow the time range or filter to check all of them.',
+              values: { count: SESSION_TRACES_LIMIT.toLocaleString() },
+            })}
+          />
+        )}
         {body}
       </div>
-      {selected && (
-        <SessionDetailsFlyout
-          // A new session gets a fresh flyout (focused trace, view and tab reset).
-          key={selected.sessionId}
-          session={selected}
-          formatTs={formatTs}
-          onClose={() => setSelected(null)}
-        />
-      )}
     </div>
   );
 };

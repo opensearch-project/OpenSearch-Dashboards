@@ -13,13 +13,16 @@ import { useReactFlow } from '@xyflow/react';
  * @param delay - Delay in milliseconds before fitting the view (default: 100ms)
  * @param padding - Padding for the fit view operation (default: 0.15)
  * @param duration - Duration of the fit view animation in milliseconds (default: 400ms)
+ * @param zoomBounds - Zoom limits for the fit (default: 60% to 100%)
  * @returns Function to trigger the delayed fit view
  */
 export const useFitViewWithDelay = (
   delay: number = 100,
   padding: number = 0.15,
-  duration: number = 400
+  duration: number = 400,
+  zoomBounds: { minZoom?: number; maxZoom?: number } = {}
 ) => {
+  const { minZoom = 0.6, maxZoom = 1 } = zoomBounds;
   // Ref to store timeout ID for delayed view fitting
   const timeoutRef = useRef<NodeJS.Timeout>();
   const reactFlowInstance = useReactFlow();
@@ -35,12 +38,12 @@ export const useFitViewWithDelay = (
 
     timeoutRef.current = setTimeout(() => {
       if (reactFlowInstance?.fitView) {
-        // We will not auto zoom beyond 100% (maxZoom: 1) and below 60% (minZoom: 0.6)
-        reactFlowInstance.fitView({ minZoom: 0.6, maxZoom: 1, padding, duration });
+        // By default we do not auto zoom beyond 100% or below 60%
+        reactFlowInstance.fitView({ minZoom, maxZoom, padding, duration });
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reactFlowInstance, delay, padding, duration]);
+  }, [reactFlowInstance, delay, padding, duration, minZoom, maxZoom]);
 
   // Cleanup timeout on unmount to prevent memory leaks
   useEffect(() => {
