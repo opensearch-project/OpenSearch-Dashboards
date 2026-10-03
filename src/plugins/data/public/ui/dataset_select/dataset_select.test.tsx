@@ -626,22 +626,26 @@ describe('DatasetSelect', () => {
   });
 
   describe('showNonTimeFieldDatasets filtering', () => {
-    const withTimeChild = makeChild({
-      id: 'with-time-id',
-      title: 'with-time-dataset',
-      displayName: 'Dataset With Time Field',
-      timeFieldName: '@timestamp',
-    });
+    // These tests observe filtering via which dataset gets auto-selected: the list is sorted by
+    // display label and the "no current dataset -> select first" fallback picks the
+    // alphabetically-first entry. The A/B label prefixes fix that order explicitly so the timeless
+    // dataset (A) sorts ahead of the time-based one (B), making the auto-selection deterministic.
     const withoutTimeChild = makeChild({
       id: 'no-time-id',
       title: 'no-time-dataset',
-      displayName: 'Dataset Without Time Field',
+      displayName: 'Dataset A (no time field)',
+    });
+    const withTimeChild = makeChild({
+      id: 'with-time-id',
+      title: 'with-time-dataset',
+      displayName: 'Dataset B (has time field)',
+      timeFieldName: '@timestamp',
     });
 
     it('filters out datasets without time fields when showNonTimeFieldDatasets is false', async () => {
       mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-      // Time-less dataset listed first; if the filter drops it, the auto-selected default
-      // becomes the time-based one instead.
+      // Time-less dataset would sort first, but the filter drops it, so the time-based dataset
+      // is the only survivor and becomes the auto-selected default.
       mockQueryService.queryString.getDatasetService = jest
         .fn()
         .mockReturnValue(
@@ -661,7 +665,8 @@ describe('DatasetSelect', () => {
 
     it('includes datasets without time fields when showNonTimeFieldDatasets is true', async () => {
       mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-      // Time-less dataset listed first and retained, so it stays the auto-selected default.
+      // Time-less dataset is retained and, sorting first alphabetically, becomes the
+      // auto-selected default — confirming it survived the filter.
       mockQueryService.queryString.getDatasetService = jest
         .fn()
         .mockReturnValue(
@@ -694,7 +699,7 @@ describe('DatasetSelect', () => {
 
       await openPopover();
 
-      expect(screen.getAllByText('Dataset Without Time Field').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Dataset A (no time field)').length).toBeGreaterThan(0);
     });
   });
 
@@ -797,6 +802,36 @@ describe('DatasetSelect', () => {
 
       // Uncontrolled + global query already has a dataset => no auto-select fires.
       expect(mockOnSelect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Alphabetical sorting', () => {
+    it('sorts datasets alphabetically regardless of fetch order, so auto-select picks the alphabetically-first dataset', async () => {
+      // Fetch order is intentionally NOT alphabetical (zebra, apple, mango). Without the sort,
+      // the "no current dataset, no default -> select first" fallback would auto-select
+      // zebra-pattern (first in fetch order) instead of apple-pattern (first alphabetically).
+      const children = [
+        makeChild({ id: 'zebra-id', title: 'Zebra-pattern', displayName: 'Zebra-pattern' }),
+        makeChild({ id: 'apple-id', title: 'apple-pattern', displayName: 'apple-pattern' }),
+        makeChild({ id: 'mango-id', title: 'mango-pattern', displayName: 'mango-pattern' }),
+      ];
+      // No current dataset and no default (uiSettings.defaultIndex unset) -> fall back to [0].
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockQueryService.queryString.getDatasetService = jest
+        .fn()
+        .mockReturnValue(makeDatasetService(makeIndexPatternType(children)));
+
+      // signalType must be non-null for the auto-select-first fallback to run
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      await waitFor(() => {
+        expect(mockOnSelect).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'apple-id', title: 'apple-pattern' })
+        );
+      });
     });
   });
 });

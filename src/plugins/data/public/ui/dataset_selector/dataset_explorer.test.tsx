@@ -4,10 +4,19 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { DatasetExplorer } from './dataset_explorer';
 import { DataStructure } from '../../../common';
+
+// jsdom never computes real layout, so AutoSizer measures 0x0 and EuiSelectable's list renders
+// no rows. Mocking only AutoSizer (not EuiSelectable itself) lets the real component render,
+// so real filtering and the real `title` attribute can be asserted on directly.
+jest.mock('react-virtualized-auto-sizer', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
+    children({ width: 600, height: 600 }),
+}));
 
 // Capture the props the custom DataStructureCreator receives so we can assert seeding.
 let lastCreatorProps: any;
@@ -162,5 +171,61 @@ describe('DatasetExplorer initial-selection props', () => {
     );
     await waitFor(() => expect(lastCreatorProps).toBeDefined());
     expect(lastCreatorProps.initialSelectedItems).toBeUndefined();
+  });
+});
+
+describe('DatasetExplorer search behavior', () => {
+  it('keeps a pattern searchable by its title even when a displayName is shown', () => {
+    const path: DataStructure[] = [
+      {
+        id: 'root',
+        title: 'Select data',
+        type: 'root',
+        columnHeader: 'Select data',
+        hasNext: false,
+        children: [
+          {
+            id: 'pattern-1',
+            title: 'logs-prod-*',
+            type: 'INDEX_PATTERN',
+            meta: { displayName: 'Production Logs' },
+            parent: { id: 'ds-1', title: 'Cluster 1', type: 'DATA_SOURCE' },
+          },
+          {
+            id: 'pattern-2',
+            title: 'metrics-*',
+            type: 'INDEX_PATTERN',
+          },
+        ],
+      },
+    ];
+
+    render(
+      <I18nProvider>
+        <DatasetExplorer
+          services={services}
+          queryString={makeQueryString()}
+          path={path}
+          setPath={jest.fn()}
+          onNext={jest.fn()}
+          onCancel={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    const getOptionByText = (text: string) =>
+      screen.getAllByRole('option').find((option) => option.textContent?.includes(text));
+
+    // The displayed label shows the friendly name, and its `title` attribute matches that same
+    // visible label.
+    const friendlyOption = getOptionByText('Production Logs');
+    expect(friendlyOption).toHaveAttribute('title', 'Cluster 1::Production Logs');
+
+    // Typing the pattern's raw title into the real filter still finds it, and doesn't match the
+    // unrelated pattern.
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'logs-prod' } });
+
+    expect(getOptionByText('Production Logs')).toBeDefined();
+    expect(getOptionByText('metrics-*')).toBeUndefined();
   });
 });
