@@ -90,7 +90,7 @@ export const SpansDataTable: React.FC = () => {
 
       const cached = spansCacheRef.current.get(traceRow.traceId);
       if (cached) {
-        updateFlyoutFullTree(cached, false);
+        updateFlyoutFullTree(traceRow.traceId, cached, false);
         return;
       }
 
@@ -106,9 +106,9 @@ export const SpansDataTable: React.FC = () => {
           const agentSpans = hitsToAgentSpans(traceHits);
           const fullTree = buildFullSpanTree(agentSpans, formatTs) as TraceRow[];
           spansCacheRef.current.set(traceRow.traceId, fullTree);
-          updateFlyoutFullTree(fullTree, false);
+          updateFlyoutFullTree(traceRow.traceId, fullTree, false);
         } catch (err) {
-          updateFlyoutFullTree(undefined, false, (err as Error).message);
+          updateFlyoutFullTree(traceRow.traceId, undefined, false, (err as Error).message);
         }
       }
     },

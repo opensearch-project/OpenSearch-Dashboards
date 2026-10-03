@@ -85,12 +85,13 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const updateFlyoutFullTree = useCallback(
-    (fullTree: TraceRow[] | undefined, isLoading: boolean, error?: string) => {
+    (traceId: string, fullTree: TraceRow[] | undefined, isLoading: boolean, error?: string) => {
       setHistory((prev) => ({
         ...prev,
-        // The trace being loaded: the one shown, or one the user already left while it loaded.
-        entries: prev.entries.map((entry, i) =>
-          entry.kind === 'trace' && (i === prev.index || entry.isLoadingFullTree)
+        // Only that trace's entries, shown or not: its fetch may finish after the user moved
+        // on, and other traces in the history keep their own trees.
+        entries: prev.entries.map((entry) =>
+          entry.kind === 'trace' && entry.trace.traceId === traceId
             ? { ...entry, fullTree, isLoadingFullTree: isLoading, fullTreeError: error }
             : entry
         ),

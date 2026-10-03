@@ -235,7 +235,7 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
       const trace = traces.find((t) => t.traceId === row.traceId);
       // Replaces this flyout with the trace flyout; Back returns here with this trace focused.
       openFlyout(row, { fromSession: session });
-      if (trace) updateFlyoutFullTree(trace.tree, false);
+      if (trace) updateFlyoutFullTree(trace.traceId, trace.tree, false);
     },
     [traces, openFlyout, updateFlyoutFullTree, session]
   );

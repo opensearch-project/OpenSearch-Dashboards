@@ -115,8 +115,12 @@ export interface TraceFlyoutContextValue {
   openSession: (session: SessionRow | string, options?: OpenSessionOptions) => void;
   /** Close the currently open flyout. */
   closeFlyout: () => void;
-  /** Update the full tree and loading state after async fetch completes. */
+  /**
+   * Update a trace's full tree and loading state after its fetch completes. Keyed by trace
+   * id: the history can hold several traces, and a fetch may finish after the user moved on.
+   */
   updateFlyoutFullTree: (
+    traceId: string,
     fullTree: TraceRow[] | undefined,
     isLoading: boolean,
     error?: string

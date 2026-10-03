@@ -24,10 +24,18 @@ const NavButtons = ({ navigation }: any) => (
 );
 
 jest.mock('./trace_details_flyout', () => ({
-  TraceDetailsFlyout: ({ trace, onClose, onOpenSession, navigation, isLoadingFullTree }: any) => (
+  TraceDetailsFlyout: ({
+    trace,
+    onClose,
+    onOpenSession,
+    navigation,
+    isLoadingFullTree,
+    fullTree,
+  }: any) => (
     <div data-test-subj="mock-flyout">
       <span>{trace.name}</span>
       <span>{isLoadingFullTree ? 'tree loading' : 'tree loaded'}</span>
+      <span data-test-subj="mock-tree">{fullTree?.[0]?.name ?? 'no tree'}</span>
       <button onClick={onClose}>Close</button>
       <button onClick={() => onOpenSession('sess-from-trace')}>Session link</button>
       <NavButtons navigation={navigation} />
@@ -67,6 +75,14 @@ const mockTrace: TraceRow = {
   latency: '100ms',
   totalTokens: 10,
   totalCost: '—',
+};
+
+const mockTraceB: TraceRow = {
+  ...mockTrace,
+  id: 'trace-2',
+  spanId: 'span-2',
+  traceId: 'trace-id-2',
+  name: 'Trace B',
 };
 
 describe('TraceFlyoutContext', () => {
@@ -156,7 +172,19 @@ describe('TraceFlyoutContext', () => {
           >
             Trace from A
           </button>
-          <button onClick={() => updateFlyoutFullTree([mockTrace], false)}>Tree loaded</button>
+          <button onClick={() => updateFlyoutFullTree(mockTrace.traceId, [mockTrace], false)}>
+            Tree loaded
+          </button>
+          <button
+            onClick={() =>
+              openFlyout(mockTraceB, { fromSession: { sessionId: 'sess-from-trace' } as any })
+            }
+          >
+            Trace B from session
+          </button>
+          <button onClick={() => updateFlyoutFullTree(mockTraceB.traceId, [mockTraceB], false)}>
+            Tree B loaded
+          </button>
         </>
       );
     };
@@ -199,6 +227,24 @@ describe('TraceFlyoutContext', () => {
       click('Tree loaded');
       click('Forward to trace Test Trace');
       expect(screen.getByTestId('mock-flyout')).toHaveTextContent('tree loaded');
+    });
+
+    it('writes a tree only to its own trace, even after the user moved on', () => {
+      renderProvider();
+      click('Open trace'); // trace A from the table, still loading
+      click('Session link');
+      click('Trace B from session');
+      click('Tree B loaded');
+      expect(screen.getByTestId('mock-tree')).toHaveTextContent('Trace B');
+
+      // A's fetch finishes while B is shown: B keeps its own tree.
+      click('Tree loaded');
+      expect(screen.getByTestId('mock-tree')).toHaveTextContent('Trace B');
+
+      // Back through the session to A: A has its own tree.
+      click('Back to session sess-from-trace');
+      click('Back to trace Test Trace');
+      expect(screen.getByTestId('mock-tree')).toHaveTextContent('Test Trace');
     });
 
     it('records trace -> session, and a new path drops the old forward entries', () => {
