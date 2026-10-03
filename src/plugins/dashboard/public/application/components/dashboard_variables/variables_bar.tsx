@@ -21,6 +21,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { isImeComposing } from '../../../../../../core/public/utils';
 import { VariableService } from '../../../variables/variable_service';
 import { VariableType, VariableWithState } from '../../../variables/types';
 import {
@@ -354,6 +355,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
           // onSearch receives the raw string; onChange would give (options, value).
           onSearch: allowCustomValue ? setSearchTerm : undefined,
           onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (isImeComposing(e)) {
+              // Keep it from EuiSelectable too, which would toggle its active row (often the add row).
+              e.stopPropagation();
+              return;
+            }
             if (e.key === 'Enter' && pendingCustomValue) {
               e.preventDefault();
               e.stopPropagation();

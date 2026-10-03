@@ -1,0 +1,2 @@
+fix:
+- Ignore Enter and Escape keydowns that belong to an IME composition in chat, text inputs and page-level key listeners ([#12826](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12826))
