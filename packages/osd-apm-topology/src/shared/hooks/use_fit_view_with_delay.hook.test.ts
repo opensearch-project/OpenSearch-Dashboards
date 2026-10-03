@@ -107,4 +107,28 @@ describe('useFitViewWithDelay', () => {
     expect(clearTimeoutSpy).toHaveBeenCalled();
     clearTimeoutSpy.mockRestore();
   });
+
+  it('uses the default zoom bounds when none are given', () => {
+    const { result } = renderHook(() => useFitViewWithDelay());
+
+    act(() => {
+      result.current();
+      jest.advanceTimersByTime(0);
+    });
+
+    expect(mockFitView).toHaveBeenCalledWith(expect.objectContaining({ minZoom: 0.6, maxZoom: 1 }));
+  });
+
+  it('honors caller-supplied zoom bounds (embedded maps fit tall graphs)', () => {
+    const { result } = renderHook(() =>
+      useFitViewWithDelay(undefined, undefined, undefined, { minZoom: 0.1 })
+    );
+
+    act(() => {
+      result.current();
+      jest.advanceTimersByTime(0);
+    });
+
+    expect(mockFitView).toHaveBeenCalledWith(expect.objectContaining({ minZoom: 0.1, maxZoom: 1 }));
+  });
 });

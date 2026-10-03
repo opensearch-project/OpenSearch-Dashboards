@@ -6,7 +6,7 @@ import React from 'react';
 
 import { useEdgesState, useNodesState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMapInitialization } from './shared/hooks/use_map_initialization.hook';
 import { useCelestialStateContext } from './shared/contexts/celestial_state_context';
 import './celestial.scss';
@@ -55,7 +55,12 @@ const useIsDarkMode = () => {
 
 export const Celestial = (props: CelestialMapProps) => {
   const isDarkMode = useIsDarkMode();
-  const fitViewWithDelay = useFitViewWithDelay();
+  const { minZoom, maxZoom, padding } = props.fitViewOptions ?? {};
+  const fitViewWithDelay = useFitViewWithDelay(undefined, padding, undefined, {
+    minZoom,
+    maxZoom,
+  });
+  const containerRef = useRef<HTMLDivElement>(null);
   const { focusOnNodes } = useFocusOnNodes();
   const { viewLock } = useCelestialStateContext();
 
@@ -111,6 +116,17 @@ export const Celestial = (props: CelestialMapProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map.nodes, map.edges, focusOnNodes, fitViewWithDelay, props.nodesInFocus]);
 
+  // Re-fit when the container is resized (e.g. an embedded map in a resizable panel).
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!props.refitOnResize || !container || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      if (!viewLock.isLocked()) fitViewWithDelay();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [props.refitOnResize, fitViewWithDelay, viewLock]);
+
   // Use breadcrumb props if provided, otherwise fall back to internal hook for backwards compatibility
   const internalBreadcrumbs = useBreadcrumbs();
 
@@ -132,7 +148,10 @@ export const Celestial = (props: CelestialMapProps) => {
       addBreadcrumb={addBreadcrumb}
       onDashboardClick={props.onDashboardClick}
     >
-      <div className={`celContainer celestial reset${isDarkMode ? ' celestial--dark' : ''}`}>
+      <div
+        ref={containerRef}
+        className={`celContainer celestial reset${isDarkMode ? ' celestial--dark' : ''}`}
+      >
         <div className="celMapContainer">
           <MapContainer
             isDarkMode={isDarkMode}

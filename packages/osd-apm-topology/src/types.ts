@@ -67,6 +67,13 @@ export interface CelestialEdgeStyleData {
 /** Camera behavior when a node is clicked */
 export type NodeClickZoom = 'none' | 'zoomToNode' | 'zoomToNeighborhood';
 
+/** Zoom bounds and padding for auto-fitting the map contents */
+export interface FitViewOptions {
+  minZoom?: number;
+  maxZoom?: number;
+  padding?: number;
+}
+
 /** Camera behavior when an edge is clicked */
 export type EdgeClickZoom = 'none' | 'zoomToEdge';
 
@@ -121,4 +128,14 @@ export interface CelestialMapProps {
 
   /** Camera zoom behavior on edge click. Default: 'none' */
   onEdgeClickZoom?: EdgeClickZoom;
+
+  /**
+   * Zoom bounds and padding used when the map auto-fits its contents.
+   * Defaults to `{ minZoom: 0.6, maxZoom: 1, padding: 0.15 }`. Embedded maps with tall
+   * graphs and a short viewport can lower `minZoom` so everything fits.
+   */
+  fitViewOptions?: FitViewOptions;
+
+  /** Re-fit the contents when the map container is resized. Default: false */
+  refitOnResize?: boolean;
 }

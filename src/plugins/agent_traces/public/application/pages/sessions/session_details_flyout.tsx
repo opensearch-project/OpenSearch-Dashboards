@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiBadge,
@@ -28,7 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { TraceRow } from '../traces/hooks/tree_utils';
-import { useTraceFlyout } from '../traces/flyout/trace_flyout_context';
+import { useTraceFlyout } from '../traces/flyout/trace_flyout_state';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SessionTrace, useSessionDetail } from './hooks/use_session_detail';
 import { SessionSpansTable } from './session_spans_table';
@@ -46,11 +46,19 @@ import {
   previewOutputMessages,
 } from '../traces/hooks/genai_message_preview';
 import { SessionRow, formatSessionDuration } from './session_utils';
+import { FlyoutHistoryNav } from '../traces/flyout/flyout_history_nav';
+import { FlyoutNavigation } from '../traces/flyout/trace_flyout_state';
+// Header metadata row shared with the trace flyout.
+import '../traces/flyout/trace_details_flyout.scss';
 
 interface SessionDetailsFlyoutProps {
   session: SessionRow;
+  /** Trace to focus once the traces load (the one the user came back from). */
+  focusTraceId?: string;
   formatTs: (ts: string) => string;
   onClose: () => void;
+  /** Back and Forward through the flyouts the user moved between. */
+  navigation?: FlyoutNavigation;
 }
 
 type DrillTab = 'traces' | 'spans';
@@ -62,12 +70,13 @@ const tokensOf = (row: TraceRow): number | null =>
 export const errorSpanCount = (trace: SessionTrace): number =>
   trace.spans.filter((span) => span.status === 'error').length;
 
+/** One header metadata item, in the trace flyout's style so both headers line up. */
 const MetaItem: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div className="agtSessionFlyout__metaItem">
-    <EuiText size="xs" className="agtSessionFlyout__metaLabel">
+  <div className="agentTracesFlyout__metaItem">
+    <EuiText size="xs" className="agentTracesFlyout__metaLabel">
       {label}
     </EuiText>
-    <EuiText size="s" className="agtSessionFlyout__metaValue">
+    <EuiText size="xs" className="agentTracesFlyout__metaValue">
       {children}
     </EuiText>
   </div>
@@ -198,8 +207,10 @@ const ConversationTurn: React.FC<{
 
 export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   session,
+  focusTraceId,
   formatTs,
   onClose,
+  navigation,
 }) => {
   const { traces, loading, error } = useSessionDetail(session.traceIds, formatTs);
   const { openFlyout, updateFlyoutFullTree } = useTraceFlyout();
@@ -222,10 +233,11 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   const openTrace = useCallback(
     (row: TraceRow) => {
       const trace = traces.find((t) => t.traceId === row.traceId);
-      openFlyout(row);
-      if (trace) updateFlyoutFullTree(trace.tree, false);
+      // Replaces this flyout with the trace flyout; Back returns here with this trace focused.
+      openFlyout(row, { fromSession: session });
+      if (trace) updateFlyoutFullTree(trace.traceId, trace.tree, false);
     },
-    [traces, openFlyout, updateFlyoutFullTree]
+    [traces, openFlyout, updateFlyoutFullTree, session]
   );
 
   /** Focus a trace: highlight it in the list and scroll its turn into view. */
@@ -252,6 +264,15 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
     [traces.length]
   );
 
+  // Coming back from a trace: focus it again once the session's traces are loaded.
+  const restoredFocus = useRef(false);
+  useEffect(() => {
+    if (restoredFocus.current || !focusTraceId || traces.length === 0) return;
+    restoredFocus.current = true;
+    const index = traces.findIndex((t) => t.traceId === focusTraceId);
+    if (index > 0) focusTrace(index);
+  }, [focusTraceId, traces, focusTrace]);
+
   const drillItems = useMemo(
     () => (drillTab === 'traces' ? traces.map((t) => t.root) : traces.flatMap((t) => t.spans)),
     [drillTab, traces]
@@ -267,9 +288,10 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
       aria-labelledby="agentTracesSessionFlyoutTitle"
     >
       <EuiFlyoutHeader hasBorder>
+        <FlyoutHistoryNav navigation={navigation} />
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} className="agtSessionFlyout__titleItem">
-            <EuiTitle size="s">
+            <EuiTitle size="m">
               <h2
                 id="agentTracesSessionFlyoutTitle"
                 className="agtSessionFlyout__title"
@@ -299,31 +321,31 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
             </EuiCopy>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <div className="agtSessionFlyout__metaRow">
+        <EuiSpacer size="s" />
+        <div className="agentTracesFlyout__metaRow">
           <MetaItem
             label={i18n.translate('agentTraces.sessions.flyout.totalDuration', {
-              defaultMessage: 'Total Duration',
+              defaultMessage: 'DURATION',
             })}
           >
-            <EuiIcon type="clock" size="s" color="subdued" />{' '}
             {formatSessionDuration(session.durationMs)}
           </MetaItem>
           <MetaItem
             label={i18n.translate('agentTraces.sessions.flyout.totalTokens', {
-              defaultMessage: 'Total Tokens',
+              defaultMessage: 'TOKENS',
             })}
           >
-            <TokenIcon />
             {totalTokens === null ? '—' : totalTokens.toLocaleString()}
           </MetaItem>
           <MetaItem
             label={i18n.translate('agentTraces.sessions.flyout.totalTraces', {
-              defaultMessage: 'Total Traces',
+              defaultMessage: 'TRACES',
             })}
           >
             {session.totalTraces.toLocaleString()}
           </MetaItem>
         </div>
+        <EuiSpacer size="s" />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

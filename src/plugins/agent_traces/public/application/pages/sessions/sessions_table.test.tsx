@@ -13,6 +13,7 @@ const session = (overrides: Partial<SessionRow> = {}): SessionRow => ({
   endTime: '2026-09-28 22:17:27.692',
   durationMs: 9033,
   totalTraces: 3,
+  errorTraces: 0,
   totalTokens: 8016,
   firstMessage: 'Plan a trip to Paris',
   lastMessage: 'Great choice! Paris looks wonderful.',
@@ -90,5 +91,18 @@ describe('SessionsTable', () => {
     );
     fireEvent.click(screen.getByTestId('agentTracesSessionTimeLink'));
     expect(onSessionClick).toHaveBeenCalledWith(row);
+  });
+
+  it('marks sessions with error traces and leaves clean sessions unmarked', () => {
+    render(
+      <SessionsTable
+        sessions={[session({ sessionId: 'bad', errorTraces: 2 }), session({ sessionId: 'ok' })]}
+        formatTs={formatTs}
+        wrapCellText={false}
+        onSessionClick={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('agentTracesSessionErrors-bad')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentTracesSessionErrors-ok')).not.toBeInTheDocument();
   });
 });

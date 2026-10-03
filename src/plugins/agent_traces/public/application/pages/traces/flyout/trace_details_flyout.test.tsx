@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
-import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { TraceDetailsFlyout, TraceDetailsProps, sessionIdOf } from './trace_details_flyout';
 import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
@@ -42,6 +42,31 @@ jest.mock('./use_flyout_resize', () => ({
     isResizingFlyout: false,
     handleFlyoutMouseDown: jest.fn(),
   }),
+}));
+
+const mockTraceLogs = {
+  logDatasets: [{ id: 'logs-1', title: 'logs-otel-v1*', type: 'INDEX_PATTERN' }],
+  datasetLogs: {},
+  logCount: 3,
+  isLoading: false,
+  traceDataset: null,
+};
+jest.mock('./use_trace_logs', () => ({
+  useTraceLogs: jest.fn(() => mockTraceLogs),
+}));
+
+jest.mock('../../../../../../explore/public', () => ({
+  TraceLogsTab: ({
+    traceId,
+    onSpanClick,
+  }: {
+    traceId: string;
+    onSpanClick: (id: string) => void;
+  }) => (
+    <button data-test-subj="mock-trace-logs" onClick={() => onSpanClick('span-1')}>
+      logs for {traceId}
+    </button>
+  ),
 }));
 
 jest.mock('./flyout_detail_panel', () => ({
@@ -130,5 +155,29 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
     expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
+  });
+});
+
+describe('sessionIdOf', () => {
+  it('returns the first span session id, flat or nested', () => {
+    expect(
+      sessionIdOf([
+        { rawDocument: { attributes: {} } } as any,
+        { rawDocument: { attributes: { gen_ai: { conversation: { id: 'sess-1' } } } } } as any,
+        { rawDocument: { attributes: { 'gen_ai.conversation.id': 'sess-2' } } } as any,
+      ])
+    ).toBe('sess-1');
+    expect(sessionIdOf([undefined, { rawDocument: {} } as any])).toBeUndefined();
+  });
+
+  it('adds a Related logs tab with the trace log count, keyed on the trace id', () => {
+    const { useTraceLogs } = jest.requireMock('./use_trace_logs');
+    render(<TraceDetailsFlyout {...defaultProps} />);
+    expect(useTraceLogs).toHaveBeenCalledWith('trace-id-abc');
+    const tab = screen.getByTestId('agentTracesFlyoutLogsTab');
+    expect(tab).toHaveTextContent('3');
+    expect(tab).toHaveTextContent('Related logs');
+    fireEvent.click(tab);
+    expect(screen.getByTestId('mock-trace-logs')).toHaveTextContent('logs for trace-id-abc');
   });
 });

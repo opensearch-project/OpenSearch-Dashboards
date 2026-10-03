@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +22,14 @@ import {
   getCategoryMeta,
   hexToRgba,
 } from '../../../../services/span_categorization';
-import { TreeNode } from './tree_helpers';
+import {
+  TreeNode,
+  findErrorNodeIds,
+  findMatchingNodeIds,
+  flattenTree,
+  stepToMatch,
+} from './tree_helpers';
+import { TraceTreeToolbar } from './trace_tree_toolbar';
 import './trace_tree_view.scss';
 
 const TokenIcon: React.FC = () => (
@@ -55,6 +62,8 @@ export interface TraceTreeViewProps {
   fullTreeError?: string;
   onSelectNode: (nodeId: string) => void;
   onToggleExpanded: (nodeId: string) => void;
+  onExpandAll?: () => void;
+  onCollapseAll?: () => void;
 }
 
 export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
@@ -65,7 +74,27 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
   fullTreeError,
   onSelectNode,
   onToggleExpanded,
+  onExpandAll,
+  onCollapseAll,
 }) => {
+  const [query, setQuery] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const flatNodes = useMemo(() => flattenTree(traceTreeData), [traceTreeData]);
+  const matchIds = useMemo(() => findMatchingNodeIds(flatNodes, query), [flatNodes, query]);
+  const matchSet = useMemo(() => new Set(matchIds), [matchIds]);
+  const errorIds = useMemo(() => findErrorNodeIds(flatNodes), [flatNodes]);
+  const matchPosition = selectedNode ? matchIds.indexOf(selectedNode.id) + 1 : 0;
+
+  const jumpTo = (id: string | undefined) => {
+    if (id) onSelectNode(id);
+  };
+
+  // Keep the selected span visible when it is changed from the toolbar or another view.
+  useEffect(() => {
+    const row = containerRef.current?.querySelector('.agentTracesFlyout__treeRow--selected');
+    (row as HTMLElement | null)?.scrollIntoView?.({ block: 'nearest' });
+  }, [selectedNode?.id]);
+
   const createTreeItems = (nodes: TreeNode[], depth = 0): React.ReactNode[] => {
     return nodes.map((node) => {
       const isSelected = node.id === selectedNode?.id;
@@ -73,7 +102,7 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
       const isExpanded = expandedNodes.has(node.id);
       const rowClassName = `agentTracesFlyout__treeRow${
         isSelected ? ' agentTracesFlyout__treeRow--selected' : ''
-      }`;
+      }${matchSet.has(node.id) ? ' agentTracesFlyout__treeRow--match' : ''}`;
 
       return (
         <div key={node.id} className="agentTracesFlyout__treeNode">
@@ -237,18 +266,34 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
           body={<p>{fullTreeError}</p>}
         />
       ) : (
-        <div
-          className="agentTracesFlyout__treeContainer"
-          style={
-            {
-              flex: 1,
-              '--agent-traces-row-hover-bg': euiThemeVars.euiColorLightestShade,
-              '--agent-traces-row-selected-bg': hexToRgba(euiThemeVars.euiColorPrimary, 0.1),
-            } as React.CSSProperties
-          }
-        >
-          {createTreeItems(traceTreeData)}
-        </div>
+        <>
+          <TraceTreeToolbar
+            query={query}
+            onQueryChange={setQuery}
+            matchCount={matchIds.length}
+            matchPosition={matchPosition}
+            onStepMatch={(direction) =>
+              jumpTo(stepToMatch(flatNodes, matchIds, selectedNode?.id, direction))
+            }
+            errorCount={errorIds.length}
+            onNextError={() => jumpTo(stepToMatch(flatNodes, errorIds, selectedNode?.id, 1))}
+            onExpandAll={onExpandAll}
+            onCollapseAll={onCollapseAll}
+          />
+          <div
+            ref={containerRef}
+            className="agentTracesFlyout__treeContainer"
+            style={
+              {
+                flex: 1,
+                '--agent-traces-row-hover-bg': euiThemeVars.euiColorLightestShade,
+                '--agent-traces-row-selected-bg': hexToRgba(euiThemeVars.euiColorPrimary, 0.1),
+              } as React.CSSProperties
+            }
+          >
+            {createTreeItems(traceTreeData)}
+          </div>
+        </>
       )}
     </div>
   );

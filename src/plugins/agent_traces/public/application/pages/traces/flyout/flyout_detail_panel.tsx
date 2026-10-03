@@ -32,6 +32,9 @@ import {
 } from './message_content_view';
 import { previewSpanInput, previewSpanOutput } from '../hooks/genai_message_preview';
 import './message_content_view.scss';
+import { GenAiAttributes } from './genai_attributes';
+import { SpanLogsTab } from '../../../../../../explore/public';
+import { TraceLogs, countSpanLogs } from './use_trace_logs';
 
 export const formatJsonOrString = (value: string | undefined): string => {
   if (!value || value === '—')
@@ -50,12 +53,15 @@ interface FlyoutDetailPanelProps {
   selectedNode: TreeNode | undefined;
   selectedTraceRow: TraceRow | undefined;
   onSelectNode: (nodeId: string) => void;
+  /** The trace's correlated logs; the selected span's logs are listed when present. */
+  traceLogs?: TraceLogs;
 }
 
 export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
   selectedNode,
   selectedTraceRow,
   onSelectNode,
+  traceLogs,
 }) => {
   const [ioMode, setIoMode] = useState<MessageViewMode>('formatted');
 
@@ -296,6 +302,57 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       <EuiSpacer size="s" />
 
       <EuiAccordion
+        id="genai-attributes-accordion"
+        buttonContent={
+          <strong>
+            {i18n.translate('agentTraces.detailPanel.genAiAttributes', {
+              defaultMessage: 'GenAI attributes',
+            })}
+          </strong>
+        }
+        paddingSize="m"
+        data-test-subj="agentTracesGenAiAttributesAccordion"
+      >
+        <GenAiAttributes doc={row?.rawDocument} />
+      </EuiAccordion>
+
+      <EuiSpacer size="s" />
+
+      {traceLogs && (traceLogs.isLoading || traceLogs.logDatasets.length > 0) && (
+        <>
+          <EuiAccordion
+            id="spanLogsAccordion"
+            buttonContent={
+              <strong>
+                {i18n.translate('agentTraces.detailPanel.logs', {
+                  defaultMessage: 'Logs',
+                })}
+              </strong>
+            }
+            extraAction={
+              traceLogs.isLoading ? undefined : (
+                <EuiBadge color="hollow" data-test-subj="agentTracesSpanLogsCount">
+                  {countSpanLogs(traceLogs, selectedTraceRow?.spanId)}
+                </EuiBadge>
+              )
+            }
+            paddingSize="s"
+            data-test-subj="agentTracesSpanLogsAccordion"
+          >
+            <SpanLogsTab
+              traceId={selectedTraceRow?.traceId || ''}
+              spanId={selectedTraceRow?.spanId || ''}
+              logDatasets={traceLogs.logDatasets}
+              datasetLogs={traceLogs.datasetLogs}
+              isLoading={traceLogs.isLoading}
+              traceDataset={traceLogs.traceDataset ?? undefined}
+            />
+          </EuiAccordion>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      <EuiAccordion
         id="raw-span-accordion"
         buttonContent={
           <strong>
@@ -304,7 +361,7 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
             })}
           </strong>
         }
-        initialIsOpen
+
         paddingSize="m"
       >
         <EuiCodeBlock language="json" overflowHeight={600} isCopyable>

@@ -8,6 +8,14 @@ import { FlyoutDetailPanel, formatJsonOrString } from './flyout_detail_panel';
 import { TreeNode } from './tree_helpers';
 import { TraceRow } from '../hooks/tree_utils';
 
+jest.mock('../../../../../../explore/public', () => ({
+  SpanLogsTab: ({ spanId }: { spanId: string }) => (
+    <div data-test-subj="mock-span-logs">{spanId}</div>
+  ),
+  filterLogsBySpanId: (logs: Array<{ spanId?: string }>, spanId: string) =>
+    logs.filter((log) => log.spanId === spanId),
+}));
+
 describe('formatJsonOrString', () => {
   it('returns "(no data)" for empty or dash values', () => {
     expect(formatJsonOrString(undefined)).toBe('(no data)');
@@ -105,5 +113,85 @@ describe('FlyoutDetailPanel', () => {
 
     expect(screen.getByText(/Span ID:/)).toBeInTheDocument();
     expect(screen.getByText('span-1-full-id-abcdef')).toBeInTheDocument();
+  });
+
+  it('orders sections Metadata, Input / Output, GenAI attributes, Raw Span; the last two collapsed', () => {
+    const { container } = render(
+      <FlyoutDetailPanel
+        selectedNode={mockTreeNode}
+        selectedTraceRow={mockTraceRow}
+        onSelectNode={jest.fn()}
+      />
+    );
+    const toggles = [...container.querySelectorAll('.euiAccordion__button')];
+    expect(toggles.map((t) => t.textContent)).toEqual([
+      'Metadata',
+      'Input / Output',
+      'GenAI attributes',
+      'Raw Span',
+    ]);
+    expect(toggles.map((t) => t.getAttribute('aria-expanded'))).toEqual([
+      'true',
+      'true',
+      'false',
+      'false',
+    ]);
+  });
+
+  describe('span logs', () => {
+    const logs = (overrides = {}) => ({
+      logDatasets: [{ id: 'logs-1', title: 'logs-otel-v1*', type: 'INDEX_PATTERN' }],
+      datasetLogs: {
+        'logs-1': [
+          {
+            _id: 'l1',
+            _source: {},
+            timestamp: 't',
+            traceId: 'trace-1',
+            spanId: 'span-1-full-id-abcdef',
+          },
+          { _id: 'l2', _source: {}, timestamp: 't', traceId: 'trace-1', spanId: 'other' },
+        ],
+      },
+      logCount: 2,
+      isLoading: false,
+      ...overrides,
+    });
+
+    it("lists the selected span's logs with their count", () => {
+      render(
+        <FlyoutDetailPanel
+          selectedNode={mockTreeNode}
+          selectedTraceRow={mockTraceRow}
+          onSelectNode={jest.fn()}
+          traceLogs={logs()}
+        />
+      );
+      expect(screen.getByTestId('agentTracesSpanLogsCount')).toHaveTextContent('1');
+      // After GenAI attributes and before Raw Span, collapsed like them.
+      const toggles = [...document.querySelectorAll('.euiAccordion__button')].map(
+        (t) => t.textContent
+      );
+      expect(toggles.slice(2)).toEqual(['GenAI attributes', 'Logs', 'Raw Span']);
+      expect(
+        screen
+          .getByTestId('agentTracesSpanLogsAccordion')
+          .querySelector('.euiAccordion__button')
+          ?.getAttribute('aria-expanded')
+      ).toBe('false');
+      expect(screen.getByTestId('mock-span-logs')).toHaveTextContent('span-1-full-id-abcdef');
+    });
+
+    it('hides the section when the traces dataset has no logs correlation', () => {
+      render(
+        <FlyoutDetailPanel
+          selectedNode={mockTreeNode}
+          selectedTraceRow={mockTraceRow}
+          onSelectNode={jest.fn()}
+          traceLogs={logs({ logDatasets: [], datasetLogs: {}, logCount: 0 })}
+        />
+      );
+      expect(screen.queryByTestId('agentTracesSpanLogsAccordion')).not.toBeInTheDocument();
+    });
   });
 });
