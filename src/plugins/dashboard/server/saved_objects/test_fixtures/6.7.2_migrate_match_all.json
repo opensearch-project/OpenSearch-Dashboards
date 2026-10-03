@@ -1,0 +1,23 @@
+{
+  "description": "Dashboard 6.7.2: Migrate match_all query to default query language",
+  "type": "dashboard",
+  "migrationVersion": "6.7.2",
+  "input": {
+    "id": "dash-match-all",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Dashboard with match_all",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"match_all\":{}},\"filter\":[]}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "attributes_equals": {
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      }
+    }
+  }
+}
