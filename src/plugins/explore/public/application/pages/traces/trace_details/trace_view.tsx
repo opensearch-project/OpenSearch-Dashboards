@@ -31,6 +31,37 @@ import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { TraceFilterBar } from './public/traces/trace_filter_bar';
 import { TraceServiceFlow } from './public/services/trace_service_flow';
 import {
+  buildTraceDependencies,
+  TraceDependenciesContext,
+} from './public/services/trace_dependencies';
+
+/** Most spans fetched for one trace. */
+const TRACE_SPAN_LIMIT = 100;
+
+export interface DependencyFilterValue {
+  field: string;
+  value: string;
+}
+
+/**
+ * Span filters after a click on a dependency card: the clicked dependency's filter replaces
+ * the one an earlier dependency click applied (`last`), as filters on different fields would
+ * AND to nothing; clicking the active dependency again removes its filter. Other filters stay.
+ * Returns the new filters and the dependency filter now applied (null when toggled off).
+ */
+export const toggleDependencyFilterIn = (
+  filters: SpanFilter[],
+  last: DependencyFilterValue | null,
+  clicked: DependencyFilterValue
+): { filters: SpanFilter[]; applied: DependencyFilterValue | null } => {
+  const isSame = (f: SpanFilter, target: DependencyFilterValue) =>
+    f.field === target.field && f.value === target.value;
+  const isActive = filters.some((f) => isSame(f, clicked));
+  const next = filters.filter((f) => !(last && isSame(f, last)) && f.field !== clicked.field);
+  if (isActive) return { filters: next, applied: null };
+  return { filters: [...next, { ...clicked, operator: '=' }], applied: clicked };
+};
+import {
   NoMatchMessage,
   getServiceInfo,
   MissingFieldsEmptyState,
@@ -291,7 +322,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         const response = await pplService.fetchTraceSpans({
           traceId,
           dataset,
-          limit: 100,
+          limit: TRACE_SPAN_LIMIT,
           filters: serverFilters,
         });
         setPplQueryData(response);
@@ -483,6 +514,35 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFiltersWithStorage(newFilters);
   };
 
+  // Dependency calls, classified once for the whole (unfiltered) trace and shared by the
+  // trace map, waterfall and Gantt: a filter must not turn a traced call into an external
+  // dependency by hiding the SERVER span it reached. A trace at the fetch cap may be cut
+  // off, so no external dependency is inferred for it.
+  const traceDependencies = useMemo(
+    () =>
+      buildTraceDependencies(unfilteredHits as any[], {
+        complete: unfilteredHits.length < TRACE_SPAN_LIMIT,
+      }),
+    [unfilteredHits]
+  );
+
+  // A dependency-card click filters the trace to that dependency. It replaces the filter of
+  // an earlier dependency click (filters on different fields would AND to nothing), and a
+  // second click on the same dependency removes it.
+  const lastDependencyFilterRef = useRef<DependencyFilterValue | null>(null);
+  const toggleDependencyFilter = (field: string, value: string) => {
+    const { filters, applied } = toggleDependencyFilterIn(
+      spanFilters,
+      lastDependencyFilterRef.current,
+      {
+        field,
+        value,
+      }
+    );
+    lastDependencyFilterRef.current = applied;
+    setSpanFiltersWithStorage(filters);
+  };
+
   const activeServiceFilter = spanFilters.find((f) => f.field === SERVICE_NAME_FILTER_FIELD)
     ?.value as string | undefined;
 
@@ -658,7 +718,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         ) : unfilteredHits.length === 0 ? (
           <NoMatchMessage traceId={traceId} />
         ) : (
-          <>
+          <TraceDependenciesContext.Provider value={traceDependencies}>
             <div className="exploreTraceView__tabsContainer">
               <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
                 <TraceDetailTabs
@@ -722,6 +782,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               onFilterService={(serviceName) =>
                                 addSpanFilter(SERVICE_NAME_FILTER_FIELD, serviceName)
                               }
+                              onFilterAttribute={toggleDependencyFilter}
+                              activeSpanFilters={spanFilters}
+                              traceDependencies={traceDependencies}
                               // The narrow flyout shows the whole graph fit-to-view,
                               // so the minimap would only cover nodes — hide it there.
                               showMinimap={!isFlyout}
@@ -791,7 +854,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                 </>
               )}
             </EuiResizableContainer>
-          </>
+          </TraceDependenciesContext.Provider>
         )}
       </>
     );
