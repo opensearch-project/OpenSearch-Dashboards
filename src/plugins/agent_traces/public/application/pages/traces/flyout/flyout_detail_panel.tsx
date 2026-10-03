@@ -321,7 +321,7 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       {traceLogs && (traceLogs.isLoading || traceLogs.logDatasets.length > 0) && (
         <>
           <EuiAccordion
-            id="span-logs-accordion"
+            id="spanLogsAccordion"
             buttonContent={
               <strong>
                 {i18n.translate('agentTraces.detailPanel.logs', {
