@@ -88,6 +88,15 @@
   top: 0;
   left: 0;
   z-index: $euiZLevel1;
+
+  // The floater spans the full width at the top of the panel. Disable pointer
+  // events on it so the empty header area doesn't intercept clicks meant for
+  // the panel content, and re-enable them on its interactive children.
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
 }
 
 // OPTIONS MENU
