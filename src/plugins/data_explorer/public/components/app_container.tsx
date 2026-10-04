@@ -20,8 +20,9 @@ import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
 import { shallowEqual } from '../utils/use/shallow_equal';
 import './app_container.scss';
+import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { IDataPluginServices } from '../../../data/public';
+import { DataExplorerServices } from '../types';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
 import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../ui_metric';
 
@@ -29,14 +30,17 @@ export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
     const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-    const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-    const { uiSettings } = opensearchDashboards.services;
+    const opensearchDashboards = useOpenSearchDashboards<DataExplorerServices>();
+    const { uiSettings, chrome } = opensearchDashboards.services;
     const isEnhancementsEnabled = uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
     const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datasetSelectorRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
+
+    const isChromeVisible = useObservable(chrome ? chrome.getIsVisible$() : undefined, true);
+    const isChromeHidden = !isChromeVisible;
 
     // In Safari, mousedown on the collapse toggle moves focus away from the resizer,
     // triggering a re-render that hides the button before the click event fires.
@@ -95,6 +99,7 @@ export const AppContainer = React.memo(
         <EuiPage
           className={classNames(
             'deLayout',
+            isChromeHidden ? 'deLayout--chromeHidden' : undefined,
             isEnhancementsEnabled && !showActionsInGroup ? 'dsc--next' : undefined
           )}
           paddingSize="none"
