@@ -5,7 +5,7 @@
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { Dataset } from '../../../../../../../data/common';
-import { PPLService } from './ppl_request_helpers';
+import { PPLService, escapePPLValue } from './ppl_request_helpers';
 
 export interface PPLLogsQueryParams {
   traceId: string;
@@ -42,8 +42,11 @@ export async function fetchTraceLogsByTraceId(
     const timeField = dataset.schemaMappings?.otelLogs?.timestamp || dataset.timeFieldName;
     const sortClause = timeField ? ` | sort - \`${timeField}\`` : '';
     const spanIdFieldName = dataset.schemaMappings?.otelLogs?.spanId || 'spanId';
-    const spanClause = spanId ? ` and ${spanIdFieldName} = "${spanId}"` : '';
-    const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = "${traceId}"${spanClause}${sortClause} | head ${limit}`;
+    // Escaped: trace and span ids come from documents and URLs.
+    const spanClause = spanId ? ` and ${spanIdFieldName} = ${escapePPLValue(spanId)}` : '';
+    const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = ${escapePPLValue(
+      traceId
+    )}${spanClause}${sortClause} | head ${limit}`;
 
     const datasetWithoutTime = {
       id: dataset.id,
