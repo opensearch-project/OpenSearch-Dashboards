@@ -130,14 +130,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         datasetTypeConfig?.languageOverrides?.PPL?.hideDatePicker === false
       ) {
         // If hideDatePicker is false, pass time filters to search strategy to insert them.
-        // An explicit range on the request (e.g. a dashboard panel's own range) wins over the
-        // global timefilter, as in buildQuery.
         request.params = {
           ...request.params,
           body: {
             ...request.params.body,
-            timeRange:
-              request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime(),
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
           },
         };
       }
