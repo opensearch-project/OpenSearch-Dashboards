@@ -4,7 +4,12 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { TRACE_LOGS_LIMIT, countSpanLogs, useTraceLogs } from './use_trace_logs';
+import {
+  TRACE_LOGS_LIMIT,
+  clearTraceLogsCache,
+  countSpanLogs,
+  useTraceLogs,
+} from './use_trace_logs';
 
 const mockCheck = jest.fn();
 jest.mock('../../../../../../explore/public', () => ({
@@ -32,6 +37,7 @@ jest.mock('../../../context/dataset_context/dataset_context', () => ({
 describe('useTraceLogs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearTraceLogsCache();
     mockDataset = { id: 'traces-1', title: 'otel-v1-apm-span*', timeFieldName: 'endTime' };
   });
 

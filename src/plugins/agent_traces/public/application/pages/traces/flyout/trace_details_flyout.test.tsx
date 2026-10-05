@@ -54,6 +54,8 @@ const mockTraceLogs = {
   datasetLogs: {},
   logCount: 3,
   isLoading: false,
+  errors: [],
+  cappedDatasetIds: [],
   traceDataset: null,
 };
 jest.mock('./use_trace_logs', () => ({
