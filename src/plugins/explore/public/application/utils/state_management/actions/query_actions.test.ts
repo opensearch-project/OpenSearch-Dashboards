@@ -54,6 +54,10 @@ jest.mock('./utils', () => ({
 
 import { configureStore } from '@reduxjs/toolkit';
 import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
+import {
   abortAllActiveQueries,
   defaultPrepareQueryString,
   defaultResultsProcessor,
@@ -71,7 +75,11 @@ import { setResults } from '../slices';
 import { queryHasAggregation } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING, ASYNC_QUERY_POLL_INTERVAL_SETTING } from '../../../../../common';
+import {
+  SAMPLE_SIZE_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
+  ExploreFlavor,
+} from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -373,6 +381,27 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(() => defaultPrepareQueryString(unsupportedQuery)).toThrow(
         'defaultPrepareQueryString encountered unhandled language: UNSUPPORTED_LANG'
       );
+    });
+
+    it("passes a source type language's query through unchanged", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+      setSourceTypeRegistry(registry);
+
+      try {
+        expect(
+          defaultPrepareQueryString({ query: 'fields @message | limit 5', language: 'FakeQL' })
+        ).toBe('fields @message | limit 5');
+      } finally {
+        setSourceTypeRegistry(new SourceTypeRegistryService());
+      }
     });
 
     it('should handle empty query string', () => {

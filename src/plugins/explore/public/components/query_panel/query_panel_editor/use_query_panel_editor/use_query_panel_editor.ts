@@ -14,10 +14,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
-import {
-  getEffectiveLanguageForAutoComplete,
-  runPPLAnalyzeInBackground,
-} from '../../../../../../data/public';
+import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../../../application/utils/languages';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
@@ -469,10 +467,17 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     execute: focusExploreQueryBar,
   });
 
+  // Opening the suggestion list for a language with no autocomplete provider only shows an empty
+  // "No suggestions." box, so skip it then.
+  const languageHasSuggestions =
+    services?.data?.autocomplete?.hasQuerySuggestions?.(
+      getEffectiveLanguageForAutoComplete(queryLanguage, 'explore')
+    ) ?? true;
+
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
-    if (isQueryMode) {
+    if (isQueryMode && languageHasSuggestions) {
       const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
         editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
@@ -485,7 +490,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         onDidFocusDisposable?.dispose();
       };
     }
-  }, [isQueryMode, editorRef, editorText]);
+  }, [isQueryMode, languageHasSuggestions, editorRef, editorText]);
 
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -626,7 +631,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
 
   const handleRun = useCallback(() => {
     onRun(editorTextRef.current);
-    runPPLAnalyzeInBackground({
+    runPPLAnalyzeWithSource({
       query: { query: editorTextRef.current, language: queryLanguage, dataset },
       http: services.http,
       timefilter: services.data.query.timefilter.timefilter,

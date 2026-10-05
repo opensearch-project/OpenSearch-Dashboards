@@ -64,6 +64,7 @@ import {
   executeErrorCountQuery,
   executeLatencyQuery,
 } from './trace_query_actions';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -90,6 +91,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
     case 'PROMQL':
       return query.query as string;
     default:
+      // Languages registered source types list are used as typed.
+      if (getSourceTypeRegistry().getLanguageSettings(query.language)) {
+        return query.query as string;
+      }
       throw new Error(
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
       );
@@ -312,8 +317,10 @@ export const executeQueries = createAsyncThunk<
   const needsDataTableQuery =
     !results[dataTableCacheKey] ||
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+  // The histogram query is built in PPL, so languages that cannot run it opt out (PROMQL, and
+  // source-type languages unless their source declares support).
   const needsHistogramQuery =
-    query.language !== 'PROMQL' &&
+    getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
