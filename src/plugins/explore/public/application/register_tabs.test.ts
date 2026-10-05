@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { registerBuiltInTabs } from './register_tabs';
+import { addRegisteredLanguagesToTabs, registerBuiltInTabs } from './register_tabs';
+import {
+  SourceTypeLanguageSettings,
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../services/source_type_registry';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import {
   ExploreFlavor,
@@ -424,5 +429,88 @@ describe('registerBuiltInTabs - patterns prepareQuery when the patterns field is
     } as any);
 
     expect(prepared).toBe('');
+  });
+});
+
+describe('addRegisteredLanguagesToTabs', () => {
+  let tabRegistry: TabRegistryService;
+
+  // A source type that lists one language, as an external plugin would register it.
+  const registerLanguage = ({
+    id,
+    flavors,
+    ...settings
+  }: SourceTypeLanguageSettings & { id: string; flavors: ExploreFlavor[] }) => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'fake',
+      label: 'Fake',
+      datasetTypes: ['FAKE'],
+      flavors,
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { [id]: settings },
+    });
+    setSourceTypeRegistry(registry);
+  };
+
+  beforeEach(() => {
+    tabRegistry = new TabRegistryService();
+    registerBuiltInTabs(tabRegistry, createMockServices() as ExploreServices, ExploreFlavor.Logs);
+  });
+
+  afterEach(() => {
+    setSourceTypeRegistry(new SourceTypeRegistryService());
+  });
+
+  it('adds a registered language to the tabs it names, keeping the built-in languages', () => {
+    registerLanguage({
+      id: 'FakeQL',
+      flavors: [ExploreFlavor.Logs],
+      tabs: [EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID],
+    });
+
+    addRegisteredLanguagesToTabs(tabRegistry, ExploreFlavor.Logs);
+
+    expect(tabRegistry.getTab(EXPLORE_LOGS_TAB_ID)?.supportedLanguages).toEqual([
+      'PPL',
+      'SQL',
+      'FakeQL',
+    ]);
+    expect(tabRegistry.getTab(EXPLORE_VISUALIZATION_TAB_ID)?.supportedLanguages).toContain(
+      'FakeQL'
+    );
+    expect(tabRegistry.getTab(EXPLORE_STATISTICS_TAB_ID)?.supportedLanguages).not.toContain(
+      'FakeQL'
+    );
+  });
+
+  it('defaults to the Logs tab when no tabs are named', () => {
+    registerLanguage({ id: 'FakeQL', flavors: [ExploreFlavor.Logs] });
+
+    addRegisteredLanguagesToTabs(tabRegistry, ExploreFlavor.Logs);
+
+    expect(tabRegistry.getTab(EXPLORE_LOGS_TAB_ID)?.supportedLanguages).toContain('FakeQL');
+    expect(tabRegistry.getTab(EXPLORE_VISUALIZATION_TAB_ID)?.supportedLanguages).not.toContain(
+      'FakeQL'
+    );
+  });
+
+  it('ignores languages of sources offered on another flavor', () => {
+    registerLanguage({ id: 'FakeQL', flavors: [ExploreFlavor.Traces] });
+
+    addRegisteredLanguagesToTabs(tabRegistry, ExploreFlavor.Logs);
+
+    expect(tabRegistry.getTab(EXPLORE_LOGS_TAB_ID)?.supportedLanguages).toEqual(['PPL', 'SQL']);
+  });
+
+  it('does not add a language twice when tabs are registered again', () => {
+    registerLanguage({ id: 'FakeQL', flavors: [ExploreFlavor.Logs] });
+
+    addRegisteredLanguagesToTabs(tabRegistry, ExploreFlavor.Logs);
+    addRegisteredLanguagesToTabs(tabRegistry, ExploreFlavor.Logs);
+
+    expect(
+      tabRegistry.getTab(EXPLORE_LOGS_TAB_ID)?.supportedLanguages.filter((l) => l === 'FakeQL')
+    ).toHaveLength(1);
   });
 });
