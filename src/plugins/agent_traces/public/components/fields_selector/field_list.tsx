@@ -30,6 +30,7 @@ export const FieldList = ({
   onAddFilter,
   getDetailsByField,
   shortDotsEnabled,
+  fixedColumns,
 }: FieldGroupProps) => {
   const [expanded, setExpanded] = useState(true);
 
@@ -75,6 +76,7 @@ export const FieldList = ({
                 getDetails={getDetailsByField}
                 useShortDots={shortDotsEnabled}
                 showSummary
+                hideColumnActions={fixedColumns}
                 nonRemovable={
                   category === 'selected' &&
                   (AGENT_TRACES_DEFAULT_COLUMNS.includes(field.name) ||

@@ -341,7 +341,7 @@
     "@osd/test": "1.0.0",
     "@osd/test-subj-selector": "0.2.1",
     "@osd/utility-types": "1.0.0",
-    "@rsdoctor/rspack-plugin": "1.5.13",
+    "@rsdoctor/rspack-plugin": "1.5.16",
     "@rspack/cli": "2.0.8",
     "@rspack/core": "2.0.8",
     "@swc/helpers": "^0.5.21",
