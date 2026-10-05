@@ -1265,6 +1265,65 @@ describe('getValidOboToken', () => {
     expect(mockTransportRequest).toHaveBeenCalledTimes(2);
   });
 
+  // Regression: the OBO cache must not be shared across differing role
+  // contexts for the same username — the cache key incorporates the resolved
+  // backend roles so a token minted for one principal is not reused for
+  // another that merely shares a username.
+  it('should not reuse a cached token across different roles for the same username', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'admin-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'low-priv-token', durationSeconds: 300 },
+      });
+
+    // Privileged request populates the cache under (same-name, [all_access]).
+    const victimToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      'same-name',
+      ['all_access']
+    );
+    // Low-privilege request: identical username, different roles — must NOT hit
+    // the privileged entry and must mint its own token.
+    const attackerToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      'same-name',
+      ['kibanauser']
+    );
+
+    expect(victimToken).toBe('admin-token');
+    expect(attackerToken).toBe('low-priv-token');
+    expect(attackerToken).not.toBe(victimToken);
+    // Two distinct contexts → two mints, no cache reuse.
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should reuse the cached token when username and roles both match', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'same-ctx-token', durationSeconds: 300 },
+    });
+
+    const first = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-f', [
+      'reports_read',
+      'alerting_read',
+    ]);
+    // Same roles, different order — must resolve to the same cache entry.
+    const second = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-f', [
+      'alerting_read',
+      'reports_read',
+    ]);
+
+    expect(first).toBe('same-ctx-token');
+    expect(second).toBe('same-ctx-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // Cached — minted once
+    expect(mockLogger.debug).toHaveBeenCalledWith('Using cached OBO token');
+  });
+
   it('should skip caching when username is undefined to prevent cross-user token sharing', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({

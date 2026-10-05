@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
+import { createHash } from 'crypto';
 import {
   IRouter,
   Logger,
@@ -35,11 +36,36 @@ interface CachedOboToken {
   expiresAt: number;
 }
 
-/** In-memory cache of OBO tokens keyed by username */
+/**
+ * In-memory cache of OBO tokens.
+ *
+ * The key is derived from the full resolved authorization context (username +
+ * backend roles), NOT the username alone. Keying on username alone lets two
+ * principals that share a username but hold different roles/realms collide on
+ * the same entry, so one could be served a cached token minted for the other.
+ * See `oboCacheKey`.
+ */
 const oboTokenCache = new Map<string, CachedOboToken>();
 
 /** Refresh buffer — mint a new token this many ms before expiry */
 const OBO_REFRESH_BUFFER_MS = 30_000;
+
+/**
+ * Build the OBO cache key from the caller's resolved authorization context.
+ *
+ * The key must be injective over (username, roles): a token minted under one
+ * authorization context must never be served to a request with a different
+ * one. Roles are sorted so ordering does not affect the key, and the tuple is
+ * JSON-serialized before hashing so that no component value (e.g. a role
+ * containing a delimiter character) can shift a boundary and alias a different
+ * identity onto the same key. The result is hashed so role names are not held
+ * in map keys in plaintext.
+ */
+function oboCacheKey(username: string, backendRoles: string[]): string {
+  const normalizedRoles = [...backendRoles].sort();
+  const serialized = JSON.stringify([username, normalizedRoles]);
+  return createHash('sha256').update(serialized).digest('hex');
+}
 
 /**
  * Generate an On-Behalf-Of (OBO) token using the security plugin API.
@@ -86,12 +112,19 @@ export async function generateOboToken(
  * not yet expired. When the cached token is within the refresh buffer or
  * missing, a fresh token is minted using the cookie-backed credentials
  * available via `asCurrentUser`.
+ *
+ * The cache is keyed on the full authorization context (username + backend
+ * roles) rather than username alone, so a token minted for one principal is
+ * never served to a different principal that merely shares a username. When
+ * the username cannot be resolved, caching is skipped entirely and a fresh
+ * token is minted each time.
  */
 export async function getValidOboToken(
   context: RequestHandlerContext,
   logger: Logger,
   agUiUrl: string,
-  username?: string
+  username?: string,
+  backendRoles: string[] = []
 ): Promise<string | undefined> {
   // When username is unknown, skip caching to avoid cross-user token sharing
   if (!username) {
@@ -99,7 +132,8 @@ export async function getValidOboToken(
     return result?.token;
   }
 
-  const cached = oboTokenCache.get(username);
+  const cacheKey = oboCacheKey(username, backendRoles);
+  const cached = oboTokenCache.get(cacheKey);
 
   if (cached) {
     if (cached.expiresAt - Date.now() > OBO_REFRESH_BUFFER_MS) {
@@ -107,7 +141,7 @@ export async function getValidOboToken(
       return cached.token;
     }
     // Expired or within refresh buffer — remove stale entry
-    oboTokenCache.delete(username);
+    oboTokenCache.delete(cacheKey);
   }
 
   // Evict other expired entries to bound memory growth
@@ -119,7 +153,7 @@ export async function getValidOboToken(
 
   const result = await generateOboToken(context, logger, agUiUrl);
   if (result) {
-    oboTokenCache.set(username, {
+    oboTokenCache.set(cacheKey, {
       token: result.token,
       expiresAt: Date.now() + result.durationSeconds * 1000,
     });
@@ -399,7 +433,11 @@ export function defineRoutes(
             const httpAuth = getHttpAuth?.();
             const principals = httpAuth ? getPrincipalsFromRequest(request, httpAuth) : undefined;
             const username = principals?.users?.[0];
-            oboToken = await getValidOboToken(context, logger, agUiUrl, username);
+            // Key the token cache on the full authorization context (username +
+            // backend roles) so a token minted for one principal is never reused
+            // for a different principal that merely shares a username.
+            const backendRoles = principals?.groups ?? [];
+            oboToken = await getValidOboToken(context, logger, agUiUrl, username, backendRoles);
           }
 
           // Forward to AG-UI capable endpoint.
