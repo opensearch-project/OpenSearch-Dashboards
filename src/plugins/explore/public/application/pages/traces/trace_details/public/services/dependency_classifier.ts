@@ -70,13 +70,18 @@ const lookupPath = (obj: unknown, parts: string[]): Primitive | undefined => {
   return undefined;
 };
 
+/** The value as a plain object, or undefined when it is not one. */
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : undefined;
+
 /**
  * Read a span attribute that may be stored flat (dot-notation key) or nested,
  * and possibly under `_source`. Returns undefined when absent.
  */
-export const getSpanAttr = (span: any, key: string): Primitive | undefined => {
-  if (!span) return undefined;
-  const source = span._source || span;
+export const getSpanAttr = (span: unknown, key: string): Primitive | undefined => {
+  const hit = asRecord(span);
+  if (!hit) return undefined;
+  const source = asRecord(hit._source) || hit;
   // Flat dotted key on the hit itself (e.g. "attributes.db.system").
   const flat = source[`attributes.${key}`];
   if (isPrimitive(flat)) return flat;
@@ -84,7 +89,7 @@ export const getSpanAttr = (span: any, key: string): Primitive | undefined => {
 };
 
 /** The first of `keys` with a non-empty value, with that key. */
-const firstEntry = (span: any, keys: string[]): DependencyFilter | undefined => {
+const firstEntry = (span: unknown, keys: string[]): DependencyFilter | undefined => {
   for (const key of keys) {
     const v = getSpanAttr(span, key);
     if (v !== undefined && v !== null && `${v}` !== '') return { key, value: `${v}` };
@@ -92,10 +97,11 @@ const firstEntry = (span: any, keys: string[]): DependencyFilter | undefined => 
   return undefined;
 };
 
-const firstAttr = (span: any, keys: string[]): string | undefined => firstEntry(span, keys)?.value;
+const firstAttr = (span: unknown, keys: string[]): string | undefined =>
+  firstEntry(span, keys)?.value;
 
 /** Whether any of `keys` is present (possibly empty), as the backend's type detection reads it. */
-const hasAnyAttr = (span: any, keys: string[]): boolean =>
+const hasAnyAttr = (span: unknown, keys: string[]): boolean =>
   keys.some((key) => {
     const v = getSpanAttr(span, key);
     return v !== undefined && v !== null;
@@ -110,7 +116,7 @@ const DB_SYSTEM_KEYS = [
 ];
 
 /** Normalize kinds like "SPAN_KIND_CLIENT" / "client" / "CLIENT" -> "CLIENT". */
-export const normalizeSpanKind = (kind: any): string =>
+export const normalizeSpanKind = (kind: unknown): string =>
   `${kind || ''}`.toUpperCase().replace(/^SPAN_KIND_/, '');
 
 /** Only these span kinds can name a dependency; SERVER / INTERNAL spans describe the service. */
@@ -138,7 +144,7 @@ const AWS_SERVICE_MAPPINGS: Record<string, string> = {
 };
 
 /** `AWS::{service}` for an AWS SDK call (rpc.system=aws-api), else undefined. */
-const awsServiceName = (span: any): string | undefined => {
+const awsServiceName = (span: unknown): string | undefined => {
   if (firstAttr(span, ['rpc.system']) !== 'aws-api') return undefined;
   const service = firstAttr(span, ['rpc.service']);
   return service ? (AWS_SERVICE_MAPPINGS[service] ?? `AWS::${service}`) : undefined;
@@ -211,7 +217,7 @@ const isPublishableName = (name: string): boolean => {
  * present host attribute is considered; an unnameable one (IP, loopback,
  * per-instance) is skipped rather than replaced by a later key.
  */
-const databaseName = (span: any, dbSystem?: string): string | null => {
+const databaseName = (span: unknown, dbSystem?: string): string | null => {
   const peer = firstAttr(span, ['peer.service']);
   if (peer) return isPublishableName(peer) ? peer : null;
   // An AWS SDK call (e.g. DynamoDB) is named after the service, as in the backend.
@@ -237,7 +243,7 @@ const databaseName = (span: any, dbSystem?: string): string | null => {
  * the caller, which has trace context to decide whether a CLIENT span reaches a
  * traced service (a normal edge) or an untraced endpoint (external).
  */
-export const classifyDependencyByAttributes = (span: any): DependencyInfo | null => {
+export const classifyDependencyByAttributes = (span: unknown): DependencyInfo | null => {
   // Messaging (Kafka, RabbitMQ, SQS/SNS, ...).
   const messagingSystem = firstAttr(span, ['messaging.system']);
   if (messagingSystem) {
@@ -328,7 +334,7 @@ const ADDRESS_PORT_KEYS: Array<[string, string]> = [
  * dropped. Null when nothing names the peer, or when it is a raw IP, loopback or
  * per-instance host (the backend suppresses those rather than minting a node per address).
  */
-const resolveExternalPeer = (span: any): { name: string; filter?: DependencyFilter } | null => {
+const resolveExternalPeer = (span: unknown): { name: string; filter?: DependencyFilter } | null => {
   const peer = firstEntry(span, ['peer.service']);
   if (peer) {
     const name = normalizeExternalName(peer.value);
@@ -372,7 +378,7 @@ const resolveExternalPeer = (span: any): { name: string; filter?: DependencyFilt
 };
 
 /** The external peer name of a CLIENT span (see resolveExternalPeer), or null. */
-export const resolveExternalName = (span: any): string | null =>
+export const resolveExternalName = (span: unknown): string | null =>
   resolveExternalPeer(span)?.name ?? null;
 
 /**
@@ -382,7 +388,7 @@ export const resolveExternalName = (span: any): string | null =>
  * as the backend does.
  */
 const namesKnownService = (
-  span: any,
+  span: unknown,
   externalName: string,
   knownServerServices: ReadonlySet<string>
 ): boolean => {
@@ -432,11 +438,11 @@ export interface SpanDependencyContext {
  * external peer only when that peer is not a service traced in the trace.
  */
 export const classifySpanDependency = (
-  span: any,
+  span: unknown,
   context: SpanDependencyContext
 ): DependencyInfo | null => {
   if (!span) return null;
-  const kind = normalizeSpanKind(span.kind);
+  const kind = normalizeSpanKind(asRecord(span)?.kind);
   if (!isDependencyCandidateKind(kind)) return null;
   if (kind !== 'CLIENT') {
     const dep = classifyDependencyByAttributes(span);

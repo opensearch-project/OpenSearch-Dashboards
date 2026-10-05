@@ -44,7 +44,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   // spans this table shows.
   const providedDependencies = useTraceDependencies();
   const dependencies = useMemo(
-    () => providedDependencies ?? buildTraceDependencies(allSpans as any[]),
+    () => providedDependencies ?? buildTraceDependencies(allSpans),
     [providedDependencies, allSpans]
   );
 

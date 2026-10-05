@@ -210,7 +210,7 @@ describe('HierarchySpanCell', () => {
         <HierarchySpanCell
           {...defaultProps}
           items={[item]}
-          dependencies={buildTraceDependencies([item, ...kids] as any[])}
+          dependencies={buildTraceDependencies([item, ...kids])}
         />
       );
     };

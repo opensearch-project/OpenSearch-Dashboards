@@ -520,7 +520,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   // off, so no external dependency is inferred for it.
   const traceDependencies = useMemo(
     () =>
-      buildTraceDependencies(unfilteredHits as any[], {
+      buildTraceDependencies(unfilteredHits, {
         complete: unfilteredHits.length < TRACE_SPAN_LIMIT,
       }),
     [unfilteredHits]
