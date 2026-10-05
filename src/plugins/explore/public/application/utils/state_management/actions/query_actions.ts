@@ -8,15 +8,17 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import semver from 'semver';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { SearchResponse } from 'elasticsearch';
 import {
   IBucketDateHistogramAggConfig,
   Query,
   DataView,
   IndexPatternField,
+  IDataFrame,
   getDataSourceEngineCapabilities,
 } from '../../../../../../../../src/plugins/data/common';
-import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
+import { QueryExecutionStatus, QueryProgress } from '../types';
+import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -31,7 +33,7 @@ import {
   getDimensions,
   Dimensions,
 } from '../../../../components/chart/utils';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, ASYNC_QUERY_POLL_INTERVAL_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
@@ -544,6 +546,7 @@ const executeQueryBase = async (
 
   const queryStartTime = Date.now();
   let abortController: AbortController | undefined;
+  let partialRowsShown = false;
   // A newer run for the same key replaces this run's controller. A superseded run must leave the
   // key's results, status and controller to its successor.
   const isSuperseded = () => {
@@ -704,11 +707,54 @@ const executeQueryBase = async (
       .getLanguageService()
       .getLanguage(query.language);
 
-    // Execute query
+    // Async sources that return rows while still running hand them to `onPartialResults` on
+    // each poll. Only row views stream them: an aggregation's running values reorder as the
+    // scan proceeds, so aggregation views wait for the final result.
+    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+
+    const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
+      // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
+      // query cleared its key; writing them would bring the key back and keep the page loading.
+      if (abortController?.signal.aborted || !getState().queryEditor.queryStatusMap[cacheKey]) {
+        return;
+      }
+      partialRowsShown = true;
+
+      dispatch(
+        setResults({
+          cacheKey,
+          results: {
+            ...partialResults,
+            // The inspector's timer stops only when the request finishes.
+            elapsedMs: Date.now() - queryStartTime,
+            fieldSchema: dataFrame.schema,
+          } as ISearchResult,
+        })
+      );
+
+      const { recordsMatched, recordsScanned } = dataFrame.meta?.progress ?? {};
+      const progress: QueryProgress = { recordsMatched, recordsScanned };
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.LOADING,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: undefined,
+            progress,
+          },
+        })
+      );
+    };
+
+    // `onPartialResults` and `pollInterval` only matter to polling sources.
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
+      ...(streamsPartialRows && { onPartialResults }),
+      pollInterval: services.uiSettings.get(ASYNC_QUERY_POLL_INTERVAL_SETTING),
     });
 
     if (isSuperseded()) {
@@ -767,6 +813,11 @@ const executeQueryBase = async (
   } catch (error: any) {
     if (isSuperseded()) {
       return;
+    }
+
+    // Partial rows from a run that didn't finish aren't results.
+    if (partialRowsShown) {
+      dispatch(clearResultsByKey(cacheKey));
     }
 
     // Clean up aborted/failed query from active controllers

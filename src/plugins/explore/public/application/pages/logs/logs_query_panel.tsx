@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
@@ -22,8 +22,10 @@ import {
   selectPromptToQueryIsLoading,
   selectDataset,
   selectQueryLanguage,
+  selectQueryProgress,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
+import type { QueryProgress } from '../../../application/utils/state_management/types';
 import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
@@ -35,6 +37,34 @@ import '../../../components/query_panel/query_panel.scss';
 // Fold out EOL/whitespace so an untouched Monaco round-trip isn't mistaken for
 // an edit in handleModeChange, which would fall into the lossy parsePPL path.
 const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim();
+
+// Counts a progressive source reports while it is still scanning, as a
+// "scanning… N records matched" line.
+const scanProgressLabel = ({ recordsMatched, recordsScanned }: QueryProgress): string | null => {
+  if (typeof recordsMatched === 'number' && typeof recordsScanned === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressMatchedScanned', {
+      defaultMessage: 'Scanning… {matched} matched of {scanned} scanned',
+      values: {
+        matched: recordsMatched.toLocaleString(),
+        scanned: recordsScanned.toLocaleString(),
+      },
+    });
+  }
+  if (typeof recordsMatched === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressMatched', {
+      defaultMessage: 'Scanning… {matched} matched',
+      values: { matched: recordsMatched.toLocaleString() },
+    });
+  }
+  if (typeof recordsScanned === 'number') {
+    return i18n.translate('explore.logsQueryPanel.scanProgressScanned', {
+      defaultMessage: 'Scanning… {scanned} scanned',
+      values: { scanned: recordsScanned.toLocaleString() },
+    });
+  }
+  // Progress with no counts adds nothing over the bar itself.
+  return null;
+};
 
 /**
  * Logs query panel with a PPL visual builder / code toggle.
@@ -72,6 +102,8 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const isLoading = queryIsLoading || promptToQueryIsLoading;
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
+  const queryProgress = useSelector(selectQueryProgress);
+  const scanProgress = queryProgress ? scanProgressLabel(queryProgress) : null;
   // Languages the PPL builder can't represent are code-only: the Builder toggle is hidden and
   // the editor stays in Code mode.
   const queryLanguage = useSelector(selectQueryLanguage);
@@ -343,12 +375,26 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
       </EuiFlexGroup>
 
       {isLoading && (
-        <EuiProgress
-          size="xs"
-          color="accent"
-          position="absolute"
-          data-test-subj="exploreQueryPanelIsLoading"
-        />
+        <>
+          {/* Indeterminate: a polling source reports what it scanned, not what's left. */}
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            data-test-subj="exploreQueryPanelIsLoading"
+          />
+          {scanProgress && (
+            <EuiText
+              size="xs"
+              color="subdued"
+              role="status"
+              aria-live="polite"
+              data-test-subj="exploreQueryPanelScanProgress"
+            >
+              {scanProgress}
+            </EuiText>
+          )}
+        </>
       )}
     </EuiPanel>
   );

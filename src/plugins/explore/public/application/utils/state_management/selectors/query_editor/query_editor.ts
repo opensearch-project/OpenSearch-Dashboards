@@ -16,6 +16,14 @@ export const selectQueryStatusMapByKey = createSelector(
   (statusMap, cacheKey) => statusMap[cacheKey]
 );
 
+/** Scan progress of the query streaming partial rows, if any. Only row queries stream. */
+export const selectQueryProgress = createSelector([selectQueryStatusMap], (statusMap) => {
+  for (const status of Object.values(statusMap)) {
+    if (status?.progress) return status.progress;
+  }
+  return undefined;
+});
+
 export const selectOverallQueryStatus = createSelector(
   [selectState],
   (state) => state.overallQueryStatus
