@@ -133,6 +133,9 @@ describe('fetchSessions', () => {
     expect(onlyErrors.errorsPartial).toBe(true); // 3 session traces checked, the cap
     const errorQuery = executeQuery.mock.calls.find(([, q]) => q.includes('error_spans'))?.[1];
     expect(errorQuery).toContain('traceId in ("t3", "t2", "t1")');
+    // The listed session's traces (t1, t2) were checked in that pass: no second error query.
+    expect(executeQuery.mock.calls.filter(([, q]) => q.includes('error_spans'))).toHaveLength(1);
+    expect(onlyErrors.sessions[0].errorTraces).toBe(1);
   });
 
   it('returns no sessions when no session trace has errors', async () => {
@@ -146,5 +149,35 @@ describe('fetchSessions', () => {
     );
     expect(result).toMatchObject({ sessions: [], totalSessions: 0, errorsPartial: false });
     expect(executeQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs the root spans and error queries together', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const executeQuery = jest.fn(async (_dataset: unknown, query: string) => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      inFlight -= 1;
+      if (query.includes('as total_sessions')) return ppl(['total_sessions'], [[1]]);
+      if (query.includes('as last_seen')) return ppl([SESSION, 'last_seen'], [['s1', 'x']]);
+      if (query.includes('as total_traces'))
+        return ppl(
+          [SESSION, 'total_traces', 'start_time', 'end_time'],
+          [['s1', 1, '2026-09-29 10:00:00', '2026-09-29 10:01:00']]
+        );
+      if (query.includes('as spans by traceId')) return ppl(['traceId', SESSION], [['t1', 's1']]);
+      return ppl([], []);
+    });
+    await fetchSessions(
+      { executeQuery },
+      { id: 'd', title: 'spans', type: 'INDEX_PATTERN' } as never,
+      'source = spans',
+      (t) => t
+    );
+    const last = executeQuery.mock.calls.slice(-2).map(([, q]) => q);
+    expect(last.some((q) => q.includes('error_spans'))).toBe(true);
+    // ids + count run together first; later, roots + errors run together.
+    expect(maxInFlight).toBe(2);
   });
 });

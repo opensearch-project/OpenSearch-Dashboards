@@ -101,6 +101,21 @@ describe('SessionDetailsFlyout', () => {
     );
     expect(screen.getByText('Forward to trace')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('agentTracesSessionOpenTrace-2'));
-    expect(mockOpenFlyout).toHaveBeenCalledWith(mockTraces[1].root, { fromSession: session });
+    expect(mockOpenFlyout).toHaveBeenCalledWith(mockTraces[1].root, {
+      fromSession: session,
+      sessionView: { view: 'overview', drillTab: 'traces' },
+    });
+  });
+
+  it('opens on the view and tab the user left the session on', () => {
+    render(
+      <SessionDetailsFlyout
+        session={session}
+        sessionView={{ view: 'all', drillTab: 'spans' }}
+        formatTs={(t) => t}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.queryByTestId('agentTracesSessionViewAllTraces')).not.toBeInTheDocument();
   });
 });

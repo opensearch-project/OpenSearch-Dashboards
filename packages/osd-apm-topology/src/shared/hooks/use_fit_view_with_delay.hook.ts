@@ -41,8 +41,8 @@ export const useFitViewWithDelay = (
         // By default we do not auto zoom beyond 100% or below 60%
         reactFlowInstance.fitView({ minZoom, maxZoom, padding, duration });
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // Calls within `delay` replace the pending fit, so a burst (e.g. resize) fits once.
+    }, delay);
   }, [reactFlowInstance, delay, padding, duration, minZoom, maxZoom]);
 
   // Cleanup timeout on unmount to prevent memory leaks

@@ -60,7 +60,9 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setHistory((prev) =>
         options?.fromSession
           ? pushHistory(prev, next, (current) =>
-              current.kind === 'session' ? { ...current, focusTraceId: trace.traceId } : current
+              current.kind === 'session'
+                ? { ...current, focusTraceId: trace.traceId, sessionView: options.sessionView }
+                : current
             )
           : resetHistory(next)
       );
@@ -82,6 +84,17 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const closeFlyout = useCallback(() => {
     setHistory(EMPTY_HISTORY);
+  }, []);
+
+  const cacheSession = useCallback((session: SessionRow) => {
+    setHistory((prev) => ({
+      ...prev,
+      entries: prev.entries.map((entry) =>
+        entry.kind === 'session' && entry.sessionId === session.sessionId && !entry.session
+          ? { ...entry, session }
+          : entry
+      ),
+    }));
   }, []);
 
   const updateFlyoutFullTree = useCallback(
@@ -112,8 +125,15 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const activeSessionId = view?.kind === 'session' ? view.sessionId : undefined;
 
   const value = useMemo<TraceFlyoutContextValue>(
-    () => ({ openFlyout, openSession, closeFlyout, updateFlyoutFullTree, activeSessionId }),
-    [openFlyout, openSession, closeFlyout, updateFlyoutFullTree, activeSessionId]
+    () => ({
+      openFlyout,
+      openSession,
+      closeFlyout,
+      cacheSession,
+      updateFlyoutFullTree,
+      activeSessionId,
+    }),
+    [openFlyout, openSession, closeFlyout, cacheSession, updateFlyoutFullTree, activeSessionId]
   );
 
   return (
@@ -122,7 +142,7 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {view?.kind === 'trace' && (
         <TraceDetailsFlyout
           // Each history entry gets a fresh flyout (selected span, tab).
-          key={`trace-${history.index}`}
+          key={`trace-${history.index}-${view.trace.id}`}
           trace={view.trace}
           onClose={closeFlyout}
           fullTree={view.fullTree}
@@ -139,6 +159,8 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
           sessionId={view.sessionId}
           session={view.session}
           focusTraceId={view.focusTraceId}
+          sessionView={view.sessionView}
+          onLoaded={cacheSession}
           formatTs={formatTs}
           onClose={closeFlyout}
           navigation={navigation}

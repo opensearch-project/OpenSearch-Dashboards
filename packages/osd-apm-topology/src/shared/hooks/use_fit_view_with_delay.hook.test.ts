@@ -29,7 +29,7 @@ describe('useFitViewWithDelay', () => {
     expect(mockFitView).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(100);
     });
 
     expect(mockFitView).toHaveBeenCalledTimes(1);
@@ -40,7 +40,7 @@ describe('useFitViewWithDelay', () => {
 
     act(() => {
       result.current();
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(100);
     });
 
     expect(mockFitView).toHaveBeenCalledWith({
@@ -56,7 +56,7 @@ describe('useFitViewWithDelay', () => {
 
     act(() => {
       result.current();
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(200);
     });
 
     expect(mockFitView).toHaveBeenCalledWith({
@@ -72,7 +72,7 @@ describe('useFitViewWithDelay', () => {
 
     act(() => {
       result.current();
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(100);
     });
 
     expect(mockFitView).toHaveBeenCalledWith(expect.objectContaining({ minZoom: 0.6, maxZoom: 1 }));
@@ -113,7 +113,7 @@ describe('useFitViewWithDelay', () => {
 
     act(() => {
       result.current();
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(100);
     });
 
     expect(mockFitView).toHaveBeenCalledWith(expect.objectContaining({ minZoom: 0.6, maxZoom: 1 }));
@@ -126,9 +126,26 @@ describe('useFitViewWithDelay', () => {
 
     act(() => {
       result.current();
-      jest.advanceTimersByTime(0);
+      jest.advanceTimersByTime(100);
     });
 
     expect(mockFitView).toHaveBeenCalledWith(expect.objectContaining({ minZoom: 0.1, maxZoom: 1 }));
+  });
+
+  it('waits for the delay and fits once for a burst of calls', () => {
+    const { result } = renderHook(() => useFitViewWithDelay(200));
+    act(() => {
+      result.current();
+      result.current();
+      result.current();
+    });
+    act(() => {
+      jest.advanceTimersByTime(199);
+    });
+    expect(mockFitView).not.toHaveBeenCalled();
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(mockFitView).toHaveBeenCalledTimes(1);
   });
 });

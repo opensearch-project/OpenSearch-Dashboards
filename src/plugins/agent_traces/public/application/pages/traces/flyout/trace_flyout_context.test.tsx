@@ -23,6 +23,7 @@ const NavButtons = ({ navigation }: any) => (
   </>
 );
 
+const mockTraceMounts = jest.fn();
 jest.mock('./trace_details_flyout', () => ({
   TraceDetailsFlyout: ({
     trace,
@@ -31,21 +32,33 @@ jest.mock('./trace_details_flyout', () => ({
     navigation,
     isLoadingFullTree,
     fullTree,
-  }: any) => (
-    <div data-test-subj="mock-flyout">
-      <span>{trace.name}</span>
-      <span>{isLoadingFullTree ? 'tree loading' : 'tree loaded'}</span>
-      <span data-test-subj="mock-tree">{fullTree?.[0]?.name ?? 'no tree'}</span>
-      <button onClick={onClose}>Close</button>
-      <button onClick={() => onOpenSession('sess-from-trace')}>Session link</button>
-      <NavButtons navigation={navigation} />
-    </div>
-  ),
+  }: any) => {
+    jest.requireActual('react').useEffect(() => {
+      mockTraceMounts(trace.name);
+    }, []);
+    return (
+      <div data-test-subj="mock-flyout">
+        <span>{trace.name}</span>
+        <span>{isLoadingFullTree ? 'tree loading' : 'tree loaded'}</span>
+        <span data-test-subj="mock-tree">{fullTree?.[0]?.name ?? 'no tree'}</span>
+        <button onClick={onClose}>Close</button>
+        <button onClick={() => onOpenSession('sess-from-trace')}>Session link</button>
+        <NavButtons navigation={navigation} />
+      </div>
+    );
+  },
 }));
 
 const mockSessionMounts = jest.fn();
 jest.mock('../../sessions/session_flyout_host', () => ({
-  SessionFlyoutHost: ({ sessionId, focusTraceId, navigation }: any) => {
+  SessionFlyoutHost: ({
+    sessionId,
+    session,
+    focusTraceId,
+    sessionView,
+    navigation,
+    onLoaded,
+  }: any) => {
     jest.requireActual('react').useEffect(() => {
       mockSessionMounts(sessionId);
     }, []);
@@ -53,6 +66,9 @@ jest.mock('../../sessions/session_flyout_host', () => ({
       <div data-test-subj="mock-session-flyout">
         <span data-test-subj="mock-session-id">{sessionId}</span>
         <span data-test-subj="mock-session-focus">{focusTraceId ?? 'none'}</span>
+        <span data-test-subj="mock-session-view">{sessionView?.view ?? 'none'}</span>
+        <span data-test-subj="mock-session-cached">{session ? 'cached' : 'not cached'}</span>
+        <button onClick={() => onLoaded({ sessionId, traceIds: [] })}>Fetched {sessionId}</button>
         <NavButtons navigation={navigation} />
       </div>
     );
@@ -165,12 +181,23 @@ describe('TraceFlyoutContext', () => {
       return (
         <>
           <button onClick={() => openFlyout(mockTrace)}>Open trace</button>
+          <button onClick={() => openFlyout(mockTraceB)}>Open trace B</button>
           <button onClick={() => openSession({ sessionId: 'sess-a' } as any)}>Open A</button>
           <button onClick={() => openSession('sess-b')}>Open B</button>
           <button
             onClick={() => openFlyout(mockTrace, { fromSession: { sessionId: 'sess-a' } as any })}
           >
             Trace from A
+          </button>
+          <button
+            onClick={() =>
+              openFlyout(mockTrace, {
+                fromSession: { sessionId: 'sess-a' } as any,
+                sessionView: { view: 'all', drillTab: 'spans' },
+              })
+            }
+          >
+            Trace from A all
           </button>
           <button onClick={() => updateFlyoutFullTree(mockTrace.traceId, [mockTrace], false)}>
             Tree loaded
@@ -245,6 +272,34 @@ describe('TraceFlyoutContext', () => {
       click('Back to session sess-from-trace');
       click('Back to trace Test Trace');
       expect(screen.getByTestId('mock-tree')).toHaveTextContent('Test Trace');
+    });
+
+    it('restores the session view the trace was opened from', () => {
+      renderProvider();
+      click('Open A');
+      click('Trace from A all');
+      click('Back to session sess-a');
+      expect(screen.getByTestId('mock-session-view')).toHaveTextContent('all');
+    });
+
+    it('keeps a session fetched by id for Back/Forward', () => {
+      renderProvider();
+      click('Open trace');
+      click('Session link');
+      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('not cached');
+      click('Fetched sess-from-trace');
+      click('Back to trace Test Trace');
+      click('Forward to session sess-from-trace');
+      expect(screen.getByTestId('mock-session-cached')).toHaveTextContent('cached');
+    });
+
+    it('gives each trace opened from a table a fresh flyout', () => {
+      mockTraceMounts.mockClear();
+      renderProvider();
+      click('Open trace');
+      click('Open trace B');
+      // Both start a new history at index 0; the trace id in the key still remounts.
+      expect(mockTraceMounts.mock.calls.map(([name]) => name)).toEqual(['Test Trace', 'Trace B']);
     });
 
     it('records trace -> session, and a new path drops the old forward entries', () => {

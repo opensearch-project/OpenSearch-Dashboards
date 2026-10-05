@@ -31,7 +31,15 @@ export type FlyoutView =
       session?: SessionRow;
       /** Trace to focus when the session shows again (the one the user opened from it). */
       focusTraceId?: string;
+      /** Session view and table tab the user left the session on, restored on Back. */
+      sessionView?: SessionViewState;
     };
+
+/** Where the user was in the session flyout: the conversation or the All traces/spans table. */
+export interface SessionViewState {
+  view: 'overview' | 'all';
+  drillTab: 'traces' | 'spans';
+}
 
 /** Flyouts visited since the flyout was opened from a table, and the one shown. */
 export interface FlyoutHistory {
@@ -101,6 +109,8 @@ export interface OpenTraceOptions {
    * session, with this trace focused) instead of starting a new one.
    */
   fromSession?: SessionRow;
+  /** The session flyout's view and tab when the trace was opened, restored on Back. */
+  sessionView?: SessionViewState;
 }
 
 export interface OpenSessionOptions {
@@ -115,6 +125,11 @@ export interface TraceFlyoutContextValue {
   openSession: (session: SessionRow | string, options?: OpenSessionOptions) => void;
   /** Close the currently open flyout. */
   closeFlyout: () => void;
+  /**
+   * Keep a session row that was fetched by id in its history entries, so Back/Forward to the
+   * session reuse it instead of fetching it again.
+   */
+  cacheSession: (session: SessionRow) => void;
   /**
    * Update a trace's full tree and loading state after its fetch completes. Keyed by trace
    * id: the history can hold several traces, and a fetch may finish after the user moved on.

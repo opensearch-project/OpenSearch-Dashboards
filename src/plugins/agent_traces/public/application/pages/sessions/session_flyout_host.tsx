@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiCallOut,
@@ -19,7 +19,7 @@ import { escapePPLValue } from '../traces/trace_details/data_fetching/ppl_reques
 import { fetchSessions } from './fetch_sessions';
 import { SessionDetailsFlyout } from './session_details_flyout';
 import { FlyoutHistoryNav } from '../traces/flyout/flyout_history_nav';
-import { FlyoutNavigation } from '../traces/flyout/trace_flyout_state';
+import { FlyoutNavigation, SessionViewState } from '../traces/flyout/trace_flyout_state';
 import { SessionRow, getSourceCommand } from './session_utils';
 
 interface SessionFlyoutHostProps {
@@ -28,6 +28,10 @@ interface SessionFlyoutHostProps {
   session?: SessionRow;
   /** Trace to focus first (the one the user came back from). */
   focusTraceId?: string;
+  /** View and tab to restore (where the user left the session). */
+  sessionView?: SessionViewState;
+  /** Called with the session once fetched by id, so the flyout history can keep it. */
+  onLoaded?: (session: SessionRow) => void;
   formatTs: (ts: string) => string;
   onClose: () => void;
   /** Back and Forward through the flyouts the user moved between. */
@@ -39,6 +43,8 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
   sessionId,
   session,
   focusTraceId,
+  sessionView,
+  onLoaded,
   formatTs,
   onClose,
   navigation,
@@ -46,6 +52,9 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
   const { pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const [row, setRow] = useState<SessionRow | null>(session ?? null);
   const [error, setError] = useState<string | null>(null);
+  // Latest callback, without refetching when its identity changes.
+  const onLoadedRef = useRef(onLoaded);
+  onLoadedRef.current = onLoaded;
 
   useEffect(() => {
     if (session) {
@@ -60,8 +69,10 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
     fetchSessions(pplService, datasetParam, query, formatTs)
       .then(({ sessions }) => {
         if (cancelled) return;
-        if (sessions[0]) setRow(sessions[0]);
-        else
+        if (sessions[0]) {
+          setRow(sessions[0]);
+          onLoadedRef.current?.(sessions[0]);
+        } else
           setError(
             i18n.translate('agentTraces.sessions.flyout.notFound', {
               defaultMessage: 'Session {sessionId} was not found in the selected time range.',
@@ -82,6 +93,7 @@ export const SessionFlyoutHost: React.FC<SessionFlyoutHostProps> = ({
       <SessionDetailsFlyout
         session={row}
         focusTraceId={focusTraceId}
+        sessionView={sessionView}
         formatTs={formatTs}
         onClose={onClose}
         navigation={navigation}

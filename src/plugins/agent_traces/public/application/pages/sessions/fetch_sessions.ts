@@ -117,6 +117,9 @@ export const fetchSessions = async (
   let sessionIds: string[];
   let total: number;
   let errorsPartial = false;
+  // Traces already checked for errors (the onlyWithErrors pass), and those with errors.
+  const checkedTraceIds = new Set<string>();
+  const knownErrorTraceIds = new Set<string>();
   if (onlyWithErrors) {
     // Trace-level, like the trace list's alert icon: a session has errors when any span of
     // one of its traces failed, even a span without the session id.
@@ -140,6 +143,8 @@ export const fetchSessions = async (
         if (typeof r.traceId === 'string') errorTraceIds.add(r.traceId);
       }
     }
+    sessionTraces.forEach((r) => checkedTraceIds.add(r.traceId));
+    errorTraceIds.forEach((id) => knownErrorTraceIds.add(id));
     // Latest first, as the traces are.
     const errorSessions = [
       ...new Set(
@@ -193,26 +198,26 @@ export const fetchSessions = async (
 
     const traceIds = [...traceToSession.keys()];
     let rootRows: Array<ReturnType<typeof spanToRow>> = [];
+    // Which of these traces have an error span anywhere (the trace list's alert icon). Only
+    // traces the onlyWithErrors pass did not check need the query.
+    const errorTraceIds = new Set(knownErrorTraceIds);
+    const uncheckedTraceIds = traceIds.filter((id) => !checkedTraceIds.has(id));
     if (traceIds.length > 0) {
-      const rootsResponse = await ppl.executeQuery(
-        wholeSession,
-        buildRootSpansQuery(source, traceIds)
-      );
+      // Independent of each other, so run together.
+      const [rootsResponse, errorsResponse] = await Promise.all([
+        ppl.executeQuery(wholeSession, buildRootSpansQuery(source, traceIds)),
+        uncheckedTraceIds.length > 0
+          ? ppl
+              .executeQuery(wholeSession, buildErrorTracesQuery(source, uncheckedTraceIds))
+              .catch(() => null)
+          : Promise.resolve(null),
+      ]);
       // The root-span query returns span rows in the PPL response shape.
       const rootHits = transformPPLDataToTraceHits(rootsResponse as PPLResponse);
       rootRows = hitsToAgentSpans(rootHits).map((span, i) => spanToRow(span, i, formatTs));
-    }
-    // Which of these traces have an error span anywhere (the trace list's alert icon).
-    let errorTraceIds = new Set<string>();
-    if (traceIds.length > 0) {
-      const errorsResponse = await ppl
-        .executeQuery(wholeSession, buildErrorTracesQuery(source, traceIds))
-        .catch(() => null);
-      errorTraceIds = new Set(
-        pplResponseToRecords(errorsResponse)
-          .map((r) => r.traceId)
-          .filter((id): id is string => typeof id === 'string')
-      );
+      for (const r of pplResponseToRecords(errorsResponse)) {
+        if (typeof r.traceId === 'string') errorTraceIds.add(r.traceId);
+      }
     }
     sessions = assembleSessionRows(stats, traceToSession, rootRows, errorTraceIds);
   }

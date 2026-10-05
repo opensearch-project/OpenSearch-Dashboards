@@ -47,7 +47,7 @@ import {
 } from '../traces/hooks/genai_message_preview';
 import { SessionRow, formatSessionDuration } from './session_utils';
 import { FlyoutHistoryNav } from '../traces/flyout/flyout_history_nav';
-import { FlyoutNavigation } from '../traces/flyout/trace_flyout_state';
+import { FlyoutNavigation, SessionViewState } from '../traces/flyout/trace_flyout_state';
 // Header metadata row shared with the trace flyout.
 import '../traces/flyout/trace_details_flyout.scss';
 
@@ -55,6 +55,8 @@ interface SessionDetailsFlyoutProps {
   session: SessionRow;
   /** Trace to focus once the traces load (the one the user came back from). */
   focusTraceId?: string;
+  /** View and tab to open on (where the user left the session). */
+  sessionView?: SessionViewState;
   formatTs: (ts: string) => string;
   onClose: () => void;
   /** Back and Forward through the flyouts the user moved between. */
@@ -208,6 +210,7 @@ const ConversationTurn: React.FC<{
 export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   session,
   focusTraceId,
+  sessionView,
   formatTs,
   onClose,
   navigation,
@@ -215,8 +218,8 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
   const { traces, loading, error } = useSessionDetail(session.traceIds, formatTs);
   const { openFlyout, updateFlyoutFullTree } = useTraceFlyout();
 
-  const [view, setView] = useState<'overview' | 'all'>('overview');
-  const [drillTab, setDrillTab] = useState<DrillTab>('traces');
+  const [view, setView] = useState<'overview' | 'all'>(sessionView?.view ?? 'overview');
+  const [drillTab, setDrillTab] = useState<DrillTab>(sessionView?.drillTab ?? 'traces');
   /** Index of the trace in focus; the conversation arrows step through traces. */
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [messageMode, setMessageMode] = useState<MessageViewMode>('formatted');
@@ -234,10 +237,10 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
     (row: TraceRow) => {
       const trace = traces.find((t) => t.traceId === row.traceId);
       // Replaces this flyout with the trace flyout; Back returns here with this trace focused.
-      openFlyout(row, { fromSession: session });
+      openFlyout(row, { fromSession: session, sessionView: { view, drillTab } });
       if (trace) updateFlyoutFullTree(trace.traceId, trace.tree, false);
     },
-    [traces, openFlyout, updateFlyoutFullTree, session]
+    [traces, openFlyout, updateFlyoutFullTree, session, view, drillTab]
   );
 
   /** Focus a trace: highlight it in the list and scroll its turn into view. */

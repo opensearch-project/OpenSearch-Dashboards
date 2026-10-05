@@ -322,7 +322,6 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
             })}
           </strong>
         }
-
         paddingSize="m"
       >
         <EuiCodeBlock language="json" overflowHeight={600} isCopyable>
