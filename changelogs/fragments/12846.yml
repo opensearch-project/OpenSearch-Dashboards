@@ -1,0 +1,2 @@
+feat:
+- Add a Sessions tab to Agent Traces that groups traces by `gen_ai.conversation.id` ([#12846](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12846))

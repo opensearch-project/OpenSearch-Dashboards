@@ -31,14 +31,12 @@
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
 import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { AskErrorButton } from '../ask_error_button/ask_error_button';
 
 interface Props {
   onRefresh: () => void;
-  getQueryError?: () => string | undefined;
 }
 
-export const DiscoverUninitialized = ({ onRefresh, getQueryError }: Props) => {
+export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
     <I18nProvider>
       <EuiPage>
@@ -60,15 +58,6 @@ export const DiscoverUninitialized = ({ onRefresh, getQueryError }: Props) => {
                     id="discover.uninitializedText"
                     defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
                   />
-                  {getQueryError && (
-                    <>
-                      {' '}
-                      <AskErrorButton
-                        getError={getQueryError}
-                        testSource="discoverQueryErrorAskAiForHelp"
-                      />
-                    </>
-                  )}
                 </p>
               }
               actions={

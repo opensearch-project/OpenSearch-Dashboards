@@ -1,0 +1,9 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// The in-context vis editor's Monaco editor grows with its line counts
+.exploreVisEditorAutoGrowEditor {
+  min-height: $ouiSize * 2;
+}

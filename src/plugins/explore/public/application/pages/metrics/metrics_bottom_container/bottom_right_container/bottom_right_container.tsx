@@ -55,7 +55,7 @@ export const BottomRightContainer = () => {
           })}
           body={i18n.translate('explore.metricsQuery.emptyBody', {
             defaultMessage:
-              'Build a query with the builder, switch to code mode, or reference the samples below to get started.',
+              'Build a query with the builder, switch to code mode, or adapt the samples below by replacing their metric and label names with your own.',
           })}
         />
       </CanvasPanel>

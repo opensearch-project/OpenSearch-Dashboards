@@ -14,6 +14,11 @@ import {
   queryEditorReducer,
   legacyReducer,
 } from '../../utils/state_management/slices';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 
 jest.mock('@osd/i18n', () => ({
   i18n: { translate: jest.fn((_key, opts) => opts.defaultMessage) },
@@ -95,6 +100,12 @@ jest.mock('../../../components/query_panel/query_panel_generated_query', () => (
 jest.mock('../../../components/query_panel/actions/ppl_execute_query_action', () => ({
   usePPLExecuteQueryAction: jest.fn(),
 }));
+// The action module builds PPL-lint-fix tool definitions from the data plugin at
+// load time and registers/cleans up assistant actions on mount/unmount; neither
+// is exercised here, so stub the hook.
+jest.mock('../../../components/query_panel/actions/ppl_lint_fix_action', () => ({
+  usePPLLintFixAction: jest.fn(),
+}));
 // Stubbed to a no-op thunk; the real action pulls in createHistogramConfigs
 // (data plugin) at module load.
 jest.mock('../../utils/state_management/actions/query_editor', () => ({
@@ -117,11 +128,16 @@ jest.mock(
   })
 );
 
-const makeStore = (query: string, savedSearch?: string) =>
+const makeStore = (
+  query: string,
+  savedSearch?: string,
+  language = 'PPL',
+  dataset: Record<string, string> = { id: '1', title: 'logs' }
+) =>
   configureStore({
     reducer: { query: queryReducer, queryEditor: queryEditorReducer, legacy: legacyReducer },
     preloadedState: {
-      query: { query, language: 'PPL', dataset: { id: '1', title: 'logs' } },
+      query: { query, language, dataset },
       legacy: { savedSearch },
     } as any,
   });
@@ -191,6 +207,36 @@ describe('LogsQueryPanel', () => {
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
     expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+  });
+
+  it("hides the Builder toggle for a source's language without visual builder support", () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'fake',
+      label: 'Fake',
+      datasetTypes: ['FAKE'],
+      flavors: [ExploreFlavor.Logs],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { FakeQL: {} },
+    });
+    setSourceTypeRegistry(registry);
+    try {
+      render(
+        <Provider
+          store={makeStore('fields @message', undefined, 'FakeQL', {
+            id: 'fake-1',
+            title: 'fake',
+            type: 'FAKE',
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+      expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+      expect(screen.queryByTestId('pplBuilderModeToggle-builder')).not.toBeInTheDocument();
+    } finally {
+      setSourceTypeRegistry(new SourceTypeRegistryService());
+    }
   });
 
   it('disables the Builder option for an unrepresentable query in Code mode', () => {

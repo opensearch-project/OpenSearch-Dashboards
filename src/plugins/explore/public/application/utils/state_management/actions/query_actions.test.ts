@@ -49,10 +49,14 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasStats: jest.fn(() => false),
+  queryHasAggregation: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
 import {
   abortAllActiveQueries,
   defaultPrepareQueryString,
@@ -63,12 +67,14 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  executeBucketCountQuery,
+  shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, ExploreFlavor } from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -368,6 +374,27 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it("passes a source type language's query through unchanged", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+      setSourceTypeRegistry(registry);
+
+      try {
+        expect(
+          defaultPrepareQueryString({ query: 'fields @message | limit 5', language: 'FakeQL' })
+        ).toBe('fields @message | limit 5');
+      } finally {
+        setSourceTypeRegistry(new SourceTypeRegistryService());
+      }
+    });
+
     it('should handle empty query string', () => {
       const pplQuery: Query = {
         query: '',
@@ -541,8 +568,66 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           field2: 1,
           field3: 1,
         },
+        nonEmptyFieldCounts: {
+          field1: 2,
+          field2: 1,
+          field3: 1,
+        },
         dataset: mockDataView,
         elapsedMs: 100,
+      });
+    });
+
+    it('should exclude empty values from nonEmptyFieldCounts but not fieldCounts', () => {
+      // Tabular responses (e.g. PPL) put every schema field on every row, using null for the
+      // ones a document doesn't populate.
+      const rawResults = {
+        hits: {
+          hits: [
+            {
+              _id: '1',
+              _source: {
+                populated: 'value1',
+                empty: null,
+                sparse: null,
+                falsy: 0,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+            {
+              _id: '2',
+              _source: {
+                populated: 'value2',
+                empty: null,
+                sparse: 'value3',
+                falsy: false,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+          ],
+          total: 2,
+        },
+        elapsedMs: 100,
+      } as any;
+
+      const result = defaultResultsProcessor(rawResults, mockDataView);
+
+      // Every field is "present" on both rows
+      expect(result.fieldCounts).toEqual({
+        populated: 2,
+        empty: 2,
+        sparse: 2,
+        falsy: 2,
+        empty_array: 2,
+        null_array: 2,
+      });
+      // Only fields carrying real values are counted; 0 and false count, nulls don't
+      expect(result.nonEmptyFieldCounts).toEqual({
+        populated: 2,
+        sparse: 1,
+        falsy: 2,
       });
     });
 
@@ -1205,6 +1290,60 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       await thunk(mockDispatch, mockGetState, undefined);
 
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
+    });
+
+    it('runs nothing at all for a blank SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: '   ', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue(''),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Neither the empty query nor the histogram's `FROM ()` reaches the cluster.
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks).toHaveLength(0);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'query/executeQueries/fulfilled' })
+      );
+    });
+
+    it('still runs a non-empty SQL query', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'SELECT * FROM logs', language: 'SQL', dataset: null },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      (mockServices.tabRegistry.getTab as jest.Mock).mockReturnValue({
+        prepareQuery: jest.fn().mockReturnValue('SELECT * FROM logs'),
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should skip histogram query when language is PROMQL', async () => {
@@ -1919,6 +2058,89 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it('lets a superseded run for the same key leave its successor untouched', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let rejectFirst: (error: Error) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((_resolve, reject) => (rejectFirst = reject)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const statusesFor = () =>
+        mockDispatch.mock.calls
+          .map(([action]) => action)
+          .filter(
+            (action) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload.cacheKey === 'tab-key'
+          )
+          .map((action) => action.payload.status.status);
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const abortError = new Error('Aborted');
+      abortError.name = 'AbortError';
+      rejectFirst(abortError);
+      await first;
+      expect(statusesFor()).not.toContain(QueryExecutionStatus.UNINITIALIZED);
+
+      resolveSecond({ hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 });
+      await second;
+      expect(statusesFor()).toEqual([
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.READY,
+      ]);
+    });
+
+    it('drops the results of a superseded run whose fetch resolves after it was replaced', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let resolveFirst: (value: unknown) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const staleHits = { hits: { hits: [{ _id: 'stale', _source: {} }], total: 1 }, took: 1 };
+      const freshHits = { hits: { hits: [{ _id: 'fresh', _source: {} }], total: 1 }, took: 1 };
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      resolveFirst(staleHits);
+      await first;
+      expect(setResults).not.toHaveBeenCalled();
+
+      resolveSecond(freshHits);
+      await second;
+      expect(setResults).toHaveBeenCalledTimes(1);
+      expect(setResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheKey: 'tab-key',
+          results: expect.objectContaining({ hits: freshHits.hits }),
+        })
+      );
+    });
+
     // A tab whose prepareQuery cannot yet build a query returns '' -- see the patterns
     // tab, whose field is derived from logs results that are gone after a page reload.
     it('does not run anything when the cache key is empty', async () => {
@@ -2321,6 +2543,41 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(results).toHaveLength(3);
       expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('shouldSkipQueryExecution', () => {
+    const queryFor = (language: string, queryText: unknown): Query =>
+      ({
+        language,
+        query: queryText,
+        dataset: { id: 'd', title: 't', type: 'INDEX_PATTERN' },
+      }) as Query;
+
+    // Selecting a dataset resets the editor to EMPTY_QUERY.QUERY ('').
+    it.each([
+      ['', 'empty'],
+      ['   ', 'whitespace only'],
+    ])('skips a %s SQL query (%s)', (queryText) => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', queryText))).toBe(true);
+    });
+
+    it('skips a SQL query whose text is not a string', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', undefined))).toBe(true);
+    });
+
+    it('runs a non-empty SQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('SQL', 'SELECT * FROM idx'))).toBe(false);
+    });
+
+    it('still skips a blank PromQL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', ''))).toBe(true);
+      expect(shouldSkipQueryExecution(queryFor('PROMQL', 'up'))).toBe(false);
+    });
+
+    // defaultPreparePplQuery turns a blank PPL editor into `source = <table>`.
+    it('runs a blank PPL query', () => {
+      expect(shouldSkipQueryExecution(queryFor('PPL', ''))).toBe(false);
     });
   });
 });

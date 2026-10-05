@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": ["data", "opensearchDashboardsReact", "opensearchDashboardsUtils", "savedObjects", "uiActions"],
   "optionalPlugins": ["dataSource", "usageCollection"],
+  "extraPublicDirs": ["common/metrics"],
   "configPath": ["queryEnhancements"]
 }
 

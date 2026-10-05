@@ -30,7 +30,7 @@ import {
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { getPreloadedStore } from './utils/state_management';
-import { opensearchFilters } from '../../data/public';
+import { getGlobalQueryUrlState } from '../../data/public';
 import { setUsageCollector } from './services';
 import { WorkspaceAvailability } from '../../../../src/core/public';
 
@@ -69,10 +69,7 @@ export class DataExplorerPlugin implements Plugin<
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],

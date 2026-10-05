@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
 
-import { MetricChartStyle } from './metric_vis_config';
+import { MetricChartStyle, shouldShowMetricName } from './metric_vis_config';
 import { AxisRole, RendererSpecConfig } from '../types';
 import { MetricAxisMapping } from './to_expression';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
@@ -119,21 +119,6 @@ function getPercentageChangeColor(
   } else {
     return isInverted ? palette.statusGreen : palette.statusRed;
   }
-}
-
-/**
- * Determines the title text based on text mode setting
- */
-function getTitleText(textMode: string | undefined, title: string): string {
-  const mode = textMode || 'value_and_name';
-
-  // Both 'name' and 'value_and_name' show the title
-  if (mode === 'name' || mode === 'value_and_name') {
-    return title;
-  }
-
-  // 'none' and 'value' don't show title
-  return '';
 }
 
 /**
@@ -278,7 +263,12 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';
-  const displayName = seriesName ?? name;
+  const customTitle = styles.title.trim() || undefined;
+  const displayName = seriesName
+    ? customTitle
+      ? `${seriesName} ${customTitle}`
+      : seriesName
+    : (customTitle ?? name);
 
   const valueColumn = axisColumnMappings[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -286,14 +276,6 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
-  const handlerRef = useRef(
-    debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100)
-  );
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
@@ -301,14 +283,19 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     return calculateMetricTextData(data, styles, numericField);
   }, [data, styles, numericField]);
 
-  const title = getTitleText(styles.textMode, displayName);
+  const title = shouldShowMetricName(styles.textMode) ? displayName : '';
 
   // ResizeObserver to track container dimensions
   useEffect(() => {
     const element = overlayRef.current;
     if (!element) return;
 
-    const handler = handlerRef.current;
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
     const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);

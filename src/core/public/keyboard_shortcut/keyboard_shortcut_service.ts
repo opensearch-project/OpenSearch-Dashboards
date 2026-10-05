@@ -50,7 +50,7 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
-    this.sequenceHandler = new SequenceHandler();
+    this.sequenceHandler.cancel();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
@@ -85,7 +85,7 @@ export class KeyboardShortcutService {
           `keyboard shortcut conflict detected for key "${shortcut.keys}". ` +
             `New shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" ` +
             `conflicts with active shortcuts: ${conflictingShortcuts}. ` +
-            `The new shortcut will take precedence when the key is pressed.`
+            `The last eligible shortcut will take precedence when the key is pressed.`
         );
       }
     }
@@ -126,7 +126,7 @@ export class KeyboardShortcutService {
     return target !== null && 'tagName' in target;
   }
 
-  private shouldIgnoreKeyboardEventForTarget(target: EventTarget | null): boolean {
+  private isEditableTarget(target: EventTarget | null): boolean {
     if (!this.isHTMLElement(target)) return false;
 
     const element = target;
@@ -165,29 +165,44 @@ export class KeyboardShortcutService {
 
   private executeShortcutForKey(event: KeyboardEvent, key: string): void {
     const shortcuts = this.shortcutsMapByKey.get(key);
-    if (shortcuts?.length) {
-      const shortcut = shortcuts[shortcuts.length - 1];
+    if (!shortcuts?.length) {
+      return;
+    }
+
+    const targetIsEditable = this.isEditableTarget(event.target);
+
+    for (let index = shortcuts.length - 1; index >= 0; index--) {
+      const shortcut = shortcuts[index];
+
+      if (targetIsEditable && !shortcut.allowInEditable) {
+        continue;
+      }
+
       this.executeShortcut(event, shortcut);
+      return;
     }
   }
 
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
-    if (this.shouldIgnoreKeyboardEventForTarget(event.target)) {
+    const eventKeyString = this.keyParser.getEventKeyString(event);
+    const targetIsEditable = this.isEditableTarget(event.target);
+
+    if (this.sequenceHandler.isInSequence()) {
+      // A pending sequence owns the next key. Execution is still subject to the
+      // shortcut's editable-target policy in executeShortcutForKey().
+      const sequenceKey = this.sequenceHandler.processSecondKey(eventKeyString);
+      this.executeShortcutForKey(event, sequenceKey);
       return;
     }
 
-    const eventKeyString = this.keyParser.getEventKeyString(event);
-
-    // Check if sequence handler already has a first key (waiting for second key)
-    if (this.sequenceHandler.isInSequence()) {
-      const sequenceKey = this.sequenceHandler.processSecondKey(eventKeyString);
-      this.executeShortcutForKey(event, sequenceKey);
-    } else if (SEQUENCE_PREFIX.has(eventKeyString)) {
+    // Text entry must not create sequence state that can later trigger a
+    // navigation shortcut after focus leaves the editable element.
+    if (!targetIsEditable && SEQUENCE_PREFIX.has(eventKeyString)) {
       this.sequenceHandler.processFirstKey(eventKeyString);
-    } else {
-      // Process as regular shortcut (including modifier keys and single keys)
-      this.executeShortcutForKey(event, eventKeyString);
+      return;
     }
+
+    this.executeShortcutForKey(event, eventKeyString);
   };
 
   private startEventListener(): void {

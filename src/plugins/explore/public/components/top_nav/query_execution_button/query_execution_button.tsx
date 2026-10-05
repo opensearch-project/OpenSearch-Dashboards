@@ -4,8 +4,6 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiSuperUpdateButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
@@ -17,24 +15,19 @@ import {
 import {
   selectDateRange,
   selectIsQueryEditorDirty,
-  selectShouldShowCancelButton,
+  selectIsUserQueryRunning,
 } from '../../../application/utils/state_management/selectors';
 import { isTimeRangeInvalid } from '../utils/validate_time_range';
-import { useCancelButtonTiming } from '../../../../../data/public';
+import { QueryRunStopButton } from './query_run_stop_button';
 
 export interface QueryExecutionButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  showCancelButton?: boolean;
   onCancel?: () => void;
-  isQueryRunning?: boolean;
 }
 
 /**
- * Query execution button that calculates and manages its own status in Redux.
- * Shows different text based on button status:
- * - "Update" when status is 'UPDATE' (there are changes)
- * - "Refresh" when status is 'REFRESH' (no changes, just re-run)
- * - Disabled when status is 'DISABLED' (validation errors)
+ * Explore's run/stop control. Derives the button status, publishes it to Redux, and reads
+ * "Stop" while a user-initiated query is running.
  */
 export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   onClick,
@@ -45,12 +38,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   const dateRange = useSelector(selectDateRange);
   const timefilter = services?.data?.query?.timefilter?.timefilter;
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
-
-  // Get Redux state for cancel button logic
-  const reduxShouldShowCancelButton = useSelector(selectShouldShowCancelButton);
-
-  // Use custom hook for cancel button timing logic
-  const shouldShowCancelButton = useCancelButtonTiming(reduxShouldShowCancelButton);
+  const isRunning = useSelector(selectIsUserQueryRunning);
 
   const determineButtonStatus = useCallback((): QueryExecutionButtonStatus => {
     if (dateRange && isTimeRangeInvalid(dateRange)) {
@@ -73,53 +61,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
     dispatch(setQueryExecutionButtonStatus(status));
   }, [dispatch, status]);
 
-  const isDisabled = status === 'DISABLED';
-  const needsUpdate = status === 'UPDATE';
-
-  const buttonText = needsUpdate
-    ? i18n.translate('explore.topNav.queryExecutionButton.update', {
-        defaultMessage: 'Update',
-      })
-    : i18n.translate('explore.topNav.queryExecutionButton.refresh', {
-        defaultMessage: 'Refresh',
-      });
-
-  const runButton = (
-    <EuiSuperUpdateButton
-      needsUpdate={needsUpdate}
-      isDisabled={isDisabled}
-      onClick={onClick || (() => {})}
-      data-test-subj="exploreQueryExecutionButton"
-      aria-label={i18n.translate('explore.topNav.queryExecutionButton.ariaLabel', {
-        defaultMessage: 'Submit query: {buttonText}',
-        values: { buttonText },
-      })}
-      compressed={true}
-      color="primary"
-      fill={needsUpdate}
-    >
-      {buttonText}
-    </EuiSuperUpdateButton>
-  );
-
-  const cancelButton = shouldShowCancelButton ? (
-    <EuiButtonIcon
-      size="s"
-      color="danger"
-      onClick={onCancel}
-      data-test-subj="exploreQueryCancelButton"
-      aria-label={i18n.translate('explore.topNav.queryExecutionButton.cancelAriaLabel', {
-        defaultMessage: 'Cancel query',
-      })}
-      iconType="cross"
-      className="osdQueryEditor__cancelButton"
-    />
-  ) : null;
-
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false} style={{ justifyContent: 'end' }}>
-      <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
-      {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
-    </EuiFlexGroup>
+    <QueryRunStopButton status={status} isRunning={isRunning} onRun={onClick} onStop={onCancel} />
   );
 };

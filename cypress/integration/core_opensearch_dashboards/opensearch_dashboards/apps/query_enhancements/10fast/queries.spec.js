@@ -79,13 +79,13 @@ const queriesTestSuite = () => {
 
       it('with SQL', () => {
         cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
-        cy.setQueryLanguage('OpenSearch SQL');
+        cy.setQueryLanguage('SQL');
 
         // Use the more robust verifyDiscoverPageState function
         verifyDiscoverPageState({
           dataset: `${INDEX_WITH_TIME_1}*`,
           queryString: `SELECT * FROM ${INDEX_WITH_TIME_1}* LIMIT 10`,
-          language: 'OpenSearch SQL',
+          language: 'SQL',
         });
 
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');

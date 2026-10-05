@@ -32,13 +32,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         defaultMessage: 'Timeline',
       }),
     },
-    // Disabled: Service Map tab
-    // {
-    //   id: TraceDetailTab.SERVICE_MAP,
-    //   name: i18n.translate('explore.traceView.tab.serviceMap', {
-    //     defaultMessage: 'Service map',
-    //   }),
-    // },
     {
       id: TraceDetailTab.SPAN_LIST,
       name: (
@@ -53,6 +46,12 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
           })}
         </>
       ),
+    },
+    {
+      id: TraceDetailTab.SERVICE_MAP,
+      name: i18n.translate('explore.traceView.tab.traceMap', {
+        defaultMessage: 'Trace map',
+      }),
     },
   ];
 
@@ -73,7 +72,7 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   });
 
   return (
-    <EuiTabs>
+    <EuiTabs display="condensed">
       {tabs.map((tab) => (
         <EuiTab key={tab.id} isSelected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
           {tab.name}

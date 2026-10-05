@@ -7,11 +7,13 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 
 interface ChatContextType {
   chatService: ChatService;
   suggestedActionsService: SuggestedActionsService;
   confirmationService: ConfirmationService;
+  humanInputService: HumanInputService;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ interface ChatProviderProps {
   chatService: ChatService;
   suggestedActionsService: SuggestedActionsService;
   confirmationService: ConfirmationService;
+  humanInputService: HumanInputService;
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
@@ -28,9 +31,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   chatService,
   suggestedActionsService,
   confirmationService,
+  humanInputService,
 }) => {
   return (
-    <ChatContext.Provider value={{ chatService, suggestedActionsService, confirmationService }}>
+    <ChatContext.Provider
+      value={{ chatService, suggestedActionsService, confirmationService, humanInputService }}
+    >
       {children}
     </ChatContext.Provider>
   );

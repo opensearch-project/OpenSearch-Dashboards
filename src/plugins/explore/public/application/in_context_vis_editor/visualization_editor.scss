@@ -100,6 +100,27 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 }
 
+.visualizationEditorTabPanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  min-height: 0;
+
+  &__editorsWrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__editorBody {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
 .exploreDatasetSelectWrapper {
   // Wrapper div should not affect layout
   display: contents;

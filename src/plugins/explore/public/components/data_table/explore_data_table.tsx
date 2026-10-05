@@ -14,6 +14,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
+import { QueryWarningsCallout } from './query_warnings_callout';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';
 import {
@@ -46,6 +47,7 @@ const ExploreDataTableComponent = () => {
   const metadata = useSelector((state: RootState) => state.results[cacheKey]);
   const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const rows = rawResults?.hits?.hits || [];
+  const warnings = metadata?.warnings ?? [];
 
   const flavorId = useFlavorId();
   const expandedTableHeader = useMemo(() => {
@@ -97,6 +99,7 @@ const ExploreDataTableComponent = () => {
       className="explore-table-container eui-xScrollWithShadows"
       ref={containerRef}
     >
+      <QueryWarningsCallout warnings={warnings} />
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"

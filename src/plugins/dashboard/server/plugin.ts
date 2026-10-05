@@ -55,13 +55,13 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
   public async setup(core: CoreSetup) {
     this.logger.debug('dashboard: Setup');
 
-    const { variables } = await this.initializerContext.config
+    const { variables, allowDashboardSections } = await this.initializerContext.config
       .create<ConfigSchema>()
       .pipe(first())
       .toPromise();
-    // Only register the `variablesJSON` mapping field when the Variables feature
-    // is enabled. When disabled, the field is absent.
-    core.savedObjects.registerType(getDashboardSavedObjectType(variables.enabled));
+    core.savedObjects.registerType(
+      getDashboardSavedObjectType(variables.enabled, allowDashboardSections)
+    );
     core.capabilities.registerProvider(capabilitiesProvider);
     core.capabilities.registerSwitcher(async (request, capabilites) => {
       return await core.security.readonlyService().hideForReadonly(request, capabilites, {

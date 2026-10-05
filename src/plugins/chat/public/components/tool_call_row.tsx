@@ -38,7 +38,7 @@ export interface TimelineToolCall {
 
 interface ToolCallRowProps {
   toolCall: TimelineToolCall;
-  onApprove?: () => void;
+  onApprove?: (modifiedArgs?: any) => void;
   onReject?: () => void;
   initialOpen?: boolean;
 }
@@ -327,6 +327,7 @@ const getCustomizedRenderOptions = ({
     args,
     result: renderResult,
     error: toolCall.status === 'error' ? new Error(toolCall.result || 'Unknown error') : undefined,
+    toolCallId: toolCall.id,
     onApprove,
     onReject,
   };

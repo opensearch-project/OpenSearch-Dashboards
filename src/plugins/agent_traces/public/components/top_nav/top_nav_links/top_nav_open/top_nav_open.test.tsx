@@ -17,8 +17,8 @@ jest.mock('./open_search_panel', () => ({
 describe('openTopNavData', () => {
   it('should have correct properties', () => {
     expect(openTopNavData).toMatchObject({
-      tooltip: 'Open',
-      ariaLabel: 'Open Saved Search',
+      tooltip: 'Browse searches',
+      ariaLabel: 'Browse searches',
       testId: 'discoverOpenButton',
       iconType: 'folderOpen',
       controlType: 'icon',

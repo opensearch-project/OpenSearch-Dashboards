@@ -73,6 +73,9 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       return (
         <>
           {content
+            // Named blocks (e.g. visualization_context) are context for the agent, not for the
+            // user bubble; skip them here. getImageSrc resolves both the legacy `binary` shape
+            // and the `image` shape, so images survive a reload either way.
             .filter((block: any) => !block.name)
             .map((block: any, index: number) => {
               const imageSrc = getImageSrc(block);

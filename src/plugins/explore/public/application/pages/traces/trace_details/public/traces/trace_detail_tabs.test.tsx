@@ -27,8 +27,8 @@ describe('TraceDetailTabs', () => {
     render(<TraceDetailTabs {...defaultProps} />);
 
     expect(screen.getByText('Timeline')).toBeInTheDocument();
-    // Service map tab is currently disabled
-    expect(screen.queryByText('Service map')).not.toBeInTheDocument();
+    // Trace map tab (per-trace service flow) is enabled
+    expect(screen.getByText('Trace map')).toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
   });
 
@@ -80,9 +80,9 @@ describe('TraceDetailTabs', () => {
     // Check that log count badge is displayed
     expect(screen.getByText('5')).toBeInTheDocument();
 
-    // Verify we have 3 tabs now (Timeline, Span list, Related logs)
+    // Verify we have 4 tabs (Timeline, Trace map, Span list, Related logs)
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(3);
+    expect(tabs).toHaveLength(4);
   });
 
   it('render logs tab when logDatasets are not present', () => {
@@ -98,9 +98,9 @@ describe('TraceDetailTabs', () => {
     // Check that logs tab is not present
     expect(screen.queryByText('Related logs')).toBeInTheDocument();
 
-    // Verify we only have 3 tabs (Timeline, Span list, Related Logs)
+    // Verify we have 4 tabs (Timeline, Trace map, Span list, Related logs)
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(3);
+    expect(tabs).toHaveLength(4);
   });
 
   it('does not render logCount badge when isLogsLoading is true', () => {
@@ -119,8 +119,8 @@ describe('TraceDetailTabs', () => {
     // Check that log count badge is NOT displayed when loading
     expect(screen.queryByText('5')).not.toBeInTheDocument();
 
-    // Verify we have 3 tabs (Timeline, Span list, Related logs)
+    // Verify we have 4 tabs (Timeline, Trace map, Span list, Related logs)
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(3);
+    expect(tabs).toHaveLength(4);
   });
 });

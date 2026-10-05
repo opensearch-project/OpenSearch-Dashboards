@@ -31,6 +31,8 @@
 import { has } from 'lodash';
 import { Query } from 'src/plugins/data/public';
 
+const SUPPORTED_DASHBOARD_QUERY_LANGUAGES = new Set(['kuery', 'lucene']);
+
 /**
  * Creates a standardized query object from old queries that were either strings or pure OpenSearch query DSL
  *
@@ -45,4 +47,17 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
   }
 
   return query as Query;
+}
+
+export function normalizeDashboardQuery(query: Query | { [key: string]: any } | string): Query {
+  const migratedQuery = migrateLegacyQuery(query);
+
+  // Dashboard-level queries are shared by every panel and support only DQL and Lucene.
+  // Older startup behavior could persist a default dataset's generated PPL query here,
+  // so discard both the unsupported query and its dataset instead of applying them globally.
+  if (!SUPPORTED_DASHBOARD_QUERY_LANGUAGES.has(migratedQuery.language)) {
+    return { query: '', language: 'kuery' };
+  }
+
+  return migratedQuery;
 }

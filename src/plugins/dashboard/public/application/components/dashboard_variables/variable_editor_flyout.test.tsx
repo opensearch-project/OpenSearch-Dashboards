@@ -10,9 +10,16 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 // The query panel pulls in monaco and the services context; it is never rendered
 // for Text/Custom variables, so stubbing it keeps these tests focused.
-jest.mock('./query_panel/variable_query_panel', () => ({
-  VariableQueryPanel: () => <div data-test-subj="mockVariableQueryPanel" />,
-}));
+jest.mock('./query_panel/variable_query_panel', () => {
+  const capture = jest.fn();
+  return {
+    VariableQueryPanel: (props: any) => {
+      capture(props);
+      return <div data-test-subj="mockVariableQueryPanel" />;
+    },
+    __capture: capture,
+  };
+});
 
 import { VariableEditorFlyout } from './variable_editor_flyout';
 import { Variable, VariableType } from '../../../variables/types';
@@ -265,5 +272,47 @@ describe('VariableEditorFlyout — allowCustomValue', () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ type: VariableType.Query, allowCustomValue: true })
     );
+  });
+});
+
+describe('VariableEditorFlyout — variable reference suggestions', () => {
+  const getLastPanelProps = () => {
+    const capture = jest.requireMock('./query_panel/variable_query_panel').__capture as jest.Mock;
+    return capture.mock.calls[capture.mock.calls.length - 1][0];
+  };
+
+  it('only suggests variables defined before the one being edited (excludes self and later)', () => {
+    (jest.requireMock('./query_panel/variable_query_panel').__capture as jest.Mock).mockClear();
+    const vars = [
+      queryVariable({ id: 'a', name: 'alpha' }),
+      queryVariable({ id: 'b', name: 'bravo' }),
+      queryVariable({ id: 'c', name: 'charlie' }),
+    ];
+    mountWithIntl(
+      <VariableEditorFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        existingVariable={vars[1]}
+        existingVariables={vars}
+      />
+    );
+    expect(getLastPanelProps().existingVariableNames).toEqual(['alpha']);
+  });
+
+  it('suggests all existing variables when creating a new one', () => {
+    (jest.requireMock('./query_panel/variable_query_panel').__capture as jest.Mock).mockClear();
+    const vars = [
+      queryVariable({ id: 'a', name: 'alpha' }),
+      queryVariable({ id: 'b', name: 'bravo' }),
+    ];
+    mountWithIntl(
+      <VariableEditorFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        existingVariable={undefined}
+        existingVariables={vars}
+      />
+    );
+    expect(getLastPanelProps().existingVariableNames).toEqual(['alpha', 'bravo']);
   });
 });

@@ -21,6 +21,9 @@
     transform: translateX(-50%);
 
     .exploreTimelineRuler__label {
+      // Darker than the ticks/baseline (which stay $euiColorMediumShade) so the
+      // labels clear WCAG contrast against the white timeline background.
+      color: $euiColorDarkShade;
       font-size: $euiFontSizeXS;
       line-height: 1;
       white-space: nowrap;

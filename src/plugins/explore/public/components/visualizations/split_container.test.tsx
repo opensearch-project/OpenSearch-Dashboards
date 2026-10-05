@@ -60,8 +60,11 @@ describe('getColumnCount', () => {
 describe('SplitContainer', () => {
   const mockRenderChart = jest.fn((group) => <div data-test-subj="mockChart">{group}</div>);
 
-  const createGroups = (count: number): string[] =>
-    Array.from({ length: count }, (_, i) => `group_${i}`);
+  const createGroups = (count: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      original: `group_${i}`,
+      displayName: `group_${i}`,
+    }));
 
   it('renders all groups', () => {
     const groups = createGroups(3);
@@ -76,7 +79,7 @@ describe('SplitContainer', () => {
   });
 
   it('passes showLabel to chart instances', () => {
-    const groups = ['TestLabel'];
+    const groups = [{ original: 'TestLabel', displayName: 'TestLabel' }];
 
     render(
       <SplitContainer
@@ -132,5 +135,26 @@ describe('SplitContainer', () => {
     );
 
     expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '60px' });
+  });
+
+  it('uses 300px as the default horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer groups={createGroups(1)} layout="horizontal" renderChart={mockRenderChart} />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '300px' });
+  });
+
+  it('uses the configured horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer
+        groups={createGroups(1)}
+        layout="horizontal"
+        horizontalItemMinWidth={180}
+        renderChart={mockRenderChart}
+      />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '180px' });
   });
 });

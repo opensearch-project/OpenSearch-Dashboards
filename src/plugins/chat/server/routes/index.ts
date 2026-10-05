@@ -14,7 +14,12 @@ import {
   Capabilities,
   OpenSearchClient,
 } from '../../../../core/server';
-import { getPrincipalsFromRequest } from '../../../../core/server/utils';
+import {
+  getPrincipalsFromRequest,
+  getWorkspaceState,
+  isRequestWorkspaceAuthorized,
+} from '../../../../core/server/utils';
+import { WorkspacePluginStart } from '../../../workspace/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
@@ -139,18 +144,42 @@ async function forwardToAgUI(
 
   logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
 
-  // Forward the request to AG-UI server using native fetch (Node 18+)
-  const agUiResponse = await fetch(agUiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'text/event-stream',
-      ...(oboToken ? { Authorization: `Bearer ${oboToken}` } : {}),
-    },
-    body: JSON.stringify(requestBody),
+  // Propagate a client disconnect upstream. Otherwise only the browser-to-Dashboards
+  // connection drops: this fetch stays open, so the agent never sees the disconnect and
+  // keeps streaming to Bedrock, running tools and persisting an answer nobody is reading.
+  // Cancelling lands on the task actually running the agent, so it needs no shared state.
+  // A disconnect is deliberately not distinguished from a stop: a refresh therefore loses
+  // the in-flight answer (it is only persisted once fully generated), which is preferred
+  // over paying for a run whose client has gone.
+  const upstreamAbort = new AbortController();
+  const abortSubscription = request.events.aborted$.subscribe(() => {
+    logger?.info('Client disconnected; aborting AG-UI request');
+    upstreamAbort.abort();
   });
 
+  // Forward the request to AG-UI server using native fetch (Node 18+).
+  // Wrapped so the aborted$ subscription is released even if fetch itself rejects — e.g. a network
+  // error, or the upstream abort firing before the response resolves. The cleanup below only runs
+  // once a response/stream exists, so without this the subscription would leak on that path.
+  let agUiResponse: Awaited<ReturnType<typeof fetch>>;
+  try {
+    agUiResponse = await fetch(agUiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        ...(oboToken ? { Authorization: `Bearer ${oboToken}` } : {}),
+      },
+      body: JSON.stringify(requestBody),
+      signal: upstreamAbort.signal,
+    });
+  } catch (error) {
+    abortSubscription.unsubscribe();
+    throw error;
+  }
+
   if (!agUiResponse.ok) {
+    abortSubscription.unsubscribe();
     return response.customError({
       statusCode: agUiResponse.status,
       body: {
@@ -159,8 +188,18 @@ async function forwardToAgUI(
     });
   }
 
+  // An ok response with no body would throw on getReader() before the Readable (whose destroy/end
+  // hooks own the unsubscribe) exists, leaking the subscription. Release it here instead.
+  if (!agUiResponse.body) {
+    abortSubscription.unsubscribe();
+    return response.customError({
+      statusCode: 502,
+      body: { message: 'AG-UI server returned no response body' },
+    });
+  }
+
   // Convert Web ReadableStream to Node.js Readable stream
-  const reader = agUiResponse.body!.getReader();
+  const reader = agUiResponse.body.getReader();
   const stream = new Readable({
     async read() {
       try {
@@ -171,10 +210,21 @@ async function forwardToAgUI(
           this.push(Buffer.from(value)); // Push as Buffer for binary mode
         }
       } catch (error) {
-        this.destroy(error as Error);
+        // An aborted upstream fetch lands here; end the stream rather than erroring,
+        // since the client that would have seen the error is already gone.
+        if ((error as Error)?.name === 'AbortError') {
+          this.push(null);
+        } else {
+          this.destroy(error as Error);
+        }
       }
     },
+    destroy(error, callback) {
+      abortSubscription.unsubscribe();
+      callback(error);
+    },
   });
+  stream.on('end', () => abortSubscription.unsubscribe());
 
   return response.ok({
     headers: {
@@ -198,7 +248,8 @@ export function defineRoutes(
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
   forwardCredentials?: boolean,
-  getHttpAuth?: () => HttpAuth | undefined
+  getHttpAuth?: () => HttpAuth | undefined,
+  getWorkspace?: () => WorkspacePluginStart | undefined
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -316,6 +367,23 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       const dataSourceId = request.query?.dataSourceId;
+
+      // If given workspaceId, then ensure user can access the workspace, and
+      // forwardedProps.workspaceId is consistent. Otherwise no ACL check and
+      // no forwardedProps.workspaceId.
+      const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
+      const mutableBody = request.body as { forwardedProps?: Record<string, unknown> };
+      const forwardedProps = (mutableBody.forwardedProps ?? {}) as Record<string, unknown>;
+      if (requestWorkspaceId) {
+        if (!(await isRequestWorkspaceAuthorized(getWorkspace?.(), request, logger))) {
+          logger.warn('Chat proxy rejected: caller lacks access to the requested workspace');
+          return response.forbidden({ body: { message: 'Access to this workspace is denied' } });
+        }
+        forwardedProps.workspaceId = requestWorkspaceId;
+      } else {
+        delete forwardedProps.workspaceId;
+      }
+      mutableBody.forwardedProps = forwardedProps;
 
       try {
         // Inject server-side system prompt if present

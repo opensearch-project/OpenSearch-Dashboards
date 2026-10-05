@@ -87,6 +87,25 @@ describe('indexTypeConfig', () => {
     });
   });
 
+  test('toDataset carries displayName from meta when present', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'index1',
+        title: 'otel-v1*',
+        type: 'INDEX',
+        meta: {
+          timeFieldName: 'startTime',
+          displayName: 'My Trace Dataset',
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        },
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    expect(result.displayName).toBe('My Trace Dataset');
+  });
+
   test('toDataset handles multi-index selection with comma-separated titles', () => {
     const mockPath: DataStructure[] = [
       {
@@ -229,6 +248,37 @@ describe('indexTypeConfig', () => {
         type: 'DATA_SOURCE',
         engineType: 'Elasticsearch',
         version: '7.10.2',
+      });
+    });
+
+    test('uses the leaf parent when the path does not contain a DATA_SOURCE node', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: DEFAULT_DATA.SET_TYPES.INDEX,
+          parent: {
+            id: 'datasource1',
+            title: 'DataSource 1',
+            type: 'OpenSearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceEngineType: 'OpenSearch',
+              dataSourceVersion: '2.17.0',
+            },
+          },
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.17.0',
       });
     });
 

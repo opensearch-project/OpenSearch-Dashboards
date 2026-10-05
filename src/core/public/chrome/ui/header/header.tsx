@@ -94,6 +94,7 @@ import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
 import { HeaderBanner } from './header_banner';
 import { OBSERVABILITY_USE_CASE_ID } from '../../../../../core/utils';
+import { GlobalSearchCommandPalette } from '../global_search/command_palette/command_palette';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -756,6 +757,7 @@ export function Header({
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
             globalSearchCommands$={observables.globalSearchCommands$}
+            commandPaletteAvailable={Boolean(keyboardShortcut)}
             enableIconSideNav={enableIconSideNav}
             navPopoverServices={observables.navPopoverServices}
             isLocked={isLocked}
@@ -788,6 +790,12 @@ export function Header({
           />
         )}
       </header>
+      {keyboardShortcut && (
+        <GlobalSearchCommandPalette
+          globalSearchCommands$={observables.globalSearchCommands$}
+          keyboardShortcut={keyboardShortcut}
+        />
+      )}
     </>
   );
 }

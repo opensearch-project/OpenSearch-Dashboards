@@ -13,14 +13,18 @@ import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_w
 import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl_lint_fix_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
+  selectDataset,
+  selectQueryLanguage,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
@@ -68,12 +72,21 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const isLoading = queryIsLoading || promptToQueryIsLoading;
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
+  // Languages the PPL builder can't represent are code-only: the Builder toggle is hidden and
+  // the editor stays in Code mode.
+  const queryLanguage = useSelector(selectQueryLanguage);
+  const queryDataset = useSelector(selectDataset);
+  const isCodeOnlyLanguage = !getSourceTypeRegistry().supportsVisualBuilder(
+    queryLanguage,
+    queryDataset
+  );
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const setEditorText = useSetEditorText();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+  usePPLLintFixAction(setEditorTextWithQuery);
 
   const { queryString } = services.data.query;
 
@@ -233,7 +246,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
       })
     : undefined;
 
-  const showBuilder = mode === 'builder' && !isPromptMode;
+  const showBuilder = mode === 'builder' && !isPromptMode && !isCodeOnlyLanguage;
 
   // Analyze is only available on the code editor, not the visual builder. Report
   // the live editor mode up so the page can show/hide the analyze panel to match.
@@ -291,6 +304,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
             hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
             hideAskAI={builderOnlyMode}
+            builderOnly={builderOnlyMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -316,7 +330,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             editors
           )}
         </EuiFlexItem>
-        {!isPromptMode && !builderOnlyMode && (
+        {!isPromptMode && !builderOnlyMode && !isCodeOnlyLanguage && (
           <EuiFlexItem grow={false}>
             <ModeButtonGroup
               mode={mode}

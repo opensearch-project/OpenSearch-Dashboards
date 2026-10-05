@@ -8,6 +8,7 @@ import { ChatMountService } from './chat_mount_service';
 import { ChatService } from './chat_service';
 import { SuggestedActionsService } from './suggested_action';
 import { ConfirmationService } from './confirmation_service';
+import { HumanInputService } from './human_input_service';
 import { SIDECAR_DOCKED_MODE } from '../../../../core/public';
 
 // Mock React and react-dom
@@ -29,6 +30,7 @@ describe('ChatMountService', () => {
   let mockChatService: any;
   let mockSuggestedActionsService: SuggestedActionsService;
   let mockConfirmationService: ConfirmationService;
+  let mockHumanInputService: HumanInputService;
   let mockChromeVisible$: BehaviorSubject<boolean>;
   let mockSidecarRef: any;
   let onWindowOpenCallback: Function;
@@ -47,6 +49,9 @@ describe('ChatMountService', () => {
 
     // Mock core services
     mockCore = {
+      application: {
+        currentAppId$: new BehaviorSubject<string | undefined>('dashboard'),
+      },
       chrome: {
         getIsVisible$: jest.fn(() => mockChromeVisible$),
       },
@@ -81,11 +86,17 @@ describe('ChatMountService', () => {
     // Mock confirmation service
     mockConfirmationService = {} as ConfirmationService;
 
+    // Mock human input service
+    mockHumanInputService = {} as HumanInputService;
+
     chatMountService = new ChatMountService();
   });
 
   afterEach(() => {
     chatMountService.stop();
+    // Several tests stub requestAnimationFrame via jest.spyOn; clearAllMocks()
+    // does not undo that, so restore the originals here.
+    jest.restoreAllMocks();
   });
 
   describe('start', () => {
@@ -95,6 +106,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       expect(contract).toEqual({
@@ -110,6 +122,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       expect(mockCore.chat.onWindowOpen).toHaveBeenCalledWith(expect.any(Function));
@@ -122,6 +135,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       expect(mockCore.chrome.getIsVisible$).toHaveBeenCalled();
@@ -135,6 +149,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
@@ -154,17 +169,40 @@ describe('ChatMountService', () => {
     it('should not open sidecar when chrome is not visible', () => {
       // Set chrome to not visible before starting
       mockChromeVisible$.next(false);
+      // Pin the current app to one that is NOT in the chromeless allow-list, so
+      // this test does not depend on the mock's default app id.
+      mockCore.application.currentAppId$.next('dashboard');
 
       const contract = chatMountService.start({
         core: mockCore,
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
 
       expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
+    });
+
+    it('should open sidecar on chromeless page when current app is in the allow-list', () => {
+      // Set chrome to not visible (chromeless page)
+      mockChromeVisible$.next(false);
+      // Set the current app to workspace_initial (in the allow-list)
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      const contract = chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      contract.open();
+
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledTimes(1);
     });
 
     it('should not open sidecar if already open', () => {
@@ -173,6 +211,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
@@ -189,6 +228,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Trigger the window open callback
@@ -205,6 +245,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
@@ -219,6 +260,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       expect(() => contract.close()).not.toThrow();
@@ -230,6 +272,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Open the sidecar first
@@ -249,6 +292,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.toggleOpen();
@@ -262,6 +306,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
@@ -278,6 +323,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Initially chrome is visible (default)
@@ -294,6 +340,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Open the sidecar
@@ -316,6 +363,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Open the sidecar while chrome is visible
@@ -341,6 +389,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Don't open the sidecar
@@ -373,6 +422,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Make chrome visible
@@ -386,6 +436,63 @@ describe('ChatMountService', () => {
 
       // Sidecar should be opened
       expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
+    });
+
+    it('should open sidecar when navigating to an allow-listed chromeless app with restored open state', () => {
+      // Chromeless page: chrome stays invisible, no app mounted yet
+      mockChromeVisible$.next(false);
+      mockCore.application.currentAppId$.next(undefined);
+
+      // Restored window state (e.g. from localStorage) says open
+      mockCore.chat.isWindowOpen = jest.fn(() => true);
+
+      const rafCallback = jest.fn();
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        rafCallback.mockImplementation(cb);
+        return 1;
+      });
+
+      chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      // No sidecar opened while no app is active
+      expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
+
+      // The allow-listed chromeless app mounts
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      expect(window.requestAnimationFrame).toHaveBeenCalled();
+      rafCallback();
+
+      // Sidecar should be opened even though chrome is invisible
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
+    });
+
+    it('should hide sidecar when navigating from an allow-listed chromeless app to a disallowed one', () => {
+      // Start on the allow-listed chromeless app with sidecar open
+      mockChromeVisible$.next(false);
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      const contract = chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      contract.open();
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledTimes(1);
+
+      // Navigate to a chromeless app NOT in the allow-list (chrome stays invisible)
+      mockCore.application.currentAppId$.next('some_other_chromeless_app');
+
+      expect(mockCore.overlays.sidecar.hide).toHaveBeenCalled();
     });
 
     it('should cancel pending openSidecar when chrome visibility changes rapidly', () => {
@@ -404,6 +511,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       // Make chrome visible (schedules openSidecar)
@@ -427,6 +535,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();
@@ -442,6 +551,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       chatMountService.stop();
@@ -469,6 +579,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       chatMountService.stop();
@@ -483,6 +594,7 @@ describe('ChatMountService', () => {
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       expect(() => {
@@ -501,6 +613,7 @@ describe('ChatMountService', () => {
         charts: {} as any,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
       });
 
       contract.open();

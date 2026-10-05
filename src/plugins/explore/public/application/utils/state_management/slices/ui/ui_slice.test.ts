@@ -9,6 +9,7 @@ import {
   setUiState,
   setShowHistogram,
   setWrapCellText,
+  setHideEmptyFields,
   UIState,
 } from './ui_slice';
 
@@ -17,6 +18,7 @@ describe('UI Slice', () => {
     activeTabId: '',
     showHistogram: true,
     wrapCellText: false,
+    hideEmptyFields: false,
   };
 
   it('should return the initial state', () => {
@@ -71,12 +73,29 @@ describe('UI Slice', () => {
     });
   });
 
+  describe('setHideEmptyFields', () => {
+    it('should handle setHideEmptyFields action', () => {
+      const newValue = false;
+      const action = setHideEmptyFields(newValue);
+
+      expect(action.type).toBe('ui/setHideEmptyFields');
+      expect(action.payload).toBe(newValue);
+
+      const newState = uiReducer(initialState, action);
+      expect(newState.hideEmptyFields).toBe(newValue);
+
+      expect(newState.activeTabId).toBe(initialState.activeTabId);
+      expect(newState.wrapCellText).toBe(initialState.wrapCellText);
+    });
+  });
+
   describe('setUiState', () => {
     it('should handle setUiState action', () => {
       const newState: UIState = {
         activeTabId: 'visualizations',
         showHistogram: false,
         wrapCellText: true,
+        hideEmptyFields: false,
       };
       const action = setUiState(newState);
 

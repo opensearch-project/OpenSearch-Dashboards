@@ -1,0 +1,24 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Permanent call-count chip at the edge midpoint. Light chip so it reads on the
+// canvas; the edge-label layer is lifted above nodes (see celestial.scss) so a
+// label near a node card is never hidden behind it.
+.celVolumeEdge__label {
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  /* stylelint-disable @osd/stylelint/no_restricted_values */
+  background: var(--osd-color-container-default, #fff);
+  color: var(--osd-color-text-default, #343741);
+  border: 1px solid var(--osd-color-border-default, #d3dae6);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 12%);
+  /* stylelint-enable @osd/stylelint/no_restricted_values */
+}

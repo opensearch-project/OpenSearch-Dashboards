@@ -9,6 +9,7 @@ import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from 
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../types';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
 import { FIELD_TYPE_MAP } from '../../visualizations/constants';
@@ -269,4 +270,56 @@ export const groupByTransformationDefinition: TransformationDefinition<GroupByCo
   }),
   iconType: 'aggregate',
   createInstance: createGroupByTransformation,
+};
+
+export const groupByConfigSchema: TransformationConfigSchema = {
+  groupByField: {
+    description:
+      'The column to group rows by. Each unique value in this column becomes one output row.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  aggregations: {
+    description:
+      'Aggregation methods to apply to all other columns per group. ' +
+      'The output column name is "<method>_<field>" (e.g. "mean_AvgTicketPrice"). ' +
+      'Set hidden: true to exclude a field from the output.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      field: {
+        description: 'Column name to aggregate.',
+        kind: 'field_name',
+        required: true,
+      },
+      method: {
+        description:
+          'Aggregation method. Not all methods apply to all field types: ' +
+          'string fields support count/first/last only; ' +
+          'date fields support count/min/max/first/last; ' +
+          'numerical fields support all methods.',
+        kind: 'enum',
+        defaultValue: 'count',
+        required: true,
+        enumOptions: [
+          { value: 'count', label: 'Count' },
+          { value: 'total', label: 'Sum (total)' },
+          { value: 'mean', label: 'Mean (average)' },
+          { value: 'median', label: 'Median' },
+          { value: 'min', label: 'Min' },
+          { value: 'max', label: 'Max' },
+          { value: 'first', label: 'First value' },
+          { value: 'last', label: 'Last value' },
+        ],
+      },
+      hidden: {
+        description: 'Set to true to exclude this aggregation from the output.',
+        kind: 'boolean',
+        defaultValue: false,
+        required: false,
+      },
+    },
+  },
 };

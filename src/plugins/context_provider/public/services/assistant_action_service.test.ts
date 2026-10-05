@@ -258,9 +258,9 @@ describe('AssistantActionService', () => {
       service.registerAction(action);
 
       const args = { param1: 'value1' };
-      const result = await service.executeAction('test-action', args);
+      const result = await service.executeAction('test-action', args, 'call-1');
 
-      expect(mockHandler).toHaveBeenCalledWith(args);
+      expect(mockHandler).toHaveBeenCalledWith(args, 'call-1');
       expect(result).toBe('test-result');
     });
 
@@ -334,7 +334,7 @@ describe('AssistantActionService', () => {
       // Should execute and return the stop instruction
       const result = await service.executeAction('disabled-action', { test: 'arg' });
 
-      expect(mockHandler).toHaveBeenCalledWith({ test: 'arg' });
+      expect(mockHandler).toHaveBeenCalledWith({ test: 'arg' }, undefined);
       expect(result).toEqual({
         success: false,
         error: 'STOP: Tool not available - context has changed',

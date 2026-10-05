@@ -8,6 +8,18 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { TimelineHeader } from './timeline_waterfall_bar';
 import { TraceTimeRange } from '../../utils/span_timerange_utils';
+import { Span } from './types';
+
+export interface TimelineColumnOptions {
+  /** Current visible window (timeline zoom). */
+  visibleRange?: TraceTimeRange;
+  /** Brush/overview slider config; when present the header renders the slider. */
+  brush?: {
+    spans: Span[];
+    colorMap?: Record<string, string>;
+    onChange: (range: TraceTimeRange | null) => void;
+  };
+}
 
 export const getSpanListTableColumns = (): EuiDataGridColumn[] => {
   return [
@@ -78,7 +90,8 @@ export const getSpanListTableColumns = (): EuiDataGridColumn[] => {
 
 export const getSpanHierarchyTableColumns = (
   traceTimeRange: TraceTimeRange,
-  availableWidth?: number
+  availableWidth?: number,
+  timelineOptions?: TimelineColumnOptions
 ): EuiDataGridColumn[] => {
   return [
     {
@@ -92,19 +105,17 @@ export const getSpanHierarchyTableColumns = (
     },
     {
       id: 'timeline',
-      display: React.createElement(TimelineHeader, { traceTimeRange }),
-      initialWidth: availableWidth ? Math.floor(availableWidth / 2) : 600,
+      display: React.createElement(TimelineHeader, {
+        traceTimeRange,
+        visibleRange: timelineOptions?.visibleRange,
+        brush: timelineOptions?.brush,
+      }),
+      // The waterfall renders each span's duration inline at the bar's trailing
+      // edge, so the timeline column reclaims the full width instead of ceding a
+      // separate far-right Duration gutter.
+      initialWidth: availableWidth ? Math.floor(availableWidth * 0.62) : 720,
       isExpandable: false,
       isResizable: true,
-      actions: false,
-    },
-    {
-      id: 'durationInNanos',
-      display: i18n.translate('explore.spanDetailTable.column.duration', {
-        defaultMessage: 'Duration',
-      }),
-      initialWidth: 100,
-      isExpandable: false,
       actions: false,
     },
   ];

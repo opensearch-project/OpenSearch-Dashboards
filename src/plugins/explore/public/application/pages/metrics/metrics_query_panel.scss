@@ -35,6 +35,13 @@
   cursor: grab;
 }
 
+// Monaco pins an explicit pixel width on its own DOM node, which becomes this
+// flex item's automatic minimum size. Without min-width, the row cannot shrink
+// and the trailing row actions get pushed out of view.
+.mqpRowEditor {
+  min-width: 0;
+}
+
 .mqpRowActions {
   display: inline-flex;
   align-items: center;

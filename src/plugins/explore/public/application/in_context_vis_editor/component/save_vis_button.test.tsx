@@ -32,7 +32,24 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 jest.mock('./save_vis_modal', () => ({
-  SaveVisModal: () => <div data-test-subj="save-vis-modal">Modal</div>,
+  SaveVisModal: ({ onConfirm }: any) => (
+    <button
+      data-test-subj="save-vis-modal"
+      onClick={() =>
+        onConfirm({
+          savedExplore: {
+            title: '',
+            save: jest.fn().mockResolvedValue('new-explore'),
+          },
+          newTitle: 'New Explore',
+          isTitleDuplicateConfirmed: false,
+          onTitleDuplicate: jest.fn(),
+        })
+      }
+    >
+      Modal
+    </button>
+  ),
 }));
 
 jest.mock('../../../components/data_transformations', () => {
@@ -141,6 +158,32 @@ describe('SaveVisButton', () => {
     // The click handler is async (slow-query save warning is awaited first), so
     // the modal opens on the next tick.
     expect(await screen.findByTestId('save-vis-modal')).toBeInTheDocument();
+  });
+
+  it('preserves container info when saving a new explore from a dashboard', async () => {
+    const containerInfo = {
+      containerName: 'Dashboard',
+      containerId: 'dashboard-1',
+      containerData: { sectionId: 'section-1' },
+    };
+    mockOsdUrlStateStorageGet.mockReturnValue({
+      originatingApp: 'dashboards',
+      containerInfo,
+    });
+
+    render(<SaveVisButton />);
+    fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
+    fireEvent.click(await screen.findByTestId('save-vis-modal'));
+
+    await waitFor(() => {
+      expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboards', {
+        state: {
+          type: 'explore',
+          input: { savedObjectId: 'new-explore' },
+          containerInfo,
+        },
+      });
+    });
   });
 
   it('saves directly without modal for existing explore when not dirty', async () => {

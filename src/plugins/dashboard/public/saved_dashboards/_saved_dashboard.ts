@@ -5,6 +5,7 @@
 
 import { SerializedDashboard } from '../dashboard';
 import { SavedObjectDashboard } from './saved_dashboard';
+import { normalizePersistedVariables } from '../variables/variable_query_utils';
 
 export const convertToSerializedDashboard = (
   savedDashboard: SavedObjectDashboard
@@ -19,6 +20,7 @@ export const convertToSerializedDashboard = (
     panelsJSON,
     optionsJSON,
     variablesJSON,
+    layoutJSON,
     uiStateJSON,
     searchSource,
     lastSavedTitle,
@@ -33,7 +35,10 @@ export const convertToSerializedDashboard = (
     refreshInterval,
     panels: JSON.parse(panelsJSON || '{}'),
     options: JSON.parse(optionsJSON || '{}'),
-    variables: variablesJSON ? JSON.parse(variablesJSON).variables : undefined,
+    variables: variablesJSON
+      ? normalizePersistedVariables(JSON.parse(variablesJSON).variables)
+      : undefined,
+    layout: layoutJSON ? JSON.parse(layoutJSON) : undefined,
     uiState: JSON.parse(uiStateJSON || '{}'),
     lastSavedTitle,
     searchSource,

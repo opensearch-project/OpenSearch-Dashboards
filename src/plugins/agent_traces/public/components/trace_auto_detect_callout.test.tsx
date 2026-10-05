@@ -16,6 +16,7 @@ import * as explorePublic from '../../../explore/public';
 jest.mock('../../../explore/public', () => ({
   detectTraceDataAcrossDataSources: jest.fn(),
   createAutoDetectedDatasets: jest.fn(),
+  getIndexPatternSignalTypes: jest.fn(),
 }));
 
 // Aliases for backward compat with rest of the test
@@ -37,6 +38,7 @@ describe('TraceAutoDetectCallout', () => {
     autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
   const mockCreateAutoDetectedDatasets =
     createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
+  const mockGetIndexPatternSignalTypes = autoDetectModule.getIndexPatternSignalTypes as jest.Mock;
 
   // Setup localStorage mock
   const localStorageMock = (() => {
@@ -78,6 +80,9 @@ describe('TraceAutoDetectCallout', () => {
     jest.clearAllMocks();
     localStorageMock.clear();
     reloadSpy.mockClear();
+
+    // No existing index patterns by default; individual tests override as needed.
+    mockGetIndexPatternSignalTypes.mockResolvedValue([]);
 
     // Setup mock services
     mockServices = {
@@ -172,11 +177,8 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock indexPatterns to indicate there are trace datasets
-    (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
-    (mockServices.indexPatterns!.get as jest.Mock).mockResolvedValue({
-      signalType: 'traces',
-    });
+    // Indicate there is an existing trace dataset so detection is skipped.
+    mockGetIndexPatternSignalTypes.mockResolvedValue([{ id: 'test-id', signalType: 'traces' }]);
 
     renderWithContext();
 
@@ -200,11 +202,8 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock indexPatterns to indicate there are NO trace datasets
-    (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
-    (mockServices.indexPatterns!.get as jest.Mock).mockResolvedValue({
-      signalType: 'logs', // Not traces
-    });
+    // Existing index patterns, but none are traces, so the callout still shows.
+    mockGetIndexPatternSignalTypes.mockResolvedValue([{ id: 'test-id', signalType: 'logs' }]);
 
     renderWithContext();
 
@@ -371,8 +370,8 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock to show no existing trace datasets so callout shows
-    (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue([]);
+    // No existing index patterns so the callout shows (default from beforeEach).
+    mockGetIndexPatternSignalTypes.mockResolvedValue([]);
 
     mockCreateAutoDetectedDatasets.mockResolvedValue({
       traceDatasetId: 'trace-id',

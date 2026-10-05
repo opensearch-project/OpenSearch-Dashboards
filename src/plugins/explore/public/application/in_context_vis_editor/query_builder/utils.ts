@@ -43,10 +43,19 @@ export const resolveDatasetByLanguage = async (
   languageType: SupportLanguageType,
   preferredDataset?: Dataset
 ): Promise<Dataset | undefined> => {
-  // Get existing dataset from QueryStringManager or use preferred dataset
+  // Prefer URL/saved state and the current shared query before resolving the configured default.
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+  let existingDataset = preferredDataset || queryStringQuery?.dataset;
+
+  if (!existingDataset) {
+    try {
+      // The editor explicitly opts in to the configured default only when no restored or current
+      // query state selected a dataset. QueryStringManager no longer resolves this implicitly.
+      existingDataset = await services.data.query.getDefaultDataset();
+    } catch {
+      // A default-dataset lookup failure should still allow the first compatible dataset fallback.
+    }
+  }
 
   // Determine dataset type based on language
   const isPromQL = languageType === SupportLanguageType.promQL;
@@ -95,6 +104,7 @@ export const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
@@ -219,12 +229,7 @@ export const queryExecution = async ({
       query: queryString,
     };
 
-    const searchSource = await createSearchSourceWithQuery(
-      preparedQueryObject,
-      dataView,
-      services,
-      false // No histogram
-    );
+    const searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services);
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
@@ -257,6 +262,7 @@ export const queryExecution = async ({
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
     };
 
     updateResultFn(rawResultsWithMeta);

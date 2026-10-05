@@ -40,7 +40,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
 
   toDataset: (path) => {
     const index = path[path.length - 1];
-    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+    const dataSource = path.find((item) => item.type === 'DATA_SOURCE') ?? index.parent;
     const indexMeta = index.meta as DataStructureCustomMeta;
     const dataSourceMeta = dataSource?.meta as DataStructureCustomMeta | undefined;
     // Prefer the engine type/version carried on the DATA_SOURCE node's meta; fall back to the leaf
@@ -73,6 +73,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return {
       id: index.id,
       title: datasetTitle,
+      ...(indexMeta?.displayName && { displayName: indexMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX,
       timeFieldName: indexMeta?.timeFieldName,
       isRemoteDataset: indexMeta?.isRemoteIndex,

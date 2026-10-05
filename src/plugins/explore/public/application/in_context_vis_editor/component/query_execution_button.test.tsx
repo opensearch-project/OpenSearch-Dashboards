@@ -48,7 +48,9 @@ describe('QueryExecutionButton', () => {
     render(<QueryExecutionButton />);
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
-    expect(button).not.toHaveClass('euiButton--fill');
+    // Always filled; the resting state is signalled by the primary colour.
+    expect(button).toHaveClass('euiButton--fill');
+    expect(button).toHaveClass('euiButton--primary');
   });
 
   it('shows Update when query is dirty', () => {
@@ -57,6 +59,8 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');
     expect(button).toHaveClass('euiButton--fill');
+    // Always primary: the state shows in the label, not the colour.
+    expect(button).toHaveClass('euiButton--primary');
   });
 
   it('disables button when date range is invalid', () => {
@@ -65,7 +69,10 @@ describe('QueryExecutionButton', () => {
       buildState({ dateRange: { from: 'now', to: 'now' } })
     );
     render(<QueryExecutionButton />);
-    expect(screen.getByTestId('exploreQueryExecutionButton')).toBeDisabled();
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(button).toBeDisabled();
+    // Filled + disabled reads as enabled, so the disabled state stays hollow.
+    expect(button).not.toHaveClass('euiButton--fill');
   });
 
   it('calls onClick when run button is clicked', () => {
@@ -75,55 +82,58 @@ describe('QueryExecutionButton', () => {
     expect(onClick).toHaveBeenCalled();
   });
 
-  it('does not render cancel button when not loading', () => {
-    render(<QueryExecutionButton />);
-    expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
-  });
+  describe('Run and Stop', () => {
+    const running = buildState({
+      queryStatus: { status: QueryExecutionStatus.LOADING },
+      userInitiatedQuery: true,
+    });
 
-  it('does not render cancel button when loading but not user-initiated', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildState({
-        queryStatus: { status: QueryExecutionStatus.LOADING },
-        userInitiatedQuery: false,
-      })
-    );
-    render(<QueryExecutionButton />);
-    expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
-  });
+    it('reads Refresh when no query is running', () => {
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.getByTestId('exploreQueryExecutionButton')).toHaveTextContent('Refresh');
+      expect(screen.queryByTestId('exploreQueryStopButton')).not.toBeInTheDocument();
+    });
 
-  it('renders cancel button when loading and user-initiated', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildState({
-        queryStatus: { status: QueryExecutionStatus.LOADING },
-        userInitiatedQuery: true,
-      })
-    );
-    render(<QueryExecutionButton />);
-    expect(screen.getByTestId('exploreQueryCancelButton')).toBeInTheDocument();
-  });
+    it('does not offer Stop for a query the user did not start', () => {
+      (useQueryBuilderState as jest.Mock).mockReturnValue(
+        buildState({
+          queryStatus: { status: QueryExecutionStatus.LOADING },
+          userInitiatedQuery: false,
+        })
+      );
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.queryByTestId('exploreQueryStopButton')).not.toBeInTheDocument();
+    });
 
-  it('calls onCancel when cancel button is clicked', () => {
-    const onCancel = jest.fn();
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildState({
-        queryStatus: { status: QueryExecutionStatus.LOADING },
-        userInitiatedQuery: true,
-      })
-    );
-    render(<QueryExecutionButton onCancel={onCancel} />);
-    fireEvent.click(screen.getByTestId('exploreQueryCancelButton'));
-    expect(onCancel).toHaveBeenCalled();
-  });
+    it('reads Stop while a user-initiated query is running, with no separate cancel button', () => {
+      (useQueryBuilderState as jest.Mock).mockReturnValue(running);
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.getByTestId('exploreQueryStopButton')).toHaveTextContent('Stop');
+      expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('button')).toHaveLength(1);
+    });
 
-  it('hides cancel button when useCancelButtonTiming returns false', () => {
-    (useCancelButtonTiming as jest.Mock).mockReturnValue(false);
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildState({
-        queryStatus: { status: QueryExecutionStatus.LOADING },
-        userInitiatedQuery: true,
-      })
-    );
-    render(<QueryExecutionButton />);
-    expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+    it('calls onCancel, not onClick, when Stop is clicked', () => {
+      const onClick = jest.fn();
+      const onCancel = jest.fn();
+      (useQueryBuilderState as jest.Mock).mockReturnValue(running);
+      render(<QueryExecutionButton onClick={onClick} onCancel={onCancel} />);
+      fireEvent.click(screen.getByTestId('exploreQueryStopButton'), { detail: 1 });
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('offers Stop even when the time range is invalid', () => {
+      (isTimeRangeInvalid as jest.Mock).mockReturnValue(true);
+      (useQueryBuilderState as jest.Mock).mockReturnValue(
+        buildState({
+          queryStatus: { status: QueryExecutionStatus.LOADING },
+          userInitiatedQuery: true,
+          dateRange: { from: 'now', to: 'now' },
+        })
+      );
+      render(<QueryExecutionButton onCancel={jest.fn()} />);
+      expect(screen.getByTestId('exploreQueryStopButton')).toBeEnabled();
+    });
   });
 });

@@ -11,7 +11,6 @@ import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
-import { extractQueryError } from '../utils/format_error';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
@@ -152,10 +151,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
           )}
           {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
           {fetchState.status === ResultStatus.ERROR && !rows?.length && (
-            <DiscoverUninitialized
-              onRefresh={() => refetch$.next()}
-              getQueryError={() => extractQueryError(data$.getValue().queryStatus?.body?.error)}
-            />
+            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
           )}
           {(fetchState.status === ResultStatus.READY ||
             (fetchState.status === ResultStatus.LOADING && !!rows?.length) ||

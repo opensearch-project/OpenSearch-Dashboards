@@ -10,6 +10,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { HumanInputService } from '../services/human_input_service';
 import { ChatLayoutMode } from '../types';
 
 // Mock dependencies
@@ -47,6 +48,7 @@ describe('ChatMount', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockSuggestedActionsService: jest.Mocked<SuggestedActionsService>;
   let mockConfirmationService: jest.Mocked<ConfirmationService>;
+  let mockHumanInputService: jest.Mocked<HumanInputService>;
   let mockContextProvider: any;
   let mockCharts: any;
   let defaultProps: any;
@@ -71,6 +73,10 @@ describe('ChatMount', () => {
       requestConfirmation: jest.fn(),
     } as any;
 
+    mockHumanInputService = {
+      ask: jest.fn(),
+    } as any;
+
     mockContextProvider = {
       getContextProvider: jest.fn(),
     };
@@ -86,6 +92,7 @@ describe('ChatMount', () => {
       chatService: mockChatService,
       suggestedActionsService: mockSuggestedActionsService,
       confirmationService: mockConfirmationService,
+      humanInputService: mockHumanInputService,
     };
   });
 

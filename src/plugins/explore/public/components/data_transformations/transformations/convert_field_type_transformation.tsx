@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -230,3 +231,33 @@ export const convertFieldTypeTransformationDefinition: TransformationDefinition<
     iconType: 'inputOutput',
     createInstance: createConvertFieldTypeTransformation,
   };
+
+export const convertFieldTypeConfigSchema: TransformationConfigSchema = {
+  rules: {
+    description:
+      'One or more conversion rules. Each rule casts a single column to a target type. ' +
+      'Multiple rules are applied in order.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      field: {
+        description: 'Column name to convert.',
+        kind: 'field_name',
+        required: true,
+      },
+      targetType: {
+        description: 'Target type to cast the field value to.',
+        kind: 'enum',
+        defaultValue: 'string',
+        required: true,
+        enumOptions: [
+          { value: 'string', label: 'String' },
+          { value: 'number', label: 'Number' },
+          { value: 'boolean', label: 'Boolean' },
+          { value: 'date', label: 'Date (ISO 8601)' },
+        ],
+      },
+    },
+  },
+};

@@ -1,0 +1,2 @@
+feat:
+- Rebuild the Explore query language picker as a source type and language panel ([#12659](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12659))

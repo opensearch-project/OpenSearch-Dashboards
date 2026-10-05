@@ -18,6 +18,11 @@ export const AGENT_TRACES_DEFAULT_LANGUAGE = 'PPL';
 export const AGENT_TRACES_TRACES_TAB_ID = 'traces';
 export const AGENT_TRACES_SPANS_TAB_ID = 'spans';
 export const AGENT_TRACES_VISUALIZATION_TAB_ID = 'visualization';
+export const AGENT_TRACES_SESSIONS_TAB_ID = 'sessions';
+
+/** Span attribute that groups traces into a session (OTel GenAI semantic conventions).
+ *  Data Prepper normalizes OpenInference/ADOT `session.id` to this key at ingest. */
+export const AGENT_TRACES_SESSION_ID_FIELD = 'attributes.gen_ai.conversation.id';
 
 export enum AgentTracesFlavor {
   Traces = 'traces',

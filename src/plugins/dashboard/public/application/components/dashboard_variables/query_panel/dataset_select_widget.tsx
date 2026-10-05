@@ -23,6 +23,7 @@ export const DatasetSelectWidget: React.FC<{
 
   const isPromQL = language?.toUpperCase() === 'PROMQL';
 
+  // PromQL queries Prometheus data connections; other languages query indices.
   const supportedTypes = useMemo(() => {
     if (isPromQL) return ['PROMETHEUS'];
     return [DEFAULT_DATA.SET_TYPES.INDEX, DEFAULT_DATA.SET_TYPES.INDEX_PATTERN];
@@ -30,7 +31,7 @@ export const DatasetSelectWidget: React.FC<{
 
   const signalType = useMemo(() => {
     if (isPromQL) return CORE_SIGNAL_TYPES.METRICS;
-    return null;
+    return [CORE_SIGNAL_TYPES.LOGS, CORE_SIGNAL_TYPES.METRICS];
   }, [isPromQL]);
 
   return (
@@ -42,6 +43,9 @@ export const DatasetSelectWidget: React.FC<{
         signalType={signalType}
         showNonTimeFieldDatasets={false}
         controlledSelectedDataset={selectedDataset}
+        // Force controlled mode: an undefined selection must not fall back to the
+        // global dashboard dataset (which would show an index pattern under PromQL).
+        isControlled
       />
     </div>
   );

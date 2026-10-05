@@ -124,6 +124,25 @@ describe('ppl_request_trace', () => {
       });
     });
 
+    it('supports the != operator', async () => {
+      await tracePPLService.fetchTraceSpans({
+        ...defaultParams,
+        filters: [
+          { field: 'serviceName', value: 'cart', operator: '!=' },
+          { field: 'status.code', value: 200, operator: '=' },
+        ],
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
+        'source = test-index | where traceId = "test-trace-id" | where serviceName != "cart" | where status.code = 200 | head 100'
+      );
+    });
+
     it('escapes filter values correctly', async () => {
       await tracePPLService.fetchTraceSpans({
         ...defaultParams,

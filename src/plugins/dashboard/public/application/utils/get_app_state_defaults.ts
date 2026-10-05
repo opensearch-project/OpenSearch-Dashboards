@@ -31,6 +31,7 @@
 import { ViewMode } from '../../../../embeddable/public';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppStateDefaults } from '../../types';
+import { normalizePersistedVariables } from '../../variables/variable_query_utils';
 
 export function getAppStateDefaults(
   savedDashboard: SavedObjectDashboard,
@@ -44,8 +45,9 @@ export function getAppStateDefaults(
     panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
     options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     variables: savedDashboard.variablesJSON
-      ? JSON.parse(savedDashboard.variablesJSON).variables
+      ? normalizePersistedVariables(JSON.parse(savedDashboard.variablesJSON).variables)
       : undefined,
+    layout: savedDashboard.layoutJSON ? JSON.parse(savedDashboard.layoutJSON) : undefined,
     query: savedDashboard.getQuery(),
     filters: savedDashboard.getFilters(),
     viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,

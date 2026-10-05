@@ -1,0 +1,78 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { QueryWarningsCallout } from './query_warnings_callout';
+
+describe('QueryWarningsCallout', () => {
+  it('renders nothing when there are no warnings', () => {
+    const { container } = render(<QueryWarningsCallout warnings={[]} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('shows the message and reveals the detail only after clicking Show more', () => {
+    render(
+      <QueryWarningsCallout
+        warnings={[
+          {
+            type: 'PARTIAL_RESULT',
+            message: 'Results are partial: 1 of 2 shards did not return data.',
+            detail: 'Rows and aggregate values from the shards that did not respond are missing.',
+          },
+        ]}
+      />
+    );
+
+    // The callout carries an explicit "Partial results" title, and the short message is always
+    // visible.
+    expect(screen.getByTestId('queryWarningsCallout')).toBeInTheDocument();
+    expect(screen.getByText('Partial results')).toBeInTheDocument();
+    expect(
+      screen.getByText('Results are partial: 1 of 2 shards did not return data.')
+    ).toBeInTheDocument();
+
+    // The long detail is collapsed behind "Show more".
+    const detailMatcher =
+      /Rows and aggregate values from the shards that did not respond are missing\./;
+    expect(screen.queryByText(detailMatcher)).not.toBeInTheDocument();
+
+    // Expand -> detail visible, toggle flips to "Show less".
+    fireEvent.click(screen.getByTestId('queryWarningsToggle'));
+    expect(screen.getByText(detailMatcher)).toBeInTheDocument();
+    expect(screen.getByText('Show less')).toBeInTheDocument();
+
+    // Collapse again -> detail hidden.
+    fireEvent.click(screen.getByTestId('queryWarningsToggle'));
+    expect(screen.queryByText(detailMatcher)).not.toBeInTheDocument();
+    expect(screen.getByText('Show more')).toBeInTheDocument();
+  });
+
+  it('does not render a toggle when the warning has no detail', () => {
+    render(
+      <QueryWarningsCallout warnings={[{ type: 'PARTIAL_RESULT', message: 'No detail here.' }]} />
+    );
+    expect(screen.getByText('No detail here.')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryWarningsToggle')).not.toBeInTheDocument();
+  });
+
+  it('titles an unrecognised warning type generically', () => {
+    render(<QueryWarningsCallout warnings={[{ type: 'SOMETHING_ELSE', message: 'Notice.' }]} />);
+    expect(screen.getByText('Warning')).toBeInTheDocument();
+  });
+
+  it('renders one callout per warning', () => {
+    render(
+      <QueryWarningsCallout
+        warnings={[
+          { type: 'PARTIAL_RESULT', message: 'First warning.' },
+          { type: 'PARTIAL_RESULT', message: 'Second warning.' },
+        ]}
+      />
+    );
+
+    expect(screen.getAllByTestId('queryWarningsCallout')).toHaveLength(2);
+  });
+});

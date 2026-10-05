@@ -137,6 +137,30 @@ describe('PrometheusManager', () => {
       ]);
     });
 
+    it('should fetch metrics with match parameter', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['node_cpu_seconds_total', 'node_memory_MemFree_bytes'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+        dataSourceName: 'prom-conn',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRICS,
+        resourceName: '{__name__=~"node.*"}',
+        query: { 'match[]': '{__name__=~"node.*"}' },
+      });
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/__name__/values`,
+        querystring: 'match%5B%5D=%7B__name__%3D%7E%22node.*%22%7D',
+        method: 'GET',
+      });
+      expect(result.data).toEqual(['node_cpu_seconds_total', 'node_memory_MemFree_bytes']);
+    });
+
     it('should fetch metric metadata', async () => {
       const mockResponse = {
         body: {
@@ -385,6 +409,31 @@ describe('PrometheusManager', () => {
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
         querystring: 'match%5B%5D=node_cpu_seconds_total&start=1638316800&end=1638320400',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request for metrics with match[] filter', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['node_cpu_seconds_total', 'node_memory_MemFree_bytes'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = {
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'metrics', name: '{__name__=~"node.*"}' },
+        },
+      } as unknown as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/__name__/values`,
+        querystring: 'match%5B%5D=%7B__name__%3D%7E%22node.*%22%7D',
         method: 'GET',
       });
     });

@@ -14,30 +14,6 @@ export function escapeLabelValue(value: string): string {
 // typical deployments (15s–60s scrapes) without requiring per-datasource config.
 const ASSUMED_SCRAPE_SEC = 60;
 
-// Default number of datapoints per chart; step = duration / resolution.
-const DEFAULT_RESOLUTION = 1440;
-const MIN_STEP_INTERVAL = 15;
-
-function roundInterval(intervalMs: number): number {
-  if (intervalMs <= 1) return 1;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(intervalMs)));
-  const normalized = intervalMs / magnitude;
-  let nice: number;
-  if (normalized <= 1) nice = 1;
-  else if (normalized <= 2) nice = 2;
-  else if (normalized <= 5) nice = 5;
-  else nice = 10;
-  return Math.round(nice * magnitude);
-}
-
-// Mirrors the server-side calculateStep in query_enhancements/server/search/prom_utils.ts
-// so client-rendered rate windows align with server-selected step intervals.
-export function calculateStep(durationMs: number): number {
-  const rawIntervalMs = durationMs / DEFAULT_RESOLUTION;
-  const stepSec = roundInterval(rawIntervalMs) / 1000;
-  return Math.max(stepSec, MIN_STEP_INTERVAL);
-}
-
 export class MetricQueryGenerator {
   public rateInterval(stepSec: number): string {
     const rateSec = Math.max(ASSUMED_SCRAPE_SEC * 4, stepSec + ASSUMED_SCRAPE_SEC);

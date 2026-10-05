@@ -9,6 +9,7 @@ import {
   AGENT_TRACES_TRACES_TAB_ID,
   AGENT_TRACES_SPANS_TAB_ID,
   AGENT_TRACES_VISUALIZATION_TAB_ID,
+  AGENT_TRACES_SESSIONS_TAB_ID,
   AGENT_TRACES_DEFAULT_LANGUAGE,
   AgentTracesFlavor,
 } from '../../common';
@@ -22,6 +23,9 @@ jest.mock('./pages/traces/spans_tab', () => ({
 jest.mock('./pages/traces/vis_tab', () => ({
   VisTab: () => null,
 }));
+jest.mock('./pages/sessions/sessions_tab', () => ({
+  SessionsTab: () => null,
+}));
 
 describe('registerBuiltInTabs', () => {
   let tabRegistry: TabRegistryService;
@@ -30,10 +34,10 @@ describe('registerBuiltInTabs', () => {
     tabRegistry = new TabRegistryService();
   });
 
-  it('should register three tabs', () => {
+  it('should register four tabs', () => {
     registerBuiltInTabs(tabRegistry);
     const tabs = tabRegistry.getAllTabs();
-    expect(tabs).toHaveLength(3);
+    expect(tabs).toHaveLength(4);
   });
 
   it('should register tabs with correct IDs', () => {
@@ -41,14 +45,16 @@ describe('registerBuiltInTabs', () => {
     expect(tabRegistry.getTab(AGENT_TRACES_TRACES_TAB_ID)).toBeDefined();
     expect(tabRegistry.getTab(AGENT_TRACES_SPANS_TAB_ID)).toBeDefined();
     expect(tabRegistry.getTab(AGENT_TRACES_VISUALIZATION_TAB_ID)).toBeDefined();
+    expect(tabRegistry.getTab(AGENT_TRACES_SESSIONS_TAB_ID)).toBeDefined();
   });
 
-  it('should register tabs in order: Traces, Spans, Visualization', () => {
+  it('should register tabs in order: Traces, Spans, Sessions, Visualization', () => {
     registerBuiltInTabs(tabRegistry);
     const tabs = tabRegistry.getAllTabs();
     expect(tabs[0].id).toBe(AGENT_TRACES_TRACES_TAB_ID);
     expect(tabs[1].id).toBe(AGENT_TRACES_SPANS_TAB_ID);
-    expect(tabs[2].id).toBe(AGENT_TRACES_VISUALIZATION_TAB_ID);
+    expect(tabs[2].id).toBe(AGENT_TRACES_SESSIONS_TAB_ID);
+    expect(tabs[3].id).toBe(AGENT_TRACES_VISUALIZATION_TAB_ID);
   });
 
   it('should set correct labels', () => {
@@ -56,6 +62,7 @@ describe('registerBuiltInTabs', () => {
     expect(tabRegistry.getTab(AGENT_TRACES_TRACES_TAB_ID)!.label).toBe('Traces');
     expect(tabRegistry.getTab(AGENT_TRACES_SPANS_TAB_ID)!.label).toBe('Spans');
     expect(tabRegistry.getTab(AGENT_TRACES_VISUALIZATION_TAB_ID)!.label).toBe('Visualization');
+    expect(tabRegistry.getTab(AGENT_TRACES_SESSIONS_TAB_ID)!.label).toBe('Sessions');
   });
 
   it('should assign Traces flavor to all tabs', () => {
@@ -158,7 +165,7 @@ describe('registerTabs', () => {
 
     registerTabs(services);
 
-    expect(tabRegistry.getAllTabs()).toHaveLength(4);
+    expect(tabRegistry.getAllTabs()).toHaveLength(5);
     expect(tabRegistry.getTab('custom_tab')).toBeDefined();
   });
 
@@ -168,6 +175,6 @@ describe('registerTabs', () => {
 
     registerTabs(services);
 
-    expect(tabRegistry.getAllTabs()).toHaveLength(3);
+    expect(tabRegistry.getAllTabs()).toHaveLength(4);
   });
 });
