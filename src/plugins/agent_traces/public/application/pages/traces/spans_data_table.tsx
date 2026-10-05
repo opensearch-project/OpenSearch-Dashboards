@@ -110,6 +110,9 @@ export const SpansDataTable: React.FC = () => {
         } catch (err) {
           updateFlyoutFullTree(traceRow.traceId, undefined, false, (err as Error).message);
         }
+      } else {
+        // Nothing can load the tree: settle the loading state so the flyout shows the row.
+        updateFlyoutFullTree(traceRow.traceId, undefined, false);
       }
     },
     [getRowMeta, openFlyout, updateFlyoutFullTree, pplService, datasetParam, formatTs]

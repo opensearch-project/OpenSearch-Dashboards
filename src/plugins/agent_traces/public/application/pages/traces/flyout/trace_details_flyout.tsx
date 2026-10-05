@@ -133,9 +133,16 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   );
   const collapseAll = useCallback(() => setExpandedNodes(new Set()), []);
 
+  // Expand everything when the tree's spans change (a new trace, or its full tree arriving),
+  // not when the same tree is sent again, so the user's expand/collapse choices stay.
+  const expandableKey = useMemo(
+    () => [...collectExpandableIds(traceTreeData)].sort().join(','),
+    [traceTreeData]
+  );
   useEffect(() => {
     expandAll();
-  }, [expandAll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandableKey]);
 
   const timelineVisibleSpans = useMemo(
     () => flattenVisibleNodes(traceTreeData, expandedNodes),

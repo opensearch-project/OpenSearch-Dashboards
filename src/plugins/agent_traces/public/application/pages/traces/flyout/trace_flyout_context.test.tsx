@@ -43,6 +43,7 @@ jest.mock('./trace_details_flyout', () => ({
         <span data-test-subj="mock-tree">{fullTree?.[0]?.name ?? 'no tree'}</span>
         <button onClick={onClose}>Close</button>
         <button onClick={() => onOpenSession('sess-from-trace')}>Session link</button>
+        <button onClick={() => onOpenSession('sess-a')}>Session link A</button>
         <NavButtons navigation={navigation} />
       </div>
     );
@@ -300,6 +301,17 @@ describe('TraceFlyoutContext', () => {
       click('Open trace B');
       // Both start a new history at index 0; the trace id in the key still remounts.
       expect(mockTraceMounts.mock.calls.map(([name]) => name)).toEqual(['Test Trace', 'Trace B']);
+    });
+
+    it('goes back instead of repeating the session a trace was opened from', () => {
+      renderProvider();
+      click('Open A'); // session sess-a
+      click('Trace from A');
+      // The trace's SESSION ID link points at the session it came from.
+      act(() => screen.getByText('Session link A').click());
+      expect(screen.getByTestId('mock-session-id')).toHaveTextContent('sess-a');
+      expect(screen.queryByText(/^Back to/)).not.toBeInTheDocument();
+      expect(screen.getByText('Forward to trace Test Trace')).toBeInTheDocument();
     });
 
     it('records trace -> session, and a new path drops the old forward entries', () => {

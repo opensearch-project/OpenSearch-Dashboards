@@ -238,7 +238,8 @@ export const SessionDetailsFlyout: React.FC<SessionDetailsFlyoutProps> = ({
       const trace = traces.find((t) => t.traceId === row.traceId);
       // Replaces this flyout with the trace flyout; Back returns here with this trace focused.
       openFlyout(row, { fromSession: session, sessionView: { view, drillTab } });
-      if (trace) updateFlyoutFullTree(trace.traceId, trace.tree, false);
+      // Always settle the loading state: with no loaded tree, the flyout shows the row.
+      updateFlyoutFullTree(row.traceId, trace?.tree, false);
     },
     [traces, openFlyout, updateFlyoutFullTree, session, view, drillTab]
   );

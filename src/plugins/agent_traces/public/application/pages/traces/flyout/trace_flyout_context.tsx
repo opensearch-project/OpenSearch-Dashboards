@@ -77,7 +77,15 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
         typeof session === 'string'
           ? { kind: 'session', sessionId: session }
           : { kind: 'session', sessionId: session.sessionId, session };
-      setHistory((prev) => (options?.fromTrace ? pushHistory(prev, next) : resetHistory(next)));
+      setHistory((prev) => {
+        if (!options?.fromTrace) return resetHistory(next);
+        // The session this trace was opened from: go back to it instead of repeating it.
+        const previous = prev.entries[prev.index - 1];
+        if (previous?.kind === 'session' && previous.sessionId === next.sessionId) {
+          return moveHistory(prev, -1);
+        }
+        return pushHistory(prev, next);
+      });
     },
     [collapseSidebar]
   );

@@ -123,13 +123,15 @@ export const fetchSessions = async (
   if (onlyWithErrors) {
     // Trace-level, like the trace list's alert icon: a session has errors when any span of
     // one of its traces failed, even a span without the session id.
-    const sessionTraces = pplResponseToRecords(
-      await ppl.executeQuery(dataset, buildRecentSessionTracesQuery(whereQuery, maxTraces))
+    // One more than the cap tells "exactly at the cap" from "more than the cap".
+    const fetchedTraces = pplResponseToRecords(
+      await ppl.executeQuery(dataset, buildRecentSessionTracesQuery(whereQuery, maxTraces + 1))
     ).filter(
       (r): r is PplRecord & { traceId: string } =>
         typeof r.traceId === 'string' && typeof r[AGENT_TRACES_SESSION_ID_FIELD] === 'string'
     );
-    errorsPartial = sessionTraces.length >= maxTraces;
+    errorsPartial = fetchedTraces.length > maxTraces;
+    const sessionTraces = fetchedTraces.slice(0, maxTraces);
     const errorTraceIds = new Set<string>();
     if (sessionTraces.length > 0) {
       const errorsResponse = await ppl.executeQuery(
@@ -153,7 +155,8 @@ export const fetchSessions = async (
           .map((r) => String(r[AGENT_TRACES_SESSION_ID_FIELD]))
       ),
     ];
-    total = errorSessions.length;
+    // Past the cap, only the checked window is known: the total would be a lower bound.
+    total = errorsPartial ? NaN : errorSessions.length;
     sessionIds = errorSessions.slice(0, SESSIONS_PAGE_LIMIT);
   } else {
     const [idsResponse, countResponse] = await Promise.all([

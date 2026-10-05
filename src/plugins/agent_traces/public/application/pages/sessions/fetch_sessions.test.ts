@@ -130,7 +130,7 @@ describe('fetchSessions', () => {
     // s2's only trace has no error; s1's t2 does.
     expect(onlyErrors.sessions.map((s) => s.sessionId)).toEqual(['s1']);
     expect(onlyErrors.totalSessions).toBe(1);
-    expect(onlyErrors.errorsPartial).toBe(true); // 3 session traces checked, the cap
+    expect(onlyErrors.errorsPartial).toBe(false); // 3 session traces: exactly the cap
     const errorQuery = executeQuery.mock.calls.find(([, q]) => q.includes('error_spans'))?.[1];
     expect(errorQuery).toContain('traceId in ("t3", "t2", "t1")');
     // The listed session's traces (t1, t2) were checked in that pass: no second error query.
@@ -179,5 +179,42 @@ describe('fetchSessions', () => {
     expect(last.some((q) => q.includes('error_spans'))).toBe(true);
     // ids + count run together first; later, roots + errors run together.
     expect(maxInFlight).toBe(2);
+  });
+
+  describe('only sessions with errors: the trace cap', () => {
+    const run = (sessionTraceCount: number, maxTraces: number) => {
+      const executeQuery = jest.fn(async (_dataset: unknown, query: string) => {
+        if (query.includes('as last_seen by traceId')) {
+          // The query asks for `head N`; return up to N of `sessionTraceCount` traces.
+          const head = Number(query.match(/head (\d+)$/)?.[1]);
+          const rows = Array.from({ length: Math.min(sessionTraceCount, head) }, (_, i) => [
+            'x',
+            `t${i}`,
+            `s${i}`,
+          ]);
+          return ppl(['last_seen', 'traceId', SESSION], rows);
+        }
+        if (query.includes('error_spans')) return ppl(['error_spans', 'traceId'], [[1, 't0']]);
+        return ppl([], []);
+      });
+      return fetchSessions(
+        { executeQuery },
+        { id: 'd', title: 'spans', type: 'INDEX_PATTERN' } as never,
+        'source = spans',
+        (t) => t,
+        { onlyWithErrors: true, maxTraces }
+      );
+    };
+
+    it('is not partial when the traces exactly fill the cap', async () => {
+      expect((await run(3, 3)).errorsPartial).toBe(false);
+    });
+
+    it('is partial, with an unknown total, when there are more traces than the cap', async () => {
+      const result = await run(4, 3);
+      expect(result.errorsPartial).toBe(true);
+      // Only the checked window is known: the total is a lower bound, not a count.
+      expect(result.totalSessions).toBeNull();
+    });
   });
 });

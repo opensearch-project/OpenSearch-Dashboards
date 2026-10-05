@@ -26,8 +26,9 @@ jest.mock('./hooks/use_session_detail', () => ({
   useSessionDetail: () => ({ traces: mockTraces, loading: false, error: null }),
 }));
 const mockOpenFlyout = jest.fn();
+const mockUpdateTree = jest.fn();
 jest.mock('../traces/flyout/trace_flyout_state', () => ({
-  useTraceFlyout: () => ({ openFlyout: mockOpenFlyout, updateFlyoutFullTree: jest.fn() }),
+  useTraceFlyout: () => ({ openFlyout: mockOpenFlyout, updateFlyoutFullTree: mockUpdateTree }),
 }));
 
 const msgs = (...roles: string[]) =>
@@ -101,6 +102,8 @@ describe('SessionDetailsFlyout', () => {
     );
     expect(screen.getByText('Forward to trace')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('agentTracesSessionOpenTrace-2'));
+    // The opened trace's loading state is always settled with the tree it has.
+    expect(mockUpdateTree).toHaveBeenCalledWith('t2', mockTraces[1].tree, false);
     expect(mockOpenFlyout).toHaveBeenCalledWith(mockTraces[1].root, {
       fromSession: session,
       sessionView: { view: 'overview', drillTab: 'traces' },
