@@ -4,12 +4,17 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
+import {
+  getSourceTypeRegistry,
+  OPENSEARCH_SOURCE_TYPE_ID,
+} from '../../../../services/source_type_registry';
 import { convertIndexPatternTerminology } from '../../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
+import { selectDataset } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
@@ -52,8 +57,25 @@ export const DatasetSelectWidget = () => {
 
         const initialQuery = queryString.getInitialQueryByDataset(dataset);
 
+        // If the picked type can't run the current language, use PPL when it can, else the
+        // type's first language Explore can run. The data plugin would otherwise pick the first
+        // one, which for index patterns is kuery, which Explore can't run.
+        const typeLanguages = queryString
+          .getDatasetService()
+          .getType(dataset.type)
+          ?.supportedLanguages(dataset);
+        const language =
+          typeLanguages?.length && !typeLanguages.includes(initialQuery.language)
+            ? typeLanguages.includes(EXPLORE_DEFAULT_LANGUAGE)
+              ? EXPLORE_DEFAULT_LANGUAGE
+              : (typeLanguages.find((languageId) =>
+                  getSourceTypeRegistry().isExploreLanguage(languageId)
+                ) ?? EXPLORE_DEFAULT_LANGUAGE)
+            : initialQuery.language;
+
         queryString.setQuery({
           ...initialQuery,
+          language,
           query: EMPTY_QUERY.QUERY,
           dataset,
         });
@@ -73,8 +95,20 @@ export const DatasetSelectWidget = () => {
     [queryString, dispatch, clearEditors, services.notifications?.toasts]
   );
 
+  // The active source type decides the picker: its own datasetSelector if it has one, else the
+  // generic picker given its dataset types. Read from redux, like the language pill.
+  const activeDataset = useSelector(selectDataset);
+  const activeSourceType = getSourceTypeRegistry().getForDataset(activeDataset);
+  const activeSourceTypeId = activeSourceType.id;
+
+  const isRegisteredSource = activeSourceTypeId !== OPENSEARCH_SOURCE_TYPE_ID;
+
   const supportedTypes = useMemo(() => {
     if (flavorId === ExploreFlavor.Metrics) return ['PROMETHEUS'];
+
+    if (isRegisteredSource) {
+      return getSourceTypeRegistry().get(activeSourceTypeId)?.datasetTypes;
+    }
 
     return (
       services.supportedTypes || [
@@ -82,7 +116,7 @@ export const DatasetSelectWidget = () => {
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       ]
     );
-  }, [services.supportedTypes, flavorId]);
+  }, [services.supportedTypes, flavorId, isRegisteredSource, activeSourceTypeId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -198,6 +232,22 @@ export const DatasetSelectWidget = () => {
       observer.disconnect();
     };
   }, [isDatasetManagementEnabled]);
+
+  // A source type can bring its own selector (e.g. region and multi-select pickers). Its choice
+  // still goes through handleDatasetSelect, so the language guard and initial query apply.
+  const { datasetSelector: SourceDatasetSelector } = activeSourceType;
+  if (SourceDatasetSelector) {
+    return (
+      <div ref={containerRef} className="exploreDatasetSelectWrapper">
+        <SourceDatasetSelector
+          dataset={activeDataset}
+          onSelect={handleDatasetSelect}
+          data={services.data}
+          flavor={flavorId}
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="exploreDatasetSelectWrapper">
