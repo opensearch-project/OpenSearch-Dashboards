@@ -65,7 +65,8 @@ export interface CelestialEdgeStyleData {
 }
 
 /** Camera behavior when a node is clicked */
-export type NodeClickZoom = 'none' | 'zoomToNode' | 'zoomToNeighborhood';
+/** `centerOnNode` pans the clicked node to the center and keeps the current zoom. */
+export type NodeClickZoom = 'none' | 'zoomToNode' | 'zoomToNeighborhood' | 'centerOnNode';
 
 /** Zoom bounds and padding for auto-fitting the map contents */
 export interface FitViewOptions {

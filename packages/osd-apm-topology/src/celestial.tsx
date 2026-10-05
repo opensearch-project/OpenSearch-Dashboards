@@ -120,8 +120,13 @@ export const Celestial = (props: CelestialMapProps) => {
   useEffect(() => {
     const container = containerRef.current;
     if (!props.refitOnResize || !container || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(() => {
-      if (!viewLock.isLocked()) fitViewWithDelay();
+    // Only on a real size change: a new observer reports the current size once on observe().
+    let lastSize = '';
+    const observer = new ResizeObserver(([entry]) => {
+      const size = `${Math.round(entry.contentRect.width)}x${Math.round(entry.contentRect.height)}`;
+      const changed = lastSize !== '' && size !== lastSize;
+      lastSize = size;
+      if (changed && !viewLock.isLocked()) fitViewWithDelay();
     });
     observer.observe(container);
     return () => observer.disconnect();
