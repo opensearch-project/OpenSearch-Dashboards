@@ -12,12 +12,15 @@ jest.mock('./fetch_sessions', () => ({
   fetchSessions: (...args: unknown[]) => mockFetchSessions(...args),
 }));
 
+// One object for every render, as the real hook memoizes it: the host's fetch effect depends on
+// these values, so new ones per render would refetch in a loop.
+const mockPPLQueryDeps = {
+  pplService: {},
+  datasetParam: { id: 'd', title: 'otel-v1-apm-span*', type: 'INDEX_PATTERN' },
+  baseQueryString: 'source = otel-v1-apm-span* | where serviceName = "x"',
+};
 jest.mock('../traces/hooks/use_ppl_query_deps', () => ({
-  usePPLQueryDeps: () => ({
-    pplService: {},
-    datasetParam: { id: 'd', title: 'otel-v1-apm-span*', type: 'INDEX_PATTERN' },
-    baseQueryString: 'source = otel-v1-apm-span* | where serviceName = "x"',
-  }),
+  usePPLQueryDeps: () => mockPPLQueryDeps,
 }));
 
 jest.mock('./session_details_flyout', () => ({
