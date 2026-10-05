@@ -57,4 +57,8 @@ export { CorrelationService } from './application/pages/traces/trace_details/pub
 export { TraceLogsTab } from './application/pages/traces/trace_details/public/logs/trace_logs_tab';
 export { SpanLogsTab } from './application/pages/traces/trace_details/public/logs/span_logs_tab';
 export { filterLogsBySpanId } from './application/pages/traces/trace_details/public/logs/url_builder';
+export {
+  fetchTraceLogsByTraceId,
+  transformLogsResponseToHits,
+} from './application/pages/traces/trace_details/server/ppl_request_logs';
 export type { LogHit } from './application/pages/traces/trace_details/server/ppl_request_logs';

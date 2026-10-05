@@ -155,6 +155,8 @@ describe('FlyoutDetailPanel', () => {
       },
       logCount: 2,
       isLoading: false,
+      errors: [] as string[],
+      cappedDatasetIds: [] as string[],
       ...overrides,
     });
 

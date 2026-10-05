@@ -43,6 +43,7 @@ import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
 import { TraceLogsTab } from '../../../../../../explore/public';
 import { useTraceLogs } from './use_trace_logs';
+import { TraceLogsNotices } from './trace_logs_notices';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
 import './trace_details_flyout.scss';
@@ -408,9 +409,13 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                       id: 'logs',
                       name: (
                         <span data-test-subj="agentTracesFlyoutLogsTab">
-                          {!traceLogs.isLoading && (
+                          {/* No badge without a logs correlation: 0 would read as "no logs". */}
+                          {!traceLogs.isLoading && traceLogs.logDatasets.length > 0 && (
                             <>
-                              <EuiBadge color="hollow">{traceLogs.logCount}</EuiBadge>{' '}
+                              <EuiBadge color="hollow" data-test-subj="agentTracesFlyoutLogsCount">
+                                {traceLogs.logCount}
+                                {traceLogs.cappedDatasetIds.length > 0 ? '+' : ''}
+                              </EuiBadge>{' '}
                             </>
                           )}
                           {i18n.translate('agentTraces.flyout.tabRelatedLogs', {
@@ -419,14 +424,20 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                         </span>
                       ),
                       content: (
-                        <TraceLogsTab
-                          traceId={rootTrace.traceId}
-                          logDatasets={traceLogs.logDatasets}
-                          datasetLogs={traceLogs.datasetLogs}
-                          isLoading={traceLogs.isLoading}
-                          onSpanClick={selectNode}
-                          traceDataset={traceLogs.traceDataset ?? undefined}
-                        />
+                        <>
+                          <TraceLogsNotices traceLogs={traceLogs} />
+                          {/* A failed correlations lookup is an error, not "set up a correlation". */}
+                          {!(traceLogs.errors.length > 0 && traceLogs.logDatasets.length === 0) && (
+                            <TraceLogsTab
+                              traceId={rootTrace.traceId}
+                              logDatasets={traceLogs.logDatasets}
+                              datasetLogs={traceLogs.datasetLogs}
+                              isLoading={traceLogs.isLoading}
+                              onSpanClick={selectNode}
+                              traceDataset={traceLogs.traceDataset ?? undefined}
+                            />
+                          )}
+                        </>
                       ),
                     },
                   ];

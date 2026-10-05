@@ -34,7 +34,8 @@ import { previewSpanInput, previewSpanOutput } from '../hooks/genai_message_prev
 import './message_content_view.scss';
 import { GenAiAttributes } from './genai_attributes';
 import { SpanLogsTab } from '../../../../../../explore/public';
-import { TraceLogs, countSpanLogs } from './use_trace_logs';
+import { TraceLogs, useSpanLogs } from './use_trace_logs';
+import { TraceLogsNotices } from './trace_logs_notices';
 
 export const formatJsonOrString = (value: string | undefined): string => {
   if (!value || value === '—')
@@ -47,6 +48,15 @@ export const formatJsonOrString = (value: string | undefined): string => {
   } catch {
     return value;
   }
+};
+
+const NO_TRACE_LOGS: TraceLogs = {
+  logDatasets: [],
+  datasetLogs: {},
+  logCount: 0,
+  isLoading: false,
+  errors: [],
+  cappedDatasetIds: [],
 };
 
 interface FlyoutDetailPanelProps {
@@ -64,6 +74,12 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
   traceLogs,
 }) => {
   const [ioMode, setIoMode] = useState<MessageViewMode>('formatted');
+  const spanDatasetLogs = useSpanLogs(
+    traceLogs ?? NO_TRACE_LOGS,
+    selectedTraceRow?.traceId ?? '',
+    selectedTraceRow?.spanId
+  );
+  const spanLogCount = Object.values(spanDatasetLogs).reduce((sum, l) => sum + l.length, 0);
 
   const row = selectedTraceRow;
 
@@ -318,39 +334,43 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
 
       <EuiSpacer size="s" />
 
-      {traceLogs && (traceLogs.isLoading || traceLogs.logDatasets.length > 0) && (
-        <>
-          <EuiAccordion
-            id="spanLogsAccordion"
-            buttonContent={
-              <strong>
-                {i18n.translate('agentTraces.detailPanel.logs', {
-                  defaultMessage: 'Logs',
-                })}
-              </strong>
-            }
-            extraAction={
-              traceLogs.isLoading ? undefined : (
-                <EuiBadge color="hollow" data-test-subj="agentTracesSpanLogsCount">
-                  {countSpanLogs(traceLogs, selectedTraceRow?.spanId)}
-                </EuiBadge>
-              )
-            }
-            paddingSize="s"
-            data-test-subj="agentTracesSpanLogsAccordion"
-          >
-            <SpanLogsTab
-              traceId={selectedTraceRow?.traceId || ''}
-              spanId={selectedTraceRow?.spanId || ''}
-              logDatasets={traceLogs.logDatasets}
-              datasetLogs={traceLogs.datasetLogs}
-              isLoading={traceLogs.isLoading}
-              traceDataset={traceLogs.traceDataset ?? undefined}
-            />
-          </EuiAccordion>
-          <EuiSpacer size="s" />
-        </>
-      )}
+      {traceLogs &&
+        (traceLogs.isLoading ||
+          traceLogs.logDatasets.length > 0 ||
+          traceLogs.errors.length > 0) && (
+          <>
+            <EuiAccordion
+              id="spanLogsAccordion"
+              buttonContent={
+                <strong>
+                  {i18n.translate('agentTraces.detailPanel.logs', {
+                    defaultMessage: 'Logs',
+                  })}
+                </strong>
+              }
+              extraAction={
+                traceLogs.isLoading ? undefined : (
+                  <EuiBadge color="hollow" data-test-subj="agentTracesSpanLogsCount">
+                    {spanLogCount}
+                  </EuiBadge>
+                )
+              }
+              paddingSize="s"
+              data-test-subj="agentTracesSpanLogsAccordion"
+            >
+              <TraceLogsNotices traceLogs={traceLogs} />
+              <SpanLogsTab
+                traceId={selectedTraceRow?.traceId || ''}
+                spanId={selectedTraceRow?.spanId || ''}
+                logDatasets={traceLogs.logDatasets}
+                datasetLogs={spanDatasetLogs}
+                isLoading={traceLogs.isLoading}
+                traceDataset={traceLogs.traceDataset ?? undefined}
+              />
+            </EuiAccordion>
+            <EuiSpacer size="s" />
+          </>
+        )}
 
       <EuiAccordion
         id="raw-span-accordion"
