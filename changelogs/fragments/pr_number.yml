@@ -1,2 +1,0 @@
-fix:
-- Restrict the workspace `reserved` attribute to dashboard admins ([#PR_NUMBER](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/PR_NUMBER))
