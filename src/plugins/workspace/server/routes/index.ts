@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { omit } from 'lodash';
 import {
   IRouter,
   Logger,
@@ -11,6 +12,7 @@ import {
   ACL,
   DEFAULT_NAV_GROUPS,
   WorkspacePermissionMode,
+  OpenSearchDashboardsRequest,
 } from '../../../../core/server';
 import {
   MAX_WORKSPACE_NAME_LENGTH,
@@ -21,6 +23,7 @@ import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
+import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   validateWorkspaceColor,
   validateWorkspaceId,
@@ -145,6 +148,17 @@ export function registerRoutes({
   isPermissionControlEnabled: boolean;
   isDataSourceEnabled: boolean;
 }) {
+  // Only dashboard admins may set or clear `reserved` when permission control is on.
+  const omitUnprivilegedReserved = <T extends { reserved?: boolean }>(
+    req: OpenSearchDashboardsRequest,
+    attributes: T
+  ) =>
+    isPermissionControlEnabled &&
+    'reserved' in attributes &&
+    !getWorkspaceState(req).isDashboardAdmin
+      ? omit(attributes, 'reserved')
+      : attributes;
+
   router.post(
     {
       path: `${WORKSPACES_API_BASE_URL}/_list`,
@@ -239,7 +253,8 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { attributes, settings } = req.body;
+      const { settings } = req.body;
+      const attributes = omitUnprivilegedReserved(req, req.body.attributes);
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
         id?: string;
@@ -292,7 +307,8 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
-      const { attributes, settings } = req.body;
+      const { settings } = req.body;
+      const attributes = omitUnprivilegedReserved(req, req.body.attributes);
 
       // Reject permission combinations that do not map to a recognized
       // collaborator access level (read only, read and write, or admin).
