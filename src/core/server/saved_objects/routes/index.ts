@@ -89,5 +89,9 @@ export function registerRoutes({
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
-  registerMigrateRoute(internalRouter, migratorPromise);
+  registerMigrateRoute(internalRouter, migratorPromise, {
+    auth: http.auth,
+    adminRoles: config.migration.adminRoles,
+    logger,
+  });
 }

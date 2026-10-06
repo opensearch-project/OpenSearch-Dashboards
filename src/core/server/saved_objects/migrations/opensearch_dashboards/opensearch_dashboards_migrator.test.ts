@@ -233,6 +233,7 @@ const mockOptions = (deleteConfig?: { enabled: boolean; types: string[] }) => {
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
+      adminRoles: ['all_access'],
       delete: {
         enabled: rawConfig.get('migrations.delete.enabled'),
         types: rawConfig.get('migrations.delete.types'),
