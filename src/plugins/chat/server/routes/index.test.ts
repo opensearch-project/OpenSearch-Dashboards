@@ -1502,6 +1502,67 @@ describe('getValidOboToken', () => {
     expect(mockTransportRequest).toHaveBeenCalledTimes(2);
   });
 
+  // Regression for the allowlist-vs-denylist direction: the proxy roles header
+  // name is deployment-configured (security plugin `proxycache.roles_header` has
+  // no default), so a deployment may use a custom name like `x-remote-groups`.
+  // Keying must still distinguish two requests that share a session cookie but
+  // carry different custom roles headers, otherwise the original privilege-
+  // escalation collision returns. Because the key hashes all non-denylisted
+  // headers, an unrecognized roles header is still included.
+  it('should distinguish a custom (non-default) roles header under the same cookie', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'admin-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'low-priv-token', durationSeconds: 300 },
+      });
+
+    // Same session cookie, different *custom-named* roles header.
+    const victimToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ cookie: 'security_authentication=abc', 'x-remote-groups': 'all_access' })
+    );
+    const attackerToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ cookie: 'security_authentication=abc', 'x-remote-groups': 'kibanauser' })
+    );
+
+    expect(victimToken).toBe('admin-token');
+    expect(attackerToken).toBe('low-priv-token');
+    expect(attackerToken).not.toBe(victimToken);
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2); // distinct keys, no reuse
+  });
+
+  // A denylisted header (not part of the credential) must NOT fragment the cache:
+  // the same identity varying only `x-forwarded-for` still hits one entry.
+  it('should ignore non-credential headers (x-forwarded-for) when keying', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'xff-token', durationSeconds: 300 },
+    });
+
+    const first = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-xff', 'x-forwarded-for': '10.0.0.1' })
+    );
+    const second = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-xff', 'x-forwarded-for': '10.0.0.2' })
+    );
+
+    expect(first).toBe('xff-token');
+    expect(second).toBe('xff-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // same credential => one mint
+  });
+
   it('should skip caching when the request carries no credential, minting fresh each time', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({

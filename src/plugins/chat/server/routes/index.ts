@@ -75,43 +75,105 @@ function setOboCacheEntry(key: string, entry: CachedOboToken): void {
 const OBO_REFRESH_BUFFER_MS = 30_000;
 
 /**
- * Request headers that can carry (part of) the caller's credential across the
- * auth types the security plugin supports: `authorization` (basic/JWT/bearer),
- * `cookie` (session), the proxy-auth user/roles headers, and `securitytenant`
- * (which scopes the resulting token). These are the inputs `asCurrentUser`
- * forwards to the OBO mint, so they fully determine the token that comes back.
+ * Headers that provably do NOT affect the OBO token the security plugin mints,
+ * and so are excluded from the cache key. Everything else is included.
  *
- * `x-forwarded-for` is deliberately excluded: it is client-controlled and does
- * not affect the token the security plugin mints, so including it would let a
- * caller vary it to spawn distinct cache entries for one identity (defeating
- * reuse) without improving correctness.
+ * This is intentionally a denylist, not an allowlist of credential headers. The
+ * credential headers vary by deployment: proxy auth reads its user/roles header
+ * *names* from security-plugin config (`proxycache.user_header`/`roles_header`,
+ * which have no fixed default — `x-proxy-user`/`x-proxy-roles` are only a common
+ * convention), and future auth types may introduce others. An allowlist fails
+ * open: a credential header it has never heard of is dropped from the key, so
+ * two different identities (e.g. same session cookie, different roles header)
+ * alias onto one entry — the original privilege-escalation collision, back
+ * again, on a configuration this plugin cannot see.
+ *
+ * A denylist fails closed: an unknown header is included, so the worst case is
+ * cache fragmentation (a performance cost — the same identity minting more than
+ * once), never a cross-identity collision (an authorization cost). The claim a
+ * reviewer must check is only "these headers provably do not change the minted
+ * token", which is stable, rather than "these are all the headers that do",
+ * which silently becomes false as deployments and auth types change.
+ *
+ * Entries are lowercase (Node lowercases incoming header names).
  */
-const OBO_CREDENTIAL_HEADERS = [
-  'authorization',
-  'cookie',
-  'securitytenant',
-  'x-proxy-user',
-  'x-proxy-roles',
-] as const;
+const OBO_NON_CREDENTIAL_HEADERS = new Set<string>([
+  // Hop-by-hop / proxy / transport metadata (client-controlled, not credentials)
+  'host',
+  'connection',
+  'keep-alive',
+  'proxy-connection',
+  'transfer-encoding',
+  'te',
+  'trailer',
+  'upgrade',
+  'via',
+  'forwarded',
+  'x-forwarded-for',
+  'x-forwarded-host',
+  'x-forwarded-port',
+  'x-forwarded-proto',
+  'x-real-ip',
+  // Content negotiation / payload descriptors
+  'accept',
+  'accept-encoding',
+  'accept-language',
+  'accept-charset',
+  'content-type',
+  'content-length',
+  'content-encoding',
+  'content-language',
+  'content-md5',
+  // Caching / conditional request metadata
+  'cache-control',
+  'pragma',
+  'if-match',
+  'if-none-match',
+  'if-modified-since',
+  'if-unmodified-since',
+  'if-range',
+  'range',
+  // Request origin / client descriptors (not credentials)
+  'user-agent',
+  'referer',
+  'origin',
+  'dnt',
+  'date',
+  'from',
+  'max-forwards',
+  // OpenSearch Dashboards request plumbing (not credentials)
+  'osd-xsrf',
+  'osd-version',
+  'osd-name',
+  'kbn-xsrf',
+  'kbn-version',
+  'kbn-name',
+]);
 
 /**
  * Build the OBO cache key from the caller's credential.
  *
- * Returns `undefined` when the request carries no credential header at all — in
- * that case the caller must skip the cache and mint fresh, rather than share a
- * single "empty credential" entry across unrelated requests.
+ * Hashes every request header except the known non-credential set
+ * (`OBO_NON_CREDENTIAL_HEADERS`). Returns `undefined` when no credential-bearing
+ * header remains — in that case the caller skips the cache and mints fresh,
+ * rather than share a single "empty credential" entry across unrelated requests.
  *
- * Header values are JSON-serialized as a fixed-order tuple before hashing so
- * that no value can shift a boundary and alias a different credential onto the
- * same key, and the result is hashed so the raw credential is never held in a
- * map key (do not log the raw values either).
+ * Header name/value pairs are collected into a fixed-order (sorted-by-name)
+ * tuple and JSON-serialized before hashing, so neither header iteration order
+ * nor a value moving between headers can alias a different credential onto the
+ * same key. The result is hashed so the raw credential is never held in a map
+ * key (and must not be logged either).
  */
 function oboCacheKey(request: OpenSearchDashboardsRequest): string | undefined {
-  const material = OBO_CREDENTIAL_HEADERS.map((name) => {
-    const value = request.headers[name];
-    return Array.isArray(value) ? value.join(',') : (value ?? '');
-  });
-  if (material.every((v) => v === '')) {
+  const material = Object.keys(request.headers)
+    .map((name) => name.toLowerCase())
+    .filter((name) => !OBO_NON_CREDENTIAL_HEADERS.has(name))
+    .sort()
+    .map((name) => {
+      const value = request.headers[name];
+      return [name, Array.isArray(value) ? value.join(',') : (value ?? '')];
+    });
+  if (material.length === 0) {
     return undefined;
   }
   return createHash('sha256').update(JSON.stringify(material)).digest('hex');
