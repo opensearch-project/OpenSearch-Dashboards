@@ -9,14 +9,12 @@ import { createHash } from 'crypto';
 import {
   IRouter,
   Logger,
-  HttpAuth,
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
   Capabilities,
   OpenSearchClient,
 } from '../../../../core/server';
 import {
-  getPrincipalsFromRequest,
   getWorkspaceState,
   isRequestWorkspaceAuthorized,
 } from '../../../../core/server/utils';
@@ -39,11 +37,14 @@ interface CachedOboToken {
 /**
  * In-memory cache of OBO tokens.
  *
- * The key is derived from the full resolved authorization context (username +
- * backend roles), NOT the username alone. Keying on username alone lets two
- * principals that share a username but hold different roles/realms collide on
- * the same entry, so one could be served a cached token minted for the other.
- * See `oboCacheKey`.
+ * The key is derived from the caller's own credential (see `oboCacheKey`), not
+ * from an identity reconstructed from it. The OBO token is minted via
+ * `asCurrentUser`, i.e. using exactly that credential, so a token is a pure
+ * function of the credential that produced it: identical credential => the same
+ * token the security plugin would mint anyway, and any difference in credential
+ * yields a different key. This avoids modelling what makes two principals
+ * equivalent (username, backend roles, directly-assigned security roles, realm,
+ * tenant, ...) and keeping that model in sync with the security plugin.
  */
 const oboTokenCache = new Map<string, CachedOboToken>();
 
@@ -51,20 +52,42 @@ const oboTokenCache = new Map<string, CachedOboToken>();
 const OBO_REFRESH_BUFFER_MS = 30_000;
 
 /**
- * Build the OBO cache key from the caller's resolved authorization context.
- *
- * The key must be injective over (username, roles): a token minted under one
- * authorization context must never be served to a request with a different
- * one. Roles are sorted so ordering does not affect the key, and the tuple is
- * JSON-serialized before hashing so that no component value (e.g. a role
- * containing a delimiter character) can shift a boundary and alias a different
- * identity onto the same key. The result is hashed so role names are not held
- * in map keys in plaintext.
+ * Request headers that can carry (part of) the caller's credential across the
+ * auth types the security plugin supports: `authorization` (basic/JWT/bearer),
+ * `cookie` (session), the proxy-auth user/roles headers, and `securitytenant`
+ * (which scopes the resulting token). These are the inputs `asCurrentUser`
+ * forwards to the OBO mint, so they fully determine the token that comes back.
  */
-function oboCacheKey(username: string, backendRoles: string[]): string {
-  const normalizedRoles = [...backendRoles].sort();
-  const serialized = JSON.stringify([username, normalizedRoles]);
-  return createHash('sha256').update(serialized).digest('hex');
+const OBO_CREDENTIAL_HEADERS = [
+  'authorization',
+  'cookie',
+  'securitytenant',
+  'x-proxy-user',
+  'x-proxy-roles',
+  'x-forwarded-for',
+] as const;
+
+/**
+ * Build the OBO cache key from the caller's credential.
+ *
+ * Returns `undefined` when the request carries no credential header at all — in
+ * that case the caller must skip the cache and mint fresh, rather than share a
+ * single "empty credential" entry across unrelated requests.
+ *
+ * Header values are JSON-serialized as a fixed-order tuple before hashing so
+ * that no value can shift a boundary and alias a different credential onto the
+ * same key, and the result is hashed so the raw credential is never held in a
+ * map key (do not log the raw values either).
+ */
+function oboCacheKey(request: OpenSearchDashboardsRequest): string | undefined {
+  const material = OBO_CREDENTIAL_HEADERS.map((name) => {
+    const value = request.headers[name];
+    return Array.isArray(value) ? value.join(',') : value ?? '';
+  });
+  if (material.every((v) => v === '')) {
+    return undefined;
+  }
+  return createHash('sha256').update(JSON.stringify(material)).digest('hex');
 }
 
 /**
@@ -108,31 +131,32 @@ export async function generateOboToken(
 }
 
 /**
- * Get a valid OBO token for the current user, using a cached token if it has
+ * Get a valid OBO token for the current request, using a cached token if it has
  * not yet expired. When the cached token is within the refresh buffer or
- * missing, a fresh token is minted using the cookie-backed credentials
- * available via `asCurrentUser`.
+ * missing, a fresh token is minted using the credentials carried on the request
+ * (via `asCurrentUser`).
  *
- * The cache is keyed on the full authorization context (username + backend
- * roles) rather than username alone, so a token minted for one principal is
- * never served to a different principal that merely shares a username. When
- * the username cannot be resolved, caching is skipped entirely and a fresh
+ * The cache is keyed on the request's own credential (see `oboCacheKey`), so a
+ * cached token is only ever returned to a request that presents the identical
+ * credential — the same credential the security plugin would mint that token
+ * from. When the request carries no credential, caching is skipped and a fresh
  * token is minted each time.
  */
 export async function getValidOboToken(
   context: RequestHandlerContext,
   logger: Logger,
   agUiUrl: string,
-  username?: string,
-  backendRoles: string[] = []
+  request: OpenSearchDashboardsRequest
 ): Promise<string | undefined> {
-  // When username is unknown, skip caching to avoid cross-user token sharing
-  if (!username) {
+  const cacheKey = oboCacheKey(request);
+
+  // No credential to key on — mint fresh and do not cache, to avoid sharing a
+  // single entry across unrelated requests.
+  if (!cacheKey) {
     const result = await generateOboToken(context, logger, agUiUrl);
     return result?.token;
   }
 
-  const cacheKey = oboCacheKey(username, backendRoles);
   const cached = oboTokenCache.get(cacheKey);
 
   if (cached) {
@@ -282,7 +306,6 @@ export function defineRoutes(
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
   forwardCredentials?: boolean,
-  getHttpAuth?: () => HttpAuth | undefined,
   getWorkspace?: () => WorkspacePluginStart | undefined
 ) {
   // Route for searching agent memory sessions (conversation history)
@@ -430,14 +453,9 @@ export function defineRoutes(
           // Get a valid OBO token (cached or freshly minted) when credential forwarding is enabled
           let oboToken: string | undefined;
           if (forwardCredentials) {
-            const httpAuth = getHttpAuth?.();
-            const principals = httpAuth ? getPrincipalsFromRequest(request, httpAuth) : undefined;
-            const username = principals?.users?.[0];
-            // Key the token cache on the full authorization context (username +
-            // backend roles) so a token minted for one principal is never reused
-            // for a different principal that merely shares a username.
-            const backendRoles = principals?.groups ?? [];
-            oboToken = await getValidOboToken(context, logger, agUiUrl, username, backendRoles);
+            // The cache is keyed on the request's credential (see getValidOboToken),
+            // so no identity needs to be resolved here.
+            oboToken = await getValidOboToken(context, logger, agUiUrl, request);
           }
 
           // Forward to AG-UI capable endpoint.

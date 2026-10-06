@@ -9,7 +9,7 @@ import { loggingSystemMock } from '../../../../core/server/mocks';
 import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
-import { RequestHandlerContext, Logger } from '../../../../core/server';
+import { RequestHandlerContext, Logger, OpenSearchDashboardsRequest } from '../../../../core/server';
 import { getWorkspaceState } from '../../../../core/server/utils/workspace';
 import { WorkspacePluginStart } from '../../../workspace/server';
 
@@ -48,7 +48,6 @@ describe('Chat Proxy Routes', () => {
       mlCommonsAgentId,
       undefined,
       forwardCredentials,
-      undefined,
       getWorkspace as unknown as (() => WorkspacePluginStart | undefined) | undefined
     );
 
@@ -1188,6 +1187,10 @@ describe('getValidOboToken', () => {
   let mockContext: RequestHandlerContext;
   let mockTransportRequest: jest.Mock;
 
+  // Build a minimal request carrying the given credential headers.
+  const mockRequest = (headers: Record<string, string | string[]>): OpenSearchDashboardsRequest =>
+    (({ headers } as unknown) as OpenSearchDashboardsRequest);
+
   beforeEach(() => {
     mockLogger = {
       info: jest.fn(),
@@ -1218,7 +1221,12 @@ describe('getValidOboToken', () => {
       body: { authenticationToken: 'fresh-token', durationSeconds: 300 },
     });
 
-    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-a');
+    const token = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-a' })
+    );
 
     expect(token).toBe('fresh-token');
     expect(mockTransportRequest).toHaveBeenCalledTimes(1);
@@ -1229,10 +1237,11 @@ describe('getValidOboToken', () => {
       body: { authenticationToken: 'cached-token', durationSeconds: 300 },
     });
 
+    const creds = { authorization: 'Bearer tok-b' };
     // First call — mints
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
-    // Second call — should use cache
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
+    // Second call with the same credential — should use cache
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
 
     expect(token1).toBe('cached-token');
     expect(token2).toBe('cached-token');
@@ -1243,33 +1252,48 @@ describe('getValidOboToken', () => {
   it('should return undefined when token generation fails', async () => {
     mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
 
-    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-c');
+    const token = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-c' })
+    );
 
     expect(token).toBeUndefined();
   });
 
-  it('should use separate cache entries per user', async () => {
+  it('should use separate cache entries per distinct credential', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({
-        body: { authenticationToken: 'token-user-d', durationSeconds: 300 },
+        body: { authenticationToken: 'token-cred-d', durationSeconds: 300 },
       })
       .mockResolvedValueOnce({
-        body: { authenticationToken: 'token-user-e', durationSeconds: 300 },
+        body: { authenticationToken: 'token-cred-e', durationSeconds: 300 },
       });
 
-    const tokenD = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-d');
-    const tokenE = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-e');
+    const tokenD = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-d' })
+    );
+    const tokenE = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-e' })
+    );
 
-    expect(tokenD).toBe('token-user-d');
-    expect(tokenE).toBe('token-user-e');
+    expect(tokenD).toBe('token-cred-d');
+    expect(tokenE).toBe('token-cred-e');
     expect(mockTransportRequest).toHaveBeenCalledTimes(2);
   });
 
-  // Regression: the OBO cache must not be shared across differing role
-  // contexts for the same username — the cache key incorporates the resolved
-  // backend roles so a token minted for one principal is not reused for
-  // another that merely shares a username.
-  it('should not reuse a cached token across different roles for the same username', async () => {
+  // Regression: the OBO cache must not be shared across different credentials.
+  // Under proxy auth two requests can share a username (x-proxy-user) but carry
+  // different role headers (x-proxy-roles); keying on the full credential keeps
+  // their tokens separate so a token minted for one is never served to the other.
+  it('should not reuse a cached token across different credentials with the same proxy user', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({
         body: { authenticationToken: 'admin-token', durationSeconds: 300 },
@@ -1278,53 +1302,72 @@ describe('getValidOboToken', () => {
         body: { authenticationToken: 'low-priv-token', durationSeconds: 300 },
       });
 
-    // Privileged request populates the cache under (same-name, [all_access]).
+    // Privileged request populates the cache.
     const victimToken = await getValidOboToken(
       mockContext,
       mockLogger,
       'http://agui:3000',
-      'same-name',
-      ['all_access']
+      mockRequest({ 'x-proxy-user': 'same-name', 'x-proxy-roles': 'all_access' })
     );
-    // Low-privilege request: identical username, different roles — must NOT hit
-    // the privileged entry and must mint its own token.
+    // Same proxy user, different roles header => different credential => must
+    // NOT hit the privileged entry and must mint its own token.
     const attackerToken = await getValidOboToken(
       mockContext,
       mockLogger,
       'http://agui:3000',
-      'same-name',
-      ['kibanauser']
+      mockRequest({ 'x-proxy-user': 'same-name', 'x-proxy-roles': 'kibanauser' })
     );
 
     expect(victimToken).toBe('admin-token');
     expect(attackerToken).toBe('low-priv-token');
     expect(attackerToken).not.toBe(victimToken);
-    // Two distinct contexts → two mints, no cache reuse.
     expect(mockTransportRequest).toHaveBeenCalledTimes(2);
   });
 
-  it('should reuse the cached token when username and roles both match', async () => {
+  it('should reuse the cached token when the full credential matches', async () => {
     mockTransportRequest.mockResolvedValue({
-      body: { authenticationToken: 'same-ctx-token', durationSeconds: 300 },
+      body: { authenticationToken: 'same-cred-token', durationSeconds: 300 },
     });
 
-    const first = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-f', [
-      'reports_read',
-      'alerting_read',
-    ]);
-    // Same roles, different order — must resolve to the same cache entry.
-    const second = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-f', [
-      'alerting_read',
-      'reports_read',
-    ]);
+    const creds = { authorization: 'Bearer tok-f', securitytenant: 'global' };
+    const first = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
+    const second = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
 
-    expect(first).toBe('same-ctx-token');
-    expect(second).toBe('same-ctx-token');
+    expect(first).toBe('same-cred-token');
+    expect(second).toBe('same-cred-token');
     expect(mockTransportRequest).toHaveBeenCalledTimes(1); // Cached — minted once
     expect(mockLogger.debug).toHaveBeenCalledWith('Using cached OBO token');
   });
 
-  it('should skip caching when username is undefined to prevent cross-user token sharing', async () => {
+  it('should treat a different securitytenant as a different credential', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'tenant-global-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'tenant-private-token', durationSeconds: 300 },
+      });
+
+    const globalToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-g', securitytenant: 'global' })
+    );
+    const privateToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-g', securitytenant: 'private' })
+    );
+
+    expect(globalToken).toBe('tenant-global-token');
+    expect(privateToken).toBe('tenant-private-token');
+    expect(privateToken).not.toBe(globalToken);
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should skip caching when the request carries no credential, minting fresh each time', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({
         body: { authenticationToken: 'token-call-1', durationSeconds: 300 },
@@ -1333,9 +1376,10 @@ describe('getValidOboToken', () => {
         body: { authenticationToken: 'token-call-2', durationSeconds: 300 },
       });
 
-    // Both calls without username should mint fresh tokens (no caching)
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+    // Both calls with no credential headers must mint fresh (no caching), so a
+    // single "empty credential" entry is never shared across requests.
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest({}));
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest({}));
 
     expect(token1).toBe('token-call-1');
     expect(token2).toBe('token-call-2');
