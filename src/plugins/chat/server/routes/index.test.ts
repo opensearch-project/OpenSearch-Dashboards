@@ -548,6 +548,117 @@ describe('Chat Proxy Routes', () => {
         expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
         expect(mockLogger.error).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
       });
+
+      // Route-level wiring: the unit tests exercise getValidOboToken directly, so
+      // they cannot catch the route passing the wrong thing into the cache key.
+      // These two go through POST /api/chat/proxy and assert what actually reaches
+      // the key — proving the real request credential (not some derived identity)
+      // is what the cache keys on, which is where the residual risk in this fix lives.
+      it('forwards the minted OBO token and reuses it across requests with the same credential', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+        const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+          .request as jest.Mock;
+        transport.mockResolvedValue({
+          body: { authenticationToken: 'route-obo-token', durationSeconds: 300 },
+        });
+
+        // Credential unique to this test so it cannot collide with cache entries
+        // left by other tests sharing the module-level cache.
+        const cred = 'Bearer route-wiring-same-cred';
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', cred)
+          .send(validRequest)
+          .expect(200);
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', cred)
+          .send(validRequest)
+          .expect(200);
+
+        // The minted OBO token (not the caller's raw credential) is forwarded.
+        const firstHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(firstHeaders.Authorization).toBe('Bearer route-obo-token');
+
+        // Same credential on both requests => the route feeds the same cache key,
+        // so the token is minted once and reused on the second request.
+        expect(transport).toHaveBeenCalledTimes(1);
+      });
+
+      it('mints separately when the proxy user is the same but the roles header differs', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+        const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+          .request as jest.Mock;
+        transport
+          .mockResolvedValueOnce({
+            body: { authenticationToken: 'route-admin-token', durationSeconds: 300 },
+          })
+          .mockResolvedValueOnce({
+            body: { authenticationToken: 'route-lowpriv-token', durationSeconds: 300 },
+          });
+
+        // Same proxy username, different roles header: the demonstrated privilege
+        // escalation shape. The route must key on the full credential so these do
+        // not share a cache entry.
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('x-proxy-user', 'route-same-name')
+          .set('x-proxy-roles', 'all_access')
+          .send(validRequest)
+          .expect(200);
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('x-proxy-user', 'route-same-name')
+          .set('x-proxy-roles', 'kibanauser')
+          .send(validRequest)
+          .expect(200);
+
+        // Distinct credentials => two distinct cache keys => two mints, and each
+        // request forwards its own token (no cross-credential reuse at the route).
+        expect(transport).toHaveBeenCalledTimes(2);
+        const firstHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        const secondHeaders = (mockFetch.mock.calls[1][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(firstHeaders.Authorization).toBe('Bearer route-admin-token');
+        expect(secondHeaders.Authorization).toBe('Bearer route-lowpriv-token');
+      });
     });
 
     describe('System Prompt Injection', () => {
