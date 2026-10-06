@@ -9,7 +9,11 @@ import { loggingSystemMock } from '../../../../core/server/mocks';
 import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
-import { RequestHandlerContext, Logger, OpenSearchDashboardsRequest } from '../../../../core/server';
+import {
+  RequestHandlerContext,
+  Logger,
+  OpenSearchDashboardsRequest,
+} from '../../../../core/server';
 import { getWorkspaceState } from '../../../../core/server/utils/workspace';
 import { WorkspacePluginStart } from '../../../workspace/server';
 
@@ -1300,7 +1304,7 @@ describe('getValidOboToken', () => {
 
   // Build a minimal request carrying the given credential headers.
   const mockRequest = (headers: Record<string, string | string[]>): OpenSearchDashboardsRequest =>
-    (({ headers } as unknown) as OpenSearchDashboardsRequest);
+    ({ headers }) as unknown as OpenSearchDashboardsRequest;
 
   beforeEach(() => {
     mockLogger = {
@@ -1350,9 +1354,19 @@ describe('getValidOboToken', () => {
 
     const creds = { authorization: 'Bearer tok-b' };
     // First call — mints
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
+    const token1 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
     // Second call with the same credential — should use cache
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
+    const token2 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
 
     expect(token1).toBe('cached-token');
     expect(token2).toBe('cached-token');
@@ -1441,8 +1455,18 @@ describe('getValidOboToken', () => {
     });
 
     const creds = { authorization: 'Bearer tok-f', securitytenant: 'global' };
-    const first = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
-    const second = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest(creds));
+    const first = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
+    const second = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
 
     expect(first).toBe('same-cred-token');
     expect(second).toBe('same-cred-token');
@@ -1489,8 +1513,18 @@ describe('getValidOboToken', () => {
 
     // Both calls with no credential headers must mint fresh (no caching), so a
     // single "empty credential" entry is never shared across requests.
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest({}));
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', mockRequest({}));
+    const token1 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({})
+    );
+    const token2 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({})
+    );
 
     expect(token1).toBe('token-call-1');
     expect(token2).toBe('token-call-2');

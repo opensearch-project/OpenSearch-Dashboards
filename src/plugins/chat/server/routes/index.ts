@@ -15,10 +15,7 @@ import {
   Capabilities,
   OpenSearchClient,
 } from '../../../../core/server';
-import {
-  getWorkspaceState,
-  isRequestWorkspaceAuthorized,
-} from '../../../../core/server/utils';
+import { getWorkspaceState, isRequestWorkspaceAuthorized } from '../../../../core/server/utils';
 import { WorkspacePluginStart } from '../../../workspace/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
@@ -91,7 +88,7 @@ const OBO_CREDENTIAL_HEADERS = [
 function oboCacheKey(request: OpenSearchDashboardsRequest): string | undefined {
   const material = OBO_CREDENTIAL_HEADERS.map((name) => {
     const value = request.headers[name];
-    return Array.isArray(value) ? value.join(',') : value ?? '';
+    return Array.isArray(value) ? value.join(',') : (value ?? '');
   });
   if (material.every((v) => v === '')) {
     return undefined;
