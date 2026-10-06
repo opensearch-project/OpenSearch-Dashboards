@@ -21,6 +21,9 @@ interface OperationCategory {
 
 export const OPERATORS = ['=', '!=', '=~', '!~'];
 
+export const EMPTY_LABEL_VALUE = '""';
+export const toLabelValueDisplay = (value: string) => value || EMPTY_LABEL_VALUE;
+
 export const AGGREGATION_IDS = new Set([
   'sum',
   'avg',

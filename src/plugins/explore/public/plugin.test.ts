@@ -5,6 +5,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ExplorePlugin, initializeLogsDefaultQuery } from './plugin';
+import { getSourceTypeRegistry } from './services/source_type_registry';
+import { ExploreFlavor, EXPLORE_LOGS_TAB_ID } from '../common';
 import { coreMock } from '../../../core/public/mocks';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
@@ -435,6 +437,21 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it('exposes source type registration that Explore reads back', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+
+      setup.sourceTypes.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+
+      expect(getSourceTypeRegistry().getForDataset({ type: 'FAKE' }).id).toBe('fake');
+      expect(getSourceTypeRegistry().getLanguageSettings('FakeQL')).toEqual({});
+    });
+
     it('should setup URL forwarding', () => {
       plugin.setup(coreSetup, setupDeps);
 
@@ -481,6 +498,36 @@ describe('ExplorePlugin', () => {
         expect.objectContaining({ id: 'observability' }),
         expect.arrayContaining([expect.objectContaining({ id: 'explore' })])
       );
+    });
+  });
+
+  describe('registration after setup', () => {
+    // Capability-gated sources (per-account flags only exist in start) register from their own
+    // start. Explore reads the registry when it renders, after every plugin has started, so it
+    // must keep accepting registrations after setup.
+    it('shows a source type registered after start, with its languages', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      setup.sourceTypes.register({
+        id: 'lateSource',
+        label: 'Late source',
+        datasetTypes: ['LATE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { LateQL: {} },
+      });
+
+      expect(
+        getSourceTypeRegistry()
+          .getAll(ExploreFlavor.Logs)
+          .map((s) => s.id)
+      ).toContain('lateSource');
+      expect(getSourceTypeRegistry().getForDataset({ type: 'LATE' }).id).toBe('lateSource');
+      expect(
+        getSourceTypeRegistry().getLanguagesForTab(EXPLORE_LOGS_TAB_ID, ExploreFlavor.Logs)
+      ).toEqual(['LateQL']);
+      expect(getSourceTypeRegistry().supportsHistogram('LateQL', { type: 'LATE' })).toBe(false);
     });
   });
 

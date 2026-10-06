@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 // @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 import { CelestialMap, MetricsCardNode, VolumeEdge } from '@osd/apm-topology';
 import { spansToServiceFlow, ServiceFlowHit } from './trace_service_flow_transform';
+import { TraceDependencies } from './trace_dependencies';
 import './trace_service_flow.scss';
 
 const NODE_TYPES = { metricsCard: MetricsCardNode };
@@ -21,6 +22,18 @@ export interface TraceServiceFlowProps {
   activeServiceFilter?: string;
   /** Clicking a service card filters the trace by that service. */
   onFilterService?: (serviceName: string) => void;
+  /**
+   * Clicking a dependency card filters the trace to that dependency's spans, by the span
+   * attribute that names it (e.g. `attributes.server.address`).
+   */
+  onFilterAttribute?: (field: string, value: string) => void;
+  /** Active span filters, used to highlight the dependency they select. */
+  activeSpanFilters?: Array<{ field: string; value: unknown }>;
+  /**
+   * The trace's dependency calls, classified over the unfiltered trace (see
+   * buildTraceDependencies). Without it they are classified from `hits`.
+   */
+  traceDependencies?: TraceDependencies;
   /**
    * Show the overview minimap. Off in the narrow flyout, where the graph is
    * already fit-to-view and the minimap would only cover the nodes.
@@ -39,9 +52,15 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
   colorMap = {},
   activeServiceFilter,
   onFilterService,
+  onFilterAttribute,
+  activeSpanFilters,
+  traceDependencies,
   showMinimap = true,
 }) => {
-  const { map } = useMemo(() => spansToServiceFlow(hits, colorMap), [hits, colorMap]);
+  const { map } = useMemo(
+    () => spansToServiceFlow(hits, colorMap, traceDependencies),
+    [hits, colorMap, traceDependencies]
+  );
 
   // Highlight the filtered service via node data (not selectedNodeId, which
   // would camera-focus a single node and chop the rest of the graph).
@@ -53,12 +72,18 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
           ...node,
           data: {
             ...node.data,
-            isSelected: !!activeServiceFilter && node.id === activeServiceFilter,
+            isSelected: node.data.dependencyFilter
+              ? (activeSpanFilters || []).some(
+                  (f) =>
+                    f.field === node.data.dependencyFilter?.field &&
+                    f.value === node.data.dependencyFilter?.value
+                )
+              : !!activeServiceFilter && node.id === activeServiceFilter,
           },
         })),
       },
     }),
-    [map, activeServiceFilter]
+    [map, activeServiceFilter, activeSpanFilters]
   );
 
   // The package fits once (clamped zoom) and never re-fits on resize; remount on
@@ -143,8 +168,20 @@ export const TraceServiceFlow: React.FC<TraceServiceFlowProps> = ({
         showGridBackground
         nodesDraggable
         topN={Infinity}
-        onDashboardClick={(node?: { id?: string }) => {
-          if (node?.id) onFilterService?.(node.id);
+        onDashboardClick={(node?: {
+          id?: string;
+          dependencyFilter?: { field: string; value: string };
+        }) => {
+          if (!node?.id) return;
+          // Synthesized dependency nodes (id "dep::<type>::<name>") are not services:
+          // filter by the attribute that names the dependency instead (no-op when none).
+          if (node.id.startsWith('dep::')) {
+            if (node.dependencyFilter) {
+              onFilterAttribute?.(node.dependencyFilter.field, node.dependencyFilter.value);
+            }
+            return;
+          }
+          onFilterService?.(node.id);
         }}
       />
     </div>

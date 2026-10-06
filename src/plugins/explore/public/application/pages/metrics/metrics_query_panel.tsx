@@ -33,6 +33,7 @@ import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_se
 import {
   selectIsLoading,
   selectIsPromptEditorMode,
+  selectIsQueryEditorDirty,
   selectPromptToQueryIsLoading,
   selectQueryLanguage,
   selectQueryString,
@@ -76,6 +77,7 @@ export const MetricsQueryPanel: React.FC = () => {
   const dataConnectionId = useSelector((state: RootState) => state.query.dataset?.id || '');
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
+  const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
   const editorRef = useEditorRef();
   const setEditorText = useSetEditorText();
@@ -116,13 +118,27 @@ export const MetricsQueryPanel: React.FC = () => {
     initRows(reduxQuery, nextRowId, reduxPerQueryOptions)
   );
   const lastDispatchedRef = useRef(reduxQuery);
+  const previousReduxQueryRef = useRef(reduxQuery);
 
   useEffect(() => {
-    if (reduxQuery !== lastDispatchedRef.current) {
-      lastDispatchedRef.current = reduxQuery;
-      setRows(initRows(reduxQuery, nextRowId, perQueryOptionsRef.current));
-    }
-  }, [reduxQuery, nextRowId]);
+    const queryChanged = reduxQuery !== previousReduxQueryRef.current;
+    previousReduxQueryRef.current = reduxQuery;
+    // Keep local drafts until a query is loaded or run, even if its text is unchanged.
+    if (!queryChanged && isQueryEditorDirty) return;
+
+    lastDispatchedRef.current = reduxQuery;
+
+    setRows((currentRows) => {
+      const serialized = serializeRows(currentRows);
+      const optionsMatch = serialized.perQueryOptions.every(
+        (options, index) =>
+          options.minStep === reduxPerQueryOptions?.[index]?.minStep &&
+          options.legendFormat === reduxPerQueryOptions?.[index]?.legendFormat
+      );
+      if (serialized.query === reduxQuery && optionsMatch) return currentRows;
+      return initRows(reduxQuery, nextRowId, reduxPerQueryOptions);
+    });
+  }, [reduxQuery, reduxPerQueryOptions, isQueryEditorDirty, nextRowId]);
 
   // Sync draft text to the QueryStringManager (NOT Redux) on every keystroke so
   // that handleQuerySubmit in TopNav can read it via queryString.getQuery().query.
@@ -312,7 +328,6 @@ export const MetricsQueryPanel: React.FC = () => {
                   draggableId={row.id}
                   customDragHandle={true}
                   spacing="none"
-                  hasInteractiveChildren={true}
                   isDragDisabled={rows.length <= 1}
                 >
                   {(provided, snapshot) => (

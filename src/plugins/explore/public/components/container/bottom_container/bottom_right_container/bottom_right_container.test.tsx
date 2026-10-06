@@ -86,10 +86,14 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
 const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('BottomRightContainer', () => {
-  const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
+  const createMockStore = (
+    status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED,
+    results: Record<string, unknown> = {},
+    progress?: Record<string, number>
+  ) => {
     const queryStatusMap =
       status === QueryExecutionStatus.LOADING
-        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
+        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING, progress } }
         : {};
 
     return configureStore({
@@ -111,7 +115,7 @@ describe('BottomRightContainer', () => {
           }
         ) => state,
         query: (state = {}) => state,
-        results: (state = {}) => state,
+        results: (state = results) => state,
         tab: (state = {}) => state,
       },
     });
@@ -136,8 +140,12 @@ describe('BottomRightContainer', () => {
     mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
   });
 
-  const renderComponent = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
-    const store = createMockStore(status);
+  const renderComponent = (
+    status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED,
+    results?: Record<string, unknown>,
+    progress?: Record<string, number>
+  ) => {
+    const store = createMockStore(status, results, progress);
     return render(
       <Provider store={store}>
         <BottomRightContainer />
@@ -175,6 +183,35 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent(QueryExecutionStatus.LOADING);
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  });
+
+  it('renders partial rows instead of the spinner while a polling query is still loading', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(
+      QueryExecutionStatus.LOADING,
+      { 'mock-query-string': { hasResults: true } },
+      { recordsMatched: 1 }
+    );
+
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
+  });
+
+  it('keeps the spinner for a re-run that has rows but is not streaming', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(QueryExecutionStatus.LOADING, { 'mock-query-string': { hasResults: true } });
+
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
