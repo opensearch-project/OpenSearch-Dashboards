@@ -36,6 +36,9 @@ export const VISUALIZATION_EDITOR_APP_NAME = 'VisualizationEditor';
 // with its own lightweight mount (no shared Redux store).
 export const LOGS_DRILLDOWN_APP_ID = `${PLUGIN_ID}/logs-drilldown`;
 export const LOGS_DRILLDOWN_APP_NAME = 'Explore logs';
+// Icon for every logs drilldown entry point (side-nav popover action, query-bar action, empty-state
+// button). Matches the metrics page's "Explore" tab so explore-mode entry points share one glyph.
+export const LOGS_DRILLDOWN_APP_ICON = 'compass';
 
 export enum ExploreFlavor {
   Logs = 'logs',

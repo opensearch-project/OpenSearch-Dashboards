@@ -40,6 +40,7 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
   LOGS_DRILLDOWN_APP_ID,
   LOGS_DRILLDOWN_APP_NAME,
+  LOGS_DRILLDOWN_APP_ICON,
 } from '../common';
 import { ConfigSchema } from '../common/config';
 import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
@@ -503,7 +504,7 @@ export class ExplorePlugin implements Plugin<
       title: LOGS_DRILLDOWN_APP_NAME,
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'discoverApp',
+      euiIconType: LOGS_DRILLDOWN_APP_ICON,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.observability,
       // Reached via the Logs nav-popover action + the query-bar action, NOT its own side-nav item.
