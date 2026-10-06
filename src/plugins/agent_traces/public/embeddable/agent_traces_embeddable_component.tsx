@@ -15,6 +15,7 @@ import {
 import { DataTable } from '../components/data_table/data_table';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
+import { AgentViewPanel } from './agent_view_panel';
 
 interface AgentTracesEmbeddableProps {
   searchProps: SearchProps;
@@ -75,6 +76,22 @@ export const AgentTracesEmbeddableComponent = ({ searchProps }: AgentTracesEmbed
   }, [searchProps]);
 
   const getEmbeddableContent = () => {
+    // Saved from Traces, Spans or Sessions: the agent table for that tab (not raw spans).
+    if (searchProps.agentView && (searchProps.agentError || searchProps.rows?.length)) {
+      return (
+        <AgentViewPanel
+          view={searchProps.agentView}
+          rows={searchProps.agentRows}
+          sessions={searchProps.sessions}
+          total={searchProps.agentTotal}
+          error={searchProps.agentError}
+          formatTs={searchProps.formatTs ?? ((ts) => ts)}
+          onOpenTrace={searchProps.onOpenTrace ?? (() => {})}
+          onOpenSession={searchProps.onOpenSession ?? (() => {})}
+        />
+      );
+    }
+
     if (searchProps?.rows?.length === 0) {
       return (
         <EuiFlexItem>

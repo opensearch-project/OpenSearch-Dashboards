@@ -4,11 +4,13 @@
  */
 
 import { MemoExoticComponent } from 'react';
+import { Observable } from 'rxjs';
 import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
 import { AgentTracesFlavor } from '../../../common';
 import { SortOrder } from '../../types/saved_agent_traces_types';
+import { Bucket } from '../../components/fields_selector/types';
 
 /**
  * Props passed to tab components
@@ -32,6 +34,25 @@ export interface TabDefinition {
 
   // Language-aware query handling
   supportedLanguages: string[];
+
+  /**
+   * Fields shown as "Faceted fields" in the fields panel while this tab is active.
+   * Defaults to the span-level facets when omitted.
+   */
+  facetFields?: string[];
+
+  /**
+   * Facet values computed by the tab itself (for example, counted per session instead of
+   * per fetched span). Keyed by field name; null while loading. When omitted, facets are
+   * counted from the fetched hits.
+   */
+  facetBuckets$?: Observable<Record<string, Bucket[]> | null>;
+
+  /**
+   * The tab renders a fixed set of columns, so the fields panel hides "Selected" and the
+   * add/remove column actions.
+   */
+  fixedColumns?: boolean;
 
   // Transform query string for cache key generation.
   // When sort is provided, it is appended as a PPL sort clause.

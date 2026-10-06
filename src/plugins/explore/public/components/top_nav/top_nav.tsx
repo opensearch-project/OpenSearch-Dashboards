@@ -9,11 +9,8 @@ import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
-import {
-  useSyncQueryStateWithUrl,
-  runPPLAnalyzeInBackground,
-  cancelPPLAnalyze,
-} from '../../../../data/public';
+import { useSyncQueryStateWithUrl, cancelPPLAnalyze } from '../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../application/utils/languages';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -168,7 +165,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       // Sourced from the editor rather than the query bar's own state so it stays
       // in sync with what actually ran.
       const currentQuery = queryString.getQuery();
-      runPPLAnalyzeInBackground({
+      runPPLAnalyzeWithSource({
         query: { ...currentQuery, query: editorText },
         http: services.http,
         timefilter: timefilter.timefilter,
