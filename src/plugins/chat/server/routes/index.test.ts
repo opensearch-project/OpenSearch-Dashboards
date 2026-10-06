@@ -1385,4 +1385,67 @@ describe('getValidOboToken', () => {
     expect(token2).toBe('token-call-2');
     expect(mockTransportRequest).toHaveBeenCalledTimes(2); // No caching — minted twice
   });
+
+  // Regression: the credential key space is much larger than before (one entry
+  // per distinct credential rather than per username), so the cache is bounded
+  // by an LRU `max`. Once the bound is exceeded the least-recently-used entry
+  // must be evicted, which keeps memory from growing without limit even when
+  // every token is still live (not expired).
+  it('should evict the least-recently-used entry once the cache bound is exceeded', async () => {
+    // Every mint returns a long-lived token so only the LRU bound — not expiry —
+    // can remove an entry.
+    mockTransportRequest.mockImplementation(() =>
+      Promise.resolve({ body: { authenticationToken: 'bounded-token', durationSeconds: 3600 } })
+    );
+
+    const OBO_CACHE_MAX_ENTRIES = 100;
+
+    // Prime the oldest entry, then fill the cache to exactly `max` with other
+    // distinct credentials. 'oldest' is now the least-recently-used entry.
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer oldest' })
+    );
+    for (let i = 1; i < OBO_CACHE_MAX_ENTRIES; i++) {
+      await getValidOboToken(
+        mockContext,
+        mockLogger,
+        'http://agui:3000',
+        mockRequest({ authorization: `Bearer filler-${i}` })
+      );
+    }
+
+    const mintsBefore = mockTransportRequest.mock.calls.length;
+
+    // 'oldest' is still cached (we are at the bound, nothing evicted yet).
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer oldest' })
+    );
+    expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBefore); // served from cache
+
+    // Re-reading 'oldest' made 'filler-1' the least-recently-used entry. Add one
+    // more distinct credential to push past the bound and force an eviction.
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer overflow' })
+    );
+
+    // 'filler-1' was evicted, so requesting it again must mint rather than hit
+    // the cache.
+    const mintsBeforeEvicted = mockTransportRequest.mock.calls.length;
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer filler-1' })
+    );
+    expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBeforeEvicted + 1); // re-minted
+  });
 });

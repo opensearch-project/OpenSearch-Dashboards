@@ -6,6 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
 import { createHash } from 'crypto';
+import LRUCache from 'lru-cache';
 import {
   IRouter,
   Logger,
@@ -45,8 +46,16 @@ interface CachedOboToken {
  * yields a different key. This avoids modelling what makes two principals
  * equivalent (username, backend roles, directly-assigned security roles, realm,
  * tenant, ...) and keeping that model in sync with the security plugin.
+ *
+ * Bounded with an LRU `max` so the map cannot grow without limit: the key space
+ * spans distinct credentials, so a deployment with many callers (or many role
+ * combinations) would otherwise accumulate an unbounded number of entries. Note
+ * the per-entry freshness check in `getValidOboToken` still governs correctness
+ * (a token within the refresh buffer is re-minted); the bound here only caps
+ * memory by discarding the least-recently-used entry once `max` is reached.
  */
-const oboTokenCache = new Map<string, CachedOboToken>();
+const OBO_CACHE_MAX_ENTRIES = 100;
+const oboTokenCache = new LRUCache<string, CachedOboToken>({ max: OBO_CACHE_MAX_ENTRIES });
 
 /** Refresh buffer — mint a new token this many ms before expiry */
 const OBO_REFRESH_BUFFER_MS = 30_000;
@@ -165,14 +174,7 @@ export async function getValidOboToken(
       return cached.token;
     }
     // Expired or within refresh buffer — remove stale entry
-    oboTokenCache.delete(cacheKey);
-  }
-
-  // Evict other expired entries to bound memory growth
-  for (const [key, entry] of oboTokenCache) {
-    if (entry.expiresAt <= Date.now()) {
-      oboTokenCache.delete(key);
-    }
+    oboTokenCache.del(cacheKey);
   }
 
   const result = await generateOboToken(context, logger, agUiUrl);
