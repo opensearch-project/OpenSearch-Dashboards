@@ -6,7 +6,6 @@
 import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
 import { createHash } from 'crypto';
-import LRUCache from 'lru-cache';
 import {
   IRouter,
   Logger,
@@ -44,15 +43,33 @@ interface CachedOboToken {
  * equivalent (username, backend roles, directly-assigned security roles, realm,
  * tenant, ...) and keeping that model in sync with the security plugin.
  *
- * Bounded with an LRU `max` so the map cannot grow without limit: the key space
- * spans distinct credentials, so a deployment with many callers (or many role
- * combinations) would otherwise accumulate an unbounded number of entries. Note
- * the per-entry freshness check in `getValidOboToken` still governs correctness
- * (a token within the refresh buffer is re-minted); the bound here only caps
- * memory by discarding the least-recently-used entry once `max` is reached.
+ * Bounded by a maximum entry count so the map cannot grow without limit: the
+ * key space spans distinct credentials, so a deployment with many callers (or
+ * many role combinations) would otherwise accumulate an unbounded number of
+ * entries. A plain Map iterates in insertion order, so once the cap is reached
+ * the oldest entry is evicted (see `setOboCacheEntry`). Note the per-entry
+ * freshness check in `getValidOboToken` still governs correctness (a token
+ * within the refresh buffer is re-minted); the bound here only caps memory.
  */
 const OBO_CACHE_MAX_ENTRIES = 100;
-const oboTokenCache = new LRUCache<string, CachedOboToken>({ max: OBO_CACHE_MAX_ENTRIES });
+const oboTokenCache = new Map<string, CachedOboToken>();
+
+/**
+ * Insert an OBO cache entry, enforcing the max-size bound. Re-inserting an
+ * existing key refreshes its recency (delete then set moves it to the newest
+ * position); when the map is full, the oldest entry (first in insertion order)
+ * is evicted before adding the new one.
+ */
+function setOboCacheEntry(key: string, entry: CachedOboToken): void {
+  oboTokenCache.delete(key);
+  if (oboTokenCache.size >= OBO_CACHE_MAX_ENTRIES) {
+    const oldestKey = oboTokenCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      oboTokenCache.delete(oldestKey);
+    }
+  }
+  oboTokenCache.set(key, entry);
+}
 
 /** Refresh buffer — mint a new token this many ms before expiry */
 const OBO_REFRESH_BUFFER_MS = 30_000;
@@ -63,6 +80,11 @@ const OBO_REFRESH_BUFFER_MS = 30_000;
  * `cookie` (session), the proxy-auth user/roles headers, and `securitytenant`
  * (which scopes the resulting token). These are the inputs `asCurrentUser`
  * forwards to the OBO mint, so they fully determine the token that comes back.
+ *
+ * `x-forwarded-for` is deliberately excluded: it is client-controlled and does
+ * not affect the token the security plugin mints, so including it would let a
+ * caller vary it to spawn distinct cache entries for one identity (defeating
+ * reuse) without improving correctness.
  */
 const OBO_CREDENTIAL_HEADERS = [
   'authorization',
@@ -70,7 +92,6 @@ const OBO_CREDENTIAL_HEADERS = [
   'securitytenant',
   'x-proxy-user',
   'x-proxy-roles',
-  'x-forwarded-for',
 ] as const;
 
 /**
@@ -171,12 +192,12 @@ export async function getValidOboToken(
       return cached.token;
     }
     // Expired or within refresh buffer — remove stale entry
-    oboTokenCache.del(cacheKey);
+    oboTokenCache.delete(cacheKey);
   }
 
   const result = await generateOboToken(context, logger, agUiUrl);
   if (result) {
-    oboTokenCache.set(cacheKey, {
+    setOboCacheEntry(cacheKey, {
       token: result.token,
       expiresAt: Date.now() + result.durationSeconds * 1000,
     });

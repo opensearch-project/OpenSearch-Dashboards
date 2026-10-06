@@ -1533,11 +1533,11 @@ describe('getValidOboToken', () => {
 
   // Regression: the credential key space is much larger than before (one entry
   // per distinct credential rather than per username), so the cache is bounded
-  // by an LRU `max`. Once the bound is exceeded the least-recently-used entry
-  // must be evicted, which keeps memory from growing without limit even when
+  // by a maximum entry count. Once the bound is exceeded the oldest-inserted
+  // entry is evicted, which keeps memory from growing without limit even when
   // every token is still live (not expired).
-  it('should evict the least-recently-used entry once the cache bound is exceeded', async () => {
-    // Every mint returns a long-lived token so only the LRU bound — not expiry —
+  it('should evict the oldest entry once the cache bound is exceeded', async () => {
+    // Every mint returns a long-lived token so only the size bound — not expiry —
     // can remove an entry.
     mockTransportRequest.mockImplementation(() =>
       Promise.resolve({ body: { authenticationToken: 'bounded-token', durationSeconds: 3600 } })
@@ -1545,8 +1545,8 @@ describe('getValidOboToken', () => {
 
     const OBO_CACHE_MAX_ENTRIES = 100;
 
-    // Prime the oldest entry, then fill the cache to exactly `max` with other
-    // distinct credentials. 'oldest' is now the least-recently-used entry.
+    // Insert the oldest entry first, then fill the cache to exactly `max` with
+    // other distinct credentials. 'oldest' is the first-inserted entry.
     await getValidOboToken(
       mockContext,
       mockLogger,
@@ -1564,7 +1564,7 @@ describe('getValidOboToken', () => {
 
     const mintsBefore = mockTransportRequest.mock.calls.length;
 
-    // 'oldest' is still cached (we are at the bound, nothing evicted yet).
+    // 'oldest' is still cached (we are exactly at the bound, nothing evicted yet).
     await getValidOboToken(
       mockContext,
       mockLogger,
@@ -1573,8 +1573,8 @@ describe('getValidOboToken', () => {
     );
     expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBefore); // served from cache
 
-    // Re-reading 'oldest' made 'filler-1' the least-recently-used entry. Add one
-    // more distinct credential to push past the bound and force an eviction.
+    // Adding one more distinct credential pushes past the bound and evicts the
+    // oldest-inserted entry ('oldest'). A cache hit does not refresh recency.
     await getValidOboToken(
       mockContext,
       mockLogger,
@@ -1582,14 +1582,14 @@ describe('getValidOboToken', () => {
       mockRequest({ authorization: 'Bearer overflow' })
     );
 
-    // 'filler-1' was evicted, so requesting it again must mint rather than hit
+    // 'oldest' was evicted, so requesting it again must mint rather than hit
     // the cache.
     const mintsBeforeEvicted = mockTransportRequest.mock.calls.length;
     await getValidOboToken(
       mockContext,
       mockLogger,
       'http://agui:3000',
-      mockRequest({ authorization: 'Bearer filler-1' })
+      mockRequest({ authorization: 'Bearer oldest' })
     );
     expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBeforeEvicted + 1); // re-minted
   });
