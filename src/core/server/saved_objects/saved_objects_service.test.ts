@@ -59,7 +59,16 @@ describe('SavedObjectsService', () => {
   const createCoreContext = ({
     skipMigration = true,
     env,
-  }: { skipMigration?: boolean; env?: Env } = {}) => {
+    storageBackend = 'opensearch',
+    permissionEnabled = false,
+    workspaceEnabled,
+  }: {
+    skipMigration?: boolean;
+    env?: Env;
+    storageBackend?: 'opensearch' | 'sqlite';
+    permissionEnabled?: boolean;
+    workspaceEnabled?: boolean;
+  } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
     configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
@@ -68,9 +77,9 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: new ByteSizeValue(0),
-        permission: { enabled: false },
+        permission: { enabled: permissionEnabled },
         storage: {
-          backend: 'opensearch',
+          backend: storageBackend,
           sqlite: { path: ':memory:' },
         },
       });
@@ -78,6 +87,7 @@ describe('SavedObjectsService', () => {
     const config$ = new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
         savedObjects: { permission: { enabled: true } },
+        ...(workspaceEnabled === undefined ? {} : { workspace: { enabled: workspaceEnabled } }),
       })
     );
 
@@ -228,6 +238,79 @@ describe('SavedObjectsService', () => {
         }).toThrowErrorMatchingInlineSnapshot(
           `"custom saved object service status is already set, and can only be set once"`
         );
+      });
+    });
+
+    describe('sqlite storage backend compatibility', () => {
+      it('throws when sqlite is combined with savedObjects.permission.enabled', async () => {
+        const coreContext = createCoreContext({
+          storageBackend: 'sqlite',
+          permissionEnabled: true,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).rejects.toThrow(
+          /savedObjects.storage.backend: "sqlite" is not compatible with savedObjects.permission.enabled: true/
+        );
+      });
+
+      it('throws when sqlite is combined with workspace.enabled', async () => {
+        const coreContext = createCoreContext({
+          storageBackend: 'sqlite',
+          workspaceEnabled: true,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).rejects.toThrow(
+          /savedObjects.storage.backend: "sqlite" is not compatible with workspace.enabled: true/
+        );
+      });
+
+      it('names both settings when sqlite is combined with each of them', async () => {
+        const coreContext = createCoreContext({
+          storageBackend: 'sqlite',
+          permissionEnabled: true,
+          workspaceEnabled: true,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).rejects.toThrow(
+          /savedObjects.permission.enabled: true and workspace.enabled: true/
+        );
+      });
+
+      it('allows sqlite when neither permission control nor workspaces are enabled', async () => {
+        const coreContext = createCoreContext({
+          storageBackend: 'sqlite',
+          permissionEnabled: false,
+          workspaceEnabled: false,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).resolves.toBeDefined();
+      });
+
+      it('allows permission control on the default opensearch backend', async () => {
+        const coreContext = createCoreContext({
+          storageBackend: 'opensearch',
+          permissionEnabled: true,
+          workspaceEnabled: true,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).resolves.toBeDefined();
+      });
+
+      it('does not fail startup on a truthy non-boolean workspace.enabled', async () => {
+        // `workspace.enabled` is read from raw, unvalidated config. A malformed value
+        // must not be mistaken for an opt-in and take down startup.
+        const coreContext = createCoreContext({
+          storageBackend: 'sqlite',
+          workspaceEnabled: 'false' as unknown as boolean,
+        });
+        const soService = new SavedObjectsService(coreContext);
+
+        await expect(soService.setup(createSetupDeps())).resolves.toBeDefined();
       });
     });
   });

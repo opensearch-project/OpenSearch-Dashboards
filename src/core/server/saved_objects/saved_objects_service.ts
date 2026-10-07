@@ -360,14 +360,45 @@ export class SavedObjectsService implements CoreService<
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    const permissionsEnabled = this.config.permission.enabled;
+    const rawWorkspacesEnabled = this.opensearchDashboardsRawConfig.get('workspace.enabled');
+
     // Recorded before any plugin runs, for callers that build mappings without the raw
     // configuration. Permission control comes from the validated config -- the same source
     // `getPermissionControlEnabled` reports -- so the two cannot drift. Workspaces belongs to the
     // workspace plugin and has no validated counterpart here.
     setConditionalFieldFlags({
-      permissionsEnabled: this.config.permission.enabled,
-      workspacesEnabled: !!this.opensearchDashboardsRawConfig.get('workspace.enabled'),
+      permissionsEnabled,
+      workspacesEnabled: !!rawWorkspacesEnabled,
     });
+
+    // The SQLite backend does not enforce saved-object ACLs or workspace isolation
+    // (see storage/README.md), and the workspace client wrapper delegates enforcement
+    // entirely to the repository. Fail at startup rather than report permission
+    // control as enabled while applying none. Remove once the repository honours
+    // ACLSearchParams and stops trusting per-object workspaces/permissions.
+    if (this.config.storage.backend === 'sqlite') {
+      const incompatible: string[] = [];
+      if (permissionsEnabled) {
+        incompatible.push('savedObjects.permission.enabled: true');
+      }
+      // Strict comparison: this value is raw, unvalidated config, and a truthy
+      // non-boolean must not take down startup.
+      if (rawWorkspacesEnabled === true) {
+        incompatible.push('workspace.enabled: true');
+      }
+      if (incompatible.length > 0) {
+        throw new Error(
+          `savedObjects.storage.backend: "sqlite" is not compatible with ${incompatible.join(
+            ' and '
+          )}. The SQLite storage backend does not enforce saved-object ACLs or workspace ` +
+            `isolation, so this combination would report permission control as active while ` +
+            `leaving saved objects readable and writable across tenants. Use ` +
+            `savedObjects.storage.backend: "opensearch" for deployments that require ` +
+            `permission control or workspaces.`
+        );
+      }
+    }
 
     // Wire up SQLite backend via the existing repository factory provider hook
     if (this.config.storage.backend === 'sqlite') {
