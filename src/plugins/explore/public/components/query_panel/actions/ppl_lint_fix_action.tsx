@@ -234,6 +234,10 @@ function createExplorePPLLintFixApplyAction({
             (session.getCurrentQuery() ?? '') === session.request.query
         );
         if (!evaluation.ok) {
+          if (evaluation.reason === 'stale-query') {
+            // The editor has moved on, so release the request and retire the tools.
+            cleanupPPLLintFixRequest(requestId, HOST.contextIdPrefix, removeContextById);
+          }
           return fail(
             requestId,
             evaluation.reason ?? 'invalid-candidate',

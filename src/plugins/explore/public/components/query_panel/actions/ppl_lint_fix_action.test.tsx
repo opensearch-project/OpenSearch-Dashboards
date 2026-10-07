@@ -463,6 +463,7 @@ describe('usePPLLintFixAction', () => {
   });
 
   it('rejects when the editor text changed after the request opened', async () => {
+    armPPLLintFixRequest(request.requestId);
     setSession('source=logs | head 10');
     const action = renderAndGetAction();
 
@@ -480,6 +481,14 @@ describe('usePPLLintFixAction', () => {
     expect(result.reason).toBe('stale-query');
     expect(mockValidatePPLLintFixCandidate).not.toHaveBeenCalled();
     expect(mockSetEditorTextWithQuery).not.toHaveBeenCalled();
+
+    // A stale request can never apply, so it is released and both tools leave
+    // the tool list while the card keeps its failure.
+    const service = AssistantActionService.getInstance();
+    expect(service.getToolDefinitions()).toEqual([]);
+    expect(getPPLLintFixOutcome(request.requestId)?.kind).toBe('failed');
+    const testResult = await service.executeAction('test_ppl_lint_fix_explore', {});
+    expect(testResult.reason).toBe('flow-inactive');
   });
 
   it('rejects invalid candidates without changing the editor', async () => {
