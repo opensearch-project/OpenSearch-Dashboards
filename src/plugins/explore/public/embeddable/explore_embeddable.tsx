@@ -114,6 +114,31 @@ interface ExploreEmbeddableConfig {
   editApp: string;
 }
 
+interface VisualizationMetadata {
+  title?: string;
+  description?: string;
+}
+
+const getVisualizationMetadata = (visualization?: string): VisualizationMetadata => {
+  if (!visualization) {
+    return {};
+  }
+
+  try {
+    const { title, description } = JSON.parse(visualization);
+    return { title, description };
+  } catch {
+    return {};
+  }
+};
+
+const UNSAVED_DASHBOARD_CROSSHAIR_GROUP = 'dashboard-unsaved';
+
+export const getCrosshairGroup = (
+  useSharedCrosshair: boolean | undefined,
+  containerId: string | undefined
+) => (useSharedCrosshair ? containerId || UNSAVED_DASHBOARD_CROSSHAIR_GROUP : undefined);
+
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
   implements IEmbeddable<ExploreInput, ExploreOutput>
@@ -125,7 +150,7 @@ export class ExploreEmbeddable
   private filtersSearchSource?: ISearchSource;
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
-  private titleVariableSubscription?: Subscription;
+  private panelMetadataVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   private panelTitle: string = '';
   private filterManager: FilterManager;
@@ -147,6 +172,7 @@ export class ExploreEmbeddable
 
   // Data transformation support
   private transformationService: TransformationService;
+  private readonly visualizationMetadata: VisualizationMetadata;
 
   constructor(
     {
@@ -163,10 +189,12 @@ export class ExploreEmbeddable
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
+    const visualizationMetadata = getVisualizationMetadata(savedExplore.visualization);
     super(
       initialInput,
       {
-        defaultTitle: savedExplore.title,
+        defaultTitle: visualizationMetadata.title || savedExplore.title,
+        description: visualizationMetadata.description,
         editUrl,
         editPath,
         editApp,
@@ -178,6 +206,7 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    this.visualizationMetadata = visualizationMetadata;
     // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
@@ -208,17 +237,17 @@ export class ExploreEmbeddable
         }
       });
     // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
-    // fires input$.next() (which triggers handleTitleVariables correctly) but then immediately
+    // fires input$.next() (which triggers handlePanelMetadataVariables correctly) but then immediately
     // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
-    // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
+    // Subscribing to output$ ensures handlePanelMetadataVariables re-applies variable interpolation
     // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
     if (parent && 'variableService' in parent) {
       const dashboardContainer = parent as unknown as DashboardContainer;
-      this.titleVariableSubscription = merge(
+      this.panelMetadataVariableSubscription = merge(
         this.getInput$(),
         this.getOutput$(),
         dashboardContainer.variableService.getVariables$()
-      ).subscribe(this.handleTitleVariables);
+      ).subscribe(this.handlePanelMetadataVariables);
     }
   }
 
@@ -238,16 +267,30 @@ export class ExploreEmbeddable
     }
   }
 
-  private handleTitleVariables = () => {
+  private handlePanelMetadataVariables = () => {
     let panelTitle = this.output.title ?? '';
     if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
       panelTitle = this.interpolationService.interpolate(this.input.title);
-    } else if (this.interpolationService.hasVariables(this.savedExplore.title)) {
-      panelTitle = this.interpolationService.interpolate(this.savedExplore.title);
+    } else {
+      const defaultTitle = this.visualizationMetadata.title || this.savedExplore.title;
+      if (this.interpolationService.hasVariables(defaultTitle)) {
+        panelTitle = this.interpolationService.interpolate(defaultTitle);
+      }
     }
-    this.updateOutput({ title: panelTitle });
+
+    const description = this.visualizationMetadata.description;
+    const panelDescription =
+      description && this.interpolationService.hasVariables(description)
+        ? this.interpolationService.interpolate(description)
+        : description;
+
+    this.updateOutput({ title: panelTitle, description: panelDescription });
     this.panelTitle = panelTitle;
   };
+
+  public getDescription() {
+    return this.output.description;
+  }
 
   /**
    * Initialize variable interpolation service and subscription
@@ -541,13 +584,17 @@ export class ExploreEmbeddable
         }),
     });
     const rawRows = resp.hits.hits;
-    const fieldSchema = searchSource.getDataFrame()?.schema;
+    const dataFrame = searchSource.getDataFrame();
+    const fieldSchema = dataFrame?.schema;
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rawRows,
       fieldSchema ?? []
     );
 
-    const visualizationData = normalizeResultRows(transformedRows, finalSchema ?? []);
+    const visualizationData = {
+      ...normalizeResultRows(transformedRows, finalSchema ?? []),
+      seriesDisplayNames: dataFrame?.meta?.seriesDisplayNames as Record<string, string>,
+    };
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
@@ -645,6 +692,10 @@ export class ExploreEmbeddable
               showRawTable={false}
               timeRange={searchContext.timeRange}
               onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+              crosshairGroup={getCrosshairGroup(
+                this.input.useSharedCrosshair,
+                this.parent?.getInput().id
+              )}
             />
           );
           this.searchProps.chartRender = chartRender;
@@ -725,8 +776,8 @@ export class ExploreEmbeddable
       this.variableSubscription.unsubscribe();
     }
 
-    if (this.titleVariableSubscription) {
-      this.titleVariableSubscription.unsubscribe();
+    if (this.panelMetadataVariableSubscription) {
+      this.panelMetadataVariableSubscription.unsubscribe();
     }
 
     // Cleanup transformation service

@@ -33,6 +33,7 @@ interface AddToDashboardModalProps {
   onConfirm: (props: OnSaveProps) => void;
   onCancel: () => void;
   savedExploreId: string | undefined;
+  initialTitle?: string;
   showComplexQueryWarning?: boolean;
 }
 
@@ -45,6 +46,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   savedObjectsClient,
   onConfirm,
   onCancel,
+  initialTitle,
   showComplexQueryWarning,
 }) => {
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
@@ -108,7 +110,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
   const { savedExplore } = useSavedExplore(savedExploreId);
 
-  const [title, setTitle] = useState<string>('');
+  const [title, setTitle] = useState<string>(initialTitle ?? '');
 
   // Dashboard-related state managed by custom hook
   const {

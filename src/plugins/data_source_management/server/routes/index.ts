@@ -50,9 +50,9 @@ export function setupRoutes({
   // registerSqlRoute(router, queryService);
 
   if (!dataSourceEnabled) {
-    registerNonMdsDataConnectionsRoute(router);
+    registerNonMdsDataConnectionsRoute(router, logger);
   }
-  registerDataConnectionsRoute(router, dataSourceEnabled);
+  registerDataConnectionsRoute(router, dataSourceEnabled, logger);
   registerDatasourcesRoute(router, dataSourceEnabled);
   registerLocalClusterVersionRoute(router, logger);
 }

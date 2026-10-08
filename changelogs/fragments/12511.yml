@@ -1,0 +1,2 @@
+fix:
+- Use a separate, larger sample size for PPL aggregation queries so `discover:sampleSize` no longer truncates aggregation buckets in Discover; the new limit is configurable via `discover:aggregationSampleSize` ([#12511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12511))

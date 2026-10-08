@@ -31,11 +31,12 @@ export interface AssistantActionContextValue {
   toolCallStates: Map<string, ToolCallState>;
   registerAction: (action: AssistantAction) => void;
   unregisterAction: (name: string) => void;
-  executeAction: (name: string, args: any) => Promise<any>;
+  executeAction: (name: string, args: any, toolCallId?: string) => Promise<any>;
   getToolDefinitions: () => ToolDefinition[];
   updateToolCallState: (id: string, state: Partial<ToolCallState>) => void;
   getActionRenderer: (name: string) => AssistantAction['render'] | undefined;
   shouldUseCustomRenderer: (name: string) => boolean;
+  getRenderPlacement: (name: string) => 'above' | 'below';
 }
 
 export const AssistantActionContext = createContext<AssistantActionContextValue | null>(null);
@@ -112,7 +113,10 @@ export function AssistantActionProvider({
   );
 
   const executeAction = useCallback(
-    async (name: string, args: any) => {
+    // toolCallId is forwarded to the handler so this path stays equivalent to
+    // AssistantActionService.executeAction; handlers that correlate by tool call id (ask_user)
+    // depend on it.
+    async (name: string, args: any, toolCallId?: string) => {
       const action = actions.get(name);
       if (!action) {
         throw new Error(`Action ${name} not found`);
@@ -120,7 +124,7 @@ export function AssistantActionProvider({
       if (!action.handler) {
         throw new Error(`Action ${name} has no handler`);
       }
-      return action.handler(args);
+      return action.handler(args, toolCallId);
     },
     [actions]
   );
@@ -158,6 +162,14 @@ export function AssistantActionProvider({
     [actions]
   );
 
+  const getRenderPlacement = useCallback(
+    (name: string): 'above' | 'below' => {
+      const action = actions.get(name);
+      return action?.renderPlacement ?? 'above';
+    },
+    [actions]
+  );
+
   const getToolDefinitions = useCallback(() => {
     return Array.from(actions.values())
       .filter((action) => action.available !== 'disabled')
@@ -180,6 +192,7 @@ export function AssistantActionProvider({
         updateToolCallState,
         getActionRenderer,
         shouldUseCustomRenderer,
+        getRenderPlacement,
       }}
     >
       {children}

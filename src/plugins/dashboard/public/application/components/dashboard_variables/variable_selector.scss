@@ -64,6 +64,26 @@
   cursor: help !important;
 }
 
+// Text-type variable input — strip EuiFieldText's own border/background so it
+// visually merges into the shared .variableSelectorContainer card, and match
+// the compact line-height/height used by the popover button (ValueSelector)
+// so Text and Query/Custom variables render at the same height.
+.variableTextInput {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: $euiFontSizeS * 1.5; // matches EuiText size="s" line-height used by ValueSelector
+  font-size: $euiFontSizeS;
+  line-height: $euiFontSizeS * 1.5;
+
+  &:focus,
+  &:focus-within {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+}
+
 .manageVariablesButton {
   border-color: $euiColorMediumShade !important;
   color: $euiColorDarkShade !important;

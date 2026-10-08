@@ -131,6 +131,23 @@ describe('BarGaugeItem', () => {
       expect(screen.getByText('89.2')).toBeInTheDocument();
     });
 
+    it('renders the category above a row containing the bar and value', () => {
+      const { container } = render(
+        <BarGaugeItem
+          item={makeItem({ category: 'A long category', displayValue: '89.2' })}
+          styles={makeStyles({ valueDisplay: 'valueColor' })}
+          isHorizontal={true}
+        />
+      );
+
+      const item = container.querySelector('.bar-gauge-item.horizontal');
+      expect(item?.firstElementChild).toHaveClass('bar-gauge-label');
+
+      const barRow = item?.querySelector('.bar-gauge-bar-row');
+      expect(barRow?.children[0]).toHaveClass('bar-gauge-background');
+      expect(barRow?.children[1]).toHaveClass('bar-gauge-value');
+    });
+
     it('does not render value element when valueDisplay is hidden', () => {
       const { container } = render(
         <BarGaugeItem

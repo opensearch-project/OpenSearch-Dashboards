@@ -92,6 +92,10 @@ export class SequenceHandler {
     this.clearSequenceTimer();
   }
 
+  public cancel(): void {
+    this.resetSequence();
+  }
+
   public isInSequence(): boolean {
     return this.firstKey !== null;
   }

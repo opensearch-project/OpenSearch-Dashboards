@@ -86,6 +86,7 @@ export interface StyleControlsProps<T extends ChartStyles> {
 
 export interface VisualizationRenderContext {
   seriesName?: string;
+  crosshairGroup?: string;
 }
 
 export interface VisRenderProps<T extends ChartType> {
@@ -99,6 +100,7 @@ export interface VisRenderProps<T extends ChartType> {
   onLegend?: (legendItems: LegendItem[]) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;
   highlightedLegendTarget$?: BehaviorSubject<LegendTarget | undefined>;
+  seriesDisplayNames?: Record<string, string>;
 }
 
 export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType; multi?: boolean }>>;

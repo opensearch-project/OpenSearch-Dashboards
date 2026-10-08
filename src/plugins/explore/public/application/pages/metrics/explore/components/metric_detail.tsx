@@ -88,6 +88,7 @@ const BreakdownPanel: React.FC<{
   metricType: MetricType;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
+  timeBounds?: { min: number; max: number };
 }> = ({
   labelName,
   data,
@@ -98,6 +99,7 @@ const BreakdownPanel: React.FC<{
   metricType,
   onVisibilityChange,
   onTimeRangeChange,
+  timeBounds,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -189,6 +191,8 @@ const BreakdownPanel: React.FC<{
                   stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
                   isDarkMode={darkMode}
                   onTimeRangeChange={onTimeRangeChange}
+                  timeFrom={timeBounds?.min}
+                  timeTo={timeBounds?.max}
                   {...breakdownYRange}
                 />
               ) : (
@@ -231,6 +235,8 @@ const BreakdownPanel: React.FC<{
               label={data.label}
               isDarkMode={darkMode}
               onTimeRangeChange={onTimeRangeChange}
+              timeFrom={timeBounds?.min}
+              timeTo={timeBounds?.max}
               {...breakdownYRange}
             />
           ) : (
@@ -254,6 +260,7 @@ export const MetricDetail: React.FC = () => {
     executePromQL,
     refreshCounter,
     onTimeRangeChange,
+    timeBounds,
   } = useExploration();
   const [chartData, setChartData] = useState<Array<[number, string]>>([]);
   const [labels, setLabels] = useState<LabelInfo[]>([]);
@@ -470,6 +477,8 @@ export const MetricDetail: React.FC = () => {
             label="value"
             isDarkMode={darkMode}
             onTimeRangeChange={onTimeRangeChange}
+            timeFrom={timeBounds?.min}
+            timeTo={timeBounds?.max}
           />
         ) : (
           <EuiText size="s" color="subdued">
@@ -550,6 +559,7 @@ export const MetricDetail: React.FC = () => {
                 metricType={metricType}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
+                timeBounds={timeBounds}
               />
             ))}
           </div>

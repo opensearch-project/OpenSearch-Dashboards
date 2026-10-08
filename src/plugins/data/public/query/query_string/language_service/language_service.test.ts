@@ -47,6 +47,11 @@ describe('LanguageService', () => {
     expect(languages[1].id).toBe('lucene');
   });
 
+  test('default DQL and Lucene languages do not override field capabilities', () => {
+    expect(service.getLanguage('kuery')?.fields).toBeUndefined();
+    expect(service.getLanguage('lucene')?.fields).toBeUndefined();
+  });
+
   test('getDefaultLanguage returns DQL by default', () => {
     const defaultLanguage = service.getDefaultLanguage();
     // @ts-expect-error TS2532 TODO(ts-error): fixme

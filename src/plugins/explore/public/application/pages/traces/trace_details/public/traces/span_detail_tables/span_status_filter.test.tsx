@@ -27,7 +27,7 @@ describe('SpanStatusFilter', () => {
       render(<SpanStatusFilter {...createDefaultProps()} />);
 
       expect(screen.getByTestId('span-status-filter-button')).toBeInTheDocument();
-      expect(screen.getByText('Filter by status')).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.queryByText('0')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('span-status-filter-button'));
@@ -51,12 +51,17 @@ describe('SpanStatusFilter', () => {
       ]);
     });
 
-    it('shows correct count badge for active status filter', () => {
+    it('shows the active status as an editable pill (pill variant)', () => {
       // Status filter
       const { rerender } = render(
-        <SpanStatusFilter {...createDefaultProps([{ field: 'isError', value: true }])} />
+        <SpanStatusFilter
+          {...createDefaultProps([{ field: 'isError', value: true }])}
+          variant="pill"
+        />
       );
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByTestId('span-status-filter-chip')).toBeInTheDocument();
+      expect(screen.getByText('status')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
 
       // Non-status filters ignored
       rerender(
@@ -65,9 +70,31 @@ describe('SpanStatusFilter', () => {
             { field: 'serviceName', value: 'test' },
             { field: 'isError', value: true },
           ])}
+          variant="pill"
         />
       );
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
+    });
+
+    it('pill variant renders nothing when no status filter is applied', () => {
+      const { container } = render(<SpanStatusFilter {...createDefaultProps([])} variant="pill" />);
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('clears status filters via the pill × while preserving other filters', () => {
+      render(
+        <SpanStatusFilter
+          {...createDefaultProps([
+            { field: 'serviceName', value: 'cart' },
+            { field: 'isError', value: true },
+          ])}
+          variant="pill"
+        />
+      );
+      fireEvent.click(screen.getByTestId('span-status-filter-reset'));
+      expect(mockSetSpanFiltersWithStorage).toHaveBeenCalledWith([
+        { field: 'serviceName', value: 'cart' },
+      ]);
     });
   });
 

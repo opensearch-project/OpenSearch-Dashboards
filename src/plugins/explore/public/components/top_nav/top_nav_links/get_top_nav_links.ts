@@ -6,7 +6,7 @@
 import { DataView as Dataset } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
-import { TopNavMenuIconData } from '../../../../../navigation/public';
+import { TopNavMenuData } from '../../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../../expressions';
 import { getNewButtonRun, newTopNavData } from './top_nav_new';
 import { getOpenButtonRun, openTopNavData } from './top_nav_open';
@@ -32,7 +32,8 @@ export const getTopNavLinks = (
 ) => {
   const { capabilities, share } = services;
 
-  const topNavLinks: TopNavMenuIconData[] = [];
+  // Union type: Save is a labeled button (controlType: 'button'); the rest are icons.
+  const topNavLinks: TopNavMenuData[] = [];
 
   if (capabilities.discover?.save) {
     topNavLinks.push({

@@ -183,6 +183,22 @@ describe('AddToDashboardModal', () => {
     expect(addButton).toBeDisabled();
   });
 
+  it('initializes the saved object title from the visualization title', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+          initialTitle="Panel title"
+        />
+      );
+    });
+
+    expect(await screen.findByPlaceholderText('Enter save search name')).toHaveValue('Panel title');
+  });
+
   it('calls onCancel when cancel button is clicked', async () => {
     await act(async () => {
       render(

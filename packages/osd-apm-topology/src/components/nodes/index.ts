@@ -14,5 +14,7 @@ export type { StatusIndicatorProps, StatusLevel } from './status_indicator';
 export { AgentCardNode } from './agent_card_node';
 export { ServiceCardNode } from './service_card_node';
 export { ServiceCircleNode } from './service_circle_node';
+export { MetricsCardNode } from './metrics_card_node';
+export type { MetricsCardData, MetricsCardCustomNode } from './metrics_card_node';
 export { HealthArc } from './health_arc';
 export type { HealthArcProps, HealthArcSegment } from './health_arc';

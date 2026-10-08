@@ -42,6 +42,7 @@ import {
   useLinkedSearchUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
+import { ContainerInfo } from '../../../../embeddable/public';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
 import { HeaderVariant } from '../../../../../core/public/index';
@@ -49,6 +50,7 @@ import { HeaderVariant } from '../../../../../core/public/index';
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
+  const [containerInfo, setContainerInfo] = useState<ContainerInfo>();
   const { services } = useOpenSearchDashboards<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
@@ -87,11 +89,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   }, [setHeaderVariant, showActionsInGroup]);
 
   useEffect(() => {
-    const { originatingApp: value } =
+    const { originatingApp: value, containerInfo: containerInfoValue } =
       services.embeddable
         .getStateTransfer(services.scopedHistory)
         .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
     setOriginatingApp(value);
+    setContainerInfo(containerInfoValue);
   }, [services]);
 
   useEffect(() => {
@@ -112,6 +115,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
+      containerInfo={containerInfo}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

@@ -15,10 +15,13 @@ import {
   VariableSortOrder,
   QueryVariable,
   CustomVariable,
+  TextVariable,
   VariableState,
   VariableWithState,
   VariableOption,
+  VariableOptionType,
   NormalizedVariableOption,
+  DistributiveOmit,
 } from './types';
 import {
   buildVariableOptionsFromQueryResult,
@@ -26,6 +29,13 @@ import {
   applyRegexToVariableOptions,
   VariableQueryResult,
 } from './variable_query_utils';
+import {
+  executePromQLResourceQuery,
+  buildPromQLVariableOptions,
+  interpolateResourceQuery,
+  collectResourceQueryTextFields,
+} from './promql_variable_query_utils';
+import { normalizePersistedVariables } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
 /**
@@ -136,7 +146,7 @@ export class VariableService {
 
       if (dashboard.attributes.variablesJSON) {
         const parsed = JSON.parse(dashboard.attributes.variablesJSON);
-        variables = parsed.variables || [];
+        variables = normalizePersistedVariables(parsed.variables) ?? [];
       }
 
       this.initialize(variables);
@@ -183,15 +193,18 @@ export class VariableService {
   /**
    * Add a new variable.
    */
-  public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
+  public async addVariable(variable: DistributiveOmit<Variable, 'id'>): Promise<void> {
     const id = this.generateId();
     const newVariable = this.buildVariable(id, variable);
 
     // Initialize runtime state
     const initialRuntimeState = this.deriveRuntimeState(newVariable);
-    const current =
-      initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
-    newVariable.current = current;
+    if (newVariable.type === VariableType.Text) {
+      newVariable.current = variable.current;
+    } else {
+      newVariable.current =
+        initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
+    }
 
     const updatedVariables = [...this.getVariables(), newVariable];
 
@@ -225,7 +238,7 @@ export class VariableService {
 
     if (updates.type && updates.type !== existing.type) {
       // Type changed — rebuild from scratch and clear any error/loading states
-      updatedVariable = this.buildVariable(id, { ...existing, ...updates } as Omit<
+      updatedVariable = this.buildVariable(id, { ...existing, ...updates } as DistributiveOmit<
         Variable,
         'id' | 'current'
       >);
@@ -234,8 +247,13 @@ export class VariableService {
         loading: false,
         error: undefined,
       };
-      updatedVariable.current =
-        newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      if (updatedVariable.type === VariableType.Text) {
+        const next = updates.current;
+        updatedVariable.current = next && next.length > 0 ? [next[0]] : undefined;
+      } else {
+        updatedVariable.current =
+          newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      }
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -373,15 +391,57 @@ export class VariableService {
     this.updateRuntimeState(id, { loading: true, error: undefined });
 
     try {
-      const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
-      const builtResult = buildVariableOptionsFromQueryResult(result, {
-        valueField: queryVariable.valueField,
-        labelField: queryVariable.labelField,
-      });
+      let options: NormalizedVariableOption[];
+      let optionType: VariableOptionType | undefined;
 
-      let options = builtResult.options;
-      if (queryVariable.regex) {
-        options = applyRegexToVariableOptions(options, queryVariable.regex);
+      if (queryVariable.sourceKind === 'prometheusResource') {
+        const promQLResourceQuery = queryVariable.promQLResourceQuery;
+        if (!this.dataPlugin) {
+          throw new Error('VariableService not initialized with dataPlugin');
+        }
+
+        const timeRange = queryVariable.useTimeFilter
+          ? this.dataPlugin.query.timefilter.timefilter.getTime()
+          : undefined;
+
+        let resolvedQueryType = promQLResourceQuery;
+        if (this.interpolationService) {
+          resolvedQueryType = interpolateResourceQuery(promQLResourceQuery, (value) =>
+            this.interpolationService!.hasVariables(value)
+              ? this.interpolationService!.interpolate(
+                  value,
+                  queryVariable.language,
+                  queryVariable.name,
+                  true
+                )
+              : value
+          );
+        }
+
+        const values = await executePromQLResourceQuery(
+          this.dataPlugin,
+          queryVariable.dataset?.id,
+          resolvedQueryType,
+          timeRange
+        );
+        options = buildPromQLVariableOptions(values, queryVariable.regex);
+        optionType = 'string';
+      } else {
+        const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+        const builtResult = buildVariableOptionsFromQueryResult(result, {
+          valueField: queryVariable.valueField,
+          labelField: queryVariable.labelField,
+        });
+
+        options = builtResult.options;
+        if (queryVariable.regex) {
+          options = applyRegexToVariableOptions(options, queryVariable.regex);
+        }
+        optionType = builtResult.optionType;
+      }
+
+      if (controller.signal.aborted) {
+        return;
       }
 
       // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
@@ -394,7 +454,7 @@ export class VariableService {
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
-        optionType: builtResult.optionType,
+        optionType,
         loading: false,
         error: undefined,
       });
@@ -450,7 +510,9 @@ export class VariableService {
   }
 
   /** Derive runtime option state from the variable definition. */
-  private deriveRuntimeState(variable: Variable | Omit<Variable, 'id' | 'current'>): VariableState {
+  private deriveRuntimeState(
+    variable: Variable | DistributiveOmit<Variable, 'id' | 'current'>
+  ): VariableState {
     if (variable.type === VariableType.Custom) {
       return this.deriveCustomRuntimeState(variable as CustomVariable);
     }
@@ -555,45 +617,71 @@ export class VariableService {
     return options.length > 0 ? [options[0]] : undefined;
   }
 
-  private buildVariable(id: string, input: Omit<Variable, 'id' | 'current'>): Variable {
-    const base: Omit<Variable, 'type'> & { type: VariableType } = {
+  private buildVariable(id: string, input: DistributiveOmit<Variable, 'id' | 'current'>): Variable {
+    const base = {
       id,
       name: input.name,
       label: input.label,
       type: input.type,
       current: undefined,
-      multi: input.multi,
-      includeAll: input.includeAll,
       hide: input.hide,
       description: input.description,
+    };
+
+    const optionMeta = {
+      multi: input.multi,
+      includeAll: input.includeAll,
+      allowCustomValue: input.allowCustomValue,
       sort: input.sort,
     };
 
     switch (input.type) {
       case VariableType.Query: {
-        const v = input as Omit<QueryVariable, 'id' | 'current'>;
-        return {
+        const v = input as DistributiveOmit<QueryVariable, 'id' | 'current'>;
+        const shared = {
           ...base,
-          type: VariableType.Query,
-          query: v.query ?? '',
+          ...optionMeta,
+          type: VariableType.Query as const,
+          regex: v.regex,
+          useTimeFilter: v.useTimeFilter ?? false,
+        };
+
+        if (v.sourceKind === 'prometheusResource') {
+          return {
+            ...shared,
+            sourceKind: v.sourceKind,
+            language: 'PROMQL',
+            dataset: v.dataset,
+            promQLResourceQuery: v.promQLResourceQuery,
+          };
+        }
+        return {
+          ...shared,
+          sourceKind: 'queryResult',
           language: v.language,
+          query: v.query ?? '',
           dataset: v.dataset,
           valueField: v.valueField,
           labelField: v.labelField,
-          regex: v.regex,
-          useTimeFilter: v.useTimeFilter ?? false,
-        } as QueryVariable;
+        };
       }
       case VariableType.Custom: {
         const v = input as Omit<CustomVariable, 'id' | 'current'>;
         return {
           ...base,
+          ...optionMeta,
           type: VariableType.Custom,
           customOptions: this.normalizeCustomOptions(v.customOptions),
         } as CustomVariable;
       }
+      case VariableType.Text: {
+        return {
+          ...base,
+          type: VariableType.Text,
+        } as TextVariable;
+      }
       default:
-        return base as Variable;
+        return { ...base, ...optionMeta } as Variable;
     }
   }
 
@@ -628,7 +716,13 @@ export class VariableService {
       const v = variables[i];
       if (v.type === VariableType.Query) {
         const qv = v as QueryVariable;
-        if (pattern.test(qv.query)) {
+        const referencesChangedVar =
+          qv.sourceKind === 'prometheusResource'
+            ? collectResourceQueryTextFields(qv.promQLResourceQuery).some((field) =>
+                pattern.test(field)
+              )
+            : pattern.test(qv.query);
+        if (referencesChangedVar) {
           this.refreshVariableOptions(qv.id);
         }
       }
@@ -644,11 +738,12 @@ export class VariableService {
       'labelField',
       'regex',
       'useTimeFilter',
+      'promQLResourceQuery',
     ].some((key) => updates[key as keyof QueryVariable] !== undefined);
   }
 
   private async fetchOptionsForVariableWithType(
-    variable: QueryVariable,
+    variable: Exclude<QueryVariable, { sourceKind: 'prometheusResource' }>,
     signal?: AbortSignal
   ): Promise<VariableQueryResult> {
     if (!this.dataPlugin) {

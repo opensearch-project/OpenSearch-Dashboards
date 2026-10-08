@@ -138,6 +138,25 @@ export const TraceMetricsBar: React.FC<TraceMetricsBarProps> = ({ metrics, onErr
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiStat
+                  title={
+                    metrics && metrics.totalSessions !== null
+                      ? formatNumber(metrics.totalSessions)
+                      : '—'
+                  }
+                  description={
+                    <EuiTextColor color="subdued">
+                      {i18n.translate('agentTraces.metricsBar.totalSessions', {
+                        defaultMessage: 'Total Sessions',
+                      })}
+                    </EuiTextColor>
+                  }
+                  titleSize="s"
+                  isLoading={showLoading}
+                  data-test-subj="agentTracesMetricsTotalSessions"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiStat
                   title={metrics ? formatNumber(metrics.totalTokens) : '—'}
                   description={
                     <EuiTextColor color="subdued">

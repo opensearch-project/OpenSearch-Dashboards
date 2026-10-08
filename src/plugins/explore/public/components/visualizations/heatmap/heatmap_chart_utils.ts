@@ -11,6 +11,7 @@ import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
 import { getSeriesDisplayName } from '../utils/series';
+import { formatUnitValue } from '../style_panel/unit/collection';
 import { DEFAULT_GRID } from '../constants';
 
 // Uses Interquartile Range method to find robust min/max values by excluding statistical outliers
@@ -163,7 +164,9 @@ export const createHeatmapSeries =
           ...(styles.exclusive.label.rotate && { rotate: 45 }),
           formatter: (params: any) => {
             const v = Array.isArray(params.value) ? params.value[seriesIndex] : params.value;
-            return typeof v === 'number' ? v.toFixed(2) : v; // trim to 2 decimals
+            return typeof v === 'number'
+              ? formatUnitValue(v, styles.unitId, styles.decimals, styles.unitSuffix)
+              : v;
           },
         },
         tooltip: {
@@ -190,11 +193,17 @@ export const createHeatmapSeries =
             const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
             const category2Index = transformedData[0].indexOf(categoryFields[1]);
 
+            const rawSeriesValue = params.value[seriesIndex];
+            const seriesValue =
+              typeof rawSeriesValue === 'number'
+                ? formatUnitValue(rawSeriesValue, styles.unitId, styles.decimals, styles.unitSuffix)
+                : (rawSeriesValue ?? '');
+
             const message = `<strong>${categoryDisplayName}</strong>: ${
               params.value[categoryIndex] ?? ''
             }<br/><strong>${categoryDisplayName2}</strong>: ${
               params.value[category2Index] ?? ''
-            }<br/><strong>${seriesDisplayName}</strong>: ${params.value[seriesIndex] ?? ''}`;
+            }<br/><strong>${seriesDisplayName}</strong>: ${seriesValue}`;
 
             return DOMPurify.sanitize(message);
           },

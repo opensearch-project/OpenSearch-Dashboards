@@ -8,7 +8,10 @@ import { Query } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
 
-export type QueryState = QueryWithQueryAsString;
+export type QueryState = QueryWithQueryAsString & {
+  /** Options the language forwards to its search strategy; narrow the entries there. */
+  queryOptions?: Record<string, unknown>;
+};
 
 const initialState: QueryState = {
   query: '',
@@ -47,9 +50,13 @@ const querySlice = createSlice({
         meta: { addToHistory: true },
       }),
     },
+    setQueryOptions: (state, action: PayloadAction<Record<string, unknown>>) => {
+      state.queryOptions = { ...state.queryOptions, ...action.payload };
+    },
   },
 });
 
-export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory } = querySlice.actions;
+export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory, setQueryOptions } =
+  querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();

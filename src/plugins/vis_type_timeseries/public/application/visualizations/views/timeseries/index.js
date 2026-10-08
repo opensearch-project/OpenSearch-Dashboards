@@ -39,6 +39,7 @@ import {
   Settings,
   AnnotationDomainType,
   LineAnnotation,
+  Tooltip,
   TooltipType,
   StackMode,
   LegendValue,
@@ -150,12 +151,12 @@ export const TimeSeries = ({
           },
         ]}
         baseTheme={baseTheme}
-        tooltip={{
-          snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
-          headerFormatter: tooltipFormatter,
-        }}
         externalPointerEvents={{ tooltip: { visible: false } }}
+      />
+      <Tooltip
+        snap={true}
+        type={tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor}
+        headerFormatter={tooltipFormatter}
       />
 
       {annotations.map(({ id, data, icon, color }) => {

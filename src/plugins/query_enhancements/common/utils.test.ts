@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isPPLSearchQuery, queryEndsWithHead, throwFacetError, formatDate } from './utils';
+import {
+  fetch,
+  isPPLAggregationQuery,
+  isPPLSearchQuery,
+  queryEndsWithHead,
+  throwFacetError,
+} from './utils';
+import { EnhancedFetchContext } from './types';
 import { Query } from 'src/plugins/data/common';
 
 describe('throwFacetError', () => {
@@ -113,62 +120,6 @@ describe('throwFacetError', () => {
   });
 });
 
-describe('formatDate', () => {
-  it('should format date string with milliseconds', () => {
-    const dateString = '2025-07-30T20:30:31.567Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-07-30 20:30:31.567');
-  });
-
-  it('should format date string with zero milliseconds', () => {
-    const dateString = '2025-07-30T20:30:31.000Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-07-30 20:30:31.000');
-  });
-
-  it('should format date string with single digit milliseconds', () => {
-    const dateString = '2025-07-30T20:30:31.005Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-07-30 20:30:31.005');
-  });
-
-  it('should format date string with double digit milliseconds', () => {
-    const dateString = '2025-07-30T20:30:31.050Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-07-30 20:30:31.050');
-  });
-
-  it('should format date string with maximum milliseconds', () => {
-    const dateString = '2025-07-30T20:30:31.999Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-07-30 20:30:31.999');
-  });
-
-  it('should handle different date formats', () => {
-    const dateString = '2025-01-01T00:00:00.123Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-01-01 00:00:00.123');
-  });
-
-  it('should pad single digit months and days', () => {
-    const dateString = '2025-01-05T09:08:07.456Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-01-05 09:08:07.456');
-  });
-
-  it('should handle leap year dates', () => {
-    const dateString = '2024-02-29T12:34:56.789Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2024-02-29 12:34:56.789');
-  });
-
-  it('should handle end of year dates', () => {
-    const dateString = '2025-12-31T23:59:59.999Z';
-    const result = formatDate(dateString);
-    expect(result).toBe('2025-12-31 23:59:59.999');
-  });
-});
-
 describe('queryEndsWithHead', () => {
   it('should detect head at end of query', () => {
     expect(queryEndsWithHead('source=t | head 100')).toBe(true);
@@ -254,6 +205,68 @@ describe('queryEndsWithHead', () => {
   });
 });
 
+describe('isPPLAggregationQuery', () => {
+  it.each([
+    'source=t | stats count()',
+    'source=t | stats count() by span(`@timestamp`, 1h), extension',
+    'source=t | timechart span=1h count() by extension',
+    'source=t | chart count() over extension',
+    'source=t | top 5 extension',
+    'source=t | rare extension',
+    'source=t | transpose',
+    'source=t | xyseries extension bytes clientip',
+    'source=t | timewrap 1d',
+    'source=t | patterns message mode=aggregation',
+    // Listed unconditionally — the default mode is a cluster setting, so the query text alone
+    // cannot tell us whether this aggregates.
+    'source=t | patterns message',
+  ])('should detect aggregating query: %s', (query) => {
+    expect(isPPLAggregationQuery(query)).toBe(true);
+  });
+
+  it.each([
+    'source=t',
+    'source=t | fields firstname, lastname',
+    'source=t | where age > 20',
+    'source=t | sort name ASC | head 100',
+    'source=t | eval x = bytes * 2',
+    'source=t | dedup extension',
+    // Row-preserving: append fields or a summary row, ~one row per document, not bucket-producing.
+    'source=t | eventstats avg(bytes) by extension',
+    'source=t | addtotals',
+    'source=t | addcoltotals',
+  ])('should not detect non-aggregating query: %s', (query) => {
+    expect(isPPLAggregationQuery(query)).toBe(false);
+  });
+
+  it('should be case insensitive', () => {
+    expect(isPPLAggregationQuery('source=t | STATS count()')).toBe(true);
+    expect(isPPLAggregationQuery('source=t | Stats count()')).toBe(true);
+  });
+
+  it('should ignore aggregations inside subquery brackets', () => {
+    expect(
+      isPPLAggregationQuery('source=t | where id in [source=other | stats count() by id]')
+    ).toBe(false);
+  });
+
+  it('should still detect an outer aggregation alongside a subquery', () => {
+    expect(
+      isPPLAggregationQuery(
+        'source=t | where id in [source=other | stats count() by id] | stats count() by extension'
+      )
+    ).toBe(true);
+  });
+
+  it('should not match field names containing a command name', () => {
+    expect(isPPLAggregationQuery('source=t | fields statsValue, topLevel')).toBe(false);
+  });
+
+  it('should not match a bare source query naming a stats index', () => {
+    expect(isPPLAggregationQuery('source=stats_index')).toBe(false);
+  });
+});
+
 describe('isPPLSearchQuery', () => {
   it('should return false if query language is not PPL', () => {
     const query: Query = {
@@ -294,5 +307,33 @@ describe('isPPLSearchQuery', () => {
 
     query.query = 'search source = test | stats count';
     expect(isPPLSearchQuery(query)).toBe(true);
+  });
+});
+
+describe('fetch', () => {
+  const createContext = (body?: EnhancedFetchContext['body']) => ({
+    http: { fetch: jest.fn().mockResolvedValue({}) } as any,
+    path: '/api/enhancements/search/promql',
+    body,
+  });
+
+  const query: Query = { language: 'PROMQL', query: 'up' };
+
+  it('forwards search options when provided', () => {
+    const context = createContext({ options: { maxDataPoints: 500 } });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body).options).toEqual({
+      maxDataPoints: 500,
+    });
+  });
+
+  it('omits options when the context has none', () => {
+    const context = createContext({ timeRange: { from: 'now-1h', to: 'now' } });
+
+    fetch(context, query).subscribe();
+
+    expect(JSON.parse(context.http.fetch.mock.calls[0][0].body)).not.toHaveProperty('options');
   });
 });

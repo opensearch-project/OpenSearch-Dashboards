@@ -190,7 +190,7 @@ export class QueryEnhancementsPlugin implements Plugin<
     // by the language service evaluator.
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
-      title: 'OpenSearch SQL',
+      title: 'SQL',
       search: new SQLSearchInterceptor({
         toasts: core.notifications.toasts,
         http: core.http,

@@ -12,8 +12,14 @@ import { TableRowContent } from './table_row_content';
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
-  TableCell: ({ columnId, sanitizedCellValue }: any) => (
-    <td data-test-subj={`table-cell-${columnId}`}>{sanitizedCellValue}</td>
+  TableCell: ({ columnId, sanitizedCellValue, disableValueFilter, dataset }: any) => (
+    <td
+      data-test-subj={`table-cell-${columnId}`}
+      data-disable-value-filter={String(Boolean(disableValueFilter))}
+      data-has-dataset={String(Boolean(dataset))}
+    >
+      {sanitizedCellValue}
+    </td>
   ),
 }));
 
@@ -147,6 +153,50 @@ describe('TableRowContent', () => {
     expect(screen.getByTestId('table-cell-field2')).toBeInTheDocument();
   });
 
+  it('disables value filtering on the configured time field regardless of its type', () => {
+    // timeFieldName is 'timestamp'; type is string here to prove it's the identity check.
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['timestamp', 'field2']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-timestamp')).toHaveAttribute(
+      'data-disable-value-filter',
+      'true'
+    );
+    expect(screen.getByTestId('table-cell-field2')).toHaveAttribute(
+      'data-disable-value-filter',
+      'false'
+    );
+  });
+
+  it.each(['date', 'date_nanos'])(
+    'disables value filtering on %s fields even when they are not the time field',
+    (type) => {
+      mockDataset.fields.getByName.mockReturnValue({ type, filterable: true });
+      mockDataset.formatField.mockReturnValue('test_value');
+
+      render(
+        <table>
+          <tbody>
+            <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+          </tbody>
+        </table>
+      );
+
+      expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+        'data-disable-value-filter',
+        'true'
+      );
+    }
+  );
+
   it('hides expand toggle when on traces page', () => {
     render(
       <table>
@@ -156,5 +206,81 @@ describe('TableRowContent', () => {
       </table>
     );
     expect(screen.queryByTestId('docTableExpandToggleColumn')).not.toBeInTheDocument();
+  });
+
+  it('routes a non-filterable, non-trace field to the plain NonFilterableTableCell', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: false });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('non-filterable-cell-field1')).toBeInTheDocument();
+    expect(screen.queryByTestId('table-cell-field1')).not.toBeInTheDocument();
+  });
+
+  it('keeps a non-filterable Span ID column as an interactive TableCell on the traces page', () => {
+    // Regression: a field-caps conflict can flip a trace-link field to
+    // non-filterable; it must still render its link, not degrade to plain text.
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: false });
+    mockDataset.formatField.mockReturnValue('span-123');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} isOnTracesPage={true} columns={['spanId']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-spanId')).toBeInTheDocument();
+    expect(screen.queryByTestId('non-filterable-cell-spanId')).not.toBeInTheDocument();
+    // A non-filterable field should not offer value-filter buttons.
+    expect(screen.getByTestId('table-cell-spanId')).toHaveAttribute(
+      'data-disable-value-filter',
+      'true'
+    );
+  });
+
+  it('routes ALL columns through TableCell on the traces page, even a non-trace non-filterable field', () => {
+    // The Traces page is all-PPL, so nothing goes to the no-link NonFilterableTableCell —
+    // TableCell decides link-vs-plain and suppresses filter buttons for non-filterable fields.
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: false });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} isOnTracesPage={true} columns={['field1']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-field1')).toBeInTheDocument();
+    expect(screen.queryByTestId('non-filterable-cell-field1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('table-cell-field1')).toHaveAttribute(
+      'data-disable-value-filter',
+      'true'
+    );
+  });
+
+  it('passes the dataset down to TableCell (so links do not depend on context)', () => {
+    mockDataset.fields.getByName.mockReturnValue({ type: 'string', filterable: true });
+    mockDataset.formatField.mockReturnValue('test_value');
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} columns={['field1']} />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByTestId('table-cell-field1')).toHaveAttribute('data-has-dataset', 'true');
   });
 });

@@ -12,26 +12,32 @@ export interface PPLQueryParams {
   limit?: number;
 }
 
+export interface PPLQueryObject {
+  query: string;
+  language: string;
+  format: string;
+  dataset: {
+    id: string;
+    title: string;
+    type: string;
+    timeFieldName?: string;
+    dataSource?: {
+      id: string;
+      title: string;
+      type: string;
+    };
+  };
+}
+
 export interface PPLQueryRequest {
   params: {
     index: string;
     body: {
-      query: {
-        query: string;
-        language: string;
-        format: string;
-        dataset: {
-          id: string;
-          title: string;
-          type: string;
-          timeFieldName?: string;
-          dataSource?: {
-            id: string;
-            title: string;
-            type: string;
-          };
-        };
-      };
+      // The PPL search interceptor reads the query to run from `query.queries[0]`
+      // (PPLSearchInterceptor.getQuery); only when that is absent does it fall back to
+      // the shared QueryStringManager. We always populate `queries` so these
+      // background/flyout fetches never depend on — or mutate — the global query state.
+      query: PPLQueryObject & { queries?: PPLQueryObject[] };
       aggConfig?: any; // For external data source aggregations
     };
   };
@@ -64,15 +70,22 @@ export const buildPPLQueryRequest = (
   pplQuery: string,
   aggConfig?: any
 ): PPLQueryRequest => {
+  const query: PPLQueryObject = {
+    query: pplQuery,
+    language: 'PPL',
+    format: 'jdbc',
+    dataset: buildPPLDataset(dataset),
+  };
+
   const request: PPLQueryRequest = {
     params: {
       index: dataset.title, // Use the dataset title as the index
       body: {
+        // Populate `queries` so the search interceptor uses this query directly
+        // instead of falling back to the shared QueryStringManager.
         query: {
-          query: pplQuery,
-          language: 'PPL',
-          format: 'jdbc',
-          dataset: buildPPLDataset(dataset),
+          ...query,
+          queries: [query],
         },
       },
     },
@@ -95,11 +108,12 @@ export const executePPLQuery = async (
     throw new Error('Data service is not available');
   }
 
-  // Set the query string in the data service
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  dataService.query.queryString.setQuery(request.params.body.query);
-
-  // Execute the search
+  // Execute the search directly from the fully-formed request. The query travels in
+  // request.params.body.query.queries[0] (see buildPPLQueryRequest), so the interceptor
+  // uses it without reading or mutating the shared QueryStringManager. This keeps these
+  // background/flyout fetches (trace spans, logs correlation) from leaking their
+  // query/dataset (e.g. logs-otel-v1*) into the main editor and corrupting the next
+  // "+"/"-" filter-add query.
   const response = await dataService.search.search(request, {}).toPromise();
 
   return response;

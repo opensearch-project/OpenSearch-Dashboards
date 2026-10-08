@@ -20,12 +20,32 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { ExplorePluginSetup, ExplorePluginStart, ExploreServices } from './types';
 
+// Extension points for external data sources
+export type {
+  SourceTypeDatasetSelectorProps,
+  SourceTypeDefinition,
+  SourceTypeDependencies,
+  SourceTypeLanguageSettings,
+  SourceTypeRegistrySetup,
+} from './services/source_type_registry';
+export {
+  ExploreFlavor,
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_STATISTICS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
+} from '../common';
+
 // Export trace auto-detection utilities for use by other plugins
 export {
   detectTraceData,
   detectTraceDataAcrossDataSources,
+  collectTraceDataSourceIds,
   DetectionResult,
 } from './utils/auto_detect_trace_data';
+export {
+  getIndexPatternSignalTypes,
+  IndexPatternSignalType,
+} from './utils/get_index_pattern_signal_types';
 export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create_auto_datasets';
 
 // Visualization system for use by other plugins

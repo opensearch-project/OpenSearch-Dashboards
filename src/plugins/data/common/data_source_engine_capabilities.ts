@@ -53,6 +53,15 @@ export interface DataSourceEngineCapabilities {
   usesOpenDistroSqlPpl: boolean;
   /** Whether `stats ... by span(<field>, <interval>)` time-bucketing is supported in PPL. */
   supportsPplSpan: boolean;
+  /**
+   * Whether SQL has the `date_histogram`/`histogram` bucket functions this engine's query planner
+   * lowers to a span. Absent from the Open Distro SQL grammar entirely.
+   */
+  supportsSqlBucketFunctions: boolean;
+  /**
+   * Minimum data-source version at which those bucket functions exist. Absent => no version gating.
+   */
+  minSqlBucketFunctionVersion?: string;
   /** Whether the backend runtime PPL grammar endpoint (`/_plugins/_ppl/_grammar`) exists. */
   supportsRuntimePplGrammar: boolean;
   /** Client-action endpoints the server Facet should use to run PPL/SQL for this engine. */
@@ -65,6 +74,8 @@ export interface DataSourceEngineCapabilities {
 export const DEFAULT_ENGINE_CAPABILITIES: DataSourceEngineCapabilities = {
   usesOpenDistroSqlPpl: false,
   supportsPplSpan: true,
+  supportsSqlBucketFunctions: true,
+  minSqlBucketFunctionVersion: '3.9.0',
   supportsRuntimePplGrammar: true,
   sqlPplEndpoints: { ppl: 'enhancements.pplQuery', sql: 'enhancements.sqlQuery' },
   columnValueSuggestionLanguage: 'PPL',
@@ -82,6 +93,7 @@ const ENGINE_CAPABILITIES: Partial<Record<string, DataSourceEngineCapabilities>>
     minLanguageVersions: { SQL: '6.5.0', PPL: '7.9.0' },
     usesOpenDistroSqlPpl: true,
     supportsPplSpan: false,
+    supportsSqlBucketFunctions: false,
     supportsRuntimePplGrammar: false,
     sqlPplEndpoints: {
       ppl: 'enhancements.pplQueryOpenDistro',

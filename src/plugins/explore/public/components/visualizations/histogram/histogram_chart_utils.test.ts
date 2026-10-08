@@ -13,6 +13,7 @@ jest.mock('../theme/default_colors', () => ({
     categories: ['#00BFB3'],
     backgroundShade: '#F5F7FA',
     statusGreen: '#00BFB3',
+    text: '#000000',
   }),
 }));
 
@@ -21,6 +22,7 @@ jest.mock('../utils/series', () => ({
 }));
 
 jest.mock('../utils/utils', () => ({
+  formatSeriesValueLabel: jest.fn((value: unknown) => String(value)),
   generateThresholdLines: jest.fn(() => ({})),
   getValueColorByThreshold: jest.fn(() => '#00BFB3'),
 }));
@@ -363,6 +365,45 @@ describe('createHistogramSeries', () => {
 
       expect(series.encode.x).toBe('start');
       expect(series.encode.y).toBe('count');
+    });
+
+    it('should render value labels', () => {
+      const options = {
+        styles: {
+          ...mockStyles,
+          showValue: true,
+          unitSuffix: 'ms',
+        },
+        binStartField: 'start',
+        binEndField: 'end',
+        seriesFields: ['count'],
+      };
+
+      const state = {
+        data: [],
+        styles: mockStyles,
+        transformedData: [
+          ['start', 'end', 'count'],
+          [0, 10, 5],
+        ],
+        axisColumnMappings: {},
+      } as any;
+
+      const result = createHistogramSeries(options)(state);
+      const series = result.series![0] as any;
+      const mockApi = {
+        value: jest.fn((index: number) => [0, 10, 5][index]),
+        coord: jest.fn((point: number[]) => {
+          if (point[1] === 0) return [100, 200];
+          return [150, 150];
+        }),
+      };
+      const renderResult = series.renderItem({}, mockApi);
+      const textNode = renderResult.children[1];
+
+      expect(renderResult.children).toHaveLength(2);
+      expect(textNode.type).toBe('text');
+      expect(textNode.style.text).toBe('5');
     });
   });
 

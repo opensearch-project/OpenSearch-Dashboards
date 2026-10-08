@@ -5,9 +5,9 @@
 
 import { GaugeChartStyle } from './gauge_vis_config';
 import { AxisRole, VisColumn } from '../types';
-import { createGaugeSeries, assembleGaugeSpec } from './gauge_chart_utils';
-import { pipe, createBaseConfig } from '../utils/echarts_spec';
-import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { buildGaugeRenderData, createGaugeSeries } from './gauge_chart_utils';
+import { convertTo2DArray } from '../utils/data_transformation';
+import { createBaseConfig } from '../utils/echarts_spec';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -15,16 +15,25 @@ export const createGauge = (
   axisColumnMappings: { [AxisRole.Value]: VisColumn }
 ) => {
   const valueColumn = axisColumnMappings[AxisRole.Value];
-
-  const result = pipe(
-    transform(convertTo2DArray()),
-    createBaseConfig({}),
-    createGaugeSeries({ styles: styleOptions, seriesFields: [valueColumn.column] }),
-    assembleGaugeSpec
-  )({
+  const tableData = convertTo2DArray()(transformedData);
+  const baseConfig = createBaseConfig({})({
     data: transformedData,
     styles: styleOptions,
     axisColumnMappings,
+  }).baseConfig;
+
+  const gaugeData = buildGaugeRenderData({
+    transformedData: tableData,
+    styles: styleOptions,
+    valueColumn,
   });
-  return result.spec;
+
+  return {
+    spec: {
+      ...baseConfig,
+      dataset: { source: tableData },
+      series: createGaugeSeries(gaugeData?.arc),
+    },
+    text: gaugeData?.text,
+  };
 };

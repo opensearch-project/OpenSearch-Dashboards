@@ -58,6 +58,7 @@ interface StartServices {
   uiActions: UiActionsStart;
   data?: DataPublicPluginStart;
   telemetry?: CoreStart['telemetry'];
+  allowDashboardSections?: boolean;
 }
 
 export type DashboardContainerFactory = EmbeddableFactory<
@@ -95,6 +96,7 @@ export class DashboardContainerFactoryDefinition implements EmbeddableFactoryDef
       isEmbeddedExternally: false,
       isFullScreenMode: false,
       useMargins: true,
+      useSharedCrosshair: false,
     };
   }
 

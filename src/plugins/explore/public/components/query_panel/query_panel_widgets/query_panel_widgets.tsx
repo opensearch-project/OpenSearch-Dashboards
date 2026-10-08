@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useSelector } from 'react-redux';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
@@ -29,6 +30,7 @@ interface QueryPanelWidgetsProps {
   onToggleAnalyze?: () => void;
   hasAnalyzeResult?: boolean;
   hideAskAI?: boolean;
+  builderOnly?: boolean;
 }
 
 export const QueryPanelWidgets = ({
@@ -36,6 +38,7 @@ export const QueryPanelWidgets = ({
   onToggleAnalyze,
   hasAnalyzeResult,
   hideAskAI,
+  builderOnly,
 }: QueryPanelWidgetsProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryPanelActionsRegistry } = services;
@@ -50,7 +53,7 @@ export const QueryPanelWidgets = ({
     <div className="exploreQueryPanelWidgets">
       {/* Left Section */}
       <div className="exploreQueryPanelWidgets__left">
-        <LanguageToggle hideAI={hideAskAI} />
+        <LanguageToggle hideAI={hideAskAI} builderOnly={builderOnly} />
         {!isMetrics && <DatasetSelectWidget />}
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <RecentQueriesButton />
@@ -75,7 +78,12 @@ export const QueryPanelWidgets = ({
               data-test-subj="exploreAnalyzeButton"
               iconType="inspect"
             >
-              Inspect Query
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="explore.queryPanel.inspectQueryButton"
+                  defaultMessage="Inspect Query"
+                />
+              </EuiText>
             </EuiButtonEmpty>
             <div className="exploreQueryPanelWidgets__verticalSeparator" />
           </>

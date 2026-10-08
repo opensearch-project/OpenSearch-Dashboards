@@ -15,8 +15,9 @@ jest.mock('../../../../../../opensearch_dashboards_utils/public', () => ({
 describe('shareTopNavData', () => {
   it('should have correct properties', () => {
     expect(shareTopNavData).toMatchObject({
-      tooltip: expect.any(String),
-      ariaLabel: expect.any(String),
+      tooltip: 'Share search',
+      // Tooltip and aria-label are deliberately the same string.
+      ariaLabel: 'Share search',
       testId: 'shareTopNavButton',
       iconType: 'share',
       controlType: 'icon',

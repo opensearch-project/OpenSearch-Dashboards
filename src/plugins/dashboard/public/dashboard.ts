@@ -11,6 +11,7 @@ import { cloneDeep } from 'lodash';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../data/public';
 import { SavedDashboardPanel } from './types';
 import { Variable } from './variables/types';
+import { DashboardLayout } from '../common';
 
 // TODO: This class can be revisited and clean up more
 export interface SerializedDashboard {
@@ -23,6 +24,7 @@ export interface SerializedDashboard {
   options?: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    useSharedCrosshair?: boolean;
   };
   uiState?: string;
   lastSavedTitle: string;
@@ -32,6 +34,7 @@ export interface SerializedDashboard {
   filters: Filter[];
   title?: string;
   variables?: Variable[];
+  layout?: DashboardLayout;
 }
 
 export interface DashboardParams {
@@ -55,6 +58,7 @@ export class Dashboard<TDashboardParams = DashboardParams> {
   public filters: Filter[];
   public title?: string;
   public variables?: Variable[];
+  public layout?: DashboardLayout;
   public isDirty = false;
 
   constructor(dashboardState: SerializedDashboard = {} as any) {
@@ -105,6 +109,11 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     }
     if (state.variables) {
       this.variables = cloneDeep(state.variables);
+    }
+    // `layout` may be explicitly cleared (undefined) on ungroup / auto-revert, so
+    // use a presence check rather than truthiness.
+    if ('layout' in state) {
+      this.layout = cloneDeep(state.layout);
     }
   }
 

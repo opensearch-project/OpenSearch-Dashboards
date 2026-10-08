@@ -96,6 +96,23 @@ describe('TableCell', () => {
     expect(screen.getByTestId('filterOutValue')).toBeInTheDocument();
   });
 
+  it('does not render value filter buttons when disableValueFilter is true', () => {
+    // Set for time/date fields: exact-equality on a high-precision timestamp is misleading
+    // (raw UTC value differs from the timezone-formatted display) and effectively never matches.
+    render(<TableCell {...defaultProps} disableValueFilter={true} />);
+
+    expect(screen.queryByTestId('filterForValue')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterOutValue')).not.toBeInTheDocument();
+  });
+
+  it('still renders value filter buttons for a time field when disableValueFilter is not set', () => {
+    // isTimeField only drives styling/flyout; the value-filter gate is disableValueFilter.
+    render(<TableCell {...defaultProps} isTimeField={true} disableValueFilter={false} />);
+
+    expect(screen.getByTestId('filterForValue')).toBeInTheDocument();
+    expect(screen.getByTestId('filterOutValue')).toBeInTheDocument();
+  });
+
   it('calls onFilter with correct parameters when filter for value button is clicked', () => {
     render(<TableCell {...defaultProps} />);
 

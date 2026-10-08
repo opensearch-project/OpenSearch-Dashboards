@@ -30,6 +30,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
+import { getGlobalQueryUrlState } from '../../data/public';
 import { VisTypeAlias } from '../../visualizations/public';
 import {
   ExploreFlavor,
@@ -39,6 +40,7 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
   LOGS_DRILLDOWN_APP_ID,
   LOGS_DRILLDOWN_APP_NAME,
+  LOGS_DRILLDOWN_APP_ICON,
 } from '../common';
 import { ConfigSchema } from '../common/config';
 import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
@@ -72,6 +74,7 @@ import { VisualizationRegistryService } from './services/visualization_registry_
 import {
   ExplorePluginSetup,
   ExplorePluginStart,
+  ExploreServices,
   ExploreSetupDependencies,
   ExploreStartDependencies,
 } from './types';
@@ -82,6 +85,7 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
+import { SourceTypeRegistryService, setSourceTypeRegistry } from './services/source_type_registry';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
@@ -106,6 +110,30 @@ import {
   registerAutoVisualizationAction,
   AUTO_VISUALIZATION_TOOL_NAME,
 } from './components/visualizations/actions/auto_visualization_action';
+import { registerGetTransformationSchemaAction } from './components/visualizations/actions/get_transformation_schema_action';
+import {
+  GET_TRANSFORMATION_SCHEMA_TOOL_NAME,
+  T2_DASHBOARD_TOOL_NAME,
+} from './components/visualizations/actions/utils';
+import { registerT2DashboardAction } from './components/visualizations/actions/t2_dashboard_action';
+
+export const initializeLogsDefaultQuery = async (services: ExploreServices): Promise<void> => {
+  const queryState = services.osdUrlStateStorage?.get<{ query?: unknown }>('_q');
+  if (queryState && Object.prototype.hasOwnProperty.call(queryState, 'query')) {
+    return;
+  }
+
+  try {
+    const defaultDataset = await services.data.query.getDefaultDataset();
+    const defaultQuery = services.data.query.queryString.getDefaultQuery(defaultDataset);
+    services.data.query.queryString.setQuery(defaultQuery, false, false);
+  } catch (error) {
+    // A default-dataset lookup failure should not prevent Logs from mounting; preload can still
+    // resolve URL state or render the no-dataset experience.
+    // eslint-disable-next-line no-console
+    console.warn('Failed to initialize the Logs default dataset query', error);
+  }
+};
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -142,6 +170,7 @@ export class ExplorePlugin implements Plugin<
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
   private slotRegistryService = new SlotRegistryService();
+  private sourceTypeRegistry = new SourceTypeRegistryService();
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
@@ -157,6 +186,8 @@ export class ExplorePlugin implements Plugin<
   ): ExplorePluginSetup {
     // Check if dataset management plugin is enabled
     this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
+    setSourceTypeRegistry(this.sourceTypeRegistry);
 
     // Store data importer config if available
     this.dataImporterConfig = setupDeps.dataImporter?.config;
@@ -328,10 +359,7 @@ export class ExplorePlugin implements Plugin<
                 (value: Record<string, unknown>) =>
                   !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
               ),
-              map((value: Record<string, unknown>) => ({
-                ...(value.state as Record<string, unknown>),
-                // Note: We don't use data plugin's filterManager, filters are managed in Redux
-              }))
+              map(({ state }) => getGlobalQueryUrlState(state))
             ),
           },
         ],
@@ -428,6 +456,12 @@ export class ExplorePlugin implements Plugin<
           // Register tabs with the tab registry
           registerTabs(services, flavor);
 
+          // Logs opts in to the dataset-generated query before its URL state is restored. Other
+          // flavors resolve their own dataset and query during preload.
+          if (flavor === ExploreFlavor.Logs) {
+            await initializeLogsDefaultQuery(services);
+          }
+
           // Instantiate the store
           const {
             store,
@@ -470,7 +504,7 @@ export class ExplorePlugin implements Plugin<
       title: LOGS_DRILLDOWN_APP_NAME,
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'discoverApp',
+      euiIconType: LOGS_DRILLDOWN_APP_ICON,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.observability,
       // Reached via the Logs nav-popover action + the query-bar action, NOT its own side-nav item.
@@ -539,10 +573,7 @@ export class ExplorePlugin implements Plugin<
                 (value: Record<string, unknown>) =>
                   !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
               ),
-              map((value: Record<string, unknown>) => ({
-                ...(value.state as Record<string, unknown>),
-                // Note: We don't use data plugin's filterManager, filters are managed in Redux
-              }))
+              map(({ state }) => getGlobalQueryUrlState(state))
             ),
           },
         ],
@@ -758,6 +789,7 @@ export class ExplorePlugin implements Plugin<
       logActionRegistry: {
         registerAction: (action) => logActionRegistry.registerAction(action),
       },
+      sourceTypes: this.sourceTypeRegistry.setup(),
     };
   }
 
@@ -931,9 +963,21 @@ export class ExplorePlugin implements Plugin<
               plugins.data,
               plugins.contextProvider
             );
+            // Register transformation schema lookup tool
+            registerGetTransformationSchemaAction(registerAssistantAction);
+
+            // Register t2-dashboard tool for creating multi-panel dashboards from chat
+            registerT2DashboardAction(
+              registerAssistantAction,
+              core,
+              plugins.data,
+              savedExploreLoader
+            );
           } else {
             // Leaving the workspace must take the tool back out of availableTools
             unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+            unregisterAssistantAction(T2_DASHBOARD_TOOL_NAME);
+            unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
           }
         }
       );
@@ -941,6 +985,8 @@ export class ExplorePlugin implements Plugin<
       this.unregisterVisualizationTools = () => {
         this.visualizationToolsWorkspaceSubscription?.unsubscribe();
         unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+        unregisterAssistantAction(T2_DASHBOARD_TOOL_NAME);
+        unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
       };
 
       // Inject contextProvider action helpers into PanelDataService
@@ -1126,11 +1172,11 @@ export class ExplorePlugin implements Plugin<
         .filter(
           (v) =>
             v.name === this.DISCOVER_VISUALIZATION_NAME ||
-            v.name === this.METRICS_VISUALIZATION_NAME ||
-            v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.METRICS_VISUALIZATION_NAME
         )
         .forEach((visAlias) => {
-          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          // Hide aliases that route into the normal Explore apps. The standalone
+          // visualization editor remains available for dashboard create flows.
           visAlias.hidden = true;
         });
     }

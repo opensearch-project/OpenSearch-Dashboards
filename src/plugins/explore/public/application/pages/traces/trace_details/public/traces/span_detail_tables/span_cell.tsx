@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { useEffect } from 'react';
 import './span_detail_table.scss';
-import { nanoToMilliSec, round } from '../../utils/helper_functions';
+import { formatSpanDuration } from '../../utils/helper_functions';
 import { extractSpanDuration } from '../../utils/span_data_utils';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../utils/shared_const';
 import { resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
@@ -26,6 +26,7 @@ export const SpanCell = ({
   setCellProps,
   traceTimeRange,
   colorMap,
+  visibleRange,
 }: {
   rowIndex: number;
   columnId: string;
@@ -36,6 +37,7 @@ export const SpanCell = ({
   setCellProps?: (props: any) => void;
   traceTimeRange?: TraceTimeRange;
   colorMap?: Record<string, string>;
+  visibleRange?: TraceTimeRange;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
@@ -54,7 +56,13 @@ export const SpanCell = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedSpanId, item?.spanId, disableInteractions]);
 
-  const cellContent = renderSpanCellValue({ item, columnId }, traceTimeRange, colorMap);
+  const cellContent = renderSpanCellValue(
+    { item, columnId },
+    traceTimeRange,
+    colorMap,
+    props.selectedSpanId,
+    visibleRange
+  );
 
   return disableInteractions || !item ? (
     cellContent
@@ -71,7 +79,9 @@ export const SpanCell = ({
 export const renderSpanCellValue = (
   { columnId, item }: { item: Span; columnId: string },
   traceTimeRange?: TraceTimeRange,
-  colorMap?: Record<string, string>
+  colorMap?: Record<string, string>,
+  selectedSpanId?: string,
+  visibleRange?: TraceTimeRange
 ): any => {
   if (!item) return '-';
 
@@ -92,7 +102,7 @@ export const renderSpanCellValue = (
     case 'spanId':
       return <span>{value}</span>;
     case 'durationInNanos':
-      return `${round(nanoToMilliSec(Math.max(0, extractSpanDuration(item))), 2)} ms`;
+      return formatSpanDuration(extractSpanDuration(item));
     case 'startTime':
       return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
     case 'endTime':
@@ -101,7 +111,13 @@ export const renderSpanCellValue = (
       return resolveServiceNameFromSpan(item) || value || '-';
     case 'timeline':
       return traceTimeRange ? (
-        <TimelineWaterfallBar span={item} traceTimeRange={traceTimeRange} colorMap={colorMap} />
+        <TimelineWaterfallBar
+          span={item}
+          traceTimeRange={traceTimeRange}
+          colorMap={colorMap}
+          isSelected={!!selectedSpanId && item.spanId === selectedSpanId}
+          visibleRange={visibleRange}
+        />
       ) : null;
     default:
       return value || '-';

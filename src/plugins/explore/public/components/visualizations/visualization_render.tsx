@@ -30,6 +30,7 @@ interface Props {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 interface CommonProps {
@@ -39,6 +40,7 @@ interface CommonProps {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  crosshairGroup?: string;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -50,6 +52,8 @@ const defaultStyleOptions: TableChartStyle = {
 };
 
 const CUSTOM_LEGEND_CHART_TYPES = ['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'];
+const COMPACT_HORIZONTAL_SPLIT_CHART_TYPES = ['gauge', 'pie'];
+const COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH = 180;
 
 export const CommonVisualizationRender = ({
   visualizationData,
@@ -58,6 +62,7 @@ export const CommonVisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: CommonProps) => {
   const { from, to } = inputTimeRange || {};
   const legendSelected$ = useRef(new BehaviorSubject<Record<string, boolean>>({})).current;
@@ -66,6 +71,11 @@ export const CommonVisualizationRender = ({
   ).current;
   const legend$ = useRef(new BehaviorSubject<Record<string, LegendItem[]>>({})).current;
   const supportsCustomLegend = CUSTOM_LEGEND_CHART_TYPES.includes(visConfig?.type ?? '');
+  const horizontalSplitMinWidth = COMPACT_HORIZONTAL_SPLIT_CHART_TYPES.includes(
+    visConfig?.type ?? ''
+  )
+    ? COMPACT_HORIZONTAL_SPLIT_MIN_WIDTH
+    : undefined;
 
   useEffect(() => {
     if (!supportsCustomLegend) {
@@ -99,6 +109,10 @@ export const CommonVisualizationRender = ({
     visualizationData?.dateColumns,
     visualizationData?.unknownColumns,
   ]);
+
+  const seriesDisplayNames = useMemo(() => {
+    return visualizationData?.seriesDisplayNames ?? {};
+  }, [visualizationData?.seriesDisplayNames]);
 
   const onLegend = useCallback(
     (key: string, legendItems: LegendItem[], validKeys?: string[]) => {
@@ -171,7 +185,10 @@ export const CommonVisualizationRender = ({
   if (visConfig?.splitField) {
     const splitColumn = columns.find((col) => col.name === visConfig.splitField);
     if (splitColumn) {
-      const groups = getSplitKeysBySplitField(rows, splitColumn.column);
+      const groups = getSplitKeysBySplitField(rows, splitColumn.column).map((item) => ({
+        original: item,
+        displayName: seriesDisplayNames?.[item] ?? item,
+      }));
 
       return (
         <div
@@ -188,15 +205,23 @@ export const CommonVisualizationRender = ({
               layout={visConfig.splitLayout ?? 'auto'}
               showLabel={visConfig.showSplitLabel}
               verticalItemMinHeight={visConfig.type === 'metric' ? 60 : undefined}
+              horizontalItemMinWidth={horizontalSplitMinWidth}
               renderChart={(groupKey) => (
                 <ChartRender
                   data={{ ...visualizationData }}
                   dataFilter={(data) => filterDataBySplitField(data, splitColumn.column, groupKey)}
                   config={visConfig}
                   renderContext={{
-                    seriesName: groupKey,
+                    seriesName: seriesDisplayNames?.[groupKey] ?? groupKey,
+                    crosshairGroup,
                   }}
-                  onLegend={(legend) => onLegend(groupKey, legend, groups)}
+                  onLegend={(legend) =>
+                    onLegend(
+                      groupKey,
+                      legend,
+                      groups.map((item) => item.original)
+                    )
+                  }
                   timeRange={timeRange}
                   onSelectTimeRange={onSelectTimeRange}
                   legendSelected$={legendSelected$}
@@ -227,6 +252,7 @@ export const CommonVisualizationRender = ({
           <ChartRender
             data={visualizationData}
             config={visConfig}
+            renderContext={{ crosshairGroup }}
             onLegend={(legend) => onLegend('__default__', legend, ['__default__'])}
             timeRange={timeRange}
             onSelectTimeRange={onSelectTimeRange}
@@ -249,6 +275,7 @@ export const VisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  crosshairGroup,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
@@ -261,6 +288,7 @@ export const VisualizationRender = ({
       timeRange={inputTimeRange}
       onSelectTimeRange={onSelectTimeRange}
       onStyleChange={onStyleChange}
+      crosshairGroup={crosshairGroup}
     />
   );
 };
@@ -325,5 +353,6 @@ const ChartRender = ({
     onLegend,
     legendSelected$,
     highlightedLegendTarget$,
+    seriesDisplayNames: data.seriesDisplayNames,
   });
 };

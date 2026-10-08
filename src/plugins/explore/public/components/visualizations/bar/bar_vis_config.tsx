@@ -18,6 +18,8 @@ import {
   BucketOptions,
   TimeUnit,
   ThresholdOptions,
+  StackMode,
+  StandardOptions,
 } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
@@ -31,7 +33,9 @@ import {
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
-export interface BarChartStyleOptions {
+export const DEFAULT_BAR_FILL_OPACITY = 1;
+
+export interface BarChartStyleOptions extends StandardOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
@@ -46,7 +50,9 @@ export interface BarChartStyleOptions {
   showBarBorder?: boolean;
   barBorderWidth?: number;
   barBorderColor?: string;
-  stackMode?: 'none' | 'total';
+  stackMode?: StackMode;
+  barRadius?: number;
+  showValues?: boolean;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -62,12 +68,39 @@ export interface BarChartStyleOptions {
 
   useThresholdColor?: boolean;
   showFullTimeRange?: boolean;
+  fillOpacity?: number;
 }
 
 export type BarChartStyle = Required<
-  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle' | 'stackMode'>
+  Omit<
+    BarChartStyleOptions,
+    | 'legendShape'
+    | 'thresholdLines'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'stackMode'>;
+  Pick<
+    BarChartStyleOptions,
+    | 'legendShape'
+    | 'legendTitle'
+    | 'barRadius'
+    | 'fillOpacity'
+    | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
+    | 'min'
+    | 'max'
+  >;
+
+export const MIN_BAR_RADIUS = 0;
+export const MAX_BAR_RADIUS = 20;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
@@ -98,7 +131,9 @@ export const defaultBarChartStyles: BarChartStyle = {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
   },
-  showFullTimeRange: false,
+  showFullTimeRange: true,
+  stackMode: 'none',
+  showValues: false,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({
@@ -120,10 +155,15 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y;
           if (!x || !y || y.length === 0) throw Error('Missing axis config for bar chart');
 
-          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
@@ -147,10 +187,15 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y || x.length === 0) throw Error('Missing axis config for bar chart');
 
-          const { spec, legendItems } = createBarSpec(props.data, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
+          const { spec, legendItems } = createBarSpec(
+            props.data,
+            props.styleOptions,
+            {
+              [AxisRole.X]: x,
+              [AxisRole.Y]: y,
+            },
+            props.seriesDisplayNames
+          );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
@@ -184,6 +229,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -241,12 +287,14 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -274,7 +322,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -307,12 +356,14 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
+              group={props.renderContext?.crosshairGroup}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
               highlightedLegendTarget$={props.highlightedLegendTarget$}
@@ -340,7 +391,8 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

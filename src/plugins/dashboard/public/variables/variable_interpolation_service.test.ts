@@ -7,7 +7,13 @@ import {
   VariableInterpolationService,
   createNoOpVariableInterpolationService,
 } from './variable_interpolation_service';
-import { VariableType, VariableWithState, CustomVariable, VariableState } from './types';
+import {
+  VariableType,
+  VariableWithState,
+  CustomVariable,
+  TextVariable,
+  VariableState,
+} from './types';
 
 type CustomVariableWithState = CustomVariable & VariableState;
 
@@ -29,6 +35,18 @@ const makeMultiVar = (overrides: Partial<CustomVariableWithState> = {}): Variabl
   multi: true,
   customOptions: ['us-east', 'us-west', 'eu-west'],
   options: [{ value: 'us-east' }, { value: 'us-west' }, { value: 'eu-west' }],
+  ...overrides,
+});
+
+type TextVariableWithState = TextVariable & VariableState;
+
+// Text variables have no options; `current` holds the free-form value.
+const makeTextVar = (overrides: Partial<TextVariableWithState> = {}): VariableWithState => ({
+  id: '3',
+  name: 'keyword',
+  type: VariableType.Text,
+  current: ['timeout'],
+  options: [],
   ...overrides,
 });
 
@@ -121,6 +139,16 @@ describe('VariableInterpolationService', () => {
     it('should escape pipe character in PromQL', () => {
       const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['a|b'] })]);
       expect(svc.interpolate('$service', 'PROMQL')).toBe('a\\|b');
+    });
+
+    it('rawValue=true skips PromQL regex-metacharacter escaping', () => {
+      const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['3.1.1'] })]);
+      expect(svc.interpolate('$service', 'PROMQL', undefined, true)).toBe('3.1.1');
+    });
+
+    it('rawValue=true still substitutes the value, just without escaping', () => {
+      const svc = new VariableInterpolationService(() => [makeCustomVar({ current: ['a|b'] })]);
+      expect(svc.interpolate('$service', 'PROMQL', undefined, true)).toBe('a|b');
     });
   });
 
@@ -281,6 +309,57 @@ describe('VariableInterpolationService', () => {
       const svc = new VariableInterpolationService(() => [makeCustomVar()]);
       const vars = svc.getVariables();
       expect(vars[0].values).toBeUndefined();
+    });
+  });
+
+  describe('interpolate — Text variables', () => {
+    it('should interpolate a Text variable value', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar()]);
+      expect(svc.interpolate('source=logs | where msg = $keyword', 'PPL')).toBe(
+        'source=logs | where msg = timeout'
+      );
+    });
+
+    it('should interpolate a Text variable with braced syntax', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar()]);
+      expect(svc.interpolate('source=logs | where msg = ${keyword}', 'PPL')).toBe(
+        'source=logs | where msg = timeout'
+      );
+    });
+
+    it('should escape PPL single quotes in a free-form Text value', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar({ current: ["o'brien"] })]);
+      expect(svc.interpolate("source=logs | where user = '$keyword'", 'PPL')).toBe(
+        "source=logs | where user = 'o''brien'"
+      );
+    });
+
+    it('should escape PromQL regex metacharacters in a free-form Text value', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar({ current: ['/api/v1.*'] })]);
+      expect(svc.interpolate('http_requests{path=~"$keyword"}', 'PROMQL')).toBe(
+        'http_requests{path=~"/api/v1\\.\\*"}'
+      );
+    });
+
+    it('should treat a Text variable as single-valued even with several current entries', () => {
+      // Text is always single-valued (multi is not applicable), so it must not be
+      // formatted with the multi-value syntax.
+      const svc = new VariableInterpolationService(() => [makeTextVar({ current: ['a', 'b'] })]);
+      const vars = svc.getVariables();
+      expect(vars[0].multi).toBeFalsy();
+      expect(vars[0].values).toBeUndefined();
+    });
+
+    it('should interpolate an empty string when a Text variable has no value', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar({ current: undefined })]);
+      expect(svc.interpolate('source=logs | where msg = $keyword', 'PPL')).toBe(
+        'source=logs | where msg = '
+      );
+    });
+
+    it('should expose a Text variable through getCurrentValues', () => {
+      const svc = new VariableInterpolationService(() => [makeTextVar()]);
+      expect(svc.getCurrentValues()).toEqual({ keyword: 'timeout' });
     });
   });
 

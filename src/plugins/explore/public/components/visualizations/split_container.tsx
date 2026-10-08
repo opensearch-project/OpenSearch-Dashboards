@@ -9,11 +9,16 @@ import { SplitChartInstance } from './split_chart_instance';
 
 import './split_container.scss';
 
+interface SplitGroup {
+  original: string;
+  displayName: string;
+}
 interface SplitContainerProps {
-  groups: string[];
+  groups: SplitGroup[];
   layout: SplitLayout;
   showLabel?: boolean;
   verticalItemMinHeight?: number;
+  horizontalItemMinWidth?: number;
   renderChart: (groupKey: string) => React.ReactNode;
 }
 
@@ -28,11 +33,14 @@ export function getColumnCount(width: number): number {
   return 1;
 }
 
+const DEFAULT_HORIZONTAL_ITEM_MIN_WIDTH = 300;
+
 export const SplitContainer: React.FC<SplitContainerProps> = ({
   groups,
   layout,
   showLabel = false,
   verticalItemMinHeight = 200,
+  horizontalItemMinWidth = DEFAULT_HORIZONTAL_ITEM_MIN_WIDTH,
   renderChart,
 }) => {
   const [columns, setColumns] = useState(1);
@@ -62,7 +70,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
 
   const itemStyles = useMemo((): React.CSSProperties[] => {
     if (layout === 'horizontal') {
-      return groups.map(() => ({ flex: 1, minWidth: 300 }));
+      return groups.map(() => ({ flex: 1, minWidth: horizontalItemMinWidth }));
     }
     if (layout === 'vertical') {
       return groups.map(() => ({ flex: 1, minHeight: verticalItemMinHeight }));
@@ -77,7 +85,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       }
       return { gridColumn: `span ${span}` };
     });
-  }, [layout, columns, groups, verticalItemMinHeight]);
+  }, [layout, columns, groups, verticalItemMinHeight, horizontalItemMinWidth]);
 
   const layoutClass = `splitContainer--${layout || 'auto'}`;
 
@@ -86,8 +94,9 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       <div ref={containerRef} className={`splitContainer ${layoutClass}`} style={containerStyle}>
         {groups.map((group, index) => (
           <SplitChartInstance
-            key={group}
-            label={group}
+            key={group.original}
+            label={group.original}
+            displayName={group.displayName}
             style={itemStyles[index]}
             showLabel={showLabel}
             scrollRoot={containerRef}

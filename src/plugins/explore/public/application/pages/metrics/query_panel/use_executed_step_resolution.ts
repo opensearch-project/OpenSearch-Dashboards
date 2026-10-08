@@ -1,0 +1,38 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import type { PromQLStepResolution } from '../../../../../../query_enhancements/common';
+import { RootState } from '../../../utils/state_management/store';
+import { resultsCache } from '../../../utils/state_management/slices';
+
+export interface ExecutedStepResolution {
+  query: string;
+  maxDataPoints: number;
+  byLabel: Record<string, { stepSec: number; rateIntervalSec: number; minStep?: string }>;
+}
+
+export function useExecutedStepResolution(): ExecutedStepResolution | undefined {
+  const language = useSelector((state: RootState) => state.query.language);
+  const queryText = useSelector((state: RootState) =>
+    typeof state.query.query === 'string' ? state.query.query : ''
+  );
+  // Identity changes on every execution, so a re-run with a new step invalidates.
+  const resultMetadata = useSelector((state: RootState) => state.results[queryText]);
+
+  return useMemo(() => {
+    if (language !== 'PROMQL' || !resultMetadata) return undefined;
+    const stepResolution = resultsCache.get(queryText)?.frameMeta?.stepResolution as
+      PromQLStepResolution | undefined;
+    if (!stepResolution) return undefined;
+
+    const byLabel: ExecutedStepResolution['byLabel'] = {};
+    stepResolution.queries.forEach(({ label, stepSec, rateIntervalSec, minStep }) => {
+      byLabel[label] = { stepSec, rateIntervalSec, minStep };
+    });
+    return { query: queryText, maxDataPoints: stepResolution.maxDataPoints, byLabel };
+  }, [language, queryText, resultMetadata]);
+}

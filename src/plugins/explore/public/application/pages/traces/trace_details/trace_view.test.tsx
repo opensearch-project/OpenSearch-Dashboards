@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { TraceDetails } from './trace_view';
+import { TraceDetails, toggleDependencyFilterIn } from './trace_view';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { getServiceInfo, NoMatchMessage } from './public/utils/helper_functions';
@@ -152,9 +152,9 @@ jest.mock('./public/top_nav_buttons', () => ({
   ),
 }));
 
-jest.mock('./public/services/service_map', () => ({
-  ServiceMap: ({ hits }: any) => (
-    <div data-testid="service-map">
+jest.mock('./public/services/trace_service_flow', () => ({
+  TraceServiceFlow: ({ hits }: any) => (
+    <div data-testid="trace-service-flow">
       <span data-testid="service-hits-count">{hits?.length || 0}</span>
     </div>
   ),
@@ -403,6 +403,26 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
+  it('surfaces a distinct query-failure callout (not "invalid trace") when the fetch fails', async () => {
+    mockPplService.fetchTraceSpans.mockRejectedValue(new Error('For input string: "ABC-123"'));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const history = createMemoryHistory();
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    const errorCallout = await screen.findByTestId('traceViewFetchError');
+    expect(errorCallout).toBeInTheDocument();
+    expect(errorCallout).toHaveTextContent('For input string: "ABC-123"');
+    // Must NOT mislabel a failed query as a missing/invalid trace.
+    expect(screen.queryByText(/invalid or could not be found/i)).not.toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+  });
+
   it('handles default dataset', async () => {
     const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
 
@@ -584,13 +604,14 @@ describe('TraceDetails', () => {
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toBeInTheDocument();
 
-    // Add filter
+    // Add filter — renders as an editable chip (field · operator · value segments)
     fireEvent.click(screen.getByTestId('addSpanFilterButton'));
-    expect(screen.getByText('spanId: span-1')).toBeInTheDocument();
+    expect(screen.getByText('spanId')).toBeInTheDocument();
+    expect(screen.getByText('span-1')).toBeInTheDocument();
 
     // Remove filter
     fireEvent.click(screen.getByLabelText('Remove filter'));
-    expect(screen.queryByText('spanId: span-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {
@@ -889,6 +910,8 @@ describe('TraceDetails', () => {
     if (serviceMapButton) fireEvent.click(serviceMapButton);
 
     expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
+    // Trace map tab renders the CelestialMap-based service flow.
+    expect(document.querySelector('[data-testid="trace-service-flow"]')).toBeInTheDocument();
   });
 
   it('handles state subscription changes', async () => {
@@ -1134,5 +1157,30 @@ describe('TraceDetails', () => {
     // Verify that no other content (like span panels or tabs) is rendered
     expect(document.querySelector('[data-testid="span-detail-panel"]')).not.toBeInTheDocument();
     expect(document.querySelector('[data-testid="trace-detail-tabs"]')).not.toBeInTheDocument();
+  });
+});
+
+describe('toggleDependencyFilterIn', () => {
+  const db = { field: 'attributes.server.address', value: 'valkey-cart' };
+  const mq = { field: 'attributes.messaging.destination.name', value: 'orders' };
+  const service = { field: 'serviceName', value: 'cart', operator: '=' as const };
+
+  it('adds the clicked dependency filter, keeping other filters', () => {
+    expect(toggleDependencyFilterIn([service], null, db)).toEqual({
+      filters: [service, { ...db, operator: '=' }],
+      applied: db,
+    });
+  });
+
+  it('replaces the previous dependency filter instead of ANDing a second field', () => {
+    const after = toggleDependencyFilterIn([service, { ...db, operator: '=' }], db, mq);
+    expect(after).toEqual({ filters: [service, { ...mq, operator: '=' }], applied: mq });
+  });
+
+  it('removes the filter when the active dependency is clicked again', () => {
+    expect(toggleDependencyFilterIn([service, { ...db, operator: '=' }], db, db)).toEqual({
+      filters: [service],
+      applied: null,
+    });
   });
 });

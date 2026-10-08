@@ -15,6 +15,7 @@ import {
   createExcludeSearchPatternQuery,
   createSearchPatternQuery,
   highlightLogUsingPattern,
+  isValidFiniteNumber,
 } from './utils/utils';
 import {
   selectPatternsField,
@@ -100,65 +101,105 @@ const PatternsContainerContent = ({
     [originalQuery, selectedPatternsField, usingRegexPatterns, redirectToLogsWithQuery]
   );
 
-  const logsTotal = histogramResults?.hits.total || 0;
-  const hits = useMemo(() => {
+  const histogramTotal = histogramResults?.hits.total || 0;
+
+  // SQL patterns come back as unaliased columns ([pattern, COUNT(*), MIN(sample)] by
+  // position) rather than the PPL field names, and the sample is a scalar rather than
+  // PPL's take(field, 1) array. Normalize both shapes into { pattern, count, sample }.
+  const isSqlPatterns = originalQuery?.language === 'SQL';
+  const patternRows = useMemo(() => {
     const rawHits = patternResults?.hits?.hits || [];
+    const schema = (patternResults as any)?.fieldSchema || [];
 
-    // Filter out rows where any required field is null
-    return rawHits.filter((row: any) => {
-      if (!row || !row._source) return false;
+    return rawHits
+      .map((row: any) => {
+        const source = row?._source;
+        if (!source) return null;
 
-      const source = row._source;
+        let pattern;
+        let count;
+        let sample;
 
-      // If ANY required field is null/undefined, reject the entire row
-      if (
-        source[PATTERNS_FIELD] == null ||
-        source[COUNT_FIELD] == null ||
-        source[SAMPLE_FIELD] == null
-      ) {
-        return false;
-      }
+        if (isSqlPatterns) {
+          // Columns are read by position. The engine returns each unaliased
+          // column's `name` as the raw SELECT-list text, and OSD keys `_source`
+          // by that name (aliases are returned separately and dropped), so the
+          // schema is the only reliable way to address them.
+          const [patternCol, countCol, sampleCol] = schema;
+          if (!patternCol?.name || !countCol?.name || !sampleCol?.name) return null;
+          pattern = source[patternCol.name];
+          count = source[countCol.name];
+          sample = source[sampleCol.name];
+        } else {
+          pattern = source[PATTERNS_FIELD];
+          count = source[COUNT_FIELD];
+          // PPL sample is an array (take(field, 1))
+          sample = Array.isArray(source[SAMPLE_FIELD]) ? source[SAMPLE_FIELD][0] : undefined;
+        }
 
-      // For SAMPLE_FIELD, also check if it's an array with a non-null first element
-      if (
-        !Array.isArray(source[SAMPLE_FIELD]) ||
-        source[SAMPLE_FIELD].length === 0 ||
-        source[SAMPLE_FIELD][0] == null
-      ) {
-        return false;
-      }
+        // Note for SQL: the empty-pattern group (documents whose patterns field
+        // is missing) has pattern === '' and sample === '', which survive this
+        // check -- only null/undefined are dropped. The outer IFNULL on MIN
+        // guarantees the sample is never null, so that group is not lost.
+        if (pattern == null || count == null || sample == null) return null;
+        return { pattern, count, sample };
+      })
+      .filter(Boolean) as Array<{ pattern: string; count: number; sample: string }>;
+  }, [patternResults, isSqlPatterns]);
 
-      return true;
-    });
-  }, [patternResults?.hits.hits]);
+  // Denominator for the event ratio. PPL reads the total from the histogram
+  // query, but the histogram is not issued for SQL (see the language guard in
+  // `executeQueries`), so that total is always 0 and every ratio would come out
+  // Infinity -- rendering the whole column as '—'.
+  //
+  // The SQL query carries the count of matched documents in a fourth column
+  // (MAX(doc_total)). Summing the returned counts instead would be wrong when the
+  // engine caps the response at `plugins.query.size_limit`: the groups that came
+  // back would be normalized to 100% and every ratio overstated. Falls back to the
+  // sum when the column is absent, so a response predating this shape still renders.
+  const logsTotal = useMemo(() => {
+    if (!isSqlPatterns) return histogramTotal;
+
+    const totalColumn = ((patternResults as any)?.fieldSchema || [])[3];
+    const reportedTotal = totalColumn?.name
+      ? patternResults?.hits?.hits?.[0]?._source?.[totalColumn.name]
+      : undefined;
+    if (isValidFiniteNumber(reportedTotal) && reportedTotal > 0) return reportedTotal;
+
+    return patternRows.reduce((sum, row) => sum + (row.count || 0), 0);
+  }, [isSqlPatterns, patternResults, patternRows, histogramTotal]);
 
   const items: PatternItem[] = useMemo(
     () =>
-      hits?.map((row: any) => ({
+      patternRows.map((row) => ({
         // not including null check for logs total, the table will handle errors and we want to
         //    display the other information if it can appear fine
-        ratio: row._source[COUNT_FIELD] / logsTotal,
-        count: row._source[COUNT_FIELD],
-        // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
-        sample: row._source[SAMPLE_FIELD][0],
-        highlightedSample: usingRegexPatterns
-          ? undefined
-          : highlightLogUsingPattern(
-              row._source[SAMPLE_FIELD][0],
-              row._source[PATTERNS_FIELD],
-              isDarkMode
-            ),
-        pattern: row._source[PATTERNS_FIELD],
+        ratio: row.count / logsTotal,
+        count: row.count,
+        sample: row.sample,
+        // Highlighting is skipped for the simple pattern method, in SQL exactly
+        // as in PPL's usingRegexPatterns path -- SQL only has the simple method.
+        // It is not that the highlighter mis-aligns: it aligns correctly and
+        // reproduces the sample byte-for-byte. The problem is density. Simple
+        // patterns replace every alphanumeric run, so the same log line comes
+        // back as ~25 alternating fragments instead of brain's ~6 contiguous
+        // ones, at the same ~66% coverage -- the highlight stops distinguishing
+        // anything and reads as noise.
+        highlightedSample:
+          isSqlPatterns || usingRegexPatterns
+            ? undefined
+            : highlightLogUsingPattern(row.sample, row.pattern, isDarkMode),
+        pattern: row.pattern,
       })),
-    [hits, logsTotal, usingRegexPatterns, isDarkMode]
+    [patternRows, logsTotal, usingRegexPatterns, isSqlPatterns, isDarkMode]
   );
 
   // Notify parent of filtered count change (optional callback)
   useEffect(() => {
-    if (onFilteredCountChange && hits) {
-      onFilteredCountChange(hits.length);
+    if (onFilteredCountChange) {
+      onFilteredCountChange(patternRows.length);
     }
-  }, [hits, onFilteredCountChange]);
+  }, [patternRows, onFilteredCountChange]);
 
   if (status?.status === QueryExecutionStatus.LOADING) {
     return (
@@ -186,21 +227,17 @@ const PatternsContainerContent = ({
     );
   }
 
-  const hit = hits?.[0];
-  if (!hit) {
+  if (!patternRows.length) {
+    // SQL addresses the columns through the response schema, so rows arriving with
+    // no usable schema is worth reporting. PPL keeps returning nothing, as before.
+    const rawHits = patternResults?.hits?.hits || [];
+    if (isSqlPatterns && rawHits.length > 0) {
+      const title = i18n.translate('explore.patterns.schemaUnexpected', {
+        defaultMessage: 'Expected schema not found',
+      });
+      return <EuiCallOut title={title} color="danger" iconType="alert" />;
+    }
     return null;
-  }
-
-  // Check if the hit has all required fields in hit._source
-  const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
-  const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
-
-  if (!hasAllRequiredFields) {
-    // doesn't match normal fields or calcite fields
-    const title = i18n.translate('explore.patterns.schemaUnexpected', {
-      defaultMessage: 'Expected schema not found',
-    });
-    return <EuiCallOut title={title} color="danger" iconType="alert" />;
   }
 
   return (

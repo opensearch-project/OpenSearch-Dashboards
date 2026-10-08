@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { BottomContainer } from './bottom_container';
 
-// Mock the components
+// The fields panel is driven entirely through `collapsePanel`, so the mock exposes it as a
+// button — that is how both layouts dismiss the panel.
 jest.mock('../../fields_selector/fields_selector_panel', () => ({
-  DiscoverPanel: () => <div data-test-subj="discover-panel">Discover Panel</div>,
+  DiscoverPanel: ({ collapsePanel }: { collapsePanel: () => void }) => (
+    <div data-test-subj="discover-panel">
+      Discover Panel
+      <button data-test-subj="mock-collapse-panel" onClick={collapsePanel}>
+        Collapse
+      </button>
+    </div>
+  ),
 }));
 
 jest.mock('./bottom_right_container/bottom_right_container', () => ({
@@ -17,55 +25,144 @@ jest.mock('./bottom_right_container/bottom_right_container', () => ({
   ),
 }));
 
-// Mock EUI hooks
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useIsWithinBreakpoints: jest.fn(() => false),
-}));
+// `BottomContainer` picks its layout from the measured *container* width, so the tests have to
+// supply one: jsdom reports 0 for every element, and the global ResizeObserver stand-in
+// (src/dev/jest/mocks/resize_observer_mock.js) never invokes its callback.
+let containerWidth = 0;
+let resizeCallbacks: Array<(entries: Array<{ contentRect: { width: number } }>) => void> = [];
 
-import { useIsWithinBreakpoints } from '@elastic/eui';
+const resizeTo = (width: number) => {
+  containerWidth = width;
+  act(() => {
+    resizeCallbacks.forEach((cb) => cb([{ contentRect: { width } }]));
+  });
+};
 
-const mockUseIsWithinBreakpoints = useIsWithinBreakpoints as jest.MockedFunction<
-  typeof useIsWithinBreakpoints
->;
+const renderAtWidth = (width: number) => {
+  containerWidth = width;
+  return render(<BottomContainer />);
+};
+
+const NARROW = 940; // the embedded-canvas target width
+const WIDE = 1400;
 
 describe('BottomContainer', () => {
+  let originalGetBoundingClientRect: typeof HTMLElement.prototype.getBoundingClientRect;
+  let originalResizeObserver: typeof global.ResizeObserver;
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseIsWithinBreakpoints.mockReturnValue(false);
+    resizeCallbacks = [];
+    containerWidth = 0;
+
+    originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      return { width: containerWidth, height: 0 } as DOMRect;
+    };
+
+    originalResizeObserver = global.ResizeObserver;
+    global.ResizeObserver = class {
+      constructor(callback: (entries: Array<{ contentRect: { width: number } }>) => void) {
+        resizeCallbacks.push(callback);
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof global.ResizeObserver;
   });
 
-  const renderComponent = () => {
-    return render(<BottomContainer />);
-  };
-
-  it('renders the resizable container with both panels', () => {
-    renderComponent();
-
-    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+  afterEach(() => {
+    HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    global.ResizeObserver = originalResizeObserver;
   });
 
-  it('renders left panel', () => {
-    renderComponent();
+  describe('wide container', () => {
+    it('renders both panels inline in the resizable container', () => {
+      renderAtWidth(WIDE);
 
-    const leftPanel = screen.getByTestId('dscBottomLeftCanvas');
-    expect(leftPanel).toBeInTheDocument();
+      expect(document.querySelector('.explore-layout__bottom-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('dscBottomLeftCanvas')).toBeInTheDocument();
+      expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    });
+
+    it('does not offer the fields flyout', () => {
+      renderAtWidth(WIDE);
+
+      expect(screen.queryByTestId('exploreFieldsFlyoutToggle')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders with correct resizable container', () => {
-    renderComponent();
+  describe('narrow container', () => {
+    it('replaces the inline fields panel with a rail toggle', () => {
+      renderAtWidth(NARROW);
 
-    const container = document.querySelector('.explore-layout__bottom-panel');
-    expect(container).toBeInTheDocument();
+      expect(screen.getByTestId('exploreFieldsFlyoutToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+      // The panel is not merely hidden — it is unmounted until the flyout is opened.
+      expect(screen.queryByTestId('discover-panel')).not.toBeInTheDocument();
+    });
+
+    it('opens the fields flyout from the rail toggle', () => {
+      renderAtWidth(NARROW);
+      fireEvent.click(screen.getByTestId('exploreFieldsFlyoutToggle'));
+
+      expect(screen.getByTestId('exploreFieldsFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
+    });
+
+    it.each([
+      [
+        'the mask is clicked',
+        () => fireEvent.click(document.querySelector('.explore-layout__fieldsFlyoutMask')!),
+      ],
+      ['Escape is pressed', () => fireEvent.keyDown(window, { key: 'Escape' })],
+      // Same affordance the wide layout uses, so the collapse button behaves identically in both.
+      [
+        'the panel collapses itself',
+        () => fireEvent.click(screen.getByTestId('mock-collapse-panel')),
+      ],
+    ])('closes the fields flyout when %s', (_label, close) => {
+      renderAtWidth(NARROW);
+      fireEvent.click(screen.getByTestId('exploreFieldsFlyoutToggle'));
+      expect(screen.getByTestId('exploreFieldsFlyout')).toBeInTheDocument();
+
+      close();
+
+      expect(screen.queryByTestId('exploreFieldsFlyout')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders with mobile layout', () => {
-    mockUseIsWithinBreakpoints.mockReturnValue(true);
+  describe('resizing', () => {
+    it('swaps to the inline layout when the container grows, dropping the flyout', () => {
+      renderAtWidth(NARROW);
+      fireEvent.click(screen.getByTestId('exploreFieldsFlyoutToggle'));
 
-    renderComponent();
+      resizeTo(WIDE);
 
-    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreFieldsFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dscBottomLeftCanvas')).toBeInTheDocument();
+    });
+
+    it('swaps to the flyout layout when the container shrinks', () => {
+      renderAtWidth(WIDE);
+
+      resizeTo(NARROW);
+
+      expect(screen.getByTestId('exploreFieldsFlyoutToggle')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscBottomLeftCanvas')).not.toBeInTheDocument();
+    });
+
+    // A container can measure 0 before its first real layout (e.g. an inactive tab). Committing
+    // to a layout then would flash the wrong one, so the component waits for a non-zero width.
+    it('renders neither layout until a non-zero width is measured', () => {
+      renderAtWidth(0);
+
+      expect(screen.queryByTestId('exploreFieldsFlyoutToggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscBottomLeftCanvas')).not.toBeInTheDocument();
+
+      resizeTo(NARROW);
+
+      expect(screen.getByTestId('exploreFieldsFlyoutToggle')).toBeInTheDocument();
+    });
   });
 });

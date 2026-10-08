@@ -71,6 +71,8 @@ export const useInitPage = () => {
         const uiState = savedExplore.uiState;
         if (visualization) {
           const {
+            title: visualizationTitle,
+            description: visualizationDescription,
             chartType,
             params,
             axesMapping,
@@ -81,6 +83,8 @@ export const useInitPage = () => {
           } = JSON.parse(visualization);
           visualizationBuilder.setVisConfig({
             type: chartType,
+            title: visualizationTitle,
+            description: visualizationDescription,
             styles: params,
             axesMapping,
             splitField,

@@ -10,6 +10,49 @@
     align-items: center;
   }
 
+  // One faint vertical guide per ancestor level; the fixed 20px width reproduces
+  // the previous indent step so nesting reads without a heavy indent block.
+  &__treeGuide {
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 20px;
+    border-left: 1px solid $euiColorLightShade;
+  }
+
+  &__spanLabel {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Small color chip anchoring each span to its service without repeating the
+  // service name on every row.
+  &__serviceDot {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: $euiSizeXS;
+  }
+
+  // De-emphasized service name — surfaced only where the service changes.
+  &__serviceName {
+    flex: 0 0 auto;
+    color: $euiColorDarkShade;
+    margin-right: $euiSizeXS;
+  }
+
+  // The operation is the primary label; let it take remaining width and ellipsize.
+  &__operationName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   &__expandIcon {
     cursor: pointer;
     margin-right: 5px;
@@ -30,5 +73,28 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+}
+
+// Brand marks are transparent and keep their official color; a mark too faint for the theme
+// (see @osd/apm-topology getBrandIconClassName) renders in one color: black on light, white
+// on dark.
+// A mark with a vendor light version (@osd/apm-topology getDependencySystemDarkIcon) renders
+// both; the theme shows one.
+@if lightness($ouiTextColor) > 50 {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnDark {
+    filter: brightness(0) invert(1);
+  }
+
+  .exploreSpanDetailTable__dependencyBrandIcon--hasDarkTheme {
+    display: none;
+  }
+} @else {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnLight {
+    filter: brightness(0);
+  }
+
+  .exploreSpanDetailTable__dependencyBrandIcon--darkTheme {
+    display: none;
   }
 }

@@ -19,6 +19,9 @@ export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
+  // True when this field is the dataset's configured time field. Used, together with
+  // the date-typed check, to suppress value filters (see below).
+  isTimeField?: boolean;
   displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
@@ -35,6 +38,7 @@ export function DocViewTableRow({
   field,
   fieldMapping,
   fieldType,
+  isTimeField,
   displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
@@ -51,18 +55,31 @@ export function DocViewTableRow({
     'truncate-by-height': isCollapsible && isCollapsed,
   });
 
+  // No value filters on date/time fields: PPL exact-equality on a timestamp is broken
+  // (the timezone-formatted display differs from the raw value, and it effectively never
+  // matches). Time filtering is owned by the time picker. Still show the column toggle.
+  // Mirrors the data-table gate (table_row_content.tsx): suppress on any date-typed field
+  // AND on the configured time field regardless of its mapped type (some time fields, e.g.
+  // OTEL startTime, are not date-typed).
+  const isDateField = fieldType === 'date' || fieldType === 'date_nanos';
+  const disableValueFilter = isTimeField || isDateField;
+
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
         <td className="exploreDocViewer__buttons" data-test-subj="osdDocViewerButtons">
-          <DocViewTableRowBtnFilterAdd
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
-          />
-          <DocViewTableRowBtnFilterRemove
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
-          />
+          {!disableValueFilter && (
+            <>
+              <DocViewTableRowBtnFilterAdd
+                disabled={!fieldMapping || !fieldMapping.filterable}
+                onClick={() => onFilter(fieldMapping, valueRaw, '+')}
+              />
+              <DocViewTableRowBtnFilterRemove
+                disabled={!fieldMapping || !fieldMapping.filterable}
+                onClick={() => onFilter(fieldMapping, valueRaw, '-')}
+              />
+            </>
+          )}
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}

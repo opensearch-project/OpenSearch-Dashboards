@@ -56,8 +56,15 @@ import {
 import { fetchDisabledObjectFields } from '../../ppl_lint/disabled_object_fields';
 import { fetchVisibleIndices } from '../../ppl_lint/visible_indices';
 import { getAiAgentAvailableForDataSource } from '../../ppl_lint/ai_agent_availability';
-import { storePPLLintFixSession } from '../../chat_tools/ppl_lint_fix_session';
-import { PPL_LINT_FIX_DATA_HOST } from '../../chat_tools/ppl_lint_fix_tool_registration';
+import {
+  armPPLLintFixRequest,
+  storePPLLintFixSession,
+} from '../../chat_tools/ppl_lint_fix_session';
+import {
+  createPPLLintFixApplyAction,
+  createPPLLintFixTestAction,
+  PPL_LINT_FIX_DATA_HOST,
+} from '../../chat_tools/ppl_lint_fix_tool_registration';
 import type { AskPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
 import { addPPLLintFixAssistantContext, PPLLintFixLifecycle } from './ppl_lint_fix_lifecycle';
 
@@ -174,6 +181,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   function onAskAiFix(request: AskPPLLintFixRequest): void {
     pplLintFixLifecycle.beginRequest(request.requestId);
+    // Arm before the chat send so the tools register for this fix turn.
+    armPPLLintFixRequest(request.requestId);
     const session = {
       host: PPL_LINT_FIX_DATA_HOST,
       request,
@@ -199,6 +208,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     // the short human message (request.chatMessage). Keyed by requestId.
     const contextStore = services.contextProvider?.getAssistantContextStore?.();
     addPPLLintFixAssistantContext(request, contextStore, PPL_LINT_FIX_DATA_HOST);
+
+    // Register the fix tools synchronously here, before the send below snapshots the
+    // available tools. Arming flips the search bar's flow-active flag, but that registers
+    // the tools in a post-commit effect, which can land after the send when the chat window
+    // is already open. Registering to the same action service (idempotent by name) closes
+    // that race; <PPLLintFixToolRegistration> still owns the reactive unregister on cleanup.
+    const contextProviderActions = services.contextProvider?.actions;
+    if (contextProviderActions) {
+      const removeContextById = (contextId: string) => contextStore?.removeContextById(contextId);
+      contextProviderActions.registerAssistantAction(
+        createPPLLintFixApplyAction({ queryString, removeContextById })
+      );
+      contextProviderActions.registerAssistantAction(createPPLLintFixTestAction());
+    }
 
     void pplLintFixLifecycle
       .waitForChatLaunch(request.requestId, () =>

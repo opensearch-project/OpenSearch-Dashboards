@@ -53,12 +53,16 @@ export function showOptionsPopover({
   onUseMarginsChange,
   hidePanelTitles,
   onHidePanelTitlesChange,
+  useSharedCrosshair,
+  onUseSharedCrosshairChange,
 }: {
   anchorElement: HTMLElement;
   useMargins: boolean;
   onUseMarginsChange: (useMargins: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  useSharedCrosshair: boolean;
+  onUseSharedCrosshairChange: (useSharedCrosshair: boolean) => void;
 }) {
   if (isOpen) {
     onClose();
@@ -77,6 +81,8 @@ export function showOptionsPopover({
           onUseMarginsChange={onUseMarginsChange}
           hidePanelTitles={hidePanelTitles}
           onHidePanelTitlesChange={onHidePanelTitlesChange}
+          useSharedCrosshair={useSharedCrosshair}
+          onUseSharedCrosshairChange={onUseSharedCrosshairChange}
         />
       </EuiWrappingPopover>
     </I18nProvider>

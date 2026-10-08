@@ -110,4 +110,9 @@ export interface IContainer<
     type: string,
     explicitInput: Partial<EEI>
   ): Promise<E | ErrorEmbeddable>;
+
+  /**
+   * Returns opaque container context to round-trip through a child editor.
+   */
+  getStateTransferContainerInfoData?(): Record<string, unknown> | undefined;
 }

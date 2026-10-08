@@ -10,11 +10,16 @@ import {
   brainUpdateSearchPatternQuery,
   createExcludeSearchPatternQuery,
   createSearchPatternQuery,
+  escapeSqlValue,
+  escapeSqlIdentifier,
   findDefaultPatternsField,
   highlightLogUsingPattern,
   isValidFiniteNumber,
   regexExcludeSearchPatternQuery,
   regexUpdateSearchPatternQuery,
+  sqlExcludeSearchPatternQuery,
+  sqlPatternQuery,
+  sqlUpdateSearchPatternQuery,
 } from './utils';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import * as queryActions from '../../../application/utils/state_management/actions/query_actions';
@@ -194,6 +199,200 @@ describe('utils', () => {
       expect(result).toBe(
         'my raw query | patterns `message` | where patterns_field != "Error <*>"'
       );
+    });
+  });
+
+  describe('SQL pattern queries', () => {
+    const queryBase = 'SELECT * FROM my_index';
+    const patternsField = 'message';
+    const patternString = '<*> /<*>/<*>';
+
+    describe('escapeSqlValue', () => {
+      it('wraps a value in single quotes', () => {
+        expect(escapeSqlValue('api')).toBe("'api'");
+      });
+
+      it('doubles embedded single quotes', () => {
+        expect(escapeSqlValue("o'brien")).toBe("'o''brien'");
+        expect(escapeSqlValue("''")).toBe("''''''");
+      });
+
+      it('coerces non-string values to string', () => {
+        expect(escapeSqlValue(123 as any)).toBe("'123'");
+      });
+
+      // SQUOTA_STRING honors backslash escapes as well as '' doubling, so a
+      // backslash before a quote would otherwise end the literal early. These
+      // values are reachable from indexed content (Windows paths, stack traces).
+      it('escapes a backslash that precedes a quote', () => {
+        expect(escapeSqlValue("path\\'s")).toBe("'path\\\\''s'");
+      });
+
+      it('escapes a trailing backslash', () => {
+        expect(escapeSqlValue('a\\')).toBe("'a\\\\'");
+      });
+
+      it('escapes backslashes before doubling quotes, not after', () => {
+        // Wrong order would emit 'a\'' — the \' is consumed as an escaped quote.
+        expect(escapeSqlValue("a\\'")).toBe("'a\\\\'''");
+      });
+    });
+
+    describe('escapeSqlIdentifier', () => {
+      it('wraps a field name in backticks', () => {
+        expect(escapeSqlIdentifier('message')).toBe('`message`');
+      });
+
+      it('leaves dotted and hyphenated field names intact', () => {
+        expect(escapeSqlIdentifier('http.request-id')).toBe('`http.request-id`');
+      });
+
+      it('doubles embedded backticks', () => {
+        expect(escapeSqlIdentifier('we`ird')).toBe('`we``ird`');
+      });
+
+      it('neutralizes a field name that would otherwise close the identifier', () => {
+        // patternsField is restored verbatim from the _a URL parameter.
+        expect(escapeSqlIdentifier('a`, (SELECT 1) x FROM y -- ')).toBe(
+          '`a``, (SELECT 1) x FROM y -- `'
+        );
+      });
+    });
+
+    describe('NULL handling', () => {
+      // Grouping by a nullable key fails the whole request with HTTP 500
+      // "[BUG] Unreachable, Comparing with NULL or MISSING is undefined", so a
+      // single document missing the field breaks the tab on real log indices.
+      it('guards the patterns field with IFNULL in the grouping expression', () => {
+        expect(sqlPatternQuery(queryBase, patternsField)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
+
+      // IFNULL(field,'') on a text field keeps OpenSearchTextType while '' does
+      // not, so MIN over a group holding both a missing and an empty-string
+      // document throws "compare expected value have same type" (HTTP 400).
+      it('projects the sample raw and guards the aggregate instead', () => {
+        const q = sqlPatternQuery(queryBase, patternsField);
+        expect(q).toContain('`message` AS sample');
+        expect(q).toContain("IFNULL(MIN(sample), '')");
+        expect(q).not.toContain('MIN(IFNULL(');
+      });
+
+      it('guards the patterns field with IFNULL in the filter-for query', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
+
+      it('guards the patterns field with IFNULL in the filter-out query', () => {
+        expect(sqlExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toContain(
+          "REPLACE(IFNULL(`message`, ''),"
+        );
+      });
+    });
+
+    describe('sqlPatternQuery', () => {
+      it('builds a REPLACE-based GROUP BY query with unaliased aggregates', () => {
+        expect(sqlPatternQuery(queryBase, patternsField)).toBe(
+          "SELECT pattern, COUNT(*), IFNULL(MIN(sample), ''), MAX(doc_total) " +
+            "FROM (SELECT REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') AS pattern, " +
+            '`message` AS sample, COUNT(*) OVER () AS doc_total ' +
+            'FROM (SELECT * FROM my_index) sub_inner) sub ' +
+            'GROUP BY pattern ORDER BY COUNT(*) DESC'
+        );
+      });
+
+      // The engine caps the response at plugins.query.size_limit, so the returned
+      // groups can be a subset. COUNT(*) OVER () is evaluated on the inner relation,
+      // before grouping and before the cap, so the ratio denominator survives it.
+      it('carries the matched-document count in its own column', () => {
+        const query = sqlPatternQuery(queryBase, patternsField);
+
+        expect(query).toContain('COUNT(*) OVER () AS doc_total');
+        expect(query).toContain('MAX(doc_total)');
+      });
+    });
+
+    // `FROM (SELECT ...;) sub` makes the engine read the terminator as part of the
+    // index name and fail with IndexNotFoundException.
+    describe('trailing statement terminator', () => {
+      const terminated = 'SELECT * FROM my_index;';
+
+      it('is dropped before the query is embedded as a subquery', () => {
+        expect(sqlPatternQuery(terminated, patternsField)).toContain(
+          'FROM (SELECT * FROM my_index) sub_inner'
+        );
+        expect(sqlPatternQuery(terminated, patternsField)).not.toContain('my_index;');
+      });
+
+      it('is dropped for the filter-for and filter-out queries too', () => {
+        expect(sqlUpdateSearchPatternQuery(terminated, patternsField, patternString)).toContain(
+          'FROM (SELECT * FROM my_index) sub'
+        );
+        expect(sqlExcludeSearchPatternQuery(terminated, patternsField, patternString)).toContain(
+          'FROM (SELECT * FROM my_index) sub'
+        );
+      });
+
+      it('tolerates whitespace and repeats around the terminator', () => {
+        expect(sqlPatternQuery('SELECT * FROM my_index ; ; ', patternsField)).toContain(
+          'FROM (SELECT * FROM my_index) sub_inner'
+        );
+      });
+
+      it('leaves a terminator inside a string literal alone', () => {
+        expect(sqlPatternQuery("SELECT * FROM my_index WHERE a = 'x;y';", patternsField)).toContain(
+          "FROM (SELECT * FROM my_index WHERE a = 'x;y') sub_inner"
+        );
+      });
+    });
+
+    describe('sqlUpdateSearchPatternQuery', () => {
+      it('builds a filter-for query using = on the REPLACE expression', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+        );
+      });
+
+      it('escapes single quotes in the pattern string', () => {
+        expect(sqlUpdateSearchPatternQuery(queryBase, patternsField, "o'brien")).toContain(
+          "= 'o''brien'"
+        );
+      });
+    });
+
+    describe('sqlExcludeSearchPatternQuery', () => {
+      it('builds a filter-out query using <> on the REPLACE expression', () => {
+        expect(sqlExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+        );
+      });
+    });
+
+    describe('createSearchPatternQuery (SQL branch)', () => {
+      it('produces the SQL filter-for query when language is SQL', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        expect(createSearchPatternQuery(query, patternsField, false, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') = '<*> /<*>/<*>'"
+        );
+      });
+
+      it('ignores usingRegexPatterns for SQL (only the simple method exists)', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        const withRegex = createSearchPatternQuery(query, patternsField, true, patternString);
+        const withoutRegex = createSearchPatternQuery(query, patternsField, false, patternString);
+        expect(withRegex).toBe(withoutRegex);
+      });
+    });
+
+    describe('createExcludeSearchPatternQuery (SQL branch)', () => {
+      it('produces the SQL filter-out query when language is SQL', () => {
+        const query = { query: queryBase, language: 'SQL' };
+        expect(createExcludeSearchPatternQuery(query, patternsField, false, patternString)).toBe(
+          "SELECT * FROM (SELECT * FROM my_index) sub WHERE REPLACE(IFNULL(`message`, ''), '[a-zA-Z0-9]+', '<*>') <> '<*> /<*>/<*>'"
+        );
+      });
     });
   });
 
@@ -477,6 +676,37 @@ describe('utils', () => {
       expect(setPatternsField).toHaveBeenCalledWith('field2');
       expect(services.store.dispatch).toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
+    });
+
+    it('should recognize the mapping types SQL reports instead of `string`', () => {
+      resultsCache.set('default-query', {
+        fieldSchema: [
+          { name: 'serviceName', type: 'keyword' },
+          { name: 'body', type: 'text' },
+          { name: 'time', type: 'timestamp' },
+        ],
+        hits: {
+          hits: [
+            {
+              _source: {
+                serviceName: 'cartService',
+                body: 'GetCartAsync called with userId=abc123',
+                time: '2026-08-10T00:00:00Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const state = { query: { language: 'SQL' }, results: {} } as any;
+      mockGetState.mockReturnValue(state);
+      const services = {
+        store: { dispatch: jest.fn(), getState: mockGetState },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      expect(findDefaultPatternsField(services)).toBe('body');
+      expect(setPatternsField).toHaveBeenCalledWith('body');
     });
 
     it('should handle non-string values in _source correctly', () => {

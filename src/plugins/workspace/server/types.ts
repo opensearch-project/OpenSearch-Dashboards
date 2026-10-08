@@ -8,6 +8,7 @@ import {
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
+  WorkspaceCreateResult,
   SavedObjectsServiceStart,
   Permissions,
   UiSettingsServiceStart,
@@ -56,9 +57,10 @@ export interface IWorkspaceClientImpl {
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
     }
-  ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
+  ): Promise<IResponse<WorkspaceCreateResult>>;
   /**
    * List workspaces
    * @param requestDetail {@link IRequestDetail}

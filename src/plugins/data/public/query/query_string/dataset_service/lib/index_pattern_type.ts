@@ -14,6 +14,7 @@ import {
   IIndexPattern,
   DATA_STRUCTURE_META_TYPES,
   DataStructureCustomMeta,
+  getDataSourceIdFromIndexPattern,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
@@ -38,8 +39,15 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       id: pattern.id,
       title: pattern.title,
       ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
-      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      // Dataset type from the saved object's `type` attribute (e.g. a rollup index pattern),
+      // defaulting to INDEX_PATTERN. Preserves downstream type-config routing for
+      // non-standard index patterns rather than flattening every dataset to INDEX_PATTERN.
+      type: patternMeta?.datasetType || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
+      // Signal type (traces/metrics/logs) drives flavor routing for consumers like Explore.
+      ...(patternMeta?.signalType && { signalType: patternMeta.signalType }),
+      ...(patternMeta?.schemaMappings && { schemaMappings: patternMeta.schemaMappings }),
+      ...(patternMeta?.description && { description: patternMeta.description }),
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
@@ -53,9 +61,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     } as Dataset;
   },
 
-  fetch: async (services, path) => {
+  fetch: async (services, path, options) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchIndexPatterns(services.savedObjects.client);
+    const indexPatterns = await fetchIndexPatterns(
+      services.savedObjects.client,
+      options?.skipQueryEditorMeta
+    );
     return {
       ...dataStructure,
       columnHeader: 'Index patterns',
@@ -103,10 +114,22 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+const fetchIndexPatterns = async (
+  client: SavedObjectsClientContract,
+  skipQueryEditorMeta: boolean = false
+): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'displayName', 'timeFieldName', 'references'],
+    fields: [
+      'title',
+      'displayName',
+      'timeFieldName',
+      'references',
+      'signalType',
+      'schemaMappings',
+      'description',
+      'type',
+    ],
     search: `*`,
     searchFields: ['title', 'displayName'],
     perPage: 10000,
@@ -116,28 +139,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
   const datasourceIds = Array.from(
     new Set(
       resp.savedObjects
-        .map((savedObject) => {
-          // First try to get from references
-          const refDataSourceId = savedObject.references.find(
-            (ref) => ref.type === 'data-source'
-          )?.id;
-          if (refDataSourceId) {
-            return refDataSourceId;
-          }
-          // If not in references, check if the ID contains :: (namespaced format)
-          if (savedObject.id.includes('::')) {
-            return savedObject.id.split('::')[0];
-          }
-          // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
-          const uIdx = savedObject.id.indexOf('_');
-          if (uIdx > 0) {
-            const prefix = savedObject.id.substring(0, uIdx);
-            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
-              return prefix;
-            }
-          }
-          return undefined;
-        })
+        .map((savedObject) => getDataSourceIdFromIndexPattern(savedObject))
         .filter(Boolean)
     )
   ) as string[];
@@ -154,25 +156,22 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
   }
 
   const dataStructures = resp.savedObjects.map((savedObject): DataStructure => {
-    // First try to get dataSourceId from references
-    let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+    const dataSourceId = getDataSourceIdFromIndexPattern(savedObject);
+    const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
-    // If not in references, check if the ID contains :: (namespaced format)
-    if (!dataSourceId && savedObject.id.includes('::')) {
-      dataSourceId = savedObject.id.split('::')[0];
-    }
-    // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
-    if (!dataSourceId) {
-      const uIdx = savedObject.id.indexOf('_');
-      if (uIdx > 0) {
-        const prefix = savedObject.id.substring(0, uIdx);
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
-          dataSourceId = prefix;
-        }
+    // schemaMappings is stored as a JSON string; parse it so toDataset emits an object.
+    // Guarded: a malformed value degrades to "no mappings" for that dataset instead of
+    // throwing and taking down the whole dataset-list build.
+    const rawSchemaMappings = (savedObject.attributes as { schemaMappings?: string })
+      .schemaMappings;
+    let schemaMappings: Record<string, unknown> | undefined;
+    if (rawSchemaMappings) {
+      try {
+        schemaMappings = JSON.parse(rawSchemaMappings);
+      } catch {
+        schemaMappings = undefined;
       }
     }
-
-    const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
     const indexPatternDataStructure: DataStructure = {
       id: savedObject.id,
@@ -182,6 +181,12 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
         timeFieldName: savedObject.attributes.timeFieldName,
         displayName: savedObject.attributes.displayName,
+        signalType: savedObject.attributes.signalType,
+        ...(schemaMappings && { schemaMappings }),
+        description: savedObject.attributes.description,
+        // Saved-object `type` attribute (distinct from the CUSTOM meta discriminator above),
+        // carried so toDataset can preserve a non-INDEX_PATTERN dataset type.
+        datasetType: savedObject.attributes.type,
       },
     };
 
@@ -200,6 +205,13 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     }
     return indexPatternDataStructure;
   });
+
+  // Query-editor extension meta (e.g. available languages) can trigger per-data-source network
+  // calls; skip it for callers that only need core dataset metadata (e.g. the dataset selector
+  // list), which would otherwise block on those lookups.
+  if (skipQueryEditorMeta) {
+    return dataStructures;
+  }
 
   return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };

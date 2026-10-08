@@ -38,6 +38,7 @@ jest.mock('../state_management/actions/query_actions', () => ({
 }));
 
 jest.mock('../state_management/actions/detect_optimal_tab', () => ({
+  ...jest.requireActual('../state_management/actions/detect_optimal_tab'),
   detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'DETECT_AND_SET_OPTIMAL_TAB' }),
 }));
 
@@ -216,6 +217,38 @@ describe('useInitialQueryExecution', () => {
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
+    });
+
+    it('picks the tab for a stats query even when the URL names a data tab', async () => {
+      await act(async () => {
+        renderHookWithProvider(mockServices, {
+          query: {
+            query: 'source=logs | stats count() by service',
+            language: 'ppl',
+            dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+          },
+          ui: { ...uiInitialState, activeTabId: 'sessions' },
+          meta: { isInitialized: false },
+        });
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
+    });
+
+    it('keeps the URL tab for a query without stats', async () => {
+      await act(async () => {
+        renderHookWithProvider(mockServices, {
+          query: {
+            query: 'source=logs | where a = 1',
+            language: 'ppl',
+            dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+          },
+          ui: { ...uiInitialState, activeTabId: 'sessions' },
+          meta: { isInitialized: false },
+        });
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+      expect(mockDetectAndSetOptimalTab).not.toHaveBeenCalled();
     });
 
     it('should only initialize once', () => {

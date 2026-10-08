@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useRef } from 'react';
 import { useMount, useUnmount } from 'react-use';
 import {
   buildApplyToolDescription,
@@ -15,20 +16,18 @@ import {
   PPLLintFixCard,
   PPL_LINT_FIX_APPLY_PARAMETERS,
   PPL_LINT_FIX_TEST_PARAMETERS,
-  PPL_LINT_FIX_UI_BINDING,
+  resolveApprovedRequestId,
   runPPLLintFixTestTool,
 } from '../../../../../data/public';
-import type {
-  BoundPPLLintFixToolArgs,
-  PPLLintFixCardProps,
-  RemovePPLLintFixContextById,
-} from '../../../../../data/public';
+import type { PPLLintFixCardProps, RemovePPLLintFixContextById } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
 import { PPL_LINT_FIX_EXPLORE_HOST } from './ppl_lint_fix_host';
 
 const HOST = PPL_LINT_FIX_EXPLORE_HOST;
+
+let enabledActionMounts = 0;
 
 interface ApplyPPLLintFixArgs {
   requestId?: string;
@@ -138,8 +137,12 @@ export function usePPLLintFixAction(
     store?.removeContextById?.(contextId);
   };
 
+  const didRegister = useRef(false);
+
   useMount(() => {
     if (!registerAction) return;
+    didRegister.current = true;
+    enabledActionMounts += 1;
 
     registerAction({
       ...TEST_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION,
@@ -173,7 +176,7 @@ export function usePPLLintFixAction(
           // frequently filled those with the wrong values (e.g. the rule name or
           // the query text), which tripped a false stale-request and, because a
           // failure result prompts a retry, sent the model into a tool-call loop.
-          const capturedRequestId = (args as BoundPPLLintFixToolArgs)[PPL_LINT_FIX_UI_BINDING];
+          const capturedRequestId = resolveApprovedRequestId(args);
           // Fail closed: a confirmed call with no card-approval binding must
           // refuse rather than apply against whatever session happens to be
           // active. getPPLLintFixSession(undefined) returns the active session,
@@ -243,9 +246,13 @@ export function usePPLLintFixAction(
   });
 
   useUnmount(() => {
-    if (registerAction) {
-      registerDisabledPPLLintFixTestAction(registerAction);
-      registerDisabledPPLLintFixAction(registerAction);
+    if (didRegister.current) {
+      didRegister.current = false;
+      enabledActionMounts = Math.max(0, enabledActionMounts - 1);
+      if (enabledActionMounts === 0 && registerAction) {
+        registerDisabledPPLLintFixTestAction(registerAction);
+        registerDisabledPPLLintFixAction(registerAction);
+      }
     }
     const requestId = getPPLLintFixSession()?.request.requestId;
     if (requestId) {

@@ -12,6 +12,7 @@ import { PermissionModeId, UiSettingScope } from '../../../core/server';
 import {
   generateRandomId,
   getPermissionMode,
+  translatePermissionsToRole,
   updateDashboardAdminStateForRequest,
   transferCurrentUserInPermissions,
   getDataSourcesList,
@@ -359,6 +360,120 @@ describe('getPermissionMode', () => {
       permissionControlClient: mockPermissionControlClient,
       permissions: { read: { users: ['user1'] } },
     });
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+});
+
+describe('translatePermissionsToRole', () => {
+  it('should return Owner when permission control is disabled', () => {
+    const result = translatePermissionsToRole(
+      false,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return Read when permission control is enabled but permissions are undefined', () => {
+    const result = translatePermissionsToRole(true, undefined, { users: ['user1'], groups: [] });
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should return Owner when the user matches both write and library_write permissions', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return ReadAndWrite when the user only matches library_write permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { library_write: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.ReadAndWrite);
+  });
+
+  it('should return Read when the user only matches read permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { read: { users: ['user1'] } },
+      { users: ['user1'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should return Read when none of the principals match any permission', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user1'] }, library_write: { users: ['user1'] } },
+      { users: ['user2'], groups: ['group2'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Read);
+  });
+
+  it('should match when a permission uses the "*" wildcard for users', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['*'] }, library_write: { users: ['*'] } },
+      { users: ['anyUser'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match when a permission uses the "*" wildcard for groups', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { groups: ['*'] }, library_write: { groups: ['*'] } },
+      { users: [], groups: ['anyGroup'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match against any of the principal groups, not only the first one', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { groups: ['group2'] }, library_write: { groups: ['group2'] } },
+      { users: [], groups: ['group1', 'group2'] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match against any of the principal users, not only the first one', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { write: { users: ['user2'] }, library_write: { users: ['user2'] } },
+      { users: ['user1', 'user2'], groups: [] }
+    );
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should match via group permission when the user does not match directly', () => {
+    const result = translatePermissionsToRole(
+      true,
+      { library_write: { groups: ['group1'] } },
+      { users: ['user1'], groups: ['group1'] }
+    );
+
+    expect(result).toBe(PermissionModeId.ReadAndWrite);
+  });
+
+  it('should handle undefined principals gracefully', () => {
+    const result = translatePermissionsToRole(true, { write: { users: ['user1'] } }, undefined);
 
     expect(result).toBe(PermissionModeId.Read);
   });

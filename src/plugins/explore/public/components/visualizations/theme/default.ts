@@ -65,11 +65,11 @@ function createEchartsTheme(colors: ReturnType<typeof getColors>) {
     tooltip: {
       axisPointer: {
         lineStyle: {
-          color: colors.grid,
+          color: colors.subText,
           width: 1,
         },
         crossStyle: {
-          color: colors.grid,
+          color: colors.subText,
           width: 1,
         },
       },

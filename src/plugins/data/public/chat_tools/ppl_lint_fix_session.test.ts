@@ -4,13 +4,18 @@
  */
 
 import {
+  armPPLLintFixRequest,
   cleanupPPLLintFixRequest,
   clearPPLLintFixSession,
+  createPPLLintFixApprovalNonce,
   getPPLLintFixOutcome,
   getPPLLintFixSession,
+  isPPLLintFixFlowActive,
   markPPLLintFixApplied,
   markPPLLintFixDismissed,
+  resolveRequestIdByApprovalNonce,
   storePPLLintFixSession,
+  subscribePPLLintFixOutcome,
 } from './ppl_lint_fix_session';
 import { PPL_LINT_FIX_DATA_HOST } from './ppl_lint_fix_tool_registration';
 
@@ -71,6 +76,36 @@ describe('PPL lint fix session', () => {
     expect(getPPLLintFixSession()).toBeUndefined();
   });
 
+  it('resolves an issued approval nonce back to its request id', () => {
+    const nonce = createPPLLintFixApprovalNonce('request-a');
+
+    expect(typeof nonce).toBe('string');
+    expect(nonce).not.toBe('request-a');
+    expect(resolveRequestIdByApprovalNonce(nonce)).toBe('request-a');
+  });
+
+  it('reuses the same nonce for a request rather than minting a second', () => {
+    const first = createPPLLintFixApprovalNonce('request-a');
+    const second = createPPLLintFixApprovalNonce('request-a');
+
+    expect(second).toBe(first);
+  });
+
+  it('does not resolve a nonce that was never issued', () => {
+    createPPLLintFixApprovalNonce('request-a');
+
+    expect(resolveRequestIdByApprovalNonce('made-up-nonce')).toBeUndefined();
+  });
+
+  it('forgets the nonce once its request is cleaned up', () => {
+    const nonce = createPPLLintFixApprovalNonce('request-a');
+    storePPLLintFixSession(createSession('request-a'));
+
+    cleanupPPLLintFixRequest('request-a', PREFIX, jest.fn());
+
+    expect(resolveRequestIdByApprovalNonce(nonce)).toBeUndefined();
+  });
+
   it('keeps outcomes scoped to their originating request', () => {
     storePPLLintFixSession(createSession('request-a'));
     markPPLLintFixApplied('request-a');
@@ -82,5 +117,71 @@ describe('PPL lint fix session', () => {
 
     expect(getPPLLintFixOutcome('request-a')).toEqual({ kind: 'dismissed' });
     expect(getPPLLintFixOutcome('request-b')).toEqual({ kind: 'applied' });
+  });
+});
+
+describe('PPL lint fix flow-active gate', () => {
+  const REQ = 'flow-req';
+
+  // No public "disarm all"; reset the id these tests use, then the session.
+  const reset = () => {
+    cleanupPPLLintFixRequest(REQ, PREFIX);
+    clearPPLLintFixSession();
+  };
+  beforeEach(reset);
+  afterEach(reset);
+
+  it('is inactive when nothing is armed and no session exists', () => {
+    expect(isPPLLintFixFlowActive()).toBe(false);
+  });
+
+  it('becomes active once a request is armed, before any session is stored', () => {
+    armPPLLintFixRequest(REQ);
+    expect(isPPLLintFixFlowActive()).toBe(true);
+    expect(getPPLLintFixSession()).toBeUndefined();
+  });
+
+  it('stays active after the session is stored', () => {
+    armPPLLintFixRequest(REQ);
+    storePPLLintFixSession(createSession(REQ));
+    expect(isPPLLintFixFlowActive()).toBe(true);
+  });
+
+  it('is active from a stored session even without an explicit arm', () => {
+    storePPLLintFixSession(createSession(REQ));
+    expect(isPPLLintFixFlowActive()).toBe(true);
+  });
+
+  it('goes inactive after cleanup disarms and clears the request', () => {
+    armPPLLintFixRequest(REQ);
+    storePPLLintFixSession(createSession(REQ));
+    cleanupPPLLintFixRequest(REQ, PREFIX);
+    expect(isPPLLintFixFlowActive()).toBe(false);
+  });
+
+  it('disarms even when the request never reached a stored session', () => {
+    armPPLLintFixRequest(REQ);
+    expect(isPPLLintFixFlowActive()).toBe(true);
+    cleanupPPLLintFixRequest(REQ, PREFIX);
+    expect(isPPLLintFixFlowActive()).toBe(false);
+  });
+
+  it('notifies subscribers on arm and on cleanup', () => {
+    const callback = jest.fn();
+    const unsubscribe = subscribePPLLintFixOutcome(callback);
+    armPPLLintFixRequest(REQ);
+    expect(callback).toHaveBeenCalledTimes(1);
+    cleanupPPLLintFixRequest(REQ, PREFIX);
+    expect(callback).toHaveBeenCalledTimes(2);
+    unsubscribe();
+  });
+
+  it('arming the same request twice notifies only once', () => {
+    const callback = jest.fn();
+    const unsubscribe = subscribePPLLintFixOutcome(callback);
+    armPPLLintFixRequest(REQ);
+    armPPLLintFixRequest(REQ);
+    expect(callback).toHaveBeenCalledTimes(1);
+    unsubscribe();
   });
 });

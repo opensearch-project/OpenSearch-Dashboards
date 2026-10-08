@@ -6,16 +6,19 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import semver from 'semver';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { SearchResponse } from 'elasticsearch';
 import {
   IBucketDateHistogramAggConfig,
   Query,
   DataView,
   IndexPatternField,
+  IDataFrame,
   getDataSourceEngineCapabilities,
 } from '../../../../../../../../src/plugins/data/common';
-import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
+import { QueryExecutionStatus, QueryProgress } from '../types';
+import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -30,7 +33,7 @@ import {
   getDimensions,
   Dimensions,
 } from '../../../../components/chart/utils';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, ASYNC_QUERY_POLL_INTERVAL_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
@@ -40,14 +43,18 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery } from '../../languages';
+import { defaultPreparePplQuery, addPPLSourceClause } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
+  buildSQLHistogramQuery,
+  buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
+  queryHasAggregation,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import { hasFieldValue } from '../../../../utils/has_field_value';
 import { ExploreFlavor } from '../../../../../common';
 import { TRACES_CHART_BAR_TARGET } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
@@ -57,6 +64,7 @@ import {
   executeErrorCountQuery,
   executeLatencyQuery,
 } from './trace_query_actions';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -83,6 +91,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
     case 'PROMQL':
       return query.query as string;
     default:
+      // Languages registered source types list are used as typed.
+      if (getSourceTypeRegistry().getLanguageSettings(query.language)) {
+        return query.query as string;
+      }
       throw new Error(
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
       );
@@ -95,7 +107,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const shouldSkipQueryExecution = (query: Query): boolean => {
   switch (query.language) {
+    // PPL is absent on purpose: `defaultPreparePplQuery` fills a blank editor in
+    // with `source = <table>`, so an empty PPL query is still runnable.
     case 'PROMQL':
+    case 'SQL':
       const queryValue = query.query;
       return typeof queryValue !== 'string' || !queryValue.trim();
     default:
@@ -113,6 +128,22 @@ export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): 
 };
 
 /**
+ * Prepare cache key for bucket count queries (used for aggregation queries)
+ */
+export const prepareBucketCountCacheKey = (query: Query): string => {
+  return `bucketCount:${prepareBucketCountQueryString(query)}`;
+};
+
+/**
+ * Prepare the bucket count query string by appending | stats count() to the original query.
+ * This returns a single row with the total number of aggregation buckets.
+ */
+export const prepareBucketCountQueryString = (query: Query): string => {
+  const withSource = addPPLSourceClause(query);
+  return `${withSource.query} | stats count() as bucket_count`;
+};
+
+/**
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
  * Also updates topQueryValues for string fields to improve autocomplete performance
@@ -122,11 +153,20 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   dataset: DataView
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
+  // Counts only occurrences that carry an actual value. Tabular responses (e.g. PPL)
+  // include every field of the schema on every row, with null for the ones a document
+  // doesn't populate, so fieldCounts alone can't tell a populated field from an empty
+  // one. Kept separate from fieldCounts because the fields sidebar relies on the
+  // latter's "present in the response" meaning.
+  const nonEmptyFieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
-      const fields = Object.keys(dataset.flattenHit(hit));
-      for (const fieldName of fields) {
+      const flattened = dataset.flattenHit(hit);
+      for (const fieldName of Object.keys(flattened)) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+        if (hasFieldValue(flattened[fieldName])) {
+          nonEmptyFieldCounts[fieldName] = (nonEmptyFieldCounts[fieldName] || 0) + 1;
+        }
       }
     }
 
@@ -137,6 +177,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
+    nonEmptyFieldCounts,
     dataset,
     elapsedMs: rawResults.elapsedMs,
   };
@@ -276,9 +317,10 @@ export const executeQueries = createAsyncThunk<
   const needsDataTableQuery =
     !results[dataTableCacheKey] ||
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+  // The histogram query is built in PPL, so languages that cannot run it opt out (PROMQL, and
+  // source-type languages unless their source declares support).
   const needsHistogramQuery =
-    query.language !== 'PROMQL' &&
-    query.language !== 'SQL' && // Disable histograms for SQL
+    getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
@@ -306,6 +348,26 @@ export const executeQueries = createAsyncThunk<
         interval,
       })
     );
+  }
+
+  // Execute bucket count query for aggregation queries (non-blocking)
+  // This appends | stats count() to get the true total bucket count
+  const originalQueryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
+    const bucketCountCacheKey = prepareBucketCountCacheKey(query);
+    const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
+    const needsBucketCountQuery =
+      !bucketCountQueryStatus ||
+      bucketCountQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+    if (needsBucketCountQuery) {
+      dispatch(
+        executeBucketCountQuery({
+          services,
+          cacheKey: bucketCountCacheKey,
+          queryString: prepareBucketCountQueryString(query),
+        })
+      );
+    }
   }
 
   // Wait only for data table query to complete (not histogram)
@@ -483,6 +545,14 @@ const executeQueryBase = async (
   const query = getState().query;
 
   const queryStartTime = Date.now();
+  let abortController: AbortController | undefined;
+  let partialRowsShown = false;
+  // A newer run for the same key replaces this run's controller. A superseded run must leave the
+  // key's results, status and controller to its successor.
+  const isSuperseded = () => {
+    const current = activeQueryAbortControllers.get(cacheKey);
+    return abortController !== undefined && current !== undefined && current !== abortController;
+  };
 
   try {
     dispatch(
@@ -506,8 +576,7 @@ const executeQueryBase = async (
     // Don't auto-abort other queries - let them complete unless explicitly cancelled
     // This prevents data loading issues when multiple queries are running concurrently
 
-    // Create abort controller for this specific query
-    const abortController = new AbortController();
+    abortController = new AbortController();
 
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
@@ -549,11 +618,58 @@ const executeQueryBase = async (
     // building it for those engines and run the plain query instead (the histogram chart just won't
     // populate).
     const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
-    const supportsPplSpan = getDataSourceEngineCapabilities(datasetEngineType).supportsPplSpan;
+    const engineCapabilities = getDataSourceEngineCapabilities(datasetEngineType);
+    const supportsPplSpan = engineCapabilities.supportsPplSpan;
+    // The bucket functions the SQL histogram is built on only exist from a certain version. Fail
+    // open the way isLanguageSupportedForDataset does: an unparseable or absent version counts as
+    // supported, so only a version we can read and that is below the minimum turns the chart off.
+    const minBucketVersion = engineCapabilities.minSqlBucketFunctionVersion;
+    const coercedVersion = semver.coerce(dataset?.dataSource?.version);
+    const supportsSqlBucketFunctions =
+      engineCapabilities.supportsSqlBucketFunctions &&
+      (!minBucketVersion ||
+        !coercedVersion ||
+        semver.satisfies(coercedVersion.version, `>=${minBucketVersion}`));
 
     let effectiveQuery = queryString;
+    let effectiveHistogramConfig = histogramConfig;
     if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
+    } else if (
+      query.language === 'SQL' &&
+      histogramConfig &&
+      isHistogramQuery &&
+      supportsSqlBucketFunctions
+    ) {
+      let sqlHistogramConfig = histogramConfig;
+      let breakdownValues: Array<string | number> | undefined;
+      // Pass 1 finds the top-N breakdown values; pass 2 buckets by them.
+      if (histogramConfig.breakdownField) {
+        try {
+          const topBreakdownQuery = buildSQLTopBreakdownQuery(queryString, histogramConfig);
+          const topBreakdownSource = await createSearchSourceWithQuery(
+            { ...query, dataset, query: topBreakdownQuery },
+            dataView,
+            services
+          );
+          const topBreakdownResults = await topBreakdownSource.fetch({
+            abortSignal: abortController.signal,
+          });
+          breakdownValues = (topBreakdownResults.hits?.hits || [])
+            .map((hit: any) => hit._source?.breakdown)
+            .filter((value: any) => value !== undefined && value !== null);
+        } catch (e) {
+          breakdownValues = undefined;
+        }
+        // Without the top-N list every distinct value becomes its own series,
+        // so fall back to a plain histogram rather than an unbounded one.
+        if (!breakdownValues || breakdownValues.length === 0) {
+          breakdownValues = undefined;
+          sqlHistogramConfig = { ...histogramConfig, breakdownField: undefined };
+        }
+      }
+      effectiveHistogramConfig = sqlHistogramConfig;
+      effectiveQuery = buildSQLHistogramQuery(queryString, sqlHistogramConfig, breakdownValues);
     }
 
     const preparedQueryObject = {
@@ -568,21 +684,13 @@ const executeQueryBase = async (
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        true, // Include histogram
-        effectiveInterval
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {
+        includeHistogram: true,
+        customInterval: effectiveInterval,
+      });
     } else {
       // Tab-specific: Create without aggregations
-      searchSource = await createSearchSourceWithQuery(
-        preparedQueryObject,
-        dataView,
-        services,
-        false // No histogram
-      );
+      searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services, {});
     }
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
@@ -599,12 +707,59 @@ const executeQueryBase = async (
       .getLanguageService()
       .getLanguage(query.language);
 
-    // Execute query
+    // Async sources that return rows while still running hand them to `onPartialResults` on
+    // each poll. Only row views stream them: an aggregation's running values reorder as the
+    // scan proceeds, so aggregation views wait for the final result.
+    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+
+    const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
+      // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
+      // query cleared its key; writing them would bring the key back and keep the page loading.
+      if (abortController?.signal.aborted || !getState().queryEditor.queryStatusMap[cacheKey]) {
+        return;
+      }
+      partialRowsShown = true;
+
+      dispatch(
+        setResults({
+          cacheKey,
+          results: {
+            ...partialResults,
+            // The inspector's timer stops only when the request finishes.
+            elapsedMs: Date.now() - queryStartTime,
+            fieldSchema: dataFrame.schema,
+          } as ISearchResult,
+        })
+      );
+
+      const { recordsMatched, recordsScanned } = dataFrame.meta?.progress ?? {};
+      const progress: QueryProgress = { recordsMatched, recordsScanned };
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.LOADING,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: undefined,
+            progress,
+          },
+        })
+      );
+    };
+
+    // `onPartialResults` and `pollInterval` only matter to polling sources.
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
       ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
+      ...(streamsPartialRows && { onPartialResults }),
+      pollInterval: services.uiSettings.get(ASYNC_QUERY_POLL_INTERVAL_SETTING),
     });
+
+    if (isSuperseded()) {
+      return;
+    }
 
     // Add response stats to inspector
     inspectorRequest
@@ -617,26 +772,33 @@ const executeQueryBase = async (
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
+      warnings: searchSource.getDataFrame()?.meta?.warnings,
     };
 
-    if (isHistogramQuery && histogramConfig) {
+    if (isHistogramQuery && effectiveHistogramConfig) {
       rawResultsWithMeta = processRawResultsForHistogram(
-        queryString,
+        effectiveQuery,
         rawResultsWithMeta,
-        histogramConfig
+        effectiveHistogramConfig,
+        query.language === 'SQL'
       );
     }
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
+    // The paths that return the raw response untouched never set hits.total,
+    // so fall back to the row count rather than reporting NO_RESULTS.
+    const hasResults = isHistogramQuery
+      ? (rawResultsWithMeta.hits?.total || 0) > 0 ||
+        (rawResultsWithMeta.hits?.hits?.length || 0) > 0
+      : (rawResults.hits?.hits?.length || 0) > 0;
+
     dispatch(
       setIndividualQueryStatus({
         cacheKey,
         status: {
-          status:
-            rawResults.hits?.hits?.length > 0
-              ? QueryExecutionStatus.READY
-              : QueryExecutionStatus.NO_RESULTS,
+          status: hasResults ? QueryExecutionStatus.READY : QueryExecutionStatus.NO_RESULTS,
           startTime: queryStartTime,
           elapsedMs: inspectorRequest.getTime()!,
           error: undefined,
@@ -649,6 +811,15 @@ const executeQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
+    if (isSuperseded()) {
+      return;
+    }
+
+    // Partial rows from a run that didn't finish aren't results.
+    if (partialRowsShown) {
+      dispatch(clearResultsByKey(cacheKey));
+    }
+
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
@@ -720,10 +891,13 @@ export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
-  includeHistogram: boolean = false,
-  customInterval?: string,
-  sizeParam?: number
+  options: {
+    includeHistogram?: boolean;
+    customInterval?: string;
+    sizeParam?: number;
+  } = {}
 ) => {
+  const { includeHistogram = false, customInterval, sizeParam } = options;
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
@@ -852,6 +1026,55 @@ export const executeTabQuery = createAsyncThunk<
   );
 
   return queryBaseResult;
+});
+
+/**
+ * Execute bucket count query for aggregation queries.
+ * Appends | stats count() to get the total number of buckets without fetch_size limiting.
+ * Returns a single row with the count value.
+ *
+ * Errors are silently suppressed because this is a supplementary query — if it fails
+ * (e.g. unsupported syntax, bad field), the table and histogram should still render
+ * normally. On failure, a terminal NO_RESULTS status is dispatched so the query status
+ * doesn't get stuck at LOADING.
+ */
+export const executeBucketCountQuery = createAsyncThunk<
+  any,
+  {
+    services: ExploreServices;
+    cacheKey: string;
+    queryString: string;
+  },
+  { state: RootState }
+>('query/executeBucketCountQuery', async (params, thunkAPI) => {
+  const { dispatch } = thunkAPI;
+  const { cacheKey } = params;
+  try {
+    return await executeQueryBase(
+      {
+        ...params,
+        includeHistogram: false,
+        interval: undefined,
+        avoidDispatchingError: () => true,
+      },
+      thunkAPI
+    );
+  } catch {
+    // Silently swallow — this is a supplementary query. Dispatch a terminal status
+    // so the query doesn't stay stuck at LOADING in queryStatusMap.
+    dispatch(
+      setIndividualQueryStatus({
+        cacheKey,
+        status: {
+          status: QueryExecutionStatus.NO_RESULTS,
+          startTime: undefined,
+          elapsedMs: undefined,
+          error: undefined,
+        },
+      })
+    );
+    return undefined;
+  }
 });
 
 /**

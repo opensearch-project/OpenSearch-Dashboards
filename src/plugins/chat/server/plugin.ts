@@ -13,12 +13,16 @@ import {
   Logger,
   OpenSearchDashboardsRequest,
   Capabilities,
-  HttpAuth,
 } from '../../../core/server';
 
 import { ChatPluginSetup, ChatPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { ChatConfigType } from './config';
+import { WorkspacePluginStart } from '../../workspace/server';
+
+interface ChatServerStartDeps {
+  workspace?: WorkspacePluginStart;
+}
 
 /**
  * @experimental
@@ -28,7 +32,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<ChatConfigType>;
   private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
-  private httpAuth?: HttpAuth;
+  private workspace?: WorkspacePluginStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -40,7 +44,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     const config = await this.config$.pipe(first()).toPromise();
     const router = core.http.createRouter();
     const getCapabilitiesResolver = () => this.capabilitiesResolver;
-    const getHttpAuth = () => this.httpAuth;
+    const getWorkspace = () => this.workspace;
 
     // Register capability to indicate observability agent availability
     core.capabilities.registerProvider(() => ({
@@ -57,18 +61,21 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       config.mlCommonsAgentId,
       config.observabilityAgentId,
       config.forwardCredentials,
-      getHttpAuth
+      getWorkspace
     );
 
-    return {};
+    return {
+      mlCommonsAgentId: config.mlCommonsAgentId,
+      observabilityAgentId: config.observabilityAgentId,
+    };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: ChatServerStartDeps) {
     this.logger.debug('chat: Started');
 
     this.capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
       core.capabilities.resolveCapabilities(request);
-    this.httpAuth = core.http.auth;
+    this.workspace = deps.workspace;
 
     return {};
   }

@@ -26,13 +26,20 @@ import {
   AgentCardNode,
   ServiceCardNode,
   ServiceCircleNode,
+  MetricsCardNode,
+  VolumeEdge,
   AGENT_NODE_KINDS,
 } from '@osd/apm-topology';
-import type { CelestialMapProps, CelestialEdge, CelestialCardProps } from '@osd/apm-topology';
+import type {
+  CelestialMapProps,
+  CelestialEdge,
+  CelestialCardProps,
+  MetricsCardData,
+} from '@osd/apm-topology';
 import { agentTraceNodes, agentTraceEdges } from './agent_mock_data';
 import './app.scss';
 
-type MapTab = 'apmCards' | 'apmCircles' | 'agentCards' | 'features';
+type MapTab = 'apmCards' | 'apmCircles' | 'agentCards' | 'traceMap' | 'features';
 
 // ---------------------------------------------------------------------------
 // Shared APM mock data
@@ -162,6 +169,94 @@ const styledEdges = [
 ];
 
 // ---------------------------------------------------------------------------
+// Per-trace service map mock data (MetricsCardNode + VolumeEdge)
+//
+// Mirrors how the Explore "Trace map" tab renders a single trace: one card per
+// service with RED-style metric bars (Requests / Errors / Duration), and edges
+// whose thickness encodes cross-service call volume (exact count on hover).
+// ---------------------------------------------------------------------------
+const COUNT_COLOR = '#69707D'; // subdued
+const ERROR_COLOR = '#BD271E'; // danger
+const OK_COLOR = '#017D73'; // success
+const DURATION_COLOR = '#0268BC'; // primary
+
+const traceService = (
+  id: string,
+  title: string,
+  color: string,
+  requests: number,
+  errors: number,
+  durationMs: number,
+  maxRequests: number,
+  maxDurationMs: number
+): { id: string; type: string; position: { x: number; y: number }; data: MetricsCardData } => ({
+  id,
+  type: 'metricsCard',
+  position: { x: 0, y: 0 },
+  data: {
+    id,
+    title,
+    color,
+    hasError: errors > 0,
+    metrics: [
+      {
+        label: 'Requests',
+        value: requests,
+        max: maxRequests,
+        color: COUNT_COLOR,
+        formattedValue: `${requests}`,
+      },
+      {
+        label: 'Errors',
+        value: errors,
+        max: requests || 1,
+        color: errors > 0 ? ERROR_COLOR : OK_COLOR,
+        formattedValue: errors > 0 ? `${errors} (${Math.round((errors / requests) * 100)}%)` : '0',
+      },
+      {
+        label: 'Duration',
+        value: durationMs,
+        max: maxDurationMs,
+        color: DURATION_COLOR,
+        formattedValue:
+          durationMs >= 1000 ? `${(durationMs / 1000).toFixed(2)}s` : `${durationMs}ms`,
+      },
+    ],
+  },
+});
+
+const traceServiceNodes = [
+  traceService('frontend', 'frontend', '#6092C0', 12, 0, 320, 12, 900),
+  traceService('cart', 'cart', '#9170B8', 7, 0, 210, 12, 900),
+  traceService('payment', 'payment', '#D36086', 3, 2, 900, 12, 900),
+  traceService('inventory', 'inventory', '#54B399', 5, 0, 140, 12, 900),
+];
+
+const traceServiceEdges = [
+  {
+    id: 'frontend->cart',
+    source: 'frontend',
+    target: 'cart',
+    type: 'volumeEdge',
+    data: { volume: 8, maxVolume: 8, hasError: false, label: '8 calls' },
+  },
+  {
+    id: 'cart->payment',
+    source: 'cart',
+    target: 'payment',
+    type: 'volumeEdge',
+    data: { volume: 3, maxVolume: 8, hasError: true, label: '3 calls' },
+  },
+  {
+    id: 'cart->inventory',
+    source: 'cart',
+    target: 'inventory',
+    type: 'volumeEdge',
+    data: { volume: 5, maxVolume: 8, hasError: false, label: '5 calls' },
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Agent legend (custom ReactNode for legend prop)
 // ---------------------------------------------------------------------------
 const AgentLegend = () => (
@@ -250,6 +345,11 @@ const TAB_DESCRIPTIONS: Record<MapTab, { title: string; description: string }> =
     description:
       'Agent/LLM/Tool/Retrieval/Embeddings/Other trace visualization. Nodes show SVG type icons, provider icons next to model names, hover glow in type color, and selection glow rings. Edges demonstrate flow animation, pulse animation, dotted styles, and arrowhead markers.',
   },
+  traceMap: {
+    title: 'Trace Map — Per-Trace Service Flow',
+    description:
+      'A single trace rendered as a service topology using MetricsCardNode (RED metric bars: Requests / Errors / Duration) and VolumeEdge (stroke thickness encodes call volume; exact count shows on hover). The whole card is clickable; error services get a red border + dot. This is the reusable pattern the Explore "Trace map" tab is built on.',
+  },
   features: {
     title: 'Features — Edge Styles, Animations & Glow Effects',
     description:
@@ -334,6 +434,15 @@ const ApmTopologyExampleApp = () => {
         showMinimap,
         ...sharedCallbacks,
       },
+      traceMap: {
+        map: { root: { nodes: traceServiceNodes as any, edges: traceServiceEdges as any } },
+        nodeTypes: { metricsCard: MetricsCardNode },
+        edgeTypes: { volumeEdge: VolumeEdge },
+        layoutOptions: { direction, rankSeparation: 160, nodeSeparation: 60 },
+        legend: false,
+        showMinimap,
+        ...sharedCallbacks,
+      },
       features: {
         map: { root: { nodes: buildApmNodes('serviceCard'), edges: styledEdges } },
         nodeTypes: { serviceCard: ServiceCardNode },
@@ -370,6 +479,22 @@ const ApmTopologyExampleApp = () => {
               ]}
               compressed
             />
+          ) : activeTab === 'traceMap' ? (
+            <>
+              {(selectedNode as any).hasError && (
+                <>
+                  <EuiCallOut title="Service has errors" color="danger" size="s" />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <EuiDescriptionList
+                listItems={((selectedNode as any).metrics ?? []).map((m: any) => ({
+                  title: m.label,
+                  description: m.formattedValue ?? String(m.value),
+                }))}
+                compressed
+              />
+            </>
           ) : (
             <>
               <EuiDescriptionList
@@ -510,6 +635,9 @@ const ApmTopologyExampleApp = () => {
             </EuiTab>
             <EuiTab isSelected={activeTab === 'agentCards'} onClick={() => switchTab('agentCards')}>
               Agent Cards
+            </EuiTab>
+            <EuiTab isSelected={activeTab === 'traceMap'} onClick={() => switchTab('traceMap')}>
+              Trace Map
             </EuiTab>
             <EuiTab isSelected={activeTab === 'features'} onClick={() => switchTab('features')}>
               Features

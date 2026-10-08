@@ -306,6 +306,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
       onQueryChange={handleQueryChange}
       customSubmitButton={customSubmitButton}
       groupActions={true}
+      groupedActionsBeforeDatePicker={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}
       showQueryBar={true}

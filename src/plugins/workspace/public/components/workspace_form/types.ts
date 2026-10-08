@@ -33,6 +33,7 @@ export type WorkspacePermissionSetting =
 
 export interface WorkspaceFormSubmitData {
   name: string;
+  customId?: string;
   description?: string;
   features: string[];
   color?: string;
@@ -44,6 +45,7 @@ export interface WorkspaceFormSubmitData {
 export enum WorkspaceFormErrorCode {
   InvalidWorkspaceName,
   WorkspaceNameMissing,
+  InvalidWorkspaceId,
   UseCaseMissing,
   InvalidDataSource,
   DuplicateDataSource,

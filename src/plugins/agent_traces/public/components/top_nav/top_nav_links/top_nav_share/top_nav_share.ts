@@ -10,13 +10,14 @@ import { SavedAgentTraces } from '../../../../types/saved_agent_traces_types';
 import { unhashUrl } from '../../../../../../opensearch_dashboards_utils/public';
 import { getSharingData } from './helpers';
 
+// One label for both the tooltip and the aria-label, matching the other search actions.
+const shareSearchLabel = i18n.translate('agentTraces.topNav.shareAriaLabel', {
+  defaultMessage: 'Share search',
+});
+
 export const shareTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('agentTraces.topNav.shareTitle', {
-    defaultMessage: 'Share',
-  }),
-  ariaLabel: i18n.translate('agentTraces.topNav.shareAriaLabel', {
-    defaultMessage: `Share search`,
-  }),
+  tooltip: shareSearchLabel,
+  ariaLabel: shareSearchLabel,
   testId: 'shareTopNavButton',
   iconType: 'share',
   controlType: 'icon',

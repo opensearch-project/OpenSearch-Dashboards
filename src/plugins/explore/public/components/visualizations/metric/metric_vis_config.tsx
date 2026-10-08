@@ -13,6 +13,7 @@ import {
   VisFieldType,
   PercentageColor,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
@@ -24,8 +25,10 @@ export type LayoutType = 'horizontal' | 'vertical' | 'auto';
 export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
 export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
-export interface MetricChartStyleOptions {
-  showTitle?: boolean;
+export const shouldShowMetricName = (textMode?: TextMode) =>
+  !textMode || textMode === 'name' || textMode === 'value_and_name';
+
+export interface MetricChartStyleOptions extends StandardOptions {
   title?: string;
   fontSize?: number;
   titleSize?: number;
@@ -45,10 +48,7 @@ export interface MetricChartStyleOptions {
    * @deprecated - use global thresholdOptions instead
    */
   customRanges?: RangeValue[];
-  unitId?: string;
   thresholdOptions?: ThresholdOptions;
-  min?: number;
-  max?: number;
   useThresholdColor?: boolean;
   layoutType?: LayoutType;
   textMode?: TextMode;
@@ -62,6 +62,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'colorSchema'
     | 'customRanges'
     | 'useColor'
@@ -78,6 +80,8 @@ export type MetricChartStyle = Required<
     | 'titleSize'
     | 'percentageSize'
     | 'unitId'
+    | 'unitSuffix'
+    | 'decimals'
     | 'min'
     | 'max'
     | 'layoutType'
@@ -86,7 +90,6 @@ export type MetricChartStyle = Required<
   >;
 
 export const defaultMetricChartStyles: MetricChartStyle = {
-  showTitle: true,
   title: '',
   showPercentage: false,
   percentageColor: 'standard',

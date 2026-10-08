@@ -47,6 +47,13 @@ export const selectWrapCellText = createSelector(
   (uiState) => uiState.wrapCellText
 );
 
+// Defaults to false so state persisted before this setting existed keeps every column until the
+// user opts in.
+export const selectHideEmptyFields = createSelector(
+  [selectUIState],
+  (uiState) => uiState.hideEmptyFields ?? false
+);
+
 export const selectPatternsField = createSelector(
   [selectTabState],
   (tabState) => tabState.patterns.patternsField
@@ -85,9 +92,6 @@ export const selectSavedSearch = createSelector(
 /**
  * Query execution status selectors
  */
-export {
-  selectIsLoading as selectIsQueryRunning,
-  selectShouldShowCancelButton,
-} from './query_editor';
+export { selectIsLoading as selectIsQueryRunning, selectIsUserQueryRunning } from './query_editor';
 
 export * from './query_editor';

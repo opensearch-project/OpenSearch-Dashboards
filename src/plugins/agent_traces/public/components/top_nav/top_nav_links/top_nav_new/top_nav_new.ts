@@ -9,13 +9,15 @@ import { resetAgentTracesStateActionCreator } from '../../../../application/util
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { useClearEditors } from '../../../../application/hooks';
 
+// One label for both the tooltip and the aria-label, so the icon strip reads as a set of
+// search actions rather than four bare verbs.
+const newSearchLabel = i18n.translate('agentTraces.topNav.newAriaLabel', {
+  defaultMessage: 'New search',
+});
+
 export const newTopNavData: TopNavMenuIconUIData = {
-  tooltip: i18n.translate('agentTraces.topNav.newTitle', {
-    defaultMessage: 'New',
-  }),
-  ariaLabel: i18n.translate('agentTraces.topNav.newAriaLabel', {
-    defaultMessage: `New Search`,
-  }),
+  tooltip: newSearchLabel,
+  ariaLabel: newSearchLabel,
   testId: 'discoverNewButton',
   iconType: 'plusInCircle',
   controlType: 'icon',

@@ -74,6 +74,9 @@ describe('TraceAutoDetectCallout', () => {
     localStorageMock.clear();
     reloadSpy.mockClear();
 
+    // Default: no existing index patterns, so detection proceeds
+    (mockCore.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+
     // Setup mock services
     mockServices = {
       savedObjects: mockCore.savedObjects,
@@ -167,10 +170,9 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock indexPatterns to indicate there are trace datasets
-    (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
-    (mockServices.indexPatterns!.get as jest.Mock).mockResolvedValue({
-      signalType: 'traces',
+    // Mock existing trace dataset via the saved-objects find used for the check
+    (mockServices.savedObjects!.client.find as jest.Mock).mockResolvedValue({
+      savedObjects: [{ attributes: { signalType: 'traces' }, references: [] }],
     });
 
     renderWithContext();
@@ -195,10 +197,9 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock indexPatterns to indicate there are NO trace datasets
-    (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
-    (mockServices.indexPatterns!.get as jest.Mock).mockResolvedValue({
-      signalType: 'logs', // Not traces
+    // Mock an existing NON-trace dataset via the saved-objects find
+    (mockServices.savedObjects!.client.find as jest.Mock).mockResolvedValue({
+      savedObjects: [{ attributes: { signalType: 'logs' }, references: [] }],
     });
 
     renderWithContext();

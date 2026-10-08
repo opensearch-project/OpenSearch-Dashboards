@@ -1,0 +1,201 @@
+// Match the Traces/Spans DataTable typography (data_table.scss): code font at XS size.
+.agtSessionsTable {
+  @include ouiCodeFont;
+
+  font-size: $euiFontSizeXS;
+  line-height: 18px;
+}
+
+.agtSessionsTable__row {
+  cursor: pointer;
+}
+
+.agtSessionsTable__nowrap {
+  white-space: nowrap;
+}
+
+.agtSessionsTable__sessionId {
+  display: inline-flex;
+  align-items: center;
+  gap: $euiSizeXS;
+}
+
+.agtSessionsTab__errorsSwitch {
+  margin: 0 $euiSizeS $euiSizeS;
+}
+
+.agtSessionsTable__tooltipAnchor {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.agtSessionsTable__text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &--mono {
+    @include ouiCodeFont;
+
+    font-size: $euiFontSizeXS;
+  }
+}
+
+/* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+.agtSessionFlyout .euiFlyoutBody__overflowContent {
+  // Let the overview fill the body below the header, whatever the header's height
+  // (it grows when the Back/Forward row shows).
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.agtSessionFlyout {
+  // Overview fills the flyout body; the trace list stays put and only the
+  // conversation scrolls.
+  &__overview {
+    height: 100%;
+  }
+
+  &__traceList {
+    height: 100%;
+    overflow-y: auto;
+    border-right: $euiBorderThin;
+    padding-right: $euiSizeM;
+  }
+
+  &__conversation {
+    height: 100%;
+    min-width: 0;
+  }
+
+  &__conversationScroll {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: $euiSizeS;
+  }
+
+  // Both panel headers share one height so "Trace list" and "Session Conversation"
+  // sit on the same line.
+  &__panelHeader {
+    display: flex;
+    flex-grow: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: $euiSizeS;
+    min-height: $euiSizeXXL;
+    margin-bottom: $euiSizeS;
+  }
+
+  &__panelActions {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  // Keep the "Session Conversation" title and its controls visible while scrolling.
+  &__conversationScroll > &__panelHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: $euiColorEmptyShade;
+  }
+
+  // Full session id; ellipsis only when the flyout is too narrow.
+  &__titleItem {
+    min-width: 0;
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__traceItem {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: $euiSizeS;
+    border-radius: $euiBorderRadius;
+    text-align: left;
+    border-left: $euiBorderWidthThick solid transparent;
+
+    &:hover,
+    &:focus {
+      background: $euiColorLightestShade;
+    }
+
+    &--focused {
+      background: $euiColorLightShade;
+      border-left-color: $euiColorPrimary;
+    }
+  }
+
+  &__traceItemLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__turn {
+    padding-left: $euiSizeS;
+    border-left: $euiBorderWidthThick solid transparent;
+    transition: border-color $euiAnimSpeedFast;
+
+    &--focused {
+      border-left-color: $euiColorPrimary;
+    }
+  }
+
+  &__stats {
+    display: inline-flex;
+    gap: $euiSizeM;
+    color: $euiTextSubduedColor;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__message {
+    overflow: hidden;
+  }
+
+  &__messageHeader {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeS;
+    padding: $euiSizeS $euiSizeM;
+    background: $euiColorLightestShade;
+    border-bottom: $euiBorderThin;
+  }
+
+  &__messageActions {
+    margin-left: auto;
+  }
+
+  &__message--output &__messageHeader {
+    background: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+
+  &__messageBody {
+    padding: $euiSizeM;
+    word-break: break-word;
+  }
+}
+
+.agtSessionsTab__ignoredCallout {
+  margin: 0 $euiSizeS $euiSizeS;
+}

@@ -5,9 +5,9 @@
 
 import { AxisRole, VisFieldType, TimeUnit, AggregationType, VisColumn } from '../types';
 import { BarChartStyle } from './bar_vis_config';
-import { getAxisConfig } from '../utils/utils';
+import { getAxisConfig, applyPercentageAxis, getNormalizedAxisConfig } from '../utils/utils';
 
-import { createBarSeries } from './bar_chart_utils';
+import { createBarSeries, inferTimeIntervals } from './bar_chart_utils';
 import {
   pipe,
   createBaseConfig,
@@ -15,65 +15,80 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  addTooltipFormatter,
 } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
-import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
+import {
+  aggregate,
+  transformStackPercentage,
+  convertTo2DArray,
+  transform,
+  pivot,
+} from '../utils/data_transformation';
+import { ceilToTimeUnit, roundToTimeUnit } from '../utils/data_transformation/utils/time';
+import { seriesDisplayNameTooltipFormatter, axisDisplayNameTooltipFormatter } from '../utils/utils';
 
-const getNormalizedAxisConfig = (
-  axisColumnMappings:
-    | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+const alignTimeRangeToBuckets = (
+  timeRange: { from: string; to: string } | undefined,
+  timeUnit: TimeUnit | undefined
 ) => {
-  let categoryField = '';
-  let categoryFieldName = '';
-  let seriesFields: string[] = [];
-  let seriesFieldNames: string[] = [];
-  let categoryEncode: 'x' | 'y' = 'x';
-  let seriesEncode: 'x' | 'y' = 'y';
+  if (!timeRange || !timeUnit) {
+    return timeRange;
+  }
 
-  if (!Array.isArray(axisColumnMappings.y) && Array.isArray(axisColumnMappings.x)) {
-    categoryField = axisColumnMappings.y.column;
-    categoryFieldName = axisColumnMappings.y.name;
-    seriesFields = axisColumnMappings.x.map((col) => col.column);
-    seriesFieldNames = axisColumnMappings.x.map((col) => col.name);
-    categoryEncode = 'y';
-    seriesEncode = 'x';
+  const from = new Date(timeRange.from);
+  const to = new Date(timeRange.to);
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+    return timeRange;
   }
-  if (Array.isArray(axisColumnMappings.y) && !Array.isArray(axisColumnMappings.x)) {
-    categoryField = axisColumnMappings.x.column;
-    categoryFieldName = axisColumnMappings.x.name;
-    seriesFields = axisColumnMappings.y.map((col) => col.column);
-    seriesFieldNames = axisColumnMappings.y.map((col) => col.name);
-    categoryEncode = 'x';
-    seriesEncode = 'y';
-  }
+
   return {
-    categoryField,
-    categoryFieldName,
-    categoryEncode,
-    seriesFields,
-    seriesFieldNames,
-    seriesEncode,
+    from: roundToTimeUnit(from, timeUnit).toISOString(),
+    to: ceilToTimeUnit(to, timeUnit).toISOString(),
   };
 };
 
+const includeDataInTimeRange = (
+  timeRange: { from: string; to: string } | undefined,
+  data: Array<Record<string, any>>,
+  timeField: string
+) => {
+  if (!timeRange) {
+    return timeRange;
+  }
+
+  const from = new Date(timeRange.from);
+  const to = new Date(timeRange.to);
+  let minTimestamp = Infinity;
+  let maxTimestamp = -Infinity;
+  data.forEach((row) => {
+    const timestamp = new Date(row[timeField]).getTime();
+    if (!isNaN(timestamp)) {
+      minTimestamp = Math.min(minTimestamp, timestamp);
+      maxTimestamp = Math.max(maxTimestamp, timestamp);
+    }
+  });
+  if (isNaN(from.getTime()) || isNaN(to.getTime()) || !isFinite(minTimestamp)) {
+    return timeRange;
+  }
+
+  return {
+    from: new Date(Math.min(from.getTime(), minTimestamp)).toISOString(),
+    to: new Date(Math.max(to.getTime(), maxTimestamp)).toISOString(),
+  };
+};
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
-  const {
-    categoryField,
-    categoryFieldName,
-    categoryEncode,
-    seriesFields,
-    seriesFieldNames,
-    seriesEncode,
-  } = getNormalizedAxisConfig(axisColumnMappings);
+  const { categoryField, categoryEncode, seriesFields, seriesEncode } =
+    getNormalizedAxisConfig(axisColumnMappings);
 
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
   const result = pipe(
@@ -83,12 +98,15 @@ export const createBarSpec = (
         field: seriesFields,
         aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
+    addTooltipFormatter(axisDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -105,6 +123,7 @@ export const createBarSpec = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
+    seriesDisplayNames,
   });
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };
@@ -133,6 +152,17 @@ export const createTimeBarChart = (
   const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
   const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
+  const effectiveTimeUnit = skipBucketing
+    ? undefined
+    : timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeField)
+      : timeUnit;
+  const visibleTimeRange =
+    styles.showFullTimeRange && transformedData.length > 0
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
+      : timeRange;
   const result = pipe(
     skipBucketing
       ? transform(convertTo2DArray())
@@ -140,15 +170,17 @@ export const createTimeBarChart = (
           aggregate({
             groupBy: timeField,
             field: seriesFields,
-            timeUnit,
+            timeUnit: effectiveTimeUnit,
             aggregationType,
           }),
+          transformStackPercentage(styles, { excludeFields: [timeField] }),
           convertTo2DArray()
         ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -166,7 +198,7 @@ export const createTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
+    timeRange: visibleTimeRange,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -184,7 +216,8 @@ export const createGroupedTimeBarChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  allData?: Array<Record<string, any>>
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ): { spec: any; legendItems: LegendItem[] } => {
   const axisConfig = getAxisConfig(styles);
 
@@ -212,6 +245,17 @@ export const createGroupedTimeBarChart = (
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
   const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
+  const effectiveTimeUnit = skipBucketing
+    ? undefined
+    : timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeField)
+      : timeUnit;
+  const visibleTimeRange =
+    styles.showFullTimeRange && transformedData.length > 0
+      ? effectiveTimeUnit
+        ? alignTimeRangeToBuckets(timeRange, effectiveTimeUnit)
+        : includeDataInTimeRange(timeRange, transformedData, timeField)
+      : timeRange;
 
   const result = pipe(
     transform(
@@ -219,17 +263,20 @@ export const createGroupedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit: skipBucketing ? undefined : timeUnit,
+        timeUnit: effectiveTimeUnit,
         // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
         aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [timeField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     applyTimeRange,
+    addTooltipFormatter(seriesDisplayNameTooltipFormatter),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
@@ -250,7 +297,8 @@ export const createGroupedTimeBarChart = (
     styles,
     axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
+    timeRange: visibleTimeRange,
+    seriesDisplayNames,
   });
 
   return { spec: result.spec, legendItems: result.legendItems ?? [] };
@@ -302,12 +350,14 @@ export const createStackedBarSpec = (
         field: valueField,
         aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
@@ -340,9 +390,7 @@ export const createDoubleNumericalBarChart = (
   const axisConfig = getAxisConfig(styles);
 
   const categoryField = axisColumnMappings[AxisRole.X].column;
-  const categoryFieldName = axisColumnMappings[AxisRole.X].name;
   const seriesFields = axisColumnMappings[AxisRole.Y].map((col) => col.column);
-  const seriesFieldNames = axisColumnMappings[AxisRole.Y].map((col) => col.name);
 
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
   const result = pipe(
@@ -352,12 +400,14 @@ export const createDoubleNumericalBarChart = (
         field: seriesFields,
         aggregationType,
       }),
+      transformStackPercentage(styles, { excludeFields: [categoryField] }),
       convertTo2DArray()
     ),
     createBaseConfig({
       legend: { show: false },
     }),
     buildAxisConfigs,
+    applyPercentageAxis(styles),
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),

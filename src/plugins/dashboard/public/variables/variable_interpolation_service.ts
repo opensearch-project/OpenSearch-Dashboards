@@ -34,9 +34,15 @@ export interface IVariableInterpolationService {
    * @param query - The query string with variable placeholders
    * @param language - The query language (e.g., 'PPL', 'PROMQL') for formatting multi-select values
    * @param currentVarName - Optional name of the current variable (for order constraint)
+   * @param rawValue - When true, substitutes the variable's raw value with no language-specific escaping.
    * @returns The query string with variables replaced by their values
    */
-  interpolate(query: string, language?: string, currentVarName?: string): string;
+  interpolate(
+    query: string,
+    language?: string,
+    currentVarName?: string,
+    rawValue?: boolean
+  ): string;
 
   /**
    * Get current variable values as a key-value map
@@ -95,7 +101,12 @@ export class VariableInterpolationService implements IVariableInterpolationServi
    * // currentVarName: 'b'
    * // Result: value-a and $b (only 'a' is interpolated because it comes before 'b')
    */
-  interpolate(query: string, language?: string, currentVarName?: string): string {
+  interpolate(
+    query: string,
+    language?: string,
+    currentVarName?: string,
+    rawValue?: boolean
+  ): string {
     if (!query || typeof query !== 'string') {
       return query;
     }
@@ -131,10 +142,10 @@ export class VariableInterpolationService implements IVariableInterpolationServi
         }
 
         if (variable.multi) {
-          return this.formatMultiValue(variable.values ?? [], lang, variable.optionType);
+          return this.formatMultiValue(variable.values ?? [], lang, variable.optionType, rawValue);
         }
 
-        return this.escapeForLanguage(variable.value, lang);
+        return rawValue ? variable.value : this.escapeForLanguage(variable.value, lang);
       }
     );
   }
@@ -180,7 +191,8 @@ export class VariableInterpolationService implements IVariableInterpolationServi
   private formatMultiValue(
     values: string[],
     language: string,
-    optionType?: VariableOptionType
+    optionType?: VariableOptionType,
+    rawValue: boolean = false
   ): string {
     if (values.length === 0) {
       switch (language) {
@@ -195,7 +207,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
 
     switch (language) {
       case 'PPL': {
-        const escaped = values.map((v) => this.escapeForLanguage(v, language));
+        const escaped = rawValue ? values : values.map((v) => this.escapeForLanguage(v, language));
         if (!optionType || optionType === 'string') {
           return `(${escaped.map((v) => `'${v}'`).join(', ')})`;
         } else {
@@ -204,11 +216,11 @@ export class VariableInterpolationService implements IVariableInterpolationServi
         }
       }
       case 'PROMQL': {
-        const escaped = values.map((v) => this.escapeForLanguage(v, language));
+        const escaped = rawValue ? values : values.map((v) => this.escapeForLanguage(v, language));
         return `(${escaped.join('|')})`;
       }
       default: {
-        const escaped = values.map((v) => this.escapeForLanguage(v, language));
+        const escaped = rawValue ? values : values.map((v) => this.escapeForLanguage(v, language));
         return escaped.join(', ');
       }
     }
@@ -268,7 +280,8 @@ export class VariableInterpolationService implements IVariableInterpolationServi
  */
 export const createNoOpVariableInterpolationService = (): IVariableInterpolationService => ({
   hasVariables: () => false,
-  interpolate: (query: string, _language?: string, _currentVarName?: string) => query,
+  interpolate: (query: string, _language?: string, _currentVarName?: string, _rawValue?: boolean) =>
+    query,
   getCurrentValues: () => ({}),
   getVariables: () => [],
 });

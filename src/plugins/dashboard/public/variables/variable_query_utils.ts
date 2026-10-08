@@ -4,7 +4,13 @@
  */
 
 import { DataPublicPluginStart, Query } from '../../../data/public';
-import { NormalizedVariableOption, VariableQueryParams, VariableOptionType } from './types';
+import {
+  NormalizedVariableOption,
+  QueryResultBaseParams,
+  Variable,
+  VariableOptionType,
+  VariableType,
+} from './types';
 
 export interface VariableQueryResult {
   rows: Array<Record<string, unknown>>;
@@ -234,7 +240,7 @@ export function buildVariableOptionsFromQueryResult(
  */
 export async function executeVariableQuery(
   dataPlugin: DataPublicPluginStart,
-  params: VariableQueryParams,
+  params: QueryResultBaseParams,
   signal?: AbortSignal,
   useTimeFilter: boolean = false
 ): Promise<VariableQueryResult> {
@@ -337,4 +343,25 @@ export function applyRegexToVariableOptions(
   } catch {
     return options;
   }
+}
+
+/**
+ * Back-fills `sourceKind` on query variables persisted before the field existed.
+ * Such variables can only be free-text queries, so absence maps to 'queryResult'.
+ */
+export function normalizePersistedVariables(variables: unknown): Variable[] | undefined {
+  if (!Array.isArray(variables)) {
+    return undefined;
+  }
+
+  return variables
+    .filter(
+      (variable): variable is Record<string, unknown> => !!variable && typeof variable === 'object'
+    )
+    .map((variable) => {
+      if (variable.type === VariableType.Query && !('sourceKind' in variable)) {
+        return { ...variable, sourceKind: 'queryResult' };
+      }
+      return variable;
+    }) as unknown as Variable[];
 }

@@ -101,6 +101,29 @@ describe('PrometheusResourceClient', () => {
         }),
       });
     });
+
+    it('should call the correct endpoint with a metric regex filter', async () => {
+      const metric = '{__name__=~"node.*"}';
+      await client.getMetrics(testDataConnectionId, testMeta, testTimeRange, metric);
+
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/enhancements/resources', {
+        body: JSON.stringify({
+          connection: {
+            id: testDataConnectionId,
+            type: 'prometheus',
+          },
+          resource: {
+            type: RESOURCE_TYPES.PROMETHEUS.METRICS,
+            name: metric,
+          },
+          content: {
+            ...testMeta,
+            start: mockFromTime,
+            end: mockToTime,
+          },
+        }),
+      });
+    });
   });
 
   describe('getLabels', () => {

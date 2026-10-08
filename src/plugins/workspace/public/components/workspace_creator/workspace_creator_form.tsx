@@ -39,6 +39,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     formErrors,
     numberOfErrors,
     setName,
+    setCustomId,
     setDescription,
     handleFormSubmit,
     handleColorChange,
@@ -68,9 +69,11 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           )}
           <CreatorDetailsPanel
             name={formData.name}
+            customId={formData.customId}
             color={formData.color}
             description={formData.description}
             onNameChange={setName}
+            onCustomIdChange={setCustomId}
             onColorChange={handleColorChange}
             onDescriptionChange={setDescription}
             formErrors={formErrors}

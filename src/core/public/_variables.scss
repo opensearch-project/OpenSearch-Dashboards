@@ -1,7 +1,20 @@
 @import "@elastic/eui/src/global_styling/variables/header";
 
+// Extra height the application header takes on when its action row wraps below the screen
+// title. Set by `navigation`'s `osdTopNavMenuGroup--actionsBeforeDatePicker` opt-in (see
+// `src/plugins/navigation/public/top_nav_menu/_index.scss`); `0px` everywhere else, so the
+// offsets below are unchanged for every app that doesn't opt in.
+// The `0px` fallback needs its unit: these values are consumed inside `calc()`, where a
+// unitless zero is not a valid length.
+// stylelint-disable-next-line length-zero-no-unit
+$osdHeaderActionRowOffset: var(--osd-app-header-action-row-height, 0px);
+
 // Base header offset including the banner height
-$osdHeaderOffset: calc(#{$euiHeaderHeightCompensation} + var(--global-banner-height, 0px));
+$osdHeaderOffset: calc(
+  #{$euiHeaderHeightCompensation} + var(--global-banner-height, 0px) + #{$osdHeaderActionRowOffset}
+);
 
 // Double header offset for expanded state
-$osdHeaderOffsetExpanded: calc((#{$euiHeaderHeightCompensation} * 2) + var(--global-banner-height, 0px));
+$osdHeaderOffsetExpanded: calc(
+  (#{$euiHeaderHeightCompensation} * 2) + var(--global-banner-height, 0px) + #{$osdHeaderActionRowOffset}
+);

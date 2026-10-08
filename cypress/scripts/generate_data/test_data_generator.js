@@ -138,22 +138,22 @@ class TestDataGenerator {
       unique_category:
         this.uniqueCategories[Math.floor((index * this.uniqueCategoriesCount) / this.docCount)],
       status_code: faker.helpers.arrayElement(this.statusCodes),
-      response_time: faker.datatype.float({ min: 0.1, max: 5.0, precision: 0.01 }),
-      bytes_transferred: faker.datatype.number({ min: 100, max: 10000 }),
+      response_time: faker.number.float({ min: 0.1, max: 5.0, multipleOf: 0.01 }),
+      bytes_transferred: faker.number.int({ min: 100, max: 10000 }),
       event_sequence_number: this.getNextSequenceNumber(), // New field for large numbers
       request_url: faker.internet.url(),
-      service_endpoint: `/api/v${faker.datatype.number({
+      service_endpoint: `/api/v${faker.number.int({
         min: 1,
         max: 3,
       })}/${faker.helpers.arrayElement(['users', 'orders', 'products', 'auth'])}`,
 
       personal: {
-        user_id: faker.datatype.uuid(),
-        name: faker.name.fullName(),
-        age: faker.datatype.number({ min: 18, max: 80 }),
+        user_id: faker.string.uuid(),
+        name: faker.person.fullName(),
+        age: faker.number.int({ min: 18, max: 80 }),
         email: faker.internet.email(),
         address: {
-          street: faker.address.streetAddress(),
+          street: faker.location.streetAddress(),
           city: location.city,
           country: location.country,
           coordinates: location.coordinates,
@@ -165,9 +165,7 @@ class TestDataGenerator {
     if (this.includeTimestamp) {
       const eventTime = this.start.plus({ milliseconds: index * this.delta });
       doc.timestamp = eventTime.toISO();
-      doc.event_time = eventTime
-        .minus({ hours: faker.datatype.number({ min: 1, max: 24 }) })
-        .toISO();
+      doc.event_time = eventTime.minus({ hours: faker.number.int({ min: 1, max: 24 }) }).toISO();
       doc.personal.birthdate = faker.date
         .birthdate({ min: 18, max: 80, mode: 'age' })
         .toISOString();

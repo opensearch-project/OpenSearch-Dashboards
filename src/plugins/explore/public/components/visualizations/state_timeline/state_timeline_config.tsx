@@ -128,7 +128,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (
@@ -188,7 +189,8 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
             props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.allData
+            props.allData,
+            props.seriesDisplayNames
           );
           props.onLegend?.(legendItems);
           return (

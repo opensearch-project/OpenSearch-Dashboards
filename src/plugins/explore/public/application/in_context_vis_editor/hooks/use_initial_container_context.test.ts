@@ -145,7 +145,15 @@ describe('useInitialContainerContext', () => {
       };
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      const variables = [
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+      ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -167,8 +175,14 @@ describe('useInitialContainerContext', () => {
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
       const variables = [
-        { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
-        { id: 'var2', name: 'env', type: 'query', current: ['dev'] },
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+        { id: 'var2', name: 'env', type: 'query', sourceKind: 'queryResult', current: ['dev'] },
       ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
@@ -187,8 +201,14 @@ describe('useInitialContainerContext', () => {
 
       await waitFor(() => {
         expect(result.current.containerVariables).toEqual([
-          { id: 'var1', name: 'region', type: 'query', current: ['us-east'] },
-          { id: 'var2', name: 'env', type: 'query', current: ['prod'] },
+          {
+            id: 'var1',
+            name: 'region',
+            type: 'query',
+            sourceKind: 'queryResult',
+            current: ['us-east'],
+          },
+          { id: 'var2', name: 'env', type: 'query', sourceKind: 'queryResult', current: ['prod'] },
         ]);
       });
     });
@@ -200,7 +220,15 @@ describe('useInitialContainerContext', () => {
       };
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      const variables = [
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+      ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -219,7 +247,13 @@ describe('useInitialContainerContext', () => {
       await waitFor(() => {
         // Should keep original value, not the invalid URL value
         expect(result.current.containerVariables).toEqual([
-          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+          {
+            id: 'var1',
+            name: 'region',
+            type: 'query',
+            sourceKind: 'queryResult',
+            current: ['us-west'],
+          },
         ]);
       });
     });
@@ -231,7 +265,15 @@ describe('useInitialContainerContext', () => {
       };
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      const variables = [
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+      ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -250,7 +292,13 @@ describe('useInitialContainerContext', () => {
       await waitFor(() => {
         // Should keep original value
         expect(result.current.containerVariables).toEqual([
-          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+          {
+            id: 'var1',
+            name: 'region',
+            type: 'query',
+            sourceKind: 'queryResult',
+            current: ['us-west'],
+          },
         ]);
       });
     });
@@ -262,7 +310,15 @@ describe('useInitialContainerContext', () => {
       };
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      const variables = [
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+      ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -281,7 +337,13 @@ describe('useInitialContainerContext', () => {
       await waitFor(() => {
         // Should keep original value
         expect(result.current.containerVariables).toEqual([
-          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+          {
+            id: 'var1',
+            name: 'region',
+            type: 'query',
+            sourceKind: 'queryResult',
+            current: ['us-west'],
+          },
         ]);
       });
     });
@@ -293,7 +355,15 @@ describe('useInitialContainerContext', () => {
       };
       mockGetIncomingEditorState.mockReturnValue(incomingState);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      const variables = [
+        {
+          id: 'var1',
+          name: 'region',
+          type: 'query',
+          sourceKind: 'queryResult',
+          current: ['us-west'],
+        },
+      ];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -316,7 +386,13 @@ describe('useInitialContainerContext', () => {
       await waitFor(() => {
         // Should only use the valid 'region' property
         expect(result.current.containerVariables).toEqual([
-          { id: 'var1', name: 'region', type: 'query', current: ['us-east'] },
+          {
+            id: 'var1',
+            name: 'region',
+            type: 'query',
+            sourceKind: 'queryResult',
+            current: ['us-east'],
+          },
         ]);
       });
     });
@@ -469,7 +545,7 @@ describe('useInitialContainerContext', () => {
       ];
       mockFindReferencingDashboards.mockResolvedValue(dashboards);
 
-      const variables = [{ id: 'var1', name: 'region', type: 'query' }];
+      const variables = [{ id: 'var1', name: 'region', type: 'query', sourceKind: 'queryResult' }];
       mockSavedObjectsClient.get.mockResolvedValue({
         attributes: {
           variablesJSON: JSON.stringify({ variables }),
@@ -578,7 +654,7 @@ describe('useInitialContainerContext', () => {
       resolveGet!({
         attributes: {
           variablesJSON: JSON.stringify({
-            variables: [{ id: 'var1', name: 'region', type: 'query' }],
+            variables: [{ id: 'var1', name: 'region', type: 'query', sourceKind: 'queryResult' }],
           }),
         },
       });
@@ -629,8 +705,12 @@ describe('useInitialContainerContext', () => {
       let firstCallResolve: (value: any) => void;
       let secondCallResolve: (value: any) => void;
 
-      const firstVariables = [{ id: 'var1', name: 'old', type: 'query' }];
-      const secondVariables = [{ id: 'var2', name: 'new', type: 'query' }];
+      const firstVariables = [
+        { id: 'var1', name: 'old', type: 'query', sourceKind: 'queryResult' },
+      ];
+      const secondVariables = [
+        { id: 'var2', name: 'new', type: 'query', sourceKind: 'queryResult' },
+      ];
 
       const mockSavedObjectsClient1 = {
         get: jest.fn(() => {

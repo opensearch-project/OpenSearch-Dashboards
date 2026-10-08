@@ -8,6 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage, InputContent } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { PPLLintFixRequestCategory } from '../../../data/public';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
@@ -24,6 +25,7 @@ import {
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
+import { ConversationDataSourceStore } from './conversation_data_source_store';
 
 export interface DataSourceInfo {
   id: string;
@@ -40,6 +42,17 @@ export interface CurrentChatState {
   threadId: string;
   messages: Message[];
 }
+
+/**
+ * How long a frontend-tool continuation waits before dispatch, so the tool-result write is visible
+ * to a backend that does not reconcile it server-side (ml-commons). See
+ * {@link ChatService.waitBeforeContinuation}.
+ */
+export const CONTINUATION_DISPATCH_DELAY_MS = 3000;
+
+export const AVAILABLE_DATA_SOURCES_CONTEXT_ID = 'available-data-sources-context';
+export const AVAILABLE_DATA_SOURCES_CONTEXT_DES =
+  'Context for available data sources in this conversation';
 
 export class ChatService {
   private agent: AgUiAgent;
@@ -71,10 +84,12 @@ export class ChatService {
 
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
-
-  // Data source explicitly selected by user in this session
-  private cachedDataSourceId?: string;
-
+  // User-confirmed conversation-level data source override.
+  private confirmedDataSourceId?: string;
+  // Data source ids that have appeared in this conversation.
+  private sessionDataSourceList: string[] = [];
+  // Persists confirmedDataSourceId + sessionDataSourceList per threadId
+  private conversationDataSourceStore = new ConversationDataSourceStore();
   // Cached available data sources for the current workspace
   private cachedAvailableDataSources?: DataSourceInfo[];
 
@@ -259,7 +274,7 @@ export class ChatService {
   public async sendMessageWithWindow(
     content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -274,6 +289,10 @@ export class ChatService {
     // Reset chat window UI to a fresh chat panel
     if (options?.clearConversation) {
       chatWindowInstance.startNewChat();
+    }
+
+    if (options?.dataSourceId) {
+      this.setDataSourceId(options.dataSourceId);
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -293,14 +312,35 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  private getDataSourceFromPageContext() {
+  private getDataSourceFromPageContext(readOnly?: boolean) {
     const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+    if (!readOnly && dsId) {
+      this.setDataSourceId(dsId);
+    }
     return dsId;
   }
 
   private getAllAssistantContexts(): any[] {
     const contextStore = (window as any).assistantContextStore;
     return contextStore ? contextStore.getAllContexts() : [];
+  }
+
+  /**
+   * Contexts sent to the agent, in AG-UI `{description, value}` form. The PPL
+   * quick-fix stamps its approved request id under this category purely so a
+   * cross-window caller can recover it from the store; the model must never
+   * receive it, or it could echo the id back as an apply arg and stand in for
+   * the user's Approve click. Typed against data's category so a rename there
+   * fails to compile here.
+   */
+  private getAgentContexts(): Array<{ description: string; value: string }> {
+    const pplLintFixRequestCategory: PPLLintFixRequestCategory = 'ppl-lint-fix-request';
+    return this.getAllAssistantContexts()
+      .filter((ctx) => !ctx.categories?.includes(pplLintFixRequestCategory))
+      .map((ctx) => ({
+        description: ctx.description,
+        value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+      }));
   }
 
   /**
@@ -335,12 +375,15 @@ export class ChatService {
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
-  private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
+  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
     try {
       // Try to get data source from page context first
-      const pageDataSourceId = this.getDataSourceFromPageContext();
+      const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
       if (pageDataSourceId) {
-        this.cachedDataSourceId = pageDataSourceId;
+        if (!readOnly) {
+          this.setDataSourceId(pageDataSourceId);
+        }
+
         return pageDataSourceId;
       }
 
@@ -368,8 +411,9 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-
-      this.cachedDataSourceId = dataSourceId || undefined;
+      if (!readOnly) {
+        this.setDataSourceId(dataSourceId || undefined);
+      }
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -380,13 +424,120 @@ export class ChatService {
 
   /**
    * Get the current data source ID from all resolution sources.
+   *
+   * Priority (highest to lowest):
+   *   1. getDataSourceFromPageContext() — data source inferred from the current page/panel context
+   *   2. confirmedDataSourceId — explicit conversation-level override confirmed or selected by the user
+   *   3. getWorkspaceAwareDataSourceId() — workspace default
+   *
+   * @param readOnly when true, resolve without committing anything: no setDataSourceId
    */
-  public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return (
-      this.getDataSourceFromPageContext() ||
-      this.cachedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId())
-    );
+  public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
+    const ds =
+      this.getDataSourceFromPageContext(readOnly) ||
+      this.confirmedDataSourceId ||
+      (await this.getWorkspaceAwareDataSourceId(readOnly));
+
+    return ds;
+  }
+
+  /**
+   * Pure read of the resolved data source — never mutates conversation state.
+   */
+  public peekCurrentDataSourceId(): Promise<string | undefined> {
+    return this.getCurrentDataSourceId(true);
+  }
+
+  public getConfirmedDataSourceId(): string | undefined {
+    return this.confirmedDataSourceId;
+  }
+
+  public clearSessionDataSourceAndContext(): void {
+    this.confirmedDataSourceId = undefined;
+    this.sessionDataSourceList = [];
+    this.clearDynamicContextFromStore(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+  }
+
+  public setSessionDataSourceList(id: string | undefined): void {
+    if (!id || this.sessionDataSourceList.includes(id)) {
+      return;
+    }
+
+    this.sessionDataSourceList = [...this.sessionDataSourceList, id];
+    this.persistDataSourceState();
+  }
+
+  public getSessionDataSourceList(): string[] {
+    return [...this.sessionDataSourceList];
+  }
+
+  private clearConversationDataSourceState(): void {
+    this.confirmedDataSourceId = undefined;
+    this.sessionDataSourceList = [];
+    this.cachedAvailableDataSources = undefined;
+  }
+
+  private persistDataSourceState(): void {
+    const threadId = this.getThreadId();
+    if (!threadId) return;
+    this.conversationDataSourceStore.set(threadId, {
+      sessionDataSourceList: this.sessionDataSourceList,
+      confirmedDataSourceId: this.confirmedDataSourceId,
+    });
+  }
+
+  /**
+   * Restore a conversation's data source state from the store
+   */
+  private async restoreDataSourceStateFromStore(threadId: string): Promise<void> {
+    const stored = this.conversationDataSourceStore.get(threadId);
+    if (!stored) return;
+
+    const [validIds, confirmedValid] = await Promise.all([
+      Promise.all(
+        (stored.sessionDataSourceList ?? []).map((id) =>
+          this.validateDataSourceId(id)
+            .then(({ valid }) => (valid ? id : undefined))
+            .catch(() => undefined)
+        )
+      ),
+      stored.confirmedDataSourceId
+        ? this.validateDataSourceId(stored.confirmedDataSourceId)
+            .then(({ valid }) => valid)
+            .catch(() => false)
+        : Promise.resolve(false),
+    ]);
+
+    if (this.getThreadId() !== threadId) return;
+
+    this.sessionDataSourceList = validIds.filter((id): id is string => !!id);
+    this.confirmedDataSourceId = confirmedValid ? stored.confirmedDataSourceId : undefined;
+
+    this.persistDataSourceState();
+  }
+
+  /**
+   * Check a data source id against the available data source list.
+   */
+  public async validateDataSourceId(id: string): Promise<{
+    valid: boolean;
+    dataSource?: DataSourceInfo;
+    availableDataSources: DataSourceInfo[];
+  }> {
+    let available = await this.getAvailableDataSources();
+    let dataSource = available.find((ds) => ds.id === id);
+
+    // A data source created after the cache warmed would be rejected — refresh once.
+    if (!dataSource && available.length > 0) {
+      available = await this.getAvailableDataSources(true);
+      dataSource = available.find((ds) => ds.id === id);
+    }
+
+    if (available.length === 0) {
+      return { valid: true, availableDataSources: available };
+    }
+
+    return { valid: !!dataSource, dataSource, availableDataSources: available };
   }
 
   public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
@@ -395,6 +546,59 @@ export class ChatService {
     const availableDs = await this.getAvailableDataSources();
     const title = availableDs.find((ds) => ds.id === id)?.title;
     return { id, title };
+  }
+
+  private async buildAvailableDsContext(dataSourceId?: string) {
+    const contextStore = (window as any).assistantContextStore;
+
+    const sessionDataSourceList = this.getSessionDataSourceList();
+
+    if (contextStore && sessionDataSourceList.length > 1) {
+      const availableDataSources = await this.getAvailableDataSources();
+      const activeDatasource = availableDataSources.find((ds) => ds.id === dataSourceId);
+
+      const activeDsLabel = activeDatasource
+        ? `"${activeDatasource.title}" (id: ${activeDatasource.id})`
+        : `id: ${dataSourceId}`;
+      const sessionDsLabel = sessionDataSourceList
+        .map((id) => {
+          const sessionDataSource = availableDataSources.find((ds) => ds.id === id);
+          return sessionDataSource
+            ? `"${sessionDataSource.title}" (id: ${sessionDataSource.id})`
+            : `id: ${id}`;
+        })
+        .join(', ');
+
+      contextStore.addContext({
+        id: AVAILABLE_DATA_SOURCES_CONTEXT_ID,
+        description: AVAILABLE_DATA_SOURCES_CONTEXT_DES,
+        value: [
+          `Currently active data source: ${activeDsLabel}`,
+          `Data sources already seen in this conversation (ordered from the oldest(first) to the most recent(last)): ${sessionDsLabel}`,
+          `IMPORTANT — this conversation involves MORE THAN ONE data source.`,
+          `Before ANY data-source-aware action (inspecting fields, querying data, or creating a`,
+          `visualization), you MUST have the USER pick which data source to use for the current`,
+          `request by calling the ask_user tool with inputType 'select'. Build ONE option per data`,
+          `source listed above: set each option's label to the data source's NAME/title (this is what`,
+          `the user sees — NEVER show the raw id to the user) and its value to that data source's id`,
+          `(used internally to switch, not displayed). Example: ask_user({ inputType: 'select', prompt:`,
+          `'This conversation uses multiple data sources. Which one should I use?', options: [{ label:`,
+          `'<data source name>', value: '<data source id>' }, ...] }).`,
+          `A data source being currently active or previously confirmed does NOT satisfy this`,
+          `requirement — you MUST still call ask_user whenever the user has not explicitly chosen one`,
+          `for the current request. Do NOT silently reuse the current/last data source, do NOT guess,`,
+          `and do NOT ask which data source to use in free-form text.`,
+          `Once the user answers, call switch_data_source with the chosen id to apply it, then proceed`,
+          `using that data source for the rest of the current request.`,
+        ].join('\n'),
+      });
+    } else if (contextStore) {
+      contextStore.removeContextById(AVAILABLE_DATA_SOURCES_CONTEXT_ID);
+    }
+
+    // Build the per-run context from the store (static + dynamic + the datasource context above),
+    // filtering out categories the model must never receive (e.g. the PPL quick-fix request id).
+    return this.getAgentContexts();
   }
 
   public async sendMessage(
@@ -431,16 +635,8 @@ export class ChatService {
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
     const threadId = this.getThreadId();
 
     if (!threadId) {
@@ -483,154 +679,6 @@ export class ChatService {
     return { observable: trackedObservable, userMessage };
   }
 
-  /**
-   * Number of consecutive polls in which the tool call id must be observed
-   * in history before we treat it as stably synced. Any pending observation
-   * or error resets the streak. This guards against transient snapshots
-   * where the id briefly appears then disappears as memory is rewritten.
-   */
-  private readonly TOOL_CALL_SYNC_MATURITY_THRESHOLD = 3;
-
-  /**
-   * Sleep for `ms` milliseconds, bailing out early if `signal` aborts.
-   * Returns true if the sleep was interrupted by the signal, false if the
-   * timer completed normally.
-   */
-  private interruptibleSleep(ms: number, signal?: AbortSignal): Promise<boolean> {
-    if (signal?.aborted) return Promise.resolve(true);
-
-    return new Promise<boolean>((resolve) => {
-      const onAbort = () => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      };
-      const timeoutId = setTimeout(() => {
-        signal?.removeEventListener('abort', onAbort);
-        resolve(false);
-      }, ms);
-      signal?.addEventListener('abort', onAbort, { once: true });
-    });
-  }
-
-  /**
-   * Wait for tool call to be synced to agentic memory.
-   *
-   * Polls conversation history up to `maxAttempts` times, waiting `intervalMs`
-   * between polls. Returns one of:
-   * - `{ shouldSend: true,  reason: 'synced' }`              — tool call is in
-   *   history, caller may dispatch the tool result.
-   * - `{ shouldSend: false, reason: 'result_already_exists' }` — another
-   *   window persisted a tool result first; caller should skip dispatch.
-   * - `{ shouldSend: false, reason: 'sync_timeout' }`        — polling
-   *   exhausted without observing sync; caller should skip dispatch and
-   *   surface a resendable failure to the user.
-   * - `{ shouldSend: false, reason: 'no_thread_id' }`        — no thread id
-   *   available; caller should skip dispatch.
-   * - `{ shouldSend: false, reason: 'aborted' }`             — caller-supplied
-   *   abort signal fired; caller should skip dispatch.
-   *
-   * Note: exhausted attempts no longer silently proceed — the caller must
-   * decide whether to resend.
-   */
-  private async waitForToolCallSync(
-    toolCallId: string,
-    maxAttempts: number = 15,
-    intervalMs: number = 1000,
-    signal?: AbortSignal
-  ): Promise<{
-    shouldSend: boolean;
-    reason: 'synced' | 'no_thread_id' | 'result_already_exists' | 'sync_timeout' | 'aborted';
-  }> {
-    if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-    const threadId = this.getThreadId();
-    if (!threadId) return { shouldSend: false, reason: 'no_thread_id' };
-
-    const checkSyncStatus = async (): Promise<'result_already_exists' | 'synced' | 'pending'> => {
-      const events = await this.conversationHistoryService.getConversation(threadId);
-      if (!events) return 'pending';
-
-      const hasToolResult = events.some((event) => {
-        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
-          const messages = (event as any).messages as Message[];
-          return messages.some(
-            (msg) =>
-              msg.role === 'tool' && 'toolCallId' in msg && (msg as any).toolCallId === toolCallId
-          );
-        }
-        return false;
-      });
-      if (hasToolResult) return 'result_already_exists';
-
-      const hasToolCall = events.some((event) => {
-        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
-          const messages = (event as any).messages as Message[];
-          return messages.some(
-            (msg) =>
-              msg.role === 'assistant' &&
-              'toolCalls' in msg &&
-              Array.isArray((msg as any).toolCalls) &&
-              (msg as any).toolCalls.some((tc: any) => tc.id === toolCallId)
-          );
-        }
-        return false;
-      });
-      return hasToolCall ? 'synced' : 'pending';
-    };
-
-    let consecutiveSyncedPolls = 0;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-      try {
-        const status = await checkSyncStatus();
-        if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
-
-        if (status === 'result_already_exists') {
-          return { shouldSend: false, reason: 'result_already_exists' };
-        }
-        if (status === 'synced') {
-          // Require `TOOL_CALL_SYNC_MATURITY_THRESHOLD` consecutive synced
-          // observations before treating the tool call as stably synced.
-          // This guards against transient snapshots where the id appears
-          // briefly before being rewritten.
-          consecutiveSyncedPolls += 1;
-          if (consecutiveSyncedPolls >= this.TOOL_CALL_SYNC_MATURITY_THRESHOLD) {
-            return { shouldSend: true, reason: 'synced' };
-          }
-        } else {
-          // Pending — id not yet in snapshot. Reset the streak so the
-          // maturity guarantee is "consecutive", not "cumulative".
-          consecutiveSyncedPolls = 0;
-        }
-      } catch (error) {
-        // Reset the streak on any error — maturity requires uninterrupted
-        // successful observations.
-        consecutiveSyncedPolls = 0;
-        // eslint-disable-next-line no-console
-        console.warn(`Failed to check tool call sync status (attempt ${attempt + 1}):`, error);
-      }
-
-      // Wait before next attempt (skip the wait after the final attempt).
-      // The sleep is interruptible so `cancelToolResultDispatch` aborts
-      // immediately rather than waiting for the next tick.
-      if (attempt < maxAttempts - 1) {
-        const interrupted = await this.interruptibleSleep(intervalMs, signal);
-        if (interrupted) return { shouldSend: false, reason: 'aborted' };
-      }
-    }
-
-    // Exhausted attempts without observing sync — do NOT silently dispatch.
-    // Surface the failure so the caller can show a system message and let the
-    // user decide whether to resend.
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Tool call sync check timed out after ${maxAttempts} attempts for toolCallId: ${toolCallId}`
-    );
-    return { shouldSend: false, reason: 'sync_timeout' };
-  }
-
   public async sendToolResult(
     toolCallId: string,
     result: any,
@@ -671,18 +719,10 @@ export class ChatService {
     // Early-out if the caller aborted before we even began.
     if (signal?.aborted) return skip('aborted');
 
-    // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
-
-    // Get all contexts from the assistant context store (static + dynamic)
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    // Convert to AG-UI format: {description: string, value: string}
-    const context = allContexts.map((ctx: any) => ({
-      description: ctx.description,
-      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
-    }));
+    // try the confirmed conversation override first; getCurrentDataSourceId still falls back
+    // to getWorkspaceAwareDataSourceId
+    const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
 
     // Send the tool result back to the agent with full conversation history
     const includeFullHistory =
@@ -708,24 +748,13 @@ export class ChatService {
       forwardedProps: {},
     };
 
-    // Wait for tool call result to be synced to agentic memory only when not including full history
-    // (when full history is included, messages are passed directly so no sync wait needed)
-    if (!includeFullHistory) {
-      const syncResult = await this.waitForToolCallSync(toolCallId, undefined, undefined, signal);
+    // Abort the halted main run so it does not overlap the continuation.
+    this.agent.abort();
 
-      // Sync check returned a reason to skip dispatch:
-      // - `result_already_exists`: another window already persisted a tool
-      //   result. Skip to avoid a duplicate.
-      // - `sync_timeout`: polling exhausted. Skip and surface the failure so
-      //   the user can resend.
-      // - `aborted`: caller cancelled via the AbortSignal. Skip silently.
-      if (!syncResult.shouldSend) {
-        return skip(syncResult.reason as Exclude<typeof syncResult.reason, 'synced'>);
-      }
-    }
-
-    // If the signal fired between sync completion and dispatch, bail out.
-    if (signal?.aborted) return skip('aborted');
+    // The tool result is dispatched directly; the server reconciles it into the persisted
+    // placeholder via its {wire tool_call_id -> native toolUseId} map (ag_ui_strands
+    // session_reconcile), which is idempotent and cross-process.
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
 
     // Fix #11881: wait for the previous run (e.g. the one that requested this
     // frontend tool) to finish before dispatching this tool-result run.
@@ -737,12 +766,52 @@ export class ChatService {
 
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, dataSourceId);
+    const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
-    // Wrap observable to track completion and honor the caller's abort
-    // signal. When the signal fires, we abort the underlying agent fetch and
-    // surface an AbortError to subscribers so they can distinguish a
-    // cancellation from a real stream error.
-    const trackedObservable = new Observable((subscriber: any) => {
+    this.events$ = trackedObservable;
+
+    return { observable: trackedObservable, toolMessage };
+  }
+
+  /**
+   * Wait before dispatching a frontend-tool continuation.
+   *
+   * The agent server reconciles a tool result into its persisted placeholder through the
+   * ag_ui_strands wire->native map, so it needs no delay. ml-commons has no such reconciliation and
+   * no backend polling, so a continuation that arrives before the placeholder write is visible can
+   * miss it. This delay keeps that path working while both backends are supported.
+   *
+   * Resolves false when the caller aborts during the wait, so the dispatch is skipped rather than
+   * firing seconds after cancellation.
+   */
+  private waitBeforeContinuation(signal?: AbortSignal): Promise<boolean> {
+    if (signal?.aborted) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      const onAbort = () => {
+        clearTimeout(timer);
+        resolve(false);
+      };
+      const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve(true);
+      }, CONTINUATION_DISPATCH_DELAY_MS);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  /**
+   * Wrap a run observable to track completion and honor the caller's abort
+   * signal. When the signal fires, we abort the underlying agent fetch and
+   * surface an AbortError to subscribers so they can distinguish a
+   * cancellation from a real stream error. Shared by the single- and
+   * batched-tool-result dispatch paths.
+   */
+  private buildTrackedRunObservable(
+    observable: any,
+    requestId: string,
+    signal?: AbortSignal
+  ): Observable<any> {
+    return new Observable((subscriber: any) => {
       // `settled` guards against emitting twice when the abort handler races
       // with the inner subscription's error/complete (aborting the agent
       // typically triggers both paths).
@@ -786,10 +855,83 @@ export class ChatService {
         subscription.unsubscribe();
       };
     });
+  }
+
+  /**
+   * Batched sibling of {@link sendToolResult}: sends several parallel frontend
+   * tool results in one continuation run (one `role=tool` message per
+   * `toolCallId`), keeping each `toolUse` adjacent to its `toolResult` and
+   * matching the memory store's fan-out shape. Since all calls belong to one
+   * assistant message, a single `abort()` + one sync-poll (on the last id)
+   * covers the batch.
+   */
+  public async sendToolResults(
+    items: Array<{ toolCallId: string; result: any }>,
+    messages: Message[],
+    signal?: AbortSignal
+  ): Promise<{
+    observable: any;
+    toolMessages: ToolMessage[];
+    skipped?: {
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted';
+    };
+  }> {
+    const requestId = this.generateRequestId();
+    this.addActiveRequest(requestId);
+
+    const toolMessages: ToolMessage[] = items.map((item) => ({
+      id: this.generateMessageId(),
+      role: 'tool',
+      content: typeof item.result === 'string' ? item.result : JSON.stringify(item.result),
+      toolCallId: item.toolCallId,
+    }));
+
+    const skip = (
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted'
+    ) => {
+      this.removeActiveRequest(requestId);
+      return {
+        observable: new Observable((subscriber) => subscriber.complete()),
+        toolMessages,
+        skipped: { reason },
+      };
+    };
+
+    if (signal?.aborted) return skip('aborted');
+
+    const dataSourceId = await this.getCurrentDataSourceId();
+    const context = await this.buildAvailableDsContext(dataSourceId);
+
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
+    const mappedMessages = includeFullHistory ? [...messages, ...toolMessages] : [...toolMessages];
+
+    const threadId = this.getThreadId();
+    if (!threadId) return skip('no_thread_id');
+
+    const runInput: RunAgentInput = {
+      threadId,
+      runId: this.generateRunId(),
+      messages: mappedMessages,
+      tools: this.availableTools || [],
+      context,
+      state: {},
+      forwardedProps: {},
+    };
+
+    // Abort the halted main run so it does not overlap the continuation.
+    this.agent.abort();
+
+    // Each result is dispatched directly; the server reconciles it via its wire->native map
+    // (see sendToolResult), which is idempotent and cross-process.
+    if (!(await this.waitBeforeContinuation(signal))) return skip('aborted');
+
+    const observable = this.agent.runAgent(runInput, dataSourceId);
+    const trackedObservable = this.buildTrackedRunObservable(observable, requestId, signal);
 
     this.events$ = trackedObservable;
 
-    return { observable: trackedObservable, toolMessage };
+    return { observable: trackedObservable, toolMessages };
   }
 
   public abort(): void {
@@ -813,12 +955,16 @@ export class ChatService {
     }
   }
 
-  private clearDynamicContextFromStore(): void {
+  private clearDynamicContextFromStore(id?: string): void {
     const contextStore = (window as any).assistantContextStore;
     if (!contextStore) {
       return;
     }
 
+    if (id) {
+      contextStore.removeContextById(id);
+      return;
+    }
     // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
     const dynamicContexts = allContexts.filter(
@@ -838,8 +984,7 @@ export class ChatService {
     this.coreChatService.newThread();
 
     // Clear data source selection and cache for new session
-    this.cachedDataSourceId = undefined;
-    this.cachedAvailableDataSources = undefined;
+    this.clearConversationDataSourceState();
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
@@ -931,13 +1076,17 @@ export class ChatService {
       } as ToolCallEndEvent);
     }
 
-    // Return: events before snapshot + patched snapshot + events after snapshot + synthetic events
-    return [
+    // Tool call events belong BEFORE the run ends, as they do in a live stream: RUN_FINISHED clears
+    // the handler's active-message map, so a tool call replayed after it can no longer resolve its
+    // parent and would spawn a second assistant message instead of attaching to the restored one.
+    const rebuilt = [
       ...events.slice(0, snapshotIndex),
       patchedSnapshot,
       ...events.slice(snapshotIndex + 1),
-      ...syntheticEvents,
     ];
+    const runFinishedIndex = rebuilt.findIndex((e) => e.type === EventType.RUN_FINISHED);
+    const insertAt = runFinishedIndex === -1 ? rebuilt.length : runFinishedIndex;
+    return [...rebuilt.slice(0, insertAt), ...syntheticEvents, ...rebuilt.slice(insertAt)];
   }
 
   /**
@@ -978,6 +1127,9 @@ export class ChatService {
         this.coreChatService.setThreadId(latestConversationSummary.threadId);
       }
 
+      // Restore the per-conversation data source state
+      await this.restoreDataSourceStateFromStore(latestConversationSummary.threadId);
+
       return this.injectUnfinishedToolCallEvents(events);
     }
 
@@ -1001,7 +1153,17 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
+    await this.restoreDataSourceStateFromStore(threadId);
+
     return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /**
+   * Delete a conversation and its persisted data source state.
+   */
+  public async deleteConversation(threadId: string): Promise<void> {
+    await this.conversationHistoryService.deleteConversation(threadId);
+    this.conversationDataSourceStore.delete(threadId);
   }
 
   /**
@@ -1028,15 +1190,20 @@ export class ChatService {
   /**
    * Explicitly set the data source ID (e.g., after user selection)
    */
-  public setDataSourceId(id: string): void {
-    this.cachedDataSourceId = id;
+  public setDataSourceId(id: string | undefined): void {
+    this.confirmedDataSourceId = id;
+    if (!id) return;
+    this.setSessionDataSourceList(id);
+    this.persistDataSourceState();
   }
 
   /**
    * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
    */
-  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
-    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+  public async getAvailableDataSources(forceRefresh: boolean = false): Promise<DataSourceInfo[]> {
+    // The cache lives until newThread(), so a data source created mid-session is invisible
+    // to it. forceRefresh lets validateDataSourceId() re-check.
+    if (!forceRefresh && this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 
     try {

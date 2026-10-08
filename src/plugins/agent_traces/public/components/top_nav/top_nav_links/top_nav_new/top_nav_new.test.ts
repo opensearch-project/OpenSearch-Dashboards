@@ -17,8 +17,8 @@ jest.mock(
 describe('newTopNavData', () => {
   it('should have correct properties', () => {
     expect(newTopNavData).toMatchObject({
-      tooltip: 'New',
-      ariaLabel: 'New Search',
+      tooltip: 'New search',
+      ariaLabel: 'New search',
       testId: 'discoverNewButton',
       iconType: 'plusInCircle',
       controlType: 'icon',

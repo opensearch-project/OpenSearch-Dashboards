@@ -1,0 +1,136 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTimelineBrush {
+  position: relative;
+  width: 100%;
+
+  // Reserve space for the absolutely-positioned track plus the total caption
+  // beneath it (otherwise the wrapper collapses and the slider is invisible).
+  height: 38px;
+
+  &__track {
+    position: absolute;
+    top: 0;
+    height: 22px;
+    background-color: $euiColorLightestShade;
+    border: 1px solid $euiColorLightShade;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  // Faint vertical guides across the overview so the minimap reads as a time strip.
+  &__tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: $euiColorLightShade;
+    opacity: 0.6;
+  }
+
+  // Trace total-duration caption, aligned to the right edge of the track.
+  &__total {
+    position: absolute;
+    top: 24px;
+    font-size: 10px;
+    line-height: 1;
+    color: $euiColorDarkShade;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__overview {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    right: 0;
+  }
+
+  &__overviewBar {
+    position: absolute;
+    top: 20%;
+    height: 60%;
+    min-width: 1px;
+    border-radius: 1px;
+    opacity: 0.7;
+  }
+
+  // Dims the parts of the trace outside the selected (zoomed) window so the brush
+  // reads as a range selector. Non-interactive so drags reach the track/handles.
+  &__mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: transparentize($euiColorInk, 0.85);
+    pointer-events: none;
+  }
+
+  &__window {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-width: 4px;
+    cursor: grab;
+    background-color: transparentize($euiColorPrimary, 0.85);
+    border: 1px solid $euiColorPrimary;
+    border-radius: 3px;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--zoomed {
+      background-color: transparentize($euiColorPrimary, 0.8);
+    }
+  }
+
+  &__handle {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 6px;
+    cursor: ew-resize;
+    background-color: $euiColorPrimary;
+    border-radius: 3px;
+    opacity: 0.7;
+
+    // Center grip line so the handle reads as draggable.
+    &::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      bottom: 25%;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background-color: $euiColorEmptyShade;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &--left {
+      left: -3px;
+    }
+
+    &--right {
+      right: -3px;
+    }
+  }
+
+  &__reset {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// Leave room for the brush strip beneath the ruler.
+.exploreTimelineBrush + * {
+  margin-top: 24px;
+}

@@ -17,6 +17,22 @@ const createMockSavedExplore = (): SavedExplore =>
   }) as unknown as SavedExplore;
 
 describe('saveStateToSavedObject', () => {
+  it('serializes panel settings into the visualization config', () => {
+    const obj = createMockSavedExplore();
+
+    saveStateToSavedObject(obj, undefined, undefined, {
+      title: 'Panel title',
+      description: 'Panel description',
+    });
+
+    expect(JSON.parse(obj.visualization!)).toEqual(
+      expect.objectContaining({
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
+  });
+
   describe('activeTab in uiState', () => {
     it('uses activeTabId when tabDefinition exists', () => {
       const obj = createMockSavedExplore();

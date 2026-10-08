@@ -6,6 +6,12 @@
 import { RootState } from './store';
 import { ResultStatus as DataPluginResultStatus } from '../../../../../data/public';
 
+/** Scan progress a polling source reports while its query is still running. */
+export interface QueryProgress {
+  recordsMatched?: number;
+  recordsScanned?: number;
+}
+
 export type QueryExecutionStatus = DataPluginResultStatus;
 export const QueryExecutionStatus = DataPluginResultStatus;
 
@@ -23,6 +29,8 @@ export interface QueryResultStatus {
   };
   elapsedMs?: number;
   startTime?: number;
+  /** Set only while a polling source streams rows for this query. */
+  progress?: QueryProgress;
 }
 
 /**

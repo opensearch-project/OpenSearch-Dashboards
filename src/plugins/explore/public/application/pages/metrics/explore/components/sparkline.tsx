@@ -23,6 +23,8 @@ interface ChartProps {
   series?: SeriesData[];
   yMin?: number;
   yMax?: number;
+  timeFrom?: number;
+  timeTo?: number;
   isDarkMode?: boolean;
   onTimeRangeChange?: (from: string, to: string) => void;
 }
@@ -70,6 +72,8 @@ export const SparklineChart: React.FC<ChartProps> = ({
   series: multiSeries,
   yMin,
   yMax,
+  timeFrom,
+  timeTo,
   isDarkMode = false,
   onTimeRangeChange,
 }) => {
@@ -180,6 +184,8 @@ export const SparklineChart: React.FC<ChartProps> = ({
       },
       xAxis: {
         type: 'time',
+        min: timeFrom,
+        max: timeTo,
         axisLabel: { fontSize: 10, color: textColor },
         axisLine: { show: false },
         axisTick: { show: false },
@@ -217,7 +223,18 @@ export const SparklineChart: React.FC<ChartProps> = ({
     }
 
     return baseOption;
-  }, [hasData, parsed, allSeries, isDarkMode, yMin, yMax, getColor, onTimeRangeChange]);
+  }, [
+    hasData,
+    parsed,
+    allSeries,
+    isDarkMode,
+    yMin,
+    yMax,
+    getColor,
+    onTimeRangeChange,
+    timeFrom,
+    timeTo,
+  ]);
 
   // Init / dispose
   useEffect(() => {

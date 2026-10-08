@@ -31,6 +31,7 @@ describe('SplitChartInstance', () => {
   const mockRenderChart = jest.fn((label) => <div data-test-subj="renderedChart">{label}</div>);
   const defaultProps = {
     label: 'Test Group',
+    displayName: 'Test Group',
     renderChart: mockRenderChart,
   };
 
