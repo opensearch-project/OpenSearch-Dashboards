@@ -47,6 +47,12 @@ export const BottomRightContainer = () => {
     return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
 
+  // A polling source can stream rows while its query runs; show them instead of the spinner.
+  const hasStreamedRows = useSelector((state: RootState) => {
+    const key = defaultPrepareQueryString(query);
+    return !!state.queryEditor.queryStatusMap[key]?.progress && !!state.results[key]?.hasResults;
+  });
+
   if (dataset == null) {
     // Show auto-detect callout only for traces flavor
     if (flavorId === ExploreFlavor.Traces) {
@@ -92,7 +98,11 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.LOADING && dataTableStatus === QueryExecutionStatus.LOADING) {
+  if (
+    status === QueryExecutionStatus.LOADING &&
+    dataTableStatus === QueryExecutionStatus.LOADING &&
+    !hasStreamedRows
+  ) {
     return (
       <CanvasPanel>
         <LoadingSpinner />
@@ -104,7 +114,8 @@ export const BottomRightContainer = () => {
     dataTableStatus === QueryExecutionStatus.READY ||
     dataTableStatus === QueryExecutionStatus.ERROR ||
     status === QueryExecutionStatus.READY ||
-    status === QueryExecutionStatus.ERROR
+    status === QueryExecutionStatus.ERROR ||
+    hasStreamedRows
   ) {
     return (
       <CanvasPanel>

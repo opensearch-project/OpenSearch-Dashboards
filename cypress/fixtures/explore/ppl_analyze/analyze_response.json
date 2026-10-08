@@ -1,0 +1,115 @@
+{
+  "logicalPlan": [
+    "LogicalSystemLimit(fetch=[10000], type=[QUERY_SIZE_LIMIT]): rowcount = 500.0, cumulative cost = {159500.0 rows, 76000.0 cpu, 0.0 io}, id = 1444",
+    "LogicalProject(spanId=[$0], traceId=[$1], severityText=[$2], resource=[$3], severityNumber=[$7], time=[$8], body=[$9], observedTime=[$10]): rowcount = 500.0, cumulative cost = {159000.0 rows, 54000.0 cpu, 0.0 io}, id = 1443",
+    "LogicalSort(fetch=[500]): rowcount = 500.0, cumulative cost = {158500.0 rows, 50000.0 cpu, 0.0 io}, id = 1441",
+    "LogicalFilter(condition=[>($7, 13)]): rowcount = 5000.0, cumulative cost = {158000.0 rows, 10000.0 cpu, 0.0 io}, id = 1440",
+    "CalciteLogicalIndexScan(table=[[OpenSearch, logs-otel-v1-local-repro]]): rowcount = 10000.0, cumulative cost = {153000.0 rows, 0.0 cpu, 0.0 io}, id = 1439"
+  ],
+  "physicalPlan": [
+    "CalciteEnumerableIndexScan(table=[[OpenSearch, logs-otel-v1-local-repro]], PushDownContext=[[PROJECT->[spanId, traceId, severityText, resource, severityNumber, time, body, observedTime], FILTER->>($4, 13), LIMIT->500, LIMIT->10000], OpenSearchRequestBuilder(sourceBuilder={\"from\":0,\"size\":500,\"timeout\":\"1m\",\"query\":{\"range\":{\"severityNumber\":{\"from\":13,\"to\":null,\"include_lower\":false,\"include_upper\":true,\"boost\":1.0}}},\"_source\":{\"includes\":[\"spanId\",\"traceId\",\"severityText\",\"resource\",\"severityNumber\",\"time\",\"body\",\"observedTime\"]}}, requestedTotalSize=500, pageSize=null, startFrom=0)]): rowcount = 500.0, cumulative cost = {3585.6 rows, 0.0 cpu, 0.0 io}, id = 1494"
+  ],
+  "profile": {
+    "summary": {
+      "total_time_ms": 178.87
+    },
+    "phases": {
+      "analyze": {
+        "time_ms": 54.38
+      },
+      "optimize": {
+        "time_ms": 37.78
+      },
+      "execute": {
+        "time_ms": 86.38
+      },
+      "format": {
+        "time_ms": 0.06
+      }
+    },
+    "plan": {
+      "node": "CalciteEnumerableIndexScan",
+      "time_ms": 83.59,
+      "rows": 33
+    },
+    "thread_pool": "sql-worker"
+  },
+  "recommendations": [
+    {
+      "severity": "INFO",
+      "rule": "Bottleneck Stage",
+      "message": "CalciteEnumerableIndexScan took 83.59 ms (97% of execution)",
+      "affected_node": "CalciteEnumerableIndexScan"
+    }
+  ],
+  "schema": [
+    {
+      "name": "spanId",
+      "type": "STRING"
+    },
+    {
+      "name": "traceId",
+      "type": "STRING"
+    },
+    {
+      "name": "severityText",
+      "type": "STRING"
+    },
+    {
+      "name": "resource",
+      "type": "STRUCT"
+    },
+    {
+      "name": "severityNumber",
+      "type": "INTEGER"
+    },
+    {
+      "name": "time",
+      "type": "TIMESTAMP"
+    },
+    {
+      "name": "body",
+      "type": "STRING"
+    },
+    {
+      "name": "observedTime",
+      "type": "TIMESTAMP"
+    }
+  ],
+  "datarows": [
+    [
+      "0000000000000002",
+      "00000000000000000000000000000002",
+      "ERROR",
+      {
+        "attributes": {
+          "service": {
+            "name": "checkout"
+          }
+        }
+      },
+      17,
+      "2026-10-01 18:56:36.773813",
+      "checkout: request 2 failed",
+      "2026-10-01 18:56:36.773813"
+    ],
+    [
+      "000000000000000d",
+      "0000000000000000000000000000000d",
+      "ERROR",
+      {
+        "attributes": {
+          "service": {
+            "name": "cart"
+          }
+        }
+      },
+      17,
+      "2026-10-01 19:01:05.773813",
+      "cart: request 13 failed",
+      "2026-10-01 19:01:05.773813"
+    ]
+  ],
+  "total": 33,
+  "size": 2
+}
