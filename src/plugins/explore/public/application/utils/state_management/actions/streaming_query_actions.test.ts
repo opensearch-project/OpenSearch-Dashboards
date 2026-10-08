@@ -551,29 +551,7 @@ describe('executeStreamingQuery', () => {
   describe('engine request fields', () => {
     // The synchronous path sends these, so a streamed query has to as well or it is planned and
     // reported differently from the same query run without streaming.
-    it('forwards the partial-results preference from the setting', async () => {
-      services.uiSettings.get.mockImplementation((key: string) =>
-        key === 'explore:enablePartialResults' ? true : undefined
-      );
-      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
-
-      await run();
-
-      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ partialResult: true }));
-    });
-
     // The rerun action behind the warning banner has to win over the setting for that one run.
-    it('lets disablePartialResults override the setting', async () => {
-      services.uiSettings.get.mockImplementation((key: string) =>
-        key === 'explore:enablePartialResults' ? true : undefined
-      );
-      mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
-
-      await run({ disablePartialResults: true });
-
-      expect(mockSubmit).toHaveBeenCalledWith(expect.objectContaining({ partialResult: false }));
-    });
-
     it('asks the engine to profile only when profiling is enabled', async () => {
       mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
 
@@ -604,18 +582,15 @@ describe('executeStreamingQuery', () => {
       );
     });
 
-    // An aggregation job returns buckets, so neither field applies to it.
-    it('sends neither preference for a histogram job', async () => {
-      services.uiSettings.get.mockImplementation((key: string) =>
-        key === 'explore:enablePartialResults' ? true : undefined
-      );
+    // An aggregation job returns buckets, so profiling its plan says nothing useful.
+    it('does not ask the engine to profile a histogram job', async () => {
+      services.queryProfilingEnabled = true;
       mockSubmit.mockResolvedValue(snapshot({ status: 'SUCCEEDED' }));
 
       await run({ asHistogram: { aggId: '2' } });
 
-      const args = mockSubmit.mock.calls[0][0];
-      expect(args).not.toHaveProperty('partialResult');
-      expect(args).not.toHaveProperty('profile');
+      expect(mockSubmit.mock.calls[0][0]).not.toHaveProperty('profile');
+      services.queryProfilingEnabled = false;
     });
   });
 

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IUiSettingsClient } from 'opensearch-dashboards/server';
 import {
   AGGREGATION_SAMPLE_SIZE_SETTING,
   resolvePPLFetchSize,
@@ -10,9 +11,12 @@ import {
 } from './resolve_ppl_fetch_size';
 
 describe('resolvePPLFetchSize', () => {
-  const uiSettings = () => ({
-    get: jest.fn(async (key: string) => (key === SAMPLE_SIZE_SETTING ? 500 : 10000)),
-  });
+  // jest.fn erases the generic on IUiSettingsClient.get, so the stub is cast at the boundary; the
+  // intersection keeps `.get` inspectable for the call assertions below.
+  const uiSettings = () =>
+    ({
+      get: jest.fn(async (key: string) => (key === SAMPLE_SIZE_SETTING ? 500 : 10000)),
+    }) as unknown as Pick<IUiSettingsClient, 'get'> & { get: jest.Mock };
 
   it('uses discover:sampleSize for a document search', async () => {
     const settings = uiSettings();

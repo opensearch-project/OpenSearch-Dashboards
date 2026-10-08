@@ -82,18 +82,6 @@ describe('registerPPLStreamRoutes', () => {
       return request.mock.calls[0][0].body;
     };
 
-    it('forwards partial_result when false, which overrides the cluster default', async () => {
-      expect(await submitWith({ partialResult: false })).toMatchObject({ partial_result: false });
-    });
-
-    it('forwards partial_result when true', async () => {
-      expect(await submitWith({ partialResult: true })).toMatchObject({ partial_result: true });
-    });
-
-    it('omits partial_result when the client expressed no preference', async () => {
-      expect(await submitWith({})).not.toHaveProperty('partial_result');
-    });
-
     it('asks the engine to profile only when requested', async () => {
       expect(await submitWith({ profile: true })).toMatchObject({ profile: true });
       expect(await submitWith({ profile: false })).not.toHaveProperty('profile');

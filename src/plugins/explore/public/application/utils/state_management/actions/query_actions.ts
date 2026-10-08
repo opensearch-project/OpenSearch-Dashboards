@@ -442,8 +442,6 @@ export const executeQueries = createAsyncThunk<
           queryString: streamingConfig.tableQuery,
           indexName: query.dataset?.title,
           dataSourceId: query.dataset?.dataSource?.id,
-          // The warning banner's rerun action overrides the partial-results setting for this run.
-          disablePartialResults,
           isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
         })
       );
@@ -457,7 +455,6 @@ export const executeQueries = createAsyncThunk<
             ? dispatch(
                 executeDataTableQuery({
                   services,
-                  disablePartialResults,
                   cacheKey: dataTableCacheKey,
                   queryString,
                 })
@@ -492,7 +489,6 @@ export const executeQueries = createAsyncThunk<
             dispatch(
               executeHistogramQuery({
                 services,
-                disablePartialResults,
                 cacheKey: histogramCacheKey,
                 queryString,
                 interval: state.legacy?.interval,

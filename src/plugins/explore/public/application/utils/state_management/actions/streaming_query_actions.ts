@@ -19,7 +19,6 @@ import {
 } from '../../streaming/ppl_stream_errors';
 import { PPLStreamService } from '../../streaming/ppl_stream_service';
 import { ExploreServices } from '../../../../types';
-import { PARTIAL_RESULTS_SETTING } from '../../../../../common';
 
 /** Core setting controlling whether integers too large for a JS number keep their precision. */
 const LONG_NUMERALS_SETTING = 'data:withLongNumerals';
@@ -79,11 +78,6 @@ export interface ExecuteStreamingQueryArgs {
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
-  /**
-   * Overrides the partial-results setting for this run only, as the warning banner's rerun action
-   * does on the synchronous path.
-   */
-  disablePartialResults?: boolean;
 }
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -114,16 +108,7 @@ export const executeStreamingQuery = createAsyncThunk<
 >(
   'query/executeStreamingQuery',
   async (
-    {
-      services,
-      cacheKey,
-      queryString,
-      indexName,
-      asHistogram,
-      dataSourceId,
-      isCurrent,
-      disablePartialResults,
-    },
+    { services, cacheKey, queryString, indexName, asHistogram, dataSourceId, isCurrent },
     { dispatch, signal }
   ) => {
     const stream = new PPLStreamService(services.http);
@@ -280,8 +265,7 @@ export const executeStreamingQuery = createAsyncThunk<
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
 
-      // The engine request fields the synchronous path also sends. An aggregation job returns
-      // buckets, so the partial-result and profiling preferences apply only to the table.
+      // The engine request fields the synchronous path also sends.
       const withLongNumeralsSupport = Boolean(
         services.uiSettings.get(LONG_NUMERALS_SETTING, false)
       );
@@ -290,14 +274,8 @@ export const executeStreamingQuery = createAsyncThunk<
         dataSourceId,
         signal,
         withLongNumeralsSupport,
-        ...(asHistogram
-          ? {}
-          : {
-              partialResult:
-                !disablePartialResults &&
-                Boolean(services.uiSettings.get(PARTIAL_RESULTS_SETTING, false)),
-              profile: services.queryProfilingEnabled,
-            }),
+        // An aggregation job returns buckets, so profiling the plan says nothing useful about it.
+        ...(asHistogram ? {} : { profile: services.queryProfilingEnabled }),
       });
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.

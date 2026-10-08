@@ -20,10 +20,8 @@ export interface SubmitStreamingQueryArgs {
   signal?: AbortSignal;
   /**
    * Engine request fields the synchronous path also sends, so a streamed query is planned and
-   * reported the same way. Meaningful when false, so sent whenever defined.
+   * reported the same way. Asks the engine which worker pool ran the query.
    */
-  partialResult?: boolean;
-  /** Asks the engine to report which worker pool ran the query, behind the profiling setting. */
   profile?: boolean;
   /** Search-highlight configuration; the engine returns matches in a `_highlight` column. */
   highlight?: Record<string, unknown>;
@@ -62,7 +60,6 @@ export class PPLStreamService {
     keepAlive,
     dataSourceId,
     signal,
-    partialResult,
     profile,
     highlight,
     withLongNumeralsSupport,
@@ -72,7 +69,6 @@ export class PPLStreamService {
         query,
         ...(waitForCompletionTimeout && { waitForCompletionTimeout }),
         ...(keepAlive && { keepAlive }),
-        ...(partialResult !== undefined && { partialResult }),
         ...(profile && { profile }),
         ...(highlight && { highlight }),
         ...(withLongNumeralsSupport && { withLongNumeralsSupport }),
