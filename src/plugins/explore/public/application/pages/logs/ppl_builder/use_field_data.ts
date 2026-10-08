@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { DataView } from '../../../../../../data/common';
 import { fetchColumnValues } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
@@ -15,9 +16,10 @@ interface FieldInfo {
   aggregatable?: boolean;
 }
 
-export const useFieldData = () => {
+export const useFieldData = (datasetOverride?: DataView) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { dataset } = useDatasetContext();
+  const { dataset: contextDataset } = useDatasetContext();
+  const dataset = datasetOverride ?? contextDataset;
 
   const fields = useMemo<FieldInfo[]>(() => {
     const all = (dataset as any)?.fields?.getAll?.() ?? [];

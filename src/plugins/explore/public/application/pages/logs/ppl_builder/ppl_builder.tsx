@@ -7,6 +7,7 @@ import './ppl_builder.scss';
 
 import React, { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import type { DataView } from '../../../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
@@ -24,15 +25,22 @@ import { ControlGroup, GhostAddButton } from '../../../components/query_builder'
 
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
+  datasetOverride?: DataView;
   onQueryChange: (query: string, state: PPLBuilderState) => void;
   onRun?: () => void;
 }
 
 const CHART_BAR_TARGET = 15;
 
-export const PPLBuilder: React.FC<PPLBuilderProps> = ({ initialState, onQueryChange, onRun }) => {
+export const PPLBuilder: React.FC<PPLBuilderProps> = ({
+  initialState,
+  datasetOverride,
+  onQueryChange,
+  onRun,
+}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { dataset } = useDatasetContext();
+  const { dataset: contextDataset } = useDatasetContext();
+  const dataset = datasetOverride ?? contextDataset;
   const [state, dispatch] = useReducer(
     builderReducer,
     initialState ?? null,
@@ -46,7 +54,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({ initialState, onQueryCha
     timeFieldName,
     getFieldType,
     getValues,
-  } = useFieldData();
+  } = useFieldData(dataset);
 
   const deriveAutoInterval = useCallback((): string => {
     if (!dataset?.timeFieldName) return '1m';
