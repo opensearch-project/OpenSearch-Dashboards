@@ -91,6 +91,16 @@ const run = async (args: Record<string, unknown> = {}) => {
   return { action, results, statuses };
 };
 
+const exhausted = (total: number) =>
+  snapshot({
+    id: 'job-1',
+    status: 'SUCCEEDED',
+    update_mode: 'APPEND',
+    datarows: [],
+    size: 0,
+    total,
+  });
+
 describe('executeStreamingQuery', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -137,7 +147,8 @@ describe('executeStreamingQuery', () => {
           size: 1,
           total: 200,
         })
-      );
+      )
+      .mockResolvedValue(exhausted(200));
 
     const { results } = await run();
 
@@ -149,17 +160,19 @@ describe('executeStreamingQuery', () => {
 
   it('reports the accumulator total, not the rows held', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
-    mockPoll.mockResolvedValue(
-      snapshot({
-        id: 'job-1',
-        sequence: 1,
-        status: 'SUCCEEDED',
-        update_mode: 'APPEND',
-        datarows: [['2026-09-15 10:00:00', 1]],
-        size: 1,
-        total: 480954,
-      })
-    );
+    mockPoll
+      .mockResolvedValueOnce(
+        snapshot({
+          id: 'job-1',
+          sequence: 1,
+          status: 'SUCCEEDED',
+          update_mode: 'APPEND',
+          datarows: [['2026-09-15 10:00:00', 1]],
+          size: 1,
+          total: 480954,
+        })
+      )
+      .mockResolvedValue(exhausted(480954));
 
     const { results, statuses } = await run();
 
@@ -371,7 +384,8 @@ describe('executeStreamingQuery', () => {
           size: 1,
           total: 500000,
         })
-      );
+      )
+      .mockResolvedValue(exhausted(500000));
 
     const { statuses } = await run();
     const inFlight = statuses.filter((s) => s.status.streaming?.isPolling === true);
@@ -648,6 +662,35 @@ describe('executeStreamingQuery', () => {
     resolveSubmit(snapshot({ status: 'SUCCEEDED' }));
     jest.advanceTimersByTime(STREAMING_POLL_INTERVAL_MS);
     await promise;
+  });
+
+  // A finished job is served as one REPLACE snapshot carrying only the requested window, so without
+  // paging the table showed ROWS_PER_POLL rows and silently dropped the rest.
+  it('pages through rows the terminal snapshot did not serve', async () => {
+    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
+    const full = (ids: number[]) =>
+      snapshot({
+        id: 'job-1',
+        status: 'SUCCEEDED',
+        update_mode: 'REPLACE',
+        datarows: ids.map(row),
+        size: ids.length,
+        total: 25,
+      });
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll
+      // The terminal snapshot: 10 of 25 rows.
+      .mockResolvedValueOnce(full([...Array(10).keys()]))
+      // Paging asks for the next windows.
+      .mockResolvedValueOnce(full([...Array(10).keys()].map((n) => n + 10)))
+      .mockResolvedValueOnce(full([20, 21, 22, 23, 24]))
+      .mockResolvedValue(exhausted(25));
+
+    const { results } = await run();
+
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(25);
+    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 10 }));
+    expect(mockPoll).toHaveBeenNthCalledWith(3, expect.objectContaining({ offset: 20 }));
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {

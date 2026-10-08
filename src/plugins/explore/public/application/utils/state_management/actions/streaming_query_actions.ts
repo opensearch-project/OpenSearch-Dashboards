@@ -257,6 +257,36 @@ export const executeStreamingQuery = createAsyncThunk<
       }
     };
 
+    /**
+     * A finished job is served as one REPLACE snapshot holding only the requested window, so a query
+     * with more rows than ROWS_PER_POLL arrives truncated. Page through the rest up to the hold cap.
+     * Those rows are already committed, so there is nothing to wait for between pages.
+     */
+    const pageThroughRemainingRows = async (total: number, longNumerals: boolean) => {
+      const wanted = Math.min(total, STREAMING_MAX_HELD_ROWS);
+      // A REPLACE snapshot does not advance `offset`, so resume from what is actually held.
+      offset = heldRows.length;
+      // `wanted` alone bounds this, but only if pages are the size asked for; the cap keeps an engine
+      // that serves a few rows at a time from turning the drain into thousands of requests.
+      const maxPages = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
+      for (let page = 0; page < maxPages && !signal.aborted && offset < wanted; page++) {
+        const snap = await stream.poll({
+          id: jobId!,
+          withLongNumeralsSupport: longNumerals,
+          offset,
+          count: ROWS_PER_POLL,
+          dataSourceId,
+          signal,
+        });
+        const rows = snapshotRowsToObjects(snap, formatter);
+        if (rows.length === 0) return;
+        const { highlights = [] } = splitHighlightColumn(snap);
+        heldRows = heldRows.concat(rows).slice(0, STREAMING_MAX_HELD_ROWS);
+        heldHighlights = heldHighlights.concat(highlights).slice(0, STREAMING_MAX_HELD_ROWS);
+        offset += rows.length;
+      }
+    };
+
     try {
       // Claim the cache key as LOADING before awaiting submit, which can take up to
       // DEFAULT_WAIT_FOR_COMPLETION. Until this key reports, a faster sibling query completing makes
@@ -339,6 +369,10 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
+        if (terminal && !asHistogram && heldRows.length < (snapshot.total ?? 0)) {
+          await pageThroughRemainingRows(snapshot.total ?? 0, withLongNumeralsSupport);
+        }
+
         publish(snapshot, !terminal);
         if (terminal) {
           // Rows are held client-side from here, so the job is never read again. Releasing it now
