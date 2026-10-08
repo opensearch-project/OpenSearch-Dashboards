@@ -27,6 +27,7 @@ import { RootState } from '../store';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { setResults } from '../slices';
 import { snapshotToHistogramBuckets } from '../../streaming/snapshot_to_histogram';
+import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import {
   FieldValueFormatter,
   snapshotRowsToObjects,
@@ -115,10 +116,7 @@ export const executeStreamingQuery = createAsyncThunk<
     const startedAt = Date.now();
     let formatter: FieldValueFormatter | undefined;
 
-    let heldRows: Array<Record<string, unknown>> = [];
-    let heldHighlights: unknown[] = [];
-    let rowGeneration = 0;
-    let offset = 0;
+    let rows: StreamRowAccumulator;
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;
@@ -152,11 +150,11 @@ export const executeStreamingQuery = createAsyncThunk<
             cacheKey,
             results: snapshotToSearchResult({
               snapshot,
-              rows: heldRows,
+              rows: rows.heldRows,
               indexName,
               elapsedMs,
-              rowGeneration,
-              highlights: heldHighlights,
+              rowGeneration: rows.rowGeneration,
+              highlights: rows.heldHighlights,
             }),
           })
         );
@@ -171,7 +169,7 @@ export const executeStreamingQuery = createAsyncThunk<
         sequence: snapshot.sequence,
         updateMode: snapshot.update_mode as PPLStreamUpdateMode | undefined,
         total: snapshot.total ?? 0,
-        rowsFetched: heldRows.length,
+        rowsFetched: rows.heldRows.length,
         fractionDone: maxFraction,
         isPolling,
         startTimeMs: startedAt,
@@ -216,10 +214,10 @@ export const executeStreamingQuery = createAsyncThunk<
     };
 
     /**
-     * Reports a terminal failure. Without this a failed run would either report READY, because
-     * `isPolling` is false once polling stops, or leave `isPolling` true and freeze the progress UI.
+     * Reports a terminal failure, carrying the backend's own error fields because consumers such as
+     * the Traces charts read them. Without this a failed run would report READY, since `isPolling`
+     * is false once polling stops.
      */
-    /** Reports the backend's own error, whose fields consumers such as the Traces charts read. */
     const failWith = (error: NonNullable<QueryResultStatus['error']>) => {
       if (isCurrent && !isCurrent()) return;
       dispatch(
@@ -236,54 +234,26 @@ export const executeStreamingQuery = createAsyncThunk<
       );
     };
 
-    /** Absorbs one snapshot's rows according to its update mode. */
-    const absorb = (snapshot: PPLStreamSnapshot) => {
-      const rows = snapshotRowsToObjects(snapshot, formatter);
-      const { highlights = [] } = splitHighlightColumn(snapshot);
-      if (snapshot.update_mode === 'REPLACE') {
-        // Prior rows are provisional and may have been revised; adopt this view wholesale. The
-        // generation advances so the replaced rows get new ids rather than inheriting the previous
-        // rows' React state.
-        heldRows = rows.slice(0, STREAMING_MAX_HELD_ROWS);
-        heldHighlights = highlights.slice(0, STREAMING_MAX_HELD_ROWS);
-        rowGeneration += 1;
-        return;
-      }
-      // APPEND rows are a stable prefix, so accumulate and advance past them.
-      if (rows.length > 0) {
-        heldRows = heldRows.concat(rows).slice(0, STREAMING_MAX_HELD_ROWS);
-        heldHighlights = heldHighlights.concat(highlights).slice(0, STREAMING_MAX_HELD_ROWS);
-        offset += snapshot.size;
-      }
-    };
-
     /**
-     * A finished job is served as one REPLACE snapshot holding only the requested window, so a query
-     * with more rows than ROWS_PER_POLL arrives truncated. Page through the rest up to the hold cap.
-     * Those rows are already committed, so there is nothing to wait for between pages.
+     * Requests windows from `nextOffset` until the accumulator holds every committed row, or is
+     * full. Used after a terminal snapshot, which serves only one window: those rows are already
+     * committed, so there is nothing to wait for between requests.
      */
-    const pageThroughRemainingRows = async (total: number, longNumerals: boolean) => {
+    const fetchCommittedRows = async (total: number, longNumerals: boolean) => {
       const wanted = Math.min(total, STREAMING_MAX_HELD_ROWS);
-      // A REPLACE snapshot does not advance `offset`, so resume from what is actually held.
-      offset = heldRows.length;
-      // `wanted` alone bounds this, but only if pages are the size asked for; the cap keeps an engine
-      // that serves a few rows at a time from turning the drain into thousands of requests.
-      const maxPages = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
-      for (let page = 0; page < maxPages && !signal.aborted && offset < wanted; page++) {
+      // Bounded by `wanted` only when windows come back the size asked for; the cap also covers an
+      // engine that serves a few rows at a time.
+      const maxRequests = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
+      for (let n = 0; n < maxRequests && !signal.aborted && rows.nextOffset < wanted; n++) {
         const snap = await stream.poll({
           id: jobId!,
           withLongNumeralsSupport: longNumerals,
-          offset,
+          offset: rows.nextOffset,
           count: ROWS_PER_POLL,
           dataSourceId,
           signal,
         });
-        const rows = snapshotRowsToObjects(snap, formatter);
-        if (rows.length === 0) return;
-        const { highlights = [] } = splitHighlightColumn(snap);
-        heldRows = heldRows.concat(rows).slice(0, STREAMING_MAX_HELD_ROWS);
-        heldHighlights = heldHighlights.concat(highlights).slice(0, STREAMING_MAX_HELD_ROWS);
-        offset += rows.length;
+        if (rows.absorb(snap) === 0) return;
       }
     };
 
@@ -307,6 +277,7 @@ export const executeStreamingQuery = createAsyncThunk<
       // caller re-runs on the non-streaming path rather than rendering unformatted dates.
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
+      rows = new StreamRowAccumulator(STREAMING_MAX_HELD_ROWS, formatter);
 
       // The engine request fields the synchronous path also sends.
       const withLongNumeralsSupport = Boolean(
@@ -323,24 +294,30 @@ export const executeStreamingQuery = createAsyncThunk<
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.
       if (!submitted.id) {
-        absorb(submitted);
+        if (!asHistogram) rows.absorb(submitted);
         publish(submitted, false);
         return;
       }
 
       jobId = submitted.id;
-      // Conservative until classification arrives: REPLACE re-reads from the start, which is
-      // always safe, whereas assuming APPEND could interleave two incompatible orderings.
-      let updateMode: PPLStreamUpdateMode = 'REPLACE';
+      if (!asHistogram) rows.absorb(submitted);
       publish(submitted, true);
+
+      // What to ask for next, which is a different question from where the rows that come back
+      // belong. A provisional set must be re-read from the start to pick up revisions; committed
+      // rows are continued from. Conservative until the engine classifies the job, since re-reading
+      // is always safe whereas assuming rows are committed can interleave two orderings.
+      let updateMode: PPLStreamUpdateMode = 'REPLACE';
 
       while (!signal.aborted) {
         await sleep(STREAMING_POLL_INTERVAL_MS, signal);
 
+        // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
+        // advancing would ask for a later slice of one.
         const snapshot = await stream.poll({
           id: jobId,
           withLongNumeralsSupport,
-          offset: updateMode === 'APPEND' ? offset : 0,
+          offset: asHistogram || updateMode === 'REPLACE' ? 0 : rows.nextOffset,
           count: ROWS_PER_POLL,
           dataSourceId,
           signal,
@@ -350,13 +327,10 @@ export const executeStreamingQuery = createAsyncThunk<
           updateMode = snapshot.update_mode as PPLStreamUpdateMode;
         }
 
-        // REPLACE is always absorbed: it is a wholesale replacement whose bucket values can change
-        // while `total` and `size` do not. APPEND is absorbed while the client's offset trails the
-        // engine's committed count, which keeps paging through a finished scan and still rejects a
-        // page served twice, since that leaves the offset already level with `total`.
-        if (updateMode === 'REPLACE' || offset < (snapshot.total ?? 0)) {
-          absorb(snapshot);
-        }
+        // Placement is by the window the engine says it served, never by `update_mode`: a completed
+        // job reports REPLACE while serving only the window asked for, so treating that as a
+        // wholesale replacement would discard every row accumulated while it ran.
+        if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
           failWith(streamJobError(snapshot.error));
@@ -369,8 +343,8 @@ export const executeStreamingQuery = createAsyncThunk<
         }
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
-        if (terminal && !asHistogram && heldRows.length < (snapshot.total ?? 0)) {
-          await pageThroughRemainingRows(snapshot.total ?? 0, withLongNumeralsSupport);
+        if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
+          await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
         }
 
         publish(snapshot, !terminal);

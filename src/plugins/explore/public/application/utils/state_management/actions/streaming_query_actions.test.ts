@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { FakeStreamEngine } from '../../streaming/fake_stream_engine';
 import { PPLStreamJobNotFoundError } from '../../streaming/ppl_stream_errors';
 import { setResults } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -45,7 +46,7 @@ const services = {
   },
 } as any;
 
-const snapshot = (overrides: Record<string, unknown> = {}) => ({
+const snapshot = ({ at = 0, ...overrides }: Record<string, any> = {}) => ({
   status: 'RUNNING',
   schema: [
     { name: '@timestamp', type: 'timestamp' },
@@ -54,6 +55,9 @@ const snapshot = (overrides: Record<string, unknown> = {}) => ({
   datarows: [],
   size: 0,
   total: 0,
+  // The real engine always echoes the window it served, and rows are placed by it. `at` is the
+  // offset these rows start at.
+  window: { offset: at, count: 10_000 },
   ...overrides,
 });
 
@@ -143,6 +147,7 @@ describe('executeStreamingQuery', () => {
           sequence: 2,
           status: 'SUCCEEDED',
           update_mode: 'APPEND',
+          at: 1,
           datarows: [['2026-09-15 10:01:00', 2]],
           size: 1,
           total: 200,
@@ -255,6 +260,7 @@ describe('executeStreamingQuery', () => {
       snapshot({
         id: 'job-1',
         update_mode: 'APPEND',
+        at: n - 1,
         datarows: [[`2026-09-15 10:00:0${n}`, n]],
         size: 1,
         // Committed up front and unchanging, as a completed scan reports it.
@@ -380,6 +386,7 @@ describe('executeStreamingQuery', () => {
           sequence: 2,
           status: 'SUCCEEDED',
           update_mode: 'APPEND',
+          at: 1,
           datarows: [['2026-09-15 10:01:00', 2]],
           size: 1,
           total: 500000,
@@ -673,6 +680,7 @@ describe('executeStreamingQuery', () => {
         id: 'job-1',
         status: 'SUCCEEDED',
         update_mode: 'REPLACE',
+        at: ids[0],
         datarows: ids.map(row),
         size: ids.length,
         total: 25,
@@ -711,5 +719,87 @@ describe('executeStreamingQuery', () => {
     const { statuses } = await run();
 
     expect(statuses[statuses.length - 1].status.status).toBe('ready');
+  });
+});
+
+describe('executeStreamingQuery against a stateful engine', () => {
+  // Per-call mocks cannot express "a window is served from the offset the client asked for", which
+  // is where every streaming bug found in manual testing actually lived. Driving the real thunk
+  // against an engine that honours offset/count covers the lifecycle end to end.
+  const drive = async (engine: FakeStreamEngine, args: Record<string, unknown> = {}) => {
+    mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
+    mockPoll.mockImplementation((a: any) => engine.poll(a));
+    mockCancel.mockImplementation((...a: unknown[]) => engine.cancel(...(a as [])));
+    return run(args);
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  it('accumulates every committed row across the run, not just the last window', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
+
+    const { results } = await drive(engine);
+
+    const hits = results[results.length - 1].results.hits.hits;
+    expect(hits).toHaveLength(40);
+    // Each row carries its absolute index, so a dropped or repeated window is visible here.
+    expect(hits.map((h: any) => h._source.event_id)).toEqual([...Array(40).keys()]);
+  });
+
+  it('asks for successive windows rather than re-reading the first', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
+
+    await drive(engine);
+
+    const offsets = engine.servedWindows.map((w) => w.offset);
+    expect(offsets).toEqual([...new Set(offsets)]);
+    expect(Math.max(...offsets)).toBeGreaterThan(0);
+  });
+
+  it('keeps the rows it holds when the user stops mid-run', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 1_000, commitPerPoll: 10 });
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+    let polls = 0;
+    mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
+    // Two windows arrive, then the user presses Stop.
+    mockPoll.mockImplementation((a: any) => {
+      if (++polls > 2) return Promise.reject(abortError);
+      return engine.poll(a);
+    });
+    mockCancel.mockImplementation((...a: unknown[]) => engine.cancel(...(a as [])));
+
+    const { results, statuses } = await run();
+
+    // The rows already on screen stay on screen; Stop is not a reset.
+    const finalHits = results[results.length - 1].results.hits.hits;
+    expect(finalHits.length).toBeGreaterThan(0);
+    expect(finalHits.map((h: any) => h._source.event_id)).toEqual([
+      ...Array(finalHits.length).keys(),
+    ]);
+    const final = statuses[statuses.length - 1].status;
+    expect(final.streaming.aborted).toBe(true);
+    expect(final.streaming.isPolling).toBe(false);
+    expect(final.streaming.rowsFetched).toBe(finalHits.length);
+  });
+
+  it('renders the single snapshot of a query that finishes inside the submit window', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 5, commitPerPoll: 5, completeOnSubmit: true });
+
+    const { results } = await drive(engine);
+
+    expect(engine.poll).not.toHaveBeenCalled();
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(5);
+  });
+
+  it('reports the engine total while holding only the rows it fetched', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
+
+    const { results, statuses } = await drive(engine);
+
+    expect(results[results.length - 1].results.hits.total).toBe(40);
+    expect(statuses[statuses.length - 1].status.streaming.total).toBe(40);
   });
 });
