@@ -40,6 +40,7 @@ type DragHandleProps = Parameters<DraggableChildFn>[0]['dragHandleProps'];
 export interface QueryRowProps {
   row: QueryRow;
   label: string;
+  positionLabel: string;
   client: PrometheusClient;
   onBuilderChange: (rowId: string, query: string, state: BuilderState) => void;
   onCodeChange: (rowId: string, query: string) => void;
@@ -58,6 +59,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
   ({
     row,
     label,
+    positionLabel,
     client,
     onBuilderChange,
     onCodeChange,
@@ -118,7 +120,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
           'mqpQueryRow--dragging': isDragging,
           'mqpQueryRow--builder': row.mode === 'builder',
         })}
-        data-test-subj={`queryRow-${label}`}
+        data-test-subj={`queryRow-${positionLabel}`}
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>

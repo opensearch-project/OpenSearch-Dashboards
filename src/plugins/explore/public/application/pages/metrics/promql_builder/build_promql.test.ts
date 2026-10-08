@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { builderReducer, buildPromQL, emptyFilter, BuilderAction } from './build_promql';
-import { BuilderState } from './promql_parser';
+import { builderReducer, buildPromQL } from './build_promql';
+import { BuilderState, emptyFilter, parsePromQL } from './promql_parser';
 
 const baseState = (): BuilderState => ({
   metric: 'http_requests_total',
@@ -124,6 +124,33 @@ describe('buildPromQL', () => {
       operations: [],
     };
     expect(buildPromQL(state)).toBe('http_requests_total{job="api"}');
+  });
+
+  it('builds empty-string label matchers', () => {
+    const state: BuilderState = {
+      metric: 'container_cpu_usage_seconds_total',
+      labelFilters: [{ id: 'f1', label: 'image', op: '!=', value: '' }],
+      operations: [],
+    };
+    expect(buildPromQL(state)).toBe('container_cpu_usage_seconds_total{image!=""}');
+  });
+
+  it('skips label filters without a value', () => {
+    const state: BuilderState = {
+      metric: 'up',
+      labelFilters: [{ id: 'f1', label: 'job', op: '=', value: undefined }],
+      operations: [],
+    };
+    expect(buildPromQL(state)).toBe('up');
+  });
+
+  it('round-trips empty-string label matchers through parsePromQL', () => {
+    const query = 'sum by (image) (rate(container_cpu_usage_seconds_total{image!=""}[5m]))';
+    const result = parsePromQL(query);
+    expect(result.canBuild).toBe(true);
+    expect(buildPromQL(result.state)).toBe(
+      'sum by (image)(rate(container_cpu_usage_seconds_total{image!=""}[5m]))'
+    );
   });
 
   it('builds metric with range', () => {

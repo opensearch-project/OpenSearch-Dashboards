@@ -17,8 +17,8 @@
   border-radius: 4px;
   /* stylelint-disable @osd/stylelint/no_restricted_values */
   background: var(--osd-color-container-default, #fff);
-  color: var(--osd-color-text-default, #343741);
-  border: 1px solid var(--osd-color-border-default, #d3dae6);
+  color: var(--osd-color-body-default, #343741);
+  border: 1px solid var(--osd-color-divider-default, #d3dae6);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 12%);
   /* stylelint-enable @osd/stylelint/no_restricted_values */
 }

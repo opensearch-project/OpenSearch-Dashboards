@@ -185,7 +185,9 @@ export const VisualizationContainer = React.memo(() => {
     if (!resultState) return;
     const rows = resultState.hits?.hits || [];
     const fieldSchema = resultState.fieldSchema || [];
-    visualizationBuilder.handleData(rows, fieldSchema);
+    // meta data seriesDisplayNames stores the map between originSeries and displayName
+    const seriesDisplayNames = resultState.frameMeta?.seriesDisplayNames as Record<string, string>;
+    visualizationBuilder.handleData(rows, fieldSchema, seriesDisplayNames);
   }, [visualizationBuilder, resultState]);
 
   const onSelectTimeRange = useCallback(

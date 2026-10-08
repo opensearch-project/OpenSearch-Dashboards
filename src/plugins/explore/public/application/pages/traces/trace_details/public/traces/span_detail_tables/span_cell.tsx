@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { useEffect } from 'react';
 import './span_detail_table.scss';
-import { nanoToMilliSec, round } from '../../utils/helper_functions';
+import { formatSpanDuration } from '../../utils/helper_functions';
 import { extractSpanDuration } from '../../utils/span_data_utils';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../utils/shared_const';
 import { resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
@@ -102,7 +102,7 @@ export const renderSpanCellValue = (
     case 'spanId':
       return <span>{value}</span>;
     case 'durationInNanos':
-      return `${round(nanoToMilliSec(Math.max(0, extractSpanDuration(item))), 2)} ms`;
+      return formatSpanDuration(extractSpanDuration(item));
     case 'startTime':
       return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
     case 'endTime':

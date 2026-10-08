@@ -84,7 +84,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           // Verify expanded state persists
           cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
@@ -92,7 +92,7 @@ export const runQueryTests = () => {
 
           // Switch back to the original language
           if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           } else {
             cy.setQueryLanguage('PPL');
           }
@@ -106,7 +106,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
           cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
@@ -160,7 +160,7 @@ export const runQueryTests = () => {
                       case 'Lucene':
                         expect(href).to.match(/\/query-dsl\/full-text\/query-string\/$/);
                         break;
-                      case 'OpenSearch SQL':
+                      case 'SQL':
                         expect(href).to.match(/\/search-plugins\/sql\/sql\/basic\/$/);
                         break;
                       case 'PPL':

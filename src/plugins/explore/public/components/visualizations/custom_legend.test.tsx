@@ -80,7 +80,7 @@ describe('CustomLegend', () => {
     expect(getByTestId('customLegendItem-seriesB')).toHaveTextContent('seriesB');
   });
 
-  it('toggles series selection on click and emits to legendSelected$', () => {
+  it('focuses the clicked series and selects all when the focused series is clicked again', () => {
     const { getByTestId } = render(
       <CustomLegend
         legend$={legend$}
@@ -92,13 +92,79 @@ describe('CustomLegend', () => {
     const item = getByTestId('customLegendItem-seriesA');
     fireEvent.click(item);
 
-    expect(legendSelected$.getValue()).toEqual({ seriesA: false });
-    expect(item).toHaveClass('customLegend__item--hidden');
+    expect(legendSelected$.getValue()).toEqual({
+      seriesA: true,
+      seriesB: false,
+      seriesC: false,
+    });
+    expect(item).not.toHaveClass('customLegend__item--hidden');
+    expect(getByTestId('customLegendItem-seriesB')).toHaveClass('customLegend__item--hidden');
+    expect(getByTestId('customLegendItem-seriesC')).toHaveClass('customLegend__item--hidden');
 
     fireEvent.click(item);
 
-    expect(legendSelected$.getValue()).toEqual({ seriesA: true });
-    expect(item).not.toHaveClass('customLegend__item--hidden');
+    expect(legendSelected$.getValue()).toEqual({
+      seriesA: true,
+      seriesB: true,
+      seriesC: true,
+    });
+    expect(getByTestId('customLegendItem-seriesB')).not.toHaveClass('customLegend__item--hidden');
+    expect(getByTestId('customLegendItem-seriesC')).not.toHaveClass('customLegend__item--hidden');
+  });
+
+  it.each([
+    ['Ctrl', { ctrlKey: true }],
+    ['Cmd', { metaKey: true }],
+  ])('adds and removes a series from the focused selection with %s-click', (_, modifier) => {
+    const { getByTestId } = render(
+      <CustomLegend
+        legend$={legend$}
+        legendSelected$={legendSelected$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
+      />
+    );
+
+    fireEvent.click(getByTestId('customLegendItem-seriesA'));
+    fireEvent.click(getByTestId('customLegendItem-seriesB'), modifier);
+
+    expect(legendSelected$.getValue()).toEqual({
+      seriesA: true,
+      seriesB: true,
+      seriesC: false,
+    });
+
+    fireEvent.click(getByTestId('customLegendItem-seriesA'), modifier);
+
+    expect(legendSelected$.getValue()).toEqual({
+      seriesA: false,
+      seriesB: true,
+      seriesC: false,
+    });
+  });
+
+  it('supports legend names that are special object properties', () => {
+    const specialNameItem: LegendItem = {
+      label: '__proto__',
+      color: '#54B399',
+      target: { type: 'series', name: '__proto__' },
+    };
+    legend$.next({ default: [specialNameItem, legendItems[0]] });
+
+    const { getByTestId } = render(
+      <CustomLegend
+        legend$={legend$}
+        legendSelected$={legendSelected$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
+      />
+    );
+
+    fireEvent.click(getByTestId('customLegendItem-__proto__'), { ctrlKey: true });
+
+    expect(legendSelected$.getValue()).toEqual({
+      ['__proto__']: false,
+      seriesA: true,
+    });
+    expect(getByTestId('customLegendItem-__proto__')).toHaveClass('customLegend__item--hidden');
   });
 
   it('emits highlighted series on mouse enter', () => {
@@ -137,11 +203,13 @@ describe('CustomLegend', () => {
       />
     );
 
-    // Hide seriesA
-    fireEvent.click(getByTestId('customLegendItem-seriesA'));
-    expect(legendSelected$.getValue()).toEqual({ seriesA: false });
+    fireEvent.click(getByTestId('customLegendItem-seriesA'), { ctrlKey: true });
+    expect(legendSelected$.getValue()).toEqual({
+      seriesA: false,
+      seriesB: true,
+      seriesC: true,
+    });
 
-    // Hover hidden item
     fireEvent.mouseEnter(getByTestId('customLegendItem-seriesA'));
     expect(highlightedLegendTarget$.getValue()).toBeUndefined();
   });
@@ -209,7 +277,7 @@ describe('CustomLegend', () => {
       />
     );
 
-    fireEvent.click(getByTestId('customLegendItem-seriesA'));
+    fireEvent.click(getByTestId('customLegendItem-seriesA'), { ctrlKey: true });
 
     const indicator = getByTestId('customLegendItem-seriesA').querySelector(
       '.customLegend__indicator'

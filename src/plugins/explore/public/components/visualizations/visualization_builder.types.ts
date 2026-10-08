@@ -15,6 +15,7 @@ export interface VisData {
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   unknownColumns: VisColumn[];
+  seriesDisplayNames?: Record<string, string>;
 }
 
 export interface SplitConfig {

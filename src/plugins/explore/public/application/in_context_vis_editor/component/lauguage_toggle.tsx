@@ -29,7 +29,7 @@ const pplOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.pp
 });
 
 const sqlOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.sqlOption', {
-  defaultMessage: 'OpenSearch SQL',
+  defaultMessage: 'SQL',
 });
 
 const getLanguageDisplayLabel = (languageType: SupportLanguageType): string => {

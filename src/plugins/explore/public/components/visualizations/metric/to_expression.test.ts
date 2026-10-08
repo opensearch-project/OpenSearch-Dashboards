@@ -26,7 +26,6 @@ describe('Metric to_expression', () => {
 
   const mockStyles: MetricChartStyle = {
     ...defaultMetricChartStyles,
-    showTitle: true,
     title: 'Test Metric',
   };
 

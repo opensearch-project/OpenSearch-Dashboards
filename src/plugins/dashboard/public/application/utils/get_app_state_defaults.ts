@@ -47,6 +47,7 @@ export function getAppStateDefaults(
     variables: savedDashboard.variablesJSON
       ? normalizePersistedVariables(JSON.parse(savedDashboard.variablesJSON).variables)
       : undefined,
+    layout: savedDashboard.layoutJSON ? JSON.parse(savedDashboard.layoutJSON) : undefined,
     query: savedDashboard.getQuery(),
     filters: savedDashboard.getFilters(),
     viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,

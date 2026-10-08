@@ -20,7 +20,12 @@ import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
-import { binaryOperatorOptions, unaryOperatorOptions, modeToggleOptions } from '../types';
+import {
+  binaryOperatorOptions,
+  unaryOperatorOptions,
+  modeToggleOptions,
+  TransformationConfigSchema,
+} from '../types';
 
 type Mode = 'binary' | 'unary' | 'crossFields';
 type BinaryOperator = '+' | '-' | '*' | '/';
@@ -585,4 +590,146 @@ export const addFieldTransformationDefinition: TransformationDefinition<AddField
   }),
   iconType: 'plusInCircle',
   createInstance: createAddFieldTransformation,
+};
+
+/**
+ * Config schema for add_field.
+ *
+ * The `mode` field is a discriminator: the set of relevant config fields changes
+ * depending on its value.
+ *
+ * mode = "binary": field1, field1CustomValue, binaryOperator, field2, field2CustomValue, alias
+ * mode = "unary":  unaryOperator, unaryField, alias
+ * mode = "crossFields" + crossFieldsOperator != "expression": crossFields, alias
+ * mode = "crossFields" + crossFieldsOperator == "expression": expression, alias
+ *
+ * To use a constant number instead of a field in binary mode, set field1 or field2 to the
+ * special sentinel value "__CUSTOM__" and put the number string in field1CustomValue /
+ * field2CustomValue.
+ */
+export const addFieldConfigSchema: TransformationConfigSchema = {
+  mode: {
+    description:
+      'Calculation mode. Determines which other fields are used. ' +
+      '"binary" — arithmetic between two operands (fields or constants); ' +
+      '"unary" — single math function applied to one numerical field; ' +
+      '"crossFields" — aggregate or expression across multiple numerical fields.',
+    kind: 'enum',
+    defaultValue: 'binary',
+    required: true,
+    discriminates: [
+      'field1',
+      'field1CustomValue',
+      'binaryOperator',
+      'field2',
+      'field2CustomValue',
+      'unaryOperator',
+      'unaryField',
+      'crossFieldsOperator',
+      'crossFields',
+      'expression',
+    ],
+    enumOptions: modeToggleOptions.map((o) => ({ value: o.id, label: o.label })),
+  },
+  // ---- binary mode fields ----
+  field1: {
+    description:
+      '(binary mode) First operand. Set to a column name from the result schema, ' +
+      'or to the sentinel "__CUSTOM__" to use a constant number from field1CustomValue.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  field1CustomValue: {
+    description:
+      '(binary mode) Constant value for field1 when field1 === "__CUSTOM__". ' +
+      'Pass a numeric string, e.g. "60".',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  binaryOperator: {
+    description: '(binary mode) Arithmetic operator to apply between field1 and field2.',
+    kind: 'enum',
+    defaultValue: '+',
+    required: false,
+    enumOptions: binaryOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+  },
+  field2: {
+    description:
+      '(binary mode) Second operand. Same rules as field1 — use a column name or "__CUSTOM__".',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  field2CustomValue: {
+    description:
+      '(binary mode) Constant value for field2 when field2 === "__CUSTOM__". ' +
+      'Pass a numeric string.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  // ---- unary mode fields ----
+  unaryOperator: {
+    description: '(unary mode) Math function to apply to unaryField.',
+    kind: 'enum',
+    defaultValue: 'abs',
+    required: false,
+    enumOptions: unaryOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+  },
+  unaryField: {
+    description: '(unary mode) Numerical column to apply the unary function to.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: false,
+  },
+  // ---- crossFields mode fields ----
+  crossFieldsOperator: {
+    description:
+      '(crossFields mode) How to combine the selected fields. ' +
+      '"total" sums them, "mean" averages them, ' +
+      '"expression" evaluates a custom formula (see expression field).',
+    kind: 'enum',
+    defaultValue: 'total',
+    required: false,
+    enumOptions: [
+      { value: 'total', label: 'Sum (total)' },
+      { value: 'mean', label: 'Mean (average)' },
+      { value: 'expression', label: 'Custom expression' },
+    ],
+  },
+  crossFields: {
+    description:
+      '(crossFields mode, operator != "expression") List of numerical columns to aggregate. ' +
+      'Only the "name" property is used.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: false,
+    nestedSchema: {
+      name: {
+        description: 'Numerical column name.',
+        kind: 'field_name',
+        required: true,
+      },
+    },
+  },
+  expression: {
+    description:
+      '(crossFields mode, operator == "expression") Arithmetic expression over column values. ' +
+      'Reference columns with ${fieldName} syntax, e.g. "${price} * 1.1 - ${discount}". ' +
+      'Supports +, -, *, /, parentheses, and numeric literals.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
+  // ---- shared ----
+  alias: {
+    description:
+      'Name of the new column added to each row. ' +
+      'If omitted, a name is auto-generated from the operator and field names.',
+    kind: 'string',
+    defaultValue: '',
+    required: false,
+  },
 };

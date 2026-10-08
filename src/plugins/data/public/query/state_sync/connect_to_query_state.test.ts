@@ -33,6 +33,7 @@ import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import {
   DataStorage,
+  DEFAULT_DATA,
   Filter,
   FilterStateStore,
   IndexPatternsService,
@@ -177,6 +178,31 @@ describe('connect_storage_to_query_state', () => {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
     });
+  });
+
+  test('state is initialized with the query selected by the application', () => {
+    const initialQuery: Query = {
+      query: 'source = application-default',
+      language: 'PPL',
+      dataset: {
+        id: 'application-default',
+        title: 'Application default',
+        type: DEFAULT_DATA.SET_TYPES.INDEX,
+      },
+    };
+    queryString.setQuery(initialQuery);
+
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.APP_STATE,
+      query: true,
+      initialQuery,
+    });
+
+    expect(osdUrlStateStorage.get('_q')).toEqual({
+      query: initialQuery,
+      filters: filterManager.getAppFilters(),
+    });
+    expect(queryString.getQuery()).toEqual(initialQuery);
   });
 
   test('state is initialized with URL states', () => {

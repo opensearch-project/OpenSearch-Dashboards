@@ -171,8 +171,10 @@ export interface ChatServiceInterface {
   sendMessageWithWindow(
     content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
+
+  setSessionDataSourceList(dataSourceId: string | undefined): void;
 }
 
 /**
@@ -189,8 +191,10 @@ export interface ChatImplementationFunctions {
   sendMessageWithWindow: (
     content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
+
+  setSessionDataSourceList: (dataSourceId: string | undefined) => void;
 }
 
 /**

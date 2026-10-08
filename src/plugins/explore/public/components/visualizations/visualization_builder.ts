@@ -6,7 +6,7 @@
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { isValidMapping } from './visualization_builder_utils';
@@ -48,6 +48,7 @@ export class VisualizationBuilder {
   private transformationService: ITransformationService = createNoOpTransformationService();
   private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
   private lastSchema: Array<{ type?: string; name?: string }> = [];
+  private seriesDisplayNames?: Record<string, string> = {};
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -67,7 +68,7 @@ export class VisualizationBuilder {
     this.subscriptions.push(
       service.getPipeline$().subscribe(() => {
         if (this.lastRawRows.length > 0) {
-          this.handleData(this.lastRawRows, this.lastSchema);
+          this.handleData(this.lastRawRows, this.lastSchema, this.seriesDisplayNames);
         }
       })
     );
@@ -408,12 +409,14 @@ export class VisualizationBuilder {
    */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
-    schema: Array<{ type?: string; name?: string }>
+    schema: Array<{ type?: string; name?: string }>,
+    seriesDisplayNames?: Record<string, string>
   ) {
     // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
     // cache the reference
     this.lastRawRows = rows;
     this.lastSchema = schema;
+    this.seriesDisplayNames = seriesDisplayNames;
 
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rows,
@@ -428,6 +431,7 @@ export class VisualizationBuilder {
       categoricalColumns,
       dateColumns,
       unknownColumns,
+      seriesDisplayNames: this.seriesDisplayNames,
     });
   }
 
@@ -560,6 +564,7 @@ export class VisualizationBuilder {
     this.transformationService = createNoOpTransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
+    this.seriesDisplayNames = {};
     this.isInitialized = false;
   }
 
@@ -597,6 +602,27 @@ export class VisualizationBuilder {
     );
   }
 
+  private getVisualizationRenderConfig$(): Observable<RenderChartConfig | undefined> {
+    return this.getRenderConfig$().pipe(
+      map((config) => {
+        if (!config) {
+          return undefined;
+        }
+
+        // Panel metadata is persisted with the visualization but does not affect chart rendering.
+        return {
+          styles: config.styles,
+          type: config.type,
+          axesMapping: config.axesMapping,
+          splitField: config.splitField,
+          splitLayout: config.splitLayout,
+          showSplitLabel: config.showSplitLabel,
+        };
+      }),
+      distinctUntilChanged((previous, current) => isEqual(previous, current))
+    );
+  }
+
   renderVisualization({
     timeRange,
     onSelectTimeRange,
@@ -606,7 +632,7 @@ export class VisualizationBuilder {
   }) {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
-      config$: this.getRenderConfig$(),
+      config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
       timeRange,
       onSelectTimeRange,

@@ -75,3 +75,26 @@
     justify-content: center;
   }
 }
+
+// Brand marks are transparent and keep their official color; a mark too faint for the theme
+// (see @osd/apm-topology getBrandIconClassName) renders in one color: black on light, white
+// on dark.
+// A mark with a vendor light version (@osd/apm-topology getDependencySystemDarkIcon) renders
+// both; the theme shows one.
+@if lightness($ouiTextColor) > 50 {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnDark {
+    filter: brightness(0) invert(1);
+  }
+
+  .exploreSpanDetailTable__dependencyBrandIcon--hasDarkTheme {
+    display: none;
+  }
+} @else {
+  .exploreSpanDetailTable__dependencyBrandIcon--monoOnLight {
+    filter: brightness(0);
+  }
+
+  .exploreSpanDetailTable__dependencyBrandIcon--darkTheme {
+    display: none;
+  }
+}

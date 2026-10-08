@@ -49,10 +49,14 @@ jest.mock('./utils', () => ({
     toDate: 'now',
     timeFieldName: 'endTime',
   })),
-  queryHasStats: jest.fn(() => false),
+  queryHasAggregation: jest.fn(() => false),
 }));
 
 import { configureStore } from '@reduxjs/toolkit';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../../services/source_type_registry';
 import {
   abortAllActiveQueries,
   defaultPrepareQueryString,
@@ -63,13 +67,19 @@ import {
   executeHistogramQuery,
   executeTabQuery,
   executeDataTableQuery,
+  executeBucketCountQuery,
   shouldSkipQueryExecution,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
+import { queryHasAggregation } from './utils';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import {
+  SAMPLE_SIZE_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
+  ExploreFlavor,
+} from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -142,6 +152,10 @@ jest.mock('../../../../application/legacy/discover/opensearch_dashboards_service
 jest.mock('../slices', () => ({
   setResults: jest.fn(),
   setIndividualQueryStatus: jest.fn(),
+  clearResultsByKey: jest.fn((cacheKey: string) => ({
+    type: 'results/clearResultsByKey',
+    payload: cacheKey,
+  })),
 }));
 
 jest.mock('../../../../components/fields_selector/lib/field_calculator', () => ({
@@ -369,6 +383,27 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it("passes a source type language's query through unchanged", () => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+      setSourceTypeRegistry(registry);
+
+      try {
+        expect(
+          defaultPrepareQueryString({ query: 'fields @message | limit 5', language: 'FakeQL' })
+        ).toBe('fields @message | limit 5');
+      } finally {
+        setSourceTypeRegistry(new SourceTypeRegistryService());
+      }
+    });
+
     it('should handle empty query string', () => {
       const pplQuery: Query = {
         query: '',
@@ -542,8 +577,66 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           field2: 1,
           field3: 1,
         },
+        nonEmptyFieldCounts: {
+          field1: 2,
+          field2: 1,
+          field3: 1,
+        },
         dataset: mockDataView,
         elapsedMs: 100,
+      });
+    });
+
+    it('should exclude empty values from nonEmptyFieldCounts but not fieldCounts', () => {
+      // Tabular responses (e.g. PPL) put every schema field on every row, using null for the
+      // ones a document doesn't populate.
+      const rawResults = {
+        hits: {
+          hits: [
+            {
+              _id: '1',
+              _source: {
+                populated: 'value1',
+                empty: null,
+                sparse: null,
+                falsy: 0,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+            {
+              _id: '2',
+              _source: {
+                populated: 'value2',
+                empty: null,
+                sparse: 'value3',
+                falsy: false,
+                empty_array: [],
+                null_array: [null],
+              },
+            },
+          ],
+          total: 2,
+        },
+        elapsedMs: 100,
+      } as any;
+
+      const result = defaultResultsProcessor(rawResults, mockDataView);
+
+      // Every field is "present" on both rows
+      expect(result.fieldCounts).toEqual({
+        populated: 2,
+        empty: 2,
+        sparse: 2,
+        falsy: 2,
+        empty_array: 2,
+        null_array: 2,
+      });
+      // Only fields carrying real values are counted; 0 and false count, nulls don't
+      expect(result.nonEmptyFieldCounts).toEqual({
+        populated: 2,
+        sparse: 1,
+        falsy: 2,
       });
     });
 
@@ -1914,6 +2007,169 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
   });
 
+  describe('partial results from polling sources', () => {
+    const mockGetState = jest.fn();
+    let mockDispatch: jest.Mock;
+    const finalResults = { hits: { hits: [{ _id: '1' }, { _id: '2' }], total: 2 } };
+    const partialResults = { hits: { hits: [{ _id: '1' }], total: 1 } };
+    const partialFrame = {
+      schema: [{ name: 'message', type: 'string' }],
+      meta: { progress: { recordsMatched: 1, recordsScanned: 10 } },
+    };
+
+    // A polling source reports one partial before the fetch resolves with the final result.
+    const fetchWithOnePartial = (beforePartial?: () => void) =>
+      mockSearchSource.fetch.mockImplementation(async (options: any) => {
+        beforePartial?.();
+        options.onPartialResults?.(partialResults, partialFrame);
+        return finalResults;
+      });
+
+    const runDataTableQuery = (queryString = 'source=logs') =>
+      executeDataTableQuery({
+        services: mockServices,
+        cacheKey: 'partial-cache-key',
+        queryString,
+      })(mockDispatch, mockGetState, undefined);
+
+    const progressDispatches = () =>
+      mockDispatch.mock.calls.filter(
+        ([action]) =>
+          action?.type === 'queryEditor/setIndividualQueryStatus' && action.payload.status.progress
+      );
+
+    // The key's LOADING entry, which a newer query's clearQueryStatusMap would remove.
+    const stateWithKey = (present = true) => ({
+      query: {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { id: 'test', type: 'INDEX_PATTERN' },
+      },
+      queryEditor: {
+        queryStatusMap: present
+          ? { 'partial-cache-key': { status: QueryExecutionStatus.LOADING } }
+          : {},
+      },
+    });
+
+    beforeEach(() => {
+      mockDispatch = jest.fn();
+      mockGetState.mockReturnValue(stateWithKey());
+      (dataPublicModule.indexPatterns as any).isDefault.mockReturnValue(true);
+      (queryHasAggregation as jest.Mock).mockReturnValue(false);
+    });
+
+    it('streams partial rows for a row query and reports scan progress', async () => {
+      fetchWithOnePartial();
+
+      await runDataTableQuery();
+
+      expect(setResults).toHaveBeenCalledWith({
+        cacheKey: 'partial-cache-key',
+        results: expect.objectContaining({
+          hits: partialResults.hits,
+          fieldSchema: partialFrame.schema,
+        }),
+      });
+      expect(setResults).toHaveBeenCalledTimes(2); // the partial, then the final result
+      expect(progressDispatches()[0][0].payload.status).toMatchObject({
+        status: QueryExecutionStatus.LOADING,
+        progress: { recordsMatched: 1, recordsScanned: 10 },
+      });
+    });
+
+    it('does not stream partials for an aggregation query', async () => {
+      (queryHasAggregation as jest.Mock).mockReturnValue(true);
+      fetchWithOnePartial();
+
+      await runDataTableQuery('source=logs | stats count() by host');
+
+      expect(mockSearchSource.fetch.mock.calls[0][0].onPartialResults).toBeUndefined();
+      expect(setResults).toHaveBeenCalledTimes(1); // the final result only
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('ignores a partial once a newer query has cleared its key', async () => {
+      fetchWithOnePartial(() => mockGetState.mockReturnValue(stateWithKey(false)));
+
+      await runDataTableQuery();
+
+      expect(progressDispatches()).toHaveLength(0);
+      expect(setResults).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a partial from a run replaced by a newer run of the same key', async () => {
+      // A fresh controller per run; starting the second run aborts the first.
+      (global.AbortController as jest.Mock).mockImplementation(() => {
+        const controller = {
+          signal: { aborted: false },
+          abort: jest.fn(() => {
+            controller.signal.aborted = true;
+          }),
+        };
+        return controller;
+      });
+      let deliverFirstPartial: () => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(
+          (options: any) =>
+            new Promise((resolve) => {
+              deliverFirstPartial = () => {
+                options.onPartialResults(partialResults, partialFrame);
+                resolve(finalResults);
+              };
+            })
+        )
+        .mockResolvedValueOnce(finalResults);
+
+      const first = runDataTableQuery();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await runDataTableQuery();
+      deliverFirstPartial();
+      await first;
+
+      expect(progressDispatches()).toHaveLength(0);
+    });
+
+    it('clears partial rows when the query fails', async () => {
+      mockSearchSource.fetch.mockImplementation(async (options: any) => {
+        options.onPartialResults(partialResults, partialFrame);
+        throw Object.assign(new Error('boom'), { body: { message: 'boom' } });
+      });
+
+      await runDataTableQuery().catch(() => undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'results/clearResultsByKey',
+        payload: 'partial-cache-key',
+      });
+    });
+
+    it('ignores a partial that arrives after the query was aborted', async () => {
+      fetchWithOnePartial(() => {
+        mockAbortController.signal.aborted = true;
+      });
+
+      await runDataTableQuery();
+
+      expect(progressDispatches()).toHaveLength(0);
+      expect(setResults).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the poll interval setting to the fetch', async () => {
+      (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+        key === ASYNC_QUERY_POLL_INTERVAL_SETTING ? 2000 : undefined
+      );
+      mockSearchSource.fetch.mockResolvedValue(finalResults);
+
+      await runDataTableQuery();
+
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({ pollInterval: 2000, onPartialResults: expect.any(Function) })
+      );
+    });
+  });
+
   describe('executeTabQuery', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
@@ -1970,6 +2226,89 @@ describe('Query Actions - Comprehensive Test Suite', () => {
               status: QueryExecutionStatus.READY,
             }),
           }),
+        })
+      );
+    });
+
+    it('lets a superseded run for the same key leave its successor untouched', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let rejectFirst: (error: Error) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((_resolve, reject) => (rejectFirst = reject)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const statusesFor = () =>
+        mockDispatch.mock.calls
+          .map(([action]) => action)
+          .filter(
+            (action) =>
+              action?.type === 'queryEditor/setIndividualQueryStatus' &&
+              action.payload.cacheKey === 'tab-key'
+          )
+          .map((action) => action.payload.status.status);
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const abortError = new Error('Aborted');
+      abortError.name = 'AbortError';
+      rejectFirst(abortError);
+      await first;
+      expect(statusesFor()).not.toContain(QueryExecutionStatus.UNINITIALIZED);
+
+      resolveSecond({ hits: { hits: [{ _id: '1', _source: {} }], total: 1 }, took: 1 });
+      await second;
+      expect(statusesFor()).toEqual([
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.LOADING,
+        QueryExecutionStatus.READY,
+      ]);
+    });
+
+    it('drops the results of a superseded run whose fetch resolves after it was replaced', async () => {
+      (global.AbortController as jest.Mock).mockImplementation(() => ({
+        abort: jest.fn(),
+        signal: { aborted: false },
+      }));
+      let resolveFirst: (value: unknown) => void = () => {};
+      let resolveSecond: (value: unknown) => void = () => {};
+      mockSearchSource.fetch
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+      const params = {
+        services: mockServices,
+        cacheKey: 'tab-key',
+        queryString: 'source=logs | stats count()',
+      };
+      const staleHits = { hits: { hits: [{ _id: 'stale', _source: {} }], total: 1 }, took: 1 };
+      const freshHits = { hits: { hits: [{ _id: 'fresh', _source: {} }], total: 1 }, took: 1 };
+
+      const first = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const second = executeTabQuery(params)(mockDispatch, mockGetState, undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      resolveFirst(staleHits);
+      await first;
+      expect(setResults).not.toHaveBeenCalled();
+
+      resolveSecond(freshHits);
+      await second;
+      expect(setResults).toHaveBeenCalledTimes(1);
+      expect(setResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheKey: 'tab-key',
+          results: expect.objectContaining({ hits: freshHits.hits }),
         })
       );
     });

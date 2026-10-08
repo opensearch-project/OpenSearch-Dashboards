@@ -13,6 +13,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -29,6 +30,37 @@ import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { TraceFilterBar } from './public/traces/trace_filter_bar';
 import { TraceServiceFlow } from './public/services/trace_service_flow';
+import {
+  buildTraceDependencies,
+  TraceDependenciesContext,
+} from './public/services/trace_dependencies';
+
+/** Most spans fetched for one trace. */
+const TRACE_SPAN_LIMIT = 100;
+
+export interface DependencyFilterValue {
+  field: string;
+  value: string;
+}
+
+/**
+ * Span filters after a click on a dependency card: the clicked dependency's filter replaces
+ * the one an earlier dependency click applied (`last`), as filters on different fields would
+ * AND to nothing; clicking the active dependency again removes its filter. Other filters stay.
+ * Returns the new filters and the dependency filter now applied (null when toggled off).
+ */
+export const toggleDependencyFilterIn = (
+  filters: SpanFilter[],
+  last: DependencyFilterValue | null,
+  clicked: DependencyFilterValue
+): { filters: SpanFilter[]; applied: DependencyFilterValue | null } => {
+  const isSame = (f: SpanFilter, target: DependencyFilterValue) =>
+    f.field === target.field && f.value === target.value;
+  const isActive = filters.some((f) => isSame(f, clicked));
+  const next = filters.filter((f) => !(last && isSame(f, last)) && f.field !== clicked.field);
+  if (isActive) return { filters: next, applied: null };
+  return { filters: [...next, { ...clicked, operator: '=' }], applied: clicked };
+};
 import {
   NoMatchMessage,
   getServiceInfo,
@@ -173,6 +205,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
+  // Set when the span fetch itself fails (e.g. a backend query error). Kept
+  // distinct from "no matching spans" so we don't mislabel a failed query as an
+  // invalid/not-found trace.
+  const [fetchError, setFetchError] = useState<Error | null>(null);
   // Filterable fields resolved from the dataset (data view) field list. Resolved
   // only when the dataset changes (the data-view lookup is async/expensive), then
   // merged UI-side with the current result's fields in the datasetFields memo.
@@ -279,19 +315,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       }
 
       try {
+        setFetchError(null);
         // Separate client-side filters from server-side filters
         const serverFilters = filters.filter((filter) => !isClientSideFilter(filter));
 
         const response = await pplService.fetchTraceSpans({
           traceId,
           dataset,
-          limit: 100,
+          limit: TRACE_SPAN_LIMIT,
           filters: serverFilters,
         });
         setPplQueryData(response);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch trace data:', err);
+        setFetchError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsBackgroundLoading(false);
         setPrevTraceId(traceId);
@@ -476,6 +514,35 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFiltersWithStorage(newFilters);
   };
 
+  // Dependency calls, classified once for the whole (unfiltered) trace and shared by the
+  // trace map, waterfall and Gantt: a filter must not turn a traced call into an external
+  // dependency by hiding the SERVER span it reached. A trace at the fetch cap may be cut
+  // off, so no external dependency is inferred for it.
+  const traceDependencies = useMemo(
+    () =>
+      buildTraceDependencies(unfilteredHits, {
+        complete: unfilteredHits.length < TRACE_SPAN_LIMIT,
+      }),
+    [unfilteredHits]
+  );
+
+  // A dependency-card click filters the trace to that dependency. It replaces the filter of
+  // an earlier dependency click (filters on different fields would AND to nothing), and a
+  // second click on the same dependency removes it.
+  const lastDependencyFilterRef = useRef<DependencyFilterValue | null>(null);
+  const toggleDependencyFilter = (field: string, value: string) => {
+    const { filters, applied } = toggleDependencyFilterIn(
+      spanFilters,
+      lastDependencyFilterRef.current,
+      {
+        field,
+        value,
+      }
+    );
+    lastDependencyFilterRef.current = applied;
+    setSpanFiltersWithStorage(filters);
+  };
+
   const activeServiceFilter = spanFilters.find((f) => f.field === SERVICE_NAME_FILTER_FIELD)
     ?.value as string | undefined;
 
@@ -621,6 +688,28 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               <EuiLoadingSpinner size="xl" />
             </div>
           </EuiPanel>
+        ) : fetchError ? (
+          <EuiPanel paddingSize="l">
+            <EuiCallOut
+              title={i18n.translate('explore.traceView.fetchError.title', {
+                defaultMessage: 'Error loading trace {traceId}',
+                values: { traceId },
+              })}
+              color="danger"
+              iconType="alert"
+              data-test-subj="traceViewFetchError"
+            >
+              <p>
+                {i18n.translate('explore.traceView.fetchError.description', {
+                  defaultMessage:
+                    'The query to load this trace failed. This is a query error, not a missing trace. Please try again.',
+                })}
+              </p>
+              <EuiText size="s" color="subdued">
+                {fetchError.message}
+              </EuiText>
+            </EuiCallOut>
+          </EuiPanel>
         ) : fieldValidation && !fieldValidation.isValid ? (
           <MissingFieldsEmptyState
             missingFields={fieldValidation.missingFields}
@@ -629,7 +718,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         ) : unfilteredHits.length === 0 ? (
           <NoMatchMessage traceId={traceId} />
         ) : (
-          <>
+          <TraceDependenciesContext.Provider value={traceDependencies}>
             <div className="exploreTraceView__tabsContainer">
               <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
                 <TraceDetailTabs
@@ -693,6 +782,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               onFilterService={(serviceName) =>
                                 addSpanFilter(SERVICE_NAME_FILTER_FIELD, serviceName)
                               }
+                              onFilterAttribute={toggleDependencyFilter}
+                              activeSpanFilters={spanFilters}
+                              traceDependencies={traceDependencies}
                               // The narrow flyout shows the whole graph fit-to-view,
                               // so the minimap would only cover nodes — hide it there.
                               showMinimap={!isFlyout}
@@ -762,7 +854,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                 </>
               )}
             </EuiResizableContainer>
-          </>
+          </TraceDependenciesContext.Provider>
         )}
       </>
     );

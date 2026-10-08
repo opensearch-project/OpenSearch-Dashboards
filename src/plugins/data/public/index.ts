@@ -546,6 +546,7 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   useSyncQueryStateWithUrl,
+  getGlobalQueryUrlState,
   QueryState,
   getDefaultQuery,
   FilterManager,

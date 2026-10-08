@@ -642,6 +642,16 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/search-plugins/sql/limitation/
             base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/limitation/`,
           },
+          // Landing pages for each language, as opposed to the `ppl` and `sql` entries
+          // above, which point at a syntax reference and a tutorial respectively.
+          sqlPplIndex: {
+            // https://opensearch.org/docs/latest/sql-and-ppl/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/ppl/index/
+            ppl: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/ppl/index/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/sql/index/
+            sql: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/sql/index/`,
+          },
         },
       },
     });
@@ -996,6 +1006,11 @@ export interface DocLinksStart {
       };
       readonly sqlPplLimitation: {
         readonly base: string;
+      };
+      readonly sqlPplIndex: {
+        readonly base: string;
+        readonly ppl: string;
+        readonly sql: string;
       };
     };
   };

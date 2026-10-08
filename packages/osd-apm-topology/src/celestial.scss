@@ -227,6 +227,40 @@
   filter: brightness(0) invert(1);
 }
 
+/* Brand marks (dependency icons such as PostgreSQL or Kafka) are transparent and keep their
+   official color in both themes, so they are not inverted with the monochrome icons. A mark
+   too faint for a theme (see getBrandIconClassName) renders in one color there instead:
+   black on light, white on dark. These selectors outrank the containers' dark-mode inversion. */
+img.celBrandIcon--monoOnLight {
+  filter: brightness(0);
+}
+
+/* A mark with a vendor light version (see getDependencySystemDarkIcon) renders both; the theme
+   shows one. */
+img.celBrandIcon--darkTheme {
+  display: none;
+}
+
+:root.celestial--dark img.celBrandIcon--lightTheme {
+  display: none;
+}
+
+:root.celestial--dark img.celBrandIcon--darkTheme {
+  display: inline;
+}
+
+:root.celestial--dark .celDonutIcon img.celBrandIcon,
+:root.celestial--dark .celServiceCircle__interior img.celBrandIcon,
+:root.celestial--dark .celMetricsCard__icon img.celBrandIcon {
+  filter: none;
+}
+
+:root.celestial--dark .celDonutIcon img.celBrandIcon--monoOnDark,
+:root.celestial--dark .celServiceCircle__interior img.celBrandIcon--monoOnDark,
+:root.celestial--dark .celMetricsCard__icon img.celBrandIcon--monoOnDark {
+  filter: brightness(0) invert(1);
+}
+
 /* Suppress the global EUI focus-ring animation inside the topology map.
    OSD's _base.scss applies `animation: focusRingAnimate !important` to every
    :focus element that lacks an "eui" class prefix or `osd-resetFocusState`.

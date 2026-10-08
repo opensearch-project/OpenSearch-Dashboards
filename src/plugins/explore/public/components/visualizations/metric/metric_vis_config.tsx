@@ -25,8 +25,10 @@ export type LayoutType = 'horizontal' | 'vertical' | 'auto';
 export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
 export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
+export const shouldShowMetricName = (textMode?: TextMode) =>
+  !textMode || textMode === 'name' || textMode === 'value_and_name';
+
 export interface MetricChartStyleOptions extends StandardOptions {
-  showTitle?: boolean;
   title?: string;
   fontSize?: number;
   titleSize?: number;
@@ -88,7 +90,6 @@ export type MetricChartStyle = Required<
   >;
 
 export const defaultMetricChartStyles: MetricChartStyle = {
-  showTitle: true,
   title: '',
   showPercentage: false,
   percentageColor: 'standard',

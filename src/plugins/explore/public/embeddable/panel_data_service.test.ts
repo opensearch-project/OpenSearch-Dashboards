@@ -101,6 +101,32 @@ describe('PanelDataService', () => {
       expect(result.rowCount).toBe(2);
       expect(result.rows).toEqual([{ v: 2 }, { v: 3 }]);
     });
+
+    it('truncates to MAX_ROWS and adds a note when there are more than 20 rows', async () => {
+      const service = PanelDataService.getInstance();
+      const manyRows = Array.from({ length: 50 }, (_, i) => ({ _source: { i } }));
+      service.setPanelData('panel-1', { rows: manyRows, panelTitle: 'Big Panel' });
+
+      const result = await getRegisteredAction().handler({ savedObjectId: 'panel-1' });
+
+      expect(result.success).toBe(true);
+      expect(result.rowCount).toBe(50);
+      expect(result.rows).toHaveLength(20);
+      expect(result.truncated).toBe(true);
+      expect(result.note).toContain('20 of 50');
+    });
+
+    it('does not add truncated flag when rows fit within the limit', async () => {
+      const service = PanelDataService.getInstance();
+      const fewRows = Array.from({ length: 5 }, (_, i) => ({ _source: { i } }));
+      service.setPanelData('panel-1', { rows: fewRows, panelTitle: 'Small Panel' });
+
+      const result = await getRegisteredAction().handler({ savedObjectId: 'panel-1' });
+
+      expect(result.success).toBe(true);
+      expect(result.rows).toHaveLength(5);
+      expect(result.truncated).toBeUndefined();
+    });
   });
 
   describe('removePanelData', () => {
