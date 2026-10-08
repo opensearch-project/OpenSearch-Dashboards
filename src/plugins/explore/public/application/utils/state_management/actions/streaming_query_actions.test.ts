@@ -373,7 +373,9 @@ describe('executeStreamingQuery', () => {
     mockPoll.mockResolvedValue(snapshot({ id: 'job-1', sequence: 1, status: 'SUCCEEDED' }));
 
     const { statuses } = await run();
-    const streamingStates = statuses.map((s) => s.status.streaming?.isPolling);
+    const streamingStates = statuses
+      .map((s) => s.status.streaming?.isPolling)
+      .filter((v) => v !== undefined);
 
     expect(streamingStates[0]).toBe(true);
     expect(streamingStates[streamingStates.length - 1]).toBe(false);
@@ -592,6 +594,34 @@ describe('executeStreamingQuery', () => {
       expect(mockSubmit.mock.calls[0][0]).not.toHaveProperty('profile');
       services.queryProfilingEnabled = false;
     });
+  });
+
+  // Until this key reports LOADING, a faster sibling completing makes the overall status READY and
+  // overall_status_middleware clears hasUserInitiatedQuery, which hides Stop for the whole run.
+  it('reports LOADING for its cache key before awaiting submit', async () => {
+    let resolveSubmit: (v: any) => void = () => {};
+    mockSubmit.mockReturnValue(new Promise((r) => (resolveSubmit = r)));
+
+    const dispatched: any[] = [];
+    const dispatch: jest.Mock = jest.fn((action: any) => {
+      dispatched.push(action);
+      return typeof action === 'function' ? action(dispatch, () => ({})) : action;
+    });
+    const thunk = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+    } as any);
+    const promise = thunk(dispatch, () => ({}) as any, undefined);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const first = dispatched.find((a) => a?.type === setIndividualQueryStatus.type);
+    expect(first?.payload).toMatchObject({ cacheKey: 'ck', status: { status: 'loading' } });
+
+    resolveSubmit(snapshot({ status: 'SUCCEEDED' }));
+    jest.advanceTimersByTime(STREAMING_POLL_INTERVAL_MS);
+    await promise;
   });
 
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {

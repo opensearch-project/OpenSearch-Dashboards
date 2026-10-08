@@ -258,6 +258,19 @@ export const executeStreamingQuery = createAsyncThunk<
     };
 
     try {
+      // Claim the cache key as LOADING before awaiting submit, which can take up to
+      // DEFAULT_WAIT_FOR_COMPLETION. Until this key reports, a faster sibling query completing makes
+      // the computed overall status READY, and overall_status_middleware then clears
+      // hasUserInitiatedQuery — which hides Stop for the rest of the run.
+      if (!isCurrent || isCurrent()) {
+        dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: { status: QueryExecutionStatus.LOADING, startTime: startedAt },
+          })
+        );
+      }
+
       // The same formatter the non-streaming path hands to `convertResult`, so date values render
       // identically. Streaming is PPL-only, so the language is known here. Resolved inside the try:
       // if it fails, nothing has been published, so the run reports itself unavailable and the
