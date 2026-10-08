@@ -36,6 +36,7 @@ import { clearResults } from '../../application/utils/state_management/slices';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
+import { abortAllStreamingQueries } from '../../application/utils/streaming/streaming_abort_registry';
 import { QueryExecutionButton } from './query_execution_button';
 import { Query, TimeRange } from '../../../../data/common';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
@@ -177,9 +178,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const handleQueryCancel = useCallback(() => {
     abortAllActiveQueries();
-    // Also cancel any in-flight PPL analyze request tied to this query.
+    // Streaming runs are held in their own registry, not activeQueryAbortControllers.
+    const stoppedStreaming = abortAllStreamingQueries();
     cancelPPLAnalyze();
     dispatch(setHasUserInitiatedQuery(false));
+
+    // A stopped streaming query keeps the rows it already rendered, and each run publishes its own
+    // terminal status with how far it got, so clearing results or resetting the status here would
+    // discard both.
+    if (stoppedStreaming) return;
+
     // Clear all cached results to ensure refresh works properly after cancel
     dispatch(clearResults());
     // Reset overall query status to UNINITIALIZED to stop spinner immediately

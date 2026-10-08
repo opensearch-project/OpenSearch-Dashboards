@@ -460,3 +460,14 @@
 # those queries to the Open Distro endpoints. When disabled (default), SQL/PPL are shown for all
 # datasets and queries always use the /_plugins endpoints.
 # queryEnhancements.legacyElasticsearchCompatibility.enabled: false
+
+# LOCAL TESTING ONLY - do not commit.
+# Deployment flag for PPL streaming partial results (PR 2, item 3). Off by default; DynamicConfig can
+# override it at runtime. Explore also requires the per-user explore:enableStreamingResults setting.
+queryEnhancements.ppl.streaming.enabled: true
+
+# Per-user opt-in, forced on here because the cluster's .kibana writes are failing (broken logs dir),
+# so the advanced-settings UI cannot persist it.
+uiSettings.overrides:
+  explore:enableStreamingResults: true
+  explore:experimental: true

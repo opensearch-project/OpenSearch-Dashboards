@@ -61,10 +61,15 @@ export const abortStreamingQuery = (cacheKey: string): boolean => {
 
 export const isStreamingQueryAbortable = (cacheKey: string): boolean => runs.has(cacheKey);
 
-/** Aborts everything in flight. Used when the app unmounts or the dataset changes wholesale. */
-export const abortAllStreamingQueries = (): void => {
+/**
+ * Aborts everything in flight. Returns true when there was something to abort, so Stop can leave the
+ * terminal state to the aborted runs, which keep their rendered rows and report how far they got.
+ */
+export const abortAllStreamingQueries = (): boolean => {
+  if (runs.size === 0) return false;
   for (const { abort } of runs.values()) {
     abort();
   }
   runs.clear();
+  return true;
 };

@@ -84,6 +84,12 @@ describe('streamingAbortRegistry', () => {
     expect(isCurrentStreamingRun('gone', 'token-1')).toBe(true);
   });
 
+  it('reports whether there was anything to abort, which Stop keys off', () => {
+    expect(abortAllStreamingQueries()).toBe(false);
+    registerStreamingAbort('a', jest.fn());
+    expect(abortAllStreamingQueries()).toBe(true);
+  });
+
   it('aborts every in-flight query', () => {
     const a = jest.fn();
     const b = jest.fn();
