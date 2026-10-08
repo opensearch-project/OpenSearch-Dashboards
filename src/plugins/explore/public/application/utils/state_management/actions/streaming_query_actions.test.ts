@@ -234,6 +234,32 @@ describe('executeStreamingQuery', () => {
     expect(finalHits[0]._source.event_id).toBe(999);
   });
 
+  // `total` plateaus as soon as the engine finishes scanning, so gating on its growth stranded the
+  // client on its first page and silently discarded the rest.
+  it('keeps paging after the engine stops reporting growth', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    const page = (n: number) =>
+      snapshot({
+        id: 'job-1',
+        update_mode: 'APPEND',
+        datarows: [[`2026-09-15 10:00:0${n}`, n]],
+        size: 1,
+        // Committed up front and unchanging, as a completed scan reports it.
+        total: 3,
+      });
+    mockPoll
+      .mockResolvedValueOnce(page(1))
+      .mockResolvedValueOnce(page(2))
+      .mockResolvedValueOnce(page(3))
+      .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 3 }));
+
+    const { results } = await run();
+
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(3);
+    expect(mockPoll).toHaveBeenNthCalledWith(2, expect.objectContaining({ offset: 1 }));
+    expect(mockPoll).toHaveBeenNthCalledWith(3, expect.objectContaining({ offset: 2 }));
+  });
+
   it('does not double-count a repeated APPEND snapshot', async () => {
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1', sequence: 0 }));
     const repeated = snapshot({

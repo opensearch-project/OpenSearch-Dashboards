@@ -299,10 +299,6 @@ export const executeStreamingQuery = createAsyncThunk<
       }
 
       jobId = submitted.id;
-      // The envelope carries no monotonic sequence, so staleness is judged per update mode: an
-      // APPEND snapshot is only absorbed when the row count grew, whereas a REPLACE snapshot is
-      // always absorbed because its bucket counts change while `total` and `size` stay constant.
-      let lastTotal = submitted.total ?? 0;
       // Conservative until classification arrives: REPLACE re-reads from the start, which is
       // always safe, whereas assuming APPEND could interleave two incompatible orderings.
       let updateMode: PPLStreamUpdateMode = 'REPLACE';
@@ -324,13 +320,11 @@ export const executeStreamingQuery = createAsyncThunk<
           updateMode = snapshot.update_mode as PPLStreamUpdateMode;
         }
 
-        // APPEND: only absorb when the accumulator grew, or a repeated snapshot would double-count
-        // rows. REPLACE: always absorb — it is a wholesale replacement, so re-applying an identical
-        // snapshot is harmless, and bucket values can change while `total` and `size` do not (a
-        // histogram keeps the same bucket count while the counts inside it move).
-        const grew = (snapshot.total ?? 0) > lastTotal;
-        if (updateMode === 'REPLACE' || grew) {
-          lastTotal = Math.max(lastTotal, snapshot.total ?? 0);
+        // REPLACE is always absorbed: it is a wholesale replacement whose bucket values can change
+        // while `total` and `size` do not. APPEND is absorbed while the client's offset trails the
+        // engine's committed count, which keeps paging through a finished scan and still rejects a
+        // page served twice, since that leaves the offset already level with `total`.
+        if (updateMode === 'REPLACE' || offset < (snapshot.total ?? 0)) {
           absorb(snapshot);
         }
 
