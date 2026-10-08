@@ -9,8 +9,12 @@ import { SplitChartInstance } from './split_chart_instance';
 
 import './split_container.scss';
 
+interface SplitGroup {
+  original: string;
+  displayName: string;
+}
 interface SplitContainerProps {
-  groups: string[];
+  groups: SplitGroup[];
   layout: SplitLayout;
   showLabel?: boolean;
   verticalItemMinHeight?: number;
@@ -90,8 +94,9 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
       <div ref={containerRef} className={`splitContainer ${layoutClass}`} style={containerStyle}>
         {groups.map((group, index) => (
           <SplitChartInstance
-            key={group}
-            label={group}
+            key={group.original}
+            label={group.original}
+            displayName={group.displayName}
             style={itemStyles[index]}
             showLabel={showLabel}
             scrollRoot={containerRef}

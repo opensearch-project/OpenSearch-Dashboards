@@ -584,13 +584,17 @@ export class ExploreEmbeddable
         }),
     });
     const rawRows = resp.hits.hits;
-    const fieldSchema = searchSource.getDataFrame()?.schema;
+    const dataFrame = searchSource.getDataFrame();
+    const fieldSchema = dataFrame?.schema;
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rawRows,
       fieldSchema ?? []
     );
 
-    const visualizationData = normalizeResultRows(transformedRows, finalSchema ?? []);
+    const visualizationData = {
+      ...normalizeResultRows(transformedRows, finalSchema ?? []),
+      seriesDisplayNames: dataFrame?.meta?.seriesDisplayNames as Record<string, string>,
+    };
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;

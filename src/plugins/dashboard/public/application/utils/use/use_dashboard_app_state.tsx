@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { map } from 'rxjs/operators';
 import { Subscription, merge } from 'rxjs';
 import { IndexPattern, connectToQueryState, opensearchFilters } from '../../../../../data/public';
-import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
+import { normalizeDashboardQuery } from '../../utils/migrate_legacy_query';
 import { DashboardServices } from '../../../types';
 
 import { DashboardAppStateContainer } from '../../../types';
@@ -81,7 +81,9 @@ export const useDashboardAppAndGlobalState = ({
 
       // sync initial app state from state container to managers
       filterManager.setAppFilters(cloneDeep(stateContainer.getState().filters));
-      queryString.setQuery(migrateLegacyQuery(stateContainer.getState().query));
+      // A saved dashboard owns its complete query. Replace the shared query instead of merging it,
+      // otherwise a dataset left by the previous app can become part of the dashboard query.
+      queryString.setQuery(normalizeDashboardQuery(stateContainer.getState().query), false, false);
 
       // setup syncing of app filters between app state and query services
       const stopSyncingAppFilters = connectToQueryState(
@@ -89,11 +91,16 @@ export const useDashboardAppAndGlobalState = ({
         {
           set: ({ filters, query }) => {
             stateContainer.transitions.set('filters', filters || []);
-            stateContainer.transitions.set('query', query || queryString.getDefaultQuery());
+            // An absent query must stay empty rather than regenerating a dataset-aware default that
+            // Dashboard cannot execute at the dashboard level.
+            stateContainer.transitions.set(
+              'query',
+              normalizeDashboardQuery(query || { query: '', language: 'kuery' })
+            );
           },
           get: () => ({
             filters: stateContainer.getState().filters,
-            query: migrateLegacyQuery(stateContainer.getState().query),
+            query: normalizeDashboardQuery(stateContainer.getState().query),
           }),
           state$: stateContainer.state$.pipe(
             map((state) => ({

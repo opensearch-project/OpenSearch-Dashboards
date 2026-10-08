@@ -250,6 +250,20 @@ describe('DataViews', () => {
   });
 
   describe('createSavedObject error handling', () => {
+    test('reuseExisting returns the existing data view instead of throwing on duplicate', async () => {
+      const title = 'reuse-pattern-*';
+      const existing = { id: 'existing-id', attributes: { title }, references: [] };
+      savedObjectsClient.find = jest.fn().mockResolvedValue([existing]);
+      const existingView = { id: 'existing-id', title } as any;
+      dataViews.get = jest.fn().mockResolvedValue(existingView);
+
+      const dataView = await dataViews.create({ title }, true);
+      const result = await dataViews.createSavedObject(dataView, false, true);
+
+      expect(dataViews.get).toHaveBeenCalledWith('existing-id');
+      expect(result).toBe(existingView);
+    });
+
     test('throws DuplicateDataViewError on 409 conflict with statusCode', async () => {
       const title = 'test-pattern-*';
       // Mock findByTitle to return nothing (no dupe check)
@@ -657,7 +671,9 @@ describe('DataViews', () => {
       expect(dataset.dataSource).toEqual({
         id: 'ds-1',
         title: 'dataSource',
-        type: 'data-source',
+        // The reference type is the registered SO type 'data-source', not an engine type, so the
+        // fetch-failure fallback must not echo it as the engine type — it defaults to OpenSearch.
+        type: 'OpenSearch',
         version: '',
       });
     });

@@ -74,14 +74,21 @@ export class ToolExecutor {
             error: 'User rejected the tool execution',
             userRejected: true,
             data: {
+              success: false,
+              rejected: true,
               message: 'The user chose not to proceed with this action.',
+              error: 'User rejected the tool execution',
               toolName,
               args: toolArgs,
             },
           };
         }
 
-        toolArgs = { ...toolArgs, confirmed: true };
+        toolArgs = {
+          ...toolArgs,
+          ...(response.modifiedArgs ?? {}),
+          confirmed: true,
+        };
       }
 
       // Include datasourceId in toolArgs if provided

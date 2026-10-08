@@ -14,6 +14,11 @@ import {
   flattenVisibleNodes,
   calculateTimelineRange,
   TIMELINE_ROW_HEIGHT,
+  collectExpandableIds,
+  nodeMatchesQuery,
+  findMatchingNodeIds,
+  findErrorNodeIds,
+  stepToMatch,
 } from './tree_helpers';
 import { TraceRow } from '../hooks/tree_utils';
 
@@ -199,5 +204,66 @@ describe('tree_helpers', () => {
       const range = calculateTimelineRange(nodes);
       expect(range.durationMs).toBe(60000);
     });
+  });
+});
+
+describe('in-trace search and error navigation', () => {
+  const span = (id: string, overrides: Partial<TraceRow> = {}) =>
+    ({
+      id,
+      spanId: id,
+      name: id,
+      status: 'success',
+      input: '',
+      output: '',
+      ...overrides,
+    }) as TraceRow;
+  const tree: TreeNode[] = [
+    {
+      id: 'root',
+      label: 'invoke_agent planner',
+      kind: 'invoke_agent',
+      traceRow: span('root'),
+      children: [
+        {
+          id: 'a',
+          label: 'chat claude',
+          traceRow: span('a', { input: 'Plan a trip to Paris' }),
+        },
+        {
+          id: 'b',
+          label: 'execute_tool get_weather',
+          traceRow: span('b', { status: 'error', statusMessage: 'timeout' }),
+          children: [{ id: 'c', label: 'http GET', traceRow: span('c', { status: 'error' }) }],
+        },
+      ],
+    },
+  ];
+  const flat = flattenTree(tree);
+
+  it('collects ids of nodes with children', () => {
+    expect([...collectExpandableIds(tree)]).toEqual(['root', 'b']);
+  });
+
+  it('matches name, kind, status message and I/O case-insensitively', () => {
+    expect(nodeMatchesQuery(tree[0], 'PLANNER')).toBe(true);
+    expect(findMatchingNodeIds(flat, 'paris')).toEqual(['a']);
+    expect(findMatchingNodeIds(flat, 'timeout')).toEqual(['b']);
+    expect(findMatchingNodeIds(flat, '  ')).toEqual([]);
+  });
+
+  it('finds error spans in tree order', () => {
+    expect(findErrorNodeIds(flat)).toEqual(['b', 'c']);
+  });
+
+  it('steps forward and backward relative to the current node, wrapping', () => {
+    const errors = findErrorNodeIds(flat);
+    expect(stepToMatch(flat, errors, undefined, 1)).toBe('b');
+    expect(stepToMatch(flat, errors, 'a', 1)).toBe('b');
+    expect(stepToMatch(flat, errors, 'b', 1)).toBe('c');
+    expect(stepToMatch(flat, errors, 'c', 1)).toBe('b');
+    expect(stepToMatch(flat, errors, 'b', -1)).toBe('c');
+    expect(stepToMatch(flat, errors, 'root', -1)).toBe('c');
+    expect(stepToMatch(flat, [], 'root', 1)).toBeUndefined();
   });
 });

@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { TraceDetails } from './trace_view';
+import { TraceDetails, toggleDependencyFilterIn } from './trace_view';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { getServiceInfo, NoMatchMessage } from './public/utils/helper_functions';
@@ -399,6 +399,26 @@ describe('TraceDetails', () => {
     await waitFor(() => {
       expect(document.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
     });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('surfaces a distinct query-failure callout (not "invalid trace") when the fetch fails', async () => {
+    mockPplService.fetchTraceSpans.mockRejectedValue(new Error('For input string: "ABC-123"'));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const history = createMemoryHistory();
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    const errorCallout = await screen.findByTestId('traceViewFetchError');
+    expect(errorCallout).toBeInTheDocument();
+    expect(errorCallout).toHaveTextContent('For input string: "ABC-123"');
+    // Must NOT mislabel a failed query as a missing/invalid trace.
+    expect(screen.queryByText(/invalid or could not be found/i)).not.toBeInTheDocument();
 
     consoleSpy.mockRestore();
   });
@@ -1137,5 +1157,30 @@ describe('TraceDetails', () => {
     // Verify that no other content (like span panels or tabs) is rendered
     expect(document.querySelector('[data-testid="span-detail-panel"]')).not.toBeInTheDocument();
     expect(document.querySelector('[data-testid="trace-detail-tabs"]')).not.toBeInTheDocument();
+  });
+});
+
+describe('toggleDependencyFilterIn', () => {
+  const db = { field: 'attributes.server.address', value: 'valkey-cart' };
+  const mq = { field: 'attributes.messaging.destination.name', value: 'orders' };
+  const service = { field: 'serviceName', value: 'cart', operator: '=' as const };
+
+  it('adds the clicked dependency filter, keeping other filters', () => {
+    expect(toggleDependencyFilterIn([service], null, db)).toEqual({
+      filters: [service, { ...db, operator: '=' }],
+      applied: db,
+    });
+  });
+
+  it('replaces the previous dependency filter instead of ANDing a second field', () => {
+    const after = toggleDependencyFilterIn([service, { ...db, operator: '=' }], db, mq);
+    expect(after).toEqual({ filters: [service, { ...mq, operator: '=' }], applied: mq });
+  });
+
+  it('removes the filter when the active dependency is clicked again', () => {
+    expect(toggleDependencyFilterIn([service, { ...db, operator: '=' }], db, db)).toEqual({
+      filters: [service],
+      applied: null,
+    });
   });
 });

@@ -116,3 +116,58 @@ describe('TraceTreeView', () => {
     expect(selected).toBeTruthy();
   });
 });
+
+describe('TraceTreeView toolbar', () => {
+  const errorRow = { status: 'error', statusMessage: 'boom' } as TreeNode['traceRow'];
+  const tree = [
+    makeNode({
+      id: 'root',
+      label: 'Root',
+      children: [
+        makeNode({ id: 'weather', label: 'get_weather', traceRow: errorRow }),
+        makeNode({ id: 'events', label: 'get_events' }),
+      ],
+    }),
+  ];
+
+  it('searches spans, shows the match count and steps to matches', () => {
+    const onSelectNode = jest.fn();
+    render(
+      <TraceTreeView
+        {...defaultProps}
+        traceTreeData={tree}
+        expandedNodes={new Set(['root'])}
+        onSelectNode={onSelectNode}
+      />
+    );
+    fireEvent.change(screen.getByTestId('agentTracesTreeSearch'), { target: { value: 'get_' } });
+    expect(screen.getByTestId('agentTracesTreeMatchCount')).toHaveTextContent('0/2');
+    fireEvent.click(screen.getByTestId('agentTracesTreeNextMatch'));
+    expect(onSelectNode).toHaveBeenLastCalledWith('weather');
+    fireEvent.keyDown(screen.getByTestId('agentTracesTreeSearch'), {
+      key: 'Enter',
+      shiftKey: true,
+    });
+    expect(onSelectNode).toHaveBeenLastCalledWith('events');
+  });
+
+  it('shows the error count and jumps to the next error span', () => {
+    const onSelectNode = jest.fn();
+    render(<TraceTreeView {...defaultProps} traceTreeData={tree} onSelectNode={onSelectNode} />);
+    fireEvent.click(screen.getByText('1 error'));
+    expect(onSelectNode).toHaveBeenCalledWith('weather');
+  });
+
+  it('hides the error button when there are no errors, and wires expand/collapse all', () => {
+    const onExpandAll = jest.fn();
+    const onCollapseAll = jest.fn();
+    render(
+      <TraceTreeView {...defaultProps} onExpandAll={onExpandAll} onCollapseAll={onCollapseAll} />
+    );
+    expect(screen.queryByTestId('agentTracesTreeNextError')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('agentTracesTreeExpandAll'));
+    fireEvent.click(screen.getByTestId('agentTracesTreeCollapseAll'));
+    expect(onExpandAll).toHaveBeenCalled();
+    expect(onCollapseAll).toHaveBeenCalled();
+  });
+});

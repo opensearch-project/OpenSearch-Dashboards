@@ -77,6 +77,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       urlDataset = {
         id: queryState.dataset.id,
         title: queryState.dataset.title,
+        displayName: queryState.dataset.displayName,
         type: queryState.dataset.type,
         language: queryState.dataset.language,
         timeFieldName: queryState.dataset.timeFieldName,
@@ -246,13 +247,19 @@ const resolveDataset = async (
         ? CORE_SIGNAL_TYPES.METRICS
         : undefined;
 
-  // Get existing dataset from QueryStringManager or use preferred dataset
+  // Prefer URL/application query state before resolving the configured default.
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery =
-    flavorFromAppId === ExploreFlavor.Metrics
-      ? undefined
-      : services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+  let existingDataset = preferredDataset || queryStringQuery?.dataset;
+
+  if (!existingDataset && flavorFromAppId !== ExploreFlavor.Metrics) {
+    try {
+      // Explore explicitly opts in to the configured default only when URL and current query state
+      // did not select a dataset. QueryStringManager no longer resolves this implicitly.
+      existingDataset = await services.data.query.getDefaultDataset();
+    } catch {
+      // A default-dataset lookup failure should still allow the first compatible dataset fallback.
+    }
+  }
 
   // If we have an existing dataset, validate SignalType compatibility
   if (existingDataset) {
@@ -305,6 +312,7 @@ const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
@@ -344,6 +352,7 @@ const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: '',
     showHistogram: true,
+    hideEmptyFields: false,
   };
 };
 

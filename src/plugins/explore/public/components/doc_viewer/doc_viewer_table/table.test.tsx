@@ -4,9 +4,13 @@
  */
 
 import { mount } from 'enzyme';
+import { Provider } from 'react-redux';
+import configureMockStore from 'redux-mock-store';
 import { findTestSubject } from 'test_utils/helpers';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
+
+const mockStore = configureMockStore([]);
 
 const indexPattern = {
   fields: {
@@ -174,6 +178,61 @@ describe('DocViewTable at Discover', () => {
         });
       }
     });
+  });
+});
+
+describe('DocViewTable hide empty fields', () => {
+  const hit = {
+    _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: 1,
+    _source: {
+      extension: 'html',
+      bytes: 0,
+      message: null,
+      not_mapped: undefined,
+      objectArray: [null],
+    },
+  };
+
+  const mountWithHideEmptyFields = (hideEmptyFields?: boolean) =>
+    mount(
+      <Provider store={mockStore({ ui: { activeTabId: 'logs', hideEmptyFields } })}>
+        <DocViewTable hit={hit} indexPattern={indexPattern} columns={['extension']} />
+      </Provider>
+    );
+
+  it('hides fields the document has no value for when enabled', () => {
+    const component = mountWithHideEmptyFields(true);
+    expect(findTestSubject(component, 'tableDocViewRow-extension').length).toBe(1);
+    expect(findTestSubject(component, 'tableDocViewRow-message').length).toBe(0);
+    expect(findTestSubject(component, 'tableDocViewRow-not_mapped').length).toBe(0);
+    expect(findTestSubject(component, 'tableDocViewRow-objectArray').length).toBe(0);
+  });
+
+  it('keeps falsy-but-present values such as 0 when enabled', () => {
+    const component = mountWithHideEmptyFields(true);
+    expect(findTestSubject(component, 'tableDocViewRow-bytes').length).toBe(1);
+  });
+
+  it('shows every field when disabled', () => {
+    const component = mountWithHideEmptyFields(false);
+    expect(findTestSubject(component, 'tableDocViewRow-message').length).toBe(1);
+    expect(findTestSubject(component, 'tableDocViewRow-objectArray').length).toBe(1);
+  });
+
+  it('defaults to showing empty fields when the setting is missing', () => {
+    const component = mountWithHideEmptyFields(undefined);
+    expect(findTestSubject(component, 'tableDocViewRow-message').length).toBe(1);
+  });
+
+  it('renders every field when there is no redux store', () => {
+    // The standalone `#/doc` route mounts this view outside the explore provider.
+    const component = mount(
+      <DocViewTable hit={hit} indexPattern={indexPattern} columns={['extension']} />
+    );
+    expect(findTestSubject(component, 'tableDocViewRow-extension').length).toBe(1);
   });
 });
 

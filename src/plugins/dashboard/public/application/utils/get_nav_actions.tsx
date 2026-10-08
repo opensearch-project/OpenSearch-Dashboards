@@ -31,9 +31,11 @@ import {
 import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
+import { appendEmptySection, migrateAllPanelsToSection } from '../embeddable/section_layout_utils';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
+import { convertSavedDashboardPanelToPanelState } from './embeddable_saved_object_converters';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -173,6 +175,9 @@ export const getNavActions = (
         showAddPanelPopover({
           anchorElement,
           uiActions: services.uiActions,
+          onAddSection: services.allowDashboardSections
+            ? () => navActions[TopNavIds.ADD_SECTION]?.(anchorElement)
+            : undefined,
           onAddExistingPanelFlyout: () => {
             openAddPanelFlyout({
               embeddable: currentContainer,
@@ -222,6 +227,37 @@ export const getNavActions = (
       throw new EmbeddableFactoryNotFoundError(type);
     }
     await factory.create({} as EmbeddableInput, currentContainer);
+  };
+
+  // The first section claims existing panels; later sections start empty.
+  navActions[TopNavIds.ADD_SECTION] = () => {
+    if (!currentContainer || isErrorEmbeddable(currentContainer)) {
+      return;
+    }
+    const input = currentContainer.getInput();
+    const existing = input.layout;
+    let createdName: string;
+    if (!existing || existing.type !== 'SectionLayout' || existing.items.length === 0) {
+      const firstSection = migrateAllPanelsToSection(input.panels);
+      createdName = firstSection.name;
+      currentContainer.reparentPanels(Object.keys(input.panels), {
+        type: 'SectionLayout',
+        items: [firstSection],
+      });
+    } else {
+      const items = appendEmptySection(existing.items);
+      createdName = items[items.length - 1].name;
+      currentContainer.updateInput({
+        layout: { type: 'SectionLayout', items },
+      });
+    }
+    notifications.toasts.addSuccess({
+      title: i18n.translate('dashboard.section.addSuccess', {
+        defaultMessage: '"{name}" added to the end',
+        values: { name: createdName },
+      }),
+      'data-test-subj': 'dashboardSectionAddedSuccess',
+    });
   };
 
   navActions[TopNavIds.OPTIONS] = (anchorElement) => {
@@ -378,6 +414,46 @@ export const getNavActions = (
         useSharedCrosshair: dashboard.options.useSharedCrosshair,
       };
       newStateContainer.timeRestore = dashboard.timeRestore;
+
+      // Undefined restores GridLayout; a value restores the saved sections.
+      newStateContainer.layout = dashboard.layout;
+
+      // Recreate only panels whose grid owner changed; reparenting unaffected
+      // live panels can leave their visualizations blank.
+      const currentInput = currentContainer?.getInput();
+      const currentLayout = currentInput?.layout;
+      const savedLayout = dashboard.layout;
+      const sectionsInvolved =
+        currentLayout?.type === 'SectionLayout' || savedLayout?.type === 'SectionLayout';
+
+      if (
+        sectionsInvolved &&
+        currentContainer &&
+        currentInput &&
+        !isErrorEmbeddable(currentContainer)
+      ) {
+        const sectionIdOf = (layout: any, panelId: string): string | undefined =>
+          layout?.type === 'SectionLayout'
+            ? layout.items.find((s: any) => s.members?.some((m: any) => m.idRef === panelId))?.id
+            : undefined;
+
+        const revertedPanels: { [key: string]: any } = {};
+        (dashboard.panels || []).forEach((panel: any) => {
+          revertedPanels[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
+        });
+
+        const currentIds = Object.keys(currentInput.panels);
+        const idsToReparent = currentIds.filter(
+          (id) =>
+            !(id in revertedPanels) ||
+            sectionIdOf(currentLayout, id) !== sectionIdOf(savedLayout, id)
+        );
+
+        if (idsToReparent.length > 0) {
+          currentContainer.reparentPanels(idsToReparent, savedLayout as any, revertedPanels);
+        }
+      }
+
       stateContainer.transitions.setDashboard(newStateContainer);
 
       // Since time filters are not tracked by app state, we need to manually reset it

@@ -16,6 +16,8 @@ import { getDashboardInstance } from '../get_dashboard_instance';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import { Dashboard, DashboardParams } from '../../../dashboard';
 
+const CREATE_DASHBOARD_LOAD_KEY = 'create';
+
 /**
  * This effect is responsible for instantiating a saved dashboard or creating a new one
  * using url parameters, embedding and destroying it in DOM
@@ -35,7 +37,9 @@ export const useSavedDashboardInstance = ({
     savedDashboard?: SavedObjectDashboard;
     dashboard?: Dashboard<DashboardParams>;
   }>({});
-  const dashboardId = useRef('');
+
+  const currentDashboardRouteKey = useRef<string>();
+  const latestRequestId = useRef(0);
 
   useEffect(() => {
     const {
@@ -47,6 +51,16 @@ export const useSavedDashboardInstance = ({
       toastNotifications,
       data,
     } = services;
+
+    // Previously, this race-condition guard only handled /view/:b -> /view/:a.
+    // It did not cover route changes from /view/:id to /create.
+    // Use routeKey to track the current route and trigger a reload when it changes.
+    const isCreateRoute = history.location.pathname === DashboardConstants.CREATE_NEW_DASHBOARD_URL;
+    const routeKey = isCreateRoute
+      ? CREATE_DASHBOARD_LOAD_KEY
+      : dashboardIdFromUrl
+        ? `view:${dashboardIdFromUrl}`
+        : undefined;
 
     const handleErrorFromSavedDashboard = (error: any) => {
       // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
@@ -95,49 +109,56 @@ export const useSavedDashboardInstance = ({
 
     // TODO: handle try/catch as expected workflows instead of catching as an error
     // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3365
-    const getSavedDashboardInstance = async () => {
+    const loadSavedDashboardInstance = async (requestId: number) => {
       try {
-        let dashboardInstance: {
-          savedDashboard: SavedObjectDashboard;
-          dashboard: Dashboard<DashboardParams>;
-        };
-        if (history.location.pathname === '/create') {
-          try {
-            dashboardInstance = await getDashboardInstance(services);
-            setSavedDashboardInstance(dashboardInstance);
-          } catch {
-            handleErrorFromCreateDashboard();
-          }
-        } else if (dashboardIdFromUrl) {
-          try {
-            dashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
-            const { savedDashboard } = dashboardInstance;
-            // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
-            // We should only set the time filter according to time restore once when we are loading the dashboard
-            if (savedDashboard.timeRestore) {
-              if (savedDashboard.timeFrom && savedDashboard.timeTo) {
-                data.query.timefilter.timefilter.setTime({
-                  from: savedDashboard.timeFrom,
-                  to: savedDashboard.timeTo,
-                });
-              }
-              if (savedDashboard.refreshInterval) {
-                data.query.timefilter.timefilter.setRefreshInterval(savedDashboard.refreshInterval);
-              }
-            }
+        const dashboardInstance = isCreateRoute
+          ? await getDashboardInstance(services)
+          : await getDashboardInstance(services, dashboardIdFromUrl);
 
-            chrome.recentlyAccessed.add(
-              savedDashboard.getFullPath(),
-              savedDashboard.title,
-              dashboardIdFromUrl,
-              { type: savedDashboard.getOpenSearchType() }
-            );
-            setSavedDashboardInstance(dashboardInstance);
-          } catch (error: any) {
-            return handleErrorFromSavedDashboard(error);
-          }
+        // Prevent stale requests from overriding the current state
+        if (requestId !== latestRequestId.current) {
+          return;
         }
-      } catch {
+
+        if (!isCreateRoute) {
+          const { savedDashboard } = dashboardInstance;
+          // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
+          // We should only set the time filter according to time restore once when we are loading the dashboard
+          if (savedDashboard.timeRestore) {
+            if (savedDashboard.timeFrom && savedDashboard.timeTo) {
+              data.query.timefilter.timefilter.setTime({
+                from: savedDashboard.timeFrom,
+                to: savedDashboard.timeTo,
+              });
+            }
+            if (savedDashboard.refreshInterval) {
+              data.query.timefilter.timefilter.setRefreshInterval(savedDashboard.refreshInterval);
+            }
+          }
+
+          chrome.recentlyAccessed.add(
+            savedDashboard.getFullPath(),
+            savedDashboard.title,
+            dashboardIdFromUrl!,
+            { type: savedDashboard.getOpenSearchType() }
+          );
+        }
+
+        setSavedDashboardInstance(dashboardInstance);
+      } catch (error: any) {
+        if (requestId !== latestRequestId.current) {
+          return;
+        }
+
+        if (isCreateRoute) {
+          handleErrorFromCreateDashboard();
+          return;
+        }
+
+        if (dashboardIdFromUrl) {
+          return handleErrorFromSavedDashboard(error);
+        }
+
         handleError();
       }
     };
@@ -147,31 +168,15 @@ export const useSavedDashboardInstance = ({
       return;
     }
 
-    /*
-     * The else if block prevents error when user clicks on one dashboard,
-     * and before it loads the next screen, user clicks a different dashboard right after.
-     * In this situation, there can be two useSavedDashboardInstance() executing, one shortly after another.
-     * The first running instance might already set the dashboardId before the second running instance
-     * execute the following if else block.
-     * The second running will go into the else if block because dashboardId
-     * is already set but it is a different value than dashboardIdFromUrl and savedDashboardInstance?.savedDashboard?.id.
-     * Therefore, to avoid errors and to actually load the second dashboard correctly,
-     * we need to reset the state by calling setSavedDashboardInstance({})
-     * and then called getSavedDashboardInstance() again using the current dashboardIdFromUrl value.
-     */
-    if (!dashboardId.current) {
-      dashboardId.current = dashboardIdFromUrl || 'new';
-      getSavedDashboardInstance();
-    } else if (
-      dashboardIdFromUrl &&
-      dashboardId.current !== dashboardIdFromUrl &&
-      savedDashboardInstance?.savedDashboard?.id !== dashboardIdFromUrl
-    ) {
-      dashboardId.current = dashboardIdFromUrl;
-      setSavedDashboardInstance({});
-      getSavedDashboardInstance();
+    if (!routeKey || currentDashboardRouteKey.current === routeKey) {
+      return;
     }
-  }, [eventEmitter, isChromeVisible, services, savedDashboardInstance, dashboardIdFromUrl]);
+
+    currentDashboardRouteKey.current = routeKey;
+    setSavedDashboardInstance({});
+    latestRequestId.current += 1;
+    loadSavedDashboardInstance(latestRequestId.current);
+  }, [eventEmitter, isChromeVisible, services, dashboardIdFromUrl]);
 
   return savedDashboardInstance;
 };

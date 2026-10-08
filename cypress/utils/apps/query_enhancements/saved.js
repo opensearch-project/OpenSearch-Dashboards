@@ -525,7 +525,7 @@ export const updateSavedSearchAndSaveAndVerify = (
     config.datasetType === DatasetTypes.INDEX_PATTERN.name
       ? [INDEX_WITH_TIME_1, DatasetTypes.INDEXES.name]
       : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
-  // If current language is PPL, update to OpenSearch SQL, else update to PPL
+  // If current language is PPL, update to SQL, else update to PPL
   const newLanguage =
     config.language === QueryLanguages.PPL.name ? QueryLanguages.SQL : QueryLanguages.PPL;
   const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, newLanguage);
@@ -563,7 +563,7 @@ export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => 
     config.datasetType === DatasetTypes.INDEX_PATTERN.name
       ? [INDEX_WITH_TIME_1, DatasetTypes.INDEXES.name]
       : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
-  // If current language is PPL, update to OpenSearch SQL, else update to PPL
+  // If current language is PPL, update to SQL, else update to PPL
   const newLanguage =
     config.language === QueryLanguages.PPL.name ? QueryLanguages.SQL : QueryLanguages.PPL;
   const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, newLanguage);

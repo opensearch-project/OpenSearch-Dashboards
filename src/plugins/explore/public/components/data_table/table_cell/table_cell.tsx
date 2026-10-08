@@ -8,12 +8,15 @@ import './table_cell.scss';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
 import {
   isSpanIdColumn,
+  isTraceIdColumn,
   TraceFlyoutButton,
   SpanIdLink,
+  TraceIdLink,
   DurationTableCell,
   isDurationColumn,
 } from './trace_utils/trace_utils';
@@ -30,6 +33,11 @@ export interface ITableCellProps {
   fieldMapping?: any;
   sanitizedCellValue: string;
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
+  // The dataset the row was rendered with. Passed explicitly so trace-cell links
+  // don't depend on DatasetContext, which can transiently resolve to `undefined`
+  // (e.g. while a new query/dataset is loading after an errored refresh) and
+  // silently degrade Span ID / Trace ID / time cells to plain text.
+  dataset?: IndexPattern | Dataset;
   isOnTracesPage: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
   wrapCellText?: boolean;
@@ -45,15 +53,21 @@ export const TableCellUI = ({
   fieldMapping,
   sanitizedCellValue,
   rowData,
+  dataset: datasetProp,
   isOnTracesPage,
   setIsRowSelected,
   wrapCellText,
 }: ITableCellProps) => {
-  const { dataset } = useDatasetContext();
+  const { dataset: contextDataset } = useDatasetContext();
+  // Prefer the explicitly-passed dataset; fall back to context for callers that
+  // don't supply it.
+  const dataset = datasetProp ?? contextDataset;
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
       <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
+    ) : isTraceIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
+      <TraceIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
     ) : isTimeField && isOnTracesPage && rowData && dataset ? (
       <TraceFlyoutButton
         sanitizedCellValue={sanitizedCellValue}

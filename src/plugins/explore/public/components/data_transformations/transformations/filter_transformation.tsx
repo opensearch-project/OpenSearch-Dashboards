@@ -16,6 +16,7 @@ import {
   FilterConfig,
   numericalOperatorOptions,
   allOperatorOptions,
+  TransformationConfigSchema,
 } from '../types';
 import { VisFieldType } from '../../visualizations/types';
 import { FieldSelector } from '../field_selector';
@@ -217,4 +218,37 @@ export const filterTransformationDefinition: TransformationDefinition<FilterConf
   // TODO icon filter is not applicable
   iconType: 'filter',
   createInstance: createFilterTransformation,
+};
+
+export const filterConfigSchema: TransformationConfigSchema = {
+  field: {
+    description: 'The column to filter on. Must be a column name from the result schema.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  operator: {
+    description:
+      'Comparison operator. Available operators depend on the field type — ' +
+      'use base operators for all types, add numerical extras for number fields, ' +
+      'add date extras for date/timestamp fields. ' +
+      'value must always be passed as a string.',
+    kind: 'enum',
+    defaultValue: 'equals',
+    required: true,
+    byFieldType: {
+      base: allOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+      numerical: numericalOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+      date: dateOperatorOptions.map((o) => ({ value: o.value, label: o.text })),
+    },
+  },
+  value: {
+    description:
+      'The value to compare against. Always a string — ' +
+      'pass numbers as numeric strings (e.g. "500"), ' +
+      'dates as ISO 8601 strings (e.g. "2025-01-01T00:00:00.000Z").',
+    kind: 'string',
+    defaultValue: '',
+    required: true,
+  },
 };

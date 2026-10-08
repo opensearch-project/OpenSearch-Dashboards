@@ -49,7 +49,11 @@ import {
   createOsdUrlStateStorage,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
+import {
+  DataPublicPluginStart,
+  DataPublicPluginSetup,
+  getGlobalQueryUrlState,
+} from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
@@ -129,10 +133,7 @@ export class VisualizePlugin implements Plugin<
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],

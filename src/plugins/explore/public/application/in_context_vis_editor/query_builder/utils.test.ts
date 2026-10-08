@@ -132,6 +132,7 @@ const buildServices = () =>
   ({
     data: {
       query: {
+        getDefaultDataset: jest.fn().mockResolvedValue(undefined),
         queryString: {
           getQuery: jest.fn().mockReturnValue({ dataset: mockDataset, language: 'PPL' }),
           getDefaultQuery: jest.fn().mockReturnValue({}),
@@ -180,14 +181,33 @@ describe('resolveDatasetByLanguage', () => {
     expect(result).toBe(availableDataset);
   });
 
-  it('fetches first available dataset when no existing dataset', async () => {
+  it('uses the configured default when no existing dataset is selected', async () => {
     const services = buildServices();
     services.data.query.queryString.getQuery.mockReturnValue({});
-    services.data.query.queryString.getDefaultQuery.mockReturnValue({});
+    const defaultDataset = {
+      id: 'default',
+      title: 'default-index',
+      type: 'INDEX_PATTERN',
+    };
+    services.data.query.getDefaultDataset.mockResolvedValue(defaultDataset);
     const availableDataset = { id: 'fallback', title: 'fallback-index', type: 'INDEX_PATTERN' };
     (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(availableDataset);
 
     const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl);
+
+    expect(result).toBe(defaultDataset);
+    expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
+    expect(fetchFirstAvailableDataset).not.toHaveBeenCalled();
+  });
+
+  it('fetches first available dataset when no configured default is available', async () => {
+    const services = buildServices();
+    services.data.query.queryString.getQuery.mockReturnValue({});
+    const availableDataset = { id: 'fallback', title: 'fallback-index', type: 'INDEX_PATTERN' };
+    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(availableDataset);
+
+    const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl);
+
     expect(result).toBe(availableDataset);
   });
 });

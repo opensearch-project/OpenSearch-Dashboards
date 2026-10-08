@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-disable no-console */
 import { schema } from '@osd/config-schema';
 import {
   IOpenSearchDashboardsResponse,
   IRouter,
+  Logger,
   ResponseError,
 } from '../../../../../src/core/server';
 import { DataConnectionType } from '../../../data_source/common/data_connections';
@@ -17,7 +17,26 @@ import {
   EDIT,
 } from '../../framework/utils/shared';
 
-export function registerNonMdsDataConnectionsRoute(router: IRouter) {
+// Status codes that are expected during normal use (e.g. a read-only user without the
+// `cluster:admin/opensearch/ql/datasources/read` permission) and should not be logged as errors.
+const EXPECTED_ERROR_STATUS_CODES = [401, 403, 404];
+
+/**
+ * Logs a concise, single-line summary of a failed data connection call. The full error object
+ * (stack trace, response body, user and role details) is intentionally not logged, since
+ * serializing it for every request can flood the server logs.
+ */
+export const logDataConnectionError = (logger: Logger, message: string, error: any) => {
+  const statusCode = error?.statusCode || error?.body?.statusCode;
+  const summary = `${message} [${statusCode ?? 'unknown'}]: ${error?.message ?? error}`;
+  if (EXPECTED_ERROR_STATUS_CODES.includes(statusCode)) {
+    logger.debug(summary);
+  } else {
+    logger.error(summary);
+  }
+};
+
+export function registerNonMdsDataConnectionsRoute(router: IRouter, logger: Logger) {
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}/{name}`,
@@ -40,7 +59,7 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data connection:', error);
+        logDataConnectionError(logger, 'Issue in fetching data connection', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
@@ -71,7 +90,7 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in deleting data connection:', error);
+        logDataConnectionError(logger, 'Issue in deleting data connection', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
@@ -106,7 +125,7 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in modifying data connection:', error);
+        logDataConnectionError(logger, 'Issue in modifying data connection', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
@@ -141,7 +160,7 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in modifying data connection:', error);
+        logDataConnectionError(logger, 'Issue in modifying data connection', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.message,
@@ -166,7 +185,7 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data sources:', error);
+        logDataConnectionError(logger, 'Issue in fetching data sources', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: error.response,
@@ -176,7 +195,11 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
   );
 }
 
-export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled: boolean) {
+export function registerDataConnectionsRoute(
+  router: IRouter,
+  dataSourceEnabled: boolean,
+  logger: Logger
+) {
   router.post(
     {
       path: `${DATACONNECTIONS_BASE}`,
@@ -220,7 +243,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
 
         return response.ok({ body: dataConnectionsresponse });
       } catch (error: any) {
-        console.error('Issue in creating data source:', error);
+        logDataConnectionError(logger, 'Issue in creating data source', error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.response });
       }
     }
@@ -255,7 +278,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data sources:', error);
+        logDataConnectionError(logger, 'Issue in fetching data sources', error);
         const statusCode = error.statusCode || error.body?.statusCode || 500;
         const errorBody = error.body ||
           error.response || { message: error.message || 'Unknown error occurred' };
@@ -303,7 +326,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data sources:', error);
+        logDataConnectionError(logger, 'Issue in fetching data sources', error);
         const statusCode = error.statusCode || error.body?.statusCode || 500;
         const errorBody = error.body ||
           error.response || { message: error.message || 'Unknown error occurred' };
@@ -355,7 +378,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
         const statusCode = error.statusCode || error.body?.statusCode || 500;
 
         if (statusCode !== 404) {
-          console.error('Issue in deleting data connection from backend:', error);
+          logDataConnectionError(logger, 'Issue in deleting data connection from backend', error);
           const errorBody = error.body ||
             error.response || { message: error.message || 'Unknown error occurred' };
 
@@ -367,7 +390,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
             },
           });
         }
-        console.log('Backend data connection not found, proceeding with saved object deletion');
+        logger.debug('Backend data connection not found, proceeding with saved object deletion');
       }
 
       try {
@@ -388,7 +411,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           body: { success: true, deleted: request.params.name },
         });
       } catch (error: any) {
-        console.error('Issue in deleting saved object:', error);
+        logDataConnectionError(logger, 'Issue in deleting saved object', error);
         return response.custom({
           statusCode: error.statusCode || 500,
           body: {

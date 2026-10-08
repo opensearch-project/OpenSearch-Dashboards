@@ -264,7 +264,9 @@ describe('ToolCallRow', () => {
         <div>
           <span>{props.status}</span>
           <span>{props.args.fixedQuery}</span>
-          <button onClick={props.onApprove}>Approve</button>
+          <button onClick={() => props.onApprove?.({ fixedQuery: 'source=logs | head 5' })}>
+            Approve
+          </button>
           <button onClick={props.onReject}>Reject</button>
         </div>
       ));
@@ -310,7 +312,7 @@ describe('ToolCallRow', () => {
       expect(screen.getByText('source=logs | head 10')).toBeInTheDocument();
       screen.getByText('Approve').click();
       screen.getByText('Reject').click();
-      expect(onApprove).toHaveBeenCalledTimes(1);
+      expect(onApprove).toHaveBeenCalledWith({ fixedQuery: 'source=logs | head 5' });
       expect(onReject).toHaveBeenCalledTimes(1);
     });
   });

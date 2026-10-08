@@ -62,7 +62,7 @@ export const createLineSeries =
     colorField?: string;
   }): PipelineFn<T> =>
   (state) => {
-    const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
+    const { xAxisConfig, transformedData = [], axisColumnMappings, seriesDisplayNames } = state;
     const palette = getColors().categories;
     const newState = { ...state };
     const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
@@ -90,9 +90,12 @@ export const createLineSeries =
     }
 
     const series = seriesFields?.map((item: string, index: number) => {
+      // name is the original name of this series
       const name = getSeriesDisplayName(item, allColumns);
+      // legend label is overridden to the display name
+      const displayLabel = seriesDisplayNames?.[item] ?? name;
       const color = getLegendColor(name, palette, sortedNames);
-      legendItems.push(createSeriesLegendItem(name, color));
+      legendItems.push(createSeriesLegendItem(displayLabel, color, name));
 
       return {
         name,
@@ -102,7 +105,7 @@ export const createLineSeries =
           y: item,
         },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         ...generateLineStyles(styles, item),
         ...(index === 0 && composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker)),
@@ -171,7 +174,7 @@ export const createLineBarSeries =
             y: field,
           },
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),
@@ -201,7 +204,7 @@ export const createLineBarSeries =
             chartType: 'bar',
           }),
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),

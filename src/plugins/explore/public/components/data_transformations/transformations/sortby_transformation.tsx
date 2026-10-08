@@ -8,6 +8,7 @@ import { EuiFormRow, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -141,4 +142,23 @@ export const sortByTransformationDefinition: TransformationDefinition<SortByConf
   }),
   iconType: 'sortable',
   createInstance: createSortByTransformation,
+};
+
+export const sortByConfigSchema: TransformationConfigSchema = {
+  field: {
+    description: 'The column to sort by. Must be a column name from the result schema.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  order: {
+    description: 'Sort direction.',
+    kind: 'enum',
+    defaultValue: 'asc',
+    required: true,
+    enumOptions: [
+      { value: 'asc', label: 'Ascending' },
+      { value: 'desc', label: 'Descending' },
+    ],
+  },
 };

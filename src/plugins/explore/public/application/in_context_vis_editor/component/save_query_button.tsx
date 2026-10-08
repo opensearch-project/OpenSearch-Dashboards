@@ -23,7 +23,7 @@ import { QueryState } from '../query_builder/query_builder';
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
-  const { getEditorText, setEditorText } = useEditorOperations();
+  const { getEditorRef, setEditorText } = useEditorOperations();
 
   const savedQueryService = services.data.query.savedQueries;
   const timeFilter = services.data.query.timefilter.timefilter;
@@ -60,7 +60,9 @@ export const SaveQueryButton = () => {
 
       const queryToSave = {
         ...clonedQuery,
-        query: getEditorText(),
+
+        // PromQL multi-row panel read query from queryState.query
+        query: getEditorRef()?.getValue() ?? queryState.query,
       };
 
       const attributes: any = {

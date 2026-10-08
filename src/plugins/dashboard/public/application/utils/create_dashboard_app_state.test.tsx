@@ -111,6 +111,47 @@ describe('createDashboardGlobalAndAppState', () => {
     expect(mockStartStateSync).toHaveBeenCalled();
   });
 
+  test('normalizes an unsupported saved dashboard query before initializing state', () => {
+    const stateWithPplQuery: DashboardAppState = {
+      ...dashboardAppStateStub,
+      query: {
+        language: 'PPL',
+        query: 'source = opensearch_dashboards_sample_data_logs',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'opensearch_dashboards_sample_data_logs',
+          type: 'INDEXES',
+          dataSource: {
+            id: '',
+            title: 'Default Cluster',
+            type: 'DATA_SOURCE',
+          },
+        },
+      },
+    };
+
+    createDashboardGlobalAndAppState({
+      stateDefaults: stateWithPplQuery,
+      osdUrlStateStorage,
+      services: mockServices,
+      savedDashboardInstance,
+    });
+
+    expect(createStateContainer).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      expect.any(Object)
+    );
+    expect(osdUrlStateStorage.set).toHaveBeenLastCalledWith(
+      '_a',
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      { replace: true }
+    );
+  });
+
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
     expect(stateContainer).toBe('stateContainer');
     stopStateSync();
@@ -161,13 +202,31 @@ describe('createDashboardGlobalAndAppState', () => {
 });
 
 describe('updateStateUrl', () => {
+  const layout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'section-1',
+        type: 'section',
+        name: 'Section 1',
+        collapsed: false,
+        members: [],
+      },
+    ],
+  };
   const dashboardAppState = {
     ...dashboardAppStateStub,
     viewMode: ViewMode.VIEW,
+    layout,
   };
 
-  test('update URL to not contain panels', () => {
-    const { panels, variables, ...statesWithoutPanelsAndVariables } = dashboardAppState;
+  test('view mode URL does not contain panels or layout', () => {
+    const {
+      panels,
+      variables,
+      layout: dashboardLayout,
+      ...stateWithoutPanelsVariablesAndLayout
+    } = dashboardAppState;
 
     const basePath = '/base';
     const history = scopedHistoryMock.create({
@@ -181,10 +240,34 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanelsAndVariables, {
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      stateWithoutPanelsVariablesAndLayout,
+      {
+        replace: true,
+      }
+    );
+    expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
+  test('edit mode URL contains panels and layout', () => {
+    const editState = {
+      ...dashboardAppState,
+      viewMode: ViewMode.EDIT,
+    };
+    const { variables, ...stateWithoutVariables } = editState;
+    const history = scopedHistoryMock.create({ pathname: '/base' });
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: editState,
+      scopedHistory: history,
       replace: true,
     });
-    expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', stateWithoutVariables, {
+      replace: true,
+    });
   });
 
   test('serializes only variable selection overrides in URL state', () => {
@@ -230,11 +313,16 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    const { panels, variables, ...stateWithoutPanelsAndVariables } = stateWithVariables;
+    const {
+      panels,
+      variables,
+      layout: dashboardLayout,
+      ...stateWithoutPanelsVariablesAndLayout
+    } = stateWithVariables;
     expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
       '_a',
       {
-        ...stateWithoutPanelsAndVariables,
+        ...stateWithoutPanelsVariablesAndLayout,
         variables: [
           { id: 'custom-1', current: ['ios'] },
           { id: 'query-1', current: ['YOW'] },
@@ -598,5 +686,53 @@ describe('panels preservation logic in URL sync', () => {
     const result2 = simulateSetFunction(urlState2, stateDefaults, modifiedPanels);
     expect(result2?.panels).toEqual(modifiedPanels);
     expect(result2?.panels).not.toEqual(initialPanels);
+  });
+});
+
+describe('layout preservation logic in URL sync', () => {
+  const savedLayout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'saved-section',
+        type: 'section',
+        name: 'Saved section',
+        collapsed: false,
+        members: [],
+      },
+    ],
+  };
+  const currentLayout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'current-section',
+        type: 'section',
+        name: 'Current section',
+        collapsed: true,
+        members: [],
+      },
+    ],
+  };
+
+  test('preserves current layout when view mode URL has no layout field', () => {
+    const result = hydrateDashboardAppState(
+      { ...dashboardAppStateStub, layout: savedLayout },
+      { viewMode: ViewMode.VIEW },
+      undefined,
+      undefined,
+      currentLayout
+    );
+
+    expect(result.layout).toEqual(currentLayout);
+  });
+
+  test('uses layout from edit mode URL when explicitly provided', () => {
+    const result = hydrateDashboardAppState(
+      { ...dashboardAppStateStub, layout: savedLayout },
+      { viewMode: ViewMode.EDIT, layout: currentLayout }
+    );
+
+    expect(result.layout).toEqual(currentLayout);
   });
 });

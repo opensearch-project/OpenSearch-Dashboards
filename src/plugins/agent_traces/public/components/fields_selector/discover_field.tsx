@@ -94,6 +94,10 @@ export interface DiscoverFieldProps {
    * When true, the field cannot be removed from the table (no remove button shown)
    */
   nonRemovable?: boolean;
+  /**
+   * When true, no add/remove column button is shown (the table has fixed columns)
+   */
+  hideColumnActions?: boolean;
 }
 
 export const DiscoverField = ({
@@ -108,6 +112,7 @@ export const DiscoverField = ({
   useShortDots,
   showSummary,
   nonRemovable,
+  hideColumnActions,
 }: DiscoverFieldProps) => {
   const addLabelAria = i18n.translate(
     'agentTraces.discover.fieldChooser.discoverField.addButtonAriaLabel',
@@ -158,7 +163,9 @@ export const DiscoverField = ({
   );
 
   let actionButton;
-  if (!isSourceField && !selected) {
+  if (hideColumnActions) {
+    actionButton = undefined;
+  } else if (!isSourceField && !selected) {
     actionButton = (
       <EuiToolTip
         delay="long"

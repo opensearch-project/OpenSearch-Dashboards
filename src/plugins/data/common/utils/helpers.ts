@@ -34,6 +34,12 @@ export interface QueryStatusOptions {
   pollQueryResults: PollQueryResultsHandler;
   queryId?: string;
   interval?: number;
+  /**
+   * Called with every poll response that is not yet terminal (neither SUCCESS nor FAILED).
+   * Sources that return rows while a query is still running put them on that response, so
+   * this is how a caller renders results before the query completes.
+   */
+  onPollResponse?: (response: FetchStatusResponse) => void;
 }
 
 export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -41,7 +47,7 @@ export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export const handleQueryResults = async <T>(
   options: QueryStatusOptions
 ): Promise<FetchStatusResponse> => {
-  const { pollQueryResults, interval = 5000 } = options;
+  const { pollQueryResults, interval = 5000, onPollResponse } = options;
   let queryResultsRes: FetchStatusResponse;
   let queryStatus;
   do {
@@ -49,6 +55,9 @@ export const handleQueryResults = async <T>(
     await delay(interval);
     queryResultsRes = await pollQueryResults();
     queryStatus = queryResultsRes?.status?.toUpperCase();
+    if (onPollResponse && queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED') {
+      onPollResponse(queryResultsRes);
+    }
   } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
   if (queryStatus === 'FAILED') {

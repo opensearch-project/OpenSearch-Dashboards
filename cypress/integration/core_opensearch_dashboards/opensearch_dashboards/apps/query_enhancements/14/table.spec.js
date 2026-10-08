@@ -133,7 +133,7 @@ export const runTableTests = () => {
           } else if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           cy.get('[data-test-subj="tableDocViewRow-_index"]').should('have.length', 2);
         });

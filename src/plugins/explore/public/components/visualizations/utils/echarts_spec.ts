@@ -27,7 +27,12 @@ import {
   VisColumn,
   StandardOptions,
 } from '../types';
-import { convertThresholds } from './utils';
+import {
+  convertThresholds,
+  valueUnitFormatter,
+  TooltipFormatFn,
+  getNormalizedAxisConfig,
+} from './utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { LegendItem } from './legend';
 import { formatUnitValue } from '../style_panel/unit/collection';
@@ -75,6 +80,8 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   axisConfig?: EChartsAxisConfig;
   axisColumnMappings: { [K in AxisRole]?: VisColumn | VisColumn[] };
   timeRange?: { from: string; to: string };
+  // Series originName / displayName Series Map
+  seriesDisplayNames?: Record<string, string>;
 }
 
 export type AxisType = 'category' | 'value' | 'time';
@@ -156,6 +163,8 @@ export const createBaseConfig =
 
     const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
 
+    const formatValue = valueUnitFormatter(styles, hasUnit);
+
     const baseConfig = {
       tooltip: {
         extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
@@ -165,10 +174,7 @@ export const createBaseConfig =
         ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
         axisPointer: { type: 'line' as const },
         ...(hasUnit && {
-          valueFormatter: (value: unknown) =>
-            typeof value === 'number'
-              ? formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix)
-              : String(value ?? ''),
+          valueFormatter: formatValue,
         }),
       },
       legend: {
@@ -186,15 +192,65 @@ export const createBaseConfig =
   };
 
 /**
+ * Let each chart own its tooltip rendering, must run after createBaseConfig.
+ */
+
+export const addTooltipFormatter =
+  <T extends BaseChartStyle>(formatFn: TooltipFormatFn) =>
+  (state: EChartsSpecState<T>): EChartsSpecState<T> => {
+    const { styles, seriesDisplayNames, baseConfig, axisColumnMappings } = state;
+
+    if (!seriesDisplayNames || Object.keys(seriesDisplayNames).length < 1) return state;
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+
+    const tooltipConfig = Array.isArray(baseConfig?.tooltip)
+      ? baseConfig.tooltip[0]
+      : baseConfig?.tooltip;
+
+    // percentage mode already define valueFormatter, use it directly
+    const formatValue =
+      typeof tooltipConfig?.valueFormatter === 'function'
+        ? (tooltipConfig.valueFormatter as any)
+        : valueUnitFormatter(styles, hasUnit);
+
+    const { categoryEncode, seriesEncode } = getNormalizedAxisConfig(
+      axisColumnMappings as
+        | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+        | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+    );
+
+    const formatter = formatFn({
+      styles,
+      seriesDisplayNames,
+      formatValue,
+      axesMappingEncode: {
+        categoryEncode,
+        valueEncode: seriesEncode,
+      },
+    });
+
+    return {
+      ...state,
+      baseConfig: {
+        ...baseConfig,
+        tooltip: {
+          ...baseConfig?.tooltip,
+          formatter,
+        },
+      },
+    };
+  };
+
+/**
  * Build axis configurations
  */
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, axisColumnMappings } = state;
+  const { axisConfig, axisColumnMappings, seriesDisplayNames } = state;
 
   const hasY2 = axisColumnMappings.y2 !== undefined;
-
+  const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
   const { styles } = state;
   const hasUnit = !!styles.unitId || styles.decimals != null || !!styles?.unitSuffix;
 
@@ -223,6 +279,13 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
             ...axisStyling.axisLabel,
             formatter: (value: number) =>
               formatUnitValue(value, styles.unitId, styles.decimals, styles.unitSuffix),
+          },
+        }),
+      ...(axisType === 'category' &&
+        hasDisplayNames && {
+          axisLabel: {
+            ...axisStyling.axisLabel,
+            formatter: (value: string) => String(seriesDisplayNames?.[value] ?? value),
           },
         }),
       // if min and max are not valid, ignore

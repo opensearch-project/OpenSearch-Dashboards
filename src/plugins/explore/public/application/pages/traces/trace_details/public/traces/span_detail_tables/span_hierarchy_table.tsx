@@ -12,6 +12,7 @@ import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
 import { calculateTraceTimeRange, TraceTimeRange } from '../../utils/span_timerange_utils';
 import { Span, SpanTableProps } from './types';
 import { HierarchySpanCell } from './hierarchy_span_cell';
+import { buildTraceDependencies, useTraceDependencies } from '../../services/trace_dependencies';
 import { SpanCell } from './span_cell';
 import { parseHits, applySpanFilters } from './utils';
 import { ServiceLegendButton } from './service_legend_button';
@@ -39,6 +40,13 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   );
 
   const traceTimeRange = useMemo(() => calculateTraceTimeRange(allSpans), [allSpans]);
+  // Classified against the whole trace when the trace view provides it; otherwise from the
+  // spans this table shows.
+  const providedDependencies = useTraceDependencies();
+  const dependencies = useMemo(
+    () => providedDependencies ?? buildTraceDependencies(allSpans),
+    [providedDependencies, allSpans]
+  );
 
   const handleVisibleRangeChange = useCallback(
     (range: TraceTimeRange | null) => setVisibleRange(range ?? undefined),
@@ -164,6 +172,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
           setExpandedRows={setExpandedRows}
           expandedRows={expandedRows}
           colorMap={colorMap}
+          dependencies={dependencies}
         />
       ) : (
         <SpanCell
@@ -180,7 +189,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
         />
       );
     },
-    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap, visibleRange]
+    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap, visibleRange, dependencies]
   );
 
   // Expand the whole tree by one more level: expand every currently-visible
