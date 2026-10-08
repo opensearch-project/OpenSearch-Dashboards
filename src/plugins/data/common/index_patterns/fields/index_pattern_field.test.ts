@@ -59,10 +59,10 @@ describe('Field', function () {
     scripted: true,
     subType: { multi: { parent: 'parent' }, nested: { path: 'path' } },
     displayName: 'displayName',
-    indexPattern: ({
+    indexPattern: {
       fieldFormatMap: { name: {}, _source: {}, _score: {}, _id: {} },
-    } as unknown) as IndexPattern,
-    $$spec: ({} as unknown) as FieldSpec,
+    } as unknown as IndexPattern,
+    $$spec: {} as unknown as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
   };
 
@@ -175,7 +175,7 @@ describe('Field', function () {
             pattern: '$0,0.[00]',
           },
         }),
-      } as FieldFormat);
+      }) as FieldFormat;
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

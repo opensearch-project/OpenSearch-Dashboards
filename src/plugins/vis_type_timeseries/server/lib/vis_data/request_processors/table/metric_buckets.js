@@ -48,7 +48,7 @@ export function metricBuckets(req, panel, opensearchQueryConfig, indexPatternObj
             try {
               const bucket = fn(metric, column.metrics, intervalString);
               overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, bucket);
-            } catch (e) {
+            } catch {
               // meh
             }
           }

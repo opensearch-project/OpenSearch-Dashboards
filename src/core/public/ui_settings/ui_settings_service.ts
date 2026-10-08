@@ -54,8 +54,8 @@ export class UiSettingsService {
 
   public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
     /**
-     * Currently, we have three scopes: workspace, global, and user.
-     * For workspace and user and global, we instantiate a dedicated API to handle operations specific to that scope.
+     * Currently, we have four scopes: workspace, global, user and admin.
+     * For them, we instantiate a dedicated API to handle operations specific to that scope.
      * if the scope is not clarified, it will remains the previous logic, leave the handling to server to decide the destinanted scope
      */
     this.uiSettingApis = {
@@ -63,6 +63,7 @@ export class UiSettingsService {
       [UiSettingScope.WORKSPACE]: new UiSettingsApi(http, UiSettingScope.WORKSPACE),
       [UiSettingScope.USER]: new UiSettingsApi(http, UiSettingScope.USER),
       [UiSettingScope.GLOBAL]: new UiSettingsApi(http, UiSettingScope.GLOBAL),
+      [UiSettingScope.DASHBOARD_ADMIN]: new UiSettingsApi(http, UiSettingScope.DASHBOARD_ADMIN),
     };
 
     const combinedLoadingCount$ = combineLatest(

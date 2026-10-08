@@ -74,14 +74,27 @@ const run = async () => {
         from: '$euiBorderRadius / 2',
         to: 'calc($euiBorderRadius / 2)',
       },
+      // OUI's euiFocusRing mixin takes a single argument; drop the extra args.
+      {
+        from: '@include euiFocusRing(null, 1);',
+        to: '@include euiFocusRing;',
+      },
+      // Wrap legacy Sass division so Dart Sass accepts it.
+      {
+        from: '$euiSizeXS / 2',
+        to: 'calc($euiSizeXS / 2)',
+      },
+      {
+        from: '$euiSizeXS/2',
+        to: 'calc($euiSizeXS/2)',
+      },
     ])
   );
   promises.push(
     patchFile('node_modules/rison-node/js/rison.js', [
       {
         from: 'return Number(s)',
-        to:
-          'return isFinite(s) && (s > Number.MAX_SAFE_INTEGER || s < Number.MIN_SAFE_INTEGER) ? BigInt(s) : Number(s)',
+        to: 'return isFinite(s) && (s > Number.MAX_SAFE_INTEGER || s < Number.MIN_SAFE_INTEGER) ? BigInt(s) : Number(s)',
       },
       {
         from: 's = {',

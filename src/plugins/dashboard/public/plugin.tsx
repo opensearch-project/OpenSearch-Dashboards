@@ -58,7 +58,11 @@ import {
   EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  getGlobalQueryUrlState,
+} from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -110,6 +114,9 @@ import {
   ACTION_LIBRARY_NOTIFICATION,
   LibraryNotificationActionContext,
   LibraryNotificationAction,
+  ACTION_MOVE_PANEL_TO_SECTION,
+  MovePanelToSectionAction,
+  MovePanelToSectionActionContext,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -129,6 +136,7 @@ import {
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
 import { VariablesBar } from './application/components/dashboard_variables';
+import { dashboardNavPopover } from './dashboard_nav_popover';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -140,6 +148,8 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  allowDashboardSections: boolean;
+  variables: { enabled: boolean };
 }
 
 interface SetupDependencies {
@@ -187,7 +197,7 @@ export interface DashboardStart {
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   >(
     type: string,
     options: AttributeServiceOptions<A>
@@ -202,11 +212,16 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [ACTION_MOVE_PANEL_TO_SECTION]: MovePanelToSectionActionContext;
   }
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardSetup, DashboardStart, SetupDependencies, StartDependencies> {
+export class DashboardPlugin implements Plugin<
+  DashboardSetup,
+  DashboardStart,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -225,9 +240,8 @@ export class DashboardPlugin
     // bootstrap UI Actions
     bootstrap(uiActions);
 
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
-      DashboardFeatureFlagConfig
-    >();
+    this.dashboardFeatureFlagConfig =
+      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -284,6 +298,8 @@ export class DashboardPlugin
         ExitFullScreenButton,
         uiActions: deps.uiActions,
         data: deps.data,
+        telemetry: coreStart.telemetry,
+        allowDashboardSections: this.dashboardFeatureFlagConfig?.allowDashboardSections ?? false,
       };
     };
 
@@ -315,10 +331,7 @@ export class DashboardPlugin
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],
@@ -422,6 +435,7 @@ export class DashboardPlugin
           }),
           core: coreStart,
           dashboardConfig,
+          allowDashboardSections: this.dashboardFeatureFlagConfig?.allowDashboardSections ?? false,
           navigateToDefaultApp,
           navigateToLegacyOpenSearchDashboardsUrl,
           navigation,
@@ -465,12 +479,17 @@ export class DashboardPlugin
 
     core.application.register(app);
 
+    const isIconSideNavEnabled = core.chrome.getIsIconSideNavEnabled();
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        order: core.chrome.getIsIconSideNavEnabled() ? 100 : 400,
+        order: isIconSideNavEnabled ? 100 : 400,
         category: undefined,
-        euiIconType: 'dashboardApp',
+        euiIconType: isIconSideNavEnabled ? 'navDashboards' : 'dashboard',
+        // In the icon side nav, hovering Dashboards reveals quick actions
+        // (create / view all) and recently accessed dashboards. Direct click
+        // still navigates to the Dashboards app.
+        ...(isIconSideNavEnabled ? { navPopover: dashboardNavPopover } : {}),
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
@@ -478,7 +497,7 @@ export class DashboardPlugin
         id: app.id,
         order: 400,
         category: undefined,
-        euiIconType: 'dashboardApp',
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
@@ -486,7 +505,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
-        euiIconType: 'dashboardApp',
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
@@ -494,7 +513,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
-        euiIconType: 'dashboardApp',
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -502,7 +521,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
-        euiIconType: 'dashboardApp',
+        euiIconType: 'dashboard',
       },
     ]);
 
@@ -627,6 +646,12 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    if (this.dashboardFeatureFlagConfig?.allowDashboardSections) {
+      const movePanelToSectionAction = new MovePanelToSectionAction(core);
+      uiActions.registerAction(movePanelToSectionAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, movePanelToSectionAction.id);
+    }
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
       const addToLibraryAction = new AddToLibraryAction();

@@ -13,12 +13,12 @@ describe('VisualizationRegistryService', () => {
   let mockGetVisualization: jest.SpyInstance;
 
   const createMockVisualization = (type: string): VisualizationType<any> =>
-    (({
+    ({
       type,
       name: `${type} chart`,
       getRules: jest.fn().mockReturnValue([]),
       ui: { style: { defaults: {}, render: jest.fn() } },
-    } as unknown) as VisualizationType<any>);
+    }) as unknown as VisualizationType<any>;
 
   beforeEach(() => {
     mockRegisterVisualization = jest

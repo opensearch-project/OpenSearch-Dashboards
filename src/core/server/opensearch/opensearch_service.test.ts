@@ -77,7 +77,9 @@ let coreContext: CoreContext;
 const logger = loggingSystemMock.create();
 
 let mockClusterClientInstance: ReturnType<typeof opensearchClientMock.createCustomClusterClient>;
-let mockLegacyClusterClientInstance: ReturnType<typeof opensearchServiceMock.createLegacyCustomClusterClient>;
+let mockLegacyClusterClientInstance: ReturnType<
+  typeof opensearchServiceMock.createLegacyCustomClusterClient
+>;
 
 beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -410,7 +412,7 @@ describe('#registerClientTransport', () => {
     class AnotherTransport extends Transport {}
 
     setupContract.registerClientTransport(CustomTransport);
-    expect(() => setupContract.registerClientTransport(AnotherTransport)).toThrowError(
+    expect(() => setupContract.registerClientTransport(AnotherTransport)).toThrow(
       'A custom Transport class has already been registered.'
     );
   });

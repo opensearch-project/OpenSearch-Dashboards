@@ -56,7 +56,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error) {
       data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+        (output.error as unknown as ExpressionValueError['error']).original || output.error
       );
     }
   });

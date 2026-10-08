@@ -30,7 +30,7 @@ describe('PromQLToolHandlers', () => {
       getSeries: jest.fn(),
     };
 
-    mockData = ({
+    mockData = {
       resourceClientFactory: {
         get: jest.fn().mockReturnValue(mockPrometheusClient),
       },
@@ -41,7 +41,7 @@ describe('PromQLToolHandlers', () => {
           },
         },
       },
-    } as unknown) as DataPublicPluginStart;
+    } as unknown as DataPublicPluginStart;
 
     handlers = new PromQLToolHandlers(mockData, testDataSourceName, testDataSourceMeta);
   });
@@ -53,11 +53,11 @@ describe('PromQLToolHandlers', () => {
     });
 
     it('should throw error when prometheus client not found', () => {
-      const mockDataWithoutClient = ({
+      const mockDataWithoutClient = {
         resourceClientFactory: {
           get: jest.fn().mockReturnValue(undefined),
         },
-      } as unknown) as DataPublicPluginStart;
+      } as unknown as DataPublicPluginStart;
 
       expect(
         () => new PromQLToolHandlers(mockDataWithoutClient, testDataSourceName, testDataSourceMeta)

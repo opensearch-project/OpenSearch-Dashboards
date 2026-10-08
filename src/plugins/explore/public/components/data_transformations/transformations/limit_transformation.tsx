@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { DebouncedFieldNumber } from '../../visualizations/style_panel/utils';
 
@@ -39,7 +40,7 @@ const LimitEditor = ({
 
 export function createLimitTransformation(): TransformationInstance<LimitConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'limit',
     config: { limit: 10 },
     hide: false,
@@ -60,4 +61,13 @@ export const limitTransformationDefinition: TransformationDefinition<LimitConfig
   }),
   iconType: 'filter',
   createInstance: createLimitTransformation,
+};
+
+export const limitConfigSchema: TransformationConfigSchema = {
+  limit: {
+    description: 'Maximum number of rows to keep. Omit or set to undefined to keep all rows.',
+    kind: 'number',
+    defaultValue: 10,
+    required: false,
+  },
 };

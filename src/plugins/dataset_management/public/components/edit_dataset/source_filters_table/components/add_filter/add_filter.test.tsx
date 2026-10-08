@@ -30,7 +30,7 @@ describe('AddFilter', () => {
     component.find('EuiSmallButton').simulate('click');
     component.update();
 
-    expect(onAddFilter).toBeCalledWith('tim*');
+    expect(onAddFilter).toHaveBeenCalledWith('tim*');
   });
 
   test('should ignore strings with just spaces', () => {

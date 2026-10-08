@@ -82,6 +82,7 @@ export const LICENSE_ALLOWLIST = [
   'ISC*',
   'MIT OR GPL-2.0',
   'MIT',
+  'MIT-0',
   'MIT*',
   'MIT/X11',
   'Nuclide software',

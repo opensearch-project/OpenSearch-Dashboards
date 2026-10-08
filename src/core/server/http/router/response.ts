@@ -52,7 +52,7 @@ export type ResponseError =
  * @public
  */
 export interface IOpenSearchDashboardsResponse<
-  T extends HttpResponsePayload | ResponseError = any
+  T extends HttpResponsePayload | ResponseError = any,
 > {
   readonly status: number;
   readonly payload?: T;
@@ -69,8 +69,9 @@ export function isOpenSearchDashboardsResponse(
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
  */
-export class OpenSearchDashboardsResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IOpenSearchDashboardsResponse<T> {
+export class OpenSearchDashboardsResponse<
+  T extends HttpResponsePayload | ResponseError = any,
+> implements IOpenSearchDashboardsResponse<T> {
   constructor(
     public readonly status: number,
     public readonly payload?: T,

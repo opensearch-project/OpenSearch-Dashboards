@@ -55,7 +55,7 @@ const buildAction = (
     getLabel: () => `label-${id}`,
     onClick: jest.fn(),
     ...overrides,
-  } as QueryPanelActionConfig);
+  }) as QueryPanelActionConfig;
 
 describe('QueryPanelActions', () => {
   let mockRegistry: jest.Mocked<QueryPanelActionsRegistryService>;
@@ -137,7 +137,7 @@ describe('QueryPanelActions', () => {
       });
     });
 
-    it('renders disabled inline buttons when getIsEnabled returns false', () => {
+    it('hides inline buttons when getIsEnabled returns false', () => {
       setupUseSelectorMock();
       mockRegistry.getSortedActions.mockReturnValue([
         buildAction('off', {
@@ -147,8 +147,7 @@ describe('QueryPanelActions', () => {
       ]);
 
       render(<QueryPanelActions registry={mockRegistry} />);
-      const btn = screen.getByTestId('queryPanelActionInline-off');
-      expect(btn).toBeDisabled();
+      expect(screen.queryByTestId('queryPanelActionInline-off')).not.toBeInTheDocument();
     });
 
     it('passes the live dependencies to getLabel / getIsEnabled / getIcon', () => {

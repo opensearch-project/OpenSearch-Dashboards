@@ -14,6 +14,7 @@ export const useIndexPatterns = () => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [hasAnalyticEngine, setHasAnalyticEngine] = useState<boolean>(false);
   const {
     services: { data, savedObjects },
   } = useOpenSearchDashboards<VisBuilderServices>();
@@ -22,8 +23,10 @@ export const useIndexPatterns = () => {
   if (!loading && !error && indexId) {
     foundSelected = indexPatterns.filter((p) => p.id === indexId)[0];
     // If the selected index pattern was filtered out (e.g., it's an AnalyticEngine data source),
-    // don't treat it as an error - it will be handled by selecting the first available pattern
-    if (foundSelected === undefined && indexPatterns.length === 0) {
+    // don't treat it as an error - it will be handled by selecting the first available pattern.
+    // When the list is empty *because* the only sources are Optimized engine (AnalyticEngine),
+    // skip the generic error so the dropdown can show a tailored empty-state message instead.
+    if (foundSelected === undefined && indexPatterns.length === 0 && !hasAnalyticEngine) {
       setError(new Error('No index patterns available'));
     }
   }
@@ -41,6 +44,7 @@ export const useIndexPatterns = () => {
 
         const indexPatternIds = new Set(indexPatternList.map((item) => item.id));
         setIndexPatterns(patterns.filter((i) => indexPatternIds.has(i.id)));
+        setHasAnalyticEngine(patterns.length > indexPatternIds.size);
       } catch (e) {
         setError(e as Error);
       } finally {
@@ -56,5 +60,6 @@ export const useIndexPatterns = () => {
     error,
     loading,
     selected: foundSelected,
+    hasAnalyticEngine,
   };
 };

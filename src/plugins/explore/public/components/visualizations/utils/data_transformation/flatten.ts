@@ -114,61 +114,61 @@
  *   ['<time2>', null, 2]
  * ]
  */
-export const flatten = (fields?: string[]) => (
-  data: Array<Record<string, any>>
-): Array<Record<string, any>> => {
-  if (data.length === 0) return [];
+export const flatten =
+  (fields?: string[]) =>
+  (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+    if (data.length === 0) return [];
 
-  // Auto-detect array fields if not specified
-  // Check all rows to find fields that contain arrays in any row
-  const fieldsToFlatten =
-    fields ??
-    Array.from(
-      new Set(data.flatMap((row) => Object.keys(row).filter((key) => Array.isArray(row[key]))))
-    );
+    // Auto-detect array fields if not specified
+    // Check all rows to find fields that contain arrays in any row
+    const fieldsToFlatten =
+      fields ??
+      Array.from(
+        new Set(data.flatMap((row) => Object.keys(row).filter((key) => Array.isArray(row[key]))))
+      );
 
-  if (fieldsToFlatten.length === 0) {
-    // No array fields to flatten, return data as-is
-    return data;
-  }
-
-  const result: Array<Record<string, any>> = [];
-
-  data.forEach((row) => {
-    // Find the maximum length among all arrays to flatten in this row
-    const maxLength = Math.max(
-      ...fieldsToFlatten.map((field) => {
-        const value = row[field];
-        return Array.isArray(value) ? value.length : 0;
-      }),
-      1 // At least 1 row even if all arrays are empty/null
-    );
-
-    // Create a row for each index up to maxLength
-    for (let i = 0; i < maxLength; i++) {
-      const newRow: Record<string, any> = {};
-
-      // Copy all fields from original row
-      Object.keys(row).forEach((key) => {
-        if (fieldsToFlatten.includes(key)) {
-          // For fields to flatten, extract value at index i
-          const value = row[key];
-          if (Array.isArray(value)) {
-            // If it's an array, extract value at index i
-            newRow[key] = i < value.length ? value[i] : null;
-          } else {
-            // If it's not an array, treat it as a single value (only for i === 0)
-            newRow[key] = i === 0 ? value : null;
-          }
-        } else {
-          // For non-array fields, copy the value as-is
-          newRow[key] = row[key];
-        }
-      });
-
-      result.push(newRow);
+    if (fieldsToFlatten.length === 0) {
+      // No array fields to flatten, return data as-is
+      return data;
     }
-  });
 
-  return result;
-};
+    const result: Array<Record<string, any>> = [];
+
+    data.forEach((row) => {
+      // Find the maximum length among all arrays to flatten in this row
+      const maxLength = Math.max(
+        ...fieldsToFlatten.map((field) => {
+          const value = row[field];
+          return Array.isArray(value) ? value.length : 0;
+        }),
+        1 // At least 1 row even if all arrays are empty/null
+      );
+
+      // Create a row for each index up to maxLength
+      for (let i = 0; i < maxLength; i++) {
+        const newRow: Record<string, any> = {};
+
+        // Copy all fields from original row
+        Object.keys(row).forEach((key) => {
+          if (fieldsToFlatten.includes(key)) {
+            // For fields to flatten, extract value at index i
+            const value = row[key];
+            if (Array.isArray(value)) {
+              // If it's an array, extract value at index i
+              newRow[key] = i < value.length ? value[i] : null;
+            } else {
+              // If it's not an array, treat it as a single value (only for i === 0)
+              newRow[key] = i === 0 ? value : null;
+            }
+          } else {
+            // For non-array fields, copy the value as-is
+            newRow[key] = row[key];
+          }
+        });
+
+        result.push(newRow);
+      }
+    });
+
+    return result;
+  };

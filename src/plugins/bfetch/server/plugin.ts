@@ -115,14 +115,12 @@ const streamingHeaders = {
   'Transfer-Encoding': 'chunked',
 };
 
-export class BfetchServerPlugin
-  implements
-    Plugin<
-      BfetchServerSetup,
-      BfetchServerStart,
-      BfetchServerSetupDependencies,
-      BfetchServerStartDependencies
-    > {
+export class BfetchServerPlugin implements Plugin<
+  BfetchServerSetup,
+  BfetchServerStart,
+  BfetchServerSetupDependencies,
+  BfetchServerStartDependencies
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
@@ -145,83 +143,78 @@ export class BfetchServerPlugin
 
   public stop() {}
 
-  private addStreamingResponseRoute = ({
-    router,
-    logger,
-  }: {
-    router: ReturnType<CoreSetup['http']['createRouter']>;
-    logger: Logger;
-  }): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
-    router.post(
-      {
-        path: `/${removeLeadingSlash(path)}`,
-        validate: {
-          body: schema.any(),
+  private addStreamingResponseRoute =
+    ({
+      router,
+      logger,
+    }: {
+      router: ReturnType<CoreSetup['http']['createRouter']>;
+      logger: Logger;
+    }): BfetchServerSetup['addStreamingResponseRoute'] =>
+    (path, handler) => {
+      router.post(
+        {
+          path: `/${removeLeadingSlash(path)}`,
+          validate: {
+            body: schema.any(),
+          },
         },
-      },
-      async (context, request, response) => {
-        const handlerInstance = handler(request);
-        const data = request.body;
-        return response.ok({
-          headers: streamingHeaders,
-          body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
-        });
-      }
-    );
-  };
-
-  private createStreamingRequestHandler = ({
-    logger,
-  }: {
-    logger: Logger;
-  }): BfetchServerSetup['createStreamingRequestHandler'] => (streamHandler) => async (
-    context,
-    request,
-    response
-  ) => {
-    const response$ = await streamHandler(context, request);
-    return response.ok({
-      headers: streamingHeaders,
-      body: createNDJSONStream(response$, logger),
-    });
-  };
-
-  private addBatchProcessingRoute = (
-    addStreamingResponseRoute: BfetchServerSetup['addStreamingResponseRoute']
-  ): BfetchServerSetup['addBatchProcessingRoute'] => <
-    BatchItemData extends object,
-    BatchItemResult extends object,
-    E extends ErrorLike = ErrorLike
-  >(
-    path: string,
-    handler: (
-      request: OpenSearchDashboardsRequest
-    ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
-  ) => {
-    addStreamingResponseRoute<
-      BatchRequestData<BatchItemData>,
-      BatchResponseItem<BatchItemResult, E>
-    >(path, (request) => {
-      const handlerInstance = handler(request);
-      return {
-        getResponseStream: ({ batch }) => {
-          const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
-          let cnt = batch.length;
-          batch.forEach(async (batchItem, id) => {
-            try {
-              const result = await handlerInstance.onBatchItem(batchItem);
-              subject.next({ id, result });
-            } catch (err) {
-              const error = normalizeError<E>(err);
-              subject.next({ id, error });
-            } finally {
-              cnt--;
-              if (!cnt) subject.complete();
-            }
+        async (context, request, response) => {
+          const handlerInstance = handler(request);
+          const data = request.body;
+          return response.ok({
+            headers: streamingHeaders,
+            body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
           });
-          return subject;
-        },
-      };
-    });
-  };
+        }
+      );
+    };
+
+  private createStreamingRequestHandler =
+    ({ logger }: { logger: Logger }): BfetchServerSetup['createStreamingRequestHandler'] =>
+    (streamHandler) =>
+    async (context, request, response) => {
+      const response$ = await streamHandler(context, request);
+      return response.ok({
+        headers: streamingHeaders,
+        body: createNDJSONStream(response$, logger),
+      });
+    };
+
+  private addBatchProcessingRoute =
+    (
+      addStreamingResponseRoute: BfetchServerSetup['addStreamingResponseRoute']
+    ): BfetchServerSetup['addBatchProcessingRoute'] =>
+    <BatchItemData extends object, BatchItemResult extends object, E extends ErrorLike = ErrorLike>(
+      path: string,
+      handler: (
+        request: OpenSearchDashboardsRequest
+      ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    ) => {
+      addStreamingResponseRoute<
+        BatchRequestData<BatchItemData>,
+        BatchResponseItem<BatchItemResult, E>
+      >(path, (request) => {
+        const handlerInstance = handler(request);
+        return {
+          getResponseStream: ({ batch }) => {
+            const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
+            let cnt = batch.length;
+            batch.forEach(async (batchItem, id) => {
+              try {
+                const result = await handlerInstance.onBatchItem(batchItem);
+                subject.next({ id, result });
+              } catch (err) {
+                const error = normalizeError<E>(err);
+                subject.next({ id, error });
+              } finally {
+                cnt--;
+                if (!cnt) subject.complete();
+              }
+            });
+            return subject;
+          },
+        };
+      });
+    };
 }

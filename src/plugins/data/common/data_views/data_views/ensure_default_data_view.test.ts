@@ -33,11 +33,11 @@ describe('ensureDefaultDataView', () => {
       delete: jest.fn(),
     };
 
-    indexPatterns = ({
+    indexPatterns = {
       getIds: jest.fn(),
       get: jest.fn(),
       getDataSource: jest.fn(),
-    } as unknown) as jest.Mocked<DataViewsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
   });
 
   test('should return early if canUpdateUiSetting is false', async () => {
@@ -338,8 +338,10 @@ describe('ensureDefaultDataView', () => {
       return [] as Array<SavedObject<unknown>>;
     });
 
+    // An empty-id data-source reference is treated as the local cluster (not a real binding),
+    // so pattern1 is a valid candidate and, being first, becomes the default.
     await ensureDefaultDataView.call(indexPatterns);
-    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern2');
+    expect(uiSettings.set).toHaveBeenCalledWith('defaultIndex', 'pattern1');
     uiSettings.set.mockClear();
 
     savedObjectsClient.find.mockImplementation(async (params) => {
@@ -377,6 +379,6 @@ describe('ensureDefaultDataView', () => {
     indexPatterns.getIds.mockResolvedValue(['pattern1']);
     indexPatterns.getDataSource.mockRejectedValue(new Error('Failed to get data source'));
 
-    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrowError();
+    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrow();
   });
 });

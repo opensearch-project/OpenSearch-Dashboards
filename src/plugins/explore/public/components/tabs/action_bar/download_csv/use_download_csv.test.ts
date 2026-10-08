@@ -81,7 +81,7 @@ const mockOnSuccess = jest.fn();
 const mockOnError = jest.fn();
 
 // this is a mock of index pattern that has just the things needed for this test
-const mockIndexPattern = ({
+const mockIndexPattern = {
   formatHit: (row: OpenSearchSearchHit) => row._source,
   fields: {
     getByName: (columnName: string) => {
@@ -98,7 +98,7 @@ const mockIndexPattern = ({
   formatField: (row: OpenSearchSearchHit<Record<string, number | string>>, columnName: string) => {
     return row._source[columnName];
   },
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const mockProps: UseDiscoverDownloadCsvProps = {
   rows: [mockRow1],

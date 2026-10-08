@@ -1,0 +1,17 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 100,
+  "height": 30,
+  "marks": [
+    {
+      "type": "text",
+      "encode": {
+        "update": {
+          "text": { "value": "hello world" },
+          "x": { "value": 10 },
+          "y": { "value": 15 }
+        }
+      }
+    }
+  ]
+}

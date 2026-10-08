@@ -45,6 +45,38 @@ describe('AddToDashboardModal', () => {
     expect(screen.getByLabelText('Save to new dashboard')).not.toBeChecked();
   });
 
+  it('shows the complex query warning when showComplexQueryWarning is true', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+          showComplexQueryWarning={true}
+        />
+      );
+    });
+
+    expect(await screen.findByTestId('complexQueryWarningCallout')).toBeInTheDocument();
+  });
+
+  it('does not show the complex query warning by default', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+        />
+      );
+    });
+
+    await screen.findByText('Save and Add to Dashboard');
+    expect(screen.queryByTestId('complexQueryWarningCallout')).not.toBeInTheDocument();
+  });
+
   it('allows entering a title and selecting an existing dashboard', async () => {
     await act(async () => {
       render(
@@ -149,6 +181,22 @@ describe('AddToDashboardModal', () => {
 
     const addButton = await screen.findByRole('button', { name: 'Add' });
     expect(addButton).toBeDisabled();
+  });
+
+  it('initializes the saved object title from the visualization title', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+          initialTitle="Panel title"
+        />
+      );
+    });
+
+    expect(await screen.findByPlaceholderText('Enter save search name')).toHaveValue('Panel title');
   });
 
   it('calls onCancel when cancel button is clicked', async () => {

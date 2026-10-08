@@ -185,7 +185,7 @@ describe('NDJSONProcessor', () => {
           expect(response.failedRows.length).toBeGreaterThan(0);
           expect(clientMock.index.mock.calls.length).toBeLessThanOrEqual(rawString.length);
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch {}
       }
     );
   });

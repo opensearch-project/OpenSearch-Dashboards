@@ -18,7 +18,7 @@
     "@osd/utility-types": "1.0.0",
     "@types/normalize-path": "^3.0.0",
     "normalize-path": "^3.0.0",
-    "@types/lodash": "4.14.165",
+    "@types/lodash": "4.17.24",
     "moment": "^2.24.0"
   }
 }

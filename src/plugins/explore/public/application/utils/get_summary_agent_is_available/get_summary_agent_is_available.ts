@@ -23,7 +23,7 @@ export const getSummaryAgentIsAvailable = async (
       },
     });
     return res.exists;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

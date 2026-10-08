@@ -6,6 +6,7 @@
 import { SetStateAction, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSetEditorText } from '../use_set_editor_text';
+import type { SetEditorTextOptions } from '../use_set_editor_text';
 import { setEditorMode } from '../../../utils/state_management/slices';
 import { EditorMode } from '../../../utils/state_management/types';
 
@@ -17,8 +18,12 @@ export const useSetEditorTextWithQuery = () => {
   const dispatch = useDispatch();
 
   return useCallback(
-    (textOrCallback: SetStateAction<string>) => {
-      setEditorText(textOrCallback);
+    (textOrCallback: SetStateAction<string>, options?: SetEditorTextOptions) => {
+      if (options) {
+        setEditorText(textOrCallback, options);
+      } else {
+        setEditorText(textOrCallback);
+      }
       dispatch(setEditorMode(EditorMode.Query));
     },
     [dispatch, setEditorText]

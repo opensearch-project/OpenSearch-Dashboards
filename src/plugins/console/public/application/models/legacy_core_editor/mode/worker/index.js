@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line import/no-unresolved -- inline loader syntax (!!file-loader!) is not understood by ESLint import resolvers
 import workerPath from '!!file-loader!./worker.js';
 
 export const workerUrl = workerPath;

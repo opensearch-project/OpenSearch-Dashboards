@@ -15,11 +15,14 @@ import {
   DashboardAppStateTransitions,
   DashboardAppStateInUrl,
   DashboardServices,
+  DashboardVariableUrlState,
 } from '../../types';
 import { ViewMode } from '../../../../embeddable/public';
 import { getDashboardIdFromUrl } from '../utils';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { SavedObjectDashboard } from '../../saved_dashboards';
+import { Variable } from '../../variables/types';
+import { normalizeDashboardQuery } from './migrate_legacy_query';
 
 const APP_STATE_STORAGE_KEY = '_a';
 
@@ -36,7 +39,7 @@ export const createDashboardGlobalAndAppState = ({
   services,
   savedDashboardInstance,
 }: Arguments) => {
-  const urlState = osdUrlStateStorage.get<DashboardAppState>(APP_STATE_STORAGE_KEY);
+  const urlState = osdUrlStateStorage.get<DashboardAppStateInUrl>(APP_STATE_STORAGE_KEY);
   const {
     opensearchDashboardsVersion,
     usageCollection,
@@ -53,10 +56,7 @@ export const createDashboardGlobalAndAppState = ({
   2. Update the version number on each panel to the current version.
   */
   const initialState = migrateAppState(
-    {
-      ...stateDefaults,
-      ...urlState,
-    },
+    hydrateDashboardAppState(stateDefaults, urlState),
     opensearchDashboardsVersion,
     usageCollection
   );
@@ -102,14 +102,19 @@ export const createDashboardGlobalAndAppState = ({
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
           if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
-          // In VIEW mode, toUrlState() excludes panels from URL to keep URLs clean.
-          // When syncing URL back to state, preserve current panels if URL state doesn't include them.
-          // This prevents panels from being reset to stateDefaults after variable changes in VIEW mode.
-          stateContainer.set({
-            ...stateDefaults,
-            ...state,
-            panels: state.panels ?? stateContainer.getState().panels,
-          });
+          // In VIEW mode, toUrlState() excludes panels and layout from the URL.
+          // Preserve their current values when syncing URL state back so unrelated
+          // URL changes do not reset the dashboard to its initial saved state.
+          const currentState = stateContainer.getState();
+          stateContainer.set(
+            hydrateDashboardAppState(
+              stateDefaults,
+              state,
+              currentState.panels,
+              currentState.variables,
+              currentState.layout
+            )
+          );
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
           // Sync from state url should be refactored within this application. The app is syncing from
@@ -141,6 +146,57 @@ export const createDashboardGlobalAndAppState = ({
   // start syncing the appState with the ('_a') url
   startStateSync();
   return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
+};
+
+const hydrateVariablesFromUrl = (
+  defaultVariables: Variable[] | undefined,
+  urlVariables: DashboardVariableUrlState[] | undefined
+): Variable[] | undefined => {
+  if (!urlVariables || !defaultVariables) {
+    return defaultVariables;
+  }
+
+  const urlVariablesById = new Map(urlVariables.map((variable) => [variable.id, variable]));
+  return defaultVariables.map((variable) => {
+    const urlVariable = urlVariablesById.get(variable.id);
+    if (!urlVariable) {
+      return variable;
+    }
+
+    return {
+      ...variable,
+      current: urlVariable.current,
+    };
+  });
+};
+
+export const hydrateDashboardAppState = (
+  stateDefaults: DashboardAppState,
+  urlState?: Partial<DashboardAppStateInUrl> | null,
+  currentPanels?: DashboardAppState['panels'],
+  currentVariables?: Variable[],
+  currentLayout?: DashboardAppState['layout']
+): DashboardAppState => {
+  let hydratedState = stateDefaults;
+  if (urlState) {
+    const { variables, panels, layout, ...urlStateWithoutDerivedState } = urlState;
+    const baseVariables = currentVariables ?? stateDefaults.variables;
+
+    hydratedState = {
+      ...stateDefaults,
+      ...urlStateWithoutDerivedState,
+      panels: panels ?? currentPanels ?? stateDefaults.panels,
+      variables: hydrateVariablesFromUrl(baseVariables, variables),
+      layout: layout ?? currentLayout ?? stateDefaults.layout,
+    };
+  }
+
+  // Normalize both saved-object defaults and URL-restored state before either can reach the shared
+  // query service or be persisted again.
+  return {
+    ...hydratedState,
+    query: normalizeDashboardQuery(hydratedState.query),
+  };
 };
 
 /**
@@ -182,10 +238,13 @@ const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
   // treat the missing key as a removal and trigger spurious dirty flags.
   const { variables, ...stateWithoutVariables } = state;
   const hasVariables = variables && variables.length > 0;
+  const variableUrlState = variables?.map(({ id, current }) => ({ id, current }));
 
   if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...rest } = stateWithoutVariables;
-    return hasVariables ? { ...rest, variables } : rest;
+    const { panels, layout, ...rest } = stateWithoutVariables;
+    return hasVariables ? { ...rest, variables: variableUrlState } : rest;
   }
-  return hasVariables ? { ...stateWithoutVariables, variables } : stateWithoutVariables;
+  return hasVariables
+    ? { ...stateWithoutVariables, variables: variableUrlState }
+    : stateWithoutVariables;
 };

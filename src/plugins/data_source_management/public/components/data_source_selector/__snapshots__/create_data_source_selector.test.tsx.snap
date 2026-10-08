@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`create data source selector should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false 1`] = `
+exports[`create data source selector lets an explicit props.hideLocalCluster=true win over the data_source config (hides local cluster) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -29,12 +29,11 @@ Object {
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-                id=""
+              <p
+                class="euiComboBoxPlaceholder"
               >
-                Local cluster
-              </span>
+                Select a data source
+              </p>
               <div
                 class="euiComboBox__input"
                 style="font-size: 14px; display: inline-block;"
@@ -47,24 +46,13 @@ Object {
                   value=""
                 />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                 />
               </div>
             </div>
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
             >
-              <button
-                aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
-                data-test-subj="comboBoxClearButton"
-                type="button"
-              >
-                <span
-                  class="euiFormControlLayoutClearButton__icon"
-                  data-euiicon-type="cross"
-                />
-              </button>
               <button
                 aria-label="Open list of options"
                 class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -108,12 +96,11 @@ Object {
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-              id=""
+            <p
+              class="euiComboBoxPlaceholder"
             >
-              Local cluster
-            </span>
+              Select a data source
+            </p>
             <div
               class="euiComboBox__input"
               style="font-size: 14px; display: inline-block;"
@@ -126,24 +113,13 @@ Object {
                 value=""
               />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
               />
             </div>
           </div>
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
           >
-            <button
-              aria-label="Clear input"
-              class="euiFormControlLayoutClearButton"
-              data-test-subj="comboBoxClearButton"
-              type="button"
-            >
-              <span
-                class="euiFormControlLayoutClearButton__icon"
-                data-euiicon-type="cross"
-              />
-            </button>
             <button
               aria-label="Open list of options"
               class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -244,11 +220,12 @@ Object {
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
-              <p
-                class="euiComboBoxPlaceholder"
+              <span
+                class="euiComboBoxPill euiComboBoxPill--plainText"
+                id=""
               >
-                Select a data source
-              </p>
+                Local cluster
+              </span>
               <div
                 class="euiComboBox__input"
                 style="font-size: 14px; display: inline-block;"
@@ -261,13 +238,24 @@ Object {
                   value=""
                 />
                 <div
-                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                 />
               </div>
             </div>
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
             >
+              <button
+                aria-label="Clear input"
+                class="euiFormControlLayoutClearButton"
+                data-test-subj="comboBoxClearButton"
+                type="button"
+              >
+                <span
+                  class="euiFormControlLayoutClearButton__icon"
+                  data-euiicon-type="cross"
+                />
+              </button>
               <button
                 aria-label="Open list of options"
                 class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -311,11 +299,12 @@ Object {
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
-            <p
-              class="euiComboBoxPlaceholder"
+            <span
+              class="euiComboBoxPill euiComboBoxPill--plainText"
+              id=""
             >
-              Select a data source
-            </p>
+              Local cluster
+            </span>
             <div
               class="euiComboBox__input"
               style="font-size: 14px; display: inline-block;"
@@ -328,13 +317,24 @@ Object {
                 value=""
               />
               <div
-                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
               />
             </div>
           </div>
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
           >
+            <button
+              aria-label="Clear input"
+              class="euiFormControlLayoutClearButton"
+              data-test-subj="comboBoxClearButton"
+              type="button"
+            >
+              <span
+                class="euiFormControlLayoutClearButton__icon"
+                data-euiicon-type="cross"
+              />
+            </button>
             <button
               aria-label="Open list of options"
               class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"

@@ -24,7 +24,7 @@ describe('ppl_request_trace', () => {
   >;
   const mockExecutePPLQuery = executePPLQuery as jest.MockedFunction<typeof executePPLQuery>;
 
-  const mockDataService = ({
+  const mockDataService = {
     query: {
       queryString: {
         setQuery: jest.fn(),
@@ -33,7 +33,7 @@ describe('ppl_request_trace', () => {
     search: {
       search: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 
   let tracePPLService: TracePPLService;
 
@@ -122,6 +122,25 @@ describe('ppl_request_trace', () => {
       expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
         query: { query: 'mock-query' },
       });
+    });
+
+    it('supports the != operator', async () => {
+      await tracePPLService.fetchTraceSpans({
+        ...defaultParams,
+        filters: [
+          { field: 'serviceName', value: 'cart', operator: '!=' },
+          { field: 'status.code', value: 200, operator: '=' },
+        ],
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
+        'source = test-index | where traceId = "test-trace-id" | where serviceName != "cart" | where status.code = 200 | head 100'
+      );
     });
 
     it('escapes filter values correctly', async () => {

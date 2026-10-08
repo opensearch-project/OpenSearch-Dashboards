@@ -44,9 +44,8 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
     },
     async (context, req, res) => {
       const internalRepository = context.core.savedObjects.client;
-      const telemetrySavedObject: TelemetrySavedObject = await getTelemetrySavedObject(
-        internalRepository
-      );
+      const telemetrySavedObject: TelemetrySavedObject =
+        await getTelemetrySavedObject(internalRepository);
 
       // update the object with a flag stating that the opt-in notice has been seen
       const updatedAttributes: TelemetrySavedObjectAttributes = {

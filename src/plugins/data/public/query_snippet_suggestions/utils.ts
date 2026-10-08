@@ -22,7 +22,7 @@ export const transformSavedSearchToSnippet = (savedSearch: any): QuerySnippetIte
   try {
     const searchSourceJSON = savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON;
     query = searchSourceJSON ? JSON.parse(searchSourceJSON)?.query : undefined;
-  } catch (e) {
+  } catch {
     query = undefined;
   }
 

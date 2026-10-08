@@ -98,6 +98,11 @@ export const createNewVisActions = (services: {
       getDisplayName: () => visType.title,
       getIconType: () => visType.icon as EuiIconType,
       grouping: [],
+      isCompatible: async () => {
+        return !Boolean(
+          [...types.all(), ...types.getAliases()].find((t) => t.name === visType.name)?.hidden
+        );
+      },
     };
     if ('aliasApp' in visType) {
       if (visType.promotion) {
@@ -117,11 +122,6 @@ export const createNewVisActions = (services: {
               visType.aliasPath,
               currentAppId,
               context?.containerInfo
-            );
-          },
-          isCompatible: async () => {
-            return !Boolean(
-              [...types.all(), ...types.getAliases()].find((t) => t.name === visType.name)?.hidden
             );
           },
         });

@@ -146,13 +146,10 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilterState,
-  ]);
+  } = useMemo(
+    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState),
+    [fields, columns, popularLimit, fieldCounts, fieldFilterState]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];

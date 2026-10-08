@@ -27,9 +27,10 @@ describe('getPromptModeIsAvailable', () => {
   });
 
   it('returns false if query-assist extension is missing', async () => {
-    (services.data.query.queryString.getLanguageService().getQueryEditorExtensionMap as jest.Mocked<
-      any
-    >).mockReturnValue({});
+    (
+      services.data.query.queryString.getLanguageService()
+        .getQueryEditorExtensionMap as jest.Mocked<any>
+    ).mockReturnValue({});
 
     const result = await getPromptModeIsAvailable(services);
     expect(result).toBe(false);
@@ -38,9 +39,10 @@ describe('getPromptModeIsAvailable', () => {
   it('returns false if query-assist extension exists but isEnabled$ returns false', async () => {
     const mockIsEnabled$ = jest.fn().mockReturnValue(of(false));
 
-    (services.data.query.queryString.getLanguageService().getQueryEditorExtensionMap as jest.Mocked<
-      any
-    >).mockReturnValue({
+    (
+      services.data.query.queryString.getLanguageService()
+        .getQueryEditorExtensionMap as jest.Mocked<any>
+    ).mockReturnValue({
       'query-assist': {
         isEnabled$: mockIsEnabled$,
       },
@@ -54,9 +56,10 @@ describe('getPromptModeIsAvailable', () => {
   it('returns true if query-assist extension exists and isEnabled$ returns true', async () => {
     const mockIsEnabled$ = jest.fn().mockReturnValue(of(true));
 
-    (services.data.query.queryString.getLanguageService().getQueryEditorExtensionMap as jest.Mocked<
-      any
-    >).mockReturnValue({
+    (
+      services.data.query.queryString.getLanguageService()
+        .getQueryEditorExtensionMap as jest.Mocked<any>
+    ).mockReturnValue({
       'query-assist': {
         isEnabled$: mockIsEnabled$,
       },
@@ -68,9 +71,10 @@ describe('getPromptModeIsAvailable', () => {
   });
 
   it('returns false if getting extension map throws an error', async () => {
-    (services.data.query.queryString.getLanguageService().getQueryEditorExtensionMap as jest.Mocked<
-      any
-    >).mockImplementation(() => {
+    (
+      services.data.query.queryString.getLanguageService()
+        .getQueryEditorExtensionMap as jest.Mocked<any>
+    ).mockImplementation(() => {
       throw new Error('Extension map error');
     });
 

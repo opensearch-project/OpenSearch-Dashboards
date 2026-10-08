@@ -106,12 +106,12 @@ const axisModes = getAxisModes();
 const scaleTypes = getScaleTypes();
 const interpolationModes = getInterpolationModes();
 
-const vis = ({
+const vis = {
   type: {
     editorConfig: {
       collections: { scaleTypes, axisModes, positions, interpolationModes },
     },
   },
-} as any) as Vis;
+} as any as Vis;
 
 export { defaultValueAxisId, categoryAxis, valueAxis, seriesParam, vis };

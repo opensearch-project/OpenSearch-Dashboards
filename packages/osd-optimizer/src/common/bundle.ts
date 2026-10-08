@@ -43,7 +43,7 @@ const isStringArray = (input: any): input is string[] =>
   Array.isArray(input) && input.every((x) => typeof x === 'string');
 
 export interface BundleSpec {
-  readonly type: typeof VALID_BUNDLE_TYPES[0];
+  readonly type: (typeof VALID_BUNDLE_TYPES)[0];
   /** Unique id for this bundle */
   readonly id: string;
   /** directory names relative to the contextDir that can be imported from */
@@ -181,68 +181,66 @@ export function parseBundles(json: string) {
       throw new Error('must be an array');
     }
 
-    return specs.map(
-      (spec: UnknownVals<BundleSpec>): Bundle => {
-        if (!(spec && typeof spec === 'object')) {
-          throw new Error('`bundles[]` must be an object');
-        }
-
-        const { type } = spec;
-        if (!includes(VALID_BUNDLE_TYPES, type)) {
-          throw new Error('`bundles[]` must have a valid `type`');
-        }
-
-        const { id } = spec;
-        if (!(typeof id === 'string')) {
-          throw new Error('`bundles[]` must have a string `id` property');
-        }
-
-        const { publicDirNames } = spec;
-        if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
-          throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
-        }
-
-        const { contextDir } = spec;
-        if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
-          throw new Error('`bundles[]` must have an absolute path `contextDir` property');
-        }
-
-        const { sourceRoot } = spec;
-        if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
-          throw new Error('`bundles[]` must have an absolute path `sourceRoot` property');
-        }
-
-        const { outputDir } = spec;
-        if (!(typeof outputDir === 'string' && Path.isAbsolute(outputDir))) {
-          throw new Error('`bundles[]` must have an absolute path `outputDir` property');
-        }
-
-        const { manifestPath } = spec;
-        if (manifestPath !== undefined) {
-          if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
-            throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
-          }
-        }
-
-        const { banner } = spec;
-        if (banner !== undefined) {
-          if (!(typeof banner === 'string')) {
-            throw new Error('`bundles[]` must have a string `banner` property');
-          }
-        }
-
-        return new Bundle({
-          type,
-          id,
-          publicDirNames,
-          contextDir,
-          sourceRoot,
-          outputDir,
-          banner,
-          manifestPath,
-        });
+    return specs.map((spec: UnknownVals<BundleSpec>): Bundle => {
+      if (!(spec && typeof spec === 'object')) {
+        throw new Error('`bundles[]` must be an object');
       }
-    );
+
+      const { type } = spec;
+      if (!includes(VALID_BUNDLE_TYPES, type)) {
+        throw new Error('`bundles[]` must have a valid `type`');
+      }
+
+      const { id } = spec;
+      if (!(typeof id === 'string')) {
+        throw new Error('`bundles[]` must have a string `id` property');
+      }
+
+      const { publicDirNames } = spec;
+      if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
+        throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
+      }
+
+      const { contextDir } = spec;
+      if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
+        throw new Error('`bundles[]` must have an absolute path `contextDir` property');
+      }
+
+      const { sourceRoot } = spec;
+      if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
+        throw new Error('`bundles[]` must have an absolute path `sourceRoot` property');
+      }
+
+      const { outputDir } = spec;
+      if (!(typeof outputDir === 'string' && Path.isAbsolute(outputDir))) {
+        throw new Error('`bundles[]` must have an absolute path `outputDir` property');
+      }
+
+      const { manifestPath } = spec;
+      if (manifestPath !== undefined) {
+        if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
+          throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
+        }
+      }
+
+      const { banner } = spec;
+      if (banner !== undefined) {
+        if (!(typeof banner === 'string')) {
+          throw new Error('`bundles[]` must have a string `banner` property');
+        }
+      }
+
+      return new Bundle({
+        type,
+        id,
+        publicDirNames,
+        contextDir,
+        sourceRoot,
+        outputDir,
+        banner,
+        manifestPath,
+      });
+    });
   } catch (error) {
     throw new Error(`unable to parse bundles: ${error.message}`);
   }

@@ -7,7 +7,7 @@ import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useObservable } from 'react-use';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
@@ -15,22 +15,22 @@ import { DiscoverDownloadCsv } from '../download_csv';
 import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
-import {
-  selectActiveTabId,
-  selectWrapCellText,
-} from '../../../../application/utils/state_management/selectors';
-import { setWrapCellText } from '../../../../application/utils/state_management/slices';
+import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
 import {
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
 } from '../../../../../common';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
+import { TableActionsPopoverButton } from '../table_actions/table_actions_popover_button';
+import { setHideEmptyFields } from '../../../../application/utils/state_management/slices';
+import { useHiddenColumnCount } from '../../../../helpers/use_displayed_columns';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { SlotItemsForType } from '../../../../services/slot_registry';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
+  bucketCount?: number;
   showResetButton?: boolean;
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
@@ -43,6 +43,7 @@ export interface DiscoverResultsActionBarProps {
 
 export const DiscoverResultsActionBar = ({
   hits,
+  bucketCount,
   showResetButton = false,
   resetQuery,
   rows,
@@ -54,8 +55,10 @@ export const DiscoverResultsActionBar = ({
 }: DiscoverResultsActionBarProps) => {
   const dispatch = useDispatch();
   const currentTab = useSelector(selectActiveTabId);
-  const wrapCellText = useSelector(selectWrapCellText);
-  const isLogsTab = currentTab === EXPLORE_LOGS_TAB_ID;
+  const hiddenColumnCount = useHiddenColumnCount();
+  // A dataset change resets the active tab to EXPLORE_NO_TAB_ID while the logs table stays on
+  // screen, so an empty id means logs here just as it does in detectAndSetOptimalTab.
+  const isLogsTab = (currentTab || EXPLORE_LOGS_TAB_ID) === EXPLORE_LOGS_TAB_ID;
   const shouldShowAddToDashboardButton =
     currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
   const shouldShowExportButton =
@@ -75,20 +78,25 @@ export const DiscoverResultsActionBar = ({
       data-test-subj="dscResultsActionBar"
     >
       <EuiFlexItem>
+        {/* Result count sits at the start of the row and the actions collapse to the end, so the
+            two read as a single set of controls for the table beneath them. */}
         <EuiFlexGroup
           alignItems="center"
           direction="row"
-          gutterSize="none"
+          gutterSize="s"
           justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
             <HitsCounter
               hits={hits}
+              bucketCount={bucketCount}
               showResetButton={showResetButton}
               onResetQuery={resetQuery}
               rows={rows}
               elapsedMs={elapsedMs}
               rowsCountOverride={rowsCountOverride}
+              hiddenColumnCount={isLogsTab ? hiddenColumnCount : 0}
+              onShowHiddenColumns={() => dispatch(setHideEmptyFields(false))}
             />
           </EuiFlexItem>
           {/* TODO: Fix data consistency issue with inspection panel */}
@@ -104,72 +112,57 @@ export const DiscoverResultsActionBar = ({
             </EuiButtonEmpty>
           </EuiFlexItem> */}
           <EuiFlexItem grow={false}>
-            {dataset && rows?.length ? (
-              <EuiFlexGroup
-                alignItems="center"
-                direction="row"
-                gutterSize="s"
-                justifyContent="flexStart"
-              >
-                {isLogsTab && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('explore.discover.wrapCellTextTooltip', {
-                        defaultMessage:
-                          'Toggle between truncated and wrapped cell text in the table',
+            <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" responsive={false}>
+              {isNonTableChart && dataset && rows?.length ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate('explore.discover.showRawDataTooltip', {
+                      defaultMessage: 'View raw data table for this visualization',
+                    })}
+                  >
+                    <EuiSwitch
+                      label={i18n.translate('explore.discover.showRawData', {
+                        defaultMessage: 'Show raw data',
                       })}
-                    >
-                      <EuiSwitch
-                        label={i18n.translate('explore.discover.wrapCellText', {
-                          defaultMessage: 'Wrap cell text',
-                        })}
-                        checked={wrapCellText ?? false}
-                        onChange={(e) => dispatch(setWrapCellText(e.target.checked))}
-                        data-test-subj="exploreWrapCellTextSwitch"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-                {isNonTableChart && dataset && rows?.length ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate('explore.discover.showRawDataTooltip', {
-                        defaultMessage: 'View raw data table for this visualization',
-                      })}
-                    >
-                      <EuiSwitch
-                        label={i18n.translate('explore.discover.showRawData', {
-                          defaultMessage: 'Show raw data',
-                        })}
-                        checked={!!showRawTable}
-                        onChange={(e) => visualizationBuilder.setShowRawTable(e.target.checked)}
-                        data-test-subj="exploreShowRawDataSwitch"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
-                {showTabSpecificSettings && (
-                  <EuiFlexItem grow={false}>
-                    <PatternsSettingsPopoverButton />
-                  </EuiFlexItem>
-                )}
-                {shouldShowExportButton && (
-                  <EuiFlexItem grow={false}>
-                    <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
-                  </EuiFlexItem>
-                )}
-                {shouldShowAddToDashboardButton && (
-                  <EuiFlexItem grow={false}>
-                    <SaveAndAddButtonWithModal dataset={dataset} />
-                  </EuiFlexItem>
-                )}
-                {extraActions?.map((item) => (
-                  <EuiFlexItem grow={false} key={item.id}>
-                    {item.render()}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : null}
+                      checked={!!showRawTable}
+                      onChange={(e) => visualizationBuilder.setShowRawTable(e.target.checked)}
+                      data-test-subj="exploreShowRawDataSwitch"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              {dataset && rows?.length ? (
+                <>
+                  {showTabSpecificSettings && (
+                    <EuiFlexItem grow={false}>
+                      <PatternsSettingsPopoverButton />
+                    </EuiFlexItem>
+                  )}
+                  {shouldShowExportButton && (
+                    <EuiFlexItem grow={false}>
+                      <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                    </EuiFlexItem>
+                  )}
+                  {shouldShowAddToDashboardButton && (
+                    <EuiFlexItem grow={false}>
+                      <SaveAndAddButtonWithModal dataset={dataset} />
+                    </EuiFlexItem>
+                  )}
+                  {extraActions?.map((item) => (
+                    <EuiFlexItem grow={false} key={item.id}>
+                      {item.render()}
+                    </EuiFlexItem>
+                  ))}
+                  {/* Table settings sit last so they anchor to the end of the action row,
+                      matching the conventional placement for data table management. */}
+                  {isLogsTab && (
+                    <EuiFlexItem grow={false}>
+                      <TableActionsPopoverButton />
+                    </EuiFlexItem>
+                  )}
+                </>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

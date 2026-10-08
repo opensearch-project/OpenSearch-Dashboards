@@ -98,7 +98,7 @@ describe('previewFile()', () => {
       expect(response.documents).toMatchObject(documents);
       expect(response.predictedMapping).toMatchObject(mockMapping);
       expect(response.existingMapping).toMatchObject(mockMapping);
-      expect(http.post).toBeCalledWith('/api/data_importer/_preview', {
+      expect(http.post).toHaveBeenCalledWith('/api/data_importer/_preview', {
         body: formData,
         headers: {
           'Content-Type': undefined,

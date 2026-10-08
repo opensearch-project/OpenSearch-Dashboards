@@ -244,8 +244,8 @@ describe('SQLSearchInterceptor', () => {
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
       );
     });
 
@@ -270,8 +270,8 @@ describe('SQLSearchInterceptor', () => {
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
-        "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000' GROUP BY method"
+        "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000') GROUP BY method"
       );
     });
 
@@ -288,8 +288,8 @@ describe('SQLSearchInterceptor', () => {
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
       );
     });
   });
@@ -339,7 +339,7 @@ describe('SQLSearchInterceptor', () => {
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000' AND ( `host` = 'a')"
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000') AND ( `host` = 'a')"
       );
     });
 

@@ -61,12 +61,13 @@ export function RecentQueriesTable({
         },
         {
           render: (item: RecentQueryTableItem) => (
-            <EuiCopy textToCopy={item.query as string}>
+            <EuiCopy beforeMessage="Copy recent query" textToCopy={item.query as string}>
               {(copy) => (
                 <EuiButtonIcon
                   onClick={copy}
-                  iconType="copyClipboard"
+                  iconType="copy"
                   aria-label="Copy recent query"
+                  data-test-subj="action-copy"
                 />
               )}
             </EuiCopy>

@@ -72,126 +72,127 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
 
   // Helper function to recursively build tree nodes from any data structure
   const buildDataNodes = useMemo(
-    () => (data: any, idPrefix: string, level = 0): TreeNode[] => {
-      const nodes: TreeNode[] = [];
+    () =>
+      (data: any, idPrefix: string, level = 0): TreeNode[] => {
+        const nodes: TreeNode[] = [];
 
-      if (data === null || data === undefined) {
-        return nodes;
-      }
+        if (data === null || data === undefined) {
+          return nodes;
+        }
 
-      // Handle different data types
-      if (typeof data === 'object' && !Array.isArray(data)) {
-        // Handle objects
-        Object.entries(data).forEach(([key, value], index) => {
-          const nodeId = `${idPrefix}-${key}-${index}`;
+        // Handle different data types
+        if (typeof data === 'object' && !Array.isArray(data)) {
+          // Handle objects
+          Object.entries(data).forEach(([key, value], index) => {
+            const nodeId = `${idPrefix}-${key}-${index}`;
 
-          if (value === null || value === undefined) {
-            nodes.push({
-              id: nodeId,
-              icon: <EuiToken iconType="tokenNull" color="euiColorMediumShade" />,
-              label: (
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{key}:</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      null
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            });
-          } else if (typeof value === 'object' && !Array.isArray(value)) {
-            // Nested object
-            const children = buildDataNodes(value, nodeId, level + 1);
-            nodes.push({
-              id: nodeId,
-              icon: <EuiToken iconType="tokenObject" color="euiColorVis1" />,
-              label: (
-                <EuiText size="s">
-                  <strong>{key}</strong>
-                </EuiText>
-              ),
-              children: children.length > 0 ? children : undefined,
-            });
-          } else if (Array.isArray(value)) {
-            // Array
-            const arrayChildren = value.map((item, arrayIndex) => {
-              const arrayNodeId = `${nodeId}-${arrayIndex}`;
-              if (typeof item === 'object') {
-                return {
-                  id: arrayNodeId,
-                  icon: <EuiToken iconType="tokenObject" color="euiColorVis2" />,
-                  label: <EuiText size="s">[{arrayIndex}]</EuiText>,
-                  children: buildDataNodes(item, arrayNodeId, level + 2),
-                };
-              } else {
-                return {
-                  id: arrayNodeId,
-                  icon: <EuiToken iconType="tokenString" color="euiColorVis3" />,
-                  label: (
-                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">[{arrayIndex}]:</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{renderTruncatedBadge(String(item))}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                };
+            if (value === null || value === undefined) {
+              nodes.push({
+                id: nodeId,
+                icon: <EuiToken iconType="tokenNull" color="euiColorMediumShade" />,
+                label: (
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>{key}:</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        null
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              });
+            } else if (typeof value === 'object' && !Array.isArray(value)) {
+              // Nested object
+              const children = buildDataNodes(value, nodeId, level + 1);
+              nodes.push({
+                id: nodeId,
+                icon: <EuiToken iconType="tokenObject" color="euiColorVis1" />,
+                label: (
+                  <EuiText size="s">
+                    <strong>{key}</strong>
+                  </EuiText>
+                ),
+                children: children.length > 0 ? children : undefined,
+              });
+            } else if (Array.isArray(value)) {
+              // Array
+              const arrayChildren = value.map((item, arrayIndex) => {
+                const arrayNodeId = `${nodeId}-${arrayIndex}`;
+                if (typeof item === 'object') {
+                  return {
+                    id: arrayNodeId,
+                    icon: <EuiToken iconType="tokenObject" color="euiColorVis2" />,
+                    label: <EuiText size="s">[{arrayIndex}]</EuiText>,
+                    children: buildDataNodes(item, arrayNodeId, level + 2),
+                  };
+                } else {
+                  return {
+                    id: arrayNodeId,
+                    icon: <EuiToken iconType="tokenString" color="euiColorVis3" />,
+                    label: (
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">[{arrayIndex}]:</EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>{renderTruncatedBadge(String(item))}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    ),
+                  };
+                }
+              });
+
+              nodes.push({
+                id: nodeId,
+                icon: <EuiToken iconType="tokenArray" color="euiColorVis4" />,
+                label: (
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>{key}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">{value.length} items</EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+                children: arrayChildren,
+              });
+            } else {
+              // Primitive values
+              const valueType = typeof value;
+              let icon = <EuiToken iconType="tokenString" color="euiColorVis5" />;
+
+              if (valueType === 'boolean') {
+                icon = <EuiToken iconType="tokenBoolean" color="euiColorVis6" />;
+              } else if (valueType === 'number') {
+                icon = <EuiToken iconType="tokenNumber" color="euiColorVis7" />;
               }
-            });
 
-            nodes.push({
-              id: nodeId,
-              icon: <EuiToken iconType="tokenArray" color="euiColorVis4" />,
-              label: (
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{key}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{value.length} items</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-              children: arrayChildren,
-            });
-          } else {
-            // Primitive values
-            const valueType = typeof value;
-            let icon = <EuiToken iconType="tokenString" color="euiColorVis5" />;
-
-            if (valueType === 'boolean') {
-              icon = <EuiToken iconType="tokenBoolean" color="euiColorVis6" />;
-            } else if (valueType === 'number') {
-              icon = <EuiToken iconType="tokenNumber" color="euiColorVis7" />;
+              nodes.push({
+                id: nodeId,
+                icon,
+                label: (
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>{key}:</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{renderTruncatedBadge(String(value))}</EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              });
             }
+          });
+        }
 
-            nodes.push({
-              id: nodeId,
-              icon,
-              label: (
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{key}:</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{renderTruncatedBadge(String(value))}</EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            });
-          }
-        });
-      }
-
-      return nodes;
-    },
+        return nodes;
+      },
     [renderTruncatedBadge]
   );
 

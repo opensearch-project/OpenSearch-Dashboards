@@ -73,7 +73,11 @@ import {
   ChromeHelpExtension,
   ChromeGlobalBanner,
 } from '../../chrome_service';
-import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import {
+  ChromeNavGroupServiceStartContract,
+  NavGroupItemInMap,
+  NavPopoverServices,
+} from '../../nav_group';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
@@ -90,6 +94,7 @@ import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
 import { HeaderBanner } from './header_banner';
 import { OBSERVABILITY_USE_CASE_ID } from '../../../../../core/utils';
+import { GlobalSearchCommandPalette } from '../global_search/command_palette/command_palette';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -134,6 +139,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   enableIconSideNav?: boolean;
+  navPopoverServices?: NavPopoverServices;
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
   globalSearchCommands$: Observable<GlobalSearchCommand[]>;
@@ -211,8 +217,8 @@ export function Header({
   const isNavOpen = enableIconSideNav
     ? isLocked || isTempExpanded
     : useUpdatedHeader
-    ? isLocked
-    : isNavOpenState;
+      ? isLocked
+      : isNavOpenState;
 
   const setIsNavOpen = useCallback(
     (value: boolean) => {
@@ -555,6 +561,7 @@ export function Header({
         opensearchDashboardsDocLink={opensearchDashboardsDocLink}
         opensearchDashboardsVersion={opensearchDashboardsVersion}
         surveyLink={survey}
+        keyboardShortcut={keyboardShortcut}
       />
     </EuiHeaderSectionItem>
   );
@@ -717,7 +724,7 @@ export function Header({
 
   return (
     <>
-      <HeaderBanner globalBanner={globalBanner} style={sidecarPaddingStyle} />
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
@@ -750,7 +757,9 @@ export function Header({
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
             globalSearchCommands$={observables.globalSearchCommands$}
+            commandPaletteAvailable={Boolean(keyboardShortcut)}
             enableIconSideNav={enableIconSideNav}
+            navPopoverServices={observables.navPopoverServices}
             isLocked={isLocked}
             onIsLockedUpdate={onIsLockedUpdate}
             openNav={() => setIsNavOpen(true)}
@@ -781,6 +790,12 @@ export function Header({
           />
         )}
       </header>
+      {keyboardShortcut && (
+        <GlobalSearchCommandPalette
+          globalSearchCommands$={observables.globalSearchCommands$}
+          keyboardShortcut={keyboardShortcut}
+        />
+      )}
     </>
   );
 }

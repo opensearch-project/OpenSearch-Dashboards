@@ -6,6 +6,7 @@
 export const PLUGIN_ID = 'discover';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+export const AGGREGATION_SAMPLE_SIZE_SETTING = 'discover:aggregationSampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';

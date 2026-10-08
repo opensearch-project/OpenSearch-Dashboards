@@ -61,12 +61,12 @@ describe('Intro component', () => {
     viewUrl: '/some-url',
     onDeleteClick: () => undefined,
     useUpdatedUX: false,
-    navigationUI: ({
+    navigationUI: {
       // @ts-expect-error TS7031 TODO(ts-error): fixme
       HeaderControl: ({ controls }) => {
         return controls?.[0].ariaLabel ?? controls?.[0].label ?? null;
       },
-    } as unknown) as NavigationPublicPluginStart['ui'],
+    } as unknown as NavigationPublicPluginStart['ui'],
     application: coreMock.createStart().application,
   };
 

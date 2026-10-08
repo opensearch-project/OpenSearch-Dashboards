@@ -5,23 +5,20 @@
 
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
-import { EditorMode } from '../../utils/state_management/types';
 import { useEditorOperations } from './use_editor_operations';
 import { useQueryBuilderState } from './use_query_builder_state';
-
-// Mock the problematic dependency chain
-jest.mock('../query_builder/query_builder', () => ({
-  getQueryBuilder: jest.fn(),
-}));
+import { EditorMode } from '../../utils/state_management/types';
 
 jest.mock('./use_query_builder_state', () => ({
   useQueryBuilderState: jest.fn(),
 }));
 
+const mockUseQueryBuilderState = jest.mocked(useQueryBuilderState);
+
 describe('useEditorOperations', () => {
-  let mockQueryBuilder: any;
   let mockEditor: any;
   let mockModel: any;
+  let mockQueryBuilder: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,87 +41,50 @@ describe('useEditorOperations', () => {
     };
 
     mockQueryBuilder = {
-      getEditorRef: jest.fn().mockReturnValue(mockEditor),
-      setEditorRef: jest.fn(),
+      getEditor: jest.fn().mockReturnValue(mockEditor),
       updateQueryEditorState: jest.fn(),
     };
 
-    (useQueryBuilderState as jest.Mock).mockReturnValue({
-      queryBuilder: mockQueryBuilder,
-    });
+    mockUseQueryBuilderState.mockReturnValue({ queryBuilder: mockQueryBuilder } as any);
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
+  const renderOps = () => renderHook(() => useEditorOperations());
+
   describe('getEditorRef', () => {
-    it('returns editor ref from queryBuilder', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
-      const editorRef = result.current.getEditorRef();
-
-      expect(editorRef).toBe(mockEditor);
-      expect(mockQueryBuilder.getEditorRef).toHaveBeenCalled();
+    it('returns editor ref from queryBuilder.getEditor', () => {
+      const { result } = renderOps();
+      expect(result.current.getEditorRef()).toBe(mockEditor);
+      expect(mockQueryBuilder.getEditor).toHaveBeenCalled();
     });
 
     it('returns null when no editor is set', () => {
-      mockQueryBuilder.getEditorRef.mockReturnValue(null);
-
-      const { result } = renderHook(() => useEditorOperations());
-
-      const editorRef = result.current.getEditorRef();
-
-      expect(editorRef).toBeNull();
-    });
-  });
-
-  describe('setEditorRef', () => {
-    it('sets editor ref in queryBuilder', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
-      act(() => {
-        result.current.setEditorRef(mockEditor);
-      });
-
-      expect(mockQueryBuilder.setEditorRef).toHaveBeenCalledWith(mockEditor);
-    });
-
-    it('can set editor ref to null', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
-      act(() => {
-        result.current.setEditorRef(null);
-      });
-
-      expect(mockQueryBuilder.setEditorRef).toHaveBeenCalledWith(null);
+      mockQueryBuilder.getEditor.mockReturnValue(null);
+      const { result } = renderOps();
+      expect(result.current.getEditorRef()).toBeNull();
     });
   });
 
   describe('focusEditor', () => {
     it('focuses editor and positions cursor at end', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.focusEditor();
         jest.runAllTimers();
       });
-
       expect(mockEditor.focus).toHaveBeenCalled();
-      expect(mockEditor.setPosition).toHaveBeenCalledWith({
-        lineNumber: 1,
-        column: 12,
-      });
+      expect(mockEditor.setPosition).toHaveBeenCalledWith({ lineNumber: 1, column: 12 });
     });
 
     it('focuses editor and selects all when selectAll is true', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.focusEditor(true);
         jest.runAllTimers();
       });
-
       expect(mockEditor.focus).toHaveBeenCalled();
       expect(mockEditor.setSelection).toHaveBeenCalledWith({ mock: 'range' });
       expect(mockEditor.setPosition).not.toHaveBeenCalled();
@@ -133,25 +93,17 @@ describe('useEditorOperations', () => {
     it('handles editor with multiple lines', () => {
       mockModel.getLineCount.mockReturnValue(3);
       mockModel.getLineMaxColumn.mockReturnValue(25);
-
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.focusEditor();
         jest.runAllTimers();
       });
-
-      expect(mockEditor.setPosition).toHaveBeenCalledWith({
-        lineNumber: 3,
-        column: 25,
-      });
+      expect(mockEditor.setPosition).toHaveBeenCalledWith({ lineNumber: 3, column: 25 });
     });
 
     it('handles null editor gracefully', () => {
-      mockQueryBuilder.getEditorRef.mockReturnValue(null);
-
-      const { result } = renderHook(() => useEditorOperations());
-
+      mockQueryBuilder.getEditor.mockReturnValue(null);
+      const { result } = renderOps();
       expect(
         act(() => {
           result.current.focusEditor();
@@ -162,14 +114,11 @@ describe('useEditorOperations', () => {
 
     it('handles editor without model gracefully', () => {
       mockEditor.getModel.mockReturnValue(null);
-
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.focusEditor();
         jest.runAllTimers();
       });
-
       expect(mockEditor.focus).toHaveBeenCalled();
       expect(mockEditor.setPosition).not.toHaveBeenCalled();
     });
@@ -178,100 +127,77 @@ describe('useEditorOperations', () => {
   describe('getEditorText', () => {
     it('returns text from editor', () => {
       mockEditor.getValue.mockReturnValue('source=metrics | head 10');
-
-      const { result } = renderHook(() => useEditorOperations());
-
-      const text = result.current.getEditorText();
-
-      expect(text).toBe('source=metrics | head 10');
+      const { result } = renderOps();
+      expect(result.current.getEditorText()).toBe('source=metrics | head 10');
       expect(mockEditor.getValue).toHaveBeenCalled();
     });
   });
 
   describe('setEditorText', () => {
     it('sets text in editor with string value', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.setEditorText('source=metrics');
       });
-
       expect(mockEditor.setValue).toHaveBeenCalledWith('source=metrics');
     });
 
     it('sets text using function callback', () => {
       mockEditor.getValue.mockReturnValue('source=logs');
-
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.setEditorText((prev) => `${prev} | head 10`);
       });
-
       expect(mockEditor.setValue).toHaveBeenCalledWith('source=logs | head 10');
     });
 
     it('handles empty string', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       act(() => {
         result.current.setEditorText('');
       });
-
       expect(mockEditor.setValue).toHaveBeenCalledWith('');
     });
   });
 
   describe('switchEditorMode', () => {
-    it('switches to Prompt mode and updates state', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+    it('updates editor mode and selects all text in editor', () => {
+      const { result } = renderOps();
       act(() => {
         result.current.switchEditorMode(EditorMode.Prompt);
         jest.runAllTimers();
       });
-
       expect(mockQueryBuilder.updateQueryEditorState).toHaveBeenCalledWith({
         editorMode: EditorMode.Prompt,
       });
       expect(mockEditor.setSelection).toHaveBeenCalledWith({ mock: 'range' });
     });
 
-    it('switches to Query mode', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+    it('does nothing to selection when editor has no model', () => {
+      mockEditor.getModel.mockReturnValue(null);
+      const { result } = renderOps();
       act(() => {
         result.current.switchEditorMode(EditorMode.Query);
         jest.runAllTimers();
       });
-
-      expect(mockQueryBuilder.updateQueryEditorState).toHaveBeenCalledWith({
-        editorMode: EditorMode.Query,
-      });
+      expect(mockEditor.setSelection).not.toHaveBeenCalled();
     });
   });
 
   describe('clearEditor', () => {
-    it('clears editor text and resets mode', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+    it('clears editor text', () => {
+      const { result } = renderOps();
       act(() => {
         result.current.clearEditor();
       });
-
       expect(mockEditor.setValue).toHaveBeenCalledWith('');
-      expect(mockQueryBuilder.updateQueryEditorState).toHaveBeenCalledWith({
-        editorMode: EditorMode.Query,
-      });
     });
   });
 
   describe('return value', () => {
     it('returns object with all expected operations', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       expect(result.current).toHaveProperty('getEditorRef');
-      expect(result.current).toHaveProperty('setEditorRef');
       expect(result.current).toHaveProperty('focusEditor');
       expect(result.current).toHaveProperty('getEditorText');
       expect(result.current).toHaveProperty('setEditorText');
@@ -280,10 +206,8 @@ describe('useEditorOperations', () => {
     });
 
     it('all operations are functions', () => {
-      const { result } = renderHook(() => useEditorOperations());
-
+      const { result } = renderOps();
       expect(typeof result.current.getEditorRef).toBe('function');
-      expect(typeof result.current.setEditorRef).toBe('function');
       expect(typeof result.current.focusEditor).toBe('function');
       expect(typeof result.current.getEditorText).toBe('function');
       expect(typeof result.current.setEditorText).toBe('function');

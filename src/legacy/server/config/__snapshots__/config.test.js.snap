@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`lib/config/config class Config() #getDefault(key) array key should throw exception for unknown key 1`] = `"Unknown config key: foo,bar."`;
 

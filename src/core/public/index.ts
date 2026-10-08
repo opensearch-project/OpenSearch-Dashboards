@@ -73,6 +73,9 @@ import {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
   PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
@@ -81,6 +84,7 @@ import {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
+  GlobalSearchResult,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -124,6 +128,7 @@ export {
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
   ENABLE_AI_FEATURES,
+  ENABLE_GLOBAL_SETTING_CONTROL,
   UseCaseId,
 } from '../utils';
 export {
@@ -136,6 +141,8 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   ChromeNavGroup,
   NavGroupType,
   NavGroupStatus,
@@ -309,7 +316,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
  */
 export type StartServicesAccessor<
   TPluginsStart extends object = object,
-  TStart = unknown
+  TStart = unknown,
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
@@ -410,6 +417,9 @@ export {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
   PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
@@ -418,6 +428,7 @@ export {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
+  GlobalSearchResult,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
@@ -445,6 +456,8 @@ export {
   ChatServiceStart,
   ChatImplementationFunctions,
   Message,
+  UserMessage,
+  InputContent,
   ChatWindowState,
   SavedConversation,
   ConversationMemoryProvider,

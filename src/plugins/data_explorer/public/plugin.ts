@@ -30,18 +30,16 @@ import {
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { getPreloadedStore } from './utils/state_management';
-import { opensearchFilters } from '../../data/public';
+import { getGlobalQueryUrlState } from '../../data/public';
 import { setUsageCollector } from './services';
 import { WorkspaceAvailability } from '../../../../src/core/public';
 
-export class DataExplorerPlugin
-  implements
-    Plugin<
-      DataExplorerPluginSetup,
-      DataExplorerPluginStart,
-      DataExplorerPluginSetupDependencies,
-      DataExplorerPluginStartDependencies
-    > {
+export class DataExplorerPlugin implements Plugin<
+  DataExplorerPluginSetup,
+  DataExplorerPluginStart,
+  DataExplorerPluginSetupDependencies,
+  DataExplorerPluginStartDependencies
+> {
   private viewService = new ViewService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
@@ -54,7 +52,11 @@ export class DataExplorerPlugin
     const viewService = this.viewService;
 
     setUsageCollector(usageCollection);
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+    } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
@@ -67,10 +69,7 @@ export class DataExplorerPlugin
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],

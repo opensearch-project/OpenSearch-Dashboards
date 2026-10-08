@@ -107,7 +107,9 @@ const paramSchema = Joi.object({
     .regex(/^[a-zA-Z_]+$/)
     .required(),
   label: Joi.string().required(),
-  type: Joi.string().valid(Object.values(PARAM_TYPES)).required(),
+  type: Joi.string()
+    .valid(...Object.values(PARAM_TYPES))
+    .required(),
 });
 
 const instructionsSchema = Joi.object({
@@ -119,7 +121,9 @@ export const tutorialSchema = {
   id: Joi.string()
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
-  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
+  category: Joi.string()
+    .valid(...Object.values(TUTORIAL_CATEGORY))
+    .required(),
   name: Joi.string().required(),
   moduleName: Joi.string(),
   isBeta: Joi.boolean().default(false),

@@ -175,9 +175,9 @@ export async function createEventEmbeddables(
             },
           });
 
-          const curList = (map.get(pluginResourceType) === undefined
-            ? []
-            : map.get(pluginResourceType)) as EventVisEmbeddableItem[];
+          const curList = (
+            map.get(pluginResourceType) === undefined ? [] : map.get(pluginResourceType)
+          ) as EventVisEmbeddableItem[];
           curList.push({
             visLayer,
             embeddable: eventEmbeddable,

@@ -14,6 +14,8 @@ const mockLoadQueryActionCreator = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
 const mockUseKeyboardShortcut = jest.fn();
 const mockI18nTranslate = jest.fn();
+const defaultCurrentQuery = { query: 'test query', language: 'PPL' };
+const mockGetQuery = jest.fn(() => defaultCurrentQuery);
 
 // Mock i18n
 jest.doMock('@osd/i18n', () => ({
@@ -38,15 +40,21 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
       data: {
         query: {
           queryString: {
-            getQuery: jest.fn(() => ({ query: 'test query', language: 'PPL' })),
+            getQuery: mockGetQuery,
             setQuery: jest.fn(),
             getQueryHistory: jest.fn(() => [
               { query: 'SELECT * FROM logs', language: 'SQL' },
               { query: 'source = table | head 10', language: 'PPL' },
             ]),
           },
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            },
+          },
         },
       },
+      http: { fetch: jest.fn() },
       keyboardShortcut: {
         useKeyboardShortcut: mockUseKeyboardShortcut,
         register: jest.fn(),
@@ -72,6 +80,7 @@ jest.doMock('../../../../application/hooks', () => ({
 }));
 
 jest.doMock('../../../../../../data/public', () => ({
+  runPPLAnalyzeInBackground: jest.fn(),
   RecentQueriesTable: ({ isVisible, onClickRecentQuery }: any) => (
     <div data-test-subj="recent-queries-table" style={{ display: isVisible ? 'block' : 'none' }}>
       <button
@@ -99,12 +108,31 @@ jest.doMock('../../../../../../data/public', () => ({
       >
         Mock Object Query
       </button>
+      <button
+        data-test-subj="mock-query-item-other-dataset"
+        onClick={() =>
+          onClickRecentQuery({
+            query: '| where status >= 500',
+            language: 'PPL',
+            dataset: {
+              id: 'dataset-a',
+              title: 'orders-*',
+              type: 'INDEX_PATTERN',
+              timeFieldName: 'created_at',
+            },
+          })
+        }
+      >
+        Mock PPL Query From Another Dataset
+      </button>
     </div>
   ),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { RecentQueriesButton } = require('./recent_queries_button');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { runPPLAnalyzeInBackground: mockRunPPLAnalyze } = require('../../../../../../data/public');
 
 const createMockStore = () => {
   return configureStore({
@@ -126,6 +154,7 @@ const renderWithStore = () => {
 describe('RecentQueriesButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetQuery.mockImplementation(() => defaultCurrentQuery);
   });
 
   it('renders the recent queries button with correct text and icon', () => {
@@ -243,6 +272,31 @@ describe('RecentQueriesButton', () => {
     // Popover should be closed (table hidden)
     table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'none' });
+  });
+
+  it('analyzes a recent query against the current dataset, not the one it was recorded on', () => {
+    // Run executes the loaded text against the current dataset, so analyze has to use it too.
+    // The history entry here was recorded on `orders-*`; the user is now on `logs-*`.
+    mockGetQuery.mockImplementation(() => ({
+      query: 'source = `logs-*` | head 10',
+      language: 'PPL',
+      dataset: {
+        id: 'dataset-b',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'timestamp',
+      },
+    }));
+    renderWithStore();
+
+    fireEvent.click(screen.getByTestId('exploreRecentQueriesButton'));
+    fireEvent.click(screen.getByTestId('mock-query-item-other-dataset'));
+
+    expect(mockRunPPLAnalyze).toHaveBeenCalledTimes(1);
+    const { query, onlyIfOpen } = mockRunPPLAnalyze.mock.calls[0][0];
+    expect(onlyIfOpen).toBe(true);
+    expect(query.dataset).toEqual(expect.objectContaining({ id: 'dataset-b', title: 'logs-*' }));
+    expect(query.query).toBe('source = `logs-*` | where status >= 500');
   });
 
   describe('Keyboard Shortcuts', () => {

@@ -47,27 +47,27 @@ const getComputedFields = () => ({
 const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
 
-const indexPattern = ({
+const indexPattern = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
-const indexPattern2 = ({
+const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const dataSourceId = 'dataSourceId';
-const indexPattern3 = ({
+const indexPattern3 = {
   dataSourceRef: {
     id: dataSourceId,
     type: 'dataSource',
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
@@ -159,7 +159,7 @@ describe('SearchSource', () => {
       searchSource.onRequestStart(fn);
       const options = {};
       await searchSource.fetch(options);
-      expect(fn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
     });
 
     test('should not be called on parent searchSource', async () => {
@@ -173,8 +173,8 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).not.toBeCalled();
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).not.toHaveBeenCalled();
     });
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
@@ -193,8 +193,8 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).toHaveBeenCalledWith(searchSource, options);
     });
   });
 
@@ -212,7 +212,7 @@ describe('SearchSource', () => {
       const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
       await searchSource.fetch(options);
-      expect(fetchSoon).toBeCalledTimes(1);
+      expect(fetchSoon).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -222,7 +222,7 @@ describe('SearchSource', () => {
       const options = {};
 
       await searchSource.fetch(options);
-      expect(mockSearchMethod).toBeCalledTimes(1);
+      expect(mockSearchMethod).toHaveBeenCalledTimes(1);
     });
 
     test('index pattern with dataSourceId will generate request with dataSourceId', async () => {
@@ -231,7 +231,7 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
       const request = searchSource.history[0];
-      expect(mockSearchMethod).toBeCalledTimes(1);
+      expect(mockSearchMethod).toHaveBeenCalledTimes(1);
       expect(request.dataSourceId).toEqual(dataSourceId);
     });
   });
@@ -388,6 +388,75 @@ describe('SearchSource', () => {
       expect(references[1].id).toEqual('456');
       expect(references[1].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
+    });
+  });
+
+  describe('#fetch() with a polling (async) external search', () => {
+    const frame = (size: number) => ({
+      name: 'lg',
+      schema: [{ name: 'msg', type: 'string' }],
+      fields: [{ name: 'msg', type: 'string', values: Array.from({ length: size }, (_, i) => i) }],
+      size,
+    });
+
+    beforeEach(() => {
+      // Route through fetchExternalSearch, the path async (non-DSL) languages take.
+      jest.spyOn(SearchSource.prototype as any, 'isUnsupportedRequest').mockReturnValue(true);
+      jest.spyOn(SearchSource.prototype, 'createDataFrame').mockResolvedValue(undefined as any);
+      jest.spyOn(SearchSource.prototype, 'setDataFrame').mockResolvedValue(undefined as any);
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    const pollingSearch = () =>
+      jest
+        .fn()
+        .mockResolvedValueOnce({
+          type: 'data_frame_polling',
+          status: 'started',
+          body: { queryStatusConfig: { queryId: 'q1' } },
+        })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'Running', body: frame(1) })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'Running' })
+        .mockResolvedValueOnce({ type: 'data_frame_polling', status: 'success', body: frame(3) });
+
+    test('forwards still-running frames to onPartialResults and resolves with the final one', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+      const onPartialResults = jest.fn();
+
+      const response = await searchSource.fetch({ onPartialResults, pollInterval: 1 });
+
+      expect(search).toHaveBeenCalledTimes(4);
+      // Only the running response that carried a frame is forwarded; the bare status is not.
+      expect(onPartialResults).toHaveBeenCalledTimes(1);
+      const [partial, partialFrame] = onPartialResults.mock.calls[0];
+      expect(partial.hits.hits).toHaveLength(1);
+      expect(partialFrame.size).toBe(1);
+      expect(response.hits.hits).toHaveLength(3);
+    });
+
+    test('still resolves with the final result when handling a partial throws', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+      const onPartialResults = jest.fn(() => {
+        throw new Error('render failed');
+      });
+
+      const response = await searchSource.fetch({ onPartialResults, pollInterval: 1 });
+
+      expect(onPartialResults).toHaveBeenCalledTimes(1);
+      expect(response.hits.hits).toHaveLength(3);
+    });
+
+    test('is unchanged for callers that do not pass onPartialResults', async () => {
+      const search = pollingSearch();
+      const searchSource = new SearchSource({}, { ...searchSourceDependencies, search });
+
+      const response = await searchSource.fetch({ pollInterval: 1 });
+
+      expect(search).toHaveBeenCalledTimes(4);
+      expect(response.hits.hits).toHaveLength(3);
     });
   });
 });

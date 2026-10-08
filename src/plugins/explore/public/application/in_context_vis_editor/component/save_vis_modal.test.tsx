@@ -21,9 +21,10 @@ jest.mock('@osd/i18n/react', () => ({
 }));
 
 jest.mock('../../../components/visualizations/style_panel/utils', () => ({
-  DebouncedFieldText: ({ onChange, placeholder }: any) => (
+  DebouncedFieldText: ({ value, onChange, placeholder }: any) => (
     <input
       data-test-subj="title-input"
+      value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -39,10 +40,14 @@ beforeEach(() => {
   (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: mockSavedExplore });
 });
 
-const renderModal = (savedExploreId: string | undefined = undefined) =>
+const renderModal = (
+  savedExploreId: string | undefined = undefined,
+  initialTitle: string | undefined = undefined
+) =>
   render(
     <SaveVisModal
       savedExploreId={savedExploreId}
+      initialTitle={initialTitle}
       onConfirm={mockOnConfirm}
       onCancel={mockOnCancel}
     />
@@ -66,6 +71,13 @@ describe('SaveVisModal', () => {
     (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: { id: undefined, title: '' } });
     renderModal();
     expect(screen.getByTestId('saveVisandBackToDashboardConfirmButton')).toBeDisabled();
+  });
+
+  it('initializes the saved object title from the visualization title', () => {
+    renderModal(undefined, 'Panel title');
+
+    expect(screen.getByTestId('title-input')).toHaveValue('Panel title');
+    expect(screen.getByTestId('saveVisandBackToDashboardConfirmButton')).toBeEnabled();
   });
 
   it('calls onConfirm when save button is clicked', async () => {

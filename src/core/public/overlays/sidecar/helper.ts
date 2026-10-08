@@ -38,6 +38,39 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
   return {};
 };
 
+// Names of the CSS custom properties OUI's EuiFlyout / EuiGlobalToastList /
+// EuiBottomBar read to shift out of the way of a docked sidecar. OUI's build
+// pipeline aliases `oui-*` -> `eui-*` in the compiled CSS it ships, and that
+// alias pass only rewrites CSS source text, never runtime JS -- so we write
+// both prefixes to cover whichever theme build is being served.
+const OVERLAY_OFFSET_RIGHT_VARS = ['--oui-overlay-offset-right', '--eui-overlay-offset-right'];
+const OVERLAY_OFFSET_LEFT_VARS = ['--oui-overlay-offset-left', '--eui-overlay-offset-left'];
+
+/**
+ * Reflect the docked sidecar's reserved width onto document root CSS variables
+ * so OUI components positioned against the raw viewport edge (which live
+ * outside #app-wrapper and therefore don't see the padding applied to it)
+ * shift left/right instead of rendering underneath the sidecar. Resets to 0
+ * when the sidecar is hidden, closed (undefined), or in takeover mode.
+ */
+export const applyOverlayOffsetCssVars = (config: ISidecarConfig | undefined): void => {
+  if (typeof document === 'undefined') return;
+
+  let right = 0;
+  let left = 0;
+  if (!config?.isHidden) {
+    if (config?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT) {
+      right = config.paddingSize;
+    } else if (config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
+      left = config.paddingSize;
+    }
+  }
+
+  const { style } = document.documentElement;
+  OVERLAY_OFFSET_RIGHT_VARS.forEach((name) => style.setProperty(name, `${right}px`));
+  OVERLAY_OFFSET_LEFT_VARS.forEach((name) => style.setProperty(name, `${left}px`));
+};
+
 export const getSidecarLeftNavStyle = (config: ISidecarConfig | undefined) => {
   // Only left style is required for left nav
   if (!config?.isHidden && config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT) {

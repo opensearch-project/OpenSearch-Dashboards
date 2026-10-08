@@ -95,7 +95,6 @@ class TutorialUi extends React.Component {
     }
 
     if (tutorial) {
-      // eslint-disable-next-line react/no-did-mount-set-state
       this.setState(
         {
           tutorial: tutorial,
@@ -103,7 +102,6 @@ class TutorialUi extends React.Component {
         this.initInstructionsState
       );
     } else {
-      // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
         notFound: true,
       });
@@ -221,7 +219,7 @@ class TutorialUi extends React.Component {
         }),
       });
       return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
-    } catch (e) {
+    } catch {
       return StatusCheckStates.ERROR;
     }
   };

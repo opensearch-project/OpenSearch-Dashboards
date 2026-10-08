@@ -29,7 +29,7 @@
  */
 
 import { SchemaTypeError, ValidationError } from '../errors';
-import { AnySchema, internals, ValidationErrorItem } from '../internals';
+import { AnySchema, OsdSchema } from '../internals';
 import { Reference } from '../references';
 
 export interface TypeOptions<T> {
@@ -58,7 +58,7 @@ export abstract class Type<V> {
 
       // If default value is a function, then we must provide description for it.
       if (typeof options.defaultValue === 'function') {
-        schema = schema.default(options.defaultValue, 'Type default value');
+        schema = schema.default(options.defaultValue);
       } else {
         schema = schema.default(
           Reference.isReference(options.defaultValue)
@@ -69,21 +69,21 @@ export abstract class Type<V> {
     }
 
     if (options.validate) {
-      schema = schema.custom(options.validate);
+      schema = (schema as unknown as OsdSchema).osdCustom(options.validate);
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
     // only the last error handler is counted.
     const schemaFlags = (schema.describe().flags as Record<string, any>) || {};
     if (schemaFlags.error === undefined) {
-      schema = schema.error(([error]) => this.onError(error));
+      schema = schema.error(([error]: any[]) => this.onError(error));
     }
 
     this.internalSchema = schema;
   }
 
   public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
-    const { value: validatedValue, error } = internals.validate(value, this.internalSchema, {
+    const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
     });
@@ -105,17 +105,21 @@ export abstract class Type<V> {
   protected handleError(
     type: string,
     context: Record<string, any>,
-    path: string[]
+    path: Array<string | number>
   ): string | SchemaTypeError | void {
     return undefined;
   }
 
-  private onError(error: SchemaTypeError | ValidationErrorItem): SchemaTypeError {
+  private onError(error: SchemaTypeError | any): SchemaTypeError {
     if (error instanceof SchemaTypeError) {
       return error;
     }
 
-    const { context = {}, type, path, message } = error;
+    // In joi v17, .error() receives ErrorReport objects with `code`, `local`, `path`
+    const context = error.local || error.context || {};
+    const type = error.code || error.type || '';
+    const path = error.path || [];
+    const message = error.message || '';
 
     const errorHandleResult = this.handleError(type, context, path);
     if (errorHandleResult instanceof SchemaTypeError) {
@@ -128,9 +132,23 @@ export abstract class Type<V> {
       return new SchemaTypeError(errorHandleResult, path);
     }
 
+    // For alternatives/oneOf errors, extract the most relevant inner error
+    // from the details array if available
+    if (
+      (type === 'alternatives.types' || type === 'alternatives.match') &&
+      context.details &&
+      Array.isArray(context.details) &&
+      context.details.length > 0
+    ) {
+      const detail =
+        context.details.find((d: any) => d.type === 'any.osdCustom') ||
+        context.details[context.details.length - 1];
+      return new SchemaTypeError(detail.message, detail.path || path);
+    }
+
     // If error is produced by the custom validator, just extract source message
     // from context and wrap it into `SchemaTypeError` instance.
-    if (type === 'any.custom') {
+    if (type === 'any.osdCustom') {
       return new SchemaTypeError(context.message, path);
     }
 

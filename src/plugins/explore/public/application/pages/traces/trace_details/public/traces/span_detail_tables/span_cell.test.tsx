@@ -15,6 +15,7 @@ jest.mock('./timeline_waterfall_bar', () => ({
 jest.mock('../../utils/helper_functions', () => ({
   nanoToMilliSec: jest.fn((nanos: number) => nanos / 1000000),
   round: jest.fn((num: number, decimals: number) => Math.round(num * 100) / 100),
+  formatSpanDuration: jest.fn((nanos: number) => `${nanos} ns`),
 }));
 
 jest.mock('../../utils/span_data_utils', () => ({
@@ -73,7 +74,7 @@ describe('renderSpanCellValue', () => {
 
   it('renders duration correctly', () => {
     const result = renderSpanCellValue({ item: mockSpan, columnId: 'durationInNanos' });
-    expect(result).toBe('1500 ms');
+    expect(result).toBe('1500000000 ns');
   });
 
   it('renders start time correctly', () => {

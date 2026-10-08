@@ -7,13 +7,29 @@ import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
+import { UiSettingScope } from '../../../core/server';
 import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
+  LOGS_BUILDER_MODE_ONLY_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
+  [ASYNC_QUERY_POLL_INTERVAL_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalTitle', {
+      defaultMessage: 'Async query poll interval',
+    }),
+    value: 5000,
+    description: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalText', {
+      defaultMessage:
+        'Milliseconds between status checks for queries that run asynchronously. Lower values ' +
+        'show partial results sooner at the cost of more requests.',
+    }),
+    category: ['explore'],
+    schema: schema.number({ min: 250, max: 60000 }),
+  },
   [DEFAULT_TRACE_COLUMNS_SETTING]: {
     name: i18n.translate('explore.advancedSettings.defaultTraceColumnsTitle', {
       defaultMessage: 'Default trace columns',
@@ -55,6 +71,21 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
     }),
     category: ['explore'],
+    schema: schema.boolean(),
+  },
+  [LOGS_BUILDER_MODE_ONLY_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.logsBuilderModeOnlyTitle', {
+      defaultMessage: 'Restrict to logs query builder mode',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.logsBuilderModeOnlyText', {
+      defaultMessage:
+        'Allow only the visual builder in the Explore logs query editor. ' +
+        'Code editing and AI-generated queries are disabled.',
+    }),
+    category: ['explore'],
+    scope: UiSettingScope.WORKSPACE,
+    requiresCapability: 'explore.logsQueryBuilderEnabled',
     schema: schema.boolean(),
   },
 };

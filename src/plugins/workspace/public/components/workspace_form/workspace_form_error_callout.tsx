@@ -17,6 +17,10 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       return i18n.translate('workspace.form.errorCallout.nameInvalid', {
         defaultMessage: 'Enter a valid name.',
       });
+    case WorkspaceFormErrorCode.InvalidWorkspaceId:
+      return i18n.translate('workspace.form.errorCallout.idInvalid', {
+        defaultMessage: 'Enter a valid ID or leave blank to auto-generate.',
+      });
     case WorkspaceFormErrorCode.UseCaseMissing:
       return i18n.translate('workspace.form.errorCallout.useCaseMissing', {
         defaultMessage: 'Select a use case.',
@@ -59,6 +63,14 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
                 defaultMessage: 'Name:',
               })}
               message={getSuggestionFromErrorCode(errors.name)}
+            />
+          )}
+          {errors.customId && (
+            <WorkspaceFormErrorCalloutItem
+              errorKey={i18n.translate('workspace.form.errorCallout.idKey', {
+                defaultMessage: 'Workspace ID:',
+              })}
+              message={getSuggestionFromErrorCode(errors.customId)}
             />
           )}
           {errors.color && (

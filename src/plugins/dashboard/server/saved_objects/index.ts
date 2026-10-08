@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { dashboardSavedObjectType } from './dashboard';
+export { getDashboardSavedObjectType } from './dashboard';

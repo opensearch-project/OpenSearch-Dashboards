@@ -33,8 +33,9 @@ import { Subscription } from 'rxjs';
 import { Logos } from 'opensearch-dashboards/public';
 import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-import { DashboardGrid } from '../grid';
+import { DashboardGrid, SectionLayoutContainer } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
+import { DashboardLayout } from '../../../../common';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -51,6 +52,7 @@ interface State {
   panels: { [key: string]: PanelState };
   isEmbeddedExternally?: boolean;
   isEmptyState?: boolean;
+  layout?: DashboardLayout;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -69,6 +71,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       title,
       isEmbeddedExternally,
       isEmptyState,
+      layout,
     } = this.props.container.getInput();
 
     this.state = {
@@ -78,6 +81,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       title,
       isEmbeddedExternally,
       isEmptyState,
+      layout,
     };
   }
 
@@ -91,6 +95,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         description,
         isEmbeddedExternally,
         isEmptyState,
+        layout,
       } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
@@ -100,6 +105,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           title,
           isEmbeddedExternally,
           isEmptyState,
+          layout,
         });
       }
     });
@@ -135,16 +141,10 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     );
   }
 
-  private renderContainerScreen() {
+  private renderContainerScreen(isSectionLayout: boolean) {
     const { container, PanelComponent } = this.props;
-    const {
-      isEmbeddedExternally,
-      isFullScreenMode,
-      panels,
-      title,
-      description,
-      useMargins,
-    } = this.state;
+    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
+      this.state;
     return (
       <div
         data-shared-items-count={Object.values(panels).length}
@@ -160,16 +160,26 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             logos={this.props.logos}
           />
         )}
-        <DashboardGrid container={container} PanelComponent={PanelComponent} />
+        {isSectionLayout ? (
+          <SectionLayoutContainer container={container} PanelComponent={PanelComponent} />
+        ) : (
+          <DashboardGrid container={container} PanelComponent={PanelComponent} />
+        )}
       </div>
     );
   }
 
   public render() {
+    const { isEmptyState, layout } = this.state;
+    // Section layouts own their empty state and remain hidden when the feature is disabled.
+    const isSectionLayout =
+      !!this.context.services.allowDashboardSections &&
+      layout?.type === 'SectionLayout' &&
+      layout.items.length > 0;
     return (
       <React.Fragment>
-        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
-        {this.renderContainerScreen()}
+        {isEmptyState && !isSectionLayout ? this.renderEmptyScreen() : null}
+        {this.renderContainerScreen(isSectionLayout)}
       </React.Fragment>
     );
   }

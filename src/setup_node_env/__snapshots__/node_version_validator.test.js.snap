@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Node.js version validation fails if package.json has a 0.x.x engines.node 1`] = `"OpenSearch Dashboards did not report its required version of the Node.js runtime in a valid format. Please revert any changes that might have been made to the package.json file and try again."`;
 

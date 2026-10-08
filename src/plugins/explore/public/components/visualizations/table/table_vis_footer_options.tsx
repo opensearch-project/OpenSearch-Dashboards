@@ -45,9 +45,10 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   onStyleChange,
   numericalColumns = [],
 }) => {
-  const localCalculations = useMemo(() => styleOptions.footerCalculations || [], [
-    styleOptions.footerCalculations,
-  ]);
+  const localCalculations = useMemo(
+    () => styleOptions.footerCalculations || [],
+    [styleOptions.footerCalculations]
+  );
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
 
   const updateStyleOption = useCallback(

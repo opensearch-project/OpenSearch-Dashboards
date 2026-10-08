@@ -28,7 +28,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createRegionMapFn } from './region_map_fn';
 

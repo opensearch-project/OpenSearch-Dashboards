@@ -55,7 +55,6 @@ describe('KuiTextInput', () => {
     });
 
     describe('autoFocus', () => {
-      /* eslint-disable no-console */
       // Silence until enzyme fixed https://github.com/enzymejs/enzyme/issues/2337
       const originalError = console.error;
       beforeAll(() => {
@@ -64,7 +63,6 @@ describe('KuiTextInput', () => {
       afterAll(() => {
         console.error = originalError;
       });
-      /* eslint-enable no-console */
 
       test('sets focus on the element', () => {
         const component = mount(

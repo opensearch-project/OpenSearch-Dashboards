@@ -28,24 +28,18 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'x1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 2,
     name: 'value 2',
     schema: VisFieldType.Numerical,
     column: 'x2',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 3,
     name: 'value 3',
     schema: VisFieldType.Numerical,
     column: 'x3',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 

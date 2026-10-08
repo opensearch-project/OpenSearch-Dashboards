@@ -44,9 +44,9 @@ describe('render_banner', () => {
 
   beforeEach(() => {
     // Create minimal mocks with only the methods needed for tests
-    mockHttp = ({
+    mockHttp = {
       get: jest.fn(),
-    } as unknown) as jest.Mocked<HttpStart>;
+    } as unknown as jest.Mocked<HttpStart>;
 
     // Create a mock container element
     mockContainer = document.createElement('div');

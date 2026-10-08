@@ -48,10 +48,10 @@ describe('FetcherTask', () => {
       });
       const result = await fetcherTask['sendIfDue']();
       expect(result).toBe(undefined);
-      expect(getCurrentConfigs).toBeCalledTimes(1);
-      expect(fetchTelemetry).toBeCalledTimes(0);
-      expect(sendTelemetry).toBeCalledTimes(0);
-      expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
+      expect(getCurrentConfigs).toHaveBeenCalledTimes(1);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(0);
+      expect(sendTelemetry).toHaveBeenCalledTimes(0);
+      expect(fetcherTask['logger'].warn).toHaveBeenCalledTimes(1);
       expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
         `Error getting telemetry configs. (${mockError})`
       );
@@ -78,12 +78,12 @@ describe('FetcherTask', () => {
 
       await fetcherTask['sendIfDue']();
 
-      expect(fetchTelemetry).toBeCalledTimes(0);
-      expect(sendTelemetry).toBeCalledTimes(0);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(0);
+      expect(sendTelemetry).toHaveBeenCalledTimes(0);
 
-      expect(areAllCollectorsReady).toBeCalledTimes(1);
-      expect(updateReportFailure).toBeCalledTimes(0);
-      expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
+      expect(areAllCollectorsReady).toHaveBeenCalledTimes(1);
+      expect(updateReportFailure).toHaveBeenCalledTimes(0);
+      expect(fetcherTask['logger'].warn).toHaveBeenCalledTimes(1);
       expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
         `Error fetching usage. (Error: Not all collectors are ready.)`
       );
@@ -117,12 +117,12 @@ describe('FetcherTask', () => {
 
       await fetcherTask['sendIfDue']();
 
-      expect(areAllCollectorsReady).toBeCalledTimes(1);
-      expect(fetchTelemetry).toBeCalledTimes(1);
-      expect(sendTelemetry).toBeCalledTimes(2);
+      expect(areAllCollectorsReady).toHaveBeenCalledTimes(1);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(1);
+      expect(sendTelemetry).toHaveBeenCalledTimes(2);
       expect(sendTelemetry).toHaveBeenNthCalledWith(1, mockTelemetryUrl, mockClusters[0]);
       expect(sendTelemetry).toHaveBeenNthCalledWith(2, mockTelemetryUrl, mockClusters[1]);
-      expect(updateReportFailure).toBeCalledTimes(0);
+      expect(updateReportFailure).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -10,7 +10,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { QueryPanel } from './query_panel';
 
 jest.mock('./query_panel_editor', () => ({
-  QueryPanelEditor: () => <div data-test-subj="query-panel-editor">Query Panel Editor</div>,
+  ExploreQueryPanelEditor: () => <div data-test-subj="query-panel-editor">Query Panel Editor</div>,
 }));
 
 jest.mock('./query_panel_generated_query', () => ({
@@ -31,6 +31,10 @@ jest.mock('./actions/ppl_execute_query_action', () => ({
   usePPLExecuteQueryAction: jest.fn(),
 }));
 
+jest.mock('./actions/ppl_lint_fix_action', () => ({
+  usePPLLintFixAction: jest.fn(),
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: jest.fn(),
@@ -39,6 +43,7 @@ jest.mock('react-redux', () => ({
 import { useSelector } from 'react-redux';
 import { useSetEditorTextWithQuery } from '../../application/hooks';
 import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
+import { usePPLLintFixAction } from './actions/ppl_lint_fix_action';
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockUseSetEditorTextWithQuery = useSetEditorTextWithQuery as jest.MockedFunction<
@@ -46,6 +51,9 @@ const mockUseSetEditorTextWithQuery = useSetEditorTextWithQuery as jest.MockedFu
 >;
 const mockUsePPLExecuteQueryAction = usePPLExecuteQueryAction as jest.MockedFunction<
   typeof usePPLExecuteQueryAction
+>;
+const mockUsePPLLintFixAction = usePPLLintFixAction as jest.MockedFunction<
+  typeof usePPLLintFixAction
 >;
 
 describe('QueryPanel', () => {
@@ -70,6 +78,7 @@ describe('QueryPanel', () => {
     const mockSetEditorTextWithQuery = jest.fn();
     mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
     mockUsePPLExecuteQueryAction.mockImplementation(() => {});
+    mockUsePPLLintFixAction.mockImplementation(() => {});
   });
 
   it('renders QueryPanelEditor component', () => {
@@ -128,14 +137,24 @@ describe('QueryPanel', () => {
     expect(mockUsePPLExecuteQueryAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
   });
 
+  it('calls usePPLLintFixAction hook with setEditorTextWithQuery', () => {
+    const mockSetEditorTextWithQuery = jest.fn();
+    mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
+
+    renderWithProvider(<QueryPanel />);
+
+    expect(mockUsePPLLintFixAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
+  });
+
   it('integrates assistant action functionality', () => {
     const mockSetEditorTextWithQuery = jest.fn();
     mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
 
     renderWithProvider(<QueryPanel />);
 
-    // Verify both hooks are called for assistant integration
+    // Verify the hooks are called for assistant integration
     expect(mockUseSetEditorTextWithQuery).toHaveBeenCalled();
     expect(mockUsePPLExecuteQueryAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
+    expect(mockUsePPLLintFixAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
   });
 });

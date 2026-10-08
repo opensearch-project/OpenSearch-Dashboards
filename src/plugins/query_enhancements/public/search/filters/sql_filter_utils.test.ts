@@ -54,10 +54,10 @@ describe('SQLFilterUtils', () => {
     it('skips filters that produce no predicate', () => {
       const query = 'SELECT * FROM test_index';
       // No `key`/field — toPredicate returns undefined.
-      const filterWithoutField = ({
+      const filterWithoutField = {
         meta: { disabled: false, negate: false, type: 'phrase', params: { query: 'x' } },
         query: {},
-      } as unknown) as Filter;
+      } as unknown as Filter;
 
       const result = SQLFilterUtils.addFiltersToQuery(query, [filterWithoutField]);
       expect(result).toBe(query);
@@ -95,6 +95,16 @@ describe('SQLFilterUtils', () => {
       );
       expect(result).toBe(
         "SELECT method, COUNT(*) FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y' GROUP BY method"
+      );
+    });
+
+    it('injects the time filter into the innermost table of a date_histogram() histogram query', () => {
+      const result = SQLFilterUtils.insertWhereClause(
+        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket FROM (SELECT * FROM logs) sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket",
+        where
+      );
+      expect(result).toBe(
+        "SELECT time_bucket, COUNT(*) FROM (SELECT date_histogram(field=`@timestamp`, interval='1h') AS time_bucket FROM (SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') sub_inner) sub GROUP BY time_bucket ORDER BY time_bucket"
       );
     });
 

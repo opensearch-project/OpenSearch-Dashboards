@@ -35,6 +35,6 @@ describe('Test on PopoverButton', () => {
     const onClick = jest.fn();
     const component = mount(<DataSourceMenuPopoverButton className="random" onClick={onClick} />);
     component.find('.dataSourceMenuPopoverButtonLabel').first().simulate('click');
-    expect(onClick).toBeCalledTimes(1);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

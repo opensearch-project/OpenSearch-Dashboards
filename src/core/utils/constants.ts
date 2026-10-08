@@ -9,3 +9,4 @@ export const WORKSPACE_PATH_PREFIX = '/w';
 export const WORKSPACE_USE_CASE_PREFIX = 'use-case-';
 
 export const ENABLE_AI_FEATURES = 'enableAIFeatures';
+export const ENABLE_GLOBAL_SETTING_CONTROL = 'enableGlobalSettingControl';

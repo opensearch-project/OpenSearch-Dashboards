@@ -30,7 +30,7 @@
 
 import { act } from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { UiSettingsType } from '../../../../../../core/public';
+import { UiSettingsType, UiSettingScope } from '../../../../../../core/public';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';
@@ -61,6 +61,7 @@ beforeAll(() => {
       },
     },
     writable: true,
+    configurable: true,
   });
 });
 
@@ -380,5 +381,170 @@ describe('Form', () => {
     });
 
     expect(save).toHaveBeenCalledWith({ 'general:test:array': ['test1', 'test2'] });
+  });
+
+  describe('saveAll partial-failure handling', () => {
+    const mountForm = (toasts: any) =>
+      mountWithI18nProvider(
+        <Form
+          settings={settings}
+          visibleSettings={settings}
+          categories={categories}
+          categoryCounts={categoryCounts}
+          save={save}
+          clearQuery={clearQuery}
+          showNoResultsMessage={true}
+          enableSaving={false}
+          toasts={toasts}
+          dockLinks={{} as any}
+        />
+      );
+
+    it('clears unsaved markers only for succeeded keys and keeps failed ones', async () => {
+      const toasts = notificationServiceMock.createStartContract().toasts;
+      const wrapper = mountForm(toasts);
+      const instance = wrapper.instance() as Form;
+
+      // Two settings edited; the first succeeds, the second fails.
+      act(() => {
+        instance.setState({
+          unsavedChanges: {
+            'general:test:date': { value: 'a' },
+            'setting:test': { value: 'b' },
+          },
+        });
+      });
+
+      save.mockResolvedValueOnce([true, false]);
+      await act(async () => {
+        await instance.saveAll();
+      });
+
+      // Succeeded key cleared, failed key retained for retry.
+      expect(instance.state.unsavedChanges).toEqual({
+        'setting:test': { value: 'b' },
+      });
+      // Failure is surfaced and names the failed setting.
+      expect(toasts.addDanger).toHaveBeenCalledWith(expect.stringContaining('Test setting'));
+    });
+
+    it('clears all unsaved markers when every key succeeds', async () => {
+      const toasts = notificationServiceMock.createStartContract().toasts;
+      const wrapper = mountForm(toasts);
+      const instance = wrapper.instance() as Form;
+
+      act(() => {
+        instance.setState({
+          unsavedChanges: {
+            'general:test:date': { value: 'a' },
+            'setting:test': { value: 'b' },
+          },
+        });
+      });
+
+      save.mockResolvedValueOnce([true, true]);
+      await act(async () => {
+        await instance.saveAll();
+      });
+
+      expect(instance.state.unsavedChanges).toEqual({});
+      expect(toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows the reload toast when a succeeded key requires a reload, even if another key fails', async () => {
+      const toasts = notificationServiceMock.createStartContract().toasts;
+      const wrapper = mountForm(toasts);
+      const instance = wrapper.instance() as Form;
+
+      // dashboard:test:setting requires reload (succeeds); setting:test fails.
+      act(() => {
+        instance.setState({
+          unsavedChanges: {
+            'dashboard:test:setting': { value: 'a' },
+            'setting:test': { value: 'b' },
+          },
+        });
+      });
+
+      save.mockResolvedValueOnce([true, false]);
+      await act(async () => {
+        await instance.saveAll();
+      });
+
+      // Reload prompt still shown for the succeeded reload-requiring key.
+      expect(toasts.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.stringContaining(
+            'One or more settings require you to reload the page to take effect.'
+          ),
+        })
+      );
+      // And the failure is still reported.
+      expect(toasts.addDanger).toHaveBeenCalled();
+    });
+
+    it('does not show the reload toast when the reload-requiring key fails', async () => {
+      const toasts = notificationServiceMock.createStartContract().toasts;
+      const wrapper = mountForm(toasts);
+      const instance = wrapper.instance() as Form;
+
+      act(() => {
+        instance.setState({
+          unsavedChanges: {
+            'dashboard:test:setting': { value: 'a' },
+          },
+        });
+      });
+
+      save.mockResolvedValueOnce([false]);
+      await act(async () => {
+        await instance.saveAll();
+      });
+
+      expect(toasts.add).not.toHaveBeenCalled();
+      expect(toasts.addDanger).toHaveBeenCalled();
+      // Failed key stays unsaved for a retry.
+      expect(instance.state.unsavedChanges).toEqual({
+        'dashboard:test:setting': { value: 'a' },
+      });
+    });
+  });
+
+  describe('clearToInherit', () => {
+    it('persists null for a setting flagged clearToInherit', async () => {
+      const toasts = notificationServiceMock.createStartContract().toasts;
+      const wrapper = mountWithI18nProvider(
+        <Form
+          settings={settings}
+          visibleSettings={settings}
+          categories={categories}
+          categoryCounts={categoryCounts}
+          save={save}
+          clearQuery={clearQuery}
+          showNoResultsMessage={true}
+          enableSaving={false}
+          toasts={toasts}
+          dockLinks={{} as any}
+          pageScope={UiSettingScope.USER}
+        />
+      );
+      const instance = wrapper.instance() as Form;
+
+      act(() => {
+        instance.setState({
+          unsavedChanges: {
+            'setting:test': { value: 'whatever', clearToInherit: true },
+          },
+        });
+      });
+
+      save.mockResolvedValueOnce([true]);
+      await act(async () => {
+        await instance.saveAll();
+      });
+
+      // clearToInherit → persist null so the scope stops storing its own value.
+      expect(save).toHaveBeenCalledWith({ 'setting:test': null });
+    });
   });
 });

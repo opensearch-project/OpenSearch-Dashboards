@@ -1,4 +1,23 @@
 .explore-results-action-bar {
+  // Narrow container: let the bar and its primary group wrap so the hits counter and the
+  // Wrap/Export/Add-to-dashboard actions don't clip off-screen.
+  @container canvas (max-width: 992px) {
+    flex-wrap: wrap;
+    row-gap: $ouiSizeXS;
+
+    // Pack wrapped items to the start instead of spreading them across the row, so the
+    // hits counter + actions read as a tidy group rather than scattered to both edges.
+    justify-content: flex-start;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    & .euiFlexGroup {
+      flex-wrap: wrap;
+      row-gap: $ouiSizeXS;
+      column-gap: $ouiSizeS;
+      justify-content: flex-start;
+    }
+  }
+
   &__extensions-container {
     .osdQueryEditorExtensionActionBarContainer {
       flex-grow: 0;

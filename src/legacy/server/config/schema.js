@@ -70,8 +70,8 @@ export default () =>
       port: Joi.number().default(5601),
       rewriteBasePath: Joi.boolean().when('basePath', {
         is: '',
-        then: Joi.default(false).valid(false),
-        otherwise: Joi.default(false),
+        then: Joi.any().valid(false).default(false),
+        otherwise: Joi.any().default(false),
       }),
 
       autoListen: HANDLED_IN_NEW_PLATFORM,
@@ -98,14 +98,14 @@ export default () =>
 
         quiet: Joi.boolean().when('silent', {
           is: true,
-          then: Joi.default(true).valid(true),
-          otherwise: Joi.default(false),
+          then: Joi.any().valid(true).default(true),
+          otherwise: Joi.any().default(false),
         }),
 
         verbose: Joi.boolean().when('quiet', {
           is: true,
           then: Joi.valid(false).default(false),
-          otherwise: Joi.default(false),
+          otherwise: Joi.any().default(false),
         }),
         events: Joi.any().default({}),
         dest: Joi.string().default('stdout'),
@@ -113,8 +113,8 @@ export default () =>
         filter: Joi.any().default({}),
         json: Joi.boolean().when('dest', {
           is: 'stdout',
-          then: Joi.default(!process.stdout.isTTY),
-          otherwise: Joi.default(true),
+          then: Joi.any().default(!process.stdout.isTTY),
+          otherwise: Joi.any().default(true),
         }),
 
         timezone: Joi.string().allow(false).default('UTC'),

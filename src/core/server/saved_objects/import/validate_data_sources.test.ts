@@ -53,9 +53,9 @@ describe('validateDataSources', () => {
   it('validates data sources within the target workspace', async () => {
     savedObjectsClient.find.mockResolvedValueOnce(response);
 
-    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockReturnValueOnce(
-      new Set<string>(['data-source-1'])
-    );
+    jest
+      .spyOn(utilsImports, 'findReferenceDataSourceForObject')
+      .mockReturnValueOnce(new Set<string>(['data-source-1']));
 
     const savedObjects = [{ id: '1', type: 'dashboards', attributes: {}, references: [] }];
 
@@ -67,9 +67,9 @@ describe('validateDataSources', () => {
   it('accumulates missing data source errors', async () => {
     savedObjectsClient.find.mockResolvedValueOnce(response);
 
-    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockReturnValueOnce(
-      new Set<string>(['data-source-2'])
-    );
+    jest
+      .spyOn(utilsImports, 'findReferenceDataSourceForObject')
+      .mockReturnValueOnce(new Set<string>(['data-source-2']));
 
     const savedObjects = [
       { id: '1', type: 'dashboards', attributes: { title: 'dashboards' }, references: [] },
@@ -97,9 +97,9 @@ describe('validateDataSources', () => {
     savedObjectsClient.find.mockResolvedValueOnce(response);
 
     // Mock source workspace data source
-    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockReturnValueOnce(
-      new Set<string>(['data-source-2'])
-    );
+    jest
+      .spyOn(utilsImports, 'findReferenceDataSourceForObject')
+      .mockReturnValueOnce(new Set<string>(['data-source-2']));
 
     const savedObject = {
       id: '1',

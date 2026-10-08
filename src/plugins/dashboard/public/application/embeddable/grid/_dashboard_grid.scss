@@ -1,26 +1,15 @@
-// SASSTODO: Can't find this selector, but could break something if removed
-.react-grid-layout .gs-w {
-  z-index: auto;
-}
-
-/**
- * 1. Due to https://github.com/STRML/react-grid-layout/issues/240 we have to manually hide the resizable
- * element.
- */
+// react-grid-layout keeps resize handles mounted in view mode.
 .dshLayout--viewing {
   .react-resizable-handle {
-    display: none; /* 1 */
+    display: none;
   }
 }
 
-/**
- * 1. If we don't give the resizable handler a larger z index value the layout will hide it.
- */
 .dshLayout--editing {
   .react-resizable-handle {
     @include size($euiSizeL);
 
-    z-index: $euiZLevel1; /* 1 */
+    z-index: $euiZLevel1;
     right: 0;
     bottom: 0;
     padding-right: $euiSizeS;
@@ -28,55 +17,200 @@
   }
 }
 
-/**
- * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
- * otherwise the height is set inline.
- */
+// Override dimensions set inline by react-grid-layout.
 .dshLayout-isMaximizedPanel {
-  height: 100% !important; /* 1. */
+  height: 100% !important;
   width: 100%;
-  position: absolute !important; /* 1 */
+  position: absolute !important;
+
+  .react-resizable-handle {
+    display: none;
+  }
 }
 
-/**
- * .dshLayout-withoutMargins only affects the panel styles themselves, see ../panel
- */
-
-/**
- * When a single panel is expanded, all the other panels are hidden in the grid.
- */
 .dshDashboardGrid__item--hidden {
   display: none;
 }
 
-/**
- * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
- */
+// Override dimensions set inline by react-grid-layout.
 .dshDashboardGrid__item--expanded {
-  height: 100% !important; /* 1 */
-  width: 100% !important; /* 1 */
-  top: 0 !important; /* 1 */
-  left: 0 !important; /* 1 */
-
-  // Altered panel styles can be found in ../panel
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
 }
 
-// REACT-GRID
+.dshDashboardSectionGrid {
+  position: relative;
+  width: 100%;
+}
+
+// Keep member embeddables mounted while the section animates closed.
+.dshDashboardSectionGrid__inner {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms ease,
+    visibility 0s linear;
+}
+
+.dshDashboardSectionGrid__inner--collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms ease,
+    visibility 0s linear 200ms;
+}
+
+.dshDashboardSectionGrid__content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dshDashboardSectionGrid__emptyCta {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
+  height: 100%;
+  padding: $euiSizeS $euiSize;
+}
+
+.dshSectionLayout {
+  display: flex;
+  flex-direction: column;
+  gap: $euiSize;
+  padding: $euiSizeS;
+}
+
+.dshSectionLayout__section {
+  border: $euiBorderThin;
+  border-style: dashed;
+  border-radius: $euiBorderRadius;
+  overflow: hidden;
+}
+
+// Override EUI's disabled draggable cursor in view mode.
+.dshSectionLayout .dshSectionLayout__section:not(.dshSectionLayout__section--editing) {
+  cursor: default;
+}
+
+.dshSectionLayout__section--hidden {
+  display: none;
+}
+
+.dshSectionLayout__section--maximized {
+  position: absolute;
+  inset: 0;
+  z-index: $euiZLevel1;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+}
+
+.dshSectionLayout__section--maximized .dshSectionLayout__sectionHeader {
+  display: none;
+}
+
+// The positioned maximized grid needs a definite containing-block height.
+.dshSectionLayout__section--maximized .dshDashboardSectionGrid {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.dshSectionLayout__section--editing {
+  transition: border-color 250ms ease;
+}
+
+.dshSectionLayout__section--editing:hover {
+  border-color: $euiColorPrimary;
+}
+
+.dshSectionLayout__sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeXS;
+  min-height: 36px;
+  padding: $euiSizeXS $euiSizeS;
+}
+
+.dshSectionLayout__collapseButton {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dshSectionLayout__collapseButton--collapsed {
+  transform: rotate(-90deg);
+}
+
+.dshSectionLayout__sectionTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dshSectionLayout__sectionTitle h3 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dshSectionLayout__sectionMenu {
+  flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+.dshSectionLayout__section--editing:hover .dshSectionLayout__sectionMenu,
+.dshSectionLayout__section--editing:focus-within .dshSectionLayout__sectionMenu {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dshSectionLayout__section--virtual {
+  margin: 0 $euiSizeS $euiSizeS;
+}
+
+.dshSectionLayout__section--virtual .dshSectionLayout__sectionTitle h3 {
+  color: $euiColorDarkShade;
+  font-style: italic;
+}
+
+.dshSectionLayout__section--virtual .embPanel__dragger,
+.dshSectionLayout__section--virtual .embPanel__dragger:hover {
+  cursor: default;
+}
+
+.dshSectionLayout__section--virtual .embPanel__dragger:hover {
+  background-color: transparent;
+}
+
+.dshSectionLayout__section--virtual .embPanel--editing {
+  border-style: solid;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dshDashboardSectionGrid__inner,
+  .dshSectionLayout__collapseButton {
+    transition: none;
+  }
+}
 
 .react-grid-item {
-  /**
-   * Disable transitions from the library on each grid element.
-   */
   transition: none;
 
-  /**
-    * Copy over and overwrite the fill color with EUI color mixin (for theming)
-    */
   > .react-resizable-handle {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='#{hexToRGB($euiColorDarkShade)}' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' /%3E%3C/svg%3E%0A");
 
     &::after {
-      border: none !important;  /** overrides library default visual indicator **/
+      border: none !important;
     }
 
     &:hover,
@@ -85,10 +219,6 @@
     }
   }
 
-  /**
-   * Dragged/Resized panels in dashboard should always appear above other panels
-   * and above the placeholder
-   */
   &.resizing,
   &.react-draggable-dragging {
     z-index: $euiZLevel2 !important;
@@ -99,12 +229,9 @@
 
     @include euiBottomShadowLarge;
 
-    border-radius: $euiBorderRadius; // keeps shadow within bounds
+    border-radius: $euiBorderRadius;
   }
 
-  /**
-   * Overwrites red coloring that comes from this library by default.
-   */
   &.react-grid-placeholder {
     border-radius: $euiBorderRadius;
     background: $euiColorWarning;

@@ -31,4 +31,4 @@ export const createMockAgentTracesServices = (
       },
     },
     ...overrides,
-  } as AgentTracesServices);
+  }) as AgentTracesServices;

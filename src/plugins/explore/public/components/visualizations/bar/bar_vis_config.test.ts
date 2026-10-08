@@ -5,8 +5,23 @@
 
 import React from 'react';
 import { createBarConfig, defaultBarChartStyles } from './bar_vis_config';
-import { Positions, ThresholdMode, AxisRole, AggregationType, TimeUnit } from '../types';
+import {
+  Positions,
+  ThresholdMode,
+  AxisRole,
+  AggregationType,
+  TimeUnit,
+  VisFieldType,
+} from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
+
+jest.mock('./to_expression', () => ({
+  createBarSpec: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createDoubleNumericalBarChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createGroupedTimeBarChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createStackedBarSpec: jest.fn(() => ({ spec: {}, legendItems: [] })),
+  createTimeBarChart: jest.fn(() => ({ spec: {}, legendItems: [] })),
+}));
 
 describe('bar_vis_config', () => {
   describe('defaultBarChartStyles', () => {
@@ -63,6 +78,31 @@ describe('bar_vis_config', () => {
 
       expect(typeof config.getRules).toBe('function');
       expect(Array.isArray(config.getRules())).toBe(true);
+    });
+
+    test('should only pass the shared crosshair group to rules with a date x-axis', () => {
+      const config = createBarConfig();
+      const crosshairGroup = 'dashboard';
+
+      config.getRules().forEach((rule) => {
+        const rendered = rule.render({
+          data: [],
+          allData: [],
+          styleOptions: config.ui.style.defaults,
+          axisColumnMappings: {
+            x: [{}],
+            y: [{}],
+            color: [{}],
+          },
+          timeRange: { from: 'now-1h', to: 'now' },
+          renderContext: { crosshairGroup },
+        } as any) as React.ReactElement<{ group?: string }>;
+        const hasDateXAxis = rule.mappings.some(
+          (mapping) => mapping[AxisRole.X]?.type === VisFieldType.Date
+        );
+
+        expect(rendered.props.group).toBe(hasDateXAxis ? crosshairGroup : undefined);
+      });
     });
 
     test('render function should create a BarVisStyleControls component', () => {

@@ -105,6 +105,8 @@ describe('Header', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'localStorage', {
       value: new StubBrowserStorage(),
+      writable: true,
+      configurable: true,
     });
   });
 
@@ -277,7 +279,7 @@ describe('Header', () => {
     };
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
-    expect(props.onIsLockedUpdate).toBeCalledWith(true);
+    expect(props.onIsLockedUpdate).toHaveBeenCalledWith(true);
   });
 
   describe('banner plugin integration', () => {
@@ -358,6 +360,17 @@ describe('Header', () => {
       });
     });
 
+    it('mounts the global command palette when keyboard shortcuts are available', () => {
+      const props = {
+        ...mockProps(),
+        keyboardShortcut: keyboardShortcutServiceMock.createStart(),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+
+      expect(component.find('GlobalSearchCommandPalette')).toHaveLength(1);
+    });
+
     it('does not register keyboard shortcut when keyboardShortcut service is not provided', () => {
       const mockKeyboardShortcut = keyboardShortcutServiceMock.createStart();
       const props = {
@@ -367,6 +380,12 @@ describe('Header', () => {
       mountWithIntl(<Header {...props} />);
 
       expect(mockKeyboardShortcut.useKeyboardShortcut).not.toHaveBeenCalled();
+    });
+
+    it('does not mount the global command palette without keyboard shortcuts', () => {
+      const component = mountWithIntl(<Header {...mockProps()} />);
+
+      expect(component.find('GlobalSearchCommandPalette')).toHaveLength(0);
     });
 
     it('executes toggle navigation when keyboard shortcut callback is invoked', () => {

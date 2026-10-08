@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`translateUsingPseudoLocale() should translate @I18N@ placeholders with wrong reference name 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà @Î18Ñ@ññôñ-ššîñĝĝļé-ŵŵôŕðð@Î18Ñ@ þþļàççéĥôôļðééŕ."`;
 

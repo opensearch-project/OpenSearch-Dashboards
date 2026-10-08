@@ -32,7 +32,10 @@ export class ContextCaptureService {
   private cachedBreadcrumbs: string[] = [];
 
   // @ts-expect-error TS6138 TODO(ts-error): fixme
-  constructor(private coreSetup: CoreSetup, private pluginsSetup: ContextProviderSetupDeps) {
+  constructor(
+    private coreSetup: CoreSetup,
+    private pluginsSetup: ContextProviderSetupDeps
+  ) {
     this.assistantContextStore = new AssistantContextStoreImpl();
   }
 
@@ -93,12 +96,12 @@ export class ContextCaptureService {
     });
   }
 
-  private suppressDefaultPageContext(): void {
+  public suppressDefaultPageContext(): void {
     this.defaultContextSuppressed = true;
     this.assistantContextStore.removeContextById(DEFAULT_PAGE_CONTEXT_ID);
   }
 
-  private unsuppressDefaultPageContext(): void {
+  public unsuppressDefaultPageContext(): void {
     this.defaultContextSuppressed = false;
     if (this.cachedAppId) {
       this.registerDefaultPageContext();

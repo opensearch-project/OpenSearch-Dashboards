@@ -7,6 +7,7 @@ import {
   setQueryState,
   setQueryWithHistory,
   setQueryStringWithHistory,
+  setQueryOptions,
   queryReducer,
   QueryState,
   queryInitialState,
@@ -193,6 +194,33 @@ describe('querySlice reducers', () => {
       expect(action.type).toBe('query/setQueryStringWithHistory');
       expect(action.payload).toBe(queryString);
       expect(action.meta).toEqual({ addToHistory: true });
+    });
+  });
+
+  describe('setQueryOptions', () => {
+    const existingState: QueryState = {
+      query: 'up',
+      language: 'PROMQL',
+      dataset: { id: 'prom', title: 'prom', type: 'PROMETHEUS' },
+      queryOptions: { maxDataPoints: 500, perQueryOptions: [{ minStep: '1m' }] },
+    };
+
+    it('merges only the provided options', () => {
+      const state = queryReducer(existingState, setQueryOptions({ maxDataPoints: 200 }));
+      expect(state.queryOptions).toEqual({
+        maxDataPoints: 200,
+        perQueryOptions: [{ minStep: '1m' }],
+      });
+    });
+
+    it('clears an option when set to undefined', () => {
+      const state = queryReducer(
+        existingState,
+        setQueryOptions({ maxDataPoints: undefined, perQueryOptions: undefined })
+      );
+      expect(state.queryOptions?.maxDataPoints).toBeUndefined();
+      expect(state.queryOptions?.perQueryOptions).toBeUndefined();
+      expect(state.query).toBe('up');
     });
   });
 });

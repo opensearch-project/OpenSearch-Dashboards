@@ -26,7 +26,7 @@ import {
   WorkspaceUserPermissionSetting,
 } from './types';
 import { DataSourceConnection } from '../../../common/types';
-import { validateWorkspaceColor } from '../../../common/utils';
+import { validateWorkspaceColor, validateWorkspaceId } from '../../../common/utils';
 import { PermissionModeId } from '../../../../../core/public';
 
 export const isValidFormTextInput = (input?: string) => {
@@ -48,6 +48,9 @@ export const EMPTY_PERMISSIONS: SavedObjectPermissions = {
 export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   let numberOfErrors = 0;
   if (formErrors.name) {
+    numberOfErrors += 1;
+  }
+  if (formErrors.customId) {
     numberOfErrors += 1;
   }
   if (formErrors.permissionSettings?.fields) {
@@ -218,7 +221,7 @@ export const isSelectedDataSourceConnectionsDuplicated = (
 
 export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, color, features, selectedDataSourceConnections } = formData;
+  const { name, customId, color, features, selectedDataSourceConnections } = formData;
   if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
@@ -235,6 +238,17 @@ export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>)
         defaultMessage: 'Name is required. Enter a name.',
       }),
     };
+  }
+  if (customId) {
+    if (!validateWorkspaceId(customId)) {
+      formErrors.customId = {
+        code: WorkspaceFormErrorCode.InvalidWorkspaceId,
+        message: i18n.translate('workspace.form.detail.id.invalid', {
+          defaultMessage:
+            'ID is invalid. Must be 6–36 characters using only letters, numbers, underscores, and hyphens.',
+        }),
+      };
+    }
   }
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
     formErrors.features = {
@@ -288,7 +302,8 @@ export const generateNextPermissionSettingsId = (permissionSettings: Array<{ id:
 };
 
 interface PermissionSettingLike
-  extends Omit<Partial<WorkspaceUserPermissionSetting>, 'type'>,
+  extends
+    Omit<Partial<WorkspaceUserPermissionSetting>, 'type'>,
     Omit<Partial<WorkspaceUserGroupPermissionSetting>, 'type'> {
   type?: string;
 }

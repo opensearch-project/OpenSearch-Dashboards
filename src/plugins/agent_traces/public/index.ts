@@ -20,6 +20,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { AgentTracesPluginSetup, AgentTracesPluginStart } from './types';
 
-// Export trace auto-detection utilities for use by other plugins
-export { detectTraceData, DetectionResult } from './utils/auto_detect_trace_data';
-export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create_auto_datasets';
+// Re-export trace auto-detection utilities from explore (single source of truth)
+export { detectTraceData, DetectionResult } from '../../explore/public';

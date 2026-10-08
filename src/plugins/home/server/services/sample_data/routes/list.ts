@@ -54,12 +54,12 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       const workspaceState = getWorkspaceState(req);
       const workspaceId = workspaceState?.requestWorkspaceId;
 
-      // For AnalyticEngine (Mustang) datasource, only support Sample Observability Logs (otel) and Sample web logs (logs)
+      // For AnalyticEngine datasource, sample data installation is not supported because
+      // it does not support certain index mappings.
+      // Return an empty list to avoid partially broken install flows.
       let filteredSampleDatasets = sampleDatasets;
       if (await isAnalyticEngineDataSource(dataSourceId, context.core.savedObjects.client)) {
-        filteredSampleDatasets = sampleDatasets.filter(
-          (dataset) => dataset.id === 'logs' || dataset.id === 'otel'
-        );
+        filteredSampleDatasets = [];
       }
 
       const registeredSampleDatasets = filteredSampleDatasets.map((sampleDataset) => {

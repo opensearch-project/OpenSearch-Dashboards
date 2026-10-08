@@ -171,7 +171,7 @@ export const AccelerationTable = ({
                   dataSourceName={dataSourceName}
                   renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
                   handleRefresh={handleRefresh}
-                  dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+                  dataSourceMDSId={featureFlagStatus ? (dataSourceMDSId ?? undefined) : undefined}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -216,7 +216,7 @@ export const AccelerationTable = ({
       enabled: () => {
         try {
           return getUiSettings().get('query:enhancements:enabled');
-        } catch (e) {
+        } catch {
           return false;
         }
       },

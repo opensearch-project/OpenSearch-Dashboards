@@ -78,7 +78,7 @@ export function toOpenSearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: (ast.toOpenSearchQuery(fullFieldNameArg) as unknown) as string,
+      name: ast.toOpenSearchQuery(fullFieldNameArg) as unknown as string,
       scripted: false,
       type: '',
     });

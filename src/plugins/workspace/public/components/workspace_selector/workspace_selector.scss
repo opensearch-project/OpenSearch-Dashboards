@@ -29,3 +29,18 @@
   font-weight: $euiFontWeightMedium;
   max-width: 160px;
 }
+
+// Flush variant used inside context-menu-style popovers (e.g. the footer
+// "Manage workspace" menu): a flat, full-width row that matches sibling menu
+// items instead of the boxed nav-header button.
+.workspaceSelectorFlushButton {
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: rgba($euiTextColor, 0.04);
+    transition: none !important;
+    transform: none !important;
+  }
+}

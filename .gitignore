@@ -94,3 +94,6 @@ snapshots.js
 
 # osd-pm bootstrap fast-path fingerprint (local machine state)
 /.osd-bootstrap-fingerprint
+
+# git worktrees (local isolated workspaces)
+/.worktrees/

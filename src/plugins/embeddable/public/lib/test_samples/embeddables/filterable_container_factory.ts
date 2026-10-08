@@ -37,8 +37,7 @@ import {
 } from './filterable_container';
 import { EmbeddableStart } from '../../../plugin';
 
-export class FilterableContainerFactory
-  implements EmbeddableFactoryDefinition<FilterableContainerInput> {
+export class FilterableContainerFactory implements EmbeddableFactoryDefinition<FilterableContainerInput> {
   public readonly type = FILTERABLE_CONTAINER;
 
   constructor(

@@ -75,6 +75,38 @@ describe('useDatasetFields', () => {
     expect(mockFetchFields).toHaveBeenCalledWith(mockBaseDataset);
   });
 
+  it('excludes nested and non-aggregatable date fields from dateFields', async () => {
+    // Mirrors an otel trace index: startTime/endTime are valid, events.time is a date
+    // inside a nested object and must not be offered as a time field.
+    const traceFields = [
+      { name: 'startTime', type: 'date', aggregatable: true },
+      { name: 'endTime', type: 'date', aggregatable: true },
+      {
+        name: 'events.time',
+        type: 'date',
+        aggregatable: false,
+        subType: { nested: { path: 'events' } },
+      },
+      { name: 'nonAggDate', type: 'date', aggregatable: false },
+    ];
+    const mockFetchFields = jest.fn().mockResolvedValue(traceFields);
+    const mockDatasetType = {
+      fetchFields: mockFetchFields,
+      supportedLanguages: () => ['PPL'],
+      meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
+    } as any;
+
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, true));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      // allFields keeps everything; only dateFields is filtered for the time-field picker
+      expect(result.current.allFields).toEqual(traceFields);
+      expect(result.current.dateFields.map((f) => f.name)).toEqual(['startTime', 'endTime']);
+    });
+  });
+
   it('sets loading state during fetch', async () => {
     const mockFetchFields = jest.fn().mockImplementation(
       () =>

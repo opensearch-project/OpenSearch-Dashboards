@@ -9,6 +9,8 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
 import type { Message, AssistantMessage } from '../../common/types';
+import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
+import { getImageSrc } from '../utils/user_message_input';
 import { ShareModal } from './share_modal';
 import './message_row.scss';
 
@@ -50,10 +52,16 @@ export const MessageRow: React.FC<MessageRowProps> = ({
 
   // Handle multimodal content (text + images) or simple string content
   const renderContent = () => {
-    const content =
+    const rawContent =
       message.role === 'user' && 'rawMessage' in message && message.rawMessage
         ? message.rawMessage
         : message.content || '';
+
+    // Strip inline suggestions from assistant messages before display
+    const content =
+      typeof rawContent === 'string' && message.role === 'assistant'
+        ? stripInlineSuggestions(rawContent)
+        : rawContent;
 
     // If content is a string, render as markdown
     if (typeof content === 'string') {
@@ -64,28 +72,33 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     if (Array.isArray(content)) {
       return (
         <>
-          {content.map((block: any, index: number) => {
-            // Render binary content (images)
-            if (block.type === 'binary' && block.data) {
-              return (
-                <img
-                  key={index}
-                  src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
-                  alt={block.filename || 'Visualization'}
-                  style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
-                />
-              );
-            }
-            // Render text content as markdown
-            if (block.type === 'text' && block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            // Handle plain text blocks (for backward compatibility)
-            if (block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            return null;
-          })}
+          {content
+            // Named blocks (e.g. visualization_context) are context for the agent, not for the
+            // user bubble; skip them here. getImageSrc resolves both the legacy `binary` shape
+            // and the `image` shape, so images survive a reload either way.
+            .filter((block: any) => !block.name)
+            .map((block: any, index: number) => {
+              const imageSrc = getImageSrc(block);
+              if (imageSrc) {
+                return (
+                  <img
+                    key={index}
+                    src={imageSrc}
+                    alt={block.filename || 'Visualization'}
+                    style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+                  />
+                );
+              }
+              // Render text content as markdown
+              if (block.type === 'text' && block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              // Handle plain text blocks (for backward compatibility)
+              if (block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              return null;
+            })}
         </>
       );
     }

@@ -16,9 +16,7 @@ export const normalizeResultRows = <T = unknown>(
       id: index,
       schema: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
       name: field.name || '',
-      column: `field-${index}`,
-      validValuesCount: 0,
-      uniqueValuesCount: 0,
+      column: field.name || '',
     };
   });
 
@@ -32,30 +30,12 @@ export const normalizeResultRows = <T = unknown>(
     return transformedRow;
   });
 
-  // count validValues and uniqueValues
-  const columnsWithStats: VisColumn[] = columns.map((column) => {
-    const values = transformedData.map((row) => row[column.column]);
-    const validValues = values.filter((v) => v !== null && v !== undefined);
-    const uniqueValues = new Set(validValues);
-    return {
-      ...column,
-      validValuesCount: validValues.length ?? 0,
-      uniqueValuesCount: uniqueValues.size ?? 0,
-    };
-  });
-
-  const numericalColumns = columnsWithStats.filter(
-    (column) => column.schema === VisFieldType.Numerical
-  );
-  const categoricalColumns = columnsWithStats.filter(
-    (column) => column.schema === VisFieldType.Categorical
-  );
-  const dateColumns = columnsWithStats.filter((column) => column.schema === VisFieldType.Date);
+  const numericalColumns = columns.filter((column) => column.schema === VisFieldType.Numerical);
+  const categoricalColumns = columns.filter((column) => column.schema === VisFieldType.Categorical);
+  const dateColumns = columns.filter((column) => column.schema === VisFieldType.Date);
 
   // unknownColumns should only be used for table display, not for the auto-vis logic
-  const unknownColumns = columnsWithStats.filter(
-    (column) => column.schema === VisFieldType.Unknown
-  );
+  const unknownColumns = columns.filter((column) => column.schema === VisFieldType.Unknown);
 
   return { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns };
 };

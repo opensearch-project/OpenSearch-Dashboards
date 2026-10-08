@@ -150,11 +150,11 @@ export const AddCollaboratorButton = ({
       <EuiContextMenu
         size="s"
         panels={
-          ([
+          [
             {
               items: panelItems,
             },
-          ] as unknown) as EuiContextMenuPanelDescriptor[]
+          ] as unknown as EuiContextMenuPanelDescriptor[]
         }
       />
     </EuiPopover>

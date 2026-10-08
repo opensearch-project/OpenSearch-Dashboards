@@ -457,14 +457,14 @@ describe('tag cloud tests', () => {
 
     try {
       expect(bbox.top >= 0 && bbox.top <= domNode.offsetHeight).toBe(shouldBeInside);
-    } catch (e) {
+    } catch {
       throw new Error(
         'top boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message
       );
     }
     try {
       expect(bbox.bottom >= 0 && bbox.bottom <= domNode.offsetHeight).toBe(shouldBeInside);
-    } catch (e) {
+    } catch {
       throw new Error(
         'bottom boundary of tag should have been ' +
           (shouldBeInside ? 'inside' : 'outside') +
@@ -473,14 +473,14 @@ describe('tag cloud tests', () => {
     }
     try {
       expect(bbox.left >= 0 && bbox.left <= domNode.offsetWidth).toBe(shouldBeInside);
-    } catch (e) {
+    } catch {
       throw new Error(
         'left boundary of tag should have been ' + (shouldBeInside ? 'inside' : 'outside') + message
       );
     }
     try {
       expect(bbox.right >= 0 && bbox.right <= domNode.offsetWidth).toBe(shouldBeInside);
-    } catch (e) {
+    } catch {
       throw new Error(
         'right boundary of tag should have been ' +
           (shouldBeInside ? 'inside' : 'outside') +

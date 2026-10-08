@@ -27,6 +27,7 @@ import {
   DashboardEmptyScreen,
   DashboardEmptyScreenProps,
 } from '../embeddable';
+import { claimPanelIntoSection } from '../embeddable/section_create_target';
 import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
@@ -48,7 +49,7 @@ import {
 import { getSavedObjectFinder } from '../../../../saved_objects/public';
 import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectDashboard } from '../../saved_dashboards';
-import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
+import { normalizeDashboardQuery } from '../utils/migrate_legacy_query';
 import { Dashboard } from '../../dashboard';
 
 export const createDashboardContainer = async ({
@@ -113,15 +114,22 @@ export const createDashboardContainer = async ({
         incomingEmbeddable &&
         !dashboardContainerEmbeddable?.getInput().panels[incomingEmbeddable.embeddableId!]
       ) {
-        dashboardContainerEmbeddable?.addNewEmbeddable<EmbeddableInput>(
-          incomingEmbeddable.type,
-          incomingEmbeddable.input
-        );
+        const addedEmbeddable =
+          await dashboardContainerEmbeddable?.addNewEmbeddable<EmbeddableInput>(
+            incomingEmbeddable.type,
+            incomingEmbeddable.input
+          );
+        // Restore the section selected before entering the editor.
+        const targetSectionId = incomingEmbeddable.containerInfo?.containerData?.sectionId as
+          string | undefined;
+        if (targetSectionId && addedEmbeddable && !isErrorEmbeddable(addedEmbeddable)) {
+          claimPanelIntoSection(dashboardContainerEmbeddable, targetSectionId, addedEmbeddable.id);
+        }
       }
 
       return dashboardContainerEmbeddable;
     }
-  } catch (error) {
+  } catch {
     services.toastNotifications.addWarning({
       title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
         defaultMessage: 'Failed to load the dashboard',
@@ -369,6 +377,7 @@ const getDashboardInputFromAppState = (
     id: savedDashboardId || '',
     filters: data.query.filterManager.getFilters(),
     hidePanelTitles: appStateData.options.hidePanelTitles,
+    useSharedCrosshair: appStateData.options.useSharedCrosshair ?? false,
     query: data.query.queryString.getQuery(),
     timeRange: data.query.timefilter.timefilter.getTime(),
     refreshConfig: data.query.timefilter.timefilter.getRefreshInterval(),
@@ -386,6 +395,7 @@ const getDashboardInputFromAppState = (
     expandedPanelId: appStateData.expandedPanelId,
     timeRestore: appStateData.timeRestore,
     variables: appStateData.variables,
+    layout: appStateData.layout,
   };
 };
 
@@ -414,9 +424,11 @@ const getChangesForContainerStateFromAppState = (
   Object.keys(containerInput).forEach((key) => {
     if (key === 'filters') return;
     const containerValue = (containerInput as { [key: string]: unknown })[key];
-    const appStateValue = ((appStateDashboardInput as unknown) as {
-      [key: string]: unknown;
-    })[key];
+    const appStateValue = (
+      appStateDashboardInput as unknown as {
+        [key: string]: unknown;
+      }
+    )[key];
     if (!isEqual(containerValue, appStateValue)) {
       (differences as { [key: string]: unknown })[key] = appStateValue;
     }
@@ -497,12 +509,16 @@ const handleDashboardContainerChanges = (
   if (input.viewMode !== appStateData.viewMode) {
     newAppState.viewMode = input.viewMode;
   }
-  if (!isEqual(input.query, migrateLegacyQuery(appStateData.query))) {
+  if (!isEqual(input.query, normalizeDashboardQuery(appStateData.query))) {
     newAppState.query = input.query;
   }
   // Sync variables from container input to appState
   if (!isEqual(input.variables, appStateData.variables)) {
     newAppState.variables = input.variables;
+    dashboard.setIsDirty(true);
+  }
+  if (!isEqual(input.layout, appStateData.layout)) {
+    newAppState.layout = input.layout;
     dashboard.setIsDirty(true);
   }
 

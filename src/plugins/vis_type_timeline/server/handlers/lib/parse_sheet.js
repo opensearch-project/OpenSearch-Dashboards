@@ -33,7 +33,7 @@ import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 const grammar = fs.readFileSync(path.resolve(__dirname, '../../../common/chain.peg'), 'utf8');
-import PEG from 'pegjs';
+import PEG from 'peggy';
 const Parser = PEG.generate(grammar);
 
 export default function parseSheet(sheet) {

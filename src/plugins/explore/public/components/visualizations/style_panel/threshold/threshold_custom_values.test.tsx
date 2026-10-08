@@ -72,4 +72,23 @@ describe('ThresholdCustomValues component', () => {
       ]);
     });
   });
+
+  it('keeps focus on the edited threshold after sorting', async () => {
+    const { handleChange } = setup([
+      { value: 7, color: '#f8f8f8ff' },
+      { value: 10, color: '#da1515ff' },
+    ]);
+
+    const valueInput = screen.getByTestId('exploreVisThresholdValue-0');
+    valueInput.focus();
+    fireEvent.change(valueInput, { target: { value: '12' } });
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledWith([
+        { value: 10, color: '#da1515ff' },
+        { value: 12, color: '#f8f8f8ff' },
+      ]);
+      expect(valueInput).toHaveFocus();
+    });
+  });
 });

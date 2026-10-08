@@ -38,10 +38,7 @@ The following five steps demonstrate how to add global query parameter persisten
            filter(
              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
            ),
-           map(({ state }) => ({
-             ...state,
-             filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-           }))
+           map(({ state }) => getGlobalQueryUrlState(state))
          ),
        },
      ],

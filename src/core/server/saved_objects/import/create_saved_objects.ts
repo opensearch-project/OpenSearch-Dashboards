@@ -183,9 +183,8 @@ export const createSavedObjects = async <T>({
               searchSource.index = `${dataSourceId}_` + searchSourceIndex;
 
               // @ts-expect-error
-              object.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-                searchSource
-              );
+              object.attributes.kibanaSavedObjectMeta.searchSourceJSON =
+                JSON.stringify(searchSource);
             }
           }
 
@@ -223,12 +222,11 @@ export const createSavedObjects = async <T>({
               if (newId) {
                 searchSource.query.dataset.id = newId;
                 // @ts-expect-error
-                object.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-                  searchSource
-                );
+                object.attributes.kibanaSavedObjectMeta.searchSourceJSON =
+                  JSON.stringify(searchSource);
               }
             }
-          } catch (e) {
+          } catch {
             // If searchSourceJSON is malformed, leave it untouched
           }
         }
@@ -248,7 +246,7 @@ export const createSavedObjects = async <T>({
       const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
       if (importIdEntry?.id) {
         objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
-        const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
+        const originId = importIdEntry.omitOriginId ? undefined : (object.originId ?? object.id);
         return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
       }
       return { ...object, ...(references && { references }) };

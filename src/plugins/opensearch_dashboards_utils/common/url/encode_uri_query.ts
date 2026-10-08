@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
 import { transform } from 'lodash';
 
 /**

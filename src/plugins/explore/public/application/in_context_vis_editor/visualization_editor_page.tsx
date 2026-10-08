@@ -64,13 +64,8 @@ export const VisualizationEditorPage = ({
 
   const [initialized, setInitialized] = useState(false);
 
-  const {
-    savedExplore,
-    savedQueryState,
-    savedVisConfig,
-    error,
-    isLoading,
-  } = useInitialSaveExplore();
+  const { savedExplore, savedQueryState, savedVisConfig, error, isLoading } =
+    useInitialSaveExplore();
 
   useEffect(() => {
     const init = async () => {
@@ -102,6 +97,8 @@ export const VisualizationEditorPage = ({
       if (savedVisConfig) {
         visualizationBuilderForEditor.setVisConfig({
           type: savedVisConfig.chartType,
+          title: savedVisConfig.title,
+          description: savedVisConfig.description,
           styles: savedVisConfig.params,
           axesMapping: savedVisConfig.axesMapping,
           splitField: savedVisConfig.splitField,

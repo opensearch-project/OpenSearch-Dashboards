@@ -51,7 +51,7 @@ describe('parse()', () => {
   test('throws on malformed expression', () => {
     expect(() => {
       parse('{ intentionally malformed }', 'expression');
-    }).toThrowError();
+    }).toThrow();
   });
 
   test('parses an argument', () => {

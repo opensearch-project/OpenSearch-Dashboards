@@ -65,8 +65,8 @@ import { coreTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
-mockPluginInitializerProvider.mockImplementation(
-  (pluginName) => mockPluginInitializers.get(pluginName)!
+mockPluginInitializerProvider.mockImplementation((pluginName) =>
+  mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedPluginMetadata[];
@@ -150,7 +150,7 @@ describe('PluginsService', () => {
     };
 
     // Reset these for each test.
-    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([
+    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>([
       [
         'pluginA',
         jest.fn(() => ({
@@ -179,7 +179,7 @@ describe('PluginsService', () => {
           stop: jest.fn(),
         })),
       ],
-    ] as unknown) as [[PluginName, any]]);
+    ] as unknown as [[PluginName, any]]);
   });
 
   describe('#getOpaqueIds()', () => {

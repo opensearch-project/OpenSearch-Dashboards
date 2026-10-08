@@ -166,6 +166,38 @@ describe('Filter Utils', () => {
       );
     });
 
+    test('Assemble filter when saved object attribute is at non-first position in flat AND tree', () => {
+      // updatedAt is at position 1 (not 0) — with binary-tree path assumptions
+      // validateFilterKueryNode would return 'arguments.1.arguments.0' instead of 'arguments.1',
+      // causing get() to return undefined and the transformation to throw.
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes.bytes > 1000 and foo.updatedAt: 5678654567',
+          mockMappings
+        )
+      ).toEqual(
+        opensearchKuery.fromKueryExpression(
+          'foo.bytes > 1000 and (type: foo and updatedAt: 5678654567)'
+        )
+      );
+    });
+
+    test('Assemble filter when saved object attribute is at index 3 in flat AND tree', () => {
+      // updatedAt is at position 3 — exercises the full flat N-ary path resolution
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and foo.updatedAt: 5678654567 and (foo.attributes.description: t* or foo.attributes.description :*)',
+          mockMappings
+        )
+      ).toEqual(
+        opensearchKuery.fromKueryExpression(
+          'foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (type: foo and updatedAt: 5678654567) and (foo.description: t* or foo.description :*)'
+        )
+      );
+    });
+
     test('Lets make sure that we are throwing an exception if we get an error', () => {
       expect(() => {
         validateConvertFilterToKueryNode(
@@ -204,35 +236,35 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -279,35 +311,35 @@ describe('Filter Utils', () => {
           type: null,
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -334,14 +366,14 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error:
             "This key 'foo.bytes' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
@@ -349,21 +381,21 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error:
             "This key 'foo.description' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
@@ -391,35 +423,35 @@ describe('Filter Utils', () => {
           type: 'bar',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -446,21 +478,21 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error:
             "This key 'foo.attributes.header' does NOT exist in foo saved object index patterns",
           isSavedObjectAttr: false,
@@ -468,14 +500,14 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',

@@ -286,15 +286,97 @@ describe('convertFiltersToClause', () => {
 });
 
 describe('getTimeFilterCommand', () => {
-  it('should create a time filter command with the correct format', () => {
-    const timeRange: TimeRange = {
-      from: '2023-01-01T00:00:00Z',
-      to: '2023-01-02T00:00:00Z',
-    };
+  const timeRange: TimeRange = {
+    from: '2023-01-01T00:00:00Z',
+    to: '2023-01-02T00:00:00Z',
+  };
 
+  it('emits bare string literals for OpenSearch (folds to a native range query, no scripts)', () => {
+    const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'OpenSearch');
+    expect(result).toBe(
+      "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
+    );
+  });
+
+  it('defaults to bare string literals when the engine type is unknown/undefined (fail-open)', () => {
     const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange);
     expect(result).toBe(
       "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
     );
+  });
+
+  it('wraps literals in TIMESTAMP() for legacy Elasticsearch (Open Distro rejects bare strings)', () => {
+    const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange, 'Elasticsearch');
+    expect(result).toBe(
+      "WHERE `timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
+    );
+  });
+  it('reports bounds that match the literals in the where clause', () => {
+    const bounds = FilterUtils.getTimeFilterBounds('timestamp', timeRange);
+
+    expect(bounds).toEqual({
+      timeField: 'timestamp',
+      start: '2023-01-01 00:00:00.000',
+      end: '2023-01-02 00:00:00.000',
+    });
+  });
+
+  // The engine prunes indices with these bounds while the clause does the filtering, so the two
+  // describing different windows could drop an index the filter would have matched. Both engine
+  // flavors reach this code, and they quote the literals differently.
+  it.each([['OpenSearch'], ['Elasticsearch'], [undefined]])(
+    'embeds exactly the reported bounds in the clause for engine %s',
+    (engineType) => {
+      const { clause, bounds } = FilterUtils.getTimeFilter('timestamp', timeRange, engineType);
+
+      expect(bounds).toBeDefined();
+      expect(clause).toContain(bounds?.start);
+      expect(clause).toContain(bounds?.end);
+    }
+  );
+
+  it('resolves a relative range once, so the clause and the bounds cannot disagree', () => {
+    // `now-15m` lands on a different millisecond every parse. Asking separately for the clause and
+    // the bounds used to produce windows a millisecond apart, with the bounds the narrower of the
+    // two -- an engine pruning on them would drop rows the clause would have matched.
+    for (let i = 0; i < 200; i++) {
+      const { clause, bounds } = FilterUtils.getTimeFilter('timestamp', {
+        from: 'now-15m',
+        to: 'now',
+      });
+
+      expect(bounds).toBeDefined();
+      expect(clause).toContain(bounds?.start);
+      expect(clause).toContain(bounds?.end);
+    }
+  });
+
+  it('reports no bounds when the range does not parse, rather than NaN text', () => {
+    // An unparseable range does not fail loudly: datemath yields either '' or an invalid moment
+    // that formats as the literal 'Invalid date'. Formatting that as a date used to yield
+    // 'NaN-aN-aN aN:aN:aN.NaN', which would then be shipped as a bound.
+    expect(
+      FilterUtils.getTimeFilterBounds('timestamp', { from: 'nonsense', to: 'now' })
+    ).toBeUndefined();
+    expect(
+      FilterUtils.getTimeFilterBounds('timestamp', { from: 'now-15m', to: 'nonsense' })
+    ).toBeUndefined();
+  });
+
+  it('keeps a bound that falls inside a DST spring-forward gap', () => {
+    // Documents the intent; it cannot fail under the jest preset's TZ=UTC, where re-parsing a UTC
+    // bound as local time is an identity. What actually prevents the regression is that the
+    // local-time formatter this used to go through no longer exists. Run with
+    // `TZ=America/New_York` to exercise it for real.
+    const bounds = FilterUtils.getTimeFilterBounds('timestamp', {
+      from: '2026-03-08T02:30:00Z',
+      to: '2026-03-08T03:30:00Z',
+    });
+
+    expect(bounds).toEqual({
+      timeField: 'timestamp',
+      start: '2026-03-08 02:30:00.000',
+      end: '2026-03-08 03:30:00.000',
+    });
   });
 });

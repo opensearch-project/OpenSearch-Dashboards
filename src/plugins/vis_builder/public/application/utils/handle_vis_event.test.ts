@@ -54,8 +54,8 @@ describe('handleVisEvent', () => {
 
     jest.runAllTimers();
 
-    expect(executeFn).toBeCalledTimes(1);
-    expect(executeFn).toBeCalledWith(
+    expect(executeFn).toHaveBeenCalledTimes(1);
+    expect(executeFn).toHaveBeenCalledWith(
       expect.objectContaining({
         data: { timeFieldName },
       })
@@ -75,8 +75,8 @@ describe('handleVisEvent', () => {
 
     jest.runAllTimers();
 
-    expect(executeFn).toBeCalledTimes(1);
-    expect(executeFn).toBeCalledWith(
+    expect(executeFn).toHaveBeenCalledTimes(1);
+    expect(executeFn).toHaveBeenCalledWith(
       expect.objectContaining({
         data: { timeFieldName },
       })
@@ -96,8 +96,8 @@ describe('handleVisEvent', () => {
 
     jest.runAllTimers();
 
-    expect(executeFn).toBeCalledTimes(1);
-    expect(executeFn).toBeCalledWith(
+    expect(executeFn).toHaveBeenCalledTimes(1);
+    expect(executeFn).toHaveBeenCalledWith(
       expect.objectContaining({
         timeFieldName,
       })

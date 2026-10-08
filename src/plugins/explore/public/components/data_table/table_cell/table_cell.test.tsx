@@ -75,15 +75,10 @@ describe('TableCell', () => {
       isLoading: false,
       error: null,
     });
-    // Reset window location
-    delete (window as any).location;
-    (window as any).location = {
-      pathname: '/app/explore',
-      hash: '',
-      origin: 'http://localhost:5601',
-    };
+    // Reset window location via the History API (jsdom 26 compatible).
+    window.history.pushState({}, '', '/app/explore');
     // Mock window.open
-    (window as any).open = jest.fn();
+    jest.spyOn(window, 'open').mockImplementation(jest.fn());
   });
 
   it('renders cell content with sanitized HTML', () => {
@@ -96,6 +91,23 @@ describe('TableCell', () => {
 
   it('renders filter buttons when onFilter is provided', () => {
     render(<TableCell {...defaultProps} />);
+
+    expect(screen.getByTestId('filterForValue')).toBeInTheDocument();
+    expect(screen.getByTestId('filterOutValue')).toBeInTheDocument();
+  });
+
+  it('does not render value filter buttons when disableValueFilter is true', () => {
+    // Set for time/date fields: exact-equality on a high-precision timestamp is misleading
+    // (raw UTC value differs from the timezone-formatted display) and effectively never matches.
+    render(<TableCell {...defaultProps} disableValueFilter={true} />);
+
+    expect(screen.queryByTestId('filterForValue')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filterOutValue')).not.toBeInTheDocument();
+  });
+
+  it('still renders value filter buttons for a time field when disableValueFilter is not set', () => {
+    // isTimeField only drives styling/flyout; the value-filter gate is disableValueFilter.
+    render(<TableCell {...defaultProps} isTimeField={true} disableValueFilter={false} />);
 
     expect(screen.getByTestId('filterForValue')).toBeInTheDocument();
     expect(screen.getByTestId('filterOutValue')).toBeInTheDocument();
@@ -258,7 +270,7 @@ describe('TableCell', () => {
     });
 
     it('renders regular cell content for non-span ID columns', () => {
-      (window as any).location.pathname = '/app/explore/traces';
+      window.history.pushState({}, '', '/app/explore/traces');
 
       render(<TableCell {...{ ...spanIdProps, columnId: 'regularColumn' }} />);
 
@@ -270,7 +282,7 @@ describe('TableCell', () => {
     });
 
     it('opens trace details URL when span ID link is clicked', () => {
-      (window as any).location.pathname = '/app/explore/traces';
+      window.history.pushState({}, '', '/app/explore/traces');
 
       render(<TableCell {...spanIdProps} />);
 
@@ -286,7 +298,7 @@ describe('TableCell', () => {
     });
 
     it('handles different span ID column variations', () => {
-      (window as any).location.pathname = '/app/explore/traces';
+      window.history.pushState({}, '', '/app/explore/traces');
 
       // Test span_id
       const { unmount: unmount1 } = render(
@@ -366,8 +378,7 @@ describe('TableCell', () => {
     });
 
     it('works when traces page is detected via hash', () => {
-      (window as any).location.pathname = '/app/explore';
-      (window as any).location.hash = '#/explore/traces';
+      window.history.pushState({}, '', '/app/explore#/explore/traces');
 
       render(<TableCell {...spanIdProps} />);
 
@@ -425,7 +436,7 @@ describe('TableCell', () => {
     };
 
     it('opens data table flyout when clicked on traces page', () => {
-      (window as any).location.pathname = '/app/explore/traces';
+      window.history.pushState({}, '', '/app/explore/traces');
 
       render(<TableCell {...spanFlyoutProps} isOnTracesPage={true} />);
 

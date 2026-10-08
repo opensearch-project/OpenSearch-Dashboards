@@ -29,8 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { IRouter, LegacyAPICaller } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
@@ -60,19 +59,23 @@ export function registerResolveIndexRoute(router: IRouter): void {
         : null;
 
       const dataSourceId = req.query.data_source;
-      const caller = dataSourceId
-        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
-        : context.core.opensearch.legacy.client.callAsCurrentUser;
+      // Use the MODERN client. For data sources this gives a per-connection client whose
+      // Transport (when backendCompatibility is enabled) can synthesize /_resolve/index for
+      // legacy Elasticsearch (6.x) clusters that lack the API. The legacy client cannot carry
+      // a Transport, so it must not be used here.
+      const client = dataSourceId
+        ? await context.dataSource.opensearch.getClient(dataSourceId)
+        : context.core.opensearch.client.asCurrentUser;
 
       try {
-        const result = await caller('transport.request', {
+        const result = await client.transport.request({
           method: 'GET',
           path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
             queryString ? '?' + new URLSearchParams(queryString).toString() : ''
           }`,
         });
-        return res.ok({ body: result });
-      } catch (err) {
+        return res.ok({ body: result.body });
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {

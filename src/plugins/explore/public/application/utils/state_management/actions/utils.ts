@@ -15,6 +15,8 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
+import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
+import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -105,13 +107,71 @@ export function fillMissingTimestamps(
 
 /**
  * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
- * Subquery brackets [...] are masked so that head inside subqueries is ignored.
+ * Subquery brackets and quoted strings are masked so that head inside them is ignored.
  */
 export const queryEndsWithHead = (queryString: string): boolean => {
-  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  const masked = maskPPLSubqueriesAndStrings(queryString);
   return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);
 };
 
+/**
+ * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
+ * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
+ * brackets and quoted strings are masked so that a command inside them is ignored.
+ *
+ * Used to detect queries where the hit counter should show bucket count separately from document
+ * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
+ */
+export const queryHasAggregation = (queryString: string): boolean => {
+  const masked = maskPPLSubqueriesAndStrings(queryString);
+  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
+};
+
+/** Commands that reshape rows such that the time field may no longer exist downstream. */
+const TIME_FIELD_CONSUMING_COMMANDS = ['stats', 'eventstats', 'top', 'rare', 'rename'];
+const TIME_FIELD_CONSUMING_REGEX = new RegExp(
+  `\\|\\s*(${TIME_FIELD_CONSUMING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+/** Splits on top-level pipes, ignoring those inside quoted strings or bracketed subqueries. */
+const splitTopLevelStages = (queryString: string): string[] => {
+  const masked = maskPPLSubqueriesAndStrings(queryString);
+  const stages: string[] = [];
+  let start = 0;
+  for (let i = 0; i < masked.length; i++) {
+    if (masked[i] === '|') {
+      stages.push(queryString.slice(start, i));
+      start = i + 1;
+    }
+  }
+  stages.push(queryString.slice(start));
+  return stages;
+};
+
+/**
+ * Removes `fields` projections so the appended aggregation can still reference the time field.
+ *
+ * `fields` is the only command that can drop the time field while leaving the row set intact, and
+ * removing it is always safe here: a projection restricts the available columns and never introduces
+ * one, so no later stage can break by having more columns available. Row-set commands (`where`,
+ * `head`, `dedup`) are preserved, because the histogram must describe the rows the query actually
+ * matches. `rex`/`eval`/`parse` are preserved too: they only add columns, and removing them could
+ * break a later stage that reads what they produced.
+ */
+const stripFieldsProjections = (queryString: string): string =>
+  splitTopLevelStages(queryString)
+    .filter((stage, index) => index === 0 || !/^\s*fields\b/i.test(stage))
+    .map((stage) => stage.trim())
+    .join(' | ');
+
+/**
+ * Appends the histogram aggregation to a query.
+ *
+ * Returns the query unchanged when no aggregation can be built, which leaves the chart empty rather
+ * than emitting a query that fails: a failed histogram is dispatched non-blocking and its error is
+ * never rendered, so an invalid query would surface as a silently missing chart.
+ */
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
   const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
@@ -119,17 +179,122 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
     return query;
   }
 
-  if (breakdownField) {
-    return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
-  } else {
-    return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+  const source = stripFieldsProjections(query);
+
+  // A remaining aggregation or rename may have consumed the time field, and whether it did cannot be
+  // determined from the query text alone.
+  if (TIME_FIELD_CONSUMING_REGEX.test(maskPPLSubqueriesAndStrings(source))) {
+    return query;
   }
+
+  if (breakdownField) {
+    return `${source} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+  } else {
+    return `${source} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+  }
+};
+
+/** Bucket expression for the time field. Only valid aliased inside a derived table. */
+const intervalToSQLBucket = (interval: string, timeFieldName: string): { expr: string } => {
+  const field = `\`${timeFieldName}\``;
+  const match = interval.match(/^(\d+)\s*([smhdwMy])$/);
+  // Fall back to per-second bucketing for an unparseable interval.
+  const normalized = match ? `${match[1]}${match[2]}` : '1s';
+
+  return { expr: `date_histogram(field=${field}, interval='${normalized}')` };
+};
+
+/** Parse a bucket key ("2026-05-01 14:30:00", UTC) back to epoch milliseconds. */
+const parseSQLBucketToMs = (bucket: string): number => {
+  const [datePart, timePart = '00:00:00'] = bucket.split(' ');
+  const [y, mo, d] = datePart.split('-').map(Number);
+  const [hh, mi, ss] = timePart.split(':').map(Number);
+  return Date.UTC(y, (mo || 1) - 1, d || 1, hh || 0, mi || 0, ss || 0);
+};
+
+/** Matches PPL's `timechart limit=4`. */
+const HISTOGRAM_BREAKDOWN_SERIES_LIMIT = 4;
+
+/** PPL `timechart`'s default `otherstr`. */
+const HISTOGRAM_OTHER_LABEL = 'OTHER';
+
+/** PPL `timechart`'s default `nullstr`. */
+const HISTOGRAM_NULL_LABEL = 'NULL';
+
+/** Render a breakdown value for a SQL IN-list. */
+const toSQLLiteral = (value: string | number): string => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  return `'${String(value).replace(/'/g, "''")}'`;
+};
+
+/** Pass 1 of the breakdown histogram: the top-N values, which pass 2 then buckets by. */
+export const buildSQLTopBreakdownQuery = (
+  query: string,
+  histogramConfig: HistogramConfig,
+  limit: number = HISTOGRAM_BREAKDOWN_SERIES_LIMIT
+): string => {
+  const { breakdownField } = histogramConfig;
+  if (!breakdownField) {
+    return query;
+  }
+  // Order by the expression, not an alias — aliases on aggregates are unreliable here.
+  return (
+    `SELECT breakdown, COUNT(*) ` +
+    `FROM (SELECT \`${breakdownField}\` AS breakdown FROM (${query}) sub_inner) sub ` +
+    `GROUP BY breakdown ORDER BY COUNT(*) DESC LIMIT ${limit}`
+  );
+};
+
+export const buildSQLHistogramQuery = (
+  query: string,
+  histogramConfig: HistogramConfig,
+  breakdownValues?: Array<string | number>
+): string => {
+  const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
+
+  if (!aggs || !timeFieldName || !finalInterval) {
+    return query;
+  }
+  const { expr } = intervalToSQLBucket(finalInterval, timeFieldName);
+
+  // A trailing LIMIT is left in place, so the histogram aggregates over the
+  // same rows the user asked for, as PPL does with `| head N`.
+  //
+  // COUNT(*) is deliberately not aliased: the analytics engine records the
+  // alias in the plan but names the physical column `COUNT(*)`, and the
+  // mismatch throws. The result parser reads it by position.
+  //
+  // Relabelling the breakdown rather than filtering with IN keeps the long
+  // tail counted in an OTHER series, matching `timechart`.
+  if (breakdownField) {
+    const field = `\`${breakdownField}\``;
+    const breakdownExpr =
+      breakdownValues && breakdownValues.length > 0
+        ? `CASE WHEN ${field} IS NULL THEN '${HISTOGRAM_NULL_LABEL}' ` +
+          `WHEN ${field} IN (${breakdownValues.map(toSQLLiteral).join(', ')}) THEN ${field} ` +
+          `ELSE '${HISTOGRAM_OTHER_LABEL}' END`
+        : field;
+    return (
+      `SELECT time_bucket, breakdown, COUNT(*) ` +
+      `FROM (SELECT ${expr} AS time_bucket, ${breakdownExpr} AS breakdown FROM (${query}) sub_inner) sub ` +
+      `GROUP BY time_bucket, breakdown ORDER BY time_bucket`
+    );
+  }
+
+  return (
+    `SELECT time_bucket, COUNT(*) ` +
+    `FROM (SELECT ${expr} AS time_bucket FROM (${query}) sub_inner) sub ` +
+    `GROUP BY time_bucket ORDER BY time_bucket`
+  );
 };
 
 export const processRawResultsForHistogram = (
   queryString: string,
   rawResults: ISearchResult,
-  histogramConfig: HistogramConfig
+  histogramConfig: HistogramConfig,
+  isSQLHistogram: boolean = false
 ) => {
   const { aggs, breakdownField } = histogramConfig;
 
@@ -137,6 +302,116 @@ export const processRawResultsForHistogram = (
     return rawResults;
   }
 
+  if (isSQLHistogram) {
+    // Handle SQL histogram results
+    const responseAggs: any = {};
+    const fieldSchema = rawResults.fieldSchema;
+
+    if (!fieldSchema || fieldSchema.length < 2) {
+      return rawResults;
+    }
+
+    const bucketIdx = fieldSchema.findIndex((col: any) => col.name === 'time_bucket');
+    if (bucketIdx === -1) {
+      return rawResults;
+    }
+    const bucketName = fieldSchema[bucketIdx].name!;
+
+    // Columns are [time_bucket, breakdown, COUNT(*)].
+    if (breakdownField) {
+      const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === 'breakdown');
+      if (breakdownIdx === -1) {
+        return rawResults;
+      }
+      // The count is whichever column isn't the bucket or the breakdown.
+      const breakdownCountIdx = fieldSchema.findIndex(
+        (_col: any, idx: number) => idx !== bucketIdx && idx !== breakdownIdx
+      );
+      if (breakdownCountIdx === -1) {
+        return rawResults;
+      }
+      const breakdownName = fieldSchema[breakdownIdx].name!;
+      const breakdownCountName = fieldSchema[breakdownCountIdx].name!;
+
+      const seriesMap = new Map<string, Array<[number, number]>>();
+      let breakdownTotalHits = 0;
+      rawResults.hits.hits.forEach((hit) => {
+        const source = hit._source as Record<string, unknown>;
+        const timestamp = parseSQLBucketToMs(String(source[bucketName]));
+        const breakdownValue = String(source[breakdownName]);
+        const count = Number(source[breakdownCountName]) || 0;
+
+        breakdownTotalHits += count;
+
+        if (!seriesMap.has(breakdownValue)) {
+          seriesMap.set(breakdownValue, []);
+        }
+        seriesMap.get(breakdownValue)!.push([timestamp, count]);
+      });
+
+      const series = Array.from(seriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
+        breakdownValue,
+        dataPoints,
+      }));
+
+      return {
+        ...rawResults,
+        hits: {
+          ...rawResults.hits,
+          total: breakdownTotalHits,
+        },
+        breakdownSeries: {
+          breakdownField,
+          series,
+        },
+      };
+    }
+
+    // Single series: the query returns two columns (bucket + count). Treat the
+    // non-bucket column as the count so we're resilient to how the engine
+    // names the aggregate (doc_count / COUNT(*) / etc.).
+    const countIdx = bucketIdx === 0 ? 1 : 0;
+    const countName = fieldSchema[countIdx].name!;
+
+    // Create aggregation response in expected format
+    let totalHits = 0;
+    Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
+      const aggTypeKeys = Object.keys(value);
+      if (aggTypeKeys.length === 0) return;
+
+      const aggTypeKey = aggTypeKeys[0];
+      if (aggTypeKey === 'date_histogram') {
+        const buckets = rawResults.hits.hits.map((hit) => {
+          const source = hit._source as Record<string, unknown>;
+          const count = Number(source[countName]) || 0;
+          const timeBucket = parseSQLBucketToMs(String(source[bucketName]));
+
+          totalHits += count;
+
+          return {
+            key_as_string: new Date(timeBucket).toISOString(),
+            key: timeBucket,
+            doc_count: count,
+          };
+        });
+
+        responseAggs[key] = { buckets };
+      }
+    });
+
+    const tempResult: ISearchResult = {
+      ...rawResults,
+      aggregations: responseAggs,
+      hits: {
+        ...rawResults.hits,
+        total: totalHits,
+      },
+    };
+
+    return tempResult;
+  }
+
+  // Original PPL histogram processing
   const aggsConfig: any = {};
 
   Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {

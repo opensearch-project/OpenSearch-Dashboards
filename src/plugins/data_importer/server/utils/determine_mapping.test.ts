@@ -643,7 +643,7 @@ describe('determine_mapping', () => {
     });
 
     it('should error out when the object is too deeply nested', () => {
-      expect(() => determineMapping(document, 4)).toThrowError();
+      expect(() => determineMapping(document, 4)).toThrow();
     });
   });
 });

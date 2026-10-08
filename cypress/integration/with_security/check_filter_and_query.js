@@ -77,7 +77,7 @@ describe('check dashboards filter and query', () => {
 
       //[Logs] Response chart should show 200 label
       cy.get('[data-title="[Logs] Response Codes Over Time + Annotations"]')
-        .find('[title="200"]')
+        .find('[title^="200"]')
         .should('have.text', '200');
     });
   });

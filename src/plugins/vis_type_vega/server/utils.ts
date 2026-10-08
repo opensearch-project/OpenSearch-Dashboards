@@ -4,8 +4,8 @@
  */
 
 import { parse } from 'hjson';
-import { SavedObjectsClientContract } from 'src/core/server';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '../../../core/server';
 
 export interface FindDataSourceByTitleQueryProps {
   dataSourceName: string;
@@ -22,7 +22,7 @@ export const findDataSourceIdbyName = async (props: FindDataSourceByTitleQueryPr
   );
 
   if (possibleDataSourceObjects.length !== 1) {
-    throw new Error(
+    throw SavedObjectsErrorHelpers.createBadRequestError(
       `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${possibleDataSourceObjects.length} results`
     );
   }
@@ -40,40 +40,50 @@ export const extractVegaSpecFromAttributes = (attributes: unknown) => {
   return undefined;
 };
 
-export const extractDataSourceNamesInVegaSpec = (spec: string) => {
-  const parsedSpec = parse(spec, { keepWsc: true });
-  const dataField = parsedSpec.data;
-  const dataSourceNameSet = new Set<string>();
+// Maximum number of nodes to visit during spec traversal. Prevents CPU abuse from
+// adversarially large specs. hjson.parse already materializes the full spec in memory,
+// so this bounds traversal time rather than memory. If exceeded, the spec is rejected
+// as too complex rather than silently dropping data source references.
+const MAX_TRAVERSAL_NODES = 10000;
 
-  if (dataField instanceof Array) {
-    dataField.forEach((dataObject) => {
-      const dataSourceName = getDataSourceNameFromObject(dataObject);
-      if (!!dataSourceName) {
-        dataSourceNameSet.add(dataSourceName);
-      }
-    });
-  } else if (dataField instanceof Object) {
-    const dataSourceName = getDataSourceNameFromObject(dataField);
-    if (!!dataSourceName) {
-      dataSourceNameSet.add(dataSourceName);
+export const extractDataSourceNamesInVegaSpec = (spec: string) => {
+  const names = new Set<string>();
+  const stack: unknown[] = [parse(spec, { keepWsc: true })];
+  let visited = 0;
+
+  while (stack.length > 0) {
+    if (++visited > MAX_TRAVERSAL_NODES) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Vega spec has too many data objects (exceeds limit of ${MAX_TRAVERSAL_NODES})`
+      );
     }
-  } else {
-    throw new Error(`"data" field should be an object or an array of objects`);
+
+    const node = stack.pop();
+    if (node === null || typeof node !== 'object') continue;
+
+    const name = getDataSourceNameFromObject(node);
+    if (name) names.add(name);
+
+    // Arrays yield their elements; objects yield their values. Push in reverse so the
+    // stack pops them in document order, keeping data source discovery (and thus the
+    // resulting reference order) deterministic and matching the spec's declared order.
+    const children = Object.values(node as Record<string, unknown>);
+    for (let i = children.length - 1; i >= 0; i--) {
+      stack.push(children[i]);
+    }
   }
 
-  return dataSourceNameSet;
+  return names;
 };
 
-const getDataSourceNameFromObject = (dataObject: any) => {
-  if (
-    dataObject.hasOwnProperty('url') &&
-    dataObject.url.hasOwnProperty('index') &&
-    dataObject.url.hasOwnProperty('data_source_name')
-  ) {
-    return dataObject.url.data_source_name;
-  }
-
-  return undefined;
+const getDataSourceNameFromObject = (node: unknown): string | undefined => {
+  if (node === null || typeof node !== 'object') return undefined;
+  const url = (node as Record<string, unknown>).url;
+  if (url === null || typeof url !== 'object') return undefined;
+  const urlObj = url as Record<string, unknown>;
+  return 'index' in urlObj && 'data_source_name' in urlObj
+    ? (urlObj.data_source_name as string)
+    : undefined;
 };
 
 const isVegaVisualization = (attributes: unknown) => {

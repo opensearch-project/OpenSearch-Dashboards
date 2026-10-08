@@ -23,7 +23,7 @@ import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
-import { ExploreFlavor, VISUALIZATION_EDITOR_APP_ID } from '../../common';
+import { EXPLORE_LOGS_TAB_ID, ExploreFlavor, VISUALIZATION_EDITOR_APP_ID } from '../../common';
 import { SavedExplore } from '../saved_explore';
 
 interface StartServices {
@@ -31,8 +31,11 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class ExploreEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ExploreInput, ExploreOutput, ExploreEmbeddable> {
+export class ExploreEmbeddableFactory implements EmbeddableFactoryDefinition<
+  ExploreInput,
+  ExploreOutput,
+  ExploreEmbeddable
+> {
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('explore.savedExplore.savedObjectName', {
@@ -50,7 +53,7 @@ export class ExploreEmbeddableFactory
         if (chart) {
           iconType = chart.icon;
         }
-      } catch (e) {
+      } catch {
         iconType = '';
       }
       return iconType;
@@ -125,15 +128,17 @@ export class ExploreEmbeddableFactory
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
-      const flavor = savedObject.type ?? ExploreFlavor.Logs;
-      const editUrl = savedObject.type
-        ? services.addBasePath(`/app/explore/${flavor}/${url}`)
+
+      const uiState = JSON.parse(savedObject.uiState || '{}');
+      const isLogs = uiState.activeTab === EXPLORE_LOGS_TAB_ID;
+
+      const editUrl = isLogs
+        ? services.addBasePath(`/app/explore/${ExploreFlavor.Logs}/${url}`)
         : services.addBasePath(`/app/${VISUALIZATION_EDITOR_APP_ID}#/edit/${savedObjectId}`);
 
-      // for in-context created visualization
-      const editPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
-
-      const editApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
+      // Log table opened in discover, other explore visualizations opened in visualization editor
+      const editPath = !isLogs ? `#/edit/${savedObjectId}` : url;
+      const editApp = !isLogs ? VISUALIZATION_EDITOR_APP_ID : `explore/${ExploreFlavor.Logs}`;
 
       return new ExploreEmbeddableClass(
         {

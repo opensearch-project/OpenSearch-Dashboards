@@ -52,10 +52,10 @@ const { createStateContainer, syncState } = jest.requireMock(
 );
 
 describe('createVisualizeAppState', () => {
-  const osdUrlStateStorage = ({
+  const osdUrlStateStorage = {
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
-  } as unknown) as IOsdUrlStateStorage;
+  } as unknown as IOsdUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({
     stateDefaults: visualizeAppStateStub,

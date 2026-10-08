@@ -61,9 +61,9 @@ describe('Editor', () => {
 
   let testCount = 0;
 
-  const callWithEditorMethod = (editorMethod, fn) => async (done) => {
+  const callWithEditorMethod = (editorMethod, fn) => async () => {
     const results = await input[editorMethod]();
-    fn(results, done);
+    fn(results);
   };
 
   function utilsTest(name, prefix, data, testToRun) {
@@ -83,9 +83,9 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function (done) {
+    test('Utils test ' + id + ' : ' + name, async function () {
       await input.update(data, true);
-      testToRun(done);
+      await testToRun();
     });
   }
 
@@ -125,12 +125,11 @@ describe('Editor', () => {
     'simple request range',
     simpleRequest.prefix,
     simpleRequest.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 4, column: 2 },
       });
-      done();
     })
   );
 
@@ -138,14 +137,13 @@ describe('Editor', () => {
     'simple request data',
     simpleRequest.prefix,
     simpleRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: '_search',
         data: [simpleRequest.data],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -153,12 +151,11 @@ describe('Editor', () => {
     'simple request range, prefixed with spaces',
     '   ' + simpleRequest.prefix,
     simpleRequest.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       expect(range).toEqual({
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 4, column: 2 },
       });
-      done();
     })
   );
 
@@ -166,7 +163,7 @@ describe('Editor', () => {
     'simple request data, prefixed with spaces',
     '    ' + simpleRequest.prefix,
     simpleRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: '_search',
@@ -174,7 +171,6 @@ describe('Editor', () => {
       };
 
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -182,12 +178,11 @@ describe('Editor', () => {
     'simple request range, suffixed with spaces',
     simpleRequest.prefix + '   ',
     simpleRequest.data + '  ',
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 4, column: 2 },
       });
-      done();
     })
   );
 
@@ -195,15 +190,13 @@ describe('Editor', () => {
     'simple request data, suffixed with spaces',
     simpleRequest.prefix + '    ',
     simpleRequest.data + ' ',
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: '_search',
         data: [simpleRequest.data],
       };
-
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -211,12 +204,11 @@ describe('Editor', () => {
     'single line request range',
     singleLineRequest.prefix,
     singleLineRequest.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 2, column: 33 },
       });
-      done();
     })
   );
 
@@ -224,14 +216,13 @@ describe('Editor', () => {
     'full url: single line request data',
     'POST https://somehost/_search',
     singleLineRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: 'https://somehost/_search',
         data: [singleLineRequest.data],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -239,12 +230,11 @@ describe('Editor', () => {
     'request with no data followed by a new line',
     getRequestNoData.prefix,
     '\n',
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 1, column: 11 },
       });
-      done();
     })
   );
 
@@ -252,14 +242,13 @@ describe('Editor', () => {
     'request with no data followed by a new line (data)',
     getRequestNoData.prefix,
     '\n',
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'GET',
         url: '_stats',
         data: [],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -267,12 +256,11 @@ describe('Editor', () => {
     'request with no data',
     getRequestNoData.prefix,
     getRequestNoData.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       expect(range).toEqual({
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 1, column: 11 },
       });
-      done();
     })
   );
 
@@ -280,14 +268,13 @@ describe('Editor', () => {
     'request with no data (data)',
     getRequestNoData.prefix,
     getRequestNoData.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'GET',
         url: '_stats',
         data: [],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -295,12 +282,11 @@ describe('Editor', () => {
     'multi doc request range',
     multiDocRequest.prefix,
     multiDocRequest.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       expect(range).toEqual({
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 3, column: 15 },
       });
-      done();
     })
   );
 
@@ -308,14 +294,13 @@ describe('Editor', () => {
     'multi doc request data',
     multiDocRequest.prefix,
     multiDocRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: '_bulk',
         data: multiDocRequest.data_as_array,
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -328,12 +313,11 @@ describe('Editor', () => {
     'script request range',
     scriptRequest.prefix,
     scriptRequest.data,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 6, column: 2 },
       });
-      done();
     })
   );
 
@@ -341,7 +325,7 @@ describe('Editor', () => {
     'simple request data',
     simpleRequest.prefix,
     simpleRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: '_search',
@@ -349,12 +333,11 @@ describe('Editor', () => {
       };
 
       compareRequest(request, expected);
-      done();
     })
   );
 
   function multiReqTest(name, editorInput, range, expected) {
-    utilsTest('multi request select - ' + name, editorInput, async function (done) {
+    utilsTest('multi request select - ' + name, editorInput, async function () {
       const requests = await input.getRequestsInRange(range, false);
       // convert to format returned by request.
       _.each(expected, function (req) {
@@ -362,7 +345,6 @@ describe('Editor', () => {
       });
 
       compareRequest(requests, expected);
-      done();
     });
   }
 
@@ -465,10 +447,9 @@ describe('Editor', () => {
   );
 
   function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
-    utilsTest('multi request copy as curl - ' + name, editorInput, async function (done) {
+    utilsTest('multi request copy as curl - ' + name, editorInput, async function () {
       const curl = await input.getRequestsAsCURL('http://localhost:9200', range);
       expect(curl).toEqual(expected);
-      done();
     });
   }
 
@@ -518,12 +499,11 @@ curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: applicatio
     'PATCH request – range (single op)',
     patchPrefix,
     patchSingleOpBody,
-    callWithEditorMethod('getRequestRange', (range, done) => {
+    callWithEditorMethod('getRequestRange', (range) => {
       expect(range).toEqual({
         start: { lineNumber: 1, column: 1 },
         end: { lineNumber: 4, column: 2 }, // line with the closing ']'
       });
-      done();
     })
   );
 
@@ -531,14 +511,13 @@ curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: applicatio
     'PATCH request – data (single op)',
     patchPrefix,
     patchSingleOpBody,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'PATCH',
         url: '_plugins/_security/api/internalusers/admin',
         data: [patchSingleOpBody],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 
@@ -546,14 +525,13 @@ curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: applicatio
     'PATCH request – data (multiple ops, full array captured)',
     patchPrefix,
     patchMultiOpBody,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'PATCH',
         url: '_plugins/_security/api/internalusers/admin',
         data: [patchMultiOpBody],
       };
       compareRequest(request, expected);
-      done();
     })
   );
 });

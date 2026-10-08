@@ -5,7 +5,12 @@
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { URI } from '../../common';
-import { coerceStatusCode, definePPLBundleRoute } from './index';
+import {
+  coerceStatusCode,
+  definePPLBundleRoute,
+  defineSearchStrategyRouteProvider,
+  resolveOpenSearchClient,
+} from './index';
 
 describe('coerceStatusCode', () => {
   it('should return 503 when input is 500', () => {
@@ -17,8 +22,8 @@ describe('coerceStatusCode', () => {
   });
 
   it('should return 503 when input is undefined or null', () => {
-    expect(coerceStatusCode((undefined as unknown) as number)).toBe(503);
-    expect(coerceStatusCode((null as unknown) as number)).toBe(503);
+    expect(coerceStatusCode(undefined as unknown as number)).toBe(503);
+    expect(coerceStatusCode(null as unknown as number)).toBe(503);
   });
 });
 
@@ -205,5 +210,55 @@ describe('definePPLBundleRoute', () => {
       body: 'dataSourceId is not supported because data source plugin is unavailable',
     });
     expect(result).toEqual(res.custom.mock.results[0].value);
+  });
+});
+
+describe('defineSearchStrategyRouteProvider', () => {
+  const validateBody = (query: Record<string, unknown>) => {
+    const router = { post: jest.fn() };
+    defineSearchStrategyRouteProvider(loggingSystemMock.create().get(), router as any)(
+      'ppl',
+      {} as any
+    );
+    const { validate } = router.post.mock.calls[0][0];
+    return validate.body.validate({
+      query: { query: 'source = logs', language: 'PPL', dataset: null, format: 'jdbc', ...query },
+      aggConfig: null,
+    });
+  };
+
+  it('accepts partial_result from older clients', () => {
+    expect(() => validateBody({ partial_result: false })).not.toThrow();
+  });
+
+  it('rejects other unknown query keys', () => {
+    expect(() => validateBody({ unknown_key: true })).toThrow(/unknown_key/);
+  });
+});
+
+describe('resolveOpenSearchClient', () => {
+  it('resolves distinct clients for distinct dataSourceIds', async () => {
+    const clientA = { id: 'A' };
+    const clientB = { id: 'B' };
+    const getClient = jest.fn(async (id: string) => (id === 'ds-1' ? clientA : clientB));
+    const context = { dataSource: { opensearch: { getClient } }, core: {} } as any;
+
+    // Proves the id is actually forwarded, not that the helper returns a single shared client.
+    expect(await resolveOpenSearchClient(context, 'ds-1')).toBe(clientA);
+    expect(await resolveOpenSearchClient(context, 'ds-2')).toBe(clientB);
+    expect(getClient).toHaveBeenNthCalledWith(1, 'ds-1');
+    expect(getClient).toHaveBeenNthCalledWith(2, 'ds-2');
+  });
+
+  it('resolves asCurrentUser when no dataSourceId is given', async () => {
+    const asCurrentUser = { id: 'current' };
+    const context = { core: { opensearch: { client: { asCurrentUser } } } } as any;
+    expect(await resolveOpenSearchClient(context)).toBe(asCurrentUser);
+  });
+
+  it('returns null when dataSourceId is given but the data source plugin is unavailable', async () => {
+    // No context.dataSource -> can't honor the requested id, so the caller responds 400.
+    const context = { core: { opensearch: { client: { asCurrentUser: {} } } } } as any;
+    expect(await resolveOpenSearchClient(context, 'ds-1')).toBeNull();
   });
 });

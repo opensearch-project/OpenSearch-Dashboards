@@ -29,7 +29,7 @@ jest.mock('../hooks/use_command_menu_keyboard', () => ({
   }),
 }));
 
-// Mock useOpenSearchDashboards hook
+// Mock useOpenSearchDashboards hook (still used for the screenshot button)
 jest.mock('../../../opensearch_dashboards_react/public', () => {
   const { BehaviorSubject } = jest.requireActual('rxjs');
   const mockScreenshotButton$ = new BehaviorSubject({
@@ -303,12 +303,25 @@ describe('ChatInput', () => {
       expect(getByLabelText('Stop generating')).toBeTruthy();
     });
 
-    it('should have autofocus on input', () => {
+    it('should auto-focus input when ownFocus is true', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} ownFocus={true} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(document.activeElement).toBe(input);
+    });
+
+    it('should NOT auto-focus input when ownFocus is false', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} ownFocus={false} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(document.activeElement).not.toBe(input);
+    });
+
+    it('should NOT auto-focus input when ownFocus is not provided (defaults to false)', () => {
       const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
 
       const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
-      // Input should exist and be focused
-      expect(input).toBeTruthy();
+      expect(document.activeElement).not.toBe(input);
     });
   });
 

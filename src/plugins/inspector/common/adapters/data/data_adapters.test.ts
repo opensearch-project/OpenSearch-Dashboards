@@ -48,9 +48,9 @@ describe('DataAdapter', () => {
     it('should call the provided callback and resolve with its value', async () => {
       const spy = jest.fn(() => 'foo');
       adapter.setTabularLoader(spy);
-      expect(spy).not.toBeCalled();
+      expect(spy).not.toHaveBeenCalled();
       const result = await adapter.getTabular();
-      expect(spy).toBeCalled();
+      expect(spy).toHaveBeenCalled();
       expect(result.data).toBe('foo');
     });
 
@@ -73,6 +73,6 @@ describe('DataAdapter', () => {
     const spy = jest.fn();
     adapter.once('change', spy);
     adapter.setTabularLoader(() => 42);
-    expect(spy).toBeCalled();
+    expect(spy).toHaveBeenCalled();
   });
 });

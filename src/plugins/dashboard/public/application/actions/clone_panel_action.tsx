@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
@@ -82,10 +82,10 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   public async isCompatible({ embeddable }: ClonePanelActionContext) {
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
+      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      embeddable.getRoot() &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
     );
   }
 
@@ -100,15 +100,34 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       throw new PanelNotFoundError();
     }
 
+    // Keep a section member's clone in the same section.
+    const layout = dashboard.getInput().layout;
+    const sourceMember =
+      layout?.type === 'SectionLayout'
+        ? layout.items
+            .flatMap((section) =>
+              section.members.map((member) => ({ sectionId: section.id, member }))
+            )
+            .find((entry) => entry.member.idRef === embeddable.id)
+        : undefined;
+    const sourceSectionId = sourceMember?.sectionId;
+
+    // Clone the visible section size rather than the panel's flat-grid size.
+    const width = sourceMember?.member.gridData.w ?? panelToClone.gridData.w;
+    const height = sourceMember?.member.gridData.h ?? panelToClone.gridData.h;
+
+    const besideArgs: IPanelPlacementBesideArgs = {
+      width,
+      height,
+      currentPanels: dashboard.getInput().panels,
+      placeBesideId: panelToClone.explicitInput.id,
+      ...(sourceSectionId ? { sectionId: sourceSectionId } : {}),
+    };
+
     dashboard.showPlaceholderUntil(
       this.cloneEmbeddable(panelToClone, embeddable.type),
       placePanelBeside,
-      {
-        width: panelToClone.gridData.w,
-        height: panelToClone.gridData.h,
-        currentPanels: dashboard.getInput().panels,
-        placeBesideId: panelToClone.explicitInput.id,
-      } as IPanelPlacementBesideArgs
+      besideArgs
     );
   }
 
@@ -142,7 +161,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       type: embeddableType,
       explicitInput: {
         ...panelToClone.explicitInput,
-        id: uuid.v4(),
+        id: uuidv4(),
       },
     };
     let newTitle: string = '';

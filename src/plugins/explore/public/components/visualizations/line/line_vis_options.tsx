@@ -14,6 +14,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxisRole, VisFieldType } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
 
@@ -55,12 +56,20 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               lineStyle={styleOptions.lineStyle}
               lineMode={styleOptions.lineMode}
               lineWidth={styleOptions.lineWidth}
+              lineDashStyle={styleOptions.lineDashStyle}
+              pointSize={styleOptions.pointSize}
+              showValues={styleOptions.showValues}
               onAddTimeMarkerChange={(addTimeMarker) =>
                 updateStyleOption('addTimeMarker', addTimeMarker)
               }
               onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
               onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
               onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+              onLineDashStyleChange={(lineDashStyle) =>
+                updateStyleOption('lineDashStyle', lineDashStyle)
+              }
+              onPointSizeChange={(pointSize) => updateStyleOption('pointSize', pointSize)}
+              onShowValuesChange={(showValues) => updateStyleOption('showValues', showValues)}
             />
           </EuiFlexItem>
 
@@ -69,6 +78,20 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

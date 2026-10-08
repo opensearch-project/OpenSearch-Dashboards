@@ -73,10 +73,10 @@ describe('data_table_helper', () => {
   });
 
   describe('getLegacyDisplayedColumns', () => {
-    const mockIndexPattern = ({
+    const mockIndexPattern = {
       getFieldByName: jest.fn(),
       timeFieldName: '@timestamp',
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
 
     beforeEach(() => {
       (mockIndexPattern.getFieldByName as jest.Mock).mockReturnValue({

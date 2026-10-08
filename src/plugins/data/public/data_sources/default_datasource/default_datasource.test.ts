@@ -11,10 +11,10 @@ describe('DefaultDslDataSource', () => {
   let indexPatternsMock: IndexPatternsService;
 
   beforeEach(() => {
-    indexPatternsMock = ({
+    indexPatternsMock = {
       ensureDefaultIndexPattern: jest.fn(),
       getCache: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
   });
 
   it('should ensure default index pattern and get cache', async () => {

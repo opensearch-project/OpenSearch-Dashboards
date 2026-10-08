@@ -30,7 +30,7 @@ export const useChartsTheme = (): PartialTheme => {
   try {
     const themeService = useChartsThemeService();
     return themeService.useChartsTheme();
-  } catch (error) {
+  } catch {
     // Charts theme service not available, using fallback theme
     return {}; // Fallback empty theme
   }
@@ -44,7 +44,7 @@ export const useChartsBaseTheme = (): Theme => {
   try {
     const themeService = useChartsThemeService();
     return themeService.useChartsBaseTheme();
-  } catch (error) {
+  } catch {
     // Charts base theme service not available, using fallback theme
     // Return a basic light theme object as fallback
     return {
@@ -77,7 +77,7 @@ export const useDarkMode = (): boolean => {
   try {
     const themeService = useChartsThemeService();
     return themeService.useDarkMode();
-  } catch (error) {
+  } catch {
     // Dark mode service not available, defaulting to light mode
     return false;
   }

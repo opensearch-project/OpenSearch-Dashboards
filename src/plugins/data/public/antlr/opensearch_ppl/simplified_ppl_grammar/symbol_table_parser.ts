@@ -273,7 +273,7 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
       return expressions
         .map((expr: any) => this.extractFieldName(expr))
         .filter((name: string) => name.length > 0);
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -295,7 +295,7 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
       return expressions
         .map((expr: any) => this.extractFieldName(expr))
         .filter((name: string) => name.length > 0);
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -353,7 +353,7 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
       }
 
       return fields;
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -419,7 +419,7 @@ export function getAvailableFieldsForAutocomplete(
     }
 
     return getAvailableFieldsFromPPL(queryToAnalyze, initialFields, filterMethod);
-  } catch (error) {
+  } catch {
     // On error, return initial fields as fallback
     return filterMethod ? initialFields.filter(filterMethod) : initialFields;
   }

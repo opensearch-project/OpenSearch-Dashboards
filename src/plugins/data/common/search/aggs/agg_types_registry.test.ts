@@ -32,8 +32,8 @@ import { AggTypesRegistry, AggTypesRegistrySetup } from './agg_types_registry';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
-const bucketType = () => ({ name: 'terms', type: 'buckets' } as BucketAggType<any>);
-const metricType = () => ({ name: 'count', type: 'metrics' } as MetricAggType<any>);
+const bucketType = () => ({ name: 'terms', type: 'buckets' }) as BucketAggType<any>;
+const metricType = () => ({ name: 'count', type: 'metrics' }) as MetricAggType<any>;
 
 describe('AggTypesRegistry', () => {
   let registry: AggTypesRegistry;
@@ -62,8 +62,8 @@ describe('AggTypesRegistry', () => {
       setup.registerBucket('terms', bucketType);
     }).toThrow(/already been registered with name: terms/);
 
-    const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
-    const fooMetric = () => ({ name: 'foo', type: 'metrics' } as MetricAggType<any>);
+    const fooBucket = () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>;
+    const fooMetric = () => ({ name: 'foo', type: 'metrics' }) as MetricAggType<any>;
     expect(() => {
       setup.registerBucket('foo', fooBucket);
       setup.registerMetric('foo', fooMetric);
@@ -82,8 +82,8 @@ describe('AggTypesRegistry', () => {
       setup.registerMetric('count', metricType);
     }).toThrow(/already been registered with name: count/);
 
-    const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
-    const fooMetric = () => ({ name: 'foo', type: 'metrics' } as MetricAggType<any>);
+    const fooBucket = () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>;
+    const fooMetric = () => ({ name: 'foo', type: 'metrics' }) as MetricAggType<any>;
     expect(() => {
       setup.registerMetric('foo', fooMetric);
       setup.registerBucket('foo', fooBucket);
@@ -109,10 +109,10 @@ describe('AggTypesRegistry', () => {
   });
 
   it('getAll returns all buckets besides disabled bucket type', () => {
-    const termsBucket = () => ({ name: 'terms', type: 'buckets' } as BucketAggType<any>);
-    const histogramBucket = () => ({ name: 'histogram', type: 'buckets' } as BucketAggType<any>);
+    const termsBucket = () => ({ name: 'terms', type: 'buckets' }) as BucketAggType<any>;
+    const histogramBucket = () => ({ name: 'histogram', type: 'buckets' }) as BucketAggType<any>;
     const significantTermsBucket = () =>
-      ({ name: 'significant_terms', type: 'buckets' } as BucketAggType<any>);
+      ({ name: 'significant_terms', type: 'buckets' }) as BucketAggType<any>;
     setup.registerBucket('terms', termsBucket);
     setup.registerBucket('histogram', histogramBucket);
     setup.registerBucket('significant_terms', significantTermsBucket);

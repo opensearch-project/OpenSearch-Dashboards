@@ -72,15 +72,10 @@ describe('TableCell', () => {
       isLoading: false,
       error: null,
     });
-    // Reset window location
-    delete (window as any).location;
-    (window as any).location = {
-      pathname: '/app/agentTraces',
-      hash: '',
-      origin: 'http://localhost:5601',
-    };
+    // Reset window location via the History API (jsdom 26 compatible).
+    window.history.pushState({}, '', '/app/agentTraces');
     // Mock window.open
-    (window as any).open = jest.fn();
+    jest.spyOn(window, 'open').mockImplementation(jest.fn());
   });
 
   it('renders cell content with sanitized HTML', () => {
@@ -238,7 +233,7 @@ describe('TableCell', () => {
     });
 
     it('renders regular cell content for non-span ID columns', () => {
-      (window as any).location.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
 
       render(<TableCell {...{ ...spanIdProps, columnId: 'regularColumn' }} />);
 
@@ -250,7 +245,7 @@ describe('TableCell', () => {
     });
 
     it('opens trace details URL when span ID link is clicked', () => {
-      (window as any).location.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
 
       render(<TableCell {...spanIdProps} />);
 
@@ -266,7 +261,7 @@ describe('TableCell', () => {
     });
 
     it('handles different span ID column variations', () => {
-      (window as any).location.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
 
       // Test span_id
       const { unmount: unmount1 } = render(
@@ -346,8 +341,7 @@ describe('TableCell', () => {
     });
 
     it('works when traces page is detected via hash', () => {
-      (window as any).location.pathname = '/app/agentTraces';
-      (window as any).location.hash = '#/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces#/agentTraces/traces');
 
       render(<TableCell {...spanIdProps} />);
 

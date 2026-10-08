@@ -82,7 +82,7 @@ test('it should not allow to create card input with non-card section', () => {
     title: 'content title',
     description: 'content description',
   };
-  expect(() => createCardInput(section, [content])).toThrowError();
+  expect(() => createCardInput(section, [content])).toThrow();
 });
 
 test('card section should not include non-card content', () => {
@@ -112,7 +112,7 @@ test('it should throw error if creating dashboard input with non-dashboard secti
   const clientMock = coreMock.createStart().savedObjects.client;
   await expect(
     async () => await createDashboardInput(section, [content], { savedObjectsClient: clientMock })
-  ).rejects.toThrowError();
+  ).rejects.toThrow();
 });
 
 test('it should create dashboard input', async () => {

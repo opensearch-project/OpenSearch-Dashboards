@@ -88,7 +88,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           onKeyDown={(e) => setIsSuggestionsVisible(e.key !== 'Enter')}
           placeholder={props.placeholder}
           prepend={<EuiIcon type={assistantMark} />}
-          append={<WarningBadge error={props.error} />}
+          append={<WarningBadge error={props.error} question={props.previousQuestion} />}
           fullWidth
           compressed
         />

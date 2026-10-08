@@ -24,20 +24,20 @@ const formIdentifier = 'CreateDataSourceForm';
 describe('Datasource Management: Create Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   describe('case1: should load resources successfully', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceMetaData').and.returnValue(
-        Promise.resolve(fetchDataSourceMetaData)
-      );
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'fetchDataSourceMetaData')
+        .mockReturnValue(Promise.resolve(fetchDataSourceMetaData));
       await act(async () => {
         component = mount(
           wrapWithIntl(
             <CreateDataSourceWizard
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -53,8 +53,8 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
 
     test('should create datasource successfully', async () => {
-      spyOn(utils, 'createSingleDataSource').and.returnValue({});
-      spyOn(utils, 'handleSetDefaultDatasource').and.returnValue({});
+      jest.spyOn(utils, 'createSingleDataSource').mockReturnValue({});
+      jest.spyOn(utils, 'handleSetDefaultDatasource').mockReturnValue({});
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('handleSubmit')(
@@ -62,12 +62,14 @@ describe('Datasource Management: Create Datasource Wizard', () => {
         );
       });
       expect(utils.createSingleDataSource).toHaveBeenCalled();
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
       expect(utils.handleSetDefaultDatasource).toHaveBeenCalled();
     });
 
     test('should fail to create datasource', async () => {
-      spyOn(utils, 'createSingleDataSource').and.throwError('error');
+      jest.spyOn(utils, 'createSingleDataSource').mockImplementation(() => {
+        throw new Error('error');
+      });
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('handleSubmit')(
@@ -79,7 +81,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
 
     test('should test connection to the endpoint successfully', async () => {
-      spyOn(utils, 'testConnection').and.returnValue({});
+      jest.spyOn(utils, 'testConnection').mockReturnValue({});
 
       await act(async () => {
         // @ts-ignore
@@ -91,7 +93,9 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
 
     test('should fail to test connection to the endpoint', async () => {
-      spyOn(utils, 'testConnection').and.throwError('error');
+      jest.spyOn(utils, 'testConnection').mockImplementation(() => {
+        throw new Error('error');
+      });
       await act(async () => {
         // @ts-ignore
         await component.find('CreateDataSourceForm').first().prop('handleTestConnection')(
@@ -108,20 +112,22 @@ describe('Datasource Management: Create Datasource Wizard', () => {
         await component.find(formIdentifier).first().prop('handleCancel')();
       });
 
-      expect(history.push).toBeCalledWith('/create');
+      expect(history.push).toHaveBeenCalledWith('/create');
     });
   });
 
   describe('case2: should fail to load resources', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.throwError('');
+      jest.spyOn(utils, 'getDataSources').mockImplementation(() => {
+        throw new Error('');
+      });
       await act(async () => {
         component = mount(
           wrapWithIntl(
             <CreateDataSourceWizard
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
@@ -137,7 +143,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
 
     test('should not render component and go back to listing page', () => {
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
     });
   });
 });

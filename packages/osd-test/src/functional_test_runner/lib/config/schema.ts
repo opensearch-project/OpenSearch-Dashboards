@@ -50,7 +50,7 @@ const urlPartsSchema = () =>
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
       certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
-      fullURL: Joi.object().type(URL),
+      fullURL: Joi.object().instance(URL),
       serverUrl: Joi.string(),
     })
     .default();
@@ -78,14 +78,17 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
-      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
-      waitFor: Joi.func().optional(),
+      waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
+      waitFor: Joi.function().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
+  const makeDefault: any = (parent: any, helpers: any) => {
+    const context = helpers?.prefs?.context || helpers?.context || {};
+    return resolve(dirname(context.path), path);
+  };
   makeDefault.description = `<config.js directory>/${path}`;
   return makeDefault;
 };
@@ -93,7 +96,7 @@ const defaultRelativeToConfigPath = (path: string) => {
 export const schema = Joi.object()
   .keys({
     testFiles: Joi.array().items(Joi.string()),
-    testRunner: Joi.func(),
+    testRunner: Joi.function(),
 
     suiteFiles: Joi.object()
       .keys({
@@ -109,9 +112,9 @@ export const schema = Joi.object()
       })
       .default(),
 
-    services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
+    services: Joi.object().pattern(ID_PATTERN, Joi.function().required()).default(),
 
-    pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
+    pageObjects: Joi.object().pattern(ID_PATTERN, Joi.function().required()).default(),
 
     timeouts: Joi.object()
       .keys({

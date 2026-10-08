@@ -14,11 +14,19 @@ import { ChartConfig } from '../../../visualizations/visualization_builder.types
 
 const mockStore = configureMockStore([]);
 const initialState = {
-  ui: { activeTabId: 'logs', wrapCellText: false },
+  ui: { activeTabId: 'logs', wrapCellText: false, hideEmptyFields: false },
 };
 const store = mockStore(initialState);
 
 const mockSetShowRawTable = jest.fn();
+
+// The count comes from the results cache and dataset context, neither of which this mock store
+// carries; the action bar's job here is only to pass it through to the hits counter.
+const mockUseHiddenColumnCount = jest.fn(() => 0);
+jest.mock('../../../../helpers/use_displayed_columns', () => ({
+  ...jest.requireActual('../../../../helpers/use_displayed_columns'),
+  useHiddenColumnCount: () => mockUseHiddenColumnCount(),
+}));
 
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
@@ -143,39 +151,50 @@ describe('ResultsActionBar', () => {
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 
-  test('should render wrap cell text toggle on logs tab', () => {
+  test('should render the table actions menu on logs tab', () => {
     render(
       <Provider store={store}>
         <DiscoverResultsActionBar {...props} />
       </Provider>
     );
-    expect(screen.getByTestId('exploreWrapCellTextSwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('exploreTableActionsButton')).toBeInTheDocument();
   });
 
-  test('should not render wrap cell text toggle on non-logs tabs', () => {
+  test('should render the table actions menu while the active tab is still unset', () => {
+    // A dataset change resets activeTabId to EXPLORE_NO_TAB_ID with the logs table still shown.
+    const noTabStore = mockStore({
+      ui: { activeTabId: '', wrapCellText: false, hideEmptyFields: false },
+    });
+    render(
+      <Provider store={noTabStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.getByTestId('exploreTableActionsButton')).toBeInTheDocument();
+  });
+
+  test('should not render the table actions menu on non-logs tabs', () => {
     const vizStore = mockStore({
-      ui: { activeTabId: 'explore_visualization_tab', wrapCellText: false },
+      ui: { activeTabId: 'explore_visualization_tab', wrapCellText: false, hideEmptyFields: false },
     });
     render(
       <Provider store={vizStore}>
         <DiscoverResultsActionBar {...props} />
       </Provider>
     );
-    expect(screen.queryByTestId('exploreWrapCellTextSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exploreTableActionsButton')).not.toBeInTheDocument();
   });
 
-  test('should dispatch setWrapCellText when toggle is clicked', () => {
-    const logsStore = mockStore({
-      ui: { activeTabId: 'logs', wrapCellText: false },
-    });
+  test('should dispatch setWrapCellText from the table actions menu', () => {
+    const logsStore = mockStore(initialState);
     render(
       <Provider store={logsStore}>
         <DiscoverResultsActionBar {...props} />
       </Provider>
     );
+    fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
     fireEvent.click(screen.getByTestId('exploreWrapCellTextSwitch'));
-    const actions = logsStore.getActions();
-    expect(actions).toContainEqual(
+    expect(logsStore.getActions()).toContainEqual(
       expect.objectContaining({
         type: 'ui/setWrapCellText',
         payload: true,
@@ -183,10 +202,47 @@ describe('ResultsActionBar', () => {
     );
   });
 
+  test('should dispatch setHideEmptyFields from the table actions menu', () => {
+    const logsStore = mockStore(initialState);
+    render(
+      <Provider store={logsStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
+    fireEvent.click(screen.getByTestId('exploreHideEmptyFieldsSwitch'));
+    expect(logsStore.getActions()).toContainEqual(
+      expect.objectContaining({
+        type: 'ui/setHideEmptyFields',
+        payload: true,
+      })
+    );
+  });
+
+  test('should dispatch setHideEmptyFields false when switching it back off', () => {
+    // Starts from the non-default on state, so the click has to turn it off.
+    const logsStore = mockStore({
+      ui: { activeTabId: 'logs', wrapCellText: false, hideEmptyFields: true },
+    });
+    render(
+      <Provider store={logsStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    fireEvent.click(screen.getByTestId('exploreTableActionsButton'));
+    fireEvent.click(screen.getByTestId('exploreHideEmptyFieldsSwitch'));
+    expect(logsStore.getActions()).toContainEqual(
+      expect.objectContaining({
+        type: 'ui/setHideEmptyFields',
+        payload: false,
+      })
+    );
+  });
+
   test('should render and toggle the show raw data switch for non-table visualizations', () => {
     const mockGetVisualizationBuilder = jest
       .spyOn(visualizationBuilder, 'getVisualizationBuilder')
-      .mockReturnValue(({
+      .mockReturnValue({
         visConfig$: new BehaviorSubject<ChartConfig | undefined>({
           type: 'bar',
           styles: undefined,
@@ -194,7 +250,7 @@ describe('ResultsActionBar', () => {
         }),
         showRawTable$: new BehaviorSubject<boolean>(false),
         setShowRawTable: mockSetShowRawTable,
-      } as unknown) as visualizationBuilder.VisualizationBuilder);
+      } as unknown as visualizationBuilder.VisualizationBuilder);
 
     render(
       <Provider store={store}>

@@ -66,13 +66,13 @@ describe('useVisualizeAppState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedVisInstance = ({
+  const savedVisInstance = {
     vis: {
       setState: jest.fn().mockResolvedValue({}),
     },
     savedVis: {},
     embeddableHandler: {},
-  } as unknown) as SavedVisInstance;
+  } as unknown as SavedVisInstance;
   let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {
@@ -123,8 +123,8 @@ describe('useVisualizeAppState', () => {
 
     unmount();
 
-    expect(stopStateSyncMock).toBeCalledTimes(1);
-    expect(stopSyncingAppFiltersMock).toBeCalledTimes(1);
+    expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
   });
 
   it('should be subscribed on dirtyStateChange event from an editor', () => {

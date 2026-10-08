@@ -64,6 +64,7 @@ import {
   OpenSearchDashboards,
 } from './types';
 import { PPLQueryParser } from './ppl_parser';
+import { validateVegaExpression } from './vega_validation';
 
 // Set default single color to match other OpenSearch Dashboards visualizations
 const defaultColor: string = euiPaletteColorBlind()[0];
@@ -81,6 +82,7 @@ const DEFAULT_PARSER: string = 'opensearch';
 export class VegaParser {
   spec: VegaSpec;
   hideWarnings: boolean;
+  restoreSignalValuesOnRefresh: boolean;
   error?: string;
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
@@ -111,6 +113,7 @@ export class VegaParser {
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+    this.restoreSignalValuesOnRefresh = false;
     this.visibleVisLayers = new Map<VisLayerTypes, boolean>();
     this.visAugmenterConfig = {} as VisAugmenterEmbeddableConfig;
 
@@ -170,11 +173,29 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         })
       );
     }
+
+    const validationResults = validateVegaExpression(this.spec);
+    if (validationResults.length > 0) {
+      const reason = validationResults
+        .map((r) => `${r.reason} in "${r.expression}" at ${r.location}`)
+        .join('\n');
+      throw new Error(
+        i18n.translate('visTypeVega.vegaParser.unexpectedVegaExpression', {
+          defaultMessage: 'Unexpected Vega expression: {reason}',
+          values: {
+            reason,
+          },
+        })
+      );
+    }
+
     this.isVegaLite = this.parseSchema(this.spec).isVegaLite;
     this.useHover = !this.isVegaLite;
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this._parseBool('restoreSignalValuesOnRefresh', this._config, false);
+    this.restoreSignalValuesOnRefresh = !!this._config.restoreSignalValuesOnRefresh;
     this.visibleVisLayers = this._config.visibleVisLayers;
     this.visAugmenterConfig = this._config.visAugmenterConfig;
     this.useMap = this._config.type === 'map';

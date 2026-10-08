@@ -563,9 +563,8 @@ describe('start', () => {
     });
 
     // Get the logger and clear its info mock to avoid accumulation from test retries
-    const log = logger.get.mock.results[logger.get.mock.results.length - 1].value as jest.Mocked<
-      Logger
-    >;
+    const log = logger.get.mock.results[logger.get.mock.results.length - 1]
+      .value as jest.Mocked<Logger>;
     log.info.mockClear();
 
     await freshPluginsSystem.setupPlugins(setupDeps);

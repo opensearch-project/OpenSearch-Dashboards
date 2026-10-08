@@ -54,7 +54,7 @@ import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { History } from 'history';
 import { EmbeddableStart, ViewMode } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SavedDashboardPanel730ToLatest } from '../common';
+import { SavedDashboardPanel730ToLatest, DashboardLayout } from '../common';
 import { UiActionsStart } from '../../ui_actions/public';
 import { Variable } from './variables/types';
 
@@ -68,13 +68,7 @@ export interface DashboardCapabilities {
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes
-  | SavedObjectAttributes[];
+  string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
 
 export interface SimpleSavedObject<T extends SavedObjectAttributes> {
   attributes: T;
@@ -124,6 +118,7 @@ export interface DashboardAppState {
   options: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    useSharedCrosshair?: boolean;
   };
   query: Query | string;
   filters: Filter[];
@@ -131,6 +126,7 @@ export interface DashboardAppState {
   expandedPanelId?: string;
   savedQuery?: string;
   variables?: Variable[];
+  layout?: DashboardLayout;
 }
 
 export type DashboardAppStateDefaults = DashboardAppState & {
@@ -138,11 +134,22 @@ export type DashboardAppStateDefaults = DashboardAppState & {
 };
 
 /**
- * In URL panels are optional,
- * Panels are not added to the URL when in "view" mode
+ * Compact variable state stored in the URL. Full variable definitions are
+ * persisted in dashboard saved objects, while URL state only shares selections.
  */
-export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
+export interface DashboardVariableUrlState {
+  id: string;
+  current?: string[];
+}
+
+/**
+ * Panels and layout are omitted from URL state in view mode and included in
+ * edit mode so unsaved dashboard changes survive refreshes.
+ */
+export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels' | 'variables' | 'layout'> & {
   panels?: SavedDashboardPanel[];
+  variables?: DashboardVariableUrlState[];
+  layout?: DashboardLayout;
 };
 
 export interface DashboardAppStateTransitions {
@@ -262,6 +269,7 @@ export interface DashboardServices extends CoreStart {
   savedDashboards: SavedObjectLoader;
   dashboardProviders: () => { [key: string]: DashboardProvider } | undefined;
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
+  allowDashboardSections: boolean;
   dashboardCapabilities: DashboardCapabilities;
   embeddableCapabilities: {
     visualizeCapabilities: any;

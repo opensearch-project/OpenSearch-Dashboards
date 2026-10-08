@@ -67,14 +67,8 @@ function stubbedLogstashFields() {
     ['script date', 'date', true, false, { script: '1234', lang: 'painless' }],
     ['script murmur3', 'murmur3', true, false, { script: '1234' }],
   ].map(function (row) {
-    const [
-      name,
-      opensearchType,
-      aggregatable,
-      searchable,
-      metadata = {},
-      subType = undefined,
-    ] = row;
+    const [name, opensearchType, aggregatable, searchable, metadata = {}, subType = undefined] =
+      row;
 
     const {
       count = 0,

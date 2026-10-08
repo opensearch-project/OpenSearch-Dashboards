@@ -76,8 +76,8 @@ class ValueInputTypeUI extends Component<Props> {
               typeof value === 'string'
                 ? parseFloat(value)
                 : typeof value === 'bigint'
-                ? (value as BigInt).toString()
-                : value
+                  ? (value as BigInt).toString()
+                  : value
             }
             onChange={this.onNumberChange}
             controlOnly={this.props.controlOnly}

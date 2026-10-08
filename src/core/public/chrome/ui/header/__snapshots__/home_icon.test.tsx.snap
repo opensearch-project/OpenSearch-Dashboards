@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Home icon, custom branded, uses the custom logo when header is expanded 1`] = `
 <EuiIcon

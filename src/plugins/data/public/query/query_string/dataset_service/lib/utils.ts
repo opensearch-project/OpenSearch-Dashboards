@@ -70,7 +70,7 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
           remoteClusterConnection.connectionAlias
       ),
     };
-  } catch (error) {
+  } catch {
     // returning a empty connections array in case of failures
     return [];
   }
@@ -90,7 +90,7 @@ export const getRemoteClusterIndices = async (
     });
 
     return response;
-  } catch (error) {
+  } catch {
     // returning a empty index array in case of failures
     return [];
   }

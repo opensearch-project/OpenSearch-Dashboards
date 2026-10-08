@@ -185,8 +185,8 @@ describe('filter_manager', () => {
       filterManager.setFilters([f2]);
 
       // this time, events should be emitted
-      expect(fetchStub).toBeCalledTimes(0);
-      expect(updateStub).toBeCalledTimes(1);
+      expect(fetchStub).toHaveBeenCalledTimes(0);
+      expect(updateStub).toHaveBeenCalledTimes(1);
     });
 
     test('should merge multiple conflicting app filters', async function () {
@@ -499,8 +499,8 @@ describe('filter_manager', () => {
       filterManager.addFilters(readyFilters);
 
       // this time, events should be emitted
-      expect(fetchStub).toBeCalledTimes(1);
-      expect(updateStub).toBeCalledTimes(1);
+      expect(fetchStub).toHaveBeenCalledTimes(1);
+      expect(updateStub).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -694,8 +694,8 @@ describe('filter_manager', () => {
       filterManager.removeFilter(readyFilters[0]);
 
       // this time, events should be emitted
-      expect(fetchStub).toBeCalledTimes(1);
-      expect(updateStub).toBeCalledTimes(1);
+      expect(fetchStub).toHaveBeenCalledTimes(1);
+      expect(updateStub).toHaveBeenCalledTimes(1);
     });
 
     test('should remove matching filters', async function () {
@@ -764,8 +764,8 @@ describe('filter_manager', () => {
       readyFilters[1].meta.negate = !readyFilters[1].meta.negate;
       filterManager.addFilters(readyFilters[1]);
       expect(filterManager.getFilters()).toHaveLength(3);
-      expect(fetchStub).toBeCalledTimes(1);
-      expect(updateStub).toBeCalledTimes(1);
+      expect(fetchStub).toHaveBeenCalledTimes(1);
+      expect(updateStub).toHaveBeenCalledTimes(1);
     });
   });
 });

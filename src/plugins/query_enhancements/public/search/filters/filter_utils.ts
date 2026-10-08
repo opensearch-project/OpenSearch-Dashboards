@@ -7,25 +7,84 @@ import {
   Filter,
   filterMatchesIndex,
   formatTimePickerDate,
+  getDataSourceEngineCapabilities,
   getFilterField,
   IIndexPattern,
   isFilterDisabled,
   TimeRange,
+  TimeBounds,
 } from '../../../../data/common';
-import { formatDate } from '../../../common';
+
+/** Format of the time bounds in both the appended where clause and {@link TimeBounds}, in UTC. */
+const TIME_BOUND_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
+
+/** TIME_BOUND_FORMAT as a shape check, to tell a real bound from datemath's failure output. */
+const TIME_BOUND_PATTERN = /^\d{4,}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$/;
 
 export class FilterUtils {
   /**
    * Get time filter where clause
    * @param timeFieldName Time field name
    * @param timeRange Time range from the time picker
+   * @param engineType Engine type of the target data source (`engineType ?? type`), used to decide
+   *   whether the time literals need to be wrapped in `TIMESTAMP('...')`.
    * @returns where clause of the time range filter
+   *
+   * Legacy Elasticsearch (Open Distro) PPL does NOT coerce a string to a timestamp for
+   * `field >= '<string>'` and rejects it with a [TIMESTAMP,STRING] type error, so those engines need
+   * the explicit `TIMESTAMP('...')` wrapper. OpenSearch PPL, however, folds a bare-string comparison
+   * into a native Lucene `range` query, whereas `TIMESTAMP('...')` (a function call on the RHS) forces
+   * a per-value `opensearch_query_expression` script filter — each unique timestamp compiles a new
+   * script and quickly trips the cluster's script-compilation rate limit
+   * (`script.context.filter.max_compilations_rate`, default 75/5m). So we only wrap for engines that
+   * require it (`usesOpenDistroSqlPpl`), keeping OpenSearch on the native, script-free range query.
    */
-  public static getTimeFilterWhereClause(timeFieldName: string, timeRange: TimeRange): string {
-    const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    return `WHERE \`${timeFieldName}\` >= '${formatDate(
-      fromDate
-    )}' AND \`${timeFieldName}\` <= '${formatDate(toDate)}'`;
+  public static getTimeFilterWhereClause(
+    timeFieldName: string,
+    timeRange: TimeRange,
+    engineType?: string
+  ): string {
+    return FilterUtils.getTimeFilter(timeFieldName, timeRange, engineType).clause;
+  }
+
+  /**
+   * The where clause for the picked time range, plus the bounds it filters on, from a single parse:
+   * `now-15m` resolves to a different millisecond on every call, so parsing twice would let the two
+   * describe different windows. Bounds are absent when the range does not parse.
+   */
+  public static getTimeFilter(
+    timeFieldName: string,
+    timeRange: TimeRange,
+    engineType?: string
+  ): { clause: string; bounds?: TimeBounds } {
+    const { fromDate, toDate } = formatTimePickerDate(timeRange, TIME_BOUND_FORMAT);
+    const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
+      ? (literal: string) => `TIMESTAMP('${literal}')`
+      : (literal: string) => `'${literal}'`;
+    // Used as they come: formatTimePickerDate already emits TIME_BOUND_FORMAT in UTC. Re-parsing it
+    // through a local-time formatter was a no-op except in a DST spring-forward gap, which shifted
+    // the bound an hour.
+    const clause = `WHERE \`${timeFieldName}\` >= ${wrap(fromDate)} AND \`${timeFieldName}\` <= ${wrap(
+      toDate
+    )}`;
+    // datemath yields '' or 'Invalid date' rather than throwing. The clause keeps carrying that, so
+    // the engine still rejects it visibly, but there is nothing to prune on.
+    const valid = TIME_BOUND_PATTERN.test(fromDate) && TIME_BOUND_PATTERN.test(toDate);
+    return {
+      clause,
+      ...(valid && { bounds: { timeField: timeFieldName, start: fromDate, end: toDate } }),
+    };
+  }
+
+  /**
+   * The bounds {@link getTimeFilterWhereClause} filters on. Callers needing both must use {@link
+   * getTimeFilter}, so a relative range is resolved once for the two.
+   */
+  public static getTimeFilterBounds(
+    timeFieldName: string,
+    timeRange: TimeRange
+  ): TimeBounds | undefined {
+    return FilterUtils.getTimeFilter(timeFieldName, timeRange).bounds;
   }
 
   /**

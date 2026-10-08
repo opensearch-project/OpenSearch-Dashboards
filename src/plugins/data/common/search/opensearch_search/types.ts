@@ -33,6 +33,7 @@ import { SearchResponse } from 'elasticsearch';
 import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { OSD_FIELD_TYPES } from '../../types';
+import type { IDataFrame } from '../../data_frames';
 
 export const OPENSEARCH_SEARCH_STRATEGY = 'opensearch';
 export const OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY = 'opensearch-with-long-numerals';
@@ -54,14 +55,24 @@ export interface ISearchOptions {
    * Use this option to format the fields in the search response.
    */
   formatter?: (value: any, type: OSD_FIELD_TYPES) => any;
+  /**
+   * Called with provisional results while an async (polling) query is still running: once per
+   * poll response that is not yet `success`/`failed` and whose `body` is a data frame with
+   * `fields`. The fetch still resolves with the complete result. A source may report scan
+   * progress on `dataFrame.meta.progress` as `{ recordsMatched?: number, recordsScanned?: number }`.
+   */
+  onPartialResults?: (response: SearchResponse<any>, dataFrame: IDataFrame) => void;
+  /**
+   * Milliseconds between polls for an async (polling) query. Defaults to 5000 when omitted.
+   */
+  pollInterval?: number;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
 
-export interface IOpenSearchSearchRequest
-  extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
+export interface IOpenSearchSearchRequest extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
   indexType?: string;
   language?: string;
   dataSourceId?: string;

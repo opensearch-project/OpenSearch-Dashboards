@@ -160,18 +160,18 @@ describe('correlation_validation', () => {
     });
 
     it('should return all required fields when schemaMappings is null', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: null,
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual(['traceId', 'spanId', 'serviceName', 'timestamp']);
     });
 
     it('should handle schemaMappings as JSON string', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: JSON.stringify({
@@ -182,18 +182,18 @@ describe('correlation_validation', () => {
             timestamp: 'timestamp',
           },
         }),
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual([]);
     });
 
     it('should return all fields when JSON parsing fails', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: 'invalid-json',
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual(['traceId', 'spanId', 'serviceName', 'timestamp']);

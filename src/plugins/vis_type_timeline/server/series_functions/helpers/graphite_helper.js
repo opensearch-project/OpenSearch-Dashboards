@@ -43,7 +43,7 @@ async function isDeniedURL(configuredUrl, deniedIPs) {
   let configuredUrlObject;
   try {
     configuredUrlObject = new URL(configuredUrl);
-  } catch (err) {
+  } catch {
     return true;
   }
   const ip = await exports.getIpAddress(configuredUrlObject);

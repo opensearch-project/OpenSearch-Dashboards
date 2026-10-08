@@ -37,4 +37,25 @@ export type Query = {
   query: string | { [key: string]: any };
   language: string;
   dataset?: Dataset;
+  profile?: boolean;
+  /** @see TimeBounds */
+  time_field?: string;
+  /** @see TimeBounds */
+  start_time?: string;
+  /** @see TimeBounds */
+  end_time?: string;
 };
+
+/**
+ * Inclusive bounds of the time filter already written into the query text, reported alongside it as
+ * `time_field` / `start_time` / `end_time` so an engine can skip indices outside the window.
+ *
+ * UTC wall clock in `YYYY-MM-DD HH:mm:ss.SSS` -- the same literals the filter carries, so the two
+ * cannot describe different windows. A hint only: the filter still does the filtering.
+ */
+export interface TimeBounds {
+  /** Time field the bounds constrain; the dataset's configured field, not necessarily `@timestamp`. */
+  timeField: string;
+  start: string;
+  end: string;
+}

@@ -61,7 +61,7 @@ export interface OpenSearchError {
           {
             lang: string;
             script: string;
-          }
+          },
         ];
         type: string;
         reason: string;

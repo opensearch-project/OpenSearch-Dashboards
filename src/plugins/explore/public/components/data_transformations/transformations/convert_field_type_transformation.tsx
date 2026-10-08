@@ -4,10 +4,11 @@
  */
 
 import { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -169,11 +170,9 @@ const ConvertFieldTypeEditor = ({
   );
 };
 
-export function createConvertFieldTypeTransformation(): TransformationInstance<
-  ConvertFieldTypeConfig
-> {
+export function createConvertFieldTypeTransformation(): TransformationInstance<ConvertFieldTypeConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'convert_field_type',
     config: { rules: [] },
     hide: false,
@@ -219,15 +218,46 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<
   };
 }
 
-export const convertFieldTypeTransformationDefinition: TransformationDefinition<ConvertFieldTypeConfig> = {
-  id: 'convert_field_type',
-  type: 'transform',
-  label: i18n.translate('explore.transformations.convertFieldType.label', {
-    defaultMessage: 'Convert Field Type',
-  }),
-  description: i18n.translate('explore.transformations.convertFieldType.description', {
-    defaultMessage: 'Convert field values to a different type (string, number, boolean, date)',
-  }),
-  iconType: 'inputOutput',
-  createInstance: createConvertFieldTypeTransformation,
+export const convertFieldTypeTransformationDefinition: TransformationDefinition<ConvertFieldTypeConfig> =
+  {
+    id: 'convert_field_type',
+    type: 'transform',
+    label: i18n.translate('explore.transformations.convertFieldType.label', {
+      defaultMessage: 'Convert Field Type',
+    }),
+    description: i18n.translate('explore.transformations.convertFieldType.description', {
+      defaultMessage: 'Convert field values to a different type (string, number, boolean, date)',
+    }),
+    iconType: 'inputOutput',
+    createInstance: createConvertFieldTypeTransformation,
+  };
+
+export const convertFieldTypeConfigSchema: TransformationConfigSchema = {
+  rules: {
+    description:
+      'One or more conversion rules. Each rule casts a single column to a target type. ' +
+      'Multiple rules are applied in order.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      field: {
+        description: 'Column name to convert.',
+        kind: 'field_name',
+        required: true,
+      },
+      targetType: {
+        description: 'Target type to cast the field value to.',
+        kind: 'enum',
+        defaultValue: 'string',
+        required: true,
+        enumOptions: [
+          { value: 'string', label: 'String' },
+          { value: 'number', label: 'Number' },
+          { value: 'boolean', label: 'Boolean' },
+          { value: 'date', label: 'Date (ISO 8601)' },
+        ],
+      },
+    },
+  },
 };

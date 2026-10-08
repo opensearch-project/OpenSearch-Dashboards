@@ -5,7 +5,6 @@
 
 import fs from 'fs';
 import { defineConfig } from 'cypress';
-import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
@@ -73,59 +72,6 @@ function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): Cypress.PluginConfigOptions {
-  const { webpackOptions } = webpackPreprocessor.defaultOptions;
-
-  // Fix: Error: Webpack Compilation Error
-  // Module not found: Error: Can't resolve 'path'
-  webpackOptions!.plugins = webpackOptions!.plugins || [];
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  webpackOptions!.plugins.push(new (require('node-polyfill-webpack-plugin'))());
-
-  /**
-   * By default, cypress' internal webpack preprocessor doesn't allow imports without file extensions.
-   * This makes our life a bit hard since if any file in our testing dependency graph has an import without
-   * the .js extension our cypress build will fail.
-   *
-   * This extra rule relaxes this a bit by allowing imports without file extension
-   *     ex. import module from './module'
-   */
-  // @ts-expect-error TODO FIX ME
-  webpackOptions!.module!.rules.unshift({
-    test: /\.m?js/,
-    resolve: {
-      fullySpecified: false,
-    },
-  });
-
-  /**
-   * Add babel-loader to handle modern JavaScript syntax like optional chaining
-   */
-  // @ts-expect-error TODO FIX ME
-  webpackOptions!.module!.rules.push({
-    test: /\.(js|ts)$/,
-    exclude: /node_modules/,
-    use: {
-      loader: 'babel-loader',
-      options: {
-        presets: [
-          ['@babel/preset-env', { targets: { node: 'current' } }],
-          '@babel/preset-typescript',
-        ],
-        plugins: [
-          '@babel/plugin-proposal-optional-chaining',
-          '@babel/plugin-proposal-nullish-coalescing-operator',
-        ],
-      },
-    },
-  });
-
-  on(
-    'file:preprocessor',
-    webpackPreprocessor({
-      webpackOptions,
-    })
-  );
-
   // Delete video files for specs where all tests passed.
   // Keeps compressed videos only for failures to aid debugging.
   on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {

@@ -30,6 +30,7 @@
 
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
+import { ReactNode } from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
@@ -91,6 +92,11 @@ export interface ErrorToastOptions extends ToastOptions {
    * The id of the error.
    */
   id?: string;
+  /**
+   * Optional extra content rendered below the "See the full error" action, allowing callers to
+   * attach custom affordances to the error toast.
+   */
+  extraAction?: ReactNode;
 }
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -253,7 +259,8 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
-    const message = options.toastMessage || error.message;
+    const { extraAction, ...toastOptions } = options;
+    const message = toastOptions.toastMessage || error.message;
     return this.add({
       color: 'danger',
       iconType: 'alert',
@@ -262,12 +269,13 @@ export class ToastsApi implements IToasts {
         <ErrorToast
           openModal={this.openModal.bind(this)}
           error={error}
-          title={options.title}
+          title={toastOptions.title}
           toastMessage={message}
           i18nContext={() => this.i18n!.Context}
+          extraAction={extraAction}
         />
       ),
-      ...options,
+      ...toastOptions,
     });
   }
 

@@ -20,9 +20,9 @@ export const createDashboardServicesMock = () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const embeddable = embeddablePluginMock.createStartContract();
   const opensearchDashboardsVersion = '3.0.0';
-  const scopedHistory = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const scopedHistory = scopedHistoryMock.create() as unknown as ScopedHistory;
 
-  return ({
+  return {
     ...coreStartMock,
     data: dataStartMock,
     toastNotifications,
@@ -34,6 +34,7 @@ export const createDashboardServicesMock = () => {
     dashboardConfig: {
       getHideWriteControls: jest.fn(),
     },
+    allowDashboardSections: false,
     dashboard,
     opensearchDashboardsVersion,
     usageCollection,
@@ -47,5 +48,5 @@ export const createDashboardServicesMock = () => {
         getListingLimit: jest.fn(),
       },
     },
-  } as unknown) as jest.Mocked<DashboardServices>;
+  } as unknown as jest.Mocked<DashboardServices>;
 };

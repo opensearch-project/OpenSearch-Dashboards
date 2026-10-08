@@ -236,11 +236,7 @@ export interface HttpRequestInit {
 /** @public */
 export interface HttpFetchQuery {
   [key: string]:
-    | string
-    | number
-    | boolean
-    | undefined
-    | Array<string | number | boolean | undefined>;
+    string | number | boolean | undefined | Array<string | number | boolean | undefined>;
 }
 
 /**
@@ -306,12 +302,13 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
  * @public
  */
 export interface HttpHandler {
-  <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
-    HttpResponse<TResponseBody>
-  >;
-  <TResponseBody = any>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
-    HttpResponse<TResponseBody>
-  >;
+  <TResponseBody = any>(
+    path: string,
+    options: HttpFetchOptions & { asResponse: true }
+  ): Promise<HttpResponse<TResponseBody>>;
+  <TResponseBody = any>(
+    options: HttpFetchOptionsWithPath & { asResponse: true }
+  ): Promise<HttpResponse<TResponseBody>>;
   <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
   <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }

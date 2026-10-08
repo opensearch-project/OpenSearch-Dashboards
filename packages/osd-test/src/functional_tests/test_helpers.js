@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 import { format } from 'util';
 
 export function checkMockConsoleLogSnapshot(logMock) {

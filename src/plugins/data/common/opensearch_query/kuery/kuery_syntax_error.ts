@@ -57,7 +57,9 @@ interface DQLSyntaxErrorData extends Error {
 }
 
 interface DQLSyntaxErrorExpected {
-  description: string;
+  type: string;
+  description?: string;
+  text?: string;
 }
 
 export class DQLSyntaxError extends Error {
@@ -67,10 +69,16 @@ export class DQLSyntaxError extends Error {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
-        return grammarRuleTranslations[expected.description] || expected.description;
+        if (expected.type === 'end') return endOfInputText;
+        if (expected.type === 'literal') return `"${expected.text}"`;
+        return grammarRuleTranslations[expected.description || ''] || expected.description;
       });
 
-      const translatedExpectationText = translatedExpectations.join(', ');
+      const uniqueExpectations = translatedExpectations.filter(
+        (exp, index, arr) => exp && arr.indexOf(exp) === index
+      );
+
+      const translatedExpectationText = uniqueExpectations.join(', ');
 
       message = i18n.translate('data.common.dql.errors.syntaxError', {
         defaultMessage: 'Expected {expectedList} but {foundInput} found.',

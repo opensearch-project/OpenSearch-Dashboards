@@ -115,6 +115,19 @@ describe('listControlFactory', () => {
         'Xi an Xianyang International Airport',
       ]);
     });
+
+    test.each(['seattle', 'Seattle', 'SEATTLE', 'SeaTtle'])(
+      'should build the same case-insensitive include pattern regardless of query casing: %s',
+      async (query) => {
+        await listControl.fetch(query);
+        const searchSourceInstance =
+          await searchSourceMock.mock.results[searchSourceMock.mock.results.length - 1].value;
+        const aggsCall = searchSourceInstance.setField.mock.calls.find(
+          ([field]: [string]) => field === 'aggs'
+        );
+        expect(aggsCall[1].termsAgg.terms.include).toEqual('.*[sS][eE][aA][tT][tT][lL][eE].*');
+      }
+    );
   });
 
   describe('fetch with ancestors', () => {

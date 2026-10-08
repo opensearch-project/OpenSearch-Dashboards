@@ -65,7 +65,7 @@ describe('DiscoverChart', () => {
     getUpdateErrors$: jest.fn(),
   } as IUiSettingsClient;
 
-  const mockData = ({
+  const mockData = {
     query: {
       timefilter: {
         timefilter: {
@@ -85,9 +85,9 @@ describe('DiscoverChart', () => {
         ],
       },
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 
-  const mockServices = ({
+  const mockServices = {
     uiSettings: mockConfig,
     core: {
       application: {
@@ -98,7 +98,7 @@ describe('DiscoverChart', () => {
         },
       },
     },
-  } as unknown) as ExploreServices;
+  } as unknown as ExploreServices;
 
   const mockStore = configureStore({
     reducer: {

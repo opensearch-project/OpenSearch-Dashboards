@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DataSourceView Should render successfully when provided datasource has not been filtered out 1`] = `
 <DataSourceView

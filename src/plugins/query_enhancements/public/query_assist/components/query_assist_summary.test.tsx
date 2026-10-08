@@ -360,7 +360,7 @@ describe('query assist summary', () => {
       // ppl query returned results
       dataSetup.search.df.df$.next(dataFrame);
     });
-    expect(coreSetup.http.post).toBeCalledWith('/api/assistant/data2summary', {
+    expect(coreSetup.http.post).toHaveBeenCalledWith('/api/assistant/data2summary', {
       body: JSON.stringify({
         sample_data: `'${JSON.stringify(convertResult(dataFrame))}'`,
         sample_count: 3,

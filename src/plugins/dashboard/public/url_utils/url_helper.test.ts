@@ -37,7 +37,7 @@ describe('', () => {
       "/pep/app/dashboards#/create?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!())";
 
     expect(addEmbeddableToDashboardUrl(url, id, 'visualization')).toBe(
-      '/pep/app/dashboards?addEmbeddableId=123eb456cd&addEmbeddableType=visualization#%2Fcreate%3F_g%3D%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3Anow-15m%2Cto%3Anow%29%29%26_a%3D%28description%3A%27%27%2Cfilters%3A%21%28%29%29'
+      "/pep/app/dashboards?addEmbeddableId=123eb456cd&addEmbeddableType=visualization#/create?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!())"
     );
   });
   it('addEmbeddableToDashboardUrl when dashboard is saved', () => {
@@ -45,7 +45,7 @@ describe('', () => {
     const url =
       "/pep/app/dashboards#/view/9b780cd0-3dd3-11e8-b2b9-5d5dc1715159?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!())";
     expect(addEmbeddableToDashboardUrl(url, id, 'visualization')).toBe(
-      '/pep/app/dashboards?addEmbeddableId=123eb456cd&addEmbeddableType=visualization#%2Fview%2F9b780cd0-3dd3-11e8-b2b9-5d5dc1715159%3F_g%3D%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3Anow-15m%2Cto%3Anow%29%29%26_a%3D%28description%3A%27%27%2Cfilters%3A%21%28%29%29'
+      "/pep/app/dashboards?addEmbeddableId=123eb456cd&addEmbeddableType=visualization#/view/9b780cd0-3dd3-11e8-b2b9-5d5dc1715159?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!())"
     );
   });
 });

@@ -37,8 +37,10 @@ export interface DataSourceManagementPluginDependencies {
   dataSource: DataSourcePluginSetup;
 }
 
-export class DataSourceManagementPlugin
-  implements Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart> {
+export class DataSourceManagementPlugin implements Plugin<
+  DataSourceManagementPluginSetup,
+  DataSourceManagementPluginStart
+> {
   private readonly config$: Observable<ConfigSchema>;
   private readonly logger: Logger;
 
@@ -49,7 +51,7 @@ export class DataSourceManagementPlugin
 
       try {
         ({ groups = [] } = getPrincipalsFromRequest(request, coreStart.http.auth));
-      } catch (e) {
+      } catch {
         return toolkit.next();
       }
 
@@ -88,12 +90,10 @@ export class DataSourceManagementPlugin
 
     const dataSourceEnabled = !!dataSource;
 
-    const openSearchDataSourceManagementClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
-      'opensearch_data_source_management',
-      {
+    const openSearchDataSourceManagementClient: ILegacyClusterClient =
+      core.opensearch.legacy.createClient('opensearch_data_source_management', {
         plugins: [PPLPlugin, OpenSearchDataSourceManagementPlugin],
-      }
-    );
+      });
 
     this.logger.debug('dataSourceManagement: Setup');
     const router = core.http.createRouter();

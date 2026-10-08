@@ -107,7 +107,7 @@ export const useField = <T, FormType = FormData, I = T>(
   // ----------------------------------
   const serializeValue: FieldHook<T, I>['__serializeValue'] = useCallback(
     (internalValue: I = value) => {
-      return serializer ? serializer(internalValue) : ((internalValue as unknown) as T);
+      return serializer ? serializer(internalValue) : (internalValue as unknown as T);
     },
     [serializer, value]
   );
@@ -444,7 +444,7 @@ export const useField = <T, FormType = FormData, I = T>(
         ? event.target.checked
         : event.target.value;
 
-      setValue((newValue as unknown) as I);
+      setValue(newValue as unknown as I);
     },
     [setValue]
   );

@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import Joi from 'joi';
 import { SavedObject } from 'src/core/public';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import Joi from 'joi';
 import {
   AppLinkSchema,
   SampleDatasetDashboardPanel,
@@ -38,6 +38,8 @@ import {
   SampleDatasetSchema,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
+
+const compiledSampleDataSchema = Joi.object(sampleDataSchema);
 
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { ecommerceSpecProvider, flightsSpecProvider, logsSpecProvider } from './data_sets';
@@ -80,7 +82,7 @@ export class SampleDataRegistry {
 
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
+        const { error, value } = compiledSampleDataSchema.validate(specProvider());
 
         if (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);

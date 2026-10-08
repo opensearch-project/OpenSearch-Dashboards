@@ -34,13 +34,28 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import { Config } from '@osd/config';
 import {
   IndexMapping,
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinitions,
 } from './../../mappings';
+
+/** Which root fields saved object indices carry beyond the ones the type registry defines. */
+export interface ConditionalFieldFlags {
+  readonly permissionsEnabled: boolean;
+  readonly workspacesEnabled: boolean;
+}
+
+let conditionalFieldFlags: ConditionalFieldFlags = {
+  permissionsEnabled: false,
+  workspacesEnabled: false,
+};
+
+/** Records the conditional-field decision. Called once, during core setup. */
+export function setConditionalFieldFlags(flags: ConditionalFieldFlags) {
+  conditionalFieldFlags = flags;
+}
 
 /**
  * Creates an index mapping with the core properties required by saved object
@@ -49,14 +64,13 @@ import {
  * @param typeDefinitions - the type definitions to build mapping from.
  */
 export function buildActiveMappings(
-  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
-  opensearchDashboardsRawConfig?: Config
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ): IndexMapping {
   const mapping = defaultMapping();
 
   let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
-  // if permission control for saved objects is enabled, the permissions field should be added to the mapping
-  if (opensearchDashboardsRawConfig?.get('savedObjects.permission.enabled')) {
+
+  if (conditionalFieldFlags.permissionsEnabled) {
     const principals: SavedObjectsFieldMapping = {
       properties: {
         users: {
@@ -79,7 +93,7 @@ export function buildActiveMappings(
     });
   }
 
-  if (opensearchDashboardsRawConfig?.get('workspace.enabled')) {
+  if (conditionalFieldFlags.workspacesEnabled) {
     mergedProperties = validateAndMerge(mapping.properties, {
       workspaces: {
         type: 'keyword',

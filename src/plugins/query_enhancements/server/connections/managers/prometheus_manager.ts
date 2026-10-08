@@ -94,7 +94,7 @@ interface LabelValuesQuery {
 }
 interface MetricsQuery {
   resourceType: typeof RESOURCE_TYPES.PROMETHEUS.METRICS;
-  resourceName: undefined;
+  resourceName?: string;
 }
 interface MetricMetadataQuery {
   resourceType: typeof RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA;
@@ -216,6 +216,8 @@ class PrometheusManager extends BaseConnectionManager<
     const queryParams: Record<string, string> = {};
 
     if (resourceType === RESOURCE_TYPES.PROMETHEUS.LABELS && resourceName) {
+      queryParams['match[]'] = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.METRICS && resourceName) {
       queryParams['match[]'] = resourceName;
     } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA && resourceName) {
       queryParams.metric = resourceName;

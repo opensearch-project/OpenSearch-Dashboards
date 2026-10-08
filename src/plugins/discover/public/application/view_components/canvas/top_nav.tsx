@@ -36,9 +36,15 @@ export interface TopNavProps {
   };
   showSaveQuery: boolean;
   isEnhancementsEnabled?: boolean;
+  resultsCount?: number;
 }
 
-export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
+export const TopNav = ({
+  opts,
+  showSaveQuery,
+  isEnhancementsEnabled,
+  resultsCount,
+}: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
@@ -81,8 +87,11 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
       skipAppFiltersFromMemory: true,
+      // Discover resolves URL or default-dataset state before this component mounts. Preserve
+      // that app-owned query when `_q` has not been created yet.
+      initialQuery: data.query.queryString.getQuery(),
     };
-  }, []);
+  }, [data.query.queryString]);
 
   useConnectStorageToQueryState(services.data.query, osdUrlStateStorage, syncConfig);
 
@@ -137,9 +146,10 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     );
   }, [savedSearch?.title]);
 
-  const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
-    indexPattern,
-  ]);
+  const showDatePicker = useMemo(
+    () => (indexPattern ? indexPattern.isTimeBased() : false),
+    [indexPattern]
+  );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));
@@ -188,7 +198,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
-        queryStatus={queryStatus}
+        queryStatus={{ ...queryStatus, resultsCount }}
         showQueryBar={!!opts?.optionalRef?.datasetSelectorRef}
       />
     </>

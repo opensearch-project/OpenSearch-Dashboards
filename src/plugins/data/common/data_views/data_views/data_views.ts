@@ -455,8 +455,8 @@ export class DataViewsService {
     const parsedFields: DataViewFieldSpec[] = Array.isArray(fields)
       ? fields
       : fields
-      ? JSON.parse(fields)
-      : [];
+        ? JSON.parse(fields)
+        : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
@@ -633,11 +633,18 @@ export class DataViewsService {
    * @param override Overwrite if existing data view exists
    * @param skipFetchFields
    */
-  async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
+  async createAndSave(
+    spec: DataViewSpec,
+    override = false,
+    skipFetchFields = false,
+    reuseExisting = false
+  ) {
     const dataView = await this.create(spec, skipFetchFields);
-    await this.createSavedObject(dataView, override);
-    await this.setDefault(dataView.id as string);
-    return dataView;
+    // createSavedObject returns the existing view when reuseExisting hits a duplicate.
+    const savedDataView =
+      (await this.createSavedObject(dataView, override, reuseExisting)) ?? dataView;
+    await this.setDefault(savedDataView.id as string);
+    return savedDataView;
   }
 
   /**
@@ -646,7 +653,7 @@ export class DataViewsService {
    * @param override Overwrite if existing data view exists
    */
 
-  async createSavedObject(dataView: DataView, override = false) {
+  async createSavedObject(dataView: DataView, override = false, reuseExisting = false) {
     const dupe = await findByTitle(
       this.savedObjectsClient,
       dataView.title,
@@ -655,6 +662,10 @@ export class DataViewsService {
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
+      } else if (reuseExisting) {
+        // Idempotent path: an equivalent data view (same title + data source) already exists,
+        // so reuse it instead of erroring. Used by selector flows that re-select a dataset.
+        return this.get(dupe.id);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
@@ -680,6 +691,18 @@ export class DataViewsService {
           err.body?.message?.includes('document already exists') ||
           err.body?.message?.includes('version conflict'))
       ) {
+        // If a concurrent create won the race, honor reuseExisting by returning the now-existing
+        // view instead of throwing (mirrors the findByTitle pre-check reuse path).
+        if (reuseExisting) {
+          const existing = await findByTitle(
+            this.savedObjectsClient,
+            dataView.title,
+            dataView.dataSourceRef?.id
+          );
+          if (existing) {
+            return this.get(existing.id);
+          }
+        }
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
       throw err;
@@ -813,14 +836,46 @@ export class DataViewsService {
       displayName: dataView.displayName,
       description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
-        dataSource: {
-          id: dataView.dataSourceRef.id,
-          title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
-          type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-          version: dataView.dataSourceRef.version || '',
-        },
+        dataSource: await this.resolveDataSourceForDataset(dataView.dataSourceRef),
       }),
     };
+  }
+
+  /**
+   * Resolve the {@link Dataset} `dataSource` from an IndexPattern's `dataSourceRef`.
+   *
+   * An IndexPattern's `dataSourceRef` is the raw saved-object reference, so its `type` is the
+   * saved-object type (`'data-source'`) rather than the engine type (e.g. `'Elasticsearch'`), and
+   * it carries no version. Consumers that route by engine (SQL/PPL endpoint selection in
+   * `query_enhancements`) need the real `dataSourceEngineType`/`dataSourceVersion`, so we fetch the
+   * data-source saved object to populate them — mirroring `DataView.toDataset()`. Falls back to the
+   * reference's own values (or OpenSearch defaults) if the fetch fails.
+   */
+  private async resolveDataSourceForDataset(
+    dataSourceRef: NonNullable<IndexPattern['dataSourceRef']>
+  ): Promise<Dataset['dataSource']> {
+    try {
+      const { attributes } = await this.getDataSource(dataSourceRef.id);
+      return {
+        id: dataSourceRef.id,
+        title: attributes.title || dataSourceRef.name || dataSourceRef.id,
+        type: attributes.dataSourceEngineType || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: attributes.dataSourceVersion || '',
+      };
+    } catch (error) {
+      return {
+        id: dataSourceRef.id,
+        title: dataSourceRef.name || dataSourceRef.id,
+        // dataSourceRef.type may be the registered saved-object type ('data-source') rather than
+        // an engine type, so only use it as the engine type when it isn't that SO type; otherwise
+        // default to OpenSearch (the real engine type comes from the data-source SO on success).
+        type:
+          dataSourceRef.type && dataSourceRef.type !== 'data-source'
+            ? dataSourceRef.type
+            : DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: dataSourceRef.version || '',
+      };
+    }
   }
 }
 

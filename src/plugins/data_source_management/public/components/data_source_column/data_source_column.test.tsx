@@ -40,7 +40,7 @@ describe('DataSourceColumn', () => {
       dataSources.map((dataSource) => [dataSource.id, dataSource])
     );
     const navigateToAppMock = jest.fn();
-    spyOn(utils, 'getApplication').and.returnValue({ navigateToApp: navigateToAppMock });
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ navigateToApp: navigateToAppMock });
     const wrapper = mount(<>{dataSourceColumn.euiColumn.render('1')}</>);
     expect(wrapper.find(EuiLink).text()).toBe('DataSource 1');
     wrapper.find(EuiLink).simulate('click');

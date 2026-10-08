@@ -5,9 +5,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
 import { QueryPanelEditor } from './query_panel_editor';
+import { QueryEditorProps } from './types';
 
 jest.mock('./use_query_panel_editor', () => ({
   useQueryPanelEditor: jest.fn(),
@@ -15,6 +14,7 @@ jest.mock('./use_query_panel_editor', () => ({
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   CodeEditor: ({ value, languageId, onChange, options, ...props }: any) => (
+    // eslint-disable-next-line react/no-unknown-property
     <div data-test-subj="code-editor" value={value} languageId={languageId} {...props}>
       Code Editor Mock
     </div>
@@ -22,16 +22,14 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useSelector: (selector: any) => selector(),
-}));
-
 import { useQueryPanelEditor } from './use_query_panel_editor';
 
 const mockUseQueryPanelEditor = useQueryPanelEditor as jest.MockedFunction<
   typeof useQueryPanelEditor
 >;
+
+// The core hook is mocked, so the component ignores prop contents; a stub satisfies the type.
+const mockProps = {} as QueryEditorProps;
 
 describe('QueryPanelEditor', () => {
   const mockUseQueryPanelEditorReturn = {
@@ -50,27 +48,14 @@ describe('QueryPanelEditor', () => {
     value: 'SELECT * FROM logs',
   };
 
-  const createMockStore = () => {
-    return configureStore({
-      reducer: {
-        root: (state = {}) => state,
-      },
-    });
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue(mockUseQueryPanelEditorReturn);
   });
 
-  const renderWithProvider = (component: React.ReactElement) => {
-    const store = createMockStore();
-    return render(<Provider store={store}>{component}</Provider>);
-  };
-
   it('renders the query panel editor with correct test subject', () => {
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     expect(screen.getByTestId('exploreQueryPanelEditor')).toBeInTheDocument();
     expect(screen.getByTestId('code-editor')).toBeInTheDocument();
@@ -84,7 +69,7 @@ describe('QueryPanelEditor', () => {
       isFocused: true,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).toHaveClass('exploreQueryPanelEditor--focused');
@@ -97,7 +82,7 @@ describe('QueryPanelEditor', () => {
       isFocused: false,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).not.toHaveClass('exploreQueryPanelEditor--focused');
@@ -110,7 +95,7 @@ describe('QueryPanelEditor', () => {
       isPromptMode: true,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).toHaveClass('exploreQueryPanelEditor--promptMode');
@@ -123,7 +108,7 @@ describe('QueryPanelEditor', () => {
       isPromptMode: false,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).not.toHaveClass('exploreQueryPanelEditor--promptMode');
@@ -136,7 +121,7 @@ describe('QueryPanelEditor', () => {
       promptIsTyping: true,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).toHaveClass('exploreQueryPanelEditor--promptIsTyping');
@@ -149,7 +134,7 @@ describe('QueryPanelEditor', () => {
       promptIsTyping: false,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const editor = screen.getByTestId('exploreQueryPanelEditor');
     expect(editor).not.toHaveClass('exploreQueryPanelEditor--promptIsTyping');
@@ -163,7 +148,7 @@ describe('QueryPanelEditor', () => {
       placeholder: 'Ask a question or search using </> PPL',
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     expect(screen.getByText('Ask a question or search using </> PPL')).toBeInTheDocument();
   });
@@ -176,7 +161,7 @@ describe('QueryPanelEditor', () => {
       placeholder: 'Ask a question or search using </> PPL',
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
   });
@@ -190,7 +175,7 @@ describe('QueryPanelEditor', () => {
       placeholder: customPlaceholder,
     });
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     expect(screen.getByText(customPlaceholder)).toBeInTheDocument();
   });
@@ -199,17 +184,20 @@ describe('QueryPanelEditor', () => {
     const customProps = {
       ...mockUseQueryPanelEditorReturn,
       value: 'SELECT COUNT(*) FROM users',
-      languageId: 'ppl',
+      languageId: 'PPL',
     };
 
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue(customProps);
 
-    renderWithProvider(<QueryPanelEditor />);
+    render(<QueryPanelEditor {...mockProps} />);
 
     const codeEditor = screen.getByTestId('code-editor');
     expect(codeEditor).toHaveAttribute('value', 'SELECT COUNT(*) FROM users');
-    expect(codeEditor).toHaveAttribute('languageId', 'ppl');
+    expect(codeEditor).toHaveAttribute('languageId', 'PPL');
+    expect(screen.getByTestId('exploreQueryPanelEditor')).toHaveClass(
+      'exploreQueryPanelEditor--ppl'
+    );
   });
 
   describe('onEditorClick', () => {
@@ -221,7 +209,7 @@ describe('QueryPanelEditor', () => {
         onEditorClick: mockOnEditorClick,
       });
 
-      renderWithProvider(<QueryPanelEditor />);
+      render(<QueryPanelEditor {...mockProps} />);
 
       expect(mockOnEditorClick).not.toHaveBeenCalled();
 

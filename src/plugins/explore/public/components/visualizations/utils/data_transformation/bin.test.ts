@@ -255,6 +255,60 @@ describe('bin', () => {
   });
 
   describe('nice number rounding', () => {
+    it('should use whole-number auto buckets for integer-valued data', () => {
+      const data = [
+        { value: 1 },
+        { value: 2 },
+        { value: 3 },
+        { value: 4 },
+        { value: 5 },
+        { value: 6 },
+      ];
+
+      const result = bin({
+        bin: { count: 30 },
+        binField: 'value',
+      })(data);
+
+      expect(result).toEqual([
+        { start: 1, end: 2, value: 1 },
+        { start: 2, end: 3, value: 1 },
+        { start: 3, end: 4, value: 1 },
+        { start: 4, end: 5, value: 1 },
+        { start: 5, end: 6, value: 1 },
+        { start: 6, end: 7, value: 1 },
+      ]);
+    });
+
+    it('should preserve explicit decimal bucket sizes', () => {
+      const data = [{ value: 1 }, { value: 2 }];
+
+      const result = bin({
+        bin: { size: 0.2 },
+        binField: 'value',
+      })(data);
+
+      expect(result).toEqual([
+        { start: 1, end: 1.2, value: 1 },
+        { start: 2, end: 2.2, value: 1 },
+      ]);
+    });
+
+    it('should keep sub-unit auto buckets for decimal-valued data', () => {
+      const data = [{ value: 0.1 }, { value: 0.2 }, { value: 0.9 }];
+
+      const result = bin({
+        bin: { count: 4 },
+        binField: 'value',
+      })(data);
+
+      expect(result).toEqual([
+        { start: 0, end: 0.2, value: 1 },
+        { start: 0.2, end: 0.4, value: 1 },
+        { start: 0.8, end: 1, value: 1 },
+      ]);
+    });
+
     it('should round step to nice numbers for count-based binning', () => {
       const data = [{ value: 0 }, { value: 37 }];
 

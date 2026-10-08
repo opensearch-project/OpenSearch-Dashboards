@@ -1,0 +1,2 @@
+fix:
+- Exclude the Observability (otel) sample data set on AnalyticEngine data sources, since its nested-field trace mappings cannot be created on a pluggable-dataformat domain ([#12216](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12216))

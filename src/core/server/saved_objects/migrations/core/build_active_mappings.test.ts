@@ -29,13 +29,28 @@
  */
 
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from './../../mappings';
-import { buildActiveMappings, diffMappings } from './build_active_mappings';
-import { configMock } from '../../../config/mocks';
+import {
+  buildActiveMappings,
+  diffMappings,
+  setConditionalFieldFlags,
+} from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
+  // The flags are process-wide, so a test that records them would change every mapping built after.
+  afterEach(() =>
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: false })
+  );
+
   test('creates a strict mapping', () => {
     const mappings = buildActiveMappings({});
     expect(mappings.dynamic).toEqual('strict');
+  });
+
+  test('omits the conditional fields unless the recorded flags enable them', () => {
+    const mappings = buildActiveMappings({});
+
+    expect(mappings.properties).not.toHaveProperty('permissions');
+    expect(mappings.properties).not.toHaveProperty('workspaces');
   });
 
   test('combines all mappings and includes core mappings', () => {
@@ -94,15 +109,13 @@ describe('buildActiveMappings', () => {
   });
 
   test('permissions field is added when permission control flag is enabled', () => {
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(true);
-    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.permissions');
+    setConditionalFieldFlags({ permissionsEnabled: true, workspacesEnabled: false });
+    expect(buildActiveMappings({})).toHaveProperty('properties.permissions');
   });
 
   test('workspaces field is added when workspace feature flag is enabled', () => {
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(true);
-    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.workspaces');
+    setConditionalFieldFlags({ permissionsEnabled: false, workspacesEnabled: true });
+    expect(buildActiveMappings({})).toHaveProperty('properties.workspaces');
   });
 });
 

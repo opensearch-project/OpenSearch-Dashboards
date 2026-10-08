@@ -742,6 +742,9 @@ export function openAddPanelFlyout(options: {
     overlays: OverlayStart_2;
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
+    onPanelAdded?: (embeddable: IEmbeddable) => void | Promise<void>;
+    closeAfterAdd?: boolean;
+    showCreateNew?: boolean;
 }): Promise<void>;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

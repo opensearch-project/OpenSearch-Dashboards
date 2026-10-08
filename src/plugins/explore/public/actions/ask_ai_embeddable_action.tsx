@@ -65,8 +65,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
     }
     // Check if the embeddable's data source is AnalyticEngine
     const visEmbeddable = embeddable as DiscoverVisualizationEmbeddable;
-    const dsType = visEmbeddable.savedExplore?.searchSource?.getFields()?.query?.dataset?.dataSource
-      ?.type;
+    const dsType =
+      visEmbeddable.savedExplore?.searchSource?.getFields()?.query?.dataset?.dataSource?.type;
     if (dsType === 'AnalyticEngine') return false;
     return true;
   }
@@ -105,48 +105,58 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
       // Use JPEG format with low quality to save tokens
       visualizationBase64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
 
-      // Create context for the assistant with summary
-      const visualizationContext = {
-        title,
-        visType,
-        savedObjectId,
-        timeRange,
-        query: query?.query,
-        filters,
-        index: query?.dataset?.title,
-      };
+      // Parse visualization config for axes mapping and transformations
+      const visualizationConfig = JSON.parse(visEmbeddable.savedExplore.visualization || '{}');
+      const axesMapping = visualizationConfig.axesMapping;
+      const chartType = visualizationConfig.chartType;
+      const dataTransformations = visualizationConfig.dataTransformations;
 
-      // Add context to the context provider
-      if (this.contextProvider) {
-        const contextStore = this.contextProvider.getAssistantContextStore();
-        await contextStore.addContext({
-          id: `visualization-${savedObjectId || embeddable.id}`,
-          description: `Visualization: ${title}`,
-          value: visualizationContext,
-          label: `Visualization: ${title}`,
-          categories: ['visualization', 'dashboard', 'chat'],
-        });
-      }
+      const visualizationContextText = [
+        `[Visualization Context]`,
+        `Title: ${title}`,
+        `Chart Type: ${chartType || visType}`,
+        `Saved Object ID: ${savedObjectId}`,
+        `Data Source ID: ${query?.dataset?.dataSource?.id || 'N/A'}`,
+        `Data Source title: ${query?.dataset?.dataSource?.title || 'N/A'}`,
+        `Index: ${query?.dataset?.title || 'N/A'}`,
+        `Query: ${query?.query || 'N/A'}`,
+        `Time Range: ${timeRange ? `${timeRange.from} → ${timeRange.to}` : 'N/A'}`,
+        filters && filters.length > 0 ? `Filters: ${JSON.stringify(filters)}` : null,
+        axesMapping && Object.keys(axesMapping).length > 0
+          ? `Axes Mapping: ${JSON.stringify(axesMapping)}`
+          : null,
+        dataTransformations && dataTransformations.length > 0
+          ? `Data Transformations: ${dataTransformations
+              .map(
+                (t: any) =>
+                  `${t.definitionId}${t.hide ? ' (disabled)' : ''}: ${JSON.stringify(t.config)}`
+              )
+              .join('; ')}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       // Send visualization screenshot to chat
       if (this.core.chat) {
-        // Create a message with the visualization image following AG-UI protocol
-        const imageMessage = {
-          role: 'user' as const,
-          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          content: [
-            {
-              type: 'binary' as const,
-              mimeType: 'image/jpeg',
-              data: visualizationBase64,
-            },
-          ],
-        };
+        // Merge the image INTO the user message content (a multimodal message) rather than
+        // sending it as a separate message. A separate message is dropped on the delta-only
+        // send path and never renders in the user bubble; carrying it in the message content
+        // makes it both visible in the bubble and delivered to the agent.
+        const panelDataSourceId = query?.dataset?.dataSource?.id;
 
-        // sendMessageWithWindow will open the chat window and send the message
         await this.core.chat.sendMessageWithWindow(
-          'Give me a summary for the selected visualization',
-          [imageMessage]
+          [
+            { type: 'binary' as const, mimeType: 'image/jpeg', data: visualizationBase64 },
+            {
+              type: 'text' as const,
+              text: visualizationContextText,
+              name: 'visualization_context',
+            },
+            { type: 'text' as const, text: 'Give me a summary for the selected visualization' },
+          ],
+          [],
+          { dataSourceId: panelDataSourceId }
         );
       }
     } catch (error) {

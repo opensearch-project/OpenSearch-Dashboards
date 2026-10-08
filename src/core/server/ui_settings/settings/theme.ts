@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { themeVersionLabelMap, themeSchemaValues, themeOptions } from '@osd/ui-shared-deps';
 import type { Type } from '@osd/config-schema';
 import { UiSettingsParams } from '../../../types';
+import { UiSettingScope } from '../types';
 import { DEFAULT_THEME_VERSION } from '../ui_settings_config';
 
 export const getThemeSettings = (): Record<string, UiSettingsParams> => {
@@ -61,6 +62,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       requiresPageReload: true,
       preferBrowserSetting: true,
       category: ['appearance'],
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
       schema: schema.boolean(),
       type: 'boolean',
     },
@@ -86,6 +88,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       preferBrowserSetting: true,
       category: ['appearance'],
       schema: schema.oneOf(themeSchemaValues.map((v) => schema.literal(v)) as [Type<string>]),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
   };
 };

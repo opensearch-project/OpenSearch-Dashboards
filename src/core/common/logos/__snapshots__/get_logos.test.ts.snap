@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getLogos when branding has both light and dark logos and only light spinners returns the correct logos 1`] = `
 AnimatedMark.dark.type = "custom"

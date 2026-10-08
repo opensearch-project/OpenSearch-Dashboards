@@ -62,7 +62,7 @@ versionCheckCommands.some((cmd) => {
     console.log(cmd);
     versionCheckOutput = execSync(cmd, { encoding: 'utf8' })?.trim?.();
     return true;
-  } catch (e) {
+  } catch {
     console.log('Failed to get version using', cmd);
   }
 });

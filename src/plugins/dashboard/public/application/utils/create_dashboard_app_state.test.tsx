@@ -10,14 +10,26 @@
  */
 
 import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
-import { createDashboardGlobalAndAppState, updateStateUrl } from './create_dashboard_app_state';
+import {
+  createDashboardGlobalAndAppState,
+  hydrateDashboardAppState,
+  updateStateUrl,
+} from './create_dashboard_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { dashboardAppStateStub } from './stubs';
 import { createDashboardServicesMock } from './mocks';
 import { SavedObjectDashboard } from '../..';
+import { DashboardAppState } from '../../types';
 import { syncQueryStateWithUrl } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
+import {
+  CustomVariable,
+  QueryVariable,
+  Variable,
+  VariableSortOrder,
+  VariableType,
+} from '../../variables/types';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
@@ -46,11 +58,11 @@ const { createStateContainer, syncState } = jest.requireMock(
   '../../../../opensearch_dashboards_utils/public'
 );
 
-const osdUrlStateStorage = ({
+const osdUrlStateStorage = {
   set: jest.fn(),
   get: jest.fn(() => ({ linked: false })),
   flush: jest.fn().mockReturnValue(true),
-} as unknown) as IOsdUrlStateStorage;
+} as unknown as IOsdUrlStateStorage;
 
 describe('createDashboardGlobalAndAppState', () => {
   const mockServices = createDashboardServicesMock();
@@ -64,16 +76,13 @@ describe('createDashboardGlobalAndAppState', () => {
     getFilters: () => {},
   } as SavedObjectDashboard;
 
-  const {
-    stateContainer,
-    stopStateSync,
-    stopSyncingQueryServiceStateWithUrl,
-  } = createDashboardGlobalAndAppState({
-    stateDefaults: dashboardAppStateStub,
-    osdUrlStateStorage,
-    services: mockServices,
-    savedDashboardInstance,
-  });
+  const { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl } =
+    createDashboardGlobalAndAppState({
+      stateDefaults: dashboardAppStateStub,
+      osdUrlStateStorage,
+      services: mockServices,
+      savedDashboardInstance,
+    });
   const transitions = createStateContainer.mock.calls[0][1];
 
   test('should initialize dashboard app state', () => {
@@ -100,6 +109,47 @@ describe('createDashboardGlobalAndAppState', () => {
     expect(syncState).toHaveBeenCalled();
     expect(syncQueryStateWithUrl).toHaveBeenCalled();
     expect(mockStartStateSync).toHaveBeenCalled();
+  });
+
+  test('normalizes an unsupported saved dashboard query before initializing state', () => {
+    const stateWithPplQuery: DashboardAppState = {
+      ...dashboardAppStateStub,
+      query: {
+        language: 'PPL',
+        query: 'source = opensearch_dashboards_sample_data_logs',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'opensearch_dashboards_sample_data_logs',
+          type: 'INDEXES',
+          dataSource: {
+            id: '',
+            title: 'Default Cluster',
+            type: 'DATA_SOURCE',
+          },
+        },
+      },
+    };
+
+    createDashboardGlobalAndAppState({
+      stateDefaults: stateWithPplQuery,
+      osdUrlStateStorage,
+      services: mockServices,
+      savedDashboardInstance,
+    });
+
+    expect(createStateContainer).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      expect.any(Object)
+    );
+    expect(osdUrlStateStorage.set).toHaveBeenLastCalledWith(
+      '_a',
+      expect.objectContaining({
+        query: { language: 'kuery', query: '' },
+      }),
+      { replace: true }
+    );
   });
 
   test('should return the stateContainer and stopStateSync and stopSyncingQueryServiceStateWithUrl', () => {
@@ -152,13 +202,31 @@ describe('createDashboardGlobalAndAppState', () => {
 });
 
 describe('updateStateUrl', () => {
+  const layout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'section-1',
+        type: 'section',
+        name: 'Section 1',
+        collapsed: false,
+        members: [],
+      },
+    ],
+  };
   const dashboardAppState = {
     ...dashboardAppStateStub,
     viewMode: ViewMode.VIEW,
+    layout,
   };
 
-  test('update URL to not contain panels', () => {
-    const { panels, variables, ...statesWithoutPanelsAndVariables } = dashboardAppState;
+  test('view mode URL does not contain panels or layout', () => {
+    const {
+      panels,
+      variables,
+      layout: dashboardLayout,
+      ...stateWithoutPanelsVariablesAndLayout
+    } = dashboardAppState;
 
     const basePath = '/base';
     const history = scopedHistoryMock.create({
@@ -172,10 +240,98 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanelsAndVariables, {
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      stateWithoutPanelsVariablesAndLayout,
+      {
+        replace: true,
+      }
+    );
+    expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
+  test('edit mode URL contains panels and layout', () => {
+    const editState = {
+      ...dashboardAppState,
+      viewMode: ViewMode.EDIT,
+    };
+    const { variables, ...stateWithoutVariables } = editState;
+    const history = scopedHistoryMock.create({ pathname: '/base' });
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: editState,
+      scopedHistory: history,
       replace: true,
     });
-    expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', stateWithoutVariables, {
+      replace: true,
+    });
+  });
+
+  test('serializes only variable selection overrides in URL state', () => {
+    const stateWithVariables: DashboardAppState = {
+      ...dashboardAppState,
+      variables: [
+        {
+          id: 'custom-1',
+          name: 'OS',
+          type: VariableType.Custom,
+          current: ['ios'],
+          customOptions: [{ value: 'ios', label: 'Apple iOS' }],
+          sort: VariableSortOrder.AlphabeticalAsc,
+        },
+        {
+          id: 'query-1',
+          name: 'Airport',
+          type: VariableType.Query,
+          current: ['YOW'],
+          sourceKind: 'queryResult',
+          query: 'source = flights | dedup DestAirportID',
+          language: 'PPL',
+          dataset: {
+            id: 'dataset-1',
+            title: 'opensearch_dashboards_sample_data_flights',
+            type: 'INDEX_PATTERN',
+          },
+          valueField: 'DestAirportID',
+          labelField: 'Dest',
+        },
+      ],
+    };
+
+    const basePath = '/base';
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+    });
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: stateWithVariables,
+      scopedHistory: history,
+      replace: true,
+    });
+
+    const {
+      panels,
+      variables,
+      layout: dashboardLayout,
+      ...stateWithoutPanelsVariablesAndLayout
+    } = stateWithVariables;
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      {
+        ...stateWithoutPanelsVariablesAndLayout,
+        variables: [
+          { id: 'custom-1', current: ['ios'] },
+          { id: 'query-1', current: ['YOW'] },
+        ],
+      },
+      {
+        replace: true,
+      }
+    );
   });
 
   test('preserve Dashboards scoped history state', () => {
@@ -201,6 +357,162 @@ describe('updateStateUrl', () => {
   });
 });
 
+describe('hydrateDashboardAppState variable URL state', () => {
+  const savedVariables: [CustomVariable, QueryVariable] = [
+    {
+      id: 'custom-1',
+      name: 'OS',
+      type: VariableType.Custom,
+      current: ['win'],
+      customOptions: [
+        { value: 'win', label: 'Windows' },
+        { value: 'ios', label: 'Apple iOS' },
+      ],
+    },
+    {
+      id: 'query-1',
+      name: 'Airport',
+      type: VariableType.Query,
+      current: ['PVG'],
+      sourceKind: 'queryResult',
+      query: 'source = flights | dedup DestAirportID',
+      language: 'PPL',
+      dataset: {
+        id: 'dataset-1',
+        title: 'opensearch_dashboards_sample_data_flights',
+        type: 'INDEX_PATTERN',
+      },
+      valueField: 'DestAirportID',
+      labelField: 'Dest',
+    },
+  ];
+
+  test('applies compact URL current values to saved variable definitions', () => {
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [
+          { id: 'custom-1', current: ['ios'] },
+          { id: 'query-1', current: ['YOW'] },
+        ],
+      }
+    );
+
+    expect(result.variables).toEqual([
+      {
+        ...savedVariables[0],
+        current: ['ios'],
+      },
+      {
+        ...savedVariables[1],
+        current: ['YOW'],
+      },
+    ]);
+  });
+
+  test('keeps saved variable definitions when URL has no variable overrides', () => {
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+      }
+    );
+
+    expect(result.variables).toEqual(savedVariables);
+  });
+
+  test('applies compact URL current values to current variable definitions when provided', () => {
+    const currentVariables: Variable[] = [
+      {
+        ...savedVariables[0],
+        customOptions: [
+          { value: 'linux', label: 'Linux' },
+          { value: 'ios', label: 'Apple iOS' },
+        ],
+      },
+      savedVariables[1],
+    ];
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [{ id: 'custom-1', current: ['linux'] }],
+      },
+      undefined,
+      currentVariables
+    );
+
+    expect(result.variables).toEqual([
+      {
+        ...currentVariables[0],
+        current: ['linux'],
+      },
+      currentVariables[1],
+    ]);
+  });
+
+  test('applies current values from legacy full variables in URL state', () => {
+    const legacyUrlVariable = {
+      ...savedVariables[1],
+      current: ['YOW'],
+      query: 'source = flights | dedup Dest',
+      valueField: 'Dest',
+      labelField: undefined,
+    };
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [legacyUrlVariable],
+      }
+    );
+
+    expect(result.variables).toEqual([
+      savedVariables[0],
+      {
+        ...savedVariables[1],
+        current: ['YOW'],
+      },
+    ]);
+  });
+
+  test('ignores URL entries that do not match saved variables', () => {
+    const deletedLegacyUrlVariable: QueryVariable = {
+      ...savedVariables[1],
+      id: 'deleted-query',
+      current: ['value'],
+    };
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [{ id: 'missing', current: ['value'] }, deletedLegacyUrlVariable],
+      }
+    );
+
+    expect(result.variables).toEqual(savedVariables);
+  });
+});
+
 describe('panels preservation logic in URL sync', () => {
   /**
    * This test suite verifies the fix for the bug where panels were being reset
@@ -217,16 +529,7 @@ describe('panels preservation logic in URL sync', () => {
 
   // Helper to simulate the set function logic from createDashboardGlobalAndAppState
   const simulateSetFunction = (state: any, stateDefaults: any, currentPanels: any[]) => {
-    if (!state) {
-      return null; // Don't set anything for null state
-    }
-
-    // This simulates the logic in create_dashboard_app_state.tsx lines 105-109
-    return {
-      ...stateDefaults,
-      ...state,
-      panels: state.panels ?? currentPanels, // The bug fix
-    };
+    return state ? hydrateDashboardAppState(stateDefaults, state, currentPanels) : null;
   };
 
   test('should preserve current panels when URL state has no panels field (VIEW mode)', () => {
@@ -238,7 +541,7 @@ describe('panels preservation logic in URL sync', () => {
     const urlState = {
       viewMode: ViewMode.VIEW,
       title: 'Test Dashboard',
-      variables: [{ id: 'var1', name: 'test', current: ['value1'] }],
+      variables: [{ id: 'var1', current: ['value1'] }],
       // panels field is missing
     };
 
@@ -248,7 +551,7 @@ describe('panels preservation logic in URL sync', () => {
     expect(result?.panels).toEqual(currentPanels);
     expect(result?.panels).not.toEqual(initialPanels);
     expect(result?.viewMode).toBe(ViewMode.VIEW);
-    expect(result?.variables).toEqual(urlState.variables);
+    expect(result?.variables).toEqual(stateDefaults.variables);
   });
 
   test('should use panels from URL state when explicitly provided (EDIT mode)', () => {
@@ -287,7 +590,7 @@ describe('panels preservation logic in URL sync', () => {
     const urlStateAfterVariableChange = {
       viewMode: ViewMode.VIEW,
       title: 'Test Dashboard',
-      variables: [{ id: 'var1', name: 'region', current: ['us-west'] }],
+      variables: [{ id: 'var1', current: ['us-west'] }],
       // panels field is missing (VIEW mode excludes them from URL)
     };
 
@@ -383,5 +686,53 @@ describe('panels preservation logic in URL sync', () => {
     const result2 = simulateSetFunction(urlState2, stateDefaults, modifiedPanels);
     expect(result2?.panels).toEqual(modifiedPanels);
     expect(result2?.panels).not.toEqual(initialPanels);
+  });
+});
+
+describe('layout preservation logic in URL sync', () => {
+  const savedLayout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'saved-section',
+        type: 'section',
+        name: 'Saved section',
+        collapsed: false,
+        members: [],
+      },
+    ],
+  };
+  const currentLayout: NonNullable<DashboardAppState['layout']> = {
+    type: 'SectionLayout',
+    items: [
+      {
+        id: 'current-section',
+        type: 'section',
+        name: 'Current section',
+        collapsed: true,
+        members: [],
+      },
+    ],
+  };
+
+  test('preserves current layout when view mode URL has no layout field', () => {
+    const result = hydrateDashboardAppState(
+      { ...dashboardAppStateStub, layout: savedLayout },
+      { viewMode: ViewMode.VIEW },
+      undefined,
+      undefined,
+      currentLayout
+    );
+
+    expect(result.layout).toEqual(currentLayout);
+  });
+
+  test('uses layout from edit mode URL when explicitly provided', () => {
+    const result = hydrateDashboardAppState(
+      { ...dashboardAppStateStub, layout: savedLayout },
+      { viewMode: ViewMode.EDIT, layout: currentLayout }
+    );
+
+    expect(result.layout).toEqual(currentLayout);
   });
 });

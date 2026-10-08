@@ -41,6 +41,7 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       data: { indexPatterns: {} },
       uiSettings: { get: jest.fn() },
+      injectedMetadata: { getBranding: jest.fn().mockReturnValue({}) },
     },
   }),
   withOpenSearchDashboards: jest.fn((component: React.Component) => component),

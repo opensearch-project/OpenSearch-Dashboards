@@ -4,285 +4,354 @@
  */
 
 import {
-  parseResponseToOptions,
-  parseResponseToOptionsWithType,
-  filterOptionsByRegex,
-  executeQueryForOptions,
-  executeQueryForOptionsWithType,
+  applyRegexToVariableOptions,
+  buildVariableOptionsFromQueryResult,
+  parseResponseToQueryResult,
+  executeVariableQuery,
+  normalizePersistedVariables,
 } from './variable_query_utils';
+import { VariableType } from './types';
 
-describe('parseResponseToOptions', () => {
-  it('should return empty array for undefined response', () => {
-    expect(parseResponseToOptions(undefined)).toEqual([]);
+describe('parseResponseToQueryResult', () => {
+  it('should return empty metadata for undefined response', () => {
+    expect(parseResponseToQueryResult(undefined)).toEqual({
+      rows: [],
+      fields: [],
+      fieldTypes: {},
+    });
   });
 
-  it('should return empty array for empty hits', () => {
-    expect(parseResponseToOptions({ hits: { hits: [] } })).toEqual([]);
+  it('should return empty metadata for empty hits', () => {
+    expect(parseResponseToQueryResult({ hits: { hits: [] } })).toEqual({
+      rows: [],
+      fields: [],
+      fieldTypes: {},
+    });
   });
 
-  it('should extract string values from _source', () => {
+  it('should return rows, ordered fields, and field types from _source', () => {
     const response = {
       hits: {
         hits: [
-          { _source: { service: 'api' } },
+          { _source: { service: 'api', product_id: 6283 } },
+          { _source: { active: true, service: 'web' } },
+        ],
+      },
+    };
+
+    expect(parseResponseToQueryResult(response)).toEqual({
+      rows: [
+        { service: 'api', product_id: 6283 },
+        { active: true, service: 'web' },
+      ],
+      fields: ['service', 'product_id', 'active'],
+      fieldTypes: {
+        service: 'string',
+        product_id: 'number',
+        active: 'boolean',
+      },
+    });
+  });
+
+  it('should ignore hits without object _source', () => {
+    const response = {
+      hits: {
+        hits: [
+          { fields: { service: ['api'] } },
+          { _source: ['not-row'] },
           { _source: { service: 'web' } },
-          { _source: { service: 'worker' } },
         ],
       },
     };
-    expect(parseResponseToOptions(response)).toEqual(['api', 'web', 'worker']);
-  });
 
-  it('should deduplicate values', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { service: 'api' } },
-          { _source: { service: 'api' } },
-          { _source: { service: 'web' } },
-        ],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['api', 'web']);
-  });
-
-  it('should convert numbers to strings', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { status: 200 } }, { _source: { status: 404 } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['200', '404']);
-  });
-
-  it('should convert booleans to strings', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { active: true } }, { _source: { active: false } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['true', 'false']);
-  });
-
-  it('should flatten array values', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { tags: ['a', 'b'] } }, { _source: { tags: ['c'] } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['a', 'b', 'c']);
-  });
-
-  it('should skip null and undefined values', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { service: null } },
-          { _source: { service: 'api' } },
-          { _source: { service: undefined } },
-        ],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['api']);
-  });
-
-  it('should include empty strings as valid options', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { service: '' } }, { _source: { service: 'api' } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['', 'api']);
-  });
-
-  it('should skip object values', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { service: { nested: 'value' } } }, { _source: { service: 'api' } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual(['api']);
-  });
-
-  it('should return empty array when _source is missing', () => {
-    const response = {
-      hits: {
-        hits: [{ fields: { service: ['api'] } }],
-      },
-    };
-    expect(parseResponseToOptions(response)).toEqual([]);
-  });
-});
-
-describe('parseResponseToOptionsWithType', () => {
-  it('should return empty array and undefined type for undefined response', () => {
-    expect(parseResponseToOptionsWithType(undefined)).toEqual({
-      options: [],
-      optionType: undefined,
-    });
-  });
-
-  it('should return empty array and undefined type for empty hits', () => {
-    expect(parseResponseToOptionsWithType({ hits: { hits: [] } })).toEqual({
-      options: [],
-      optionType: undefined,
-    });
-  });
-
-  it('should detect string type from first value', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { service: 'api' } },
-          { _source: { service: 'web' } },
-          { _source: { service: 'worker' } },
-        ],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['api', 'web', 'worker'],
-      optionType: 'string',
-    });
-  });
-
-  it('should detect number type from first value', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { product_id: 6283 } },
-          { _source: { product_id: 120 } },
-          { _source: { product_id: 223 } },
-        ],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['6283', '120', '223'],
-      optionType: 'number',
-    });
-  });
-
-  it('should detect boolean type from first value', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { active: true } },
-          { _source: { active: false } },
-          { _source: { active: true } },
-        ],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['true', 'false'],
-      optionType: 'boolean',
-    });
-  });
-
-  it('should skip null values when detecting type', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { status: null } },
-          { _source: { status: 200 } },
-          { _source: { status: 404 } },
-        ],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['200', '404'],
-      optionType: 'number',
-    });
-  });
-
-  it('should handle array values and detect type from first element', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { ids: [100, 200] } }, { _source: { ids: [300] } }],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['100', '200', '300'],
-      optionType: 'number',
-    });
-  });
-
-  it('should return string type when first value is a string', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { mixed: '123' } }, { _source: { mixed: '456' } }],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['123', '456'],
-      optionType: 'string',
-    });
-  });
-
-  it('should deduplicate values while preserving type', () => {
-    const response = {
-      hits: {
-        hits: [
-          { _source: { status: 200 } },
-          { _source: { status: 200 } },
-          { _source: { status: 404 } },
-        ],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: ['200', '404'],
-      optionType: 'number',
-    });
-  });
-
-  it('should return undefined type when all values are null', () => {
-    const response = {
-      hits: {
-        hits: [{ _source: { service: null } }, { _source: { service: null } }],
-      },
-    };
-    expect(parseResponseToOptionsWithType(response)).toEqual({
-      options: [],
-      optionType: undefined,
+    expect(parseResponseToQueryResult(response)).toEqual({
+      rows: [{ service: 'web' }],
+      fields: ['service'],
+      fieldTypes: { service: 'string' },
     });
   });
 });
 
-describe('filterOptionsByRegex', () => {
-  const options = ['prod-api', 'prod-web', 'staging-api', 'dev-worker', 'PROD-DB'];
+describe('buildVariableOptionsFromQueryResult', () => {
+  it('should preserve first-field behavior when valueField is unset', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [
+          { _source: { service: 'api', name: 'API' } },
+          { _source: { service: 'web', name: 'Web' } },
+        ],
+      },
+    });
 
-  it('should return all options when regex is undefined', () => {
-    expect(filterOptionsByRegex(options, undefined)).toEqual(options);
+    expect(buildVariableOptionsFromQueryResult(result)).toEqual({
+      options: [{ value: 'api' }, { value: 'web' }],
+      optionType: 'string',
+    });
   });
 
-  it('should return all options when regex is empty string', () => {
-    expect(filterOptionsByRegex(options, '')).toEqual(options);
+  it('should use the configured value field', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [
+          { _source: { name: 'API', service_id: 'svc-1' } },
+          { _source: { name: 'Web', service_id: 'svc-2' } },
+        ],
+      },
+    });
+
+    expect(buildVariableOptionsFromQueryResult(result, { valueField: 'service_id' })).toEqual({
+      options: [{ value: 'svc-1' }, { value: 'svc-2' }],
+      optionType: 'string',
+    });
   });
 
-  it('should filter options with a plain regex string', () => {
-    expect(filterOptionsByRegex(options, '^prod')).toEqual(['prod-api', 'prod-web']);
+  it('should return empty options when configured value field is missing', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [{ _source: { service: 'api' } }],
+      },
+    });
+
+    expect(buildVariableOptionsFromQueryResult(result, { valueField: 'missing' })).toEqual({
+      options: [],
+      optionType: undefined,
+    });
   });
 
-  it('should filter options with /pattern/ syntax', () => {
-    expect(filterOptionsByRegex(options, '/^prod/')).toEqual(['prod-api', 'prod-web']);
+  it('should use configured scalar label field', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [
+          { _source: { service_id: 'svc-1', service_name: 'API service' } },
+          { _source: { service_id: 'svc-2', service_name: 'Web service' } },
+        ],
+      },
+    });
+
+    expect(
+      buildVariableOptionsFromQueryResult(result, {
+        valueField: 'service_id',
+        labelField: 'service_name',
+      })
+    ).toEqual({
+      options: [
+        { value: 'svc-1', label: 'API service' },
+        { value: 'svc-2', label: 'Web service' },
+      ],
+      optionType: 'string',
+    });
+  });
+
+  it('should omit labels when label field is unset or missing', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [{ _source: { service_id: 'svc-1', service_name: 'API service' } }],
+      },
+    });
+
+    expect(
+      buildVariableOptionsFromQueryResult(result, {
+        valueField: 'service_id',
+        labelField: 'missing',
+      })
+    ).toEqual({
+      options: [{ value: 'svc-1' }],
+      optionType: 'string',
+    });
+  });
+
+  it('should flatten array values and omit labels for those values', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [{ _source: { service_id: ['svc-1', 'svc-2'], service_name: 'Shared label' } }],
+      },
+    });
+
+    expect(
+      buildVariableOptionsFromQueryResult(result, {
+        valueField: 'service_id',
+        labelField: 'service_name',
+      })
+    ).toEqual({
+      options: [{ value: 'svc-1' }, { value: 'svc-2' }],
+      optionType: 'string',
+    });
+  });
+
+  it('should return no options for array values containing objects', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [
+          {
+            _source: {
+              products: [
+                { product_name: 'Shirt', sku: 'sku-1' },
+                { product_name: 'Shoes', sku: 'sku-2' },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    expect(buildVariableOptionsFromQueryResult(result, { valueField: 'products' })).toEqual({
+      options: [],
+      optionType: undefined,
+    });
+  });
+
+  it('should deduplicate by value and keep the first non-empty label', () => {
+    const result = parseResponseToQueryResult({
+      hits: {
+        hits: [
+          { _source: { service_id: 'svc-1', service_name: '' } },
+          { _source: { service_id: 'svc-1', service_name: 'API service' } },
+          { _source: { service_id: 'svc-1', service_name: 'Duplicate label' } },
+        ],
+      },
+    });
+
+    expect(
+      buildVariableOptionsFromQueryResult(result, {
+        valueField: 'service_id',
+        labelField: 'service_name',
+      })
+    ).toEqual({
+      options: [{ value: 'svc-1', label: 'API service' }],
+      optionType: 'string',
+    });
+  });
+});
+
+describe('applyRegexToVariableOptions', () => {
+  const options = [
+    { value: 'prod-api', label: 'Production API' },
+    { value: 'staging-api', label: 'Production-like label' },
+    { value: 'dev-worker' },
+  ];
+
+  it('should filter normalized options by value', () => {
+    expect(applyRegexToVariableOptions(options, '^prod')).toEqual([
+      { value: 'prod-api', label: 'Production API' },
+    ]);
+  });
+
+  it('should return original normalized options for invalid regex', () => {
+    expect(applyRegexToVariableOptions(options, '/[invalid')).toEqual(options);
+  });
+
+  it('should return all normalized options when regex is undefined or empty', () => {
+    expect(applyRegexToVariableOptions(options, undefined)).toEqual(options);
+    expect(applyRegexToVariableOptions(options, '')).toEqual(options);
   });
 
   it('should support /pattern/flags syntax', () => {
-    expect(filterOptionsByRegex(options, '/^prod/i')).toEqual(['prod-api', 'prod-web', 'PROD-DB']);
+    expect(applyRegexToVariableOptions(options, '/^prod/i')).toEqual([
+      { value: 'prod-api', label: 'Production API' },
+    ]);
   });
 
-  it('should return all options for invalid regex', () => {
-    expect(filterOptionsByRegex(options, '/[invalid')).toEqual(options);
+  it('should support global regex flags across all options', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }, { value: 'env=dev,label=Development' }],
+        '/env=(?<value>[^,]+),label=(?<label>.+)/g'
+      )
+    ).toEqual([
+      { value: 'prod', label: 'Production' },
+      { value: 'dev', label: 'Development' },
+    ]);
   });
 
   it('should return empty array when no options match', () => {
-    expect(filterOptionsByRegex(options, '^xyz')).toEqual([]);
+    expect(applyRegexToVariableOptions(options, '^qa')).toEqual([]);
   });
 
-  it('should work with partial match', () => {
-    expect(filterOptionsByRegex(options, 'api')).toEqual(['prod-api', 'staging-api']);
+  it('should return all options when every value matches', () => {
+    expect(applyRegexToVariableOptions(options, 'api|worker')).toEqual(options);
+  });
+
+  it('should keep positional capture groups filter-only', () => {
+    expect(applyRegexToVariableOptions(options, '^([^-]+)-')).toEqual([
+      { value: 'prod-api', label: 'Production API' },
+      { value: 'staging-api', label: 'Production-like label' },
+      { value: 'dev-worker' },
+    ]);
+  });
+
+  it('should keep multiple positional capture groups filter-only', () => {
+    const encodedOptions = [
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ];
+
+    expect(applyRegexToVariableOptions(encodedOptions, '^env=([^,]+),label=(.+)$')).toEqual([
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ]);
+  });
+
+  it('should extract value and label from named capture groups', () => {
+    const encodedOptions = [
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ];
+
+    expect(
+      applyRegexToVariableOptions(encodedOptions, '^env=(?<value>[^,]+),label=(?<label>.+)$')
+    ).toEqual([
+      { value: 'prod', label: 'Production' },
+      { value: 'dev', label: 'Development' },
+    ]);
+  });
+
+  it('should trim extracted values and labels', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env= dev ,label= Development ' }],
+        '^env=(?<value>[^,]+),label=(?<label>.+)$'
+      )
+    ).toEqual([{ value: 'dev', label: 'Development' }]);
+  });
+
+  it('should fall back when named capture groups are empty', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=,label=', label: 'Original label' }],
+        '^env=(?<value>[^,]*),label=(?<label>.*)$'
+      )
+    ).toEqual([{ value: 'env=,label=', label: 'Original label' }]);
+  });
+
+  it('should ignore unsupported named capture groups', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }],
+        '^env=(?<value>[^,]+),label=(?<text>.+)$'
+      )
+    ).toEqual([{ value: 'prod' }]);
+  });
+
+  it('should keep the original value when only a label capture is provided', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }],
+        '^env=prod,label=(?<label>.+)$'
+      )
+    ).toEqual([{ value: 'env=prod,label=Production', label: 'Production' }]);
+  });
+
+  it('should deduplicate extracted values', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,source=a' }, { value: 'env=prod,source=b', label: 'Production' }],
+        '^env=(?<value>[^,]+)'
+      )
+    ).toEqual([{ value: 'prod', label: 'Production' }]);
   });
 });
 
-describe('executeQueryForOptions', () => {
+describe('executeVariableQuery', () => {
   const mockSetField = jest.fn();
   const mockFetch = jest.fn();
   const mockCreate = jest.fn().mockResolvedValue({
@@ -307,17 +376,17 @@ describe('executeQueryForOptions', () => {
     mockFetch.mockResolvedValue({ hits: { hits: [] } });
   });
 
-  it('should return empty array for empty query', async () => {
-    const result = await executeQueryForOptions(mockDataPlugin, {
+  it('should return empty metadata for empty query', async () => {
+    const result = await executeVariableQuery(mockDataPlugin, {
       query: '',
       language: 'PPL',
     });
-    expect(result).toEqual([]);
+    expect(result).toEqual({ rows: [], fields: [], fieldTypes: {} });
     expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it('should set skipFilters on the search source', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: 'source=logs | dedup service | fields service',
       language: 'PPL',
       dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' },
@@ -332,7 +401,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should automatically add source clause for PPL queries without source', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: '| dedup service | fields service',
       language: 'PPL',
       dataset: { id: 'test', title: 'logs', type: 'INDEX_PATTERN' },
@@ -346,7 +415,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should not add source clause for describe command', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: 'describe logs',
       language: 'PPL',
       dataset: { id: 'test', title: 'logs', type: 'INDEX_PATTERN' },
@@ -360,7 +429,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should not add source clause for show command', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: 'show tables',
       language: 'PPL',
       dataset: { id: 'test', title: 'logs', type: 'INDEX_PATTERN' },
@@ -374,7 +443,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should not modify non-PPL queries', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: 'up',
       language: 'PROMQL',
       dataset: { id: 'test', title: 'prometheus', type: 'PROMETHEUS' },
@@ -388,7 +457,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should add backticks for INDEX_PATTERN dataset type', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: '| fields service',
       language: 'PPL',
       dataset: { id: 'test', title: 'my-logs', type: 'INDEX_PATTERN' },
@@ -402,7 +471,7 @@ describe('executeQueryForOptions', () => {
   });
 
   it('should not add backticks for non-INDEX dataset types', async () => {
-    await executeQueryForOptions(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: '| fields service',
       language: 'PPL',
       dataset: { id: 'test', title: 'logs', type: 'OTHER' },
@@ -417,7 +486,7 @@ describe('executeQueryForOptions', () => {
 
   it('should pass abort signal to fetch', async () => {
     const controller = new AbortController();
-    await executeQueryForOptions(
+    await executeVariableQuery(
       mockDataPlugin,
       { query: 'source=logs | fields service', language: 'PPL' },
       controller.signal
@@ -426,57 +495,26 @@ describe('executeQueryForOptions', () => {
     expect(mockFetch).toHaveBeenCalledWith({ abortSignal: controller.signal });
   });
 
-  it('should parse response and return options', async () => {
+  it('should parse response and return query result metadata', async () => {
     mockFetch.mockResolvedValue({
       hits: {
         hits: [{ _source: { service: 'api' } }, { _source: { service: 'web' } }],
       },
     });
 
-    const result = await executeQueryForOptions(mockDataPlugin, {
+    const result = await executeVariableQuery(mockDataPlugin, {
       query: 'source=logs | dedup service | fields service',
       language: 'PPL',
     });
 
-    expect(result).toEqual(['api', 'web']);
-  });
-});
-
-describe('executeQueryForOptionsWithType', () => {
-  const mockSetField = jest.fn();
-  const mockFetch = jest.fn();
-  const mockCreate = jest.fn().mockResolvedValue({
-    setField: mockSetField,
-    fetch: mockFetch,
-  });
-
-  const mockDataPlugin = {
-    search: {
-      searchSource: {
-        create: mockCreate,
-      },
-    },
-  } as any;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockCreate.mockResolvedValue({
-      setField: mockSetField,
-      fetch: mockFetch,
+    expect(result).toEqual({
+      rows: [{ service: 'api' }, { service: 'web' }],
+      fields: ['service'],
+      fieldTypes: { service: 'string' },
     });
-    mockFetch.mockResolvedValue({ hits: { hits: [] } });
   });
 
-  it('should return empty array and undefined type for empty query', async () => {
-    const result = await executeQueryForOptionsWithType(mockDataPlugin, {
-      query: '',
-      language: 'PPL',
-    });
-    expect(result).toEqual({ options: [], optionType: undefined });
-    expect(mockCreate).not.toHaveBeenCalled();
-  });
-
-  it('should return options with detected type', async () => {
+  it('should detect number type correctly', async () => {
     mockFetch.mockResolvedValue({
       hits: {
         hits: [
@@ -487,32 +525,15 @@ describe('executeQueryForOptionsWithType', () => {
       },
     });
 
-    const result = await executeQueryForOptionsWithType(mockDataPlugin, {
+    const result = await executeVariableQuery(mockDataPlugin, {
       query: 'source=logs | dedup product_id | fields product_id',
       language: 'PPL',
     });
 
     expect(result).toEqual({
-      options: ['6283', '120', '223'],
-      optionType: 'number',
-    });
-  });
-
-  it('should detect string type correctly', async () => {
-    mockFetch.mockResolvedValue({
-      hits: {
-        hits: [{ _source: { service: 'api' } }, { _source: { service: 'web' } }],
-      },
-    });
-
-    const result = await executeQueryForOptionsWithType(mockDataPlugin, {
-      query: 'source=logs | dedup service | fields service',
-      language: 'PPL',
-    });
-
-    expect(result).toEqual({
-      options: ['api', 'web'],
-      optionType: 'string',
+      rows: [{ product_id: 6283 }, { product_id: 120 }, { product_id: 223 }],
+      fields: ['product_id'],
+      fieldTypes: { product_id: 'number' },
     });
   });
 
@@ -523,19 +544,20 @@ describe('executeQueryForOptionsWithType', () => {
       },
     });
 
-    const result = await executeQueryForOptionsWithType(mockDataPlugin, {
+    const result = await executeVariableQuery(mockDataPlugin, {
       query: 'source=logs | dedup active | fields active',
       language: 'PPL',
     });
 
     expect(result).toEqual({
-      options: ['true', 'false'],
-      optionType: 'boolean',
+      rows: [{ active: true }, { active: false }],
+      fields: ['active'],
+      fieldTypes: { active: 'boolean' },
     });
   });
 
   it('should skip time filter by default', async () => {
-    await executeQueryForOptionsWithType(mockDataPlugin, {
+    await executeVariableQuery(mockDataPlugin, {
       query: 'source=logs | fields service',
       language: 'PPL',
     });
@@ -544,7 +566,7 @@ describe('executeQueryForOptionsWithType', () => {
   });
 
   it('should not skip time filter when useTimeFilter is true', async () => {
-    await executeQueryForOptionsWithType(
+    await executeVariableQuery(
       mockDataPlugin,
       {
         query: 'source=logs | fields service',
@@ -555,5 +577,102 @@ describe('executeQueryForOptionsWithType', () => {
     );
 
     expect(mockSetField).not.toHaveBeenCalledWith('skipTimeFilter', true);
+  });
+});
+
+describe('normalizePersistedVariables', () => {
+  it('should return undefined when input is not an array', () => {
+    expect(normalizePersistedVariables(undefined)).toBeUndefined();
+    expect(normalizePersistedVariables(null)).toBeUndefined();
+    expect(normalizePersistedVariables({})).toBeUndefined();
+    expect(normalizePersistedVariables('not-an-array')).toBeUndefined();
+  });
+
+  it('should return an empty array unchanged', () => {
+    expect(normalizePersistedVariables([])).toEqual([]);
+  });
+
+  it('should back-fill sourceKind=queryResult on a query variable that lacks it', () => {
+    const legacy = { id: '1', name: 'svc', type: VariableType.Query, query: 'source=logs' };
+
+    const result = normalizePersistedVariables([legacy]);
+
+    expect(result).toEqual([{ ...legacy, sourceKind: 'queryResult' }]);
+  });
+
+  it('should not mutate the input variable when back-filling', () => {
+    const legacy = { id: '1', name: 'svc', type: VariableType.Query };
+
+    const result = normalizePersistedVariables([legacy])!;
+
+    expect(result[0]).not.toBe(legacy);
+    expect(legacy).not.toHaveProperty('sourceKind');
+  });
+
+  it('should leave a query variable that already has sourceKind untouched', () => {
+    const queryResultVar = {
+      id: '1',
+      name: 'svc',
+      type: VariableType.Query,
+      sourceKind: 'queryResult',
+    };
+    const prometheusVar = {
+      id: '2',
+      name: 'label',
+      type: VariableType.Query,
+      sourceKind: 'prometheusResource',
+    };
+
+    const result = normalizePersistedVariables([queryResultVar, prometheusVar])!;
+
+    expect(result[0]).toBe(queryResultVar);
+    expect(result[1]).toBe(prometheusVar);
+  });
+
+  it('should not touch non-query variables (custom/text)', () => {
+    const custom = { id: '1', name: 'c', type: VariableType.Custom };
+    const text = { id: '2', name: 't', type: VariableType.Text };
+
+    const result = normalizePersistedVariables([custom, text])!;
+
+    expect(result[0]).toBe(custom);
+    expect(result[1]).toBe(text);
+    expect(result[0]).not.toHaveProperty('sourceKind');
+    expect(result[1]).not.toHaveProperty('sourceKind');
+  });
+
+  it('should drop non-object entries without throwing', () => {
+    const result = normalizePersistedVariables([null, undefined, 'x', 42])!;
+
+    expect(result).toEqual([]);
+  });
+
+  it('should drop dirty entries interleaved with valid variables (downstream .map(v => v.name) stays safe)', () => {
+    const legacyQuery = { id: '1', name: 'svc', type: VariableType.Query };
+    const custom = { id: '2', name: 'c', type: VariableType.Custom };
+
+    const result = normalizePersistedVariables([null, legacyQuery, 'bad', custom, 42])!;
+
+    // Only the two real variables survive, in order, with back-fill applied.
+    expect(result).toEqual([{ ...legacyQuery, sourceKind: 'queryResult' }, custom]);
+    // Guard the exact failure mode the normalizer is meant to prevent.
+    expect(() => result.map((v) => v.name)).not.toThrow();
+  });
+
+  it('should normalize a mixed array, only touching query variables missing sourceKind', () => {
+    const legacyQuery = { id: '1', name: 'svc', type: VariableType.Query };
+    const newQuery = {
+      id: '2',
+      name: 'label',
+      type: VariableType.Query,
+      sourceKind: 'prometheusResource',
+    };
+    const custom = { id: '3', name: 'c', type: VariableType.Custom };
+
+    const result = normalizePersistedVariables([legacyQuery, newQuery, custom])!;
+
+    expect(result[0]).toEqual({ ...legacyQuery, sourceKind: 'queryResult' });
+    expect(result[1]).toBe(newQuery);
+    expect(result[2]).toBe(custom);
   });
 });

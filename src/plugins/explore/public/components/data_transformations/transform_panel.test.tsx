@@ -30,7 +30,7 @@ const createMockInstance = (id: string, definitionId = 'limit'): TransformationI
 });
 
 const createMockService = (pipeline: TransformationPipeline = []) => {
-  const service = ({
+  const service = {
     pipeline$: new BehaviorSubject<TransformationPipeline>(pipeline),
     stageSchemas$: new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
       new Map()
@@ -44,7 +44,7 @@ const createMockService = (pipeline: TransformationPipeline = []) => {
     updateInstanceConfig: jest.fn(),
     toggleInstanceHide: jest.fn(),
     setPipeline: jest.fn(),
-  } as unknown) as TransformationService;
+  } as unknown as TransformationService;
   return service;
 };
 

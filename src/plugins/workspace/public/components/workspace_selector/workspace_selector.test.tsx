@@ -148,24 +148,15 @@ describe('<WorkspaceSelector />', () => {
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
     ]);
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     render(<WorkspaceSelectorCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/discover'
-    );
+    expect(assignSpy).toHaveBeenCalledWith('https://test.com/w/workspace-1/app/discover');
 
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
+    assignSpy.mockRestore();
   });
 
   it('should navigate to the workspace detail page when use case is all', () => {
@@ -173,24 +164,15 @@ describe('<WorkspaceSelector />', () => {
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-all'] },
     ]);
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     render(<WorkspaceSelectorCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_detail'
-    );
+    expect(assignSpy).toHaveBeenCalledWith('https://test.com/w/workspace-1/app/workspace_detail');
 
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
+    assignSpy.mockRestore();
   });
 
   it('should navigate to create workspace page', () => {
@@ -221,5 +203,46 @@ describe('<WorkspaceSelector />', () => {
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     expect(screen.queryByText(/manage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/create workspaces/i)).toBeNull();
+  });
+
+  describe('flush variant', () => {
+    const FlushComponent = () => (
+      <I18nProvider>
+        <WorkspaceSelector
+          coreStart={coreStartMock}
+          registeredUseCases$={registeredUseCases$}
+          flush
+        />
+      </I18nProvider>
+    );
+
+    it('renders the flat trigger showing the current workspace name', () => {
+      render(<FlushComponent />);
+      const button = screen.getByTestId('workspace-selector-button');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveClass('workspaceSelectorFlushButton');
+      expect(screen.getByTestId('workspace-selector-current-name')).toHaveTextContent(
+        'workspace 3'
+      );
+    });
+
+    it('opens the same picker popover on click', () => {
+      coreStartMock.workspaces.workspaceList$.next([
+        { id: 'workspace-1', name: 'workspace 1', features: [] },
+      ]);
+      render(<FlushComponent />);
+      fireEvent.click(screen.getByTestId('workspace-selector-button'));
+      expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    });
+
+    it('shows "Select a workspace" as a flat row when outside a workspace', () => {
+      coreStartMock.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(
+        null
+      );
+      render(<FlushComponent />);
+      const button = screen.getByTestId('workspace-selector-button');
+      expect(button).toHaveClass('workspaceSelectorFlushButton');
+      expect(screen.getByText(/select a workspace/i)).toBeInTheDocument();
+    });
   });
 });

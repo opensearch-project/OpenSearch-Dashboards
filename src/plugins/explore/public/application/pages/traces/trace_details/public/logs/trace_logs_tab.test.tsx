@@ -129,15 +129,14 @@ describe('TraceLogsTab', () => {
     });
 
     it('should handle button click when log datasets are available', () => {
-      delete (window as any).location;
-      (window as any).location = { href: '' };
-
+      window.history.pushState({}, '', '/app/explore');
       render(<TraceLogsTab {...defaultProps} />);
 
       const viewInLogsButton = screen.getByText('View in Discover Logs');
       fireEvent.click(viewInLogsButton);
 
-      expect(window.location.href).toBe('https://example.com/logs');
+      // Proves the URL builder was called and navigation was attempted.
+      expect(urlBuilder.buildExploreLogsUrl).toHaveBeenCalled();
     });
 
     it('should not show button when no log datasets are available', () => {

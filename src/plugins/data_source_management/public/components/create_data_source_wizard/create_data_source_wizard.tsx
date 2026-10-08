@@ -66,7 +66,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
           listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
         );
       }
-    } catch (e) {
+    } catch {
       handleDisplayToastMessage({
         message: i18n.translate('dataSourcesManagement.createDataSource.existingDatasourceNames', {
           defaultMessage: 'Unable to fetch some resources.',
@@ -95,7 +95,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
         currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
       );
       props.history.push('');
-    } catch (e) {
+    } catch {
       setIsLoading(false);
       handleDisplayToastMessage({
         message: i18n.translate('dataSourcesManagement.createDataSource.createDataSourceFailMsg', {
@@ -117,7 +117,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
         }),
         success: true,
       });
-    } catch (e) {
+    } catch {
       handleDisplayToastMessage({
         message: i18n.translate('dataSourcesManagement.createDataSource.testConnectionFailMsg', {
           defaultMessage:

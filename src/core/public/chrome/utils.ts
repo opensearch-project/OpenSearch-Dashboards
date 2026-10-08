@@ -15,14 +15,17 @@ export const sortBy = <T>(key: KeyOf<T>) => {
 };
 
 const groupBy = <T>(array: T[], getKey: (item: T) => string | undefined): Record<string, T[]> => {
-  return array.reduce((result, currentValue) => {
-    const groupKey = String(getKey(currentValue));
-    if (!result[groupKey]) {
-      result[groupKey] = [];
-    }
-    result[groupKey].push(currentValue);
-    return result;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (result, currentValue) => {
+      const groupKey = String(getKey(currentValue));
+      if (!result[groupKey]) {
+        result[groupKey] = [];
+      }
+      result[groupKey].push(currentValue);
+      return result;
+    },
+    {} as Record<string, T[]>
+  );
 };
 
 export const LinkItemType = {
@@ -69,7 +72,7 @@ export function fulfillRegistrationLinksToChromeNavLinks(
           ({
             ...navLinks[allExistingNavLinkId.indexOf(navLink.id)],
             ...navLink,
-          } as ChromeNavLink & ChromeRegistrationNavLink)
+          }) as ChromeNavLink & ChromeRegistrationNavLink
       ) || []
   );
 }

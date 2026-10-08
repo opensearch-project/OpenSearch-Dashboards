@@ -43,9 +43,8 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
-    false
-  );
+  const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] =
+    useState<boolean>(false);
 
   const { savedAgentTraces } = useSavedAgentTraces(savedAgentTracesId);
 

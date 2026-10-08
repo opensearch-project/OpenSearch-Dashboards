@@ -39,10 +39,18 @@ export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   controlIndex: number;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
   allowedIndexPatternIds: Set<string>;
+  hasAnalyticEngine?: boolean;
 };
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
-  const { controlIndex, indexPatternId, intl, onChange, allowedIndexPatternIds } = props;
+  const {
+    controlIndex,
+    indexPatternId,
+    intl,
+    onChange,
+    allowedIndexPatternIds,
+    hasAnalyticEngine,
+  } = props;
 
   const selectId = `indexPatternSelect-${controlIndex}`;
   // Create filter function based on allowed index pattern IDs
@@ -57,6 +65,15 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         id: 'inputControl.editor.indexPatternSelect.patternLabel',
         defaultMessage: 'Index Pattern',
       })}
+      helpText={
+        hasAnalyticEngine
+          ? intl.formatMessage({
+              id: 'inputControl.editor.indexPatternSelect.optimizedEngineNotSupported',
+              defaultMessage:
+                "Controls support only DSL queries. Index patterns backed by Optimized engine (AnalyticEngine type) data sources aren't supported and don't appear in this list.",
+            })
+          : undefined
+      }
     >
       <props.IndexPatternSelect
         placeholder={intl.formatMessage({

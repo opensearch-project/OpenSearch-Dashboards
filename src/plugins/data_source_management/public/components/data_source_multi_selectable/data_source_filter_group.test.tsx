@@ -42,10 +42,10 @@ describe('DataSourceFilterGroup', () => {
     });
 
     expect(container).toMatchSnapshot();
-    expect(mockCallBack).toBeCalledTimes(0);
+    expect(mockCallBack).toHaveBeenCalledTimes(0);
 
     fireEvent.click(screen.getByText('name1'));
-    expect(mockCallBack).toBeCalledWith([
+    expect(mockCallBack).toHaveBeenCalledWith([
       { checked: undefined, id: '1', label: 'name1', visible: true },
     ]);
   });
@@ -68,12 +68,12 @@ describe('DataSourceFilterGroup', () => {
     });
 
     fireEvent.click(screen.getByText('Deselect all'));
-    expect(mockCallBack).toBeCalledWith([
+    expect(mockCallBack).toHaveBeenCalledWith([
       { checked: undefined, id: '1', label: 'name1', visible: true },
     ]);
 
     fireEvent.click(screen.getByText('Select all'));
-    expect(mockCallBack).toBeCalledWith([
+    expect(mockCallBack).toHaveBeenCalledWith([
       { checked: 'on', id: '1', label: 'name1', visible: true },
     ]);
 
@@ -81,7 +81,7 @@ describe('DataSourceFilterGroup', () => {
     fireEvent.change(input, { target: { value: 'random input' } });
     fireEvent.keyDown(input, { key: 'enter', keyCode: 13 });
 
-    expect(mockCallBack).toBeCalledWith([
+    expect(mockCallBack).toHaveBeenCalledWith([
       { checked: 'on', id: '1', label: 'name1', visible: false },
     ]);
   });

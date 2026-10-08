@@ -54,7 +54,7 @@ const methods = [
   'deleteByQuery',
 ] as const;
 
-type MethodName = typeof methods[number];
+type MethodName = (typeof methods)[number];
 
 export interface MigrationOpenSearchClient {
   bulk: OpenSearchClient['bulk'];

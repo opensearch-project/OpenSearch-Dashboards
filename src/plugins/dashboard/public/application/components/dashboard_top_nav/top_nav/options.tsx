@@ -38,17 +38,21 @@ interface Props {
   onUseMarginsChange: (useMargins: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  useSharedCrosshair: boolean;
+  onUseSharedCrosshairChange: (useSharedCrosshair: boolean) => void;
 }
 
 interface State {
   useMargins: boolean;
   hidePanelTitles: boolean;
+  useSharedCrosshair: boolean;
 }
 
 export class OptionsMenu extends Component<Props, State> {
   state = {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
+    useSharedCrosshair: this.props.useSharedCrosshair,
   };
 
   constructor(props: Props) {
@@ -65,6 +69,12 @@ export class OptionsMenu extends Component<Props, State> {
     const isChecked = !evt.target.checked;
     this.props.onHidePanelTitlesChange(isChecked);
     this.setState({ hidePanelTitles: isChecked });
+  };
+
+  handleUseSharedCrosshairChange = (evt: any) => {
+    const isChecked = evt.target.checked;
+    this.props.onUseSharedCrosshairChange(isChecked);
+    this.setState({ useSharedCrosshair: isChecked });
   };
 
   render() {
@@ -89,6 +99,17 @@ export class OptionsMenu extends Component<Props, State> {
             checked={!this.state.hidePanelTitles}
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
+          />
+        </EuiCompressedFormRow>
+
+        <EuiCompressedFormRow>
+          <EuiCompressedSwitch
+            label={i18n.translate('dashboard.topNav.options.useSharedCrosshairSwitchLabel', {
+              defaultMessage: 'Sync crosshair across panels',
+            })}
+            checked={this.state.useSharedCrosshair}
+            onChange={this.handleUseSharedCrosshairChange}
+            data-test-subj="dashboardSharedCrosshairCheckbox"
           />
         </EuiCompressedFormRow>
       </EuiForm>

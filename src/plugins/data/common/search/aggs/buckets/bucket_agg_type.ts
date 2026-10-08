@@ -37,16 +37,19 @@ export interface IBucketAggConfig extends IAggConfig {
   type: InstanceType<typeof BucketAggType>;
 }
 
-export interface BucketAggParam<TBucketAggConfig extends IAggConfig>
-  extends AggParamType<TBucketAggConfig> {
+export interface BucketAggParam<
+  TBucketAggConfig extends IAggConfig,
+> extends AggParamType<TBucketAggConfig> {
   scriptable?: boolean;
   filterFieldTypes?: OSD_FIELD_TYPES | OSD_FIELD_TYPES[] | '*';
 }
 
 const bucketType = 'buckets';
 
-interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
-  extends AggTypeConfig<TBucketAggConfig, BucketAggParam<TBucketAggConfig>> {
+interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig> extends AggTypeConfig<
+  TBucketAggConfig,
+  BucketAggParam<TBucketAggConfig>
+> {
   getKey?: (bucket: any, key: any, agg: IAggConfig) => any;
 }
 

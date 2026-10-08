@@ -47,7 +47,7 @@ describe('RenderCustomDataGrid', () => {
     expect(spinner).toHaveClass('euiLoadingSpinner');
   });
 
-  it('renders secondaryToolbar when provided', () => {
+  it('accepts a secondaryToolbar without a separate overlay (merged into the grid toolbar)', () => {
     const secondaryToolbar = [
       <button key="test-button" data-test-subj="secondary-button">
         Secondary Button
@@ -56,13 +56,9 @@ describe('RenderCustomDataGrid', () => {
 
     render(<RenderCustomDataGrid {...defaultProps} secondaryToolbar={secondaryToolbar} />);
 
-    expect(screen.getByTestId('secondary-button')).toBeInTheDocument();
-    expect(screen.getByText('Secondary Button')).toBeInTheDocument();
-  });
-
-  it('does not render secondaryToolbar when not provided', () => {
-    render(<RenderCustomDataGrid {...defaultProps} />);
-
-    expect(screen.queryByTestId('secondary-button')).not.toBeInTheDocument();
+    // Grid still renders, and the legacy absolutely-positioned overlay is gone —
+    // secondary controls are now merged into the grid's own controls row.
+    expect(getDataGrid()).toBeInTheDocument();
+    expect(document.querySelector('.exploreCustomDataGrid__secondaryToolbar')).toBeNull();
   });
 });

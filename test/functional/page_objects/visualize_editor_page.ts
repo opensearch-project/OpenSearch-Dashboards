@@ -423,9 +423,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async selectXAxisPosition(position: string) {
-      const option = await (await testSubjects.find('categoryAxisPosition')).findByCssSelector(
-        `option[value="${position}"]`
-      );
+      const option = await (
+        await testSubjects.find('categoryAxisPosition')
+      ).findByCssSelector(`option[value="${position}"]`);
       await option.click();
     }
 

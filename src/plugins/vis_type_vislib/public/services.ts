@@ -32,14 +32,12 @@ import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 
-export const [getDataActions, setDataActions] = createGetterSetter<
-  DataPublicPluginStart['actions']
->('vislib data.actions');
+export const [getDataActions, setDataActions] =
+  createGetterSetter<DataPublicPluginStart['actions']>('vislib data.actions');
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
-  OpenSearchDashboardsLegacyStart
->('vislib opensearchDashboardsLegacy');
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] =
+  createGetterSetter<OpenSearchDashboardsLegacyStart>('vislib opensearchDashboardsLegacy');

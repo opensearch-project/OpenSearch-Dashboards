@@ -15,8 +15,8 @@ jest.mock('../../../../application/utils/state_management/actions/reset_explore_
 describe('newTopNavData', () => {
   it('should have correct properties', () => {
     expect(newTopNavData).toMatchObject({
-      tooltip: 'New',
-      ariaLabel: 'New Search',
+      tooltip: 'New search',
+      ariaLabel: 'New search',
       testId: 'discoverNewButton',
       iconType: 'plusInCircle',
       controlType: 'icon',
@@ -32,10 +32,10 @@ describe('getNewButtonRun', () => {
 
     const dispatch = jest.fn();
     const mockPush = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: { push: mockPush },
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);
@@ -53,10 +53,10 @@ describe('getNewButtonRun', () => {
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);
 
     const dispatch = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: undefined,
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);

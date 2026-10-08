@@ -45,9 +45,7 @@ export function validateCorrelationConstraints(
  * Validates that the number of log datasets does not exceed the maximum allowed
  * Business rule: Max 5 log datasets per correlation
  */
-export function validateMaxLogDatasets(
-  logDatasetIds: string[]
-): {
+export function validateMaxLogDatasets(logDatasetIds: string[]): {
   isValid: boolean;
   error?: string;
 } {
@@ -93,7 +91,7 @@ export function checkMissingFieldMappings(dataset: DataView): string[] {
         missingFields.push(field);
       }
     });
-  } catch (error) {
+  } catch {
     // If parsing fails, assume all fields are missing
     return REQUIRED_OTEL_LOGS_FIELDS;
   }

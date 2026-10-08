@@ -70,9 +70,7 @@ const FILTER_ITEM_WARNING = 'warn';
 const FILTER_ITEM_ERROR = 'error';
 
 export type FilterLabelStatus =
-  | typeof FILTER_ITEM_OK
-  | typeof FILTER_ITEM_WARNING
-  | typeof FILTER_ITEM_ERROR;
+  typeof FILTER_ITEM_OK | typeof FILTER_ITEM_WARNING | typeof FILTER_ITEM_ERROR;
 
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);

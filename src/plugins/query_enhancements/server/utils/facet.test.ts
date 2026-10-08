@@ -17,9 +17,12 @@ describe('Facet', () => {
 
   beforeEach(() => {
     mockClient = jest.fn();
-    mockLogger = ({
+    mockLogger = {
       error: jest.fn(),
-    } as unknown) as jest.Mocked<Logger>;
+      info: jest.fn(),
+      debug: jest.fn(),
+      warn: jest.fn(),
+    } as unknown as jest.Mocked<Logger>;
 
     const props: FacetProps = {
       client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
@@ -45,6 +48,8 @@ describe('Facet', () => {
       body: {
         query: {
           query: 'test query',
+          // `format` is nested under `query` by the client/route, matching production.
+          format: 'jdbc',
           dataset: {
             dataSource: {
               id: 'test-id',
@@ -55,7 +60,6 @@ describe('Facet', () => {
             },
           },
         },
-        format: 'jdbc',
         lang: 'sql',
       },
     };
@@ -75,6 +79,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -93,7 +98,90 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
+    });
+
+    it('forwards the time range so the engine can prune indices that cannot match it', async () => {
+      // Endpoint matters: the bounds only ride along on the PPL action (see TIME_BOUNDS_ENDPOINTS).
+      const pplFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.pplQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient).toHaveBeenCalledWith('enhancements.pplQuery', {
+        body: {
+          query: 'test query',
+          datasource: 'test-name',
+          sessionId: 'test-session',
+          lang: 'sql',
+          time_field: '@timestamp',
+          start_time: '2026-01-01 00:00:00.000',
+          end_time: '2026-01-01 00:30:00.000',
+        },
+        format: 'jdbc',
+      });
+    });
+
+    it('omits the time range for the SQL action, whose parser allowlists body fields', async () => {
+      // An unexpected field makes _plugins/_sql fall back to the legacy V1 engine with no error, so
+      // the hint must not ride along there either.
+      const sqlFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.sqlQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
+
+      await sqlFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
+    });
+
+    it('omits the bounds when the time field is missing, rather than letting the engine guess', async () => {
+      // The engine defaults an absent time_field to @timestamp, so sending bounds without it would
+      // prune on a field the dataset does not use -- a wrong answer, not a missed optimization.
+      const pplFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.pplQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('end_time');
+    });
+
+    it('omits the time range for an endpoint whose body parser rejects unknown fields', async () => {
+      // This body builder is shared with the async direct-query endpoint, which fails the query on
+      // an unexpected field ("Unknown field: ..."), so the hint must not ride along there.
+      const asyncFacet = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'enhancements.runDirectQuery',
+      });
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.query.time_field = '@timestamp';
+      mockRequest.body.query.start_time = '2026-01-01 00:00:00.000';
+      mockRequest.body.query.end_time = '2026-01-01 00:30:00.000';
+
+      await asyncFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][1].body).not.toHaveProperty('start_time');
     });
 
     it('should not include fetch_size when fetchSize is not provided', async () => {
@@ -118,6 +206,7 @@ describe('Facet', () => {
           query: 'test query',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -133,6 +222,7 @@ describe('Facet', () => {
           query: 'test query',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -159,6 +249,29 @@ describe('Facet', () => {
         'Facet fetch: test-endpoint: Error: Test error'
       );
     });
+
+    it('sends format=jdbc as a query param read from body.query.format', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      await facet.describeQuery(mockContext, mockRequest);
+
+      const callArgs = mockClient.mock.calls[0][1];
+      // `format` is a top-level sibling of `body` (becomes the `?format=` query-string param).
+      expect(callArgs.format).toBe('jdbc');
+    });
+
+    it('applies the jdbc shim (adds jsonData) when body.query.format is jdbc and shimResponse is on', async () => {
+      mockClient.mockResolvedValue({
+        schema: [{ name: 'col1' }],
+        datarows: [['a'], ['b']],
+      });
+
+      const result = await facetWithShimEnabled.describeQuery(mockContext, mockRequest);
+
+      expect(result.success).toBe(true);
+      // shimSchemaRow maps datarows -> jsonData keyed by schema name.
+      expect(result.data.jsonData).toEqual([{ col1: 'a' }, { col1: 'b' }]);
+    });
   });
 
   describe('requestCompression', () => {
@@ -175,6 +288,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
         headers: { 'accept-encoding': 'gzip, deflate' },
       });
     });
@@ -192,6 +306,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
       // Verify headers are not present
       const callArgs = mockClient.mock.calls[0][1];
@@ -217,6 +332,74 @@ describe('Facet', () => {
         queryId: 'test-query-id',
         headers: { 'accept-encoding': 'gzip, deflate' },
       });
+    });
+  });
+
+  describe('legacy Elasticsearch Open Distro routing', () => {
+    const buildProps = (endpoint: string, legacyEsCompatEnabled: boolean): FacetProps => ({
+      client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+      logger: mockLogger,
+      endpoint,
+      legacyEsCompatEnabled,
+    });
+
+    beforeEach(() => {
+      mockClient.mockResolvedValue({ result: 'success' });
+    });
+
+    it('routes PPL queries against Elasticsearch data sources to the Open Distro action when the flag is ON', async () => {
+      const pplFacet = new Facet(buildProps('enhancements.pplQuery', true));
+      mockRequest.body.query.dataset.dataSource.engineType = 'Elasticsearch';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.pplQueryOpenDistro');
+    });
+
+    it('routes SQL queries against Elasticsearch data sources to the Open Distro action when the flag is ON', async () => {
+      const sqlFacet = new Facet(buildProps('enhancements.sqlQuery', true));
+      mockRequest.body.query.dataset.dataSource.engineType = 'Elasticsearch';
+
+      await sqlFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.sqlQueryOpenDistro');
+    });
+
+    it('does NOT remap Elasticsearch data sources when the flag is OFF', async () => {
+      const pplFacet = new Facet(buildProps('enhancements.pplQuery', false));
+      mockRequest.body.query.dataset.dataSource.engineType = 'Elasticsearch';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.pplQuery');
+    });
+
+    it('does NOT remap non-Elasticsearch (OpenSearch) data sources when the flag is ON', async () => {
+      const pplFacet = new Facet(buildProps('enhancements.pplQuery', true));
+      mockRequest.body.query.dataset.dataSource.engineType = 'OpenSearch';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.pplQuery');
+    });
+
+    it('fails open and keeps the original endpoint when dataSource is undefined and the flag is ON', async () => {
+      const pplFacet = new Facet(buildProps('enhancements.pplQuery', true));
+      mockRequest.body.query.dataset.dataSource = undefined;
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.pplQuery');
+    });
+
+    it('falls back to dataSource.type when engineType is absent and remaps Elasticsearch sources when the flag is ON', async () => {
+      const pplFacet = new Facet(buildProps('enhancements.pplQuery', true));
+      delete mockRequest.body.query.dataset.dataSource.engineType;
+      mockRequest.body.query.dataset.dataSource.type = 'Elasticsearch';
+
+      await pplFacet.describeQuery(mockContext, mockRequest);
+
+      expect(mockClient.mock.calls[0][0]).toBe('enhancements.pplQueryOpenDistro');
     });
   });
 });

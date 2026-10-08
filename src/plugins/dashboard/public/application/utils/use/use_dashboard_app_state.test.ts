@@ -42,14 +42,14 @@ describe('useDashboardAppAndGlobalState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedDashboardInstance = ({
+  const savedDashboardInstance = {
     ...dashboardAppStateStub,
     ...{
       getQuery: () => dashboardAppStateStub.query,
       getFilters: () => dashboardAppStateStub.filters,
       optionsJSON: JSON.stringify(dashboardAppStateStub.options),
     },
-  } as unknown) as SavedObjectDashboard;
+  } as unknown as SavedObjectDashboard;
   const dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
 
   let mockServices: jest.Mocked<DashboardServices>;
@@ -93,9 +93,20 @@ describe('useDashboardAppAndGlobalState', () => {
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       dashboardAppStateStub.filters
     );
+    expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(
+      dashboardAppStateStub.query,
+      false,
+      false
+    );
     expect(connectToQueryState).toHaveBeenCalledWith(mockServices.data.query, expect.any(Object), {
       filters: 'appState',
       query: true,
+    });
+    const queryStateAdapter = (connectToQueryState as jest.Mock).mock.calls[0][1];
+    queryStateAdapter.set({ filters: [], query: undefined });
+    expect(stateContainer.transitions.set).toHaveBeenCalledWith('query', {
+      language: 'kuery',
+      query: '',
     });
     expect(result.current).toEqual({
       appState: stateContainer,
@@ -116,8 +127,8 @@ describe('useDashboardAppAndGlobalState', () => {
 
     unmount();
 
-    expect(stopStateSyncMock).toBeCalledTimes(1);
-    expect(stopSyncingAppFiltersMock).toBeCalledTimes(1);
-    expect(stopSyncingQueryServiceStateWithUrlMock).toBeCalledTimes(1);
+    expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingQueryServiceStateWithUrlMock).toHaveBeenCalledTimes(1);
   });
 });

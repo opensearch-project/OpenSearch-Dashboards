@@ -166,6 +166,8 @@ const getLanguageSpecificConfig = (language, config) => {
 export const createOtherQueryUsingAutocomplete = (config) => {
   const langConfig = getLanguageSpecificConfig(config.language, config);
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(langConfig.editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -270,6 +272,28 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
 };
 
 /**
+ * Selects the first field-value suggestion the editor offers and stores its text
+ * as the `@selectedFieldValue` alias for later assertions. Field-value suggestions
+ * are seeded from the most recent documents, so the exact set is not stable; select
+ * whatever value is present instead of a hard-coded one.
+ * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
+ */
+export const selectFirstValueSuggestion = (useKeyboard = false) => {
+  cy.get('.suggest-widget.visible', { timeout: 15000 })
+    .find('.monaco-list-row:has(.codicon-symbol-value) .monaco-icon-label-container .label-name', {
+      timeout: 15000,
+    })
+    .first()
+    .invoke('text')
+    .then((text) => {
+      const value = text.trim();
+      expect(value, 'a field value suggestion should be available').to.not.be.empty;
+      cy.wrap(value).as('selectedFieldValue');
+      selectSuggestion(value, useKeyboard);
+    });
+};
+
+/**
  * Shows suggestion widget and waits for hint to appear with retry logic
  * @param {number} maxAttempts - Maximum number of retry attempts
  * @returns {Cypress.Chainable}
@@ -347,6 +371,8 @@ export const hideWidgets = (maxAttempts = 3) => {
 export const setQueryInMonacoEditor = (query) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -384,7 +410,7 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Development', useKeyboard);
+        selectFirstValueSuggestion(useKeyboard);
       }
     });
 };
@@ -395,6 +421,8 @@ export const createQuery = (config, useKeyboard = false) => {
  */
 export const createInvalidQuery = (config) => {
   const editorType = 'exploreQueryPanelEditor';
+
+  cy.explore.showQueryEditor();
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
@@ -451,6 +479,8 @@ export const validateImplicitPPLQuery = (config) => {
 export const validateDocumentationPanelIsOpen = (config) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -484,6 +514,7 @@ export const validateDocumentationPanelIsOpen = (config) => {
  */
 export const verifyMonacoEditorContent = (queryString) => {
   if (!queryString) return;
+  cy.explore.showQueryEditor();
   // Check the editor content against our pattern - try multiple approaches
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')

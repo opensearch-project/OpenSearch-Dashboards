@@ -56,8 +56,7 @@ export type OpenSearchClientConfig = Pick<
   | 'requestCompression'
 > & {
   memoryCircuitBreaker?:
-    | OpenSearchConfig['memoryCircuitBreaker']
-    | ClientOptions['memoryCircuitBreaker'];
+    OpenSearchConfig['memoryCircuitBreaker'] | ClientOptions['memoryCircuitBreaker'];
   pingTimeout?: OpenSearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: OpenSearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<OpenSearchConfig['ssl']>;

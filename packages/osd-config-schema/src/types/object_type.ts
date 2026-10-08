@@ -56,10 +56,9 @@ type RequiredProperties<Base extends Props> = Pick<
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
 export type ObjectResultType<P extends Props> = Readonly<
-  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
-    {
-      [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
-    }
+  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } & {
+    [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
+  }
 >;
 
 type DefinedProperties<Base extends NullableProps> = Pick<
@@ -69,10 +68,9 @@ type DefinedProperties<Base extends NullableProps> = Pick<
   }[keyof Base]
 >;
 
-type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> &
-  {
-    [K in keyof DefinedProperties<NP>]: NP[K];
-  };
+type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> & {
+  [K in keyof DefinedProperties<NP>]: NP[K];
+};
 
 type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
   ExtendedProps<P, NP>
@@ -111,8 +109,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(unknowns === 'allow')
-      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+      .options({
+        allowUnknown: unknowns === 'allow',
+        stripUnknown: unknowns === 'ignore',
+      });
 
     super(schema, typeOptions);
     this.props = props;
@@ -186,15 +186,18 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const extendedProps = Object.entries({
       ...this.props,
       ...newProps,
-    }).reduce((memo, [key, value]) => {
-      if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value,
-        };
-      }
-      return memo;
-    }, {} as ExtendedProps<P, NP>);
+    }).reduce(
+      (memo, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          return {
+            ...memo,
+            [key]: value,
+          };
+        }
+        return memo;
+      },
+      {} as ExtendedProps<P, NP>
+    );
 
     const extendedOptions = {
       ...this.options,
@@ -211,10 +214,8 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
         return `could not parse object value from json input`;
-      case 'object.allowUnknown':
+      case 'object.unknown':
         return `definition for this key is missing`;
-      case 'object.child':
-        return reason[0];
     }
   }
 

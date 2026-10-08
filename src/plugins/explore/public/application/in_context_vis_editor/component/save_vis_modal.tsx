@@ -23,6 +23,7 @@ import { DebouncedFieldText } from '../../../components/visualizations/style_pan
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 
 import { SavedExplore } from '../../../saved_explore';
+import { ComplexQueryWarningCallout } from '../../../helpers/complex_query_warning';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -35,12 +36,16 @@ interface SaveVisModalProps {
   onConfirm: (props: OnSaveProps) => Promise<void>;
   onCancel: () => void;
   savedExploreId: string | undefined;
+  initialTitle?: string;
+  showComplexQueryWarning?: boolean;
 }
 
 export const SaveVisModal: React.FC<SaveVisModalProps> = ({
   savedExploreId,
+  initialTitle,
   onConfirm,
   onCancel,
+  showComplexQueryWarning,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -48,7 +53,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
 
   const { savedExplore } = useSavedExplore(savedExploreId);
 
-  const [title, setTitle] = useState<string>(savedExplore?.title ?? '');
+  const [title, setTitle] = useState<string>(initialTitle ?? '');
 
   const enableButton = title !== '';
 
@@ -119,6 +124,12 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
           alignItems="flexStart"
           gutterSize="s"
         >
+          {showComplexQueryWarning && (
+            <EuiFlexItem style={{ width: '100%' }}>
+              <ComplexQueryWarningCallout />
+            </EuiFlexItem>
+          )}
+
           {renderDuplicateTitleCallout()}
 
           <EuiFlexItem grow={true} style={{ width: '100%' }}>
@@ -128,7 +139,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
               })}
             >
               <DebouncedFieldText
-                value={savedExplore?.title ?? ''}
+                value={title}
                 placeholder="Enter save search name"
                 onChange={(text: string) => {
                   setIsTitleDuplicate(false);

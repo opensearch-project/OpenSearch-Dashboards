@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`App should render in embedded mode without Router and page wrappers 1`] = `
 <div>
@@ -134,7 +134,7 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
                       value=""
                     />
                     <div
-                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                     />
                   </div>
                 </div>
@@ -514,11 +514,12 @@ exports[`App should render with MDS 1`] = `
                     data-test-subj="comboBoxInput"
                     tabindex="-1"
                   >
-                    <p
-                      class="euiComboBoxPlaceholder"
+                    <span
+                      class="euiComboBoxPill euiComboBoxPill--plainText"
+                      id=""
                     >
-                      Select a data source
-                    </p>
+                      Local cluster
+                    </span>
                     <div
                       class="euiComboBox__input"
                       style="font-size: 14px; display: inline-block;"
@@ -531,13 +532,24 @@ exports[`App should render with MDS 1`] = `
                         value=""
                       />
                       <div
-                        style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                        style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                       />
                     </div>
                   </div>
                   <div
                     class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
+                    <button
+                      aria-label="Clear input"
+                      class="euiFormControlLayoutClearButton"
+                      data-test-subj="comboBoxClearButton"
+                      type="button"
+                    >
+                      <span
+                        class="euiFormControlLayoutClearButton__icon"
+                        data-euiicon-type="cross"
+                      />
+                    </button>
                     <button
                       aria-label="Open list of options"
                       class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -604,7 +616,7 @@ exports[`App should render with MDS 1`] = `
                             value=""
                           />
                           <div
-                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                           />
                         </div>
                       </div>
@@ -1006,7 +1018,7 @@ exports[`App should render with Router when embedded is false 1`] = `
                             value=""
                           />
                           <div
-                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                           />
                         </div>
                       </div>
@@ -1408,7 +1420,7 @@ exports[`App should render without MDS 1`] = `
                             value=""
                           />
                           <div
-                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                           />
                         </div>
                       </div>

@@ -5,21 +5,34 @@
 
 import React from 'react';
 
+/**
+ * Agent monitoring "Traces" nav icon: the OUI `visTable` glyph with a small AI
+ * sparkle badge overlaid in the top-right corner. Drawn entirely in
+ * `currentColor` so it inherits the nav item text color (incl. active/hover).
+ *
+ * The badge's halo circle uses the `agentBadgeHalo` class, which is styled in
+ * core's `collapsible_nav_group_enabled.scss` (theme-aware fill). This icon is
+ * intended for the side nav only; if it is ever rendered OUTSIDE core chrome
+ * (breadcrumb, tab, page header), that class won't be in scope and the halo
+ * will be transparent — give it an explicit fill there.
+ */
 export const AgentTracesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
     fill="currentColor"
     {...props}
   >
-    <g transform="rotate(-90 16 16)">
-      <path d="M16 0c5.5228475 0 10 4.4771525 10 10s-4.4771525 10-10 10S6 15.5228475 6 10 10.4771525 0 16 0zm0 2c-4.418278 0-8 3.581722-8 8s3.581722 8 8 8 8-3.581722 8-8-3.581722-8-8-8z" />
-      <path d="M8.40092 19.2878c.49076.402 1.01397.7659 1.56509 1.0871L7.26023 23.682C7.72604 24.3359 8 25.136 8 26c0 2.2092-1.79086 4-4 4s-4-1.7908-4-4c0-2.2091 1.79086-4 4-4 .65662 0 1.27629.1582 1.82296.4386l2.57796-3.1508zm15.19818 0l2.5779 3.1508C26.7237 22.1582 27.3434 22 28 22c2.2091 0 4 1.7909 4 4 0 2.2092-1.7909 4-4 4-2.2091 0-4-1.7908-4-4 0-.864.274-1.6641.7398-2.318l-2.7058-3.3071c.5511-.3212 1.0743-.6851 1.5651-1.0871zM4 24c-1.10457 0-2 .8954-2 2s.89543 2 2 2 2-.8954 2-2-.89543-2-2-2zm24 0c-1.1046 0-2 .8954-2 2s.8954 2 2 2 2-.8954 2-2-.8954-2-2-2z" />
-      <g transform="translate(16, 10)">
-        <path d="M0,-6.5 C0,-3 -3,0 -6.5,0 C-3,0 0,3 0,6.5 C0,3 3,0 6.5,0 C3,0 0,-3 0,-6.5Z" />
-      </g>
+    {/* Base: OUI visTable */}
+    <path d="M16 3v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1Zm-1 0V2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v1h14Zm0 1H1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4ZM4.5 6a.5.5 0 0 1 0 1H2.496a.5.5 0 1 1 0-1H4.5Zm9 0a.5.5 0 1 1 0 1h-6a.5.5 0 0 1 0-1h6Zm-9 3a.5.5 0 0 1 0 1H2.496a.5.5 0 1 1 0-1H4.5Zm9 0a.5.5 0 1 1 0 1h-6a.5.5 0 0 1 0-1h6Zm-9 3a.5.5 0 1 1 0 1H2.496a.5.5 0 1 1 0-1H4.5Zm9 0a.5.5 0 1 1 0 1h-6a.5.5 0 1 1 0-1h6Z" />
+    {/* AI sparkle badge (top-right). The halo is punched out in the sidebar
+        background color so it lifts off the table lines in both light and dark
+        themes (a hardcoded white halo looked wrong on the dark panel). */}
+    <circle cx="12.2" cy="3.8" r="4" className="agentBadgeHalo" />
+    <g transform="translate(12.2 3.8)">
+      <path d="M0,-3.4 C0,-1.6 -1.6,0 -3.4,0 C-1.6,0 0,1.6 0,3.4 C0,1.6 1.6,0 3.4,0 C1.6,0 0,-1.6 0,-3.4Z" />
     </g>
   </svg>
 );

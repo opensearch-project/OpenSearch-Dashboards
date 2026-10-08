@@ -8,7 +8,6 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { GaugeChartStyle } from './gauge_vis_config';
-import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -78,11 +77,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               {styleOptions.showTitle && (
                 <EuiFormRow>
                   <DebouncedFieldText
-                    value={
-                      styleOptions.title || axisColumnMappings[AxisRole.Value]?.[0]?.name || ''
-                    }
+                    value={styleOptions.title}
                     placeholder={i18n.translate('explore.vis.gauge.title', {
-                      defaultMessage: 'Title',
+                      defaultMessage: 'Auto',
                     })}
                     onChange={(text) => updateStyleOption('title', text)}
                   />
@@ -126,6 +123,10 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               onMaxChange={(value) => updateStyleOption('max', value)}
               unit={styleOptions.unitId}
               onUnitChange={(value) => updateStyleOption('unitId', value)}
+              decimals={styleOptions.decimals}
+              onDecimalsChange={(value) => updateStyleOption('decimals', value)}
+              unitSuffix={styleOptions.unitSuffix}
+              onUnitSuffixChange={(value) => updateStyleOption('unitSuffix', value)}
             />
           </EuiFlexItem>
         </>

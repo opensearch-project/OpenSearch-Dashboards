@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Header handles visibility and lock changes 1`] = `
 <Header
@@ -3001,13 +3001,7 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
 >
-  <HeaderBanner
-    style={
-      Object {
-        "paddingRight": 648,
-      }
-    }
-  />
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -8157,7 +8151,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   Object {
                                     "aria-label": "dashboard, type: opensearchDashboards",
                                     "data-test-subj": "collapsibleNavAppLink--recent",
-                                    "href": "http://localhost/",
+                                    "href": "http://localhost:5601/",
                                     "label": "dashboard",
                                     "onClick": [Function],
                                     "title": "dashboard, type: opensearchDashboards",
@@ -8180,7 +8174,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   aria-label="dashboard, type: opensearchDashboards"
                                   color="subdued"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/"
+                                  href="http://localhost:5601/"
                                   key="title-0"
                                   label="dashboard"
                                   onClick={[Function]}
@@ -8196,7 +8190,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                       aria-label="dashboard, type: opensearchDashboards"
                                       className="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink--recent"
-                                      href="http://localhost/"
+                                      href="http://localhost:5601/"
                                       onClick={[Function]}
                                       rel="noreferrer"
                                       title="dashboard, type: opensearchDashboards"
@@ -10405,13 +10399,7 @@ exports[`Header renders application header without title 1`] = `
     }
   }
 >
-  <HeaderBanner
-    style={
-      Object {
-        "paddingRight": 648,
-      }
-    }
-  />
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -14851,13 +14839,7 @@ exports[`Header renders condensed header 1`] = `
     }
   }
 >
-  <HeaderBanner
-    style={
-      Object {
-        "paddingRight": 648,
-      }
-    }
-  />
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -20534,13 +20516,7 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
 >
-  <HeaderBanner
-    style={
-      Object {
-        "paddingRight": 648,
-      }
-    }
-  />
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -25184,13 +25160,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
 >
-  <HeaderBanner
-    style={
-      Object {
-        "paddingRight": 648,
-      }
-    }
-  />
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"

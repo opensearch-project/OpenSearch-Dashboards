@@ -28,6 +28,7 @@
  * under the License.
  */
 
+/* globals global */
 import { Writable } from 'stream';
 
 import { runTestsCli } from './cli';

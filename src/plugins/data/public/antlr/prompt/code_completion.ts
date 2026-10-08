@@ -111,7 +111,7 @@ export const getSuggestions = async ({
       finalSuggestions.push(...commandSuggestions);
     }
     return finalSuggestions;
-  } catch (e) {
+  } catch {
     return [];
   }
 };

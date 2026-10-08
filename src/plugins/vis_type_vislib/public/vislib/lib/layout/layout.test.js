@@ -136,21 +136,21 @@ dateHistogramArray.forEach(function (data, i) {
             type: undefined,
             class: 'chart',
           });
-        }).toThrowError();
+        }).toThrow();
 
         expect(function () {
           testLayout.layout({
             type: 'div',
             class: 'chart',
           });
-        }).toThrowError();
+        }).toThrow();
 
         expect(function () {
           testLayout.layout({
             parent: 'histogram',
             type: 'div',
           });
-        }).toThrowError();
+        }).toThrow();
 
         expect(function () {
           testLayout.layout({
@@ -160,7 +160,7 @@ dateHistogramArray.forEach(function (data, i) {
             },
             class: 'chart',
           });
-        }).toThrowError();
+        }).toThrow();
       });
     });
 

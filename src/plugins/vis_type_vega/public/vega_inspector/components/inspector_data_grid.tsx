@@ -47,9 +47,10 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
   );
 
   // @ts-expect-error TS7006 TODO(ts-error): fixme
-  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
-    setPagination,
-  ]);
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    [setPagination]
+  );
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);

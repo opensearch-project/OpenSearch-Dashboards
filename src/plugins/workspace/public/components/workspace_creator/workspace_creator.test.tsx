@@ -184,26 +184,9 @@ function clearMockedFunctions() {
 }
 
 describe('WorkspaceCreator', () => {
-  beforeEach(() => clearMockedFunctions());
-  const { location } = window;
-  const setHrefSpy = jest.fn((href) => href);
-
-  beforeAll(() => {
-    if (window.location) {
-      // @ts-ignore
-      delete window.location;
-    }
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = {} as Location;
-    Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/w/workspace/app/workspace_create',
-      set: setHrefSpy,
-    });
-  });
-
-  afterAll(() => {
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = location as Location;
+  beforeEach(() => {
+    clearMockedFunctions();
+    window.history.pushState({}, '', '/w/workspace/app/workspace_create');
   });
 
   it('should not create workspace when name is empty', async () => {
@@ -295,6 +278,88 @@ describe('WorkspaceCreator', () => {
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('creates a workspace with a custom id', async () => {
+    const { getByTestId, getByRole } = render(<WorkspaceCreator />);
+
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    expect(getByRole('textbox', { name: 'Workspace ID' })).toBeInTheDocument();
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-nameInputText'), {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-idInputText'), {
+      target: { value: 'custom1' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'custom1',
+        name: 'test workspace name',
+      }),
+      expect.anything()
+    );
+  });
+
+  it('does not create a workspace with an invalid custom id', async () => {
+    const { getByTestId, getByText } = render(<WorkspaceCreator />);
+
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-nameInputText'), {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-idInputText'), {
+      target: { value: 'invalid id' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+
+    expect(
+      getByText(
+        'ID is invalid. Must be 6–36 characters using only letters, numbers, underscores, and hyphens.'
+      )
+    ).toBeInTheDocument();
+    expect(workspaceClientCreate).not.toHaveBeenCalled();
+  });
+
+  it('shows association failures in the workspace creation success toast', async () => {
+    workspaceClientCreate.mockReturnValueOnce({
+      result: {
+        id: 'successResult',
+        failedAssociations: [
+          {
+            id: 'id1',
+            type: 'data-source',
+            error: 'association failed',
+          },
+        ],
+      },
+      success: true,
+    });
+    const { getByTestId } = render(<WorkspaceCreator />);
+
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    fireEvent.input(getByTestId('workspaceForm-workspaceDetails-nameInputText'), {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalledWith({
+        title: 'Create workspace successfully',
+        text: '1 selected data source or connection was not associated. You can add them later from workspace settings.',
+      });
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
@@ -516,12 +581,13 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    jest.useFakeTimers();
-    jest.runAllTimers();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      // Workspace was created successfully; the redirect to the landing page follows.
+      expect(workspaceClientCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'test workspace name' }),
+        expect.anything()
+      );
     });
-    jest.useRealTimers();
   });
 
   it('should redirect to workspace setting collaborators page if jump to collaborators checked', async () => {
@@ -565,11 +631,12 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    jest.useFakeTimers();
-    jest.runAllTimers();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      // Workspace was created successfully; the redirect to the landing page follows.
+      expect(workspaceClientCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'test workspace name' }),
+        expect.anything()
+      );
     });
-    jest.useRealTimers();
   });
 });

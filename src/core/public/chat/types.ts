@@ -10,6 +10,7 @@ import type { Event } from './events';
 export interface TextInputContent {
   type: 'text';
   text: string;
+  name?: string;
 }
 
 interface BinaryInputContent {
@@ -19,9 +20,10 @@ interface BinaryInputContent {
   url?: string;
   data?: string;
   filename?: string;
+  name?: string;
 }
 
-type InputContent = TextInputContent | BinaryInputContent;
+export type InputContent = TextInputContent | BinaryInputContent;
 
 /**
  * Function call interface
@@ -113,11 +115,7 @@ export interface ToolMessage {
  * Discriminated union of all message types
  */
 export type Message =
-  | DeveloperMessage
-  | SystemMessage
-  | AssistantMessage
-  | UserMessage
-  | ToolMessage;
+  DeveloperMessage | SystemMessage | AssistantMessage | UserMessage | ToolMessage;
 
 /**
  * Valid message role types
@@ -171,10 +169,12 @@ export interface ChatServiceInterface {
     messages: Message[]
   ): Promise<{ observable: any; userMessage: UserMessage }>;
   sendMessageWithWindow(
-    content: string,
+    content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
+
+  setSessionDataSourceList(dataSourceId: string | undefined): void;
 }
 
 /**
@@ -189,10 +189,12 @@ export interface ChatImplementationFunctions {
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (
-    content: string,
+    content: string | InputContent[],
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; dataSourceId?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
+
+  setSessionDataSourceList: (dataSourceId: string | undefined) => void;
 }
 
 /**

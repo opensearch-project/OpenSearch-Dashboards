@@ -8,10 +8,10 @@ import { ConfirmationService } from './confirmation_service';
 import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AssistantActionService
-const mockAssistantActionService = ({
+const mockAssistantActionService = {
   executeAction: jest.fn(),
   isUserConfirmRequired: jest.fn(),
-} as unknown) as jest.Mocked<AssistantActionService>;
+} as unknown as jest.Mocked<AssistantActionService>;
 
 describe('ToolExecutor', () => {
   let toolExecutor: ToolExecutor;
@@ -33,9 +33,27 @@ describe('ToolExecutor', () => {
       expect(result.success).toBe(true);
       expect(result.data).toEqual({ result: 'success' });
       expect(result.source).toBe('registered_action');
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('testTool', {
-        param: 'value',
-      });
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'testTool',
+        {
+          param: 'value',
+        },
+        'call-123'
+      );
+    });
+
+    it('should propagate cancellation when a registered handler returns cancelled', async () => {
+      // A handler (e.g. ask_user) returning { cancelled: true } means it was
+      // torn down while pending; executeTool must surface cancelled so the
+      // caller short-circuits without dispatching a tool result.
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
+      mockAssistantActionService.executeAction.mockResolvedValue({ cancelled: true });
+
+      const result = await toolExecutor.executeTool('ask_user', { prompt: 'x' }, 'call-123');
+
+      expect(result.cancelled).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.source).toBe('registered_action');
     });
 
     it('should handle agent tool when action not found', async () => {
@@ -53,12 +71,20 @@ describe('ToolExecutor', () => {
       mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
       mockAssistantActionService.executeAction.mockResolvedValue({ result: 'success' });
 
-      await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123', 'datasource-1');
-
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('testTool', {
-        param: 'value',
-        datasourceId: 'datasource-1',
+      await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123', {
+        id: 'datasource-1',
+        title: 'Datasource 1',
       });
+
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'testTool',
+        {
+          param: 'value',
+          datasourceId: 'datasource-1',
+          datasourceTitle: 'Datasource 1',
+        },
+        'call-123'
+      );
     });
   });
 
@@ -83,10 +109,44 @@ describe('ToolExecutor', () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual({ result: 'confirmed' });
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
-        param: 'value',
-        confirmed: true,
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'confirmTool',
+        {
+          param: 'value',
+          confirmed: true,
+        },
+        'call-123'
+      );
+    });
+
+    it('should let the user override tool arguments before execution', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'confirmed' });
+
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { dataSourceId: 'ds-a', reason: 'assistant suggestion' },
+        'call-123'
+      );
+
+      const pending = confirmationService.getPendingConfirmations();
+      confirmationService.approve(pending[0].id, {
+        dataSourceId: 'ds-b',
+        datasourceTitle: 'Cluster B',
       });
+
+      await executionPromise;
+
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'confirmTool',
+        {
+          dataSourceId: 'ds-b',
+          datasourceTitle: 'Cluster B',
+          reason: 'assistant suggestion',
+          confirmed: true,
+        },
+        'call-123'
+      );
     });
 
     it('should reject execution when user rejects confirmation', async () => {
@@ -119,7 +179,8 @@ describe('ToolExecutor', () => {
         'confirmTool',
         { param: 'value' },
         'call-123',
-        'datasource-1'
+        // 'datasource-1'
+        { id: 'datasource-1', title: 'Datasource 1' }
       );
 
       const pending = confirmationService.getPendingConfirmations();
@@ -127,11 +188,16 @@ describe('ToolExecutor', () => {
 
       await executionPromise;
 
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
-        param: 'value',
-        confirmed: true,
-        datasourceId: 'datasource-1',
-      });
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith(
+        'confirmTool',
+        {
+          param: 'value',
+          confirmed: true,
+          datasourceId: 'datasource-1',
+          datasourceTitle: 'Datasource 1',
+        },
+        'call-123'
+      );
     });
   });
 

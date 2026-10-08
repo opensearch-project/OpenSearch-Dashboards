@@ -151,7 +151,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ]);
 
   const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+    !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
   const searchClient = data.search.search;
 

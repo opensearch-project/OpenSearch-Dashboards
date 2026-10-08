@@ -17,6 +17,7 @@ export type {
   ToolMessage,
   Role,
   TextInputContent,
+  InputContent,
 } from '../../../core/public/chat';
 
 // Zod schemas for runtime validation - these ensure the core types are followed
@@ -32,9 +33,11 @@ export const ToolCallSchema = z.object({
 });
 
 // AG-UI Protocol: Input content schemas for multimodal content (text + images)
+// name marks a msg as a machine-only payload — hidden from the conversation view
 export const TextInputContentSchema = z.object({
   type: z.literal('text'),
   text: z.string(),
+  name: z.string().optional(),
 });
 
 export const BinaryInputContentSchema = z.object({
@@ -44,9 +47,26 @@ export const BinaryInputContentSchema = z.object({
   url: z.string().optional(),
   data: z.string().optional(),
   filename: z.string().optional(),
+  name: z.string().optional(),
 });
 
-export const InputContentSchema = z.union([TextInputContentSchema, BinaryInputContentSchema]);
+export const InputContentSourceSchema = z.union([
+  z.object({ type: z.literal('data'), value: z.string(), mimeType: z.string() }),
+  z.object({ type: z.literal('url'), value: z.string(), mimeType: z.string().optional() }),
+]);
+
+export const ImageInputContentSchema = z.object({
+  type: z.literal('image'),
+  source: InputContentSourceSchema,
+  metadata: z.record(z.unknown()).optional(),
+  name: z.string().optional(),
+});
+
+export const InputContentSchema = z.union([
+  TextInputContentSchema,
+  BinaryInputContentSchema,
+  ImageInputContentSchema,
+]);
 
 export const BaseMessageSchema = z.object({
   id: z.string(),

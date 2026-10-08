@@ -140,7 +140,7 @@ describe('DefaultEditorAgg component', () => {
   it('should call setTouched with false', () => {
     mount(<DefaultEditorAggGroup {...defaultProps} />);
 
-    expect(setTouched).toBeCalledWith(false);
+    expect(setTouched).toHaveBeenCalledWith(false);
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {

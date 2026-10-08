@@ -56,7 +56,7 @@ describe('AskAIEmbeddableAction', () => {
     };
 
     // Mock embeddable
-    mockEmbeddable = ({
+    mockEmbeddable = {
       id: 'test-embeddable-id',
       getTitle: jest.fn().mockReturnValue('Test Visualization'),
       type: 'explore',
@@ -81,7 +81,7 @@ describe('AskAIEmbeddableAction', () => {
         },
       },
       node: document.createElement('div'),
-    } as unknown) as ExploreEmbeddable;
+    } as unknown as ExploreEmbeddable;
 
     // Create action instance
     action = new AskAIEmbeddableAction(mockCore, mockContextProvider);
@@ -162,17 +162,25 @@ describe('AskAIEmbeddableAction', () => {
       document.body.innerHTML = '';
     });
 
-    it('should add context to context provider', async () => {
+    it('should send visualization context to chat', async () => {
       await action.execute({ embeddable: mockEmbeddable });
 
       await waitFor(() => {
-        expect(mockContextProvider.getAssistantContextStore).toHaveBeenCalled();
-        expect(mockContextProvider.getAssistantContextStore().addContext).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: expect.stringContaining('visualization-'),
-            description: expect.stringContaining('Test Visualization'),
-            categories: ['visualization', 'dashboard', 'chat'],
-          })
+        expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              type: 'binary',
+              mimeType: 'image/jpeg',
+              data: 'mockImageData',
+            }),
+            expect.objectContaining({
+              type: 'text',
+              name: 'visualization_context',
+              text: expect.stringContaining('Test Visualization'),
+            }),
+          ]),
+          [],
+          { dataSourceId: undefined }
         );
       });
     });

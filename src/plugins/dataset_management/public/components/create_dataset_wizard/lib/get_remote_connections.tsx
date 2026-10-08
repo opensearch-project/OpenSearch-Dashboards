@@ -48,7 +48,7 @@ export const getRemoteClusterConnections = async (
         };
       }) ?? []
     );
-  } catch (error) {
+  } catch {
     return []; // Return an empty array if the request fails
   }
 };

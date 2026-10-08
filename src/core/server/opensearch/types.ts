@@ -208,19 +208,23 @@ export interface OpenSearchServiceStart {
      */
     readonly client: ILegacyClusterClient;
   };
+
+  /**
+   * Returns the custom Transport class registered via
+   * {@link OpenSearchServiceSetup.registerClientTransport}, if any.
+   * Plugins that create their own OpenSearch clients (e.g. the data source plugin's
+   * per-connection client pool) can apply the same Transport extension so that
+   * request/response interception (such as legacy backend compatibility) is consistent
+   * with core's own client. Returns `undefined` when no Transport has been registered.
+   */
+  getClientTransport?: () => typeof Transport | undefined;
 }
 
 /**
  * @internal
  */
-export interface InternalOpenSearchServiceStart extends OpenSearchServiceStart {
-  /**
-   * Returns the custom Transport class registered via `registerClientTransport`, if any.
-   * Useful for plugins that create their own OpenSearch clients and need to apply
-   * the same Transport extension.
-   */
-  getClientTransport?: () => typeof Transport | undefined;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InternalOpenSearchServiceStart extends OpenSearchServiceStart {}
 
 /** @public */
 export interface OpenSearchStatusMeta {

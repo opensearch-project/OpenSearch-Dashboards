@@ -169,7 +169,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
       async () => {
         try {
           await outcomePromise;
-        } catch (error) {
+        } catch {
           // ignore
         }
       },

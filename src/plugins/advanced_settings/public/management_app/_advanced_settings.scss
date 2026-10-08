@@ -61,6 +61,11 @@
   margin-left: $euiSizeS;
 }
 
+.mgtAdvancedSettings__fieldLabelSourceBadge {
+  margin-left: $euiSizeS;
+  vertical-align: middle;
+}
+
 .mgtAdvancedSettingsForm__unsavedCount {
   @include euiBreakpoint("xs") {
     display: none;

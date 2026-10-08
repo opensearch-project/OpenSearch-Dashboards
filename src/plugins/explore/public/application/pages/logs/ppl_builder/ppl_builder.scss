@@ -1,0 +1,56 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "../../../components/query_builder/query_builder";
+
+.plqSearchBoxWrap {
+  flex: 1;
+  min-width: 200px;
+}
+
+.plqSearchBoxEditor {
+  position: relative;
+  width: 100%;
+  border: 1px solid $plqBorder;
+  border-radius: $plqRadius;
+  padding: 7px 10px;
+  background: $plqCtlBg;
+
+  &:hover,
+  &:focus-within {
+    border-color: $plqHoverBorder;
+  }
+
+  &__placeholder {
+    position: absolute;
+    z-index: 1;
+    top: 7px;
+    left: 10px;
+    right: 10px;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 18px;
+    color: $plqSub;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+
+  .monaco-editor,
+  .monaco-editor .overflow-guard {
+    border-radius: $plqRadius;
+  }
+
+  .monaco-editor,
+  .monaco-editor-background,
+  .monaco-editor .margin {
+    background: transparent;
+  }
+
+  .monaco-editor,
+  .monaco-editor.focused {
+    outline: none;
+  }
+}

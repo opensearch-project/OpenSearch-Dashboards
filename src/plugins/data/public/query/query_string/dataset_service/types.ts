@@ -21,6 +21,12 @@ export interface DataStructureFetchOptions {
   search?: string;
   /** Token for paginated results */
   paginationToken?: string;
+  /**
+   * Skip enriching results with query-editor extension meta (e.g. available languages).
+   * Those extensions may issue their own network calls; consumers that only need core dataset
+   * metadata (title, time field, signal type, description, type) can set this to avoid them.
+   */
+  skipQueryEditorMeta?: boolean;
 }
 
 export interface DatasetIndexedView {

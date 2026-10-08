@@ -49,9 +49,8 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
   onClose,
   onSave,
 }) => {
-  const { savedObjects, data, notifications } = useOpenSearchDashboards<
-    DatasetManagmentContext
-  >().services;
+  const { savedObjects, data, notifications } =
+    useOpenSearchDashboards<DatasetManagmentContext>().services;
 
   const [selectedLogDatasetIds, setSelectedLogDatasetIds] = useState<string[]>([]);
   const [maxDatasetsError, setMaxDatasetsError] = useState<string>('');
@@ -63,11 +62,11 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
   const { createCorrelation, loading: creating } = useCreateCorrelation(savedObjects.client);
   const { updateCorrelation, loading: updating } = useUpdateCorrelation(savedObjects.client);
 
-  const { validationResult, datasets, loading: validating } = useValidateFieldMappings(
-    selectedLogDatasetIds,
-    data,
-    validationKey
-  );
+  const {
+    validationResult,
+    datasets,
+    loading: validating,
+  } = useValidateFieldMappings(selectedLogDatasetIds, data, validationKey);
 
   // Initialize form with existing correlation data if editing
   useEffect(() => {

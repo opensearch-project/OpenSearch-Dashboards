@@ -14,11 +14,15 @@ import { setDateRange } from '../../../application/utils/state_management/slices
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
 
-// Shared tool definition for execute_ppl_query action
-export const EXECUTE_PPL_QUERY_TOOL_DEFINITION = {
-  name: 'execute_ppl_query',
+// Shared tool definition for apply_ppl_query action
+export const APPLY_PPL_QUERY_TOOL_DEFINITION = {
+  name: 'apply_ppl_query',
   description:
-    'Updates the query bar with a PPL query and executes it in the UI. IMPORTANT: This tool only updates the visual query interface and returns execution status (success/failure) - it does NOT return the actual query results or data. Use this tool when you want to help the user visualize data in the Explore interface. If you need to retrieve actual data for analysis or generating reports, use backend data retrieval tools instead, and make sure to pass the same time range (from/to) to those backend tools for consistent results. The query should NOT contain time filters - use the from/to parameters to specify the time range.',
+    "UI-only tool. Writes a PPL query into the Explore query editor and executes it. This tool only updates the user's interface and triggers query execution. It returns only the execution status (for example, success or failure) and never returns the query results, including rows, fields, counts, aggregations, or any other data produced by the query. " +
+    'CHOOSING THIS TOOL if you need to change what the user is looking at, i.e. when the user asked to see, run, plot, or explore something in the Explore UI, or when you want to leave them with the final query for further exploration. ' +
+    'DO NOT CALL THIS TOOL if you need the actual data - to answer a question, compute a number, inspect fields, validate a query, summarize, or generate a report - call pplQueryTool instead. ' +
+    'Never call this tool as a way to fetch data, and never claim or infer what the data contains from its status response. When you need both - the data and the on-screen view - call pplQueryTool first to get the data, then call this tool once with the same query and the same time range so the UI stays consistent with your answer. ' +
+    'The query must NOT contain time filters - use the from/to parameters to specify the time range, and pass the same from/to you passed to pplQueryTool.',
   parameters: {
     type: 'object' as const,
     properties: {
@@ -56,14 +60,14 @@ export function registerDisabledPPLExecuteQueryAction(
   if (!registerAction) return;
 
   registerAction({
-    ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+    ...APPLY_PPL_QUERY_TOOL_DEFINITION,
     available: 'disabled',
     handler: async () => {
       return {
         success: false,
         error: 'STOP: Tool not available - context has changed',
         message:
-          'IMPORTANT: The execute_ppl_query tool is no longer available because the user has navigated away from the query panel. ' +
+          'IMPORTANT: The apply_ppl_query tool is no longer available because the user has navigated away from the query panel. ' +
           'Do not attempt to use any more tools. Instead, please respond directly to the user explaining that you cannot complete this action ' +
           'because they are no longer in the query panel context. Suggest they navigate to the Logs, Traces, or Metrics explorer view if they want to execute queries.',
         stop_tool_execution: true,
@@ -84,7 +88,7 @@ export function usePPLExecuteQueryAction(
     if (!registerAction) return;
 
     registerAction({
-      ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+      ...APPLY_PPL_QUERY_TOOL_DEFINITION,
       handler: async (args: any) => {
         try {
           const shouldExecute = args.autoExecute !== false;

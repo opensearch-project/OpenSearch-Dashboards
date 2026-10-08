@@ -65,6 +65,13 @@ jest.mock('../../application/legacy/discover/application/components/no_results/n
   DiscoverNoResults: () => <div>No Results</div>,
 }));
 
+jest.mock(
+  '../../application/legacy/discover/application/components/loading_spinner/loading_spinner',
+  () => ({
+    LoadingSpinner: () => <div>Searching</div>,
+  })
+);
+
 const mockSetActiveTab = setActiveTab as jest.MockedFunction<typeof setActiveTab>;
 const mockClearQueryStatusMapByKey = clearQueryStatusMapByKey as jest.MockedFunction<
   typeof clearQueryStatusMapByKey
@@ -100,7 +107,7 @@ describe('ExploreTabsComponent', () => {
     },
   };
 
-  const createMockStore = (initialState = {}) => {
+  const createMockStore = ({ queryEditor, ...initialState }: Record<string, any> = {}) => {
     return configureStore({
       reducer: {
         ui: uiReducer,
@@ -121,6 +128,10 @@ describe('ExploreTabsComponent', () => {
         },
         results: {},
         ...initialState,
+        queryEditor: {
+          ...queryEditorReducer(undefined, { type: '@@INIT' }),
+          ...queryEditor,
+        },
       },
     });
   };
@@ -199,6 +210,33 @@ describe('ExploreTabsComponent', () => {
     expect(mockExecuteTabQuery).not.toHaveBeenCalled();
   });
 
+  it('does not restart a tab query that is already running when its tab is clicked', () => {
+    const store = createMockStore({
+      ui: {
+        activeTabId: 'logs',
+        showHistogram: true,
+      },
+      queryEditor: {
+        overallQueryStatus: { status: 'loading' },
+        queryStatusMap: { 'cache-key-SELECT * FROM logs': { status: 'loading' } },
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <OpenSearchDashboardsContextProvider services={mockServices}>
+          <ExploreTabs />
+        </OpenSearchDashboardsContextProvider>
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByText('Visualization'));
+
+    expect(mockSetActiveTab).toHaveBeenCalledWith('explore_visualization_tab');
+    expect(mockClearQueryStatusMapByKey).not.toHaveBeenCalled();
+    expect(mockExecuteTabQuery).not.toHaveBeenCalled();
+  });
+
   it('should render selected tab content when activeTabId is set', () => {
     const store = createMockStore({
       ui: {
@@ -221,6 +259,70 @@ describe('ExploreTabsComponent', () => {
     expect(screen.getByText('Visualization Content')).toBeInTheDocument();
   });
 
+  describe('while the active tab has its own query in flight', () => {
+    const renderTabs = (queryEditor: Record<string, unknown>, results = {}) => {
+      const store = createMockStore({
+        ui: { activeTabId: 'explore_visualization_tab', showHistogram: true },
+        results,
+        queryEditor: { overallQueryStatus: { status: 'ready' }, ...queryEditor },
+      });
+      return render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={mockServices}>
+            <ExploreTabs />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+    };
+    const TAB_KEY = 'cache-key-SELECT * FROM logs';
+
+    it('shows the searching state instead of an empty tab', () => {
+      renderTabs({ queryStatusMap: { [TAB_KEY]: { status: 'loading' } } });
+      expect(screen.getByText('Visualization')).toBeInTheDocument();
+
+      expect(screen.getByText('Searching')).toBeInTheDocument();
+      expect(screen.queryByText('Visualization Content')).not.toBeInTheDocument();
+    });
+
+    it('shows the tab once its query has returned', () => {
+      renderTabs({ queryStatusMap: { [TAB_KEY]: { status: 'ready' } } });
+
+      expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+      expect(screen.queryByText('Searching')).not.toBeInTheDocument();
+    });
+
+    it('keeps showing results that are already cached', () => {
+      renderTabs(
+        { queryStatusMap: { [TAB_KEY]: { status: 'loading' } } },
+        { [TAB_KEY]: { hits: { hits: [] } } }
+      );
+
+      expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+    });
+
+    it('leaves a failed tab query to the error guard', () => {
+      renderTabs({ queryStatusMap: { [TAB_KEY]: { status: 'error' } } });
+
+      expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+    });
+
+    it('does not treat a tab that cannot build a query yet as loading', () => {
+      mockServices.tabRegistry.getAllTabs.mockReturnValueOnce([
+        {
+          id: 'explore_visualization_tab',
+          label: 'Visualization',
+          component: () => <div>Visualization Content</div>,
+          flavor: [ExploreFlavor.Logs],
+          prepareQuery: () => '',
+        } as any,
+      ]);
+      renderTabs({ queryStatusMap: { '': { status: 'loading' } } });
+
+      expect(screen.queryByText('Searching')).not.toBeInTheDocument();
+      expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+    });
+  });
+
   it('should return null when flavorId is null', () => {
     mockUseFlavorId.mockReturnValue(null);
     const store = createMockStore();
@@ -235,6 +337,78 @@ describe('ExploreTabsComponent', () => {
 
     expect(container.firstChild).toBeNull();
     mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs); // Reset for other tests
+  });
+
+  describe('language-based tab visibility', () => {
+    // Two tabs: one language-agnostic (declares nothing), one PPL-only.
+    const servicesWithLanguages = (supportedLanguages: string[]) => ({
+      tabRegistry: {
+        getAllTabs: jest.fn(() => [
+          {
+            id: 'logs_tab',
+            label: 'Logs',
+            component: () => <div>Logs Content</div>,
+            flavor: [ExploreFlavor.Logs],
+          },
+          {
+            id: 'lang_gated_tab',
+            label: 'Gated',
+            component: () => <div>Gated Content</div>,
+            flavor: [ExploreFlavor.Logs],
+            supportedLanguages,
+          },
+        ]),
+        getTab: jest.fn((id: string) => ({
+          id,
+          label: id,
+          component: () => <div>{id} Content</div>,
+          prepareQuery: undefined,
+          flavor: [ExploreFlavor.Logs],
+        })),
+      },
+    });
+
+    const renderWithLanguage = (supportedLanguages: string[], language: string) => {
+      const store = createMockStore({
+        query: {
+          query: 'SELECT * FROM logs',
+          language,
+          dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        },
+      });
+      return render(
+        <Provider store={store}>
+          <OpenSearchDashboardsContextProvider services={servicesWithLanguages(supportedLanguages)}>
+            <ExploreTabs />
+          </OpenSearchDashboardsContextProvider>
+        </Provider>
+      );
+    };
+
+    it('renders a tab whose supportedLanguages include the active language', () => {
+      renderWithLanguage(['PPL', 'SQL'], 'SQL');
+      expect(screen.getByText('Gated')).toBeInTheDocument();
+    });
+
+    it('hides a tab whose supportedLanguages exclude the active language', () => {
+      // Previously only Patterns and Field statistics were hidden for SQL by a
+      // hardcoded id check, so a PPL-only tab like this one still rendered.
+      renderWithLanguage(['PPL'], 'SQL');
+      expect(screen.queryByText('Gated')).not.toBeInTheDocument();
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+    });
+
+    it('treats a tab that declares no supportedLanguages as language-agnostic', () => {
+      // The Logs tab in this fixture declares none and must survive both languages.
+      renderWithLanguage(['PPL'], 'SQL');
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+    });
+
+    it('matches languages case-sensitively against the canonical values', () => {
+      // EXPLORE_DEFAULT_LANGUAGE is 'PPL'; query.language is always uppercase.
+      renderWithLanguage(['PPL'], 'PPL');
+      expect(screen.getByText('Gated')).toBeInTheDocument();
+    });
   });
 
   it('should fallback to first tab when activeTabId is empty', () => {

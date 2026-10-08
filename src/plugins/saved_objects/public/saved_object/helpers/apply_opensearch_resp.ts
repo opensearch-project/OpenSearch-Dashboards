@@ -92,9 +92,8 @@ export async function applyOpenSearchResp(
 
       if (config.searchSource) {
         searchSourceValues = injectSearchSourceReferences(searchSourceValues, resp.references);
-        savedObject.searchSource = await dependencies.search.searchSource.create(
-          searchSourceValues
-        );
+        savedObject.searchSource =
+          await dependencies.search.searchSource.create(searchSourceValues);
       } else {
         savedObject.searchSourceFields = searchSourceValues;
       }

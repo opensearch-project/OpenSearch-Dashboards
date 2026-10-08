@@ -31,7 +31,7 @@
 import Stream from 'stream';
 import moment from 'moment-timezone';
 import { get, _ } from 'lodash';
-import queryString from 'query-string';
+import qs from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
 import stringify from 'json-stringify-safe';
@@ -120,7 +120,7 @@ export default class TransformObjStream extends Stream.Transform {
         contentLength: contentLength,
       };
 
-      const query = queryString.stringify(event.query, { sort: false });
+      const query = qs.stringify(event.query, { sort: false });
       if (query) data.req.url += '?' + query;
 
       data.message = data.req.method.toUpperCase() + ' ';

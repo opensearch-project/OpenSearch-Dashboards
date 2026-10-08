@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
+import {
+  getPreloadedState,
+  loadReduxState,
+  persistReduxState,
+  tabFromPathname,
+} from './redux_persistence';
 import { AgentTracesServices } from '../../../../types';
 import { RootState } from '../store';
 import {
@@ -84,7 +89,12 @@ describe('redux_persistence', () => {
         query: {
           query: 'source=logs | head 10',
           language: 'PPL',
-          dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+          dataset: {
+            id: 'test-dataset',
+            title: 'test-dataset',
+            type: 'INDEX_PATTERN',
+            signalType: CORE_SIGNAL_TYPES.TRACES,
+          },
         },
         ui: {
           activeTabId: '',
@@ -178,7 +188,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -232,7 +247,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
 
       // resolveDataset requires TRACES signal type
@@ -319,9 +339,14 @@ describe('redux_persistence', () => {
     });
 
     it('should handle dataset initialization', async () => {
-      const mockDataset = { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' };
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'test-dataset',
+        type: 'INDEX_PATTERN',
+        signalType: CORE_SIGNAL_TYPES.TRACES,
+      };
 
-      // Mock dataset service to return a dataset
+      // Mock dataset service to return a dataset (signalType populated by toDataset)
       (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
         getType: jest.fn(() => ({
           fetch: jest.fn(() =>
@@ -331,13 +356,6 @@ describe('redux_persistence', () => {
           ),
           toDataset: jest.fn(() => mockDataset),
         })),
-      });
-
-      // resolveDataset requires TRACES signal type
-      (mockServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
-        id: 'test-dataset',
-        title: 'test-dataset',
-        signalType: CORE_SIGNAL_TYPES.TRACES,
       });
 
       const result = await getPreloadedState(mockServices);
@@ -402,7 +420,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -436,7 +459,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -490,14 +518,15 @@ describe('redux_persistence', () => {
 
   describe('SignalType filtering', () => {
     it('should accept Traces datasets', async () => {
-      (mockServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
-        signalType: CORE_SIGNAL_TYPES.TRACES,
-      });
-
       (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
         getType: jest.fn(() => ({
           fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
-          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+          toDataset: jest.fn(() => ({
+            id: 'test',
+            title: 'test',
+            type: 'INDEX_PATTERN',
+            signalType: CORE_SIGNAL_TYPES.TRACES,
+          })),
         })),
       });
 
@@ -527,7 +556,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -572,7 +606,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=traces',
         language: 'PPL',
-        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'traces-dataset',
+          title: 'Traces Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -618,7 +657,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -650,7 +694,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
       const mockAppState = {
         ui: { activeTabId: 'logs', showHistogram: true },
@@ -684,7 +733,12 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=traces | head 10',
         language: 'PPL',
-        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'traces-dataset',
+          title: 'Traces Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        },
       };
 
       (mockServices.osdUrlStateStorage!.get as jest.Mock)
@@ -731,6 +785,7 @@ describe('redux_persistence', () => {
             id: 'traces-dataset',
             title: 'Traces Dataset',
             type: 'INDEX_PATTERN',
+            signalType: CORE_SIGNAL_TYPES.TRACES,
           })),
         })),
       });
@@ -770,6 +825,7 @@ describe('redux_persistence', () => {
             id: 'fallback-dataset',
             title: 'Fallback Dataset',
             type: 'INDEX_PATTERN',
+            signalType: CORE_SIGNAL_TYPES.TRACES,
           })),
         })),
       });
@@ -802,6 +858,20 @@ describe('redux_persistence', () => {
       const result = await getPreloadedState(mockServices);
       // Metrics datasets are rejected because resolveDataset requires TRACES
       expect(result.query.dataset).toBeUndefined();
+    });
+  });
+
+  describe('tabFromPathname', () => {
+    it('opens the tab named by the app path', () => {
+      expect(tabFromPathname('/app/agentTraces/sessions')).toBe('sessions');
+      expect(tabFromPathname('/w/abc/app/agentTraces/traces/')).toBe('traces');
+      expect(tabFromPathname('/app/agentTraces/spans')).toBe('spans');
+    });
+
+    it('falls back to the default for other paths', () => {
+      expect(tabFromPathname('/app/agentTraces/')).toBe('');
+      expect(tabFromPathname('/app/agentTraces/visualization')).toBe('');
+      expect(tabFromPathname('/app/discover')).toBe('');
     });
   });
 });

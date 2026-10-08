@@ -1,0 +1,8 @@
+{
+  "id": "grokDebugger",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["devTools"],
+  "optionalPlugins": []
+}

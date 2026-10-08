@@ -8,19 +8,18 @@ import { ISearchSource } from '../../../data/public';
 
 export type SortDirection = 'asc' | 'desc';
 export type SortOrder = [string, SortDirection];
-export interface SavedAgentTraces
-  extends Pick<
-    SavedObject,
-    | 'id'
-    | 'title'
-    | 'copyOnSave'
-    | 'destroy'
-    | 'lastSavedTitle'
-    | 'save'
-    | 'getFullPath'
-    | 'getOpenSearchType'
-    | 'searchSourceFields'
-  > {
+export interface SavedAgentTraces extends Pick<
+  SavedObject,
+  | 'id'
+  | 'title'
+  | 'copyOnSave'
+  | 'destroy'
+  | 'lastSavedTitle'
+  | 'save'
+  | 'getFullPath'
+  | 'getOpenSearchType'
+  | 'searchSourceFields'
+> {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
   legacyState?: string; // Serialized legacy state (columns, sort, interval, etc.)

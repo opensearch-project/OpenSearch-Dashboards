@@ -112,7 +112,7 @@ describe('Saved Object', () => {
   }
 
   beforeEach(() => {
-    SavedObjectClass = createSavedObjectClass(({
+    SavedObjectClass = createSavedObjectClass({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
       search: {
@@ -123,7 +123,7 @@ describe('Saved Object', () => {
           createEmpty: createSearchSourceMock,
         },
       },
-    } as unknown) as SavedObjectOpenSearchDashboardsServices);
+    } as unknown as SavedObjectOpenSearchDashboardsServices);
   });
 
   describe('save', () => {
@@ -588,13 +588,13 @@ describe('Saved Object', () => {
     });
 
     it('passes references to search source parsing function', async () => {
-      SavedObjectClass = createSavedObjectClass(({
+      SavedObjectClass = createSavedObjectClass({
         savedObjectsClient: savedObjectsClientStub,
         indexPatterns: dataStartMock.indexPatterns,
         search: {
           ...dataStartMock.search,
         },
-      } as unknown) as SavedObjectOpenSearchDashboardsServices);
+      } as unknown as SavedObjectOpenSearchDashboardsServices);
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
       return savedObject.init!().then(async () => {
         const searchSourceJSON = JSON.stringify({
@@ -628,7 +628,7 @@ describe('Saved Object', () => {
           ],
         };
         await savedObject.applyOpenSearchResp(response);
-        expect(dataStartMock.search.searchSource.create).toBeCalledWith({
+        expect(dataStartMock.search.searchSource.create).toHaveBeenCalledWith({
           filter: [{ meta: { index: 'my-index-2' } }],
           index: 'my-index-1',
         });

@@ -34,6 +34,7 @@ require('regenerator-runtime/runtime');
 if (typeof window.Event === 'object') {
   // IE11 doesn't support unknown event types, required by react-use
   // https://github.com/streamich/react-use/issues/73
+  // eslint-disable-next-line no-undef
   window.Event = CustomEvent;
 }
 

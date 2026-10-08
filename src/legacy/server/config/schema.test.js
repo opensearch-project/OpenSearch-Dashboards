@@ -29,32 +29,31 @@
  */
 
 import schemaProvider from './schema';
-import Joi from 'joi';
 
 describe('Config schema', function () {
   let schema;
   beforeEach(async () => (schema = await schemaProvider()));
 
   function validate(data, options) {
-    return Joi.validate(data, schema, options);
+    return schema.validate(data, options);
   }
 
   describe('server', function () {
     it('everything is optional', function () {
       const { error } = validate({});
-      expect(error).toBe(null);
+      expect(error).toBeUndefined();
     });
 
     describe('basePath', function () {
       it('accepts empty strings', function () {
         const { error, value } = validate({ server: { basePath: '' } });
-        expect(error).toBe(null);
+        expect(error).toBeUndefined();
         expect(value.server.basePath).toBe('');
       });
 
       it('accepts strings with leading slashes', function () {
         const { error, value } = validate({ server: { basePath: '/path' } });
-        expect(error).toBe(null);
+        expect(error).toBeUndefined();
         expect(value.server.basePath).toBe('/path');
       });
 
@@ -82,19 +81,19 @@ describe('Config schema', function () {
     describe('rewriteBasePath', function () {
       it('defaults to false', () => {
         const { error, value } = validate({});
-        expect(error).toBe(null);
+        expect(error).toBeUndefined();
         expect(value.server.rewriteBasePath).toBe(false);
       });
 
       it('accepts false', function () {
         const { error, value } = validate({ server: { rewriteBasePath: false } });
-        expect(error).toBe(null);
+        expect(error).toBeUndefined();
         expect(value.server.rewriteBasePath).toBe(false);
       });
 
       it('accepts true if basePath set', function () {
         const { error, value } = validate({ server: { basePath: '/foo', rewriteBasePath: true } });
-        expect(error).toBe(null);
+        expect(error).toBeUndefined();
         expect(value.server.rewriteBasePath).toBe(true);
       });
 

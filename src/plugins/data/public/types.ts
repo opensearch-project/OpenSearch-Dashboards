@@ -147,6 +147,7 @@ export interface DataPublicPluginStart {
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
+  contextProvider?: ContextProviderStart;
   uiSettings: CoreStart['uiSettings'];
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];

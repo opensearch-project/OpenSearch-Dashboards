@@ -33,6 +33,9 @@ import { i18n } from '@osd/i18n';
 const upperFirst = (str = '') => str.replace(/^./, (strng) => strng.toUpperCase());
 
 const names: Record<string, string> = {
+  admin: i18n.translate('advancedSettings.categoryNames.adminLabel', {
+    defaultMessage: 'Admin',
+  }),
   general: i18n.translate('advancedSettings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),

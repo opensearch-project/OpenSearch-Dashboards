@@ -64,6 +64,7 @@ export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
+  registerKeyboardShortcut?: boolean;
   screenTitle?: string;
   prepend?: any;
   persistedLog?: PersistedLog;
@@ -532,7 +533,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
     // Register keyboard shortcut for focusing query input using direct service registration
     const { keyboardShortcut } = this.services;
-    if (keyboardShortcut) {
+    if (this.props.registerKeyboardShortcut && keyboardShortcut && this.textareaId) {
       keyboardShortcut.register({
         id: 'focus_query_bar',
         pluginId: 'data',
@@ -594,7 +595,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.componentIsUnmounting = true;
 
     const { keyboardShortcut } = this.services;
-    if (keyboardShortcut) {
+    if (this.props.registerKeyboardShortcut && keyboardShortcut && this.textareaId) {
       keyboardShortcut.unregister({
         id: 'focus_query_bar',
         pluginId: 'data',

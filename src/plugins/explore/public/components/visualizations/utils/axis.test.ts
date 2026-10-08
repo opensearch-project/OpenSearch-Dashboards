@@ -18,8 +18,6 @@ describe('getAxisConfigByColumnMapping', () => {
     name: 'test_column',
     schema: VisFieldType.Numerical,
     column: 'test_column',
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   // Mock StandardAxes configurations

@@ -9,7 +9,6 @@
  * GitHub history for details.
  */
 
-/* eslint-disable-line @osd/eslint/require-license-header */
 /*
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.
@@ -43,11 +42,13 @@ const { RuleTester } = require('eslint');
 const rule = require('./no_restricted_paths');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('@babel/eslint-parser'),
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2015,
-    requireConfigFile: false,
+  languageOptions: {
+    parser: require('@babel/eslint-parser'),
+    parserOptions: {
+      sourceType: 'module',
+      ecmaVersion: 2015,
+      requireConfigFile: false,
+    },
   },
 });
 

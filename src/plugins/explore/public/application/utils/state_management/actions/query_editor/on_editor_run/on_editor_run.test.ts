@@ -78,7 +78,7 @@ describe('onEditorRunActionCreator', () => {
     mockDispatch = jest.fn();
     mockGetState = jest.fn();
 
-    mockServices = ({
+    mockServices = {
       notifications: {
         toasts: {
           addWarning: jest.fn(),
@@ -93,7 +93,7 @@ describe('onEditorRunActionCreator', () => {
           },
         },
       },
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
 
     // Default state with REFRESH status
     setMockState();

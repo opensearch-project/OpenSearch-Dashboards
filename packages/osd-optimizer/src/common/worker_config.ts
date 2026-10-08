@@ -39,7 +39,7 @@ export interface WorkerConfig {
   readonly dist: boolean;
   readonly themeTags: ThemeTags;
   readonly cache: boolean;
-  readonly profileWebpack: boolean;
+  readonly profileRspack: boolean;
   readonly browserslistEnv: string;
 }
 
@@ -75,9 +75,9 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`dist` config must be a boolean');
     }
 
-    const profileWebpack = parsed.profileWebpack;
-    if (typeof profileWebpack !== 'boolean') {
-      throw new Error('`profileWebpack` must be a boolean');
+    const profileRspack = parsed.profileRspack;
+    if (typeof profileRspack !== 'boolean') {
+      throw new Error('`profileRspack` must be a boolean');
     }
 
     const browserslistEnv = parsed.browserslistEnv;
@@ -92,7 +92,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       cache,
       watch,
       dist,
-      profileWebpack,
+      profileRspack,
       browserslistEnv,
       themeTags: themes,
     };

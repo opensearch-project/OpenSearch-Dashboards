@@ -31,18 +31,18 @@ describe('useLegend', () => {
     const { result } = renderHook(() => useLegend());
 
     act(() => {
-      result.current.onToggle(({
+      result.current.onToggle({
         stopPropagation: mockStopPropagation,
-      } as unknown) as React.MouseEvent);
+      } as unknown as React.MouseEvent);
     });
 
     expect(mockStopPropagation).toHaveBeenCalled();
     expect(result.current.isOpen).toBe(true);
 
     act(() => {
-      result.current.onToggle(({
+      result.current.onToggle({
         stopPropagation: mockStopPropagation,
-      } as unknown) as React.MouseEvent);
+      } as unknown as React.MouseEvent);
     });
     expect(result.current.isOpen).toBe(false);
   });
@@ -51,9 +51,9 @@ describe('useLegend', () => {
     const { result } = renderHook(() => useLegend());
 
     act(() => {
-      result.current.onToggle(({
+      result.current.onToggle({
         stopPropagation: mockStopPropagation,
-      } as unknown) as React.MouseEvent);
+      } as unknown as React.MouseEvent);
     });
     expect(result.current.isOpen).toBe(true);
 
@@ -65,14 +65,14 @@ describe('useLegend', () => {
   });
 
   it('should calculate position using useLegendPosition', () => {
-    const mockedUseLegendPosition = (useLegendPosition as unknown) as ReturnType<typeof jest.fn>;
+    const mockedUseLegendPosition = useLegendPosition as unknown as ReturnType<typeof jest.fn>;
     const { result } = renderHook(() => useLegend());
     expect(mockedUseLegendPosition).toHaveBeenCalledWith(false, null);
 
     act(() => {
-      result.current.onToggle(({
+      result.current.onToggle({
         stopPropagation: mockStopPropagation,
-      } as unknown) as React.MouseEvent);
+      } as unknown as React.MouseEvent);
     });
     expect(mockedUseLegendPosition).toHaveBeenCalledWith(true, null);
   });

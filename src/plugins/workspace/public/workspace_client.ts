@@ -9,6 +9,8 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
@@ -18,7 +20,9 @@ import {
   PermissionModeId,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { WorkspaceAssociateResult } from '../common/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -106,18 +110,21 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Fetch latest list of workspaces and update workspaceList$ to notify subscriptions
    */
   private async updateWorkspaceList(): Promise<void> {
+    // Request the `maximum_workspaces` page size so the server pages by
+    // `workspace.maximum_workspaces`, ensuring every workspace a user is allowed to
+    // create can also be listed.
     const result = await this.list({
-      perPage: 999,
+      perPage: MAXIMUM_WORKSPACES_PER_PAGE,
     });
 
     if (result?.success) {
       const [resultWithWritePermission, resultWithOwnerPermission] = await Promise.all([
         this.list({
-          perPage: 999,
+          perPage: MAXIMUM_WORKSPACES_PER_PAGE,
           permissionModes: [WorkspacePermissionMode.LibraryWrite],
         }),
         this.list({
-          perPage: 999,
+          perPage: MAXIMUM_WORKSPACES_PER_PAGE,
           permissionModes: [WorkspacePermissionMode.Write],
         }),
       ]);
@@ -200,19 +207,19 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Create a workspace
    *
    * @param attributes
-   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
+   * @returns {Promise<IResponse<WorkspaceCreateResult>>} result of the workspace creation
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
       dataConnections?: string[];
     }
-  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
+  ): Promise<IResponse<WorkspaceCreateResult>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
+    const result = await this.safeFetch<WorkspaceCreateResult>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
@@ -270,7 +277,7 @@ export class WorkspaceClient implements IWorkspaceClient {
           result.fail += 1;
           result.failedIds.push(id);
         }
-      } catch (error) {
+      } catch {
         result.fail += 1;
         result.failedIds.push(id);
       }
@@ -295,9 +302,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
-  public list(
-    options?: WorkspaceFindOptions
-  ): Promise<
+  public list(options?: WorkspaceFindOptions): Promise<
     IResponse<{
       workspaces: WorkspaceAttributeWithPermission[];
       total: number;
@@ -393,7 +398,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       savedObjects,
       workspaceId,
     };
-    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+    const result = await this.safeFetch<WorkspaceAssociateResult[]>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });

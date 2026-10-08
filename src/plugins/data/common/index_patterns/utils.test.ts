@@ -20,7 +20,7 @@ import {
 
 describe('test validateDataSourceReference', () => {
   const getIndexPatternSavedObjectMock = (mockedFields: any = {}) =>
-    ({ ...mockedFields } as SavedObject<IndexPatternSavedObjectAttrs>);
+    ({ ...mockedFields }) as SavedObject<IndexPatternSavedObjectAttrs>;
   let indexPatternSavedObjectMock;
   const dataSourceId = 'fakeDataSourceId';
 
@@ -39,6 +39,14 @@ describe('test validateDataSourceReference', () => {
     });
 
     expect(validateDataSourceReference(indexPatternSavedObjectMock)).toBe(false);
+    expect(validateDataSourceReference(indexPatternSavedObjectMock, dataSourceId)).toBe(true);
+  });
+
+  test('should match a legacy engine-typed reference (name "dataSource") so it is reused, not duplicated', () => {
+    indexPatternSavedObjectMock = getIndexPatternSavedObjectMock({
+      references: [{ type: 'OpenSearch', name: 'dataSource', id: dataSourceId }],
+    });
+
     expect(validateDataSourceReference(indexPatternSavedObjectMock, dataSourceId)).toBe(true);
   });
 });
@@ -147,6 +155,24 @@ describe('test getDataSourceIdFromIndexPattern', () => {
       getDataSourceIdFromIndexPattern({
         id: 'logs-*',
         references: [{ id: 'space-1', type: 'space', name: 'space' }],
+      })
+    ).toBeUndefined();
+  });
+
+  test('resolves a reference named "dataSource" even when its type is the engine type', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: 'ds-4', type: 'OpenSearch', name: 'dataSource' }],
+      })
+    ).toBe('ds-4');
+  });
+
+  test('ignores a data-source reference with an empty id', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: '', type: 'DATA_SOURCE', name: 'dataSource' }],
       })
     ).toBeUndefined();
   });

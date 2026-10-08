@@ -12,7 +12,7 @@ import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { Sidecar } from './components/sidecar';
-import { calculateNewPaddingSize } from './helper';
+import { calculateNewPaddingSize, applyOverlayOffsetCssVars } from './helper';
 /**
  * A SidecarRef is a reference to an opened sidecar panel. It offers methods to
  * close the sidecar panel again. If you open a sidecar panel you should make
@@ -128,6 +128,14 @@ export class SidecarService {
     this.targetDomElement = targetDomElement;
     const sidecarConfig$ = new BehaviorSubject<ISidecarConfig | undefined>(undefined);
     const getSidecarConfig$ = () => sidecarConfig$.pipe(takeUntil(this.stop$));
+
+    // Keep OUI's overlay-offset CSS variables in sync with the sidecar's
+    // current dock mode + width, so EuiFlyout / EuiGlobalToastList /
+    // EuiBottomBar shift out of the sidecar's way. Every config change
+    // (open, resize, hide/show, close) flows through sidecarConfig$.
+    sidecarConfig$.pipe(takeUntil(this.stop$)).subscribe((config) => {
+      applyOverlayOffsetCssVars(config);
+    });
 
     const setSidecarConfig = (config: Partial<ISidecarConfig>) => {
       let newSidecarConfig: ISidecarConfig | undefined;

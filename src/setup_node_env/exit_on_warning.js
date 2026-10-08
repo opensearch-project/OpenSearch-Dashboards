@@ -34,6 +34,10 @@ if (process.noProcessWarnings !== true) {
     'NodeDeprecationWarning',
     'MODULE_TYPELESS_PACKAGE_JSON',
     'fs.Stats constructor is deprecated.',
+    // Advisory performance hint emitted by ESLint 10 when `concurrency: 'auto'`
+    // picks multithreading for a small workload (e.g. linting a single plugin
+    // dir). Not a code problem, so it must not terminate the process.
+    'ESLintPoorConcurrencyWarning',
   ];
 
   process.on('warning', function (warn) {

@@ -99,7 +99,7 @@ describe('vegaVisualizationClientWrapper()', () => {
   test('Should just call create as usual if MDS is disabled', async () => {
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', {}, { references: [] });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'visualization',
       {},
       expect.objectContaining({ references: [] })
@@ -109,7 +109,7 @@ describe('vegaVisualizationClientWrapper()', () => {
   test('Should just call create as usual if object type is not visualization type', async () => {
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('dashboard', {}, { references: [] });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'dashboard',
       {},
       expect.objectContaining({ references: [] })
@@ -123,7 +123,7 @@ describe('vegaVisualizationClientWrapper()', () => {
       JSON.parse('{"type": "area", "params": {"spec": "no-spec-here"}}')
     );
     await wrapper.create('visualization', { visState }, { references: [] });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'visualization',
       { visState },
       expect.objectContaining({ references: [] })
@@ -135,7 +135,7 @@ describe('vegaVisualizationClientWrapper()', () => {
     const attributes = getAttributesGivenSpec(spec);
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: [] });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'visualization',
       attributes,
       expect.objectContaining({ references: [] })
@@ -159,7 +159,7 @@ describe('vegaVisualizationClientWrapper()', () => {
     ];
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'visualization',
       attributes,
       expect.objectContaining({ references })
@@ -181,7 +181,7 @@ describe('vegaVisualizationClientWrapper()', () => {
       visState: JSON.stringify(visState),
     };
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
-    expect(wrapper.create('visualization', attributes, { references: [] })).rejects.toThrowError(
+    expect(wrapper.create('visualization', attributes, { references: [] })).rejects.toThrow(
       `Expected exactly 1 result for data_source_name`
     );
   });
@@ -234,7 +234,7 @@ describe('vegaVisualizationClientWrapper()', () => {
     ];
     const wrapper = vegaVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: oldReferences });
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       'visualization',
       attributes,
       expect.objectContaining({ references: newReferences })

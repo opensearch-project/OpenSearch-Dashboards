@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { omit } from 'lodash';
 import {
   IRouter,
   Logger,
@@ -11,17 +12,21 @@ import {
   ACL,
   DEFAULT_NAV_GROUPS,
   WorkspacePermissionMode,
+  OpenSearchDashboardsRequest,
 } from '../../../../core/server';
 import {
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
+  MAXIMUM_WORKSPACES_PER_PAGE,
 } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
+import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   validateWorkspaceColor,
+  validateWorkspaceId,
   getInvalidWorkspacePermissionsError,
   normalizeWorkspacePermissions,
 } from '../../common/utils';
@@ -106,6 +111,15 @@ const workspaceNameSchema = schema.string({
 });
 
 const createWorkspaceAttributesSchema = schema.object({
+  id: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (!validateWorkspaceId(value)) {
+          return 'must be 6–36 characters using only letters, numbers, underscores, and hyphens.';
+        }
+      },
+    })
+  ),
   name: workspaceNameSchema,
   features: featuresSchema,
   ...workspaceOptionalAttributesSchema,
@@ -134,6 +148,17 @@ export function registerRoutes({
   isPermissionControlEnabled: boolean;
   isDataSourceEnabled: boolean;
 }) {
+  // Only dashboard admins may set or clear `reserved` when permission control is on.
+  const omitUnprivilegedReserved = <T extends { reserved?: boolean }>(
+    req: OpenSearchDashboardsRequest,
+    attributes: T
+  ) =>
+    isPermissionControlEnabled &&
+    'reserved' in attributes &&
+    !getWorkspaceState(req).isDashboardAdmin
+      ? omit(attributes, 'reserved')
+      : attributes;
+
   router.post(
     {
       path: `${WORKSPACES_API_BASE_URL}/_list`,
@@ -141,7 +166,14 @@ export function registerRoutes({
         body: schema.object({
           search: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.string()),
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          // Accepts a number for regular paging, or the `MAXIMUM_WORKSPACES_PER_PAGE`
+          // sentinel to page by `workspace.maximum_workspaces` (resolved per request
+          // through the dynamic config service). Defaults to 20, keeping the original
+          // API behavior unchanged.
+          perPage: schema.oneOf(
+            [schema.number({ min: 0 }), schema.literal(MAXIMUM_WORKSPACES_PER_PAGE)],
+            { defaultValue: 20 }
+          ),
           page: schema.number({ min: 0, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
@@ -150,6 +182,8 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      // The `perPage` value (including the `MAXIMUM_WORKSPACES_PER_PAGE` sentinel) is
+      // resolved inside `client.list`.
       const result = await client.list(
         {
           request: req,
@@ -219,9 +253,11 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { attributes, settings } = req.body;
+      const { settings } = req.body;
+      const attributes = omitUnprivilegedReserved(req, req.body.attributes);
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+        id?: string;
         dataSources?: string[];
         dataConnections?: string[];
       } = attributes;
@@ -271,7 +307,8 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
-      const { attributes, settings } = req.body;
+      const { settings } = req.body;
+      const attributes = omitUnprivilegedReserved(req, req.body.attributes);
 
       // Reject permission combinations that do not map to a recognized
       // collaborator access level (read only, read and write, or admin).

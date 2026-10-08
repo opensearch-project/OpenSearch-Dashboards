@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`UserDefaultWorkspace should render title and table normally 1`] = `
 <div>
@@ -196,7 +196,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       >
                         <a
                           class="euiLink euiLink--primary"
-                          href="http://localhost/w/id1/undefined"
+                          href="http://localhost:5601/w/id1/undefined"
                           rel="noreferrer"
                         >
                           <div
@@ -342,7 +342,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       >
                         <a
                           class="euiLink euiLink--primary"
-                          href="http://localhost/w/id2/undefined"
+                          href="http://localhost:5601/w/id2/undefined"
                           rel="noreferrer"
                         >
                           <div
@@ -488,7 +488,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       >
                         <a
                           class="euiLink euiLink--primary"
-                          href="http://localhost/w/id3/undefined"
+                          href="http://localhost:5601/w/id3/undefined"
                           rel="noreferrer"
                         >
                           <div

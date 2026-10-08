@@ -129,7 +129,10 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
     return {
       type: 'opensearch_dashboards_context',
       query: queries,
-      filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
+      filters: uniqFilters(
+        filters.filter((f: any) => !f.meta?.disabled),
+        { negate: true }
+      ),
       timeRange,
     };
   },

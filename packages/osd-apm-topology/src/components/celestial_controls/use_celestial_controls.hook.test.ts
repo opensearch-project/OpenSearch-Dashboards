@@ -17,9 +17,9 @@ describe('useCelestialControls', () => {
   const mockFitView = jest.fn();
 
   const createMockEvent = () =>
-    (({
+    ({
       stopPropagation: jest.fn(),
-    } as unknown) as React.MouseEvent);
+    }) as unknown as React.MouseEvent;
 
   beforeEach(() => {
     jest.clearAllMocks();

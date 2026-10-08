@@ -124,18 +124,20 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
-          const spec = createNumericalStateTimeline(
-            props.transformedData,
+          const { spec, legendItems } = createNumericalStateTimeline(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData,
+            props.seriesDisplayNames
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -154,18 +156,19 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
-          const spec = createCategoricalStateTimeline(
-            props.transformedData,
+          const { spec, legendItems } = createCategoricalStateTimeline(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -182,18 +185,20 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const x = props.axisColumnMappings.x?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
-          const spec = createSingleCategoricalStateTimeline(
-            props.transformedData,
+          const { spec, legendItems } = createSingleCategoricalStateTimeline(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData,
+            props.seriesDisplayNames
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -210,18 +215,19 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const x = props.axisColumnMappings.x?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
-          const spec = createSingleNumericalStateTimeline(
-            props.transformedData,
+          const { spec, legendItems } = createSingleNumericalStateTimeline(
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
-            props.onLegend
+            props.allData
           );
+          props.onLegend?.(legendItems);
           return (
             <EchartsRender
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

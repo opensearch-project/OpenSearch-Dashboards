@@ -31,7 +31,7 @@ export const ImportFileContentBody = ({
           lastModified: selectedFile.lastModified,
         });
         onFileUpdate(detachedFile);
-      } catch (error) {
+      } catch {
         // fallback to empty handle
         onFileUpdate(selectedFile);
       }

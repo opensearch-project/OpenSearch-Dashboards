@@ -202,6 +202,8 @@ export interface SavedObjectsImportOptions {
   dataSourceEnabled?: boolean;
   workspaces?: SavedObjectsBaseOptions['workspaces'];
   isCopy?: boolean;
+  /** If true, allows importing config-type saved objects. Requires advancedSettings.save capability. */
+  canImportConfig?: boolean;
 }
 
 /**
@@ -227,6 +229,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
   workspaces?: SavedObjectsBaseOptions['workspaces'];
+  /** If true, allows importing config-type saved objects. Requires advancedSettings.save capability. */
+  canImportConfig?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

@@ -180,7 +180,7 @@ export const createSavedQueryService = (
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       parsedQuery = JSON.parse(queryString);
       parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
-    } catch (error) {
+    } catch {
       parsedQuery = queryString;
     }
 

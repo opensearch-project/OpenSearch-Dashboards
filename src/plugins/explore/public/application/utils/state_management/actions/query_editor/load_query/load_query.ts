@@ -12,12 +12,14 @@ import { clearLastExecutedData } from '../../../slices';
 /**
  * This is called when you need to load a query, it runs the loaded query.
  */
-export const loadQueryActionCreator = (
-  services: ExploreServices,
-  setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>,
-  query: string
-) => async (dispatch: AppDispatch) => {
-  dispatch(clearLastExecutedData());
-  setEditorTextWithQuery(query);
-  await ((dispatch(runQueryActionCreator(services, query)) as unknown) as Promise<void>);
-};
+export const loadQueryActionCreator =
+  (
+    services: ExploreServices,
+    setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>,
+    query: string
+  ) =>
+  async (dispatch: AppDispatch) => {
+    dispatch(clearLastExecutedData());
+    setEditorTextWithQuery(query);
+    await (dispatch(runQueryActionCreator(services, query)) as unknown as Promise<void>);
+  };

@@ -65,3 +65,24 @@ test('tar strips root directory', async () => {
   await decompress(tarGzSnapshot, path.resolve(opensearchFolder, 'foo'));
   expect(fs.readdirSync(path.resolve(opensearchFolder, 'foo/bin'))).toContain('opensearch');
 });
+
+test('zip with explicit root directory entry decompresses without false zip-slip error', async () => {
+  // root_dir_entry.zip has entries: rootdir/, rootdir/subdir/, rootdir/file.txt, rootdir/subdir/nested.txt
+  // The leading path segment is stripped, so the root dir entry resolves to the output dir itself.
+  // This must not throw "Zip slip detected".
+  const archive = path.resolve(fixturesFolder, 'root_dir_entry.zip');
+  const outDir = path.resolve(opensearchFolder, 'root_dir_out');
+  await expect(decompress(archive, outDir)).resolves.toBeUndefined();
+  expect(fs.readFileSync(path.resolve(outDir, 'file.txt'), 'utf8')).toBe('hello');
+  expect(fs.readFileSync(path.resolve(outDir, 'subdir/nested.txt'), 'utf8')).toBe('world');
+});
+
+test('zip rejects zip-slip path traversal attempts', async () => {
+  const archive = path.resolve(fixturesFolder, 'zip_slip.zip');
+  const outDir = path.resolve(opensearchFolder, 'slip_out');
+  // yauzl v3 may itself reject traversal paths before our guard fires;
+  // either rejection is acceptable — both protect against zip-slip.
+  await expect(decompress(archive, outDir)).rejects.toThrow(
+    /Zip slip detected|invalid relative path/i
+  );
+});

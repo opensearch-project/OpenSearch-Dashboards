@@ -19,7 +19,7 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: PROMETHEUS_ICON },
     tooltip: 'Prometheus',
-    supportedAppNames: ['explore'],
+    supportedAppNames: ['explore', 'dashboard'],
   },
 
   toDataset: (path) => {
@@ -82,7 +82,7 @@ const fetchConnections = async (services: IDataPluginServices): Promise<DataStru
           type: DATASET.PROMETHEUS,
         }))
     );
-  } catch (error) {
+  } catch {
     return [];
   }
 };

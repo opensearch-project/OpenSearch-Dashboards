@@ -36,8 +36,6 @@ describe('ChartTypeSelector', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
   ];
 
@@ -47,8 +45,6 @@ describe('ChartTypeSelector', () => {
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 100,
-      uniqueValuesCount: 10,
     },
   ];
 
@@ -58,8 +54,6 @@ describe('ChartTypeSelector', () => {
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 100,
-      uniqueValuesCount: 80,
     },
   ];
 

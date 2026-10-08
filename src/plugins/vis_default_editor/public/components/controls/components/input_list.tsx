@@ -97,7 +97,7 @@ const validateValue = (
     result.model = new InputObject(inputValue).toString();
     result.isInvalid = false;
     return result;
-  } catch (e) {
+  } catch {
     result.isInvalid = true;
     return result;
   }
@@ -111,7 +111,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         ({
           id: generateId(),
           ...getModelValue(item),
-        } as InputModel)
+        }) as InputModel
     )
   );
   const hasInvalidValues = models.some(config.hasInvalidValuesFn);
@@ -193,7 +193,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
             ({
               id: generateId(),
               ...getModelValue(item),
-            } as InputModel)
+            }) as InputModel
         )
       );
     }

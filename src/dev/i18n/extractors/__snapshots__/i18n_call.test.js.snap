@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`dev/i18n/extractors/i18n_call extracts "i18n" and "i18n.translate" functions call message 1`] = `
 Array [

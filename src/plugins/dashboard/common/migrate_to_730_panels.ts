@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import semver from 'semver';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   GridData,
   SavedDashboardPanelTo60,
@@ -138,7 +138,7 @@ function migratePre61PanelToLatest(
 
   const { columns, sort, row, col, size_x: sizeX, size_y: sizeY, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuidv4();
   return {
     ...rest,
     version,
@@ -191,7 +191,7 @@ function migrate610PanelToLatest(
     : PANEL_HEIGHT_SCALE_FACTOR;
   const { columns, sort, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuidv4();
   return {
     ...rest,
     version,
@@ -229,7 +229,7 @@ function migrate620PanelToLatest(
     : PANEL_HEIGHT_SCALE_FACTOR;
   const { columns, sort, ...rest } = panel;
 
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuidv4();
   return {
     ...rest,
     version,
@@ -260,7 +260,7 @@ function migrate630PanelToLatest(
   }
 
   const { columns, sort, ...rest } = panel;
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuidv4();
   return {
     ...rest,
     version,
@@ -275,7 +275,7 @@ function migrate640To720PanelsToLatest(
   panel: RawSavedDashboardPanel630,
   version: string
 ): RawSavedDashboardPanel730ToLatest {
-  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuidv4();
   const embeddableConfig = panel.embeddableConfig ?? {};
   return {
     ...panel,

@@ -146,7 +146,7 @@ function pluginInitializerContextMock() {
       },
     },
     config: {
-      get: <T>() => ({} as T),
+      get: <T>() => ({}) as T,
     },
   };
 

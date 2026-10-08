@@ -6,6 +6,8 @@
 import {
   SavedObjectPermissions,
   WorkspaceAttribute,
+  WorkspaceCreateAttributes,
+  WorkspaceCreateResult,
   WorkspaceAttributeWithPermission,
   WorkspaceFindOptions,
 } from '../../types';
@@ -97,16 +99,16 @@ export interface IWorkspaceClient {
    * Create a workspace
    *
    * @param attributes
-   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
+   * @returns {Promise<IResponse<WorkspaceCreateResult>>} result of the workspace creation
    */
   create(
-    attributes: Omit<WorkspaceAttribute, 'id'>,
+    attributes: WorkspaceCreateAttributes,
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
       dataConnections?: string[];
     }
-  ): Promise<IWorkspaceResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>>;
+  ): Promise<IWorkspaceResponse<WorkspaceCreateResult>>;
 
   /**
    * Deletes a workspace by workspace id
@@ -137,9 +139,7 @@ export interface IWorkspaceClient {
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
-  list(
-    options?: WorkspaceFindOptions
-  ): Promise<
+  list(options?: WorkspaceFindOptions): Promise<
     IWorkspaceResponse<{
       workspaces: WorkspaceAttributeWithPermission[];
       total: number;

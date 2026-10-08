@@ -5,7 +5,7 @@
 
 import { isEqual } from 'lodash';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
@@ -15,10 +15,27 @@ import {
   VariableSortOrder,
   QueryVariable,
   CustomVariable,
+  TextVariable,
   VariableState,
   VariableWithState,
+  VariableOption,
+  VariableOptionType,
+  NormalizedVariableOption,
+  DistributiveOmit,
 } from './types';
-import { executeQueryForOptionsWithType, filterOptionsByRegex } from './variable_query_utils';
+import {
+  buildVariableOptionsFromQueryResult,
+  executeVariableQuery,
+  applyRegexToVariableOptions,
+  VariableQueryResult,
+} from './variable_query_utils';
+import {
+  executePromQLResourceQuery,
+  buildPromQLVariableOptions,
+  interpolateResourceQuery,
+  collectResourceQueryTextFields,
+} from './promql_variable_query_utils';
+import { normalizePersistedVariables } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
 /**
@@ -26,6 +43,14 @@ import { IVariableInterpolationService } from './variable_interpolation_service'
  * This prevents performance issues with large option lists in the UI.
  */
 const MAX_DISPLAY_OPTIONS = 100;
+
+/**
+ * Minimal telemetry sink so this service can report feature usage without
+ * depending on core. Mirrors the pattern used by the query_enhancements plugin.
+ * Callers wire this to core.telemetry's plugin recorder; when omitted, all
+ * reporting is skipped.
+ */
+export type VariableTelemetrySink = (event: { name: string; data: Record<string, any> }) => void;
 
 /**
  * VariableService — a self-contained feature for managing dashboard variables.
@@ -39,20 +64,37 @@ export class VariableService {
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
+  private telemetrySink?: VariableTelemetrySink;
 
   /**
    * @param dataPlugin - Data plugin for executing queries
    * @param dashboardId - Dashboard ID for auto-saving (optional)
    * @param savedObjectsClient - Client for saving to dashboard saved object
+   * @param telemetrySink - Optional sink for feature-usage telemetry
    */
   constructor(
     dataPlugin?: DataPublicPluginStart,
     dashboardId?: string,
-    savedObjectsClient?: SavedObjectsClientContract
+    savedObjectsClient?: SavedObjectsClientContract,
+    telemetrySink?: VariableTelemetrySink
   ) {
     this.dataPlugin = dataPlugin;
     this.dashboardId = dashboardId;
     this.savedObjectsClient = savedObjectsClient;
+    this.telemetrySink = telemetrySink;
+  }
+
+  /**
+   * Report a telemetry event. Never throws -- telemetry must not break the
+   * feature it measures.
+   */
+  private recordTelemetry(name: string, data: Record<string, any> = {}): void {
+    try {
+      this.telemetrySink?.({ name, data });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[VariableService] Failed to record telemetry:', e);
+    }
   }
 
   public setInterpolationService(service: IVariableInterpolationService): void {
@@ -75,6 +117,14 @@ export class VariableService {
    */
   public initialize(initialVariables: Variable[] = []): void {
     this.variables$.next(initialVariables);
+
+    // Telemetry: reported once per dashboard load that carries variables.
+    if (initialVariables.length > 0) {
+      this.recordTelemetry('variables_loaded', {
+        count: initialVariables.length,
+        types: Array.from(new Set(initialVariables.map((v) => v.type))),
+      });
+    }
   }
 
   /**
@@ -96,7 +146,7 @@ export class VariableService {
 
       if (dashboard.attributes.variablesJSON) {
         const parsed = JSON.parse(dashboard.attributes.variablesJSON);
-        variables = parsed.variables || [];
+        variables = normalizePersistedVariables(parsed.variables) ?? [];
       }
 
       this.initialize(variables);
@@ -143,18 +193,32 @@ export class VariableService {
   /**
    * Add a new variable.
    */
-  public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
+  public async addVariable(variable: DistributiveOmit<Variable, 'id'>): Promise<void> {
     const id = this.generateId();
     const newVariable = this.buildVariable(id, variable);
 
     // Initialize runtime state
-    const options = this.deriveOptions(newVariable);
-    const current = options.length > 0 ? [options[0]] : undefined;
-    newVariable.current = current;
+    const initialRuntimeState = this.deriveRuntimeState(newVariable);
+    if (newVariable.type === VariableType.Text) {
+      newVariable.current = variable.current;
+    } else {
+      newVariable.current =
+        initialRuntimeState.options.length > 0 ? [initialRuntimeState.options[0].value] : undefined;
+    }
 
     const updatedVariables = [...this.getVariables(), newVariable];
-    await this.saveVariables(updatedVariables);
-    this.updateRuntimeState(id, { options });
+
+    try {
+      await this.saveVariables(updatedVariables);
+    } catch (error) {
+      this.recordTelemetry('variable_create_failed', {
+        type: newVariable.type,
+        errorType: (error as Error)?.name ?? 'Unknown',
+      });
+      throw error;
+    }
+    this.recordTelemetry('variable_create_succeeded', { type: newVariable.type });
+    this.updateRuntimeState(id, initialRuntimeState);
 
     if (newVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
@@ -174,13 +238,22 @@ export class VariableService {
 
     if (updates.type && updates.type !== existing.type) {
       // Type changed — rebuild from scratch and clear any error/loading states
-      updatedVariable = this.buildVariable(id, { ...existing, ...updates } as Omit<
+      updatedVariable = this.buildVariable(id, { ...existing, ...updates } as DistributiveOmit<
         Variable,
         'id' | 'current'
       >);
-      const options = this.deriveOptions(updatedVariable);
-      updatedVariable.current = options.length > 0 ? [options[0]] : undefined;
-      newRuntimeState = { options, loading: false, error: undefined };
+      newRuntimeState = {
+        ...this.deriveRuntimeState(updatedVariable),
+        loading: false,
+        error: undefined,
+      };
+      if (updatedVariable.type === VariableType.Text) {
+        const next = updates.current;
+        updatedVariable.current = next && next.length > 0 ? [next[0]] : undefined;
+      } else {
+        updatedVariable.current =
+          newRuntimeState.options.length > 0 ? [newRuntimeState.options[0].value] : undefined;
+      }
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -193,11 +266,13 @@ export class VariableService {
           (existing as CustomVariable).customOptions
         )
       ) {
-        const options = this.deriveOptions(updatedVariable);
-        newRuntimeState = { ...this.getRuntimeState(id), options };
+        newRuntimeState = {
+          ...this.getRuntimeState(id),
+          ...this.deriveRuntimeState(updatedVariable),
+        };
         updatedVariable.current = this.resolveCurrentValueForCustom(
           updatedVariable.current,
-          options,
+          newRuntimeState.options,
           updatedVariable.multi
         );
       }
@@ -210,30 +285,55 @@ export class VariableService {
 
       // When sort changes, re-sort the existing options
       if (updates.sort !== undefined && updates.sort !== existing.sort) {
-        const currentState = newRuntimeState || this.getRuntimeState(id);
-        const sorted = this.sortOptions(currentState.options, updates.sort);
-        newRuntimeState = { ...currentState, options: sorted };
+        if (updatedVariable.type === VariableType.Custom) {
+          newRuntimeState = {
+            ...this.getRuntimeState(id),
+            ...newRuntimeState,
+            ...this.deriveRuntimeState(updatedVariable),
+          };
+        } else {
+          const currentState = newRuntimeState || this.getRuntimeState(id);
+          newRuntimeState = {
+            ...currentState,
+            options: this.sortVariableOptions(currentState.options, updates.sort),
+          };
+        }
       }
     }
 
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = updatedVariable;
-    await this.saveVariables(updatedVariables);
+
+    try {
+      await this.saveVariables(updatedVariables);
+    } catch (error) {
+      this.recordTelemetry('variable_update_failed', {
+        type: updatedVariable.type,
+        errorType: (error as Error)?.name ?? 'Unknown',
+      });
+      throw error;
+    }
+    this.recordTelemetry('variable_update_succeeded', { type: updatedVariable.type });
 
     // Update runtime state only after successful save
     if (newRuntimeState) {
       this.updateRuntimeState(id, newRuntimeState);
     }
 
-    if ((updates as any).query !== undefined && updatedVariable.type === VariableType.Query) {
+    if (
+      updatedVariable.type === VariableType.Query &&
+      this.shouldRefreshQueryOptions(updates as Partial<QueryVariable>)
+    ) {
       await this.refreshVariableOptions(id);
     }
   }
 
   public async removeVariable(id: string): Promise<void> {
+    const removed = this.getVariables().find((v) => v.id === id);
     const updatedVariables = this.getVariables().filter((v) => v.id !== id);
     this.refreshControllers.get(id)?.abort();
     await this.saveVariables(updatedVariables);
+    this.recordTelemetry('variable_deleted', { type: removed?.type ?? 'unknown' });
 
     this.refreshControllers.delete(id);
     this.runtimeState.delete(id);
@@ -270,6 +370,8 @@ export class VariableService {
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = { ...variable, current: value } as Variable;
     this.variables$.next(updatedVariables);
+    // Telemetry: record variable change.
+    this.recordTelemetry('variable_value_changed', { type: variable.type });
 
     this.refreshDependentVariables(variable.name);
   }
@@ -289,24 +391,70 @@ export class VariableService {
     this.updateRuntimeState(id, { loading: true, error: undefined });
 
     try {
-      const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+      let options: NormalizedVariableOption[];
+      let optionType: VariableOptionType | undefined;
 
-      let options = result.options;
-      if (queryVariable.regex) {
-        options = filterOptionsByRegex(options, queryVariable.regex);
+      if (queryVariable.sourceKind === 'prometheusResource') {
+        const promQLResourceQuery = queryVariable.promQLResourceQuery;
+        if (!this.dataPlugin) {
+          throw new Error('VariableService not initialized with dataPlugin');
+        }
+
+        const timeRange = queryVariable.useTimeFilter
+          ? this.dataPlugin.query.timefilter.timefilter.getTime()
+          : undefined;
+
+        let resolvedQueryType = promQLResourceQuery;
+        if (this.interpolationService) {
+          resolvedQueryType = interpolateResourceQuery(promQLResourceQuery, (value) =>
+            this.interpolationService!.hasVariables(value)
+              ? this.interpolationService!.interpolate(
+                  value,
+                  queryVariable.language,
+                  queryVariable.name,
+                  true
+                )
+              : value
+          );
+        }
+
+        const values = await executePromQLResourceQuery(
+          this.dataPlugin,
+          queryVariable.dataset?.id,
+          resolvedQueryType,
+          timeRange
+        );
+        options = buildPromQLVariableOptions(values, queryVariable.regex);
+        optionType = 'string';
+      } else {
+        const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+        const builtResult = buildVariableOptionsFromQueryResult(result, {
+          valueField: queryVariable.valueField,
+          labelField: queryVariable.labelField,
+        });
+
+        options = builtResult.options;
+        if (queryVariable.regex) {
+          options = applyRegexToVariableOptions(options, queryVariable.regex);
+        }
+        optionType = builtResult.optionType;
+      }
+
+      if (controller.signal.aborted) {
+        return;
       }
 
       // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
       const limitedOptions = options.slice(0, MAX_DISPLAY_OPTIONS);
-      const sortedOptions = this.sortOptions(limitedOptions, queryVariable.sort);
+      const sortedOptions = this.sortVariableOptions(limitedOptions, queryVariable.sort);
       const preservedCurrent = this.resolveCurrentValueForQuery(
         queryVariable.current,
-        sortedOptions
+        this.getOptionValues(sortedOptions)
       );
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
-        optionType: result.optionType,
+        optionType,
         loading: false,
         error: undefined,
       });
@@ -321,6 +469,11 @@ export class VariableService {
       if (error?.name === 'AbortError') {
         return;
       }
+      this.recordTelemetry('variable_query_failed', {
+        type: queryVariable.type,
+        language: queryVariable.language ?? 'unknown',
+        errorType: error?.name ?? 'Unknown',
+      });
       this.updateRuntimeState(id, {
         loading: false,
         error: error.message || 'Failed to fetch options',
@@ -356,34 +509,76 @@ export class VariableService {
     return this.runtimeState.get(id) ?? { options: [] };
   }
 
-  /** Derive options from the variable definition (Custom only; Query returns []) */
-  private deriveOptions(variable: Variable | Omit<Variable, 'id' | 'current'>): string[] {
+  /** Derive runtime option state from the variable definition. */
+  private deriveRuntimeState(
+    variable: Variable | DistributiveOmit<Variable, 'id' | 'current'>
+  ): VariableState {
     if (variable.type === VariableType.Custom) {
-      const customVar = variable as CustomVariable;
-      // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
-      const limited = (customVar.customOptions ?? []).slice(0, MAX_DISPLAY_OPTIONS);
-      return this.sortOptions(limited, (variable as any).sort);
+      return this.deriveCustomRuntimeState(variable as CustomVariable);
     }
-    return [];
+    return { options: [] };
   }
 
-  /** Sort options based on the variable's sort setting */
-  private sortOptions(options: string[], sort?: VariableSortOrder): string[] {
+  private deriveCustomRuntimeState(variable: CustomVariable): VariableState {
+    const normalizedOptions = this.normalizeCustomOptions(variable.customOptions ?? []);
+    // Limit to MAX_DISPLAY_OPTIONS before sorting to preserve existing behavior.
+    const limitedOptions = normalizedOptions.slice(0, MAX_DISPLAY_OPTIONS);
+    const sortedOptions = this.sortVariableOptions(limitedOptions, variable.sort);
+
+    return {
+      options: sortedOptions,
+    };
+  }
+
+  private sortVariableOptions(
+    options: NormalizedVariableOption[],
+    sort?: VariableSortOrder
+  ): NormalizedVariableOption[] {
     if (!sort || sort === VariableSortOrder.Disabled) return options;
 
     const sorted = [...options];
+    const getDisplayText = (option: NormalizedVariableOption) => option.label || option.value;
     switch (sort) {
       case VariableSortOrder.AlphabeticalAsc:
-        return sorted.sort((a, b) => a.localeCompare(b));
+        return sorted.sort((a, b) => getDisplayText(a).localeCompare(getDisplayText(b)));
       case VariableSortOrder.AlphabeticalDesc:
-        return sorted.sort((a, b) => b.localeCompare(a));
+        return sorted.sort((a, b) => getDisplayText(b).localeCompare(getDisplayText(a)));
       case VariableSortOrder.NumericalAsc:
-        return sorted.sort((a, b) => parseFloat(a) - parseFloat(b));
+        return sorted.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
       case VariableSortOrder.NumericalDesc:
-        return sorted.sort((a, b) => parseFloat(b) - parseFloat(a));
+        return sorted.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
       default:
         return sorted;
     }
+  }
+
+  private normalizeCustomOptions(options: VariableOption[] = []): NormalizedVariableOption[] {
+    return options.map((option) => {
+      if (typeof option === 'string') {
+        return { value: option };
+      }
+
+      const label = option.label?.trim();
+      return {
+        value: option.value,
+        ...(label ? { label } : {}),
+      };
+    });
+  }
+
+  private getOptionValues(options: NormalizedVariableOption[]): string[] {
+    return options.map((option) => option.value);
+  }
+
+  private normalizeVariableForPersistence(variable: Variable): Variable {
+    if (variable.type !== VariableType.Custom) {
+      return variable;
+    }
+
+    return {
+      ...variable,
+      customOptions: this.normalizeCustomOptions(variable.customOptions),
+    };
   }
 
   /**
@@ -392,17 +587,18 @@ export class VariableService {
    */
   private resolveCurrentValueForCustom(
     currentVal: string[] | undefined,
-    options: string[],
+    options: NormalizedVariableOption[],
     multi?: boolean
   ): string[] | undefined {
-    if (currentVal && currentVal.length > 0 && options.length > 0) {
+    const optionValues = this.getOptionValues(options);
+    if (currentVal && currentVal.length > 0 && optionValues.length > 0) {
       if (multi) {
-        const selected = currentVal.filter((v) => options.includes(v));
-        return selected.length > 0 ? selected : [options[0]];
+        const selected = currentVal.filter((v) => optionValues.includes(v));
+        return selected.length > 0 ? selected : [optionValues[0]];
       }
-      return options.includes(currentVal[0]) ? [currentVal[0]] : [options[0]];
+      return optionValues.includes(currentVal[0]) ? [currentVal[0]] : [optionValues[0]];
     }
-    return options.length > 0 ? [options[0]] : undefined;
+    return optionValues.length > 0 ? [optionValues[0]] : undefined;
   }
 
   /**
@@ -421,43 +617,71 @@ export class VariableService {
     return options.length > 0 ? [options[0]] : undefined;
   }
 
-  private buildVariable(id: string, input: Omit<Variable, 'id' | 'current'>): Variable {
-    const base: Omit<Variable, 'type'> & { type: VariableType } = {
+  private buildVariable(id: string, input: DistributiveOmit<Variable, 'id' | 'current'>): Variable {
+    const base = {
       id,
       name: input.name,
       label: input.label,
       type: input.type,
       current: undefined,
-      multi: input.multi,
-      includeAll: input.includeAll,
       hide: input.hide,
       description: input.description,
+    };
+
+    const optionMeta = {
+      multi: input.multi,
+      includeAll: input.includeAll,
+      allowCustomValue: input.allowCustomValue,
       sort: input.sort,
     };
 
     switch (input.type) {
       case VariableType.Query: {
-        const v = input as Omit<QueryVariable, 'id' | 'current'>;
-        return {
+        const v = input as DistributiveOmit<QueryVariable, 'id' | 'current'>;
+        const shared = {
           ...base,
-          type: VariableType.Query,
-          query: v.query ?? '',
-          language: v.language,
-          dataset: v.dataset,
+          ...optionMeta,
+          type: VariableType.Query as const,
           regex: v.regex,
           useTimeFilter: v.useTimeFilter ?? false,
-        } as QueryVariable;
+        };
+
+        if (v.sourceKind === 'prometheusResource') {
+          return {
+            ...shared,
+            sourceKind: v.sourceKind,
+            language: 'PROMQL',
+            dataset: v.dataset,
+            promQLResourceQuery: v.promQLResourceQuery,
+          };
+        }
+        return {
+          ...shared,
+          sourceKind: 'queryResult',
+          language: v.language,
+          query: v.query ?? '',
+          dataset: v.dataset,
+          valueField: v.valueField,
+          labelField: v.labelField,
+        };
       }
       case VariableType.Custom: {
         const v = input as Omit<CustomVariable, 'id' | 'current'>;
         return {
           ...base,
+          ...optionMeta,
           type: VariableType.Custom,
-          customOptions: v.customOptions,
+          customOptions: this.normalizeCustomOptions(v.customOptions),
         } as CustomVariable;
       }
+      case VariableType.Text: {
+        return {
+          ...base,
+          type: VariableType.Text,
+        } as TextVariable;
+      }
       default:
-        return base as Variable;
+        return { ...base, ...optionMeta } as Variable;
     }
   }
 
@@ -465,7 +689,7 @@ export class VariableService {
   private mergeWithState(variables: Variable[]): VariableWithState[] {
     return variables.map((v) => {
       if (!this.runtimeState.has(v.id)) {
-        this.runtimeState.set(v.id, { options: this.deriveOptions(v) });
+        this.runtimeState.set(v.id, this.deriveRuntimeState(v));
       }
       return {
         ...v,
@@ -492,17 +716,36 @@ export class VariableService {
       const v = variables[i];
       if (v.type === VariableType.Query) {
         const qv = v as QueryVariable;
-        if (pattern.test(qv.query)) {
+        const referencesChangedVar =
+          qv.sourceKind === 'prometheusResource'
+            ? collectResourceQueryTextFields(qv.promQLResourceQuery).some((field) =>
+                pattern.test(field)
+              )
+            : pattern.test(qv.query);
+        if (referencesChangedVar) {
           this.refreshVariableOptions(qv.id);
         }
       }
     }
   }
 
+  private shouldRefreshQueryOptions(updates: Partial<QueryVariable>): boolean {
+    return [
+      'query',
+      'language',
+      'dataset',
+      'valueField',
+      'labelField',
+      'regex',
+      'useTimeFilter',
+      'promQLResourceQuery',
+    ].some((key) => updates[key as keyof QueryVariable] !== undefined);
+  }
+
   private async fetchOptionsForVariableWithType(
-    variable: QueryVariable,
+    variable: Exclude<QueryVariable, { sourceKind: 'prometheusResource' }>,
     signal?: AbortSignal
-  ): Promise<{ options: string[]; optionType?: any }> {
+  ): Promise<VariableQueryResult> {
     if (!this.dataPlugin) {
       throw new Error('VariableService not initialized with dataPlugin');
     }
@@ -511,7 +754,7 @@ export class VariableService {
       // Enforce order constraint: only interpolate variables that appear before current variable
       query = this.interpolationService.interpolate(query, variable.language, variable.name);
     }
-    return executeQueryForOptionsWithType(
+    return executeVariableQuery(
       this.dataPlugin,
       { query, language: variable.language, dataset: variable.dataset },
       signal,
@@ -520,7 +763,7 @@ export class VariableService {
   }
 
   private generateId(): string {
-    return uuid.v4();
+    return uuidv4();
   }
 
   /**
@@ -539,12 +782,16 @@ export class VariableService {
     try {
       // Use empty string to clear variablesJSON when all variables are deleted
       // Using undefined would not remove the field from saved object
-      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : '';
+      const normalizedVariables = variables.map((variable) =>
+        this.normalizeVariableForPersistence(variable)
+      );
+      const variablesJSON =
+        normalizedVariables.length > 0 ? JSON.stringify({ variables: normalizedVariables }) : '';
       await this.savedObjectsClient.update('dashboard', this.dashboardId, {
         variablesJSON,
       });
 
-      this.variables$.next(variables);
+      this.variables$.next(normalizedVariables);
     } catch (error) {
       throw error;
     }

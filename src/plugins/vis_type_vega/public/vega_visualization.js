@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { getNotifications, getData } from './services';
+import { VegaSignalStateManager } from './lib/vega_signal_state_manager';
 
 export const createVegaVisualization = ({ getServiceSettings }) =>
   class VegaVisualization {
@@ -37,6 +38,8 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       this._el = el;
       this._vis = vis;
       this.dataPlugin = getData();
+      this._lastSpec = undefined;
+      this._vegaSignalStateManager = null;
     }
 
     /**
@@ -45,7 +48,7 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
      * @param {*} status
      * @returns {Promise<void>}
      */
-    async render(visData) {
+    async render(visData, visParams) {
       const { toasts } = getNotifications();
 
       if (!visData && !this._vegaView) {
@@ -58,7 +61,7 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       }
 
       try {
-        await this._render(visData);
+        await this._render(visData, visParams);
       } catch (error) {
         if (this._vegaView) {
           this._vegaView.onError(error);
@@ -72,13 +75,26 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
       }
     }
 
-    async _render(vegaParser) {
+    async _render(vegaParser, visParams) {
       if (vegaParser) {
-        // New data received, rebuild the graph
+        const spec = typeof visParams?.spec === 'string' ? visParams.spec : undefined;
+        const specChanged = spec !== undefined && spec !== this._lastSpec;
+
+        // New data received, rebuild the graph. Destroy first so same-spec
+        // refreshes can save state; clear that state afterwards for spec edits.
         if (this._vegaView) {
           await this._vegaView.destroy();
           this._vegaView = null;
         }
+
+        if (specChanged) {
+          this._vegaSignalStateManager?.clear();
+          this._lastSpec = spec;
+        }
+
+        this._vegaSignalStateManager = vegaParser.restoreSignalValuesOnRefresh
+          ? this._vegaSignalStateManager || new VegaSignalStateManager()
+          : null;
 
         const serviceSettings = await getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
@@ -91,6 +107,7 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
           filterManager,
           timefilter,
           externalAction: this._vis.API.events.externalAction,
+          vegaSignalStateManager: this._vegaSignalStateManager,
         };
 
         if (vegaParser.useMap) {
@@ -106,6 +123,8 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
     }
 
     destroy() {
-      return this._vegaView && this._vegaView.destroy();
+      const destroyPromise = this._vegaView && this._vegaView.destroy();
+      this._vegaSignalStateManager?.clear();
+      return destroyPromise;
     }
   };

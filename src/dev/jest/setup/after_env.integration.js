@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 /**
  * Set the default timeout for the integration test suite to 10 minutes
  */

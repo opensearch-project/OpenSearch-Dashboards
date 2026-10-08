@@ -41,6 +41,9 @@ import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { uiSettingsType } from './saved_objects';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
+import { PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID } from './utils';
+import { ENABLE_GLOBAL_SETTING_CONTROL } from '../../utils/constants';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -77,12 +80,17 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
-    coreContext.configService.atPath.mockReturnValue(
-      new BehaviorSubject({ overrides, permission })
-    );
+    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
-    setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
+    // Saved objects is the source of truth for the permission control flag.
+    savedObjectsSetup.getPermissionControlEnabled.mockReturnValue(permission.enabled);
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalSetupContract();
+    setupDeps = {
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+      dynamicConfig: dynamicConfigService,
+    };
     savedObjectsClient = savedObjectsClientMock.create();
     service = new UiSettingsService(coreContext);
     jest.spyOn(service as any, 'register');
@@ -103,6 +111,8 @@ describe('uiSettings', () => {
     it('register adminUiSettings', async () => {
       const setup = await service.setup(setupDeps);
       setup.register(adminUiSettings);
+      // With permission control enabled, only the permission-controlled wrapper is
+      // registered (the legacy dynamic-config wrapper was removed).
       expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
 
       expect((service as any).register).toHaveBeenCalledWith(adminUiSettings);
@@ -136,6 +146,55 @@ describe('uiSettings', () => {
       await expect(customizedService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
         `[Error: [ui settings defaults [foo]: expected key to be have been registered]`
       );
+    });
+
+    describe('permission control', () => {
+      // Builds a service where saved objects reports the given permission control state.
+      const setupWithPermission = async (enabled: boolean) => {
+        const coreContext = mockCoreContext.create();
+        coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+        (setupDeps.savedObjects.getPermissionControlEnabled as jest.Mock).mockReturnValue(enabled);
+        const customizedService = new UiSettingsService(coreContext);
+        const registerSpy = jest.spyOn(customizedService as any, 'register');
+        await customizedService.setup(setupDeps);
+        const start = await customizedService.start();
+        start.asScopedToClient(savedObjectsClient);
+        return { registerSpy };
+      };
+
+      it('registers the permission-controlled wrapper and global setting control when enabled', async () => {
+        const { registerSpy } = await setupWithPermission(true);
+
+        expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
+        expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledWith(
+          expect.any(Number),
+          PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
+          expect.any(Function)
+        );
+        // The admin-only "restrict global settings" toggle is registered.
+        expect(registerSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            [ENABLE_GLOBAL_SETTING_CONTROL]: expect.any(Object),
+          })
+        );
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].permissionControlEnabled).toBe(
+          true
+        );
+      });
+
+      it('skips the wrapper and global setting control when disabled', async () => {
+        const { registerSpy } = await setupWithPermission(false);
+
+        expect(setupDeps.savedObjects.addClientWrapper).not.toHaveBeenCalled();
+        expect(registerSpy).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            [ENABLE_GLOBAL_SETTING_CONTROL]: expect.anything(),
+          })
+        );
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].permissionControlEnabled).toBe(
+          false
+        );
+      });
     });
   });
 
@@ -186,7 +245,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
       });
 
@@ -194,7 +253,7 @@ describe('uiSettings', () => {
         await service.setup(setupDeps);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
       });
@@ -206,7 +265,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(
           adminUiSettings
@@ -235,7 +294,7 @@ describe('uiSettings', () => {
         await customizedService.setup(setupDeps);
         const start = await customizedService.start();
         start.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults?.foo?.value).toEqual(
           'configured'
         );

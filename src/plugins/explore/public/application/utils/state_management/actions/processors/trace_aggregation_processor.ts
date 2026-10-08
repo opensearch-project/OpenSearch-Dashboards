@@ -65,6 +65,7 @@ export const processTraceAggregationResults = ({
     : {
         hits: { hits: [], total: 0, max_score: 0 },
         fieldCounts: {},
+        nonEmptyFieldCounts: {},
         dataset,
         elapsedMs: 0,
       };
@@ -130,7 +131,7 @@ export const processTraceAggregationResults = ({
           }
           // Cache the xAxisFormat
           histogramConfigCache.set(cacheKey, { xAxisFormat, bucketInterval, intervalMs });
-        } catch (error) {
+        } catch {
           // Fall back to default format if histogram config fails
         }
       }
@@ -173,7 +174,7 @@ export const processTraceAggregationResults = ({
     }
 
     result.bucketInterval = bucketInterval;
-  } catch (error) {
+  } catch {
     // Error during processing
   }
 

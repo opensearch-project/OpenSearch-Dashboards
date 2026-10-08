@@ -39,6 +39,8 @@ export const savedObjectsMigrationConfig = {
     scrollDuration: schema.string({ defaultValue: '15m' }),
     pollInterval: schema.number({ defaultValue: 1500 }),
     skip: schema.boolean({ defaultValue: false }),
+    // Security roles allowed to call the internal `_migrate` route when an auth provider is registered.
+    adminRoles: schema.arrayOf(schema.string(), { defaultValue: ['all_access'] }),
     delete: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),
@@ -81,6 +83,9 @@ export class SavedObjectConfig {
   public maxImportExportSize: number;
 
   public migration: SavedObjectsMigrationConfigType;
+  public permission: {
+    enabled: boolean;
+  };
   public storage: {
     backend: 'opensearch' | 'sqlite';
     sqlite: { path: string };
@@ -93,6 +98,9 @@ export class SavedObjectConfig {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
     this.migration = rawMigrationConfig;
+    this.permission = {
+      enabled: rawConfig.permission.enabled,
+    };
     this.storage = {
       backend: rawConfig.storage.backend,
       sqlite: { path: rawConfig.storage.sqlite.path },

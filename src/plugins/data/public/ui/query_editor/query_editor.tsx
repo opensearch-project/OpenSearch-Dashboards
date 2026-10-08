@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
+import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
 import {
   IDataPluginServices,
   Query,
@@ -26,6 +26,7 @@ import {
   QueryResult,
   QueryStatus,
   useQueryStringManager,
+  UI_SETTINGS,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -40,11 +41,32 @@ import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
 } from '../../antlr/opensearch_ppl/ppl_grammar_cache';
+import { syncPPLValidationContext } from './validation_context';
 import {
-  attachPPLGrammarRefresh,
-  attachPPLValidationContext,
-  syncPPLValidationContext,
-} from './validation_context';
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+} from './lint_context';
+import {
+  buildPPLLintContext,
+  extractFieldMetadata,
+  LintFieldsCache,
+} from '../../ppl_lint/lint_context_builder';
+import { fetchDisabledObjectFields } from '../../ppl_lint/disabled_object_fields';
+import { fetchVisibleIndices } from '../../ppl_lint/visible_indices';
+import { getAiAgentAvailableForDataSource } from '../../ppl_lint/ai_agent_availability';
+import {
+  armPPLLintFixRequest,
+  storePPLLintFixSession,
+} from '../../chat_tools/ppl_lint_fix_session';
+import {
+  createPPLLintFixApplyAction,
+  createPPLLintFixTestAction,
+  PPL_LINT_FIX_DATA_HOST,
+} from '../../chat_tools/ppl_lint_fix_tool_registration';
+import type { AskPPLLintFixRequest } from '../../chat_tools/ppl_lint_fix_session';
+import { addPPLLintFixAssistantContext, PPLLintFixLifecycle } from './ppl_lint_fix_lifecycle';
 
 export interface QueryEditorProps {
   query: Query;
@@ -83,8 +105,17 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const detachValidationContextRef = useRef<(() => void) | undefined>();
-  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
+  const detachRefs = useRef<PPLDetachRefs>({
+    validationContext: { current: undefined },
+    grammarRefresh: { current: undefined },
+    lintContext: { current: undefined },
+    lintGrammarRefresh: { current: undefined },
+    lintContextRefresh: { current: undefined },
+    lintHoverPersistence: { current: undefined },
+  });
+  // Cache of index-pattern field names per dataset id, populated asynchronously
+  // for field-validation lint. Self-suppresses until loaded.
+  const lintFieldsRef = useRef<LintFieldsCache>({});
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const bottomPanelRef = useRef<HTMLDivElement>(null);
@@ -97,6 +128,19 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const languageManager = queryString.getLanguageService();
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
+  // Owns the in-flight AI lint-fix request for this editor mount: serializes
+  // chat launches, expires abandoned requests, and releases only its own
+  // request when async launch work completes out of order.
+  const pplLintFixLifecycleRef = useRef<PPLLintFixLifecycle>();
+  if (!pplLintFixLifecycleRef.current) {
+    pplLintFixLifecycleRef.current = new PPLLintFixLifecycle(
+      PPL_LINT_FIX_DATA_HOST,
+      (contextId) => {
+        services.contextProvider?.getAssistantContextStore()?.removeContextById(contextId);
+      }
+    );
+  }
+  const pplLintFixLifecycle = pplLintFixLifecycleRef.current;
   const { query } = useQueryStringManager({
     queryString,
   });
@@ -125,22 +169,193 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const getValidationContext = (): PPLValidationContext => {
     const dsId = queryRef.current.dataset?.dataSource?.id;
     const dsVersion = queryRef.current.dataset?.dataSource?.version;
+    const dsEngineType =
+      queryRef.current.dataset?.dataSource?.engineType ??
+      queryRef.current.dataset?.dataSource?.type;
     return {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     };
   };
 
+  function onAskAiFix(request: AskPPLLintFixRequest): void {
+    pplLintFixLifecycle.beginRequest(request.requestId);
+    // Arm before the chat send so the tools register for this fix turn.
+    armPPLLintFixRequest(request.requestId);
+    const session = {
+      host: PPL_LINT_FIX_DATA_HOST,
+      request,
+      getCurrentQuery: () => inputRef.current?.getValue() ?? toUser(queryRef.current.query),
+      getCurrentQueryState: () => queryString.getQuery(),
+      getLintContext,
+    };
+
+    const chat = services.chat;
+    if (!chat?.sendMessageWithWindow || !(chat.isAvailable?.() ?? true)) {
+      pplLintFixLifecycle.abandonRequest(request.requestId);
+      services.notifications.toasts.addWarning(
+        i18n.translate('data.pplLint.aiFix.chatUnavailable', {
+          defaultMessage: 'AI is not available for this PPL lint fix.',
+        })
+      );
+      return;
+    }
+
+    // Send the fix request's machine plumbing (correlation ids + tool-calling
+    // instructions) out-of-band via the assistant context store so the model
+    // receives it without it rendering as a chat bubble. The visible bubble is
+    // the short human message (request.chatMessage). Keyed by requestId.
+    const contextStore = services.contextProvider?.getAssistantContextStore?.();
+    addPPLLintFixAssistantContext(request, contextStore, PPL_LINT_FIX_DATA_HOST);
+
+    // Register the fix tools synchronously here, before the send below snapshots the
+    // available tools. Arming flips the search bar's flow-active flag, but that registers
+    // the tools in a post-commit effect, which can land after the send when the chat window
+    // is already open. Registering to the same action service (idempotent by name) closes
+    // that race; <PPLLintFixToolRegistration> still owns the reactive unregister on cleanup.
+    const contextProviderActions = services.contextProvider?.actions;
+    if (contextProviderActions) {
+      const removeContextById = (contextId: string) => contextStore?.removeContextById(contextId);
+      contextProviderActions.registerAssistantAction(
+        createPPLLintFixApplyAction({ queryString, removeContextById })
+      );
+      contextProviderActions.registerAssistantAction(createPPLLintFixTestAction());
+    }
+
+    void pplLintFixLifecycle
+      .waitForChatLaunch(request.requestId, () =>
+        chat.sendMessageWithWindow!(request.chatMessage, [], { clearConversation: true })
+      )
+      .then((failure) => {
+        if (!failure) {
+          // Activate only after the fresh chat reset so an older card cannot
+          // capture this request while its previous conversation is still live.
+          if (pplLintFixLifecycle.ownsRequest(request.requestId)) {
+            storePPLLintFixSession({
+              ...session,
+              chatThreadId: chat.getThreadId(),
+              getCurrentChatThreadId: () => chat.getThreadId(),
+            });
+          }
+          return;
+        }
+        // A late failure for a replaced request still cleans that exact context,
+        // but should not warn for or disturb the newer owned request.
+        if (!failure.abandonedOwnedRequest) {
+          return;
+        }
+        services.notifications.toasts.addWarning(
+          i18n.translate('data.pplLint.aiFix.openChatError', {
+            defaultMessage: 'Could not open AI for this PPL lint fix.',
+          })
+        );
+      });
+  }
+
+  function getLintContext(): PPLLintContext {
+    const aiFixToolName = (
+      services as IDataPluginServices & {
+        pplLintFixToolName?: string;
+      }
+    ).pplLintFixToolName;
+    const chatAvailable = Boolean(
+      aiFixToolName &&
+      services.chat?.sendMessageWithWindow &&
+      (services.chat.isAvailable?.() ?? true)
+    );
+    return buildPPLLintContext(
+      queryRef.current.dataset,
+      lintFieldsRef.current,
+      services,
+      chatAvailable ? { onAskAiFix, aiFixToolName } : undefined
+    );
+  }
+
   useEffect(
     () => () => {
-      detachValidationContextRef.current?.();
-      detachValidationContextRef.current = undefined;
-      detachGrammarRefreshRef.current?.();
-      detachGrammarRefreshRef.current = undefined;
+      pplLintFixLifecycle.dispose();
+      cleanupPPLContexts(detachRefs.current);
     },
-    []
+    [pplLintFixLifecycle]
   );
+
+  // Load index-pattern field names for the active dataset and feed them to the
+  // lint context. Field-validation self-suppresses until this resolves; we push
+  // the context in a single phase after the async load to avoid flicker.
+  useEffect(() => {
+    const datasetId = query.dataset?.id;
+    const dataSourceId = query.dataset?.dataSource?.id;
+    const datasetType = query.dataset?.type;
+    const sourcePattern = query.dataset?.title;
+    let cancelled = false;
+
+    const loadFields = async () => {
+      if (!datasetId) {
+        // No dataset: drop cached fields so field-validation self-suppresses
+        // rather than running against a previous dataset's metadata.
+        lintFieldsRef.current = {};
+      } else {
+        try {
+          // Probe per-source AI reachability alongside the field load, only when
+          // chat is wired at all — otherwise the AI action is already hidden by
+          // the missing opener, so the probe would be a wasted call on every
+          // dataset switch. Fail-open when unprobed (undefined leaves it shown).
+          const shouldProbeAi = Boolean(services.http && (services.chat?.isAvailable?.() ?? false));
+          const [indexPattern, aiAgentAvailableForSource] = await Promise.all([
+            getIndexPatterns().get(datasetId),
+            shouldProbeAi
+              ? getAiAgentAvailableForDataSource(services.http, dataSourceId, 5000)
+              : Promise.resolve(undefined),
+          ]);
+          if (cancelled || !indexPattern) {
+            return;
+          }
+          const { fields, typeMap } = extractFieldMetadata(indexPattern);
+          // Two metadata probes the field list cannot supply: `enabled:false` is
+          // stripped by _field_caps, and the visible-index list is cluster-wide.
+          // Both are best-effort — their rules self-suppress when absent.
+          const [disabledObjectFields, visibleIndices] = await Promise.all([
+            fetchDisabledObjectFields(services.http, indexPattern),
+            fetchVisibleIndices(services.http, dataSourceId),
+          ]);
+          if (cancelled) {
+            return;
+          }
+          lintFieldsRef.current = {
+            datasetId,
+            dataSourceId,
+            datasetType,
+            selectedSourcePattern: sourcePattern,
+            fields,
+            typeMap,
+            disabledObjectFields,
+            visibleIndices,
+            aiAgentAvailableForSource,
+          };
+        } catch {
+          // On failure leave fields unset so field-validation self-suppresses.
+          if (cancelled) {
+            return;
+          }
+          lintFieldsRef.current = {};
+        }
+      }
+
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    };
+
+    void loadFields();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.dataset?.id, query.dataset?.dataSource?.id, query.dataset?.type, query.dataset?.title]);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {
@@ -152,8 +367,9 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   useEffect(() => {
     const dsId = query.dataset?.dataSource?.id;
     const dsVersion = query.dataset?.dataSource?.version;
+    const dsEngineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
     syncPPLValidationContext(inputRef.current, {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     });
@@ -162,20 +378,52 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     if (model) {
       void revalidatePPLModel(model);
     }
-  }, [query.dataset?.dataSource?.id, query.dataset?.dataSource?.version]);
+  }, [
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    query.dataset?.dataSource?.engineType,
+    query.dataset?.dataSource?.type,
+  ]);
+
+  useEffect(() => {
+    syncPPLLintContext(inputRef.current, getLintContext());
+    const model = inputRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    query.dataset?.id,
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    services.uiSettings,
+  ]);
+
+  useEffect(() => {
+    const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
+        return;
+      }
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.uiSettings]);
 
   const renderQueryEditorExtensions = () => {
-    if (
-      !(
-        headerRef.current &&
-        bannerRef.current &&
-        queryControlsContainer.current &&
-        bottomPanelRef.current &&
-        query.language &&
-        extensionMap &&
-        Object.keys(extensionMap).length > 0
-      )
-    ) {
+    if (!(
+      headerRef.current &&
+      bannerRef.current &&
+      queryControlsContainer.current &&
+      bottomPanelRef.current &&
+      query.language &&
+      extensionMap &&
+      Object.keys(extensionMap).length > 0
+    )) {
       return null;
     }
     return (
@@ -375,14 +623,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       setLineCount(editor.getModel()?.getLineCount());
       inputRef.current = editor;
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const editorModel = editor.getModel();
       if (editorModel) {
@@ -450,14 +698,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const singleLineModel = editor.getModel();
       if (singleLineModel) {

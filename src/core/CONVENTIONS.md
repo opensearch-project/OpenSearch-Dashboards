@@ -153,7 +153,7 @@ The bulk of your plugin logic will most likely live inside _handlers_ registered
 
 #### Applications
 
-It's important that UI code is not included in the main bundle for your plugin. Our webpack configuration supports
+It's important that UI code is not included in the main bundle for your plugin. Our rspack configuration supports
 dynamic async imports to split out imports into a separate bundle. Every app's rendering logic and UI code should
 leverage this pattern.
 

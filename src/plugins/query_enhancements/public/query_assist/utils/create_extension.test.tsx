@@ -113,7 +113,7 @@ describe('CreateExtension', () => {
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
-    expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
+    expect(httpMock.get).toHaveBeenCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
     });
   });
@@ -130,7 +130,7 @@ describe('CreateExtension', () => {
     );
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeFalsy();
-    expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
+    expect(httpMock.get).toHaveBeenCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
     });
   });
@@ -185,7 +185,7 @@ describe('CreateExtension', () => {
         "type": "FEATURE",
       }
     `);
-    expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
+    expect(httpMock.get).toHaveBeenCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id2' },
       signal: new AbortController().signal,
     });
@@ -206,7 +206,7 @@ describe('CreateExtension', () => {
     );
     metas.push(await extension.getDataStructureMeta?.('mock-data-source-id2'));
     metas.forEach((meta) => expect(meta?.type).toBe('FEATURE'));
-    expect(httpMock.get).toBeCalledTimes(1);
+    expect(httpMock.get).toHaveBeenCalledTimes(1);
   });
 
   it('should render the component if language is supported', async () => {

@@ -14,8 +14,6 @@ const numericalColumns: VisColumn[] = [
     column: 'num1',
     name: 'Num1',
     schema: VisFieldType.Numerical,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 
@@ -25,8 +23,6 @@ const categoricalColumns: VisColumn[] = [
     column: 'cat1',
     name: 'Cat1',
     schema: VisFieldType.Categorical,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 
@@ -36,8 +32,6 @@ const dateColumns: VisColumn[] = [
     column: 'date1',
     name: 'Date1',
     schema: VisFieldType.Date,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 

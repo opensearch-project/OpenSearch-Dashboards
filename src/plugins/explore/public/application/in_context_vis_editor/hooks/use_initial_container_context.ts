@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { getServices } from '../../../services/services';
 import { ContainerState, CONTAINER_URL_KEY, VARIABLE_VALUES_URL_KEY } from '../types';
-import { Variable } from '../../../../../dashboard/public';
+import { Variable, normalizePersistedVariables } from '../../../../../dashboard/public';
 import {
   findReferencingDashboards,
   ReferencingDashboard,
@@ -36,19 +36,14 @@ export const useInitialContainerContext = () => {
 
         if (savedObject.attributes.variablesJSON) {
           const parsed = JSON.parse(savedObject.attributes.variablesJSON);
+          const normalizedVariables = normalizePersistedVariables(parsed?.variables);
 
-          if (
-            parsed &&
-            typeof parsed === 'object' &&
-            Array.isArray(parsed.variables) &&
-            parsed.variables.length > 0
-          ) {
+          if (normalizedVariables && normalizedVariables.length > 0) {
             // Read variable values from URL
-            const urlVariableValues = osdUrlStateStorage?.get<Record<string, string[]>>(
-              VARIABLE_VALUES_URL_KEY
-            );
+            const urlVariableValues =
+              osdUrlStateStorage?.get<Record<string, string[]>>(VARIABLE_VALUES_URL_KEY);
 
-            const variablesWithValues = parsed.variables.map((variable: Variable) => {
+            const variablesWithValues = normalizedVariables.map((variable: Variable) => {
               // Validate URL variable values
               if (
                 urlVariableValues &&

@@ -21,9 +21,9 @@ describe('PrometheusResourceClient', () => {
   const testTimeRange = { from: 'now-15m', to: 'now' };
 
   beforeEach(() => {
-    mockHttp = ({
+    mockHttp = {
       post: jest.fn().mockResolvedValue({ data: [] }),
-    } as unknown) as jest.Mocked<HttpSetup>;
+    } as unknown as jest.Mocked<HttpSetup>;
 
     client = new PrometheusResourceClient(mockHttp);
 
@@ -97,6 +97,29 @@ describe('PrometheusResourceClient', () => {
           resource: {
             type: RESOURCE_TYPES.PROMETHEUS.METRICS,
             name: undefined,
+          },
+        }),
+      });
+    });
+
+    it('should call the correct endpoint with a metric regex filter', async () => {
+      const metric = '{__name__=~"node.*"}';
+      await client.getMetrics(testDataConnectionId, testMeta, testTimeRange, metric);
+
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/enhancements/resources', {
+        body: JSON.stringify({
+          connection: {
+            id: testDataConnectionId,
+            type: 'prometheus',
+          },
+          resource: {
+            type: RESOURCE_TYPES.PROMETHEUS.METRICS,
+            name: metric,
+          },
+          content: {
+            ...testMeta,
+            start: mockFromTime,
+            end: mockToTime,
           },
         }),
       });

@@ -35,7 +35,7 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
     let visState;
     try {
       visState = JSON.parse(tsvbAttributes.visState);
-    } catch (ex) {
+    } catch {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 

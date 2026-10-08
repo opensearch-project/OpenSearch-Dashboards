@@ -57,7 +57,7 @@ export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   public readonly path: string;
   public readonly manifest: PluginManifest;

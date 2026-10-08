@@ -32,7 +32,7 @@ import normalizePath from 'normalize-path';
 import Qs from 'querystring';
 
 /**
- * Parse an absolute path, supporting normalized paths from webpack,
+ * Parse an absolute path, supporting normalized paths from rspack,
  * into a list of directories and root
  */
 export function parseDirPath(path: string) {

@@ -113,7 +113,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
           listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
         );
       }
-    } catch (e) {
+    } catch {
       setDataSource(defaultDataSource);
       handleDisplayToastMessage({
         message: i18n.translate('dataSourcesManagement.editDataSource.fetchDataSourceFailMsg', {
@@ -165,7 +165,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       await setDefaultDataSource();
       await loadDefaultDataSourceId();
       props.history.push('');
-    } catch (e) {
+    } catch {
       setIsLoading(false);
       handleDisplayToastMessage({
         message: i18n.translate('dataSourcesManagement.editDataSource.deleteDataSourceFailMsg', {
@@ -181,7 +181,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       if (defaultDataSourceId === dataSourceID) {
         await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, scope);
       }
-    } catch (e) {
+    } catch {
       setIsLoading(false);
       handleDisplayToastMessage({
         message: i18n.translate(

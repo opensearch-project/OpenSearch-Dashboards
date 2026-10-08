@@ -42,10 +42,10 @@ describe('onSetOptInClick', () => {
     telemetryNotifications['optInBannerId'] = bannerId;
 
     await telemetryNotifications['onSetOptInClick'](optIn);
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
-    expect(telemetryService.setOptIn).toBeCalledTimes(1);
-    expect(telemetryService.setOptIn).toBeCalledWith(optIn);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledWith(bannerId);
+    expect(telemetryService.setOptIn).toHaveBeenCalledTimes(1);
+    expect(telemetryService.setOptIn).toHaveBeenCalledWith(optIn);
   });
 });
 
@@ -59,9 +59,9 @@ describe('setOptedInNoticeSeen', () => {
     telemetryNotifications['optedInNoticeBannerId'] = bannerId;
     await telemetryNotifications.setOptedInNoticeSeen();
 
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
-    expect(telemetryService.setUserHasSeenNotice).toBeCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledTimes(1);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledWith(bannerId);
+    expect(telemetryService.setUserHasSeenNotice).toHaveBeenCalledTimes(1);
   });
 });
 

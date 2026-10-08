@@ -7,6 +7,24 @@ import { WorkspaceObject } from 'opensearch-dashboards/public';
 import moment from 'moment';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 
+export const ASSET_MIGRATION_TOUR_STORAGE_KEY = 'workspace.assetMigration.tourDismissed';
+
+export const readMigrationTourDismissed = (): boolean => {
+  try {
+    return Boolean(localStorage.getItem(ASSET_MIGRATION_TOUR_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+};
+
+export const writeMigrationTourDismissed = () => {
+  try {
+    localStorage.setItem(ASSET_MIGRATION_TOUR_STORAGE_KEY, 'true');
+  } catch {
+    // The in-memory state still hides the tour for this session.
+  }
+};
+
 export interface UpdatedWorkspaceObject extends WorkspaceObject {
   accessTimeStamp?: number;
   visitedMessage?: string;
@@ -26,6 +44,84 @@ export const getWorkspacesWithRecentMessage = (
         ? `Viewed ${moment(recentWorkspace.timestamp).fromNow()}`
         : `Not visited recently`,
     };
+  });
+};
+
+export type WorkspaceRole = 'owner' | 'readwrite' | 'readonly';
+export type WorkspaceRecency = 'all' | 'today' | 'week' | 'month';
+
+export interface WorkspaceFilterCriteria {
+  searchQuery: string;
+  roles: WorkspaceRole[];
+  recency: WorkspaceRecency;
+}
+
+export type WorkspaceRoleFilter = 'all' | WorkspaceRole;
+
+export const buildWorkspaceFilterCriteria = ({
+  searchQuery,
+  roleFilter,
+  recency,
+}: {
+  searchQuery: string;
+  roleFilter: WorkspaceRoleFilter;
+  recency: WorkspaceRecency;
+}): WorkspaceFilterCriteria => ({
+  searchQuery,
+  roles: roleFilter === 'all' ? [] : [roleFilter],
+  recency,
+});
+
+export const getWorkspaceRole = (workspace: WorkspaceObject): WorkspaceRole => {
+  if (workspace.owner) {
+    return 'owner';
+  }
+  if (workspace.readonly) {
+    return 'readonly';
+  }
+  return 'readwrite';
+};
+
+export const getRecencyCutoff = (recency: WorkspaceRecency): number | null => {
+  switch (recency) {
+    case 'today':
+      return moment().startOf('day').valueOf();
+    case 'week':
+      return moment().startOf('week').valueOf();
+    case 'month':
+      return moment().startOf('month').valueOf();
+    default:
+      return null;
+  }
+};
+
+export const isWorkspaceFilterActive = ({
+  searchQuery,
+  roles,
+  recency,
+}: WorkspaceFilterCriteria): boolean =>
+  !!searchQuery.trim() || roles.length > 0 || recency !== 'all';
+
+export const filterWorkspaces = (
+  workspaces: UpdatedWorkspaceObject[],
+  { searchQuery, roles, recency }: WorkspaceFilterCriteria
+): UpdatedWorkspaceObject[] => {
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const recencyCutoff = getRecencyCutoff(recency);
+  return workspaces.filter((workspace) => {
+    if (normalizedQuery && !workspace.name.toLowerCase().includes(normalizedQuery)) {
+      return false;
+    }
+    if (roles.length > 0 && !roles.includes(getWorkspaceRole(workspace))) {
+      return false;
+    }
+    if (
+      recencyCutoff !== null &&
+      (!workspace.accessTimeStamp || workspace.accessTimeStamp < recencyCutoff)
+    ) {
+      return false;
+    }
+    return true;
   });
 };
 

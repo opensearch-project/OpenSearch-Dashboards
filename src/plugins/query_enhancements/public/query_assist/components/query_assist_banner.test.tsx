@@ -59,7 +59,7 @@ describe('<QueryAssistBanner /> spec', () => {
     const { props, component } = renderQueryAssistBanner();
 
     fireEvent.click(component.getByTestId('queryAssist-banner-changeLanguage'));
-    expect(props.dependencies.onSelectLanguage).toBeCalledWith('test-lang1');
-    expect(props.dependencies.setIsCollapsed).toBeCalledWith(false);
+    expect(props.dependencies.onSelectLanguage).toHaveBeenCalledWith('test-lang1');
+    expect(props.dependencies.setIsCollapsed).toHaveBeenCalledWith(false);
   });
 });

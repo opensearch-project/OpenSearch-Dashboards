@@ -83,8 +83,11 @@ export const CollapsibleNavTop = ({
       hasShadow={false}
       className="navGroupEnabledNavTopWrapper"
     >
-      {/* The spacer here is used for align with the page header */}
-      <EuiSpacer size="xs" />
+      {/* Small top offset to align the logo row with the chrome page header.
+          Only for the classic nav — the icon side nav handles its own top
+          spacing via the wrapper padding so the logo lines up with the header
+          row instead of sitting ~8px lower. */}
+      {!enableIconSideNav && <EuiSpacer size="xs" />}
       {enableIconSideNav ? (
         // Icon side nav — single stable DOM tree. CSS handles collapsed vs expanded layout.
         <div
@@ -92,7 +95,9 @@ export const CollapsibleNavTop = ({
             shouldShrinkNavigation ? 'iconSideNavTop--collapsed' : 'iconSideNavTop--expanded'
           }`}
         >
-          {/* Row 1: Logo + action buttons */}
+          {/* Row 1: Logo (home link) + action buttons. Expanded shows search, a
+              collapse button, and a pin to keep the nav open. The logo is just
+              the home link. */}
           <div className="iconSideNavTop__row">
             <EuiButtonEmpty
               flush="both"
@@ -102,52 +107,58 @@ export const CollapsibleNavTop = ({
             >
               <EuiIcon type={homeIcon} size="l" data-test-subj={`collapsibleNavIcon-${homeIcon}`} />
             </EuiButtonEmpty>
-            {/* Action buttons: visible in expanded, hidden (overflow clipped) in collapsed */}
+            {/* Action buttons: visible in expanded, hidden (overflow clipped) in
+                collapsed. Search is a destination affordance and sits in its own
+                slot; collapse + pin are chrome controls, grouped together at the
+                trailing edge so the two kinds don't read as one cluster. */}
             <div className="iconSideNavTop__actions">
-              {searchElement}
-              {onIsLockedUpdate && (
+              <div className="iconSideNavTop__searchSlot">{searchElement}</div>
+              <div className="iconSideNavTop__chromeControls">
                 <EuiButtonIcon
-                  onClick={() => onIsLockedUpdate(!isLocked)}
-                  iconType={isLocked ? 'lock' : 'lockOpen'}
-                  color="subdued"
+                  onClick={onClickShrink}
+                  iconType="dockedLeft"
+                  color="text"
                   display="empty"
-                  aria-label={
-                    isLocked
-                      ? i18n.translate('core.ui.primaryNav.unlockNavigation', {
-                          defaultMessage: 'Unlock navigation',
-                        })
-                      : i18n.translate('core.ui.primaryNav.lockNavigation', {
-                          defaultMessage: 'Lock navigation',
-                        })
-                  }
-                  data-test-subj="collapsibleNavLockButton"
+                  aria-label={i18n.translate('core.ui.primaryNav.collapseNavigation', {
+                    defaultMessage: 'Collapse navigation',
+                  })}
+                  data-test-subj="collapsibleNavCollapseButton"
                   size="xs"
                 />
-              )}
-              <EuiButtonIcon
-                onClick={onClickShrink}
-                iconType="menuLeft"
-                color="subdued"
-                display="empty"
-                aria-label={i18n.translate('core.ui.primaryNav.collapseNavigation', {
-                  defaultMessage: 'Collapse navigation',
-                })}
-                data-test-subj="collapsibleNavToggleButton"
-                size="xs"
-              />
+                {onIsLockedUpdate && (
+                  <EuiButtonIcon
+                    onClick={() => onIsLockedUpdate(!isLocked)}
+                    iconType={isLocked ? 'lock' : 'lockOpen'}
+                    color="text"
+                    display="empty"
+                    aria-label={
+                      isLocked
+                        ? i18n.translate('core.ui.primaryNav.unpinNavigation', {
+                            defaultMessage: 'Unpin navigation',
+                          })
+                        : i18n.translate('core.ui.primaryNav.pinNavigation', {
+                            defaultMessage: 'Pin navigation open',
+                          })
+                    }
+                    data-test-subj="collapsibleNavLockButton"
+                    size="xs"
+                  />
+                )}
+              </div>
             </div>
           </div>
-          {/* Row 2 (collapsed only): hamburger + search stacked below logo */}
+          {/* Row 2 (collapsed only): expand button + search, stacked below the
+              logo. This is the explicit control to open the full nav. */}
           <div className="iconSideNavTop__collapsedControls">
             <EuiButtonIcon
               onClick={onClickExpand}
-              iconType="menu"
-              color="subdued"
+              iconType="dockedLeft"
+              color="text"
               display="empty"
               aria-label={i18n.translate('core.ui.primaryNav.expandNavigation', {
                 defaultMessage: 'Expand navigation',
               })}
-              data-test-subj="collapsibleNavToggleButton"
+              data-test-subj="collapsibleNavExpandButton"
               size="s"
             />
             {searchElement}

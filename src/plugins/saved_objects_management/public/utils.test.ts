@@ -106,14 +106,14 @@ describe('Utils', () => {
       mockCoreStart.workspaces.currentWorkspace$.next(currentWorkspace);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 
-      expect(result).toBe('http://localhost/w/workspace1/app/objects/dashboard/ID1');
+      expect(result).toBe('http://localhost:5601/w/workspace1/app/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is true and saved object belongs to certain workspaces', () => {
       mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace1', name: 'workspace1' }]);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 
-      expect(result).toBe('http://localhost/w/workspace1/app/objects/dashboard/ID1');
+      expect(result).toBe('http://localhost:5601/w/workspace1/app/objects/dashboard/ID1');
     });
 
     it('formats URL correctly when useUpdatedUX is true and the object does not belong to any workspace', () => {

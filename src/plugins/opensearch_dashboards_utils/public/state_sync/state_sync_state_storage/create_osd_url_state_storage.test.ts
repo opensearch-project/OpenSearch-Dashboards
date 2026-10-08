@@ -121,7 +121,7 @@ describe('OsdUrlStateStorage', () => {
       const key = '_s';
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
       expect(() => urlStateStorage.get(key)).not.toThrow();
-      expect(cb).toBeCalledWith(expect.any(Error));
+      expect(cb).toHaveBeenCalledWith(expect.any(Error));
     });
 
     describe('withNotifyOnErrors integration', () => {
@@ -135,7 +135,7 @@ describe('OsdUrlStateStorage', () => {
         const key = '_s';
         history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
-        expect(toasts.addError).toBeCalled();
+        expect(toasts.addError).toHaveBeenCalled();
       });
     });
   });
@@ -195,7 +195,7 @@ describe('OsdUrlStateStorage', () => {
         const cb = jest.fn();
         urlStateStorage = createOsdUrlStateStorage({ useHash: true, history, onSetError: cb });
         await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-        expect(cb).toBeCalledWith(expect.any(Error));
+        expect(cb).toHaveBeenCalledWith(expect.any(Error));
       });
 
       describe('withNotifyOnErrors integration', () => {
@@ -207,7 +207,7 @@ describe('OsdUrlStateStorage', () => {
             ...withNotifyOnErrors(toasts),
           });
           await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-          expect(toasts.addError).toBeCalled();
+          expect(toasts.addError).toHaveBeenCalled();
         });
       });
     });

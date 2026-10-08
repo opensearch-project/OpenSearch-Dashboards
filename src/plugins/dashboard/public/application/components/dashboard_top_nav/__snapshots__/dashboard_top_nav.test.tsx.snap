@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Dashboard top nav render in embed mode 1`] = `
 <I18nProvider>
@@ -90,6 +90,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -156,6 +157,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -404,6 +406,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -420,6 +423,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -641,6 +645,11 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -1062,6 +1071,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
@@ -1297,6 +1307,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -1363,6 +1374,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -1611,6 +1623,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -1627,6 +1640,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -1848,6 +1862,11 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -2269,6 +2288,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
@@ -2504,6 +2524,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -2570,6 +2591,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -2818,6 +2840,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -2834,6 +2857,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -3055,6 +3079,11 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -3476,6 +3505,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
@@ -3711,6 +3741,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -3777,6 +3808,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -4025,6 +4057,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -4041,6 +4074,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -4262,6 +4296,11 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -4683,6 +4722,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
@@ -4918,6 +4958,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -4984,6 +5025,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -5232,6 +5274,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -5248,6 +5291,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -5469,6 +5513,11 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -5890,6 +5939,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
@@ -6125,6 +6175,7 @@ exports[`Dashboard top nav render with all components 1`] = `
       <Provider
         services={
           Object {
+            "allowDashboardSections": false,
             "application": Object {
               "applications$": BehaviorSubject {
                 "_isScalar": false,
@@ -6191,6 +6242,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "screenshotPageContainerElement": undefined,
               "sendMessage": [MockFunction],
               "sendMessageWithWindow": [MockFunction],
+              "setSessionDataSourceList": [MockFunction],
               "setThreadId": [MockFunction],
               "setWindowState": [MockFunction],
               "suggestedActionsService": undefined,
@@ -6439,6 +6491,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "setFilters": [MockFunction],
                   "setGlobalFilters": [MockFunction],
                 },
+                "getDefaultDataset": [MockFunction],
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
                   "addToQueryHistory": [MockFunction],
@@ -6455,6 +6508,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "getQuery": [MockFunction],
                   "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
+                  "refreshDefaultQuery": [MockFunction],
                   "setQuery": [MockFunction],
                 },
                 "savedQueries": [MockFunction],
@@ -6676,6 +6730,11 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                   "sql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                  },
+                  "sqlPplIndex": Object {
+                    "base": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/",
+                    "ppl": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/ppl/index/",
+                    "sql": "https://opensearch.org/docs/mocked-test-branch/sql-and-ppl/sql/index/",
                   },
                   "sqlPplLimitation": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
@@ -7097,6 +7156,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getAllUserProvidedWithScope": [MockFunction],
               "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],

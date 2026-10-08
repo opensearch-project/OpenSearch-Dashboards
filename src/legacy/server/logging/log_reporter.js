@@ -75,7 +75,6 @@ export function getLoggerStream({ events, config }) {
 export function onFinished(error) {
   if (error) {
     if (error.code === 'ENOSPC') {
-      // eslint-disable-next-line no-console
       console.error('Error in logging pipeline:', error.stack);
     } else {
       throw error;

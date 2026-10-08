@@ -22,7 +22,7 @@ jest.mock('./application/legacy/discover/opensearch_dashboards_services', () => 
 }));
 
 const createMockPlugins = (): ExploreStartDependencies =>
-  (({
+  ({
     data: {
       indexPatterns: {},
       search: {},
@@ -44,16 +44,21 @@ const createMockPlugins = (): ExploreStartDependencies =>
     embeddable: {},
     expressions: {},
     dashboard: {},
-  } as unknown) as ExploreStartDependencies);
+  }) as unknown as ExploreStartDependencies;
 
-const createMockInitializerContext = (sqlSupportEnabled: boolean) => ({
+const createMockInitializerContext = (
+  sqlSupportEnabled: boolean,
+  pplAnalyzeEnabled: boolean = false
+) => ({
   config: {
     get: jest.fn().mockReturnValue({
       enabled: true,
       supportedTypes: ['INDEX_PATTERN'],
       sqlSupport: { enabled: sqlSupportEnabled },
+      pplAnalyze: { enabled: pplAnalyzeEnabled },
       discoverTraces: { enabled: false },
       discoverMetrics: { enabled: false },
+      logsQueryBuilder: { enabled: false },
       agentTraces: { enabled: false },
     }),
     create: jest.fn(),
@@ -127,6 +132,34 @@ describe('buildServices', () => {
       );
 
       expect(context.config.get).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('PPL Analyze feature flag', () => {
+    it('exposes pplAnalyzeEnabled as true when config has pplAnalyze.enabled set to true', () => {
+      const services = buildServices(
+        coreMock.createStart(),
+        createMockPlugins(),
+        createMockInitializerContext(false, true) as any,
+        tabRegistry,
+        visualizationRegistry,
+        queryPanelActionsRegistry
+      );
+
+      expect(services.pplAnalyzeEnabled).toBe(true);
+    });
+
+    it('exposes pplAnalyzeEnabled as false when config has pplAnalyze.enabled set to false', () => {
+      const services = buildServices(
+        coreMock.createStart(),
+        createMockPlugins(),
+        createMockInitializerContext(false, false) as any,
+        tabRegistry,
+        visualizationRegistry,
+        queryPanelActionsRegistry
+      );
+
+      expect(services.pplAnalyzeEnabled).toBe(false);
     });
   });
 });

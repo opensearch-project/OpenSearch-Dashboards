@@ -33,9 +33,9 @@ import { IIndexPattern } from '../../index_patterns';
 import { fields } from '../../index_patterns/fields/fields.mocks';
 
 describe('exists filter', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IIndexPattern = {
     fields,
-  } as unknown) as IIndexPattern;
+  } as unknown as IIndexPattern;
 
   describe('getExistsFilterField', function () {
     it('should return the name of the field an exists query is targeting', () => {

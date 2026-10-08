@@ -222,10 +222,10 @@ describe('Filters Agg', () => {
         expect(() => {
           aggConfigs.aggs[0].toDsl();
         }).toThrowErrorMatchingInlineSnapshot(`
-"Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.
-*foo*
-^"
-`);
+          "Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.
+          *foo*
+          ^"
+        `);
       });
 
       test('works with leading wildcards if allowed', () => {

@@ -65,7 +65,7 @@ export class ArrayType<T> extends Type<T[]> {
         return `array size is [${value.length}], but cannot be smaller than [${limit}]`;
       case 'array.max':
         return `array size is [${value.length}], but cannot be greater than [${limit}]`;
-      case 'array.includesOne':
+      case 'array.includes':
         return reason[0];
     }
   }

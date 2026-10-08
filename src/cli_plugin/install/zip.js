@@ -29,138 +29,92 @@
  */
 
 import path from 'path';
-import { createWriteStream, mkdir } from 'fs';
+import { createWriteStream, mkdirSync } from 'fs';
+import { pipeline } from 'stream/promises';
 
 import yauzl from 'yauzl';
-
-const isDirectoryRegex = /(\/|\\)$/;
-function isDirectory(filename) {
-  return isDirectoryRegex.test(filename);
-}
 
 /**
  * Returns an array of package objects. There will be one for each of
  * package.json files in the archive
  */
 
-export function analyzeArchive(archive) {
+export async function analyzeArchive(archive) {
   const plugins = [];
   const regExp = new RegExp(
     '(opensearch-dashboards[\\\\/][^\\\\/]+)[\\\\/]opensearch_dashboards.json',
     'i'
   );
 
-  return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
-      if (err) {
-        return reject(err);
-      }
+  const zipfile = await yauzl.openPromise(archive);
+  for await (const entry of zipfile.eachEntry()) {
+    const match = entry.fileName.match(regExp);
+    if (!match) continue;
 
-      zipfile.readEntry();
-      zipfile.on('entry', function (entry) {
-        const match = entry.fileName.match(regExp);
+    const readStream = await zipfile.openReadStreamPromise(entry);
+    const chunks = [];
+    for await (const chunk of readStream) {
+      chunks.push(chunk);
+    }
 
-        if (!match) {
-          return zipfile.readEntry();
-        }
+    const manifest = JSON.parse(Buffer.concat(chunks).toString());
+    plugins.push({
+      id: manifest.id,
+      stripPrefix: match[1],
 
-        zipfile.openReadStream(entry, function (error, readable) {
-          const chunks = [];
-
-          if (error) {
-            return reject(error);
-          }
-
-          readable.on('data', (chunk) => chunks.push(chunk));
-
-          readable.on('end', function () {
-            const manifestJson = Buffer.concat(chunks).toString();
-            const manifest = JSON.parse(manifestJson);
-
-            plugins.push({
-              id: manifest.id,
-              stripPrefix: match[1],
-
-              // Plugins must specify their version, and by default that version in the plugin
-              // manifest should match the version of opensearch-dashboards down to the patch level. If these
-              // two versions need plugins can specify a opensearchDashboardsVersion to indicate the version
-              // of opensearch-dashboards the plugin is intended to work with.
-              opensearchDashboardsVersion:
-                typeof manifest.opensearchDashboardsVersion === 'string' &&
-                manifest.opensearchDashboardsVersion
-                  ? manifest.opensearchDashboardsVersion
-                  : manifest.version,
-            });
-
-            zipfile.readEntry();
-          });
-        });
-      });
-
-      zipfile.on('close', () => {
-        resolve(plugins);
-      });
+      // Plugins must specify their version, and by default that version in the plugin
+      // manifest should match the version of opensearch-dashboards down to the patch level. If these
+      // two versions need plugins can specify a opensearchDashboardsVersion to indicate the version
+      // of opensearch-dashboards the plugin is intended to work with.
+      opensearchDashboardsVersion:
+        typeof manifest.opensearchDashboardsVersion === 'string' &&
+        manifest.opensearchDashboardsVersion
+          ? manifest.opensearchDashboardsVersion
+          : manifest.version,
     });
-  });
+  }
+
+  return plugins;
 }
 
-export function extractArchive(archive, targetDir, stripPrefix) {
-  return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
-      if (err) {
-        return reject(err);
+export async function extractArchive(archive, targetDir, stripPrefix) {
+  const resolvedTarget = targetDir ? path.resolve(targetDir) : null;
+  // Normalise stripPrefix so the boundary check is suffix-safe:
+  // 'opensearch-dashboards/plugin' must not match 'opensearch-dashboards/plugin-evil'.
+  // NOTE: stripPrefix is required for any files to be extracted; if omitted, nothing is written.
+  let normalizedPrefix = null;
+  if (stripPrefix) {
+    normalizedPrefix = stripPrefix.endsWith('/') ? stripPrefix : stripPrefix + '/';
+  }
+
+  const zipfile = await yauzl.openPromise(archive);
+  for await (const entry of zipfile.eachEntry()) {
+    if (!normalizedPrefix || !entry.fileName.startsWith(normalizedPrefix)) {
+      continue;
+    }
+
+    let fileName = entry.fileName.substring(normalizedPrefix.length);
+
+    if (resolvedTarget) {
+      fileName = path.resolve(resolvedTarget, fileName);
+      if (fileName !== resolvedTarget && !fileName.startsWith(resolvedTarget + path.sep)) {
+        throw new Error(`Zip slip detected: ${entry.fileName}`);
       }
+    }
 
-      zipfile.readEntry();
-      zipfile.on('close', resolve);
-      zipfile.on('entry', function (entry) {
-        let fileName = entry.fileName;
+    if (entry.fileName.endsWith('/')) {
+      mkdirSync(fileName, { recursive: true });
+    } else {
+      // file entry — ensure parent directory exists
+      mkdirSync(path.dirname(fileName), { recursive: true });
 
-        if (stripPrefix && fileName.startsWith(stripPrefix)) {
-          fileName = fileName.substring(stripPrefix.length);
-        } else {
-          return zipfile.readEntry();
-        }
-
-        if (targetDir) {
-          fileName = path.join(targetDir, fileName);
-        }
-
-        if (isDirectory(fileName)) {
-          mkdir(fileName, { recursive: true }, function (error) {
-            if (error) {
-              return reject(error);
-            }
-
-            zipfile.readEntry();
-          });
-        } else {
-          // file entry
-          zipfile.openReadStream(entry, function (error, readStream) {
-            if (error) {
-              return reject(error);
-            }
-
-            // ensure parent directory exists
-            mkdir(path.dirname(fileName), { recursive: true }, function (error2) {
-              if (error2) {
-                return reject(error2);
-              }
-
-              readStream.pipe(
-                createWriteStream(fileName, {
-                  // eslint-disable-next-line no-bitwise
-                  mode: entry.externalFileAttributes >>> 16,
-                })
-              );
-
-              readStream.on('end', function () {
-                zipfile.readEntry();
-              });
-            });
-          });
-        }
-      });
-    });
-  });
+      const readStream = await zipfile.openReadStreamPromise(entry);
+      await pipeline(
+        readStream,
+        createWriteStream(fileName, {
+          mode: entry.externalFileAttributes >>> 16,
+        })
+      );
+    }
+  }
 }

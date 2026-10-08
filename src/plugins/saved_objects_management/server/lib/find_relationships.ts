@@ -74,7 +74,7 @@ export async function findRelationships({
         ({
           ...obj,
           relationship: 'child',
-        } as SavedObjectRelation)
+        }) as SavedObjectRelation
     )
     .concat(
       parentReferencesResponse.saved_objects
@@ -85,7 +85,7 @@ export async function findRelationships({
             ({
               ...obj,
               relationship: 'parent',
-            } as SavedObjectRelation)
+            }) as SavedObjectRelation
         )
     );
 }

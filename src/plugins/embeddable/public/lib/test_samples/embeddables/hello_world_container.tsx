@@ -41,11 +41,11 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-type InheritedInput = {
+interface InheritedInput {
   id: string;
   viewMode: ViewMode;
   lastName: string;
-};
+}
 
 interface HelloWorldContainerInput extends ContainerInput {
   lastName?: string;

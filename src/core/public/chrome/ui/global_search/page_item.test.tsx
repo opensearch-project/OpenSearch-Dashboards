@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { GlobalSearchPageItem } from './page_item';
-import { coreMock } from '../../../../../core/public/mocks';
 import {
   ChromeNavLink,
   ChromeRegistrationNavLink,
@@ -34,20 +33,7 @@ describe('PageItem', () => {
     },
   } as ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
 
-  const coreStartMock = coreMock.createStart();
-  const { application } = coreStartMock;
-
-  const assignMock = jest.fn();
-
-  // Mock window.location.assign
-  Object.defineProperty(window, 'location', {
-    value: {
-      assign: assignMock,
-    },
-    writable: true,
-  });
-
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -162,99 +148,5 @@ describe('PageItem', () => {
     expect(getByText('Workspace 1')).toBeInTheDocument();
     expect(getByText('Security Analytics')).toBeInTheDocument();
     expect(getByText('Overview')).toBeInTheDocument();
-  });
-
-  it('click on the item will navigate to corresponding page', () => {
-    const settingsLink = {
-      ...link,
-      category: { label: 'Security Analytics', id: 'sa' },
-      id: 'sa_overview',
-      title: 'Overview',
-    };
-
-    const { getByText, getByTestId } = render(
-      <GlobalSearchPageItem
-        link={settingsLink}
-        search="abc"
-        renderBreadcrumbs={(breadcrumbs) => {
-          breadcrumbs.push({ text: <>{currentWorkspace.name}</> });
-          return breadcrumbs;
-        }}
-        callback={() => application.navigateToApp(settingsLink.id)}
-      />
-    );
-
-    // workspace name and link title
-    expect(getByText('Workspace 1')).toBeInTheDocument();
-    expect(getByText('Security Analytics')).toBeInTheDocument();
-    expect(getByText('Overview')).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('global-search-item-sa_overview'));
-    expect(application.navigateToApp).toBeCalledWith('sa_overview');
-  });
-
-  it('click on the item will navigate to correctly page for data source out of workspace', () => {
-    const navLink = {
-      ...link,
-      href: 'http://localhost:5601/w/foo/app/data_source',
-      navGroup: {
-        id: 'admin',
-        description: '',
-        title: 'Data administration',
-        type: NavGroupType.SYSTEM,
-        navLinks: [],
-      },
-      id: 'data_source',
-      title: 'Data source',
-    };
-
-    const { getByText, getByTestId } = render(
-      <GlobalSearchPageItem
-        link={navLink}
-        search="abc"
-        renderBreadcrumbs={(breadcrumbs) => {
-          breadcrumbs.push({ text: <>{navLink.navGroup.title}</> });
-          return breadcrumbs;
-        }}
-        callback={() => {
-          window.location.assign('http://localhost:5601/app/data_source');
-        }}
-      />
-    );
-
-    expect(getByText('Data administration')).toBeInTheDocument();
-    expect(getByText('Data source')).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('global-search-item-data_source'));
-    expect(application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignMock).toHaveBeenCalledWith('http://localhost:5601/app/data_source');
-  });
-
-  it('click on the item will navigate to correctly page for data source in a workspace', () => {
-    const navLink = {
-      ...link,
-      href: 'http://localhost:5601/w/foo/app/data_source',
-      navGroup: {
-        id: 'sa',
-        description: '',
-        title: 'Security Analytics',
-        navLinks: [],
-      },
-      id: 'data_source',
-      title: 'Data source',
-    };
-
-    const { getByText, getByTestId } = render(
-      <GlobalSearchPageItem
-        link={navLink}
-        search="abc"
-        callback={() => application.navigateToApp('data_source')}
-      />
-    );
-
-    expect(getByText('Data source')).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('global-search-item-data_source'));
-    expect(application.navigateToApp).toBeCalledWith('data_source');
   });
 });

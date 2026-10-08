@@ -34,7 +34,7 @@ export const handleErrorResponse = (panel) => (error) => {
   let errorResponse;
   try {
     errorResponse = JSON.parse(error.response);
-  } catch (e) {
+  } catch {
     errorResponse = error.response;
   }
   if (!errorResponse && !(error.name === 'DQLSyntaxError')) {

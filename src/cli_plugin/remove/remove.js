@@ -37,7 +37,7 @@ export function remove(settings, logger) {
     let stat;
     try {
       stat = statSync(settings.pluginPath);
-    } catch (e) {
+    } catch {
       throw new Error(`Plugin [${settings.plugin}] is not installed`);
     }
 
@@ -50,6 +50,6 @@ export function remove(settings, logger) {
     logger.log('Plugin removal complete');
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);
-    process.exit(74); // eslint-disable-line no-process-exit
+    process.exit(74);
   }
 }

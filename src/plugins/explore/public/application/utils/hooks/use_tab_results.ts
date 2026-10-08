@@ -34,11 +34,15 @@ export const useTabResults = () => {
   // the metadata reference changes (i.e. when new results arrive). The actual hits are then
   // read from resultsCache, which was already populated by the middleware before Redux
   // notified this selector. Do not read hits from state.results — it holds metadata only.
-  const metadata = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
+  // `!= null`, not truthiness: an empty editor in a language Explore passes through as typed
+  // prepares to '', which is still a real cache key with results.
+  const metadata = useSelector((state: RootState) =>
+    cacheKey != null ? state.results[cacheKey] : null
+  );
   const status = useSelector((state: RootState) => selectQueryStatusMapByKey(state, cacheKey));
 
   return {
-    results: metadata ? resultsCache.get(cacheKey) ?? null : null,
+    results: metadata ? (resultsCache.get(cacheKey) ?? null) : null,
     status,
   };
 };

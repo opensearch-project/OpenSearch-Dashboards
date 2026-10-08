@@ -54,4 +54,4 @@ oop.inherits(Mode, JSONMode);
   };
 
   this.$id = 'sense/mode/input';
-}.call(Mode.prototype));
+}).call(Mode.prototype);

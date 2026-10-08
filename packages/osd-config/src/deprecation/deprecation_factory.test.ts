@@ -32,13 +32,8 @@ import { ConfigDeprecationLogger } from './types';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
-  const {
-    rename,
-    unused,
-    renameFromRoot,
-    unusedFromRoot,
-    renameFromRootWithoutMap,
-  } = configDeprecationFactory;
+  const { rename, unused, renameFromRoot, unusedFromRoot, renameFromRootWithoutMap } =
+    configDeprecationFactory;
 
   let deprecationMessages: string[];
   const logger: ConfigDeprecationLogger = (msg) => deprecationMessages.push(msg);

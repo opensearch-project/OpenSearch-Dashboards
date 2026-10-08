@@ -57,7 +57,7 @@ describe('DiscoverFieldSearch', () => {
     const component = mountComponent();
     const input = findTestSubject(component, 'fieldFilterSearchInput');
     input.simulate('change', { target: { value: 'new filter' } });
-    expect(defaultProps.onChange).toBeCalledTimes(1);
+    expect(defaultProps.onChange).toHaveBeenCalledTimes(1);
   });
 
   test('change in active filters should change facet selection and call onChange', () => {
@@ -75,7 +75,7 @@ describe('DiscoverFieldSearch', () => {
     component.update();
     btn = findTestSubject(component, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFilterButton-hasActiveFilters')).toBe(true);
-    expect(onChange).toBeCalledWith('aggregatable', true);
+    expect(onChange).toHaveBeenCalledWith('aggregatable', true);
   });
 
   test('change in active filters should change filters count', () => {
@@ -135,7 +135,7 @@ describe('DiscoverFieldSearch', () => {
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     missingSwitch.simulate('click');
-    expect(onChange).toBeCalledTimes(2);
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 
   test('change in type filters triggers onChange with appropriate value', () => {
@@ -146,9 +146,9 @@ describe('DiscoverFieldSearch', () => {
     btn.simulate('click');
     const typeSelector = findTestSubject(component, 'typeSelect');
     typeSelector.simulate('change', { target: { value: 'string' } });
-    expect(onChange).toBeCalledWith('type', 'string');
+    expect(onChange).toHaveBeenCalledWith('type', 'string');
     typeSelector.simulate('change', { target: { value: 'any' } });
-    expect(onChange).toBeCalledWith('type', 'any');
+    expect(onChange).toHaveBeenCalledWith('type', 'any');
   });
 
   test('click on filter button should open and close popover', () => {

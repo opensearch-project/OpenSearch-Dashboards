@@ -9,8 +9,6 @@
  * GitHub history for details.
  */
 
-/* eslint-disable @osd/eslint/require-license-header */
-
 /* @notice
  * This product bundles childnode-remove which is available under a
  * "MIT" license.

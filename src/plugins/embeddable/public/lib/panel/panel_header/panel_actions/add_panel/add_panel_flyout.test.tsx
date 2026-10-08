@@ -65,7 +65,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     ({
       firstName: 'foo',
       lastName: 'bar',
-    } as any);
+    }) as any;
   setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
   const start = doStart();
   const getEmbeddableFactory = start.getEmbeddableFactory;
@@ -115,7 +115,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
     ({
       firstName: 'foo',
       lastName: 'bar',
-    } as any);
+    }) as any;
 
   setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
   const start = doStart();
@@ -146,4 +146,48 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
   findTestSubject(component, `createNew-${CONTACT_CARD_EMBEDDABLE}`).simulate('click');
 
   expect(spy).toHaveBeenCalledTimes(1);
+});
+
+test('saved-object additions can run a post-add hook and close the flyout', async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  const core = coreMock.createStart();
+  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
+    (() => null) as any,
+    core.overlays
+  );
+  const savedObjectType = 'contact-card';
+  (contactCardEmbeddableFactory as any).savedObjectMetaData = {
+    name: 'Contact card',
+    type: savedObjectType,
+  };
+
+  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
+  const start = doStart();
+  const container = new HelloWorldContainer({ id: '1', panels: {} }, {
+    getEmbeddableFactory: start.getEmbeddableFactory,
+  } as any);
+  const onClose = jest.fn();
+  const onPanelAdded = jest.fn();
+  const component = mount(
+    <AddPanelFlyout
+      container={container}
+      onClose={onClose}
+      getFactory={start.getEmbeddableFactory}
+      getAllFactories={start.getEmbeddableFactories}
+      notifications={core.notifications}
+      SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
+      onPanelAdded={onPanelAdded}
+      closeAfterAdd
+      showCreateNew={false}
+    />
+  ) as ReactWrapper<any, {}, AddPanelFlyout>;
+
+  expect(findTestSubject(component, 'createNew')).toHaveLength(0);
+
+  await component.instance().onAddPanel('saved-object-id', savedObjectType, 'Saved contact');
+
+  const [embeddableId] = Object.keys(container.getInput().panels);
+  const child = container.getChild<ContactCardEmbeddable>(embeddableId);
+  expect(onPanelAdded).toHaveBeenCalledWith(child);
+  expect(onClose).toHaveBeenCalledTimes(1);
 });

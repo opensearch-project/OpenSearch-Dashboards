@@ -16,7 +16,7 @@ export const useCelestialNodeActions = ({
   addBreadcrumb,
 }: UseCelestialActionsProps) => {
   const onGroupToggle = useCallback(
-    (event: React.MouseEvent, nodeProps: CelestialCardProps) => {
+    (event: React.SyntheticEvent, nodeProps: CelestialCardProps) => {
       event.stopPropagation();
       const groupId = nodeProps.id;
       addBreadcrumb(nodeProps.title || groupId, nodeProps);

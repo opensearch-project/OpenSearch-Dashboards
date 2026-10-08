@@ -1,63 +1,73 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Query Result show error status with error message 2`] = `
-<EuiPopover
-  anchorPosition="downRight"
-  button={
-    <EuiButtonEmpty
-      className="editor__footerItem"
-      color="danger"
-      data-test-subj="queryResultErrorBtn"
-      iconSide="left"
-      iconType="alert"
-      onClick={[Function]}
-      size="xs"
-    >
-      <EuiText
-        className="editor__footerItem"
-        color="danger"
-        data-test-subj="editorFooterItem"
-        size="xs"
-      >
-        Error
-      </EuiText>
-    </EuiButtonEmpty>
-  }
-  closePopover={[Function]}
-  data-test-subj="queryResultError"
-  display="inlineBlock"
-  hasArrow={true}
-  isOpen={false}
-  ownFocus={true}
-  panelPaddingSize="s"
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+  responsive={false}
 >
-  <EuiPopoverTitle>
-    ERRORS
-  </EuiPopoverTitle>
-  <div
-    className="eui-textBreakWord"
-    data-test-subj="textBreakWord"
-    style={
-      Object {
-        "maxHeight": "250px",
-        "overflowY": "auto",
-        "width": "250px",
-      }
-    }
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiText
-      size="s"
+    <EuiPopover
+      anchorPosition="downRight"
+      button={
+        <EuiButtonEmpty
+          className="editor__footerItem"
+          color="danger"
+          data-test-subj="queryResultErrorBtn"
+          iconSide="left"
+          iconType="alert"
+          onClick={[Function]}
+          size="xs"
+        >
+          <EuiText
+            className="editor__footerItem"
+            color="danger"
+            data-test-subj="editorFooterItem"
+            size="xs"
+          >
+            Error
+          </EuiText>
+        </EuiButtonEmpty>
+      }
+      closePopover={[Function]}
+      data-test-subj="queryResultError"
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="s"
     >
-      <p>
-        <strong>
-          Message:
-        </strong>
-         
-        {"reason":"error reason","details":"error details","status":400}
-      </p>
-    </EuiText>
-  </div>
-</EuiPopover>
+      <EuiPopoverTitle>
+        ERRORS
+      </EuiPopoverTitle>
+      <div
+        className="eui-textBreakWord"
+        data-test-subj="textBreakWord"
+        style={
+          Object {
+            "maxHeight": "250px",
+            "overflowY": "auto",
+            "width": "250px",
+          }
+        }
+      >
+        <EuiText
+          size="s"
+        >
+          <p>
+            <strong>
+              Message:
+            </strong>
+             
+            {"reason":"error reason","details":"error details","status":400}
+          </p>
+        </EuiText>
+      </div>
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
 
 exports[`Query Result shows loading status 1`] = `

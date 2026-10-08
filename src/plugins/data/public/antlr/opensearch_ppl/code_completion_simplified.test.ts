@@ -160,7 +160,7 @@ describe('ppl code_completion', () => {
         language: 'PPL',
         selectionStart: 0,
         selectionEnd: 0,
-        services: (null as unknown) as IDataPluginServices,
+        services: null as unknown as IDataPluginServices,
       });
 
       expect(result).toEqual([]);
@@ -169,7 +169,7 @@ describe('ppl code_completion', () => {
     it('should return empty array when index pattern are missing', async () => {
       const result = await getSimplifiedPPLSuggestions({
         query: '',
-        indexPattern: (null as unknown) as IndexPattern,
+        indexPattern: null as unknown as IndexPattern,
         position: mockPosition,
         language: 'PPL',
         selectionStart: 0,
@@ -601,10 +601,10 @@ describe('ppl code_completion', () => {
     });
 
     describe('runtime grammar pipe-first', () => {
-      const runtimeIndexPattern = ({
+      const runtimeIndexPattern = {
         ...mockIndexPattern,
         dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
-      } as unknown) as IndexPattern;
+      } as unknown as IndexPattern;
 
       it('should use runtime grammar cache for pipe-first suggestions', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
@@ -703,10 +703,10 @@ describe('ppl code_completion', () => {
         const shouldFetchSpy = jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend');
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
-        const indexPatternWithoutVersion = ({
+        const indexPatternWithoutVersion = {
           ...mockIndexPattern,
           dataSourceRef: { id: 'runtime-ds' },
-        } as unknown) as IndexPattern;
+        } as unknown as IndexPattern;
         const result = await getSimpleSuggestionsForIndexPattern('| ', indexPatternWithoutVersion);
 
         expect(result.length).toBeGreaterThan(0);
@@ -788,7 +788,7 @@ describe('ppl code_completion', () => {
           .spyOn(pplGrammarCache, 'getCachedGrammar')
           .mockReturnValue(buildRuntimeGrammar());
 
-        const servicesWithDatasetRef = ({
+        const servicesWithDatasetRef = {
           ...mockServices,
           data: {
             query: {
@@ -804,7 +804,7 @@ describe('ppl code_completion', () => {
               },
             },
           },
-        } as unknown) as IDataPluginServices;
+        } as unknown as IDataPluginServices;
 
         const result = await getSimplifiedPPLSuggestions({
           query: '| ',
@@ -1071,10 +1071,10 @@ describe('ppl code_completion', () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(false);
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
-        const unsupportedIndexPattern = ({
+        const unsupportedIndexPattern = {
           ...mockIndexPattern,
           dataSourceRef: { id: 'runtime-ds', version: '3.5.0' },
-        } as unknown) as IndexPattern;
+        } as unknown as IndexPattern;
 
         const result = await getSimpleSuggestionsForIndexPattern(
           '| rex field = ',
@@ -1090,10 +1090,10 @@ describe('ppl code_completion', () => {
     });
 
     describe('runtime grammar evolution (backend adds/removes/renames)', () => {
-      const runtimeIndexPattern = ({
+      const runtimeIndexPattern = {
         ...mockIndexPattern,
         dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
-      } as unknown) as IndexPattern;
+      } as unknown as IndexPattern;
 
       const setupRuntimeGrammar = (overrides: Partial<CachedGrammar> = {}) => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);

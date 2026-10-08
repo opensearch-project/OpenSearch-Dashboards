@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`#ensureValidProjectDependency using link: in workspace 1`] = `"[opensearch-dashboards] depends on [foo] but should be using a workspace. Update its package.json to the expected value below."`;
 

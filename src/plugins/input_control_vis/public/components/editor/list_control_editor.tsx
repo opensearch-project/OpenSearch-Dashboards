@@ -51,6 +51,7 @@ interface ListControlEditorState {
   prevFieldName: string;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
   allowedIndexPatternIds: Set<string>;
+  hasAnalyticEngine: boolean;
 }
 
 interface ListControlEditorProps {
@@ -88,6 +89,7 @@ export class ListControlEditor extends PureComponent<
     prevFieldName: this.props.controlParams.fieldName,
     IndexPatternSelect: null,
     allowedIndexPatternIds: new Set(),
+    hasAnalyticEngine: false,
   };
 
   componentDidMount() {
@@ -124,7 +126,7 @@ export class ListControlEditor extends PureComponent<
   async getIndexPatternSelect() {
     const [, { data }] = await this.props.deps.core.getStartServices();
 
-    // Get allowed index pattern IDs (excluding AnalyticEngine)
+    const allIndexPatterns = await data.indexPatterns.getCache();
     const indexPatternList = await data.indexPatterns.getCache({
       excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
     });
@@ -133,6 +135,7 @@ export class ListControlEditor extends PureComponent<
     this.setState({
       IndexPatternSelect: data.ui.IndexPatternSelect,
       allowedIndexPatternIds,
+      hasAnalyticEngine: (allIndexPatterns?.length ?? 0) > (indexPatternList?.length ?? 0),
     });
   }
 
@@ -322,6 +325,7 @@ export class ListControlEditor extends PureComponent<
           controlIndex={this.props.controlIndex}
           IndexPatternSelect={this.state.IndexPatternSelect}
           allowedIndexPatternIds={this.state.allowedIndexPatternIds}
+          hasAnalyticEngine={this.state.hasAnalyticEngine}
         />
 
         <FieldSelect

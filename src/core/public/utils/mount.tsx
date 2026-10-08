@@ -53,11 +53,13 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint; classNam
  *
  * @param node to get a mount for
  */
-export const mountReactNode = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  const root = createRoot(element);
-  // Use flushSync to ensure synchronous rendering for consistent DOM measurements
-  flushSync(() => {
-    root.render(<I18nProvider>{node}</I18nProvider>);
-  });
-  return () => root.unmount();
-};
+export const mountReactNode =
+  (node: React.ReactNode): MountPoint =>
+  (element: HTMLElement) => {
+    const root = createRoot(element);
+    // Use flushSync to ensure synchronous rendering for consistent DOM measurements
+    flushSync(() => {
+      root.render(<I18nProvider>{node}</I18nProvider>);
+    });
+    return () => root.unmount();
+  };

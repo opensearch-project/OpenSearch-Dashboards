@@ -28,14 +28,16 @@
  * under the License.
  */
 
-import Joi from 'joi';
 import { CoreSetup } from 'src/core/server';
+import Joi from 'joi';
 import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { tutorialSchema } from './lib/tutorial_schema';
+
+const compiledTutorialSchema = Joi.object(tutorialSchema);
 
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
@@ -64,7 +66,7 @@ export class TutorialsRegistry {
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
         const emptyContext = {};
-        const { error } = Joi.validate(specProvider(emptyContext), tutorialSchema);
+        const { error } = compiledTutorialSchema.validate(specProvider(emptyContext));
 
         if (error) {
           throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);

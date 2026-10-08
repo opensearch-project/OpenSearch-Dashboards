@@ -6,7 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
-import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
+import { TOOL_EXECUTION_ERROR_PREFIX, HALT_MARKER } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -71,9 +71,21 @@ export class ChatEventHandler {
   // agent fetch is cancelled.
   private toolResultAbortController: AbortController | null = null;
 
+  // Parallel frontend tool calls in one turn are buffered and dispatched
+  // together once complete. `expected`
+  // holds ids that resolve locally, `results` their outcomes; `sealed` flips on
+  // RUN_FINISHED, after which a full `results` set triggers dispatch.
+  private batchExpected = new Set<string>();
+  private batchResults = new Map<string, any>();
+  private batchSealed = false;
+
   // Telemetry tracking
   private interactionStartTime: number | null = null;
   private runErrorOccurred = false;
+  // Start timestamp per tool call (keyed by toolCallId), captured on
+  // TOOL_CALL_START and consumed when the execution telemetry is recorded to
+  // compute the tool call duration (result time − start time).
+  private toolCallStartTimes = new Map<string, number>();
 
   constructor(config: ChatEventHandlerConfig) {
     this.assistantActionService = config.assistantActionService;
@@ -143,6 +155,11 @@ export class ChatEventHandler {
   private handleRunStarted(event: any): void {
     this.onStreamingStateChange(true);
 
+    // Fresh run, fresh batch.
+    this.batchExpected.clear();
+    this.batchResults.clear();
+    this.batchSealed = false;
+
     // Start timing for telemetry
     this.interactionStartTime = Date.now();
     this.runErrorOccurred = false;
@@ -153,6 +170,12 @@ export class ChatEventHandler {
    */
   private handleRunFinished(event: any): void {
     this.onStreamingStateChange(false);
+
+    // Seal the batch — all tool calls for this turn have been emitted. If every
+    // member already resolved, this triggers the dispatch.
+    this.batchSealed = true;
+    this.maybeFlushBatch();
+
     // Clear any remaining active messages (cleanup)
     this.activeAssistantMessages.clear();
     // Reset the connection state to allow new chats
@@ -233,6 +256,37 @@ export class ChatEventHandler {
   }
 
   /**
+   * Append the halt marker to the assistant message currently streaming, so a stopped run reads
+   * as "partial answer + stop line" immediately — the same shape the agent server persists on
+   * halt, so a reload matches. No-op if no assistant message is streaming (e.g. stopped before
+   * any text arrived). Matched to the last TEXT_MESSAGE_START, which is the streaming turn.
+   */
+  markStreamingMessageHalted(): void {
+    const messageId = this.lastTextMessageStartId;
+    if (!messageId) {
+      return;
+    }
+    const assistantMessage = this.activeAssistantMessages.get(messageId);
+    if (!assistantMessage) {
+      return;
+    }
+    const existing = (assistantMessage.content as string) || '';
+    if (existing.endsWith(HALT_MARKER)) {
+      return; // already marked
+    }
+    assistantMessage.content = existing + HALT_MARKER;
+    this.onTimelineUpdate((prev) => {
+      const index = prev.findIndex((m) => m.id === messageId);
+      if (index >= 0) {
+        const updated = [...prev];
+        updated[index] = { ...assistantMessage };
+        return updated;
+      }
+      return prev;
+    });
+  }
+
+  /**
    * Handle end of text message
    */
   private handleTextMessageEnd(event: TextMessageEndEvent): void {
@@ -290,6 +344,10 @@ export class ChatEventHandler {
     this.onStartResponse(true);
     const { toolCallId, toolCallName, parentMessageId } = event;
 
+    // Record the start time so the execution duration can be reported when the
+    // tool completes (locally) or the agent returns a TOOL_CALL_RESULT.
+    this.toolCallStartTimes.set(toolCallId, Date.now());
+
     // Update tool call state in AssistantActionService
     this.assistantActionService.updateToolCallState(toolCallId, {
       id: toolCallId,
@@ -311,17 +369,25 @@ export class ChatEventHandler {
     // Add to pending map for args accumulation
     this.pendingToolCalls.set(toolCallId, toolCall);
 
+    // A tool call belongs to exactly one message: if some message already carries this id, it is
+    // updated there rather than attached again elsewhere.
+    const host = this.findMessageIdWithToolCall(toolCallId);
+    if (host && this.addToolCallToMessage(host, toolCall)) {
+      return;
+    }
+
     // Strategy 1: Use explicitly provided parent message ID
     // This is the most reliable approach when the backend provides it
-    if (parentMessageId) {
-      this.addToolCallToMessage(parentMessageId, toolCall);
+    if (parentMessageId && this.addToolCallToMessage(parentMessageId, toolCall)) {
       return;
     }
 
     // Strategy 2: Determine placement based on message timeline positions
-    // Check if the last assistant message is still the most recent response
+    // Check if the last assistant message is still the most recent response.
+    // Skipped when the backend named a parent: it wants this tool call on a message of
+    // its own, not folded into the text message it has already ended.
     const timelineMessages = this.getTimeline();
-    if (this.lastTextMessageStartId) {
+    if (!parentMessageId && this.lastTextMessageStartId) {
       const lastAssistantTextMessageIndex = timelineMessages.findLastIndex(
         (message) => message.id === this.lastTextMessageStartId
       );
@@ -341,16 +407,27 @@ export class ChatEventHandler {
     // This handles the case where the LLM responds with tool calls but without any text message.
     // Since there's no TEXT_MESSAGE_START event, we need to create a fake assistant message
     // to hold the tool calls so they appear in the correct position in the timeline.
-    const fakeAssistantMessageId = `fake-assistant-message-` + new Date().getTime();
-    this.onTimelineUpdate((prev) => {
-      const newMessage: AssistantMessage = {
-        id: fakeAssistantMessageId,
-        role: 'assistant',
-        toolCalls: [toolCall],
-      };
-      return [...prev, newMessage];
-    });
-    this.lastTextMessageStartId = fakeAssistantMessageId;
+    const newMessageId = parentMessageId ?? `fake-assistant-message-` + new Date().getTime();
+
+    // Message ids are unique in the timeline: when this id already exists, the tool call folds into
+    // that message instead of appending a duplicate.
+    if (this.getTimeline().some((m) => m.id === newMessageId)) {
+      this.addToolCallToMessage(newMessageId, toolCall);
+      this.lastTextMessageStartId = newMessageId;
+      return;
+    }
+
+    const newMessage: AssistantMessage = {
+      id: newMessageId,
+      role: 'assistant',
+      toolCalls: [toolCall],
+    };
+    // Register in the active map too, not just the timeline: TEXT_MESSAGE_CONTENT resolves
+    // its target through this map, so a timeline-only insert would silently drop any text
+    // the agent streams onto the same message id afterwards.
+    this.activeAssistantMessages.set(newMessageId, newMessage);
+    this.onTimelineUpdate((prev) => [...prev, newMessage]);
+    this.lastTextMessageStartId = newMessageId;
   }
 
   /**
@@ -381,8 +458,12 @@ export class ChatEventHandler {
       return;
     }
 
+    // Provisionally a batch member; removed below if it's a backend tool.
+    this.batchExpected.add(toolCallId);
+
     try {
       const isAgentTool = !this.assistantActionService.hasAction(toolCall.function.name);
+
       // Parse arguments
       const args =
         toolCall.function.arguments && !isAgentTool ? JSON.parse(toolCall.function.arguments) : {};
@@ -393,90 +474,133 @@ export class ChatEventHandler {
         args,
       });
 
-      // Execute the tool and update tool execution status
-      const result = await this.toolExecutor.executeTool(
-        toolCall.function.name,
-        args,
-        toolCallId,
-        await this.chatService.getCurrentDataSourceId()
-      );
+      // Agent tools skip `executeTool` entirely — its local-action path awaits
+      // `executeAction` even when guaranteed to fail, delaying `markToolPending`
+      // and opening a race with the agent's TOOL_CALL_RESULT.
+      const result = isAgentTool
+        ? await this.toolExecutor.executeAgentTool()
+        : await this.toolExecutor.executeTool(
+            toolCall.function.name,
+            args,
+            toolCallId,
+            await this.chatService.getCurrentDataSourceInfo(),
+            this.chatService.getCurrentTimeRange()
+          );
 
-      // Check if tool execution was cancelled (e.g., due to cleanup)
+      // Cancelled (teardown): no result, drop from batch, not reported.
       if (result.cancelled) {
+        this.batchExpected.delete(toolCallId);
         this.pendingToolCalls.delete(toolCallId);
+        this.toolCallStartTimes.delete(toolCallId);
+        this.assistantActionService.updateToolCallState(toolCallId, { status: 'failed' });
+        this.maybeFlushBatch();
         return;
       }
 
       if (result.userRejected) {
-        // User rejected the tool execution. Hold off on marking 'failed'
-        // until the rejection has actually been delivered to the assistant,
-        // so the tool row keeps its running indicator during the send
-        // rather than showing a failed state while still doing work.
-        await this.sendToolResultToAssistant(toolCallId, result);
+        // Buffer the rejection as this member's result.
+        this.batchResults.set(
+          toolCallId,
+          result.data ?? this.getAssistantToolResultPayload(result)
+        );
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'failed',
         });
+        // Record rejected telemetry
+        this.recordToolExecuted(toolCallId, toolCall.function.name, 'rejected', 'local');
 
         // Clean up pending tool call
         this.pendingToolCalls.delete(toolCallId);
+        this.maybeFlushBatch();
         return;
       }
 
       if (result.waitingForAgentResponse) {
-        // Agent will handle this tool and send results back via events
+        // Backend tool: completes in the original run via TOOL_CALL_RESULT, so
+        // it's not a batch member.
+        this.batchExpected.delete(toolCallId);
         this.toolExecutor.markToolPending(toolCallId, {
           id: toolCallId,
           name: toolCall.function.name,
           args: toolCall.function.arguments,
         });
-        // Don't send result back immediately, wait for TOOL_CALL_RESULT event
+        // Don't send result back immediately, wait for TOOL_CALL_RESULT event — which does not read
+        // pendingToolCalls, so this entry is done with and dropped like on every other terminal
+        // branch.
+        this.pendingToolCalls.delete(toolCallId);
+        // Dropping this member can be what makes an already-sealed batch complete, so the flush
+        // has to be re-checked here as it is on every other terminal branch.
+        this.maybeFlushBatch();
       } else {
-        // Tool was executed locally. Hold off on marking 'complete' until
-        // the result has actually been delivered to the assistant and the
-        // next streaming turn has started. Otherwise there would be a
-        // confusing window where the tool row shows a checkmark while the
-        // UI is still waiting on the network round-trip with no visible
-        // activity. If the send itself fails, `sendToolResultToAssistant`
-        // appends a system message to the timeline so the user can see the
-        // conversation is out of sync — the tool call itself still
-        // completed locally, so mark it 'complete'.
-        await this.sendToolResultToAssistant(toolCallId, result.data);
+        // Executed locally (includes `declined`): buffer for batch dispatch.
+        const assistantResult = this.getAssistantToolResultPayload(result);
+        this.batchResults.set(toolCallId, assistantResult);
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
-          result: result.data,
+          result: assistantResult,
         });
+        // Record tool execution telemetry
+        this.recordToolExecuted(
+          toolCallId,
+          toolCall.function.name,
+          result.success ? 'success' : 'failure',
+          'local'
+        );
+        this.pendingToolCalls.delete(toolCallId);
+        this.maybeFlushBatch();
       }
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error(`Error executing tool ${toolCall.function.name}:`, error);
 
-      // Send error back to assistant. Prefix the content with
-      // `TOOL_EXECUTION_ERROR_PREFIX` so a snapshot reload can render the
-      // tool row as an error via `getToolStatus` — `chatService.sendToolResult`
-      // passes this string straight into the ToolMessage content (which is
-      // what is persisted to agentic memory), so the UI can detect the
-      // prefix without needing a separate local-only ToolMessage that
-      // would diverge from the saved conversation. Natural-language prose
-      // also keeps the payload readable for the LLM on the next turn.
-      //
-      // Hold off on marking 'failed' until the error has actually been
-      // delivered, so the tool row keeps its running indicator during the
-      // send rather than flipping to a failed state while the UI is still
-      // doing work. `sendToolResultToAssistant` owns the timeline append on
-      // success, skip, and send failure.
-      await this.sendToolResultToAssistant(
-        toolCallId,
-        `${TOOL_EXECUTION_ERROR_PREFIX}${error.message}`
-      );
+      // Buffer the error as this member's result. The prefix lets a snapshot
+      // reload render the tool row as an error via `getToolStatus`.
+      this.batchResults.set(toolCallId, `${TOOL_EXECUTION_ERROR_PREFIX}${error.message}`);
 
       // Update state to failed
       this.assistantActionService.updateToolCallState(toolCallId, {
         status: 'failed',
         error: error instanceof Error ? error : new Error(error.message),
       });
+      // Record tool execution failure telemetry
+      this.recordToolExecuted(toolCallId, toolCall.function.name, 'error', 'local');
     } finally {
       // Clean up pending tool call
       this.pendingToolCalls.delete(toolCallId);
+      // Dropping this member can be what completes an already-sealed batch, so the
+      // flush is re-checked here as it is on every terminal branch above. Idempotent:
+      // `maybeFlushBatch` consumes the batch before dispatching, so the explicit
+      // calls above make this a no-op.
+      this.maybeFlushBatch();
+    }
+  }
+
+  /**
+   * Dispatch the buffered batch once it's sealed and every member has a result;
+   * a no-op until then. A batch of one uses the unchanged single-result path,
+   * so only genuine parallel batches (2+) take the multi-result run.
+   */
+  private maybeFlushBatch(): void {
+    if (!this.batchSealed) return;
+    if (this.batchExpected.size === 0) return;
+    for (const id of this.batchExpected) {
+      if (!this.batchResults.has(id)) return;
+    }
+
+    // Order preserved by insertion order of `batchExpected`.
+    const items = Array.from(this.batchExpected).map((toolCallId) => ({
+      toolCallId,
+      result: this.batchResults.get(toolCallId),
+    }));
+
+    // Consume before dispatching so a late event can't re-flush.
+    this.batchExpected.clear();
+    this.batchResults.clear();
+
+    if (items.length === 1) {
+      void this.sendToolResultToAssistant(items[0].toolCallId, items[0].result);
+    } else {
+      void this.sendToolResultsToAssistant(items);
     }
   }
 
@@ -520,9 +644,74 @@ export class ChatEventHandler {
       result: resultContent,
     });
 
-    // Clear pending tool if it was an agent-only tool
+    // Record telemetry and clear pending entry. The guard prevents double-counting
+    // if a duplicate TOOL_CALL_RESULT arrives after the entry was already cleared.
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
+      const pendingTool = this.toolExecutor.getPendingTool(toolCallId);
+      this.recordToolExecuted(toolCallId, pendingTool?.name ?? 'unknown', 'success', 'agent');
       this.toolExecutor.clearPendingTool(toolCallId);
+    }
+  }
+
+  private getAssistantToolResultPayload(result: { success?: boolean; data?: any; error?: string }) {
+    if (result.data !== undefined) {
+      return result.data;
+    }
+    if (result.success) return { success: true };
+    return {
+      success: false,
+      error: result.error || 'Unknown error occurred',
+    };
+  }
+
+  /**
+   * Record a `chat_tool_executed` telemetry event, plus a
+   * `chat_tool_executed_duration_ms` metric carrying the execution duration.
+   * `source` distinguishes browser-executed actions ('local') from
+   * agent-executed tools reported via TOOL_CALL_RESULT ('agent').
+   * The duration is the elapsed time from TOOL_CALL_START to this record,
+   * derived from the per-tool-call start timestamp; the metric is skipped when
+   * the start time is unknown (e.g. a tool call replayed from a snapshot with
+   * no observed TOOL_CALL_START).
+   */
+  private recordToolExecuted(
+    toolCallId: string,
+    toolName: string,
+    status: 'success' | 'failure' | 'error' | 'rejected',
+    source: 'local' | 'agent'
+  ): void {
+    // Always consume the start-time entry so it does not leak, even when
+    // telemetry is disabled.
+    const startTime = this.toolCallStartTimes.get(toolCallId);
+    this.toolCallStartTimes.delete(toolCallId);
+
+    if (!this.telemetryRecorder) {
+      return;
+    }
+
+    this.telemetryRecorder.recordEvent({
+      name: 'chat_tool_executed',
+      data: {
+        chatToolCallToolName: toolName,
+        chatToolCallStatus: status,
+        chatToolCallSource: source,
+      },
+    });
+
+    // Report the execution duration as an aggregatable metric (avg/p90/etc.)
+    // rather than embedding it in the event payload. Only emitted when the
+    // TOOL_CALL_START timestamp was observed.
+    if (startTime !== undefined) {
+      this.telemetryRecorder.recordMetric({
+        name: 'chat_tool_executed_duration_ms',
+        value: Date.now() - startTime,
+        unit: 'ms',
+        labels: {
+          chatToolCallToolName: toolName,
+          chatToolCallStatus: status,
+          chatToolCallSource: source,
+        },
+      });
     }
   }
 
@@ -531,6 +720,18 @@ export class ChatEventHandler {
    */
   private handleRunError(event: any): void {
     this.runErrorOccurred = true;
+
+    // Run failed — mark any pending batch members as failed so their tool-call
+    // state is cleaned up (prevents a stale 'executing' from locking the composer).
+    for (const id of this.batchExpected) {
+      if (!this.batchResults.has(id)) {
+        this.assistantActionService.updateToolCallState(id, { status: 'failed' });
+      }
+    }
+    this.batchExpected.clear();
+    this.batchResults.clear();
+    this.batchSealed = false;
+
     const errorMessage: SystemMessage = {
       id: `error-${Date.now()}`,
       role: 'system',
@@ -579,14 +780,38 @@ export class ChatEventHandler {
   }
 
   /**
-   * Add tool call to a specific message in timeline
+   * Id of the message already carrying `toolCallId`, or null. Checks the active map first, then the
+   * timeline (which may lag a render behind mid-replay).
    */
-  private addToolCallToMessage(messageId: string, toolCall: ToolCall): void {
+  private findMessageIdWithToolCall(toolCallId: string): string | null {
+    for (const [messageId, message] of this.activeAssistantMessages) {
+      if (message.toolCalls?.some((tc) => tc.id === toolCallId)) return messageId;
+    }
+    const known = this.getTimeline().find(
+      (m) =>
+        m.role === 'assistant' &&
+        (m as AssistantMessage).toolCalls?.some((tc) => tc.id === toolCallId)
+    );
+    return known ? known.id : null;
+  }
+
+  /**
+   * Add tool call to a specific message in timeline. Tool calls are keyed by id — an id already on
+   * the message is replaced, not appended, since each entry renders its own card.
+   */
+  private addToolCallToMessage(messageId: string, toolCall: ToolCall): boolean {
+    const upsert = (list: ToolCall[]): ToolCall[] => {
+      const at = list.findIndex((tc) => tc.id === toolCall.id);
+      if (at < 0) return [...list, toolCall];
+      const merged = [...list];
+      merged[at] = toolCall;
+      return merged;
+    };
+
     // Check if message is in active messages
     const activeMessage = this.activeAssistantMessages.get(messageId);
     if (activeMessage) {
-      activeMessage.toolCalls = activeMessage.toolCalls || [];
-      activeMessage.toolCalls.push(toolCall);
+      activeMessage.toolCalls = upsert(activeMessage.toolCalls || []);
 
       // Update timeline
       this.onTimelineUpdate((prev) => {
@@ -598,8 +823,11 @@ export class ChatEventHandler {
         }
         return prev;
       });
-      return;
+      return true;
     }
+
+    const known = this.getTimeline().find((m) => m.id === messageId);
+    if (!known || known.role !== 'assistant') return false;
 
     // Otherwise find in timeline and update
     this.onTimelineUpdate((prev) => {
@@ -610,14 +838,17 @@ export class ChatEventHandler {
         const message = updated[messageIndex];
         if (message.role === 'assistant') {
           const assistantMsg = message as AssistantMessage;
-          assistantMsg.toolCalls = assistantMsg.toolCalls || [];
-          assistantMsg.toolCalls.push(toolCall);
-          updated[messageIndex] = { ...assistantMsg };
+          updated[messageIndex] = {
+            ...assistantMsg,
+            toolCalls: upsert(assistantMsg.toolCalls || []),
+          };
         }
       }
 
       return updated;
     });
+
+    return true;
   }
 
   /**
@@ -698,8 +929,7 @@ export class ChatEventHandler {
     let observable: Observable<ChatEvent>;
     let toolMessage: ToolMessage;
     let skipped:
-      | { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' }
-      | undefined;
+      { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' } | undefined;
 
     try {
       // Notify that we're starting to send tool result
@@ -822,6 +1052,137 @@ export class ChatEventHandler {
     this.toolResultSubscription = subscription;
   }
 
+  /**
+   * Batched sibling of {@link sendToolResultToAssistant}: sends a whole batch of
+   * frontend tool results in one continuation run. Skip/error system messages
+   * are keyed off the first toolCallId in the batch.
+   */
+  async sendToolResultsToAssistant(
+    items: Array<{ toolCallId: string; result: any }>
+  ): Promise<void> {
+    if (items.length === 0) return;
+    const anchorId = items[0].toolCallId;
+
+    // Abort any in-flight tool result send so we don't leak controllers or
+    // race two dispatches.
+    if (this.toolResultAbortController) {
+      this.toolResultAbortController.abort();
+    }
+    const abortController = new AbortController();
+    this.toolResultAbortController = abortController;
+
+    const releaseController = () => {
+      if (this.toolResultAbortController === abortController) {
+        this.toolResultAbortController = null;
+      }
+    };
+
+    let observable: Observable<ChatEvent>;
+    let toolMessages: ToolMessage[];
+    let skipped:
+      { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' } | undefined;
+
+    try {
+      const messages = this.getTimeline();
+      ({ observable, toolMessages, skipped } = await this.chatService.sendToolResults(
+        items,
+        messages,
+        abortController.signal
+      ));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to send tool results:', error);
+      releaseController();
+      const failureMessage: SystemMessage = {
+        id: `tool-send-failed-${anchorId}-${Date.now()}`,
+        role: 'system',
+        content: i18n.translate('chat.toolResult.sendFailed', {
+          defaultMessage:
+            'Failed to send tool result to the assistant. The conversation may be out of sync.',
+        }),
+      };
+      this.onTimelineUpdate((prev) => [...prev, failureMessage]);
+      return;
+    }
+
+    if (skipped) {
+      if (skipped.reason === 'aborted') {
+        releaseController();
+        return;
+      }
+
+      if (skipped.reason === 'sync_timeout') {
+        // Store the batch so the user can resend it as a unit.
+        const timeoutMessage: SystemMessage = {
+          id: `tool-sync-timeout-${anchorId}-${Date.now()}`,
+          role: 'system',
+          content: i18n.translate('chat.toolResult.syncTimeout', {
+            defaultMessage:
+              'We could not confirm the tool call was synced before sending the result. You can resend the tool result to try again.',
+          }),
+          toolCallId: anchorId,
+          canResend: true,
+          toolResult: items,
+        };
+        this.onTimelineUpdate((prev) => [...prev, timeoutMessage]);
+        releaseController();
+        return;
+      }
+
+      if (skipped.reason === 'no_thread_id') {
+        const noThreadMessage: SystemMessage = {
+          id: `tool-no-thread-${anchorId}-${Date.now()}`,
+          role: 'system',
+          content: i18n.translate('chat.toolResult.noThreadId', {
+            defaultMessage:
+              'Tool result could not be sent because the conversation thread is missing. Start a new chat and try again.',
+          }),
+          toolCallId: anchorId,
+        };
+        this.onTimelineUpdate((prev) => [...prev, noThreadMessage]);
+        releaseController();
+        return;
+      }
+
+      // result_already_exists: another window already persisted results.
+      const infoMessage: SystemMessage = {
+        id: `tool-skipped-${anchorId}-${Date.now()}`,
+        role: 'system',
+        content: i18n.translate('chat.toolResult.alreadySubmitted', {
+          defaultMessage: 'This tool result was already submitted from another window.',
+        }),
+      };
+      this.onTimelineUpdate((prev) => [...prev, infoMessage]);
+      releaseController();
+      return;
+    }
+
+    // Append every tool message so each parallel tool call shows its result.
+    this.onTimelineUpdate((prev) => [...prev, ...toolMessages]);
+
+    this.onStreamingStateChange(true);
+
+    const subscription = observable.subscribe({
+      next: (event: ChatEvent) => {
+        this.handleEvent(event);
+      },
+      error: (error: Error) => {
+        if (error?.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
+          console.error('Tool result response error:', error);
+        }
+      },
+    });
+    subscription.add(() => {
+      this.onStreamingStateChange(false);
+      this.onStartResponse(false);
+      this.toolResultSubscription = null;
+      releaseController();
+    });
+
+    this.toolResultSubscription = subscription;
+  }
+
   // timelineToMessages method removed - timeline is now directly AG-UI compatible
 
   /**
@@ -829,11 +1190,81 @@ export class ChatEventHandler {
    * Simply sets the timeline to the saved messages
    */
   private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
-    // Set timeline to snapshot messages
-    this.onTimelineUpdate(() => event.messages || []);
+    // Copies, not the event's own objects: replay re-attaches tool calls by mutating the assistant
+    // message it resolves, and the caller keeps this event array for further restores.
+    const snapshotMessages: Message[] = (event.messages || []).map((message) =>
+      message.role === 'assistant'
+        ? ({
+            ...message,
+            ...((message as AssistantMessage).toolCalls
+              ? { toolCalls: [...(message as AssistantMessage).toolCalls!] }
+              : {}),
+          } as Message)
+        : message
+    );
+
+    // Registered so a replayed TOOL_CALL_START resolves its parent through this map — the timeline
+    // read it would otherwise fall back on may not have flushed yet mid-replay.
+    for (const message of snapshotMessages) {
+      if (message.role === 'assistant') {
+        this.activeAssistantMessages.set(message.id, message as AssistantMessage);
+      }
+    }
+
+    // agent backends may serialize a user message's `InputContent[]` to str
+    // restore multimodal user messages
+    this.onTimelineUpdate((prev) => {
+      const snapshot = snapshotMessages;
+
+      const localArrayContent = new Map<string, unknown>();
+      for (const message of prev) {
+        if (message.role === 'user' && Array.isArray(message.content)) {
+          localArrayContent.set(message.id, message.content);
+        }
+      }
+      if (localArrayContent.size === 0) return snapshot;
+
+      return snapshot.map((message) => {
+        if (message.role !== 'user' || typeof message.content !== 'string') return message;
+        const content = localArrayContent.get(message.id);
+        return content ? ({ ...message, content } as Message) : message;
+      });
+    });
 
     // Reset streaming state
     this.onStreamingStateChange(false);
+  }
+
+  /**
+   * Handle abnormal stream termination (connection drop or error without
+   * RUN_FINISHED). If the batch was already sealed and flushed by a normal
+   * RUN_FINISHED this is a no-op. Otherwise, marks still-pending batch
+   * members as failed so the composer is not permanently locked, and
+   * attempts to flush any completed results.
+   */
+  handleStreamTermination(): void {
+    if (this.batchSealed || this.batchExpected.size === 0) return;
+
+    // Mark any batch members that never resolved as failed
+    for (const id of this.batchExpected) {
+      if (!this.batchResults.has(id)) {
+        this.assistantActionService.updateToolCallState(id, { status: 'failed' });
+      }
+    }
+
+    // Seal the batch so any already-buffered results can flush. Members
+    // whose results are still missing will simply be absent from the
+    // dispatch (they were already marked failed above).
+    this.batchSealed = true;
+    this.maybeFlushBatch();
+
+    // If maybeFlushBatch couldn't flush (some members still pending),
+    // discard the batch entirely — no partial dispatch on stream error.
+    if (this.batchExpected.size > 0) {
+      this.batchExpected.clear();
+      this.batchResults.clear();
+      this.batchSealed = false;
+    }
   }
 
   /**
@@ -842,8 +1273,13 @@ export class ChatEventHandler {
   clearState(): void {
     this.activeAssistantMessages.clear();
     this.pendingToolCalls.clear();
+    this.toolCallStartTimes.clear();
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
+    // Drop any half-gathered batch.
+    this.batchExpected.clear();
+    this.batchResults.clear();
+    this.batchSealed = false;
     // Drain the process-wide AssistantActionService tool call states so
     // stale pending/executing entries from a previous run do not bleed
     // into a freshly replayed or newly started conversation and leave

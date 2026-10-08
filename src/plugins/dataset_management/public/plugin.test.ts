@@ -32,7 +32,7 @@ describe('DiscoverPlugin', () => {
         management: managementPluginMock.createSetupContract(),
       })
     ).not.toThrow();
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    expect(setupMock.application.register).toHaveBeenCalledTimes(1);
   });
 
   it('when new navigation is enabled, should navigate to standard IPM app', async () => {
@@ -61,8 +61,10 @@ describe('DiscoverPlugin', () => {
 
     await applicationRegistration.mount({} as ManagementAppMountParams);
 
-    expect(startMock.application.getUrlForApp).toBeCalledWith('datasets');
-    expect(startMock.application.navigateToUrl).toBeCalledWith('http://localhost/app/datasets');
+    expect(startMock.application.getUrlForApp).toHaveBeenCalledWith('datasets');
+    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
+      'http://localhost:5601/app/datasets'
+    );
   });
 
   it('redirects to indexPatterns when NOT in observability or analytics workspace', async () => {
@@ -106,8 +108,8 @@ describe('DiscoverPlugin', () => {
 
     await applicationRegistration.mount({} as ManagementAppMountParams);
 
-    expect(startMock.application.getUrlForApp).toBeCalledWith('indexPatterns');
-    expect(startMock.application.navigateToUrl).toBeCalledWith('/app/indexPatterns');
+    expect(startMock.application.getUrlForApp).toHaveBeenCalledWith('indexPatterns');
+    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith('/app/indexPatterns');
   });
 
   it('allows access when in observability workspace', async () => {

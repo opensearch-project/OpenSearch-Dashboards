@@ -6,6 +6,7 @@
 import { includes } from 'lodash';
 import { DataViewsContract } from './data_views';
 import { DataViewSavedObjectsClientCommon, DataViewUiSettingsCommon } from '../types';
+import { isDataSourceReference } from '../utils';
 
 export type EnsureDefaultDataView = () => Promise<unknown | void> | undefined;
 
@@ -49,7 +50,7 @@ export const createEnsureDefaultDataView = (
           isDefaultDataViewReferenceValid = !(
             result.error?.statusCode === 403 || result.error?.statusCode === 404
           );
-        } catch (e) {
+        } catch {
           // The logic below for updating the default index pattern only handles cases where the data source is not found or the user lacks access permissions
           // For other unexpected errors, we simply return to prevent infinite loops when updating the default index pattern.
           return;
@@ -64,7 +65,7 @@ export const createEnsureDefaultDataView = (
             const existDataSources = datasources.map((item) => item.id);
             patterns = [];
             dataViews.forEach((item) => {
-              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const sourceRef = item.references?.find(isDataSourceReference);
               let isDataSourceReferenceValid = false;
               /**
                * The reference is valid when either:
@@ -84,7 +85,7 @@ export const createEnsureDefaultDataView = (
               }
             });
           }
-        } catch (e) {
+        } catch {
           return;
         }
       } else {

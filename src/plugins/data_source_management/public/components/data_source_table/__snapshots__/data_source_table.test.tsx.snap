@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DataSourceTable should get datasources failed should render empty table 1`] = `
 <IntlProvider
@@ -2843,7 +2843,6 @@ exports[`DataSourceTable should get datasources successful should render normall
   </DataSourceTable>
 </IntlProvider>
 `;
-
 
 exports[`DataSourceTable should not manage datasources when canManageDataSource is false should render empty table 1`] = `
 <IntlProvider

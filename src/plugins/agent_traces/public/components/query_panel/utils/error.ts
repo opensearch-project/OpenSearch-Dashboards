@@ -26,14 +26,12 @@ export class AgentError extends Error {
   public readonly error: IAgentError;
   constructor(error: IAgentError) {
     super(error.error.details);
-    if (
-      !(
-        'status' in error &&
-        'reason' in error.error &&
-        'details' in error.error &&
-        'type' in error.error
-      )
-    ) {
+    if (!(
+      'status' in error &&
+      'reason' in error.error &&
+      'details' in error.error &&
+      'type' in error.error
+    )) {
       throw new Error('Failed to parse error');
     }
     this.error = error;

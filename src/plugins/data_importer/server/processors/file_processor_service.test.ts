@@ -36,7 +36,7 @@ describe('FileProcessorService', () => {
       fileProcessorService.registerFileProcessor('testFormat', otherCSVProcessor);
       expect(() =>
         fileProcessorService.registerFileProcessor('testFormat', csvProcessor)
-      ).toThrowError();
+      ).toThrow();
     });
   });
 

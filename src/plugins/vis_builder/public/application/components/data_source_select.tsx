@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { SearchableDropdown, SearchableDropdownOption } from './searchable_dropdown';
 import { useIndexPatterns } from '../utils/use';
@@ -26,7 +26,7 @@ function toSearchableDropdownOption(indexPattern: IndexPattern): SearchableDropd
 }
 
 export const DataSourceSelect = () => {
-  const { indexPatterns, loading, error, selected } = useIndexPatterns();
+  const { indexPatterns, loading, error, selected, hasAnalyticEngine } = useIndexPatterns();
   const dispatch = useTypedDispatch();
 
   // If no index pattern is selected (e.g., the selected one was filtered out as AnalyticEngine),
@@ -36,6 +36,15 @@ export const DataSourceSelect = () => {
       dispatch(setIndexPattern(indexPatterns[0].id));
     }
   }, [loading, error, selected, indexPatterns, dispatch]);
+
+  const optimizedEngineNote = (
+    <EuiText size="xs" color="subdued" data-test-subj="vbDataSourceOptimizedEngineNote">
+      {i18n.translate('visBuilder.dataSource.optimizedEngineNotSupported', {
+        defaultMessage:
+          "VisBuilder supports only DSL queries. Index patterns backed by Optimized engine (AnalyticEngine type) data sources aren't supported and don't appear in this list.",
+      })}
+    </EuiText>
+  );
 
   // TODO: Should be a standard EUI component
   return (
@@ -54,6 +63,7 @@ export const DataSourceSelect = () => {
       loading={loading}
       options={indexPatterns.map(toSearchableDropdownOption)}
       equality={indexPatternEquality}
+      footer={hasAnalyticEngine ? optimizedEngineNote : undefined}
     />
   );
 };

@@ -42,7 +42,6 @@ export default function ({ getService }) {
           expect(response.body).to.be.an('array');
         }));
 
-    // eslint-disable-next-line jest/no-disabled-tests
     it.skip('should only return langs enabled for inline scripting', () =>
       supertest
         .get('/api/opensearch-dashboards/scripts/languages')

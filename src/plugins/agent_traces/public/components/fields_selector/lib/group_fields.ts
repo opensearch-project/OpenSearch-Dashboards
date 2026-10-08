@@ -33,12 +33,15 @@ import { FieldFilterState, isFieldFiltered } from './field_filter';
 import { AGENT_TRACES_COLUMN_DISPLAY_NAMES } from '../../../../common';
 
 // TODO: Use data set defined faceted field
-const FACET_FIELDS = ['attributes.gen_ai.operation.name', 'status.code'] as const;
+export const DEFAULT_FACET_FIELDS: readonly string[] = [
+  'attributes.gen_ai.operation.name',
+  'status.code',
+];
 
-function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[number] {
+function isFacetedField(fieldName: string, facetFields: readonly string[]): boolean {
   // Remove invisiable char
   const normalizedFieldName = fieldName.replace(/[\u200b-\u200f\uFEFF]/g, '');
-  return (FACET_FIELDS as readonly string[]).includes(normalizedFieldName);
+  return facetFields.includes(normalizedFieldName);
 }
 
 interface GroupedFields {
@@ -56,7 +59,8 @@ export function groupFields(
   columns: string[],
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
-  showFacetedFields: boolean = false
+  showFacetedFields: boolean = false,
+  facetFields: readonly string[] = DEFAULT_FACET_FIELDS
 ): GroupedFields {
   const result: GroupedFields = {
     facetedFields: [],
@@ -91,7 +95,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (showFacetedFields && isFacetedField(field.name)) {
+    if (showFacetedFields && isFacetedField(field.name, facetFields)) {
       result.facetedFields.push(field);
     }
     if (columns.includes(field.name)) {

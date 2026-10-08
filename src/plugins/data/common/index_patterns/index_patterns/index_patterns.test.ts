@@ -89,11 +89,11 @@ describe('IndexPatterns', () => {
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: ({
+      uiSettings: {
         get: uiSettingsGet,
         getAll: () => {},
-      } as any) as UiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      } as any as UiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -119,11 +119,11 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 
-  test('savedObjectCache pre-fetches title and displayName', async () => {
+  test('savedObjectCache pre-fetches fields required for source compatibility filtering', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title', 'displayName'],
+      fields: ['title', 'displayName', 'type'],
       perPage: 10000,
     });
   });
@@ -191,10 +191,10 @@ describe('IndexPatterns', () => {
     const indexPattern = await indexPatterns.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
+    expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
 
     await indexPatterns.create({ title });
-    expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPatterns.refreshFields).toHaveBeenCalled();
   });
 
   test('createAndSave', async () => {
@@ -202,8 +202,8 @@ describe('IndexPatterns', () => {
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {
@@ -263,12 +263,12 @@ describe('IndexPatterns', () => {
     expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
   });
 
-  describe('getCache - excludeEngineTypes', () => {
-    const buildPattern = (id: string, dataSourceId?: string) => ({
+  describe('getCache filtering', () => {
+    const buildPattern = (id: string, dataSourceId?: string, datasetType?: string) => ({
       id,
       type: 'index-pattern',
       version: '1',
-      attributes: { title: id },
+      attributes: { title: id, ...(datasetType && { type: datasetType }) },
       references: dataSourceId ? [{ id: dataSourceId, type: 'data-source', name: 'ds' }] : [],
     });
 
@@ -314,6 +314,38 @@ describe('IndexPatterns', () => {
       });
       const cache = await indexPatterns.getCache({ excludeEngineTypes: [] });
       expect(cache?.map((o) => o.id)).toEqual(['a', 'b']);
+    });
+
+    test('excludes saved objects whose dataset type is blocked', async () => {
+      setupClientWithDataSources(
+        [
+          buildPattern('index-pattern'),
+          buildPattern('indexes-dataset', undefined, 'INDEXES'),
+          buildPattern('rollup', undefined, 'rollup'),
+        ],
+        {}
+      );
+      const cache = await indexPatterns.getCache({ excludeDatasetTypes: ['INDEXES'] });
+      expect(cache?.map((o) => o.id)).toEqual(['index-pattern', 'rollup']);
+    });
+
+    test('combines engine-type and dataset-type filters', async () => {
+      setupClientWithDataSources(
+        [
+          buildPattern('supported', 'ds-os'),
+          buildPattern('blocked-engine', 'ds-ae'),
+          buildPattern('blocked-dataset', 'ds-os', 'INDEXES'),
+        ],
+        {
+          'ds-os': 'OpenSearch',
+          'ds-ae': 'AnalyticEngine',
+        }
+      );
+      const cache = await indexPatterns.getCache({
+        excludeEngineTypes: ['AnalyticEngine'],
+        excludeDatasetTypes: ['INDEXES'],
+      });
+      expect(cache?.map((o) => o.id)).toEqual(['supported']);
     });
 
     test('excludes patterns whose data source has a blocked engine type', async () => {

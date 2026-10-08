@@ -69,7 +69,7 @@ describe('concatStream', () => {
       let promise;
       try {
         promise = createPromiseFromStreams([createListStream([1, '1']), createConcatStream()]);
-      } catch (err) {
+      } catch {
         throw new Error('createPromiseFromStreams() should not fail synchronously');
       }
 

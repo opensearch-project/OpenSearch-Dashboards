@@ -1,0 +1,35 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "hconcat": [
+    {
+      "data": {
+        "url": {
+          "data_source_name": "datasource-alpha",
+          "index": "index-a",
+          "body": { "size": 10 }
+        },
+        "format": { "property": "hits.hits" }
+      },
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "_source.category", "type": "nominal" },
+        "y": { "field": "_source.count", "type": "quantitative" }
+      }
+    },
+    {
+      "data": {
+        "url": {
+          "data_source_name": "datasource-beta",
+          "index": "index-b",
+          "body": { "size": 10 }
+        },
+        "format": { "property": "hits.hits" }
+      },
+      "mark": "point",
+      "encoding": {
+        "x": { "field": "_source.x", "type": "quantitative" },
+        "y": { "field": "_source.y", "type": "quantitative" }
+      }
+    }
+  ]
+}

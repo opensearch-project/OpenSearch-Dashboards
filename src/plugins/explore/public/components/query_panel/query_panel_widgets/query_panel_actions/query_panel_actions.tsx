@@ -69,16 +69,20 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
     [dependencies, closePopover]
   );
 
-  // Split the sorted action list at the inline threshold. The slice is
-  // memoized so the underlying buttons keep stable identity across renders
-  // when the registry contents haven't changed.
-  const { inlineActions, overflowActions } = useMemo(() => {
-    const all = registry.getSortedActions();
-    return {
-      inlineActions: all.slice(0, INLINE_ACTION_LIMIT),
-      overflowActions: all.slice(INLINE_ACTION_LIMIT),
-    };
-  }, [registry]);
+  // Filter out disabled actions and split at the inline threshold.
+  // `getIsEnabled` acts as a visibility gate — disabled actions are hidden
+  // entirely (not greyed out) because the registry has no separate
+  // `isVisible` hook. This prevents duplicate labels (e.g. two
+  // "Create alert rule" buttons) when multiple plugins register
+  // context-specific actions for different page flavors.
+  // Not memoized: `dependencies` is a fresh object each render (the hook
+  // doesn't memoize its return value), and the computation is trivial
+  // (filter + slice over a handful of registered actions).
+  const enabledActions = registry
+    .getSortedActions()
+    .filter((action) => (action.getIsEnabled ? action.getIsEnabled(dependencies) : true));
+  const inlineActions = enabledActions.slice(0, INLINE_ACTION_LIMIT);
+  const overflowActions = enabledActions.slice(INLINE_ACTION_LIMIT);
 
   // Get open flyout configuration
   const openFlyoutConfig = useMemo(() => {
@@ -95,7 +99,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
   return (
     <div className="exploreQueryPanelActions__group" data-test-subj="queryPanelActionsGroup">
       {inlineActions.map((action) => {
-        const isEnabled = action.getIsEnabled ? action.getIsEnabled(dependencies) : true;
         const label = action.getLabel(dependencies);
         const icon = action.getIcon?.(dependencies);
 
@@ -104,7 +107,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
             key={action.id}
             size="xs"
             onClick={() => handleActionClick(action)}
-            disabled={!isEnabled}
             iconType={icon}
             data-test-subj={`queryPanelActionInline-${action.id}`}
           >
@@ -147,7 +149,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
         >
           <div className="exploreQueryPanelActions__overflowList">
             {overflowActions.map((action) => {
-              const isEnabled = action.getIsEnabled ? action.getIsEnabled(dependencies) : true;
               const label = action.getLabel(dependencies);
               const icon = action.getIcon?.(dependencies);
 
@@ -156,7 +157,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
                   key={action.id}
                   className="exploreQueryPanelActions__item"
                   onClick={() => handleActionClick(action)}
-                  disabled={!isEnabled}
                   iconType={icon}
                   data-test-subj={`queryPanelActionOverflow-${action.id}`}
                 >

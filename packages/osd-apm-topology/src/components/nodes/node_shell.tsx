@@ -58,7 +58,7 @@ export const NodeShell: React.FC<NodeShellProps> = ({
     (event: React.KeyboardEvent) => {
       if (onClick && (event.key === 'Enter' || event.key === ' ')) {
         event.preventDefault();
-        onClick((event as unknown) as React.MouseEvent);
+        onClick(event as unknown as React.MouseEvent);
       }
     },
     [onClick]
@@ -71,8 +71,8 @@ export const NodeShell: React.FC<NodeShellProps> = ({
                   disableGlow
                     ? 'osd:outline-none osd:shadow-none osd:focus:outline-none osd:focus:shadow-none osd:hover:shadow-none'
                     : isSelected
-                    ? 'osd:shadow-node-selected osd:outline-0'
-                    : 'osd:hover:shadow-node-hover'
+                      ? 'osd:shadow-node-selected osd:outline-0'
+                      : 'osd:hover:shadow-node-hover'
                 }
                 ${isFaded ? 'osd:opacity-30' : 'osd:opacity-100'}
                 ${isInteractive ? 'osd:cursor-pointer' : ''}

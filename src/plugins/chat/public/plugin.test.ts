@@ -189,8 +189,9 @@ describe('ChatPlugin', () => {
       plugin.start(mockCoreStart, mockDeps);
 
       // Get the mount function that was registered
-      const registerCall = (mockCoreStart.chrome.navControls
-        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
+      const registerCall = (
+        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
+      ).mock.calls[0];
       mountFunction = registerCall[0].mount;
     });
 
@@ -249,8 +250,9 @@ describe('ChatPlugin', () => {
     it('should pass correct props to ChatHeaderButton', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      const registerCall = (mockCoreStart.chrome.navControls
-        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
+      const registerCall = (
+        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
+      ).mock.calls[0];
       const mountFunction = registerCall[0].mount;
       const mockElement = document.createElement('div');
 
@@ -305,6 +307,44 @@ describe('ChatPlugin', () => {
         clearConversation: true,
       });
     });
+
+    it('should return a selectable result that sends the current query', async () => {
+      const sendMessageWithWindowMock = jest.fn();
+      jest
+        .spyOn(ChatService.prototype, 'sendMessageWithWindow')
+        .mockImplementationOnce(sendMessageWithWindowMock);
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+      const results = await commandConfig.run('test query');
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          id: 'chat-with-ai',
+          label: 'Chat with AI',
+          placement: 'trailing',
+          execute: expect.any(Function),
+        }),
+      ]);
+
+      await results[0].execute();
+
+      expect(sendMessageWithWindowMock).toHaveBeenCalledWith('test query', [], {
+        clearConversation: true,
+      });
+    });
+
+    it('should return no selectable result for an empty query', async () => {
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+
+      await expect(commandConfig.run('')).resolves.toEqual([]);
+    });
   });
 
   describe('localStorage persistence', () => {
@@ -331,11 +371,24 @@ describe('ChatPlugin', () => {
           }),
         },
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26: localStorage is non-configurable by default
       });
 
-      // Mock core.chat methods
-      mockCoreStart.chat.setWindowState = jest.fn();
+      // Mock core.chat methods. setWindowState synchronously invokes the
+      // registered onWindowOpen callback when isWindowOpen becomes true —
+      // mirroring the real core ChatService, where windowState$.next(...)
+      // drives the onWindowOpen subscription synchronously in the same call
+      // stack (see src/core/public/chat/chat_service.ts). This is required
+      // for the isBootstrapping-guard tests below, which depend on the
+      // callback firing while the bootstrap setWindowState call is still on
+      // the stack.
+      mockCoreStart.chat.setWindowState = jest.fn((partialState: { isWindowOpen?: boolean }) => {
+        if (partialState.isWindowOpen === true) {
+          (mockCoreStart.chat.onWindowOpen as jest.Mock).mock.calls.forEach(
+            ([callback]: [() => void]) => callback()
+          );
+        }
+      });
       mockCoreStart.chat.openWindow = jest.fn().mockResolvedValue(undefined);
       mockCoreStart.chat.getWindowState$ = jest.fn().mockReturnValue(
         of({
@@ -351,7 +404,7 @@ describe('ChatPlugin', () => {
       Object.defineProperty(window, 'localStorage', {
         value: originalLocalStorage,
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26
       });
     });
 
@@ -395,6 +448,13 @@ describe('ChatPlugin', () => {
       );
     });
 
+    it('should open chat window by default when no stored state exists', () => {
+      // No localStorage state set (first visit)
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ isWindowOpen: true });
+    });
+
     it('should not restore invalid state from localStorage', () => {
       // Set invalid state in localStorage
       mockLocalStorage['chat.windowState'] = JSON.stringify({
@@ -404,10 +464,67 @@ describe('ChatPlugin', () => {
 
       plugin.start(mockCoreStart, mockDeps);
 
-      // Should not call setWindowState with invalid data from localStorage
-      // but will be called with paddingSize from sidecar config subscription
-      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledTimes(1);
+      // Should not call setWindowState with invalid data from localStorage,
+      // but will fall back to the first-visit default open, plus be called
+      // with paddingSize from the sidecar config subscription
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledTimes(2);
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ isWindowOpen: true });
       expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ paddingSize: 400 });
+    });
+
+    it('should NOT request auto-focus for the bootstrap window-open triggered by first-visit default open', () => {
+      // No stored state — plugin falls back to the first-visit default open,
+      // which synchronously fires onWindowOpen while isBootstrapping is
+      // still true (see the setWindowState mock above).
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+      const chatServiceInstance = startContract.chatService as jest.Mocked<ChatService>;
+
+      expect(chatServiceInstance.setShouldAutoFocusInput).toHaveBeenCalledWith(false);
+    });
+
+    it('should NOT request auto-focus for the bootstrap window-open triggered by restoring localStorage', () => {
+      mockLocalStorage['chat.windowState'] = JSON.stringify({
+        isWindowOpen: true,
+        windowMode: 'sidecar',
+        paddingSize: 400,
+      });
+
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+      const chatServiceInstance = startContract.chatService as jest.Mocked<ChatService>;
+
+      // setWindowState (mocked above) synchronously fires onWindowOpen while
+      // isBootstrapping is still true, matching the real core ChatService.
+      expect(chatServiceInstance.setShouldAutoFocusInput).toHaveBeenCalledWith(false);
+    });
+
+    it('should request auto-focus for a window-open NOT triggered by bootstrap', () => {
+      mockLocalStorage['chat.windowState'] = JSON.stringify({
+        isWindowOpen: true,
+        windowMode: 'sidecar',
+        paddingSize: 400,
+      });
+
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+      const chatServiceInstance = startContract.chatService as jest.Mocked<ChatService>;
+
+      // Bootstrap has already completed by the time start() returns.
+      // Simulate a later, explicit open (header button / quick-start /
+      // agent) — dispatched after the isBootstrapping guard has closed.
+      const onWindowOpenCallback = (mockCoreStart.chat.onWindowOpen as jest.Mock).mock.calls[0][0];
+      onWindowOpenCallback();
+
+      expect(chatServiceInstance.setShouldAutoFocusInput).toHaveBeenCalledWith(true);
+    });
+
+    it('should clear the auto-focus signal on window close', () => {
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+      const chatServiceInstance = startContract.chatService as jest.Mocked<ChatService>;
+
+      const onWindowCloseCallback = (mockCoreStart.chat.onWindowClose as jest.Mock).mock
+        .calls[0][0];
+      onWindowCloseCallback();
+
+      expect(chatServiceInstance.setShouldAutoFocusInput).toHaveBeenCalledWith(false);
     });
   });
 
@@ -434,6 +551,7 @@ describe('ChatPlugin', () => {
         charts: mockDeps.charts,
         suggestedActionsService: expect.any(Object),
         confirmationService: expect.any(Object),
+        humanInputService: expect.any(Object),
       });
     });
 

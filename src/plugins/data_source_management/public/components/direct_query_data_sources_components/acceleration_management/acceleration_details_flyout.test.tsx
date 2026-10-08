@@ -17,19 +17,19 @@ jest.mock('../../../../framework/utils/shared', () => ({
   DSL_BASE: '/api/accelerations',
 }));
 
-const mockHttp: HttpStart = ({
+const mockHttp: HttpStart = {
   get: jest.fn().mockResolvedValue({ some: jest.fn().mockReturnValue(true) }),
-} as unknown) as HttpStart;
+} as unknown as HttpStart;
 
-const mockNotifications = ({
+const mockNotifications = {
   toasts: {
     addWarning: jest.fn(),
   },
-} as unknown) as NotificationsStart;
+} as unknown as NotificationsStart;
 
-const mockApplication: ApplicationStart = ({
+const mockApplication: ApplicationStart = {
   navigateToApp: jest.fn(),
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const defaultAcceleration: CachedAcceleration = {
   flintIndexName: 'test_index',

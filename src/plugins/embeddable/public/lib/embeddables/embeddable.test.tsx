@@ -87,7 +87,7 @@ test('Embeddable reload is called if lastReloadRequest input time changes', asyn
 
   hello.updateInput({ lastReloadRequestTime: 1 });
 
-  expect(hello.reload).toBeCalledTimes(1);
+  expect(hello.reload).toHaveBeenCalledTimes(1);
 });
 
 test('Embeddable reload is not called if lastReloadRequest input time does not change', async () => {
@@ -97,7 +97,7 @@ test('Embeddable reload is not called if lastReloadRequest input time does not c
 
   hello.updateInput({ lastReloadRequestTime: 1 });
 
-  expect(hello.reload).toBeCalledTimes(0);
+  expect(hello.reload).toHaveBeenCalledTimes(0);
 });
 
 test('updating output state retains instance information', async () => {

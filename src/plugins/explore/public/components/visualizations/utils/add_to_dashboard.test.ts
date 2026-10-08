@@ -5,7 +5,7 @@
 
 import { addToDashboard } from './add_to_dashboard'; // Adjust path as needed
 import { setStateToOsdUrl } from '../../../../../opensearch_dashboards_utils/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 // Mock dependencies
 jest.mock('uuid', () => ({
@@ -41,7 +41,7 @@ describe('addToDashboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (uuid.v4 as jest.Mock).mockReturnValue('mock-panel-id');
+    (uuidv4 as jest.Mock).mockReturnValue('mock-panel-id');
   });
 
   it('adds to an existing dashboard correctly', async () => {

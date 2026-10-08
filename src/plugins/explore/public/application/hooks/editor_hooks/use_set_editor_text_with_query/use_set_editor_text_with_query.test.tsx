@@ -62,4 +62,14 @@ describe('useSetEditorTextWithQuery', () => {
     expect(mockSetEditorText).toHaveBeenCalledTimes(1);
     expect(mockDispatch).toHaveBeenCalledTimes(1);
   });
+
+  it('forwards undo-preservation options to the editor text hook', () => {
+    const { result } = renderHook(() => useSetEditorTextWithQuery());
+    const testText = 'source=logs | where status = 500';
+
+    result.current(testText, { preserveUndo: true });
+
+    expect(mockSetEditorText).toHaveBeenCalledWith(testText, { preserveUndo: true });
+    expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
+  });
 });

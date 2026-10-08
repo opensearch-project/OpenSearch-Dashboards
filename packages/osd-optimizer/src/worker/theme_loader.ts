@@ -28,28 +28,36 @@
  * under the License.
  */
 
-import { stringifyRequest, getOptions } from 'loader-utils';
-import webpack from 'webpack';
+import type { LoaderContext } from '@rspack/core';
 import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
 
-const getVersion = (tag: ThemeTag) => (tag.includes('v7') ? 7 : 8);
+interface ThemeLoaderOptions {
+  bundleId: string;
+  themeTags: string;
+}
+
+const getVersion = (tag: ThemeTag) => (tag.includes('v7') ? 7 : tag.includes('v9') ? 9 : 8);
 const getIsDark = (tag: ThemeTag) => tag.includes('dark');
 const compare = (a: ThemeTag, b: ThemeTag) =>
   (getVersion(a) === getVersion(b) ? 1 : 0) + (getIsDark(a) === getIsDark(b) ? 1 : 0);
 
 // eslint-disable-next-line import/no-default-export
-export default function (this: webpack.loader.LoaderContext) {
+export default function (this: LoaderContext<ThemeLoaderOptions>) {
   this.cacheable(true);
 
-  const options = getOptions(this);
-  const bundleId: string = options.bundleId!;
+  const options = this.getOptions();
+  const bundleId: string = options.bundleId;
   const themeTags = parseThemeTags(options.themeTags);
+
+  const contextify = (resourcePath: string) => {
+    return this.utils.contextify(this.context!, resourcePath);
+  };
 
   const cases = ALL_THEMES.map((tag) => {
     if (themeTags.includes(tag)) {
       return `
   case '${tag}':
-    return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`;
+    return require(${JSON.stringify(contextify(`${this.resourcePath}?${tag}`))});`;
     }
 
     const fallback = themeTags
@@ -61,7 +69,7 @@ export default function (this: webpack.loader.LoaderContext) {
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
-    return require(${stringifyRequest(this, `${this.resourcePath}?${fallback}`)})`;
+    return require(${JSON.stringify(contextify(`${this.resourcePath}?${fallback}`))})`;
   }).join('\n');
 
   return `

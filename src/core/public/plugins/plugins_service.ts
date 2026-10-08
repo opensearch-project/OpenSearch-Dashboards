@@ -69,7 +69,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: InjectedPluginMetadata[]
+  ) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 

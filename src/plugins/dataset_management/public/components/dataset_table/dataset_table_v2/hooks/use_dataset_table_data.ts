@@ -42,7 +42,7 @@ export const useDatasetTableData = ({
   const searchClient = data.search.search;
 
   const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+    !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
   const loadSources = () => {
     getIndices({ http, pattern: '*', searchClient }).then((dataSources) =>

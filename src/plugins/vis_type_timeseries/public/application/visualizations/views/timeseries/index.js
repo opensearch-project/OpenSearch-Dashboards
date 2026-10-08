@@ -39,8 +39,10 @@ import {
   Settings,
   AnnotationDomainType,
   LineAnnotation,
+  Tooltip,
   TooltipType,
   StackMode,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -61,7 +63,10 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = (formatter) => ({ value }) => formatter(value);
+const decorateFormatter =
+  (formatter) =>
+  ({ value }) =>
+    formatter(value);
 
 const handleCursorUpdate = (cursor) => {
   eventBus.trigger(ACTIVE_CURSOR, cursor);
@@ -124,7 +129,7 @@ export const TimeSeries = ({
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
-        showLegendExtra={true}
+        legendValues={[LegendValue.CurrentAndLastValue]}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
         animateData={false}
@@ -146,12 +151,12 @@ export const TimeSeries = ({
           },
         ]}
         baseTheme={baseTheme}
-        tooltip={{
-          snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
-          headerFormatter: tooltipFormatter,
-        }}
         externalPointerEvents={{ tooltip: { visible: false } }}
+      />
+      <Tooltip
+        snap={true}
+        type={tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor}
+        headerFormatter={tooltipFormatter}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -278,6 +283,7 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
+        timeAxisLayerCount={0}
         gridLine={{
           ...GRID_LINE_CONFIG,
           visible: showGrid,

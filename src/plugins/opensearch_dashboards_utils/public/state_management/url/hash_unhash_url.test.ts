@@ -209,7 +209,7 @@ describe('hash unhash url', () => {
       mockStorage.setStubbedSizeLimit(1);
 
       const url = `https://localhost:5601/app/discover#/?foo=bar&_g=${rison}`;
-      expect(() => hashUrl(url)).toThrowError();
+      expect(() => hashUrl(url)).toThrow();
     });
   });
 
@@ -218,7 +218,7 @@ describe('hash unhash url', () => {
       it('if missing input', () => {
         expect(() => {
           // @ts-ignore
-        }).not.toThrowError();
+        }).not.toThrow();
       });
 
       it('if just a host and port', () => {

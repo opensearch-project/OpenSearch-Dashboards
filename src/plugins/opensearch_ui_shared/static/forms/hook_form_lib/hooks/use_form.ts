@@ -47,8 +47,15 @@ interface UseFormReturn<T extends FormData, I extends FormData> {
 export function useForm<T extends FormData = FormData, I extends FormData = T>(
   formConfig?: FormConfig<T, I>
 ): UseFormReturn<T, I> {
-  const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
-    formConfig ?? {};
+  const {
+    onSubmit,
+    schema,
+    serializer,
+    deserializer,
+    options,
+    id = 'default',
+    defaultValue,
+  } = formConfig ?? {};
 
   const initDefaultValue = useCallback(
     (_defaultValue?: Partial<T>): { [key: string]: any } => {
@@ -221,10 +228,13 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
       const areFieldsValid = validationResult.every(Boolean);
 
-      const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
-        acc[field.path] = validationResult[i].isValid;
-        return acc;
-      }, {} as { [key: string]: boolean });
+      const validationResultByPath = fieldsToValidate.reduce(
+        (acc, field, i) => {
+          acc[field.path] = validationResult[i].isValid;
+          return acc;
+        },
+        {} as { [key: string]: boolean }
+      );
 
       // At this stage we have an updated field validation state inside the "validationResultByPath" object.
       // The fields we have in our "fieldsRefs.current" have not been updated yet with the new validation state

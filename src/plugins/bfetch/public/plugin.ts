@@ -53,14 +53,12 @@ export interface BfetchPublicContract {
 export type BfetchPublicSetup = BfetchPublicContract;
 export type BfetchPublicStart = BfetchPublicContract;
 
-export class BfetchPublicPlugin
-  implements
-    Plugin<
-      BfetchPublicSetup,
-      BfetchPublicStart,
-      BfetchPublicSetupDependencies,
-      BfetchPublicStartDependencies
-    > {
+export class BfetchPublicPlugin implements Plugin<
+  BfetchPublicSetup,
+  BfetchPublicStart,
+  BfetchPublicSetupDependencies,
+  BfetchPublicStartDependencies
+> {
   private contract!: BfetchPublicContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -86,26 +84,27 @@ export class BfetchPublicPlugin
 
   public stop() {}
 
-  private fetchStreaming = (
-    version: string,
-    basePath: string
-  ): BfetchPublicSetup['fetchStreaming'] => (params) =>
-    fetchStreamingStatic({
-      ...params,
-      url: `${basePath}/${removeLeadingSlash(params.url)}`,
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'osd-bfetch',
-        'osd-version': version,
-        ...(params.headers || {}),
-      },
-    });
+  private fetchStreaming =
+    (version: string, basePath: string): BfetchPublicSetup['fetchStreaming'] =>
+    (params) =>
+      fetchStreamingStatic({
+        ...params,
+        url: `${basePath}/${removeLeadingSlash(params.url)}`,
+        headers: {
+          'Content-Type': 'application/json',
+          'osd-xsrf': 'osd-bfetch',
+          'osd-version': version,
+          ...(params.headers || {}),
+        },
+      });
 
-  private batchedFunction = (
-    fetchStreaming: BfetchPublicContract['fetchStreaming']
-  ): BfetchPublicContract['batchedFunction'] => (params) =>
-    createStreamingBatchedFunction({
-      ...params,
-      fetchStreaming: params.fetchStreaming || fetchStreaming,
-    });
+  private batchedFunction =
+    (
+      fetchStreaming: BfetchPublicContract['fetchStreaming']
+    ): BfetchPublicContract['batchedFunction'] =>
+    (params) =>
+      createStreamingBatchedFunction({
+        ...params,
+        fetchStreaming: params.fetchStreaming || fetchStreaming,
+      });
 }

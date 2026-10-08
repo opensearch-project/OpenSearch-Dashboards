@@ -14,10 +14,18 @@
 
   &.visLib--legend-top {
     flex-direction: column-reverse;
+
+    .visLib__legend {
+      max-height: 50px;
+    }
   }
 
   &.visLib--legend-bottom {
     flex-direction: column;
+
+    .visLib__legend {
+      max-height: 50px;
+    }
   }
 }
 

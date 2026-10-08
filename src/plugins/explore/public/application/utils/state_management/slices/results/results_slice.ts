@@ -8,9 +8,39 @@ import { SearchResponse } from 'elasticsearch';
 
 import { IFieldType } from '../../../../../../../../../src/plugins/data/common';
 
+/**
+ * Query profiling results, populated when query profiling is enabled
+ * (explore.queryProfiling.enabled) and the backend supports it. Grouped under one object so
+ * future profiling fields live together rather than as top-level result attributes.
+ */
+export interface QueryProfile {
+  // Raw worker thread pool the query ran on (e.g. 'sql-worker' | 'sql-complex-worker').
+  queryPool?: string;
+  // True when profiling classified this query as complex (ran on the complex worker pool).
+  isComplex?: boolean;
+}
+
+/**
+ * A non-fatal notice attached to an otherwise-successful query response by the backend (e.g. a
+ * search that reached only some of its shards). Surfaced to the user so a correct-but-partial
+ * result is never mistaken for a complete one.
+ */
+export interface QueryWarning {
+  // Machine-readable category, e.g. 'PARTIAL_RESULT'.
+  type: string;
+  // Short human-readable summary.
+  message: string;
+  // Optional longer explanation with specifics and remedy.
+  detail?: string;
+}
+
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
+  profile?: QueryProfile;
+  /** Data frame meta as the search strategy returned it; keys belong to the strategy. */
+  frameMeta?: Record<string, unknown>;
+  warnings?: QueryWarning[];
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
@@ -32,6 +62,8 @@ export interface ResultMetadata {
   fieldSchema?: Array<Partial<IFieldType>>;
   instantFieldSchema?: Array<Partial<IFieldType>>;
   hasResults: boolean;
+  profile?: QueryProfile;
+  warnings?: QueryWarning[];
 }
 
 export type ResultsState = Record<string, ResultMetadata>;
@@ -52,11 +84,13 @@ const extractMetadata = (result: ISearchResult): ResultMetadata => ({
   total:
     typeof result.hits?.total === 'number'
       ? result.hits.total
-      : (result.hits?.total as any)?.value ?? 0,
+      : ((result.hits?.total as any)?.value ?? 0),
   elapsedMs: result.elapsedMs,
   fieldSchema: result.fieldSchema,
   instantFieldSchema: (result as IPrometheusSearchResult).instantFieldSchema,
   hasResults: (result.hits?.hits?.length ?? 0) > 0,
+  profile: result.profile,
+  warnings: result.warnings,
 });
 
 const initialState: ResultsState = {};

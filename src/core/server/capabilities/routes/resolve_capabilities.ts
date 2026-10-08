@@ -32,6 +32,10 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
+const MAX_APPLICATIONS = 1000;
+
+const MAX_APPLICATION_ID_LENGTH = 256;
+
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   router.post(
     {
@@ -41,7 +45,9 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
       },
       validate: {
         body: schema.object({
-          applications: schema.arrayOf(schema.string()),
+          applications: schema.arrayOf(schema.string({ maxLength: MAX_APPLICATION_ID_LENGTH }), {
+            maxSize: MAX_APPLICATIONS,
+          }),
         }),
       },
     },

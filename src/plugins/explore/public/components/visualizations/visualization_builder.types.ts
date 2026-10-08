@@ -15,6 +15,7 @@ export interface VisData {
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   unknownColumns: VisColumn[];
+  seriesDisplayNames?: Record<string, string>;
 }
 
 export interface SplitConfig {
@@ -25,6 +26,8 @@ export interface SplitConfig {
 
 export interface ChartConfig extends SplitConfig {
   type: ChartType;
+  title?: string;
+  description?: string;
   styles?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
   dataTransformations?: UrlTransformationState[];

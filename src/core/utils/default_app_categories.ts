@@ -147,11 +147,12 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   observabilityTools: {
     id: 'observabilityTools',
     label: i18n.translate('core.ui.observabilityTools.label', {
-      defaultMessage: 'Tools',
+      defaultMessage: 'More',
     }),
     order: 7000,
     collapsible: true,
     defaultOpen: true,
+    euiIconType: 'navQuerySets',
   },
   manage: {
     id: 'manage',
@@ -175,5 +176,9 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 9000,
     collapsible: true,
     defaultOpen: false,
+    // Always start collapsed on a fresh page load (don't restore a prior
+    // expanded state) — it's a low-priority section.
+    alwaysUseDefaultOpen: true,
+    euiIconType: 'navQuerySets',
   },
 });

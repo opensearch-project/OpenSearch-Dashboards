@@ -6,9 +6,9 @@
 import { CryptographyServiceSetup } from './cryptography_service';
 
 const create = () =>
-  (({
+  ({
     encryptAndEncode: jest.fn(),
     decodeAndDecrypt: jest.fn(),
-  } as unknown) as jest.Mocked<CryptographyServiceSetup>);
+  }) as unknown as jest.Mocked<CryptographyServiceSetup>;
 
 export const cryptographyServiceSetupMock = { create };

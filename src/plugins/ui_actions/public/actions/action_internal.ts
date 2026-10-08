@@ -40,7 +40,8 @@ import { ActionType } from '../types';
  * @internal
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
-  implements Action<Context<A>>, Presentable<Context<A>> {
+  implements Action<Context<A>>, Presentable<Context<A>>
+{
   constructor(public readonly definition: A) {}
 
   // @ts-expect-error TS2729 TODO(ts-error): fixme

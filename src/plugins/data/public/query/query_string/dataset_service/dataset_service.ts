@@ -22,11 +22,20 @@ import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
+export type DatasetFilter = (dataset: Dataset) => boolean;
+
+interface AppDatasetFilter {
+  appId: string;
+  filter: DatasetFilter;
+}
+
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
+  private defaultDatasetId?: string;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
+  private datasetFilters: AppDatasetFilter[] = [];
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -51,11 +60,23 @@ export class DatasetService {
 
   public async init(indexPatterns: IndexPatternsContract): Promise<void> {
     this.indexPatterns = indexPatterns;
-    this.defaultDataset = await this.fetchDefaultDataset();
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
   }
 
   public registerType(handlerConfig: DatasetTypeConfig): void {
     this.typesRegistry.set(handlerConfig.id, handlerConfig);
+  }
+
+  public registerDatasetFilter(appId: string, filter: DatasetFilter): void {
+    this.datasetFilters.push({ appId, filter });
+  }
+
+  public isDatasetAllowed(dataset: Dataset, appId?: string): boolean {
+    if (!appId) return true;
+    return this.datasetFilters.filter((f) => f.appId === appId).every((f) => f.filter(dataset));
   }
 
   public getType(type: string): DatasetTypeConfig | undefined {
@@ -67,6 +88,20 @@ export class DatasetService {
   }
 
   public getDefault(): Dataset | undefined {
+    return this.defaultDataset;
+  }
+
+  public async refreshDefault(): Promise<Dataset | undefined> {
+    const defaultDatasetId = this.uiSettings.get('defaultIndex');
+    if (defaultDatasetId === this.defaultDatasetId) {
+      return this.defaultDataset;
+    }
+
+    // defaultIndex can change after the Data plugin starts. Re-fetch only when its ID changes so
+    // application initialization sees the current default without repeating the startup request.
+    const defaultDataset = await this.fetchDefaultDataset(defaultDatasetId);
+    this.defaultDataset = defaultDataset;
+    this.defaultDatasetId = defaultDatasetId;
     return this.defaultDataset;
   }
 
@@ -113,10 +148,13 @@ export class DatasetService {
           id: dataset.id,
           type: dataset.type,
           title: dataset.title,
+          displayName: dataset.displayName,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
           fieldsLoading: asyncType,
-          signalType,
+          // Fall back to the dataset's own signalType so cache-hydrated views (e.g. the default
+          // dataset, where no signalType arg is passed) keep it instead of showing Type: N/A.
+          signalType: signalType ?? dataset.signalType,
           schemaMappings: dataset.schemaMappings,
           dataSourceRef: dataset.dataSource
             ? {
@@ -182,7 +220,10 @@ export class DatasetService {
   public async saveDataset(
     dataset: Dataset,
     services: Partial<IDataPluginServices>,
-    signalType?: string
+    signalType?: string,
+    // Re-selection flows set this to reuse an existing dataset; creates leave it false so a
+    // real conflict still surfaces.
+    reuseExisting: boolean = false
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
@@ -223,10 +264,11 @@ export class DatasetService {
         const createdDataView = await services.data?.dataViews.createAndSave(
           spec,
           undefined,
-          asyncType
+          asyncType,
+          reuseExisting
         );
 
-        // Update the dataset with the new UUID generated during save
+        // Update the dataset with the id of the saved (or reused) data view.
         if (createdDataView?.id) {
           dataset.id = createdDataView.id;
         }
@@ -351,8 +393,9 @@ export class DatasetService {
     this.sessionStorage.set('lastCacheTime', time);
   }
 
-  private async fetchDefaultDataset(): Promise<Dataset | undefined> {
-    const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
+  private async fetchDefaultDataset(
+    defaultIndexPatternId: string | undefined
+  ): Promise<Dataset | undefined> {
     if (!defaultIndexPatternId) {
       return undefined;
     }
@@ -380,12 +423,21 @@ export class DatasetService {
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+            ...(indexPattern.signalType && { signalType: indexPattern.signalType }),
+            ...(indexPattern.schemaMappings && { schemaMappings: indexPattern.schemaMappings }),
           },
           parent: dataSource
             ? {
                 id: dataSource.id,
                 title: dataSource.attributes?.title,
-                type: dataSource.attributes?.dataSourceEngineType || '',
+                type:
+                  dataSource.attributes?.dataSourceEngineType ||
+                  DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+                meta: {
+                  type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                  dataSourceEngineType: dataSource.attributes?.dataSourceEngineType,
+                  dataSourceVersion: dataSource.attributes?.dataSourceVersion,
+                },
               }
             : undefined,
         },

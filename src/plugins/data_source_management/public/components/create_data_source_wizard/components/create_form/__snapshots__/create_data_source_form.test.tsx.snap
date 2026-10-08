@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 1`] = `
 <EuiCompressedSuperSelect

@@ -329,21 +329,32 @@ describe('schema', () => {
 
       it('fails on %date with unknown date format', () => {
         expect(() => patternSchema.validate('%date{HH:MM:SS}')).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"`
+          `
+          "Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS
+          Cause: Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"
+          `
         );
       });
 
       it('fails on %date with predefined date format and invalid timezone', () => {
         expect(() =>
           patternSchema.validate('%date{ISO8601_TZ}{Europe/OpenSearchDashboards}')
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/OpenSearchDashboards"`);
+        ).toThrowErrorMatchingInlineSnapshot(
+          `
+          "Unknown timezone: Europe/OpenSearchDashboards
+          Cause: Unknown timezone: Europe/OpenSearchDashboards"
+          `
+        );
       });
 
       it('validates several %date in pattern', () => {
         expect(() =>
           patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}')
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
+          `
+          "Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH
+          Cause: Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"
+          `
         );
       });
     });

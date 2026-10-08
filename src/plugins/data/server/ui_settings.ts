@@ -36,7 +36,6 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 // cannot import from core/server due to src/core/server/saved_objects/opensearch_query.js which
 // export { opensearchKuery } from '../../../plugins/data/server';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiSettingScope } from '../../../core/server/ui_settings/types';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {

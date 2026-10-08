@@ -17,6 +17,7 @@ import {
   AggregationType,
   VisFieldType,
   ThresholdOptions,
+  StandardOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
@@ -49,7 +50,7 @@ export interface ExclusiveHeatmapConfig {
   customRanges?: RangeValue[];
 }
 // Complete heatmap chart style options interface
-export interface HeatmapChartStyleOptions {
+export interface HeatmapChartStyleOptions extends StandardOptions {
   // Basic controls
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
@@ -66,8 +67,13 @@ export interface HeatmapChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
-  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
+export type HeatmapChartStyle = Required<
+  Omit<
+    HeatmapChartStyleOptions,
+    'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals' | 'min' | 'max'
+  >
+> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle' | 'unitId' | 'unitSuffix' | 'decimals'>;
 
 export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   // Basic controls
@@ -138,7 +144,7 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for heatmap chart');
-          const spec = createRegularHeatmap(props.transformedData, props.styleOptions, {
+          const spec = createRegularHeatmap(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
             [AxisRole.COLOR]: color,

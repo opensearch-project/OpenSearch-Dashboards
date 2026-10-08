@@ -1,9 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`<DevToolItem /> render DevToolItem 1`] = `
 <div>
   <div
-    aria-hidden="true"
     data-test-subj="toolId-dev"
   >
     <nav

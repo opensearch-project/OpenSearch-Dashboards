@@ -43,10 +43,10 @@ export interface FilterableContainerInput extends ContainerInput {
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-export type InheritedChildrenInput = {
+export interface InheritedChildrenInput {
   filters: Filter[];
   id?: string;
-};
+}
 
 export class FilterableContainer extends Container<
   InheritedChildrenInput,

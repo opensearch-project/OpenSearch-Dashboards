@@ -54,18 +54,18 @@ describe('encryptTelemetry', () => {
   it('encrypts payload', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: true });
-    expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
+    expect(createRequestEncryptor).toHaveBeenCalledWith(telemetryJWKS);
   });
 
   it('uses opensearch_dashboards kid on { useProdKey: true }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: true });
-    expect(mockEncrypt).toBeCalledWith('opensearch_dashboards', payload);
+    expect(mockEncrypt).toHaveBeenCalledWith('opensearch_dashboards', payload);
   });
 
   it('uses opensearch_dashboards_dev kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: false });
-    expect(mockEncrypt).toBeCalledWith('opensearch_dashboards_dev', payload);
+    expect(mockEncrypt).toHaveBeenCalledWith('opensearch_dashboards_dev', payload);
   });
 });

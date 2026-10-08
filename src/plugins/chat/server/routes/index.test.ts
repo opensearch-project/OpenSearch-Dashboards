@@ -9,7 +9,18 @@ import { loggingSystemMock } from '../../../../core/server/mocks';
 import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
-import { RequestHandlerContext, Logger } from '../../../../core/server';
+import {
+  RequestHandlerContext,
+  Logger,
+  OpenSearchDashboardsRequest,
+} from '../../../../core/server';
+import { getWorkspaceState } from '../../../../core/server/utils/workspace';
+import { WorkspacePluginStart } from '../../../workspace/server';
+
+jest.mock('../../../../core/server/utils/workspace', () => ({
+  ...jest.requireActual('../../../../core/server/utils/workspace'),
+  getWorkspaceState: jest.fn(() => ({})),
+}));
 
 // Mock native fetch
 global.fetch = jest.fn();
@@ -19,14 +30,17 @@ describe('Chat Proxy Routes', () => {
   let mockFetch: jest.MockedFunction<typeof fetch>;
   let mockLogger: any;
   let mockCapabilitiesResolver: jest.Mock;
+  let lastHandlerContext: any;
 
   const testSetup = async (
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
     mlCommonsAgentId?: string,
-    forwardCredentials?: boolean
+    forwardCredentials?: boolean,
+    getWorkspace?: () => { authorizeWorkspace: jest.Mock } | undefined
   ) => {
-    const { server: testServer, httpSetup } = await setupServer();
+    const { server: testServer, httpSetup, handlerContext } = await setupServer();
+    lastHandlerContext = handlerContext;
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
@@ -37,7 +51,8 @@ describe('Chat Proxy Routes', () => {
       getCapabilitiesResolver,
       mlCommonsAgentId,
       undefined,
-      forwardCredentials
+      forwardCredentials,
+      getWorkspace as unknown as (() => WorkspacePluginStart | undefined) | undefined
     );
 
     // Mock dynamicConfigService required by server.start()
@@ -62,6 +77,7 @@ describe('Chat Proxy Routes', () => {
     });
 
     jest.clearAllMocks();
+    (getWorkspaceState as jest.Mock).mockReturnValue({});
   });
 
   afterEach(async () => {
@@ -122,6 +138,7 @@ describe('Chat Proxy Routes', () => {
           Accept: 'text/event-stream',
         },
         body: JSON.stringify(validRequest),
+        signal: expect.any(AbortSignal),
       });
 
       // Verify response headers for SSE
@@ -142,7 +159,7 @@ describe('Chat Proxy Routes', () => {
       expect(response.body).toEqual({
         statusCode: 503,
         error: 'Service Unavailable',
-        message: 'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured',
+        message: 'No AI agent available: AG-UI URL not configured and ML Commons agent not enabled',
       });
 
       // Verify fetch was not called
@@ -261,8 +278,8 @@ describe('Chat Proxy Routes', () => {
     });
 
     describe('Generic ML Integration', () => {
-      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML context is not available', async () => {
-        // Enable agentic features but no ML context available
+      it('should always route to AG-UI when agUiUrl is configured, even if agenticFeaturesEnabled is true', async () => {
+        // Enable agentic features, but AG-UI must still take precedence
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
@@ -291,10 +308,11 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // When agUiUrl is configured, ML Commons routing is bypassed entirely,
+        // so capabilities are never resolved.
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
           method: 'POST',
           headers: {
@@ -302,17 +320,17 @@ describe('Chat Proxy Routes', () => {
             Accept: 'text/event-stream',
           },
           body: JSON.stringify(validRequest),
+          signal: expect.any(AbortSignal),
         });
       });
 
-      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML client is disabled', async () => {
-        // Enable agentic features but disable ML client
+      it('should always route to AG-UI when agUiUrl is configured, regardless of ML client availability', async () => {
+        // Enable agentic features; AG-UI still wins
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
           },
         });
-        // ML client disabled via missing context ML client
 
         // Mock successful AG-UI response
         mockFetch.mockResolvedValue({
@@ -336,10 +354,10 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // ML Commons routing bypassed — capabilities not resolved
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
           method: 'POST',
           headers: {
@@ -347,10 +365,11 @@ describe('Chat Proxy Routes', () => {
             Accept: 'text/event-stream',
           },
           body: JSON.stringify(validRequest),
+          signal: expect.any(AbortSignal),
         });
       });
 
-      it('should fallback to AG-UI when agenticFeaturesEnabled is false', async () => {
+      it('should route to AG-UI when agUiUrl is configured and agenticFeaturesEnabled is false', async () => {
         // Disable agentic features
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
@@ -380,15 +399,15 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // ML Commons routing bypassed — capabilities not resolved
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
         // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalled();
       });
 
-      it('should return 503 when ML Commons agent ID is not configured', async () => {
-        // Enable agentic features
+      it('should return 503 when neither AG-UI nor ML Commons is available', async () => {
+        // Enable agentic features but provide no AG-UI URL and no ML router
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
@@ -407,14 +426,14 @@ describe('Chat Proxy Routes', () => {
           .expect(503);
 
         expect(response.body.message).toContain(
-          'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured'
+          'No AI agent available: AG-UI URL not configured and ML Commons agent not enabled'
         );
 
-        // Verify AG-UI was not called since ML router handled the error
+        // Verify AG-UI was not called
         expect(mockFetch).not.toHaveBeenCalled();
       });
 
-      it('should fallback to AG-UI when capabilities resolver is not available', async () => {
+      it('should route to AG-UI when agUiUrl is configured and no capabilities resolver is available', async () => {
         // Mock successful AG-UI response
         mockFetch.mockResolvedValue({
           ok: true,
@@ -437,7 +456,7 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalled();
       });
     });
@@ -533,6 +552,117 @@ describe('Chat Proxy Routes', () => {
         expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
         expect(mockLogger.error).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
       });
+
+      // Route-level wiring: the unit tests exercise getValidOboToken directly, so
+      // they cannot catch the route passing the wrong thing into the cache key.
+      // These two go through POST /api/chat/proxy and assert what actually reaches
+      // the key — proving the real request credential (not some derived identity)
+      // is what the cache keys on, which is where the residual risk in this fix lives.
+      it('forwards the minted OBO token and reuses it across requests with the same credential', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+        const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+          .request as jest.Mock;
+        transport.mockResolvedValue({
+          body: { authenticationToken: 'route-obo-token', durationSeconds: 300 },
+        });
+
+        // Credential unique to this test so it cannot collide with cache entries
+        // left by other tests sharing the module-level cache.
+        const cred = 'Bearer route-wiring-same-cred';
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', cred)
+          .send(validRequest)
+          .expect(200);
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', cred)
+          .send(validRequest)
+          .expect(200);
+
+        // The minted OBO token (not the caller's raw credential) is forwarded.
+        const firstHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(firstHeaders.Authorization).toBe('Bearer route-obo-token');
+
+        // Same credential on both requests => the route feeds the same cache key,
+        // so the token is minted once and reused on the second request.
+        expect(transport).toHaveBeenCalledTimes(1);
+      });
+
+      it('mints separately when the proxy user is the same but the roles header differs', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+        const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+          .request as jest.Mock;
+        transport
+          .mockResolvedValueOnce({
+            body: { authenticationToken: 'route-admin-token', durationSeconds: 300 },
+          })
+          .mockResolvedValueOnce({
+            body: { authenticationToken: 'route-lowpriv-token', durationSeconds: 300 },
+          });
+
+        // Same proxy username, different roles header: the demonstrated privilege
+        // escalation shape. The route must key on the full credential so these do
+        // not share a cache entry.
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('x-proxy-user', 'route-same-name')
+          .set('x-proxy-roles', 'all_access')
+          .send(validRequest)
+          .expect(200);
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('x-proxy-user', 'route-same-name')
+          .set('x-proxy-roles', 'kibanauser')
+          .send(validRequest)
+          .expect(200);
+
+        // Distinct credentials => two distinct cache keys => two mints, and each
+        // request forwards its own token (no cross-credential reuse at the route).
+        expect(transport).toHaveBeenCalledTimes(2);
+        const firstHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        const secondHeaders = (mockFetch.mock.calls[1][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(firstHeaders.Authorization).toBe('Bearer route-admin-token');
+        expect(secondHeaders.Authorization).toBe('Bearer route-lowpriv-token');
+      });
     });
 
     describe('System Prompt Injection', () => {
@@ -593,6 +723,77 @@ describe('Chat Proxy Routes', () => {
 
         expect(requestBody.messages).toHaveLength(1);
         expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
+
+    describe('Workspace access', () => {
+      const mockAgUiStream = () =>
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => ({ read: jest.fn().mockResolvedValue({ done: true }) }) },
+        } as any);
+
+      const forwardedBody = () =>
+        JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
+
+      it('strips a client-supplied workspaceId on an unscoped request', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({});
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(200);
+
+        expect(forwardedBody().forwardedProps).not.toHaveProperty('workspaceId');
+      });
+
+      it('pins workspaceId to the request workspace, overwriting a spoofed value', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({ requestWorkspaceId: 'ws-real' });
+        const authorizeWorkspace = jest.fn().mockResolvedValue({ authorized: true });
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          () => ({
+            authorizeWorkspace,
+          })
+        );
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(200);
+
+        expect(authorizeWorkspace).toHaveBeenCalledWith(expect.any(Object), ['ws-real']);
+        expect(forwardedBody().forwardedProps.workspaceId).toBe('ws-real');
+      });
+
+      it('returns 403 when the caller is not authorized for the request workspace', async () => {
+        mockAgUiStream();
+        (getWorkspaceState as jest.Mock).mockReturnValue({ requestWorkspaceId: 'ws-real' });
+        const authorizeWorkspace = jest.fn().mockResolvedValue({ authorized: false });
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          () => ({
+            authorizeWorkspace,
+          })
+        );
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send({ ...validRequest, forwardedProps: { workspaceId: 'spoofed-ws' } })
+          .expect(403);
+
+        expect(response.body.message).toBe('Access to this workspace is denied');
+        expect(mockFetch).not.toHaveBeenCalled();
       });
     });
   });
@@ -843,6 +1044,142 @@ describe('Chat Proxy Routes', () => {
       });
     });
   });
+
+  describe('GET /api/chat/agent_available', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reports available on the external AG-UI path without probing a cluster', async () => {
+      // AG-UI takes precedence in the proxy, so the ML router is never consulted:
+      // the adapter is the authority, we report available and never probe.
+      const getRouterSpy = jest.spyOn(MLAgentRouterFactory, 'getRouter');
+
+      const httpSetup = await testSetup('http://test-agui:3000');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available?dataSourceId=ds-1')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'ag-ui' });
+      expect(transport).not.toHaveBeenCalled();
+      expect(getRouterSpy).not.toHaveBeenCalled();
+    });
+
+    it('reports unavailable when neither ML router nor AG-UI is configured', async () => {
+      jest.spyOn(MLAgentRouterFactory, 'getRouter').mockReturnValue(undefined);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(); // no agUiUrl
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'not-configured' });
+    });
+
+    it('reports available on the Oasis path without probing the selected cluster', async () => {
+      mockCapabilitiesResolver.mockResolvedValue({
+        oasis: {
+          enabled: true,
+        },
+        investigation: {
+          agenticFeaturesEnabled: true,
+        },
+      });
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available?dataSourceId=ds-1')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'oasis' });
+      expect(transport).not.toHaveBeenCalled();
+    });
+
+    it('probes the selected cluster for the agent when the ML router is active', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockResolvedValue({ statusCode: 200, body: {} });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true });
+      expect(transport).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_plugins/_ml/agents/test-agent-id',
+      });
+    });
+
+    it('reports unavailable when the agent is missing on the cluster (404)', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockRejectedValue({ statusCode: 404, message: 'not found' });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'agent-missing' });
+    });
+
+    it('fails open (available) on a transient probe error (5xx)', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, 'test-agent-id');
+      const transport = lastHandlerContext.opensearch.client.asCurrentUser.transport
+        .request as jest.Mock;
+      transport.mockRejectedValue({ statusCode: 503, message: 'unavailable' });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: true, reason: 'probe-error' });
+    });
+
+    it('reports unavailable when the ML router is active but no agent id is configured', async () => {
+      jest
+        .spyOn(MLAgentRouterFactory, 'getRouter')
+        .mockReturnValue({ getRouterName: () => 'GenericMLRouter' } as any);
+      jest.spyOn(MLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+
+      const httpSetup = await testSetup(undefined, undefined, undefined);
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/chat/agent_available')
+        .expect(200);
+
+      expect(response.body).toEqual({ available: false, reason: 'no-agent-configured' });
+    });
+  });
 });
 
 describe('generateOboToken', () => {
@@ -851,15 +1188,15 @@ describe('generateOboToken', () => {
   let mockTransportRequest: jest.Mock;
 
   beforeEach(() => {
-    mockLogger = ({
+    mockLogger = {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    } as unknown) as Logger;
+    } as unknown as Logger;
 
     mockTransportRequest = jest.fn();
 
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -871,7 +1208,7 @@ describe('generateOboToken', () => {
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
   });
 
   it('should return OBO token and duration on successful generation', async () => {
@@ -965,17 +1302,21 @@ describe('getValidOboToken', () => {
   let mockContext: RequestHandlerContext;
   let mockTransportRequest: jest.Mock;
 
+  // Build a minimal request carrying the given credential headers.
+  const mockRequest = (headers: Record<string, string | string[]>): OpenSearchDashboardsRequest =>
+    ({ headers }) as unknown as OpenSearchDashboardsRequest;
+
   beforeEach(() => {
-    mockLogger = ({
+    mockLogger = {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
       debug: jest.fn(),
-    } as unknown) as Logger;
+    } as unknown as Logger;
 
     mockTransportRequest = jest.fn();
 
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -987,7 +1328,7 @@ describe('getValidOboToken', () => {
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
   });
 
   it('should mint a new token when cache is empty', async () => {
@@ -995,7 +1336,12 @@ describe('getValidOboToken', () => {
       body: { authenticationToken: 'fresh-token', durationSeconds: 300 },
     });
 
-    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-a');
+    const token = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-a' })
+    );
 
     expect(token).toBe('fresh-token');
     expect(mockTransportRequest).toHaveBeenCalledTimes(1);
@@ -1006,10 +1352,21 @@ describe('getValidOboToken', () => {
       body: { authenticationToken: 'cached-token', durationSeconds: 300 },
     });
 
+    const creds = { authorization: 'Bearer tok-b' };
     // First call — mints
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
-    // Second call — should use cache
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+    const token1 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
+    // Second call with the same credential — should use cache
+    const token2 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
 
     expect(token1).toBe('cached-token');
     expect(token2).toBe('cached-token');
@@ -1020,29 +1377,193 @@ describe('getValidOboToken', () => {
   it('should return undefined when token generation fails', async () => {
     mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
 
-    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-c');
+    const token = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-c' })
+    );
 
     expect(token).toBeUndefined();
   });
 
-  it('should use separate cache entries per user', async () => {
+  it('should use separate cache entries per distinct credential', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({
-        body: { authenticationToken: 'token-user-d', durationSeconds: 300 },
+        body: { authenticationToken: 'token-cred-d', durationSeconds: 300 },
       })
       .mockResolvedValueOnce({
-        body: { authenticationToken: 'token-user-e', durationSeconds: 300 },
+        body: { authenticationToken: 'token-cred-e', durationSeconds: 300 },
       });
 
-    const tokenD = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-d');
-    const tokenE = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-e');
+    const tokenD = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-d' })
+    );
+    const tokenE = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-e' })
+    );
 
-    expect(tokenD).toBe('token-user-d');
-    expect(tokenE).toBe('token-user-e');
+    expect(tokenD).toBe('token-cred-d');
+    expect(tokenE).toBe('token-cred-e');
     expect(mockTransportRequest).toHaveBeenCalledTimes(2);
   });
 
-  it('should skip caching when username is undefined to prevent cross-user token sharing', async () => {
+  // Regression: the OBO cache must not be shared across different credentials.
+  // Under proxy auth two requests can share a username (x-proxy-user) but carry
+  // different role headers (x-proxy-roles); keying on the full credential keeps
+  // their tokens separate so a token minted for one is never served to the other.
+  it('should not reuse a cached token across different credentials with the same proxy user', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'admin-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'low-priv-token', durationSeconds: 300 },
+      });
+
+    // Privileged request populates the cache.
+    const victimToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ 'x-proxy-user': 'same-name', 'x-proxy-roles': 'all_access' })
+    );
+    // Same proxy user, different roles header => different credential => must
+    // NOT hit the privileged entry and must mint its own token.
+    const attackerToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ 'x-proxy-user': 'same-name', 'x-proxy-roles': 'kibanauser' })
+    );
+
+    expect(victimToken).toBe('admin-token');
+    expect(attackerToken).toBe('low-priv-token');
+    expect(attackerToken).not.toBe(victimToken);
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should reuse the cached token when the full credential matches', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'same-cred-token', durationSeconds: 300 },
+    });
+
+    const creds = { authorization: 'Bearer tok-f', securitytenant: 'global' };
+    const first = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
+    const second = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest(creds)
+    );
+
+    expect(first).toBe('same-cred-token');
+    expect(second).toBe('same-cred-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // Cached — minted once
+    expect(mockLogger.debug).toHaveBeenCalledWith('Using cached OBO token');
+  });
+
+  it('should treat a different securitytenant as a different credential', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'tenant-global-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'tenant-private-token', durationSeconds: 300 },
+      });
+
+    const globalToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-g', securitytenant: 'global' })
+    );
+    const privateToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-g', securitytenant: 'private' })
+    );
+
+    expect(globalToken).toBe('tenant-global-token');
+    expect(privateToken).toBe('tenant-private-token');
+    expect(privateToken).not.toBe(globalToken);
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  // Regression for the allowlist-vs-denylist direction: the proxy roles header
+  // name is deployment-configured (security plugin `proxycache.roles_header` has
+  // no default), so a deployment may use a custom name like `x-remote-groups`.
+  // Keying must still distinguish two requests that share a session cookie but
+  // carry different custom roles headers, otherwise the original privilege-
+  // escalation collision returns. Because the key hashes all non-denylisted
+  // headers, an unrecognized roles header is still included.
+  it('should distinguish a custom (non-default) roles header under the same cookie', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'admin-token', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'low-priv-token', durationSeconds: 300 },
+      });
+
+    // Same session cookie, different *custom-named* roles header.
+    const victimToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ cookie: 'security_authentication=abc', 'x-remote-groups': 'all_access' })
+    );
+    const attackerToken = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ cookie: 'security_authentication=abc', 'x-remote-groups': 'kibanauser' })
+    );
+
+    expect(victimToken).toBe('admin-token');
+    expect(attackerToken).toBe('low-priv-token');
+    expect(attackerToken).not.toBe(victimToken);
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2); // distinct keys, no reuse
+  });
+
+  // A denylisted header (not part of the credential) must NOT fragment the cache:
+  // the same identity varying only `x-forwarded-for` still hits one entry.
+  it('should ignore non-credential headers (x-forwarded-for) when keying', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'xff-token', durationSeconds: 300 },
+    });
+
+    const first = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-xff', 'x-forwarded-for': '10.0.0.1' })
+    );
+    const second = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer tok-xff', 'x-forwarded-for': '10.0.0.2' })
+    );
+
+    expect(first).toBe('xff-token');
+    expect(second).toBe('xff-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // same credential => one mint
+  });
+
+  it('should skip caching when the request carries no credential, minting fresh each time', async () => {
     mockTransportRequest
       .mockResolvedValueOnce({
         body: { authenticationToken: 'token-call-1', durationSeconds: 300 },
@@ -1051,12 +1572,86 @@ describe('getValidOboToken', () => {
         body: { authenticationToken: 'token-call-2', durationSeconds: 300 },
       });
 
-    // Both calls without username should mint fresh tokens (no caching)
-    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
-    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+    // Both calls with no credential headers must mint fresh (no caching), so a
+    // single "empty credential" entry is never shared across requests.
+    const token1 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({})
+    );
+    const token2 = await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({})
+    );
 
     expect(token1).toBe('token-call-1');
     expect(token2).toBe('token-call-2');
     expect(mockTransportRequest).toHaveBeenCalledTimes(2); // No caching — minted twice
+  });
+
+  // Regression: the credential key space is much larger than before (one entry
+  // per distinct credential rather than per username), so the cache is bounded
+  // by a maximum entry count. Once the bound is exceeded the oldest-inserted
+  // entry is evicted, which keeps memory from growing without limit even when
+  // every token is still live (not expired).
+  it('should evict the oldest entry once the cache bound is exceeded', async () => {
+    // Every mint returns a long-lived token so only the size bound — not expiry —
+    // can remove an entry.
+    mockTransportRequest.mockImplementation(() =>
+      Promise.resolve({ body: { authenticationToken: 'bounded-token', durationSeconds: 3600 } })
+    );
+
+    const OBO_CACHE_MAX_ENTRIES = 100;
+
+    // Insert the oldest entry first, then fill the cache to exactly `max` with
+    // other distinct credentials. 'oldest' is the first-inserted entry.
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer oldest' })
+    );
+    for (let i = 1; i < OBO_CACHE_MAX_ENTRIES; i++) {
+      await getValidOboToken(
+        mockContext,
+        mockLogger,
+        'http://agui:3000',
+        mockRequest({ authorization: `Bearer filler-${i}` })
+      );
+    }
+
+    const mintsBefore = mockTransportRequest.mock.calls.length;
+
+    // 'oldest' is still cached (we are exactly at the bound, nothing evicted yet).
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer oldest' })
+    );
+    expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBefore); // served from cache
+
+    // Adding one more distinct credential pushes past the bound and evicts the
+    // oldest-inserted entry ('oldest'). A cache hit does not refresh recency.
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer overflow' })
+    );
+
+    // 'oldest' was evicted, so requesting it again must mint rather than hit
+    // the cache.
+    const mintsBeforeEvicted = mockTransportRequest.mock.calls.length;
+    await getValidOboToken(
+      mockContext,
+      mockLogger,
+      'http://agui:3000',
+      mockRequest({ authorization: 'Bearer oldest' })
+    );
+    expect(mockTransportRequest).toHaveBeenCalledTimes(mintsBeforeEvicted + 1); // re-minted
   });
 });

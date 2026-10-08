@@ -50,8 +50,10 @@ import { visualizationSavedObjectType } from './saved_objects';
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { registerVisualizationsCollector } from './usage_collector';
 
-export class VisualizationsPlugin
-  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsPluginSetup,
+  VisualizationsPluginStart
+> {
   private readonly logger: Logger;
   private readonly config: Observable<{ opensearchDashboards: { index: string } }>;
 

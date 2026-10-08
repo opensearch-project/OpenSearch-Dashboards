@@ -71,9 +71,13 @@ const fieldDisplayFilteringTestSuite = () => {
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
         cy.getElementByTestId('field-category-showDetails').click();
-        cy.getElementByTestId('plus-category-Network').click();
-
-        verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
+        cy.get('[data-test-subj^="plus-category-"]')
+          .first()
+          .then(($plusButton) => {
+            const categoryValue = $plusButton.attr('data-test-subj').replace('plus-category-', '');
+            cy.wrap($plusButton).click();
+            verifyMonacoEditorContent(`| WHERE \`category\` = '${categoryValue}' `);
+          });
       });
 
       it(`filter out action in table field for ${config.testName}`, () => {
@@ -84,9 +88,15 @@ const fieldDisplayFilteringTestSuite = () => {
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
         cy.getElementByTestId('field-category-showDetails').click();
-        cy.getElementByTestId('minus-category-Network').click();
-
-        verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
+        cy.get('[data-test-subj^="minus-category-"]')
+          .first()
+          .then(($minusButton) => {
+            const categoryValue = $minusButton
+              .attr('data-test-subj')
+              .replace('minus-category-', '');
+            cy.wrap($minusButton).click();
+            verifyMonacoEditorContent(`| WHERE \`category\` != '${categoryValue}' `);
+          });
       });
 
       it(`filter for actions in expanded table for ${config.testName}`, () => {
@@ -103,11 +113,15 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.wait(2000);
 
-        cy.getElementByTestId('tableDocViewRow-category').within(() => {
-          cy.getElementByTestId('addInclusiveFilterButton').click();
-        });
+        cy.getElementByTestId('tableDocViewRow-category-value')
+          .invoke('text')
+          .then((categoryValue) => {
+            cy.getElementByTestId('tableDocViewRow-category').within(() => {
+              cy.getElementByTestId('addInclusiveFilterButton').click();
+            });
 
-        verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
+            verifyMonacoEditorContent(`| WHERE \`category\` = '${categoryValue.trim()}' `);
+          });
       });
 
       it(`filter out actions in expanded table for ${config.testName}`, () => {
@@ -124,11 +138,15 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.wait(2000);
 
-        cy.getElementByTestId('tableDocViewRow-category').within(() => {
-          cy.getElementByTestId('removeInclusiveFilterButton').click();
-        });
+        cy.getElementByTestId('tableDocViewRow-category-value')
+          .invoke('text')
+          .then((categoryValue) => {
+            cy.getElementByTestId('tableDocViewRow-category').within(() => {
+              cy.getElementByTestId('removeInclusiveFilterButton').click();
+            });
 
-        verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
+            verifyMonacoEditorContent(`| WHERE \`category\` != '${categoryValue.trim()}' `);
+          });
       });
     });
   });

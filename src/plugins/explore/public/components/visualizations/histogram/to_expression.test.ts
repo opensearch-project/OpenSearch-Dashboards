@@ -13,8 +13,6 @@ describe('Histogram to_expression', () => {
     name: 'Count',
     column: 'count',
     schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockNumericalColumn2: VisColumn = {
@@ -22,8 +20,6 @@ describe('Histogram to_expression', () => {
     name: 'Sum',
     column: 'sum',
     schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockData = [

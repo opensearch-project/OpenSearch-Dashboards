@@ -98,8 +98,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           ? database.name === selectedDatabase
             ? 'on'
             : index === 0
-            ? 'on'
-            : undefined
+              ? 'on'
+              : undefined
           : undefined,
       };
     })

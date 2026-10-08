@@ -7,62 +7,93 @@ import { PieSeriesOption } from 'echarts';
 import { PieChartStyle } from './pie_vis_config';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 import { getColors } from '../theme/default_colors';
+import {
+  createDataLegendItem,
+  getLegendColor,
+  getLegendNameDomain,
+  LegendItem,
+} from '../utils/legend';
+import { normalizeEmptyValue } from '../utils/data_transformation';
+import { formatUnitValue } from '../style_panel/unit/collection';
 
-export const createPieSeries = <T extends BaseChartStyle>({
-  styles,
-  cateField,
-  valueField,
-}: {
-  styles: PieChartStyle;
-  cateField: string;
-  valueField: string;
-}): PipelineFn<T> => (state: EChartsSpecState<T>) => {
-  const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
-  const palette = getColors().categories;
-  const data: PieSeriesOption['data'] = [];
-  if (state.transformedData) {
-    const sortedNames = state.transformedData.map((d) => String(d[cateField])).sort();
-    state.transformedData.forEach((d) => {
-      const value = d[valueField];
-      const name = d[cateField];
-      const colorIndex = sortedNames.indexOf(String(name));
-      data.push({
-        name,
-        value,
-        itemStyle: {
-          color: palette[colorIndex % palette.length],
-        },
+export const createPieSeries =
+  <T extends BaseChartStyle>({
+    styles,
+    cateField,
+    valueField,
+    allData,
+  }: {
+    styles: PieChartStyle;
+    cateField: string;
+    valueField: string;
+    allData?: Array<Record<string, any>>;
+  }): PipelineFn<T> =>
+  (state: EChartsSpecState<T>) => {
+    const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
+    const palette = getColors().categories;
+    const hasUnit = !!styles.unitId || styles.decimals != null || !!styles.unitSuffix;
+    const data: PieSeriesOption['data'] = [];
+    const legendItems: LegendItem[] = [];
+    if (state.transformedData) {
+      const sortedNames = getLegendNameDomain({
+        data: allData ?? state.transformedData,
+        nameField: cateField,
+        seriesFields: [],
+        columns: [],
       });
-    });
-  }
+      state.transformedData.forEach((d) => {
+        const value = d[valueField];
+        const name = normalizeEmptyValue(d[cateField]);
+        const displayLabel = state.seriesDisplayNames?.[name] ?? name;
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createDataLegendItem(displayLabel, color, 0, name));
+        data.push({
+          name,
+          value,
+          itemStyle: {
+            color,
+          },
+        });
+      });
+    }
 
-  let formatter = '{b}';
-  if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
-    formatter = `{b}: {@${valueField}}`;
-  } else if (styles?.exclusive?.showLabels) {
-    formatter = '{b}';
-  } else if (styles?.exclusive?.showValues) {
-    formatter = `{@${valueField}}`;
-  }
+    const formatter = (params: any) => {
+      const label = state.seriesDisplayNames?.[params.name] ?? params.name;
+      const rawValue = params.data?.value ?? params.value;
+      const value = hasUnit
+        ? formatUnitValue(rawValue, styles.unitId, styles.decimals, styles.unitSuffix)
+        : String(rawValue);
 
-  const series: PieSeriesOption[] = [
-    {
-      type: 'pie',
-      radius,
-      avoidLabelOverlap: true,
-      data,
-      labelLine: {
-        show: true,
-      },
-      label: {
-        show: styles?.exclusive?.showValues || styles?.exclusive?.showLabels,
-        formatter,
-      },
-      labelLayout: {
-        width: styles?.exclusive.truncate,
-      },
-    },
-  ];
+      if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
+        return `${label}: ${value}`;
+      }
+      if (styles?.exclusive?.showLabels) {
+        return label;
+      }
+      if (styles?.exclusive?.showValues) {
+        return value;
+      }
+      return '';
+    };
 
-  return { ...state, series };
-};
+    const series: PieSeriesOption[] = [
+      {
+        type: 'pie',
+        radius,
+        avoidLabelOverlap: true,
+        data,
+        labelLine: {
+          show: true,
+        },
+        label: {
+          show: styles?.exclusive?.showValues || styles?.exclusive?.showLabels,
+          formatter,
+        },
+        labelLayout: {
+          width: styles?.exclusive.truncate,
+        },
+      },
+    ];
+
+    return { ...state, series, legendItems };
+  };

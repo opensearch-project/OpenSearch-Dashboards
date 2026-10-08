@@ -89,10 +89,9 @@ export interface Presentable<Context extends object = object> {
   readonly grouping?: PresentableGrouping<Context>;
 }
 
-export interface PresentableGroup<Context extends object = object>
-  extends Partial<
-    Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
-  > {
+export interface PresentableGroup<Context extends object = object> extends Partial<
+  Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
+> {
   id: string;
   /**
    * This allows groups to be categorized with other groups. Within a UI action

@@ -23,16 +23,8 @@ jest.mock('moment', () => {
 });
 
 describe('url_builder', () => {
-  const mockLocation = {
-    origin: 'https://example.com',
-    pathname: '/app/explore',
-  };
-
   beforeEach(() => {
-    Object.defineProperty(window, 'location', {
-      value: mockLocation,
-      writable: true,
-    });
+    window.history.pushState({}, '', 'http://localhost:5601/app/explore');
   });
 
   describe('buildExploreLogsUrl', () => {
@@ -57,7 +49,7 @@ describe('url_builder', () => {
 
       const result = buildExploreLogsUrl(params);
 
-      expect(result).toContain('https://example.com/app/explore/logs/#/');
+      expect(result).toContain('http://localhost:5601/app/explore/logs/#/');
       expect(result).toContain('test-trace-id');
       expect(result).toContain("id:'logs-dataset-id'");
       expect(result).toContain("title:'logs-*'");
@@ -81,7 +73,7 @@ describe('url_builder', () => {
     });
 
     it('should handle custom base path', () => {
-      mockLocation.pathname = '/custom-base/app/explore';
+      window.history.pushState({}, '', 'http://localhost:5601/custom-base/app/explore');
 
       const params = {
         traceId: 'test-trace-id',
@@ -91,7 +83,7 @@ describe('url_builder', () => {
 
       const result = buildExploreLogsUrl(params);
 
-      expect(result).toContain('https://example.com/custom-base/app/explore/logs/#/');
+      expect(result).toContain('http://localhost:5601/custom-base/app/explore/logs/#/');
     });
 
     it('should handle dataset with custom time field', () => {

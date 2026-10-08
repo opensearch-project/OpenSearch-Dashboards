@@ -113,6 +113,7 @@ export interface OpenSearchDashboards {
   controlsLocation: ControlsLocation;
   controlsDirection: ControlsDirection;
   hideWarnings: boolean;
+  restoreSignalValuesOnRefresh?: boolean;
   type: string;
   renderer: Renderer;
   visibleVisLayers?: Map<VisLayerTypes, boolean>;

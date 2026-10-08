@@ -6,7 +6,7 @@
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { isValidMapping } from './visualization_builder_utils';
@@ -27,6 +27,8 @@ import { ITransformationService } from '../data_transformations/types';
 import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
 interface VisState {
+  title?: string;
+  description?: string;
   styleOptions?: StyleOptions;
   chartType?: string;
   axesMapping?: AxisFieldNameMappings;
@@ -46,6 +48,7 @@ export class VisualizationBuilder {
   private transformationService: ITransformationService = createNoOpTransformationService();
   private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
   private lastSchema: Array<{ type?: string; name?: string }> = [];
+  private seriesDisplayNames?: Record<string, string> = {};
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -65,7 +68,7 @@ export class VisualizationBuilder {
     this.subscriptions.push(
       service.getPipeline$().subscribe(() => {
         if (this.lastRawRows.length > 0) {
-          this.handleData(this.lastRawRows, this.lastSchema);
+          this.handleData(this.lastRawRows, this.lastSchema, this.seriesDisplayNames);
         }
       })
     );
@@ -110,6 +113,13 @@ export class VisualizationBuilder {
         initialVisConfig.styles = state.styleOptions;
       }
 
+      if (state.title !== undefined) {
+        initialVisConfig.title = state.title;
+      }
+      if (state.description !== undefined) {
+        initialVisConfig.description = state.description;
+      }
+
       if (state.axesMapping) {
         initialVisConfig.axesMapping = state.axesMapping;
       }
@@ -151,6 +161,8 @@ export class VisualizationBuilder {
         .subscribe(([visConfig, isVisDirty]) =>
           this.syncToUrl(
             {
+              title: visConfig?.title,
+              description: visConfig?.description,
               chartType: visConfig?.type,
               axesMapping: visConfig?.axesMapping,
               styleOptions: visConfig?.styles,
@@ -190,7 +202,11 @@ export class VisualizationBuilder {
     }
 
     const currentVisConfig = this.visConfig$.value;
-    const newVisConfig: ChartConfig = { type: chartType };
+    const newVisConfig: ChartConfig = {
+      type: chartType,
+      title: currentVisConfig?.title,
+      description: currentVisConfig?.description,
+    };
 
     const visConfig = visualizationRegistry.getVisualization(chartType);
     if (!visConfig) {
@@ -317,6 +333,8 @@ export class VisualizationBuilder {
           ? currentConfig.styles
           : chartTypeConfig.ui.style.defaults,
       axesMapping,
+      title: currentConfig?.title,
+      description: currentConfig?.description,
       splitField: currentConfig?.splitField,
       splitLayout: currentConfig?.splitLayout,
       showSplitLabel: currentConfig?.showSplitLabel,
@@ -391,24 +409,21 @@ export class VisualizationBuilder {
    */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
-    schema: Array<{ type?: string; name?: string }>
+    schema: Array<{ type?: string; name?: string }>,
+    seriesDisplayNames?: Record<string, string>
   ) {
     // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
     // cache the reference
     this.lastRawRows = rows;
     this.lastSchema = schema;
+    this.seriesDisplayNames = seriesDisplayNames;
 
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rows,
       schema
     );
-    const {
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      unknownColumns,
-    } = normalizeResultRows(transformedRows, finalSchema);
+    const { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
+      normalizeResultRows(transformedRows, finalSchema);
 
     this.data$.next({
       transformedData,
@@ -416,6 +431,7 @@ export class VisualizationBuilder {
       categoricalColumns,
       dateColumns,
       unknownColumns,
+      seriesDisplayNames: this.seriesDisplayNames,
     });
   }
 
@@ -430,6 +446,19 @@ export class VisualizationBuilder {
         ...currentVisConfig,
         styles: { ...currentVisConfig.styles, ...styles },
       });
+    }
+  }
+
+  updatePanelSettings(settings: { title?: string; description?: string }) {
+    const currentVisConfig = this.visConfig$.value;
+    if (!currentVisConfig) {
+      return;
+    }
+
+    const nextConfig = { ...currentVisConfig, ...settings };
+    if (!isEqual(currentVisConfig, nextConfig)) {
+      this.setIsVisDirty(true);
+      this.visConfig$.next(nextConfig);
     }
   }
 
@@ -535,11 +564,18 @@ export class VisualizationBuilder {
     this.transformationService = createNoOpTransformationService();
     this.lastRawRows = [];
     this.lastSchema = [];
+    this.seriesDisplayNames = {};
     this.isInitialized = false;
   }
 
   clearUrl() {
-    this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
+    this.syncToUrl({
+      title: undefined,
+      description: undefined,
+      axesMapping: {},
+      styleOptions: undefined,
+      chartType: undefined,
+    });
   }
 
   getRenderConfig$(): Observable<RenderChartConfig | undefined> {
@@ -550,6 +586,8 @@ export class VisualizationBuilder {
           if (vis) {
             const styles: ChartStyles = mergeStyles(vis.ui.style.defaults, config.styles);
             return {
+              title: config.title,
+              description: config.description,
               styles,
               type: config.type,
               axesMapping: config.axesMapping,
@@ -564,6 +602,27 @@ export class VisualizationBuilder {
     );
   }
 
+  private getVisualizationRenderConfig$(): Observable<RenderChartConfig | undefined> {
+    return this.getRenderConfig$().pipe(
+      map((config) => {
+        if (!config) {
+          return undefined;
+        }
+
+        // Panel metadata is persisted with the visualization but does not affect chart rendering.
+        return {
+          styles: config.styles,
+          type: config.type,
+          axesMapping: config.axesMapping,
+          splitField: config.splitField,
+          splitLayout: config.splitLayout,
+          showSplitLabel: config.showSplitLabel,
+        };
+      }),
+      distinctUntilChanged((previous, current) => isEqual(previous, current))
+    );
+  }
+
   renderVisualization({
     timeRange,
     onSelectTimeRange,
@@ -573,7 +632,7 @@ export class VisualizationBuilder {
   }) {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
-      config$: this.getRenderConfig$(),
+      config$: this.getVisualizationRenderConfig$(),
       showRawTable$: this.showRawTable$,
       timeRange,
       onSelectTimeRange,
@@ -590,6 +649,7 @@ export class VisualizationBuilder {
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),
       onSplitConfigChange: this.updateSplitConfig.bind(this),
+      onPanelSettingsChange: this.updatePanelSettings.bind(this),
     });
   }
 }

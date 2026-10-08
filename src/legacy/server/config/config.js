@@ -38,7 +38,7 @@ import {
   deepCloneWithBuffers as clone,
   IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE,
 } from '../../utils';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
@@ -63,9 +63,13 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, (child) => {
-        this.extendSchema(child.schema, _.get(settings, child.key), child.key);
-      });
+      const described = extension.describe();
+      if (described.keys) {
+        Object.keys(described.keys).forEach((childKey) => {
+          this.extendSchema(extension.extract(childKey), _.get(settings, childKey), childKey);
+        });
+      }
+      return;
     }
 
     if (this.has(key)) {
@@ -137,7 +141,7 @@ export class Config {
       );
     }
 
-    const results = Joi.validate(newVals, this.getSchema(), {
+    const results = this.getSchema().validate(newVals, {
       context,
       abortEarly: false,
     });
@@ -169,41 +173,30 @@ export class Config {
   getDefault(key) {
     const schemaKey = Array.isArray(key) ? key.join('.') : key;
 
-    const subSchema = Joi.reach(this.getSchema(), schemaKey);
+    let subSchema;
+    try {
+      subSchema = this.getSchema().extract(schemaKey);
+    } catch {
+      throw new Error(`Unknown config key: ${key}.`);
+    }
     if (!subSchema) {
       throw new Error(`Unknown config key: ${key}.`);
     }
 
-    return clone(_.get(Joi.describe(subSchema), 'flags.default'));
+    return clone(_.get(subSchema.describe(), 'flags.default'));
   }
 
   has(key) {
-    function has(key, schema, path) {
-      path = path || [];
-      // Catch the partial paths
-      if (path.join('.') === key) return true;
-      // Only go deep on inner objects with children
-      if (_.size(schema._inner.children)) {
-        for (let i = 0; i < schema._inner.children.length; i++) {
-          const child = schema._inner.children[i];
-          // If the child is an object recurse through it's children and return
-          // true if there's a match
-          if (child.schema._type === 'object') {
-            if (has(key, child.schema, path.concat([child.key]))) return true;
-            // if the child matches, return true
-          } else if (path.concat([child.key]).join('.') === key) {
-            return true;
-          }
-        }
-      }
-    }
-
     if (Array.isArray(key)) {
-      // TODO: add .has() support for array keys
       key = key.join('.');
     }
 
-    return !!has(key, this.getSchema());
+    try {
+      const sub = this.getSchema().extract(key);
+      return !!sub;
+    } catch {
+      return false;
+    }
   }
 
   getSchema() {
@@ -215,7 +208,7 @@ export class Config {
           const child = children[key];
           const childSchema = _.isPlainObject(child) ? convertToSchema(child) : child;
 
-          if (!childSchema || !childSchema.isJoi) {
+          if (!childSchema || !Joi.isSchema(childSchema)) {
             throw new TypeError(
               'Unable to convert configuration definition value to Joi schema: ' + childSchema
             );

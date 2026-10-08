@@ -5,7 +5,7 @@
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { ERROR_DETAILS } from '../../../common';
-import { AgentError, formatError, ProhibitedQueryError } from './errors';
+import { AgentError, extractAgentErrorDetail, formatError, ProhibitedQueryError } from './errors';
 
 describe('formatError', () => {
   it('should return an error with a custom message for status code 429', () => {
@@ -79,5 +79,49 @@ describe('formatError', () => {
     const error = new Error('Some error');
     const formattedError = formatError(error);
     expect(formattedError).toEqual(error);
+  });
+});
+
+describe('extractAgentErrorDetail', () => {
+  it('returns the input unchanged when it is empty', () => {
+    expect(extractAgentErrorDetail('')).toBe('');
+  });
+
+  it('returns the input unchanged when there is no embedded JSON', () => {
+    expect(extractAgentErrorDetail('plain error text without json')).toBe(
+      'plain error text without json'
+    );
+  });
+
+  it('unwraps the real cause from an OriginalMessage wrapper', () => {
+    const details = `Error from remote service: ${JSON.stringify({
+      OriginalMessage: JSON.stringify({ error: 'the real cause' }),
+      StatusCode: 400,
+    })}`;
+    expect(extractAgentErrorDetail(details)).toBe('the real cause');
+  });
+
+  it('unwraps from Message when OriginalMessage is absent', () => {
+    const details = `wrapped: ${JSON.stringify({
+      Message: JSON.stringify({ error: 'message level cause' }),
+    })}`;
+    expect(extractAgentErrorDetail(details)).toBe('message level cause');
+  });
+
+  it('falls back to the inner message field when there is no inner error field', () => {
+    const details = JSON.stringify({
+      OriginalMessage: JSON.stringify({ message: 'inner message cause' }),
+    });
+    expect(extractAgentErrorDetail(details)).toBe('inner message cause');
+  });
+
+  it('returns the original details when the outer JSON has no usable inner payload', () => {
+    const details = JSON.stringify({ StatusCode: 500, SomethingElse: true });
+    expect(extractAgentErrorDetail(details)).toBe(details);
+  });
+
+  it('returns the original details when the embedded JSON is malformed', () => {
+    const details = 'Error from remote service: {not valid json';
+    expect(extractAgentErrorDetail(details)).toBe(details);
   });
 });

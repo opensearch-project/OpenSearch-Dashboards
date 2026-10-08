@@ -61,21 +61,8 @@ describe('ApmSystem', () => {
     });
 
     describe('http request normalization', () => {
-      let windowSpy: any;
-
-      beforeEach(() => {
-        windowSpy = jest.spyOn(global as any, 'window', 'get').mockImplementation(() => ({
-          location: {
-            protocol: 'http:',
-            hostname: 'myopensearch-dashboardsdomain.com',
-            port: '5601',
-          },
-        }));
-      });
-
-      afterEach(() => {
-        windowSpy.mockRestore();
-      });
+      // window.location is 'http://localhost:5601' as configured in src/dev/jest/config.js.
+      // No mocking needed — tests use those values directly.
 
       it('adds an observe function', async () => {
         const apmSystem = new ApmSystem({ active: true });
@@ -104,31 +91,33 @@ describe('ApmSystem', () => {
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
+            name: 'GET http://localhost:5601/asdf/qwerty',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /asdf/qwerty' });
 
-        // Does not modify URLs that are not on the same origin
+        // Does not modify URLs that are not on the same origin (different protocol)
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET https://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
+            name: 'GET https://localhost:5601/asdf/qwerty',
           } as Transaction)
         ).toEqual({
           type: 'http-request',
-          name: 'GET https://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
+          name: 'GET https://localhost:5601/asdf/qwerty',
         });
 
+        // Does not modify URLs that are not on the same origin (different port)
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:9200/asdf/qwerty',
+            name: 'GET http://localhost:9200/asdf/qwerty',
           } as Transaction)
         ).toEqual({
           type: 'http-request',
-          name: 'GET http://myopensearch-dashboardsdomain.com:9200/asdf/qwerty',
+          name: 'GET http://localhost:9200/asdf/qwerty',
         });
 
+        // Does not modify URLs that are not on the same origin (different hostname)
         expect(
           wrappedObserver({
             type: 'http-request',
@@ -149,28 +138,28 @@ describe('ApmSystem', () => {
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha',
+            name: 'GET http://localhost:5601/alpha',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/',
+            name: 'GET http://localhost:5601/alpha/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/beta',
+            name: 'GET http://localhost:5601/alpha/beta',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/beta/',
+            name: 'GET http://localhost:5601/alpha/beta/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta/' });
 

@@ -87,7 +87,7 @@ export function buildServices(
     overlays: core.overlays,
 
     // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-    store: (undefined as unknown) as AppStore, // Will be set by the store
+    store: undefined as unknown as AppStore, // Will be set by the store
     viewRegistry: undefined, // Will be replaced with tabRegistry
     embeddable: plugins.embeddable,
     scopedHistory: undefined, // Will be set by the app
@@ -106,6 +106,9 @@ export function buildServices(
     // Add supportedTypes from config
     supportedTypes,
     sqlSupportEnabled: config.sqlSupport?.enabled ?? false,
+    queryProfilingEnabled: config.queryProfiling?.enabled ?? false,
+    pplAnalyzeEnabled: config.pplAnalyze?.enabled ?? false,
+    logsDrilldownEnabled: config.logsDrilldown?.enabled ?? false,
     isDatasetManagementEnabled,
     dataImporterConfig,
     dataSourceEnabled,

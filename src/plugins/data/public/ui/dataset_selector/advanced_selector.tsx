@@ -46,6 +46,9 @@ export const AdvancedSelector = ({
   alwaysShowDatasetFields,
   signalType,
   showNonTimeFieldDatasets,
+  initialSelectedItems,
+  initialDataSourceId,
+  autoFocus,
 }: {
   services: IDataPluginServices;
   onSelect: (query: Partial<Query>, saveDataset?: boolean) => void;
@@ -55,6 +58,16 @@ export const AdvancedSelector = ({
   alwaysShowDatasetFields?: boolean;
   signalType?: string;
   showNonTimeFieldDatasets?: boolean;
+  /**
+   * Optional index/pattern names to pre-select at step 1 (browse) in a custom data-structure creator
+   * such as the INDEX creator. Opt-in; default undefined preserves today's blank-start behavior.
+   */
+  initialSelectedItems?: string[];
+  /** Optional data source id (MDS) to auto-select at step 1. Opt-in. */
+  initialDataSourceId?: string;
+  /** Auto-focus the creator's search input on mount. Opt-in; default (undefined) keeps today's
+   *  focus-on-mount behavior. Pass false to open the selector without grabbing focus. */
+  autoFocus?: boolean;
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -112,6 +125,9 @@ export const AdvancedSelector = ({
       setPath={setPath}
       onNext={(dataset) => setSelectedDataset(dataset)}
       onCancel={onCancel}
+      initialSelectedItems={initialSelectedItems}
+      initialDataSourceId={initialDataSourceId}
+      autoFocus={autoFocus}
     />
   );
 };

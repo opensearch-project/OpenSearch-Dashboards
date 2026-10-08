@@ -53,6 +53,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { OpenSearchDashboardsRequest, InternalHttpServiceSetup } from '../http';
+import { Capabilities } from '../capabilities';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -67,6 +68,8 @@ import { registerRoutes } from './routes';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+// Not via the barrel: this records process-wide state, and the barrel is what plugins deep-import.
+import { setConditionalFieldFlags } from './migrations/core/build_active_mappings';
 import { Config } from '../config';
 import { SqliteSavedObjectsRepository } from './storage/sqlite_repository';
 /**
@@ -171,6 +174,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Returns whether saved objects permission control is enabled.
+   */
+  getPermissionControlEnabled: () => boolean;
 
   /**
    * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
@@ -297,8 +305,10 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
 }
 
-export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+export class SavedObjectsService implements CoreService<
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart
+> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -308,6 +318,7 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
@@ -322,6 +333,12 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+  }
+
+  public setCapabilitiesResolver(
+    resolver: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+  ) {
+    this.capabilitiesResolver = resolver;
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -342,6 +359,15 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+
+    // Recorded before any plugin runs, for callers that build mappings without the raw
+    // configuration. Permission control comes from the validated config -- the same source
+    // `getPermissionControlEnabled` reports -- so the two cannot drift. Workspaces belongs to the
+    // workspace plugin and has no validated counterpart here.
+    setConditionalFieldFlags({
+      permissionsEnabled: this.config.permission.enabled,
+      workspacesEnabled: !!this.opensearchDashboardsRawConfig.get('workspace.enabled'),
+    });
 
     // Wire up SQLite backend via the existing repository factory provider hook
     if (this.config.storage.backend === 'sqlite') {
@@ -371,6 +397,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      getCapabilities: () => this.capabilitiesResolver,
     });
 
     return {
@@ -401,6 +428,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      getPermissionControlEnabled: () => this.config!.permission.enabled,
       setRepositoryFactoryProvider: (repositoryProvider) => {
         if (this.started) {
           throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');

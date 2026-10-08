@@ -46,7 +46,7 @@ export const indexPatternFieldMock = {
 } as IIndexPatternFieldList;
 
 // Create a mock for the initial index pattern
-export const indexPatternInitialMock = ({
+export const indexPatternInitialMock = {
   id: '123',
   title: 'test_index',
   fields: indexPatternFieldMock,
@@ -56,7 +56,7 @@ export const indexPatternInitialMock = ({
   formatField: undefined,
   metaFields: ['_id', '_index', '_source'],
   getFieldByName: () => ({}),
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 // Add a flattenHit method to the initial index pattern mock using flattenHitWrapper
 const flatternHitMock = indexPatterns.flattenHitWrapper(

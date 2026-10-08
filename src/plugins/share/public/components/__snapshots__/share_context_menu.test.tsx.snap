@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`shareContextMenuExtensions should sort ascending on sort order first and then ascending on name 1`] = `
 <I18nProvider>

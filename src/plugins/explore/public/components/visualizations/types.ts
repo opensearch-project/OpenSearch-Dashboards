@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import type { EChartsOption } from 'echarts';
 import { ChartStyles } from '../visualizations/utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
 
@@ -26,8 +26,6 @@ export interface VisColumn {
   name: string;
   schema: VisFieldType;
   column: string;
-  validValuesCount: number;
-  uniqueValuesCount: number;
 }
 
 export enum VisFieldType {
@@ -67,6 +65,14 @@ export type ThresholdLines = ThresholdLine[];
 
 export interface TooltipOptions {
   mode: 'all' | 'hidden';
+}
+
+export interface StandardOptions {
+  unitId?: string;
+  unitSuffix?: string;
+  decimals?: number;
+  min?: number;
+  max?: number;
 }
 
 // Styling: Grid configuration
@@ -251,7 +257,7 @@ export interface UnitItem {
   id: string;
   name: string;
   symbol?: string;
-  display?: (value: number, symbol?: string) => UnitDisplay;
+  display?: (value: number, symbol?: string, decimals?: number) => UnitDisplay;
   fontScale?: number;
 }
 
@@ -280,6 +286,8 @@ export interface ValueMappingOptions {
 export enum DisableMode {
   Never = 'never',
   Threshold = 'threshold',
+  // only for connecting null values
+  Always = 'always',
 }
 
 export interface DisconnectValuesOption {
@@ -293,7 +301,14 @@ export interface ConnectNullValuesOption {
 }
 
 export interface RendererSpecConfig {
-  spec?: echarts.EChartsOption;
+  spec?: EChartsOption;
   name?: string;
   data: Array<Record<string, any>>;
 }
+
+export type StackMode = 'none' | 'total' | 'percentage';
+
+export type LineMode = 'straight' | 'smooth' | 'stepped';
+
+export type LineDashStyle = 'solid' | 'dashed' | 'dotted';
+export type LineStyle = 'both' | 'line' | 'dots';

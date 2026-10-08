@@ -5,16 +5,17 @@
 
 import { PieChartStyle } from './pie_vis_config';
 import { AxisRole, VisColumn, AggregationType } from '../types';
-import { pipe, createBaseConfig, assembleSpec, collectPieLegend } from '../utils/echarts_spec';
+import { pipe, createBaseConfig, assembleSpec, addTooltipFormatter } from '../utils/echarts_spec';
 import { aggregate, transform } from '../utils/data_transformation';
 import { createPieSeries } from './pie_chart_utils';
-import { ColorMap } from '../utils/color_map';
+import { pieDisplayNameTooltipFormatter } from '../utils/utils';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
   styleOptions: PieChartStyle,
   axisColumnMappings: { [AxisRole.SIZE]: VisColumn; [AxisRole.COLOR]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
+  allData?: Array<Record<string, any>>,
+  seriesDisplayNames?: Record<string, string>
 ) => {
   const colorCol = axisColumnMappings[AxisRole.COLOR];
   const sizeCol = axisColumnMappings[AxisRole.SIZE];
@@ -28,18 +29,20 @@ export const createPieSpec = (
       })
     ),
     createBaseConfig({ legend: { show: false } }),
+    addTooltipFormatter(pieDisplayNameTooltipFormatter),
     createPieSeries({
       styles: styleOptions,
       cateField: colorCol.column,
       valueField: sizeCol.column,
+      allData,
     }),
-    collectPieLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
     styles: styleOptions,
     axisColumnMappings,
+    seriesDisplayNames,
   });
 
-  return result.spec;
+  return { spec: result.spec, legendItems: result.legendItems ?? [] };
 };

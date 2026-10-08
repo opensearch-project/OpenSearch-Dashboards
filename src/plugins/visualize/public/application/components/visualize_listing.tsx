@@ -142,11 +142,10 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history, uiSettings), [
-    application,
-    history,
-    uiSettings,
-  ]);
+  const tableColumns = useMemo(
+    () => getTableColumns(application, history, uiSettings),
+    [application, history, uiSettings]
+  );
 
   const fetchItems = useCallback(
     // @ts-expect-error TS7006 TODO(ts-error): fixme

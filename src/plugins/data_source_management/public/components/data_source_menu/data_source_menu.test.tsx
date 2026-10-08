@@ -33,8 +33,8 @@ describe('DataSourceMenu', () => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
     mockedContext.workspaces.currentWorkspaceId$.getValue = jest.fn().mockReturnValue(undefined);
   });
 

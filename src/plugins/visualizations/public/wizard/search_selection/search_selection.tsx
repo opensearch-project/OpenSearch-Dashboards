@@ -28,7 +28,13 @@
  * under the License.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -37,7 +43,7 @@ import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../..
 
 import { SavedObjectFinderUi } from '../../../../saved_objects/public';
 import { VisType } from '../../vis_types';
-import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
+import { DEFAULT_DATA, UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -50,6 +56,7 @@ interface SearchSelectionProps {
 
 interface SearchSelectionState {
   indexPatternIds: Set<string>;
+  hasUnsupportedSources: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
@@ -59,16 +66,23 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     super(props);
     this.state = {
       indexPatternIds: new Set(),
+      hasUnsupportedSources: false,
     };
   }
 
   async componentDidMount() {
-    const indexPatternList = await this.props.data.indexPatterns.getCache({
+    const allIndexPatterns = await this.props.data.indexPatterns.getCache();
+    const legacyCompatibleIndexPatterns = await this.props.data.indexPatterns.getCache({
       excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+      excludeDatasetTypes: [DEFAULT_DATA.SET_TYPES.INDEX],
     });
 
     this.setState({
-      indexPatternIds: new Set(indexPatternList?.map((indexpattern) => indexpattern.id)),
+      indexPatternIds: new Set(
+        legacyCompatibleIndexPatterns?.map((indexPattern) => indexPattern.id)
+      ),
+      hasUnsupportedSources:
+        (allIndexPatterns?.length ?? 0) > (legacyCompatibleIndexPatterns?.length ?? 0),
     });
   }
 
@@ -90,6 +104,22 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
+          {this.state.hasUnsupportedSources && (
+            <>
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'visualizations.newVisWizard.searchSelection.unsupportedSources',
+                  {
+                    defaultMessage:
+                      "Legacy visualizations support only DSL queries. Optimized engine (AnalyticEngine) index patterns and PPL/SQL-only index datasets, including their saved searches, aren't supported and are hidden from the list below.",
+                  }
+                )}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}

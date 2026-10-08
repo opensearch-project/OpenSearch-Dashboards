@@ -16,20 +16,17 @@ import {
   SearchInterceptorDeps,
 } from '../../../data/public';
 import { formatTimePickerDate, Query } from '../../../data/common';
-import {
-  API,
-  DATASET,
-  EnhancedFetchContext,
-  formatDate,
-  SEARCH_STRATEGY,
-  fetch,
-} from '../../common';
+import { API, DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
-  private static readonly timeFilterSupportedAppNames = ['dashboards', 'explore/logs'];
+  private static readonly timeFilterSupportedAppNames = [
+    'dashboards',
+    'explore/logs',
+    'visualization-editor',
+  ];
 
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
@@ -105,9 +102,17 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
+    // Wrap the time literals in `TIMESTAMP('...')` rather than emitting bare string literals.
+    // Modern OpenSearch SQL implicitly coerces a string to a timestamp for `field >= '<string>'`,
+    // but legacy Elasticsearch (Open Distro) SQL does not and rejects it with a [TIMESTAMP,STRING]
+    // type error. `TIMESTAMP('...')` is accepted by both engines, so this form is portable across
+    // all data sources.
+    // formatTimePickerDate already emits this format in UTC. Re-parsing it through a local-time
+    // formatter was a no-op except inside a DST spring-forward gap, where it shifted the bound an
+    // hour and dropped an hour of matching rows.
+    const whereClause = `\`${dataset.timeFieldName}\` >= TIMESTAMP('${fromDate}') AND \`${
       dataset.timeFieldName
-    }\` <= '${formatDate(toDate)}'`;
+    }\` <= TIMESTAMP('${toDate}')`;
 
     return {
       ...nextQuery,

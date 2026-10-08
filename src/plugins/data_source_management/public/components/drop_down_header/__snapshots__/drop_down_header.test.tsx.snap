@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DataSourceDropDownHeader should render correctly with the provided totalDataSourceCount 1`] = `
 <EuiPopoverTitle

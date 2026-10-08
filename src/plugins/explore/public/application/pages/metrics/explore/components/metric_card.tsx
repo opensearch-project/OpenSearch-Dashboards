@@ -63,7 +63,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   const type = inferMetricType(name, metadata?.type || MetricType.UNKNOWN);
 
-  const { onTimeRangeChange } = useExploration();
+  const { onTimeRangeChange, timeBounds } = useExploration();
 
   const sparklineLabel =
     type === MetricType.COUNTER ? 'sum(rate)' : type === MetricType.HISTOGRAM ? 'p95' : 'avg';
@@ -104,6 +104,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           label={sparklineLabel}
           isDarkMode={darkMode}
           onTimeRangeChange={onTimeRangeChange}
+          timeFrom={timeBounds?.min}
+          timeTo={timeBounds?.max}
         />
       );
     return <EuiLoadingChart size="m" />;

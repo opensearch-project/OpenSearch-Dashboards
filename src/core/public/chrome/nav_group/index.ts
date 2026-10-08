@@ -11,3 +11,4 @@ export {
   NavGroupItemInMap,
   ChromeNavGroupUpdater,
 } from './nav_group_service';
+export { NavPopoverServices, NavPopoverAction, NavPopoverConfig } from './types';

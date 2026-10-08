@@ -4,6 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { AssistantActionContext } from '../../../context_provider/public';
 import { ToolCallRow, TimelineToolCall } from './tool_call_row';
 
 // Mock the context - use require inside the factory
@@ -247,6 +248,72 @@ describe('ToolCallRow', () => {
       const { container } = render(<ToolCallRow toolCall={toolCall} />);
 
       expect(container.querySelector('.toolCallRow')).toBeInTheDocument();
+    });
+  });
+
+  describe('custom confirmation renderers', () => {
+    it('passes args and confirmation callbacks to non-graph custom renderers', () => {
+      const args = {
+        requestId: 'req-1',
+        sourceQueryHash: 'hash-1',
+        fixedQuery: 'source=logs | head 10',
+      };
+      const onApprove = jest.fn();
+      const onReject = jest.fn();
+      const renderer = jest.fn((props) => (
+        <div>
+          <span>{props.status}</span>
+          <span>{props.args.fixedQuery}</span>
+          <button onClick={() => props.onApprove?.({ fixedQuery: 'source=logs | head 5' })}>
+            Approve
+          </button>
+          <button onClick={props.onReject}>Reject</button>
+        </div>
+      ));
+      const contextValue = {
+        toolCallStates: new Map([
+          [
+            'tool-1',
+            {
+              id: 'tool-1',
+              name: 'apply_ppl_lint_fix_data',
+              status: 'pending',
+              args,
+              timestamp: Date.now(),
+            },
+          ],
+        ]),
+        getActionRenderer: jest.fn(() => renderer),
+        shouldUseCustomRenderer: jest.fn(() => true),
+      };
+
+      render(
+        <AssistantActionContext.Provider value={contextValue as any}>
+          <ToolCallRow
+            toolCall={createToolCall({
+              toolName: 'apply_ppl_lint_fix_data',
+              status: 'running',
+              arguments: JSON.stringify(args),
+            })}
+            onApprove={onApprove}
+            onReject={onReject}
+          />
+        </AssistantActionContext.Provider>
+      );
+
+      expect(renderer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'executing',
+          args,
+          onApprove,
+          onReject,
+        })
+      );
+      expect(screen.getByText('source=logs | head 10')).toBeInTheDocument();
+      screen.getByText('Approve').click();
+      screen.getByText('Reject').click();
+      expect(onApprove).toHaveBeenCalledWith({ fixedQuery: 'source=logs | head 5' });
+      expect(onReject).toHaveBeenCalledTimes(1);
     });
   });
 });

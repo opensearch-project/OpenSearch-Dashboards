@@ -1,0 +1,189 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.osdGlobalSearchCommandPaletteOverlay {
+  --osd-command-palette-top-offset: 100px;
+  --osd-command-palette-mask-opacity: 70%;
+  --osd-command-palette-animation-duration: 150ms;
+
+  align-items: flex-start;
+  padding-top: var(--osd-command-palette-top-offset);
+  padding-bottom: 0;
+  background:
+    color-mix(
+      in srgb,
+      $euiColorEmptyShade var(--osd-command-palette-mask-opacity),
+      transparent
+    );
+  animation:
+    osdGlobalSearchCommandPaletteMaskIn
+    var(--osd-command-palette-animation-duration)
+    ease-out
+    both;
+}
+
+.osdGlobalSearchCommandPaletteOverlay.osdGlobalSearchCommandPaletteOverlay--closing {
+  animation:
+    osdGlobalSearchCommandPaletteMaskOut
+    var(--osd-command-palette-animation-duration)
+    ease-in
+    both;
+}
+
+.osdGlobalSearchCommandPaletteOverlay--closing .osdGlobalSearchCommandPalette {
+  animation:
+    osdGlobalSearchCommandPaletteOut
+    var(--osd-command-palette-animation-duration)
+    ease-in
+    both;
+}
+
+.osdGlobalSearchCommandPalette {
+  display: flex;
+  flex-direction: column;
+  width: min(800px, calc(100vw - 48px));
+  max-height: calc(100vh - var(--osd-command-palette-top-offset) - 24px);
+  overflow: hidden;
+  animation:
+    osdGlobalSearchCommandPaletteIn
+    var(--osd-command-palette-animation-duration)
+    cubic-bezier(0.694, 0.0482, 0.335, 1)
+    both;
+}
+
+.osdGlobalSearchCommandPalette__search {
+  padding: 8px;
+  border-bottom: $euiBorderThin;
+}
+
+.osdGlobalSearchCommandPalette__results {
+  max-height: min(480px, calc(100vh - var(--osd-command-palette-top-offset) - 80px));
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.osdGlobalSearchCommandPalette__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.osdGlobalSearchCommandPalette__group + .osdGlobalSearchCommandPalette__group {
+  margin-top: 8px;
+}
+
+.osdGlobalSearchCommandPalette__groupLabel {
+  padding: 8px 12px 4px;
+  color: $euiTextSubduedColor;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.osdGlobalSearchCommandPalette__result {
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.osdGlobalSearchCommandPalette__result[aria-selected="true"] {
+  background-color: $euiFocusBackgroundColor;
+}
+
+.osdGlobalSearchCommandPalette__message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 80px;
+  padding: 24px 12px;
+  color: $euiTextSubduedColor;
+  text-align: center;
+}
+
+.osdGlobalSearchCommandPalette__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: $euiBorderThin;
+  color: $euiTextSubduedColor;
+  font-size: 12px;
+}
+
+.osdGlobalSearchCommandPalette__footerTip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.osdGlobalSearchCommandPalette__footerToken {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: $euiBorderThin;
+  border-radius: 2px;
+  background-color: $euiColorLightestShade;
+  color: $euiTextColor;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1;
+}
+
+@keyframes osdGlobalSearchCommandPaletteMaskIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteMaskOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes osdGlobalSearchCommandPaletteOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .osdGlobalSearchCommandPaletteOverlay,
+  .osdGlobalSearchCommandPaletteOverlay--closing,
+  .osdGlobalSearchCommandPalette,
+  .osdGlobalSearchCommandPaletteOverlay--closing .osdGlobalSearchCommandPalette {
+    animation: none;
+  }
+}

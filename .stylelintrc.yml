@@ -7,6 +7,13 @@ rules:
   # recommended to turn off descending specificity since we use a lot of nesting:
   # https://stylelint.io/user-guide/rules/list/no-descending-specificity/
   no-descending-specificity: null
+  # `@container` is standard CSS that this version of stylelint-scss doesn't know yet. It only
+  # trips the check when nested (a top-level `@container` already passes), which would leave the
+  # rule enforced inconsistently rather than usefully.
+  scss/at-rule-no-unknown:
+    - true
+    - ignoreAtRules:
+        - container
   # need to use global function/value names from EUI
   function-name-case: null
   value-keyword-case: null

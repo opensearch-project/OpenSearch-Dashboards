@@ -8,5 +8,3 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
-/* eslint-disable */

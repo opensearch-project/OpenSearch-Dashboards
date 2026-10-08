@@ -78,7 +78,7 @@ export function createPluginInitializerContext(
     env: coreContext.env,
     config: {
       get<T>() {
-        return (pluginConfig as unknown) as T;
+        return pluginConfig as unknown as T;
       },
     },
   };
@@ -98,7 +98,7 @@ export function createPluginSetupContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsStart extends object,
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -143,7 +143,7 @@ export function createPluginStartContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsStart extends object,
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,

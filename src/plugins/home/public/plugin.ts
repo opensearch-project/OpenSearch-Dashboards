@@ -97,14 +97,12 @@ export interface HomePluginSetupDependencies {
   contentManagement: ContentManagementPluginSetup;
 }
 
-export class HomePublicPlugin
-  implements
-    Plugin<
-      HomePublicPluginSetup,
-      HomePublicPluginStart,
-      HomePluginSetupDependencies,
-      HomePluginStartDependencies
-    > {
+export class HomePublicPlugin implements Plugin<
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  HomePluginSetupDependencies,
+  HomePluginStartDependencies
+> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -195,10 +193,8 @@ export class HomePublicPlugin
         id: SEARCH_OVERVIEW_PAGE_ID,
         title: 'Overview',
         mount: async (params: AppMountParameters) => {
-          const [
-            coreStart,
-            { contentManagement: contentManagementStart, navigation },
-          ] = await core.getStartServices();
+          const [coreStart, { contentManagement: contentManagementStart, navigation }] =
+            await core.getStartServices();
           setCommonService();
 
           const { renderSearchUseCaseOverviewApp } = await import('./application');

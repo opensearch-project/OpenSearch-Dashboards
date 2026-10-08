@@ -36,9 +36,8 @@ const TraceFlowContext = createContext<TraceFlowContextValue>({
 });
 
 /**
- * Custom wrapper around AgentCardNode that intercepts clicks to:
- * 1. Call onSelectSpan with the corresponding span
- * 2. Prevent CelestialMap's default viewport reset behavior via stopPropagation
+ * Custom wrapper around AgentCardNode that selects the corresponding span on click. The click
+ * still reaches CelestialMap, which centers the node (onNodeClickZoom="centerOnNode").
  */
 const TraceAgentCardNode = (props: NodeProps<any>) => {
   const { onSelectSpan, spanMap } = useContext(TraceFlowContext);
@@ -50,13 +49,7 @@ const TraceAgentCardNode = (props: NodeProps<any>) => {
     }
   }, [onSelectSpan, spanMap, props.data.id]);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      selectSpan();
-    },
-    [selectSpan]
-  );
+  const handleClick = useCallback(() => selectSpan(), [selectSpan]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -112,10 +105,10 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
     return { mapData: { root: { nodes, edges } }, spanMap: map };
   }, [categorizedTree]);
 
-  const contextValue = useMemo<TraceFlowContextValue>(() => ({ onSelectSpan, spanMap }), [
-    onSelectSpan,
-    spanMap,
-  ]);
+  const contextValue = useMemo<TraceFlowContextValue>(
+    () => ({ onSelectSpan, spanMap }),
+    [onSelectSpan, spanMap]
+  );
 
   // Deselect when clicking the ReactFlow background pane
   const handleContainerClick = useCallback(
@@ -190,6 +183,12 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
           legend={false}
           breadcrumbs={[]}
           showMinimap
+          // Deep trace trees need to zoom out further than the default 60% floor to fit
+          // the flyout panel, and the panel is resizable.
+          fitViewOptions={{ minZoom: 0.1 }}
+          refitOnResize
+          // Clicking a node pans it to the center at the current zoom.
+          onNodeClickZoom="centerOnNode"
           topN={Infinity}
         />
       </div>

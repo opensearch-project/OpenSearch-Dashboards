@@ -10,7 +10,11 @@ import {
   computingDate,
   currencyFormat,
   computing,
-  dataUnits,
+  decimalDataUnits,
+  binaryDataUnits,
+  metricLengthUnits,
+  imperialLengthUnits,
+  timeUnits,
 } from './collection';
 
 // Mock Date.now for consistent testing
@@ -164,30 +168,32 @@ describe('UnitsCollection', () => {
   it('should add proper unit for data values using display function', () => {
     const bits = getUnitById('bits');
     expect(bits?.display?.(100.12, 'b').label).toBe('12.52 B');
+    expect(bits?.display?.(8000, 'b').label).toBe('1 KB');
 
-    const kbits = getUnitById('bytes');
-    expect(kbits?.display?.(100.12, 'B').label).toBe('100.12 B');
+    const bytes = getUnitById('bytes');
+    expect(bytes?.display?.(100.12, 'B').label).toBe('100.12 B');
+    expect(bytes?.display?.(1024, 'B').label).toBe('1.02 KB');
 
     const kilobytes = getUnitById('kilobytes');
-    expect(kilobytes?.display?.(100.12, 'kB').label).toBe('97.77 KiB');
+    expect(kilobytes?.display?.(100.12, 'KB').label).toBe('100.12 KB');
 
     const kibibytes = getUnitById('kibibytes');
     expect(kibibytes?.display?.(100.12, 'KiB').label).toBe('100.12 KiB');
 
     const megabytes = getUnitById('megabytes');
-    expect(megabytes?.display?.(100.12, 'MB').label).toBe('95.48 MiB');
+    expect(megabytes?.display?.(100.12, 'MB').label).toBe('100.12 MB');
 
     const mebibytes = getUnitById('mebibytes');
     expect(mebibytes?.display?.(100.12, 'MiB').label).toBe('100.12 MiB');
 
     const gigabytes = getUnitById('gigabytes');
-    expect(gigabytes?.display?.(100.12, 'GB').label).toBe('93.24 GiB');
+    expect(gigabytes?.display?.(100.12, 'GB').label).toBe('100.12 GB');
 
     const gibibytes = getUnitById('gibibytes');
     expect(gibibytes?.display?.(100.12, 'GiB').label).toBe('100.12 GiB');
 
     const terabytes = getUnitById('terabytes');
-    expect(terabytes?.display?.(100.12, 'TB').label).toBe('91.06 TiB');
+    expect(terabytes?.display?.(100.12, 'TB').label).toBe('100.12 TB');
 
     const tebibytes = getUnitById('tebibytes');
     expect(tebibytes?.display?.(100.12, 'TiB').label).toBe('100.12 TiB');
@@ -216,6 +222,20 @@ describe('UnitsCollection', () => {
     expect(second?.display?.(1000, 'seconds').label).toBe('16.67 minutes');
     const millisecond = getUnitById('millisecond');
     expect(millisecond?.display?.(1000, 'milliseconds').label).toBe('1 seconds');
+  });
+
+  it('should keep length values in the same measurement system', () => {
+    const meter = getUnitById('meter');
+    expect(meter?.display?.(2000, 'm').label).toBe('2 km');
+
+    const kilometer = getUnitById('kilometer');
+    expect(kilometer?.display?.(0.5, 'km').label).toBe('500 m');
+
+    const feet = getUnitById('feet');
+    expect(feet?.display?.(6000, 'ft').label).toBe('1.14 mi');
+
+    const mile = getUnitById('mile');
+    expect(mile?.display?.(0.5, 'mi').label).toBe('2640 ft');
   });
 });
 
@@ -379,7 +399,42 @@ describe('currencyFormat', () => {
 
 describe('computing', () => {
   it('should compute the decent unit with the base unit', () => {
-    const result = computing(1000, dataUnits, 'B');
-    expect(result.label).toBe('1 kB');
+    const result = computing(1000, decimalDataUnits, 'B');
+    expect(result.label).toBe('1 KB');
+  });
+
+  it('should compute downward when the value is smaller than the current unit', () => {
+    const result = computing(0.5, timeUnits, 'hours');
+    expect(result.label).toBe('30 minutes');
+  });
+});
+
+describe('data unit groups', () => {
+  it('should keep decimal data units in the decimal system', () => {
+    expect(computing(1024, decimalDataUnits, 'KB').label).toBe('1.02 MB');
+    expect(computing(1000, decimalDataUnits, 'MB').label).toBe('1 GB');
+  });
+
+  it('should keep binary data units in the binary system', () => {
+    expect(computing(1024, binaryDataUnits, 'KiB').label).toBe('1 MiB');
+    expect(computing(1024, binaryDataUnits, 'MiB').label).toBe('1 GiB');
+  });
+
+  it('should scale data units downward within the same system', () => {
+    expect(computing(0.5, decimalDataUnits, 'MB').label).toBe('500 KB');
+    expect(computing(0.5, binaryDataUnits, 'KiB').label).toBe('512 B');
+    expect(computing(0.5, decimalDataUnits, 'B').label).toBe('4 b');
+  });
+});
+
+describe('length unit groups', () => {
+  it('should keep metric length units in the metric system', () => {
+    expect(computing(2000, metricLengthUnits, 'm').label).toBe('2 km');
+    expect(computing(0.5, metricLengthUnits, 'km').label).toBe('500 m');
+  });
+
+  it('should keep imperial length units in the imperial system', () => {
+    expect(computing(6000, imperialLengthUnits, 'ft').label).toBe('1.14 mi');
+    expect(computing(0.5, imperialLengthUnits, 'mi').label).toBe('2640 ft');
   });
 });

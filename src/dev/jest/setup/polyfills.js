@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* globals global */
+
 // Disable chalk colors in tests for consistent snapshot results across environments
 // (TTY detection varies between Docker containers, CI, and local terminals)
 process.env.FORCE_COLOR = '0';

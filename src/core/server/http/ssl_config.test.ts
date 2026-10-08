@@ -194,7 +194,10 @@ describe('#sslSchema', () => {
         },
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [key] when [keystore.path] is specified"`
+        `
+        "cannot use [key] when [keystore.path] is specified
+        Cause: cannot use [key] when [keystore.path] is specified"
+        `
       );
     });
 
@@ -206,7 +209,10 @@ describe('#sslSchema', () => {
         },
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [certificate] when [keystore.path] is specified"`
+        `
+        "cannot use [certificate] when [keystore.path] is specified
+        Cause: cannot use [certificate] when [keystore.path] is specified"
+        `
       );
     });
 
@@ -216,7 +222,10 @@ describe('#sslSchema', () => {
         enabled: true,
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+        `
       );
     });
 
@@ -226,7 +235,10 @@ describe('#sslSchema', () => {
         key: '/path/to/key',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+        `
       );
     });
 
@@ -235,7 +247,10 @@ describe('#sslSchema', () => {
         enabled: true,
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
+        `
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+        `
       );
     });
 
@@ -245,7 +260,10 @@ describe('#sslSchema', () => {
         clientAuthentication: 'optional',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
+        `
+        "must enable ssl to use [clientAuthentication]
+        Cause: must enable ssl to use [clientAuthentication]"
+        `
       );
     });
 
@@ -255,7 +273,10 @@ describe('#sslSchema', () => {
         clientAuthentication: 'required',
       };
       expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
+        `
+        "must enable ssl to use [clientAuthentication]
+        Cause: must enable ssl to use [clientAuthentication]"
+        `
       );
     });
   });
@@ -303,21 +324,20 @@ describe('#sslSchema', () => {
         supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3', 'SOMEv100500'],
       };
 
-      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
-`);
-      expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
-        .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.4]: types that failed validation:
-- [supportedProtocols.4.0]: expected value to equal [TLSv1]
-- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
-`);
+      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(
+        `
+        "[supportedProtocols.0]: SchemaTypeError: expected value to equal [TLSv1.3]
+        Cause: SchemaTypeError: expected value to equal [TLSv1.3]"
+        `
+      );
+      expect(() =>
+        sslSchema.validate(allKnownWithOneUnknownProtocols)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `
+        "[supportedProtocols.4]: SchemaTypeError: expected value to equal [TLSv1.3]
+        Cause: SchemaTypeError: expected value to equal [TLSv1.3]"
+        `
+      );
     });
   });
 

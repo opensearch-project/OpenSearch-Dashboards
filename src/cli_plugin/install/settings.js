@@ -55,7 +55,7 @@ export function parseMilliseconds(val) {
   try {
     const timeVal = expiry(val);
     result = timeVal.asMilliseconds();
-  } catch (ex) {
+  } catch {
     result = 0;
   }
 

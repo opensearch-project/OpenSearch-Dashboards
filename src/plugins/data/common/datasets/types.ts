@@ -4,6 +4,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import type { IFieldSubType } from '../index_patterns/types';
 export * from './_structure_cache';
 
 /**
@@ -16,6 +17,13 @@ export interface DataSource {
   title: string;
   /** The engine type of the data source */
   type: string;
+  /**
+   * Explicit data-source engine type (e.g. `Elasticsearch`, `OpenSearch`). Distinct from
+   * {@link type}, which is overloaded across dataset types (engine type for index patterns, the
+   * literal `DATA_SOURCE` for indexes). Consumers gating on the engine should prefer
+   * `engineType ?? type`.
+   */
+  engineType?: string;
   /** Version of the data source */
   version: string;
   /** Optional metadata for the data source */
@@ -49,6 +57,19 @@ export interface DataStructureCreatorProps<FetchOptions = unknown> {
     dataType: string,
     options?: FetchOptions
   ) => Promise<DataStructure>;
+  /**
+   * Optional index/pattern names to pre-select when the creator first mounts (backward-compatible;
+   * default undefined = today's behavior of an empty selection). Lets a caller open the selector at
+   * step 1 with the clicked index/pattern already staged. Comma-joined titles are split into items;
+   * any title containing `*` is treated as a wildcard.
+   */
+  initialSelectedItems?: string[];
+  /**
+   * Auto-focus the creator's search input on mount (opens the index dropdown). Default true
+   * (today's behavior); a caller that opens the creator pre-seeded can pass false so it doesn't
+   * grab focus / pop the dropdown immediately.
+   */
+  autoFocus?: boolean;
 }
 
 /**
@@ -197,9 +218,7 @@ export interface DataStructureCustomMeta {
  * Union type for DataStructureMeta
  */
 export type DataStructureMeta =
-  | DataStructureFeatureMeta
-  | DataStructureDataTypeMeta
-  | DataStructureCustomMeta;
+  DataStructureFeatureMeta | DataStructureDataTypeMeta | DataStructureCustomMeta;
 
 /**
  * Represents a cached version of DataStructure with string references instead of object references.
@@ -295,6 +314,10 @@ export interface DatasetField {
   name: string;
   type: string;
   displayName?: string;
+  /** Whether the field can be used in aggregations. Nested/text fields are typically not aggregatable. */
+  aggregatable?: boolean;
+  /** Sub-type info. `subType.nested` marks a field that lives inside a nested object (e.g. `events.time`). */
+  subType?: IFieldSubType;
   // TODO:  osdFieldType?
 }
 

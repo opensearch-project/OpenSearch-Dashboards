@@ -1,0 +1,2 @@
+fix:
+- Make list control dynamic options search case-insensitive so values like "Seattle" are found when searching "seattle" ([#11951](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11951))

@@ -7,11 +7,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiPopover,
   EuiSelectable,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSelectableOption,
 } from '@elastic/eui';
 import { SpanFilter } from '../../../trace_view';
@@ -19,11 +17,18 @@ import { SpanFilter } from '../../../trace_view';
 export interface SpanStatusFilterProps {
   spanFilters: SpanFilter[];
   setSpanFiltersWithStorage: (filters: SpanFilter[]) => void;
+  /**
+   * 'button' renders the persistent entry control (always shown). 'pill' renders
+   * the applied-filter chip (only when a status filter is active). Both open the
+   * same status editor.
+   */
+  variant?: 'button' | 'pill';
 }
 
 export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
   spanFilters,
   setSpanFiltersWithStorage,
+  variant = 'button',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -89,9 +94,23 @@ export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
     setOptions(newOptions);
   }, [spanFilters]);
 
-  const selectedCount = useMemo(() => options.filter((option) => option.checked === 'on').length, [
-    options,
-  ]);
+  const selectedLabels = useMemo(
+    () => options.filter((option) => option.checked === 'on').map((option) => option.label),
+    [options]
+  );
+  const selectedCount = selectedLabels.length;
+
+  // Drop just the status-related filters (leaving other filters untouched) so
+  // the user can reset status without "Clear all".
+  const clearStatus = useCallback(() => {
+    setSpanFiltersWithStorage(
+      spanFilters.filter(
+        (filter) =>
+          !(filter.field === 'status.code' && [0, 1, 2].includes(filter.value as number)) &&
+          !(filter.field === 'isError' && filter.value === true)
+      )
+    );
+  }, [spanFilters, setSpanFiltersWithStorage]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -128,31 +147,62 @@ export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
     [spanFilters, setSpanFiltersWithStorage]
   );
 
-  const button = useMemo(
+  const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
+
+  // Applied-filter pill: the field (status) is fixed, so only the value segment
+  // is an editable dropdown — the key carries no caret.
+  const pill = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="filter"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="span-status-filter-button"
-            isSelected={isPopoverOpen}
-          >
-            {i18n.translate('explore.traceView.button.filterByStatus', {
-              defaultMessage: 'Filter by status',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {selectedCount > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{selectedCount}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <span className="plqWhereChip" data-test-subj="span-status-filter-chip">
+        <span className="plqWhereChip__field plqWhereChip__field--static">
+          {i18n.translate('explore.traceView.status.chipField', { defaultMessage: 'status' })}
+        </span>
+        <span className="plqWhereChip__op plqWhereChip__op--static">=</span>
+        <button type="button" className="plqWhereChip__val" onClick={togglePopover}>
+          <span className="plqWhereChip__valText">{selectedLabels.join(', ')}</span>
+          <span className="plqWhereChip__caret">▾</span>
+        </button>
+        <EuiButtonIcon
+          className="plqPillX"
+          iconType="cross"
+          color="text"
+          size="s"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            clearStatus();
+          }}
+          aria-label={i18n.translate('explore.traceView.status.clearAriaLabel', {
+            defaultMessage: 'Clear status filter',
+          })}
+          data-test-subj="span-status-filter-reset"
+        />
+      </span>
     ),
-    [isPopoverOpen, selectedCount]
+    [selectedLabels, clearStatus, togglePopover]
   );
+
+  // Persistent entry button (always shown).
+  const triggerButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        size="xs"
+        color="text"
+        iconType="filter"
+        onClick={togglePopover}
+        data-test-subj="span-status-filter-button"
+        isSelected={isPopoverOpen}
+      >
+        {i18n.translate('explore.traceView.button.filterByStatus', {
+          defaultMessage: 'Status',
+        })}
+      </EuiButtonEmpty>
+    ),
+    [isPopoverOpen, togglePopover]
+  );
+
+  // In pill mode, render nothing until a status filter is actually applied.
+  if (variant === 'pill' && selectedCount === 0) return null;
+  const button = variant === 'pill' ? pill : triggerButton;
 
   return (
     <EuiPopover

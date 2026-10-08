@@ -65,7 +65,7 @@ export class AttributeService<
   ValType extends EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 > {
   constructor(
     private type: string,

@@ -31,6 +31,7 @@
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
 import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
+import { isDataSourceReference } from '../utils';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
@@ -74,7 +75,7 @@ export const createEnsureDefaultIndexPattern = (
           isDefaultIndexPatternReferenceValid = !(
             result.error?.statusCode === 403 || result.error?.statusCode === 404
           );
-        } catch (e) {
+        } catch {
           // The logic below for updating the default index pattern only handles cases where the data source is not found or the user lacks access permissions
           // For other unexpected errors, we simply return to prevent infinite loops when updating the default index pattern.
           return;
@@ -89,7 +90,7 @@ export const createEnsureDefaultIndexPattern = (
             const existDataSources = datasources.map((item) => item.id);
             patterns = [];
             indexPatterns.forEach((item) => {
-              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              const sourceRef = item.references?.find(isDataSourceReference);
               let isDataSourceReferenceValid = false;
               /**
                * The reference is valid when either:
@@ -109,7 +110,7 @@ export const createEnsureDefaultIndexPattern = (
               }
             });
           }
-        } catch (e) {
+        } catch {
           return;
         }
       } else {

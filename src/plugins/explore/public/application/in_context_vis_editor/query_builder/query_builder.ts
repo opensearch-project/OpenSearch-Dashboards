@@ -6,6 +6,7 @@
 import { BehaviorSubject, Subscription, from, of, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, debounceTime, filter, skip } from 'rxjs/operators';
 import moment from 'moment';
+import { MutableRefObject } from 'react';
 import { firstValueFrom } from '@osd/std';
 import { isEqual } from 'lodash';
 import type { monaco } from '@osd/monaco';
@@ -25,9 +26,9 @@ import {
   QueryAssistParameters,
   QueryAssistResponse,
 } from '../../../../../query_enhancements/common/query_assist';
+import { PromQLQueryOptions } from '../../../../../query_enhancements/common';
 
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
-import { getSummaryAgentIsAvailable } from '../../../application/utils/get_summary_agent_is_available';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
 import {
   queryExecution,
@@ -60,12 +61,14 @@ export enum SupportLanguageType {
   ppl = 'PPL',
   promQL = 'PROMQL',
   ai = 'AI',
+  sql = 'SQL',
 }
 
 export interface QueryState {
   query: string;
   language: string;
   dataset?: Dataset;
+  queryOptions?: PromQLQueryOptions;
 }
 
 export interface QueryEditorState {
@@ -73,7 +76,6 @@ export interface QueryEditorState {
   editorMode: EditorMode;
   promptModeIsAvailable: boolean;
   promptToQueryIsLoading: boolean;
-  summaryAgentIsAvailable: boolean;
 
   isQueryEditorDirty: boolean;
   dateRange?: { from: string; to: string };
@@ -102,7 +104,6 @@ const initialQueryEditorState: QueryEditorState = {
   editorMode: EditorMode.Query,
   promptModeIsAvailable: false,
   promptToQueryIsLoading: false,
-  summaryAgentIsAvailable: false,
   isQueryEditorDirty: false,
   dateRange: undefined,
   userInitiatedQuery: false, // user click the refresh button
@@ -131,7 +132,9 @@ export class QueryBuilder {
   });
   public variableNames$ = new BehaviorSubject<string[]>([]);
   private isInitialized = false;
-  private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
+  public editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> = {
+    current: null,
+  };
   private subscriptions = Array<Subscription>();
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
@@ -151,9 +154,8 @@ export class QueryBuilder {
 
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (urlStateStorage) {
-      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>(
-        QUERY_EDITOR_STATE_KEY
-      );
+      queryEditorStateFromUrl =
+        urlStateStorage?.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY);
       queryStateFromUrl = urlStateStorage?.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
     }
 
@@ -163,6 +165,9 @@ export class QueryBuilder {
       SupportLanguageType.ppl;
 
     const preferredDataset = queryStateFromUrl?.dataset ?? options?.savedQueryState?.dataset;
+
+    const queryOptions =
+      queryStateFromUrl?.queryOptions ?? options?.savedQueryState?.queryOptions ?? {};
 
     // Retrieve the preloaded query state based on the language type for a new explore object,
     // or validate whether the URL dataset is compatible with the language type before proceeding.
@@ -176,9 +181,7 @@ export class QueryBuilder {
       preferredDataset
     );
 
-    if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
-    }
+    this.updateQueryEditorState({ languageType: languageType as SupportLanguageType });
 
     if (queryEditorStateFromUrl?.activeBottomPanelTab) {
       this.updateQueryEditorState({
@@ -202,6 +205,7 @@ export class QueryBuilder {
     const finalQueryState = {
       ...preloadedQueryState,
       query: finalQuery,
+      ...(languageType === SupportLanguageType.promQL && queryOptions ? { queryOptions } : {}),
     };
 
     this.updateQueryState(finalQueryState);
@@ -272,7 +276,6 @@ export class QueryBuilder {
     if (!dataset) {
       this.updateQueryEditorState({
         promptModeIsAvailable: false,
-        summaryAgentIsAvailable: false,
       });
       return undefined;
     }
@@ -291,8 +294,13 @@ export class QueryBuilder {
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
 
+          const cleanQuery =
+            newQuery?.language === SupportLanguageType.promQL
+              ? newQuery
+              : { ...newQuery, queryOptions: undefined };
+
           // sync query state with global queryStringManager
-          this.getServices().data.query.queryString.setQuery(newQuery);
+          this.getServices().data.query.queryString.setQuery(cleanQuery);
 
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
@@ -360,22 +368,9 @@ export class QueryBuilder {
     this.subscriptions.push(languageSyncSub);
   }
 
-  private async checkAgentAvailability(datasourceId?: string) {
-    const [promptMode, summaryAgent] = await Promise.allSettled([
-      getPromptModeIsAvailable(this.getServices()),
-      getSummaryAgentIsAvailable(this.getServices(), datasourceId || ''),
-    ]);
-
-    const updates: Partial<QueryEditorState> = {};
-    if (promptMode.status === 'fulfilled') {
-      updates.promptModeIsAvailable = promptMode.value;
-    }
-    if (summaryAgent.status === 'fulfilled') {
-      updates.summaryAgentIsAvailable = summaryAgent.value;
-    }
-    if (Object.keys(updates).length > 0) {
-      this.updateQueryEditorState(updates);
-    }
+  private async checkAgentAvailability(_datasourceId?: string) {
+    const result = await getPromptModeIsAvailable(this.getServices());
+    this.updateQueryEditorState({ promptModeIsAvailable: result });
   }
 
   private async fetchDataView(dataset: Dataset) {
@@ -429,11 +424,11 @@ export class QueryBuilder {
   }
 
   async callAgent() {
-    if (!this.editorRef) return;
+    if (!this.editorRef.current) return;
 
     // for prompt mode, we won't store the prompt and generated query
     // so directly read user input
-    const editorText = this.editorRef.getValue();
+    const editorText = this.editorRef.current.getValue();
 
     if (!editorText.length) {
       showMissingPromptWarning(this.getServices().notifications.toasts);
@@ -552,6 +547,15 @@ export class QueryBuilder {
     this.queryState$.next(updatedQuery);
   }
 
+  // Only for updating PromQL step/legend options
+  updateQueryOptions(partial: Partial<PromQLQueryOptions>) {
+    const queryOptions = {
+      ...this.queryState$.value.queryOptions,
+      ...partial,
+    };
+    this.updateQueryState({ queryOptions });
+  }
+
   async waitForDatasetReady(): Promise<DatasetViewState> {
     return firstValueFrom(this.datasetView$.pipe(filter((dv) => !dv.isLoading)));
   }
@@ -606,12 +610,12 @@ export class QueryBuilder {
     return this.variableNames$.value;
   }
 
-  setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {
-    this.editorRef = editor;
+  setEditor(editor: monaco.editor.IStandaloneCodeEditor | null) {
+    this.editorRef.current = editor;
   }
 
-  getEditorRef(): monaco.editor.IStandaloneCodeEditor | null {
-    return this.editorRef;
+  getEditor(): monaco.editor.IStandaloneCodeEditor | null {
+    return this.editorRef.current;
   }
 
   // register a callback that fires when the dataset changes,
@@ -652,7 +656,7 @@ export class QueryBuilder {
       error: null,
     });
     this.variableNames$ = new BehaviorSubject<string[]>([]);
-    this.editorRef = null;
+    this.editorRef.current = null;
     this.isInitialized = false;
   }
 }

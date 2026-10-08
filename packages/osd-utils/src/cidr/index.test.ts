@@ -188,7 +188,9 @@ describe('IPCIDR', () => {
     });
 
     it('should throw error for IPv4 with leading zeros', () => {
-      expect(() => IPCIDR.createAddress('192.168.01.1')).toThrow('Invalid IPv4 address.');
+      expect(() => IPCIDR.createAddress('192.168.01.1')).toThrow(
+        "IPv4 addresses can't have leading zeroes."
+      );
     });
 
     it('should handle IPv4-mapped IPv6 addresses', () => {

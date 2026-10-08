@@ -130,12 +130,15 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    const button = screen.getByText('Add to dashboard');
+    // Icon-only button: the name lives on aria-label, not in visible text.
+    const button = screen.getByLabelText('Add to dashboard');
     expect(button).toBeInTheDocument();
 
     fireEvent.click(button);
 
-    expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+    // The click handler is async (slow-query save warning is awaited first), so
+    // the modal opens on the next tick.
+    expect(await screen.findByTestId('mock-modal')).toBeInTheDocument();
   });
 
   it('handles save and shows success toast', async () => {
@@ -151,8 +154,8 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    fireEvent.click(screen.getByText('Add to dashboard'));
-    fireEvent.click(screen.getByText('Confirm'));
+    fireEvent.click(screen.getByLabelText('Add to dashboard'));
+    fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {
       expect(saveSavedExplore).toHaveBeenCalled();
@@ -176,8 +179,8 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    fireEvent.click(screen.getByText('Add to dashboard'));
-    fireEvent.click(screen.getByText('Confirm'));
+    fireEvent.click(screen.getByLabelText('Add to dashboard'));
+    fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {
       expect(mockToastAdd).toHaveBeenCalledWith(

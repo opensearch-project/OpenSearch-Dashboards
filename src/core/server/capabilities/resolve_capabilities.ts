@@ -37,15 +37,14 @@ export type CapabilitiesResolver = (
   applications: string[]
 ) => Promise<Capabilities>;
 
-export const getCapabilitiesResolver = (
-  capabilities: () => Capabilities,
-  switchers: () => CapabilitiesSwitcher[]
-): CapabilitiesResolver => async (
-  request: OpenSearchDashboardsRequest,
-  applications: string[]
-): Promise<Capabilities> => {
-  return resolveCapabilities(capabilities(), switchers(), request, applications);
-};
+export const getCapabilitiesResolver =
+  (
+    capabilities: () => Capabilities,
+    switchers: () => CapabilitiesSwitcher[]
+  ): CapabilitiesResolver =>
+  async (request: OpenSearchDashboardsRequest, applications: string[]): Promise<Capabilities> => {
+    return resolveCapabilities(capabilities(), switchers(), request, applications);
+  };
 
 export const resolveCapabilities = async (
   capabilities: Capabilities,
@@ -53,44 +52,35 @@ export const resolveCapabilities = async (
   request: OpenSearchDashboardsRequest,
   applications: string[]
 ): Promise<Capabilities> => {
-  const mergedCaps = cloneDeep({
-    ...capabilities,
-    navLinks: applications.reduce(
-      (acc, app) => ({
-        ...acc,
-        [app]: true,
-      }),
-      capabilities.navLinks
-    ),
-  });
-  return switchers.reduce(async (caps, switcher) => {
-    const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps);
-    return recursiveApplyChanges(resolvedCaps, changes);
-  }, Promise.resolve(mergedCaps));
+  const mergedCaps = cloneDeep(capabilities);
+  for (const app of applications) {
+    mergedCaps.navLinks[app] = true;
+  }
+  let resolved: Capabilities = mergedCaps;
+  for (const switcher of switchers) {
+    const changes = await switcher(request, resolved);
+    resolved = recursiveApplyChanges(resolved, changes);
+  }
+  return resolved;
 };
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
-  TSource extends Record<string, any>
+  TSource extends Record<string, any>,
 >(destination: TDestination, source: TSource): TDestination {
-  return Object.keys(destination)
-    .map((key) => {
-      const orig = destination[key];
-      const changed = source[key];
-      if (changed == null) {
-        return [key, orig];
-      }
-      if (typeof orig === 'object' && typeof changed === 'object') {
-        return [key, recursiveApplyChanges(orig, changed)];
-      }
-      return [key, typeof orig === typeof changed ? changed : orig];
-    })
-    .reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {} as TDestination
-    );
+  const result = {} as Record<string, any>;
+  for (const key of Object.keys(destination)) {
+    const orig = destination[key];
+    const changed = source[key];
+    if (changed == null) {
+      result[key] = orig;
+      continue;
+    }
+    if (typeof orig === 'object' && typeof changed === 'object') {
+      result[key] = recursiveApplyChanges(orig, changed);
+      continue;
+    }
+    result[key] = typeof orig === typeof changed ? changed : orig;
+  }
+  return result as TDestination;
 }

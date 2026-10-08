@@ -5,3 +5,7 @@ A customized version of monaco that is automatically configured the way we want 
 Includes custom xjson language support. The `opensearch_ui_shared` plugin has an example of how to use it, in the future we will likely expose helpers from this package to make using it everywhere a little more seamless.
 
 Includes json language worker support.
+
+The package also provides PPL language support. See the
+[PPL query linting documentation](src/ppl/lint/README.md) for the lint
+architecture, rule reference, and contributor workflow.

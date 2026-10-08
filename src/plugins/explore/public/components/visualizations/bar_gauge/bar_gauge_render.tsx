@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { CSSProperties, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { DEFAULT_GREY, getColors } from '../theme/default_colors';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, appendUnitSuffix } from '../style_panel/unit/collection';
+import { formatDecimal } from '../utils/data_transformation';
 import { BarGaugeItem, BarGaugeItemData } from './bar_gauge_item';
 import './bar_gauge_component.scss';
 
@@ -18,7 +19,32 @@ interface BarGaugeRenderProps {
   data: Array<{ category: string; value: number | null }>;
   styles: BarGaugeChartStyle;
   isHorizontal: boolean;
+  seriesDisplayNames?: Record<string, string>;
 }
+
+interface BarGaugeContainerStyle extends CSSProperties {
+  '--bar-gauge-value-width': string;
+}
+
+const DEFAULT_VALUE_FONT_SIZE = 14;
+const VALUE_WIDTH_BUFFER = 2;
+const DEFAULT_VALUE_FONT_FAMILY =
+  'Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+
+let measurementContext: CanvasRenderingContext2D | null = null;
+
+const measureTextWidth = (text: string, fontSize: number, fontFamily: string): number => {
+  if (!measurementContext && typeof document !== 'undefined') {
+    measurementContext = document.createElement('canvas').getContext('2d');
+  }
+
+  if (!measurementContext) {
+    return text.length * fontSize * 0.6;
+  }
+
+  measurementContext.font = `400 ${fontSize}px ${fontFamily}`;
+  return measurementContext.measureText(text).width;
+};
 
 // Build thresholds for each bar
 const buildItemThresholds = (
@@ -41,9 +67,15 @@ const buildItemThresholds = (
   return [base, ...applicable, { value, color: lastColor }];
 };
 
-export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderProps) => {
+export const BarGaugeRender = ({
+  data,
+  styles,
+  isHorizontal,
+  seriesDisplayNames,
+}: BarGaugeRenderProps) => {
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [valueFontFamily, setValueFontFamily] = useState(DEFAULT_VALUE_FONT_FAMILY);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const handlerRef = useRef(
     debounce((entries: ResizeObserverEntry[]) => {
@@ -54,9 +86,13 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     }, 100)
   );
 
+  const hasDisplayNames = !!seriesDisplayNames && Object.keys(seriesDisplayNames).length > 0;
+
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
+
+    setValueFontFamily(getComputedStyle(element).fontFamily || DEFAULT_VALUE_FONT_FAMILY);
 
     const handler = handlerRef.current;
     const resizeObserver = new ResizeObserver(handler);
@@ -90,16 +126,23 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
   const formatValue = useCallback(
     (value: number | null): string => {
       if (value === null) return '-';
-      if (selectedUnit?.display) {
-        return String(selectedUnit.display(value, selectedUnit.symbol).label);
-      }
-      return `${Math.round(value * 100) / 100}${
-        selectedUnit?.symbol ? ` ${selectedUnit.symbol}` : ''
-      }`;
+      const base = selectedUnit?.display
+        ? String(selectedUnit.display(value, selectedUnit.symbol, styles.decimals).label)
+        : `${formatDecimal(value, styles.decimals)}${
+            selectedUnit?.symbol ? ` ${selectedUnit.symbol}` : ''
+          }`;
+      return appendUnitSuffix(base, styles.unitSuffix);
     },
-    [selectedUnit]
+    [selectedUnit, styles.decimals, styles.unitSuffix]
   );
 
+  const formatDisplayValue = useCallback(
+    (category: string): string => {
+      if (!hasDisplayNames) return category;
+      return seriesDisplayNames?.[category] ?? category;
+    },
+    [hasDisplayNames, seriesDisplayNames]
+  );
   const getFontColor = useCallback(
     (value: number | null): string => {
       if (styles.exclusive.valueDisplay === 'textColor') return getColors().text;
@@ -123,7 +166,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
       // only show unfilled area shadow shows if turn on showUnfilledArea
       if (value === null || isInvalid) {
         return {
-          category,
+          category: formatDisplayValue(category),
           value,
           displayValue: formatValue(value),
           fontColor: DEFAULT_GREY,
@@ -157,7 +200,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
       }
 
       return {
-        category,
+        category: formatDisplayValue(category),
         value,
         displayValue: formatValue(value),
         fontColor: getFontColor(value),
@@ -176,6 +219,7 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     styles.exclusive.displayMode,
     formatValue,
     getFontColor,
+    formatDisplayValue,
   ]);
 
   // scale font size  with bar thickness
@@ -197,10 +241,30 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     return Math.min(24, fontSize);
   }, [containerDimensions, data.length, isHorizontal, items]);
 
+  const valueColumnWidth = useMemo(() => {
+    if (!isHorizontal || styles.exclusive.valueDisplay === 'hidden' || items.length === 0) {
+      return 0;
+    }
+
+    const fontSize = valueFontSize ?? DEFAULT_VALUE_FONT_SIZE;
+    const widestValue = items.reduce(
+      (maxWidth, item) =>
+        Math.max(maxWidth, measureTextWidth(item.displayValue, fontSize, valueFontFamily)),
+      0
+    );
+
+    return Math.ceil(widestValue) + VALUE_WIDTH_BUFFER;
+  }, [isHorizontal, items, styles.exclusive.valueDisplay, valueFontFamily, valueFontSize]);
+
+  const containerStyle: BarGaugeContainerStyle | undefined = isHorizontal
+    ? { '--bar-gauge-value-width': `${valueColumnWidth}px` }
+    : undefined;
+
   return (
     <div
       ref={containerRef}
       className={`main-bar-gauge-container ${isHorizontal ? 'horizontal' : 'vertical'}`}
+      style={containerStyle}
     >
       {items.map((item, index) => (
         <BarGaugeItem

@@ -43,10 +43,19 @@ export const resolveDatasetByLanguage = async (
   languageType: SupportLanguageType,
   preferredDataset?: Dataset
 ): Promise<Dataset | undefined> => {
-  // Get existing dataset from QueryStringManager or use preferred dataset
+  // Prefer URL/saved state and the current shared query before resolving the configured default.
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+  let existingDataset = preferredDataset || queryStringQuery?.dataset;
+
+  if (!existingDataset) {
+    try {
+      // The editor explicitly opts in to the configured default only when no restored or current
+      // query state selected a dataset. QueryStringManager no longer resolves this implicitly.
+      existingDataset = await services.data.query.getDefaultDataset();
+    } catch {
+      // A default-dataset lookup failure should still allow the first compatible dataset fallback.
+    }
+  }
 
   // Determine dataset type based on language
   const isPromQL = languageType === SupportLanguageType.promQL;
@@ -65,7 +74,7 @@ export const resolveDatasetByLanguage = async (
       if (isSignalTypeCompatible(effectiveSignalType, requiredSignalType)) {
         return existingDataset;
       }
-    } catch (error) {
+    } catch {
       // Dataset no longer exists or validation failed
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
@@ -95,6 +104,7 @@ export const getPreloadedQueryState = async (
       minimalDataset = {
         id: selectedDataset.id,
         title: selectedDataset.title,
+        displayName: selectedDataset.displayName,
         type: selectedDataset.type,
         language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
@@ -107,13 +117,14 @@ export const getPreloadedQueryState = async (
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || 'PPL',
+      language: minimalDataset.language || languageType || 'PPL',
     });
 
     // override the initial query to be an empty string
     return {
       ...initialQueryByDataset,
-      query: '',
+      // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
+      ...(languageType !== SupportLanguageType.sql ? { query: '' } : {}),
       // Ensure we use the minimal dataset
       dataset: minimalDataset,
     };
@@ -210,7 +221,7 @@ export const queryExecution = async ({
       throw new Error('Dataset not found for query execution');
     }
 
-    const dataset = services.data.dataViews.convertToDataset(dataView);
+    const dataset = await services.data.dataViews.convertToDataset(dataView);
 
     const preparedQueryObject = {
       ...query,
@@ -218,12 +229,7 @@ export const queryExecution = async ({
       query: queryString,
     };
 
-    const searchSource = await createSearchSourceWithQuery(
-      preparedQueryObject,
-      dataView,
-      services,
-      false // No histogram
-    );
+    const searchSource = await createSearchSourceWithQuery(preparedQueryObject, dataView, services);
 
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
@@ -255,6 +261,8 @@ export const queryExecution = async ({
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      profile: searchSource.getDataFrame()?.meta?.profile,
+      frameMeta: searchSource.getDataFrame()?.meta,
     };
 
     updateResultFn(rawResultsWithMeta);

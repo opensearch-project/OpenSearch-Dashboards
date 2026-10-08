@@ -318,9 +318,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultPrepareQueryString', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -388,9 +389,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('prepareHistogramCacheKey', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -738,9 +740,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeQueries', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -1286,9 +1289,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('Integration Tests', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     it('should handle full query execution flow', async () => {
       mockDefaultPreparePplQuery.mockReturnValue({

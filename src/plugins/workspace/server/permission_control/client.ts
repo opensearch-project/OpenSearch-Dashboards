@@ -146,10 +146,9 @@ export class SavedObjectsPermissionControl {
     principals: Principals,
     permissionModes: SavedObjectsPermissionModes
   ) {
-    const notPermittedSavedObjects: Array<Pick<
-      SavedObject<unknown>,
-      'id' | 'type' | 'workspaces' | 'permissions'
-    >> = [];
+    const notPermittedSavedObjects: Array<
+      Pick<SavedObject<unknown>, 'id' | 'type' | 'workspaces' | 'permissions'>
+    > = [];
     const hasPermissionToAllObjects = savedObjects.every((savedObject) => {
       // for object that doesn't contain ACL like config, return true
       if (!savedObject.permissions) {

@@ -65,8 +65,10 @@ export interface ShareContext {
  * used to order the individual items in a flat list returned by all registered
  * menu providers.
  * */
-export interface ShareContextMenuPanelItem
-  extends Omit<EuiContextMenuPanelItemDescriptorEntry, 'name'> {
+export interface ShareContextMenuPanelItem extends Omit<
+  EuiContextMenuPanelItemDescriptorEntry,
+  'name'
+> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
   sortOrder?: number;
 }

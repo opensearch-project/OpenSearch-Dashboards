@@ -45,7 +45,8 @@ export class ToolExecutor {
     toolName: string,
     toolArgs: any,
     toolCallId: string,
-    datasourceId?: string
+    datasourceInfo?: { id: string; title?: string },
+    timeRange?: { from: string; to: string }
   ): Promise<ToolResult> {
     try {
       // Check if this tool requires confirmation
@@ -73,27 +74,45 @@ export class ToolExecutor {
             error: 'User rejected the tool execution',
             userRejected: true,
             data: {
+              success: false,
+              rejected: true,
               message: 'The user chose not to proceed with this action.',
+              error: 'User rejected the tool execution',
               toolName,
               args: toolArgs,
             },
           };
         }
 
-        toolArgs = { ...toolArgs, confirmed: true };
+        toolArgs = {
+          ...toolArgs,
+          ...(response.modifiedArgs ?? {}),
+          confirmed: true,
+        };
       }
 
       // Include datasourceId in toolArgs if provided
-      const enrichedToolArgs = datasourceId ? { ...toolArgs, datasourceId } : toolArgs;
+
+      let enrichedToolArgs = datasourceInfo
+        ? { ...toolArgs, datasourceId: datasourceInfo.id, datasourceTitle: datasourceInfo.title }
+        : toolArgs;
+      // Include the current page time range
+      if (timeRange) {
+        enrichedToolArgs = { ...enrichedToolArgs, timeRange };
+      }
 
       // First, check if this is a registered assistant action
-      const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);
+      const registeredAction = await this.tryExecuteRegisteredAction(
+        toolName,
+        enrichedToolArgs,
+        toolCallId
+      );
       if (registeredAction.handled && registeredAction.result) {
         return registeredAction.result;
       }
 
       // Otherwise, handle as agent-only tool
-      return await this.executeAgentTool(toolName, enrichedToolArgs);
+      return await this.executeAgentTool();
     } catch (error: any) {
       return {
         success: false,
@@ -108,11 +127,29 @@ export class ToolExecutor {
    */
   private async tryExecuteRegisteredAction(
     toolName: string,
-    toolArgs: any
+    toolArgs: any,
+    toolCallId?: string
   ): Promise<{ handled: boolean; result?: ToolResult }> {
     try {
-      // Use the assistantActionService to execute the action
-      const result = await this.assistantActionService.executeAction(toolName, toolArgs);
+      // toolCallId lets handlers (e.g. ask_user) correlate the answer to this call.
+      const result = await this.assistantActionService.executeAction(
+        toolName,
+        toolArgs,
+        toolCallId
+      );
+
+      // A handler returning { cancelled: true } (e.g. ask_user torn down mid-question)
+      // short-circuits without dispatching a stray result on a dead thread.
+      if (result && typeof result === 'object' && (result as any).cancelled === true) {
+        return {
+          handled: true,
+          result: {
+            success: false,
+            cancelled: true,
+            source: 'registered_action',
+          },
+        };
+      }
 
       return {
         handled: true,
@@ -141,9 +178,13 @@ export class ToolExecutor {
   }
 
   /**
-   * Execute agent-only tools that report results back via AG-UI events
+   * Execute agent-only tools that report results back via AG-UI events.
+   *
+   * Public so `ChatEventHandler` can bypass `executeTool`'s local-action path
+   * (which awaits `executeAction` even when doomed to fail) and call this directly.
+   * No parameters needed — the agent already has the tool name/args.
    */
-  private async executeAgentTool(_toolName: string, _toolArgs: any): Promise<ToolResult> {
+  async executeAgentTool(): Promise<ToolResult> {
     // Any tool that reaches here is assumed to be handled by the agent
     // The agent will send the results back via TOOL_CALL_RESULT events
     return {

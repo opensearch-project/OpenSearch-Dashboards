@@ -32,6 +32,8 @@ export interface SpanTableProps {
   setIsServiceLegendOpen?: (isOpen: boolean) => void;
   isServiceLegendOpen?: boolean;
   isFlyoutPanel?: boolean;
+  /** All spans in the trace (pre-filter), used to derive duration presets. */
+  allTraceSpans?: Array<Record<string, any>>;
 }
 
 export interface SpanSearchParams {

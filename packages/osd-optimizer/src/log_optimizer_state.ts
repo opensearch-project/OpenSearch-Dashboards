@@ -160,7 +160,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'issue') {
           clearProgressLine();
           stopRedrawInterval();
-          log.error(`webpack compile errors`);
+          log.error(`rspack compile errors`);
           log.indent(4);
           for (const b of state.compilerStates) {
             if (b.type === 'compiler issue') {

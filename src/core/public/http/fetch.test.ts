@@ -42,7 +42,7 @@ function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
 }
 
-const BASE_PATH = 'http://localhost/myBase';
+const BASE_PATH = 'http://localhost:5601/myBase';
 
 describe('Fetch', () => {
   const fetchInstance = new Fetch({
@@ -166,7 +166,7 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { query: { a: 'b' } });
 
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path?a=b');
+      expect(fetchMock.lastUrl()).toBe('http://localhost:5601/myBase/my/path?a=b');
     });
 
     it('should use supplied headers', async () => {
@@ -284,7 +284,7 @@ describe('Fetch', () => {
     it('should prepend url with basepath by default', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path');
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
+      expect(fetchMock.lastUrl()).toBe('http://localhost:5601/myBase/my/path');
     });
 
     it('should not prepend url with basepath when disabled', async () => {
@@ -296,7 +296,7 @@ describe('Fetch', () => {
     it('should not include undefined query params', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { query: { a: undefined } });
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
+      expect(fetchMock.lastUrl()).toBe('http://localhost:5601/myBase/my/path');
     });
 
     it('should make request with defaults', async () => {
@@ -366,7 +366,7 @@ describe('Fetch', () => {
         },
         response: {
           status: 404,
-          url: 'http://localhost/myBase/my/path',
+          url: 'http://localhost:5601/myBase/my/path',
         },
       });
     });
@@ -401,7 +401,7 @@ describe('Fetch', () => {
       expect(interceptedResponse.request).toEqual(
         expect.objectContaining({
           method: 'GET',
-          url: 'http://localhost/myBase/my/path',
+          url: 'http://localhost:5601/myBase/my/path',
         })
       );
       expect(interceptedResponse.error.name).toEqual('AbortError');
@@ -552,7 +552,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'CustomContentType',
       });
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/route');
+      expect(fetchMock.lastUrl()).toBe('http://localhost:5601/myBase/my/route');
     });
 
     it('should call interceptors in correct order', async () => {

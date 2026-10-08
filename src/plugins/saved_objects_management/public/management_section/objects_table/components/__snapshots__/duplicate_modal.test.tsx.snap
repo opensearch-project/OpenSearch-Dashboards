@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DuplicateModal should Unmount normally 1`] = `""`;
 
@@ -120,7 +120,7 @@ HTMLCollection [
                                   value=""
                                 />
                                 <div
-                                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                 />
                               </div>
                             </div>

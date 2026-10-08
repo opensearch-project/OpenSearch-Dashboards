@@ -31,7 +31,14 @@
 import { SavedObjectsType } from 'opensearch-dashboards/server';
 import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 
-export const dashboardSavedObjectType: SavedObjectsType = {
+/**
+ * Register optional JSON fields only when their features are enabled so disabled
+ * features do not change the mapping hash or trigger tenant-index migrations.
+ */
+export const getDashboardSavedObjectType = (
+  variablesEnabled: boolean,
+  sectionsEnabled: boolean = false
+): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
   namespaceType: 'single',
@@ -63,7 +70,8 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
-      variablesJSON: { type: 'text', index: false },
+      ...(variablesEnabled ? { variablesJSON: { type: 'text', index: false } } : {}),
+      ...(sectionsEnabled ? { layoutJSON: { type: 'text', index: false } } : {}),
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },
@@ -80,4 +88,4 @@ export const dashboardSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: dashboardSavedObjectTypeMigrations,
-};
+});

@@ -103,13 +103,13 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(okResponse);
 
-      expect(response.ok).toBeCalledWith({
+      expect(response.ok).toHaveBeenCalledWith({
         body: {
           value: configurations,
         },
       });
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
 
     it('return error response when client throws error', async () => {
@@ -141,15 +141,15 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
-      expect(client.getConfig).toBeCalledTimes(1);
+      expect(client.getConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.customError).toBeCalledWith({
+      expect(response.customError).toHaveBeenCalledWith({
         body: error,
         statusCode: 500,
       });
 
-      expect(logger.error).toBeCalledWith(error);
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(logger.error).toHaveBeenCalledWith(error);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
   });
 
@@ -187,13 +187,13 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(okResponse);
 
-      expect(response.ok).toBeCalledWith({
+      expect(response.ok).toHaveBeenCalledWith({
         body: {
           value: ENTITY_VALUE,
         },
       });
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
 
     it('return error response when client throws error', async () => {
@@ -229,16 +229,16 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
-      expect(client.getEntityConfig).toBeCalledTimes(1);
+      expect(client.getEntityConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.customError).toBeCalledWith({
+      expect(response.customError).toHaveBeenCalledWith({
         body: error,
         statusCode: 500,
       });
 
-      expect(logger.error).toBeCalledWith(error);
+      expect(logger.error).toHaveBeenCalledWith(error);
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
   });
 
@@ -279,17 +279,17 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(okResponse);
 
-      expect(client.updateEntityConfig).toBeCalledTimes(1);
+      expect(client.updateEntityConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.ok).toBeCalledWith({
+      expect(response.ok).toHaveBeenCalledWith({
         body: {
           newValue: ENTITY_NEW_VALUE,
         },
       });
 
-      expect(logger.error).not.toBeCalled();
+      expect(logger.error).not.toHaveBeenCalled();
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
 
     it('return error response when client fails', async () => {
@@ -328,16 +328,16 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
-      expect(client.updateEntityConfig).toBeCalledTimes(1);
+      expect(client.updateEntityConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.customError).toBeCalledWith({
+      expect(response.customError).toHaveBeenCalledWith({
         body: error,
         statusCode: 500,
       });
 
-      expect(logger.error).toBeCalledWith(error);
+      expect(logger.error).toHaveBeenCalledWith(error);
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
   });
 
@@ -375,16 +375,16 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(okResponse);
 
-      expect(client.deleteEntityConfig).toBeCalledTimes(1);
+      expect(client.deleteEntityConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.ok).toBeCalledWith({
+      expect(response.ok).toHaveBeenCalledWith({
         body: {
           deletedEntity: ENTITY_NAME,
         },
       });
 
-      expect(logger.error).not.toBeCalled();
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
 
     it('return error response when client fails', async () => {
@@ -420,16 +420,16 @@ describe('application config routes', () => {
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
-      expect(client.deleteEntityConfig).toBeCalledTimes(1);
+      expect(client.deleteEntityConfig).toHaveBeenCalledTimes(1);
 
-      expect(response.customError).toBeCalledWith({
+      expect(response.customError).toHaveBeenCalledWith({
         body: error,
         statusCode: 500,
       });
 
-      expect(logger.error).toBeCalledWith(error);
+      expect(logger.error).toHaveBeenCalledWith(error);
 
-      expect(getConfigurationClient).toBeCalledWith(request);
+      expect(getConfigurationClient).toHaveBeenCalledWith(request);
     });
   });
 });

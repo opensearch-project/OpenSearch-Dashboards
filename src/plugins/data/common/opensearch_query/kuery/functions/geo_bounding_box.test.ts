@@ -52,9 +52,9 @@ describe('kuery functions', () => {
     let indexPattern: IIndexPattern;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+      } as unknown as IIndexPattern;
     });
 
     describe('buildNodeParams', () => {
@@ -122,7 +122,7 @@ describe('kuery functions', () => {
       test('should throw an error for scripted fields', () => {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'script number', params);
 
-        expect(() => geoBoundingBox.toOpenSearchQuery(node, indexPattern)).toThrowError(
+        expect(() => geoBoundingBox.toOpenSearchQuery(node, indexPattern)).toThrow(
           /Geo bounding box query does not support scripted fields/
         );
       });

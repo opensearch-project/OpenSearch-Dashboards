@@ -66,11 +66,11 @@ describe('<TutorialDirectory />', () => {
   });
   it('should render home breadcrumbs when withoutHomeBreadCrumb is undefined', async () => {
     currentService.http.get.mockResolvedValueOnce([]);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(new DataSourceSelectionService());
 
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     await setup({ services: currentService });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         href: '#/',
         text: 'Home',
@@ -83,13 +83,13 @@ describe('<TutorialDirectory />', () => {
 
   it('should not render home breadcrumbs when withoutHomeBreadCrumb is true', async () => {
     currentService.http.get.mockResolvedValueOnce([]);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(new DataSourceSelectionService());
 
     await setup({
       props: { withoutHomeBreadCrumb: true },
       services: currentService,
     });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         text: 'Add data',
       },
@@ -100,13 +100,13 @@ describe('<TutorialDirectory />', () => {
     currentService.http.get.mockResolvedValueOnce([]);
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     currentService.uiSettings.get.mockResolvedValueOnce(true);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(new DataSourceSelectionService());
 
     await setup({
       props: { withoutHomeBreadCrumb: true },
       services: currentService,
     });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         text: 'Sample data',
       },
@@ -117,7 +117,7 @@ describe('<TutorialDirectory />', () => {
     currentService.http.get.mockResolvedValueOnce([]);
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     currentService.uiSettings.get.mockResolvedValueOnce(true);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(new DataSourceSelectionService());
 
     const { setHeaderActionMenuMock, renderResult } = await setup({
       props: { withoutHomeBreadCrumb: true },

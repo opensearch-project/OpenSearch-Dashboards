@@ -169,8 +169,8 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           numberOfHostsConfigured: Array.isArray(opensearchConfig.hosts)
             ? opensearchConfig.hosts.length
             : isConfigured.string(opensearchConfig.hosts)
-            ? 1
-            : 0,
+              ? 1
+              : 0,
           customHeadersConfigured: isConfigured.record(opensearchConfig.customHeaders),
           healthCheckDelayMs: opensearchConfig.healthCheck.delay.asMilliseconds(),
           logQueries: opensearchConfig.logQueries,

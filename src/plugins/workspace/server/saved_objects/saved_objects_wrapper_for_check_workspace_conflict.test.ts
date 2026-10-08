@@ -60,7 +60,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -89,7 +89,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             workspaces: ['bar'],
           }
         )
-      ).rejects.toThrowError('Saved object [dashboard/dashboard:foo] conflict');
+      ).rejects.toThrow('Saved object [dashboard/dashboard:foo] conflict');
     });
 
     it(`Should use options.workspaces when get throws error`, async () => {
@@ -111,7 +111,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -180,8 +180,8 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }),
       ]);
 
-      expect(mockedClient.bulkGet).not.toBeCalled();
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkGet).not.toHaveBeenCalled();
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [{ attributes: {}, id: 'foo', references: [], type: 'dashboard' }],
         {}
       );
@@ -198,8 +198,8 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }),
       ]);
 
-      expect(mockedClient.bulkGet).not.toBeCalled();
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkGet).not.toHaveBeenCalled();
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [{ attributes: {}, id: 'foo', references: [], type: 'dashboard', workspaces: ['foo'] }],
         {}
       );
@@ -267,8 +267,8 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.bulkGet).toBeCalled();
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkGet).toHaveBeenCalled();
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [
           { attributes: {}, id: 'foo', references: [], type: 'dashboard', workspaces: ['foo'] },
           {
@@ -362,7 +362,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.bulkCreate).toBeCalledWith([], {
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith([], {
         workspaces: ['foo'],
       });
       expect(result.saved_objects[0].error).toEqual(
@@ -397,7 +397,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
     it(`Return early when no objects`, async () => {
       const result = await wrapperClient.checkConflicts([]);
       expect(result.errors).toEqual([]);
-      expect(mockedClient.bulkGet).not.toBeCalled();
+      expect(mockedClient.bulkGet).not.toHaveBeenCalled();
     });
 
     it(`Should filter out workspace conflict objects`, async () => {
@@ -448,8 +448,8 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.bulkGet).toBeCalled();
-      expect(mockedClient.checkConflicts).toBeCalledWith(
+      expect(mockedClient.bulkGet).toHaveBeenCalled();
+      expect(mockedClient.checkConflicts).toHaveBeenCalledWith(
         [
           { attributes: {}, id: 'foo', references: [], type: 'dashboard' },
           {
@@ -511,7 +511,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       );
 
-      expect(mockedClient.bulkCreate).toBeCalledWith([], {
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith([], {
         workspaces: ['foo'],
       });
       expect(result.errors[0].error).toEqual(

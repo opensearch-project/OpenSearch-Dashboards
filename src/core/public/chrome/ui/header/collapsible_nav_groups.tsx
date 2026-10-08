@@ -77,9 +77,11 @@ export function NavGroups({
       if (!enableIconSideNav) {
         return <EuiText>{link.title}</EuiText>;
       }
-      const linkBadge$ = (link as ChromeNavLink & {
-        badge$?: Observable<number | string | undefined>;
-      }).badge$;
+      const linkBadge$ = (
+        link as ChromeNavLink & {
+          badge$?: Observable<number | string | undefined>;
+        }
+      ).badge$;
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {link.euiIconType && (

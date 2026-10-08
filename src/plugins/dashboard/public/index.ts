@@ -61,6 +61,7 @@ export { DASHBOARD_ADD_PANEL_TRIGGER } from './ui_triggers';
 
 export { VariablesBar, VariablesBarProps } from './application/components/dashboard_variables';
 export { VariableService } from './variables/variable_service';
+export { normalizePersistedVariables } from './variables/variable_query_utils';
 export {
   VariableInterpolationService,
   IVariableInterpolationService,
@@ -71,8 +72,12 @@ export {
   Variable,
   VariableType,
   VariableSortOrder,
+  PromQLResourceQuery,
+  QueryResultBaseParams,
   QueryVariable,
   CustomVariable,
+  VariableOption,
+  NormalizedVariableOption,
   VariableWithState,
   VariableState,
 } from './variables/types';

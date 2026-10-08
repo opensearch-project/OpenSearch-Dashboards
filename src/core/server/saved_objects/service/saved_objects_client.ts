@@ -104,8 +104,10 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions' | 'workspaces'> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<
+  SavedObjectsUpdateOptions,
+  'version' | 'references' | 'permissions' | 'workspaces'
+> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -281,8 +283,10 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsUpdateResponse<T = unknown>
-  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<
+  SavedObject<T>,
+  'attributes' | 'references'
+> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
 }

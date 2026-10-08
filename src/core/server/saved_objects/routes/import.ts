@@ -31,7 +31,8 @@
 import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@osd/config-schema';
-import { IRouter } from '../../http';
+import { IRouter, OpenSearchDashboardsRequest } from '../../http';
+import { Capabilities } from '../../capabilities';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
@@ -42,7 +43,30 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) => {
+export type CapabilitiesResolver = (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
+
+export async function resolveCanImportConfig(
+  getCapabilities: (() => CapabilitiesResolver | undefined) | undefined,
+  request: OpenSearchDashboardsRequest
+): Promise<boolean> {
+  const resolver = getCapabilities?.();
+  if (resolver) {
+    const capabilities = await resolver(request);
+    return capabilities.advancedSettings?.save === true;
+  }
+  // Resolver is absent (capabilities service not yet started). This cannot
+  // happen during normal request handling because the HTTP server only begins
+  // accepting connections after server.start() completes, which is after
+  // capabilitiesStart is set. Failing closed (blocking config import) is the
+  // safe default.
+  return false;
+}
+
+export const registerImportRoute = (
+  router: IRouter,
+  config: SavedObjectConfig,
+  getCapabilities?: () => CapabilitiesResolver | undefined
+) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -119,6 +143,8 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
 
       const dataSourceEnabled = req.query.dataSourceEnabled;
 
+      const canImportConfig = await resolveCanImportConfig(getCapabilities, req);
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
@@ -130,6 +156,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         dataSourceTitle,
         workspaces,
         dataSourceEnabled,
+        canImportConfig,
       });
 
       return res.ok({ body: result });

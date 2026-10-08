@@ -100,18 +100,24 @@ describe('DataSourcePermissionClientWrapper', () => {
 
       it('should create data source when user is admin', async () => {
         await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
-        expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+        expect(mockedClient.create).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes,
+          {}
+        );
       });
 
       it('should bulk create data source when user is admin', async () => {
         const mockCreateObjects = [dataSource];
         await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
-        expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+        expect(mockedClient.bulkCreate).toHaveBeenCalledWith(mockCreateObjects, {
+          overwrite: true,
+        });
       });
 
       it('should update data source when user is admin', async () => {
         await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
-        expect(mockedClient.update).toBeCalledWith(
+        expect(mockedClient.update).toHaveBeenCalledWith(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           'data-source-id',
           {}
@@ -126,12 +132,15 @@ describe('DataSourcePermissionClientWrapper', () => {
           },
         ];
         await wrapperClient.bulkUpdate(mockUpdateObjects, {});
-        expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+        expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(mockUpdateObjects, {});
       });
 
       it('should delete data source', async () => {
         await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
-        expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+        expect(mockedClient.delete).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id'
+        );
       });
     });
     describe('any user is osd admin when osd admin is not configured', () => {
@@ -146,18 +155,24 @@ describe('DataSourcePermissionClientWrapper', () => {
 
       it('should create data source when user is admin', async () => {
         await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
-        expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+        expect(mockedClient.create).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes,
+          {}
+        );
       });
 
       it('should bulk create data source when user is admin', async () => {
         const mockCreateObjects = [dataSource];
         await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
-        expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+        expect(mockedClient.bulkCreate).toHaveBeenCalledWith(mockCreateObjects, {
+          overwrite: true,
+        });
       });
 
       it('should update data source when user is admin', async () => {
         await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
-        expect(mockedClient.update).toBeCalledWith(
+        expect(mockedClient.update).toHaveBeenCalledWith(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           'data-source-id',
           {}
@@ -172,13 +187,16 @@ describe('DataSourcePermissionClientWrapper', () => {
           },
         ];
         await wrapperClient.bulkUpdate(mockUpdateObjects, {});
-        expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+        expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(mockUpdateObjects, {});
       });
 
       it('should delete data source', async () => {
         jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({});
         await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
-        expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+        expect(mockedClient.delete).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id'
+        );
       });
     });
   });
@@ -212,7 +230,7 @@ describe('DataSourcePermissionClientWrapper', () => {
       expect(errorCatch.message).toEqual(errorMessage);
 
       await wrapperClient.create('dashboard', {}, {});
-      expect(mockedClient.create).toBeCalledWith('dashboard', {}, {});
+      expect(mockedClient.create).toHaveBeenCalledWith('dashboard', {}, {});
     });
 
     it('should not bulk create data source', async () => {
@@ -231,7 +249,7 @@ describe('DataSourcePermissionClientWrapper', () => {
       expect(errorCatch.message).toEqual(errorMessage);
 
       await wrapperClient.update('dashboard', 'dashboard-id', {});
-      expect(mockedClient.update).toBeCalledWith('dashboard', 'dashboard-id', {}, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('dashboard', 'dashboard-id', {}, {});
     });
 
     it('should not bulk update data source', async () => {
@@ -253,7 +271,7 @@ describe('DataSourcePermissionClientWrapper', () => {
       expect(errorCatch.message).toEqual(errorMessage);
 
       await wrapperClient.delete('dashboard', 'dashboard-id');
-      expect(mockedClient.delete).toBeCalledWith('dashboard', 'dashboard-id', {});
+      expect(mockedClient.delete).toHaveBeenCalledWith('dashboard', 'dashboard-id', {});
     });
   });
 
@@ -269,18 +287,22 @@ describe('DataSourcePermissionClientWrapper', () => {
 
     it('should create data source', async () => {
       await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
-      expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes,
+        {}
+      );
     });
 
     it('should bulk create data source', async () => {
       const mockCreateObjects = [dataSource];
       await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
-      expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(mockCreateObjects, { overwrite: true });
     });
 
     it('should update data source', async () => {
       await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
         'data-source-id',
         {}
@@ -295,12 +317,15 @@ describe('DataSourcePermissionClientWrapper', () => {
         },
       ];
       await wrapperClient.bulkUpdate(mockUpdateObjects, {});
-      expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+      expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(mockUpdateObjects, {});
     });
 
     it('should delete data source', async () => {
       await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
-      expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+      expect(mockedClient.delete).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'data-source-id'
+      );
     });
   });
 
@@ -316,18 +341,22 @@ describe('DataSourcePermissionClientWrapper', () => {
 
     it('should create data source', async () => {
       await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
-      expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes,
+        {}
+      );
     });
 
     it('should bulk create data source', async () => {
       const mockCreateObjects = [dataSource];
       await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
-      expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(mockCreateObjects, { overwrite: true });
     });
 
     it('should update data source', async () => {
       await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
         'data-source-id',
         {}
@@ -342,12 +371,15 @@ describe('DataSourcePermissionClientWrapper', () => {
         },
       ];
       await wrapperClient.bulkUpdate(mockUpdateObjects, {});
-      expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+      expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(mockUpdateObjects, {});
     });
 
     it('should delete data source', async () => {
       await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
-      expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+      expect(mockedClient.delete).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'data-source-id'
+      );
     });
   });
 });

@@ -22,9 +22,9 @@ const BUNDLE_A = makeBundle('a');
 const BUNDLE_B = makeBundle('b');
 const BUNDLE_C = makeBundle('c');
 
-const mockConfig = ({
+const mockConfig = {
   bundles: [BUNDLE_A, BUNDLE_B, BUNDLE_C],
-} as unknown) as OptimizerConfig;
+} as unknown as OptimizerConfig;
 
 const INITIAL_STATE: OptimizerState = {
   phase: 'initializing',

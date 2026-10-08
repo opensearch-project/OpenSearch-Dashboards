@@ -5,7 +5,6 @@
 
 import { render, screen, act } from '@testing-library/react';
 import { SplitContainer, getColumnCount } from './split_container';
-import { SplitGroup } from './utils/group_data_by_split';
 
 const mockObserve = jest.fn();
 const mockDisconnect = jest.fn();
@@ -59,14 +58,12 @@ describe('getColumnCount', () => {
 });
 
 describe('SplitContainer', () => {
-  const mockRenderChart = jest.fn((data) => (
-    <div data-test-subj="mockChart">{data.length} rows</div>
-  ));
+  const mockRenderChart = jest.fn((group) => <div data-test-subj="mockChart">{group}</div>);
 
-  const createGroups = (count: number): SplitGroup[] =>
+  const createGroups = (count: number) =>
     Array.from({ length: count }, (_, i) => ({
-      key: `group_${i}`,
-      data: [{ value: i }],
+      original: `group_${i}`,
+      displayName: `group_${i}`,
     }));
 
   it('renders all groups', () => {
@@ -78,11 +75,11 @@ describe('SplitContainer', () => {
       jest.advanceTimersByTime(100);
     });
 
-    expect(screen.getAllByText(/rows/)).toHaveLength(3);
+    expect(screen.getAllByTestId('mockChart')).toHaveLength(3);
   });
 
   it('passes showLabel to chart instances', () => {
-    const groups: SplitGroup[] = [{ key: 'TestLabel', data: [{ v: 1 }] }];
+    const groups = [{ original: 'TestLabel', displayName: 'TestLabel' }];
 
     render(
       <SplitContainer
@@ -97,7 +94,7 @@ describe('SplitContainer', () => {
   });
 
   it('hides labels by default', () => {
-    const groups: SplitGroup[] = [{ key: 'HiddenLabel', data: [{ v: 1 }] }];
+    const groups = ['HiddenLabel'];
 
     render(<SplitContainer groups={groups} layout="auto" renderChart={mockRenderChart} />);
 
@@ -117,5 +114,47 @@ describe('SplitContainer', () => {
 
     expect(global.ResizeObserver).toHaveBeenCalled();
     expect(mockObserve).toHaveBeenCalled();
+  });
+
+  it('uses the default vertical item min height', () => {
+    const { container } = render(
+      <SplitContainer groups={createGroups(1)} layout="vertical" renderChart={mockRenderChart} />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '200px' });
+  });
+
+  it('uses a custom vertical item min height when provided', () => {
+    const { container } = render(
+      <SplitContainer
+        groups={createGroups(1)}
+        layout="vertical"
+        verticalItemMinHeight={60}
+        renderChart={mockRenderChart}
+      />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minHeight: '60px' });
+  });
+
+  it('uses 300px as the default horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer groups={createGroups(1)} layout="horizontal" renderChart={mockRenderChart} />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '300px' });
+  });
+
+  it('uses the configured horizontal item min width', () => {
+    const { container } = render(
+      <SplitContainer
+        groups={createGroups(1)}
+        layout="horizontal"
+        horizontalItemMinWidth={180}
+        renderChart={mockRenderChart}
+      />
+    );
+
+    expect(container.querySelector('.splitChartInstance')).toHaveStyle({ minWidth: '180px' });
   });
 });

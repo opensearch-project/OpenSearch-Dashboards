@@ -97,7 +97,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   let readStream: Readable;
   const objectLimit = 10;
-  const overwrite = (Symbol() as unknown) as boolean;
+  const overwrite = Symbol() as unknown as boolean;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
@@ -118,7 +118,7 @@ describe('#importSavedObjectsFromStream', () => {
         ({
           // other attributes aren't needed for the purposes of injecting metadata
           management: { icon: `${type}-icon` },
-        } as any)
+        }) as any
     );
     return {
       readStream,
@@ -762,80 +762,84 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
     });
 
-    test('early return if import contains config type object', async () => {
+    test('filters out config type objects when canImportConfig is false', async () => {
       const options = setupOptions();
       const configObj = createConfigObject();
       const collectedObjects = [configObj];
 
-      const errors = [
-        {
-          type: configObj.type,
-          id: configObj.id,
-          title: configObj.id,
-          meta: { title: configObj.id },
-          error: { type: 'unsupported_type' },
-        },
-      ];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
         importIdMap: new Map(),
       });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
       const result = await importSavedObjectsFromStream(options);
-      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
-      expect(createSavedObjects).not.toHaveBeenCalled();
+      expect(result.success).toEqual(false);
+      expect(result.successCount).toEqual(0);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: 'config', id: configObj.id })])
+      );
     });
 
-    test('early return if import contains config type mixed with valid objects', async () => {
+    test('filters config objects but processes remaining valid objects', async () => {
       const options = setupOptions();
       const configObj = createConfigObject();
       const validObj = createObject();
       const collectedObjects = [validObj, configObj];
 
-      const errors = [
-        {
-          type: configObj.type,
-          id: configObj.id,
-          title: configObj.id,
-          meta: { title: configObj.id },
-          error: { type: 'unsupported_type' },
-        },
-      ];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
         importIdMap: new Map(),
       });
+      getMockFn(createSavedObjects).mockResolvedValue({
+        errors: [],
+        createdObjects: [validObj],
+      });
       const result = await importSavedObjectsFromStream(options);
-      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
-      expect(createSavedObjects).not.toHaveBeenCalled();
+      expect(result.successCount).toEqual(1);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: 'config', id: configObj.id })])
+      );
+      expect(createSavedObjects).toHaveBeenCalled();
     });
 
-    test('early return if import contains config type in workspace-scoped import', async () => {
+    test('allows config type objects when canImportConfig is true', async () => {
+      const options = { ...setupOptions(), canImportConfig: true };
+      const configObj = createConfigObject();
+      const collectedObjects = [configObj];
+
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({
+        errors: [],
+        createdObjects: [configObj],
+      });
+      const result = await importSavedObjectsFromStream(options);
+      expect(result.successCount).toEqual(1);
+      expect(result.success).toEqual(true);
+      expect(createSavedObjects).toHaveBeenCalled();
+    });
+
+    test('filters out config type in workspace-scoped import when canImportConfig is false', async () => {
       const options = setupOptions(false, undefined, true, ['workspace-1']);
       const configObj = createConfigObject();
       const collectedObjects = [configObj];
 
-      const errors = [
-        {
-          type: configObj.type,
-          id: configObj.id,
-          title: configObj.id,
-          meta: { title: configObj.id },
-          error: { type: 'unsupported_type' },
-        },
-      ];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
         importIdMap: new Map(),
       });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
       const result = await importSavedObjectsFromStream(options);
-      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
-      expect(createSavedObjects).not.toHaveBeenCalled();
+      expect(result.success).toEqual(false);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: 'config', id: configObj.id })])
+      );
     });
   });
 });

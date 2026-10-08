@@ -624,4 +624,65 @@ describe('SlashCommandRegistry', () => {
       consoleWarnSpy.mockRestore();
     });
   });
+
+  describe('onChange', () => {
+    it('should notify listener on register', () => {
+      const listener = jest.fn();
+      slashCommandRegistry.onChange(listener);
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should notify listener on unregister', () => {
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      const listener = jest.fn();
+      slashCommandRegistry.onChange(listener);
+
+      slashCommandRegistry.unregister('test');
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not notify after unsubscribe', () => {
+      const listener = jest.fn();
+      const unsubscribe = slashCommandRegistry.onChange(listener);
+
+      unsubscribe();
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('should notify multiple listeners', () => {
+      const listener1 = jest.fn();
+      const listener2 = jest.fn();
+      slashCommandRegistry.onChange(listener1);
+      slashCommandRegistry.onChange(listener2);
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener1).toHaveBeenCalledTimes(1);
+      expect(listener2).toHaveBeenCalledTimes(1);
+    });
+  });
 });

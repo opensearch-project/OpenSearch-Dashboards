@@ -158,8 +158,8 @@ test('spins up notReady server until started if configured with `autoListen:true
 
   await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
-  expect(httpServer.start).toBeCalledTimes(1);
-  expect(notReadyHapiServer.stop).toBeCalledTimes(1);
+  expect(httpServer.start).toHaveBeenCalledTimes(1);
+  expect(notReadyHapiServer.stop).toHaveBeenCalledTimes(1);
 });
 
 test('logs error if already set up', async () => {

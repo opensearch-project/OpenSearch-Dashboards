@@ -31,9 +31,9 @@ jest.mock('../../application/utils/hooks/use_existing_dashboard', () => ({
   })),
 }));
 
-const mockSavedObjectsClient = ({
+const mockSavedObjectsClient = {
   find: jest.fn(),
-} as unknown) as SavedObjectsClientContract;
+} as unknown as SavedObjectsClientContract;
 
 /** Helper to get the actual radio input inside an EuiRadio wrapper */
 const getRadioInput = (testSubj: string) => {

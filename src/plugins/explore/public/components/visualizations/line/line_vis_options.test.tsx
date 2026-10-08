@@ -14,8 +14,9 @@ import {
   AxisRole,
   AxisColumnMappings,
   StandardAxes,
+  LineStyle,
 } from '../types';
-import { LineStyle } from './line_exclusive_vis_options';
+import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the child components
 jest.mock('../style_panel/legend/legend', () => ({
@@ -165,8 +166,6 @@ describe('LineVisStyleControls', () => {
     name: 'value',
     schema: VisFieldType.Numerical,
     column: 'field-1',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockCategoricalColumn = {
@@ -174,8 +173,6 @@ describe('LineVisStyleControls', () => {
     name: 'category',
     schema: VisFieldType.Categorical,
     column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockDateColumn = {
@@ -183,8 +180,6 @@ describe('LineVisStyleControls', () => {
     name: 'date',
     schema: VisFieldType.Date,
     column: 'field-0',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockAxisColumnMappings: AxisColumnMappings = {
@@ -195,6 +190,7 @@ describe('LineVisStyleControls', () => {
 
   const mockProps: LineVisStyleControlsProps = {
     styleOptions: {
+      ...defaultLineChartStyles,
       addLegend: true,
       legendPosition: Positions.RIGHT,
       legendTitle: '',
@@ -209,7 +205,7 @@ describe('LineVisStyleControls', () => {
       },
       tooltipOptions: defaultTooltipOptions,
       standardAxes: [defaultCategoryAxis, defaultValueAxis],
-      showFullTimeRange: false,
+      showFullTimeRange: true,
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],

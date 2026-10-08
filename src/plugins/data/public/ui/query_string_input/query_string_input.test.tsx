@@ -297,6 +297,7 @@ describe('QueryStringInput', () => {
       const defaultOptions = {
         screenTitle: 'Another Screen',
         intl: null as any,
+        registerKeyboardShortcut: true,
       };
 
       const services = {

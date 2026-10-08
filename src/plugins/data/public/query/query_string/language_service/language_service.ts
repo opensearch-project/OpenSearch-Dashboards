@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import semver from 'semver';
 import { EditorEnhancements, LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
 import { ISearchInterceptor } from '../../../search';
 import { createEditor, DQLBody, QueryEditorExtensionConfig, SingleLineInput } from '../../../ui';
-import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
+import { DataStorage, Dataset, setOverrides as setFieldOverrides } from '../../../../common';
 import { dqlLanguageReference } from './lib/dql_language_reference';
 import { luceneLanguageReference } from './lib/lucene_language_reference';
 
@@ -62,6 +63,33 @@ export class LanguageService {
 
   public getDefaultLanguage(): LanguageConfig | undefined {
     return this.languages.get('kuery') || this.languages.values().next().value;
+  }
+
+  /**
+   * Determines whether a language is supported for the currently selected dataset, based on the
+   * dataset's data-source engine type and version against the language's declared
+   * `LanguageConfig.supportedDataSources`.
+   *
+   * Fail-open by design: returns `true` whenever applicability cannot be conclusively determined,
+   * so unknown/missing engine types, blank or unparseable versions, datasets without a data source,
+   * and languages that declare no `supportedDataSources` are all treated as supported. Only an
+   * engine with a declared minimum version AND a parseable dataset version below that minimum
+   * yields `false`.
+   */
+  public isLanguageSupportedForDataset(language: LanguageConfig, dataset?: Dataset): boolean {
+    const minVersionByEngine = language.supportedDataSources?.minVersionByEngine;
+    if (!minVersionByEngine) return true;
+
+    const engine = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
+    if (!engine) return true;
+
+    const minVersion = minVersionByEngine[engine];
+    if (!minVersion) return true;
+
+    const coerced = semver.coerce(dataset?.dataSource?.version);
+    if (!coerced) return true;
+
+    return semver.satisfies(coerced.version, `>=${minVersion}`);
   }
 
   public getQueryEditorExtensionMap() {

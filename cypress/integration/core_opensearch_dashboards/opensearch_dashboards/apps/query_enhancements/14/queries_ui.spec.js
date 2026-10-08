@@ -31,6 +31,14 @@ const datasetId = getRandomizedDatasetId();
 
 export const runQueryTests = () => {
   describe('discover Query UI tests', () => {
+    // Suppress the one-time "Workspace management moved" footer tour: on a fresh
+    // browser it auto-opens an EuiTour popover that persists in the DOM, which
+    // trips assertions expecting no popover. Seed the dismissed flag before
+    // every page load so the tour never opens.
+    Cypress.on('window:before:load', (win) => {
+      win.localStorage.setItem('workspace.manageWorkspaceMoved.tourDismissed', 'true');
+    });
+
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
 
@@ -76,7 +84,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           // Verify expanded state persists
           cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
@@ -84,7 +92,7 @@ export const runQueryTests = () => {
 
           // Switch back to the original language
           if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           } else {
             cy.setQueryLanguage('PPL');
           }
@@ -98,7 +106,7 @@ export const runQueryTests = () => {
           if (config.language === QueryLanguages.SQL.name) {
             cy.setQueryLanguage('PPL');
           } else {
-            cy.setQueryLanguage('OpenSearch SQL');
+            cy.setQueryLanguage('SQL');
           }
           cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
           cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
@@ -152,7 +160,7 @@ export const runQueryTests = () => {
                       case 'Lucene':
                         expect(href).to.match(/\/query-dsl\/full-text\/query-string\/$/);
                         break;
-                      case 'OpenSearch SQL':
+                      case 'SQL':
                         expect(href).to.match(/\/search-plugins\/sql\/sql\/basic\/$/);
                         break;
                       case 'PPL':

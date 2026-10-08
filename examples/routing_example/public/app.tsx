@@ -69,24 +69,21 @@ function RoutingExplorer({
               listItems={[
                 {
                   label: 'IRouter API docs',
-                  href:
-                    'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/server/opensearch-dashboards-plugin-core-server.irouter.md',
+                  href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/server/opensearch-dashboards-plugin-core-server.irouter.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
                 },
                 {
                   label: 'HttpHandler (core.http.fetch) API docs',
-                  href:
-                    'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/public/opensearch-dashboards-plugin-core-public.httphandler.md',
+                  href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/public/opensearch-dashboards-plugin-core-public.httphandler.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
                 },
                 {
                   label: 'Conventions',
-                  href:
-                    'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/DEVELOPER_GUIDE.md#api-endpoints',
+                  href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/DEVELOPER_GUIDE.md#api-endpoints',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',

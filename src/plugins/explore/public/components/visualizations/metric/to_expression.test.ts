@@ -15,8 +15,6 @@ describe('Metric to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 2,
-    uniqueValuesCount: 2,
   };
 
   const dateColumn: VisColumn = {
@@ -24,13 +22,10 @@ describe('Metric to_expression', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'date',
-    validValuesCount: 2,
-    uniqueValuesCount: 2,
   };
 
   const mockStyles: MetricChartStyle = {
     ...defaultMetricChartStyles,
-    showTitle: true,
     title: 'Test Metric',
   };
 

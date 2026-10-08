@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`StepTimeField should disable the action button if an invalid time field is selected 1`] = `
 <ActionButtons

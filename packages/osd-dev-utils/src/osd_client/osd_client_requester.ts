@@ -89,7 +89,10 @@ export class OsdClientRequester {
   private readonly url: string;
   private readonly httpsAgent: Https.Agent | null;
 
-  constructor(private readonly log: ToolingLog, options: Options) {
+  constructor(
+    private readonly log: ToolingLog,
+    options: Options
+  ) {
     this.url = options.url;
     this.httpsAgent =
       new URL(options.url).protocol === 'https:'

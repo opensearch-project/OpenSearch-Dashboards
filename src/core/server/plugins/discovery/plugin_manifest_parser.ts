@@ -71,6 +71,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     supportedOSDataSourceVersions: true,
     requiredOSDataSourcePlugins: true,
     unsupportedOSDataSourceEngineTypes: true,
+    minDataSourceEngineVersions: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -255,6 +256,11 @@ export async function parseManifest(
     unsupportedOSDataSourceEngineTypes: Array.isArray(manifest.unsupportedOSDataSourceEngineTypes)
       ? manifest.unsupportedOSDataSourceEngineTypes
       : [],
+    minDataSourceEngineVersions:
+      manifest.minDataSourceEngineVersions &&
+      typeof manifest.minDataSourceEngineVersions === 'object'
+        ? manifest.minDataSourceEngineVersions
+        : undefined,
   };
 }
 

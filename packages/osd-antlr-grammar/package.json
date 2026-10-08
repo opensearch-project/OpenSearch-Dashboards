@@ -13,7 +13,8 @@
     "generate:opensearchppl": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_ppl/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 ./src/opensearch_ppl/grammar/OpenSearchPPLParser.g4",
     "generate:opensearchppl-simplified": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_ppl_simplified/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_ppl_simplified/grammar/OpenSearchPPLLexer.g4 ./src/opensearch_ppl_simplified/grammar/OpenSearchPPLParser.g4",
     "generate:dql": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/dql/.generated -visitor -no-listener -Xexact-output-dir ./src/dql/grammar/DQLLexer.g4 ./src/dql/grammar/DQLParser.g4",
-    "generate:all": "yarn generate:opensearchsql && yarn generate:opensearchppl && yarn generate:opensearchppl-simplified && yarn generate:dql"
+    "generate:opensearchppl-searchonly": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_ppl_searchonly/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_ppl_searchonly/grammar/OpenSearchPPLSearchOnlyLexer.g4 ./src/opensearch_ppl_searchonly/grammar/OpenSearchPPLSearchOnlyParser.g4",
+    "generate:all": "yarn generate:opensearchsql && yarn generate:opensearchppl && yarn generate:opensearchppl-simplified && yarn generate:dql && yarn generate:opensearchppl-searchonly"
   },
   "dependencies": {
     "antlr4ng": "^3.0.16"

@@ -351,9 +351,8 @@ describe('QueryPanelActionsRegistryService', () => {
     describe('query length and complexity', () => {
       it('should handle very long query (>1000 characters)', () => {
         // Construct a realistic long query with multiple conditions
-        const longWhereClause = 'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(
-          30
-        );
+        const longWhereClause =
+          'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(30);
         const longQuery =
           'source=logs | where ' +
           longWhereClause +
@@ -812,9 +811,8 @@ describe('QueryPanelActionsRegistryService', () => {
       it('should handle flyout action with very long query', () => {
         const setup = service.setup();
         const mockComponent = jest.fn();
-        const longWhereClause = 'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(
-          30
-        );
+        const longWhereClause =
+          'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(30);
         const longQuery =
           'source=logs | where ' +
           longWhereClause +

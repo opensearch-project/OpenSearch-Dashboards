@@ -66,11 +66,7 @@ export interface DslTermQuery {
 }
 
 export type DslQuery =
-  | DslRangeQuery
-  | DslMatchQuery
-  | DslQueryStringQuery
-  | DslMatchAllQuery
-  | DslTermQuery;
+  DslRangeQuery | DslMatchQuery | DslQueryStringQuery | DslMatchAllQuery | DslTermQuery;
 
 export const isOpenSearchQueryString = (query: any): query is DslQueryStringQuery =>
   has(query, 'query_string.query');

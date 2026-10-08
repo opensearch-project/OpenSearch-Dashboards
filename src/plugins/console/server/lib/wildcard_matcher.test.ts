@@ -28,7 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
 import { WildcardMatcher } from './wildcard_matcher';
 
 function should(candidate: string, pattern: string, ...emptyVal: string[]) {

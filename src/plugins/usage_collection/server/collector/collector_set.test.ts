@@ -65,9 +65,7 @@ describe('CollectorSet', () => {
         } as any); // We are intentionally sending it wrong.
       };
 
-      expect(registerPojo).toThrowError(
-        'CollectorSet can only have Collector instances registered'
-      );
+      expect(registerPojo).toThrow('CollectorSet can only have Collector instances registered');
     });
 
     it('should throw when 2 collectors with the same type are registered', () => {
@@ -84,7 +82,7 @@ describe('CollectorSet', () => {
             isReady: () => false,
           })
         )
-      ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
+      ).toThrow(`Usage collector's type "test_duplicated" is duplicated.`);
     });
 
     it('should log debug status of fetching from the collector', async () => {

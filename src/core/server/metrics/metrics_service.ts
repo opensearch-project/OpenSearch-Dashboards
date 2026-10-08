@@ -43,8 +43,10 @@ export interface MetricsServiceSetupDeps {
 }
 
 /** @internal */
-export class MetricsService
-  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
+export class MetricsService implements CoreService<
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart
+> {
   private readonly logger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
@@ -99,7 +101,7 @@ export class MetricsService
 
   public async stop() {
     if (this.collectInterval) {
-      clearInterval((this.collectInterval as unknown) as NodeJS.Timeout);
+      clearInterval(this.collectInterval as unknown as NodeJS.Timeout);
     }
     this.metrics$.complete();
   }

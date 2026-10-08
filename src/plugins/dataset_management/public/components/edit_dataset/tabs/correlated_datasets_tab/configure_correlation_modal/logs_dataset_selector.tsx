@@ -107,6 +107,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
       fullWidth
     >
       <EuiComboBox
+        isInvalid={isInvalid}
         placeholder={i18n.translate(
           'datasetManagement.correlatedDatasets.modal.logsDatasetSelectorPlaceholder',
           {

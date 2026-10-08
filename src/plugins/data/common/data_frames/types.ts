@@ -147,9 +147,7 @@ export interface QueryFailedStatusResponse {
 }
 
 export type FetchStatusResponse = { queryId?: string } & (
-  | QueryFailedStatusResponse
-  | QuerySuccessStatusResponse
-  | { status?: string }
+  QueryFailedStatusResponse | QuerySuccessStatusResponse | { status?: string }
 );
 
 export type PollQueryResultsHandler = () => Promise<FetchStatusResponse>;

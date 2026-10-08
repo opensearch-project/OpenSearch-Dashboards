@@ -34,19 +34,35 @@ export const updateDashboardAdminStateForRequest = (
   request: OpenSearchDashboardsRequest,
   groups: string[],
   users: string[],
-  configGroups: string[],
-  configUsers: string[]
+  configGroups: string | string[],
+  configUsers: string | string[]
 ) => {
+  const normalizedConfigUsers = Array.isArray(configUsers)
+    ? configUsers
+    : configUsers
+      ? configUsers
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
+      : [];
+  const normalizedConfigGroups = Array.isArray(configGroups)
+    ? configGroups
+    : configGroups
+      ? configGroups
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
+      : [];
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   // If user config contains wildcard characters '*', login defaults to OSD Admin
-  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
+  if (normalizedConfigUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
-  const groupMatchAny = groups.some((group) => configGroups.includes(group));
-  const userMatchAny = users.some((user) => configUsers.includes(user));
+  const groupMatchAny = groups.some((group) => normalizedConfigGroups.includes(group));
+  const userMatchAny = users.some((user) => normalizedConfigUsers.includes(user));
   return updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
@@ -149,38 +165,56 @@ export const translatePermissionsToRole = (
   principals?: Principals
 ): PermissionModeId => {
   let permissionMode = PermissionModeId.Owner;
-  if (isPermissionControlEnabled && permissions) {
-    const modes = [] as WorkspacePermissionMode[];
-    const currentUserId = principals?.users?.[0] || '';
-    const currentGroupId = principals?.groups?.[0] || '';
-    [
-      WorkspacePermissionMode.Write,
-      WorkspacePermissionMode.LibraryWrite,
-      WorkspacePermissionMode.LibraryRead,
-      WorkspacePermissionMode.Read,
-    ].forEach((mode) => {
-      if (
-        permissions[mode] &&
-        (permissions[mode].users?.includes(currentUserId) ||
-          permissions[mode].groups?.includes(currentGroupId))
-      ) {
-        modes.push(mode);
-      }
-    });
+  if (isPermissionControlEnabled) {
+    if (permissions) {
+      const modes = [] as WorkspacePermissionMode[];
+      [
+        WorkspacePermissionMode.Write,
+        WorkspacePermissionMode.LibraryWrite,
+        WorkspacePermissionMode.LibraryRead,
+        WorkspacePermissionMode.Read,
+      ].forEach((mode) => {
+        if (permissions[mode]) {
+          if (permissions[mode].users?.includes('*') || permissions[mode].groups?.includes('*')) {
+            modes.push(mode);
+            return;
+          }
 
-    if (
-      modes.includes(WorkspacePermissionMode.LibraryWrite) &&
-      modes.includes(WorkspacePermissionMode.Write)
-    ) {
-      permissionMode = PermissionModeId.Owner;
-    } else if (modes.includes(WorkspacePermissionMode.LibraryWrite)) {
-      permissionMode = PermissionModeId.ReadAndWrite;
+          const isGroupMatched = (principals?.groups || []).find((group) =>
+            permissions[mode].groups?.includes(group)
+          );
+
+          if (isGroupMatched) {
+            modes.push(mode);
+            return;
+          }
+
+          const isUserMatched = (principals?.users || []).find((user) =>
+            permissions[mode].users?.includes(user)
+          );
+
+          if (isUserMatched) {
+            modes.push(mode);
+            return;
+          }
+        }
+      });
+
+      if (
+        modes.includes(WorkspacePermissionMode.LibraryWrite) &&
+        modes.includes(WorkspacePermissionMode.Write)
+      ) {
+        permissionMode = PermissionModeId.Owner;
+      } else if (modes.includes(WorkspacePermissionMode.LibraryWrite)) {
+        permissionMode = PermissionModeId.ReadAndWrite;
+      } else {
+        permissionMode = PermissionModeId.Read;
+      }
     } else {
       permissionMode = PermissionModeId.Read;
     }
-  } else {
-    permissionMode = PermissionModeId.Read;
   }
+
   return permissionMode;
 };
 

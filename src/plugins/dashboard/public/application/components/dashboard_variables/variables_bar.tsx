@@ -22,7 +22,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
-import { VariableWithState } from '../../../variables/types';
+import { VariableType, VariableWithState } from '../../../variables/types';
+import {
+  buildVariableOptionDisplayTextMap,
+  getVariableOptionDisplayText,
+} from '../../../variables/variable_option_display_utils';
+import { TextValueEditor } from './text_value_editor';
 import './variable_selector.scss';
 
 export interface VariablesBarProps {
@@ -43,9 +48,14 @@ interface ValueSelectorProps {
 }
 
 const ALL_OPTION_VALUE = '__all__';
+// EuiSelectable emits display labels on change, so namespaced keys carry the stored values.
+const OPTION_VALUE_KEY_PREFIX = '__value:';
+// Key of the synthetic "add the value you just typed" row. Never a stored value.
+const ADD_CUSTOM_VALUE_KEY = '__addCustomValue__';
 
 const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Parse current selected values
   const currentValue = variable.current;
@@ -53,17 +63,59 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     return currentValue ?? [];
   }, [currentValue]);
 
+  const allowCustomValue = !!variable.allowCustomValue;
+
+  // Committed values that are not in the generated/static option list.
+  const customSelectedValues = useMemo(() => {
+    if (!allowCustomValue) return [];
+    return selectedValues.filter(
+      (value) => !variable.options.some((option) => option.value === value)
+    );
+  }, [allowCustomValue, selectedValues, variable.options]);
+
   // Check if "All" is currently selected (all real options are selected)
   const isAllSelected = useMemo(() => {
     if (!variable.includeAll || !variable.multi) return false;
     return (
-      variable.options.length > 0 && variable.options.every((opt) => selectedValues.includes(opt))
+      variable.options.length > 0 &&
+      variable.options.every((option) => selectedValues.includes(option.value))
     );
   }, [variable.includeAll, variable.multi, variable.options, selectedValues]);
+
+  const optionDisplayTextMap = useMemo(
+    () => buildVariableOptionDisplayTextMap(variable.options),
+    [variable.options]
+  );
+
+  // The typed term, unless it is already an option or an already-committed value.
+  const pendingCustomValue = useMemo(() => {
+    if (!allowCustomValue) return '';
+    const term = searchTerm.trim();
+    if (!term) return '';
+    const alreadyExists =
+      variable.options.some((option) => option.value === term) || selectedValues.includes(term);
+    return alreadyExists ? '' : term;
+  }, [allowCustomValue, searchTerm, variable.options, selectedValues]);
 
   // Convert to EuiSelectable options format, prepend "All" if enabled
   const selectableOptions: EuiSelectableOption[] = useMemo(() => {
     const options: EuiSelectableOption[] = [];
+
+    // First row, under the search box. Label is the term itself so EuiSelectable's
+    // filtering keeps it visible.
+    if (pendingCustomValue) {
+      options.push({
+        label: pendingCustomValue,
+        key: ADD_CUSTOM_VALUE_KEY,
+        append: (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('dashboard.variables.hitEnterToAdd', {
+              defaultMessage: 'Hit enter to add',
+            })}
+          </EuiText>
+        ),
+      });
+    }
 
     if (variable.includeAll && variable.multi && variable.options.length > 0) {
       options.push({
@@ -73,38 +125,87 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       });
     }
 
-    variable.options.forEach((opt) => {
+    variable.options.forEach((option) => {
       options.push({
-        label: opt,
-        checked: selectedValues.includes(opt) ? 'on' : undefined,
+        label: getVariableOptionDisplayText(option, optionDisplayTextMap),
+        key: `${OPTION_VALUE_KEY_PREFIX}${option.value}`,
+        checked: selectedValues.includes(option.value) ? 'on' : undefined,
+      });
+    });
+
+    // Committed off-list values need rows too, or they cannot be de-selected.
+    customSelectedValues.forEach((value) => {
+      options.push({
+        label: value,
+        key: `${OPTION_VALUE_KEY_PREFIX}${value}`,
+        checked: 'on',
+        'data-test-subj': 'variable-custom-value-option',
       });
     });
 
     return options;
-  }, [variable.options, variable.includeAll, variable.multi, selectedValues, isAllSelected]);
+  }, [
+    variable.options,
+    variable.includeAll,
+    variable.multi,
+    selectedValues,
+    isAllSelected,
+    optionDisplayTextMap,
+    customSelectedValues,
+    pendingCustomValue,
+  ]);
+
+  const commitCustomValue = useCallback(() => {
+    if (!pendingCustomValue) return;
+    const next = variable.multi
+      ? Array.from(new Set([...selectedValues, pendingCustomValue]))
+      : [pendingCustomValue];
+    onValuesChange(variable.id, next);
+    // Keep the search term: the value now renders as a checked row that still
+    // matches it, which is the only confirmation this popover can show.
+    if (!variable.multi) {
+      setIsOpen(false);
+    }
+  }, [pendingCustomValue, variable.multi, variable.id, selectedValues, onValuesChange]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
+      // Synthetic "add" row: commit a custom value instead of storing a selection.
+      const addCustomOption = newOptions.find((opt) => opt.key === ADD_CUSTOM_VALUE_KEY);
+      if (addCustomOption?.checked === 'on') {
+        commitCustomValue();
+        return;
+      }
+
       // Check if "All" option exists and was toggled
       const allOption = newOptions.find((opt) => opt.key === ALL_OPTION_VALUE);
       const allIsChecked = allOption?.checked === 'on';
 
       if (variable.includeAll && variable.multi && allOption) {
         if (allIsChecked && !isAllSelected) {
-          // "All" was just checked → select all real options
-          onValuesChange(variable.id, [...variable.options]);
+          // "All" covers the listed options only; custom values are kept.
+          onValuesChange(variable.id, [
+            ...variable.options.map((option) => option.value),
+            ...customSelectedValues,
+          ]);
           return;
         } else if (!allIsChecked && isAllSelected) {
-          // "All" was just unchecked → deselect all
-          onValuesChange(variable.id, []);
+          onValuesChange(variable.id, [...customSelectedValues]);
           return;
         }
       }
 
-      // Normal selection: filter out the "All" pseudo-option
+      // Normal selection: filter out the "All" and "add custom value" pseudo-options
       const values = newOptions
-        .filter((opt) => opt.checked === 'on' && opt.key !== ALL_OPTION_VALUE)
-        .map((opt) => opt.label);
+        .filter(
+          (opt) =>
+            opt.checked === 'on' && opt.key !== ALL_OPTION_VALUE && opt.key !== ADD_CUSTOM_VALUE_KEY
+        )
+        .map((opt) =>
+          typeof opt.key === 'string' && opt.key.startsWith(OPTION_VALUE_KEY_PREFIX)
+            ? opt.key.slice(OPTION_VALUE_KEY_PREFIX.length)
+            : opt.label
+        );
       onValuesChange(variable.id, values);
 
       // Close popover after selection for single-select mode
@@ -118,16 +219,21 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       variable.multi,
       variable.options,
       isAllSelected,
+      customSelectedValues,
       onValuesChange,
+      commitCustomValue,
     ]
   );
 
   // Calculate popover width based on longest option label
   const popoverWidth = useMemo(() => {
-    const longestLength = variable.options.reduce((max, opt) => Math.max(max, opt.length), 0);
+    const longestLength = variable.options.reduce((max, option) => {
+      const displayText = getVariableOptionDisplayText(option, optionDisplayTextMap);
+      return Math.max(max, displayText.length);
+    }, 0);
     // ~8px per char + 60px for checkbox/padding/scrollbar
     return Math.max(300, Math.min(longestLength * 8 + 60, 700));
-  }, [variable.options]);
+  }, [variable.options, optionDisplayTextMap]);
 
   const isLoading = !!variable.loading;
   const isError = !!variable.error;
@@ -140,11 +246,15 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     if (isError) {
       return i18n.translate('dashboard.variables.error', { defaultMessage: 'Error' });
     }
-    if (isAllSelected) {
+    // Only a plain "All" when nothing off-list is also selected.
+    if (isAllSelected && customSelectedValues.length === 0) {
       return i18n.translate('dashboard.variables.allSelected', { defaultMessage: 'All' });
     }
     if (selectedValues.length > 0) {
-      return selectedValues[0];
+      const selectedOption = variable.options.find((option) => option.value === selectedValues[0]);
+      return selectedOption
+        ? getVariableOptionDisplayText(selectedOption, optionDisplayTextMap)
+        : selectedValues[0];
     }
     if (variable.options.length === 0) {
       return i18n.translate('dashboard.variables.displayNoOptions', {
@@ -153,7 +263,8 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     }
     return i18n.translate('dashboard.variables.selectValue', { defaultMessage: 'Select value' });
   };
-  const selectedCount = isAllSelected ? variable.options.length : selectedValues.length;
+  // Already includes custom values; the old isAllSelected special-case was equivalent.
+  const selectedCount = selectedValues.length;
   const displayLabel = variable.label || variable.name;
   const calculatedMinWidth = Math.max(60, displayLabel.length * 5 + 60);
 
@@ -232,12 +343,26 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
         onChange={handleChange}
         searchable
         searchProps={{
-          placeholder: i18n.translate('dashboard.variables.searchPlaceholder', {
-            defaultMessage: 'Contains...',
-          }),
+          placeholder: allowCustomValue
+            ? i18n.translate('dashboard.variables.searchOrAddPlaceholder', {
+                defaultMessage: 'Contains... or type to add',
+              })
+            : i18n.translate('dashboard.variables.searchPlaceholder', {
+                defaultMessage: 'Contains...',
+              }),
           compressed: true,
+          // onSearch receives the raw string; onChange would give (options, value).
+          onSearch: allowCustomValue ? setSearchTerm : undefined,
+          onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter' && pendingCustomValue) {
+              e.preventDefault();
+              e.stopPropagation();
+              commitCustomValue();
+            }
+          },
         }}
         height={300}
+        listProps={pendingCustomValue ? { onFocusBadge: false } : undefined}
         singleSelection={variable.multi ? false : 'always'}
         emptyMessage={i18n.translate('dashboard.variables.noOptions', {
           defaultMessage: 'No options available',
@@ -355,7 +480,11 @@ export const VariablesBar: React.FC<VariablesBarProps> = ({
             <EuiFlexItem key={variable.id} grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <ValueSelector variable={variable} onValuesChange={handleValueChange} />
+                  {variable.type === VariableType.Text ? (
+                    <TextValueEditor variable={variable} onValuesChange={handleValueChange} />
+                  ) : (
+                    <ValueSelector variable={variable} onValuesChange={handleValueChange} />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

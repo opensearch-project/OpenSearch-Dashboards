@@ -29,15 +29,11 @@ export function SpanDetailPanel(props: {
   isEmbedded?: boolean;
   servicesInOrder?: string[];
   isFlyoutPanel?: boolean;
+  /** All spans in the trace (pre-filter), used to derive duration presets. */
+  allTraceSpans?: Array<Record<string, any>>;
 }) {
-  const {
-    chrome,
-    spanFilters,
-    setSpanFiltersWithStorage,
-    payloadData,
-    onSpanSelect,
-    colorMap,
-  } = props;
+  const { chrome, spanFilters, setSpanFiltersWithStorage, payloadData, onSpanSelect, colorMap } =
+    props;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(
@@ -122,6 +118,7 @@ export function SpanDetailPanel(props: {
           colorMap={colorMap}
           servicesInOrder={props.servicesInOrder}
           isFlyoutPanel={props.isFlyoutPanel}
+          allTraceSpans={props.allTraceSpans}
         />
       </div>
     ),
@@ -135,6 +132,7 @@ export function SpanDetailPanel(props: {
       colorMap,
       props.servicesInOrder,
       props.isFlyoutPanel,
+      props.allTraceSpans,
     ]
   );
 

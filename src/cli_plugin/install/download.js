@@ -57,7 +57,7 @@ export function _downloadSingle(settings, logger, sourceUrl) {
   let urlInfo;
   try {
     urlInfo = new URL('', sourceUrl);
-  } catch (e) {
+  } catch {
     return Promise.reject(new UnsupportedProtocolError());
   }
   let downloadPromise;

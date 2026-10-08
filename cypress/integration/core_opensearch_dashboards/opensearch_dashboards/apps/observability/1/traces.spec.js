@@ -271,11 +271,10 @@ const traceTestSuite = () => {
           // Check for timeline column header
           cy.get('[data-test-subj="dataGridHeaderCell-timeline"]').should('be.visible');
 
-          // Check for duration column header
-          cy.get('[data-test-subj="dataGridHeaderCell-durationInNanos"]').should(
-            'contain.text',
-            'Duration'
-          );
+          // Duration now renders inline at each bar's trailing edge, so there is
+          // no separate Duration column; assert the inline duration is present.
+          cy.get('[data-test-subj="dataGridHeaderCell-durationInNanos"]').should('not.exist');
+          cy.get('[data-test-subj="timeline-bar-duration"]').should('exist');
 
           // Check for service names in span cells (first column)
           cy.get('.euiDataGridRowCell--firstColumn').should(
@@ -581,8 +580,8 @@ const traceTestSuite = () => {
           .contains('Error')
           .click();
 
-        // Verify filter badge appears
-        cy.get('[data-test-subj^="filter-badge-"]').should('be.visible');
+        // Verify the applied status filter shows as a pill
+        cy.getElementByTestId('span-status-filter-chip').should('be.visible');
 
         // Verify clear filters button appears
         cy.getElementByTestId('clear-all-filters-button').should('be.visible');
@@ -590,8 +589,8 @@ const traceTestSuite = () => {
         // Clear filters
         cy.getElementByTestId('clear-all-filters-button').click();
 
-        // Verify filter badge disappears
-        cy.get('[data-test-subj^="filter-badge-"]').should('not.exist');
+        // Verify the status pill disappears
+        cy.getElementByTestId('span-status-filter-chip').should('not.exist');
       });
     });
 

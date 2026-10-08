@@ -3,12 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExplorePlugin } from './plugin';
+import { BehaviorSubject } from 'rxjs';
+import { ExplorePlugin, initializeLogsDefaultQuery } from './plugin';
+import { getSourceTypeRegistry } from './services/source_type_registry';
+import { ExploreFlavor, EXPLORE_LOGS_TAB_ID } from '../common';
 import { coreMock } from '../../../core/public/mocks';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
-import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
-import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
+import {
+  CoreSetup,
+  CoreStart,
+  DEFAULT_NAV_GROUPS,
+  getUseCaseFeatureConfig,
+} from 'opensearch-dashboards/public';
+import {
+  ExplorePluginStart,
+  ExploreServices,
+  ExploreSetupDependencies,
+  ExploreStartDependencies,
+} from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
@@ -26,6 +39,9 @@ import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
+import { registerDisabledPPLLintFixAction } from './components/query_panel/actions/ppl_lint_fix_action';
+import { clearActivePPLLintFixSession } from './components/query_panel/actions/ppl_lint_fix_session';
+import { registerAutoVisualizationAction } from './components/visualizations/actions/auto_visualization_action';
 
 // Mock the action
 jest.mock('./actions/ask_ai_embeddable_action');
@@ -48,7 +64,21 @@ jest.mock('./actions/ask_ai_action', () => ({
 // Mock registerDisabledPPLExecuteQueryAction
 jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
   registerDisabledPPLExecuteQueryAction: jest.fn(),
-  EXECUTE_PPL_QUERY_TOOL_DEFINITION: { name: 'execute_ppl_query' },
+  APPLY_PPL_QUERY_TOOL_DEFINITION: { name: 'apply_ppl_query' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_action', () => ({
+  registerDisabledPPLLintFixAction: jest.fn(),
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION: { name: 'apply_ppl_lint_fix_explore' },
+}));
+
+jest.mock('./components/query_panel/actions/ppl_lint_fix_session', () => ({
+  clearActivePPLLintFixSession: jest.fn(),
+}));
+
+jest.mock('./components/visualizations/actions/auto_visualization_action', () => ({
+  registerAutoVisualizationAction: jest.fn(),
+  AUTO_VISUALIZATION_TOOL_NAME: 'auto_create_visualization',
 }));
 
 // Mock createOsdUrlTracker
@@ -69,6 +99,7 @@ describe('ExplorePlugin', () => {
   let setupDeps: ExploreSetupDependencies;
   let startDeps: ExploreStartDependencies;
   let mockCapabilities: any;
+  let currentWorkspace$: BehaviorSubject<{ features?: string[] } | null>;
 
   function createMockInitializerContext() {
     return {
@@ -97,7 +128,7 @@ describe('ExplorePlugin', () => {
 
   function createMockSetupDeps(): ExploreSetupDependencies {
     return {
-      data: ({
+      data: {
         __enhance: jest.fn(),
         query: {
           state$: {
@@ -106,21 +137,21 @@ describe('ExplorePlugin', () => {
             }),
           },
         },
-      } as unknown) as DataPublicPluginSetup,
-      urlForwarding: ({
+      } as unknown as DataPublicPluginSetup,
+      urlForwarding: {
         forwardApp: jest.fn(),
-      } as Partial<UrlForwardingSetup>) as UrlForwardingSetup,
-      embeddable: ({
+      } as Partial<UrlForwardingSetup> as UrlForwardingSetup,
+      embeddable: {
         registerEmbeddableFactory: jest.fn(),
-      } as Partial<EmbeddableSetup>) as EmbeddableSetup,
-      visualizations: ({
+      } as Partial<EmbeddableSetup> as EmbeddableSetup,
+      visualizations: {
         registerAlias: jest.fn(),
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsSetup>) as VisualizationsSetup,
-      uiActions: ({
+      } as Partial<VisualizationsSetup> as VisualizationsSetup,
+      uiActions: {
         getTriggerActions: jest.fn().mockReturnValue([]),
-      } as Partial<UiActionsSetup>) as UiActionsSetup,
+      } as Partial<UiActionsSetup> as UiActionsSetup,
       navigation: {} as NavigationStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacySetup,
       usageCollection: {} as UsageCollectionSetup,
@@ -131,7 +162,7 @@ describe('ExplorePlugin', () => {
 
   function createMockStartDeps(): ExploreStartDependencies {
     return {
-      data: ({
+      data: {
         indexPatterns: {},
         dataViews: {},
         search: {},
@@ -142,10 +173,13 @@ describe('ExplorePlugin', () => {
           },
           queryString: {
             clearQuery: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              registerDatasetFilter: jest.fn(),
+            }),
           },
         },
-      } as unknown) as DataPublicPluginStart,
-      uiActions: ({
+      } as unknown as DataPublicPluginStart,
+      uiActions: {
         registerAction: jest.fn(),
         addTriggerAction: jest.fn(),
         detachAction: jest.fn(),
@@ -153,24 +187,25 @@ describe('ExplorePlugin', () => {
         registerTrigger: jest.fn(),
         getTrigger: jest.fn(),
         getTriggers: jest.fn(),
+        getTriggerActions: jest.fn().mockReturnValue([]),
         unregisterAction: jest.fn(),
         attachAction: jest.fn(),
         getAction: jest.fn(),
         hasAction: jest.fn(),
-      } as Partial<UiActionsStart>) as UiActionsStart,
+      } as Partial<UiActionsStart> as UiActionsStart,
       dashboard: {} as DashboardStart,
-      expressions: ({
+      expressions: {
         ExpressionLoader: jest.fn(),
-      } as Partial<ExpressionsStart>) as ExpressionsStart,
-      charts: ({
+      } as Partial<ExpressionsStart> as ExpressionsStart,
+      charts: {
         theme: {},
-      } as Partial<ChartsPluginStart>) as ChartsPluginStart,
+      } as Partial<ChartsPluginStart> as ChartsPluginStart,
       navigation: {} as NavigationStart,
       inspector: {} as InspectorPublicPluginStart,
       urlForwarding: {} as UrlForwardingStart,
       embeddable: {} as EmbeddableStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacyStart,
-      contextProvider: ({
+      contextProvider: {
         getAssistantContextStore: jest.fn().mockReturnValue({
           addContext: jest.fn(),
         }),
@@ -178,11 +213,11 @@ describe('ExplorePlugin', () => {
           registerAssistantAction: jest.fn(),
           unregisterAssistantAction: jest.fn(),
         },
-      } as Partial<ContextProviderStart>) as ContextProviderStart,
-      visualizations: ({
+      } as Partial<ContextProviderStart> as ContextProviderStart,
+      visualizations: {
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsStart>) as VisualizationsStart,
+      } as Partial<VisualizationsStart> as VisualizationsStart,
     };
   }
 
@@ -217,20 +252,14 @@ describe('ExplorePlugin', () => {
 
     // Mock core start
     coreStart = coreMock.createStart();
-    // Add workspaces mock with proper BehaviorSubject-like structure
+    // A real BehaviorSubject rather than a hand-rolled stub: the plugin both reads it once
+    // (`getIsExploreEnabledWorkspace`) and subscribes to it for the lifetime of start()
+    // (`getIsExploreEnabledWorkspace$`), and tests need to push workspace switches through it.
+    currentWorkspace$ = new BehaviorSubject<{ features?: string[] } | null>({
+      features: ['observability'],
+    });
     Object.defineProperty(coreStart, 'workspaces', {
-      value: {
-        currentWorkspace$: {
-          pipe: jest.fn().mockReturnValue({
-            toPromise: jest.fn().mockResolvedValue({
-              features: ['observability'],
-            }),
-          }),
-          subscribe: jest.fn(),
-          getValue: jest.fn(),
-          next: jest.fn(),
-        },
-      },
+      value: { currentWorkspace$ },
       writable: true,
       configurable: true,
     });
@@ -280,9 +309,11 @@ describe('ExplorePlugin', () => {
   });
 
   describe('setup', () => {
-    it('should register explore applications', () => {
+    it('should register explore applications (logs drilldown OFF by default)', () => {
       plugin.setup(coreSetup as any, setupDeps as any);
 
+      // logsDrilldown flag is off in the default mock config → the drilldown app is NOT registered,
+      // so only the 5 always-on apps register (visualization editor + logs/traces/metrics + explore).
       expect(coreSetup.application.register).toHaveBeenCalledTimes(5);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -307,6 +338,25 @@ describe('ExplorePlugin', () => {
           id: 'explore',
           title: 'Discover',
         })
+      );
+      // The feature-flagged Logs Drilldown app is absent.
+      expect(coreSetup.application.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
+      );
+    });
+
+    it('registers the Logs Drilldown app + query-bar action when the feature flag is ON', () => {
+      initializerContext.config.get.mockReturnValue({
+        discoverTraces: { enabled: false },
+        logsDrilldown: { enabled: true },
+      });
+      plugin = new ExplorePlugin(initializerContext as any);
+      plugin.setup(coreSetup as any, setupDeps as any);
+
+      // The 5 always-on apps + the drilldown app = 6 registrations.
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(6);
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
       );
     });
 
@@ -387,6 +437,21 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it('exposes source type registration that Explore reads back', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+
+      setup.sourceTypes.register({
+        id: 'fake',
+        label: 'Fake',
+        datasetTypes: ['FAKE'],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { FakeQL: {} },
+      });
+
+      expect(getSourceTypeRegistry().getForDataset({ type: 'FAKE' }).id).toBe('fake');
+      expect(getSourceTypeRegistry().getLanguageSettings('FakeQL')).toEqual({});
+    });
+
     it('should setup URL forwarding', () => {
       plugin.setup(coreSetup, setupDeps);
 
@@ -433,6 +498,36 @@ describe('ExplorePlugin', () => {
         expect.objectContaining({ id: 'observability' }),
         expect.arrayContaining([expect.objectContaining({ id: 'explore' })])
       );
+    });
+  });
+
+  describe('registration after setup', () => {
+    // Capability-gated sources (per-account flags only exist in start) register from their own
+    // start. Explore reads the registry when it renders, after every plugin has started, so it
+    // must keep accepting registrations after setup.
+    it('shows a source type registered after start, with its languages', () => {
+      const setup = plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      setup.sourceTypes.register({
+        id: 'lateSource',
+        label: 'Late source',
+        datasetTypes: ['LATE'],
+        flavors: [ExploreFlavor.Logs],
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { LateQL: {} },
+      });
+
+      expect(
+        getSourceTypeRegistry()
+          .getAll(ExploreFlavor.Logs)
+          .map((s) => s.id)
+      ).toContain('lateSource');
+      expect(getSourceTypeRegistry().getForDataset({ type: 'LATE' }).id).toBe('lateSource');
+      expect(
+        getSourceTypeRegistry().getLanguagesForTab(EXPLORE_LOGS_TAB_ID, ExploreFlavor.Logs)
+      ).toEqual(['LateQL']);
+      expect(getSourceTypeRegistry().supportsHistogram('LateQL', { type: 'LATE' })).toBe(false);
     });
   });
 
@@ -537,6 +632,24 @@ describe('ExplorePlugin', () => {
       expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(true);
       expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
     });
+
+    it('keeps the visualization editor alias visible outside Explore-enabled workspaces', async () => {
+      currentWorkspace$.next(null);
+      const discoverAlias = { name: 'DiscoverVisualization', hidden: false };
+      const metricsAlias = { name: 'MetricsVisualization', hidden: false };
+      const editorAlias = { name: 'VisualizationEditor', hidden: false };
+      (startDeps.visualizations.getAliases as jest.Mock).mockReturnValue([
+        discoverAlias,
+        metricsAlias,
+        editorAlias,
+      ]);
+
+      await (plugin as any).configureExploreVisualizationVisibility(coreStart, startDeps);
+
+      expect(discoverAlias.hidden).toBe(true);
+      expect(metricsAlias.hidden).toBe(true);
+      expect(editorAlias.hidden).toBe(false);
+    });
   });
 
   describe('stop', () => {
@@ -547,15 +660,19 @@ describe('ExplorePlugin', () => {
       expect(() => plugin.stop()).not.toThrow();
     });
 
-    it('should unregister execute_ppl_query assistant action on stop', () => {
+    it('should unregister apply_ppl_query assistant action on stop', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
       plugin.stop();
 
       expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
-        'execute_ppl_query'
+        'apply_ppl_query'
       );
+      expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
+        'apply_ppl_lint_fix_explore'
+      );
+      expect(clearActivePPLLintFixSession).toHaveBeenCalled();
     });
 
     it('should not throw on stop when contextProvider was not available at start', () => {
@@ -571,21 +688,27 @@ describe('ExplorePlugin', () => {
     });
   });
 
-  describe('disabled PPL query action registration', () => {
-    // Cast the imported mocked function to jest.Mock
-    const mockRegisterDisabledPPLExecuteQueryAction = registerDisabledPPLExecuteQueryAction as jest.Mock;
+  describe('disabled PPL assistant action registration', () => {
+    // Cast the imported mocked functions to jest.Mock
+    const mockRegisterDisabledPPLExecuteQueryAction =
+      registerDisabledPPLExecuteQueryAction as jest.Mock;
+    const mockRegisterDisabledPPLLintFixAction = registerDisabledPPLLintFixAction as jest.Mock;
 
     beforeEach(() => {
-      // Clear the mock before each test
+      // Clear the mocks before each test
       mockRegisterDisabledPPLExecuteQueryAction.mockClear();
+      mockRegisterDisabledPPLLintFixAction.mockClear();
     });
 
-    it('should register disabled execute_ppl_query action when contextProvider is available', () => {
+    it('should register disabled apply_ppl_query action when contextProvider is available', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledTimes(1);
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(
+        startDeps.contextProvider.actions.registerAssistantAction
+      );
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(
         startDeps.contextProvider.actions.registerAssistantAction
       );
     });
@@ -600,6 +723,7 @@ describe('ExplorePlugin', () => {
       plugin.start(coreStart, startDepsWithoutContextProvider);
 
       expect(mockRegisterDisabledPPLExecuteQueryAction).not.toHaveBeenCalled();
+      expect(mockRegisterDisabledPPLLintFixAction).not.toHaveBeenCalled();
     });
 
     it('should register disabled action with the correct function reference', () => {
@@ -608,6 +732,7 @@ describe('ExplorePlugin', () => {
 
       const registerActionFn = startDeps.contextProvider?.actions?.registerAssistantAction;
       expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(registerActionFn);
+      expect(mockRegisterDisabledPPLLintFixAction).toHaveBeenCalledWith(registerActionFn);
     });
 
     it('should register disabled action before other start lifecycle actions', () => {
@@ -621,13 +746,13 @@ describe('ExplorePlugin', () => {
         callOrder.push('registerAction');
       });
 
-      const startDepsWithTracking = ({
+      const startDepsWithTracking = {
         ...startDeps,
         uiActions: {
           ...startDeps.uiActions,
           registerAction: originalRegisterAction,
         },
-      } as unknown) as ExploreStartDependencies;
+      } as unknown as ExploreStartDependencies;
 
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDepsWithTracking);
@@ -636,5 +761,137 @@ describe('ExplorePlugin', () => {
       const disabledActionIndex = callOrder.indexOf('registerDisabledAction');
       expect(disabledActionIndex).toBeGreaterThanOrEqual(0);
     });
+  });
+
+  describe('visualization assistant tool workspace gating', () => {
+    const mockRegisterAutoVisualizationAction = registerAutoVisualizationAction as jest.Mock;
+    // isNavGroupInFeatureConfigs matches on the prefixed form, not the bare nav group id.
+    const OBSERVABILITY_FEATURE = getUseCaseFeatureConfig(DEFAULT_NAV_GROUPS.observability.id);
+
+    const unregisterCalls = () =>
+      (startDeps.contextProvider!.actions.unregisterAssistantAction as jest.Mock).mock.calls.filter(
+        ([name]) => name === 'auto_create_visualization'
+      );
+
+    beforeEach(() => {
+      mockRegisterAutoVisualizationAction.mockClear();
+    });
+
+    it('registers the tool when start happens inside a workspace', () => {
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledTimes(1);
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledWith(
+        startDeps.contextProvider!.actions.registerAssistantAction,
+        coreStart,
+        startDeps.data,
+        startDeps.contextProvider
+      );
+    });
+
+    it('registers once the workspace loads, not just at start', () => {
+      // currentWorkspace$ is null until the workspace list resolves, which is the state
+      // start() usually observes. A one-shot read here would skip registration for good.
+      currentWorkspace$.next(null);
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+      expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
+
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+      expect(mockRegisterAutoVisualizationAction).toHaveBeenCalledTimes(1);
+    });
+
+    it('unregisters the tool when leaving the workspace', () => {
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      const before = unregisterCalls().length;
+      currentWorkspace$.next(null);
+
+      expect(unregisterCalls().length).toBe(before + 1);
+    });
+
+    it('stops reacting to workspace changes after stop', () => {
+      currentWorkspace$.next(null);
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+      plugin.stop();
+
+      currentWorkspace$.next({ features: [OBSERVABILITY_FEATURE] });
+
+      expect(mockRegisterAutoVisualizationAction).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('initializeLogsDefaultQuery', () => {
+  const defaultDataset = {
+    id: 'logs',
+    title: 'Logs',
+    type: 'INDEXES',
+  };
+  const defaultQuery = {
+    dataset: defaultDataset,
+    language: 'PPL',
+    query: 'source = Logs',
+  };
+
+  const createServices = (queryState: unknown = null) =>
+    ({
+      osdUrlStateStorage: {
+        get: jest.fn().mockReturnValue(queryState),
+      },
+      data: {
+        query: {
+          getDefaultDataset: jest.fn().mockResolvedValue(defaultDataset),
+          queryString: {
+            getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
+            setQuery: jest.fn(),
+          },
+        },
+      },
+    }) as unknown as ExploreServices;
+
+  test('initializes the default query when URL state has no explicit query', async () => {
+    const services = createServices();
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).toHaveBeenCalledTimes(1);
+    expect(services.data.query.queryString.getDefaultQuery).toHaveBeenCalledWith(defaultDataset);
+    expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(
+      defaultQuery,
+      false,
+      false
+    );
+  });
+
+  test('preserves an explicit URL query', async () => {
+    const services = createServices({ query: '' });
+
+    await initializeLogsDefaultQuery(services);
+
+    expect(services.data.query.getDefaultDataset).not.toHaveBeenCalled();
+    expect(services.data.query.queryString.setQuery).not.toHaveBeenCalled();
+  });
+
+  test('does not reject the Logs mount when default dataset resolution fails', async () => {
+    const services = createServices();
+    const error = new Error('default dataset unavailable');
+    (services.data.query.getDefaultDataset as jest.Mock).mockRejectedValue(error);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await expect(initializeLogsDefaultQuery(services)).resolves.toBeUndefined();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Failed to initialize the Logs default dataset query',
+      error
+    );
+
+    consoleWarn.mockRestore();
   });
 });

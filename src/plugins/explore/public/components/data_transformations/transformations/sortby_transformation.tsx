@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -82,7 +83,7 @@ const SortByEditor = ({
 
 export function createSortByTransformation(): TransformationInstance<SortByConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'sort_by',
     config: {
       field: undefined,
@@ -141,4 +142,23 @@ export const sortByTransformationDefinition: TransformationDefinition<SortByConf
   }),
   iconType: 'sortable',
   createInstance: createSortByTransformation,
+};
+
+export const sortByConfigSchema: TransformationConfigSchema = {
+  field: {
+    description: 'The column to sort by. Must be a column name from the result schema.',
+    kind: 'field_name',
+    defaultValue: undefined,
+    required: true,
+  },
+  order: {
+    description: 'Sort direction.',
+    kind: 'enum',
+    defaultValue: 'asc',
+    required: true,
+    enumOptions: [
+      { value: 'asc', label: 'Ascending' },
+      { value: 'desc', label: 'Descending' },
+    ],
+  },
 };

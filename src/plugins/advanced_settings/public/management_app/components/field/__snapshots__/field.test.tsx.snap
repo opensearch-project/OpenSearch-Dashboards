@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Field for array setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
@@ -23,8 +23,6 @@ exports[`Field for array setting should render as read only if saving is disable
       >
         Array test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -96,8 +94,6 @@ exports[`Field for array setting should render as read only with help text if ov
       >
         Array test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -179,8 +175,6 @@ exports[`Field for array setting should render as read only with help text if pe
       >
         Array test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -252,7 +246,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -302,8 +295,6 @@ exports[`Field for array setting should render default value if there is no user
       >
         Array test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -455,8 +446,6 @@ exports[`Field for array setting should render user value if there is user value
       >
         Array test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -468,22 +457,29 @@ exports[`Field for array setting should render user value if there is user value
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset array test setting to default"
-            data-test-subj="advancedSetting-resetField-array:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset array test setting to default"
+              data-test-subj="advancedSetting-resetField-array:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="array:test:setting"
     labelType="label"
@@ -523,8 +519,6 @@ exports[`Field for boolean setting should render as read only if saving is disab
       >
         Boolean test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -602,8 +596,6 @@ exports[`Field for boolean setting should render as read only with help text if 
       >
         Boolean test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -691,8 +683,6 @@ exports[`Field for boolean setting should render as read only with help text if 
       >
         Boolean test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -770,7 +760,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -826,8 +815,6 @@ exports[`Field for boolean setting should render default value if there is no us
       >
         Boolean test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -987,8 +974,6 @@ exports[`Field for boolean setting should render user value if there is user val
       >
         Boolean test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1000,22 +985,29 @@ exports[`Field for boolean setting should render user value if there is user val
     hasChildLabel={false}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset boolean test setting to default"
-            data-test-subj="advancedSetting-resetField-boolean:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset boolean test setting to default"
+              data-test-subj="advancedSetting-resetField-boolean:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="boolean:test:setting"
     labelType="label"
@@ -1061,8 +1053,6 @@ exports[`Field for image setting should render as read only if saving is disable
       >
         Image test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1137,8 +1127,6 @@ exports[`Field for image setting should render as read only with help text if ov
       >
         Image test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1218,8 +1206,6 @@ exports[`Field for image setting should render as read only with help text if pe
       >
         Image test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1289,7 +1275,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -1342,8 +1327,6 @@ exports[`Field for image setting should render default value if there is no user
       >
         Image test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1496,8 +1479,6 @@ exports[`Field for image setting should render user value if there is user value
       >
         Image test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1509,35 +1490,46 @@ exports[`Field for image setting should render user value if there is user value
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset image test setting to default"
-            data-test-subj="advancedSetting-resetField-image:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-        <span>
-          <EuiLink
-            aria-label="Change image test setting"
-            data-test-subj="advancedSetting-changeImage-image:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Change image"
-              id="advancedSettings.field.changeImageLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset image test setting to default"
+              data-test-subj="advancedSetting-resetField-image:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Change image test setting"
+              data-test-subj="advancedSetting-changeImage-image:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Change image"
+                id="advancedSettings.field.changeImageLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="image:test:setting"
     labelType="label"
@@ -1600,8 +1592,6 @@ exports[`Field for json setting should render as read only if saving is disabled
       >
         Json test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1696,8 +1686,6 @@ exports[`Field for json setting should render as read only with help text if ove
       >
         Json test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1802,8 +1790,6 @@ exports[`Field for json setting should render as read only with help text if per
       >
         Json test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -1895,7 +1881,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -1990,8 +1975,6 @@ exports[`Field for json setting should render default value if there is no user 
       >
         Json test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2003,22 +1986,29 @@ exports[`Field for json setting should render default value if there is no user 
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset json test setting to default"
-            data-test-subj="advancedSetting-resetField-json:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset json test setting to default"
+              data-test-subj="advancedSetting-resetField-json:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="json:test:setting"
     labelType="label"
@@ -2203,8 +2193,6 @@ exports[`Field for json setting should render user value if there is user value 
       >
         Json test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2216,22 +2204,29 @@ exports[`Field for json setting should render user value if there is user value 
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset json test setting to default"
-            data-test-subj="advancedSetting-resetField-json:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset json test setting to default"
+              data-test-subj="advancedSetting-resetField-json:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="json:test:setting"
     labelType="label"
@@ -2291,8 +2286,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
       >
         Markdown test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2384,8 +2377,6 @@ exports[`Field for markdown setting should render as read only with help text if
       >
         Markdown test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2487,8 +2478,6 @@ exports[`Field for markdown setting should render as read only with help text if
       >
         Markdown test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2580,7 +2569,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -2650,8 +2638,6 @@ exports[`Field for markdown setting should render default value if there is no u
       >
         Markdown test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2839,8 +2825,6 @@ exports[`Field for markdown setting should render user value if there is user va
       >
         Markdown test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -2852,22 +2836,29 @@ exports[`Field for markdown setting should render user value if there is user va
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset markdown test setting to default"
-            data-test-subj="advancedSetting-resetField-markdown:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset markdown test setting to default"
+              data-test-subj="advancedSetting-resetField-markdown:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="markdown:test:setting"
     labelType="label"
@@ -2927,8 +2918,6 @@ exports[`Field for number setting should render as read only if saving is disabl
       >
         Number test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3000,8 +2989,6 @@ exports[`Field for number setting should render as read only with help text if o
       >
         Number test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3083,8 +3070,6 @@ exports[`Field for number setting should render as read only with help text if p
       >
         Number test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3156,7 +3141,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -3206,8 +3190,6 @@ exports[`Field for number setting should render default value if there is no use
       >
         Number test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3355,8 +3337,6 @@ exports[`Field for number setting should render user value if there is user valu
       >
         Number test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3368,22 +3348,29 @@ exports[`Field for number setting should render user value if there is user valu
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset number test setting to default"
-            data-test-subj="advancedSetting-resetField-number:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset number test setting to default"
+              data-test-subj="advancedSetting-resetField-number:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="number:test:setting"
     labelType="label"
@@ -3423,8 +3410,6 @@ exports[`Field for select setting should render as read only if saving is disabl
       >
         Select test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3512,8 +3497,6 @@ exports[`Field for select setting should render as read only with help text if o
       >
         Select test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3611,8 +3594,6 @@ exports[`Field for select setting should render as read only with help text if p
       >
         Select test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3700,7 +3681,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -3766,8 +3746,6 @@ exports[`Field for select setting should render default value if there is no use
       >
         Select test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3947,8 +3925,6 @@ exports[`Field for select setting should render user value if there is user valu
       >
         Select test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -3960,22 +3936,29 @@ exports[`Field for select setting should render user value if there is user valu
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset select test setting to default"
-            data-test-subj="advancedSetting-resetField-select:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset select test setting to default"
+              data-test-subj="advancedSetting-resetField-select:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="select:test:setting"
     labelType="label"
@@ -4031,8 +4014,6 @@ exports[`Field for string setting should render as read only if saving is disabl
       >
         String test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4104,8 +4085,6 @@ exports[`Field for string setting should render as read only with help text if o
       >
         String test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4187,8 +4166,6 @@ exports[`Field for string setting should render as read only with help text if p
       >
         String test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4260,7 +4237,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -4310,8 +4286,6 @@ exports[`Field for string setting should render default value if there is no use
       >
         String test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4459,8 +4433,6 @@ exports[`Field for string setting should render user value if there is user valu
       >
         String test setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4472,22 +4444,29 @@ exports[`Field for string setting should render user value if there is user valu
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset string test setting to default"
-            data-test-subj="advancedSetting-resetField-string:test:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset string test setting to default"
+              data-test-subj="advancedSetting-resetField-string:test:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="string:test:setting"
     labelType="label"
@@ -4527,8 +4506,6 @@ exports[`Field for stringWithValidation setting should render as read only if sa
       >
         String test validation setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4600,8 +4577,6 @@ exports[`Field for stringWithValidation setting should render as read only with 
       >
         String test validation setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4683,8 +4658,6 @@ exports[`Field for stringWithValidation setting should render as read only with 
       >
         String test validation setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4756,7 +4729,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
         }
         type="asterisk"
       />
-      
     </h3>
   }
 >
@@ -4806,8 +4778,6 @@ exports[`Field for stringWithValidation setting should render default value if t
       >
         String test validation setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4955,8 +4925,6 @@ exports[`Field for stringWithValidation setting should render user value if ther
       >
         String test validation setting
       </span>
-      
-      
     </h3>
   }
 >
@@ -4968,22 +4936,29 @@ exports[`Field for stringWithValidation setting should render user value if ther
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <span>
-        <span>
-          <EuiLink
-            aria-label="Reset string test validation setting to default"
-            data-test-subj="advancedSetting-resetField-string:test-validation:setting"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Reset to default"
-              id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
-            />
-          </EuiLink>
-             
-        </span>
-      </span>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <span>
+            <EuiLink
+              aria-label="Reset string test validation setting to default"
+              data-test-subj="advancedSetting-resetField-string:test-validation:setting"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Reset to default"
+                id="advancedSettings.field.resetToDefaultLinkText"
+                values={Object {}}
+              />
+            </EuiLink>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     }
     label="string:test-validation:setting"
     labelType="label"

@@ -5,7 +5,10 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
-import { SavedObjectsClientContract } from '../../../../../src/core/server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
@@ -67,6 +70,29 @@ export const getDataSource = async (
   return dataSourceAttr;
 };
 
+/**
+ * Fetch a data source with full credentials using the internal repository.
+ * The internal repository bypasses the credential-stripping SavedObjects wrapper,
+ * so encrypted credentials are present in the returned attributes.
+ *
+ * IMPORTANT: callers MUST have already verified the requesting user can access
+ * this data source via the scoped client (getDataSource) before calling this.
+ */
+export const getDataSourceInternal = async (
+  dataSourceId: string,
+  internalSavedObjects: ISavedObjectsRepository
+): Promise<DataSourceAttributes> => {
+  const dataSourceSavedObject = await internalSavedObjects.get<DataSourceAttributes>(
+    DATA_SOURCE_SAVED_OBJECT_TYPE,
+    dataSourceId
+  );
+
+  return {
+    ...dataSourceSavedObject.attributes,
+    lastUpdatedTime: dataSourceSavedObject.updated_at,
+  };
+};
+
 export const getCredential = async (
   dataSource: DataSourceAttributes,
   cryptography: CryptographyServiceSetup
@@ -96,21 +122,17 @@ export const getAWSCredential = async (
   const { endpoint } = dataSource;
   const { accessKey, secretKey, region, service } = dataSource.auth.credentials! as SigV4Content;
 
-  const {
-    decryptedText: accessKeyText,
-    encryptionContext: accessKeyEncryptionContext,
-  } = await cryptography.decodeAndDecrypt(accessKey).catch((err: any) => {
-    // Re-throw as DataSourceError
-    throw createDataSourceError(err);
-  });
+  const { decryptedText: accessKeyText, encryptionContext: accessKeyEncryptionContext } =
+    await cryptography.decodeAndDecrypt(accessKey).catch((err: any) => {
+      // Re-throw as DataSourceError
+      throw createDataSourceError(err);
+    });
 
-  const {
-    decryptedText: secretKeyText,
-    encryptionContext: secretKeyEncryptionContext,
-  } = await cryptography.decodeAndDecrypt(secretKey).catch((err: any) => {
-    // Re-throw as DataSourceError
-    throw createDataSourceError(err);
-  });
+  const { decryptedText: secretKeyText, encryptionContext: secretKeyEncryptionContext } =
+    await cryptography.decodeAndDecrypt(secretKey).catch((err: any) => {
+      // Re-throw as DataSourceError
+      throw createDataSourceError(err);
+    });
 
   if (
     accessKeyEncryptionContext.endpoint !== endpoint ||

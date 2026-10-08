@@ -245,7 +245,7 @@ Map {
 
       expect(mockWriteFileAsync).not.toHaveBeenCalled();
       expect(mockMakeDirAsync).not.toHaveBeenCalled();
-      await expect(action()).rejects.toThrowError('Locale file should contain a "formats" object.');
+      await expect(action()).rejects.toThrow('Locale file should contain a "formats" object.');
     });
 
     test('adds translations despite missing formats object', async () => {
@@ -277,9 +277,7 @@ Map {
 
       expect(mockWriteFileAsync).not.toHaveBeenCalled();
       expect(mockMakeDirAsync).not.toHaveBeenCalled();
-      await expect(action()).rejects.toThrowError(
-        'Locale file should contain a "messages" object.'
-      );
+      await expect(action()).rejects.toThrow('Locale file should contain a "messages" object.');
     });
   });
 });

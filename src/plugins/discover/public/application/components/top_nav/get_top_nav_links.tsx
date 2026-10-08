@@ -33,16 +33,8 @@ const getLegacyTopNavLinks = (
   startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
-  const {
-    history,
-    inspector,
-    core,
-    capabilities,
-    share,
-    toastNotifications,
-    chrome,
-    store,
-  } = services;
+  const { history, inspector, core, capabilities, share, toastNotifications, chrome, store } =
+    services;
 
   const newSearch: TopNavMenuData = {
     id: 'new',
