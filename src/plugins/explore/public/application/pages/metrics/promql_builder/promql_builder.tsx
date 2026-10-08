@@ -16,8 +16,8 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { PrometheusClient } from '../explore/services/prometheus_client';
-import { BuilderState } from './promql_parser';
-import { builderReducer, buildPromQL, emptyFilter } from './build_promql';
+import { BuilderState, emptyFilter } from './promql_parser';
+import { builderReducer, buildPromQL } from './build_promql';
 import { getOperationSiblings } from './operation_lookup';
 import { OperationPill } from './operation_pill';
 import { withConnector } from './tree_connector';

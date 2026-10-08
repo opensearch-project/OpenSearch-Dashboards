@@ -39,6 +39,8 @@ export const savedObjectsMigrationConfig = {
     scrollDuration: schema.string({ defaultValue: '15m' }),
     pollInterval: schema.number({ defaultValue: 1500 }),
     skip: schema.boolean({ defaultValue: false }),
+    // Security roles allowed to call the internal `_migrate` route when an auth provider is registered.
+    adminRoles: schema.arrayOf(schema.string(), { defaultValue: ['all_access'] }),
     delete: schema.object(
       {
         enabled: schema.boolean({ defaultValue: false }),

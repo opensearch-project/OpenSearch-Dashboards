@@ -106,4 +106,27 @@ describe('FlyoutDetailPanel', () => {
     expect(screen.getByText(/Span ID:/)).toBeInTheDocument();
     expect(screen.getByText('span-1-full-id-abcdef')).toBeInTheDocument();
   });
+
+  it('orders sections Metadata, Input / Output, GenAI attributes, Raw Span; the last two collapsed', () => {
+    const { container } = render(
+      <FlyoutDetailPanel
+        selectedNode={mockTreeNode}
+        selectedTraceRow={mockTraceRow}
+        onSelectNode={jest.fn()}
+      />
+    );
+    const toggles = [...container.querySelectorAll('.euiAccordion__button')];
+    expect(toggles.map((t) => t.textContent)).toEqual([
+      'Metadata',
+      'Input / Output',
+      'GenAI attributes',
+      'Raw Span',
+    ]);
+    expect(toggles.map((t) => t.getAttribute('aria-expanded'))).toEqual([
+      'true',
+      'true',
+      'false',
+      'false',
+    ]);
+  });
 });

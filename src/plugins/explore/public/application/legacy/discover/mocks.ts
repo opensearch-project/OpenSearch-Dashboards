@@ -58,6 +58,9 @@ const createSetupContract = (): Setup => {
     docViewsLinks: {
       addDocViewLink: jest.fn(),
     },
+    sourceTypes: {
+      register: jest.fn(),
+    },
   };
   return setupContract;
 };

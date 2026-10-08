@@ -8,6 +8,10 @@ import { QueryPanelWidgets } from './query_panel_widgets';
 import { useDatasetContext } from '../../../application/context';
 import { useSelector } from 'react-redux';
 import { QueryPanelActionsRegistryService } from '../../../services/query_panel_actions_registry';
+import {
+  selectIsPromptEditorMode,
+  selectQueryLanguage,
+} from '../../../application/utils/state_management/selectors';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -210,6 +214,78 @@ describe('QueryPanelWidgets', () => {
         .map((node) => node.getAttribute('data-test-subj'));
 
       expect(testSubjects).toEqual(['ask-ai-button']);
+    });
+  });
+
+  describe('inspect query button', () => {
+    // The shared `mockUseSelector.mockReturnValue` in beforeEach hands every selector the same
+    // object, which is enough for the query-status paths but not here: the button's visibility
+    // depends on two specific selectors, so they have to be answered individually.
+    const mockLanguageAndMode = (queryLanguage: string, isPromptMode: boolean) => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectQueryLanguage) return queryLanguage;
+        if (selector === selectIsPromptEditorMode) return isPromptMode;
+        return mockQueryStatus;
+      });
+    };
+
+    beforeEach(() => {
+      mockQueryPanelActionsRegistry.isEmpty.mockReturnValue(true);
+    });
+
+    it('renders the Inspect Query button for PPL queries in query mode', () => {
+      mockLanguageAndMode('PPL', false);
+
+      render(<QueryPanelWidgets onToggleAnalyze={jest.fn()} />);
+
+      expect(screen.getByTestId('exploreAnalyzeButton')).toBeInTheDocument();
+      expect(screen.getByText('Inspect Query')).toBeInTheDocument();
+    });
+
+    it('wraps the label in extra-small EuiText so it matches the other toolbar buttons', () => {
+      mockLanguageAndMode('PPL', false);
+
+      render(<QueryPanelWidgets onToggleAnalyze={jest.fn()} />);
+
+      // Guards the sizing fix: without the EuiText wrapper the label inherits the surrounding
+      // font size and renders visibly larger than its neighbors (e.g. Explore logs).
+      expect(screen.getByText('Inspect Query').closest('.euiText')).toHaveClass(
+        'euiText--extraSmall'
+      );
+    });
+
+    it('calls onToggleAnalyze when clicked', () => {
+      mockLanguageAndMode('PPL', false);
+      const onToggleAnalyze = jest.fn();
+
+      render(<QueryPanelWidgets onToggleAnalyze={onToggleAnalyze} />);
+      screen.getByTestId('exploreAnalyzeButton').click();
+
+      expect(onToggleAnalyze).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render the button for SQL queries', () => {
+      mockLanguageAndMode('SQL', false);
+
+      render(<QueryPanelWidgets onToggleAnalyze={jest.fn()} />);
+
+      expect(screen.queryByTestId('exploreAnalyzeButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render the button in prompt mode', () => {
+      mockLanguageAndMode('PPL', true);
+
+      render(<QueryPanelWidgets onToggleAnalyze={jest.fn()} />);
+
+      expect(screen.queryByTestId('exploreAnalyzeButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render the button when onToggleAnalyze is not provided', () => {
+      mockLanguageAndMode('PPL', false);
+
+      render(<QueryPanelWidgets />);
+
+      expect(screen.queryByTestId('exploreAnalyzeButton')).not.toBeInTheDocument();
     });
   });
 
