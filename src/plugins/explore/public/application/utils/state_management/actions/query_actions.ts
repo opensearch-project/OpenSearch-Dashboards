@@ -446,7 +446,9 @@ export const executeQueries = createAsyncThunk<
         })
       );
       registerStreamingAbort(dataTableCacheKey, () => run.abort(), tableToken);
-      run.finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken));
+      run
+        .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
+        .catch(() => undefined);
       // An engine that does not serve the async PPL API only reveals itself when the submit fails.
       // Nothing was rendered in that case, so the query is simply re-run on the standard path.
       promises.push(
@@ -481,21 +483,24 @@ export const executeQueries = createAsyncThunk<
           })
         );
         registerStreamingAbort(histogramKey, () => histogramRun.abort(), histogramToken);
-        histogramRun.finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
         // If its submit fails the chart has nothing, so let the standard histogram query run
-        // instead of leaving it blank.
-        histogramRun.then((outcome) => {
-          if (isStreamUnavailable(outcome)) {
-            dispatch(
-              executeHistogramQuery({
-                services,
-                cacheKey: histogramCacheKey,
-                queryString,
-                interval: state.legacy?.interval,
-              })
-            );
-          }
-        });
+        // instead of leaving it blank. Deliberately not awaited, as the chart is already dispatched
+        // fire-and-forget, so the chain is terminated here rather than left floating.
+        histogramRun
+          .then((outcome) => {
+            if (isStreamUnavailable(outcome)) {
+              dispatch(
+                executeHistogramQuery({
+                  services,
+                  cacheKey: histogramCacheKey,
+                  queryString,
+                  interval: state.legacy?.interval,
+                })
+              );
+            }
+          })
+          .catch(() => undefined)
+          .finally(() => unregisterStreamingAbort(histogramKey, histogramToken));
         streamedHistogram = true;
       }
     } else {

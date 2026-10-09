@@ -27,9 +27,13 @@ export class StreamRowAccumulator {
   /** Bumped when rows are replaced, so synthesised row ids change with them. */
   private generation = 0;
 
+  /**
+   * `formatter` is read per snapshot rather than captured, so the accumulator can be constructed
+   * before the PPL language formatter has been resolved.
+   */
   constructor(
     private readonly maxRows: number,
-    private readonly formatter?: FieldValueFormatter
+    private readonly formatter: () => FieldValueFormatter | undefined = () => undefined
   ) {}
 
   public get heldRows(): Array<Record<string, unknown>> {
@@ -60,7 +64,7 @@ export class StreamRowAccumulator {
   absorb(
     snapshot: Pick<PPLStreamSnapshot, 'schema' | 'datarows' | 'window' | 'update_mode'>
   ): number {
-    const incoming = snapshotRowsToObjects(snapshot, this.formatter);
+    const incoming = snapshotRowsToObjects(snapshot, this.formatter());
     if (incoming.length === 0) return 0;
     const { highlights = [] } = splitHighlightColumn(snapshot);
 

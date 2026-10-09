@@ -116,7 +116,7 @@ export const executeStreamingQuery = createAsyncThunk<
     const startedAt = Date.now();
     let formatter: FieldValueFormatter | undefined;
 
-    let rows: StreamRowAccumulator;
+    const rows = new StreamRowAccumulator(STREAMING_MAX_HELD_ROWS, () => formatter);
     let lastStreaming: StreamingQueryStatus | undefined;
     let maxFraction = PPL_STREAM_UNKNOWN;
     let jobId: string | undefined;
@@ -277,7 +277,6 @@ export const executeStreamingQuery = createAsyncThunk<
       // caller re-runs on the non-streaming path rather than rendering unformatted dates.
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
-      rows = new StreamRowAccumulator(STREAMING_MAX_HELD_ROWS, formatter);
 
       // The engine request fields the synchronous path also sends.
       const withLongNumeralsSupport = Boolean(
