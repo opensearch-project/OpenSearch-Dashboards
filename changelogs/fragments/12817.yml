@@ -1,0 +1,2 @@
+doc:
+- Correct the npm package name and two spelling mistakes in the memory circuit breaker comments in the default configuration ([#12817](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12817))

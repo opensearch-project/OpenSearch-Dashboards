@@ -146,6 +146,7 @@ import { renderHook } from '@testing-library/react';
 import { monaco, revalidatePPLModel } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';
 import {
+  armPPLLintFixRequest,
   getEffectiveLanguageForAutoComplete,
   attachPPLContexts,
   buildPPLLintContext,
@@ -1223,6 +1224,40 @@ describe('useQueryPanelEditor', () => {
 
       expect(addContext).toHaveBeenCalledTimes(1);
       expect(addContext.mock.calls[0][0].categories).toContain('page');
+    });
+
+    it('arms the request before the chat send, since the send snapshots the tool list', async () => {
+      // usePPLLintFixAction registers the fix tools off the arm notification.
+      const sendMessageWithWindow = jest.fn(() => Promise.resolve());
+      mockServices.core = {
+        chat: {
+          isAvailable: jest.fn(() => true),
+          sendMessageWithWindow,
+          getThreadId: jest.fn(() => 'thread-arm'),
+        },
+      };
+      mockServices.contextProvider = {
+        getAssistantContextStore: jest.fn(() => ({
+          addContext: jest.fn(),
+          removeContextById: jest.fn(),
+        })),
+      };
+      mockServices.notifications = { toasts: { addWarning: jest.fn() } };
+
+      renderHook(() => useQueryPanelEditor(buildProps()));
+
+      await act(async () => {
+        getOnAskAiFix()({
+          requestId: 'req-arm-1',
+          chatMessage: 'Please fix this query',
+          chatContext: { requestId: 'req-arm-1' },
+        });
+      });
+
+      expect(armPPLLintFixRequest).toHaveBeenCalledWith('req-arm-1');
+      expect((armPPLLintFixRequest as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        sendMessageWithWindow.mock.invocationCallOrder[0]
+      );
     });
 
     it('warns and does not store a session when chat is unavailable', () => {
