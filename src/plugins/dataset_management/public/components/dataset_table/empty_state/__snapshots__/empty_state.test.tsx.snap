@@ -76,7 +76,7 @@ exports[`EmptyState should render normally 1`] = `
                   Object {
                     "description": <EuiLink
                       external={true}
-                      href="https://opensearch.org/docs/mocked-test-branch"
+                      href="https://opensearch.org/docs/mocked-test-branch/getting-started/ingest-data/"
                       target="_blank"
                     >
                       <FormattedMessage

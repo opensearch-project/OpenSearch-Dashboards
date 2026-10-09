@@ -60,7 +60,6 @@ export class DocLinksService {
     const DOC_LINK_VERSION = branch;
     const OPENSEARCH_WEBSITE_URL = 'https://opensearch.org/';
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
-    const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
     const OPENSEARCH_DASHBOARDS_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`;
 
     return deepFreeze({
@@ -68,367 +67,367 @@ export class DocLinksService {
       OPENSEARCH_WEBSITE_URL,
       links: {
         opensearch: {
-          // https://opensearch.org/docs/latest/opensearch/index/
-          introduction: `${OPENSEARCH_VERSIONED_DOCS}index/`,
+          // https://opensearch.org/docs/latest/about/
+          introduction: `${OPENSEARCH_WEBSITE_DOCS}/about/`,
           installation: {
-            // https://opensearch.org/docs/latest/opensearch/install/index/
-            base: `${OPENSEARCH_VERSIONED_DOCS}install/index/`,
-            // https://opensearch.org/docs/latest/opensearch/install/compatibility/
-            compatibility: `${OPENSEARCH_VERSIONED_DOCS}install/compatibility/`,
-            // https://opensearch.org/docs/latest/opensearch/install/docker/
-            docker: `${OPENSEARCH_VERSIONED_DOCS}install/docker`,
-            // https://opensearch.org/docs/latest/opensearch/install/docker-security/
-            dockerSecurity: `${OPENSEARCH_VERSIONED_DOCS}install/docker-security`,
-            // https://opensearch.org/docs/latest/opensearch/install/helm/
-            helm: `${OPENSEARCH_VERSIONED_DOCS}install/helm/`,
-            // https://opensearch.org/docs/latest/opensearch/install/tar/
-            tar: `${OPENSEARCH_VERSIONED_DOCS}install/tar/`,
-            // https://opensearch.org/docs/latest/opensearch/install/ansible/
-            ansible: `${OPENSEARCH_VERSIONED_DOCS}install/ansible/`,
-            // https://opensearch.org/docs/latest/opensearch/install/important-settings/
-            settings: `${OPENSEARCH_VERSIONED_DOCS}install/important-settings/`,
-            // https://opensearch.org/docs/latest/opensearch/install/plugins/
-            plugins: `${OPENSEARCH_VERSIONED_DOCS}install/plugins/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/index/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/
+            compatibility: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/index/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
+            docker: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/docker/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/docker/
+            dockerSecurity: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/docker/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/helm/
+            helm: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/helm/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/tar/
+            tar: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/tar/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/ansible/
+            ansible: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/ansible/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/
+            settings: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-opensearch/index/`,
+            // https://opensearch.org/docs/latest/install-and-configure/plugins/
+            plugins: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/plugins/`,
           },
-          // https://opensearch.org/docs/latest/opensearch/configuration/
-          configuration: `${OPENSEARCH_VERSIONED_DOCS}configuration/`,
+          // https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/index/
+          configuration: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/configuring-opensearch/index/`,
           cluster: {
-            // https://opensearch.org/docs/latest/opensearch/cluster/
-            base: `${OPENSEARCH_VERSIONED_DOCS}cluster/`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#step-1-name-a-cluster
-            naming: `${OPENSEARCH_VERSIONED_DOCS}cluster/#step-1-name-a-cluster`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#step-2-set-node-attributes-for-each-node-in-a-cluster
-            set_attribute: `${OPENSEARCH_VERSIONED_DOCS}cluster/#step-2-set-node-attributes-for-each-node-in-a-cluster`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#step-3-bind-a-cluster-to-specific-ip-addresses
-            build_cluster: `${OPENSEARCH_VERSIONED_DOCS}cluster/#step-3-bind-a-cluster-to-specific-ip-addresses`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#step-4-configure-discovery-hosts-for-a-cluster
-            config_host: `${OPENSEARCH_VERSIONED_DOCS}cluster/cluster/#step-4-configure-discovery-hosts-for-a-cluster`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#step-5-start-the-cluster
-            start: `${OPENSEARCH_VERSIONED_DOCS}cluster/#step-5-start-the-cluster`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#advanced-step-6-configure-shard-allocation-awareness-or-forced-awareness
-            config_shard: `${OPENSEARCH_VERSIONED_DOCS}cluster/#advanced-step-6-configure-shard-allocation-awareness-or-forced-awareness`,
-            // https://opensearch.org/docs/latest/opensearch/cluster/#advanced-step-7-set-up-a-hot-warm-architecture
-            setup_hot_arch: `${OPENSEARCH_VERSIONED_DOCS}cluster/#advanced-step-7-set-up-a-hot-warm-architecture`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#step-1-name-a-cluster
+            naming: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#step-1-name-a-cluster`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#step-2-set-node-attributes-for-each-node-in-a-cluster
+            set_attribute: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#step-2-set-node-attributes-for-each-node-in-a-cluster`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#step-3-bind-a-cluster-to-specific-ip-addresses
+            build_cluster: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#step-3-bind-a-cluster-to-specific-ip-addresses`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#step-4-configure-discovery-hosts-and-initial-cluster-manager-nodes-for-a-cluster
+            config_host: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#step-4-configure-discovery-hosts-and-initial-cluster-manager-nodes-for-a-cluster`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#step-5-start-the-cluster
+            start: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#step-5-start-the-cluster`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-6-configure-shard-allocation-awareness-or-forced-awareness
+            config_shard: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#advanced-step-6-configure-shard-allocation-awareness-or-forced-awareness`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture
+            setup_hot_arch: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/#advanced-step-7-set-up-a-hot-warm-architecture`,
           },
           indexData: {
-            // https://opensearch.org/docs/latest/opensearch/index-data/
-            base: `${OPENSEARCH_VERSIONED_DOCS}index-data/`,
-            // https://opensearch.org/docs/latest/opensearch/index-data/#naming-restrictions-for-indices
-            naming: `${OPENSEARCH_VERSIONED_DOCS}index-data/#naming-restrictions-for-indices`,
-            // https://opensearch.org/docs/latest/opensearch/index-data/#read-data
-            read_data: `${OPENSEARCH_VERSIONED_DOCS}index-data/#read-data`,
-            // https://opensearch.org/docs/latest/opensearch/index-data/#update-data
-            update_data: `${OPENSEARCH_VERSIONED_DOCS}index-data/#update-data`,
-            // https://opensearch.org/docs/latest/opensearch/index-data/#delete-data
-            delete_data: `${OPENSEARCH_VERSIONED_DOCS}index-data/#delete-data`,
+            // https://opensearch.org/docs/latest/im-plugin/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/`,
+            // https://opensearch.org/docs/latest/api-reference/index-apis/create-index/#index-naming-restrictions
+            naming: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/create-index/#index-naming-restrictions`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/get-documents/
+            read_data: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/get-documents/`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/update-document/
+            update_data: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/update-document/`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/delete-document/
+            delete_data: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/delete-document/`,
           },
           indexAlias: {
-            // https://opensearch.org/docs/latest/opensearch/index-alias/
-            base: `${OPENSEARCH_VERSIONED_DOCS}index-alias/`,
-            // https://opensearch.org/docs/latest/opensearch/index-alias/#create-aliases
-            create_alias: `${OPENSEARCH_VERSIONED_DOCS}index-alias/#create-aliases`,
-            // https://opensearch.org/docs/latest/opensearch/index-alias/#add-or-remove-indices
-            add_remove_index: `${OPENSEARCH_VERSIONED_DOCS}index-alias/#add-or-remove-indices`,
-            // https://opensearch.org/docs/latest/opensearch/index-alias/#manage-aliases
-            manage_alias: `${OPENSEARCH_VERSIONED_DOCS}index-alias/#manage-aliases`,
-            // https://opensearch.org/docs/latest/opensearch/index-alias/#create-filtered-aliases
-            filtered_alias: `${OPENSEARCH_VERSIONED_DOCS}index-alias/#create-filtered-aliases`,
-            // https://opensearch.org/docs/latest/opensearch/index-alias/#index-alias-options
-            alias_option: `${OPENSEARCH_VERSIONED_DOCS}index-alias/#index-alias-options`,
+            // https://opensearch.org/docs/latest/im-plugin/index-alias/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-alias/`,
+            // https://opensearch.org/docs/latest/im-plugin/index-alias/#creating-an-alias
+            create_alias: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-alias/#creating-an-alias`,
+            // https://opensearch.org/docs/latest/im-plugin/index-alias/#switching-an-alias-to-a-different-index
+            add_remove_index: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-alias/#switching-an-alias-to-a-different-index`,
+            // https://opensearch.org/docs/latest/im-plugin/index-alias/#inspecting-and-querying-aliases
+            manage_alias: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-alias/#inspecting-and-querying-aliases`,
+            // https://opensearch.org/docs/latest/im-plugin/index-alias/#filtering-an-alias
+            filtered_alias: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-alias/#filtering-an-alias`,
+            // https://opensearch.org/docs/latest/api-reference/alias/aliases-api/#request-body-fields
+            alias_option: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/alias/aliases-api/#request-body-fields`,
           },
-          // https://opensearch.org/docs/latest/opensearch/data-streams/
-          dataStreams: `${OPENSEARCH_VERSIONED_DOCS}data-streams/`,
+          // https://opensearch.org/docs/latest/im-plugin/data-streams/
+          dataStreams: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/data-streams/`,
           // https://opensearch.org/docs/latest/opensearch/aggregations/
           aggregations: {
-            // https://opensearch.org/docs/latest/opensearch/aggregations/
-            base: `${OPENSEARCH_VERSIONED_DOCS}aggregations/`,
+            // https://opensearch.org/docs/latest/aggregations/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/`,
             metric: {
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/
-              base: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#types-of-metric-aggregations
-              types: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#types-of-metric-aggregations`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#sum-min-max-avg
-              sum: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#sum-min-max-avg`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#cardinality
-              cardinality: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#cardinality`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#value_count
-              value_count: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#value_count`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#stats-extended_stats-matrix_stats
-              stats: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#stats-extended_stats-matrix_stats`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#percentile-percentile_ranks
-              percentile: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#percentile-percentile_ranks`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#geo_bound
-              geo_bound: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#geo_bound`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#top_hits
-              top_hits: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#top_hits`,
-              // https://opensearch.org/docs/latest/opensearch/metric-agg/#scripted_metric
-              scripted_metric: `${OPENSEARCH_VERSIONED_DOCS}metric-agg/#scripted_metric`,
+              // https://opensearch.org/docs/latest/aggregations/metric/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/index/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/index/#types-of-metric-aggregations
+              types: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/index/#types-of-metric-aggregations`,
+              // https://opensearch.org/docs/latest/aggregations/metric/sum/
+              sum: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/sum/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/cardinality/
+              cardinality: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/cardinality/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/value-count/
+              value_count: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/value-count/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/stats/
+              stats: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/stats/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/percentile/
+              percentile: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/percentile/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/geobounds/
+              geo_bound: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/geobounds/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/top-hits/
+              top_hits: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/top-hits/`,
+              // https://opensearch.org/docs/latest/aggregations/metric/scripted-metric/
+              scripted_metric: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/metric/scripted-metric/`,
             },
             bucket: {
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/
-              base: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#terms
-              terms: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#terms`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#sampler-diversified_sampler
-              smapler: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#sampler-diversified_sampler`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#significant_terms-significant_text
-              significant_terms: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#significant_terms-significant_text`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#missing
-              missing: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#missing`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#histogram-date_histogram
-              histogram: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#histogram-date_histogram`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#range-date_range-ip_range
-              range: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#range-date_range-ip_range`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#filter-filters
-              filter: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#filter-filters`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#global
-              global: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#global`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#geo_distance-geohash_grid
-              geo: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#geo_distance-geohash_grid`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#adjacency_matrix
-              adjacency_matrix: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#adjacency_matrix`,
-              // https://opensearch.org/docs/latest/opensearch/bucket-agg/#nested-reverse_nested
-              nested: `${OPENSEARCH_VERSIONED_DOCS}bucket-agg/#nested-reverse_nested`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/index/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/terms/
+              terms: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/terms/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/sampler/
+              smapler: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/sampler/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/significant-terms/
+              significant_terms: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/significant-terms/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/missing/
+              missing: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/missing/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/histogram/
+              histogram: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/histogram/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/range/
+              range: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/range/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/filter/
+              filter: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/filter/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/global/
+              global: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/global/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/geo-distance/
+              geo: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/geo-distance/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/adjacency-matrix/
+              adjacency_matrix: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/adjacency-matrix/`,
+              // https://opensearch.org/docs/latest/aggregations/bucket/nested/
+              nested: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/bucket/nested/`,
             },
             pipeline: {
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/
-              base: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#pipeline-aggregation-syntax
-              syntax: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#pipeline-aggregation-syntax`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#types-of-pipeline-aggregations
-              types: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#types-of-pipeline-aggregations`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#avg_bucket-sum_bucket-min_bucket-max_bucket
-              avg_bucket: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#avg_bucket-sum_bucket-min_bucket-max_bucket`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#stats_bucket-extended_stats_bucket
-              stats_bucket: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#stats_bucket-extended_stats_bucket`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#bucket_script-bucket_selector
-              bucket_script: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#bucket_script-bucket_selector`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#bucket_sort
-              bucket_sort: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#bucket_sort`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#cumulative_sum
-              cumulative_sum: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#cumulative_sum`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#derivative
-              derivative: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#derivative`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#moving_avg
-              moving_avg: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#moving_avg`,
-              // https://opensearch.org/docs/latest/opensearch/pipeline-agg/#serial_diff
-              serial_diff: `${OPENSEARCH_VERSIONED_DOCS}pipeline-agg/#serial_diff`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/index/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/index/#buckets-path
+              syntax: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/index/#buckets-path`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/index/#pipeline-aggregation-types
+              types: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/index/#pipeline-aggregation-types`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/avg-bucket/
+              avg_bucket: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/avg-bucket/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/stats-bucket/
+              stats_bucket: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/stats-bucket/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/bucket-script/
+              bucket_script: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/bucket-script/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/bucket-sort/
+              bucket_sort: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/bucket-sort/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/cumulative-sum/
+              cumulative_sum: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/cumulative-sum/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/derivative/
+              derivative: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/derivative/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/moving-avg/
+              moving_avg: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/moving-avg/`,
+              // https://opensearch.org/docs/latest/aggregations/pipeline/serial-diff/
+              serial_diff: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/pipeline/serial-diff/`,
             },
           },
           indexTemplates: {
-            // https://opensearch.org/docs/latest/opensearch/index-templates/
-            base: `${OPENSEARCH_VERSIONED_DOCS}index-templates`,
-            // https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
-            composable: `${OPENSEARCH_VERSIONED_DOCS}index-templates/#composable-index-templates`,
-            // https://opensearch.org/docs/latest/opensearch/index-templates/#index-template-options
-            options: `${OPENSEARCH_VERSIONED_DOCS}index-templates/#index-template-options`,
+            // https://opensearch.org/docs/latest/im-plugin/index-templates/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-templates/`,
+            // https://opensearch.org/docs/latest/im-plugin/index-templates/#creating-an-index-template
+            composable: `${OPENSEARCH_WEBSITE_DOCS}/im-plugin/index-templates/#creating-an-index-template`,
+            // https://opensearch.org/docs/latest/api-reference/index-apis/create-index-template/#request-body-fields
+            options: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/create-index-template/#request-body-fields`,
           },
           reindexData: {
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/
-            base: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#reindex-all-documents
-            all: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#reindex-all-documents`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#reindex-from-a-remote-cluster
-            remote: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#reindex-from-a-remote-cluster`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#reindex-a-subset-of-documents
-            subset: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#reindex-a-subset-of-documents`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#combine-one-or-more-indices
-            combine: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#combine-one-or-more-indices`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#reindex-only-unique-documents
-            unique: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#reindex-only-unique-documents`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#transform-documents-during-reindexing
-            transform: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#transform-documents-during-reindexing`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#update-documents-in-the-current-index
-            update: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#update-documents-in-the-current-index`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#source-index-options
-            source: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#source-index-options`,
-            // https://opensearch.org/docs/latest/opensearch/reindex-data/#destination-index-options
-            destination: `${OPENSEARCH_VERSIONED_DOCS}reindex-data/#destination-index-options`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#example-request
+            all: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#example-request`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#cross-cluster-reindexing
+            remote: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#cross-cluster-reindexing`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#filtering-documents-by-query
+            subset: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#filtering-documents-by-query`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#consolidating-time-based-indexes
+            combine: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#consolidating-time-based-indexes`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#the-dest-object
+            unique: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#the-dest-object`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#transforming-documents-using-ingest-pipelines
+            transform: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#transforming-documents-using-ingest-pipelines`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/update-by-query/
+            update: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/update-by-query/`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#the-source-object
+            source: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#the-source-object`,
+            // https://opensearch.org/docs/latest/api-reference/document-apis/reindex/#the-dest-object
+            destination: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/reindex/#the-dest-object`,
           },
           queryDSL: {
-            // https://opensearch.org/docs/latest/opensearch/query-dsl/index/
-            base: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/index/`,
+            // https://opensearch.org/docs/latest/query-dsl/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/`,
             term: {
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/
-              base: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#terms
-              terms: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#terms`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#ids
-              ids: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#ids`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range
-              range: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#range`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#prefix
-              prefix: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#prefix`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#exists
-              exists: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#exists`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#wildcards
-              wildcards: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#wildcards`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/term/#regex
-              regex: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/term/#regex`,
+              // https://opensearch.org/docs/latest/query-dsl/term/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/index/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/terms/
+              terms: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/terms/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/ids/
+              ids: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/ids/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/range/
+              range: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/range/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/prefix/
+              prefix: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/prefix/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/exists/
+              exists: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/exists/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/wildcard/
+              wildcards: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/wildcard/`,
+              // https://opensearch.org/docs/latest/query-dsl/term/regexp/
+              regex: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/term/regexp/`,
             },
             fullText: {
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/
-              base: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#match
-              match: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#match`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#multi-match
-              multi_match: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#multi-match`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#match-phrase
-              match_phrase: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#match-phrase`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#common-terms
-              common_terms: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#common-terms`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#query-string
-              query_string: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#query-string`,
-              // https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#options
-              options: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/full-text/#options`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/index/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/match/
+              match: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/match/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/multi-match/
+              multi_match: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/multi-match/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/match-phrase/
+              match_phrase: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/match-phrase/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/index/
+              common_terms: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/index/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/query-string/
+              query_string: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/query-string/`,
+              // https://opensearch.org/docs/latest/query-dsl/full-text/index/
+              options: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/index/`,
             },
-            // https://opensearch.org/docs/latest/opensearch/query-dsl/bool/
-            boolQuery: `${OPENSEARCH_VERSIONED_DOCS}query-dsl/bool/`,
+            // https://opensearch.org/docs/latest/query-dsl/compound/bool/
+            boolQuery: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/compound/bool/`,
           },
           searchTemplate: {
-            // https://opensearch.org/docs/latest/opensearch/search-template/
-            base: `${OPENSEARCH_VERSIONED_DOCS}search-template`,
-            // https://opensearch.org/docs/latest/opensearch/search-template/#create-search-templates
-            create: `${OPENSEARCH_VERSIONED_DOCS}search-template/#create-search-templates`,
-            // https://opensearch.org/docs/latest/opensearch/search-template/#save-and-execute-search-templates
-            execute: `${OPENSEARCH_VERSIONED_DOCS}search-template/#save-and-execute-search-templates`,
-            // https://opensearch.org/docs/latest/opensearch/search-template/#advanced-parameter-conversion-with-search-templates
-            advanced_operation: `${OPENSEARCH_VERSIONED_DOCS}search-template/#advanced-parameter-conversion-with-search-templates`,
-            // https://opensearch.org/docs/latest/opensearch/search-template/#multiple-search-templates
-            multiple_search: `${OPENSEARCH_VERSIONED_DOCS}search-template/#multiple-search-templates`,
-            // https://opensearch.org/docs/latest/opensearch/search-template/#manage-search-templates
-            manage: `${OPENSEARCH_VERSIONED_DOCS}search-template/#manage-search-templates`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/#create-search-templates
+            create: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/#create-search-templates`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/#save-and-execute-search-templates
+            execute: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/#save-and-execute-search-templates`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/#advanced-parameter-conversion-with-search-templates
+            advanced_operation: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/#advanced-parameter-conversion-with-search-templates`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/#multiple-search-templates
+            multiple_search: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/#multiple-search-templates`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search-template/index/#manage-search-templates
+            manage: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-template/index/#manage-search-templates`,
           },
           searchExperience: {
-            // https://opensearch.org/docs/latest/opensearch/ux/
-            base: `${OPENSEARCH_VERSIONED_DOCS}ux`,
-            // https://opensearch.org/docs/latest/opensearch/ux/#autocomplete-queries
-            autocomplete: `${OPENSEARCH_VERSIONED_DOCS}ux/#autocomplete-queries`,
-            // https://opensearch.org/docs/latest/opensearch/ux/#paginate-results
-            paginate: `${OPENSEARCH_VERSIONED_DOCS}ux/#paginate-results`,
-            // https://opensearch.org/docs/latest/opensearch/ux/#scroll-search
-            scroll: `${OPENSEARCH_VERSIONED_DOCS}ux/#scroll-search`,
-            // https://opensearch.org/docs/latest/opensearch/ux/#sort-results
-            sort: `${OPENSEARCH_VERSIONED_DOCS}ux/#sort-results`,
-            // https://opensearch.org/docs/latest/opensearch/ux/#highlight-query-matches
-            highlight_match: `${OPENSEARCH_VERSIONED_DOCS}ux/#highlight-query-matches`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/index/`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/autocomplete/
+            autocomplete: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/autocomplete/`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/paginate/
+            paginate: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/paginate/`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/paginate/#scroll-search
+            scroll: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/paginate/#scroll-search`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/sort/
+            sort: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/sort/`,
+            // https://opensearch.org/docs/latest/search-plugins/searching-data/highlight/
+            highlight_match: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/highlight/`,
           },
           logs: {
-            // https://opensearch.org/docs/latest/opensearch/logs/
-            base: `${OPENSEARCH_VERSIONED_DOCS}logs`,
-            // https://opensearch.org/docs/latest/opensearch/logs/#application-logs
-            application_log: `${OPENSEARCH_VERSIONED_DOCS}logs/#application-logs`,
-            // https://opensearch.org/docs/latest/opensearch/logs/#slow-logs
-            slow_log: `${OPENSEARCH_VERSIONED_DOCS}logs/#slow-logs`,
-            // https://opensearch.org/docs/latest/opensearch/logs/#deprecation-logs
-            deprecation_log: `${OPENSEARCH_VERSIONED_DOCS}logs/#deprecation-logs`,
+            // https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/configuring-opensearch/logs/`,
+            // https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#application-logs
+            application_log: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/configuring-opensearch/logs/#application-logs`,
+            // https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs
+            slow_log: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/configuring-opensearch/logs/#search-request-slow-logs`,
+            // https://opensearch.org/docs/latest/install-and-configure/configuring-opensearch/logs/#deprecation-logs
+            deprecation_log: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/configuring-opensearch/logs/#deprecation-logs`,
           },
           snapshotRestore: {
-            // https://opensearch.org/docs/latest/opensearch/snapshot-restore/
-            base: `${OPENSEARCH_VERSIONED_DOCS}snapshot-restore`,
-            // https://opensearch.org/docs/latest/opensearch/snapshot-restore/#register-repository
-            register: `${OPENSEARCH_VERSIONED_DOCS}snapshot-restore/#register-repository`,
-            // https://opensearch.org/docs/latest/opensearch/snapshot-restore/#take-snapshots
-            take_snapshot: `${OPENSEARCH_VERSIONED_DOCS}snapshot-restore/#take-snapshots`,
-            // https://opensearch.org/docs/latest/opensearch/snapshot-restore/#restore-snapshots
-            restore_snapshot: `${OPENSEARCH_VERSIONED_DOCS}snapshot-restore/#restore-snapshots`,
-            // https://opensearch.org/docs/latest/opensearch/snapshot-restore/#security-plugin-considerations
-            security_plugin: `${OPENSEARCH_VERSIONED_DOCS}snapshot-restore/#security-plugin-considerations`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#register-repository
+            register: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#register-repository`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#take-snapshots
+            take_snapshot: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#take-snapshots`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#restore-snapshots
+            restore_snapshot: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#restore-snapshots`,
+            // https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#security-considerations
+            security_plugin: `${OPENSEARCH_WEBSITE_DOCS}/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/#security-considerations`,
           },
-          // https://opensearch.org/docs/latest/opensearch/units/
-          supportedUnits: `${OPENSEARCH_VERSIONED_DOCS}units`,
-          // https://opensearch.org/docs/latest/opensearch/common-parameters/
-          commonParameters: `${OPENSEARCH_VERSIONED_DOCS}common-parameters`,
-          // https://opensearch.org/docs/latest/opensearch/popular-api/
-          popularAPI: `${OPENSEARCH_VERSIONED_DOCS}popular-api`,
+          // https://opensearch.org/docs/latest/api-reference/units/
+          supportedUnits: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/units/`,
+          // https://opensearch.org/docs/latest/api-reference/common-parameters/
+          commonParameters: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/common-parameters/`,
+          // https://opensearch.org/docs/latest/api-reference/popular-api/
+          popularAPI: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/popular-api/`,
           restAPI: {
-            // https://opensearch.org/docs/latest/opensearch/rest-api/index/
-            base: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index/`,
+            // https://opensearch.org/docs/latest/api-reference/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/`,
             indexAPI: {
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/index/
-              base: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/index/`,
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/create-index/
-              create: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/create-index/`,
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/exists/
-              exists: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/exists/`,
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/delete-index/
-              delete: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/delete-index/`,
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/get-index/
-              get: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/get-index/`,
-              // https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/close-index/
-              close: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/close-index/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/index/
+              base: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/index/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/create-index/
+              create: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/create-index/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/exists/
+              exists: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/exists/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/delete-index/
+              delete: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/delete-index/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/get-index/
+              get: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/get-index/`,
+              // https://opensearch.org/docs/latest/api-reference/index-apis/close-index/
+              close: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/close-index/`,
             },
           },
-          // https://opensearch.org/docs/latest/opensearch/supported-field-types/date/#date-math
-          dateMath: `${OPENSEARCH_VERSIONED_DOCS}supported-field-types/date/#date-math`,
+          // https://opensearch.org/docs/latest/mappings/supported-field-types/date/#date-math
+          dateMath: `${OPENSEARCH_WEBSITE_DOCS}/mappings/supported-field-types/date/#date-math`,
           // https://forum.opensearch.org/t/feedback-experimental-feature-connect-to-external-data-sources/11144
           openSearchForum:
             'https://forum.opensearch.org/t/feedback-experimental-feature-connect-to-external-data-sources/11144',
         },
         opensearchDashboards: {
-          // https://opensearch.org/docs/latest/dashboards/index/
-          introduction: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}index/`,
+          // https://opensearch.org/docs/latest/dashboards/
+          introduction: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`,
           installation: {
-            // https://opensearch.org/docs/latest/dashboards/install/index/
-            base: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/index/`,
-            // https://opensearch.org/docs/latest/dashboards/install/docker/
-            docker: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/docker/`,
-            // https://opensearch.org/docs/latest/dashboards/install/tar/
-            tar: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/tar/`,
-            // https://opensearch.org/docs/latest/dashboards/install/helm/
-            helm: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/helm/`,
-            // https://opensearch.org/docs/latest/dashboards/install/tls/
-            tls: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/tls/`,
-            // https://opensearch.org/docs/latest/dashboards/install/plugins/
-            plugins: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}install/plugins/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/index/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/index/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/docker/
+            docker: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/docker/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tar/
+            tar: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/tar/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/helm/
+            helm: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/helm/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tls/
+            tls: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/tls/`,
+            // https://opensearch.org/docs/latest/install-and-configure/install-dashboards/plugins/
+            plugins: `${OPENSEARCH_WEBSITE_DOCS}/install-and-configure/install-dashboards/plugins/`,
           },
-          // https://opensearch.org/docs/latest/dashboards/maptiles/
-          mapTiles: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}maptiles`,
+          // https://opensearch.org/docs/latest/dashboards/visualize/visualize-app/maptiles/
+          mapTiles: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/visualize/visualize-app/maptiles/`,
           // https://opensearch.org/docs/latest/dashboards/gantt/
           ganttCharts: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}gantt`,
-          // https://opensearch.org/docs/latest/dashboards/reporting/
-          reporting: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}reporting`,
-          // https://opensearch.org/docs/latest/dashboards/dev-tools/index-dev/
-          devTools: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dev-tools/index-dev/`,
+          // https://opensearch.org/docs/latest/reporting/report-dashboard-index/
+          reporting: `${OPENSEARCH_WEBSITE_DOCS}/reporting/report-dashboard-index/`,
+          // https://opensearch.org/docs/latest/dashboards/dev-tools/index/
+          devTools: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/dev-tools/index/`,
           notebooks: {
-            // https://opensearch.org/docs/latest/dashboards/notebooks/
-            base: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}notebooks`,
-            // https://opensearch.org/docs/latest/dashboards/notebooks/#get-started-with-notebooks
-            notebook_tutorial: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}notebooks/#get-started-with-notebooks`,
-            // https://opensearch.org/docs/latest/dashboards/notebooks/#paragraph-actions
-            paragraph_tutorial: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}notebooks/#paragraph-actions`,
-            // https://opensearch.org/docs/latest/dashboards/notebooks/#sample-notebooks
-            sample_notebook: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}notebooks/#sample-notebooks`,
-            // https://opensearch.org/docs/latest/dashboards/notebooks/#create-a-report
-            create_report: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}notebooks/#create-a-report`,
+            // https://opensearch.org/docs/latest/observing-your-data/notebooks/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/observing-your-data/notebooks/`,
+            // https://opensearch.org/docs/latest/observing-your-data/notebooks/#get-started-with-notebooks
+            notebook_tutorial: `${OPENSEARCH_WEBSITE_DOCS}/observing-your-data/notebooks/#get-started-with-notebooks`,
+            // https://opensearch.org/docs/latest/observing-your-data/notebooks/#paragraph-actions
+            paragraph_tutorial: `${OPENSEARCH_WEBSITE_DOCS}/observing-your-data/notebooks/#paragraph-actions`,
+            // https://opensearch.org/docs/latest/observing-your-data/notebooks/#sample-notebooks
+            sample_notebook: `${OPENSEARCH_WEBSITE_DOCS}/observing-your-data/notebooks/#sample-notebooks`,
+            // https://opensearch.org/docs/latest/observing-your-data/notebooks/#create-a-report
+            create_report: `${OPENSEARCH_WEBSITE_DOCS}/observing-your-data/notebooks/#create-a-report`,
           },
           dql: {
             // https://opensearch.org/docs/latest/dashboards/dql/
             base: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql`,
-            // https://opensearch.org/docs/latest/dashboards/dql/#terms-query
-            terms_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#terms-query`,
-            // https://opensearch.org/docs/latest/dashboards/dql/#boolean-query
-            boolean_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#boolean-query`,
-            // https://opensearch.org/docs/latest/dashboards/dql/#date-and-range-queries
-            date_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#date-and-range-queries`,
-            // https://opensearch.org/docs/latest/dashboards/dql/#nested-field-query
-            nested_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#nested-field-query`,
+            // https://opensearch.org/docs/latest/dashboards/dql/#search-for-terms
+            terms_query: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/dql/#search-for-terms`,
+            // https://opensearch.org/docs/latest/dashboards/dql/#boolean-operators
+            boolean_query: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/dql/#boolean-operators`,
+            // https://opensearch.org/docs/latest/dashboards/dql/#ranges
+            date_query: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/dql/#ranges`,
+            // https://opensearch.org/docs/latest/dashboards/dql/#nested-fields
+            nested_query: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/dql/#nested-fields`,
           },
-          // https://opensearch.org/docs/latest/dashboards/browser-compatibility
-          browser: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}browser-compatibility`,
+          // https://opensearch.org/docs/latest/dashboards/getting-started/index/
+          browser: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/getting-started/index/`,
           dataSource: {
-            // https://opensearch.org/docs/latest/dashboards/discover/multi-data-sources/
-            guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}discover/multi-data-sources/`,
+            // https://opensearch.org/docs/latest/dashboards/management/multi-data-sources/
+            guide: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/multi-data-sources/`,
             // https://opensearch.org/docs/latest/dashboards/management/S3-data-source/
             s3DataSource: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/S3-data-source/`,
           },
           visualize: {
-            // https://opensearch.org/docs/latest/dashboards/visualize/viz-index/
-            guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}visualize/viz-index/`,
+            // https://opensearch.org/docs/latest/dashboards/visualize/visualize-app/index/
+            guide: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/visualize/visualize-app/index/`,
           },
           dashboards: {
-            // https://opensearch.org/docs/latest/dashboards/quickstart/
-            quickStart: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}quickstart/`,
+            // https://opensearch.org/docs/latest/dashboards/getting-started/index/
+            quickStart: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/getting-started/index/`,
             // https://opensearch.org/docs/latest/dashboards/dashboard/index/
             createDashboards: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dashboard/index/`,
           },
@@ -444,136 +443,136 @@ export class DocLinksService {
           },
         },
         noDocumentation: {
-          auditbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
-          filebeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
-          metricbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
-          heartbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
-          logstash: `${OPENSEARCH_WEBSITE_DOCS}`,
-          functionbeat: `${OPENSEARCH_WEBSITE_DOCS}tools/index/#downloads`,
+          auditbeat: `${OPENSEARCH_WEBSITE_DOCS}/tools/`,
+          filebeat: `${OPENSEARCH_WEBSITE_DOCS}/tools/`,
+          metricbeat: `${OPENSEARCH_WEBSITE_DOCS}/tools/`,
+          heartbeat: `${OPENSEARCH_WEBSITE_DOCS}/tools/`,
+          logstash: `${OPENSEARCH_WEBSITE_DOCS}/tools/logstash/index/`,
+          functionbeat: `${OPENSEARCH_WEBSITE_DOCS}/tools/`,
           winlogbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
-          siem: `${OPENSEARCH_WEBSITE_DOCS}`,
+          siem: `${OPENSEARCH_WEBSITE_DOCS}/security-analytics/`,
           indexPatterns: {
-            loadingData: `${OPENSEARCH_WEBSITE_DOCS}`,
-            introduction: `${OPENSEARCH_WEBSITE_DOCS}`,
+            loadingData: `${OPENSEARCH_WEBSITE_DOCS}/getting-started/ingest-data/`,
+            introduction: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/index-patterns/`,
           },
           management: {
-            opensearchDashboardsGeneralSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
-            opensearchDashboardsSearchSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
-            dashboardSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
+            opensearchDashboardsGeneralSettings: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/advanced-settings/`,
+            opensearchDashboardsSearchSettings: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/advanced-settings/`,
+            dashboardSettings: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/advanced-settings/`,
           },
           scriptedFields: {
-            scriptFields: `${OPENSEARCH_WEBSITE_DOCS}`,
-            scriptAggs: `${OPENSEARCH_WEBSITE_DOCS}`,
-            painless: `${OPENSEARCH_WEBSITE_DOCS}`,
-            painlessApi: `${OPENSEARCH_WEBSITE_DOCS}`,
-            painlessSyntax: `${OPENSEARCH_WEBSITE_DOCS}`,
-            luceneExpressions: `${OPENSEARCH_WEBSITE_DOCS}`,
+            scriptFields: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/index/`,
+            scriptAggs: `${OPENSEARCH_WEBSITE_DOCS}/aggregations/`,
+            painless: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/index/`,
+            painlessApi: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/exec-script/`,
+            painlessSyntax: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/index/`,
+            luceneExpressions: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/index/`,
           },
-          addData: `${OPENSEARCH_WEBSITE_DOCS}`,
-          vega: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}`,
+          addData: `${OPENSEARCH_WEBSITE_DOCS}/getting-started/ingest-data/`,
+          vega: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/visualize/visualize-app/vega/`,
           savedObject: {
-            // https://opensearch.org/docs/latest/security/multi-tenancy/mt-agg-view/
-            manageSavedObject: `${OPENSEARCH_WEBSITE_DOCS}/security/multi-tenancy/mt-agg-view/`,
+            // https://opensearch.org/docs/latest/dashboards/management/saved-objects/
+            manageSavedObject: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/management/saved-objects/`,
           },
           clusterAPI: {
-            // https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-awareness/
-            clusterRoute: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/cluster-api/cluster-awareness/`,
-            clusterState: `${OPENSEARCH_WEBSITE_DOCS}`,
+            // https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-reroute/
+            clusterRoute: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/cluster-api/cluster-reroute/`,
+            clusterState: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/cluster-api/cluster-state/`,
             // https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-stats/
             clusterStats: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/cluster-api/cluster-stats/`,
-            clusterPending: `${OPENSEARCH_WEBSITE_DOCS}`,
+            clusterPending: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/cluster-api/cluster-pending-tasks/`,
           },
-          // https://opensearch.org/docs/latest/field-types/mappings/
-          mappingTypes: `${OPENSEARCH_WEBSITE_DOCS}/field-types/mappings/`,
-          moduleScripting: `${OPENSEARCH_WEBSITE_DOCS}`,
+          // https://opensearch.org/docs/latest/mappings/
+          mappingTypes: `${OPENSEARCH_WEBSITE_DOCS}/mappings/`,
+          moduleScripting: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/index/`,
           indexAPI: {
-            // https://opensearch.org/docs/latest/api-reference/analyze-apis/index/
-            indexAnalyze: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/analyze-apis/index/`,
+            // https://opensearch.org/docs/latest/api-reference/analyze-apis/
+            indexAnalyze: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/analyze-apis/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/clear-index-cache/
             indexClearCache: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/clear-index-cache/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/clone/
             indexClone: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/clone/`,
-            indexSynced: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexFlush: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexForceMerge: `${OPENSEARCH_WEBSITE_DOCS}`,
+            indexSynced: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/flush/`,
+            indexFlush: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/flush/`,
+            indexForceMerge: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/force-merge/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/get-settings/
             indexSetting: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/get-settings/`,
-            indexUpgrade: `${OPENSEARCH_WEBSITE_DOCS}`,
+            indexUpgrade: `${OPENSEARCH_WEBSITE_DOCS}/migrate-or-upgrade/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/update-settings/
             indexUpdateSetting: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/update-settings/`,
-            indexRecovery: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexRefresh: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexRollover: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexSegment: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexShardStore: `${OPENSEARCH_WEBSITE_DOCS}`,
+            indexRecovery: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/recover/`,
+            indexRefresh: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/refresh/`,
+            indexRollover: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/rollover/`,
+            indexSegment: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/segment/`,
+            indexShardStore: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/shard-stores/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/shrink-index/
             indexShrink: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/shrink-index/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/split/
             indexSplit: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/split/`,
-            indexStats: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexGetFieldMapping: `${OPENSEARCH_WEBSITE_DOCS}`,
-            indexGetMapping: `${OPENSEARCH_WEBSITE_DOCS}`,
+            indexStats: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/stats/`,
+            indexGetFieldMapping: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/get-field-mapping/`,
+            indexGetMapping: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/get-mapping/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/open-index/
             indexOpenClose: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/open-index/`,
             // https://opensearch.org/docs/latest/api-reference/index-apis/put-mapping/
             indexPutMapping: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/index-apis/put-mapping/`,
-            indexSearchValidate: `${OPENSEARCH_WEBSITE_DOCS}`,
+            indexSearchValidate: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/validate/`,
           },
           ingest: {
-            // https://opensearch.org/docs/latest/api-reference/ingest-apis/delete-ingest/
-            deletePipeline: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/ingest-apis/delete-ingest/`,
-            // https://opensearch.org/docs/latest/api-reference/ingest-apis/get-ingest/
-            getPipeline: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/ingest-apis/get-ingest/`,
-            // https://opensearch.org/docs/latest/api-reference/ingest-apis/create-update-ingest/
-            putPipeline: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/ingest-apis/create-update-ingest/`,
-            // https://opensearch.org/docs/latest/api-reference/ingest-apis/simulate-ingest/
-            simulatePipeline: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/ingest-apis/simulate-ingest/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/grok/
-            grokProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/grok/`,
-            appendProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            bytesProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/delete-ingest/
+            deletePipeline: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/delete-ingest/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/get-ingest/
+            getPipeline: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/get-ingest/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/create-ingest/
+            putPipeline: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/create-ingest/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/simulate-ingest/
+            simulatePipeline: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/simulate-ingest/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/grok/
+            grokProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/grok/`,
+            appendProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/append/`,
+            bytesProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/bytes/`,
             ingestCircleProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/csv/
-            csvProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/csv/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/string-converter/
-            convertProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/string-converter/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/date/
-            dataProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/date/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/date/
-            dataIndexNamProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/date/`,
-            dissectProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            dotExpandProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/drop-events/
-            dropProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/drop-events/`,
-            failProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            foreachProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            geoIPProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            gusbProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            htmlstripProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            inferenceProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            joinProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/parse-json/
-            jsonProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/parse-json/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/key-value/
-            kvProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/key-value/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/lowercase-string/
-            lowecaseProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/lowercase-string/`,
-            pipelineProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            removeProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/rename-keys/
-            renameProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/rename-keys/`,
-            scriptProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            setProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/csv/
+            csvProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/csv/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/convert/
+            convertProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/convert/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/date/
+            dataProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/date/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/date-index-name/
+            dataIndexNamProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/date-index-name/`,
+            dissectProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/dissect/`,
+            dotExpandProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/dot-expander/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/drop/
+            dropProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/drop/`,
+            failProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/fail/`,
+            foreachProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/foreach/`,
+            geoIPProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/ip2geo/`,
+            gusbProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/gsub/`,
+            htmlstripProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/html-strip/`,
+            inferenceProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/ml-inference/`,
+            joinProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/join/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/json/
+            jsonProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/json/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/kv/
+            kvProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/kv/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/lowercase/
+            lowecaseProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/lowercase/`,
+            pipelineProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/pipeline/`,
+            removeProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/remove/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/rename/
+            renameProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/rename/`,
+            scriptProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/script/`,
+            setProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/set/`,
             securityUserProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/split-string/
-            splitProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/split-string/`,
-            sortProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/trim-string/
-            trimProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/trim-string/`,
-            // https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/uppercase-string/
-            uppercaseProcessor: `${OPENSEARCH_WEBSITE_DOCS}/data-prepper/pipelines/configuration/processors/uppercase-string/`,
-            urldecodeProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
-            userAgentProcessor: `${OPENSEARCH_WEBSITE_DOCS}`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/split/
+            splitProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/split/`,
+            sortProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/sort/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/trim/
+            trimProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/trim/`,
+            // https://opensearch.org/docs/latest/ingest-pipelines/processors/uppercase/
+            uppercaseProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/uppercase/`,
+            urldecodeProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/urldecode/`,
+            userAgentProcessor: `${OPENSEARCH_WEBSITE_DOCS}/ingest-pipelines/processors/user-agent/`,
           },
           nodes: {
             // https://opensearch.org/docs/latest/api-reference/nodes-apis/nodes-info/
@@ -588,41 +587,41 @@ export class DocLinksService {
             usage: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/nodes-apis/nodes-usage/`,
           },
           reIndex: {
-            rethrottle: `${OPENSEARCH_WEBSITE_DOCS}`,
+            rethrottle: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/tasks/rethrottle/`,
           },
           apmServer: `${OPENSEARCH_WEBSITE_DOCS}`,
           tutorial: {
-            loadDataTutorial: `${OPENSEARCH_WEBSITE_DOCS}`,
-            visualizeTutorial: `${OPENSEARCH_WEBSITE_DOCS}`,
+            loadDataTutorial: `${OPENSEARCH_WEBSITE_DOCS}/getting-started/quickstart/`,
+            visualizeTutorial: `${OPENSEARCH_WEBSITE_DOCS}/dashboards/visualize/index/`,
           },
           scroll: {
-            // https://opensearch.org/docs/latest/api-reference/scroll/
-            clear_scroll: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/scroll/`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/scroll/#step-3-close-the-scroll-context
+            clear_scroll: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/scroll/#step-3-close-the-scroll-context`,
           },
           documentAPI: {
             // https://opensearch.org/docs/latest/api-reference/document-apis/delete-by-query/
             delete_by_query: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/delete-by-query/`,
-            multiTermVector: `${OPENSEARCH_WEBSITE_DOCS}`,
-            termVector: `${OPENSEARCH_WEBSITE_DOCS}`,
-            // https://opensearch.org/docs/latest/api-reference/document-apis/update-by-query/
-            update_by_query_rethrottle: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/update-by-query/`,
+            multiTermVector: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/mtermvectors/`,
+            termVector: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/document-apis/termvector/`,
+            // https://opensearch.org/docs/latest/api-reference/tasks/rethrottle/
+            update_by_query_rethrottle: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/tasks/rethrottle/`,
           },
-          filed_caps: `${OPENSEARCH_WEBSITE_DOCS}`,
+          filed_caps: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/field-caps/`,
           // https://opensearch.org/docs/latest/api-reference/script-apis/exec-script/
           painless_execute: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/script-apis/exec-script/`,
           search: {
-            // https://opensearch.org/docs/latest/api-reference/search/
-            search: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search/`,
-            searchRankEval: `${OPENSEARCH_WEBSITE_DOCS}`,
-            searchShards: `${OPENSEARCH_WEBSITE_DOCS}`,
-            searchFieldCap: `${OPENSEARCH_WEBSITE_DOCS}`,
+            // https://opensearch.org/docs/latest/api-reference/search-apis/search/
+            search: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search/`,
+            searchRankEval: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/rank-eval/`,
+            searchShards: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/search-shards/`,
+            searchFieldCap: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/search-apis/field-caps/`,
           },
           snapshot: {
             // https://opensearch.org/docs/latest/api-reference/snapshots/delete-snapshot/
             deleteSnapshot: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/snapshots/delete-snapshot/`,
             // https://opensearch.org/docs/latest/api-reference/snapshots/delete-snapshot-repository/
             deleteRepository: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/snapshots/delete-snapshot-repository/`,
-            cleanup: `${OPENSEARCH_WEBSITE_DOCS}`,
+            cleanup: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/snapshots/cleanup-snapshot-repository/`,
             // https://opensearch.org/docs/latest/api-reference/snapshots/verify-snapshot-repository/
             veirfyRepository: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/snapshots/verify-snapshot-repository/`,
           },
@@ -631,16 +630,16 @@ export class DocLinksService {
             base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/query-string/`,
           },
           ppl: {
-            // https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/
-            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/ppl/syntax/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/ppl/commands/syntax/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/ppl/commands/syntax/`,
           },
           sql: {
-            // https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/
-            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/sql/basic/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/sql/basic/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/sql/basic/`,
           },
           sqlPplLimitation: {
-            // https://opensearch.org/docs/latest/search-plugins/sql/limitation/
-            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/limitation/`,
+            // https://opensearch.org/docs/latest/sql-and-ppl/limitation/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/sql-and-ppl/limitation/`,
           },
           // Landing pages for each language, as opposed to the `ppl` and `sql` entries
           // above, which point at a syntax reference and a tutorial respectively.
