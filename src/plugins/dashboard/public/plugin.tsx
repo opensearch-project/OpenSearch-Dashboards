@@ -137,6 +137,13 @@ import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
 import { VariablesBar } from './application/components/dashboard_variables';
 import { dashboardNavPopover } from './dashboard_nav_popover';
+import { StarterSuggestionsPluginSetup } from '../../starter_suggestions/public';
+import { registerDashboardStarterSuggestions } from './starter_suggestions';
+import { ContextProviderStart } from '../../context_provider/public';
+import {
+  registerListDashboardsAction,
+  LIST_DASHBOARDS_TOOL_DEFINITION,
+} from './actions/list_dashboards_action';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -161,6 +168,7 @@ interface SetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  starterSuggestions?: StarterSuggestionsPluginSetup;
 }
 
 interface StartDependencies {
@@ -174,6 +182,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
@@ -232,13 +241,28 @@ export class DashboardPlugin implements Plugin<
 
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
+  private starterSuggestions?: ReturnType<typeof registerDashboardStarterSuggestions>;
+  private unregisterAssistantAction?: ContextProviderStart['actions']['unregisterAssistantAction'];
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
-    { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
+    {
+      share,
+      uiActions,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      starterSuggestions,
+    }: SetupDependencies
   ): DashboardSetup {
     // bootstrap UI Actions
     bootstrap(uiActions);
+
+    if (starterSuggestions) {
+      this.starterSuggestions = registerDashboardStarterSuggestions(starterSuggestions);
+    }
 
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -467,9 +491,11 @@ export class DashboardPlugin implements Plugin<
         await dataStart.indexPatterns.clearCache();
         params.element.classList.add('dshAppContainer');
         const { renderApp } = await import('./application');
+        this.starterSuggestions?.setHistory(history);
         const unmount = renderApp(params, services);
         return () => {
           params.element.classList.remove('dshAppContainer');
+          this.starterSuggestions?.clearHistory();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -666,6 +692,12 @@ export class DashboardPlugin implements Plugin<
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
+    this.unregisterAssistantAction = plugins.contextProvider?.actions.unregisterAssistantAction;
+    registerListDashboardsAction(plugins.contextProvider?.actions.registerAssistantAction, {
+      savedObjectsClient: core.savedObjects.client,
+      getDashboardTypes: () => Object.keys(this.dashboardProviders || {}),
+    });
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
@@ -702,5 +734,7 @@ export class DashboardPlugin implements Plugin<
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.starterSuggestions?.registration.unregister();
+    this.unregisterAssistantAction?.(LIST_DASHBOARDS_TOOL_DEFINITION.name);
   }
 }
