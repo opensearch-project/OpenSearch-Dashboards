@@ -19,6 +19,6 @@
     "@types/normalize-path": "^3.0.0",
     "normalize-path": "^3.0.0",
     "@types/lodash": "4.17.24",
-    "moment": "^2.31.0"
+    "moment": "^2.24.0"
   }
 }
