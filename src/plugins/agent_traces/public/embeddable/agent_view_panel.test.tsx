@@ -34,6 +34,7 @@ const session = {
   endTime: '2026-09-29 10:01:00',
   durationMs: 60000,
   totalTraces: 2,
+  errorTraces: 0,
   totalTokens: 100,
   firstMessage: 'Hi',
   lastMessage: 'Bye',

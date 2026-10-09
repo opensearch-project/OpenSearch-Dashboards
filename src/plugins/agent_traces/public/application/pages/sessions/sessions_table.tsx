@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiBadge, EuiLink, EuiProgress } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink, EuiProgress, EuiToolTip } from '@elastic/eui';
 import { TableHeaderColumn } from '../../../components/data_table/table_header/table_header_column';
 import { TokenIcon } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { SortOrder } from '../../../helpers/data_table_helper';
@@ -167,6 +167,32 @@ export const SessionsTable: React.FC<SessionsTableProps> = ({
         return session.totalTraces.toLocaleString();
       case 'totalTokens':
         return <TokensBadge tokens={session.totalTokens} />;
+      case 'sessionId':
+        return (
+          <span className="agtSessionsTable__sessionId">
+            <span onMouseEnter={wrapCellText ? undefined : setTitleIfTruncated(session.sessionId)}>
+              {session.sessionId}
+            </span>
+            {session.errorTraces > 0 && (
+              <EuiToolTip
+                content={i18n.translate('agentTraces.sessions.table.errorTraces', {
+                  defaultMessage: '{count, plural, one {# trace} other {# traces}} with errors',
+                  values: { count: session.errorTraces },
+                })}
+              >
+                <EuiIcon
+                  type="alert"
+                  color="danger"
+                  size="s"
+                  aria-label={i18n.translate('agentTraces.sessions.table.hasErrors', {
+                    defaultMessage: 'Session has errors',
+                  })}
+                  data-test-subj={`agentTracesSessionErrors-${session.sessionId}`}
+                />
+              </EuiToolTip>
+            )}
+          </span>
+        );
       default: {
         const text = (session[column.key] as string | null) ?? '';
         return text ? (

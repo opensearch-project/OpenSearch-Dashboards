@@ -144,7 +144,6 @@ export const previewOutputMessages = (value: unknown): string => {
   return messages.map(previewMessage).filter(Boolean).join('\n').trim();
 };
 
-/** Read a span attribute stored either as a flat dotted key or as nested objects. */
 /** A span attribute from nested (`attributes.a.b`), dotted-key or flattened documents. */
 export const readAttribute = (doc: Record<string, unknown> | undefined, key: string): unknown => {
   if (!doc) return undefined;

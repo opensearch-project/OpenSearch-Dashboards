@@ -14,7 +14,11 @@ import {
   setIsInitialized,
   setSort,
 } from '../state_management/slices';
-import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
+import {
+  detectAndSetOptimalTab,
+  hasStatsPipe,
+} from '../state_management/actions/detect_optimal_tab';
+import { AGENT_TRACES_VISUALIZATION_TAB_ID } from '../../../../common';
 import { selectActiveTabId, selectSort } from '../state_management/selectors';
 import { useCurrentAgentTracesId } from './use_current_agent_traces_id';
 import { useDatasetContext } from '../../context';
@@ -73,7 +77,13 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
 
         // @ts-expect-error TS2345 TODO(ts-error): fixme
         await dispatch(executeQueries({ services }));
-        if (!activeTabId) {
+        // Pick the tab when the URL has none, and also when it names a data tab for a
+        // query that aggregates (e.g. a link or bookmark with `| stats`), which only the
+        // Visualization tab can show.
+        const queryString = typeof queryState.query === 'string' ? queryState.query : '';
+        const aggregatesOnDataTab =
+          hasStatsPipe(queryString) && activeTabId !== AGENT_TRACES_VISUALIZATION_TAB_ID;
+        if (!activeTabId || aggregatesOnDataTab) {
           // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(detectAndSetOptimalTab({ services }));
         }
