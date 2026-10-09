@@ -90,10 +90,49 @@ describe('hits counter', () => {
     expect(hits.text()).toBe(props.hits?.toString());
   });
 
-  it('expect to render the number of elapsedMs', () => {
+  it('renders a sub-second duration in milliseconds', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedMs = findTestSubject(component, 'discoverQueryElapsedMs');
-    expect(elapsedMs.text()).toBe(props.elapsedMs?.toString());
+    expect(elapsedMs.text()).toBe('200 ms');
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain('10 hits · 200 ms');
+  });
+
+  it('renders a duration of a second or more in seconds', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={42282} />);
+    expect(findTestSubject(component, 'discoverQueryElapsedMs').text()).toBe('42.282 s');
+    expect(findTestSubject(component, 'dscResultCount').text()).not.toContain('ms');
+  });
+
+  it('renders the duration in the no-hits format', () => {
+    component = mountWithIntl(<HitsCounter {...props} hits={undefined} elapsedMs={1500} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain('2 hits · 1.500 s');
+  });
+
+  it('omits the duration segment entirely when there is no duration', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={undefined} />);
+    expect(findTestSubject(component, 'discoverQueryElapsedMs').length).toBe(0);
+    const text = findTestSubject(component, 'dscResultCount').text();
+    expect(text).toContain('2 / 10 hits');
+    expect(text).not.toContain('·');
+    expect(text).not.toContain('ms');
+  });
+
+  it('omits the duration segment in the aggregation and no-hits formats too', () => {
+    component = mountWithIntl(
+      <HitsCounter
+        {...props}
+        showResetButton={false}
+        hits={2540}
+        bucketCount={849}
+        elapsedMs={undefined}
+      />
+    );
+    expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2,540 hits$/);
+
+    component = mountWithIntl(
+      <HitsCounter {...props} showResetButton={false} hits={undefined} elapsedMs={undefined} />
+    );
+    expect(findTestSubject(component, 'dscResultCount').text()).toMatch(/2 hits$/);
   });
 
   it('expect to render 1,899 hits if 1899 hits given', () => {
@@ -121,10 +160,53 @@ describe('hits counter', () => {
     expect(component.exists('[data-test-subj="discoverQueryHits"]')).toBeFalsy();
   });
 
+  it('renders the count and elapsed time on one line as "N / M hits · T ms"', () => {
+    component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toBe('2 / 10 hits · 200 ms');
+  });
+
   it('should reset query', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     findTestSubject(component, 'resetSavedSearch').simulate('click');
     expect(props.onResetQuery).toHaveBeenCalled();
+  });
+
+  describe('hidden column disclosure', () => {
+    it('says nothing when no columns are hidden', () => {
+      component = mountWithIntl(<HitsCounter {...props} hiddenColumnCount={0} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').length).toBe(0);
+    });
+
+    it('says nothing when the count is not supplied at all', () => {
+      component = mountWithIntl(<HitsCounter {...props} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').length).toBe(0);
+    });
+
+    it('discloses the hidden columns alongside the counts', () => {
+      component = mountWithIntl(
+        <HitsCounter {...props} showResetButton={false} hiddenColumnCount={2} />
+      );
+      // The space before the separator is a CSS margin, so it is absent from the text content.
+      expect(findTestSubject(component, 'dscResultCount').text()).toBe(
+        '2 / 10 hits · 200 ms· 2 columns hidden'
+      );
+    });
+
+    it('uses the singular when only one column is hidden', () => {
+      component = mountWithIntl(<HitsCounter {...props} hiddenColumnCount={1} />);
+      expect(findTestSubject(component, 'exploreHiddenColumnsCount').text()).toBe(
+        '1 column hidden'
+      );
+    });
+
+    it('asks to show the hidden columns when clicked', () => {
+      const onShowHiddenColumns = jest.fn();
+      component = mountWithIntl(
+        <HitsCounter {...props} hiddenColumnCount={2} onShowHiddenColumns={onShowHiddenColumns} />
+      );
+      findTestSubject(component, 'exploreHiddenColumnsCount').simulate('click');
+      expect(onShowHiddenColumns).toHaveBeenCalled();
+    });
   });
 });
 
@@ -168,7 +250,14 @@ describe('hits counter - aggregation format', () => {
   it('should render elapsedMs in aggregation format', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
     const elapsedEl = findTestSubject(component, 'discoverQueryElapsedMs');
-    expect(elapsedEl.text()).toBe('66');
+    expect(elapsedEl.text()).toBe('66 ms');
+  });
+
+  it('should render a long duration in seconds in aggregation format', () => {
+    component = mountWithIntl(<HitsCounter {...props} elapsedMs={3456} />);
+    expect(findTestSubject(component, 'dscResultCount').text()).toContain(
+      '500 / 849 buckets · 2,540 hits · 3.456 s'
+    );
   });
 
   it('should render formatted large numbers in aggregation format', () => {

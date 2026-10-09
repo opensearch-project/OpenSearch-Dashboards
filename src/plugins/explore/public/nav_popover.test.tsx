@@ -6,7 +6,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { of } from 'rxjs';
 import { buildExploreNavPopover } from './nav_popover';
-import { ExploreFlavor, LOGS_DRILLDOWN_APP_ID } from '../common';
+import { ExploreFlavor, LOGS_DRILLDOWN_APP_ID, LOGS_DRILLDOWN_APP_ICON } from '../common';
 import { httpServiceMock } from '../../../core/public/mocks';
 import { NavPopoverServices, ChromeRecentlyAccessedHistoryItem } from '../../../core/public';
 
@@ -46,6 +46,13 @@ describe('buildExploreNavPopover (Logs)', () => {
     const services = makeServices();
     flagged.actions!.find((a) => a.id === 'logsDrilldown')!.onClick(services);
     expect(services.navigateToApp).toHaveBeenCalledWith(LOGS_DRILLDOWN_APP_ID, { path: '#/' });
+  });
+
+  it('the drilldown action uses the shared Explore logs icon (compass)', () => {
+    const flagged = buildExploreNavPopover(ExploreFlavor.Logs, true);
+    const action = flagged.actions!.find((a) => a.id === 'logsDrilldown')!;
+    expect(action.iconType).toBe(LOGS_DRILLDOWN_APP_ICON);
+    expect(LOGS_DRILLDOWN_APP_ICON).toBe('compass');
   });
 
   it('never shows the drilldown action for a non-Logs flavor even when the flag is on', () => {

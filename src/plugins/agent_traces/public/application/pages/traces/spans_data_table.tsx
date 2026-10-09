@@ -90,7 +90,7 @@ export const SpansDataTable: React.FC = () => {
 
       const cached = spansCacheRef.current.get(traceRow.traceId);
       if (cached) {
-        updateFlyoutFullTree(cached, false);
+        updateFlyoutFullTree(traceRow.traceId, cached, false);
         return;
       }
 
@@ -106,10 +106,13 @@ export const SpansDataTable: React.FC = () => {
           const agentSpans = hitsToAgentSpans(traceHits);
           const fullTree = buildFullSpanTree(agentSpans, formatTs) as TraceRow[];
           spansCacheRef.current.set(traceRow.traceId, fullTree);
-          updateFlyoutFullTree(fullTree, false);
+          updateFlyoutFullTree(traceRow.traceId, fullTree, false);
         } catch (err) {
-          updateFlyoutFullTree(undefined, false, (err as Error).message);
+          updateFlyoutFullTree(traceRow.traceId, undefined, false, (err as Error).message);
         }
+      } else {
+        // Nothing can load the tree: settle the loading state so the flyout shows the row.
+        updateFlyoutFullTree(traceRow.traceId, undefined, false);
       }
     },
     [getRowMeta, openFlyout, updateFlyoutFullTree, pplService, datasetParam, formatTs]

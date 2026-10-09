@@ -8,6 +8,7 @@ import { View, parse } from 'vega';
 import { Handler } from 'vega-tooltip';
 import { createGanttSpec } from './gantt_chart_spec';
 import { convertToVegaGanttData } from './gantt_data_adapter';
+import { useTraceDependencies } from '../services/trace_dependencies';
 import { GANTT_CHART_CONSTANTS, TOTAL_PADDING } from './gantt_constants';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../../../../../../../data_explorer/public';
@@ -31,6 +32,7 @@ export function GanttChart({
   isEmbedded,
 }: GanttChartProps) {
   const { services } = useOpenSearchDashboards<DataExplorerServices>();
+  const traceDependencies = useTraceDependencies();
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<View | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
@@ -118,7 +120,7 @@ export function GanttChart({
       }
 
       try {
-        const vegaData = convertToVegaGanttData(data, colorMap);
+        const vegaData = convertToVegaGanttData(data, colorMap, traceDependencies);
 
         const chartHeight = calculateHeight(data.length);
 
@@ -179,6 +181,7 @@ export function GanttChart({
     selectedSpanId,
     services?.uiSettings,
     isEmbedded,
+    traceDependencies,
   ]);
 
   const finalHeight = calculateHeight(data.length);

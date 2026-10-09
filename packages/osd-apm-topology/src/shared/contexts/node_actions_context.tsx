@@ -10,8 +10,9 @@ import { useCelestialStateContext } from './celestial_state_context';
 
 interface CelestialNodeActionsType {
   selectedNodeId?: string;
-  onGroupToggle?: (event: React.MouseEvent, node: CelestialCardProps) => void;
-  onDashboardClick?: (event: React.MouseEvent, node: CelestialCardProps) => void;
+  // Card actions can be triggered by mouse or keyboard (see CelestialCard).
+  onGroupToggle?: (event: React.SyntheticEvent, node: CelestialCardProps) => void;
+  onDashboardClick?: (event: React.SyntheticEvent, node: CelestialCardProps) => void;
   onUnstackNode?: (event: React.MouseEvent, node: CelestialCardProps) => void;
   onStackNode?: (event: React.MouseEvent, node: CelestialCardProps) => void;
 }
@@ -37,7 +38,7 @@ export const CelestialNodeActionsProvider: React.FC<
   const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
 
   const onGroupToggle = useCallback(
-    (event: React.MouseEvent, props: CelestialCardProps) => {
+    (event: React.SyntheticEvent, props: CelestialCardProps) => {
       event.stopPropagation();
       const groupId = props.id;
       addBreadcrumb?.(props.title || groupId, props);
@@ -49,7 +50,7 @@ export const CelestialNodeActionsProvider: React.FC<
   );
 
   const handleDashboardClick = useCallback(
-    (event: React.MouseEvent, props: CelestialCardProps) => {
+    (event: React.SyntheticEvent, props: CelestialCardProps) => {
       onDashboardClick?.(props);
     },
     [onDashboardClick]

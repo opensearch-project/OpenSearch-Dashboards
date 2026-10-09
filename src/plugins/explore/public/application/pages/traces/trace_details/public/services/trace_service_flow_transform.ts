@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+import { getDependencyIconKey } from '@osd/apm-topology';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { nanoToMilliSec } from '../utils/helper_functions';
+import { normalizeSpanKind, dependencyTypeLabel, DependencyInfo } from './dependency_classifier';
+import { buildTraceDependencies, TraceDependencies } from './trace_dependencies';
+
+// @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 
 /**
  * Largest `valueOf(item)` across an iterable, folded pairwise (no `Math.max(...spread)`,
@@ -51,6 +57,17 @@ export interface ServiceFlowNode {
     hasError: boolean;
     errorLabel?: string;
     metrics: ServiceMetric[];
+    /** Set on synthesized dependency nodes: 'database' | 'messaging' | 'external'. */
+    dependencyType?: string;
+    /** Human-readable subtitle for dependency nodes (e.g. "Database"). */
+    subtitle?: string;
+    /** Icon key for dependency nodes (see @osd/apm-topology ICONS). */
+    iconType?: string;
+    /**
+     * Span filter that selects this dependency's spans (e.g. `attributes.server.address` =
+     * `valkey-cart`), applied when the node is clicked. Absent when no attribute names it.
+     */
+    dependencyFilter?: { field: string; value: string };
   };
 }
 
@@ -94,7 +111,12 @@ export const formatDuration = (ms: number): string => {
  */
 export const spansToServiceFlow = (
   hits: ServiceFlowHit[],
-  colorMap: Record<string, string> = {}
+  colorMap: Record<string, string> = {},
+  /**
+   * The trace's dependency calls (buildTraceDependencies over the unfiltered trace). Pass it
+   * when `hits` is filtered; built from `hits` otherwise.
+   */
+  traceDependencies?: TraceDependencies
 ): ServiceFlowResult => {
   if (!hits || hits.length === 0) {
     return { map: { root: { nodes: [], edges: [] } } };
@@ -192,6 +214,156 @@ export const spansToServiceFlow = (
         label: `${count} call${count === 1 ? '' : 's'}`,
       },
     };
+  });
+
+  // ---- Synthesize dependency nodes (database / messaging / external) --------
+  // Mirrors the aggregated APM service map: represent DB/broker/external targets
+  // the calling spans reach, using attributes the trace already carries. These
+  // are additive to the service-to-service topology above.
+
+  // Classified against the whole trace (the caller passes it when `hits` is filtered).
+  const dependencies = traceDependencies ?? buildTraceDependencies(hits);
+
+  const depNodeId = (dep: DependencyInfo) => `dep::${dep.type}::${dep.name}`;
+  interface DepAgg {
+    type: DependencyInfo['type'];
+    name: string;
+    /** Filters of the node's spans, as `field\u0000value`; one entry when they agree. */
+    filters: Set<string>;
+    /** OTel system (db.system.name / messaging.system), which picks the icon. */
+    system?: string;
+    count: number;
+    errors: number;
+    durationNanos: number;
+  }
+  const depAgg = new Map<string, DepAgg>();
+  // Keyed by edge id; endpoints are kept alongside rather than re-split from the
+  // id, since service and dependency names may themselves contain "->".
+  const depEdges = new Map<string, { source: string; target: string; count: number }>();
+  const depEdgeHasError = new Set<string>();
+
+  hits.forEach((hit) => {
+    const kind = normalizeSpanKind(hit.kind);
+    const dep = dependencies.get(hit.spanId);
+    if (!dep) return;
+
+    const service = serviceOf(hit);
+    const nodeId = depNodeId(dep);
+    const agg = depAgg.get(nodeId) || {
+      type: dep.type,
+      name: dep.name,
+      filters: new Set<string>(),
+      system: dep.system,
+      count: 0,
+      errors: 0,
+      durationNanos: 0,
+    };
+    agg.count += 1;
+    agg.filters.add(dep.filter ? `attributes.${dep.filter.key}\u0000${dep.filter.value}` : '');
+    if (hit.status?.code === 2) agg.errors += 1;
+    agg.durationNanos += extractSpanDuration(hit);
+    depAgg.set(nodeId, agg);
+
+    // CONSUMER: broker -> service; PRODUCER / CLIENT (db, external): service -> dependency.
+    const [source, target] = kind === 'CONSUMER' ? [nodeId, service] : [service, nodeId];
+    const key = `${source}->${target}`;
+    const edge = depEdges.get(key) || { source, target, count: 0 };
+    edge.count += 1;
+    depEdges.set(key, edge);
+    if (hit.status?.code === 2) depEdgeHasError.add(key);
+  });
+
+  const maxDepCount = maxBy(depAgg.values(), (d) => d.count, maxSpanCount);
+  const maxDepDurationMs = maxBy(
+    depAgg.values(),
+    (d) => nanoToMilliSec(d.durationNanos),
+    maxDurationMs
+  );
+
+  // A node's click filter must select exactly its spans: all of them carry the same
+  // attribute, and no other dependency node in the trace shares it (e.g. one host on two
+  // ports, or one topic name on two brokers). Otherwise the click is a no-op.
+  const filterUse = new Map<string, number>();
+  depAgg.forEach((agg) => {
+    if (agg.filters.size === 1) {
+      const [f] = Array.from(agg.filters);
+      if (f) filterUse.set(f, (filterUse.get(f) || 0) + 1);
+    }
+  });
+  const nodeFilter = (agg: DepAgg) => {
+    if (agg.filters.size !== 1) return undefined;
+    const [f] = Array.from(agg.filters);
+    if (!f || filterUse.get(f) !== 1) return undefined;
+    const [field, value] = f.split('\u0000');
+    return { field, value };
+  };
+
+  depAgg.forEach((agg, nodeId) => {
+    const filter = nodeFilter(agg);
+    const totalMs = nanoToMilliSec(agg.durationNanos);
+    const errorRate = agg.count > 0 ? (agg.errors / agg.count) * 100 : 0;
+    nodes.push({
+      id: nodeId,
+      type: 'metricsCard',
+      position: { x: 0, y: 0 },
+      data: {
+        id: nodeId,
+        title: agg.name,
+        hasError: agg.errors > 0,
+        dependencyType: agg.type,
+        subtitle: dependencyTypeLabel(agg.type),
+        // The system's icon (e.g. PostgreSQL, Kafka) or the type's generic glyph, as on the
+        // aggregated APM map.
+        iconType: getDependencyIconKey(agg.type, agg.system),
+        ...(filter && { dependencyFilter: filter }),
+        errorLabel:
+          agg.errors > 0
+            ? i18n.translate('explore.traceView.traceMap.dependencyErrorLabel', {
+                defaultMessage: '{count, plural, one {# error} other {# errors}} ({rate}%)',
+                values: { count: agg.errors, rate: errorRate.toFixed(0) },
+              })
+            : undefined,
+        metrics: [
+          {
+            label: 'Requests',
+            value: agg.count,
+            max: maxDepCount,
+            color: COUNT_COLOR,
+            formattedValue: `${agg.count}`,
+          },
+          {
+            label: 'Errors',
+            value: agg.errors,
+            max: agg.count || 1,
+            color: agg.errors > 0 ? ERROR_COLOR : OK_COLOR,
+            formattedValue: agg.errors > 0 ? `${agg.errors} (${errorRate.toFixed(0)}%)` : '0',
+          },
+          {
+            label: 'Duration',
+            value: totalMs,
+            max: maxDepDurationMs,
+            color: DURATION_COLOR,
+            formattedValue: formatDuration(totalMs),
+          },
+        ],
+      },
+    });
+  });
+
+  const maxDepVolume = maxBy(depEdges.values(), (e) => e.count, maxVolume);
+  depEdges.forEach(({ source, target, count }, key) => {
+    edges.push({
+      id: key,
+      source,
+      target,
+      type: 'volumeEdge',
+      data: {
+        volume: count,
+        maxVolume: maxDepVolume,
+        hasError: depEdgeHasError.has(key),
+        label: `${count} call${count === 1 ? '' : 's'}`,
+      },
+    });
   });
 
   return { map: { root: { nodes, edges } } };
