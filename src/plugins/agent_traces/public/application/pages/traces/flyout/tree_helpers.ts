@@ -135,3 +135,66 @@ export const calculateTimelineRange = (
   }
   return { minMs, maxMs, durationMs: maxMs - minMs };
 };
+
+/** Ids of all nodes that have children (used for expand all). */
+export const collectExpandableIds = (
+  nodes: TreeNode[],
+  result = new Set<string>()
+): Set<string> => {
+  nodes.forEach((node) => {
+    if (node.children && node.children.length > 0) {
+      result.add(node.id);
+      collectExpandableIds(node.children, result);
+    }
+  });
+  return result;
+};
+
+/** Whether a span matches an in-trace search (name, kind, span id, status message, I/O). */
+export const nodeMatchesQuery = (node: TreeNode, query: string): boolean => {
+  const q = query.trim().toLowerCase();
+  if (!q) return false;
+  const row = node.traceRow;
+  const haystack = [
+    node.label,
+    node.kind,
+    row?.spanId,
+    row?.statusMessage,
+    row?.input,
+    row?.output,
+  ];
+  return haystack.some((value) => typeof value === 'string' && value.toLowerCase().includes(q));
+};
+
+/** Ids of spans matching the search, in tree (depth-first) order. */
+export const findMatchingNodeIds = (flatNodes: TreeNode[], query: string): string[] =>
+  flatNodes.filter((node) => nodeMatchesQuery(node, query)).map((node) => node.id);
+
+/** Ids of error spans, in tree (depth-first) order. */
+export const findErrorNodeIds = (flatNodes: TreeNode[]): string[] =>
+  flatNodes.filter((node) => node.traceRow?.status === 'error').map((node) => node.id);
+
+/**
+ * The next (direction 1) or previous (-1) id in `ids` relative to the current node's
+ * position in tree order, wrapping around. Returns undefined when `ids` is empty.
+ */
+export const stepToMatch = (
+  flatNodes: TreeNode[],
+  ids: string[],
+  currentId: string | undefined,
+  direction: 1 | -1
+): string | undefined => {
+  if (ids.length === 0) return undefined;
+  const order = new Map(flatNodes.map((node, i) => [node.id, i]));
+  const current = currentId !== undefined ? (order.get(currentId) ?? -1) : -1;
+  const positions = ids.map((id) => order.get(id) ?? -1);
+  if (direction === 1) {
+    const next = positions.findIndex((p) => p > current);
+    return ids[next >= 0 ? next : 0];
+  }
+  let prev = -1;
+  positions.forEach((p, i) => {
+    if (p < current) prev = i;
+  });
+  return ids[prev >= 0 ? prev : ids.length - 1];
+};

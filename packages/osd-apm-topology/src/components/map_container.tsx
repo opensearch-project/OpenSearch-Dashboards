@@ -153,7 +153,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       viewLock.lock();
       const padding = 50;
 
-      if (onNodeClickZoom === 'zoomToNode') {
+      if (onNodeClickZoom === 'centerOnNode') {
+        const width = node.measured?.width ?? node.width ?? 272;
+        const height = node.measured?.height ?? node.height ?? 156;
+        reactFlowInstance.setCenter(node.position.x + width / 2, node.position.y + height / 2, {
+          zoom: reactFlowInstance.getZoom(),
+          duration: 400,
+        });
+      } else if (onNodeClickZoom === 'zoomToNode') {
         const width = node.measured?.width ?? node.width ?? 272;
         const height = node.measured?.height ?? node.height ?? 156;
         reactFlowInstance.fitBounds(

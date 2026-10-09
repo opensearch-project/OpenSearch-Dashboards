@@ -13,6 +13,7 @@ import {
   clearLastExecutedData,
   setPatternsField,
   setUsingRegexPatterns,
+  setHideEmptyFields,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
@@ -109,6 +110,7 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
     expect(mockStore.dispatch).toHaveBeenCalledWith(setPatternsField(''));
     expect(mockStore.dispatch).toHaveBeenCalledWith(setUsingRegexPatterns(false));
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setHideEmptyFields(false));
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
     expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
     expect(mockStore.dispatch).toHaveBeenCalledWith(setPromptModeIsAvailable(true));
@@ -145,6 +147,21 @@ describe('createDatasetChangeMiddleware', () => {
     // Verify the executeQueries action was dispatched
     expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/executeQueries' });
+  });
+
+  it('should turn hide empty fields back off when the dataset changes', async () => {
+    // Which fields are empty depends on the previous dataset's results, so the opt-in is dropped.
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: { id: 'new-dataset', type: 'index_pattern' } },
+      queryEditor: {
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+    });
+
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setHideEmptyFields(false));
   });
 
   it('should not trigger side effects if the dataset has not changed', async () => {

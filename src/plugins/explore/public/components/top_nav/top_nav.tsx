@@ -9,11 +9,8 @@ import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
-import {
-  useSyncQueryStateWithUrl,
-  runPPLAnalyzeInBackground,
-  cancelPPLAnalyze,
-} from '../../../../data/public';
+import { useSyncQueryStateWithUrl, cancelPPLAnalyze } from '../../../../data/public';
+import { runPPLAnalyzeWithSource } from '../../application/utils/languages';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -24,8 +21,6 @@ import {
   selectTabState,
   selectActiveTabId,
   selectQueryStatus,
-  selectIsQueryRunning,
-  selectShouldShowCancelButton,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
@@ -70,8 +65,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const activeTabId = useNewStateSelector(selectActiveTabId);
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
-  const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
-  const shouldShowCancelButton = useNewStateSelector(selectShouldShowCancelButton);
 
   const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
@@ -172,7 +165,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       // Sourced from the editor rather than the query bar's own state so it stays
       // in sync with what actually ran.
       const currentQuery = queryString.getQuery();
-      runPPLAnalyzeInBackground({
+      runPPLAnalyzeWithSource({
         query: { ...currentQuery, query: editorText },
         http: services.http,
         timefilter: timefilter.timefilter,
@@ -292,15 +285,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   }, [handleQuerySubmit]);
 
   const customSubmitButton = useMemo(() => {
-    return (
-      <QueryExecutionButton
-        onClick={handleCustomButtonClick}
-        showCancelButton={shouldShowCancelButton}
-        onCancel={handleQueryCancel}
-        isQueryRunning={isQueryRunning}
-      />
-    );
-  }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
+    return <QueryExecutionButton onClick={handleCustomButtonClick} onCancel={handleQueryCancel} />;
+  }, [handleCustomButtonClick, handleQueryCancel]);
 
   // When chrome is hidden (e.g. `?embed=true`) the header portal isn't
   // rendered, so render the search bar + date picker inline instead.
@@ -333,9 +319,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
-      showCancelButton={shouldShowCancelButton}
-      onQueryCancel={handleQueryCancel}
-      isQueryRunning={isQueryRunning}
     />
   );
 };

@@ -49,6 +49,9 @@ describe('ChatMountService', () => {
 
     // Mock core services
     mockCore = {
+      application: {
+        currentAppId$: new BehaviorSubject<string | undefined>('dashboard'),
+      },
       chrome: {
         getIsVisible$: jest.fn(() => mockChromeVisible$),
       },
@@ -91,6 +94,9 @@ describe('ChatMountService', () => {
 
   afterEach(() => {
     chatMountService.stop();
+    // Several tests stub requestAnimationFrame via jest.spyOn; clearAllMocks()
+    // does not undo that, so restore the originals here.
+    jest.restoreAllMocks();
   });
 
   describe('start', () => {
@@ -163,6 +169,9 @@ describe('ChatMountService', () => {
     it('should not open sidecar when chrome is not visible', () => {
       // Set chrome to not visible before starting
       mockChromeVisible$.next(false);
+      // Pin the current app to one that is NOT in the chromeless allow-list, so
+      // this test does not depend on the mock's default app id.
+      mockCore.application.currentAppId$.next('dashboard');
 
       const contract = chatMountService.start({
         core: mockCore,
@@ -175,6 +184,25 @@ describe('ChatMountService', () => {
       contract.open();
 
       expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
+    });
+
+    it('should open sidecar on chromeless page when current app is in the allow-list', () => {
+      // Set chrome to not visible (chromeless page)
+      mockChromeVisible$.next(false);
+      // Set the current app to workspace_initial (in the allow-list)
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      const contract = chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      contract.open();
+
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledTimes(1);
     });
 
     it('should not open sidecar if already open', () => {
@@ -408,6 +436,63 @@ describe('ChatMountService', () => {
 
       // Sidecar should be opened
       expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
+    });
+
+    it('should open sidecar when navigating to an allow-listed chromeless app with restored open state', () => {
+      // Chromeless page: chrome stays invisible, no app mounted yet
+      mockChromeVisible$.next(false);
+      mockCore.application.currentAppId$.next(undefined);
+
+      // Restored window state (e.g. from localStorage) says open
+      mockCore.chat.isWindowOpen = jest.fn(() => true);
+
+      const rafCallback = jest.fn();
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        rafCallback.mockImplementation(cb);
+        return 1;
+      });
+
+      chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      // No sidecar opened while no app is active
+      expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
+
+      // The allow-listed chromeless app mounts
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      expect(window.requestAnimationFrame).toHaveBeenCalled();
+      rafCallback();
+
+      // Sidecar should be opened even though chrome is invisible
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
+    });
+
+    it('should hide sidecar when navigating from an allow-listed chromeless app to a disallowed one', () => {
+      // Start on the allow-listed chromeless app with sidecar open
+      mockChromeVisible$.next(false);
+      mockCore.application.currentAppId$.next('workspace_initial');
+
+      const contract = chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+        humanInputService: mockHumanInputService,
+      });
+
+      contract.open();
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledTimes(1);
+
+      // Navigate to a chromeless app NOT in the allow-list (chrome stays invisible)
+      mockCore.application.currentAppId$.next('some_other_chromeless_app');
+
+      expect(mockCore.overlays.sidecar.hide).toHaveBeenCalled();
     });
 
     it('should cancel pending openSidecar when chrome visibility changes rapidly', () => {

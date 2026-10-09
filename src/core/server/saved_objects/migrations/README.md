@@ -111,6 +111,10 @@ OpenSearch Dashboards index migrations expose a few config settings which might 
   This should only be used for running integration tests without a running
   opensearch cluster. Note: even though migrations won't run on startup,
   individual docs will still be migrated when read from OpenSearch.
+- `migrations.adminRoles` - Security roles allowed to rerun migrations through
+  `POST /internal/saved_objects/_migrate` when an authentication provider (e.g.
+  the security plugin) is installed. Defaults to `['all_access']`. Without an
+  authentication provider the route is unrestricted.
 
 ## Example
 
