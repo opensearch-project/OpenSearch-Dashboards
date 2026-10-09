@@ -194,6 +194,12 @@ describe('Filter editor utils', () => {
       expect(isValidParams).toBe(false);
     });
 
+    it('should return false if ip params are not a string', () => {
+      [null, undefined, 123, [], ['::1'], {}].forEach((params) =>
+        expect(validateParams(params as any, 'ip')).toBe(false)
+      );
+    });
+
     it('should return true if ip address is valid string', () => {
       const isValidParams = validateParams('1.1.1.1', 'ip');
       expect(isValidParams).toBe(true);
@@ -202,6 +208,34 @@ describe('Filter editor utils', () => {
     it('should return true if ip address is valid CIDR string', () => {
       const isValidParams = validateParams('192.168.0.0/24', 'ip');
       expect(isValidParams).toBe(true);
+    });
+
+    it('should return true if ip address is a valid IPv6 string', () => {
+      [
+        '::',
+        '::1',
+        '2001:db8::1',
+        '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+        '::ffff:192.168.1.1',
+      ].forEach((ip) => expect(validateParams(ip, 'ip')).toBe(true));
+    });
+
+    it('should return true if ip address is a valid IPv6 CIDR string', () => {
+      ['::/0', '2001:db8::/32', 'fe80::/10', '::1/128'].forEach((ip) =>
+        expect(validateParams(ip, 'ip')).toBe(true)
+      );
+    });
+
+    it('should return false if ip address is an invalid IPv6 string', () => {
+      ['g::1', '1::2::3', '1:2:3:4:5:6:7:8:9', ':::', '12345::1', '::1]@evil.com'].forEach((ip) =>
+        expect(validateParams(ip, 'ip')).toBe(false)
+      );
+    });
+
+    it('should return false if ip address is an invalid IPv6 CIDR string', () => {
+      ['::/129', '2001:db8::/-1', '2001:db8:://32', 'g::/32', '2001:db8::/'].forEach((ip) =>
+        expect(validateParams(ip, 'ip')).toBe(false)
+      );
     });
 
     it('should return true if type is not ip or date', () => {
