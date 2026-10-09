@@ -12,6 +12,7 @@ import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_s
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
 import { getSeriesDisplayName } from '../utils/series';
 import { formatUnitValue } from '../style_panel/unit/collection';
+import { createDataLegendItem } from '../utils/legend';
 import { DEFAULT_GRID } from '../constants';
 
 // Uses Interquartile Range method to find robust min/max values by excluding statistical outliers
@@ -46,7 +47,7 @@ const buildVisualMap = (visualMap: any, styles: HeatmapChartStyle, numericalValu
   // heatmap use visualMap as legend
   // TODO a dynamic way to place legend
   const baseStyle = {
-    show: styles.addLegend,
+    show: styles.useThresholdColor ? false : styles.addLegend,
     itemWidth: 10,
     itemHeight: 80,
     orient: [Positions.LEFT, Positions.RIGHT].includes(styles?.legendPosition)
@@ -62,7 +63,12 @@ const buildVisualMap = (visualMap: any, styles: HeatmapChartStyle, numericalValu
   };
 
   if (styles.useThresholdColor) {
-    return visualMap.map((vm: any) => ({ ...vm, ...baseStyle }));
+    // for out of range rect, set it DEFAULT_GREY
+    return visualMap.map((vm: any) => ({
+      ...vm,
+      ...baseStyle,
+      outOfRange: { color: DEFAULT_GREY, opacity: 0.15 },
+    }));
   }
 
   const { min, max } = styles.exclusive.percentageMode
@@ -223,6 +229,18 @@ export const createHeatmapSeries =
     newState.visualMap = buildVisualMap(visualMap, styles, numericalValues);
     newState.transformedData = newTransformedData;
     newState.series = series as HeatmapSeriesOption[];
+
+    // In percentage-threshold mode, feed the threshold buckets to CustomLegend.
+    // `visualMap` still holds the pre-styled pieces from buildVisMap, each with a
+    // percentage `label` (e.g. "50% ~ 80%") and color.
+    if (styles.useThresholdColor) {
+      const vm = Array.isArray(visualMap) ? visualMap[0] : visualMap;
+      const pieces =
+        (vm as { pieces?: Array<{ label?: string; gte?: number; color?: string }> })?.pieces ?? [];
+      newState.legendItems = pieces.map((piece: any) =>
+        createDataLegendItem(String(piece.label ?? ''), piece.color)
+      );
+    }
 
     return newState;
   };

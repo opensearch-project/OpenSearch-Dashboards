@@ -10,6 +10,7 @@ import {
   formatSeriesValueLabel,
   generateThresholdLines,
   getValueColorByThreshold,
+  resolveThresholds,
 } from '../utils/utils';
 import { HistogramChartStyle } from './histogram_vis_config';
 import { getColors } from '../theme/default_colors';
@@ -58,7 +59,7 @@ export const createHistogramSeries =
     const { styles, binStartField, binEndField } = options;
     let seriesFields = options.seriesFields;
 
-    const { axisColumnMappings, transformedData = [] } = state;
+    const { axisColumnMappings, transformedData = [], dataRange } = state;
     const newState = { ...state };
     const headers = transformedData[0] ?? [];
 
@@ -89,8 +90,17 @@ export const createHistogramSeries =
     const min = firstRow[binStartIndex];
     const max = lastRow[binEndIndex];
 
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+    const thresholdLines = generateThresholdLines(styles.thresholdOptions, dataRange);
     const defaultFill = getColors().categories[0];
+
+    const resolvedThresholdOptions = {
+      ...styles.thresholdOptions,
+      thresholds: resolveThresholds(
+        styles.thresholdOptions?.thresholds,
+        styles.thresholdOptions?.thresholdMode,
+        dataRange
+      ),
+    };
 
     // Histogram series
     const series = seriesFields.map((seriesField, index) => {
@@ -131,7 +141,7 @@ export const createHistogramSeries =
                 },
                 style: {
                   ...(styles.useThresholdColor
-                    ? { fill: getValueColorByThreshold(yValue, styles.thresholdOptions) }
+                    ? { fill: getValueColorByThreshold(yValue, resolvedThresholdOptions) }
                     : { fill: defaultFill }),
                   ...(styles.showBarBorder
                     ? { stroke: styles.barBorderColor }

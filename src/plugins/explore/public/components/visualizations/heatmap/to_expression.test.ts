@@ -53,21 +53,20 @@ describe('Heatmap to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset, series, and axes', () => {
-      const result = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
+      const { spec } = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result).toHaveProperty('xAxis');
-      expect(result).toHaveProperty('yAxis');
-      expect(result).toHaveProperty('visualMap');
+      expect(spec).toHaveProperty('dataset');
+      expect(spec).toHaveProperty('series');
+      expect(spec).toHaveProperty('xAxis');
+      expect(spec).toHaveProperty('yAxis');
+      expect(spec).toHaveProperty('visualMap');
     });
 
     it('produces heatmap-type series', () => {
-      const result = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
+      const { spec } = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
 
-      expect(Array.isArray(result?.series)).toBe(true);
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      const heatmapSeries = (result?.series ?? []).filter((s: any) => s.type === 'heatmap');
+      expect(Array.isArray(spec?.series)).toBe(true);
+      const heatmapSeries = (spec?.series ?? []).filter((s: any) => s.type === 'heatmap');
       expect(heatmapSeries.length).toBeGreaterThanOrEqual(1);
     });
 

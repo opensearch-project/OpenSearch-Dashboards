@@ -144,12 +144,13 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
           const y = props.axisColumnMappings.y?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for heatmap chart');
-          const spec = createRegularHeatmap(props.data, props.styleOptions, {
+          const { spec, legendItems } = createRegularHeatmap(props.data, props.styleOptions, {
             [AxisRole.X]: x,
             [AxisRole.Y]: y,
             [AxisRole.COLOR]: color,
           });
-          return <EchartsRender spec={spec ?? {}} />;
+          props.onLegend?.(legendItems);
+          return <EchartsRender spec={spec ?? {}} legendSelected$={props.legendSelected$} />;
         },
       },
     ];

@@ -226,10 +226,23 @@ export interface AxisConfig {
     milliseconds?: string;
   };
 }
+
+export type ThresholdValueMode = 'absolute' | 'percentage';
+
+// Min/max of the series data, used to resolve percentage thresholds into absolute axis positions.
+export interface DataRange {
+  min: number;
+  max: number;
+  stackMin?: number;
+  stackMax?: number;
+}
+
 export interface ThresholdOptions {
   thresholds?: Threshold[];
   baseColor?: string;
   thresholdStyle?: ThresholdMode;
+  // Defaults to 'absolute' when unset (backward compatible).
+  thresholdMode?: ThresholdValueMode;
 }
 
 export type PercentageColor = 'standard' | 'inverted';
