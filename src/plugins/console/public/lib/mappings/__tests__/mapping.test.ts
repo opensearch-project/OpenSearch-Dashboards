@@ -298,6 +298,12 @@ describe('Mappings', () => {
 describe('Auto Complete Info', () => {
   let response = {};
 
+  const flushPromises = async () => {
+    for (let i = 0; i < 5; i++) {
+      await Promise.resolve();
+    }
+  };
+
   const mockHttpResponse = createMockHttpResponse(
     200,
     'ok',
@@ -306,6 +312,7 @@ describe('Auto Complete Info', () => {
   );
 
   beforeEach(() => {
+    mappings.clearSubscriptions();
     mappings.clear();
     response = {
       body: {
@@ -325,6 +332,7 @@ describe('Auto Complete Info', () => {
   });
 
   afterEach(() => {
+    mappings.clearSubscriptions();
     jest.clearAllMocks();
     jest.useRealTimers();
   });
@@ -388,5 +396,74 @@ describe('Auto Complete Info', () => {
 
     // Ensure send is called with different arguments
     expect(sendSpy).toHaveBeenCalledWith(http, 'GET', '_mapping', null, dataSourceId);
+  });
+
+  test('Coalesces overlapping autocomplete refreshes', async () => {
+    const dataSourceId = 'mock-data-source-id';
+    const resolvers: Array<(value: typeof mockHttpResponse) => void> = [];
+    const sendSpy = jest.spyOn(opensearch, 'send').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvers.push(resolve);
+        })
+    );
+    const {
+      services: { http, settings: settingsService },
+    } = serviceContextMock.create();
+    const autocompleteSettings = {
+      fields: true,
+      indices: true,
+      templates: true,
+    };
+
+    mappings.retrieveAutoCompleteInfo(http, settingsService, autocompleteSettings, dataSourceId);
+    mappings.retrieveAutoCompleteInfo(http, settingsService, autocompleteSettings, dataSourceId);
+    mappings.retrieveAutoCompleteInfo(http, settingsService, autocompleteSettings, dataSourceId);
+
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+
+    resolvers.splice(0).forEach((resolve) => resolve(mockHttpResponse));
+    await flushPromises();
+
+    // Multiple triggers during the first refresh produce one trailing refresh.
+    expect(sendSpy).toHaveBeenCalledTimes(6);
+
+    resolvers.splice(0).forEach((resolve) => resolve(mockHttpResponse));
+    await flushPromises();
+
+    // Only one polling chain is scheduled after the trailing refresh completes.
+    expect(jest.getTimerCount()).toBe(1);
+  });
+
+  test('Does not restart polling after subscriptions are cleared', async () => {
+    const dataSourceId = 'mock-data-source-id';
+    const resolvers: Array<(value: typeof mockHttpResponse) => void> = [];
+    const sendSpy = jest.spyOn(opensearch, 'send').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvers.push(resolve);
+        })
+    );
+    const {
+      services: { http, settings: settingsService },
+    } = serviceContextMock.create();
+
+    mappings.retrieveAutoCompleteInfo(
+      http,
+      settingsService,
+      {
+        fields: true,
+        indices: true,
+        templates: true,
+      },
+      dataSourceId
+    );
+    mappings.clearSubscriptions();
+
+    resolvers.splice(0).forEach((resolve) => resolve(mockHttpResponse));
+    await flushPromises();
+    jest.advanceTimersByTime(mappings.POLL_INTERVAL);
+
+    expect(sendSpy).toHaveBeenCalledTimes(3);
   });
 });
