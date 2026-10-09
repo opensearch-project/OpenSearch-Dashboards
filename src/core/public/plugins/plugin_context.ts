@@ -108,6 +108,7 @@ export function createPluginSetupContext<
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
+      createAsyncUpdater: (asyncCheck) => deps.application.createAsyncUpdater(asyncCheck),
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
