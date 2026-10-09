@@ -22,6 +22,9 @@ import {
   LineMode,
   LineStyle,
   StandardOptions,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import {
@@ -81,6 +84,8 @@ export interface AreaChartStyleOptions extends StandardOptions {
   showFullTimeRange?: boolean;
   stackMode?: StackMode;
   lineStyle?: LineStyle;
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
 }
 
 export type AreaChartStyle = Required<
@@ -140,6 +145,14 @@ export const defaultAreaChartStyles: AreaChartStyle = {
   showFullTimeRange: true,
   stackMode: 'total',
   lineStyle: 'line',
+  disconnectValues: {
+    disableMode: DisableMode.Never,
+    threshold: '1h',
+  },
+  connectNullValues: {
+    connectMode: DisableMode.Always,
+    threshold: '1h',
+  },
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

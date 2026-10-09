@@ -18,6 +18,10 @@ import {
   StandardAxes,
   LineDashStyle,
   LineStyle,
+  ConnectNullValuesOption,
+  DisconnectValuesOption,
+  DisableMode,
+  LineMode,
 } from '../types';
 import { TooltipOptions, StandardOptions } from '../types';
 import { getColors } from '../theme/default_colors';
@@ -29,8 +33,6 @@ import {
   createCategoryMultiLineChart,
 } from './to_expression';
 import { EchartsRender } from '../echarts_render';
-
-export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
 export interface LineChartStyleOptions extends StandardOptions {
@@ -69,6 +71,8 @@ export interface LineChartStyleOptions extends StandardOptions {
   pointSize?: number;
   // Renders each data point's value
   showValues?: boolean;
+  connectNullValues?: ConnectNullValuesOption;
+  disconnectValues?: DisconnectValuesOption;
 }
 
 export type LineChartStyle = Required<
@@ -116,6 +120,14 @@ export const defaultLineChartStyles: LineChartStyle = {
   showFullTimeRange: true,
   showValues: false,
   lineDashStyle: 'solid',
+  disconnectValues: {
+    disableMode: DisableMode.Never,
+    threshold: '1h',
+  },
+  connectNullValues: {
+    connectMode: DisableMode.Always,
+    threshold: '1h',
+  },
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
