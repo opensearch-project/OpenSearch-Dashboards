@@ -32,7 +32,12 @@ import {
   IAuthenticationMethodRegistry,
   AuthenticationMethodRegistry,
 } from './auth_registry';
-import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
+import {
+  jwtAuthMethod,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
@@ -223,6 +228,9 @@ export class DataSourceManagementPlugin implements Plugin<
     }
     if (dataSource!.awsSigV4AuthEnabled) {
       registerAuthenticationMethod(sigV4AuthMethod);
+    }
+    if (dataSource!.jwtAuthEnabled) {
+      registerAuthenticationMethod(jwtAuthMethod);
     }
 
     setHideLocalCluster({ enabled: dataSource!.hideLocalCluster });
