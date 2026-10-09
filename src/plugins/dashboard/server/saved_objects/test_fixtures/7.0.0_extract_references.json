@@ -1,0 +1,25 @@
+{
+  "description": "Dashboard 7.0.0: Extract panel references from panelsJSON into top-level references array",
+  "type": "dashboard",
+  "migrationVersion": "7.0.0",
+  "input": {
+    "id": "test-dash-1",
+    "type": "dashboard",
+    "attributes": {
+      "title": "My Dashboard",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      },
+      "panelsJSON": "[{\"id\":\"viz-1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15}},{\"id\":\"search-1\",\"type\":\"search\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15}}]"
+    },
+    "references": []
+  },
+  "expected": {
+    "references_length": 2,
+    "references_contain": [
+      { "type": "visualization", "id": "viz-1" },
+      { "type": "search", "id": "search-1" }
+    ],
+    "attributes_has": ["panelsJSON", "kibanaSavedObjectMeta"]
+  }
+}
