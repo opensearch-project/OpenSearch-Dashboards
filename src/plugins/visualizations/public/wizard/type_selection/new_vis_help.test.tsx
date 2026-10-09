@@ -33,29 +33,7 @@ import { NewVisHelp } from './new_vis_help';
 
 describe('NewVisHelp', () => {
   it('should render as expected', () => {
-    expect(
-      shallowWithIntl(
-        <NewVisHelp
-          promotedTypes={[
-            {
-              aliasApp: 'myApp',
-              aliasPath: '/my/fancy/new/thing',
-              description: 'Some desc',
-              icon: 'whatever',
-              name: 'whatever',
-              promotion: {
-                buttonText: 'Do it now!',
-                description: 'Look at this fancy new thing!!!',
-              },
-
-              title: 'Test title',
-              stage: 'production',
-            },
-          ]}
-          onPromotionClicked={() => {}}
-        />
-      )
-    ).toMatchInlineSnapshot(`
+    expect(shallowWithIntl(<NewVisHelp />)).toMatchInlineSnapshot(`
       <EuiText
         size="s"
       >
@@ -66,20 +44,6 @@ describe('NewVisHelp', () => {
             values={Object {}}
           />
         </p>
-        <p>
-          <strong>
-            Look at this fancy new thing!!!
-          </strong>
-        </p>
-        <EuiButton
-          fill={true}
-          iconSide="right"
-          iconType="popout"
-          onClick={[Function]}
-          size="s"
-        >
-          Do it now!
-        </EuiButton>
       </EuiText>
     `);
   });

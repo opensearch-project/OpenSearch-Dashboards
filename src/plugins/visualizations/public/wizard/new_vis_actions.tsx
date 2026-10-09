@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiModal, EuiText } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import { take } from 'rxjs/operators';
 import {
   ApplicationStart,
@@ -20,28 +20,6 @@ import { reactToUiComponent, toMountPoint } from '../../../opensearch_dashboards
 import { SearchSelection } from './search_selection';
 import { DataPublicPluginStart } from '../../../data/public';
 import { EmbeddableStart } from '../../../embeddable/public';
-
-const VisualizationActionMenuItem = ({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) => {
-  return (
-    <>
-      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>{title}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">New!</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiText size="xs" color="subdued">
-        {description}
-      </EuiText>
-    </>
-  );
-};
 
 export const createNewVisActions = (services: {
   types: TypesServiceStart;
@@ -109,12 +87,7 @@ export const createNewVisActions = (services: {
         uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
           ...actionConfig,
           order: 10 * (visTypes.length + i),
-          MenuItem: reactToUiComponent(() => (
-            <VisualizationActionMenuItem
-              title={visType.title}
-              description={visType.promotion?.description ?? ''}
-            />
-          )),
+          getTooltip: () => visType.promotion.description,
           execute: async (context) => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
             await navigateTo(
