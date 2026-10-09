@@ -151,6 +151,35 @@ describe('url_builder', () => {
       expect(result).toContain('test-span-id');
     });
 
+    it('should strip a .keyword suffix from mapped field names', () => {
+      const datasetWithKeywordMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+        schemaMappings: {
+          otelLogs: {
+            traceId: 'log_processed.trace_id.keyword',
+            spanId: 'log_processed.span_id.keyword',
+          },
+        },
+      };
+
+      const params = {
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        logDataset: datasetWithKeywordMappings,
+        timeRange: mockTimeRange,
+      };
+
+      const result = buildExploreLogsUrl(params);
+
+      // The generated PPL query targets the base fields, never the .keyword sub-fields.
+      expect(result).toContain('log_processed.trace_id');
+      expect(result).toContain('log_processed.span_id');
+      expect(result).not.toContain('.keyword');
+    });
+
     it('should fall back to default field names when schema mappings are not provided', () => {
       const params = {
         traceId: 'test-trace-id',
