@@ -31,6 +31,22 @@ import {
 const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
 
+const queryRequestUrls = {
+  [QueryLanguages.DQL.name]: '**/internal/search/opensearch*',
+  [QueryLanguages.PPL.name]: '**/api/enhancements/search/ppl',
+  [QueryLanguages.SQL.name]: '**/api/enhancements/search/sql',
+};
+
+const interceptQueryRequest = (language, responseDelay = 0) => {
+  cy.intercept('POST', queryRequestUrls[language], (request) => {
+    if (responseDelay > 0) {
+      request.on('response', (response) => {
+        response.setDelay(responseDelay);
+      });
+    }
+  }).as('query');
+};
+
 export const runAutocompleteTests = () => {
   describe('discover autocomplete tests', () => {
     before(() => {
@@ -100,11 +116,14 @@ export const runAutocompleteTests = () => {
 
             createQuery(config, false); // use mouse
 
+            // Exercise the slow-query path that previously read the stale results table.
+            const responseDelay = config.testName === 'PPL-INDEXES' ? 3000 : 0;
+            interceptQueryRequest(config.language, responseDelay);
+
             // Run with mouse click
             cy.getElementByTestId('querySubmitButton').click();
 
-            cy.osd.waitForLoader(true);
-            cy.wait(1000);
+            cy.wait('@query', { timeout: 60000 });
             validateQueryResults('unique_category', 'Development');
           });
 
@@ -116,6 +135,8 @@ export const runAutocompleteTests = () => {
 
             createQuery(config, true); // use keyboard
 
+            interceptQueryRequest(config.language);
+
             // Run with keyboard shortcut
             if (config.language === QueryLanguages.DQL.name) {
               cy.get('.inputarea').type('{enter}');
@@ -126,8 +147,7 @@ export const runAutocompleteTests = () => {
               cy.getElementByTestId('querySubmitButton').click();
             }
 
-            cy.osd.waitForLoader(true);
-            cy.wait(2000);
+            cy.wait('@query', { timeout: 60000 });
             validateQueryResults('unique_category', 'Development');
           });
         });
