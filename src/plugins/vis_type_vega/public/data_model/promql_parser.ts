@@ -88,15 +88,14 @@ export class PromQLQueryParser {
           query: {
             query: request.url.body!.query as string,
             language: 'PROMQL',
+            // Routes to the local cluster's direct-query Prometheus endpoint only.
+            // Remote MDS data sources are not supported.
             dataset: {
               id: request.datasource,
               title: request.datasource,
               type: 'PROMETHEUS',
               language: 'PROMQL',
               timeFieldName: 'Time',
-              // Routes to the local cluster's direct-query Prometheus endpoint.
-              // Remote MDS data sources are not supported.
-              dataSource: {},
             },
             format: 'jdbc',
           },
