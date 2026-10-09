@@ -26,6 +26,7 @@ import {
 } from '../state_timeline/state_timeline_config';
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 import { HistogramChartStyle, HistogramChartStyleOptions } from '../histogram/histogram_vis_config';
+import { SankeyChartStyle, SankeyChartStyleOptions } from '../sankey/sankey_vis_config';
 import { TimeRange } from '../../../../../data/public';
 import { LegendItem, LegendTarget } from './legend';
 
@@ -41,7 +42,8 @@ export type ChartType =
   | 'gauge'
   | 'state_timeline'
   | 'bar_gauge'
-  | 'histogram';
+  | 'histogram'
+  | 'sankey';
 
 export interface ChartStylesMapping {
   line: LineChartStyle;
@@ -56,6 +58,7 @@ export interface ChartStylesMapping {
   state_timeline: StateTimeLineChartStyle;
   bar_gauge: BarGaugeChartStyle;
   histogram: HistogramChartStyle;
+  sankey: SankeyChartStyle;
 }
 
 export type StyleOptions =
@@ -70,7 +73,8 @@ export type StyleOptions =
   | GaugeChartStyleOptions
   | StateTimeLineChartStyleOptions
   | BarGaugeChartStyleOptions
-  | HistogramChartStyleOptions;
+  | HistogramChartStyleOptions
+  | SankeyChartStyleOptions;
 
 export type ChartStyles = ChartStylesMapping[ChartType];
 
