@@ -5,10 +5,10 @@
 
 import { PieChartStyle } from './pie_vis_config';
 import { AxisRole, VisColumn, AggregationType } from '../types';
-import { pipe, createBaseConfig, assembleSpec, addTooltipFormatter } from '../utils/echarts_spec';
+import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
 import { aggregate, transform } from '../utils/data_transformation';
 import { createPieSeries } from './pie_chart_utils';
-import { pieDisplayNameTooltipFormatter } from '../utils/utils';
+import { pieDisplayNameTooltipFormatter } from '../utils/tooltip';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
@@ -28,8 +28,10 @@ export const createPieSpec = (
         aggregationType: AggregationType.SUM,
       })
     ),
-    createBaseConfig({ legend: { show: false } }),
-    addTooltipFormatter(pieDisplayNameTooltipFormatter),
+    createBaseConfig({
+      legend: { show: false },
+      tooltipFormatter: pieDisplayNameTooltipFormatter,
+    }),
     createPieSeries({
       styles: styleOptions,
       cateField: colorCol.column,

@@ -64,7 +64,7 @@ export interface ThresholdLine {
 export type ThresholdLines = ThresholdLine[];
 
 export interface TooltipOptions {
-  mode: 'all' | 'hidden';
+  mode: 'all' | 'single' | 'hidden';
 }
 
 export interface StandardOptions {
