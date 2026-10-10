@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { Welcome } from './welcome';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 import { getLogosMock } from '../../../../../core/common/mocks';
@@ -37,6 +37,7 @@ jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},
+    uiSettings: { get: () => false },
   }),
 }));
 /*
@@ -138,6 +139,23 @@ describe('Welcome page', () => {
       expect(img.prop('alt')).toEqual(`${mockTitle} logo`);
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('Escape key handling', () => {
+    it('does not skip on Escape during IME composition but skips on plain Escape', () => {
+      const props = makeProps();
+      const component = mount(<Welcome {...props} />);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, bubbles: true })
+      );
+      expect(props.onSkip).not.toHaveBeenCalled();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(props.onSkip).toHaveBeenCalledTimes(1);
+
+      component.unmount();
     });
   });
 });

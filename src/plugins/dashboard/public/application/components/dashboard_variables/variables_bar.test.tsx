@@ -335,6 +335,42 @@ describe('VariablesBar — allowCustomValue: committing', () => {
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
   });
 
+  it('does not commit the typed value on an Enter that confirms an IME composition', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeCustomVariable({ allowCustomValue: true, multi: false }),
+    ]);
+    const getProps = openSelector(component);
+
+    act(() => {
+      getProps().searchProps.onSearch!('지표');
+    });
+    const composing = {
+      ...keyEvent('Enter'),
+      keyCode: 229,
+      nativeEvent: { isComposing: true },
+    } as unknown as MockedKeyEvent;
+    act(() => {
+      getProps().searchProps.onKeyDown(composing);
+    });
+
+    expect(updateVariableValue).not.toHaveBeenCalled();
+    expect(composing.stopPropagation).toHaveBeenCalledTimes(1);
+    expect(composing.preventDefault).not.toHaveBeenCalled();
+
+    // Positive control: a plain Enter still commits, so the test cannot pass vacuously.
+    const plain = {
+      ...keyEvent('Enter'),
+      keyCode: 13,
+      nativeEvent: { isComposing: false },
+    } as unknown as MockedKeyEvent;
+    act(() => {
+      getProps().searchProps.onKeyDown(plain);
+    });
+
+    expect(updateVariableValue).toHaveBeenCalledTimes(1);
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['지표']);
+  });
+
   it('replaces the selection for a single-select variable', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({ allowCustomValue: true, multi: false, current: ['dev'] }),

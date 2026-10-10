@@ -148,6 +148,25 @@ describe('AskAIActionItem', () => {
       });
     });
 
+    it('should not execute on the Enter that commits an IME composition', async () => {
+      render(
+        <AskAIActionItem
+          context={mockContext}
+          action={{} as any}
+          onClose={mockOnClose}
+          chatService={mockChatService}
+        />
+      );
+
+      const input = screen.getByTestId('askAiActionInput');
+      fireEvent.change(input, { target: { value: '질문' } });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229, isComposing: true });
+
+      await waitFor(() => {
+        expect(mockChatService.sendMessageWithWindow).not.toHaveBeenCalled();
+      });
+    });
+
     it('should not execute on Shift+Enter', async () => {
       render(
         <AskAIActionItem

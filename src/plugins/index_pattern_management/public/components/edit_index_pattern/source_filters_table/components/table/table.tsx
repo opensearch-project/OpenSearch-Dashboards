@@ -44,6 +44,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
+import { isImeComposing } from '../../../../../../../../core/public/utils';
 
 const filterHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.source.table.filterHeader',
@@ -123,7 +124,9 @@ export class Table extends Component<TableProps, TableState> {
   onEditingFilterChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ editingFilterValue: e.target.value });
 
-  onEditFieldKeyDown = ({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+  onEditFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isImeComposing(e)) return;
+    const { key } = e;
     if (keys.ENTER === key && this.state.editingFilterId && this.state.editingFilterValue) {
       this.props.saveFilter({
         clientId: this.state.editingFilterId,

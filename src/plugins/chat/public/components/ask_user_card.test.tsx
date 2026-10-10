@@ -67,6 +67,32 @@ describe('AskUserCard', () => {
       expect(onAnswer).toHaveBeenCalledWith('req-1', 'metrics');
     });
 
+    it('does not submit on the Enter that commits an IME composition', () => {
+      const onAnswer = jest.fn();
+      const { getByTestId } = render(
+        <AskUserCard request={baseRequest()} onAnswer={onAnswer} onDismiss={jest.fn()} />
+      );
+
+      const input = getByTestId('askUserTextInput');
+      fireEvent.change(input, { target: { value: '지표' } });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229, isComposing: true });
+
+      expect(onAnswer).not.toHaveBeenCalled();
+    });
+
+    it('submits on an Enter that arrives after the composition ended', () => {
+      const onAnswer = jest.fn();
+      const { getByTestId } = render(
+        <AskUserCard request={baseRequest()} onAnswer={onAnswer} onDismiss={jest.fn()} />
+      );
+
+      const input = getByTestId('askUserTextInput');
+      fireEvent.change(input, { target: { value: '지표' } });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 });
+
+      expect(onAnswer).toHaveBeenCalledWith('req-1', '지표');
+    });
+
     it('does not submit empty / whitespace-only text', () => {
       const onAnswer = jest.fn();
       const { getByTestId } = render(

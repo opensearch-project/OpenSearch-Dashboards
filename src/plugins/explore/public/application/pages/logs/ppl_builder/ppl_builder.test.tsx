@@ -134,6 +134,19 @@ describe('PPLBuilder', () => {
     expect(onRun).toHaveBeenCalledTimes(2);
   });
 
+  it('ignores Cmd+Enter while an IME composition is active', () => {
+    const onRun = jest.fn();
+    renderBuilder(emptyState(), onRun);
+    fireEvent.keyDown(screen.getByTestId('pplBuilder'), {
+      key: 'Enter',
+      metaKey: true,
+      isComposing: true,
+    });
+    expect(onRun).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByTestId('pplBuilder'), { key: 'Enter', metaKey: true });
+    expect(onRun).toHaveBeenCalledTimes(1);
+  });
+
   it('does not run on a bare Enter (no modifier)', () => {
     const onRun = jest.fn();
     renderBuilder(emptyState(), onRun);
