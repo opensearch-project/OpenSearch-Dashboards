@@ -14,6 +14,7 @@ import { QueryExecutionStatus } from '../../application/utils/state_management/t
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { cancelPPLAnalyze, runPPLAnalyzeInBackground } from '../../../../data/public';
 import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
+import { abortAllStreamingQueries } from '../../application/utils/streaming/streaming_abort_registry';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
@@ -50,6 +51,9 @@ jest.mock(
     onEditorRunActionCreator: jest.fn(() => ({ type: 'test/onEditorRun' })),
   })
 );
+jest.mock('../../application/utils/streaming/streaming_abort_registry', () => ({
+  abortAllStreamingQueries: jest.fn(() => false),
+}));
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   abortAllActiveQueries: jest.fn(),
 }));
@@ -121,6 +125,21 @@ describe('TopNav', () => {
     expect(runPPLAnalyzeInBackground).toHaveBeenCalledWith(
       expect.objectContaining({ onlyIfOpen: true })
     );
+  });
+
+  it('stops a streaming query through the registry, leaving its results and status alone', () => {
+    (abortAllStreamingQueries as jest.Mock).mockReturnValue(true);
+    const { menuProps, dispatchSpy } = renderTopNav();
+    render(menuProps.customSubmitButton);
+    mockQueryExecutionButton.mock.calls[0][0].onCancel();
+
+    expect(abortAllStreamingQueries).toHaveBeenCalledTimes(1);
+    // The aborted run publishes its own terminal status and keeps its rows, so Stop must not clear
+    // results or reset the overall status on top of it.
+    const types = dispatchSpy.mock.calls.map(([a]: any[]) => a?.type).filter(Boolean);
+    expect(types).toContain('queryEditor/setHasUserInitiatedQuery');
+    expect(types).not.toContain('results/clearResults');
+    expect(types).not.toContain('queryEditor/setOverallQueryStatus');
   });
 
   it('stops every running query and resets the page when the control is stopped', () => {

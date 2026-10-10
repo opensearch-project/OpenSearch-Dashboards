@@ -47,6 +47,12 @@ export const API = {
   PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   PPL_CALCITE_SETTINGS: `${BASE_API}/ppl/calcite_settings`,
   PPL_EXPLAIN: `${BASE_API}/ppl/explain`,
+  // Streaming (asynchronous partial results). Proxies POST /_plugins/_ppl with the async
+  // lifecycle fields, plus GET/DELETE on /_plugins/_ppl/jobs/{id}. Separate from PPL_SEARCH
+  // because that path goes through Facet, whose fixed body allowlist drops
+  // wait_for_completion_timeout / keep_alive.
+  PPL_STREAM_SUBMIT: `${BASE_API}/ppl/stream`,
+  PPL_STREAM_JOB: `${BASE_API}/ppl/stream/job`,
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
@@ -54,6 +60,9 @@ export const API = {
 
 export const URI = {
   PPL: '/_plugins/_ppl',
+  // Asynchronous PPL job lifecycle: GET to poll a snapshot, DELETE to cancel and release.
+  // Append `/{id}`.
+  PPL_JOBS: '/_plugins/_ppl/jobs',
   SQL: '/_plugins/_sql',
   // Open Distro endpoints used for legacy Elasticsearch data sources (SQL/PPL live here on ES
   // domains that support them) when legacyElasticsearchCompatibility is enabled.

@@ -53,11 +53,38 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
     return startContract;
   };
 
-  it('registers a disabled-by-default pplLint capability provider', () => {
+  it('registers every feature capability disabled by default', () => {
     const { core } = setupPlugin();
     const registerProvider = core.capabilities.registerProvider as jest.Mock;
     const provided = registerProvider.mock.calls[0][0]();
-    expect(provided).toEqual({ queryEnhancements: { pplLint: false } });
+    expect(provided).toEqual({ queryEnhancements: { pplLint: false, pplStreaming: false } });
+  });
+
+  it('enables pplStreaming when the dynamic config flag is on', async () => {
+    const { core, switcher } = setupPlugin();
+    stubConfig(core, { ppl: { streaming: { enabled: true } } });
+
+    const result = await switcher({} as any, baseCapabilities());
+
+    expect(result.queryEnhancements.pplStreaming).toBe(true);
+  });
+
+  it('resolves each feature independently', async () => {
+    const { core, switcher } = setupPlugin();
+    stubConfig(core, { ppl: { lint: { enabled: true }, streaming: { enabled: false } } });
+
+    const result = await switcher({} as any, baseCapabilities());
+
+    expect(result.queryEnhancements).toMatchObject({ pplLint: true, pplStreaming: false });
+  });
+
+  it('coerces a non-boolean pplStreaming flag to false', async () => {
+    const { core, switcher } = setupPlugin();
+    stubConfig(core, { ppl: { streaming: { enabled: 'false' } } } as any);
+
+    const result = await switcher({} as any, baseCapabilities());
+
+    expect(result.queryEnhancements.pplStreaming).toBe(false);
   });
 
   it('enables pplLint when the dynamic config flag is on', async () => {

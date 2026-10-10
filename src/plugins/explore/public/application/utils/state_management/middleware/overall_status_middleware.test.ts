@@ -408,4 +408,27 @@ describe('createOverallStatusMiddleware', () => {
       expect(finalState.queryEditor.queryStatusMap.onlyQuery).toEqual(singleStatus);
     });
   });
+
+  it('carries the streaming marker onto the overall status while any query is in flight', () => {
+    // The overall status is what bottom_right_container reads, so dropping `streaming` here would
+    // hide partial results even though the individual query reported them.
+    const streaming = { isPolling: true, total: 500, rowsFetched: 10, fractionDone: 0.2 };
+
+    store.dispatch(
+      setIndividualQueryStatus({
+        cacheKey: 'histogram',
+        status: { status: QueryExecutionStatus.READY, startTime: 1, elapsedMs: 5 },
+      })
+    );
+    store.dispatch(
+      setIndividualQueryStatus({
+        cacheKey: 'table',
+        status: { status: QueryExecutionStatus.LOADING, startTime: 1, streaming },
+      })
+    );
+
+    const overall = store.getState().queryEditor.overallQueryStatus;
+    expect(overall.status).toBe(QueryExecutionStatus.LOADING);
+    expect(overall.streaming?.isPolling).toBe(true);
+  });
 });

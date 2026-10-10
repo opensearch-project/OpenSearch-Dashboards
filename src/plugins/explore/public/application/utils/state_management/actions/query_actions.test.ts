@@ -1210,6 +1210,72 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       });
     });
 
+    // Item 4: an engine without the async PPL API only fails at submit, and the run reports itself
+    // as unavailable. The query must then be answered on the non-streaming path rather than erroring.
+    describe('when a streaming run reports itself unavailable', () => {
+      const STREAMING_SETTING = 'explore:enableStreamingResults';
+
+      const streamingServices = () =>
+        ({
+          uiSettings: { get: jest.fn((key: string) => key === STREAMING_SETTING) },
+          capabilities: { queryEnhancements: { pplStreaming: true } },
+          data: {
+            query: {
+              timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } },
+              queryString: {
+                getLanguageService: () => ({
+                  getLanguage: () => ({ fields: { formatter: (value: any) => value } }),
+                }),
+              },
+            },
+            dataViews: { get: jest.fn().mockResolvedValue(undefined) },
+          },
+          tabRegistry: { getTab: jest.fn() },
+        }) as any;
+
+      const stateWithPplDataset = () => ({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: {
+            id: 'ds',
+            title: 'logs',
+            type: 'INDEX_PATTERN',
+            dataSource: { engineType: 'OpenSearch' },
+          },
+        },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      // The streaming run fails at submit here (no http service is stubbed), which is exactly the
+      // shape item 4 handles: it publishes nothing and reports itself unavailable.
+      it('re-runs the data table query on the standard path', async () => {
+        mockGetState.mockReturnValue(stateWithPplDataset());
+        // Annotated because the mock references itself for thunk actions, which otherwise
+        // infers as any.
+        const dispatch: jest.Mock = jest.fn((action: any) => {
+          if (typeof action === 'function') return action(dispatch, mockGetState, undefined);
+          return action;
+        });
+
+        await executeQueries({ services: streamingServices() })(
+          dispatch as any,
+          mockGetState,
+          undefined
+        );
+
+        const dispatchedTypes = dispatch.mock.calls
+          .map(([action]: any[]) => action?.type)
+          .filter(Boolean);
+        expect(dispatchedTypes.some((type: string) => type.includes('executeDataTableQuery'))).toBe(
+          true
+        );
+      });
+    });
+
     it('should return early when no services provided', async () => {
       const mockState = {
         query: { query: '', language: 'PPL', dataset: null },
