@@ -30,6 +30,9 @@ import {
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
+const expectedResultField = 'unique_category';
+const expectedResultValue = 'Development';
+const expectedResultCount = '500';
 
 const queryRequestUrls = {
   [QueryLanguages.DQL.name]: '**/internal/search/opensearch*',
@@ -37,14 +40,33 @@ const queryRequestUrls = {
   [QueryLanguages.SQL.name]: '**/api/enhancements/search/sql',
 };
 
-const interceptQueryRequest = (language, responseDelay = 0) => {
+const interceptSubmittedQuery = (language, responseDelay = 0) => {
   cy.intercept('POST', queryRequestUrls[language], (request) => {
+    const requestBody =
+      typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
+
+    // A submit can produce multiple requests to the same endpoint. Alias only the request carrying
+    // the completed autocomplete query so cy.wait() cannot resolve against stale query state.
+    if (!requestBody.includes(expectedResultField) || !requestBody.includes(expectedResultValue)) {
+      return;
+    }
+
+    request.alias = 'submittedQuery';
+
     if (responseDelay > 0) {
       request.on('response', (response) => {
         response.setDelay(responseDelay);
       });
     }
-  }).as('query');
+  });
+};
+
+const waitForSubmittedQueryResults = () => {
+  cy.wait('@submittedQuery', { timeout: 60000 });
+  cy.getElementByTestId('discoverQueryRowsCount', { timeout: 60000 }).should(
+    'have.text',
+    expectedResultCount
+  );
 };
 
 export const runAutocompleteTests = () => {
@@ -118,13 +140,13 @@ export const runAutocompleteTests = () => {
 
             // Exercise the slow-query path that previously read the stale results table.
             const responseDelay = config.testName === 'PPL-INDEXES' ? 3000 : 0;
-            interceptQueryRequest(config.language, responseDelay);
+            interceptSubmittedQuery(config.language, responseDelay);
 
             // Run with mouse click
             cy.getElementByTestId('querySubmitButton').click();
 
-            cy.wait('@query', { timeout: 60000 });
-            validateQueryResults('unique_category', 'Development');
+            waitForSubmittedQueryResults();
+            validateQueryResults(expectedResultField, expectedResultValue);
           });
 
           it('should build query using keyboard shortcuts', () => {
@@ -135,7 +157,7 @@ export const runAutocompleteTests = () => {
 
             createQuery(config, true); // use keyboard
 
-            interceptQueryRequest(config.language);
+            interceptSubmittedQuery(config.language);
 
             // Run with keyboard shortcut
             if (config.language === QueryLanguages.DQL.name) {
@@ -147,8 +169,8 @@ export const runAutocompleteTests = () => {
               cy.getElementByTestId('querySubmitButton').click();
             }
 
-            cy.wait('@query', { timeout: 60000 });
-            validateQueryResults('unique_category', 'Development');
+            waitForSubmittedQueryResults();
+            validateQueryResults(expectedResultField, expectedResultValue);
           });
         });
       }

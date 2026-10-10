@@ -382,6 +382,11 @@ export const createQuery = (config, useKeyboard = false) => {
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
         selectSuggestion(dataset, useKeyboard);
         selectSuggestion('|', useKeyboard);
+        if (useKeyboard) {
+          // Narrow the live command list before keyboard navigation so a refresh cannot repeatedly
+          // reset focus ahead of the "where" suggestion.
+          cy.get('.inputarea').type('w', { force: true });
+        }
         selectSuggestion('where', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
@@ -551,38 +556,38 @@ export const generateAutocompleteTestConfigurations = (
 export const validateQueryResults = (field, expectedValue, operator) => {
   // Expand the first row to view the field value
   cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
-  cy.getElementByTestId(`tableDocViewRow-${field}-value`).within(() => {
-    cy.get('span')
-      .invoke('text')
-      .then((text) => {
-        // For numeric comparisons (>, <, >=, <=)
-        if (['>', '<', '>=', '<=', '='].includes(operator)) {
-          const actualValue = parseFloat(text.replace(/,/g, ''));
-          const numericExpectedValue = parseFloat(expectedValue.toString().replace(/,/g, ''));
+  cy.getElementByTestId(`tableDocViewRow-${field}-value`)
+    .find('span')
+    .should(($value) => {
+      const text = $value.text();
 
-          switch (operator) {
-            case '>':
-              expect(actualValue).to.be.greaterThan(numericExpectedValue);
-              break;
-            case '<':
-              expect(actualValue).to.be.lessThan(numericExpectedValue);
-              break;
-            case '>=':
-              expect(actualValue).to.be.at.least(numericExpectedValue);
-              break;
-            case '<=':
-              expect(actualValue).to.be.at.most(numericExpectedValue);
-              break;
-            case '=':
-              expect(actualValue).to.equal(numericExpectedValue);
-              break;
-          }
-        } else {
-          // For undefined, keep original string comparison
-          expect(text).to.equal(expectedValue.toString());
+      // For numeric comparisons (>, <, >=, <=)
+      if (['>', '<', '>=', '<=', '='].includes(operator)) {
+        const actualValue = parseFloat(text.replace(/,/g, ''));
+        const numericExpectedValue = parseFloat(expectedValue.toString().replace(/,/g, ''));
+
+        switch (operator) {
+          case '>':
+            expect(actualValue).to.be.greaterThan(numericExpectedValue);
+            break;
+          case '<':
+            expect(actualValue).to.be.lessThan(numericExpectedValue);
+            break;
+          case '>=':
+            expect(actualValue).to.be.at.least(numericExpectedValue);
+            break;
+          case '<=':
+            expect(actualValue).to.be.at.most(numericExpectedValue);
+            break;
+          case '=':
+            expect(actualValue).to.equal(numericExpectedValue);
+            break;
         }
-      });
-  });
+      } else {
+        // For undefined, keep original string comparison
+        expect(text).to.equal(expectedValue.toString());
+      }
+    });
   // Close the expanded row
   cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
 };
