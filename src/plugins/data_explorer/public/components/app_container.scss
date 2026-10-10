@@ -17,6 +17,15 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     height: calc(100vh - #{$osdHeaderOffset * 2});
   }
 
+  &--chromeHidden,
+  &--embed {
+    height: 100vh;
+
+    &.dsc--next {
+      height: calc(100vh - #{$osdHeaderOffset * 1});
+    }
+  }
+
   &__canvas {
     height: 100%;
   }
@@ -36,6 +45,15 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
   &.dsc--next {
     height: calc(100vh - #{$osdHeaderOffset * 3});
+  }
+
+  &.deLayout--chromeHidden,
+  &.deLayout--embed {
+    height: 100vh;
+
+    &.dsc--next {
+      height: calc(100vh - #{$osdHeaderOffset * 1});
+    }
   }
 }
 
