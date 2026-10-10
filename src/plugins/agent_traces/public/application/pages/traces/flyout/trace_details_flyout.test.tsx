@@ -49,6 +49,33 @@ jest.mock('./use_flyout_resize', () => ({
   }),
 }));
 
+const mockTraceLogs = {
+  logDatasets: [{ id: 'logs-1', title: 'logs-otel-v1*', type: 'INDEX_PATTERN' }],
+  datasetLogs: {},
+  logCount: 3,
+  isLoading: false,
+  errors: [],
+  cappedDatasetIds: [],
+  traceDataset: null,
+};
+jest.mock('./use_trace_logs', () => ({
+  useTraceLogs: jest.fn(() => mockTraceLogs),
+}));
+
+jest.mock('../../../../../../explore/public', () => ({
+  TraceLogsTab: ({
+    traceId,
+    onSpanClick,
+  }: {
+    traceId: string;
+    onSpanClick: (id: string) => void;
+  }) => (
+    <button data-test-subj="mock-trace-logs" onClick={() => onSpanClick('span-1')}>
+      logs for {traceId}
+    </button>
+  ),
+}));
+
 jest.mock('./flyout_detail_panel', () => ({
   FlyoutDetailPanel: () => <div data-test-subj="mock-detail-panel">Detail Panel</div>,
 }));
@@ -160,5 +187,16 @@ describe('sessionIdOf', () => {
     // The traces table re-sends the tree (new array, same spans), e.g. on a cache sync.
     rerender(<TraceDetailsFlyout {...defaultProps} fullTree={tree()} />);
     expect(screen.getByTestId('mock-expanded')).toHaveTextContent(/^0$/);
+  });
+
+  it('adds a Related logs tab with the trace log count, keyed on the trace id', () => {
+    const { useTraceLogs } = jest.requireMock('./use_trace_logs');
+    render(<TraceDetailsFlyout {...defaultProps} />);
+    expect(useTraceLogs).toHaveBeenCalledWith('trace-id-abc');
+    const tab = screen.getByTestId('agentTracesFlyoutLogsTab');
+    expect(tab).toHaveTextContent('3');
+    expect(tab).toHaveTextContent('Related logs');
+    fireEvent.click(tab);
+    expect(screen.getByTestId('mock-trace-logs')).toHaveTextContent('logs for trace-id-abc');
   });
 });
