@@ -462,7 +462,7 @@ export class DocLinksService {
             dashboardSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
           },
           scriptedFields: {
-            scriptFields: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/retrieve-specific-fields/`,
+            scriptFields: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/searching-data/retrieve-specific-fields/#using-scripted-fields`,
             scriptAggs: `${OPENSEARCH_WEBSITE_DOCS}/scripting/script-contexts/#aggregations`,
             painless: `${OPENSEARCH_WEBSITE_DOCS}/scripting/painless/`,
             painlessApi: `${OPENSEARCH_WEBSITE_DOCS}/scripting/painless-language/#available-libraries`,
