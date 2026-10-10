@@ -664,6 +664,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
     }, [capturePageContainer]);
 
+    const handleAttachScreenshot = useCallback(
+      (attach: boolean) => {
+        if (attach && screenshotFeatureEnabled) {
+          handleCaptureScreenshot();
+          return;
+        }
+        setScreenshotData(undefined);
+      },
+      [handleCaptureScreenshot, screenshotFeatureEnabled]
+    );
+
     const enhancedProps = useMemo(() => {
       return {
         toolCallStates,
@@ -860,6 +871,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
                 chatInputRef.current?.focus();
                 telemetryRecorder?.recordEvent({ name: 'suggestion_click', data: {} });
               }}
+              onAttachScreenshot={handleAttachScreenshot}
               inputValue={input}
               onRemoveInput={(content: string) =>
                 setInput((prev) => prev.replace(content, '').trim())
