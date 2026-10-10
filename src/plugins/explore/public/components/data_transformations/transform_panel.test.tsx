@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 import { TransformPanel } from './transform_panel';
 import { TransformationService } from './transformation_service';
 import { TransformationInstance, TransformationPipeline } from './types';
+import { VisFieldType } from '../visualizations/types';
 
 jest.mock('./transform_selector_overlay', () => ({
   TransformSelectorButton: ({ onSelectTransformation }: any) => (
@@ -25,16 +26,18 @@ const createMockInstance = (id: string, definitionId = 'limit'): TransformationI
   definition_id: definitionId,
   config: {},
   hide: false,
-  transformationMethod: (data) => data,
-  Editor: ({ config, onChange }) => <div data-test-subj={`editor-${id}`}>Editor for {id}</div>,
+  transformationMethod: (data) => ({ rows: data, status: 'applied', issues: [] }),
+  Editor: ({ availableFields }) => (
+    <div data-test-subj={`editor-${id}`}>
+      {availableFields.map((field) => field.name).join(',')}
+    </div>
+  ),
 });
 
 const createMockService = (pipeline: TransformationPipeline = []) => {
   const service = {
     pipeline$: new BehaviorSubject<TransformationPipeline>(pipeline),
-    stageSchemas$: new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
-      new Map()
-    ),
+    stageFields$: new BehaviorSubject(new Map()),
     getDefinition: jest.fn((defId: string) => ({
       id: defId,
       label: defId.charAt(0).toUpperCase() + defId.slice(1),
@@ -59,9 +62,13 @@ describe('TransformPanel', () => {
   it('renders transformation cards when pipeline has items', () => {
     const instance = createMockInstance('inst-1', 'limit');
     const service = createMockService([instance]);
+    service.stageFields$.next(
+      new Map([['inst-1', [{ name: 'input_field', visFieldType: VisFieldType.Categorical }]]])
+    );
     render(<TransformPanel transformationService={service} />);
     expect(screen.getByText('1 - Limit')).toBeInTheDocument();
-    expect(screen.getByTestId('editor-inst-1')).toBeInTheDocument();
+    expect(screen.getByTestId('editor-inst-1')).toHaveTextContent('input_field');
+    expect(screen.queryByText('Add a Transformation')).not.toBeInTheDocument();
   });
 
   it('renders multiple transformation cards with correct numbering', () => {
@@ -96,12 +103,5 @@ describe('TransformPanel', () => {
     render(<TransformPanel transformationService={service} />);
     fireEvent.click(screen.getByTestId('transformPanelAddButton'));
     expect(service.addInstance).toHaveBeenCalledWith('limit');
-  });
-
-  it('does not render empty state when pipeline has items', () => {
-    const instance = createMockInstance('inst-1');
-    const service = createMockService([instance]);
-    render(<TransformPanel transformationService={service} />);
-    expect(screen.queryByText('Add a Transformation')).not.toBeInTheDocument();
   });
 });

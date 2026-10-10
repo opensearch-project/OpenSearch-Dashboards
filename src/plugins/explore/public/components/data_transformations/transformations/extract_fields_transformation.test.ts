@@ -14,34 +14,29 @@ const createHit = (source: Record<string, unknown>) => ({
 
 describe('extract_fields_transformation', () => {
   const instance = createExtractFieldsTransformation();
+  type TestHit = ReturnType<typeof createHit>;
+  type TestConfig = Parameters<typeof instance.transformationMethod>[1];
+  const transform = (data: TestHit[], config: TestConfig) =>
+    instance.transformationMethod(data, config).rows;
 
   describe('transformationMethod', () => {
-    it('returns original data when field is not set', () => {
-      const data = [createHit({ nested: { a: 1 } })];
-      const result = instance.transformationMethod(data, {
-        field: undefined,
-        format: 'object',
-        prefix: '',
-      });
-      expect(result).toEqual(data);
-    });
-
-    it('extracts object fields into top-level source', () => {
+    it('extracts object fields and reports the transformation as applied', () => {
       const data = [createHit({ nested: { x: 10, y: 20 }, other: 'keep' })];
       const result = instance.transformationMethod(data, {
         field: 'nested',
         format: 'object',
         prefix: '',
       });
-      const source = result[0]._source as Record<string, unknown>;
-      expect(source.x).toBe(10);
-      expect(source.y).toBe(20);
-      expect(source.other).toBe('keep');
+      expect(result).toEqual({
+        rows: [createHit({ nested: { x: 10, y: 20 }, other: 'keep', x: 10, y: 20 })],
+        status: 'applied',
+        issues: [],
+      });
     });
 
     it('applies prefix to extracted fields', () => {
       const data = [createHit({ nested: { x: 10 } })];
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         field: 'nested',
         format: 'object',
         prefix: 'ns_',
@@ -53,7 +48,7 @@ describe('extract_fields_transformation', () => {
 
     it('parses JSON string format', () => {
       const data = [createHit({ jsonField: '{"a":1,"b":"hello"}' })];
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         field: 'jsonField',
         format: 'json',
         prefix: '',
@@ -63,50 +58,72 @@ describe('extract_fields_transformation', () => {
       expect(source.b).toBe('hello');
     });
 
-    it('handles invalid JSON gracefully', () => {
-      const data = [createHit({ jsonField: 'not json' })];
-      const result = instance.transformationMethod(data, {
-        field: 'jsonField',
-        format: 'json',
-        prefix: '',
-      });
-      const source = result[0]._source as Record<string, unknown>;
-      expect(source.jsonField).toBe('not json');
-    });
-
-    it('skips rows where field value is null', () => {
-      const data = [createHit({ nested: null, other: 'keep' })];
-      const result = instance.transformationMethod(data, {
-        field: 'nested',
-        format: 'object',
-        prefix: '',
-      });
-      expect(result[0]._source).toEqual({ nested: null, other: 'keep' });
-    });
-
-    it('does not extract arrays', () => {
-      const data = [createHit({ nested: [1, 2, 3] })];
-      const result = instance.transformationMethod(data, {
-        field: 'nested',
-        format: 'object',
-        prefix: '',
-      });
-      expect(result[0]._source).toEqual({ nested: [1, 2, 3] });
+    it.each([
+      {
+        name: 'invalid JSON',
+        data: [createHit({ source: 'not json' })],
+        format: 'json' as const,
+      },
+      {
+        name: 'a null object',
+        data: [createHit({ source: null })],
+        format: 'object' as const,
+      },
+      {
+        name: 'an array',
+        data: [createHit({ source: [1, 2, 3] })],
+        format: 'object' as const,
+      },
+    ])('leaves rows unchanged for $name', ({ data, format }) => {
+      expect(
+        transform(data, {
+          field: 'source',
+          format,
+          prefix: '',
+        })
+      ).toEqual(data);
     });
   });
 
-  describe('validateConfig', () => {
-    it('returns config unchanged when field exists', () => {
-      const config = { field: 'nested', format: 'object' as const, prefix: '' };
-      const fields = [{ name: 'nested' }, { name: 'other' }];
-      expect(instance.validateConfig!(config, fields)).toEqual(config);
+  describe('execution diagnostics', () => {
+    it('skips when the required field no longer exists', () => {
+      const config = { field: 'removed', format: 'object' as const, prefix: '' };
+      const data = [createHit({ nested: { value: 1 } })];
+      const result = instance.transformationMethod(data, config);
+
+      expect(result).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'missing_fields', fields: ['removed'] }],
+      });
     });
 
-    it('resets field when it no longer exists', () => {
-      const config = { field: 'removed', format: 'object' as const, prefix: '' };
-      const fields = [{ name: 'nested' }];
-      const result = instance.validateConfig!(config, fields);
-      expect(result.field).toBeUndefined();
+    it('extracts only rows containing the configured field', () => {
+      const config = { field: 'nested', format: 'object' as const, prefix: '' };
+      const data = [
+        createHit({ nested: { value: 1 } }),
+        createHit({ label: 'missing nested field' }),
+      ];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: [
+          createHit({ nested: { value: 1 }, value: 1 }),
+          createHit({ label: 'missing nested field' }),
+        ],
+        status: 'partially_applied',
+        issues: [{ code: 'missing_fields', fields: ['nested'] }],
+      });
+    });
+
+    it('skips when the source field is not configured', () => {
+      const config = { field: undefined, format: 'object' as const, prefix: '' };
+      const data = [createHit({ nested: { value: 1 } })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'invalid_config' }],
+      });
     });
   });
 

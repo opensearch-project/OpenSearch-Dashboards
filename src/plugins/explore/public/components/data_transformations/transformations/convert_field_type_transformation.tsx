@@ -11,6 +11,11 @@ import { TransformationInstance, TransformationDefinition, FieldSchema } from '.
 import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+} from '../transformation_utils';
 
 type TargetType = 'string' | 'number' | 'boolean' | 'date';
 
@@ -177,42 +182,41 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<C
     config: { rules: [] },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: ConvertFieldTypeConfig) => {
-      if (!isConfigComplete(config)) return data;
-      const rules = config.rules.filter((r) => !!r.field && !!r.targetType);
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Convert Field Type configuration is incomplete.');
+      }
 
-      return data.map((row) => {
+      const rules = config.rules.filter((r) => !!r.field && !!r.targetType);
+      const missingFields = new Set<string>();
+      const typeOverrides: Record<string, string> = {};
+      let appliedAnyRule = false;
+
+      const transformed = data.map((row) => {
         const source = { ...(row._source as Record<string, unknown>) };
         for (const rule of rules) {
+          if (!Object.prototype.hasOwnProperty.call(source, rule.field!)) {
+            missingFields.add(rule.field!);
+            continue;
+          }
           source[rule.field!] = convertValue(source[rule.field!], rule.targetType!);
+          typeOverrides[rule.field!] = rule.targetType!;
+          appliedAnyRule = true;
         }
         return { ...row, _source: source };
       });
-    },
-    transformSchema: (schema, config: ConvertFieldTypeConfig) => {
-      if (!isConfigComplete(config)) return schema;
-      const typeMap = new Map<string, string>();
-      for (const rule of config.rules) {
-        if (rule.field && rule.targetType) typeMap.set(rule.field, rule.targetType);
+
+      if (data.length === 0) {
+        rules.forEach((rule) => missingFields.add(rule.field!));
       }
-      return schema.map((f) => {
-        const target = f.name ? typeMap.get(f.name) : null;
-        return target ? { ...f, type: target } : f;
-      });
-    },
-    validateConfig: (config: ConvertFieldTypeConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      let changed = false;
-      const cleaned = config.rules.map((r) => {
-        if (r.field && !fieldNames.has(r.field)) {
-          changed = true;
-          return { ...r, field: undefined };
-        }
-        return r;
-      });
-      if (changed) {
-        return { ...config, rules: cleaned };
+      if (missingFields.size === 0) {
+        return { ...createAppliedResult(transformed), typeOverrides };
       }
-      return config;
+      const result = createMissingFieldsResult(
+        appliedAnyRule ? transformed : data,
+        Array.from(missingFields),
+        appliedAnyRule ? 'partially_applied' : 'skipped'
+      );
+      return appliedAnyRule ? { ...result, typeOverrides } : result;
     },
     Editor: ConvertFieldTypeEditor,
   };

@@ -14,7 +14,6 @@ const createHit = (source: Record<string, unknown>) => ({
 
 describe('limit_transformation', () => {
   const instance = createLimitTransformation();
-
   describe('transformationMethod', () => {
     const data = [
       createHit({ name: 'a' }),
@@ -24,26 +23,21 @@ describe('limit_transformation', () => {
       createHit({ name: 'e' }),
     ];
 
-    it('limits data to specified number of rows', () => {
-      const result = instance.transformationMethod(data, { limit: 3 });
-      expect(result).toHaveLength(3);
-      expect(result[0]._source).toEqual({ name: 'a' });
-      expect(result[2]._source).toEqual({ name: 'c' });
-    });
+    it.each([
+      { limit: 3, expectedNames: ['a', 'b', 'c'] },
+      { limit: 100, expectedNames: ['a', 'b', 'c', 'd', 'e'] },
+      { limit: 0, expectedNames: [] },
+      { limit: undefined, expectedNames: ['a', 'b', 'c', 'd', 'e'] },
+    ])('keeps the expected rows when limit is $limit', ({ limit, expectedNames }) => {
+      const result = instance.transformationMethod(data, { limit });
 
-    it('returns all data when limit is greater than data length', () => {
-      const result = instance.transformationMethod(data, { limit: 100 });
-      expect(result).toHaveLength(5);
-    });
-
-    it('returns empty array when limit is 0', () => {
-      const result = instance.transformationMethod(data, { limit: 0 });
-      expect(result).toHaveLength(0);
-    });
-
-    it('returns original data when limit is undefined', () => {
-      const result = instance.transformationMethod(data, { limit: undefined });
-      expect(result).toHaveLength(5);
+      expect(result).toEqual({
+        rows: data.filter((row) =>
+          expectedNames.includes((row._source as Record<string, string>).name)
+        ),
+        status: 'applied',
+        issues: [],
+      });
     });
   });
 

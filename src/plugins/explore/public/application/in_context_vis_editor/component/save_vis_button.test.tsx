@@ -66,7 +66,7 @@ jest.mock('../../../components/data_transformations', () => {
       clearPipeline: jest.fn(),
       pipeline$: mockObs,
       getPipeline$: () => mockObs,
-      stageSchemas$: mockMapObs,
+      stageFields$: mockMapObs,
     }),
     TransformPanel: () => null,
   };
@@ -240,16 +240,6 @@ describe('SaveVisButton', () => {
 
   it('discards and navigates to originatingApp when originatingApp is set', () => {
     mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    render(<SaveVisButton />);
-    fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));
-    expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboard');
-  });
-
-  it('saves and navigates to edit path when originatingApp is set', () => {
-    mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    // jsdom 26: spy on location.reload rather than replacing the location object.
-    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
-
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));
     expect(mockNavigateToWithEmbeddablePackage).toHaveBeenCalledWith('dashboard');

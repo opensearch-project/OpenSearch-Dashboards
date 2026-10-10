@@ -12,28 +12,81 @@ import {
   TransformationDefinition,
   ITransformationService,
   UrlTransformationState,
+  TransformationIssue,
+  TransformationStepResult,
+  FieldSchema,
 } from './types';
 import {
   addTransformation,
   removeTransformation,
   updateTransformationConfig,
   toggleTransformationHide,
-  deriveSchemaFromRows,
+  inferSchemaFromRows,
 } from './transformation_utils';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
+import { FIELD_TYPE_MAP } from '../visualizations/constants';
+import { VisFieldType } from '../visualizations/types';
 
 export const TRANSFORMATION_STATE_KEY = '_t';
 
+// Rows determine which fields exist; the current schema preserves metadata for fields that remain.
+const reconcileSchemaWithRows = (
+  rows: OpenSearchSearchHit[],
+  currentSchema: Array<{ name?: string; type?: string }>,
+  typeOverrides: Record<string, string> = {}
+): Array<{ name?: string; type?: string }> => {
+  const inferredSchema = inferSchemaFromRows(rows);
+  const inferredByName = new Map(inferredSchema.map((field) => [field.name, field]));
+  const reconciledSchema: Array<{ name?: string; type?: string }> = [];
+
+  for (const field of currentSchema) {
+    if (!field.name) {
+      continue;
+    }
+    const inferredField = inferredByName.get(field.name);
+    if (!inferredField) {
+      continue;
+    }
+    reconciledSchema.push({
+      ...field,
+      type: typeOverrides[field.name] ?? field.type ?? inferredField.type,
+    });
+    inferredByName.delete(field.name);
+  }
+
+  for (const field of inferredByName.values()) {
+    reconciledSchema.push({
+      ...field,
+      type: typeOverrides[field.name] ?? field.type,
+    });
+  }
+
+  return reconciledSchema;
+};
+
+// TODO: Preserve raw schema types in stageFields$ instead of reducing them to VisFieldType.
+// Transformation editors need distinctions such as boolean versus string; VisFieldType is
+// a visualization-level classification. Keep this projection until the editor contract is updated.
+const getFieldSchemas = (schema: Array<{ name?: string; type?: string }>): FieldSchema[] =>
+  schema.flatMap((field) =>
+    field.name
+      ? [
+          {
+            name: field.name,
+            visFieldType: FIELD_TYPE_MAP[field.type ?? ''] ?? VisFieldType.Unknown,
+          },
+        ]
+      : []
+  );
+
 export class TransformationService implements ITransformationService {
-  // catelog of available transformations
+  // Catalog of available transformations.
   private definitions = new Map<string, TransformationDefinition>();
 
-  // Active pipeline — list of transformation instances user choice
+  // Active pipeline of transformation instances selected by the user.
   public pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
-  // Per-instance field schemas produced by the transformation pipeline
-  public stageSchemas$ = new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
-    new Map()
-  );
+  // Per-instance fields projected from each step's input rows.
+  public stageFields$ = new BehaviorSubject<Map<string, FieldSchema[]>>(new Map());
   private debouncedPipeline$ = this.pipeline$.pipe(debounceTime(300));
 
   private urlStateStorage?: IOsdUrlStateStorage;
@@ -122,69 +175,79 @@ export class TransformationService implements ITransformationService {
   }
 
   /**
-   * Apply the full pipeline in a single pass, collecting per-stage schemas.
-   * Returns:
-   * rows: final transformed rows
-   * stageSchemas: stageSchemas[i] = schema available as input to step i
+   * Apply the full pipeline without changing its stored configuration.
+   * Returns the final rows, their inferred schema, and execution diagnostics for each step.
+   * stageFields$ projects each step's input rows into fields for its editor.
    */
   applyPipeline(
     rawRows: OpenSearchSearchHit[],
     originalSchema: Array<{ name?: string; type?: string }> = []
-  ): { rows: OpenSearchSearchHit[]; finalSchema: Array<{ name?: string; type?: string }> } {
+  ): {
+    rows: OpenSearchSearchHit[];
+    finalSchema: Array<{ name?: string; type?: string }>;
+    steps: TransformationStepResult[];
+  } {
     const instances = this.pipeline$.getValue();
 
     if (instances.length === 0) {
-      this.stageSchemas$.next(new Map());
-      return { rows: rawRows, finalSchema: originalSchema };
+      this.stageFields$.next(new Map());
+      return { rows: rawRows, finalSchema: originalSchema, steps: [] };
     }
 
-    const schemaMap = new Map<string, Array<{ name?: string; type?: string }>>();
+    const stageFields = new Map<string, FieldSchema[]>();
+    const steps: TransformationStepResult[] = [];
     let rows = [...rawRows];
-    let currentSchema: Array<{ name?: string; type?: string }> = [...originalSchema];
+    let currentSchema = reconcileSchemaWithRows(rows, originalSchema);
 
-    let pipelineChanged = false;
-    const updatedInstances = [...instances];
+    for (const instance of instances) {
+      stageFields.set(instance.instance_id, getFieldSchemas(currentSchema));
 
-    for (let i = 0; i < updatedInstances.length; i++) {
-      const instance = updatedInstances[i];
-      schemaMap.set(instance.instance_id, currentSchema);
-
-      if (instance.validateConfig) {
-        const cleaned = instance.validateConfig(instance.config, currentSchema);
-        if (cleaned !== instance.config) {
-          updatedInstances[i] = { ...instance, config: cleaned };
-          pipelineChanged = true;
-        }
+      if (instance.hide) {
+        steps.push({
+          instanceId: instance.instance_id,
+          definitionId: instance.definition_id,
+          status: 'skipped',
+          issues: [],
+        });
+        continue;
       }
-
-      const current = updatedInstances[i];
-      if (current.hide) continue;
 
       try {
-        rows = current.transformationMethod(rows, current.config);
-        // deriveSchemaFromRows handles field add/remove
+        const result = instance.transformationMethod(rows, instance.config);
+        rows = result.rows;
+        currentSchema = reconcileSchemaWithRows(rows, currentSchema, result.typeOverrides);
 
-        currentSchema = deriveSchemaFromRows(rows, currentSchema);
-        // transformSchema handles type override
-        if (current.transformSchema) {
-          currentSchema = current.transformSchema(currentSchema, current.config);
-        }
+        steps.push({
+          instanceId: instance.instance_id,
+          definitionId: instance.definition_id,
+          status: result.status,
+          issues: result.issues,
+        });
       } catch (err) {
+        const executionIssue: TransformationIssue = {
+          code: 'execution_error',
+          message: err instanceof Error ? err.message : String(err),
+        };
         // eslint-disable-next-line no-console
         console.error(
-          `TransformationService: step "${current.instance_id}" throws — skipping`,
+          `TransformationService: step "${instance.instance_id}" throws — skipping`,
           err
         );
+        steps.push({
+          instanceId: instance.instance_id,
+          definitionId: instance.definition_id,
+          status: 'failed',
+          issues: [executionIssue],
+        });
       }
     }
 
-    if (pipelineChanged) {
-      this.pipeline$.next(updatedInstances);
-    }
+    this.stageFields$.next(stageFields);
 
-    this.stageSchemas$.next(schemaMap);
+    const hasActiveTransformations = instances.some((instance) => !instance.hide);
+    const finalSchema = hasActiveTransformations ? currentSchema : originalSchema;
 
-    return { rows, finalSchema: currentSchema };
+    return { rows, finalSchema, steps };
   }
 
   /**
@@ -251,16 +314,14 @@ export class TransformationService implements ITransformationService {
       this.urlSyncSubscription.unsubscribe();
     }
     this.pipeline$.complete();
-    this.stageSchemas$.complete();
+    this.stageFields$.complete();
     this.definitions.clear();
   }
 }
 
 export const createNoOpTransformationService = (): ITransformationService => {
   const pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
-  const stageSchemas$ = new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
-    new Map()
-  );
+  const stageFields$ = new BehaviorSubject<Map<string, FieldSchema[]>>(new Map());
 
   return {
     registerDefinition: () => {},
@@ -268,7 +329,7 @@ export const createNoOpTransformationService = (): ITransformationService => {
     getDefinitionsByType: () => [],
     getDefinition: () => undefined,
     pipeline$,
-    stageSchemas$,
+    stageFields$,
     getPipeline$: () => pipeline$,
     addInstance: () => {},
     removeInstance: () => {},
@@ -276,9 +337,10 @@ export const createNoOpTransformationService = (): ITransformationService => {
     toggleInstanceHide: () => {},
     setPipeline: () => {},
     clearPipeline: () => {},
-    applyPipeline: (rawRows: any[], originalSchema: any[] = []) => ({
-      rows: rawRows ?? [],
+    applyPipeline: (rawRows: OpenSearchSearchHit[], originalSchema = []) => ({
+      rows: rawRows,
       finalSchema: originalSchema,
+      steps: [],
     }),
     initUrlSync: () => {},
     destroy: () => {},
