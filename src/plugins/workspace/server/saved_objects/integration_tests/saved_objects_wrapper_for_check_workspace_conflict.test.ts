@@ -94,7 +94,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       name: 'bar',
       features: ['use-case-all'],
     }).then((resp) => resp.body.result);
-  }, 30000);
+  });
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();

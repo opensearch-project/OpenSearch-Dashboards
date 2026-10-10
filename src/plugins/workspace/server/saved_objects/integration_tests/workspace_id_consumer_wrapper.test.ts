@@ -76,7 +76,7 @@ describe('workspace_id_consumer integration test', () => {
       name: 'bar',
       features: ['use-case-all'],
     }).then((resp) => resp.body.result);
-  }, 30000);
+  });
   afterAll(async () => {
     await Promise.all([
       deleteWorkspace(createdFooWorkspace.id),
