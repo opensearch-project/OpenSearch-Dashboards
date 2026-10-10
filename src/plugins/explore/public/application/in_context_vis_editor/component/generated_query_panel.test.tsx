@@ -16,6 +16,7 @@ jest.mock('../hooks/use_editor_operations', () => ({ useEditorOperations: jest.f
 jest.mock('../../../application/hooks', () => ({ useEditorFocus: jest.fn() }));
 
 const mockUpdateQueryEditorState = jest.fn();
+const mockUpdateQueryState = jest.fn();
 const mockSetEditorText = jest.fn();
 const mockFocusOnEditor = jest.fn();
 
@@ -28,7 +29,10 @@ beforeEach(() => {
 const renderWithQuery = (lastExecutedTranslatedQuery?: string) => {
   (useQueryBuilderState as jest.Mock).mockReturnValue({
     queryEditorState: { lastExecutedTranslatedQuery },
-    queryBuilder: { updateQueryEditorState: mockUpdateQueryEditorState },
+    queryBuilder: {
+      updateQueryEditorState: mockUpdateQueryEditorState,
+      updateQueryState: mockUpdateQueryState,
+    },
   });
   return render(<QueryPanelGeneratedQuery />);
 };
@@ -55,6 +59,12 @@ describe('QueryPanelGeneratedQuery', () => {
     renderWithQuery('source=logs | head 10');
     fireEvent.click(screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton'));
     expect(mockSetEditorText).toHaveBeenCalledWith('source=logs | head 10');
+  });
+
+  it('clicking edit updates query state with the generated query', () => {
+    renderWithQuery('source=logs | head 10');
+    fireEvent.click(screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton'));
+    expect(mockUpdateQueryState).toHaveBeenCalledWith({ query: 'source=logs | head 10' });
   });
 
   it('clicking edit switches editor mode to Query and clears lastExecutedTranslatedQuery', () => {
