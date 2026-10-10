@@ -9,6 +9,7 @@ import {
   Operation,
   OperationGrouping,
   RANGE_FUNCTIONS,
+  emptyFilter,
   nextFilterId,
 } from './promql_parser';
 import { AGGREGATION_IDS } from './operation_categories';
@@ -44,13 +45,6 @@ export type BuilderAction =
   | { type: 'SET_RANGE'; range: string }
   | { type: 'REMOVE_RANGE' }
   | { type: 'RESET' };
-
-export const emptyFilter = (): LabelFilter => ({
-  id: nextFilterId(),
-  label: '',
-  op: '=',
-  value: '',
-});
 
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
@@ -115,9 +109,9 @@ function groupingClause(op: Operation): string {
 export function buildPromQL(state: BuilderState): string {
   if (!state.metric) return '';
 
-  const matchers = state.labelFilters
-    .filter((f) => f.label && f.value)
-    .map((f) => `${f.label}${f.op}"${escapeLabelValue(f.value)}"`);
+  const matchers = state.labelFilters.flatMap(({ label, op, value }) =>
+    label && value !== undefined ? [`${label}${op}"${escapeLabelValue(value)}"`] : []
+  );
 
   let selector = state.metric;
   if (matchers.length > 0) {

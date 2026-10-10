@@ -1,0 +1,2 @@
+fix:
+- Update documentation links in `DocLinksService` to their current pages ([#12894](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12894))

@@ -36,6 +36,7 @@ import { QueryExecutionStatus } from './utils/state_management/types';
 import { PatternsTab } from '../components/tabs/patterns_tab';
 import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
 import { StatisticsTab } from '../components/tabs/statistics_tab';
+import { getSourceTypeRegistry } from '../services/source_type_registry';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -261,12 +262,36 @@ export const registerBuiltInTabs = (
 };
 
 /**
+ * Adds the languages registered source types list in `languageSettings` to the tabs they asked
+ * for. A language no tab lists is filtered out of the tab bar entirely, which leaves
+ * the results area blank.
+ */
+export const addRegisteredLanguagesToTabs = (
+  tabRegistry: TabRegistryService,
+  flavor: ExploreFlavor
+) => {
+  const sourceTypeRegistry = getSourceTypeRegistry();
+  tabRegistry.getAllTabs().forEach((tab) => {
+    const added = sourceTypeRegistry
+      .getLanguagesForTab(tab.id, flavor)
+      .filter((languageId) => !tab.supportedLanguages.includes(languageId));
+    if (added.length) {
+      tabRegistry.registerTab({
+        ...tab,
+        supportedLanguages: [...tab.supportedLanguages, ...added],
+      });
+    }
+  });
+};
+
+/**
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
 export const registerTabs = (services: ExploreServices, flavor: ExploreFlavor) => {
   // Register built-in tabs
   registerBuiltInTabs(services.tabRegistry, services, flavor);
+  addRegisteredLanguagesToTabs(services.tabRegistry, flavor);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs
