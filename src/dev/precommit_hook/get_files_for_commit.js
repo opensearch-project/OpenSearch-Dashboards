@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import SimpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { fromNode as fcb } from 'bluebird';
 
 import { REPO_ROOT } from '@osd/utils';
@@ -42,9 +42,9 @@ import { File } from '../file';
  * @return {Promise<Array<File>>}
  */
 export async function getFilesForCommit() {
-  const simpleGit = new SimpleGit(REPO_ROOT);
+  const git = simpleGit(REPO_ROOT);
 
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb));
+  const output = await fcb((cb) => git.diff(['--name-status', '--cached'], cb));
 
   return (
     output
