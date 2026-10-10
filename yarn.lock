@@ -2893,10 +2893,10 @@
     "@hapi/bourne" "^3.0.0"
     "@hapi/hoek" "^11.0.2"
 
-"@hono/node-server@^1.19.9":
-  version "1.19.17"
-  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.19.17.tgz#99bd8625cdbae82652a135c71363cd6322fae483"
-  integrity sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==
+"@hono/node-server@^1.19.9 || ^2.0.5":
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-2.1.3.tgz#d30105145a33fd8e492afee4df3eaa3ff1d26b9f"
+  integrity sha512-TA//nWMqPhbfdfneACk6t5a9eqbS9lABEPyKn0/xZTah3H3U2XaVg85rJFl0/Fyit0I552YDHgXGVSf3GwqbUw==
 
 "@humanfs/core@^0.19.2":
   version "0.19.2"
@@ -3689,12 +3689,12 @@
   resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.16.0.tgz#2249090633e04063176863a050c8f0808d2b6d2b"
   integrity sha512-xgAyonlVVS+q7Vc7qLW0UrJU7rSFcETRWsqdXZtjzRU8dF+6CkozTK4V4y1LwOX7j8r/vHphjDeMeGI4tNGeGA==
 
-"@modelcontextprotocol/sdk@^1.26.0":
-  version "1.26.0"
-  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.26.0.tgz#5b35d73062125f126cc70b0be83cbab53bcdde74"
-  integrity sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==
+"@modelcontextprotocol/sdk@^1.31.0":
+  version "1.31.0"
+  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.31.0.tgz#86ce85651376ae54e5df2db29b18da0eef7054d4"
+  integrity sha512-UvTMgnNlnIBO/22ob2RcVGDlcvOslQs8T59+FTGdA0L27a39fdGF/EDETNtDVK4DZGpwomlsYpRdA8UXcVL/pw==
   dependencies:
-    "@hono/node-server" "^1.19.9"
+    "@hono/node-server" "^1.19.9 || ^2.0.5"
     ajv "^8.17.1"
     ajv-formats "^3.0.1"
     content-type "^1.0.5"
@@ -6658,17 +6658,7 @@ ajv-keywords@^5.1.0:
   dependencies:
     fast-deep-equal "^3.1.3"
 
-ajv@^6.12.4, ajv@^6.12.5:
-  version "6.14.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.14.0.tgz#fd067713e228210636ebb08c60bd3765d6dbe73a"
-  integrity sha512-IWrosm/yrn43eiKqkfkHis7QioDleaXQHdDVPKg0FSwwd/DuvyX79TZnFOnYpB7dcsFAMmtFztZuXPDvSePkFw==
-  dependencies:
-    fast-deep-equal "^3.1.1"
-    fast-json-stable-stringify "^2.0.0"
-    json-schema-traverse "^0.4.1"
-    uri-js "^4.2.2"
-
-ajv@^6.14.0:
+ajv@^6.12.4, ajv@^6.12.5, ajv@^6.14.0:
   version "6.15.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.15.0.tgz#07e982c74626167aa7a2495c53817892d7139492"
   integrity sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==
@@ -8685,16 +8675,7 @@ create-require@^1.1.0, create-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.3, cross-spawn@^7.0.5:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.5.tgz#910aac880ff5243da96b728bc6521a5f6c2f2f82"
-  integrity sha512-ZVJrKKYunU38/76t0RMOulHOnUcbU9GbpWKAOZ0mhjr7CX6FVrH+4FrAapSOekrgFQ3f/8gwMEuIft0aKq6Hug==
-  dependencies:
-    path-key "^3.1.0"
-    shebang-command "^2.0.0"
-    which "^2.0.1"
-
-cross-spawn@^7.0.6:
+cross-spawn@^7.0.0, cross-spawn@^7.0.3, cross-spawn@^7.0.5, cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
   integrity sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==
@@ -13974,9 +13955,9 @@ known-css-properties@^0.24.0:
   integrity sha512-RTSoaUAfLvpR357vWzAz/50Q/BmHfmE6ETSWfutT0AJiw10e6CmcdYRQJlLRd95B53D0Y2aD1jSxD3V3ySF+PA==
 
 langsmith@^0.10.4, langsmith@^0.3.67:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.10.5.tgz#9df7871757247814f6a9ff07cb0b7c8f23ad9462"
-  integrity sha512-VUh6LQYGb+wjmMz5Ulazqx1rUHLbWi2XZvVkSHfxDjz6V7u9TJOB6jW5CC84xcpffu7Jr1MZpBbEz3gg972HbA==
+  version "0.10.8"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.10.8.tgz#8ee42365f6736000ca80f1ed28d4f008a9441225"
+  integrity sha512-svLrSnytr4cwZvx5XAel93fXRB1/OmC/u7tfXhnmyMpxIazPLDKKaMQYxGIjCvCRGhprmp9P4RiKM8ecZU46Mg==
   dependencies:
     p-queue "6.6.2"
 
@@ -21396,12 +21377,7 @@ zod@^3.22.0, zod@^3.22.4, zod@^3.23.8, zod@^3.24.1, zod@^3.25.32:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
 
-"zod@^3.25 || ^4.0":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.2.1.tgz#07f0388c7edbfd5f5a2466181cb4adf5b5dbd57b"
-  integrity sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==
-
-"zod@^3.25.0 || ^4.0.0":
+"zod@^3.25 || ^4.0", "zod@^3.25.0 || ^4.0.0":
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
   integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
