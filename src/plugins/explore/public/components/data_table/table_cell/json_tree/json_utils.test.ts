@@ -100,9 +100,38 @@ describe('containsTerm', () => {
     expect(containsTerm([{ status: 'in_transit' }], ['transit'])).toBe(true);
   });
 
+  it('finds a term in a key, a number, a boolean or null', () => {
+    expect(containsTerm({ order_id: 1 }, ['order'])).toBe(true);
+    expect(containsTerm({ error: { code: 502 } }, ['502'])).toBe(true);
+    expect(containsTerm({ paid: true }, ['true'])).toBe(true);
+    expect(containsTerm({ retry: null }, ['null'])).toBe(true);
+  });
+
   it('returns false without a match or without terms', () => {
     expect(containsTerm({ a: 'b' }, ['zzz'])).toBe(false);
     expect(containsTerm({ a: 'b' }, [])).toBe(false);
     expect(containsTerm(undefined, ['a'])).toBe(false);
+  });
+
+  it('only looks at keys and values, not at the JSON punctuation between them', () => {
+    expect(containsTerm({ a: 'b' }, ['":'])).toBe(false);
+    expect(containsTerm({ a: 'b', c: 'd' }, ['b","c'])).toBe(false);
+    expect(containsTerm(['x', 'y'], ['x","y'])).toBe(false);
+  });
+
+  it('matches the text of a string value as written, not its JSON-escaped form', () => {
+    expect(containsTerm({ a: 'say "hi"' }, ['say "hi"'])).toBe(true);
+  });
+
+  it('stops at the first match', () => {
+    let readLater = false;
+    const later = {
+      get value() {
+        readLater = true;
+        return 'never read';
+      },
+    };
+    expect(containsTerm([{ first: 'match here' }, later], ['match'])).toBe(true);
+    expect(readLater).toBe(false);
   });
 });

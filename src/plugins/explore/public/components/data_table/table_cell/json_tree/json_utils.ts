@@ -89,9 +89,21 @@ export const extractHighlightTerms = (html: unknown): string[] => {
   return Array.from(new Set(terms));
 };
 
-/** True when `value`, or anything nested in it, contains one of `terms`. */
+/**
+ * True when `value`, or a key or value nested anywhere in it, contains one of `terms`.
+ *
+ * Walks the structure and stops at the first match, rather than serializing it: this runs for
+ * every collapsed node of a tree, so serializing would copy each subtree once per ancestor.
+ */
 export const containsTerm = (value: unknown, terms: string[]): boolean => {
   if (terms.length === 0) return false;
-  const text = typeof value === 'string' ? value : (JSON.stringify(value) ?? '');
-  return terms.some((term) => text.includes(term));
+  const hasTerm = (text: string) => terms.some((term) => text.includes(term));
+  const visit = (node: unknown): boolean => {
+    if (Array.isArray(node)) return node.some(visit);
+    if (isContainer(node)) {
+      return Object.entries(node).some(([key, child]) => hasTerm(key) || visit(child));
+    }
+    return node !== undefined && hasTerm(String(node));
+  };
+  return visit(value);
 };

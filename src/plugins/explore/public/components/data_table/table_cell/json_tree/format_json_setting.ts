@@ -12,12 +12,15 @@ const STORAGE_KEY = 'explore:formatJson';
 
 /**
  * The user's own choice for showing JSON values as a tree, remembered in the browser.
- * Undefined until they change it from the table settings.
+ * Undefined until they change it from the table settings, and for any stored value other than
+ * the two `storeFormatJson` writes.
  */
 export const getStoredFormatJson = (): boolean | undefined => {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === null ? undefined : stored !== 'false';
+    if (stored === 'true') return true;
+    if (stored === 'false') return false;
+    return undefined;
   } catch (e) {
     return undefined;
   }

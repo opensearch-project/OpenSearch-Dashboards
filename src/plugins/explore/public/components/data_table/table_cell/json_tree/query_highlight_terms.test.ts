@@ -28,6 +28,22 @@ describe('extractQueryLiterals', () => {
     ).toEqual(['time', "it's"]);
   });
 
+  it('reads a doubled quote inside a literal as one quote (SQL-style escaping)', () => {
+    expect(extractQueryLiterals("source = t | where a = 'it''s here'")).toEqual(["it's here"]);
+    expect(extractQueryLiterals('source = t | where a = "say ""hi"""')).toEqual(['say "hi"']);
+    // the other kind of quote is ordinary text inside a literal
+    expect(extractQueryLiterals(`source = t | where a = 'x""y' and b = "p''q"`)).toEqual([
+      'x""y',
+      "p''q",
+    ]);
+  });
+
+  it('still separates adjacent literals and skips empty ones', () => {
+    expect(
+      extractQueryLiterals("source = t | where a = '' and b = 'x' and c in ('y', 'z')")
+    ).toEqual(['x', 'y', 'z']);
+  });
+
   it('returns nothing for a missing query', () => {
     expect(extractQueryLiterals(undefined)).toEqual([]);
     expect(extractQueryLiterals({})).toEqual([]);
