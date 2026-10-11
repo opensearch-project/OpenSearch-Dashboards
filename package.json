@@ -95,7 +95,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
-    "**/@babel/traverse": "^7.25.0",
+    "**/@babel/traverse": "^7.29.8",
     "**/@babel/helpers": "^7.27.0",
     "**/@babel/runtime": "^7.27.0",
     "**/@babel/runtime-corejs3": "^7.27.0",
