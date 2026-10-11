@@ -221,7 +221,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "npm:@amoo-miki/dns-sync@^0.2.1",
-    "dompurify": "^3.4.11",
+    "dompurify": "^3.4.16",
     "elastic-apm-node": "^3.43.0",
     "elasticsearch": "^16.7.0",
     "execa": "^4.0.2",
