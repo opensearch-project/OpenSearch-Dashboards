@@ -10,7 +10,7 @@ import type {
   TextInputContent,
 } from '../../../common/types';
 import { TOOL_EXECUTION_ERROR_PREFIX } from '../../../common';
-import { stripInlineSuggestions } from '../../../common/parse_inline_suggestions';
+import { stripAdditionalTextFromResponse } from '../../../common/strip_inline_response';
 import { resolveImageContent } from '../../utils/user_message_input';
 import { ChatExportData, ChatExportOptions, ChatTraceStep, QuestionImage } from './types';
 import { generatePDFReport } from './pdf_template';
@@ -38,7 +38,7 @@ export async function collectChatExportData(
   return {
     question,
     questionImage,
-    answer: stripInlineSuggestions(targetMessage.content || ''),
+    answer: stripAdditionalTextFromResponse(targetMessage.content || ''),
     traces: options.includeTraces ? extractTraces(timeline, targetIndex) : [],
     metadata: options.includeMetadata
       ? { timestamp: new Date().toISOString(), threadId }
