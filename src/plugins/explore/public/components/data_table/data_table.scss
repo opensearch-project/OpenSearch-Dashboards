@@ -132,6 +132,11 @@
     table-layout: auto;
     width: 100%;
 
+    // Faint separator between records (explore:rowSeparators)
+    &.explore-table--separators > tbody > tr:not(:first-child) > td {
+      border-top: $euiBorderThin;
+    }
+
     tr:first-child td {
       border-top: none;
     }

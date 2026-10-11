@@ -14,6 +14,8 @@ import {
   ENABLE_EXPERIMENTAL_SETTING,
   LOGS_BUILDER_MODE_ONLY_SETTING,
   ASYNC_QUERY_POLL_INTERVAL_SETTING,
+  FORMAT_JSON_SETTING,
+  ROW_SEPARATORS_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -29,6 +31,32 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['explore'],
     schema: schema.number({ min: 250, max: 60000 }),
+  },
+  [FORMAT_JSON_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.formatJsonValuesTitle', {
+      defaultMessage: 'Format JSON values',
+    }),
+    value: true,
+    description: i18n.translate('explore.advancedSettings.formatJsonValuesText', {
+      defaultMessage:
+        'Show string values that contain a JSON object or array as a collapsible, highlighted ' +
+        'tree in the Explore results table and in expanded documents. Rows showing a tree also ' +
+        'put the date and the time of the time column on separate lines. Each user can ' +
+        'override this from the table settings.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
+  },
+  [ROW_SEPARATORS_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.rowSeparatorsTitle', {
+      defaultMessage: 'Show row separators',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.rowSeparatorsText', {
+      defaultMessage: 'Draw a thin line between the rows of the Explore results table.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
   },
   [DEFAULT_TRACE_COLUMNS_SETTING]: {
     name: i18n.translate('explore.advancedSettings.defaultTraceColumnsTitle', {

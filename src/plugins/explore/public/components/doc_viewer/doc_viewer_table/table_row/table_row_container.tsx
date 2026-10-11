@@ -7,6 +7,8 @@ import { useMemo, useState } from 'react';
 import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
 import { DocViewRenderProps } from '../../../../types/doc_views_types';
+import { GetLeafFilter } from '../../../data_table/table_cell/json_tree/json_tree';
+import { findFieldForLeaf } from '../../../data_table/table_cell/json_tree/json_utils';
 
 export interface IDocViewTableRowContainer extends DocViewRenderProps {
   field: string;
@@ -87,6 +89,17 @@ export function DocViewTableRowContainer({
     });
   };
 
+  // A leaf of a JSON string value can be filtered on when the same data is also indexed as a
+  // real, filterable field of this document.
+  const getLeafFilter: GetLeafFilter | undefined = filter
+    ? (path, leafValue) => {
+        const leafField = findFieldForLeaf(flattened, field, path, leafValue);
+        const leafMapping = leafField ? indexPattern.fields.getByName(leafField) : undefined;
+        if (!leafMapping || leafMapping.filterable === false) return undefined;
+        return (mode) => filter(leafMapping, leafValue, mode);
+      }
+    : undefined;
+
   const toggleColumn =
     onRemoveColumn && onAddColumn && Array.isArray(columns)
       ? () => {
@@ -115,6 +128,9 @@ export function DocViewTableRowContainer({
       onToggleColumn={toggleColumn}
       value={value}
       valueRaw={valueRaw}
+      getLeafFilter={getLeafFilter}
+      // Separate from the data table cell's key: the two views are expanded independently.
+      jsonStateKey={hit._id !== undefined ? `doc/${hit._index}/${hit._id}/${field}` : undefined}
     />
   );
 }
