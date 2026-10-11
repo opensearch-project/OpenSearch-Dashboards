@@ -151,7 +151,8 @@
     "**/serialize-javascript": "^7.0.5",
     "**/@cypress/request/form-data": "^2.5.6",
     "**/tmp": "^0.2.7",
-    "**/js-cookie": "^3.0.8"
+    "**/js-cookie": "^3.0.8",
+    "**/extract-zip": "file:./scripts/extract_zip_shim"
   },
   "workspaces": {
     "packages": [
@@ -296,6 +297,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/filesaver": "1.1.2",
     "@elastic/makelogs": "^6.1.0",
+    "@electron-internal/extract-zip": "^1.0.5",
     "@faker-js/faker": "^7.6.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",

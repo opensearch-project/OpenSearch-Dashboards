@@ -1,0 +1,8 @@
+{
+  "name": "extract-zip",
+  "version": "2.0.1-shim",
+  "description": "CommonJS shim mapping extract-zip to @electron-internal/extract-zip (fixes CVE-2026-56876, CVE-2026-19693)",
+  "main": "index.js",
+  "private": true,
+  "license": "Apache-2.0"
+}
