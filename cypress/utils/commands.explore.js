@@ -186,7 +186,13 @@ cy.explore.add('setQueryEditor', (value, options = {}) => {
 cy.explore.add('setTopNavDate', (start, end, submit = true) => {
   cy.osd.ensureTopNavExists();
 
-  // cy.wait(3000);
+  // Close any open overlays first
+  cy.get('body').then(($body) => {
+    if ($body.find('.euiOverlayMask').length > 0) {
+      cy.get('body').type('{esc}');
+      cy.wait(500);
+    }
+  });
 
   const opts = { log: false };
 
@@ -331,6 +337,14 @@ cy.explore.add('updateTopNav', (options) => {
 cy.explore.add(
   'saveQuery',
   (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
+    // Close any open overlays first
+    cy.get('body').then(($body) => {
+      if ($body.find('.euiOverlayMask').length > 0) {
+        cy.get('body').type('{esc}');
+        cy.wait(500);
+      }
+    });
+
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
@@ -352,12 +366,23 @@ cy.explore.add(
     cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
       .contains('was saved')
       .should('be.visible');
+    // Dismiss toast and ensure modal is closed
+    cy.get('body').click(0, 0);
+    cy.wait(500);
   }
 );
 
 cy.explore.add(
   'updateSavedQuery',
   (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
+    // Close any open overlays first
+    cy.get('body').then(($body) => {
+      if ($body.find('.euiOverlayMask').length > 0) {
+        cy.get('body').type('{esc}');
+        cy.wait(500);
+      }
+    });
+
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
       cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
@@ -392,6 +417,9 @@ cy.explore.add(
     cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
       .contains('was saved')
       .should('be.visible');
+    // Dismiss toast and ensure modal is closed
+    cy.get('body').click(0, 0);
+    cy.wait(500);
     cy.osd.waitForSync();
   }
 );
@@ -419,7 +447,15 @@ cy.explore.add('clearSavedQuery', () => {
 });
 
 cy.explore.add('deleteSavedQuery', (name) => {
-  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+  // Close any open overlays first
+  cy.get('body').then(($body) => {
+    if ($body.find('.euiOverlayMask').length > 0) {
+      cy.get('body').type('{esc}');
+      cy.wait(500);
+    }
+  });
+
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
 
   // Wait for the popover to fully render before clicking the open button
   cy.getElementByTestId('saved-query-management-open-button')
