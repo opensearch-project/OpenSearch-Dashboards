@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensearch.org/schemas/saved-objects/search.v1.schema.json",
+  "title": "OpenSearch Dashboards Saved Search Object v1",
+  "description": "Schema for a saved search object, representing a Discover query with column selections, sort order, and search source configuration.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title of the saved search."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the saved search."
+    },
+    "hits": {
+      "type": "integer",
+      "description": "Number of hits (usage tracking counter).",
+      "minimum": 0
+    },
+    "version": {
+      "type": "integer",
+      "description": "Saved object schema version for migration tracking."
+    },
+    "columns": {
+      "type": "array",
+      "description": "Ordered list of field names displayed as columns in the Discover results table.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sort": {
+      "type": "array",
+      "description": "Sort configuration. Each element is a two-element array of [fieldName, direction] or a single sort entry.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "array",
+            "description": "Sort entry as [fieldName, direction].",
+            "items": [
+              {
+                "type": "string",
+                "description": "Field name to sort by."
+              },
+              {
+                "type": "string",
+                "description": "Sort direction.",
+                "enum": ["asc", "desc"]
+              }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          {
+            "type": "string",
+            "description": "Field name with implicit direction."
+          }
+        ]
+      }
+    },
+    "kibanaSavedObjectMeta": {
+      "$ref": "common.schema.json#/$defs/kibanaSavedObjectMeta"
+    },
+    "references": {
+      "$ref": "common.schema.json#/$defs/references"
+    }
+  },
+  "required": ["title"],
+  "additionalProperties": false
+}
