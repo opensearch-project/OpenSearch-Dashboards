@@ -6,17 +6,13 @@
 import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
 
 /**
- * A stateful stand-in for the async PPL engine, for tests that need the client driven through a
- * realistic lifecycle rather than a fixed sequence of canned snapshots.
+ * A stateful stand-in for the async PPL engine, for tests that need a realistic lifecycle rather
+ * than a fixed sequence of canned snapshots. Serves rows from the `offset` and `count` asked for,
+ * which per-call mocks cannot express, and reproduces two envelope details:
  *
- * Per-call mocks cannot express the behaviour that matters here — that a window is served from the
- * offset the client asked for — so they let bugs through where the client requests the wrong window
- * or fails to advance. This honours `offset` and `count`, and reproduces the two envelope details
- * that are easy to get wrong:
- *
- *  - while running it reports `update_mode: APPEND` and a `total` that grows as rows are committed;
- *  - once finished it reports `update_mode: REPLACE`, because the final result is a whole result set
- *    rather than an increment, while still serving only the requested window.
+ *  - while running, `update_mode: APPEND` and a `total` that grows as rows are committed;
+ *  - once finished, `update_mode: REPLACE` — the final result is a whole result set rather than an
+ *    increment — while still serving only the requested window.
  */
 export interface FakeStreamEngineOptions {
   /** Rows the query will ultimately match. */

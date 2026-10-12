@@ -9,20 +9,19 @@
  *
  * Converts a streaming PPL snapshot into the `ISearchResult` the results table already renders.
  *
- * The synchronous path reaches the same shape through the server search strategy (`createDataFrame`)
- * and the client's `convertResult`, but streaming bypasses `SearchSource`, which has no observable
- * `fetch$`. This reproduces that pipeline's two observable behaviours:
+ * The synchronous path reaches the same shape via `createDataFrame` and `convertResult`, but
+ * streaming bypasses `SearchSource`, which has no observable `fetch$`. Two behaviours of that
+ * pipeline have to be reproduced here:
  *
- * - Field types are mapped with the same `getFieldType`, so `timestamp` becomes `date` and `struct`
- *   becomes `object`.
- * - Date values go through the language formatter, which renders the PPL wire format as an ISO
- *   string with an explicit offset. Without it the table treats `2026-09-29 12:34:56` as local time
- *   and shifts every timestamp by the browser's UTC offset.
+ * - field types mapped with the same `getFieldType`, so `timestamp` becomes `date` and `struct`
+ *   becomes `object`;
+ * - date values through the language formatter, which renders the PPL wire format as ISO with an
+ *   explicit offset. Without it the table reads `2026-09-29 12:34:56` as local time and shifts every
+ *   timestamp by the browser's UTC offset.
  *
- * Values of other types are passed through untouched, exactly as `convertResult` does. Note the
- * server's `shimSchemaRow` stringifies booleans and objects, but the PPL search strategy explore
- * uses does not call it — mirroring it here is what made booleans, structs, `geo_point` values and
- * arrays arrive as strings.
+ * All other values pass through untouched, as `convertResult` does. The server's `shimSchemaRow`
+ * stringifies booleans and objects, but the PPL strategy explore uses never calls it, so it must not
+ * be mirrored here either.
  */
 
 import { getFieldType, OSD_FIELD_TYPES } from '../../../../../data/common';

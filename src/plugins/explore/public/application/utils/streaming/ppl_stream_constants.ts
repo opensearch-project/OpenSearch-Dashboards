@@ -6,13 +6,11 @@
 import type { PPLStreamProgress, PPLStreamStatus } from '../../../../../query_enhancements/common';
 
 /**
- * Runtime constants and helpers for streaming PPL queries, defined locally in `explore`.
+ * Runtime constants for streaming PPL queries, duplicated here rather than imported.
  *
- * The types live in `query_enhancements/common` and are imported with `import type`, which the
- * bundler erases. Runtime *values* cannot cross that boundary: the optimizer only permits value
- * imports from a plugin's `public` entry point and `common/metrics`, and anything else fails the
- * build with "references a non-public export of the [queryEnhancements] bundle". So the handful of
- * values below are duplicated here rather than imported.
+ * Types cross from `query_enhancements/common` via `import type`, which the bundler erases. Values
+ * cannot: the optimizer only permits value imports from a plugin's `public` entry point, and
+ * anything else fails the build as "references a non-public export".
  */
 
 /**

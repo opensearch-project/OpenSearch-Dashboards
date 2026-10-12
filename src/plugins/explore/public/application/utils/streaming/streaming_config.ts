@@ -39,22 +39,16 @@ export interface StreamingQueryDescriptor {
 /**
  * Whether a query should run on the streaming path.
  *
- * All of the following are required:
+ * Two gates, both required: `queryEnhancements.pplStreaming` is the deployment capability, which the
+ * stream routes also enforce per request so a runtime change stops jobs already in flight, and
+ * `explore:enableStreamingResults` is the per-user opt-in beneath it.
  *
- * - Only PPL is supported: the asynchronous partial-results API is a PPL endpoint, and its
- *   restrictions (Calcite execution, JDBC response format) do not apply to the other languages.
- * - `queryEnhancements.pplStreaming` is the deployment flag, off by default and overridable at
- *   runtime through DynamicConfig. It decides whether streaming is available at all, and the stream
- *   routes enforce it again per request, so a runtime change also stops jobs already in flight.
- * - `explore:enableStreamingResults` is the per-user opt-in beneath that flag.
- * - The dataset must be index-backed, so the query is one the streaming path can actually replace.
- * - The engine must serve the async PPL API. Open Distro and legacy Elasticsearch do not, and
- *   unknown engines are assumed to (matching the rest of the engine capability table); a wrong
- *   assumption costs one failed submit, which falls back to the non-streaming path.
+ * An unknown engine is assumed to serve the async PPL API, matching the rest of the capability
+ * table; being wrong costs one failed submit and falls back to the non-streaming path.
  *
- * Note this cannot predict whether a query will actually produce partial results — that depends on
- * the plan, which only the engine knows. A query that turns out to sort or aggregate still runs
- * correctly here, it just delivers everything in one final snapshot.
+ * Eligibility cannot predict whether a query will actually produce partial results — that depends on
+ * the plan, which only the engine knows. A sorting or aggregating query still runs correctly, it
+ * just delivers everything in one final snapshot.
  */
 export const isStreamingEligible = (
   { uiSettings, capabilities }: StreamingEligibilityDeps,

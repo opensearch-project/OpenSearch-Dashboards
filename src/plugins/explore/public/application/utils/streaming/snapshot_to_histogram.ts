@@ -14,10 +14,9 @@ import { parseRowTimestamp } from './parse_row_timestamp';
  *   schema:   [{ name: 'count()', type: 'bigint' }, { name: 'span(`@timestamp`,1h)', type: 'timestamp' }]
  *   datarows: [[58823, '2026-09-14 19:00:00'], [211765, '2026-09-14 20:00:00'], ...]
  *
- * These are authoritative counts over every matching document, computed by the engine — not an
- * approximation derived from the subset of rows a client happened to fetch. On the progressive
- * backend the aggregation publishes `REPLACE` snapshots as composite pages complete, so the counts
- * grow toward the true distribution while the query runs.
+ * Counts are the engine's own, over every matching document, not derived from the rows the client
+ * happened to fetch. The aggregation publishes `REPLACE` snapshots as composite pages complete, so
+ * they grow toward the true distribution while the query runs.
  */
 
 export interface HistogramBucket {

@@ -9,21 +9,14 @@ import { RootState } from '../state_management/store';
 /**
  * Releases server-side streaming jobs when the page goes away.
  *
- * The client is the only holder of a job id: the backend exposes no way to enumerate jobs, and the id
- * is not persisted across a reload. A job abandoned without being released therefore cannot be
- * cancelled by anyone, and holds its entire result in cluster heap until `keep_alive` lapses.
- *
- * Reading is what renews `keep_alive`, so an abandoned job does expire a few minutes after its last
- * poll. This makes that reclamation prompt rather than delayed; it is best effort by nature, since an
- * unload handler is not guaranteed to run.
+ * The client is the sole holder of a job id — the backend cannot enumerate jobs and the id does not
+ * survive a reload — so an abandoned job can be cancelled by no one and holds its result in cluster
+ * heap until `keep_alive` lapses. Best effort: an unload handler is not guaranteed to run.
  */
 
 /**
- * Every job id the page knows of, whether or not its run is still polling.
- *
- * A completed job keeps holding its result until `keep_alive` lapses, so it is worth releasing too —
- * a finished high-cardinality histogram can be holding millions of buckets. Releasing twice is
- * harmless: the route reports an already-released job as cancelled.
+ * Every job id the page knows of, including completed ones: a finished job holds its result until
+ * `keep_alive` lapses. Releasing twice is harmless, as the route reports that as cancelled.
  */
 export const collectInFlightJobIds = (state: RootState): string[] => {
   const statuses = state?.queryEditor?.queryStatusMap ?? {};

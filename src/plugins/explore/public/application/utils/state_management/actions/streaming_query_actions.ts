@@ -32,22 +32,17 @@ import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/sna
 import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
 
 /**
- * Interval between polls. A snapshot older than this is simply re-read; no work is lost.
+ * Interval between polls. A snapshot older than this is simply re-read, so no work is lost.
  *
- * The engine publishes on geometric backoff from 200 rows with a 500ms floor, so it commits rows
- * far faster than any client drains them. Polling faster makes the row count and table update more
- * visibly, but cannot keep up with the accumulator by design (see notes.md §4).
+ * The engine commits rows far faster than any client can drain them, so polling faster only makes
+ * the counter move more visibly without ever catching up.
  */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
 
 /**
- * Rows held client-side. Deliberately bounded: the engine commits rows far faster than any client
- * can drain them (a full drain of 5M rows measured 5,000 round trips / 71s), so the table shows a
- * window while `total` reports the real size.
- *
- * Must stay well above ROWS_PER_POLL, or the cap is reached on the first poll and the table stops
- * growing. At 10 polls of 10,000 this fills in ten seconds; beyond that the window slides no
- * further and `total` alone conveys progress.
+ * Rows held client-side. Bounded because the engine outruns the client, so the table shows a window
+ * while `total` reports the real size. Must stay well above ROWS_PER_POLL, or the cap is reached on
+ * the first poll and the table stops growing.
  */
 export const STREAMING_MAX_HELD_ROWS = 100_000;
 

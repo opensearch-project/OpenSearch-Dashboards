@@ -65,13 +65,10 @@ export interface DataSourceEngineCapabilities {
   /** Whether the backend runtime PPL grammar endpoint (`/_plugins/_ppl/_grammar`) exists. */
   supportsRuntimePplGrammar: boolean;
   /**
-   * Whether the engine serves the asynchronous PPL API that streaming partial results depends on:
-   * `/_plugins/_ppl` accepting `wait_for_completion_timeout` and returning a pollable job id. The
-   * Open Distro endpoints have no async equivalent, so any engine using them must set this false.
-   *
-   * No version gating is needed on engines that do serve it: SQL plugins older than the async API
-   * ignore the extra fields and return an ordinary complete result, which the client renders as a
-   * single final snapshot.
+   * Whether the engine serves the asynchronous PPL API streaming depends on: `/_plugins/_ppl`
+   * accepting `wait_for_completion_timeout` and returning a pollable job id. The Open Distro
+   * endpoints have no async equivalent, so engines using them must set this false. Needs no version
+   * gating otherwise — older SQL plugins ignore the extra fields and return a complete result.
    */
   supportsAsyncPplStreaming: boolean;
   /** Client-action endpoints the server Facet should use to run PPL/SQL for this engine. */

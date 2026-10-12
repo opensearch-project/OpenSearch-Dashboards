@@ -1210,8 +1210,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       });
     });
 
-    // Item 4: an engine without the async PPL API only fails at submit, and the run reports itself
-    // as unavailable. The query must then be answered on the non-streaming path rather than erroring.
+    // An engine without the async PPL API only reveals that at submit. Nothing has been rendered
+    // at that point, so the query must fall back to the non-streaming path rather than error.
     describe('when a streaming run reports itself unavailable', () => {
       const STREAMING_SETTING = 'explore:enableStreamingResults';
 
@@ -1250,8 +1250,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
-      // The streaming run fails at submit here (no http service is stubbed), which is exactly the
-      // shape item 4 handles: it publishes nothing and reports itself unavailable.
+      // Submit fails here because no http service is stubbed, so the run publishes nothing and
+      // reports itself unavailable.
       it('re-runs the data table query on the standard path', async () => {
         mockGetState.mockReturnValue(stateWithPplDataset());
         // Annotated because the mock references itself for thunk actions, which otherwise
