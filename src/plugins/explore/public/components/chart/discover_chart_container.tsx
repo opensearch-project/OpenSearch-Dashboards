@@ -5,6 +5,7 @@
 
 import './discover_chart_container.scss';
 import { useMemo } from 'react';
+import { EuiLoadingChart } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { ExploreFlavor } from '../../../common';
 import { ExploreServices } from '../../types';
@@ -28,6 +29,17 @@ import {
   TracesChartProcessedResults,
 } from '../../application/utils/interfaces';
 import { TRACES_CHART_BAR_TARGET } from '../../application/utils/state_management/constants';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+
+/**
+ * Height the rendered chart settles at, per flavor, measured at 1600x1000. Reserved while the
+ * histogram query is in flight so the results below do not get pushed down when it arrives.
+ *
+ * An aggregation publishes nothing until it completes, so the chart can be seconds behind a table
+ * that is already showing rows — without this the table visibly jumps when it lands.
+ */
+const RESERVED_CHART_HEIGHT: Record<string, number> = { logs: 137, traces: 147 };
+const DEFAULT_RESERVED_CHART_HEIGHT = 137;
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -160,22 +172,46 @@ export const DiscoverChartContainer = () => {
     uiSettings,
   ]);
 
+  // Whether the query feeding this chart is still running. Covers both paths: a streamed histogram
+  // runs as its own job, and the synchronous one is dispatched fire-and-forget, so in either case
+  // the chart has no data for a while after the results below it do.
+  const isChartLoading =
+    flavorId === ExploreFlavor.Traces
+      ? [requestCacheKey, errorCacheKey, latencyCacheKey].some(
+          (key) => key && queryStatusMap[key]?.status === QueryExecutionStatus.LOADING
+        )
+      : !!cacheKey && queryStatusMap[cacheKey]?.status === QueryExecutionStatus.LOADING;
+
+  const reservedHeight = RESERVED_CHART_HEIGHT[flavorId ?? ''] ?? DEFAULT_RESERVED_CHART_HEIGHT;
+
+  const chartPlaceholder = (
+    <div
+      className="dscCanvas__chart dscCanvas__chartPlaceholder"
+      style={{ height: reservedHeight }}
+      data-test-subj="dscChartLoadingPlaceholder"
+    >
+      <EuiLoadingChart size="l" />
+    </div>
+  );
+
+  // A non-time-based query has no histogram at all, so there is nothing to reserve.
   if (!isTimeBased) {
     return null;
   }
 
   if (!processedResults) {
-    return null;
+    return isChartLoading ? chartPlaceholder : null;
   }
 
   if (flavorId === ExploreFlavor.Traces) {
     if (!(processedResults as TracesChartProcessedResults).requestChartData) {
-      return null;
+      return isChartLoading ? chartPlaceholder : null;
     }
-  } else {
-    if (!processedResults.hits.total || !(processedResults as ProcessedSearchResults).chartData) {
-      return null;
-    }
+  } else if (
+    !processedResults.hits.total ||
+    !(processedResults as ProcessedSearchResults).chartData
+  ) {
+    return isChartLoading ? chartPlaceholder : null;
   }
 
   return (

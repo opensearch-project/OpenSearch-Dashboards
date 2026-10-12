@@ -340,6 +340,78 @@ describe('DiscoverChartContainer', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  // An aggregation publishes nothing until it completes, so the chart can arrive seconds after the
+  // results below it. Without reserved space those results get pushed down when it lands.
+  describe('while the chart query is still running', () => {
+    const loading = (key: string) => ({ [key]: { status: QueryExecutionStatus.LOADING } });
+
+    // An earlier test replaces the dataset with a non-time-based one, and clearAllMocks does not
+    // restore implementations, so these set it explicitly rather than inherit whatever ran before.
+    beforeEach(() => {
+      mockUseDatasetContext.mockReturnValue({
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-*',
+          timeFieldName: '@timestamp',
+          isTimeBased: jest.fn(() => true),
+        },
+        isLoading: false,
+        error: null,
+      } as any);
+    });
+
+    it('reserves the chart height for logs instead of rendering nothing', () => {
+      renderComponent(false, ExploreFlavor.Logs, undefined, loading('histogram:test-cache-key'));
+
+      const placeholder = screen.getByTestId('dscChartLoadingPlaceholder');
+      expect(placeholder).toBeInTheDocument();
+      expect(placeholder).toHaveStyle({ height: '137px' });
+    });
+
+    it('reserves the taller chart height for traces', () => {
+      renderComponent(false, ExploreFlavor.Traces, undefined, loading('trace-requests:test-query'));
+
+      expect(screen.getByTestId('dscChartLoadingPlaceholder')).toHaveStyle({ height: '147px' });
+    });
+
+    it('renders nothing once the query is no longer loading and has no data', () => {
+      const { container } = renderComponent(false, ExploreFlavor.Logs, undefined, {
+        'histogram:test-cache-key': { status: QueryExecutionStatus.READY },
+      });
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('reserves nothing for a non-time-based dataset, which has no histogram', () => {
+      mockUseDatasetContext.mockReturnValue({
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-*',
+          timeFieldName: undefined,
+          isTimeBased: jest.fn(() => false),
+        },
+        isLoading: false,
+        error: null,
+      } as any);
+
+      const { container } = renderComponent(
+        false,
+        ExploreFlavor.Logs,
+        undefined,
+        loading('histogram:test-cache-key')
+      );
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('gives way to the real chart once data arrives', () => {
+      renderComponent(true, ExploreFlavor.Logs, undefined, loading('histogram:test-cache-key'));
+
+      expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscChartLoadingPlaceholder')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Breakdown cache key logic', () => {
     beforeEach(() => {
       jest.clearAllMocks();
