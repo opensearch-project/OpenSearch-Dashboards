@@ -34,7 +34,7 @@ import Fs from 'fs';
 import execa from 'execa';
 import { REPO_ROOT, standardize } from '@osd/cross-platform';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
-import extract from 'extract-zip';
+import yauzl from 'yauzl';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
@@ -52,6 +52,58 @@ const PLUGIN_ARCHIVE_X = Path.resolve(
   `fooTestPlugin-${OPENSEARCH_DASHBOARDS_VERSION_X}.zip`
 );
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
+
+/**
+ * Extract a zip archive, preserving the full entry paths.
+ *
+ * Modelled on `decompressZip` in @osd/opensearch, without its root-directory
+ * stripping. This replaces extract-zip, whose final release (2.0.1) carries two
+ * unfixed path-traversal advisories; yauzl is the engine extract-zip itself
+ * wrapped, and it never creates symlink entries, which is what those advisories
+ * abuse. Entry paths are still checked so nothing can be written outside `dir`.
+ */
+function extractArchive(archive: string, dir: string) {
+  return new Promise<void>((resolve, reject) => {
+    yauzl.open(archive, { lazyEntries: true }, (openError, zipfile) => {
+      if (openError || !zipfile) {
+        reject(openError);
+        return;
+      }
+
+      zipfile.on('error', reject);
+      zipfile.on('close', resolve);
+
+      zipfile.on('entry', (entry) => {
+        const target = Path.resolve(dir, entry.fileName);
+        if (target !== dir && !target.startsWith(dir + Path.sep)) {
+          reject(new Error(`Zip entry "${entry.fileName}" would be written outside of ${dir}`));
+          return;
+        }
+
+        if (entry.fileName.endsWith('/')) {
+          Fs.mkdirSync(target, { recursive: true });
+          zipfile.readEntry();
+          return;
+        }
+
+        Fs.mkdirSync(Path.dirname(target), { recursive: true });
+        zipfile.openReadStream(entry, (streamError, readStream) => {
+          if (streamError || !readStream) {
+            reject(streamError);
+            return;
+          }
+
+          const writeStream = Fs.createWriteStream(target);
+          writeStream.on('error', reject);
+          writeStream.on('close', () => zipfile.readEntry());
+          readStream.pipe(writeStream);
+        });
+      });
+
+      zipfile.readEntry();
+    });
+  });
+}
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
@@ -115,7 +167,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info cleaning up compression temporary artifacts"
   `);
 
-  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
+  await extractArchive(PLUGIN_ARCHIVE, TMP_DIR);
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
@@ -209,7 +261,7 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
      info cleaning up compression temporary artifacts"
   `);
 
-  await extract(PLUGIN_ARCHIVE_X, { dir: TMP_DIR }, () => {});
+  await extractArchive(PLUGIN_ARCHIVE_X, TMP_DIR);
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));

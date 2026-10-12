@@ -62,6 +62,7 @@ export const CopySource: Task = {
         'config/node.options',
         'tsconfig*.json',
         'opensearch_dashboards.d.ts',
+        'scripts/extract_zip_shim/**',
       ],
     });
 
