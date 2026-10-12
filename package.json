@@ -238,7 +238,7 @@
     "chokidar": "^3.4.2",
     "color": "1.0.3",
     "commander": "^3.0.2",
-    "core-js": "^3.6.5",
+    "core-js": "^3.50.0",
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dompurify": "^3.4.16",

@@ -20,7 +20,7 @@
     "autoprefixer": "^10.4.1",
     "compression-webpack-plugin": "^11.1.0",
     "cpy": "^8.0.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.50.0",
     "dedent": "^0.7.0",
     "del": "^6.1.1",
     "execa": "^4.0.2",

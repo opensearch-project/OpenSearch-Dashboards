@@ -17,7 +17,7 @@
     "@osd/monaco": "1.0.0",
     "axios": "^1.20.0",
     "compression-webpack-plugin": "^11.1.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.50.0",
     "jquery": "^3.5.0",
     "lodash": "^4.18.0",
     "mini-css-extract-plugin": "^2.9.2",
