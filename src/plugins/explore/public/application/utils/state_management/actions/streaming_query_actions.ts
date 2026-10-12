@@ -28,12 +28,7 @@ import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_sl
 import { setResults } from '../slices';
 import { snapshotToHistogramBuckets } from '../../streaming/snapshot_to_histogram';
 import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
-import {
-  FieldValueFormatter,
-  snapshotRowsToObjects,
-  snapshotToSearchResult,
-  splitHighlightColumn,
-} from '../../streaming/snapshot_to_result';
+import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
 import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
 
 /**

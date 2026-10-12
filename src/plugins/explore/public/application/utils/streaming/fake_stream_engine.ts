@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { PPLStreamSnapshot } from '../../../../query_enhancements/common';
+import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
 
 /**
  * A stateful stand-in for the async PPL engine, for tests that need the client driven through a
