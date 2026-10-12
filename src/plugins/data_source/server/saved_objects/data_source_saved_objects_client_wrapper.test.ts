@@ -16,6 +16,11 @@ import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects
 import { SavedObject } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
+// Mock dns-sync to avoid real DNS lookups in tests
+jest.mock('dns-sync', () => ({
+  resolve: jest.fn(() => '1.2.3.4'),
+}));
+
 describe('DataSourceSavedObjectsClientWrapper', () => {
   const customAuthName = 'role_based_auth';
   const customAuthMethod = {
