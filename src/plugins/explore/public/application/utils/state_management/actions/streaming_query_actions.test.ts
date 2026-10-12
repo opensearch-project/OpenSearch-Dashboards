@@ -797,6 +797,45 @@ describe('executeStreamingQuery against a stateful engine', () => {
   // The accumulator reads the formatter through a provider, because it is constructed before the
   // language service is consulted. An identity-function mock would pass whether or not the provider
   // ever delivers it, so assert the formatter's own output reaches the rendered rows.
+  // An abort can land while a poll is in flight rather than during a sleep, in which case the poll
+  // resolves, its rows publish, and the loop exits on its own condition instead of throwing. That
+  // path still has to report the run as aborted.
+  it('reports an abort that lands between iterations', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 1_000, commitPerPoll: 10 });
+    mockSubmit.mockImplementation((...a: unknown[]) => engine.submit(...(a as [])));
+
+    const dispatched: any[] = [];
+    const dispatch: jest.Mock = jest.fn((action: any) => {
+      dispatched.push(action);
+      return typeof action === 'function' ? action(dispatch, () => ({})) : action;
+    });
+    const thunk = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+    } as any);
+    const promise: any = thunk(dispatch, () => ({}) as any, undefined);
+
+    // The mock ignores the signal, so aborting mid-poll lets it resolve and the loop exits on its
+    // own condition.
+    mockPoll.mockImplementation(async (a: any) => {
+      promise.abort();
+      return engine.poll(a);
+    });
+
+    for (let i = 0; i < 4; i++) {
+      await Promise.resolve();
+      jest.advanceTimersByTime(STREAMING_POLL_INTERVAL_MS);
+      await Promise.resolve();
+    }
+    await promise;
+
+    const final = dispatched.filter((a) => a?.type === setIndividualQueryStatus.type).pop()
+      .payload.status;
+    expect(final.streaming.isPolling).toBe(false);
+    expect(final.streaming.aborted).toBe(true);
+  });
+
   it('renders date values through the PPL formatter', async () => {
     const engine = new FakeStreamEngine({ totalRows: 10, commitPerPoll: 10 });
     pplFormatter.mockImplementation((value: any) =>

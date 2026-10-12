@@ -347,8 +347,10 @@ export const executeStreamingQuery = createAsyncThunk<
         }
       }
 
-      // The loop can also exit by observing `signal.aborted` between iterations.
-      finalise();
+      // Reached only when the loop condition saw `signal.aborted`, i.e. an abort landed between
+      // iterations rather than interrupting a sleep or a poll. Derived rather than hardcoded so it
+      // stays correct if the loop gains another exit.
+      finalise(signal.aborted);
     } catch (error) {
       if (isAbort(error)) {
         // The user cancelled: release the job so the coordinator stops work and frees memory.
