@@ -48,9 +48,10 @@ jest.mock('fs', () => ({
 }));
 
 import sinon from 'sinon';
+import { Command } from 'commander';
 
 import { Keystore } from '../legacy/server/keystore';
-import { create } from './create';
+import { create, createCli } from './create';
 import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from './utils/prompt';
 
@@ -113,6 +114,20 @@ describe('OpenSearch Dashboards keystore', () => {
       sinon.assert.calledWith(Logger.prototype.log, 'Exiting without modifying keystore.');
 
       sinon.assert.notCalled(keystore.save);
+    });
+
+    it('honors the silent option from the CLI', async () => {
+      Logger.prototype.log.restore();
+      sandbox.stub(process.stdout, 'write');
+
+      const keystore = new Keystore('/data/foo.keystore');
+      sandbox.stub(keystore, 'save');
+      const program = new Command();
+      createCli(program, keystore);
+
+      await program.parseAsync(['node', 'keystore', 'create', '--silent']);
+
+      sinon.assert.notCalled(process.stdout.write);
     });
   });
 

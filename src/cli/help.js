@@ -32,18 +32,18 @@ import _ from 'lodash';
 
 export default function help(command, spaces) {
   if (!_.size(command.commands)) {
-    return command.outputHelp();
+    return command.helpInformation();
   }
 
   const defCmd = _.find(command.commands, function (cmd) {
-    return cmd._name === 'serve';
+    return cmd.name() === 'serve';
   });
 
   const desc = !command.description() ? '' : command.description();
-  const cmdDef = !defCmd ? '' : `=${defCmd._name}`;
+  const cmdDef = !defCmd ? '' : `=${defCmd.name()}`;
 
   return `
-Usage: ${command._name} [command${cmdDef}] [options]
+Usage: ${command.name()} [command${cmdDef}] [options]
 
 ${desc}
 
@@ -65,10 +65,10 @@ function indent(str, n) {
 function commandsSummary(program) {
   const cmds = _.compact(
     program.commands.map(function (cmd) {
-      const name = cmd._name;
+      const name = cmd.name();
       if (name === '*') return;
       const opts = cmd.options.length ? ' [options]' : '';
-      const args = cmd._args
+      const args = cmd.registeredArguments
         .map(function (arg) {
           return humanReadableArgName(arg);
         })
@@ -90,13 +90,27 @@ function commandsSummary(program) {
 function cmdHelp(cmd) {
   if (!cmd) return '';
   return `
-"${cmd._name}" Options:
+"${cmd.name()}" Options:
 
-${indent(cmd.optionHelp(), 2)}
+${indent(optionHelp(cmd), 2)}
 `.trim();
 }
 
+function optionHelp(cmd) {
+  const helper = cmd.createHelp();
+  const options = helper.visibleOptions(cmd);
+  const termWidth = options.reduce(function (width, option) {
+    return Math.max(width, helper.optionTerm(option).length);
+  }, 0);
+
+  return options
+    .map(function (option) {
+      return `${_.padEnd(helper.optionTerm(option), termWidth)}  ${helper.optionDescription(option)}`;
+    })
+    .join('\n');
+}
+
 function humanReadableArgName(arg) {
-  const nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+  const nameOutput = arg.name() + (arg.variadic === true ? '...' : '');
   return arg.required ? '<' + nameOutput + '>' : '[' + nameOutput + ']';
 }

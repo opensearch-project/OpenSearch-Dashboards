@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const program = require('commander');
+const { Command, InvalidArgumentError } = require('commander');
 const { createWriteStream } = require('fs');
 const { join } = require('path');
 const { TestDataGenerator } = require('./test_data_generator');
@@ -11,6 +11,14 @@ const { TestDataGenerator } = require('./test_data_generator');
 // Need to update different path for multiple clusters
 const DEFAULT_PATH = './fixtures/query_enhancements/data_logs_2';
 const ID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const program = new Command();
+const argv = process.argv.map((arg) => {
+  // Modern Commander requires single-character short flags. Preserve the existing
+  // multi-character aliases used by this development script.
+  if (arg === '-st') return '--start-time';
+  if (arg === '-et') return '--end-time';
+  return arg;
+});
 
 function generateRandomId(length = 20) {
   return Array.from({ length }, () => ID_CHARS[Math.floor(Math.random() * ID_CHARS.length)]).join(
@@ -22,18 +30,18 @@ function generateRandomId(length = 20) {
 function parseInteger(value) {
   const parsedValue = parseInt(value, 10);
   if (isNaN(parsedValue)) {
-    throw new commander.InvalidArgumentError('Not a number.');
+    throw new InvalidArgumentError('Not a number.');
   }
   return parsedValue;
 }
 
 program
   .name('node cypress/scripts/generate_data/index.js')
-  .arguments('<index>', 'Index name for the test data')
-  .arguments('[path]', 'Path to save the test data')
+  .argument('<index>', 'Index name for the test data')
+  .argument('[path]', 'Path to save the test data')
   .option('-n, --doc-count <number>', 'Number of documents to generate', parseInteger, 10000)
-  .option('-st, --start-time <date>', 'Start time for generating docs', '2021-01-01T00:00:00.000')
-  .option('-et, --end-time <date>', 'End time for generating docs', '2022-12-31T23:59:59.999')
+  .option('--start-time <date>', 'Start time for generating docs', '2021-01-01T00:00:00.000')
+  .option('--end-time <date>', 'End time for generating docs', '2022-12-31T23:59:59.999')
   .option('--no-timestamp', 'Generate data without timestamp fields')
   .action(async (indexName, path, options) => {
     try {
@@ -93,4 +101,4 @@ program
     }
   });
 
-program.parse(process.argv);
+program.parseAsync(argv);

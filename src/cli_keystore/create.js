@@ -31,7 +31,7 @@
 import { Logger } from '../cli_plugin/lib/logger';
 import { confirm } from './utils';
 
-export async function create(keystore, command, options) {
+export async function create(keystore, options = {}) {
   const logger = new Logger(options);
 
   if (keystore.exists()) {
@@ -53,5 +53,5 @@ export function createCli(program, keystore) {
     .command('create')
     .description('Creates a new OpenSearch Dashboards keystore')
     .option('-s, --silent', 'prevent all logging')
-    .action(create.bind(null, keystore));
+    .action((options) => create(keystore, options));
 }

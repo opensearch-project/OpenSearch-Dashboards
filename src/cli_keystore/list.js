@@ -30,7 +30,7 @@
 
 import { Logger } from '../cli_plugin/lib/logger';
 
-export function list(keystore, command, options = {}) {
+export function list(keystore, options = {}) {
   const logger = new Logger(options);
 
   if (!keystore.exists()) {
@@ -48,5 +48,5 @@ export function listCli(program, keystore) {
     .command('list')
     .description('List entries in the keystore')
     .option('-s, --silent', 'prevent all logging')
-    .action(list.bind(null, keystore));
+    .action((options) => list(keystore, options));
 }

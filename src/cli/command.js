@@ -70,9 +70,10 @@ Command.prototype.unknownArgv = function (argv) {
  * @return {[type]} [description]
  */
 Command.prototype.collectUnknownOptions = function () {
-  const title = `Extra ${this._name} options`;
+  const title = `Extra ${this.name()} options`;
 
   this.allowUnknownOption();
+  this.allowExcessArguments();
   this.getUnknownOptions = function () {
     const opts = {};
     const unknowns = this.unknownArgv();
@@ -103,6 +104,14 @@ Command.prototype.collectUnknownOptions = function () {
 
     return opts;
   };
+
+  return this;
+};
+
+Command.prototype.rejectUnknownCommands = function () {
+  this.on('command:*', ([command]) => {
+    this.error(`unknown command ${command}`);
+  });
 
   return this;
 };
