@@ -30,6 +30,7 @@ import {
   syncPPLValidationContext,
   syncPPLLintContext,
   addPPLLintFixAssistantContext,
+  armPPLLintFixRequest,
   attachPPLContexts,
   cleanupPPLContexts,
   PPLDetachRefs,
@@ -188,6 +189,8 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
       // Supersede any older in-flight request (cleans its context under the
       // Explore host prefix) and take ownership of this one.
       pplLintFixLifecycle.beginRequest(request.requestId);
+      // Arm before the chat send so the tools register for this fix turn.
+      armPPLLintFixRequest(request.requestId);
 
       const session = {
         host: PPL_LINT_FIX_EXPLORE_HOST,
