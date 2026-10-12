@@ -172,7 +172,7 @@ function checkExpressionAst(expression: string, location: string): ValidationRes
 
   let ast: ASTNode;
   try {
-    ast = parseExpression(expression) as unknown as ASTNode;
+    ast = (parseExpression(expression) as unknown) as ASTNode;
   } catch (e) {
     // If the expression doesn't parse, Vega will reject it at render time anyway
     return results;
