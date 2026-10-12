@@ -473,7 +473,7 @@
     "jest-environment-jsdom": "^30.4.1",
     "jest-location-mock": "^4.0.1",
     "jimp": "^1.6.1",
-    "jquery": "^3.5.0",
+    "jquery": "^3.7.1",
     "json-stringify-pretty-compact": "1.2.0",
     "json5": "^2.2.3",
     "leaflet": "1.5.1",
