@@ -33,6 +33,9 @@ interface Arguments {
   savedDashboardInstance: SavedObjectDashboard;
 }
 
+const enforceReadOnlyViewMode = (state: DashboardAppState, hideWriteControls: boolean) =>
+  hideWriteControls ? { ...state, viewMode: ViewMode.VIEW } : state;
+
 export const createDashboardGlobalAndAppState = ({
   stateDefaults,
   osdUrlStateStorage,
@@ -55,14 +58,21 @@ export const createDashboardGlobalAndAppState = ({
      OpenSearch version so no need to migrate panels that are version 7.3.0 or higher
   2. Update the version number on each panel to the current version.
   */
-  const initialState = migrateAppState(
-    hydrateDashboardAppState(stateDefaults, urlState),
-    opensearchDashboardsVersion,
-    usageCollection
+  const hideWriteControls = services.dashboardConfig.getHideWriteControls();
+  const initialState = enforceReadOnlyViewMode(
+    migrateAppState(
+      hydrateDashboardAppState(stateDefaults, urlState),
+      opensearchDashboardsVersion,
+      usageCollection
+    ),
+    hideWriteControls
   );
 
   const pureTransitions = {
-    set: (state) => (prop, value) => ({ ...state, [prop]: value }),
+    set: (state) => (prop, value) =>
+      hideWriteControls && prop === 'viewMode' && value === ViewMode.EDIT
+        ? state
+        : { ...state, [prop]: value },
     setOption: (state) => (option, value) => ({
       ...state,
       options: {
@@ -70,14 +80,18 @@ export const createDashboardGlobalAndAppState = ({
         [option]: value,
       },
     }),
-    setDashboard: (state) => (dashboard) => ({
-      ...state,
-      ...dashboard,
-      options: {
-        ...state.options,
-        ...dashboard.options,
-      },
-    }),
+    setDashboard: (state) => (dashboard) =>
+      enforceReadOnlyViewMode(
+        {
+          ...state,
+          ...dashboard,
+          options: {
+            ...state.options,
+            ...dashboard.options,
+          },
+        },
+        hideWriteControls
+      ),
   } as DashboardAppStateTransitions;
 
   const stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
@@ -107,12 +121,15 @@ export const createDashboardGlobalAndAppState = ({
           // URL changes do not reset the dashboard to its initial saved state.
           const currentState = stateContainer.getState();
           stateContainer.set(
-            hydrateDashboardAppState(
-              stateDefaults,
-              state,
-              currentState.panels,
-              currentState.variables,
-              currentState.layout
+            enforceReadOnlyViewMode(
+              hydrateDashboardAppState(
+                stateDefaults,
+                state,
+                currentState.panels,
+                currentState.variables,
+                currentState.layout
+              ),
+              hideWriteControls
             )
           );
         } else {

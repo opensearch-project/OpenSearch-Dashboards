@@ -26,7 +26,13 @@ import {
   initializeClientCallAuditor,
   updateWorkspaceState,
 } from 'opensearch-dashboards/server/utils';
-import { ACL, Permissions, PermissionModeId } from 'opensearch-dashboards/server';
+import {
+  ACL,
+  Permissions,
+  PermissionModeId,
+  WORKSPACE_TYPE,
+  WorkspacePermissionMode,
+} from 'opensearch-dashboards/server';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -321,9 +327,39 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       dashboards: { isDashboardAdmin: false },
     }));
     // Dynamically update capabilities based on the auth information from request.
-    core.capabilities.registerSwitcher((request) => {
+    core.capabilities.registerSwitcher(async (request) => {
+      const workspaceState = getWorkspaceState(request);
       // If the value is undefined/true, the user is dashboard admin.
-      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
+      const isDashboardAdmin = workspaceState.isDashboardAdmin !== false;
+      const workspaceId = workspaceState.requestWorkspaceId;
+      const readOnlyCapabilities = {
+        dashboard: {
+          createNew: false,
+          showWriteControls: false,
+          saveQuery: false,
+        },
+        visualize: {
+          createShortUrl: false,
+          delete: false,
+          save: false,
+          saveQuery: false,
+        },
+      };
+
+      if (isPermissionControlEnabled && workspaceId && !isDashboardAdmin) {
+        const result = await this.permissionControl?.validate(
+          request,
+          { id: workspaceId, type: WORKSPACE_TYPE },
+          [WorkspacePermissionMode.LibraryWrite]
+        );
+        if (result?.result !== true) {
+          return {
+            ...readOnlyCapabilities,
+            dashboards: { isDashboardAdmin },
+          };
+        }
+      }
+
       return { dashboards: { isDashboardAdmin } };
     });
 
