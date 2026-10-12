@@ -3,7 +3,9 @@
     "world": "World"
   },
   "buttons": {
-    "viewInsights": "View insights"
+    "viewInsights": "View insights",
+    "openNode": "{title}, view insights",
+    "expandGroup": "{title}, expand group"
   },
   "contextMenu": {
     "collapseDependencies": "Collapse dependencies",

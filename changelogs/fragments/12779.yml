@@ -1,0 +1,2 @@
+chore:
+- Bump `langsmith` from 0.6.3 to 0.10.4 to clear CVE-2026-45134 and CVE-2026-41182 ([#12779](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12779))

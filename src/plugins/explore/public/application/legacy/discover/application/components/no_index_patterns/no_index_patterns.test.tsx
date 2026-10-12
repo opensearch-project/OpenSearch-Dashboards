@@ -56,6 +56,13 @@ describe('DiscoverNoIndexPatterns — Explore logs gating', () => {
     expect(await screen.findByTestId('discoverNoIndexPatternsLogsDrilldown')).toBeInTheDocument();
   });
 
+  it('renders the Explore logs button with the shared compass icon', async () => {
+    mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Logs);
+    render(<DiscoverNoIndexPatterns />);
+    const btn = await screen.findByTestId('discoverNoIndexPatternsLogsDrilldown');
+    expect(btn.querySelector('[data-euiicon-type="compass"]')).not.toBeNull();
+  });
+
   it('hides the Explore logs button on the Traces flavor (shared empty state)', async () => {
     mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Traces);
     render(<DiscoverNoIndexPatterns />);

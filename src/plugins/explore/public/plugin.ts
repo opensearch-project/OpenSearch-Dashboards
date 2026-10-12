@@ -40,6 +40,7 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
   LOGS_DRILLDOWN_APP_ID,
   LOGS_DRILLDOWN_APP_NAME,
+  LOGS_DRILLDOWN_APP_ICON,
 } from '../common';
 import { ConfigSchema } from '../common/config';
 import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
@@ -84,6 +85,7 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
+import { SourceTypeRegistryService, setSourceTypeRegistry } from './services/source_type_registry';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
@@ -168,6 +170,7 @@ export class ExplorePlugin implements Plugin<
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
   private slotRegistryService = new SlotRegistryService();
+  private sourceTypeRegistry = new SourceTypeRegistryService();
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
@@ -183,6 +186,8 @@ export class ExplorePlugin implements Plugin<
   ): ExplorePluginSetup {
     // Check if dataset management plugin is enabled
     this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
+    setSourceTypeRegistry(this.sourceTypeRegistry);
 
     // Store data importer config if available
     this.dataImporterConfig = setupDeps.dataImporter?.config;
@@ -499,7 +504,7 @@ export class ExplorePlugin implements Plugin<
       title: LOGS_DRILLDOWN_APP_NAME,
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'discoverApp',
+      euiIconType: LOGS_DRILLDOWN_APP_ICON,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.observability,
       // Reached via the Logs nav-popover action + the query-bar action, NOT its own side-nav item.
@@ -784,6 +789,7 @@ export class ExplorePlugin implements Plugin<
       logActionRegistry: {
         registerAction: (action) => logActionRegistry.registerAction(action),
       },
+      sourceTypes: this.sourceTypeRegistry.setup(),
     };
   }
 

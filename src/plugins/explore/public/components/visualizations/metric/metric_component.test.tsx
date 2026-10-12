@@ -58,6 +58,31 @@ describe('MetricChartRender', () => {
     expect(screen.queryByText('COUNT()')).not.toBeInTheDocument();
   });
 
+  it('uses the query-derived name when the custom metric name is only whitespace', () => {
+    render(
+      <MetricChartRender
+        styles={{ ...defaultMetricChartStyles, title: '   ' }}
+        axisColumnMappings={axisColumnMappings}
+        spec={{ data: [{ count: 2 }], name: 'COUNT()' }}
+      />
+    );
+
+    expect(screen.getByText('COUNT()')).toBeInTheDocument();
+  });
+
+  it('does not render a custom metric name when text display excludes the name', () => {
+    render(
+      <MetricChartRender
+        styles={{ ...defaultMetricChartStyles, title: 'Total requests', textMode: 'value' }}
+        axisColumnMappings={axisColumnMappings}
+        spec={{ data: [{ count: 2 }], name: 'COUNT()' }}
+      />
+    );
+
+    expect(screen.queryByText('Total requests')).not.toBeInTheDocument();
+    expect(screen.queryByText('COUNT()')).not.toBeInTheDocument();
+  });
+
   it('prefixes custom metric names with the split series name', () => {
     render(
       <MetricChartRender

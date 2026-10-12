@@ -13,10 +13,23 @@ import {
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
   LOGS_BUILDER_MODE_ONLY_SETTING,
-  PARTIAL_RESULTS_SETTING,
+  ASYNC_QUERY_POLL_INTERVAL_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
+  [ASYNC_QUERY_POLL_INTERVAL_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalTitle', {
+      defaultMessage: 'Async query poll interval',
+    }),
+    value: 5000,
+    description: i18n.translate('explore.advancedSettings.asyncQueryPollIntervalText', {
+      defaultMessage:
+        'Milliseconds between status checks for queries that run asynchronously. Lower values ' +
+        'show partial results sooner at the cost of more requests.',
+    }),
+    category: ['explore'],
+    schema: schema.number({ min: 250, max: 60000 }),
+  },
   [DEFAULT_TRACE_COLUMNS_SETTING]: {
     name: i18n.translate('explore.advancedSettings.defaultTraceColumnsTitle', {
       defaultMessage: 'Default trace columns',
@@ -73,24 +86,6 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     category: ['explore'],
     scope: UiSettingScope.WORKSPACE,
     requiresCapability: 'explore.logsQueryBuilderEnabled',
-    schema: schema.boolean(),
-  },
-  [PARTIAL_RESULTS_SETTING]: {
-    name: i18n.translate('explore.advancedSettings.enablePartialResultsTitle', {
-      defaultMessage: 'Return partial results on mapping conflicts',
-    }),
-    value: false,
-    description: i18n.translate('explore.advancedSettings.enablePartialResultsText', {
-      defaultMessage:
-        'When a field is mapped inconsistently across indices (e.g. text in some, keyword in ' +
-        'others), aggregating on that field falls back to a slower scan that reads every ' +
-        'document to return the complete result. When enabled, the aggregation instead runs over ' +
-        'just the indices where the field is aggregatable — faster, but incomplete — and the ' +
-        'result is returned with a warning naming the excluded indices. The warning offers a ' +
-        'one-click rerun without partial results when the complete result is wanted for a ' +
-        'specific query.',
-    }),
-    category: ['explore'],
     schema: schema.boolean(),
   },
 };

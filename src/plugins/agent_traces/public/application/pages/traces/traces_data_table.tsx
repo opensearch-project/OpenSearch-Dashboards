@@ -111,7 +111,7 @@ export const TracesDataTable: React.FC = () => {
     if (!traceId) return;
     const cached = traceSpansCacheRef.current.get(traceId);
     if (cached) {
-      updateFlyoutFullTree(cached as TraceRow[], false);
+      updateFlyoutFullTree(traceId, cached as TraceRow[], false);
     }
   }, [childHitsMap, updateFlyoutFullTree]);
 
@@ -121,7 +121,7 @@ export const TracesDataTable: React.FC = () => {
     if (!traceId) return;
     const loadState = traceLoadingState.get(traceId);
     if (loadState && !loadState.loading && loadState.error) {
-      updateFlyoutFullTree(undefined, false, loadState.error);
+      updateFlyoutFullTree(traceId, undefined, false, loadState.error);
     }
   }, [traceLoadingState, updateFlyoutFullTree]);
 
@@ -321,7 +321,7 @@ export const TracesDataTable: React.FC = () => {
 
       const cached = traceSpansCacheRef.current.get(traceRow.traceId);
       if (cached) {
-        updateFlyoutFullTree(cached as TraceRow[], false);
+        updateFlyoutFullTree(traceRow.traceId, cached as TraceRow[], false);
         return;
       }
 

@@ -6,7 +6,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
 
-import { MetricChartStyle } from './metric_vis_config';
+import { MetricChartStyle, shouldShowMetricName } from './metric_vis_config';
 import { AxisRole, RendererSpecConfig } from '../types';
 import { MetricAxisMapping } from './to_expression';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
@@ -119,21 +119,6 @@ function getPercentageChangeColor(
   } else {
     return isInverted ? palette.statusGreen : palette.statusRed;
   }
-}
-
-/**
- * Determines the title text based on text mode setting
- */
-function getTitleText(textMode: string | undefined, title: string): string {
-  const mode = textMode || 'value_and_name';
-
-  // Both 'name' and 'value_and_name' show the title
-  if (mode === 'name' || mode === 'value_and_name') {
-    return title;
-  }
-
-  // 'none' and 'value' don't show title
-  return '';
 }
 
 /**
@@ -278,7 +263,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';
-  const customTitle = styles.title || undefined;
+  const customTitle = styles.title.trim() || undefined;
   const displayName = seriesName
     ? customTitle
       ? `${seriesName} ${customTitle}`
@@ -298,7 +283,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     return calculateMetricTextData(data, styles, numericField);
   }, [data, styles, numericField]);
 
-  const title = getTitleText(styles.textMode, displayName);
+  const title = shouldShowMetricName(styles.textMode) ? displayName : '';
 
   // ResizeObserver to track container dimensions
   useEffect(() => {

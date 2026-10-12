@@ -17,6 +17,10 @@
 .agentTracesFlow__container {
   height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 
   // Map EUI theme colors to CelestialMap node-kind CSS custom properties
   --osd-color-type-agent: #{$ouiColorPrimary};
@@ -25,4 +29,22 @@
   --osd-color-type-embeddings: #{$ouiColorVis1};
   --osd-color-type-retrieval: #{$ouiColorVis4};
   --osd-color-type-other: #{$ouiColorMediumShade};
+}
+
+/* The shared topology package sizes its root with `height: 100vh` for full-page use.
+   Inside the trace flyout that overflows the panel, which pushed the minimap out of
+   view and made fitView measure against a box taller than the visible area.
+   stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+.agentTracesFlow__container > .celContainer {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Line the minimap up with the zoom controls on the right edge, and keep it small
+   enough not to cover the graph in a flyout-sized panel.
+   stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+.agentTracesFlow__container .react-flow__minimap {
+  width: 160px;
+  height: 120px;
+  margin: $ouiSizeL;
 }

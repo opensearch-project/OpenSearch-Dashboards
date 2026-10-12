@@ -19,8 +19,8 @@ describe('QueryWarningsCallout', () => {
         warnings={[
           {
             type: 'PARTIAL_RESULT',
-            message: 'Results exclude 1 of 2 indices due to a mapping conflict.',
-            detail: 'Field [env] is mapped inconsistently. Excluded indices: [logs-text].',
+            message: 'Results are partial: 1 of 2 shards did not return data.',
+            detail: 'Rows and aggregate values from the shards that did not respond are missing.',
           },
         ]}
       />
@@ -31,12 +31,12 @@ describe('QueryWarningsCallout', () => {
     expect(screen.getByTestId('queryWarningsCallout')).toBeInTheDocument();
     expect(screen.getByText('Partial results')).toBeInTheDocument();
     expect(
-      screen.getByText('Results exclude 1 of 2 indices due to a mapping conflict.')
+      screen.getByText('Results are partial: 1 of 2 shards did not return data.')
     ).toBeInTheDocument();
 
     // The long detail is collapsed behind "Show more".
     const detailMatcher =
-      /Field \[env\] is mapped inconsistently\. Excluded indices: \[logs-text\]\./;
+      /Rows and aggregate values from the shards that did not respond are missing\./;
     expect(screen.queryByText(detailMatcher)).not.toBeInTheDocument();
 
     // Expand -> detail visible, toggle flips to "Show less".
@@ -58,35 +58,9 @@ describe('QueryWarningsCallout', () => {
     expect(screen.queryByTestId('queryWarningsToggle')).not.toBeInTheDocument();
   });
 
-  it('offers a rerun action on a partial result and invokes it when clicked', () => {
-    const onRerun = jest.fn();
-    render(
-      <QueryWarningsCallout
-        warnings={[{ type: 'PARTIAL_RESULT', message: 'Partial.' }]}
-        onRerunWithoutPartialResults={onRerun}
-      />
-    );
-
-    const rerun = screen.getByTestId('queryWarningsRerunWithoutPartial');
-    expect(rerun).toBeInTheDocument();
-    fireEvent.click(rerun);
-    expect(onRerun).toHaveBeenCalledTimes(1);
-  });
-
-  it('hides the rerun action when no handler is supplied', () => {
-    render(<QueryWarningsCallout warnings={[{ type: 'PARTIAL_RESULT', message: 'Partial.' }]} />);
-    expect(screen.queryByTestId('queryWarningsRerunWithoutPartial')).not.toBeInTheDocument();
-  });
-
-  it('hides the rerun action for warnings that are not partial results', () => {
-    render(
-      <QueryWarningsCallout
-        warnings={[{ type: 'SOMETHING_ELSE', message: 'Unrelated notice.' }]}
-        onRerunWithoutPartialResults={jest.fn()}
-      />
-    );
+  it('titles an unrecognised warning type generically', () => {
+    render(<QueryWarningsCallout warnings={[{ type: 'SOMETHING_ELSE', message: 'Notice.' }]} />);
     expect(screen.getByText('Warning')).toBeInTheDocument();
-    expect(screen.queryByTestId('queryWarningsRerunWithoutPartial')).not.toBeInTheDocument();
   });
 
   it('renders one callout per warning', () => {

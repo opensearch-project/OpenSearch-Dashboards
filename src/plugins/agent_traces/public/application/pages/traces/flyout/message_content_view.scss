@@ -1,0 +1,25 @@
+.agtMessageContent {
+  display: flex;
+  flex-direction: column;
+  gap: $euiSizeS;
+}
+
+.agtMessageContent__message {
+  padding: $euiSizeS;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  background: $euiColorEmptyShade;
+}
+
+.agtMessageContent__role {
+  margin-bottom: $euiSizeXS;
+}
+
+.agtMessageContent__markdown,
+.agtMessageContent__plain {
+  word-break: break-word;
+}
+
+.agtMessageContent__plain {
+  white-space: pre-wrap;
+}

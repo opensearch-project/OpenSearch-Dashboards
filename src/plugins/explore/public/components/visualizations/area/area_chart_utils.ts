@@ -286,7 +286,7 @@ export const createStackAreaSeries =
           y: valueField,
         },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         itemStyle: {
           color,
