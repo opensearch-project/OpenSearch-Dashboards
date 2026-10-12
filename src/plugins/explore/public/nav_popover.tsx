@@ -7,7 +7,12 @@ import { useEffect, useState } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NavPopoverConfig, NavPopoverServices } from '../../../core/public';
-import { PLUGIN_ID, ExploreFlavor, LOGS_DRILLDOWN_APP_ID } from '../common';
+import {
+  PLUGIN_ID,
+  ExploreFlavor,
+  LOGS_DRILLDOWN_APP_ID,
+  LOGS_DRILLDOWN_APP_ICON,
+} from '../common';
 
 interface RecentItem {
   id: string;
@@ -184,7 +189,7 @@ export function buildExploreNavPopover(
               label: i18n.translate('explore.navPopover.logsDrilldown', {
                 defaultMessage: 'Explore logs',
               }),
-              iconType: 'inspect',
+              iconType: LOGS_DRILLDOWN_APP_ICON,
               onClick: ({ navigateToApp }: NavPopoverServices) =>
                 navigateToApp(LOGS_DRILLDOWN_APP_ID, { path: '#/' }),
             },

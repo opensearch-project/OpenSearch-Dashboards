@@ -103,8 +103,8 @@ export const pplSearchStrategyProvider = (
           };
         }
 
-        // Surface non-fatal warnings the backend attached to a successful response (e.g. a partial
-        // result returned over a subset of indices). Present only when non-empty.
+        // Surface non-fatal warnings the backend attached to a successful response (e.g. a search
+        // that reached only some of its shards). Present only when non-empty.
         const warnings = rawResponse.data.warnings;
         if (Array.isArray(warnings) && warnings.length > 0) {
           dataFrame.meta = {

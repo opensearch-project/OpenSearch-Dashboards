@@ -10,6 +10,7 @@ import { PrincipalType, Principals } from '../saved_objects/permission_control/a
 
 export interface AuthInfo {
   backend_roles?: string[];
+  roles?: string[];
   user_name?: string;
   user_id?: string;
 }

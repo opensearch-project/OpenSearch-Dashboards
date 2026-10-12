@@ -6,7 +6,16 @@
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
+import {
+  getBrandIconClassName,
+  getDependencySystemDarkIcon,
+  getDependencySystemIcon,
+  isBrandDependencySystem,
+} from '@osd/apm-topology';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
+import { dependencyTypeLabel, dependencyIconType } from '../../services/dependency_classifier';
+import { TraceDependencies } from '../../services/trace_dependencies';
+// @ts-expect-error TS7016 @osd/apm-topology ships without consumer-resolvable types here
 import { ParsedHit, SpanTableProps } from './types';
 
 export const HierarchySpanCell = ({
@@ -18,6 +27,7 @@ export const HierarchySpanCell = ({
   expandedRows,
   setExpandedRows,
   colorMap,
+  dependencies,
 }: {
   rowIndex: number;
   items: ParsedHit[];
@@ -27,6 +37,8 @@ export const HierarchySpanCell = ({
   expandedRows: Set<string>;
   setExpandedRows: React.Dispatch<React.SetStateAction<Set<string>>>;
   colorMap?: Record<string, string>;
+  /** The trace's dependency calls (see buildTraceDependencies), keyed by spanId. */
+  dependencies?: TraceDependencies;
 }) => {
   const item = items[rowIndex];
   const isRowSelected =
@@ -46,6 +58,13 @@ export const HierarchySpanCell = ({
   const serviceName = resolveServiceNameFromSpan(item);
   const operationName = item?.name;
   const hasError = isSpanError(item);
+
+  // Annotate spans that call an inferred dependency (database / messaging / external),
+  // as classified for the whole trace, so the waterfall matches the trace map.
+  const dependency = (item?.spanId && dependencies?.get(item.spanId)) || null;
+  const dependencyLabel = dependency
+    ? `${dependencyTypeLabel(dependency.type)}${dependency.system ? `: ${dependency.system}` : ''}`
+    : '';
   const level = item?.level || 0;
   const serviceColor = (serviceName && colorMap?.[serviceName]) || undefined;
 
@@ -114,6 +133,54 @@ export const HierarchySpanCell = ({
         <span className="exploreSpanDetailTable__operationName">
           {operationName || (showService ? '' : serviceName) || '-'}
         </span>
+        {dependency && (
+          <EuiToolTip content={dependencyLabel}>
+            <span style={{ display: 'inline-flex', flexShrink: 0 }}>
+              <EuiIcon
+                // A full-color brand mark (e.g. PostgreSQL) when the system has one, else the
+                // theme-aware category glyph.
+                type={
+                  isBrandDependencySystem(dependency.system)
+                    ? getDependencySystemIcon(dependency.system)
+                    : dependencyIconType(dependency.type, dependency.system)
+                }
+                size="s"
+                color="subdued"
+                className={
+                  isBrandDependencySystem(dependency.system)
+                    ? [
+                        getBrandIconClassName(dependency.system).replace(
+                          /celBrandIcon/g,
+                          'exploreSpanDetailTable__dependencyBrandIcon'
+                        ),
+                        getDependencySystemDarkIcon(dependency.system)
+                          ? 'exploreSpanDetailTable__dependencyBrandIcon--hasDarkTheme'
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                    : undefined
+                }
+                style={{ marginInlineStart: 6, flexShrink: 0 }}
+                data-test-subj="spanDependencyIcon"
+                // Carries the system too, which the hover tooltip shows.
+                aria-label={dependencyLabel}
+              />
+              {/* The vendor's light version for dark mode (the theme's styles show one). */}
+              {isBrandDependencySystem(dependency.system) &&
+                getDependencySystemDarkIcon(dependency.system) && (
+                  <EuiIcon
+                    type={getDependencySystemDarkIcon(dependency.system)}
+                    size="s"
+                    className="exploreSpanDetailTable__dependencyBrandIcon exploreSpanDetailTable__dependencyBrandIcon--darkTheme"
+                    style={{ marginInlineStart: 6, flexShrink: 0 }}
+                    data-test-subj="spanDependencyIconDark"
+                    aria-hidden={true}
+                  />
+                )}
+            </span>
+          </EuiToolTip>
+        )}
       </span>
     </EuiToolTip>
   );

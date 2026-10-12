@@ -73,6 +73,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return {
       id: index.id,
       title: datasetTitle,
+      ...(indexMeta?.displayName && { displayName: indexMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX,
       timeFieldName: indexMeta?.timeFieldName,
       isRemoteDataset: indexMeta?.isRemoteIndex,

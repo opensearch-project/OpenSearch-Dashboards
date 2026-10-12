@@ -30,6 +30,10 @@ import {
   getCategoryMeta,
   getOperationNamesForCategory,
 } from '../../../../services/span_categorization';
+import {
+  previewSpanInput,
+  previewSpanOutput,
+} from '../../../../application/pages/traces/hooks/genai_message_preview';
 import { useTraceExpansion } from '../../../../application/pages/traces/trace_expansion_context';
 
 export const isOnTracesPage = (): boolean => {
@@ -288,7 +292,7 @@ const AgentTracesStatusCell: React.FC<{ status: string }> = ({ status }) => (
   </EuiHealth>
 );
 
-const TokenIcon: React.FC = () => (
+export const TokenIcon: React.FC = () => (
   <svg
     width="16"
     height="16"
@@ -497,14 +501,19 @@ export const AgentTracesVirtualCell: React.FC<AgentTracesVirtualCellProps> = ({
         />
       );
       break;
-    case 'input':
-      content = traceRow.input;
-      if (typeof traceRow.input === 'string') truncationTooltipText = traceRow.input;
+    // Preview per the OTel GenAI message schema; raw JSON stays in the trace flyout panels.
+    case 'input': {
+      const preview = previewSpanInput(traceRow);
+      content = preview || '—';
+      if (preview) truncationTooltipText = preview;
       break;
-    case 'output':
-      content = traceRow.output;
-      if (typeof traceRow.output === 'string') truncationTooltipText = traceRow.output;
+    }
+    case 'output': {
+      const preview = previewSpanOutput(traceRow);
+      content = preview || '—';
+      if (preview) truncationTooltipText = preview;
       break;
+    }
     default:
       content = null;
   }

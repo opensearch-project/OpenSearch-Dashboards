@@ -14,6 +14,7 @@ import { DiscoverFieldSearch } from './discover_field_search';
 import './discover_sidebar.scss';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getDetails } from './lib/get_details';
+import { Bucket, FieldDetails } from './types';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { groupFields } from './lib/group_fields';
 import { DiscoverFieldHeader } from './discover_field_header';
@@ -27,6 +28,19 @@ export interface DiscoverSidebarProps {
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
+  /**
+   * Fields shown as faceted fields; defaults to the span-level facets
+   */
+  facetFields?: readonly string[];
+  /**
+   * Facet values supplied by the active tab (keyed by field name); null while loading.
+   * When omitted, facet values are counted from `hits`.
+   */
+  facetBuckets?: Record<string, Bucket[]> | null;
+  /**
+   * The active tab has fixed columns: hide "Selected" and the add/remove column actions.
+   */
+  fixedColumns?: boolean;
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -64,8 +78,17 @@ export interface DiscoverSidebarProps {
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const { columns, fieldCounts, hits, selectedDataSet, isEnhancementsEnabledOverride, onCollapse } =
-    props;
+  const {
+    columns,
+    fieldCounts,
+    hits,
+    selectedDataSet,
+    isEnhancementsEnabledOverride,
+    onCollapse,
+    facetFields,
+    facetBuckets,
+    fixedColumns,
+  } = props;
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const flavorId = useFlavorId();
   const shortDotsEnabled = useMemo(() => {
@@ -90,6 +113,16 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     [hits, selectedDataSet]
   );
 
+  const getFacetDetailsByField = useCallback(
+    (ipField: DataViewField): FieldDetails => {
+      if (facetBuckets === undefined) return getDetailsByField(ipField);
+      const buckets = facetBuckets?.[ipField.name] ?? [];
+      const total = buckets.reduce((sum, b) => sum + b.count, 0);
+      return { buckets, exists: total, total, error: '' };
+    },
+    [facetBuckets, getDetailsByField]
+  );
+
   const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(() => {
     const showFacetedFields = flavorId === AgentTracesFlavor.Traces;
     const services = getServices();
@@ -98,14 +131,25 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     const timeField = selectedDataSet?.timeFieldName;
     const effectiveColumns =
       !hideTimeCol && timeField && !columns.includes(timeField) ? [timeField, ...columns] : columns;
+    const groupColumns = fixedColumns ? [] : effectiveColumns;
     return groupFields(
       fields as DataViewField[],
-      effectiveColumns,
+      groupColumns,
       fieldCounts,
       fieldFilterState,
-      showFacetedFields
+      showFacetedFields,
+      facetFields
     );
-  }, [flavorId, fields, columns, fieldCounts, fieldFilterState, selectedDataSet]);
+  }, [
+    flavorId,
+    fields,
+    columns,
+    fieldCounts,
+    fieldFilterState,
+    selectedDataSet,
+    facetFields,
+    fixedColumns,
+  ]);
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
@@ -166,7 +210,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
               {facetedFields.length > 0 && (
                 <FacetList
                   fields={facetedFields}
-                  getDetailsByField={getDetailsByField}
+                  getDetailsByField={getFacetDetailsByField}
                   shortDotsEnabled={shortDotsEnabled}
                   title={i18n.translate(
                     'agentTraces.discover.fieldChooser.filter.facetedFieldsTitle',
@@ -177,19 +221,21 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                   {...props}
                 />
               )}
-              <FieldList
-                category="selected"
-                fields={selectedFields}
-                getDetailsByField={getDetailsByField}
-                shortDotsEnabled={shortDotsEnabled}
-                title={i18n.translate(
-                  'agentTraces.discover.fieldChooser.filter.selectedFieldsTitle',
-                  {
-                    defaultMessage: 'Selected',
-                  }
-                )}
-                {...props}
-              />
+              {!fixedColumns && (
+                <FieldList
+                  category="selected"
+                  fields={selectedFields}
+                  getDetailsByField={getDetailsByField}
+                  shortDotsEnabled={shortDotsEnabled}
+                  title={i18n.translate(
+                    'agentTraces.discover.fieldChooser.filter.selectedFieldsTitle',
+                    {
+                      defaultMessage: 'Selected',
+                    }
+                  )}
+                  {...props}
+                />
+              )}
               {queryFields.length > 0 && (
                 <FieldList
                   category="query"
