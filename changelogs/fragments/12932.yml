@@ -1,0 +1,2 @@
+fix:
+  - Prevent a browser stack overflow when using Workspaces with legacy navigation ([#12932](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12932))
