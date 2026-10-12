@@ -16,7 +16,12 @@ import {
 } from '../slices';
 import { Dataset, DataStructure, CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import { AGENT_TRACES_DEFAULT_LANGUAGE } from '../../../../../common';
+import {
+  AGENT_TRACES_DEFAULT_LANGUAGE,
+  AGENT_TRACES_SESSIONS_TAB_ID,
+  AGENT_TRACES_SPANS_TAB_ID,
+  AGENT_TRACES_TRACES_TAB_ID,
+} from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
@@ -300,12 +305,28 @@ const getPreloadedQueryState = async (
   }
 };
 
+const PATH_TABS = new Set([
+  AGENT_TRACES_TRACES_TAB_ID,
+  AGENT_TRACES_SPANS_TAB_ID,
+  AGENT_TRACES_SESSIONS_TAB_ID,
+]);
+
+/**
+ * The tab named by the app path, e.g. `/app/agentTraces/sessions` or the
+ * `agentTraces/traces` sub-app. Used when the URL carries no tab state, so a bare link or
+ * bookmark opens the tab it names instead of the default.
+ */
+export const tabFromPathname = (pathname: string): string => {
+  const match = pathname.match(/\/app\/agentTraces\/([a-z]+)\/?$/);
+  return match && PATH_TABS.has(match[1]) ? match[1] : '';
+};
+
 /**
  * Get preloaded UI state
  */
 const getPreloadedUIState = (services: AgentTracesServices): UIState => {
   return {
-    activeTabId: '',
+    activeTabId: tabFromPathname(window.location.pathname),
     showHistogram: true,
   };
 };

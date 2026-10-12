@@ -119,7 +119,8 @@ describe('GanttChart', () => {
   it('calls convertToVegaGanttData with correct parameters', () => {
     render(<GanttChart data={mockData} colorMap={mockColorMap} height={400} />);
 
-    expect(convertToVegaGanttData).toHaveBeenCalledWith(mockData, mockColorMap);
+    // No trace view provider in this test, so no trace-wide dependencies are passed.
+    expect(convertToVegaGanttData).toHaveBeenCalledWith(mockData, mockColorMap, null);
   });
 
   it('calls createGanttSpec with correct parameters', () => {

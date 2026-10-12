@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -14,9 +14,25 @@ import {
   queryEditorReducer,
   legacyReducer,
 } from '../../utils/state_management/slices';
+import {
+  setIndividualQueryStatus,
+  setOverallQueryStatus,
+} from '../../utils/state_management/slices/query_editor/query_editor_slice';
+import { QueryExecutionStatus, QueryProgress } from '../../utils/state_management/types';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 
 jest.mock('@osd/i18n', () => ({
-  i18n: { translate: jest.fn((_key, opts) => opts.defaultMessage) },
+  i18n: {
+    translate: jest.fn((_key, opts) =>
+      opts.defaultMessage.replace(/\{(\w+)\}/g, (match: string, name: string) =>
+        opts.values?.[name] !== undefined ? String(opts.values[name]) : match
+      )
+    ),
+  },
 }));
 
 const mockSetQuery = jest.fn();
@@ -123,11 +139,16 @@ jest.mock(
   })
 );
 
-const makeStore = (query: string, savedSearch?: string) =>
+const makeStore = (
+  query: string,
+  savedSearch?: string,
+  language = 'PPL',
+  dataset: Record<string, string> = { id: '1', title: 'logs' }
+) =>
   configureStore({
     reducer: { query: queryReducer, queryEditor: queryEditorReducer, legacy: legacyReducer },
     preloadedState: {
-      query: { query, language: 'PPL', dataset: { id: '1', title: 'logs' } },
+      query: { query, language, dataset },
       legacy: { savedSearch },
     } as any,
   });
@@ -197,6 +218,85 @@ describe('LogsQueryPanel', () => {
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
     expect(screen.queryByTestId('ppl-builder-stub')).not.toBeInTheDocument();
+  });
+
+  // Renders the panel while a query is loading, optionally with the progress a source reported.
+  const renderLoading = (progress?: QueryProgress) => {
+    const store = makeStore('fields @message');
+    act(() => {
+      store.dispatch(
+        setOverallQueryStatus({
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        })
+      );
+      if (progress) {
+        store.dispatch(
+          setIndividualQueryStatus({
+            cacheKey: 'rows',
+            status: { status: QueryExecutionStatus.LOADING, progress },
+          })
+        );
+      }
+    });
+    render(
+      <Provider store={store}>
+        <LogsQueryPanel />
+      </Provider>
+    );
+  };
+
+  it.each([
+    [{ recordsMatched: 1200, recordsScanned: 50000 }, 'Scanning… 1,200 matched of 50,000 scanned'],
+    [{ recordsMatched: 1200 }, 'Scanning… 1,200 matched'],
+    [{ recordsScanned: 50000 }, 'Scanning… 50,000 scanned'],
+  ])('shows the scan counts a source reports (%o)', (progress, label) => {
+    renderLoading(progress);
+
+    expect(screen.getByTestId('exploreQueryPanelScanProgress')).toHaveTextContent(label);
+    // Announced to screen readers as it updates.
+    expect(screen.getByRole('status')).toBe(screen.getByTestId('exploreQueryPanelScanProgress'));
+  });
+
+  it.each([
+    ['no progress', undefined],
+    ['progress without counts', {}],
+  ])('shows only the loading bar for %s', (_case, progress) => {
+    renderLoading(progress);
+
+    expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('exploreQueryPanelScanProgress')).not.toBeInTheDocument();
+  });
+
+  it("hides the Builder toggle for a source's language without visual builder support", () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'fake',
+      label: 'Fake',
+      datasetTypes: ['FAKE'],
+      flavors: [ExploreFlavor.Logs],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { FakeQL: {} },
+    });
+    setSourceTypeRegistry(registry);
+    try {
+      render(
+        <Provider
+          store={makeStore('fields @message', undefined, 'FakeQL', {
+            id: 'fake-1',
+            title: 'fake',
+            type: 'FAKE',
+          })}
+        >
+          <LogsQueryPanel />
+        </Provider>
+      );
+      expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
+      expect(screen.queryByTestId('pplBuilderModeToggle-builder')).not.toBeInTheDocument();
+    } finally {
+      setSourceTypeRegistry(new SourceTypeRegistryService());
+    }
   });
 
   it('disables the Builder option for an unrepresentable query in Code mode', () => {

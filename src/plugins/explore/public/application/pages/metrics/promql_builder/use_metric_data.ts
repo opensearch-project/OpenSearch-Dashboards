@@ -6,13 +6,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { PrometheusClient } from '../explore/services/prometheus_client';
+import { toLabelValueDisplay } from './operation_categories';
 
 export function useMetricData(client: PrometheusClient, metric: string) {
   const [metricOptions, setMetricOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [metricSearchLoading, setMetricSearchLoading] = useState(false);
   const [labelOptions, setLabelOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [labelValueOptions, setLabelValueOptions] = useState<
-    Record<string, EuiComboBoxOptionOption[]>
+    Record<string, Array<EuiComboBoxOptionOption<string>>>
   >({});
   const [labelCardinality, setLabelCardinality] = useState<Record<string, number>>({});
 
@@ -109,7 +110,7 @@ export function useMetricData(client: PrometheusClient, metric: string) {
         .then((values) => {
           setLabelValueOptions((prev) => ({
             ...prev,
-            [labelName]: values.map((v) => ({ label: v })),
+            [labelName]: values.map((v) => ({ label: toLabelValueDisplay(v), value: v })),
           }));
         })
         .catch(() => {

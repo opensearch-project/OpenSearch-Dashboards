@@ -7,6 +7,9 @@ import { i18n } from '@osd/i18n';
 import { TracesTab } from './pages/traces/traces_tab';
 import { SpansTab } from './pages/traces/spans_tab';
 import { VisTab } from './pages/traces/vis_tab';
+import { SessionsTab } from './pages/sessions/sessions_tab';
+import { SESSION_FACET_FIELDS } from './pages/sessions/session_utils';
+import { sessionFacetBuckets$ } from './pages/sessions/session_facets';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { AgentTracesServices } from '../types';
 import {
@@ -15,9 +18,9 @@ import {
   AGENT_TRACES_TRACES_TAB_ID,
   AGENT_TRACES_SPANS_TAB_ID,
   AGENT_TRACES_VISUALIZATION_TAB_ID,
+  AGENT_TRACES_SESSIONS_TAB_ID,
 } from '../../common';
-import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
-import { buildPplSortClause, splitPplWhereAndTail } from './pages/traces/table_shared';
+import { prepareAgentSpansQuery, prepareRootSpansQuery } from './tab_queries';
 import { prepareQueryForLanguage } from './utils/languages';
 
 /**
@@ -35,12 +38,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 10,
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
 
-    prepareQuery: (query, sort) => {
-      const baseQuery = defaultPrepareQueryString(query);
-      const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
-      const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
-      return `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
-    },
+    prepareQuery: prepareRootSpansQuery,
 
     component: TracesTab,
   };
@@ -57,16 +55,30 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
 
     // Filter to all gen_ai spans (not just root spans)
-    prepareQuery: (query, sort) => {
-      const baseQuery = defaultPrepareQueryString(query);
-      const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
-      const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
-      return `${whereQuery} | where isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
-    },
+    prepareQuery: prepareAgentSpansQuery,
 
     component: SpansTab,
   };
   tabRegistry.registerTab(spansTabDefinition);
+
+  // Register Sessions Tab: traces grouped by gen_ai.conversation.id.
+  // The sessions list itself comes from its own stats queries (see use_sessions.ts). The
+  // root-span prepareQuery (same cache key as Traces) feeds the fields panel so facet
+  // filters work; a facet filter narrows sessions to those containing matching traces.
+  tabRegistry.registerTab({
+    id: AGENT_TRACES_SESSIONS_TAB_ID,
+    label: i18n.translate('agentTraces.sessionsTab.label', {
+      defaultMessage: 'Sessions',
+    }),
+    flavor: [AgentTracesFlavor.Traces],
+    order: 25,
+    supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
+    prepareQuery: prepareRootSpansQuery,
+    facetFields: SESSION_FACET_FIELDS,
+    facetBuckets$: sessionFacetBuckets$,
+    fixedColumns: true,
+    component: SessionsTab,
+  });
 
   // Register Visualization Tab
   tabRegistry.registerTab({

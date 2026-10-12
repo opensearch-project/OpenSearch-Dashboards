@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
+import {
+  getPreloadedState,
+  loadReduxState,
+  persistReduxState,
+  tabFromPathname,
+} from './redux_persistence';
 import { AgentTracesServices } from '../../../../types';
 import { RootState } from '../store';
 import {
@@ -853,6 +858,20 @@ describe('redux_persistence', () => {
       const result = await getPreloadedState(mockServices);
       // Metrics datasets are rejected because resolveDataset requires TRACES
       expect(result.query.dataset).toBeUndefined();
+    });
+  });
+
+  describe('tabFromPathname', () => {
+    it('opens the tab named by the app path', () => {
+      expect(tabFromPathname('/app/agentTraces/sessions')).toBe('sessions');
+      expect(tabFromPathname('/w/abc/app/agentTraces/traces/')).toBe('traces');
+      expect(tabFromPathname('/app/agentTraces/spans')).toBe('spans');
+    });
+
+    it('falls back to the default for other paths', () => {
+      expect(tabFromPathname('/app/agentTraces/')).toBe('');
+      expect(tabFromPathname('/app/agentTraces/visualization')).toBe('');
+      expect(tabFromPathname('/app/discover')).toBe('');
     });
   });
 });

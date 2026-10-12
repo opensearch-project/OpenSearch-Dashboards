@@ -235,13 +235,13 @@ export function createGanttSpec(
             fill: { value: isDarkMode ? '#cccccc' : '#666666' },
             text: {
               signal:
-                'length(datum.name) > ' +
+                '(length(datum.name) > ' +
                 GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_THRESHOLD +
                 ' ? slice(datum.name, 0, ' +
                 GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_HEAD_LENGTH +
                 ") + '…' + slice(datum.name, -" +
                 GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_TAIL_LENGTH +
-                ') : datum.name',
+                ") : datum.name) + (datum.dependencyLabel ? ' · ' + datum.dependencyLabel : '')",
             },
             x: { value: -5 },
             align: { value: 'right' },

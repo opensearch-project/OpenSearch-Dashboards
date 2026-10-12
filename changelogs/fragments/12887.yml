@@ -1,0 +1,2 @@
+fix:
+- Use the compass icon for the Explore logs drilldown entry points ([#12887](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12887))

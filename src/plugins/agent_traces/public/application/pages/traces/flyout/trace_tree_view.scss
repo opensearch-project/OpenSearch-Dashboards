@@ -33,6 +33,15 @@
     &--selected {
       background-color: var(--agent-traces-row-selected-bg);
     }
+
+    &--match {
+      box-shadow: inset 3px 0 0 $ouiColorWarning;
+    }
+  }
+
+  &__treeToolbar {
+    flex-grow: 0;
+    padding: 0 $ouiSizeS;
   }
 
   &__treeRowLabel {
