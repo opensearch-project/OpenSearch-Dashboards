@@ -9,6 +9,7 @@ import { TraceServiceFlow } from './trace_service_flow';
 import { ServiceFlowHit } from './trace_service_flow_transform';
 
 jest.mock('@osd/apm-topology', () => ({
+  getDependencyIconKey: (type: string, system?: string) => `Dependency::${system || type}`,
   MetricsCardNode: () => null,
   VolumeEdge: () => null,
   CelestialMap: (props: any) => {
@@ -31,6 +32,14 @@ jest.mock('@osd/apm-topology', () => ({
           onClick={() => props.onDashboardClick?.({ id: nodes[0]?.id })}
         >
           select
+        </button>
+        <button
+          data-test-subj="fireSelectDependency"
+          onClick={() =>
+            props.onDashboardClick?.(nodes.find((n: any) => `${n.id}`.startsWith('dep::'))?.data)
+          }
+        >
+          select dependency
         </button>
       </div>
     );
@@ -75,5 +84,45 @@ describe('TraceServiceFlow', () => {
     const { container, queryByTestId } = render(<TraceServiceFlow hits={[]} />);
     expect(queryByTestId('celestial-map')).toBeNull();
     expect(container.querySelector('[data-test-subj="traceServiceFlowEmpty"]')).toBeInTheDocument();
+  });
+
+  describe('dependency nodes', () => {
+    const depHits: ServiceFlowHit[] = [
+      { spanId: 'c', parentSpanId: '', serviceName: 'cart', kind: 'SPAN_KIND_SERVER' } as any,
+      {
+        spanId: 'h',
+        parentSpanId: 'c',
+        serviceName: 'cart',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { db_system: 'redis', 'server.address': 'valkey-cart' },
+      } as any,
+    ];
+
+    it('clicking a dependency filters the trace by the attribute that names it', () => {
+      const onFilterAttribute = jest.fn();
+      const onFilterService = jest.fn();
+      const { getByTestId } = render(
+        <TraceServiceFlow
+          hits={depHits}
+          onFilterAttribute={onFilterAttribute}
+          onFilterService={onFilterService}
+        />
+      );
+      fireEvent.click(getByTestId('fireSelectDependency'));
+      expect(onFilterAttribute).toHaveBeenCalledWith('attributes.server.address', 'valkey-cart');
+      expect(onFilterService).not.toHaveBeenCalled();
+    });
+
+    it('highlights the dependency its active filter selects', () => {
+      const { getByTestId } = render(
+        <TraceServiceFlow
+          hits={depHits}
+          activeSpanFilters={[{ field: 'attributes.server.address', value: 'valkey-cart' }]}
+        />
+      );
+      expect(getByTestId('celestial-map').getAttribute('data-active')).toBe(
+        'dep::database::redis:valkey-cart'
+      );
+    });
   });
 });

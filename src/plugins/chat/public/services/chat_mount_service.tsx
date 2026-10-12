@@ -5,9 +5,9 @@
 
 import { createRoot } from 'react-dom/client';
 
-import { Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ContextProviderStart } from '../../../context_provider/public';
@@ -17,6 +17,19 @@ import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
 import { HumanInputService } from '../services/human_input_service';
 import { ChatMount } from '../components/chat_mount';
+
+/**
+ * Chromeless apps where the chat sidecar should still be allowed to open.
+ * Normally the chat hides on chromeless pages, but these specific apps
+ * render their own UI that includes chat entry points (e.g. "Ask AI" card).
+ *
+ * Intentionally plain strings rather than imports: the chat plugin must not
+ * depend on the plugins that own these apps. Keep in sync with
+ * WORKSPACE_INITIAL_APP_ID in src/plugins/workspace/common/constants.ts —
+ * nothing enforces that at compile time, so renaming the app id there fails
+ * silently here.
+ */
+const CHROMELESS_CHAT_ALLOWED_APPS = new Set(['workspace_initial']);
 
 export interface ChatMountStartContract {
   open: () => void;
@@ -29,8 +42,8 @@ export class ChatMountService {
   private chatMountPoint: MountPoint | undefined;
   private unsubscribeWindowOpen?: () => void;
   private unsubscribeWindowClose?: () => void;
-  private chromeVisibilitySubscription?: Subscription;
-  private isChromeVisible: boolean = false;
+  private chatAllowedSubscription?: Subscription;
+  private isChatAllowed: boolean = false;
   private pendingOpenSidecarFrame?: number;
 
   start(options: {
@@ -59,8 +72,9 @@ export class ChatMountService {
         return; // Already open
       }
 
-      // Don't open sidecar if chrome is not visible
-      if (!this.isChromeVisible) {
+      // Chat is allowed when chrome is visible, or when the current app is a
+      // chromeless page that explicitly supports chat (allow-list).
+      if (!this.isChatAllowed) {
         return;
       }
 
@@ -99,13 +113,24 @@ export class ChatMountService {
       closeSidecar();
     });
 
-    // Subscribe to chrome visibility changes to control sidecar visibility
-    this.chromeVisibilitySubscription = core.chrome
-      .getIsVisible$()
-      .pipe(distinctUntilChanged())
-      .subscribe((isVisible) => {
-        // Update visibility state immediately so openSidecar guard works correctly
-        this.isChromeVisible = isVisible;
+    // Chat is allowed when chrome is visible OR the current app is an
+    // allow-listed chromeless page. This single signal drives the openSidecar
+    // guard, hide/show on navigation, and re-opening a restored window state
+    // (e.g. isWindowOpen persisted in localStorage) once a page that supports
+    // chat becomes active.
+    this.chatAllowedSubscription = combineLatest([
+      core.chrome.getIsVisible$(),
+      core.application.currentAppId$,
+    ])
+      .pipe(
+        map(
+          ([isVisible, appId]) => isVisible || (!!appId && CHROMELESS_CHAT_ALLOWED_APPS.has(appId))
+        ),
+        distinctUntilChanged()
+      )
+      .subscribe((isAllowed) => {
+        // Update state immediately so the openSidecar guard works correctly
+        this.isChatAllowed = isAllowed;
 
         // Clear any pending openSidecar call
         if (this.pendingOpenSidecarFrame) {
@@ -113,12 +138,12 @@ export class ChatMountService {
           this.pendingOpenSidecarFrame = undefined;
         }
 
-        if (isVisible) {
+        if (isAllowed) {
           if (this.sideCar) {
-            // Chrome is visible and sidecar exists, show it immediately
+            // Chat became allowed and sidecar exists, show it immediately
             core.overlays.sidecar.show();
           } else if (core.chat.isWindowOpen()) {
-            // Chrome became visible, sidecar not initialized, but window state is open
+            // Chat became allowed, sidecar not initialized, but window state is open
             // Defer openSidecar to next frame to avoid flicker during fast navigation
             this.pendingOpenSidecarFrame = requestAnimationFrame(() => {
               this.pendingOpenSidecarFrame = undefined;
@@ -126,7 +151,7 @@ export class ChatMountService {
             });
           }
         } else if (this.sideCar) {
-          // Chrome is not visible, hide the sidecar immediately
+          // Chat is not allowed on this page, hide the sidecar immediately
           core.overlays.sidecar.hide();
         }
       });
@@ -149,6 +174,6 @@ export class ChatMountService {
     }
     this.unsubscribeWindowOpen?.();
     this.unsubscribeWindowClose?.();
-    this.chromeVisibilitySubscription?.unsubscribe();
+    this.chatAllowedSubscription?.unsubscribe();
   }
 }

@@ -105,6 +105,12 @@ export interface RawSearchResults {
 export interface BaseProcessedSearchResults {
   hits: ISearchResult['hits'];
   fieldCounts: Record<string, number>;
+  /**
+   * Occurrences that carry an actual value, keyed by field name. Fields empty across the
+   * whole result set are absent. Unlike fieldCounts, which counts a field as present even
+   * when a tabular response fills it with null, this reflects populated data only.
+   */
+  nonEmptyFieldCounts: Record<string, number>;
   dataset: Dataset;
   elapsedMs: number;
 }

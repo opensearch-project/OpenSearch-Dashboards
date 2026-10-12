@@ -127,6 +127,51 @@ export const queryHasAggregation = (queryString: string): boolean => {
   return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
 };
 
+/** Commands that reshape rows such that the time field may no longer exist downstream. */
+const TIME_FIELD_CONSUMING_COMMANDS = ['stats', 'eventstats', 'top', 'rare', 'rename'];
+const TIME_FIELD_CONSUMING_REGEX = new RegExp(
+  `\\|\\s*(${TIME_FIELD_CONSUMING_COMMANDS.join('|')})\\b`,
+  'i'
+);
+
+/** Splits on top-level pipes, ignoring those inside quoted strings or bracketed subqueries. */
+const splitTopLevelStages = (queryString: string): string[] => {
+  const masked = maskPPLSubqueriesAndStrings(queryString);
+  const stages: string[] = [];
+  let start = 0;
+  for (let i = 0; i < masked.length; i++) {
+    if (masked[i] === '|') {
+      stages.push(queryString.slice(start, i));
+      start = i + 1;
+    }
+  }
+  stages.push(queryString.slice(start));
+  return stages;
+};
+
+/**
+ * Removes `fields` projections so the appended aggregation can still reference the time field.
+ *
+ * `fields` is the only command that can drop the time field while leaving the row set intact, and
+ * removing it is always safe here: a projection restricts the available columns and never introduces
+ * one, so no later stage can break by having more columns available. Row-set commands (`where`,
+ * `head`, `dedup`) are preserved, because the histogram must describe the rows the query actually
+ * matches. `rex`/`eval`/`parse` are preserved too: they only add columns, and removing them could
+ * break a later stage that reads what they produced.
+ */
+const stripFieldsProjections = (queryString: string): string =>
+  splitTopLevelStages(queryString)
+    .filter((stage, index) => index === 0 || !/^\s*fields\b/i.test(stage))
+    .map((stage) => stage.trim())
+    .join(' | ');
+
+/**
+ * Appends the histogram aggregation to a query.
+ *
+ * Returns the query unchanged when no aggregation can be built, which leaves the chart empty rather
+ * than emitting a query that fails: a failed histogram is dispatched non-blocking and its error is
+ * never rendered, so an invalid query would surface as a silently missing chart.
+ */
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
   const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
@@ -134,10 +179,18 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
     return query;
   }
 
+  const source = stripFieldsProjections(query);
+
+  // A remaining aggregation or rename may have consumed the time field, and whether it did cannot be
+  // determined from the query text alone.
+  if (TIME_FIELD_CONSUMING_REGEX.test(maskPPLSubqueriesAndStrings(source))) {
+    return query;
+  }
+
   if (breakdownField) {
-    return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+    return `${source} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
   } else {
-    return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+    return `${source} | stats count() by span(${timeFieldName}, ${finalInterval})`;
   }
 };
 

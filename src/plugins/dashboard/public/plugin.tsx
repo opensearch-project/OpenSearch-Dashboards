@@ -58,7 +58,11 @@ import {
   EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  getGlobalQueryUrlState,
+} from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -327,10 +331,7 @@ export class DashboardPlugin implements Plugin<
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
+            map(({ state }) => getGlobalQueryUrlState(state))
           ),
         },
       ],

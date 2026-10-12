@@ -28,5 +28,16 @@ export * from './components/edges';
 export { AGENT_NODE_KINDS } from './shared/constants/agent.constants';
 export type { AgentNodeKindConfig } from './shared/constants/agent.constants';
 
+// Dependency icon utilities (databases, message brokers, external endpoints)
+export {
+  getDependencyIconKey,
+  getDependencySystemIcon,
+  getDependencySystemDarkIcon,
+  normalizeDependencySystem,
+  isBrandDependencySystem,
+  isBrandIconKey,
+  getBrandIconClassName,
+} from './shared/constants/dependency_icons.constants';
+
 // Provider icon utilities
 export { getProviderIcon, PROVIDER_ICONS } from './shared/constants/provider_icons.constants';

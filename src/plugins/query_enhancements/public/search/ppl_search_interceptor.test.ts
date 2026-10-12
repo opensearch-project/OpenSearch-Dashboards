@@ -12,6 +12,7 @@ import {
   ISearchOptions,
   SearchInterceptorDeps,
 } from '../../../data/public';
+import { UI_SETTINGS } from '../../../data/common';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
@@ -28,10 +29,19 @@ jest.mock('../../common/utils', () => ({
 jest.mock('./filters', () => ({
   PPLFilterUtils: {
     convertFiltersToWhereClause: jest.fn(),
-    getTimeFilterWhereClause: jest.fn(),
+    getTimeFilter: jest.fn(),
     insertWhereCommand: jest.requireActual('./filters').PPLFilterUtils.insertWhereCommand,
   },
 }));
+
+/**
+ * Canned clause text (the assertions on the built query check for it verbatim) paired with the real
+ * bounds, so the hint assertions exercise the production derivation rather than a fixture.
+ */
+const mockTimeFilter = (field: string, range: any) => ({
+  clause: 'WHERE @timestamp >= "2023-01-01"',
+  bounds: jest.requireActual('./filters').PPLFilterUtils.getTimeFilterBounds(field, range),
+});
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -115,9 +125,7 @@ describe('PPLSearchInterceptor', () => {
 
     beforeEach(() => {
       mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
-      mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue(
-        'WHERE @timestamp >= "2023-01-01"'
-      );
+      mockPPLFilterUtils.getTimeFilter.mockImplementation(mockTimeFilter as any);
 
       const mockDatasetService = {
         getType: jest.fn().mockReturnValue({
@@ -364,9 +372,7 @@ describe('PPLSearchInterceptor', () => {
 
     beforeEach(() => {
       mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
-      mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue(
-        'WHERE @timestamp >= "2023-01-01"'
-      );
+      mockPPLFilterUtils.getTimeFilter.mockImplementation(mockTimeFilter as any);
 
       const mockDatasetService = {
         getType: jest.fn().mockReturnValue({
@@ -503,9 +509,12 @@ describe('PPLSearchInterceptor', () => {
   describe('buildQuery', () => {
     beforeEach(() => {
       mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
-      mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue(
-        'WHERE @timestamp >= "2023-01-01"'
-      );
+      mockPPLFilterUtils.getTimeFilter.mockImplementation(mockTimeFilter as any);
+      // A real time range: buildQuery derives the time range hint from it with the real helper.
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
 
       // Ensure application currentAppId$ is set to 'dashboards' by default
       (mockCoreStart.application.currentAppId$ as BehaviorSubject<string>).next('dashboards');
@@ -537,7 +546,199 @@ describe('PPLSearchInterceptor', () => {
 
       expect(result).toEqual(mockQuery);
       expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
+    });
+
+    it('carries the picked time range as a hint alongside the appended where clause', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: '2023-01-01T00:00:00Z',
+        to: '2023-01-02T00:00:00Z',
+      });
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // The engine prunes indices with these bounds, so they must be the same ones the appended
+      // where clause filters on -- hence the shared helper rather than a second formatting path.
+      expect({
+        time_field: result.time_field,
+        start_time: result.start_time,
+        end_time: result.end_time,
+      }).toEqual({
+        time_field: '@timestamp',
+        start_time: '2023-01-01 00:00:00.000',
+        end_time: '2023-01-02 00:00:00.000',
+      });
+      expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalledWith(
+        '@timestamp',
+        { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
+        undefined
+      );
+    });
+
+    // Defensive: nothing in this repo currently reaches buildQuery with body.timeRange set (the one
+    // writer, search(), sets it only for hideDatePicker === false datasets, which this branch skips),
+    // but the clause already honours it, so the hint must describe the same window it does.
+    it('mirrors a caller-supplied time range rather than the global picker', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: { queries: [mockQuery] },
+            // The clause reads this in preference to the global picker; the hint must follow it.
+            timeRange: { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
+          },
+        },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect({
+        time_field: result.time_field,
+        start_time: result.start_time,
+        end_time: result.end_time,
+      }).toEqual({
+        time_field: '@timestamp',
+        start_time: '2024-05-05 00:00:00.000',
+        end_time: '2024-05-06 00:00:00.000',
+      });
+      expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalledWith(
+        '@timestamp',
+        { from: '2024-05-05T00:00:00Z', to: '2024-05-06T00:00:00Z' },
+        undefined
+      );
+    });
+
+    it('omits the time range hint when the dataset defers time filtering to the strategy', async () => {
+      // hideDatePicker === false means no clause is appended here, so there is nothing to hint at.
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn().mockReturnValue({
+          languageOverrides: { PPL: { hideDatePicker: false } },
+        }),
+      });
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.start_time).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
+    });
+
+    it('omits the time range hint when the picked range does not parse', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'nonsense',
+        to: 'now',
+      });
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // The clause is still appended -- only the hint, which would be meaningless, is dropped.
+      expect(result.start_time).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalled();
+    });
+
+    it('omits the time range hint for a dataset with no time field', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT' },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] } } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.start_time).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['off', false, false],
+      ['on', true, true],
+      ['unset', undefined, true],
+    ])(
+      'sends the bounds only when the time-bounds setting is not off (%s)',
+      async (_label, setting, expectHint) => {
+        const mockQuery = {
+          language: 'PPL',
+          query: 'source=test_index',
+          dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        };
+        const mockRequest: IOpenSearchDashboardsSearchRequest = {
+          params: { body: { query: { queries: [mockQuery] } } },
+        };
+        mockIsPPLSearchQuery.mockReturnValue(true);
+        (mockDataService.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-02T00:00:00Z',
+        });
+        (mockCoreStart.uiSettings.get as jest.Mock).mockImplementation(
+          (key: string, fallback?: unknown) =>
+            key === UI_SETTINGS.QUERY_ENHANCEMENTS_INDEX_PRUNING ? (setting ?? fallback) : true
+        );
+
+        const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+        // Turning the hint off must not touch the filter itself, or the setting would change
+        // results rather than only which indices are read.
+        expect(result.query).toContain('WHERE @timestamp >=');
+        expect(result.start_time === undefined).toBe(!expectHint);
+      }
+    );
+
+    it('omits the time range hint when no time filter is appended', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: { body: { query: { queries: [mockQuery] }, skipTimeFilter: true } },
+      };
+      mockIsPPLSearchQuery.mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      expect(result.start_time).toBeUndefined();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
     });
 
     it('should append filter clause for PPL search queries', async () => {
@@ -657,7 +858,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalledWith(
+      expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalledWith(
         '@timestamp',
         mockTimeRange,
         undefined
@@ -707,7 +908,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 
@@ -738,7 +939,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 
@@ -784,7 +985,7 @@ describe('PPLSearchInterceptor', () => {
 
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).not.toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilter).not.toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | fields *');
     });
 
@@ -947,7 +1148,7 @@ describe('PPLSearchInterceptor', () => {
       // Filter manager filters should NOT be applied
       expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
       // Time filter should still be applied
-      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalled();
+      expect(mockPPLFilterUtils.getTimeFilter).toHaveBeenCalled();
       expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
     });
 
@@ -1036,7 +1237,7 @@ describe('PPLSearchInterceptor', () => {
         });
         mockIsPPLSearchQuery.mockReturnValue(true);
         mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
-        mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue('');
+        mockPPLFilterUtils.getTimeFilter.mockReturnValue({ clause: '' } as any);
 
         return mockRequest;
       };
@@ -1094,6 +1295,13 @@ describe('PPLSearchInterceptor', () => {
       'source=test_index | fields age, name',
       'source=test_index |stats count()',
       'source=test_index |   sort   age',
+      // Charting commands emit their own time column -- `timechart` always `@timestamp`, `chart`
+      // whatever its `over` argument was -- which need not be the field the dataset is configured
+      // on. Appending a sort on the dataset's field then fails to resolve.
+      'source=test_index | chart count() over @timestamp by host',
+      'source=test_index | timechart span=1m count() by host',
+      'source=test_index |chart count() over ts by host',
+      'source=test_index |   timechart   count()',
     ])('does not append a sort when the query already customizes it: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',

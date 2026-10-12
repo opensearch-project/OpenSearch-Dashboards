@@ -22,6 +22,7 @@ import { getDashboardIdFromUrl } from '../utils';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { Variable } from '../../variables/types';
+import { normalizeDashboardQuery } from './migrate_legacy_query';
 
 const APP_STATE_STORAGE_KEY = '_a';
 
@@ -176,19 +177,25 @@ export const hydrateDashboardAppState = (
   currentVariables?: Variable[],
   currentLayout?: DashboardAppState['layout']
 ): DashboardAppState => {
-  if (!urlState) {
-    return stateDefaults;
+  let hydratedState = stateDefaults;
+  if (urlState) {
+    const { variables, panels, layout, ...urlStateWithoutDerivedState } = urlState;
+    const baseVariables = currentVariables ?? stateDefaults.variables;
+
+    hydratedState = {
+      ...stateDefaults,
+      ...urlStateWithoutDerivedState,
+      panels: panels ?? currentPanels ?? stateDefaults.panels,
+      variables: hydrateVariablesFromUrl(baseVariables, variables),
+      layout: layout ?? currentLayout ?? stateDefaults.layout,
+    };
   }
 
-  const { variables, panels, layout, ...urlStateWithoutDerivedState } = urlState;
-  const baseVariables = currentVariables ?? stateDefaults.variables;
-
+  // Normalize both saved-object defaults and URL-restored state before either can reach the shared
+  // query service or be persisted again.
   return {
-    ...stateDefaults,
-    ...urlStateWithoutDerivedState,
-    panels: panels ?? currentPanels ?? stateDefaults.panels,
-    variables: hydrateVariablesFromUrl(baseVariables, variables),
-    layout: layout ?? currentLayout ?? stateDefaults.layout,
+    ...hydratedState,
+    query: normalizeDashboardQuery(hydratedState.query),
   };
 };
 

@@ -1,0 +1,2 @@
+feat:
+- Agent Traces Sessions follow-ups: flyout Back/Forward history and aligned headers, sessions with errors, trace tree search and jump to error, GenAI attributes per span ([#12871](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12871))

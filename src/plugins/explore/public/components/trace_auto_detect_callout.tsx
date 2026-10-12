@@ -174,7 +174,7 @@ export const TraceAutoDetectCallout: React.FC = () => {
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" data-test-subj="traceAutoDetectCallout">
           <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
             <EuiFlexItem>
               <EuiIcon type="search" size="xl" color="primary" />
@@ -239,7 +239,12 @@ export const TraceAutoDetectCallout: React.FC = () => {
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={handleCreate} isLoading={isCreating} fill>
+                  <EuiButton
+                    data-test-subj="traceAutoDetectCreateButton"
+                    onClick={handleCreate}
+                    isLoading={isCreating}
+                    fill
+                  >
                     <FormattedMessage
                       id="explore.traces.autoDetect.createButton"
                       defaultMessage="Create Trace Datasets"
@@ -247,7 +252,10 @@ export const TraceAutoDetectCallout: React.FC = () => {
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={handleDismiss}>
+                  <EuiButtonEmpty
+                    data-test-subj="traceAutoDetectDismissButton"
+                    onClick={handleDismiss}
+                  >
                     <FormattedMessage
                       id="explore.traces.autoDetect.dismissButton"
                       defaultMessage="Dismiss"

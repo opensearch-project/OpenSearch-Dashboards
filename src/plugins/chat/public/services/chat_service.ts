@@ -312,9 +312,9 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  private getDataSourceFromPageContext() {
+  private getDataSourceFromPageContext(readOnly?: boolean) {
     const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
-    if (dsId) {
+    if (!readOnly && dsId) {
       this.setDataSourceId(dsId);
     }
     return dsId;
@@ -375,13 +375,15 @@ export class ChatService {
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
-  private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
+  private async getWorkspaceAwareDataSourceId(readOnly?: boolean): Promise<string | undefined> {
     try {
       // Try to get data source from page context first
-      const pageDataSourceId = this.getDataSourceFromPageContext();
+      const pageDataSourceId = this.getDataSourceFromPageContext(readOnly);
       if (pageDataSourceId) {
-        // update cache data source and add new session data source
-        this.setDataSourceId(pageDataSourceId);
+        if (!readOnly) {
+          this.setDataSourceId(pageDataSourceId);
+        }
+
         return pageDataSourceId;
       }
 
@@ -409,7 +411,9 @@ export class ChatService {
 
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
-      this.setDataSourceId(dataSourceId || undefined);
+      if (!readOnly) {
+        this.setDataSourceId(dataSourceId || undefined);
+      }
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -423,16 +427,25 @@ export class ChatService {
    *
    * Priority (highest to lowest):
    *   1. getDataSourceFromPageContext() — data source inferred from the current page/panel context
-   *   2. confirmedDataSourceId    — explicit conversation-level override confirmed or selected by the user
+   *   2. confirmedDataSourceId — explicit conversation-level override confirmed or selected by the user
    *   3. getWorkspaceAwareDataSourceId() — workspace default
+   *
+   * @param readOnly when true, resolve without committing anything: no setDataSourceId
    */
-  public async getCurrentDataSourceId(): Promise<string | undefined> {
+  public async getCurrentDataSourceId(readOnly = false): Promise<string | undefined> {
     const ds =
-      this.getDataSourceFromPageContext() ||
+      this.getDataSourceFromPageContext(readOnly) ||
       this.confirmedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId());
+      (await this.getWorkspaceAwareDataSourceId(readOnly));
 
     return ds;
+  }
+
+  /**
+   * Pure read of the resolved data source — never mutates conversation state.
+   */
+  public peekCurrentDataSourceId(): Promise<string | undefined> {
+    return this.getCurrentDataSourceId(true);
   }
 
   public getConfirmedDataSourceId(): string | undefined {

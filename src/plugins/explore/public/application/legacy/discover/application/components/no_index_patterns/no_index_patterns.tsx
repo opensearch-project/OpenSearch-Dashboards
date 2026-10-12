@@ -22,6 +22,7 @@ import { toMountPoint } from '../../../../../../../../opensearch_dashboards_reac
 import { getServices } from '../../../opensearch_dashboards_services';
 import {
   LOGS_DRILLDOWN_APP_ID,
+  LOGS_DRILLDOWN_APP_ICON,
   EXPLORE_DEFAULT_LANGUAGE,
   ExploreFlavor,
 } from '../../../../../../../common';
@@ -191,7 +192,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
                     <EuiButton
                       fill
                       size="s"
-                      iconType="inspect"
+                      iconType={LOGS_DRILLDOWN_APP_ICON}
                       onClick={() =>
                         services.core.application.navigateToApp(LOGS_DRILLDOWN_APP_ID, {
                           path: '#/',

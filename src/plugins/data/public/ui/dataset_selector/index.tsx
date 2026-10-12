@@ -28,7 +28,7 @@ const ConnectedDatasetSelector = ({
   const queryString = services.data.query.queryString;
   const indexPatterns = services.data.indexPatterns;
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
+    () => queryString.getQuery().dataset
   );
 
   // Enrich dataset with displayName if missing (e.g., from cached URL state)

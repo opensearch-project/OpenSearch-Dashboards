@@ -600,16 +600,20 @@ export const useSearch = (services: DiscoverViewServices) => {
     const loadSavedSearch = async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       const dataQuery = data.query.queryString.getQuery();
-      const defaultQuery = data.query.queryString.getDefaultQuery();
+      // Include the active dataset so the generated query text and language are comparable to the
+      // current query; a dataset-less default can make Discover restore the wrong saved query.
+      const defaultQuery = data.query.queryString.getDefaultQuery(dataQuery.dataset);
       const isDataQueryDefault = dataQuery.query === defaultQuery.query;
       const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      // Use existing query; if it matches default, prefer savedSearchQuery, then the freshly
-      // computed defaultQuery (which reflects the post-init default dataset and language clamp),
-      // falling back to dataQuery for back-compat.
-      const query = isDataQueryDefault
-        ? (savedSearchQuery ?? defaultQuery ?? dataQuery)
-        : dataQuery;
+      // Preserve the existing default-query fallback for saved searches.
+      let query = isDataQueryDefault ? (savedSearchQuery ?? defaultQuery ?? dataQuery) : dataQuery;
+      // `_q` is the explicit URL override for a saved search. Without it, same-app navigation
+      // (such as Reset search) may leave the previous query in the shared query service, so the
+      // query persisted in the saved search must take precedence.
+      if (!initialUrlHadQueryState.current && savedSearchQuery) {
+        query = savedSearchQuery;
+      }
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {

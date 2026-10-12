@@ -82,6 +82,29 @@ export const unflattenSource = (source: Record<string, any>): Record<string, any
   return result;
 };
 
+/**
+ * Convert an OTel GenAI message attribute into text that is safe to render as a React child.
+ * OpenSearch/PPL can return JSON attributes as structured values.
+ * Empty objects represent missing content; arrays are valid structured message values.
+ */
+const normalizeMessageValue = (value: unknown): string | undefined => {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'string') return value;
+
+  if (typeof value === 'object') {
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized && serialized !== '{}' ? serialized : undefined;
+    } catch {
+      return String(value);
+    }
+  }
+
+  return String(value);
+};
+
+const resolveMessageValue = (value: unknown): string => normalizeMessageValue(value) ?? '—';
+
 export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => {
   const attrs = hit.attributes ? unflattenSource(hit.attributes) : ({} as any);
   return {
@@ -102,9 +125,8 @@ export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => 
     genAiInputTokens: attrs?.gen_ai?.usage?.input_tokens || null,
     genAiOutputTokens: attrs?.gen_ai?.usage?.output_tokens || null,
     genAiTotalTokens: attrs?.gen_ai?.usage?.total_tokens || null,
-    input: attrs?.gen_ai?.input?.messages || attrs?.gen_ai?.prompt || attrs?.input?.value || '—',
-    output:
-      attrs?.gen_ai?.output?.messages || attrs?.gen_ai?.completion || attrs?.output?.value || '—',
+    input: resolveMessageValue(attrs?.gen_ai?.input?.messages),
+    output: resolveMessageValue(attrs?.gen_ai?.output?.messages),
     rawDocument: hit as Record<string, unknown>,
   };
 };

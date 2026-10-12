@@ -27,11 +27,14 @@ export interface LabelFilter {
   id: string;
   label: string;
   op: string;
-  value: string;
+  // An unfinished filter has no value; an empty string is a valid matcher.
+  value?: string;
 }
 
 let filterIdCounter = 0;
 export const nextFilterId = (): string => `lf-${++filterIdCounter}`;
+
+export const emptyFilter = (): LabelFilter => ({ id: nextFilterId(), label: '', op: '=' });
 
 export interface OperationGrouping {
   mode: 'by' | 'without';
@@ -106,7 +109,7 @@ const BINARY_OP_ID_MAP: Record<number, string> = {
 
 const emptyState = (): BuilderState => ({
   metric: '',
-  labelFilters: [{ id: nextFilterId(), label: '', op: '=', value: '' }],
+  labelFilters: [emptyFilter()],
   operations: [],
 });
 
@@ -148,10 +151,7 @@ export function parsePromQL(query: string): ParseResult {
           canBuild: true,
           state: {
             metric: visitor.metric,
-            labelFilters:
-              visitor.labelFilters.length > 0
-                ? visitor.labelFilters
-                : [{ id: nextFilterId(), label: '', op: '=', value: '' }],
+            labelFilters: visitor.labelFilters.length > 0 ? visitor.labelFilters : [emptyFilter()],
             operations: visitor.operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },

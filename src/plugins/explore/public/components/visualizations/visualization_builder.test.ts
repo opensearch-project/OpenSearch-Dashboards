@@ -5,7 +5,7 @@
 
 import { VisualizationBuilder } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
-import { VisColumn, VisFieldType } from './types';
+import { RenderChartConfig, VisColumn, VisFieldType } from './types';
 import { VisualizationRegistryService } from '../../services/visualization_registry_service';
 
 // Register all built-in visualizations into the singleton registry
@@ -652,6 +652,37 @@ describe('VisualizationBuilder', () => {
 
     expect(builder.visConfig$.value?.title).toBe('Panel title');
     expect(builder.visConfig$.value?.description).toBe('Panel description');
+  });
+
+  test('should not emit a new chart render config when panel settings change', () => {
+    const builder = new VisualizationBuilder({});
+    builder.setVisConfig({
+      type: 'line',
+      styles: { addLegend: true } as any,
+      axesMapping: { x: 'field0', y: 'field1' },
+    });
+
+    const visualization = builder.renderVisualization({});
+    const emittedConfigs: Array<RenderChartConfig | undefined> = [];
+    const subscription = visualization.props.config$.subscribe(
+      (config: RenderChartConfig | undefined) => emittedConfigs.push(config)
+    );
+
+    builder.updatePanelSettings({ title: 'Panel title' });
+    builder.updatePanelSettings({ description: 'Panel description' });
+
+    expect(builder.visConfig$.value).toEqual(
+      expect.objectContaining({
+        title: 'Panel title',
+        description: 'Panel description',
+      })
+    );
+    expect(emittedConfigs).toHaveLength(1);
+
+    builder.updateStyles({ addLegend: false });
+
+    expect(emittedConfigs).toHaveLength(2);
+    subscription.unsubscribe();
   });
 
   test('should reset vis state', () => {

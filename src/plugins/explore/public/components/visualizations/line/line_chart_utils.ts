@@ -111,7 +111,7 @@ export const createLineSeries =
           y: item,
         },
         emphasis: {
-          focus: 'self',
+          focus: 'series',
         },
         ...generateLineStyles(styles, item),
         ...(index === 0 &&
@@ -181,7 +181,7 @@ export const createLineBarSeries =
             y: field,
           },
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),
@@ -211,7 +211,7 @@ export const createLineBarSeries =
             chartType: 'bar',
           }),
           emphasis: {
-            focus: 'self',
+            focus: 'series',
           },
         };
       }),
