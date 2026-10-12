@@ -794,6 +794,23 @@ describe('executeStreamingQuery against a stateful engine', () => {
     expect(results[results.length - 1].results.hits.hits).toHaveLength(5);
   });
 
+  // The accumulator reads the formatter through a provider, because it is constructed before the
+  // language service is consulted. An identity-function mock would pass whether or not the provider
+  // ever delivers it, so assert the formatter's own output reaches the rendered rows.
+  it('renders date values through the PPL formatter', async () => {
+    const engine = new FakeStreamEngine({ totalRows: 10, commitPerPoll: 10 });
+    pplFormatter.mockImplementation((value: any) =>
+      typeof value === 'string' && value.startsWith('2026-') ? `FORMATTED:${value}` : value
+    );
+
+    const { results } = await drive(engine);
+
+    const hits = results[results.length - 1].results.hits.hits;
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0]._source['@timestamp']).toMatch(/^FORMATTED:2026-/);
+    expect(pplFormatter).toHaveBeenCalled();
+  });
+
   it('reports the engine total while holding only the rows it fetched', async () => {
     const engine = new FakeStreamEngine({ totalRows: 40, commitPerPoll: 10 });
 
