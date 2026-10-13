@@ -21,10 +21,21 @@ import {
   getPPLLintFixOutcome,
   setActivePPLLintFixSession,
 } from './ppl_lint_fix_session';
-import { PPL_LINT_FIX_UI_BINDING } from '../../../../../data/public';
+import {
+  armPPLLintFixRequest,
+  cleanupPPLLintFixRequest,
+  PPL_LINT_FIX_UI_BINDING,
+} from '../../../../../data/public';
 import { PPL_LINT_FIX_EXPLORE_HOST } from './ppl_lint_fix_host';
+import { AssistantActionService } from '../../../../../context_provider/public';
 
-const mockRegisterAssistantAction = jest.fn();
+// Record and forward to the real singleton. The service commits a
+// re-registration only when `description`, `parameters` or `available` change,
+// so assertions that read `mock.calls` alone see registrations the registry
+// silently dropped.
+const mockRegisterAssistantAction = jest.fn((action: any) => {
+  AssistantActionService.getInstance().registerAction(action);
+});
 const mockSetEditorTextWithQuery = jest.fn();
 // The enabled apply action threads this hook's removeContextById into the card;
 // spy on the underlying store remover so we can prove Dismiss/unmount reach it.
@@ -109,7 +120,12 @@ const request = {
 describe('usePPLLintFixAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Disarm as well as clear, or an armed request keeps the flow active into
+    // the next test.
+    cleanupPPLLintFixRequest(request.requestId, PPL_LINT_FIX_EXPLORE_HOST.contextIdPrefix);
     clearActivePPLLintFixSession();
+    // The action registry is a process-wide singleton, so drop it between tests.
+    (AssistantActionService as unknown as { instance: unknown }).instance = null;
     mockValidatePPLLintFixCandidate.mockReturnValue({ accepted: true });
     mockVerifyPerformanceFixOutcome.mockResolvedValue(true);
   });
@@ -137,6 +153,8 @@ describe('usePPLLintFixAction', () => {
   };
 
   it('registers the Explore-specific fix action with confirmation and custom rendering', () => {
+    // Arm so this asserts against the enabled action, not the disabled placeholder.
+    armPPLLintFixRequest(request.requestId);
     const action = renderAndGetAction();
 
     expect(action.name).toBe('apply_ppl_lint_fix_explore');
@@ -151,6 +169,122 @@ describe('usePPLLintFixAction', () => {
     // dismiss-clears-context test below verifies the binding actually reaches
     // the card.
     expect(action.render).toEqual(expect.any(Function));
+  });
+
+  it('withholds the apply/test tools until a fix flow is armed', () => {
+    act(() => {
+      renderHook(() => usePPLLintFixAction(mockSetEditorTextWithQuery));
+    });
+
+    // Disabled placeholders are filtered out of the agent's tool list, so the
+    // model is not offered either tool while no fix is in flight.
+    const idle = mockRegisterAssistantAction.mock.calls.map(([action]) => action);
+    expect(idle.map((action) => [action.name, action.available])).toEqual([
+      [TEST_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name, 'disabled'],
+      [APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name, 'disabled'],
+    ]);
+
+    // No act() on purpose. Arming must register synchronously, so wrapping this
+    // would let a post-commit effect pass too.
+    mockRegisterAssistantAction.mockClear();
+    armPPLLintFixRequest(request.requestId);
+
+    const armed = mockRegisterAssistantAction.mock.calls.map(([action]) => action);
+    expect(armed.map((action) => [action.name, action.available])).toEqual([
+      [TEST_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name, undefined],
+      [APPLY_PPL_LINT_FIX_EXPLORE_TOOL_DEFINITION.name, undefined],
+    ]);
+  });
+
+  it('disables both tools when the flow ends, without claiming the user navigated away', async () => {
+    armPPLLintFixRequest(request.requestId);
+    setSession();
+    const action = renderAndGetAction();
+
+    await action.handler(
+      withApprovalBinding(
+        {
+          requestId: 'req-1',
+          sourceQueryHash: 'hash-1',
+          fixedQuery: 'source=logs | where response_status = 500',
+        },
+        request.requestId
+      )
+    );
+
+    // Read the registry, not the recorded calls, so a dropped re-registration
+    // cannot pass.
+    const service = AssistantActionService.getInstance();
+    const state = service.getCurrentState();
+    expect([
+      state.actions.get('apply_ppl_lint_fix_explore')?.available,
+      state.actions.get('test_ppl_lint_fix_explore')?.available,
+    ]).toEqual(['disabled', 'disabled']);
+
+    const applyResult = await service.executeAction('apply_ppl_lint_fix_explore', {});
+    expect(applyResult.message).not.toContain('navigated away');
+    expect(applyResult.reason).toBe('flow-inactive');
+    expect(applyResult.context_lost).toBeUndefined();
+    expect(applyResult.error).not.toContain('context has changed');
+
+    const testResult = await service.executeAction('test_ppl_lint_fix_explore', {});
+    expect(testResult.reason).toBe('flow-inactive');
+    expect(testResult.message).not.toContain('no longer active');
+  });
+
+  it('does not claim a fix ran when none was ever armed', async () => {
+    // Production order. plugin.ts registers the startup placeholder before any
+    // panel mounts.
+    registerDisabledPPLLintFixAction(mockRegisterAssistantAction);
+    act(() => {
+      renderHook(() => usePPLLintFixAction(mockSetEditorTextWithQuery));
+    });
+
+    const service = AssistantActionService.getInstance();
+    const testResult = await service.executeAction('test_ppl_lint_fix_explore', {});
+    expect(testResult.reason).toBe('flow-inactive');
+    expect(testResult.message).toBe('No PPL lint fix is awaiting action.');
+
+    const applyResult = await service.executeAction('apply_ppl_lint_fix_explore', {});
+    expect(applyResult.reason).toBe('flow-inactive');
+    expect(applyResult.applied).toBe(false);
+    expect(applyResult.context_lost).toBeUndefined();
+    expect(applyResult.message).toContain('There is no PPL lint fix awaiting action');
+  });
+
+  it('still reports context-lost after unmount when the tools are already disabled', async () => {
+    armPPLLintFixRequest(request.requestId);
+    setSession();
+
+    const hook = renderHook(() => usePPLLintFixAction(mockSetEditorTextWithQuery));
+
+    const service = AssistantActionService.getInstance();
+    await service.executeAction(
+      'apply_ppl_lint_fix_explore',
+      withApprovalBinding(
+        {
+          requestId: 'req-1',
+          sourceQueryHash: 'hash-1',
+          fixedQuery: 'source=logs | where response_status = 500',
+        },
+        request.requestId
+      )
+    );
+
+    act(() => {
+      hook.unmount();
+    });
+
+    // The apply above already swapped in a disabled placeholder, so this
+    // asserts the unmount reason survives a second disabled registration the
+    // service will not commit.
+    const applyResult = await service.executeAction('apply_ppl_lint_fix_explore', {});
+    expect(applyResult.reason).toBe('context-lost');
+    expect(applyResult.context_lost).toBe(true);
+    expect(applyResult.message).toContain('navigated away');
+
+    const testResult = await service.executeAction('test_ppl_lint_fix_explore', {});
+    expect(testResult.reason).toBe('context-lost');
   });
 
   it('registers a silent test action that validates without updating the editor', async () => {
@@ -250,6 +384,9 @@ describe('usePPLLintFixAction', () => {
   });
 
   it('rejects when there is no active request', async () => {
+    // The apply tool is enabled only while a fix flow is active, so arm one without
+    // storing a session to reach the enabled handler's fail-closed guard.
+    armPPLLintFixRequest(request.requestId);
     const action = renderAndGetAction();
 
     const result = await action.handler(
@@ -326,6 +463,7 @@ describe('usePPLLintFixAction', () => {
   });
 
   it('rejects when the editor text changed after the request opened', async () => {
+    armPPLLintFixRequest(request.requestId);
     setSession('source=logs | head 10');
     const action = renderAndGetAction();
 
@@ -343,6 +481,14 @@ describe('usePPLLintFixAction', () => {
     expect(result.reason).toBe('stale-query');
     expect(mockValidatePPLLintFixCandidate).not.toHaveBeenCalled();
     expect(mockSetEditorTextWithQuery).not.toHaveBeenCalled();
+
+    // A stale request can never apply, so it is released and both tools leave
+    // the tool list while the card keeps its failure.
+    const service = AssistantActionService.getInstance();
+    expect(service.getToolDefinitions()).toEqual([]);
+    expect(getPPLLintFixOutcome(request.requestId)?.kind).toBe('failed');
+    const testResult = await service.executeAction('test_ppl_lint_fix_explore', {});
+    expect(testResult.reason).toBe('flow-inactive');
   });
 
   it('rejects invalid candidates without changing the editor', async () => {
@@ -505,6 +651,7 @@ describe('usePPLLintFixAction', () => {
   it('registers a disabled placeholder and clears the session on unmount', () => {
     setSession();
     const { unmount } = renderHook(() => usePPLLintFixAction(mockSetEditorTextWithQuery));
+    mockRegisterAssistantAction.mockClear();
 
     unmount();
 

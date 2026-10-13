@@ -252,6 +252,28 @@ describe('UnifiedIndexSelector', () => {
       ]);
     });
 
+    it('does not add pattern on Enter while IME composition is active', () => {
+      const mockOnSelectionChange = jest.fn();
+      const { getByTestId } = renderComponent({ onSelectionChange: mockOnSelectionChange });
+      const input = getByTestId('unified-index-selector-search') as HTMLInputElement;
+
+      fireEvent.change(input, { target: { value: '지표-*' } });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229, isComposing: true });
+
+      expect(mockOnSelectionChange).not.toHaveBeenCalled();
+
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 13 });
+
+      expect(mockOnSelectionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnSelectionChange).toHaveBeenCalledWith([
+        {
+          id: 'test::지표-*',
+          title: '지표-*',
+          isWildcard: true,
+        },
+      ]);
+    });
+
     it('does not add duplicate patterns', () => {
       const mockOnSelectionChange = jest.fn();
       const { getByTestId } = renderComponent({

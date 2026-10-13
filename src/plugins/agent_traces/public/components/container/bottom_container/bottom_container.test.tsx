@@ -150,6 +150,17 @@ describe('BottomContainer', () => {
 
       expect(screen.queryByTestId('agentTracesFieldsFlyout')).not.toBeInTheDocument();
     });
+
+    it('keeps the fields flyout open while Escape confirms an IME composition', () => {
+      renderAtWidth(NARROW);
+      fireEvent.click(screen.getByTestId('agentTracesFieldsFlyoutToggle'));
+
+      fireEvent.keyDown(window, { key: 'Escape', isComposing: true });
+      expect(screen.getByTestId('agentTracesFieldsFlyout')).toBeInTheDocument();
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByTestId('agentTracesFieldsFlyout')).not.toBeInTheDocument();
+    });
   });
 
   describe('sidebar panel context', () => {
