@@ -52,6 +52,8 @@ exports.externals = {
   '@osd/ui-shared-deps/theme': '__osdSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__osdSharedDeps__.MonacoBarePluginApi',
+  'monaco-editor/editor/editor.api': '__osdSharedDeps__.MonacoBarePluginApi',
+  'monaco-editor/editor/editor.api.js': '__osdSharedDeps__.MonacoBarePluginApi',
 
   /**
    * big deps which are locked to a single version

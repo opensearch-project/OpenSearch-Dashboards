@@ -103,7 +103,7 @@ exports.getRspackConfig = ({ dev = false } = {}) => ({
       // Special handling for Monaco's codicon CSS
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
         type: 'javascript/auto',
       },
       // Handle Monaco's codicon font files

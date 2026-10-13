@@ -143,6 +143,8 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    '^monaco-editor/esm/vs/(.*)$': '<rootDir>/node_modules/monaco-editor/esm/vs/$1',
+    '^monaco-editor/(?!esm/)(.+)$': '<rootDir>/node_modules/monaco-editor/esm/vs/$1',
     // query-string v9 is pure ESM; this shim restores the default-import shape
     // (`import qs from 'query-string'`) under Jest's CJS transform.
     '^query-string$': '<rootDir>/src/dev/jest/mocks/query_string_mock.js',
