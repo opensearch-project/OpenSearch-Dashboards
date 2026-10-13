@@ -1302,6 +1302,12 @@ describe('PPLSearchInterceptor', () => {
       'source=test_index | timechart span=1m count() by host',
       'source=test_index |chart count() over ts by host',
       'source=test_index |   timechart   count()',
+      // transpose/xyseries/timewrap pivot or aggregate away the dataset time field, and
+      // aggregation-mode patterns does too, so a default sort on that field would fail to resolve.
+      'source=test_index | transpose',
+      'source=test_index | xyseries host bytes clientip',
+      'source=test_index | timechart count() | timewrap 1d',
+      'source=test_index | patterns message mode=aggregation',
     ])('does not append a sort when the query already customizes it: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',
@@ -1317,7 +1323,27 @@ describe('PPLSearchInterceptor', () => {
       "source=test_index | where msg = 'took first | head spot'",
       'source=test_index | where id in [source=other | stats count()]',
       'source=test_index | where topic = "x"',
+      // A multi-line bracketed subquery must be fully masked, so an aggregating command inside it
+      // (even aggregation-mode patterns) does not block the outer doc query's default sort.
+      'source=test_index | where id in [\n  source=other | patterns message mode=aggregation\n]',
     ])('appends a sort when command keywords only appear in literals/subqueries: %s', (query) => {
+      const result = (pplSearchInterceptor as any).appendDefaultSort({
+        language: 'PPL',
+        query,
+        dataset: datasetWithTime,
+      });
+
+      expect(result.query).toBe(`${query} | sort - \`@timestamp\``);
+    });
+
+    // Label-mode patterns (default or explicit) keeps document rows and the dataset time field, so
+    // the default sort is still valid and must be appended -- only aggregation-mode patterns blocks.
+    it.each([
+      'source=test_index | patterns message',
+      'source=test_index | patterns message mode=label',
+      'source=test_index | patterns message method=brain mode=label new_field=pat',
+      'source=test_index | patterns message method=brain',
+    ])('appends a sort for label-mode patterns: %s', (query) => {
       const result = (pplSearchInterceptor as any).appendDefaultSort({
         language: 'PPL',
         query,

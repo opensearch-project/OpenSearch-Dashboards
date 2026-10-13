@@ -23,7 +23,7 @@ import { RootState } from '../../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import {
   queryEndsWithHead,
-  queryHasAggregation,
+  queryIsBucketCountable,
 } from '../../../application/utils/state_management/actions/utils';
 
 interface ActionBarProps {
@@ -70,14 +70,18 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const queryString = query.language === 'PPL' ? defaultPrepareQueryString(query) : '';
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
   const hasHead = query.language === 'PPL' && queryEndsWithHead(queryString);
-  const hasAggregation = query.language === 'PPL' && queryHasAggregation(originalQueryString);
+  // Only queries whose rendered rows are countable buckets get a bucket denominator from the
+  // dedicated count query. This covers stats/top/rare/chart/timechart/transpose/xyseries and
+  // `patterns mode=aggregation`; it excludes `timewrap` (post-plan pivot can't be probed) and
+  // label-mode `patterns`, which fall back to the plain hits format.
+  const isBucketCountable = query.language === 'PPL' && queryIsBucketCountable(originalQueryString);
   const totalHits = hasHead ? undefined : histogramResults?.hits.total;
   // For aggregation queries, use the bucket count from the dedicated count query.
   // Only show bucket format on Statistics/Visualization tabs where rows are actual buckets.
   // On Logs tab, rows are documents (stripStatsFromQuery removes the aggregation clause).
   // When the count query hasn't returned or failed, degrade to the standard hits format.
   const isLogsTab = activeTabId === EXPLORE_LOGS_TAB_ID;
-  const effectiveBucketCount = hasAggregation && !isLogsTab ? bucketCount : undefined;
+  const effectiveBucketCount = isBucketCountable && !isLogsTab ? bucketCount : undefined;
   const elapsedMs = results?.elapsedMs;
 
   return (

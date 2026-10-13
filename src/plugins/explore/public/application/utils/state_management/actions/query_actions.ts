@@ -51,7 +51,7 @@ import {
   buildSQLTopBreakdownQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
-  queryHasAggregation,
+  queryIsBucketCountable,
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { hasFieldValue } from '../../../../utils/has_field_value';
@@ -351,9 +351,11 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Execute bucket count query for aggregation queries (non-blocking)
-  // This appends | stats count() to get the true total bucket count
+  // This appends | stats count() to get the true total bucket count. Gated on
+  // queryIsBucketCountable: `timewrap` and label-mode `patterns` are skipped because a count probe
+  // can't reproduce their rendered bucket count.
   const originalQueryString = typeof query.query === 'string' ? query.query : '';
-  if (query.language === 'PPL' && queryHasAggregation(originalQueryString)) {
+  if (query.language === 'PPL' && queryIsBucketCountable(originalQueryString)) {
     const bucketCountCacheKey = prepareBucketCountCacheKey(query);
     const bucketCountQueryStatus = state.queryEditor.queryStatusMap[bucketCountCacheKey];
     const needsBucketCountQuery =
@@ -710,7 +712,7 @@ const executeQueryBase = async (
     // Async sources that return rows while still running hand them to `onPartialResults` on
     // each poll. Only row views stream them: an aggregation's running values reorder as the
     // scan proceeds, so aggregation views wait for the final result.
-    const streamsPartialRows = !isHistogramQuery && !queryHasAggregation(queryString);
+    const streamsPartialRows = !isHistogramQuery && !queryIsBucketCountable(queryString);
 
     const onPartialResults = (partialResults: SearchResponse<any>, dataFrame: IDataFrame) => {
       // Drop partials once this run is cancelled (a newer run of the key aborts it) or a newer
