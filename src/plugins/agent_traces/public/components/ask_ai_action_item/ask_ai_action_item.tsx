@@ -16,6 +16,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { AgentTracesServices } from '../../types';
 import { LogActionItemProps } from '../../types/log_actions';
 import { ChatServiceStart } from '../../../../../core/public';
+import { isImeComposing } from '../../../../../core/public/utils';
 
 // Create stable NOOP hook reference outside component to avoid re-renders
 const NOOP_DYNAMIC_CONTEXT_HOOK = (_options: any, _shouldCleanup?: boolean): string => '';
@@ -105,7 +106,7 @@ export const AskAIActionItem: React.FC<AskAIActionItemProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !isImeComposing(e)) {
         e.preventDefault();
         handleExecute();
       }

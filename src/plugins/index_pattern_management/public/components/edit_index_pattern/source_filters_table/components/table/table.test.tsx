@@ -270,6 +270,52 @@ describe('Table', () => {
     expect(component.state('editingFilterId')).toBe('');
   });
 
+  test('should not save when the enter key is pressed during IME composition', () => {
+    const saveFilter = jest.fn();
+
+    const component = shallow(
+      <Table
+        indexPattern={indexPattern}
+        items={items}
+        deleteFilter={() => {}}
+        fieldWildcardMatcher={() => {}}
+        saveFilter={saveFilter}
+        isSaving={false}
+      />
+    );
+
+    // Start the editing process
+    const editingComponent = shallow(
+      <div>{component.prop('columns')[2].render({ clientId: 1, value: '지표' })}</div>
+    );
+    editingComponent.find('EuiButtonIcon').at(0).simulate('click');
+
+    component.update();
+
+    const filterNameTableCell = shallow(
+      <div>{component.prop('columns')[0].render('지표', { clientId: 1 })}</div>
+    );
+    const input = filterNameTableCell.find('EuiCompressedFieldText');
+
+    // Composing Enter only commits the IME candidate
+    input.simulate('keydown', {
+      key: 'Enter',
+      keyCode: 229,
+      nativeEvent: { isComposing: true },
+    });
+    expect(saveFilter).not.toHaveBeenCalled();
+    expect(component.state('editingFilterId')).not.toBe('');
+
+    // Plain Enter saves once
+    input.simulate('keydown', {
+      key: 'Enter',
+      keyCode: 13,
+      nativeEvent: { isComposing: false },
+    });
+    expect(saveFilter).toHaveBeenCalledTimes(1);
+    expect(component.state('editingFilterId')).toBe('');
+  });
+
   test('should cancel when in edit mode and the esc key is pressed', () => {
     const saveFilter = jest.fn();
 

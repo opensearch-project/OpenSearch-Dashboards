@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 import { CanvasPanel } from '../../panel/canvas_panel';
 import { DiscoverPanel } from '../../fields_selector/fields_selector_panel';
 import { BottomRightContainer } from './bottom_right_container';
+import { isImeComposing } from '../../../../../../core/public/utils';
 
 // Below this *container* width the fields sidebar becomes an overlay flyout. Measured on the
 // container, not the window, so it also fires when this view is embedded in a narrow host
@@ -52,7 +53,7 @@ export const BottomContainer = () => {
   useEffect(() => {
     if (!isFieldsFlyoutOpen) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsFieldsFlyoutOpen(false);
+      if (event.key === 'Escape' && !isImeComposing(event)) setIsFieldsFlyoutOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
