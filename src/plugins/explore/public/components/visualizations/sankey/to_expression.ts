@@ -36,7 +36,7 @@ const toSankeyLinks =
       const target = targetValue == null ? '' : String(targetValue);
       const value = Number(row[valueField]);
 
-      if (!source || !target || !Number.isFinite(value) || value <= 0) {
+      if (!source || !target || source === target || !Number.isFinite(value) || value <= 0) {
         return;
       }
 

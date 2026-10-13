@@ -298,11 +298,6 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
         </React.Fragment>
       ))}
 
-      {/* <EuiFormRow
-        label={i18n.translate('explore.stylePanel.sankey.levelStyles', {
-          defaultMessage: 'Level styles',
-        })}
-      > */}
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
@@ -314,7 +309,6 @@ export const SankeyExclusiveVisOptions = ({ styles, onChange }: SankeyExclusiveV
           defaultMessage: 'Add level style',
         })}
       </EuiButton>
-      {/* </EuiFormRow> */}
     </StyleAccordion>
   );
 };

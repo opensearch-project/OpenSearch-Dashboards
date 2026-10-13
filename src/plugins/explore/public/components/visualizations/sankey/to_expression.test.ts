@@ -143,6 +143,22 @@ describe('Sankey to_expression', () => {
     });
   });
 
+  it('excludes self-links while preserving valid links', () => {
+    const spec = createSankeySpec(
+      [
+        { source: 'A', target: 'A', value: 10 },
+        { source: 'A', target: 'B', value: 5 },
+      ],
+      defaultSankeyChartStyles,
+      axisColumnMappings
+    );
+
+    expect(spec?.series?.[0]).toMatchObject({
+      data: [{ name: 'A' }, { name: 'B' }],
+      links: [{ source: 'A', target: 'B', value: 5 }],
+    });
+  });
+
   it('formats visible link values using Standard options', () => {
     const spec = createSankeySpec(
       [{ source: 'A', target: 'B', value: 10 }],
