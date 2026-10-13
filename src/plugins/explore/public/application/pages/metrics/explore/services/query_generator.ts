@@ -17,7 +17,7 @@ const PROMQL_LABEL_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 /**
  * A label name as PromQL needs it: bare when it can be, else quoted (Prometheus 3 UTF-8 names,
- * e.g. OTel's `"@resource.service.name"` or `"@aws.tag.Team"`).
+ * e.g. OTel's `"service.name"` or `"k8s.namespace.name"`).
  */
 export function formatLabelName(name: string): string {
   return PROMQL_LABEL_NAME.test(name) ? name : `"${escapeLabelValue(name)}"`;

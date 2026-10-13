@@ -247,19 +247,19 @@ describe('metric names PromQL cannot take bare', () => {
 
   it('quotes label names PromQL cannot take bare, and parses them back', () => {
     const built = buildPromQL(
-      state('5xx', [{ id: 'f', label: '@aws.tag.clean', op: '=', value: 'true' }])
+      state('5xx', [{ id: 'f', label: 'k8s.namespace.name', op: '=', value: 'prod' }])
     );
-    expect(built).toBe('{__name__="5xx", "@aws.tag.clean"="true"}');
+    expect(built).toBe('{__name__="5xx", "k8s.namespace.name"="prod"}');
 
-    const parsed = parsePromQL(`sum by ("@aws.region", job) (${built})`);
+    const parsed = parsePromQL(`sum by ("service.name", job) (${built})`);
     expect(parsed.canBuild).toBe(true);
     expect(parsed.state.metric).toBe('5xx');
     expect(parsed.state.labelFilters.map((f) => [f.label, f.value])).toEqual([
-      ['@aws.tag.clean', 'true'],
+      ['k8s.namespace.name', 'prod'],
     ]);
-    expect(parsed.state.operations[0].grouping?.labels).toEqual(['@aws.region', 'job']);
+    expect(parsed.state.operations[0].grouping?.labels).toEqual(['service.name', 'job']);
     expect(buildPromQL(parsed.state)).toBe(
-      'sum by ("@aws.region", job)({__name__="5xx", "@aws.tag.clean"="true"})'
+      'sum by ("service.name", job)({__name__="5xx", "k8s.namespace.name"="prod"})'
     );
   });
 

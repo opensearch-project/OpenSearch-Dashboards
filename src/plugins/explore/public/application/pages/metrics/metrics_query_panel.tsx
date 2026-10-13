@@ -98,7 +98,7 @@ export const MetricsQueryPanel: React.FC = () => {
 
   const queryLanguage = useSelector(selectQueryLanguage);
   const dataset = useSelector(selectDataset);
-  // Engine-qualified where the bare name is shared across sources (e.g. "CloudWatch SQL").
+  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
     const languageService = services.data.query.queryString.getLanguageService();
     return getSourceTypeRegistry().getLanguageLabel(

@@ -186,7 +186,7 @@ const QUOTED_ITEM = new RegExp(QUOTED, 'g');
 
 /**
  * The grammar only takes bare label names, but Prometheus 3 quotes names it can't take bare
- * (`"@aws.tag.Team"="x"`, `by ("@resource.service.name")`). Swap each for a placeholder name
+ * (`"k8s.namespace.name"="x"`, `by ("service.name")`). Swap each for a placeholder name
  * before parsing; `names` maps the placeholders back.
  */
 const replaceQuotedLabelNames = (query: string) => {

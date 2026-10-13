@@ -55,14 +55,14 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   }),
 }));
 
-const cloudWatch = { id: 'cloudwatch-metrics::us-west-2', type: 'CW' };
+const myMetrics = { id: 'my-metrics-source::default', type: 'MY_METRICS_TYPE' };
 
-const register = (resolved: unknown = cloudWatch) => {
+const register = (resolved: unknown = myMetrics) => {
   const registry = new SourceTypeRegistryService();
   registry.register({
-    id: 'cw',
-    label: 'CloudWatch Metrics',
-    datasetTypes: ['CW'],
+    id: 'my-metrics-source',
+    label: 'My Metrics Source',
+    datasetTypes: ['MY_METRICS_TYPE'],
     flavors: [ExploreFlavor.Metrics],
     resolveDefaultDataset: async () => resolved as any,
   });
@@ -89,11 +89,11 @@ describe('MetricsSourceTypeSelect', () => {
     expect(button).toHaveTextContent('Prometheus');
 
     fireEvent.click(button);
-    fireEvent.click(screen.getByTestId('metricsSourceType-cw'));
+    fireEvent.click(screen.getByTestId('metricsSourceType-my-metrics-source'));
 
     await waitFor(() =>
       expect(mockSetQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ dataset: cloudWatch, query: '', language: 'PROMQL' })
+        expect.objectContaining({ dataset: myMetrics, query: '', language: 'PROMQL' })
       )
     );
     expect(mockCacheDataset).toHaveBeenCalled();
@@ -103,9 +103,9 @@ describe('MetricsSourceTypeSelect', () => {
 
   it('switches back to Prometheus even without a connection', async () => {
     register();
-    mockDataset = cloudWatch;
+    mockDataset = myMetrics;
     render(<MetricsSourceTypeSelect />);
-    expect(screen.getByTestId('metricsSourceTypeSelect')).toHaveTextContent('CloudWatch Metrics');
+    expect(screen.getByTestId('metricsSourceTypeSelect')).toHaveTextContent('My Metrics Source');
 
     fireEvent.click(screen.getByTestId('metricsSourceTypeSelect'));
     fireEvent.click(screen.getByTestId('metricsSourceType-opensearch'));
@@ -123,7 +123,7 @@ describe('MetricsSourceTypeSelect', () => {
     register(null);
     render(<MetricsSourceTypeSelect />);
     fireEvent.click(screen.getByTestId('metricsSourceTypeSelect'));
-    fireEvent.click(screen.getByTestId('metricsSourceType-cw'));
+    fireEvent.click(screen.getByTestId('metricsSourceType-my-metrics-source'));
     await waitFor(() => expect(mockAddWarning).toHaveBeenCalled());
     expect(mockSetQuery).not.toHaveBeenCalled();
   });

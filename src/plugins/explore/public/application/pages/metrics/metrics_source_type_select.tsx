@@ -21,7 +21,7 @@ import { selectDataset } from '../../utils/state_management/selectors';
 import { useClearEditors } from '../../hooks';
 
 /**
- * The Metrics page's source type switch (e.g. Prometheus / CloudWatch Metrics), next to the
+ * The Metrics page's source type switch (e.g. Prometheus and a plugin-registered source), next to the
  * dataset picker so it is there in both the Explore and Query modes. Shown only when a source
  * other than the built-in one is registered for Metrics. Picking a source opens its default
  * dataset; its own picker (or the Prometheus connection picker) then refines it.

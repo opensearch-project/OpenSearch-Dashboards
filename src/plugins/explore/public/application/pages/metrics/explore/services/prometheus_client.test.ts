@@ -253,11 +253,11 @@ describe('PrometheusClient.queryRange language', () => {
     const setFields = jest.fn();
     const searchSource = { setFields, fetch: jest.fn().mockResolvedValue({ hits: { hits: [] } }) };
     const dataset = {
-      id: 'cloudwatch-metrics::us-west-2',
-      title: 'cw',
-      type: 'CLOUDWATCH_METRICS',
+      id: 'my-metrics-source::default',
+      title: 'My metrics',
+      type: 'MY_METRICS_TYPE',
     };
-    const queryState = { language: 'CloudWatch Metrics Insights', query: 'SELECT 1', dataset };
+    const queryState = { language: 'My Metrics SQL', query: 'SELECT 1', dataset };
     const dataView = { id: dataset.id, type: dataset.type };
     const services = {
       data: {
