@@ -9,6 +9,7 @@ import {
   EXPLORE_STATISTICS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
+import { patternsModeCache } from '../../../../../../data/public/ppl_settings/patterns_mode_cache';
 
 jest.mock('../slices', () => ({
   setActiveTab: jest.fn((tabId) => ({ type: 'ui/setActiveTab', payload: tabId })),
@@ -199,6 +200,149 @@ describe('detectAndSetOptimalTab', () => {
         EXPLORE_LOGS_TAB_ID
       );
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+  });
+
+  // =========================================================================
+  // Rule 5: pivot commands and aggregation-mode patterns are routed like the
+  // aggregations they are, so the Logs tab never shows their stripped query
+  // =========================================================================
+  describe('Rule 5 — pivot commands and aggregation-mode patterns', () => {
+    const statisticsQueries = [
+      ['transpose', 'source = idx | transpose'],
+      ['xyseries', "source = idx | xyseries host status in ('200', '404') bytes"],
+      ['patterns mode=aggregation', 'source = idx | patterns message mode=aggregation'],
+      ['patterns mode = aggregation', 'source = idx | patterns message mode = aggregation'],
+    ];
+
+    it.each(statisticsQueries)(
+      'switches from Logs to Statistics for %s',
+      async (_command, query) => {
+        expect(await runDetect(query, EXPLORE_LOGS_TAB_ID)).toBe(EXPLORE_STATISTICS_TAB_ID);
+      }
+    );
+
+    it.each(statisticsQueries)('stays on Statistics for %s', async (_command, query) => {
+      expect(await runDetect(query, EXPLORE_STATISTICS_TAB_ID)).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('switches from Logs to Visualization for timewrap', async () => {
+      const tab = await runDetect(
+        'source = idx | timechart span=1h count() | timewrap 1d',
+        EXPLORE_LOGS_TAB_ID
+      );
+      expect(tab).toBe(EXPLORE_VISUALIZATION_TAB_ID);
+    });
+
+    it('stays on Statistics for timewrap', async () => {
+      const tab = await runDetect(
+        'source = idx | timechart span=1h count() | timewrap 1d',
+        EXPLORE_STATISTICS_TAB_ID
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('prefers Statistics when a pivot follows a chart command', async () => {
+      const tab = await runDetect(
+        'source = idx | timechart span=1h count() by host | transpose',
+        EXPLORE_LOGS_TAB_ID
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it.each([
+      ['bare patterns', 'source = idx | patterns message'],
+      ['label-mode patterns', 'source = idx | patterns message mode=label'],
+    ])('stays on Logs for %s (rows are still documents)', async (_command, query) => {
+      expect(await runDetect(query, EXPLORE_LOGS_TAB_ID)).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+
+    it('stays on Logs when transpose appears only inside a quoted string', async () => {
+      const tab = await runDetect('source = idx | where msg = "| transpose"', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+  });
+
+  // =========================================================================
+  // Rule 6: a patterns without mode= follows the cluster's default mode
+  // (plugins.ppl.pattern.mode), which is fetched only for such queries
+  // =========================================================================
+  describe('Rule 6 — patterns without mode= follows the cluster default', () => {
+    const runWithClusterMode = async (
+      query: string,
+      activeTabId: string,
+      clusterMode: 'label' | 'aggregation'
+    ) => {
+      const http = {
+        get: jest.fn().mockResolvedValue({ patternMode: clusterMode, patternModeMeasured: true }),
+      };
+      const mockDispatch = jest.fn();
+      const mockGetState = jest.fn().mockReturnValue({
+        query: { query, language: 'PPL', dataset: { dataSource: { id: 'ds-1' } } },
+        ui: { activeTabId },
+      });
+      await detectAndSetOptimalTab({ services: { http } as any })(
+        mockDispatch,
+        mockGetState,
+        undefined
+      );
+      const tab = mockDispatch.mock.calls.find((call) => call[0]?.type === 'ui/setActiveTab')?.[0]
+        .payload;
+      return { tab, http };
+    };
+
+    afterEach(() => {
+      patternsModeCache.dispose();
+    });
+
+    it('switches from Logs to Statistics when the cluster default is aggregation', async () => {
+      const { tab, http } = await runWithClusterMode(
+        'source = idx | patterns message',
+        EXPLORE_LOGS_TAB_ID,
+        'aggregation'
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+      expect(http.get).toHaveBeenCalledWith(expect.any(String), {
+        query: { dataSourceId: 'ds-1' },
+      });
+    });
+
+    it('stays on Statistics when the cluster default is aggregation', async () => {
+      const { tab } = await runWithClusterMode(
+        'source = idx | patterns message',
+        EXPLORE_STATISTICS_TAB_ID,
+        'aggregation'
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('stays on Logs when the cluster default is label', async () => {
+      const { tab } = await runWithClusterMode(
+        'source = idx | patterns message',
+        EXPLORE_LOGS_TAB_ID,
+        'label'
+      );
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+    });
+
+    it('lets an explicit mode=label win over an aggregation default, without fetching', async () => {
+      const { tab, http } = await runWithClusterMode(
+        'source = idx | patterns message mode=label',
+        EXPLORE_LOGS_TAB_ID,
+        'aggregation'
+      );
+      expect(tab).toBe(EXPLORE_LOGS_TAB_ID);
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('does not fetch the setting for queries without patterns', async () => {
+      const { tab, http } = await runWithClusterMode(
+        'source = idx | stats count() by host',
+        EXPLORE_LOGS_TAB_ID,
+        'aggregation'
+      );
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+      expect(http.get).not.toHaveBeenCalled();
     });
   });
 });

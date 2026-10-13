@@ -46,6 +46,7 @@ export const API = {
   PPL_ANALYZE: `${BASE_API}/ppl/analyze`,
   PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   PPL_CALCITE_SETTINGS: `${BASE_API}/ppl/calcite_settings`,
+  PPL_PATTERN_MODE_SETTINGS: `${BASE_API}/ppl/pattern_mode_settings`,
   PPL_EXPLAIN: `${BASE_API}/ppl/explain`,
   // Streaming (asynchronous partial results). Proxies POST /_plugins/_ppl with the async
   // lifecycle fields, plus GET/DELETE on /_plugins/_ppl/jobs/{id}. Separate from PPL_SEARCH

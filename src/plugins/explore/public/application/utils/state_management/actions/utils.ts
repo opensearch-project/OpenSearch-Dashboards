@@ -15,9 +15,9 @@ import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
 import { calculateTraceInterval } from '../constants';
-import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 import { HISTOGRAM_RESULT_COLUMNS } from '../../../../services/source_type_registry/histogram_columns';
+import { maskedPPLQueryHasTrait, PPLTraitOptions } from '../../languages/ppl/aggregation_commands';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -126,16 +126,43 @@ export const queryEndsWithHead = (queryString: string): boolean => {
 };
 
 /**
- * Checks if a PPL query contains a bucketing aggregation command ({@link AGGREGATION_COMMANDS}:
- * `stats`, `top`, `rare`), whose output rows are aggregation buckets rather than documents. Subquery
- * brackets and quoted strings are masked so that a command inside them is ignored.
- *
- * Used to detect queries where the hit counter should show bucket count separately from document
- * count. Kept in sync with tab routing and stripStatsFromQuery via the shared command list.
+ * Checks whether a PPL query's output rows are aggregation values rather than documents (any command
+ * with the `isAggregation` trait, including `timewrap` and an aggregating `patterns`). Used to
+ * keep async partial results from streaming, since running aggregate values change as the scan
+ * proceeds. `options.patternsDefaultMode` decides whether a `patterns` without `mode=` aggregates.
+ * Subquery brackets and quoted strings are masked so a command inside them is ignored.
  */
-export const queryHasAggregation = (queryString: string): boolean => {
+export const queryIsAggregation = (queryString: string, options: PPLTraitOptions = {}): boolean =>
+  maskedPPLQueryHasTrait(
+    maskPPLSubqueriesAndStrings(queryString),
+    (traits) => traits.isAggregation,
+    options
+  );
+
+/**
+ * Checks whether a PPL query's rendered rows are buckets that can be counted with a separate
+ * `... | stats count() as bucket_count` probe, so the hit counter shows a `N / M buckets` denominator
+ * instead of plain hits.
+ *
+ * This is a narrower question than {@link queryIsAggregation}: one aggregation whose count can't be
+ * probed (`timewrap`, whose pivot runs after the query plan) disqualifies the whole query, even
+ * though the `timechart` it follows is countable on its own. `table` is not an aggregation (its row
+ * count equals the hit count) and label-mode `patterns` returns documents, so neither counts.
+ * Subquery brackets and quoted strings are masked so a command inside them is ignored.
+ */
+export const queryIsBucketCountable = (
+  queryString: string,
+  options: PPLTraitOptions = {}
+): boolean => {
   const masked = maskPPLSubqueriesAndStrings(queryString);
-  return new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN})\\b`, 'i').test(masked);
+  return (
+    maskedPPLQueryHasTrait(masked, (traits) => traits.isAggregation, options) &&
+    !maskedPPLQueryHasTrait(
+      masked,
+      (traits) => traits.isAggregation && !traits.isBucketCountable,
+      options
+    )
+  );
 };
 
 /** Commands that reshape rows such that the time field may no longer exist downstream. */

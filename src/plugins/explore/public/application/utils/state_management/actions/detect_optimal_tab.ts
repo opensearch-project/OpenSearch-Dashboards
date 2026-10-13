@@ -12,18 +12,21 @@ import {
   EXPLORE_STATISTICS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../../common';
-import { AGGREGATION_COMMAND_PATTERN } from '../../languages/ppl/aggregation_commands';
+import {
+  ensurePatternsDefaultMode,
+  maskedPPLQueryHasTrait,
+  PPLTraitOptions,
+} from '../../languages/ppl/aggregation_commands';
 import { maskPPLSubqueriesAndStrings } from '../../languages/ppl/mask_ppl_subqueries_and_strings';
 
-// The bucketing aggregations (AGGREGATION_COMMANDS: stats/top/rare) and `table` all produce
-// non-document output that belongs on the Statistics tab. The aggregation set is shared with
-// stripStatsFromQuery and the bucket-count summary so the three stay in sync; `table` is routed
-// here only (it is a projection, so it keeps hit-count semantics and is not stripped). Both
-// predicates run on the masked query (see the thunk) so a command inside a string or subquery
+// Derived from the shared PPL command traits, so every command stripped from the Logs/histogram
+// query is routed off the Logs tab (otherwise Logs would silently show the stripped documents).
+// Both predicates run on the masked query (see the thunk) so a command inside a string or subquery
 // doesn't mis-route the tab, matching how stripStatsFromQuery and the bucket-count gate mask.
-const hasAggregation = (masked: string) =>
-  new RegExp(`\\|\\s*(${AGGREGATION_COMMAND_PATTERN}|table)\\b`, 'i').test(masked);
-const hasChartOrTimechart = (masked: string) => /\|\s*(chart|timechart)\b/i.test(masked);
+const routesToStatistics = (masked: string, options: PPLTraitOptions) =>
+  maskedPPLQueryHasTrait(masked, (traits) => traits.routesTo === 'statistics', options);
+const routesToVisualization = (masked: string, options: PPLTraitOptions) =>
+  maskedPPLQueryHasTrait(masked, (traits) => traits.routesTo === 'visualization', options);
 
 /**
  * Determines the optimal tab based on the current query and the user's
@@ -31,29 +34,39 @@ const hasChartOrTimechart = (masked: string) => /\|\s*(chart|timechart)\b/i.test
  *
  * Decision matrix:
  *
- * | Current Tab ↓ \ Query →  | stats/table/top/rare | chart/timechart  | No command      |
- * |--------------------------|----------------------|------------------|-----------------|
- * | Logs (default)           | → Statistic          | → Visualization  | → Logs (stay)   |
- * | Statistic                | → Statistic          | → Statistic      | → Logs          |
- * | Visualization            | → Visualization      | → Visualization  | → Visualization |
+ * | Current Tab ↓ \ Query →  | Statistics command¹  | Visualization command² | No command      |
+ * |--------------------------|----------------------|------------------------|-----------------|
+ * | Logs (default)           | → Statistic          | → Visualization        | → Logs (stay)   |
+ * | Statistic                | → Statistic          | → Statistic            | → Logs          |
+ * | Visualization            | → Visualization      | → Visualization        | → Visualization |
+ *
+ * ¹ stats, top, rare, table, transpose, xyseries, and `patterns` when it aggregates (explicit
+ *   `mode=aggregation`, or no `mode=` on a cluster whose default mode is aggregation)
+ * ² chart, timechart, timewrap
+ * (see PPL_COMMAND_TRAITS; a Statistics command wins when both are present)
  */
 export const detectAndSetOptimalTab = createAsyncThunk<
   void,
   { services: ExploreServices },
   { state: RootState }
->('ui/detectAndSetOptimalTab', async (_args, { getState, dispatch }) => {
+>('ui/detectAndSetOptimalTab', async ({ services }, { getState, dispatch }) => {
   const state = getState();
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
   const maskedQuery = maskPPLSubqueriesAndStrings(queryString);
+  // A `patterns` without `mode=` aggregates only if the cluster default says so; this fetches the
+  // setting only for such queries.
+  const options: PPLTraitOptions = {
+    patternsDefaultMode: await ensurePatternsDefaultMode(services?.http, state.query),
+  };
   const currentTab = state.ui.activeTabId || EXPLORE_LOGS_TAB_ID;
 
   let targetTab: string;
 
   switch (currentTab) {
     case EXPLORE_LOGS_TAB_ID:
-      if (hasAggregation(maskedQuery)) {
+      if (routesToStatistics(maskedQuery, options)) {
         targetTab = EXPLORE_STATISTICS_TAB_ID;
-      } else if (hasChartOrTimechart(maskedQuery)) {
+      } else if (routesToVisualization(maskedQuery, options)) {
         targetTab = EXPLORE_VISUALIZATION_TAB_ID;
       } else {
         targetTab = EXPLORE_LOGS_TAB_ID;
@@ -61,7 +74,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
       break;
 
     case EXPLORE_STATISTICS_TAB_ID:
-      if (hasAggregation(maskedQuery) || hasChartOrTimechart(maskedQuery)) {
+      if (routesToStatistics(maskedQuery, options) || routesToVisualization(maskedQuery, options)) {
         targetTab = EXPLORE_STATISTICS_TAB_ID;
       } else {
         targetTab = EXPLORE_LOGS_TAB_ID;
