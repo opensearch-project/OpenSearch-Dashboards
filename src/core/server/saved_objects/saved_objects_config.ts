@@ -61,21 +61,30 @@ export type SavedObjectsConfigType = TypeOf<typeof savedObjectsConfig.schema>;
 
 export const savedObjectsConfig = {
   path: 'savedObjects',
-  schema: schema.object({
-    maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
-    maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
-    permission: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
-    storage: schema.object({
-      backend: schema.oneOf([schema.literal('opensearch'), schema.literal('sqlite')], {
-        defaultValue: 'opensearch',
+  schema: schema.object(
+    {
+      maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
+      maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
+      permission: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
       }),
-      sqlite: schema.object({
-        path: schema.string({ defaultValue: 'data/osd-metadata.db' }),
+      storage: schema.object({
+        backend: schema.oneOf([schema.literal('opensearch'), schema.literal('sqlite')], {
+          defaultValue: 'opensearch',
+        }),
+        sqlite: schema.object({
+          path: schema.string({ defaultValue: 'data/osd-metadata.db' }),
+        }),
       }),
-    }),
-  }),
+    },
+    {
+      validate(value) {
+        if (value.storage.backend === 'sqlite' && value.permission.enabled) {
+          return 'savedObjects.permission.enabled is not supported when savedObjects.storage.backend is "sqlite"';
+        }
+      },
+    }
+  ),
 };
 
 export class SavedObjectConfig {
