@@ -1210,6 +1210,34 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       });
     });
 
+    // Stop renders on `isLoading && hasUserInitiatedQuery`, and the flag used to be set only by the
+    // editor's Run. A page load, time-range change or dataset change goes straight to
+    // executeQueries, so those ran a cancellable query while offering no way to cancel it.
+    it('marks the query as user-initiated, so Stop is offered however it started', async () => {
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'd', title: 'd', type: 'INDEX_PATTERN' },
+        },
+        ui: { activeTabId: 'logs' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      });
+
+      await executeQueries({ services: {} as any })(mockDispatch, mockGetState, undefined);
+
+      const types = mockDispatch.mock.calls
+        .map(([a]) => (typeof a === 'object' && a !== null ? a.type : undefined))
+        .filter(Boolean);
+      expect(types).toContain('queryEditor/setHasUserInitiatedQuery');
+      const flag = mockDispatch.mock.calls
+        .map(([a]) => a)
+        .find((a) => typeof a === 'object' && a?.type === 'queryEditor/setHasUserInitiatedQuery');
+      expect(flag.payload).toBe(true);
+    });
+
     // An engine without the async PPL API only reveals that at submit. Nothing has been rendered
     // at that point, so the query must fall back to the non-streaming path rather than error.
     describe('when a streaming run reports itself unavailable', () => {

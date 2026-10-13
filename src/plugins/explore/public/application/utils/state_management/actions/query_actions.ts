@@ -19,7 +19,10 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus, QueryProgress } from '../types';
 import { setResults, clearResultsByKey, ISearchResult, IPrometheusSearchResult } from '../slices';
-import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
+import {
+  setHasUserInitiatedQuery,
+  setIndividualQueryStatus,
+} from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
   DataPublicPluginStart,
@@ -420,6 +423,14 @@ export const executeQueries = createAsyncThunk<
     getSourceTypeRegistry().supportsHistogram(query.language, query.dataset) &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
+  // Stop is offered while a user-initiated query runs, and every path through here is one: a page
+  // load, a time-range or dataset change, an interval change, as well as the editor's Run. Setting
+  // it only in `onEditorRun` left those other paths running a cancellable query with no way to
+  // cancel it. Cleared by `overall_status_middleware` when the queries settle.
+  if (needsDataTableQuery || needsHistogramQuery) {
+    dispatch(setHasUserInitiatedQuery(true));
+  }
+
   const promises = [];
   // Set when the histogram is streamed as its own job, so the synchronous one is not also run.
   let streamedHistogram = false;
