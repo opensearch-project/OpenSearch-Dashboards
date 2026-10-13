@@ -8,6 +8,11 @@
     "declarationMap": true,
     "types": ["jest", "node"],
     "noImplicitAny": false,
+    "baseUrl": ".",
+    "paths": {
+      // see types/postcss.d.ts
+      "postcss": ["./types/postcss.d.ts"]
+    }
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["target"]
