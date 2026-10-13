@@ -461,9 +461,9 @@ export const executeQueries = createAsyncThunk<
       );
 
       // Stream the histogram as its own job, so its counts come from the engine and no raw rows are
-      // transferred to compute them. The engine does not publish partial aggregations today — a
-      // running aggregation reports total=0 until it completes — so the chart arrives whole, and
-      // later than the table above it.
+      // transferred to compute them. In practice the chart arrives whole and later than the table:
+      // the engine publishes on an output-row threshold, which for an aggregation means buckets, and
+      // a histogram sized for a bar target never has enough of them to cross it.
       if (streamingConfig.histogram && needsHistogramQuery) {
         const histogramKey = streamingConfig.histogram.cacheKey;
         const histogramToken = {};

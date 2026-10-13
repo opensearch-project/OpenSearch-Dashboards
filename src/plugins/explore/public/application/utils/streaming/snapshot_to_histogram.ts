@@ -17,10 +17,9 @@ import { parseRowTimestamp } from './parse_row_timestamp';
  * Counts are the engine's own, over every matching document, not derived from the rows the client
  * happened to fetch.
  *
- * Snapshots arrive as `REPLACE`, so each one supersedes the last. In practice there is only one: a
- * running aggregation reports no rows until it completes, so the bucket set arrives whole rather
- * than growing. The handling here does not depend on that — if the engine gains partial
- * aggregations, successive snapshots simply replace earlier ones.
+ * Snapshots are always `REPLACE`, at every offset, so each supersedes the last. A histogram sized
+ * for a bar target yields only one: the engine publishes once its output rows cross a threshold,
+ * and a few dozen buckets never do. An aggregation large enough does publish while running.
  */
 
 export interface HistogramBucket {
