@@ -182,36 +182,34 @@ export const DiscoverChartContainer = () => {
         )
       : !!cacheKey && queryStatusMap[cacheKey]?.status === QueryExecutionStatus.LOADING;
 
-  const reservedHeight = RESERVED_CHART_HEIGHT[flavorId ?? ''] ?? DEFAULT_RESERVED_CHART_HEIGHT;
+  /** Reserved space while the chart's query runs, so the results below it do not shift. */
+  const pendingChart = () =>
+    isChartLoading ? (
+      <div
+        className="dscCanvas__chart dscCanvas__chartPlaceholder"
+        style={{ height: RESERVED_CHART_HEIGHT[flavorId ?? ''] ?? DEFAULT_RESERVED_CHART_HEIGHT }}
+        data-test-subj="dscChartLoadingPlaceholder"
+      >
+        <EuiLoadingChart size="l" />
+      </div>
+    ) : null;
 
-  const chartPlaceholder = (
-    <div
-      className="dscCanvas__chart dscCanvas__chartPlaceholder"
-      style={{ height: reservedHeight }}
-      data-test-subj="dscChartLoadingPlaceholder"
-    >
-      <EuiLoadingChart size="l" />
-    </div>
-  );
-
-  // A non-time-based query has no histogram at all, so there is nothing to reserve.
+  // A non-time-based query has no histogram at all, so there is nothing to render or reserve.
   if (!isTimeBased) {
     return null;
   }
 
   if (!processedResults) {
-    return isChartLoading ? chartPlaceholder : null;
+    return pendingChart();
   }
 
-  if (flavorId === ExploreFlavor.Traces) {
-    if (!(processedResults as TracesChartProcessedResults).requestChartData) {
-      return isChartLoading ? chartPlaceholder : null;
-    }
-  } else if (
-    !processedResults.hits.total ||
-    !(processedResults as ProcessedSearchResults).chartData
-  ) {
-    return isChartLoading ? chartPlaceholder : null;
+  const hasChartData =
+    flavorId === ExploreFlavor.Traces
+      ? !!(processedResults as TracesChartProcessedResults).requestChartData
+      : !!processedResults.hits.total && !!(processedResults as ProcessedSearchResults).chartData;
+
+  if (!hasChartData) {
+    return pendingChart();
   }
 
   return (

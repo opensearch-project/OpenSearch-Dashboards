@@ -374,9 +374,12 @@ const getStreamingConfig = async (
         ),
       },
     };
-  } catch {
+  } catch (error) {
     // Streaming is an enhancement, never a prerequisite: returning undefined falls back to the
-    // standard single-shot path so a failure here can never stop a query from running.
+    // standard single-shot path so a failure here can never stop a query from running. Logged
+    // because the fallback is otherwise indistinguishable from streaming simply being disabled.
+    // eslint-disable-next-line no-console
+    console.warn('[STREAMING] Falling back to the non-streaming path:', error);
     return undefined;
   }
 };
@@ -465,9 +468,11 @@ export const executeQueries = createAsyncThunk<
         )
       );
 
-      // Stream the histogram as its own job. On the progressive backend a composite aggregation
-      // publishes REPLACE snapshots as pages complete, so the chart shows authoritative counts that
-      // grow — no client-side derivation, and no raw rows transferred to compute them.
+      // Stream the histogram as its own job, so its counts come from the engine rather than being
+      // derived from whatever rows the client happened to fetch, and no raw rows are transferred to
+      // compute them. Note the engine does not currently publish partial aggregations: measured, a
+      // running aggregation reports total=0 until it completes, then returns every bucket at once.
+      // So the chart arrives in one piece, and later than the table it sits above.
       if (streamingConfig.histogram && needsHistogramQuery) {
         const histogramKey = streamingConfig.histogram.cacheKey;
         const histogramToken = {};

@@ -15,8 +15,12 @@ import { parseRowTimestamp } from './parse_row_timestamp';
  *   datarows: [[58823, '2026-09-14 19:00:00'], [211765, '2026-09-14 20:00:00'], ...]
  *
  * Counts are the engine's own, over every matching document, not derived from the rows the client
- * happened to fetch. The aggregation publishes `REPLACE` snapshots as composite pages complete, so
- * they grow toward the true distribution while the query runs.
+ * happened to fetch.
+ *
+ * Snapshots arrive as `REPLACE`, so each one supersedes the last. In practice there is only one: a
+ * running aggregation reports no rows until it completes, so the bucket set arrives whole rather
+ * than growing. The handling here does not depend on that — if the engine gains partial
+ * aggregations, successive snapshots simply replace earlier ones.
  */
 
 export interface HistogramBucket {
