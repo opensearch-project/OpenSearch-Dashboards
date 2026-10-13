@@ -44,6 +44,7 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import * as tar from 'tar';
 import { ToolingLog } from '@osd/dev-utils';
+import { standardize } from '@osd/cross-platform';
 
 const pipelineAsync = promisify(pipeline);
 const mkdirAsync = promisify(fs.mkdir);
@@ -114,13 +115,33 @@ export async function deleteAll(patterns: string[], log: ToolingLog) {
     assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
   }
 
-  const files = await del(patterns, {
+  const filesToDelete = await del(patterns, {
     concurrency: 4,
+    dryRun: true,
   });
 
+  await Promise.all(
+    filesToDelete.map(async (folder) => {
+      if (process.platform === 'win32') {
+        folder = standardize(folder, false, false, true); // extended long path
+      }
+
+      for (let i = 0; i < 3; i++) {
+        try {
+          await rm(folder, { force: true, recursive: true });
+          return;
+        } catch (err) {
+          if (i === 2) throw err;
+          log.debug(`Retry ${i + 1}/3 on ${folder}, waiting for 1000ms`);
+          await new Promise((resolveSleep) => setTimeout(resolveSleep, 1000));
+        }
+      }
+    })
+  );
+
   if (log) {
-    log.debug('Deleted %d files/directories', files.length);
-    log.verbose('Deleted:', longInspect(files));
+    log.debug('Deleted %d files/directories', filesToDelete.length);
+    log.verbose('Deleted:', longInspect(filesToDelete));
   }
 }
 
@@ -145,11 +166,30 @@ export async function deleteEmptyFolders(
     dryRun: true,
   });
 
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
-    return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
-  });
+  const foldersToDelete = Array.isArray(emptyFoldersList)
+    ? emptyFoldersList.filter((folderToDelete: string[]) => {
+        return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
+      })
+    : [];
 
-  await Promise.all(foldersToDelete.map((folder) => rm(folder, { force: true, recursive: true })));
+  await Promise.all(
+    foldersToDelete.map(async (folder) => {
+      if (process.platform === 'win32') {
+        folder = standardize(folder, false, false, true); // extended long path
+      }
+
+      for (let i = 0; i < 3; i++) {
+        try {
+          await rm(folder, { force: true, recursive: true });
+          return;
+        } catch (err) {
+          if (i === 2) throw err;
+          log.debug(`Retry ${i + 1}/3 on ${folder}, waiting for 1000ms`);
+          await new Promise((resolveSleep) => setTimeout(resolveSleep, 1000));
+        }
+      }
+    })
+  );
 
   log.debug('Deleted %d empty folders', foldersToDelete.length);
   log.verbose('Deleted:', longInspect(foldersToDelete));
