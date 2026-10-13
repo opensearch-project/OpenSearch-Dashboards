@@ -131,6 +131,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
                   key={instance.instance_id}
                   index={index}
                   draggableId={instance.instance_id}
+                  data-test-subj="transformationPipelineItem"
                 >
                   {(provided) => (
                     <TransformationCard
