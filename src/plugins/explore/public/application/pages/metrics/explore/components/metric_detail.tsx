@@ -22,6 +22,7 @@ import {
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { LabelInfo, MetricType, inferMetricType, LayoutMode, breakdownGridStyle } from '../types';
+import { isNativeHistogram } from '../services/query_generator';
 import { useExploration } from '../contexts/exploration_context';
 import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { LabelFilterBar } from './label_filter_bar';
@@ -67,7 +68,8 @@ const BreakdownErrorContent: React.FC<{ error: string }> = ({ error }) => (
   </EuiFlexGroup>
 );
 
-function seriesLabelForType(type: MetricType): string {
+function seriesLabelForType(type: MetricType, nativeHistogram = false): string {
+  if (nativeHistogram) return 'histogram_avg';
   switch (type) {
     case MetricType.COUNTER:
       return 'sum(rate)';
@@ -86,6 +88,8 @@ const BreakdownPanel: React.FC<{
   breakdownYRange?: { yMin: number; yMax: number };
   layout: LayoutMode;
   metricType: MetricType;
+  /** The metric is a native histogram (see isNativeHistogram). */
+  nativeHistogram?: boolean;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
   timeBounds?: { min: number; max: number };
@@ -97,6 +101,7 @@ const BreakdownPanel: React.FC<{
   breakdownYRange,
   layout,
   metricType,
+  nativeHistogram,
   onVisibilityChange,
   onTimeRangeChange,
   timeBounds,
@@ -187,7 +192,7 @@ const BreakdownPanel: React.FC<{
                 <SparklineChart
                   values={s.values}
                   height={160}
-                  label={seriesLabelForType(metricType)}
+                  label={seriesLabelForType(metricType, nativeHistogram)}
                   stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
                   isDarkMode={darkMode}
                   onTimeRangeChange={onTimeRangeChange}
@@ -557,6 +562,7 @@ export const MetricDetail: React.FC = () => {
                 breakdownYRange={breakdownYRange}
                 layout={state.layout}
                 metricType={metricType}
+                nativeHistogram={isNativeHistogram(state.metric, metricType)}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
                 timeBounds={timeBounds}

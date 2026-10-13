@@ -1091,6 +1091,36 @@ describe('promqlSearchStrategy', () => {
       ).rejects.toThrow('Single query failed');
     });
 
+    it.each([
+      [{ statusCode: 400 }, 400],
+      [{ status: 403 }, 403],
+      [{ statusCode: 502 }, undefined],
+      [{}, undefined],
+    ])("keeps a single query's client-error status %p", async (fields, expected) => {
+      (prometheusManager.query as jest.Mock).mockRejectedValue(
+        Object.assign(new Error('Bad query'), fields)
+      );
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const error = await strategy
+        .search(
+          emptyRequestHandlerContext,
+          {
+            body: {
+              query: { query: 'bad{', dataset: { id: 'dataset-1' }, language: 'PROMQL' },
+              timeRange: { from: '2021-12-01T00:00:00.000Z', to: '2021-12-01T01:00:00.000Z' },
+            },
+          } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+          {}
+        )
+        .catch((e: any) => e);
+      // The JSON shape Explore's error panel reads; the route takes the status from it.
+      expect(JSON.parse(error.message)).toEqual({
+        error: { type: 'PromQLQueryError', reason: 'PromQL query failed', details: 'Bad query' },
+        ...(expected ? { status: expected } : {}),
+      });
+      expect(error.status).toBe(expected);
+    });
+
     it('should extract error details from response body in multi-query', async () => {
       const mockResponseA = {
         queryId: 'query-a',

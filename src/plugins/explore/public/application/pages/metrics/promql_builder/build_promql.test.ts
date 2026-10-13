@@ -220,3 +220,54 @@ describe('buildPromQL', () => {
     expect(buildPromQL(state)).toBe('sum by (job)(rate(http_requests_total[5m]))');
   });
 });
+
+describe('metric names PromQL cannot take bare', () => {
+  const state = (
+    metric: string,
+    labelFilters: BuilderState['labelFilters'] = []
+  ): BuilderState => ({
+    metric,
+    labelFilters,
+    operations: [],
+  });
+
+  it('selects them by __name__', () => {
+    expect(buildPromQL(state('2xx'))).toBe('{__name__="2xx"}');
+    expect(buildPromQL(state('ClusterStatus.red'))).toBe('{__name__="ClusterStatus.red"}');
+    expect(
+      buildPromQL(
+        state('ClusterStatus.red', [{ id: 'f', label: 'DomainName', op: '=', value: 'd' }])
+      )
+    ).toBe('{__name__="ClusterStatus.red", DomainName="d"}');
+  });
+
+  it('keeps plain names bare', () => {
+    expect(buildPromQL(state('http_requests_total'))).toBe('http_requests_total');
+  });
+
+  it('quotes label names PromQL cannot take bare, and parses them back', () => {
+    const built = buildPromQL(
+      state('5xx', [{ id: 'f', label: '@aws.tag.clean', op: '=', value: 'true' }])
+    );
+    expect(built).toBe('{__name__="5xx", "@aws.tag.clean"="true"}');
+
+    const parsed = parsePromQL(`sum by ("@aws.region", job) (${built})`);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.metric).toBe('5xx');
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.value])).toEqual([
+      ['@aws.tag.clean', 'true'],
+    ]);
+    expect(parsed.state.operations[0].grouping?.labels).toEqual(['@aws.region', 'job']);
+    expect(buildPromQL(parsed.state)).toBe(
+      'sum by ("@aws.region", job)({__name__="5xx", "@aws.tag.clean"="true"})'
+    );
+  });
+
+  it('parses the __name__ form back into the builder', () => {
+    const parsed = parsePromQL('avg({__name__="ClusterStatus.red", DomainName="d"})');
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.metric).toBe('ClusterStatus.red');
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.value])).toEqual([['DomainName', 'd']]);
+    expect(buildPromQL(parsed.state)).toBe('avg({__name__="ClusterStatus.red", DomainName="d"})');
+  });
+});

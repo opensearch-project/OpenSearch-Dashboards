@@ -8,11 +8,36 @@ import { Dataset } from '../../../../data/common';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { ExploreFlavor, EXPLORE_LOGS_TAB_ID } from '../../../common';
 import { openSearchSourceType, OPENSEARCH_SOURCE_TYPE_ID } from './opensearch_source_type';
+import { BUILT_IN_LANGUAGE_GUIDES } from './built_in_language_guides';
 
 export { OPENSEARCH_SOURCE_TYPE_ID };
 
 /** Languages Explore supports itself; their default behavior applies unless a source lists them. */
 const BUILT_IN_LANGUAGES = ['PPL', 'SQL', 'PROMQL'];
+
+/** A sample query the query panel offers for a language. */
+export interface SourceTypeSampleQuery {
+  label: string;
+  query: string;
+}
+
+/**
+ * How the query panel introduces a language on a source, so users can tell the same language
+ * apart across sources (for example SQL on OpenSearch versus SQL on another store).
+ */
+export interface SourceTypeLanguageGuide {
+  /**
+   * The language's name on this source, qualified by its engine where the bare name is shared
+   * (e.g. "OpenSearch SQL"). Defaults to the language's registered title.
+   */
+  label?: string;
+  /** One sentence on what the language queries on this source. */
+  description?: string;
+  /** The language's docs for this source; replaces the language's own "Learn more" link. */
+  docLink?: { title: string; url: string };
+  /** Examples shown where the Metrics page has no query yet. */
+  sampleQueries?: SourceTypeSampleQuery[];
+}
 
 /**
  * What a source type's callbacks receive. Kept to the data plugin's start contract so a plugin
@@ -40,13 +65,34 @@ export interface SourceTypeDatasetSelectorProps {
  * Explore-only parts. Explore uses the language's query text as typed (no source clause, no stats
  * stripping).
  */
-export interface SourceTypeLanguageSettings {
+export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
   /** Tabs that can render this language's results. Defaults to the Logs tab. */
   tabs?: string[];
   /** Run Explore's histogram query. Off by default: that query is built in PPL. */
   supportsHistogram?: boolean;
   /** Offer the Logs page's visual query builder. Off by default: the builder emits PPL. */
   supportsVisualBuilder?: boolean;
+  /**
+   * Replaces the Metrics page's query rows while this language is active on one of this source's
+   * datasets, for example a builder of the source's own. Without it, PromQL keeps the PromQL rows
+   * and any other language gets a single code editor.
+   */
+  metricsQueryEditor?: ComponentType<SourceTypeQueryEditorProps>;
+}
+
+/** Props Explore passes to a source type's own query editor. */
+export interface SourceTypeQueryEditorProps {
+  /** The query text to show. */
+  query: string;
+  /** Call with the full query text on every edit. */
+  onChange: (query: string) => void;
+  /** Runs the query last passed to `onChange`. */
+  onRun: () => void;
+  /** The language being edited. */
+  languageId: string;
+  /** The active dataset (one of this source's). */
+  dataset?: Dataset;
+  data: DataPublicPluginStart;
 }
 
 /**
@@ -64,6 +110,8 @@ export interface SourceTypeDefinition {
   id: string;
   /** Shown in the query panel's "Source type" column. */
   label: string;
+  /** A different label on some flavors (e.g. what the source means on the Metrics page). */
+  flavorLabels?: Partial<Record<ExploreFlavor, string>>;
   /**
    * Icon on the query panel's language pill while this source is active: an EUI icon type or an
    * image URL. Defaults to the active dataset type's `meta.icon`.
@@ -146,6 +194,23 @@ export class SourceTypeRegistryService {
     return owner ?? openSearchSourceType;
   }
 
+  /** A source's label on a flavor. */
+  public getLabel(sourceType: SourceTypeDefinition, flavor?: ExploreFlavor | null): string {
+    return (flavor && sourceType.flavorLabels?.[flavor]) || sourceType.label;
+  }
+
+  /** Whether a dataset belongs to a registered (non-OpenSearch) source offered on a flavor. */
+  public isRegisteredSourceDataset(
+    dataset: { type?: string } | undefined,
+    flavor: ExploreFlavor
+  ): boolean {
+    const owner = this.getForDataset(dataset);
+    return (
+      owner.id !== OPENSEARCH_SOURCE_TYPE_ID &&
+      (owner.flavors ?? [ExploreFlavor.Logs]).includes(flavor)
+    );
+  }
+
   /**
    * Explore settings for a language: the active dataset's source's entry when there is a dataset,
    * else the first source that lists it. Undefined for languages no source lists (built-ins).
@@ -163,6 +228,33 @@ export class SourceTypeRegistryService {
       if (settings) return settings;
     }
     return undefined;
+  }
+
+  /**
+   * How to introduce a language on the active dataset's source. A source that lists the language
+   * describes it entirely (built-in wording would name the wrong store); otherwise a built-in
+   * language gets Explore's own wording.
+   */
+  public getLanguageGuide(
+    languageId?: string,
+    dataset?: { type?: string }
+  ): SourceTypeLanguageGuide {
+    if (!languageId) return {};
+    const settings = this.settingsFor(languageId, dataset);
+    if (settings) {
+      const { label, description, docLink, sampleQueries } = settings;
+      return { label, description, docLink, sampleQueries };
+    }
+    return BUILT_IN_LANGUAGE_GUIDES[languageId] ?? {};
+  }
+
+  /** What to call a language on the active dataset's source: its guide's label, else `title`. */
+  public getLanguageLabel(
+    languageId: string | undefined,
+    dataset: { type?: string } | undefined,
+    title?: string
+  ): string {
+    return this.getLanguageGuide(languageId, dataset).label ?? title ?? languageId ?? '';
   }
 
   /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */

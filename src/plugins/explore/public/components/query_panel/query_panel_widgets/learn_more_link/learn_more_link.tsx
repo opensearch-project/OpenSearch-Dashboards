@@ -7,14 +7,17 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
 import {
+  selectDataset,
   selectIsPromptEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { getServices } from '../../../../services/services';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 export const LearnMoreLink = () => {
   const queryLanguage = useSelector(selectQueryLanguage);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
+  const dataset = useSelector(selectDataset);
   const { data, docLinks } = getServices();
   const langConfig = data.query.queryString.getLanguageService().getLanguage(queryLanguage);
 
@@ -29,6 +32,20 @@ export const LearnMoreLink = () => {
   // they register hardcode `latest`. That leaves `docLink` uneven for now, editing PromQL's
   // registration moves this link and editing PPL's does not. The `base` tail matters because
   // EuiLink renders a disabled button with no `href`.
+  // A source that documents the language for itself (say, its own SQL dialect) links there.
+  const sourceDocLink = getSourceTypeRegistry().getLanguageGuide(queryLanguage, dataset).docLink;
+  if (sourceDocLink) {
+    return (
+      <EuiLink
+        className="exploreLanguagePicker__learnMore"
+        href={sourceDocLink.url}
+        target="_blank"
+        data-test-subj="exploreQueryPanelLearnMore"
+      >
+        {sourceDocLink.title}
+      </EuiLink>
+    );
+  }
   const { sqlPplIndex } = docLinks.links.noDocumentation;
   const url =
     (queryLanguage === 'SQL'
@@ -42,7 +59,9 @@ export const LearnMoreLink = () => {
   // `title` not the raw id, so the label matches the chip above it.
   const label = i18n.translate('explore.queryPanel.learnMoreLabel', {
     defaultMessage: 'Learn more about {language}',
-    values: { language: langConfig?.title ?? queryLanguage },
+    values: {
+      language: getSourceTypeRegistry().getLanguageLabel(queryLanguage, dataset, langConfig?.title),
+    },
   });
 
   return (

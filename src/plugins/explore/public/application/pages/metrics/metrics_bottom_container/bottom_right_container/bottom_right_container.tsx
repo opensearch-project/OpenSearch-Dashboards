@@ -17,6 +17,8 @@ import { RootState } from '../../../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { MetricsEmptyState } from '../../explore/components/metrics_empty_state';
+import { getServices } from '../../../../../services/services';
+import { getSourceTypeRegistry } from '../../../../../services/source_type_registry';
 
 export const BottomRightContainer = () => {
   const { dataset } = useDatasetContext();
@@ -47,16 +49,41 @@ export const BottomRightContainer = () => {
   }
 
   if (shouldSkipQueryExecution(query)) {
+    // Introduce the active language as this source runs it, so PromQL on Prometheus reads
+    // differently from PromQL on another store, and SQL from OpenSearch SQL.
+    const languageId = query.language;
+    const registry = getSourceTypeRegistry();
+    const languageTitle = registry.getLanguageLabel(
+      languageId,
+      dataset,
+      getServices().data.query.queryString.getLanguageService().getLanguage(languageId)?.title
+    );
+    const guide = registry.getLanguageGuide(languageId, dataset);
+    const sampleQueries = guide.sampleQueries ?? [];
     return (
       <CanvasPanel>
         <MetricsEmptyState
           title={i18n.translate('explore.metricsQuery.emptyTitle', {
-            defaultMessage: 'Write a PromQL query to visualize metrics',
+            defaultMessage: 'Write a {language} query to visualize metrics',
+            values: { language: languageTitle },
           })}
-          body={i18n.translate('explore.metricsQuery.emptyBody', {
-            defaultMessage:
-              'Build a query with the builder, switch to code mode, or adapt the samples below by replacing their metric and label names with your own.',
+          description={guide.description}
+          body={
+            sampleQueries.length
+              ? i18n.translate('explore.metricsQuery.emptyBody', {
+                  defaultMessage:
+                    'Build a query with the builder, switch to code mode, or adapt the samples below by replacing their metric and label names with your own.',
+                })
+              : i18n.translate('explore.metricsQuery.emptyBodyNoSamples', {
+                  defaultMessage: 'Build a query with the builder, or switch to code mode.',
+                })
+          }
+          sampleQueries={sampleQueries}
+          sampleQueriesTitle={i18n.translate('explore.metricsQuery.sampleQueriesTitle', {
+            defaultMessage: 'Sample {language} queries',
+            values: { language: languageTitle },
           })}
+          codeLanguage={languageId === 'PROMQL' ? 'promql' : 'sql'}
         />
       </CanvasPanel>
     );

@@ -47,6 +47,12 @@ export const openSearchSourceType: SourceTypeDefinition = {
   label: i18n.translate('explore.sourceType.openSearchLabel', {
     defaultMessage: 'OpenSearch',
   }),
+  // On the Metrics page this source's datasets are Prometheus connections.
+  flavorLabels: {
+    [ExploreFlavor.Metrics]: i18n.translate('explore.sourceType.prometheusLabel', {
+      defaultMessage: 'Prometheus',
+    }),
+  },
   icon: 'logoOpenSearch',
   datasetTypes: [DEFAULT_DATA.SET_TYPES.INDEX, DEFAULT_DATA.SET_TYPES.INDEX_PATTERN],
   flavors: [ExploreFlavor.Logs, ExploreFlavor.Traces, ExploreFlavor.Metrics],

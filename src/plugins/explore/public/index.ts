@@ -25,14 +25,19 @@ export type {
   SourceTypeDatasetSelectorProps,
   SourceTypeDefinition,
   SourceTypeDependencies,
+  SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
+  SourceTypeQueryEditorProps,
   SourceTypeRegistrySetup,
+  SourceTypeSampleQuery,
 } from './services/source_type_registry';
 export {
   ExploreFlavor,
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_STATISTICS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
+  EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_METRICS_TABLE_TAB_ID,
 } from '../common';
 
 // Export trace auto-detection utilities for use by other plugins

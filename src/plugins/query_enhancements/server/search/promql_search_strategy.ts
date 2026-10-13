@@ -64,6 +64,8 @@ interface LabeledQueryResult {
   label: string;
   response?: PromQLQueryResponse;
   error?: string;
+  /** HTTP status of the failure, when the connection reported one (e.g. 400 for a bad query). */
+  errorStatus?: number;
   legendFormat?: string;
 }
 
@@ -141,9 +143,23 @@ export const promqlSearchStrategyProvider = (
           logger
         );
 
-        // For single query, preserve fail-fast behavior
+        // For single query, preserve fail-fast behavior, with the failure's own status (a bad
+        // query is a 400, not a 503).
         if (isSingleQuery && queryResults[0]?.error) {
-          throw new Error(queryResults[0].error);
+          const status = queryResults[0].errorStatus;
+          // The search route returns the message as the body and reads `status` from it when
+          // it is JSON; Explore's error panel shows `error.details` of that JSON.
+          const failure = new Error(
+            JSON.stringify({
+              error: {
+                type: 'PromQLQueryError',
+                reason: 'PromQL query failed',
+                details: queryResults[0].error,
+              },
+              ...(status ? { status } : {}),
+            })
+          );
+          throw status ? Object.assign(failure, { status }) : failure;
         }
 
         const stepResolution: PromQLStepResolution | undefined = isInstantQuery
@@ -264,9 +280,12 @@ async function executeMultipleQueries(
         }
       }
 
+      const status = Number((error as any)?.statusCode ?? (error as any)?.status);
       return {
         label: plan.label,
         error: errorMessage,
+        // Only client errors are worth keeping: everything else stays a 503 for the route.
+        ...(status >= 400 && status < 500 ? { errorStatus: status } : {}),
         legendFormat: plan.legendFormat,
       };
     }

@@ -173,7 +173,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
           services.notifications?.toasts.addWarning({
             title: i18n.translate('explore.queryPanelFooter.sourceType.noDataset', {
               defaultMessage: 'No {sourceType} dataset found to query',
-              values: { sourceType: sourceType.label },
+              values: { sourceType: getSourceTypeRegistry().getLabel(sourceType, flavorId) },
             }),
           });
           return;
@@ -192,9 +192,14 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
 
   const languageService = getServices().data.query.queryString.getLanguageService();
 
+  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
-    return languageService.getLanguage(language)?.title ?? language;
-  }, [language, languageService]);
+    return getSourceTypeRegistry().getLanguageLabel(
+      language,
+      activeDataset,
+      languageService.getLanguage(language)?.title
+    );
+  }, [language, activeDataset, languageService]);
 
   // Source types offered for this flavor (OpenSearch always is). Builder-only workspaces get only
   // sources whose languages the visual builder supports.
@@ -280,6 +285,12 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
+  // What the selected language queries on the active source, so e.g. OpenSearch SQL and another
+  // source's SQL read differently. None in prompt mode, where no language chip is selected.
+  const languageDescription = isPromptMode
+    ? undefined
+    : getSourceTypeRegistry().getLanguageGuide(language, activeDataset).description;
+
   // The active source's icon, else the one its dataset type declares for the dataset picker.
   const triggerIcon = useMemo(() => {
     const registry = getSourceTypeRegistry();
@@ -312,6 +323,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     return supportedLanguages.map((langId) => {
       const langConfig = languageService.getLanguage(langId);
       const title = langConfig?.title ?? langId;
+      const label = getSourceTypeRegistry().getLanguageLabel(langId, activeDataset, title);
       const isSelected = !isPromptMode && langId === language;
       return (
         <button
@@ -332,11 +344,19 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
           })}
           data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
         >
-          {title}
+          {label}
         </button>
       );
     });
-  }, [supportedLanguages, languageService, isPromptMode, language, onItemClick, onLanguageClick]);
+  }, [
+    supportedLanguages,
+    languageService,
+    isPromptMode,
+    language,
+    onItemClick,
+    onLanguageClick,
+    activeDataset,
+  ]);
 
   const aiChip = useMemo(() => {
     if (!promptModeIsAvailable || hideAI) {
@@ -428,7 +448,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
                     })}
                     data-test-subj={`queryPanelFooterSourceType-${sourceType.label}`}
                   >
-                    {sourceType.label}
+                    {getSourceTypeRegistry().getLabel(sourceType, flavorId)}
                   </button>
                 );
               })
@@ -440,7 +460,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
                 aria-current="true"
                 data-test-subj={`queryPanelFooterSourceType-${sourceTypes[0]?.label}`}
               >
-                {sourceTypes[0]?.label}
+                {sourceTypes[0] && getSourceTypeRegistry().getLabel(sourceTypes[0], flavorId)}
               </div>
             )}
           </div>
@@ -461,6 +481,14 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
               {languageChips}
               {aiChip}
             </div>
+            {languageDescription && (
+              <p
+                className="exploreLanguagePicker__description"
+                data-test-subj="queryPanelFooterLanguageDescription"
+              >
+                {languageDescription}
+              </p>
+            )}
             <LearnMoreLink />
           </div>
         </div>

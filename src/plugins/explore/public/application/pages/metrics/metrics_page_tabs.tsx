@@ -22,6 +22,7 @@ import { DatasetSelectWidget } from '../../../components/query_panel/query_panel
 import { RootState } from '../../utils/state_management/store';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_context';
+import { MetricsSourceTypeSelect } from './metrics_source_type_select';
 
 export { useMetricsPageMode } from './metrics_page_mode_context';
 
@@ -46,6 +47,9 @@ export const MetricsPageTabs: React.FC = () => {
     <MetricsPageModeContext.Provider value={mode}>
       <div className="metricsPageTabs__tabBar">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <MetricsSourceTypeSelect />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DatasetSelectWidget />
           </EuiFlexItem>

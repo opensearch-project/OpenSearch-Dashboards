@@ -31,6 +31,7 @@ import { usePPLLintFixAction } from '../../../components/query_panel/actions/ppl
 import { useEditorRef, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
+  selectDataset,
   selectIsLoading,
   selectIsPromptEditorMode,
   selectIsQueryEditorDirty,
@@ -65,7 +66,9 @@ import {
   formatStepSeconds,
   useExecutedStepResolution,
   useMetricsQuerySettings,
+  SourceQueryEditor,
 } from './query_panel';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 import type { RowStepReadout } from './query_panel';
 
 export const MetricsQueryPanel: React.FC = () => {
@@ -94,15 +97,29 @@ export const MetricsQueryPanel: React.FC = () => {
   }, [dispatch, services, editorRef]);
 
   const queryLanguage = useSelector(selectQueryLanguage);
+  const dataset = useSelector(selectDataset);
+  // Engine-qualified where the bare name is shared across sources (e.g. "CloudWatch SQL").
   const languageTitle = useMemo(() => {
     const languageService = services.data.query.queryString.getLanguageService();
-    return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
-  }, [queryLanguage, services.data.query.queryString]);
+    return getSourceTypeRegistry().getLanguageLabel(
+      queryLanguage,
+      dataset,
+      languageService.getLanguage(queryLanguage)?.title
+    );
+  }, [queryLanguage, dataset, services.data.query.queryString]);
 
   const client = useMemo(
     () => new PrometheusClient(services, dataConnectionId),
     [services, dataConnectionId]
   );
+
+  // A registered source's language gets the source's own editor (or a single code editor) in
+  // place of the PromQL rows, unless it is PromQL without an editor of its own.
+  const sourceQueryEditor = useMemo(
+    () => getSourceTypeRegistry().getLanguageSettings(queryLanguage, dataset)?.metricsQueryEditor,
+    [queryLanguage, dataset]
+  );
+  const usesPromQLRows = queryLanguage === 'PROMQL' && !sourceQueryEditor;
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
@@ -187,6 +204,18 @@ export const MetricsQueryPanel: React.FC = () => {
       };
     },
     [executedSteps, executedStepsMatchRows, getResolvedStep]
+  );
+
+  // Same as syncEditorText, for a source's single editor: the text as typed, no per-row options.
+  const syncSourceQuery = useCallback(
+    (query: string) => {
+      queryString.setQuery({ query } as Partial<Query>);
+      dispatch(setIsQueryEditorDirty(true));
+      if (query === lastDispatchedRef.current) return;
+      lastDispatchedRef.current = query;
+      setEditorText(query);
+    },
+    [setEditorText, dispatch, queryString]
   );
 
   const updateRow = useCallback(
@@ -317,6 +346,18 @@ export const MetricsQueryPanel: React.FC = () => {
           <ExploreQueryPanelEditor />
           <QueryPanelGeneratedQuery />
         </div>
+      ) : !usesPromQLRows ? (
+        <SourceQueryEditor
+          editor={sourceQueryEditor}
+          reduxQuery={reduxQuery}
+          isDirty={isQueryEditorDirty}
+          onQueryChange={syncSourceQuery}
+          onRun={handleRun}
+          languageId={queryLanguage}
+          languageTitle={languageTitle}
+          dataset={dataset}
+          data={services.data}
+        />
       ) : (
         <>
           <EuiDragDropContext onDragEnd={onDragEnd}>

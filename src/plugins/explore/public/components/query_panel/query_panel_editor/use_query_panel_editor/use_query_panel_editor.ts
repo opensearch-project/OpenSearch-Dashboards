@@ -51,6 +51,7 @@ import {
   PPL_LINT_FIX_EXPLORE_HOST,
   setActivePPLLintFixSession,
 } from '../../actions/ppl_lint_fix_session';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -124,10 +125,15 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
   const queryLanguage = queryState.language;
+  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
     const languageService = queryString.getLanguageService();
-    return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
-  }, [queryLanguage, queryString]);
+    return getSourceTypeRegistry().getLanguageLabel(
+      queryLanguage,
+      queryState.dataset,
+      languageService.getLanguage(queryLanguage)?.title
+    );
+  }, [queryLanguage, queryState.dataset, queryString]);
 
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
   const isQueryMode = !isPromptMode;

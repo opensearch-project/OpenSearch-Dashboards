@@ -235,6 +235,41 @@ describe('LanguageToggle', () => {
     expect(screen.getByTestId('exploreQueryPanelLearnMore')).toBeInTheDocument();
   });
 
+  it('describes the selected language as the active source runs it', () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'cloud',
+      label: 'Cloud',
+      datasetTypes: ['CLOUD'],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { SQL: { description: 'Query Cloud metrics using Cloud SQL.' } },
+    });
+    setSourceTypeRegistry(registry);
+    mockSelectQueryLanguage.mockReturnValue('SQL');
+    mockGetLanguage.mockReturnValue({ title: 'SQL' });
+    mockGetTab.mockReturnValue({ supportedLanguages: ['SQL'] });
+
+    // OpenSearch's own SQL.
+    const { unmount } = renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(screen.getByTestId('queryPanelFooterLanguageDescription')).toHaveTextContent(
+      'Query OpenSearch indexes using OpenSearch SQL.'
+    );
+    // SQL dialects differ, so OpenSearch's chip and badge name the engine.
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveTextContent(
+      'OpenSearch SQL'
+    );
+    unmount();
+
+    // The same SQL chip on the other source's dataset.
+    mockSelectDataset.mockReturnValue(testDataset('cloud-1', 'CLOUD'));
+    renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(screen.getByTestId('queryPanelFooterLanguageDescription')).toHaveTextContent(
+      'Query Cloud metrics using Cloud SQL.'
+    );
+  });
+
   it('hides the documentation link in prompt mode, where no language chip is selected', () => {
     mockSelectIsPromptEditorMode.mockReturnValue(true);
     renderWithProvider(<LanguageToggle />);

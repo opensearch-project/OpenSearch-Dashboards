@@ -132,7 +132,8 @@ export function parsePromQL(query: string): ParseResult {
 
   let result: ParseResult;
   try {
-    const lexer = new PromQLLexer(CharStream.fromString(trimmed));
+    const { text, names } = replaceQuotedLabelNames(trimmed);
+    const lexer = new PromQLLexer(CharStream.fromString(text));
     const tokenStream = new CommonTokenStream(lexer);
     const parser = new PromQLParser(tokenStream);
     parser.removeErrorListeners();
@@ -147,12 +148,19 @@ export function parsePromQL(query: string): ParseResult {
       if (!visitor.canBuild || !visitor.metric) {
         result = { canBuild: false, state: emptyState() };
       } else {
+        const restore = (label: string) => names.get(label) ?? label;
+        const labelFilters = visitor.labelFilters.map((f) => ({ ...f, label: restore(f.label) }));
+        const operations = visitor.operations.map((op) =>
+          op.grouping
+            ? { ...op, grouping: { ...op.grouping, labels: op.grouping.labels.map(restore) } }
+            : op
+        );
         result = {
           canBuild: true,
           state: {
             metric: visitor.metric,
-            labelFilters: visitor.labelFilters.length > 0 ? visitor.labelFilters : [emptyFilter()],
-            operations: visitor.operations,
+            labelFilters: labelFilters.length > 0 ? labelFilters : [emptyFilter()],
+            operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },
         };
@@ -169,6 +177,35 @@ export function parsePromQL(query: string): ParseResult {
   parseCache.set(trimmed, result);
   return result;
 }
+
+const QUOTED = String.raw`"(?:\\.|[^"\\])*"`;
+// A quoted string followed by a matcher operator is a label name (values never are).
+const QUOTED_MATCHER_NAME = new RegExp(`(${QUOTED})(\\s*(?:=~|!~|!=|=))`, 'g');
+const GROUPING = new RegExp(`\\b(by|without)(\\s*)\\(([^()]*)\\)`, 'g');
+const QUOTED_ITEM = new RegExp(QUOTED, 'g');
+
+/**
+ * The grammar only takes bare label names, but Prometheus 3 quotes names it can't take bare
+ * (`"@aws.tag.Team"="x"`, `by ("@resource.service.name")`). Swap each for a placeholder name
+ * before parsing; `names` maps the placeholders back.
+ */
+const replaceQuotedLabelNames = (query: string) => {
+  const names = new Map<string, string>();
+  const placeholder = (quoted: string) => {
+    const name = JSON.parse(quoted) as string;
+    const id = `__osd_label_${names.size}__`;
+    names.set(id, name);
+    return id;
+  };
+  const text = query
+    .replace(QUOTED_MATCHER_NAME, (_m, quoted: string, op: string) => placeholder(quoted) + op)
+    .replace(
+      GROUPING,
+      (_m, mode: string, space: string, labels: string) =>
+        `${mode}${space}(${labels.replace(QUOTED_ITEM, (quoted) => placeholder(quoted))})`
+    );
+  return { text, names };
+};
 
 /**
  * Visitor that walks the ANTLR parse tree and extracts BuilderState fields.
@@ -280,6 +317,15 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     if (matcherList) {
       for (const matcher of matcherList.labelMatcher()) {
         this.visitLabelMatcher(matcher);
+      }
+    }
+
+    // `{__name__="2xx", ...}` is how the builder writes a name PromQL can't take bare.
+    if (!this.metric) {
+      const nameIndex = this.labelFilters.findIndex((f) => f.label === '__name__' && f.op === '=');
+      if (nameIndex !== -1) {
+        this.metric = this.labelFilters[nameIndex].value;
+        this.labelFilters.splice(nameIndex, 1);
       }
     }
   };

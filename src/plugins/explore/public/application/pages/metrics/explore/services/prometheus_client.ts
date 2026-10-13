@@ -255,7 +255,9 @@ export class PrometheusClient {
     searchSource.setFields({
       index: dataView,
       size: 2000,
-      query: { ...queryState, query: promql },
+      // The browser's queries are PromQL whatever language the editor is on (a source can offer
+      // others, e.g. SQL), so they must run through the PromQL search interceptor.
+      query: { ...queryState, query: promql, language: 'PROMQL' },
       highlightAll: false,
       version: false,
     });

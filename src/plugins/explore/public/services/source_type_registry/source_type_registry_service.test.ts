@@ -55,6 +55,24 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getForDataset(undefined).id).toBe(OPENSEARCH_SOURCE_TYPE_ID);
   });
 
+  it('labels OpenSearch as Prometheus on the Metrics flavor', () => {
+    const openSearch = registry.get(OPENSEARCH_SOURCE_TYPE_ID)!;
+    expect(registry.getLabel(openSearch, ExploreFlavor.Metrics)).toBe('Prometheus');
+    expect(registry.getLabel(openSearch, ExploreFlavor.Logs)).toBe('OpenSearch');
+    expect(registry.getLabel(fakeSource(), ExploreFlavor.Metrics)).toBe('Fake');
+  });
+
+  it('tells whether a dataset belongs to a registered source offered on a flavor', () => {
+    registry.setup().register(fakeSource({ flavors: [ExploreFlavor.Metrics] }));
+
+    expect(registry.isRegisteredSourceDataset({ type: 'FAKE' }, ExploreFlavor.Metrics)).toBe(true);
+    expect(registry.isRegisteredSourceDataset({ type: 'FAKE' }, ExploreFlavor.Logs)).toBe(false);
+    expect(registry.isRegisteredSourceDataset({ type: 'PROMETHEUS' }, ExploreFlavor.Metrics)).toBe(
+      false
+    );
+    expect(registry.isRegisteredSourceDataset(undefined, ExploreFlavor.Metrics)).toBe(false);
+  });
+
   it('resolves a dataset to the registered source that owns its type', () => {
     registry.setup().register(fakeSource());
 
@@ -231,6 +249,63 @@ describe('SourceTypeRegistryService', () => {
         'CloudQL',
       ]);
       expect(registry.getLanguagesForTab('logs', ExploreFlavor.Traces)).toEqual([]);
+    });
+  });
+
+  describe('language guides', () => {
+    beforeEach(() => {
+      registry.register(
+        fakeSource({
+          id: 'cloud',
+          datasetTypes: ['CLOUD'],
+          languageSettings: {
+            PROMQL: {
+              description: 'Cloud PromQL',
+              docLink: { title: 'Cloud docs', url: 'https://cloud.test' },
+              sampleQueries: [{ label: 'up', query: 'up' }],
+            },
+            SQL: {},
+          },
+        })
+      );
+    });
+
+    it("describes a built-in language in Explore's words on the built-in source", () => {
+      const guide = registry.getLanguageGuide('PROMQL', { type: 'INDEX_PATTERN' });
+      expect(guide.description).toBe('Query Prometheus metrics using PromQL.');
+      expect(guide.docLink).toBeUndefined();
+      expect(guide.sampleQueries?.length).toBeGreaterThan(0);
+      expect(registry.getLanguageGuide('SQL').description).toBe(
+        'Query OpenSearch indexes using OpenSearch SQL.'
+      );
+    });
+
+    it("uses a source's own guide on its datasets", () => {
+      expect(registry.getLanguageGuide('PROMQL', { type: 'CLOUD' })).toEqual({
+        description: 'Cloud PromQL',
+        docLink: { title: 'Cloud docs', url: 'https://cloud.test' },
+        sampleQueries: [{ label: 'up', query: 'up' }],
+      });
+    });
+
+    it('never borrows the built-in wording for a language a source lists', () => {
+      // OpenSearch's SQL description would misname another store's dialect.
+      expect(registry.getLanguageGuide('SQL', { type: 'CLOUD' }).description).toBeUndefined();
+    });
+
+    it('names SQL by its engine, and falls back to the title for other languages', () => {
+      expect(registry.getLanguageLabel('SQL', { type: 'INDEX_PATTERN' }, 'SQL')).toBe(
+        'OpenSearch SQL'
+      );
+      expect(registry.getLanguageLabel('PROMQL', undefined, 'PromQL')).toBe('PromQL');
+      // A source listing SQL without a label of its own keeps the registered title.
+      expect(registry.getLanguageLabel('SQL', { type: 'CLOUD' }, 'SQL')).toBe('SQL');
+      expect(registry.getLanguageLabel('kuery', undefined)).toBe('kuery');
+    });
+
+    it('returns nothing for an unknown or missing language', () => {
+      expect(registry.getLanguageGuide('kuery')).toEqual({});
+      expect(registry.getLanguageGuide(undefined)).toEqual({});
     });
   });
 });

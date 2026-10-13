@@ -181,6 +181,14 @@ $exploreLanguagePickerSoftPrimary: tintOrShade($ouiColorPrimary, 90%, 70%);
     gap: $ouiSizeS;
   }
 
+  &__description {
+    color: $ouiTextSubduedColor;
+    font-size: $ouiFontSizeXS;
+    line-height: $ouiLineHeight;
+    margin-top: $ouiSizeM;
+    max-width: 280px;
+  }
+
   &__learnMore {
     // `block` for `margin-top`, which is ignored on the anchor's default `inline`.
     // `fit-content` so the click target stops at the label, not the whole column.
