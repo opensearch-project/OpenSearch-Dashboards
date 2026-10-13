@@ -29,12 +29,17 @@ import { VisFieldType } from '../visualizations/types';
 
 export const TRANSFORMATION_STATE_KEY = '_t';
 
-// Rows determine which fields exist; the current schema preserves metadata for fields that remain.
+// Non-empty rows determine which fields exist. Empty results preserve the last known schema
+// because they provide no evidence that fields were removed.
 const reconcileSchemaWithRows = (
   rows: OpenSearchSearchHit[],
   currentSchema: Array<{ name?: string; type?: string }>,
   typeOverrides: Record<string, string> = {}
 ): Array<{ name?: string; type?: string }> => {
+  if (rows.length === 0) {
+    return currentSchema;
+  }
+
   const inferredSchema = inferSchemaFromRows(rows);
   const inferredByName = new Map(inferredSchema.map((field) => [field.name, field]));
   const reconciledSchema: Array<{ name?: string; type?: string }> = [];

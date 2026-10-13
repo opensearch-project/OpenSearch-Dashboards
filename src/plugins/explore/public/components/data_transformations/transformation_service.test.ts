@@ -376,18 +376,16 @@ describe('TransformationService', () => {
       expect(service.pipeline$.getValue()[0].config).toEqual({ field: 'removed' });
     });
 
-    it('returns an empty final schema when an active transformation removes every row', () => {
+    it('preserves the current schema when an active transformation removes every row', () => {
       const limitDefinition = createMockDefinition('limit', () => []);
       service.registerDefinition(limitDefinition);
       service.addInstance('limit');
 
-      const result = service.applyPipeline(
-        [createHit({ name: 'Alice' })],
-        [{ name: 'name', type: 'string' }]
-      );
+      const originalSchema = [{ name: 'name', type: 'string' }];
+      const result = service.applyPipeline([createHit({ name: 'Alice' })], originalSchema);
 
       expect(result.rows).toEqual([]);
-      expect(result.finalSchema).toEqual([]);
+      expect(result.finalSchema).toEqual(originalSchema);
     });
 
     it('reports a failed step, preserves its input, and continues the pipeline', () => {
