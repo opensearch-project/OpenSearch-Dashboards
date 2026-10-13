@@ -512,6 +512,38 @@ describe('<HeaderSearchBar />', () => {
     });
   });
 
+  it('should not trigger action commands when Enter is pressed during IME composition', () => {
+    const actionFn = jest.fn();
+    const commandsWithAction: GlobalSearchCommand[] = [
+      {
+        id: 'action-command',
+        type: 'ACTIONS',
+        run: jest.fn().mockResolvedValue([]),
+        action: actionFn,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithAction} panel />
+    );
+    const searchInput = getByTestId('global-search-input');
+
+    fireEvent.change(searchInput, { target: { value: '지표' } });
+
+    // composing Enter (keyCode 229) commits the IME candidate and must not run actions
+    fireEvent.keyDown(searchInput, { key: 'Enter', keyCode: 229, isComposing: true });
+    fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter', keyCode: 13 });
+
+    expect(actionFn).not.toHaveBeenCalled();
+
+    // positive control: a plain Enter runs the action exactly once
+    fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter', keyCode: 13 });
+    fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter', keyCode: 13 });
+
+    expect(actionFn).toHaveBeenCalledTimes(1);
+    expect(actionFn).toHaveBeenCalledWith({ content: '지표' });
+  });
+
   it('should display custom input placeholder from commands', () => {
     const customPlaceholder = 'Search for custom items';
     const commandsWithPlaceholder: GlobalSearchCommand[] = [
