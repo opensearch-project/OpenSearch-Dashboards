@@ -9,19 +9,13 @@
  *
  * Converts a streaming PPL snapshot into the `ISearchResult` the results table already renders.
  *
- * The synchronous path reaches the same shape via `createDataFrame` and `convertResult`, but
- * streaming bypasses `SearchSource`, which has no observable `fetch$`. Two behaviours of that
- * pipeline have to be reproduced here:
+ * The synchronous path reaches the same shape via `createDataFrame` and `convertResult`; streaming
+ * bypasses `SearchSource`, so two of its behaviours are reproduced here: field types through the
+ * same `getFieldType`, and date values through the language formatter. Without the formatter the
+ * table reads the PPL wire format as local time and shifts every timestamp by the browser's offset.
  *
- * - field types mapped with the same `getFieldType`, so `timestamp` becomes `date` and `struct`
- *   becomes `object`;
- * - date values through the language formatter, which renders the PPL wire format as ISO with an
- *   explicit offset. Without it the table reads `2026-09-29 12:34:56` as local time and shifts every
- *   timestamp by the browser's UTC offset.
- *
- * All other values pass through untouched, as `convertResult` does. The server's `shimSchemaRow`
- * stringifies booleans and objects, but the PPL strategy explore uses never calls it, so it must not
- * be mirrored here either.
+ * All other values pass through untouched. The server's `shimSchemaRow` stringifies booleans and
+ * objects, but the PPL strategy explore uses never calls it, so it is not mirrored here.
  */
 
 import { getFieldType, OSD_FIELD_TYPES } from '../../../../../data/common';
@@ -33,9 +27,8 @@ import type { HistogramBucket } from './snapshot_to_histogram';
 export type FieldValueFormatter = (value: any, type: OSD_FIELD_TYPES) => any;
 
 /**
- * Search highlights arrive as an extra `_highlight` data column rather than envelope metadata. The
- * synchronous strategy splices it out of the schema and rows before building the data frame and
- * attaches it per hit; the same is done here so the column does not render as a field.
+ * Highlights arrive as an extra `_highlight` data column, not envelope metadata. Spliced out of the
+ * schema and rows and attached per hit, as the synchronous strategy does, so it is not a field.
  */
 const HIGHLIGHT_COLUMN = '_highlight';
 
@@ -64,7 +57,7 @@ interface SnapshotColumn {
 
 /**
  * Column metadata for a snapshot, aligned with the rows `splitHighlightColumn` returns. Derived once
- * per snapshot rather than per row, since the schema is constant for the lifetime of a job.
+ * per snapshot, since the schema is constant for a job.
  */
 export const snapshotColumns = (snapshot: Pick<PPLStreamSnapshot, 'schema'>): SnapshotColumn[] =>
   (snapshot.schema ?? [])
@@ -111,8 +104,8 @@ export interface SnapshotToSearchResultArgs {
    */
   histogram?: { aggId: string; buckets: HistogramBucket[] };
   /**
-   * Overrides `hits.total`. Needed for the derived-histogram result: the chart renders nothing when
-   * `hits.total` is falsy, and it should report the bucketed count rather than the accumulator size.
+   * Overrides `hits.total`, for the histogram result: the chart renders nothing when `hits.total` is
+   * falsy, and it should report the bucketed count.
    */
   totalOverride?: number;
 }
@@ -132,14 +125,12 @@ export const snapshotToSearchResult = ({
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
-      // The accumulator size, not `rows.length`: the point of streaming is to report how many rows
-      // exist while showing only a window of them.
+      // The accumulator size, not `rows.length`: report how many rows exist, show a window.
       total: totalOverride ?? snapshot.total ?? rows.length,
       max_score: 0,
-      // PPL hits carry no document id, and the table falls back to the row's position as its React
-      // key. While rows append that is stable, but a REPLACE snapshot puts a different document at
-      // the same position, so React would reuse the previous row's state — an expanded row would
-      // stay open over unrelated content. The generation makes the id change when that happens.
+      // PPL hits carry no document id and the table falls back to row position as its React key,
+      // so a replacement would put a different document at the same position and React would reuse
+      // the previous row's state. The generation makes the id change instead.
       hits: rows.map((source, index) => ({
         _id: `${rowGeneration}:${index}`,
         _index: indexName,

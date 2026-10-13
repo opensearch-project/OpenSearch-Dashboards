@@ -38,10 +38,9 @@ const formatDate = (dateString: string): string => {
 };
 
 /**
- * Legacy Elasticsearch (Open Distro) PPL rejects a bare string compared against a timestamp, so
- * those engines need an explicit `TIMESTAMP(...)` wrapper. OpenSearch PPL folds a bare string into a
- * native range query, whereas the wrapper forces a per-value script filter that trips the cluster's
- * script-compilation rate limit, so it is only applied where required.
+ * Open Distro PPL rejects a bare string compared against a timestamp and needs `TIMESTAMP(...)`.
+ * Applied only there: on OpenSearch the wrapper forces a per-value script filter that trips the
+ * cluster's script-compilation rate limit, where a bare string folds into a native range query.
  */
 export const buildTimeFilterWhereClause = (
   timeFieldName: string,

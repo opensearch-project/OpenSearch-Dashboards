@@ -22,12 +22,9 @@ const MAX_WAIT_FOR_COMPLETION_MS = 30_000;
 const MAX_KEEP_ALIVE_MS = 24 * 60 * 60 * 1000;
 
 /**
- * How long submit waits before giving up on an inline result and returning a job id.
- *
- * Sized so an interactive query that would have completed quickly on the synchronous path completes
- * inline here too, instead of costing a job id plus a full poll interval before any rows appear. A
- * slower query is not penalised: the backend returns its first snapshot alongside the job id when
- * this elapses, so the wait buys a snapshot rather than just an id.
+ * How long submit waits before returning a job id, sized so a query that would have been fast on
+ * the synchronous path still completes inline. A slower query is not penalised: the backend returns
+ * its first snapshot alongside the job id, so the wait buys a snapshot rather than just an id.
  */
 const DEFAULT_WAIT_FOR_COMPLETION = '1s';
 const DEFAULT_KEEP_ALIVE = '5m';
@@ -42,8 +39,7 @@ const parseDurationMs = (value: string): number | undefined => {
 };
 
 /**
- * Bounds mirror the API contract so callers get a clear error without a round trip. If the backend
- * relaxes its limits, update the two constants above.
+ * Bounds mirror the API contract so callers get a clear error without a round trip.
  */
 const boundedDuration = (maxMs: number) =>
   schema.string({

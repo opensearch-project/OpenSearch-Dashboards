@@ -31,18 +31,12 @@ import { StreamRowAccumulator } from '../../streaming/stream_row_accumulator';
 import { FieldValueFormatter, snapshotToSearchResult } from '../../streaming/snapshot_to_result';
 import { streamJobError, streamRequestError } from '../../streaming/stream_error_status';
 
-/**
- * Interval between polls. A snapshot older than this is simply re-read, so no work is lost.
- *
- * The engine commits rows far faster than any client can drain them, so polling faster only makes
- * the counter move more visibly without ever catching up.
- */
+/** Interval between polls. A snapshot older than this is simply re-read, so no work is lost. */
 export const STREAMING_POLL_INTERVAL_MS = 1_000;
 
 /**
- * Rows held client-side. Bounded because the engine outruns the client, so the table shows a window
- * while `total` reports the real size. Must stay well above ROWS_PER_POLL, or the cap is reached on
- * the first poll and the table stops growing.
+ * Rows held client-side; `total` still reports the real size. Must stay well above ROWS_PER_POLL,
+ * or the cap is reached on the first poll and the table stops growing.
  */
 export const STREAMING_MAX_HELD_ROWS = 100_000;
 
@@ -61,11 +55,8 @@ export interface ExecuteStreamingQueryArgs {
   /** Index title, used as `_index` on synthesised hits. */
   indexName?: string;
   /**
-   * Publishes this job's rows as histogram buckets rather than table rows.
-   *
-   * Used for a second streaming job whose query is the aggregation
-   * (`… | stats count() by span(field, interval)`). Its snapshots are authoritative bucket counts
-   * over every matching document, so no client-side derivation is involved.
+   * Publishes this job's rows as histogram buckets rather than table rows, for the second job whose
+   * query is the aggregation (`… | stats count() by span(field, interval)`).
    */
   asHistogram?: { aggId: string };
   dataSourceId?: string;
@@ -166,9 +157,8 @@ export const executeStreamingQuery = createAsyncThunk<
       };
       lastStreaming = streaming;
 
-      // LOADING is reported for the whole run because the query genuinely has not finished.
-      // `streaming.isPolling` is what tells the UI that partial results exist and should be
-      // rendered rather than hidden behind a loading spinner.
+      // LOADING for the whole run, since the query has not finished; `streaming.isPolling` is what
+      // tells the UI to render the partial results rather than a spinner.
       dispatch(
         setIndividualQueryStatus({
           cacheKey,
@@ -183,10 +173,8 @@ export const executeStreamingQuery = createAsyncThunk<
     };
 
     /**
-     * Marks the query as no longer in flight, preserving the counts already shown.
-     *
-     * Every exit path must call this: `isPolling` drives the elapsed timer, the progress bar and the
-     * Stop button, so returning without it leaves a stuck bar and a timer that never stops.
+     * Marks the query as no longer in flight, preserving the counts already shown. Every exit path
+     * must call this: `isPolling` drives the elapsed timer, progress bar and Stop button.
      */
     const finalise = (aborted = false) => {
       if (isCurrent && !isCurrent()) return;
@@ -205,8 +193,7 @@ export const executeStreamingQuery = createAsyncThunk<
 
     /**
      * Reports a terminal failure, carrying the backend's own error fields because consumers such as
-     * the Traces charts read them. Without this a failed run would report READY, since `isPolling`
-     * is false once polling stops.
+     * the Traces charts read them.
      */
     const failWith = (error: NonNullable<QueryResultStatus['error']>) => {
       if (isCurrent && !isCurrent()) return;
@@ -225,14 +212,12 @@ export const executeStreamingQuery = createAsyncThunk<
     };
 
     /**
-     * Requests windows from `nextOffset` until the accumulator holds every committed row, or is
-     * full. Used after a terminal snapshot, which serves only one window: those rows are already
-     * committed, so there is nothing to wait for between requests.
+     * Drains the remaining committed rows after a terminal snapshot, which serves only one window.
+     * Those rows are already committed, so there is nothing to wait for between requests.
      */
     const fetchCommittedRows = async (total: number, longNumerals: boolean) => {
       const wanted = Math.min(total, STREAMING_MAX_HELD_ROWS);
-      // Bounded by `wanted` only when windows come back the size asked for; the cap also covers an
-      // engine that serves a few rows at a time.
+      // `wanted` alone bounds this only if windows come back the size asked for.
       const maxRequests = Math.ceil(STREAMING_MAX_HELD_ROWS / ROWS_PER_POLL) + 1;
       for (let n = 0; n < maxRequests && !signal.aborted && rows.nextOffset < wanted; n++) {
         const snap = await stream.poll({
@@ -261,14 +246,12 @@ export const executeStreamingQuery = createAsyncThunk<
         );
       }
 
-      // The same formatter the non-streaming path hands to `convertResult`, so date values render
-      // identically. Streaming is PPL-only, so the language is known here. Resolved inside the try:
-      // if it fails, nothing has been published, so the run reports itself unavailable and the
-      // caller re-runs on the non-streaming path rather than rendering unformatted dates.
+      // The same formatter the non-streaming path hands to `convertResult`, so dates render
+      // identically. Inside the try: if it fails nothing has been published, so the run reports
+      // itself unavailable rather than rendering unformatted dates.
       formatter = services.data.query.queryString.getLanguageService().getLanguage('PPL')
         ?.fields?.formatter;
 
-      // The engine request fields the synchronous path also sends.
       const withLongNumeralsSupport = Boolean(
         services.uiSettings.get(LONG_NUMERALS_SETTING, false)
       );
@@ -292,10 +275,10 @@ export const executeStreamingQuery = createAsyncThunk<
       if (!asHistogram) rows.absorb(submitted);
       publish(submitted, true);
 
-      // What to ask for next, which is a different question from where the rows that come back
-      // belong. A provisional set must be re-read from the start to pick up revisions; committed
-      // rows are continued from. Conservative until the engine classifies the job, since re-reading
-      // is always safe whereas assuming rows are committed can interleave two orderings.
+      // Which window to ask for next. Separate from where returned rows belong, which the
+      // accumulator decides from `window.offset`. A provisional set is re-read from the start to
+      // pick up revisions; committed rows are continued from. REPLACE until the engine classifies
+      // the job, since re-reading is always safe.
       let updateMode: PPLStreamUpdateMode = 'REPLACE';
 
       while (!signal.aborted) {
@@ -316,9 +299,8 @@ export const executeStreamingQuery = createAsyncThunk<
           updateMode = snapshot.update_mode as PPLStreamUpdateMode;
         }
 
-        // Placement is by the window the engine says it served, never by `update_mode`: a completed
-        // job reports REPLACE while serving only the window asked for, so treating that as a
-        // wholesale replacement would discard every row accumulated while it ran.
+        // Placement is by served window, not `update_mode`: a completed job reports REPLACE while
+        // serving only the window asked for.
         if (!asHistogram) rows.absorb(snapshot);
 
         if (snapshot.status === 'FAILED') {
@@ -347,13 +329,10 @@ export const executeStreamingQuery = createAsyncThunk<
         }
       }
 
-      // Reached only when the loop condition saw `signal.aborted`, i.e. an abort landed between
-      // iterations rather than interrupting a sleep or a poll. Derived rather than hardcoded so it
-      // stays correct if the loop gains another exit.
+      // Reached only when the loop condition saw `signal.aborted`, so the run was aborted.
       finalise(signal.aborted);
     } catch (error) {
       if (isAbort(error)) {
-        // The user cancelled: release the job so the coordinator stops work and frees memory.
         if (jobId) {
           stream.cancel(jobId, dataSourceId).catch(() => undefined);
         }
@@ -365,10 +344,8 @@ export const executeStreamingQuery = createAsyncThunk<
         finalise();
         return;
       }
-      // Nothing reached the screen, so there is nothing to lose by starting over: report it as
-      // unavailable and let the caller re-run on the non-streaming path. Reporting an error here
-      // instead would leave the user with a failed query the standard path would have answered.
-      // `lastStreaming` is only set by `publish`, so it doubles as "something was rendered".
+      // Nothing reached the screen, so the caller can re-run on the non-streaming path instead of
+      // showing a failure. `lastStreaming` is only set by `publish`, so it doubles as "rendered".
       if (!lastStreaming && (!isCurrent || isCurrent())) {
         throw new PPLStreamUnavailableError(error);
       }

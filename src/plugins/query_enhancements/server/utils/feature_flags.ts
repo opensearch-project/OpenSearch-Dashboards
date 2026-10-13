@@ -14,20 +14,14 @@ import {
 
 type DynamicConfigClient = Pick<IDynamicConfigurationClient, 'getConfig'>;
 
-/**
- * Derived from the client's own signature rather than imported: core declares
- * `AsyncLocalStorageContext` but does not re-export it, and deriving keeps this correct if the type
- * changes.
- */
+/** Derived rather than imported: core declares `AsyncLocalStorageContext` but does not export it. */
 type AsyncLocalStore = NonNullable<
   Parameters<IDynamicConfigurationClient['getConfig']>[1]
 >['asyncLocalStorageContext'];
 
 /**
- * Reads a flag out of a resolved config blob.
- *
- * `=== true` coerces explicitly: dynamic config writes are not schema-validated, so a stored value
- * could be a non-boolean (the string `'false'` is truthy) that must not leak into the flag.
+ * Reads a flag out of a resolved config blob. `=== true` because dynamic config writes are not
+ * schema-validated, so a stored value could be a truthy non-boolean such as the string `'false'`.
  */
 const readFlag = (config: unknown, path: readonly string[]): boolean =>
   path.reduce<any>((node, key) => (node == null ? undefined : node[key]), config) === true;
@@ -39,22 +33,18 @@ export const resolveFeatureFlags = (config: unknown): QueryEnhancementsFeatureFl
   }, {} as QueryEnhancementsFeatureFlags);
 
 /**
- * Every flag off — the registered capability defaults, before the switcher overrides them. Resolved
- * from no config at all, so it cannot drift from what an unreadable or empty config produces.
+ * Registered capability defaults, before the switcher overrides them. Resolved from no config, so
+ * it cannot drift from what an unreadable config produces.
  */
 export const defaultFeatureFlags = (): QueryEnhancementsFeatureFlags =>
   resolveFeatureFlags(undefined);
 
 /**
- * Resolves every flag for the current request.
+ * Resolves every flag for the current request, with the dynamic config store merged over the
+ * yml-backed defaults.
  *
- * `getConfig` merges the dynamic config store over the yml-backed defaults and falls back to those
- * defaults when nothing is stored, so this is the effective value whether or not DynamicConfig has
- * been written to.
- *
- * Note the caller must pass `pluginConfigPath`, not `{ name }`: `pathToString` runs `snakeCase` on
- * `name`, which would turn `queryEnhancements` into the non-existent `query_enhancements`
- * namespace.
+ * Must pass `pluginConfigPath`, not `{ name }`: `pathToString` runs `snakeCase` on `name`, turning
+ * `queryEnhancements` into the non-existent `query_enhancements` namespace.
  */
 export const readFeatureFlags = async (
   client: DynamicConfigClient,

@@ -291,12 +291,8 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
 
 /**
  * Resolves streaming configuration for the current query, or undefined to use the standard
- * single-shot path.
- *
- * The histogram entry enables the client-derived chart: the backend cannot stream a histogram
- * (aggregation snapshots require a non-bucketed parser), so if the chart is to update at all it has
- * to be computed from the rows already received. It is only offered when the dataset has a time
- * field and the histogram config yields a date histogram.
+ * single-shot path. The histogram entry is present only when the dataset has a time field and the
+ * histogram config yields a date histogram.
  */
 const getStreamingConfig = async (
   state: RootState,
@@ -326,8 +322,7 @@ const getStreamingConfig = async (
     const timeRange = services.data.query.timefilter.timefilter.getTime();
     const baseQuery = defaultPrepareQueryString(query);
 
-    // The interceptor that normally adds the time filter and default sort is bypassed by the
-    // streaming path, so the same enrichment is applied here.
+    // The streaming path bypasses the interceptor, so apply the same enrichment here.
     const tableQuery = enrichStreamingQuery({
       queryString: baseQuery,
       timeFieldName,
@@ -360,8 +355,7 @@ const getStreamingConfig = async (
         // The chart reads this key, not the data table's.
         cacheKey: prepareHistogramCacheKey(query, !!state.queryEditor.breakdownField),
         aggId,
-        // The aggregation query itself, so it can run as its own streaming job and publish
-        // authoritative bucket counts as composite pages complete.
+        // The aggregation itself, so it runs as its own streaming job.
         queryString: buildPPLHistogramQuery(
           enrichStreamingQuery({
             queryString: baseQuery,
@@ -431,9 +425,7 @@ export const executeQueries = createAsyncThunk<
   let streamedHistogram = false;
   // Execute query without aggregations
   if (needsDataTableQuery) {
-    // Streaming replaces the single-shot data-table fetch when enabled. The histogram below is
-    // left alone: it cannot stream (aggregation snapshots require a non-bucketed parser) and it is
-    // already dispatched fire-and-forget, so it will not hold up progressive rows.
+    // Streaming replaces the single-shot data-table fetch when enabled.
     const streamingConfig = await getStreamingConfig(state, services, getState);
     if (streamingConfig) {
       // Identifies this run so a superseded one cannot publish over, or unregister, its successor.
@@ -452,8 +444,8 @@ export const executeQueries = createAsyncThunk<
       run
         .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
         .catch(() => undefined);
-      // An engine that does not serve the async PPL API only reveals itself when the submit fails.
-      // Nothing was rendered in that case, so the query is simply re-run on the standard path.
+      // An engine without the async PPL API only fails at submit, with nothing rendered, so the
+      // query is re-run on the standard path.
       promises.push(
         run.then((outcome) =>
           isStreamUnavailable(outcome)
@@ -468,11 +460,10 @@ export const executeQueries = createAsyncThunk<
         )
       );
 
-      // Stream the histogram as its own job, so its counts come from the engine rather than being
-      // derived from whatever rows the client happened to fetch, and no raw rows are transferred to
-      // compute them. Note the engine does not currently publish partial aggregations: measured, a
-      // running aggregation reports total=0 until it completes, then returns every bucket at once.
-      // So the chart arrives in one piece, and later than the table it sits above.
+      // Stream the histogram as its own job, so its counts come from the engine and no raw rows are
+      // transferred to compute them. The engine does not publish partial aggregations today — a
+      // running aggregation reports total=0 until it completes — so the chart arrives whole, and
+      // later than the table above it.
       if (streamingConfig.histogram && needsHistogramQuery) {
         const histogramKey = streamingConfig.histogram.cacheKey;
         const histogramToken = {};
@@ -488,9 +479,8 @@ export const executeQueries = createAsyncThunk<
           })
         );
         registerStreamingAbort(histogramKey, () => histogramRun.abort(), histogramToken);
-        // If its submit fails the chart has nothing, so let the standard histogram query run
-        // instead of leaving it blank. Deliberately not awaited, as the chart is already dispatched
-        // fire-and-forget, so the chain is terminated here rather than left floating.
+        // If submit fails the chart has nothing, so run the standard histogram query instead.
+        // Not awaited, so the chain is terminated here rather than left floating.
         histogramRun
           .then((outcome) => {
             if (isStreamUnavailable(outcome)) {

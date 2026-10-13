@@ -14,13 +14,11 @@ interface StreamingEligibilityDeps {
 }
 
 /**
- * Dataset types whose PPL queries run against OpenSearch indices through the synchronous PPL
- * strategy, which is what the streaming path replaces.
+ * Dataset types whose PPL queries run through the synchronous PPL strategy, which is what streaming
+ * replaces.
  *
- * Deliberately an allowlist. Other types route elsewhere — an S3 dataset goes to the `pplasync`
- * strategy and its own job API — so streaming them would send the query to the wrong place. A new
- * dataset type is more likely to be another external source than a plain index, so it must be added
- * here consciously rather than start streaming by default.
+ * An allowlist on purpose: other types route elsewhere — S3 goes to `pplasync` and its own job API —
+ * so a new dataset type must be added here consciously rather than start streaming by default.
  */
 const STREAMABLE_DATASET_TYPES: ReadonlySet<string> = new Set([
   DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
@@ -40,15 +38,12 @@ export interface StreamingQueryDescriptor {
  * Whether a query should run on the streaming path.
  *
  * Two gates, both required: `queryEnhancements.pplStreaming` is the deployment capability, which the
- * stream routes also enforce per request so a runtime change stops jobs already in flight, and
- * `explore:enableStreamingResults` is the per-user opt-in beneath it.
+ * routes also enforce per request so a runtime change stops jobs already in flight, and
+ * `explore:enableStreamingResults` is the per-user opt-in beneath it. An unknown engine is assumed
+ * to serve the async API; being wrong costs one failed submit and falls back.
  *
- * An unknown engine is assumed to serve the async PPL API, matching the rest of the capability
- * table; being wrong costs one failed submit and falls back to the non-streaming path.
- *
- * Eligibility cannot predict whether a query will actually produce partial results — that depends on
- * the plan, which only the engine knows. A sorting or aggregating query still runs correctly, it
- * just delivers everything in one final snapshot.
+ * This cannot predict whether a query will actually produce partial results — that depends on the
+ * plan. A sorting or aggregating query runs correctly, it just arrives in one final snapshot.
  */
 export const isStreamingEligible = (
   { uiSettings, capabilities }: StreamingEligibilityDeps,
@@ -61,8 +56,8 @@ export const isStreamingEligible = (
   Boolean(uiSettings.get(STREAMING_RESULTS_SETTING, false));
 
 /**
- * Finds the aggregation id the histogram chart reads from, so a client-derived histogram can be
- * attached where the chart already looks. Returns undefined when the config has no date histogram.
+ * The aggregation id the histogram chart reads from, so streamed buckets are attached where the
+ * chart already looks. Undefined when the config has no date histogram.
  */
 export const findDateHistogramAggId = (
   aggs: Record<string, unknown> | undefined

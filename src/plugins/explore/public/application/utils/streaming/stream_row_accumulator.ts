@@ -13,13 +13,11 @@ import {
 /**
  * Holds the rows a streaming run has fetched, and the cursor for the next window to request.
  *
- * Placement is decided by the window the engine says it served, not by `update_mode`. A completed
- * job reports REPLACE while still serving a single window, so treating that as a wholesale
- * replacement discards everything accumulated while the query ran. The window offset is
- * unambiguous: rows belong where the engine says they belong.
+ * Placement follows the window the engine says it served, not `update_mode`: a completed job reports
+ * REPLACE while serving a single window, so treating that as a wholesale replacement would discard
+ * everything accumulated while the query ran.
  *
- * The invariant is `nextOffset === rows.length` whenever rows form a prefix from 0, which is what
- * makes the next request a simple continuation.
+ * Invariant: `nextOffset === rows.length`.
  */
 export class StreamRowAccumulator {
   private rows: Array<Record<string, unknown>> = [];
@@ -27,10 +25,7 @@ export class StreamRowAccumulator {
   /** Bumped when rows are replaced, so synthesised row ids change with them. */
   private generation = 0;
 
-  /**
-   * `formatter` is read per snapshot rather than captured, so the accumulator can be constructed
-   * before the PPL language formatter has been resolved.
-   */
+  /** Read per snapshot, so the accumulator can be built before the formatter is resolved. */
   constructor(
     private readonly maxRows: number,
     private readonly formatter: () => FieldValueFormatter | undefined = () => undefined
@@ -68,12 +63,10 @@ export class StreamRowAccumulator {
     if (incoming.length === 0) return 0;
     const { highlights = [] } = splitHighlightColumn(snapshot);
 
-    // Absent `window` means the engine did not say where these rows sit. The only safe reading is
-    // "from the start", which is also what a pre-windowing backend meant by a bare snapshot.
+    // No `window` means the engine did not say where these rows sit; read it as from the start.
     const at = snapshot.window?.offset ?? 0;
 
     if (at === 0) {
-      // A fresh view of the result set from the beginning.
       const replacing = this.rows.length > 0;
       this.rows = incoming.slice(0, this.maxRows);
       this.highlights = highlights.slice(0, this.maxRows);
@@ -87,8 +80,7 @@ export class StreamRowAccumulator {
     }
 
     if (at > this.rows.length) {
-      // A gap would make `nextOffset` lie about what is held, so the window is refused and the run
-      // re-requests from `nextOffset`.
+      // A gap would make `nextOffset` lie about what is held, so refuse it and re-request.
       return 0;
     }
 
