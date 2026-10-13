@@ -153,6 +153,7 @@
     "**/glob-parent": "^6.0.0",
     "**/loader-utils": "^2.0.4",
     "**/nth-check": "^2.0.1",
+    "**/postcss-selector-parser": "^7.1.6",
     "**/semver": "^7.5.3",
     "**/serialize-javascript": "^7.0.3",
     "**/trim": "^0.0.3",
