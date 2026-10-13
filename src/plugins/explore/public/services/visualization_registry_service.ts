@@ -4,6 +4,7 @@
  */
 
 import {
+  VisualizationFullMetadata,
   visualizationRegistry,
   VisualizationRegistry,
 } from '../components/visualizations/visualization_registry';
@@ -44,6 +45,11 @@ export interface VisualizationRegistryServiceStart {
    * Get a visualization by type
    */
   getVisualization: (chartType: string) => VisualizationType<any> | undefined;
+
+  /**
+   * Get full metadata for each visualization
+   */
+  getVisualizationsFullMetadata: () => VisualizationFullMetadata[];
 }
 
 export class VisualizationRegistryService {
@@ -83,6 +89,9 @@ export class VisualizationRegistryService {
       },
       getVisualization: (chartType) => {
         return this.registry.getVisualization(chartType);
+      },
+      getVisualizationsFullMetadata: () => {
+        return this.registry.getVisualizationsFullMetadata();
       },
     };
   }
