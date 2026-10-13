@@ -726,6 +726,57 @@ describe('ChatWindow', () => {
     });
   });
 
+  describe('IME composition', () => {
+    it('should not send on the Enter that commits an IME composition', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '안녕하세요' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 229, isComposing: true });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(input).toHaveValue('안녕하세요');
+
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '안녕하세요',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+
+    it('should send on an Enter that arrives after the composition ended', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '안녕하세요' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 229 });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.sendMessage).toHaveBeenCalledTimes(1);
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '안녕하세요',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+  });
+
   describe('new chat functionality', () => {
     it('should clear timeline and reset state on new chat', () => {
       const ref = React.createRef<ChatWindowInstance>();
