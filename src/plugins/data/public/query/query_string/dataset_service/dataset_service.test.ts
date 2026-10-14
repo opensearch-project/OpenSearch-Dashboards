@@ -188,6 +188,77 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
   });
 
+  describe('cacheDataset with a saved dataset', () => {
+    const savedDataset = {
+      id: 'saved-dataset',
+      title: 'logs*',
+      type: mockType.id,
+    } as Dataset;
+
+    const buildServices = (dataViews: Record<string, jest.Mock>) =>
+      ({
+        ...mockDataPluginServices,
+        data: { ...dataPluginMock.createStartContract(), dataViews },
+      }) as unknown as IDataPluginServices;
+
+    test('loads the saved object instead of caching a temporary view', async () => {
+      const dataViews = {
+        get: jest
+          .fn()
+          .mockResolvedValueOnce(undefined)
+          .mockResolvedValueOnce({ id: 'saved-dataset', version: 'v1' }),
+        clearCache: jest.fn(),
+      };
+      mockType.fetchFields.mockClear();
+      service.registerType(mockType);
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.get).toHaveBeenNthCalledWith(1, 'saved-dataset', true);
+      expect(dataViews.clearCache).toHaveBeenCalledWith('saved-dataset', false);
+      expect(dataViews.get).toHaveBeenNthCalledWith(2, 'saved-dataset');
+      expect(mockType.fetchFields).not.toHaveBeenCalled();
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('keeps an already cached saved-object view without refetching', async () => {
+      const dataViews = {
+        get: jest.fn().mockResolvedValue({ id: 'saved-dataset', version: 'v1' }),
+        clearCache: jest.fn(),
+      };
+      service.registerType(mockType);
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.get).toHaveBeenCalledTimes(1);
+      expect(dataViews.clearCache).not.toHaveBeenCalled();
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('falls back to a temporary view for ad-hoc datasets and remembers them', async () => {
+      const dataViews = {
+        get: jest
+          .fn()
+          .mockImplementation((_id: string, onlyCheckCache?: boolean) =>
+            onlyCheckCache ? Promise.resolve(undefined) : Promise.reject(new Error('not found'))
+          ),
+        clearCache: jest.fn(),
+        create: jest.fn().mockResolvedValue({ id: 'saved-dataset' }),
+        saveToCache: jest.fn(),
+      };
+      const services = buildServices(dataViews);
+      service.registerType(mockType);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+      expect(dataViews.get).toHaveBeenCalledTimes(2);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(2);
+      expect(dataViews.get).toHaveBeenCalledTimes(2);
+    });
+  });
+
   test('cacheDataset passes signalType and schemaMappings to index pattern spec', async () => {
     const mockDataset = {
       id: 'test-dataset',
