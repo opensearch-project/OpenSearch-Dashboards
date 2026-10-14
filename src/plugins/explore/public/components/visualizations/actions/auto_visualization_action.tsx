@@ -723,7 +723,11 @@ export function registerAutoVisualizationAction(
           preparedQuery: query,
           resolvedTimeRange,
           transformations: args.transformations,
-          message: `Created ${resolvedChartType} visualization for ${args.indexName}`,
+          message:
+            `Created a ${resolvedChartType} visualization preview for ${args.indexName}. ` +
+            'PREVIEW ONLY: this tool does not save the visualization or add a panel to the ' +
+            'dashboard. Instead, the user needs to click "Open in Editor" and then "Save and ' +
+            'back" in the editor to add the panel manually.',
         };
       } catch (error) {
         return {
