@@ -32,6 +32,16 @@ import { copyWorkspacePackages } from '@osd/pm';
 
 import { read, write, Task } from '../lib';
 
+// The extract-zip shim resolution only redirects devDependencies, which are not
+// installed in the build, and scripts/extract_zip_shim is not copied into it, so
+// yarn would fail on the missing directory.
+const EXTRACT_ZIP_SHIM_RESOLUTION = 'file:./scripts/extract_zip_shim';
+
+export const getBuildResolutions = (resolutions: Record<string, string> = {}) =>
+  Object.fromEntries(
+    Object.entries(resolutions).filter(([, value]) => value !== EXTRACT_ZIP_SHIM_RESOLUTION)
+  );
+
 export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
@@ -55,7 +65,7 @@ export const CreatePackageJson: Task = {
       engines: {
         node: pkg.engines.node,
       },
-      resolutions: pkg.resolutions,
+      resolutions: getBuildResolutions(pkg.resolutions),
       workspaces: pkg.workspaces,
       dependencies: pkg.dependencies,
     };
