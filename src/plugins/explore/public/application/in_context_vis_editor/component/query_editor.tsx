@@ -8,11 +8,11 @@ import { useQueryPanelEditorProps } from '../hooks/use_query_panel_editor_props'
 import './query_editor.scss';
 
 export const QueryPanelEditor = () => {
-  const props = useQueryPanelEditorProps();
+  const { editorKey, ...props } = useQueryPanelEditorProps();
 
   return (
     <div className="exploreVisEditorAutoGrowEditor">
-      <InnerQueryEditor {...props} />
+      <InnerQueryEditor key={editorKey} {...props} />
     </div>
   );
 };
