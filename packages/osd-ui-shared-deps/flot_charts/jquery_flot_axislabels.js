@@ -217,6 +217,7 @@ import dompurify from 'dompurify';
 
     CssTransformAxisLabel.prototype.transforms = function(degrees, x, y) {
         var stransforms = {
+            transform: '',
             '-moz-transform': '',
             '-webkit-transform': '',
             '-o-transform': '',
@@ -224,6 +225,7 @@ import dompurify from 'dompurify';
         };
         if (x != 0 || y != 0) {
             var stdTranslate = ' translate(' + x + 'px, ' + y + 'px)';
+            stransforms.transform += stdTranslate;
             stransforms['-moz-transform'] += stdTranslate;
             stransforms['-webkit-transform'] += stdTranslate;
             stransforms['-o-transform'] += stdTranslate;
@@ -232,6 +234,7 @@ import dompurify from 'dompurify';
         if (degrees != 0) {
             var rotation = degrees / 90;
             var stdRotate = ' rotate(' + degrees + 'deg)';
+            stransforms.transform += stdRotate;
             stransforms['-moz-transform'] += stdRotate;
             stransforms['-webkit-transform'] += stdRotate;
             stransforms['-o-transform'] += stdRotate;
@@ -294,8 +297,10 @@ import dompurify from 'dompurify';
       this.elem = $('<div>')
         .addClass('axisLabels ' + sanitizedAxisName + 'Label')
         .css('position', 'absolute')
-        .css('transform', this.transforms(offsets.degrees, offsets.x, offsets.y))
         .html(sanitizedLabel);
+
+      // transforms() returns complete CSS declarations for both the standard and legacy renderers.
+      this.elem[0].style.cssText += this.transforms(offsets.degrees, offsets.x, offsets.y);
 
       if (this.opts.axisLabelColour) {
         this.elem.css('color', this.opts.axisLabelColour);

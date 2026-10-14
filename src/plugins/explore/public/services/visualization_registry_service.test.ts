@@ -40,6 +40,12 @@ describe('VisualizationRegistryService', () => {
       const registry = service.getRegistry();
       expect(registry).toBeInstanceOf(VisualizationRegistry);
     });
+
+    it('registers Sankey as a built-in visualization', () => {
+      expect(mockRegisterVisualization).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: 'sankey' })])
+      );
+    });
   });
 
   describe('setup', () => {

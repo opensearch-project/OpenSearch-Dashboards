@@ -43,6 +43,7 @@ import {
   openAddPanelFlyout,
 } from '../../../../../embeddable/public';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { isImeComposing } from '../../../../../../core/public/utils';
 import { DashboardLayout, DashboardSection, SectionLayoutMember } from '../../../../common';
 import {
   DashboardContainer,
@@ -367,7 +368,7 @@ class SectionLayoutContainerUi extends React.Component<Props, State> {
             autoFocus
             onChange={(e) => this.setState({ renameDraft: e.target.value })}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') this.commitRename();
+              if (e.key === 'Enter' && !isImeComposing(e)) this.commitRename();
             }}
           />
         </EuiModalBody>
