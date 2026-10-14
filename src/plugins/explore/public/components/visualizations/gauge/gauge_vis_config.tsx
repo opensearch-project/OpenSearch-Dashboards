@@ -52,6 +52,9 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
   name: 'Gauge',
   icon: 'visGauge',
   type: 'gauge',
+  metadata: {
+    description: 'Single value against a threshold range.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'gauge'>> = [
       {

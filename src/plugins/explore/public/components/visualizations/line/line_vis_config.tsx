@@ -122,6 +122,10 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
   name: 'Line',
   icon: 'visLine',
   type: 'line',
+  metadata: {
+    description:
+      'Trends over time. Use when user asks about trends, changes over time, or time-series.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'line'>> = [
       {

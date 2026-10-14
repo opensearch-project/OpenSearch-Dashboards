@@ -59,6 +59,10 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
   name: 'Pie',
   icon: 'visPie',
   type: 'pie',
+  metadata: {
+    description:
+      'Proportional breakdown of a whole. Use when user asks about proportions, shares, percentages, breakdown.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'pie'>> = [
       {
