@@ -1,2 +1,0 @@
-feat:
-- Let each user choose their own date format by adding user scope to `dateFormat` and `dateNanosFormat` ([#12960](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12960))
