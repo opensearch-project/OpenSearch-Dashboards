@@ -14,7 +14,6 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
@@ -26,6 +25,13 @@ import {
   modeToggleOptions,
   TransformationConfigSchema,
 } from '../types';
+import {
+  createAppliedResult,
+  createInvalidConfigResult,
+  createMissingFieldsResult,
+  getRowFieldValue,
+  rowHasField,
+} from '../transformation_utils';
 
 type Mode = 'binary' | 'unary' | 'crossFields';
 type BinaryOperator = '+' | '-' | '*' | '/';
@@ -172,13 +178,24 @@ const parseArithmetic = (input: string): number | null => {
   return result !== null && isFinite(result) ? result : null;
 };
 
-const evaluateExpression = (expression: string, source: Record<string, unknown>): number | null => {
+const evaluateExpression = (expression: string, row: OpenSearchSearchHit): number | null => {
   const expr = expression.replace(/\$\{([^}]+)\}/g, (_, fieldName) => {
-    const val = Number(source[fieldName]);
+    const val = Number(getRowFieldValue(row, fieldName));
     return isNaN(val) ? 'NaN' : String(val);
   });
   if (expr.includes('NaN')) return null;
   return parseArithmetic(expr);
+};
+
+const getExpressionFields = (expression: string): string[] => {
+  const fields: string[] = [];
+  const fieldPattern = /\$\{([^}]+)\}/g;
+  let match = fieldPattern.exec(expression);
+  while (match) {
+    fields.push(match[1]);
+    match = fieldPattern.exec(expression);
+  }
+  return fields;
 };
 
 const operatorMap: Record<BinaryOperator, string> = {
@@ -509,16 +526,51 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
     },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: AddFieldConfig) => {
-      if (!isConfigComplete(config)) return data;
+      if (!isConfigComplete(config)) {
+        return createInvalidConfigResult(data, 'Add Field configuration is incomplete.');
+      }
+
+      let referencedFields: string[] = [];
+
+      if (config.mode === 'binary') {
+        referencedFields = [config.field1, config.field2].filter(
+          (field): field is string => !!field && field !== CUSTOM_VALUE_KEY
+        );
+      } else if (config.mode === 'unary') {
+        referencedFields = [config.unaryField!];
+      } else if (config.crossFieldsOperator === 'expression') {
+        referencedFields = getExpressionFields(config.expression);
+      } else {
+        referencedFields = (config.crossFields ?? []).map((field) => field.name);
+      }
 
       const alias = config.alias || generateAlias(config);
+      const missingFields = new Set<string>();
+      let applicableRows = 0;
+      const allowsPartialInputs =
+        config.mode === 'crossFields' && config.crossFieldsOperator !== 'expression';
 
-      return data.map((row) => {
+      if (data.length === 0) {
+        referencedFields.forEach((field) => missingFields.add(field));
+      }
+
+      const transformed = data.map((row) => {
+        const missingFieldsForRow = referencedFields.filter((field) => !rowHasField(row, field));
+        missingFieldsForRow.forEach((field) => missingFields.add(field));
+
+        if (
+          (!allowsPartialInputs && missingFieldsForRow.length > 0) ||
+          (allowsPartialInputs && missingFieldsForRow.length === referencedFields.length)
+        ) {
+          return row;
+        }
+        applicableRows++;
+
         let result: number | null = null;
 
         if (config.mode === 'binary') {
           const getRaw = (field: string | undefined, custom: string) =>
-            field === CUSTOM_VALUE_KEY ? Number(custom) : Number(get(row, `_source.${field}`));
+            field === CUSTOM_VALUE_KEY ? Number(custom) : Number(getRowFieldValue(row, field!));
 
           const v1 = getRaw(config.field1, config.field1CustomValue);
           const v2 = getRaw(config.field2, config.field2CustomValue);
@@ -527,15 +579,16 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
             result = applyBinary(v1, config.binaryOperator, v2);
           }
         } else if (config.mode === 'unary') {
-          const raw = Number(get(row, `_source.${config.unaryField}`));
+          const raw = Number(getRowFieldValue(row, config.unaryField!));
           if (!isNaN(raw)) {
             result = applyUnary(raw, config.unaryOperator);
           }
         } else if (config.crossFieldsOperator === 'expression') {
-          result = evaluateExpression(config.expression, row._source as Record<string, unknown>);
+          result = evaluateExpression(config.expression, row);
         } else {
           const values = (config.crossFields ?? [])
-            .map((f) => Number(get(row, `_source.${f.name}`)))
+            .filter((field) => rowHasField(row, field.name))
+            .map((field) => Number(getRowFieldValue(row, field.name)))
             .filter((v) => !isNaN(v));
           if (values.length > 0) {
             const sum = values.reduce((a, b) => a + b, 0);
@@ -549,32 +602,15 @@ export function createAddFieldTransformation(): TransformationInstance<AddFieldC
 
         return { ...row, _source: newSource };
       });
-    },
-    validateConfig: (config: AddFieldConfig, availableFields: Array<{ name?: string }>) => {
-      const fieldNames = new Set(availableFields.map((f) => f.name));
-      const patch: Partial<AddFieldConfig> = {};
 
-      if (config.mode === 'binary') {
-        if (config.field1 && config.field1 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field1)) {
-          patch.field1 = undefined;
-          patch.field1CustomValue = '';
-        }
-        if (config.field2 && config.field2 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field2)) {
-          patch.field2 = undefined;
-          patch.field2CustomValue = '';
-        }
-      } else if (config.mode === 'unary') {
-        if (config.unaryField && !fieldNames.has(config.unaryField)) {
-          patch.unaryField = undefined;
-        }
-      } else if (config.crossFieldsOperator !== 'expression') {
-        const valid = (config.crossFields ?? []).filter((f) => fieldNames.has(f.name));
-        if (valid.length !== (config.crossFields ?? []).length) {
-          patch.crossFields = valid;
-        }
+      if (missingFields.size === 0) {
+        return createAppliedResult(transformed);
       }
-
-      return Object.keys(patch).length > 0 ? { ...config, ...patch } : config;
+      return createMissingFieldsResult(
+        applicableRows > 0 ? transformed : data,
+        Array.from(missingFields),
+        applicableRows > 0 ? 'partially_applied' : 'skipped'
+      );
     },
     Editor: AddFieldEditor,
   };

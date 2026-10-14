@@ -115,10 +115,18 @@ export interface VisRule<T extends ChartType> {
   render: (props: VisRenderProps<T>) => React.ReactNode;
 }
 
+export interface VisualizationMetadata {
+  /**
+   * Description for visualization, this can be used as guidance exposed to assistant tool
+   */
+  description: string;
+}
+
 export interface VisualizationType<T extends ChartType> {
   readonly name: string;
   readonly type: T;
   readonly icon?: string;
+  readonly metadata?: VisualizationMetadata;
   readonly getRules: () => Array<VisRule<T>>;
   readonly ui: {
     style: {

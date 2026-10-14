@@ -29,7 +29,7 @@
  */
 
 import moment from 'moment-timezone';
-import { UiSettingsParams } from '../../../types';
+import { UiSettingScope, UiSettingsParams } from '../../../types';
 import { getDateFormatSettings } from './date_formats';
 
 describe('accessibility settings', () => {
@@ -37,6 +37,18 @@ describe('accessibility settings', () => {
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
+
+  describe('scopes', () => {
+    it('lets each user override how and where dates are displayed, with a shared default', () => {
+      for (const key of ['dateFormat', 'dateNanosFormat', 'dateFormat:tz', 'dateFormat:dow']) {
+        expect(dateFormatSettings[key].scope).toEqual([UiSettingScope.USER, UiSettingScope.GLOBAL]);
+      }
+    });
+
+    it('keeps the scaled date format shared', () => {
+      expect(dateFormatSettings['dateFormat:scaled'].scope).toBeUndefined();
+    });
+  });
 
   describe('dateFormat', () => {
     const validate = getValidationFn(dateFormatSettings.dateFormat);

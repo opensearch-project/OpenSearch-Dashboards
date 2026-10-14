@@ -146,6 +146,10 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
   name: 'Area',
   icon: 'visArea',
   type: 'area',
+  metadata: {
+    description:
+      'Stacked or cumulative trends over time. Use for totals and composition over time.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'area'>> = [
       {
