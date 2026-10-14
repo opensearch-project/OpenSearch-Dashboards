@@ -6,7 +6,13 @@
 import type { ComponentType } from 'react';
 import { Dataset } from '../../../../data/common';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { ExploreFlavor, EXPLORE_LOGS_TAB_ID } from '../../../common';
+import {
+  ExploreFlavor,
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_METRICS_TABLE_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
+} from '../../../common';
+import { getServices } from '../services';
 import { openSearchSourceType, OPENSEARCH_SOURCE_TYPE_ID } from './opensearch_source_type';
 import { BUILT_IN_LANGUAGE_GUIDES } from './built_in_language_guides';
 
@@ -14,6 +20,13 @@ export { OPENSEARCH_SOURCE_TYPE_ID };
 
 /** Languages Explore supports itself; their default behavior applies unless a source lists them. */
 const BUILT_IN_LANGUAGES = ['PPL', 'SQL', 'PROMQL'];
+
+/** The results tabs a language joins on each flavor when its settings don't list `tabs`. */
+const DEFAULT_TABS: Record<ExploreFlavor, string[]> = {
+  [ExploreFlavor.Logs]: [EXPLORE_LOGS_TAB_ID],
+  [ExploreFlavor.Traces]: [EXPLORE_LOGS_TAB_ID],
+  [ExploreFlavor.Metrics]: [EXPLORE_METRICS_TABLE_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID],
+};
 
 /** A sample query the query panel offers for a language. */
 export interface SourceTypeSampleQuery {
@@ -26,10 +39,7 @@ export interface SourceTypeSampleQuery {
  * apart across sources (for example SQL on OpenSearch versus SQL on another store).
  */
 export interface SourceTypeLanguageGuide {
-  /**
-   * The language's name on this source, qualified by its engine where the bare name is shared
-   * (e.g. "OpenSearch SQL"). Defaults to the language's registered title.
-   */
+  /** The language's name on this source. Defaults to the language's registered title. */
   label?: string;
   /** One sentence on what the language queries on this source. */
   description?: string;
@@ -37,6 +47,8 @@ export interface SourceTypeLanguageGuide {
   docLink?: { title: string; url: string };
   /** Examples shown where the Metrics page has no query yet. */
   sampleQueries?: SourceTypeSampleQuery[];
+  /** Syntax highlighting for the sample queries (an EuiCode language). Defaults to plain text. */
+  codeLanguage?: string;
 }
 
 /**
@@ -66,7 +78,10 @@ export interface SourceTypeDatasetSelectorProps {
  * stripping).
  */
 export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
-  /** Tabs that can render this language's results. Defaults to the Logs tab. */
+  /**
+   * Tabs that can render this language's results. Defaults to the results tabs of the flavor the
+   * page shows: the Logs tab on Logs and Traces, the Table and Visualization tabs on Metrics.
+   */
   tabs?: string[];
   /** Run Explore's histogram query. Off by default: that query is built in PPL. */
   supportsHistogram?: boolean;
@@ -80,19 +95,36 @@ export interface SourceTypeLanguageSettings extends SourceTypeLanguageGuide {
   metricsQueryEditor?: ComponentType<SourceTypeQueryEditorProps>;
 }
 
-/** Props Explore passes to a source type's own query editor. */
+/** Where the last run of the query stands, for a source's own query editor. */
+export interface SourceTypeQueryStatus {
+  /** Whether a run is in progress. */
+  isRunning: boolean;
+  /** Why the last run failed, if it did. */
+  error?: string;
+}
+
+/**
+ * Props Explore passes to a source type's own query editor. The time range is the data plugin's
+ * (`data.query.timefilter`); Explore sends it with every run.
+ */
 export interface SourceTypeQueryEditorProps {
   /** The query text to show. */
   query: string;
   /** Call with the full query text on every edit. */
   onChange: (query: string) => void;
-  /** Runs the query last passed to `onChange`. */
-  onRun: () => void;
+  /** Runs `query` when given (it is applied first), else the query last passed to `onChange`. */
+  onRun: (query?: string) => void;
   /** The language being edited. */
   languageId: string;
   /** The active dataset (one of this source's). */
   dataset?: Dataset;
   data: DataPublicPluginStart;
+  /** The query's options (`query.queryOptions`), sent with every run. */
+  queryOptions?: Record<string, unknown>;
+  /** Merges options into `query.queryOptions`. */
+  onQueryOptionsChange: (options: Record<string, unknown>) => void;
+  /** The last run's status. */
+  status: SourceTypeQueryStatus;
 }
 
 /**
@@ -139,6 +171,14 @@ export interface SourceTypeDefinition {
    * settings only while one of this source's datasets is active.
    */
   languageSettings?: Record<string, SourceTypeLanguageSettings>;
+  /**
+   * Metrics page: the id of the data plugin resource client (`resourceClientFactory`) that the
+   * Explore tab's metric browser and the PromQL builder use for this source's datasets. The client
+   * must implement the Prometheus resource calls (metric metadata, labels, label values, series).
+   * Without one, the Metrics page offers only its Query tab for this source, and PromQL gets a
+   * single code editor instead of the builder rows. The built-in source uses `prometheus`.
+   */
+  metricsResourceClientId?: string;
 }
 
 export interface SourceTypeRegistrySetup {
@@ -242,19 +282,32 @@ export class SourceTypeRegistryService {
     if (!languageId) return {};
     const settings = this.settingsFor(languageId, dataset);
     if (settings) {
-      const { label, description, docLink, sampleQueries } = settings;
-      return { label, description, docLink, sampleQueries };
+      const { label, description, docLink, sampleQueries, codeLanguage } = settings;
+      return { label, description, docLink, sampleQueries, codeLanguage };
     }
     return BUILT_IN_LANGUAGE_GUIDES[languageId] ?? {};
   }
 
-  /** What to call a language on the active dataset's source: its guide's label, else `title`. */
+  /**
+   * What to call a language on the active dataset's source: its guide's label, else the title the
+   * language is registered with in the data plugin, else its id.
+   */
   public getLanguageLabel(
     languageId: string | undefined,
-    dataset: { type?: string } | undefined,
-    title?: string
+    dataset: { type?: string } | undefined
   ): string {
-    return this.getLanguageGuide(languageId, dataset).label ?? title ?? languageId ?? '';
+    if (!languageId) return '';
+    return (
+      this.getLanguageGuide(languageId, dataset).label ?? registeredTitle(languageId) ?? languageId
+    );
+  }
+
+  /**
+   * The resource client the Metrics page's metric browser and PromQL builder use for a dataset's
+   * source, or undefined when the source has none (the page then offers only its Query tab).
+   */
+  public getMetricsResourceClientId(dataset?: { type?: string }): string | undefined {
+    return this.getForDataset(dataset).metricsResourceClientId;
   }
 
   /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */
@@ -298,7 +351,7 @@ export class SourceTypeRegistryService {
     const languages = new Set<string>();
     this.getAll(flavor).forEach((sourceType) => {
       Object.entries(sourceType.languageSettings ?? {}).forEach(([languageId, settings]) => {
-        if ((settings.tabs ?? [EXPLORE_LOGS_TAB_ID]).includes(tabId)) languages.add(languageId);
+        if ((settings.tabs ?? DEFAULT_TABS[flavor]).includes(tabId)) languages.add(languageId);
       });
     });
     return Array.from(languages);
@@ -310,6 +363,15 @@ export class SourceTypeRegistryService {
     };
   }
 }
+
+// The title a language is registered with. Explore's services are unset in some unit tests.
+const registeredTitle = (languageId: string): string | undefined => {
+  try {
+    return getServices().data.query.queryString.getLanguageService().getLanguage(languageId)?.title;
+  } catch {
+    return undefined;
+  }
+};
 
 // Read from components and query actions that have no services handle. Falls back to a registry
 // holding only the built-in OpenSearch source, which is also what unit tests get.

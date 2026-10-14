@@ -17,7 +17,8 @@ const mockFetchFirstAvailableDataset = jest.fn();
 jest.mock('../../application/utils/state_management/utils/redux_persistence', () => ({
   fetchFirstAvailableDataset: (...args: unknown[]) => mockFetchFirstAvailableDataset(...args),
 }));
-jest.mock('../services', () => ({ getServices: () => ({ mock: 'services' }) }));
+let mockServices: object = { mock: 'services' };
+jest.mock('../services', () => ({ getServices: () => mockServices }));
 
 const logsPattern = { id: 'logs-*', title: 'logs-*', type: 'INDEX_PATTERN', signalType: 'logs' };
 const spansPattern = {
@@ -46,6 +47,7 @@ describe('SourceTypeRegistryService', () => {
 
   beforeEach(() => {
     registry = new SourceTypeRegistryService();
+    mockServices = { mock: 'services' };
   });
 
   it('has OpenSearch built in, owning index patterns and any unclaimed dataset type', () => {
@@ -85,6 +87,28 @@ describe('SourceTypeRegistryService', () => {
     expect(() => registry.register(fakeSource())).toThrow(
       'Explore source type "fake" is already registered'
     );
+  });
+
+  it('keeps the built-in Prometheus connections for the built-in source', () => {
+    expect(() => registry.register(fakeSource({ datasetTypes: ['PROMETHEUS'] }))).toThrow(
+      'Dataset type "PROMETHEUS" already belongs to Explore source type "opensearch"'
+    );
+    expect(registry.getForDataset({ type: 'PROMETHEUS' }).id).toBe(OPENSEARCH_SOURCE_TYPE_ID);
+  });
+
+  it("names a dataset's metrics resource client: Prometheus for the built-in source", () => {
+    registry.register(
+      fakeSource({
+        id: 'browsable',
+        datasetTypes: ['BROWSABLE'],
+        metricsResourceClientId: 'my-metrics',
+      })
+    );
+    registry.register(fakeSource({ id: 'queryOnly', datasetTypes: ['QUERY_ONLY'] }));
+    expect(registry.getMetricsResourceClientId({ type: 'PROMETHEUS' })).toBe('prometheus');
+    expect(registry.getMetricsResourceClientId(undefined)).toBe('prometheus');
+    expect(registry.getMetricsResourceClientId({ type: 'BROWSABLE' })).toBe('my-metrics');
+    expect(registry.getMetricsResourceClientId({ type: 'QUERY_ONLY' })).toBeUndefined();
   });
 
   it('rejects a dataset type another source already owns', () => {
@@ -161,6 +185,13 @@ describe('SourceTypeRegistryService', () => {
         ExploreFlavor.Traces,
         'traces'
       );
+    });
+
+    it('opens a Prometheus connection in PromQL on the Metrics flavor', async () => {
+      const prometheus = { id: 'prom', title: 'prom', type: 'PROMETHEUS', signalType: 'metrics' };
+      await expect(
+        resolve({ data: dataWithDefault(prometheus), flavor: ExploreFlavor.Metrics })
+      ).resolves.toEqual({ ...prometheus, language: 'PROMQL' });
     });
 
     it('resolves to undefined when no dataset fits', async () => {
@@ -250,6 +281,23 @@ describe('SourceTypeRegistryService', () => {
       ]);
       expect(registry.getLanguagesForTab('logs', ExploreFlavor.Traces)).toEqual([]);
     });
+
+    it("puts a language without tabs on the results tabs of the page's flavor", () => {
+      registry.register(
+        fakeSource({
+          id: 'metricsAndLogs',
+          datasetTypes: ['METRICS_AND_LOGS'],
+          flavors: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+          languageSettings: { MetricsQL: {} },
+        })
+      );
+      expect(registry.getLanguagesForTab('metrics', ExploreFlavor.Metrics)).toEqual(['MetricsQL']);
+      expect(
+        registry.getLanguagesForTab('explore_visualization_tab', ExploreFlavor.Metrics)
+      ).toEqual(['MetricsQL']);
+      expect(registry.getLanguagesForTab('logs', ExploreFlavor.Metrics)).toEqual([]);
+      expect(registry.getLanguagesForTab('logs', ExploreFlavor.Logs)).toContain('MetricsQL');
+    });
   });
 
   describe('language guides', () => {
@@ -270,14 +318,16 @@ describe('SourceTypeRegistryService', () => {
       );
     });
 
-    it("describes a built-in language in Explore's words on the built-in source", () => {
-      const guide = registry.getLanguageGuide('PROMQL', { type: 'INDEX_PATTERN' });
-      expect(guide.description).toBe('Query Prometheus metrics using PromQL.');
+    it('adds nothing visible for built-in languages on the built-in source', () => {
+      // PromQL keeps the Metrics page's existing samples; no labels or descriptions are added.
+      const guide = registry.getLanguageGuide('PROMQL', { type: 'PROMETHEUS' });
+      expect(guide.label).toBeUndefined();
+      expect(guide.description).toBeUndefined();
       expect(guide.docLink).toBeUndefined();
       expect(guide.sampleQueries?.length).toBeGreaterThan(0);
-      expect(registry.getLanguageGuide('SQL').description).toBe(
-        'Query OpenSearch indexes using OpenSearch SQL.'
-      );
+      expect(guide.codeLanguage).toBe('promql');
+      expect(registry.getLanguageGuide('SQL')).toEqual({ codeLanguage: 'sql' });
+      expect(registry.getLanguageGuide('PPL')).toEqual({});
     });
 
     it("uses a source's own guide on its datasets", () => {
@@ -293,14 +343,41 @@ describe('SourceTypeRegistryService', () => {
       expect(registry.getLanguageGuide('SQL', { type: 'CLOUD' }).description).toBeUndefined();
     });
 
-    it('names SQL by its engine, and falls back to the title for other languages', () => {
-      expect(registry.getLanguageLabel('SQL', { type: 'INDEX_PATTERN' }, 'SQL')).toBe(
-        'OpenSearch SQL'
+    it("labels a language by its source's label, else its registered title, else its id", () => {
+      registry.register(
+        fakeSource({
+          id: 'labelled',
+          datasetTypes: ['LABELLED'],
+          languageSettings: { SQL: { label: 'Labelled SQL' } },
+        })
       );
-      expect(registry.getLanguageLabel('PROMQL', undefined, 'PromQL')).toBe('PromQL');
-      // A source listing SQL without a label of its own keeps the registered title.
-      expect(registry.getLanguageLabel('SQL', { type: 'CLOUD' }, 'SQL')).toBe('SQL');
+      mockServices = {
+        data: {
+          query: {
+            queryString: {
+              getLanguageService: () => ({
+                getLanguage: (id: string) => (id === 'PROMQL' ? { title: 'PromQL' } : undefined),
+              }),
+            },
+          },
+        },
+      };
+      expect(registry.getLanguageLabel('SQL', { type: 'LABELLED' })).toBe('Labelled SQL');
+      expect(registry.getLanguageLabel('PROMQL', undefined)).toBe('PromQL');
+      expect(registry.getLanguageLabel('SQL', { type: 'CLOUD' })).toBe('SQL');
       expect(registry.getLanguageLabel('kuery', undefined)).toBe('kuery');
+      expect(registry.getLanguageLabel(undefined, undefined)).toBe('');
+    });
+
+    it("passes a source guide's code language through", () => {
+      registry.register(
+        fakeSource({
+          id: 'coded',
+          datasetTypes: ['CODED'],
+          languageSettings: { MyQL: { codeLanguage: 'sql' } },
+        })
+      );
+      expect(registry.getLanguageGuide('MyQL', { type: 'CODED' }).codeLanguage).toBe('sql');
     });
 
     it('returns nothing for an unknown or missing language', () => {

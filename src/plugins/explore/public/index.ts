@@ -28,6 +28,7 @@ export type {
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
   SourceTypeQueryEditorProps,
+  SourceTypeQueryStatus,
   SourceTypeRegistrySetup,
   SourceTypeSampleQuery,
 } from './services/source_type_registry';

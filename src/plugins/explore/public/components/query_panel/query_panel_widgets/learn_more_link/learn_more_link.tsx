@@ -60,7 +60,7 @@ export const LearnMoreLink = () => {
   const label = i18n.translate('explore.queryPanel.learnMoreLabel', {
     defaultMessage: 'Learn more about {language}',
     values: {
-      language: getSourceTypeRegistry().getLanguageLabel(queryLanguage, dataset, langConfig?.title),
+      language: getSourceTypeRegistry().getLanguageLabel(queryLanguage, dataset),
     },
   });
 

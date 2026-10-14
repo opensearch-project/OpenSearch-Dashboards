@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { ExploreServices } from '../../../../types';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 import type { PromQLQueryOptions } from '../../../../../../query_enhancements/common';
 import { useSetEditorText } from '../../../hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import { runQueryActionCreator } from '../../../utils/state_management/actions/query_editor/run_query/run_query';
@@ -59,9 +60,12 @@ export const MetricsExploreTab = () => {
   const setEditorText = useSetEditorText();
   const queryGenRef = useRef(new MetricQueryGenerator());
 
+  // The Metrics page only shows this tab for sources with a metrics resource client.
+  const resourceClientId =
+    getSourceTypeRegistry().getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
   const client = useMemo(() => {
-    return new PrometheusClient(services, dataConnectionId);
-  }, [services, dataConnectionId]);
+    return new PrometheusClient(services, dataConnectionId, resourceClientId);
+  }, [services, dataConnectionId, resourceClientId]);
 
   const maxDataPoints = (queryState.queryOptions as PromQLQueryOptions | undefined)?.maxDataPoints;
 

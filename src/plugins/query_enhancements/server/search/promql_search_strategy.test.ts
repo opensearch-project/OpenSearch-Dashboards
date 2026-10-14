@@ -1093,10 +1093,15 @@ describe('promqlSearchStrategy', () => {
 
     it.each([
       [{ statusCode: 400 }, 400],
-      [{ status: 403 }, 403],
+      [{ statusCode: 404 }, 404],
+      [{ status: 422 }, 422],
+      // The connection's credentials were rejected, not the user's session.
+      [{ statusCode: 401 }, 502],
+      [{ status: 403 }, 502],
+      [{ statusCode: 409 }, undefined],
       [{ statusCode: 502 }, undefined],
       [{}, undefined],
-    ])("keeps a single query's client-error status %p", async (fields, expected) => {
+    ])("maps a single query's upstream status %p", async (fields, expected) => {
       (prometheusManager.query as jest.Mock).mockRejectedValue(
         Object.assign(new Error('Bad query'), fields)
       );
@@ -1116,9 +1121,8 @@ describe('promqlSearchStrategy', () => {
       // The JSON shape Explore's error panel reads; the route takes the status from it.
       expect(JSON.parse(error.message)).toEqual({
         error: { type: 'PromQLQueryError', reason: 'PromQL query failed', details: 'Bad query' },
-        ...(expected ? { status: expected } : {}),
+        ...(expected ? { status: expected, statusCode: expected } : {}),
       });
-      expect(error.status).toBe(expected);
     });
 
     it('should extract error details from response body in multi-query', async () => {

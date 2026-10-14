@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiIcon, EuiPopover, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import { Dataset, EMPTY_QUERY } from '../../../../../../data/common';
 import {
   selectActiveTabId,
   selectDataset,
@@ -18,7 +17,7 @@ import {
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
-import { useClearEditors, useEditorFocus } from '../../../../application/hooks';
+import { useEditorFocus, useSwitchSourceType } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { getServices } from '../../../../services/services';
@@ -67,7 +66,6 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
   const activeTabId = useSelector(selectActiveTabId);
   const activeDataset = useSelector(selectDataset);
   const focusOnEditor = useEditorFocus();
-  const clearEditors = useClearEditors();
   const dispatch = useDispatch();
   const flavorId = useFlavorId();
 
@@ -128,78 +126,20 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     [closePopover, focusOnEditor, dispatch, scheduleTimeout]
   );
 
-  // Switch the active source by selecting a dataset. Mirrors DatasetSelectWidget's
-  // handleDatasetSelect (cache the dataView, set the initial query for the dataset, push to
-  // history) and then auto-runs, matching the language-switch behavior above.
-  const switchToDataset = useCallback(
-    async (dataset: Dataset) => {
-      const services = getServices();
-      const queryString = services.data.query.queryString;
-      // The dataset picker caches the dataView inside its own component; here we bypass the
-      // picker, so cache it ourselves or query execution can't resolve the dataView.
-      try {
-        const { storage, ...datasetServices } = services;
-        await queryString.getDatasetService().cacheDataset(dataset, datasetServices);
-      } catch {
-        // Non-fatal: execution will surface a clearer error if the dataView truly can't load.
-      }
-      // getInitialQueryByDataset derives the language from dataset.language, which each source
-      // type's resolveDefaultDataset sets so a language left over from the previous source isn't
-      // coerced to the index-pattern type's kuery default.
-      const initialQuery = queryString.getInitialQueryByDataset(dataset);
-      // Start from an empty editor, like a dataset pick: the previous text is in another language.
-      queryString.setQuery({ ...initialQuery, query: EMPTY_QUERY.QUERY, dataset });
-      queryString.getLanguageService().setUserQueryLanguage(initialQuery.language);
-      dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
-      clearEditors();
-      scheduleTimeout(focusOnEditor);
-      scheduleTimeout(() =>
-        dispatch(onEditorRunActionCreator(services, queryString.getQuery().query as string))
-      );
-    },
-    [dispatch, focusOnEditor, scheduleTimeout, clearEditors]
-  );
-
+  const switchSourceType = useSwitchSourceType(flavorId);
   const onSourceTypeClick = useCallback(
-    async (sourceType: SourceTypeDefinition) => {
+    (sourceType: SourceTypeDefinition) => {
       closePopover();
-      const services = getServices();
-      try {
-        const target = await sourceType.resolveDefaultDataset({
-          data: services.data,
-          flavor: flavorId,
-        });
-        if (!target) {
-          services.notifications?.toasts.addWarning({
-            title: i18n.translate('explore.queryPanelFooter.sourceType.noDataset', {
-              defaultMessage: 'No {sourceType} dataset found to query',
-              values: { sourceType: getSourceTypeRegistry().getLabel(sourceType, flavorId) },
-            }),
-          });
-          return;
-        }
-        await switchToDataset(target);
-      } catch (error) {
-        services.notifications?.toasts.addError(error, {
-          title: i18n.translate('explore.queryPanelFooter.sourceType.switchError', {
-            defaultMessage: 'Could not switch source type',
-          }),
-        });
-      }
+      return switchSourceType(sourceType);
     },
-    [closePopover, switchToDataset, flavorId]
+    [closePopover, switchSourceType]
   );
 
   const languageService = getServices().data.query.queryString.getLanguageService();
 
-  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
-    return getSourceTypeRegistry().getLanguageLabel(
-      language,
-      activeDataset,
-      languageService.getLanguage(language)?.title
-    );
-  }, [language, activeDataset, languageService]);
+    return getSourceTypeRegistry().getLanguageLabel(language, activeDataset);
+  }, [language, activeDataset]);
 
   // Source types offered for this flavor (OpenSearch always is). Builder-only workspaces get only
   // sources whose languages the visual builder supports.
@@ -321,9 +261,9 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     // `supportedLanguages` is already narrowed to the active dataset type's languages (see the
     // effect above), so each source shows only the languages it can run.
     return supportedLanguages.map((langId) => {
-      const langConfig = languageService.getLanguage(langId);
-      const title = langConfig?.title ?? langId;
-      const label = getSourceTypeRegistry().getLanguageLabel(langId, activeDataset, title);
+      // The test subject keeps the registered title so it doesn't change with a source's label.
+      const title = languageService.getLanguage(langId)?.title ?? langId;
+      const label = getSourceTypeRegistry().getLanguageLabel(langId, activeDataset);
       const isSelected = !isPromptMode && langId === language;
       return (
         <button

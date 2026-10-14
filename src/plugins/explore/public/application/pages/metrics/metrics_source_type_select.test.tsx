@@ -13,11 +13,17 @@ import {
 import { ExploreFlavor } from '../../../../common';
 
 let mockDataset: { id: string; type: string } | undefined;
+let mockDefaultDataset: Record<string, unknown> | undefined;
+let mockCurrentQuery: Record<string, unknown>;
 const mockDispatch = jest.fn();
 const mockClearEditors = jest.fn();
-const mockSetQuery = jest.fn();
+const mockSetQuery = jest.fn((query: Record<string, unknown>) => {
+  mockCurrentQuery = { ...mockCurrentQuery, ...query };
+});
 const mockCacheDataset = jest.fn();
 const mockAddWarning = jest.fn();
+const mockSetUserQueryLanguage = jest.fn();
+const mockRun = jest.fn((_services: unknown, query: string) => ({ type: 'run', query }));
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
@@ -29,33 +35,53 @@ jest.mock('../../utils/state_management/selectors', () => ({
 jest.mock('../../utils/state_management/slices', () => ({
   setQueryWithHistory: (query: unknown) => ({ type: 'setQueryWithHistory', payload: query }),
 }));
-jest.mock('../../hooks', () => ({ useClearEditors: () => mockClearEditors }));
-jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: () => ({
-    services: {
-      data: {
-        query: {
-          queryString: {
-            setQuery: mockSetQuery,
-            getQuery: () => ({}),
-            getInitialQueryByDataset: (dataset: any) => ({
-              query: 'x',
-              language: 'PROMQL',
-              dataset,
-            }),
-            getDatasetService: () => ({
-              cacheDataset: mockCacheDataset,
-              getDefault: () => undefined,
-            }),
-          },
+jest.mock('../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run', () => ({
+  onEditorRunActionCreator: (...args: [unknown, string]) => mockRun(...args),
+}));
+jest.mock('../../hooks', () => ({
+  useSwitchSourceType: (...args: unknown[]) =>
+    jest
+      .requireActual('../../hooks/editor_hooks/use_switch_source_type/use_switch_source_type')
+      .useSwitchSourceType(...args),
+}));
+jest.mock('../../hooks/editor_hooks/use_clear_editors', () => ({
+  useClearEditors: () => mockClearEditors,
+}));
+jest.mock('../../hooks/editor_hooks/use_editor_focus', () => ({
+  useEditorFocus: () => jest.fn(),
+}));
+// The data plugin's query manager, as far as switching uses it: the initial query takes the
+// dataset's language, else keeps the current one.
+jest.mock('../../../services/services', () => ({
+  getServices: () => ({
+    data: {
+      query: {
+        queryString: {
+          setQuery: mockSetQuery,
+          getQuery: () => mockCurrentQuery,
+          getInitialQueryByDataset: (dataset: { language?: string }) => ({
+            ...mockCurrentQuery,
+            query: 'x',
+            language: dataset.language || mockCurrentQuery.language,
+            dataset,
+          }),
+          getLanguageService: () => ({
+            setUserQueryLanguage: mockSetUserQueryLanguage,
+            getLanguage: () => undefined,
+          }),
+          getDatasetService: () => ({
+            cacheDataset: mockCacheDataset,
+            getDefault: () => mockDefaultDataset,
+          }),
         },
       },
-      notifications: { toasts: { addWarning: mockAddWarning, addError: jest.fn() } },
     },
+    notifications: { toasts: { addWarning: mockAddWarning, addError: jest.fn() } },
   }),
 }));
 
-const myMetrics = { id: 'my-metrics-source::default', type: 'MY_METRICS_TYPE' };
+const myMetrics = { id: 'my-metrics-source::default', type: 'MY_METRICS_TYPE', language: 'MyQL' };
+const prometheus = { id: 'prom-1', type: 'PROMETHEUS', signalType: 'metrics' };
 
 const register = (resolved: unknown = myMetrics) => {
   const registry = new SourceTypeRegistryService();
@@ -73,6 +99,12 @@ describe('MetricsSourceTypeSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDataset = undefined;
+    mockDefaultDataset = undefined;
+    mockCurrentQuery = {
+      query: 'up',
+      language: 'PROMQL',
+      queryOptions: { maxDataPoints: 500, perQueryOptions: [{ minStep: '1m' }] },
+    };
   });
   afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
 
@@ -82,7 +114,7 @@ describe('MetricsSourceTypeSelect', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('shows the active source and switches to another one', async () => {
+  it("switches to another source's dataset, language and an empty editor", async () => {
     register();
     render(<MetricsSourceTypeSelect />);
     const button = screen.getByTestId('metricsSourceTypeSelect');
@@ -91,21 +123,51 @@ describe('MetricsSourceTypeSelect', () => {
     fireEvent.click(button);
     fireEvent.click(screen.getByTestId('metricsSourceType-my-metrics-source'));
 
-    await waitFor(() =>
-      expect(mockSetQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ dataset: myMetrics, query: '', language: 'PROMQL' })
-      )
+    await waitFor(() => expect(mockRun).toHaveBeenCalledWith(expect.anything(), ''));
+    // PromQL's options belong to the previous language.
+    expect(mockSetQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataset: myMetrics,
+        query: '',
+        language: 'MyQL',
+        queryOptions: undefined,
+      })
     );
     expect(mockCacheDataset).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalled();
+    expect(mockSetUserQueryLanguage).toHaveBeenCalledWith('MyQL');
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'setQueryWithHistory' })
+    );
     expect(mockClearEditors).toHaveBeenCalled();
+  });
+
+  it('switches back to a Prometheus connection in PromQL', async () => {
+    register();
+    mockDataset = myMetrics;
+    mockDefaultDataset = prometheus;
+    mockCurrentQuery = { query: 'SELECT 1', language: 'MyQL', dataset: myMetrics };
+    render(<MetricsSourceTypeSelect />);
+    expect(screen.getByTestId('metricsSourceTypeSelect')).toHaveTextContent('My Metrics Source');
+
+    fireEvent.click(screen.getByTestId('metricsSourceTypeSelect'));
+    fireEvent.click(screen.getByTestId('metricsSourceType-opensearch'));
+
+    await waitFor(() =>
+      expect(mockSetQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: '',
+          language: 'PROMQL',
+          dataset: { ...prometheus, language: 'PROMQL' },
+        })
+      )
+    );
+    expect(mockSetUserQueryLanguage).toHaveBeenCalledWith('PROMQL');
   });
 
   it('switches back to Prometheus even without a connection', async () => {
     register();
     mockDataset = myMetrics;
     render(<MetricsSourceTypeSelect />);
-    expect(screen.getByTestId('metricsSourceTypeSelect')).toHaveTextContent('My Metrics Source');
 
     fireEvent.click(screen.getByTestId('metricsSourceTypeSelect'));
     fireEvent.click(screen.getByTestId('metricsSourceType-opensearch'));
@@ -115,8 +177,27 @@ describe('MetricsSourceTypeSelect', () => {
         query: '',
         language: 'PROMQL',
         dataset: undefined,
+        queryOptions: undefined,
       })
     );
+  });
+
+  it('switches even when the dataset cannot be cached, and says why', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mockCacheDataset.mockRejectedValueOnce(new Error('no dataView'));
+    register();
+    render(<MetricsSourceTypeSelect />);
+    fireEvent.click(screen.getByTestId('metricsSourceTypeSelect'));
+    fireEvent.click(screen.getByTestId('metricsSourceType-my-metrics-source'));
+
+    await waitFor(() =>
+      expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ dataset: myMetrics }))
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('my-metrics-source::default'),
+      expect.any(Error)
+    );
+    warn.mockRestore();
   });
 
   it('warns when a registered source has nothing to open', async () => {

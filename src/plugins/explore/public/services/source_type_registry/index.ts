@@ -11,6 +11,7 @@ export {
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
   SourceTypeQueryEditorProps,
+  SourceTypeQueryStatus,
   SourceTypeRegistrySetup,
   SourceTypeSampleQuery,
   SourceTypeRegistryService,

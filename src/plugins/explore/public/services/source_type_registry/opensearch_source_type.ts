@@ -41,7 +41,10 @@ const findFirstDatasetForFlavor = async (flavor?: ExploreFlavor | null) => {
   }
 };
 
-/** The built-in OpenSearch source: index patterns and indexes, and any unclaimed dataset type. */
+/**
+ * The built-in OpenSearch source: index patterns, indexes and Prometheus connections, and any
+ * dataset type no registered source claims.
+ */
 export const openSearchSourceType: SourceTypeDefinition = {
   id: OPENSEARCH_SOURCE_TYPE_ID,
   label: i18n.translate('explore.sourceType.openSearchLabel', {
@@ -54,9 +57,11 @@ export const openSearchSourceType: SourceTypeDefinition = {
     }),
   },
   icon: 'logoOpenSearch',
-  datasetTypes: [DEFAULT_DATA.SET_TYPES.INDEX, DEFAULT_DATA.SET_TYPES.INDEX_PATTERN],
+  // Prometheus is listed so no plugin can take over the built-in Prometheus connections.
+  datasetTypes: [DEFAULT_DATA.SET_TYPES.INDEX, DEFAULT_DATA.SET_TYPES.INDEX_PATTERN, 'PROMETHEUS'],
   flavors: [ExploreFlavor.Logs, ExploreFlavor.Traces, ExploreFlavor.Metrics],
   order: 0,
+  metricsResourceClientId: 'prometheus',
   // The workspace default if it fits the flavor, else the first dataset that does. The default
   // alone can be a traces pattern, which on the Logs page leaves the picker on "Select dataset"
   // while PPL runs against spans.
@@ -67,7 +72,9 @@ export const openSearchSourceType: SourceTypeDefinition = {
       (await findFirstDatasetForFlavor(flavor));
     // Index-pattern datasets carry no language, so the query manager would keep the current
     // one; coming from another source that language is unsupported here and would be coerced
-    // to the index-pattern type's first language (kuery), which Explore cannot run.
-    return dataset ? { ...dataset, language: EXPLORE_DEFAULT_LANGUAGE } : undefined;
+    // to the index-pattern type's first language (kuery), which Explore cannot run. The Metrics
+    // page only runs PromQL.
+    const language = flavor === ExploreFlavor.Metrics ? 'PROMQL' : EXPLORE_DEFAULT_LANGUAGE;
+    return dataset ? { ...dataset, language } : undefined;
   },
 };

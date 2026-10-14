@@ -43,6 +43,19 @@ jest.mock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
   useEditorFocus: () => mockFocusOnEditor,
   useEditorRef: () => mockEditorRef,
+  // The real switch, on the mocked editor hooks below.
+  useSwitchSourceType: (...args: unknown[]) =>
+    jest
+      .requireActual(
+        '../../../../application/hooks/editor_hooks/use_switch_source_type/use_switch_source_type'
+      )
+      .useSwitchSourceType(...args),
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_clear_editors', () => ({
+  useClearEditors: () => mockClearEditors,
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_editor_focus', () => ({
+  useEditorFocus: () => mockFocusOnEditor,
 }));
 
 // Mock getServices to provide language title
@@ -249,16 +262,11 @@ describe('LanguageToggle', () => {
     mockGetLanguage.mockReturnValue({ title: 'SQL' });
     mockGetTab.mockReturnValue({ supportedLanguages: ['SQL'] });
 
-    // OpenSearch's own SQL.
+    // OpenSearch's own SQL reads as before: its registered title and no description.
     const { unmount } = renderWithProvider(<LanguageToggle />);
     fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
-    expect(screen.getByTestId('queryPanelFooterLanguageDescription')).toHaveTextContent(
-      'Query OpenSearch indexes using OpenSearch SQL.'
-    );
-    // SQL dialects differ, so OpenSearch's chip and badge name the engine.
-    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveTextContent(
-      'OpenSearch SQL'
-    );
+    expect(screen.queryByTestId('queryPanelFooterLanguageDescription')).not.toBeInTheDocument();
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveTextContent('SQL');
     unmount();
 
     // The same SQL chip on the other source's dataset.
@@ -1008,10 +1016,12 @@ describe('LanguageToggle', () => {
       fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
 
       await waitFor(() => {
+        // The previous language's query options don't carry over.
         expect(mockSetQuery).toHaveBeenCalledWith({
           language: 'FakeQL',
           query: '',
           dataset: fakeDataset,
+          queryOptions: undefined,
         });
       });
       expect(resolve).toHaveBeenCalledWith({

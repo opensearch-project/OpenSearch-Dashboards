@@ -38,6 +38,7 @@ jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectQueryLanguage: (state: MockState) => state.query.language,
   selectQueryString: (state: MockState) => state.query.query,
   selectDataset: (state: MockState) => state.query.dataset,
+  selectOverallQueryStatus: () => ({ status: 'uninitialized' }),
 }));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
@@ -192,7 +193,7 @@ describe('MetricsQueryPanel with a registered source', () => {
   const SourceEditor = () => null;
   const dataset = { id: 'external-1', type: 'EXTERNAL_METRICS' };
 
-  const register = (languageSettings: Record<string, object>) => {
+  const register = (languageSettings: Record<string, object>, metricsResourceClientId?: string) => {
     const registry = new SourceTypeRegistryService();
     registry.register({
       id: 'external',
@@ -201,6 +202,7 @@ describe('MetricsQueryPanel with a registered source', () => {
       flavors: [ExploreFlavor.Metrics],
       resolveDefaultDataset: async () => undefined,
       languageSettings,
+      metricsResourceClientId,
     });
     setSourceTypeRegistry(registry);
   };
@@ -232,14 +234,37 @@ describe('MetricsQueryPanel with a registered source', () => {
     expect(screen.getByTestId('sourceQueryEditor')).toHaveTextContent('External QL:SELECT 1:code');
   });
 
-  it('keeps the PromQL rows for PromQL on a source dataset without an editor', () => {
-    register({ PROMQL: {} });
+  it('keeps the PromQL rows for PromQL on a source with a metrics resource client', () => {
+    register({ PROMQL: {} }, 'external-metrics');
     setState('PROMQL', 'up');
 
     render(<MetricsQueryPanel />);
 
     expect(screen.getByTestId('queryRowQuery')).toHaveTextContent('up');
     expect(screen.queryByTestId('sourceQueryEditor')).not.toBeInTheDocument();
+  });
+
+  it('gives PromQL a code editor on a source with no metrics resource client', () => {
+    // The builder rows would have nothing to list metrics and labels from.
+    register({ PROMQL: {} });
+    setState('PROMQL', 'up');
+
+    render(<MetricsQueryPanel />);
+
+    expect(screen.getByTestId('sourceQueryEditor')).toHaveTextContent('PROMQL:up:code');
+    expect(screen.queryByTestId('queryRow')).not.toBeInTheDocument();
+  });
+
+  it('rebuilds the PromQL rows when the language switches back to PromQL', () => {
+    register({ 'External QL': {}, PROMQL: {} }, 'external-metrics');
+    setState('External QL', 'SELECT 1');
+    const { rerender } = render(<MetricsQueryPanel />);
+    expect(screen.queryByTestId('queryRow')).not.toBeInTheDocument();
+
+    setState('PROMQL', 'up');
+    rerender(<MetricsQueryPanel />);
+
+    expect(screen.getByTestId('queryRowQuery')).toHaveTextContent('up');
   });
 
   it("uses the source's editor for PromQL when it brings one", () => {

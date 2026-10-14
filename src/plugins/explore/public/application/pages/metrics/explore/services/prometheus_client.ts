@@ -66,9 +66,14 @@ export class PrometheusClient {
   private activeControllers = new Set<AbortController>();
   private aborted = false;
 
+  /**
+   * @param resourceClientId The data plugin resource client to call: `prometheus` for Prometheus
+   *   connections, or the one a registered source names in `metricsResourceClientId`.
+   */
   constructor(
     private services: ExploreServices,
-    public readonly dataConnectionId: string
+    public readonly dataConnectionId: string,
+    private readonly resourceClientId: string = 'prometheus'
   ) {}
 
   abort(): void {
@@ -87,9 +92,10 @@ export class PrometheusClient {
   }
 
   private getResourceClient(): PrometheusResourceClientLike {
-    const rc =
-      this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>('prometheus');
-    if (!rc) throw new Error('Prometheus resource client is not registered');
+    const rc = this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>(
+      this.resourceClientId
+    );
+    if (!rc) throw new Error(`Resource client "${this.resourceClientId}" is not registered`);
     return rc;
   }
 

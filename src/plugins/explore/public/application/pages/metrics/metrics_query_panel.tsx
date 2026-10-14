@@ -35,6 +35,7 @@ import {
   selectIsLoading,
   selectIsPromptEditorMode,
   selectIsQueryEditorDirty,
+  selectOverallQueryStatus,
   selectPromptToQueryIsLoading,
   selectQueryLanguage,
   selectQueryString,
@@ -44,6 +45,7 @@ import { setQueryOptions } from '../../../application/utils/state_management/sli
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
 import { RootState } from '../../../application/utils/state_management/store';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { getQueryLabel, Query } from '../../../../../data/common';
 import { parsePromQL } from './promql_builder';
 import type { BuilderState } from './promql_builder';
@@ -98,28 +100,25 @@ export const MetricsQueryPanel: React.FC = () => {
 
   const queryLanguage = useSelector(selectQueryLanguage);
   const dataset = useSelector(selectDataset);
-  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
-    const languageService = services.data.query.queryString.getLanguageService();
-    return getSourceTypeRegistry().getLanguageLabel(
-      queryLanguage,
-      dataset,
-      languageService.getLanguage(queryLanguage)?.title
-    );
-  }, [queryLanguage, dataset, services.data.query.queryString]);
+    return getSourceTypeRegistry().getLanguageLabel(queryLanguage, dataset);
+  }, [queryLanguage, dataset]);
 
+  // The PromQL builder rows list metrics and labels through the source's metrics resource client.
+  const resourceClientId = getSourceTypeRegistry().getMetricsResourceClientId(dataset);
   const client = useMemo(
-    () => new PrometheusClient(services, dataConnectionId),
-    [services, dataConnectionId]
+    () => new PrometheusClient(services, dataConnectionId, resourceClientId ?? 'prometheus'),
+    [services, dataConnectionId, resourceClientId]
   );
 
   // A registered source's language gets the source's own editor (or a single code editor) in
-  // place of the PromQL rows, unless it is PromQL without an editor of its own.
+  // place of the PromQL rows. PromQL keeps the rows unless the source brings its own editor or
+  // has no metrics resource client for the builder to call.
   const sourceQueryEditor = useMemo(
     () => getSourceTypeRegistry().getLanguageSettings(queryLanguage, dataset)?.metricsQueryEditor,
     [queryLanguage, dataset]
   );
-  const usesPromQLRows = queryLanguage === 'PROMQL' && !sourceQueryEditor;
+  const usesPromQLRows = queryLanguage === 'PROMQL' && !sourceQueryEditor && !!resourceClientId;
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);
@@ -131,19 +130,25 @@ export const MetricsQueryPanel: React.FC = () => {
   const perQueryOptionsRef = useRef(reduxPerQueryOptions);
   perQueryOptionsRef.current = reduxPerQueryOptions;
 
+  // The rows parse the query as PromQL, so they're only built while they are shown.
   const [rows, setRows] = useState<QueryRow[]>(() =>
-    initRows(reduxQuery, nextRowId, reduxPerQueryOptions)
+    usesPromQLRows ? initRows(reduxQuery, nextRowId, reduxPerQueryOptions) : []
   );
   const lastDispatchedRef = useRef(reduxQuery);
   const previousReduxQueryRef = useRef(reduxQuery);
+  const rowsShownRef = useRef(usesPromQLRows);
 
   useEffect(() => {
     const queryChanged = reduxQuery !== previousReduxQueryRef.current;
     previousReduxQueryRef.current = reduxQuery;
+    // Switching back to the rows (e.g. from another language) rebuilds them from the query.
+    const rowsJustShown = usesPromQLRows && !rowsShownRef.current;
+    rowsShownRef.current = usesPromQLRows;
     // Keep local drafts until a query is loaded or run, even if its text is unchanged.
-    if (!queryChanged && isQueryEditorDirty) return;
+    if (!rowsJustShown && !queryChanged && isQueryEditorDirty) return;
 
     lastDispatchedRef.current = reduxQuery;
+    if (!usesPromQLRows) return;
 
     setRows((currentRows) => {
       const serialized = serializeRows(currentRows);
@@ -152,10 +157,10 @@ export const MetricsQueryPanel: React.FC = () => {
           options.minStep === reduxPerQueryOptions?.[index]?.minStep &&
           options.legendFormat === reduxPerQueryOptions?.[index]?.legendFormat
       );
-      if (serialized.query === reduxQuery && optionsMatch) return currentRows;
+      if (!rowsJustShown && serialized.query === reduxQuery && optionsMatch) return currentRows;
       return initRows(reduxQuery, nextRowId, reduxPerQueryOptions);
     });
-  }, [reduxQuery, reduxPerQueryOptions, isQueryEditorDirty, nextRowId]);
+  }, [reduxQuery, reduxPerQueryOptions, isQueryEditorDirty, nextRowId, usesPromQLRows]);
 
   // Sync draft text to the QueryStringManager (NOT Redux) on every keystroke so
   // that handleQuerySubmit in TopNav can read it via queryString.getQuery().query.
@@ -216,6 +221,42 @@ export const MetricsQueryPanel: React.FC = () => {
       setEditorText(query);
     },
     [setEditorText, dispatch, queryString]
+  );
+
+  // A source editor may run a query it hasn't passed to onChange yet.
+  const runSourceQuery = useCallback(
+    (query?: string) => {
+      if (query !== undefined) syncSourceQuery(query);
+      const text = query ?? String(queryString.getQuery().query || '');
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
+      dispatch(onEditorRunActionCreator(services, text));
+    },
+    [syncSourceQuery, queryString, dispatch, services]
+  );
+
+  const queryOptions = useSelector((state: RootState) => state.query.queryOptions);
+  const onSourceQueryOptionsChange = useCallback(
+    (options: Record<string, unknown>) => {
+      const currentQuery = queryString.getQuery() as PromQLQuery;
+      queryString.setQuery({
+        queryOptions: { ...currentQuery.queryOptions, ...options },
+      } as Partial<Query>);
+      dispatch(setQueryOptions(options));
+    },
+    [queryString, dispatch]
+  );
+  const overallStatus = useSelector(selectOverallQueryStatus);
+  const sourceQueryStatus = useMemo(
+    () => ({
+      isRunning: overallStatus.status === QueryExecutionStatus.LOADING,
+      error:
+        overallStatus.status === QueryExecutionStatus.ERROR
+          ? overallStatus.error?.message?.details ||
+            overallStatus.error?.message?.reason ||
+            overallStatus.error?.error
+          : undefined,
+    }),
+    [overallStatus]
   );
 
   const updateRow = useCallback(
@@ -352,11 +393,14 @@ export const MetricsQueryPanel: React.FC = () => {
           reduxQuery={reduxQuery}
           isDirty={isQueryEditorDirty}
           onQueryChange={syncSourceQuery}
-          onRun={handleRun}
+          onRun={runSourceQuery}
           languageId={queryLanguage}
           languageTitle={languageTitle}
           dataset={dataset}
           data={services.data}
+          queryOptions={queryOptions}
+          onQueryOptionsChange={onSourceQueryOptionsChange}
+          status={sourceQueryStatus}
         />
       ) : (
         <>

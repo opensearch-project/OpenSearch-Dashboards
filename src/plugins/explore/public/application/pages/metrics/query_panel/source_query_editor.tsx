@@ -10,7 +10,10 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { queryEditorOptions } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/editor_options';
 import { getCommandEnterAction } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/command_enter_action';
-import type { SourceTypeQueryEditorProps } from '../../../../services/source_type_registry';
+import type {
+  SourceTypeQueryEditorProps,
+  SourceTypeQueryStatus,
+} from '../../../../services/source_type_registry';
 
 import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
 
@@ -72,11 +75,15 @@ export interface SourceQueryEditorProps {
   isDirty: boolean;
   /** Called with the full query text on every edit. */
   onQueryChange: (query: string) => void;
-  onRun: () => void;
+  /** Runs `query` when given, else the query last passed to `onQueryChange`. */
+  onRun: (query?: string) => void;
   languageId: string;
   languageTitle: string;
   dataset?: Dataset;
   data: DataPublicPluginStart;
+  queryOptions?: Record<string, unknown>;
+  onQueryOptionsChange: (options: Record<string, unknown>) => void;
+  status: SourceTypeQueryStatus;
 }
 
 /**
@@ -93,6 +100,9 @@ export const SourceQueryEditor: React.FC<SourceQueryEditorProps> = ({
   languageTitle,
   dataset,
   data,
+  queryOptions,
+  onQueryOptionsChange,
+  status,
 }) => {
   const [draft, setDraft] = useState(reduxQuery);
   const previousReduxQueryRef = useRef(reduxQuery);
@@ -112,13 +122,24 @@ export const SourceQueryEditor: React.FC<SourceQueryEditorProps> = ({
     [onQueryChange]
   );
 
+  const handleRun = useCallback(
+    (query?: string) => {
+      if (query !== undefined) setDraft(query);
+      onRun(query);
+    },
+    [onRun]
+  );
+
   const props: SourceTypeQueryEditorProps = {
     query: draft,
     onChange: handleChange,
-    onRun,
+    onRun: handleRun,
     languageId,
     dataset,
     data,
+    queryOptions,
+    onQueryOptionsChange,
+    status,
   };
 
   return (

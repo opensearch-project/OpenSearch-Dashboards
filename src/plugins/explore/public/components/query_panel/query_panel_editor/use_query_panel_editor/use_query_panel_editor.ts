@@ -114,10 +114,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const {
-    data: {
-      dataViews,
-      query: { queryString },
-    },
+    data: { dataViews },
     keyboardShortcut,
   } = services;
   const { updateDecorations, clearDecorations } = useMultiQueryDecorations();
@@ -125,15 +122,9 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
   const queryLanguage = queryState.language;
-  // Engine-qualified where the bare name is shared across sources (e.g. "OpenSearch SQL").
   const languageTitle = useMemo(() => {
-    const languageService = queryString.getLanguageService();
-    return getSourceTypeRegistry().getLanguageLabel(
-      queryLanguage,
-      queryState.dataset,
-      languageService.getLanguage(queryLanguage)?.title
-    );
-  }, [queryLanguage, queryState.dataset, queryString]);
+    return getSourceTypeRegistry().getLanguageLabel(queryLanguage, queryState.dataset);
+  }, [queryLanguage, queryState.dataset]);
 
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
   const isQueryMode = !isPromptMode;

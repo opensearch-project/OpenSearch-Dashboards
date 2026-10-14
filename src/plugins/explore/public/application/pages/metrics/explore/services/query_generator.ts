@@ -39,10 +39,29 @@ export function metricSelector(name: string, matchers: string[], separator = ', 
  * A histogram whose samples are histograms (native/OTel exponential histograms), not `_bucket`
  * series: the metadata says histogram, but the name is a series of its own. These need histogram
  * functions (`histogram_avg`); aggregations such as `avg` skip histogram samples, and
- * `histogram_quantile(... by (le))` expects classic buckets.
+ * `histogram_quantile(... by (le))` expects classic buckets. A backend only reports such a series
+ * when it stores native histograms; `histogram_avg` needs Prometheus 2.50 or later.
  */
 export function isNativeHistogram(name: string, type: MetricType): boolean {
-  return type === MetricType.HISTOGRAM && !/_(bucket|count|sum)$/.test(name);
+  return (
+    (type === MetricType.HISTOGRAM || type === MetricType.GAUGE_HISTOGRAM) &&
+    !/_(bucket|count|sum)$/.test(name)
+  );
+}
+
+/**
+ * The average of a native histogram over the step, weighted across series: a counter histogram
+ * is cumulative, so it is rated first (as `sum(rate(...))` is for a counter); a gauge histogram
+ * already holds the current distribution.
+ */
+function nativeHistogramAverage(
+  selector: string,
+  type: MetricType,
+  rate: string,
+  by?: string
+): string {
+  const samples = type === MetricType.GAUGE_HISTOGRAM ? selector : `rate(${selector}[${rate}])`;
+  return `histogram_avg(sum${by ? ` by (${by})` : ''} (${samples}))`;
 }
 
 // Assumed Prometheus scrape interval when building rate windows. 60s covers
@@ -59,7 +78,7 @@ export class MetricQueryGenerator {
   forMetric(name: string, type: MetricType, stepSec: number, filters: LabelFilter[] = []): string {
     const selector = this.buildSelector(name, filters);
     const rate = this.rateInterval(stepSec);
-    if (isNativeHistogram(name, type)) return `avg(histogram_avg(${selector}))`;
+    if (isNativeHistogram(name, type)) return nativeHistogramAverage(selector, type, rate);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
         return `sum(rate(${selector}[${rate}]))`;
@@ -89,7 +108,7 @@ export class MetricQueryGenerator {
     const selector = this.buildSelector(name, filters);
     const rate = this.rateInterval(stepSec);
     const by = formatLabelName(label);
-    if (isNativeHistogram(name, type)) return `avg by (${by}) (histogram_avg(${selector}))`;
+    if (isNativeHistogram(name, type)) return nativeHistogramAverage(selector, type, rate, by);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
         return `sum by (${by}) (rate(${selector}[${rate}]))`;

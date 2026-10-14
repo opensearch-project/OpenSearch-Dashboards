@@ -104,13 +104,21 @@ describe('MetricQueryGenerator with names PromQL cannot take bare', () => {
 describe('MetricQueryGenerator with native histograms', () => {
   const generator = new MetricQueryGenerator();
 
-  it('averages them with histogram_avg', () => {
-    expect(generator.forMetric('CPUUtilization', MetricType.HISTOGRAM, 60)).toBe(
-      'avg(histogram_avg(CPUUtilization))'
+  it('averages a counter histogram over the step: rated, summed, then histogram_avg', () => {
+    expect(generator.forMetric('http_duration', MetricType.HISTOGRAM, 60)).toBe(
+      'histogram_avg(sum (rate(http_duration[4m])))'
     );
-    expect(generator.forBreakdown('CPUUtilization', MetricType.HISTOGRAM, 'InstanceId', 60)).toBe(
-      'avg by (InstanceId) (histogram_avg(CPUUtilization))'
+    expect(generator.forBreakdown('http_duration', MetricType.HISTOGRAM, 'job', 60)).toBe(
+      'histogram_avg(sum by (job) (rate(http_duration[4m])))'
     );
+  });
+  it('averages a gauge histogram as it is, weighted across series', () => {
+    expect(generator.forMetric('CPUUtilization', MetricType.GAUGE_HISTOGRAM, 60)).toBe(
+      'histogram_avg(sum (CPUUtilization))'
+    );
+    expect(
+      generator.forBreakdown('CPUUtilization', MetricType.GAUGE_HISTOGRAM, 'InstanceId', 60)
+    ).toBe('histogram_avg(sum by (InstanceId) (CPUUtilization))');
   });
 
   it('keeps the classic bucket form for _bucket series', () => {

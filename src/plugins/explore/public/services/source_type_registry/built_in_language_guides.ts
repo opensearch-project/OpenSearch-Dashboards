@@ -7,29 +7,14 @@ import { i18n } from '@osd/i18n';
 import type { SourceTypeLanguageGuide } from './source_type_registry_service';
 
 /**
- * What the query panel says about Explore's own languages on the built-in source. A registered
- * source that lists one of these languages describes it itself, so the same language can read
- * differently per source (PromQL on Prometheus versus PromQL on another metrics store).
+ * What the query panel says about Explore's own languages on the built-in source: no label or
+ * description of their own, so the panel reads as it did before sources could describe their
+ * languages. A registered source that lists one of these languages describes it itself.
  */
 export const BUILT_IN_LANGUAGE_GUIDES: Record<string, SourceTypeLanguageGuide> = {
-  PPL: {
-    description: i18n.translate('explore.languageGuide.ppl.description', {
-      defaultMessage: 'Query OpenSearch indexes using Piped Processing Language (PPL).',
-    }),
-  },
-  SQL: {
-    // SQL dialects differ across engines, so this one names its engine.
-    label: i18n.translate('explore.languageGuide.sql.label', {
-      defaultMessage: 'OpenSearch SQL',
-    }),
-    description: i18n.translate('explore.languageGuide.sql.description', {
-      defaultMessage: 'Query OpenSearch indexes using OpenSearch SQL.',
-    }),
-  },
+  SQL: { codeLanguage: 'sql' },
   PROMQL: {
-    description: i18n.translate('explore.languageGuide.promql.description', {
-      defaultMessage: 'Query Prometheus metrics using PromQL.',
-    }),
+    codeLanguage: 'promql',
     sampleQueries: [
       {
         label: i18n.translate('explore.metricsExplore.samples.requestRate', {

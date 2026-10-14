@@ -179,8 +179,7 @@ export function parsePromQL(query: string): ParseResult {
 }
 
 const QUOTED = String.raw`"(?:\\.|[^"\\])*"`;
-// A quoted string followed by a matcher operator is a label name (values never are).
-const QUOTED_MATCHER_NAME = new RegExp(`(${QUOTED})(\\s*(?:=~|!~|!=|=))`, 'g');
+const MATCHER_OPERATOR = /^\s*(?:=~|!~|!=|=)/;
 const GROUPING = new RegExp(`\\b(by|without)(\\s*)\\(([^()]*)\\)`, 'g');
 const QUOTED_ITEM = new RegExp(QUOTED, 'g');
 
@@ -197,8 +196,16 @@ const replaceQuotedLabelNames = (query: string) => {
     names.set(id, name);
     return id;
   };
+  // Strings are matched left to right, so each value is consumed whole and its closing quote
+  // can't start another string. A string is a label name when it opens a matcher: right after
+  // `{` or `,`, and followed by a matcher operator.
   const text = query
-    .replace(QUOTED_MATCHER_NAME, (_m, quoted: string, op: string) => placeholder(quoted) + op)
+    .replace(QUOTED_ITEM, (quoted: string, offset: number, source: string) => {
+      const before = source.slice(0, offset).trimEnd();
+      const opensMatcher = before.endsWith('{') || before.endsWith(',');
+      const after = source.slice(offset + quoted.length);
+      return opensMatcher && MATCHER_OPERATOR.test(after) ? placeholder(quoted) : quoted;
+    })
     .replace(
       GROUPING,
       (_m, mode: string, space: string, labels: string) =>
@@ -324,7 +331,7 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     if (!this.metric) {
       const nameIndex = this.labelFilters.findIndex((f) => f.label === '__name__' && f.op === '=');
       if (nameIndex !== -1) {
-        this.metric = this.labelFilters[nameIndex].value;
+        this.metric = this.labelFilters[nameIndex].value ?? '';
         this.labelFilters.splice(nameIndex, 1);
       }
     }

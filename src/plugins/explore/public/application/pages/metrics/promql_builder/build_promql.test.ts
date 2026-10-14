@@ -263,6 +263,35 @@ describe('metric names PromQL cannot take bare', () => {
     );
   });
 
+  it.each([
+    [
+      'up{a="foo", b="=bar"}',
+      [
+        ['a', '=', 'foo'],
+        ['b', '=', '=bar'],
+      ],
+    ],
+    [
+      'up{a="foo", b!="!=bar"}',
+      [
+        ['a', '=', 'foo'],
+        ['b', '!=', '!=bar'],
+      ],
+    ],
+    [
+      'up{a="x,", "k8s.pod"=~"=~y"}',
+      [
+        ['a', '=', 'x,'],
+        ['k8s.pod', '=~', '=~y'],
+      ],
+    ],
+  ])('keeps label values that start with an operator: %s', (query, filters) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.op, f.value])).toEqual(filters);
+    expect(buildPromQL(parsed.state)).toBe(query);
+  });
+
   it('parses the __name__ form back into the builder', () => {
     const parsed = parsePromQL('avg({__name__="ClusterStatus.red", DomainName="d"})');
     expect(parsed.canBuild).toBe(true);

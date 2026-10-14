@@ -147,19 +147,18 @@ export const promqlSearchStrategyProvider = (
         // query is a 400, not a 503).
         if (isSingleQuery && queryResults[0]?.error) {
           const status = queryResults[0].errorStatus;
-          // The search route returns the message as the body and reads `status` from it when
-          // it is JSON; Explore's error panel shows `error.details` of that JSON.
-          const failure = new Error(
+          // The search route returns the message as the body and takes the response status from
+          // its JSON `status`; Explore's error panel shows `error.details`.
+          throw new Error(
             JSON.stringify({
               error: {
                 type: 'PromQLQueryError',
                 reason: 'PromQL query failed',
                 details: queryResults[0].error,
               },
-              ...(status ? { status } : {}),
+              ...(status ? { status, statusCode: status } : {}),
             })
           );
-          throw status ? Object.assign(failure, { status }) : failure;
         }
 
         const stepResolution: PromQLStepResolution | undefined = isInstantQuery
@@ -217,6 +216,26 @@ type SharedExecOptions =
       time: string;
     };
 
+interface UpstreamError {
+  statusCode?: unknown;
+  status?: unknown;
+  body?: unknown;
+  response?: unknown;
+}
+
+const asUpstreamError = (error: unknown): UpstreamError =>
+  typeof error === 'object' && error !== null ? (error as UpstreamError) : {};
+
+// Upstream statuses the browser can act on as is. A 401 or 403 from the connection (e.g. a bad
+// datasource credential) would read as the user's own session ending, so it becomes a 502; any
+// other failure stays the route's 503.
+const FORWARDED_STATUSES = [400, 404, 422];
+const toClientStatus = (upstreamStatus: number): number | undefined => {
+  if (FORWARDED_STATUSES.includes(upstreamStatus)) return upstreamStatus;
+  if (upstreamStatus === 401 || upstreamStatus === 403) return 502;
+  return undefined;
+};
+
 /**
  * Executes multiple PromQL queries in parallel
  */
@@ -265,8 +284,9 @@ async function executeMultipleQueries(
         errorMessage = error.message;
       }
 
+      const upstream = asUpstreamError(error);
       // Try to extract detailed error from response body from SQL plugin
-      const responseBody = (error as any)?.body ?? (error as any)?.response;
+      const responseBody = upstream.body ?? upstream.response;
       if (responseBody) {
         try {
           const parsed = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
@@ -280,12 +300,11 @@ async function executeMultipleQueries(
         }
       }
 
-      const status = Number((error as any)?.statusCode ?? (error as any)?.status);
+      const status = toClientStatus(Number(upstream.statusCode ?? upstream.status));
       return {
         label: plan.label,
         error: errorMessage,
-        // Only client errors are worth keeping: everything else stays a 503 for the route.
-        ...(status >= 400 && status < 500 ? { errorStatus: status } : {}),
+        ...(status ? { errorStatus: status } : {}),
         legendFormat: plan.legendFormat,
       };
     }

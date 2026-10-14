@@ -35,7 +35,12 @@ const FakeEditor = (props: SourceTypeQueryEditorProps) => {
     <>
       <span data-test-subj="fakeQuery">{props.query}</span>
       <button data-test-subj="fakeEdit" onClick={() => props.onChange('edited')} />
-      <button data-test-subj="fakeRun" onClick={props.onRun} />
+      <button data-test-subj="fakeRun" onClick={() => props.onRun()} />
+      <button data-test-subj="fakeRunText" onClick={() => props.onRun('SELECT 9')} />
+      <button
+        data-test-subj="fakeOptions"
+        onClick={() => props.onQueryOptionsChange({ period: 300 })}
+      />
     </>
   );
 };
@@ -52,6 +57,9 @@ const renderEditor = (overrides: Partial<SourceQueryEditorProps> = {}) => {
     onRun: jest.fn(),
     languageId: 'External QL',
     languageTitle: 'External',
+    queryOptions: { period: 60 },
+    onQueryOptionsChange: jest.fn(),
+    status: { isRunning: false, error: 'Bad query' },
     dataset,
     data,
     ...overrides,
@@ -85,6 +93,25 @@ describe('SourceQueryEditor', () => {
     expect(props.onQueryChange).toHaveBeenCalledWith('edited');
     expect(screen.getByTestId('fakeQuery')).toHaveTextContent('edited');
     expect(props.onRun).toHaveBeenCalled();
+  });
+
+  it('runs the query it is given, and shows it', () => {
+    const { props } = renderEditor();
+    fireEvent.click(screen.getByTestId('fakeRunText'));
+    expect(props.onRun).toHaveBeenCalledWith('SELECT 9');
+    expect(screen.getByTestId('fakeQuery')).toHaveTextContent('SELECT 9');
+  });
+
+  it('passes the query options and the last run status, and reports option changes', () => {
+    const { props } = renderEditor();
+    expect(mockEditorProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        queryOptions: { period: 60 },
+        status: { isRunning: false, error: 'Bad query' },
+      })
+    );
+    fireEvent.click(screen.getByTestId('fakeOptions'));
+    expect(props.onQueryOptionsChange).toHaveBeenCalledWith({ period: 300 });
   });
 
   it('keeps a dirty draft until another query is loaded', () => {
