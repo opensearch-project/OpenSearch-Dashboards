@@ -16,9 +16,17 @@ import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects
 import { SavedObject } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
-// Mock dns-sync to avoid real DNS lookups in tests
-jest.mock('dns-sync', () => ({
-  resolve: jest.fn(() => '1.2.3.4'),
+// Mock dns module to avoid real DNS lookups in tests
+jest.mock('dns', () => ({
+  promises: {
+    lookup: jest.fn(async (hostname: string) => {
+      if (hostname === '127.0.0.1') {
+        return { address: '127.0.0.1', family: 4 };
+      }
+      // Default mock IP for any other hostname (e.g., test.com)
+      return { address: '1.2.3.4', family: 4 };
+    }),
+  },
 }));
 
 describe('DataSourceSavedObjectsClientWrapper', () => {
@@ -223,7 +231,32 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(`"endpoint" attribute is not valid or allowed`);
+        ).rejects.toThrowError(`Invalid URL format`);
+      });
+
+      it('should throw error when endpoint is blocked by IP restrictions', async () => {
+        const wrapperInstanceWithBlockedIPs = new DataSourceSavedObjectsClientWrapper(
+          cryptographyMock,
+          logger,
+          authRegistryPromise,
+          ['127.0.0.0/8', '192.168.1.0/24'] // blocked IPs
+        );
+        const wrapperClientWithBlockedIPs = wrapperInstanceWithBlockedIPs.wrapperFactory({
+          client: mockedClient,
+          typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+          request: httpServerMock.createOpenSearchDashboardsRequest(),
+        });
+
+        const mockDataSourceAttributes = attributes({
+          endpoint: 'http://127.0.0.1:9200',
+        });
+        await expect(
+          wrapperClientWithBlockedIPs.create(
+            DATA_SOURCE_SAVED_OBJECT_TYPE,
+            mockDataSourceAttributes,
+            {}
+          )
+        ).rejects.toThrowError(`Endpoint IP address is not allowed`);
       });
 
       it('should throw error when auth is not present', async () => {

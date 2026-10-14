@@ -48,6 +48,7 @@ export const configSchema = schema.object({
     appender: fileAppenderSchema,
   }),
   endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
+  endpointAllowlistedSuffixes: schema.maybe(schema.arrayOf(schema.string())),
   authTypes: schema.object({
     NoAuthentication: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

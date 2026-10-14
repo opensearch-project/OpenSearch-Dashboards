@@ -186,7 +186,8 @@ export class DataSourceSavedObjectsClientWrapper {
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
     private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
-    private endpointBlockedIps?: string[]
+    private endpointBlockedIps?: string[],
+    private endpointAllowlistedSuffixes?: string[]
   ) {}
 
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
@@ -297,14 +298,23 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
-    this.validateEndpoint(endpoint);
+    await this.validateEndpoint(endpoint);
     await this.validateAuth(auth);
   }
 
-  private validateEndpoint(endpoint: string) {
-    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
+  private async validateEndpoint(endpoint: string) {
+    const validationResult = await isValidURL(
+      endpoint,
+      this.endpointBlockedIps,
+      this.endpointAllowlistedSuffixes
+    );
+    if (!validationResult.valid) {
+      // Log detailed error for server-side debugging
+      this.logger.error(`Endpoint validation failed for ${endpoint}: ${validationResult.error}`);
+
+      // Throw error with safe user message
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"endpoint" attribute is not valid or allowed'
+        validationResult.userMessage || 'Endpoint URL validation failed'
       );
     }
   }
