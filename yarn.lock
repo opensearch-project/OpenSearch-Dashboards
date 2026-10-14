@@ -6444,9 +6444,9 @@
   integrity sha512-nAB74NfSNKknqQ1RrYj6uz8FcXEomu/MATJZxh/x+BArzN2U3JbOYC0APYzUIGhVY3m5hRxA8VPNdPBoG8txlA==
 
 "@wdio/logger@^9.18.0":
-  version "9.18.0"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-9.18.0.tgz#4a288ae8628ba6031ebee18f9eb7375f22c23111"
-  integrity sha512-HdzDrRs+ywAqbXGKqe1i/bLtCv47plz4TvsHFH3j729OooT5VH38ctFn5aLXgECmiAKDkmH/A6kOq2Zh5DIxww==
+  version "9.29.1"
+  resolved "https://registry.npmjs.org/@wdio/logger/-/logger-9.29.1.tgz#a28ce99a302b3fead8cefedb382dfaad8ed05085"
+  integrity sha512-0ZAEIo6PNyMIJPlOGkIgyOJUjcd0pC8/QHlVAAe1c91/IcjZ1X+k0yidXHaboJdN7dq1XPUacmhRdtua0U5EZg==
   dependencies:
     chalk "^5.1.2"
     loglevel "^1.6.0"
@@ -6489,9 +6489,9 @@
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
 "@zip.js/zip.js@^2.8.11":
-  version "2.8.16"
-  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.8.16.tgz#2b84088c9637bc4df0dfceeda6d20c32477753c0"
-  integrity sha512-kCjaXh50GCf9afcof6ekjXPKR//rBVIxNHJLSUaM3VAET2F0+hymgrK1GpInRIIFUpt+wsnUfgx2+bbrmc+7Tw==
+  version "2.23.0"
+  resolved "https://registry.npmjs.org/@zip.js/zip.js/-/zip.js-2.23.0.tgz#ea45d9b8c56f7d9e9dd1a266b34b153532f2757e"
+  integrity sha512-K5obAqfrO7zhycnCupM9aaoZ9kx0SA0kv7+Z2oOUsdpWquv4s/Z4zyD7AdTqxrK3pgPM+ozaUi8kdRQbCWaIrQ==
 
 abbrev@1:
   version "1.1.1"
@@ -9286,7 +9286,7 @@ decamelize@^4.0.0:
 
 decamelize@^6.0.1:
   version "6.0.1"
-  resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-6.0.1.tgz#e858c37870153e1f733e92347ac3a3f009081ca7"
+  resolved "https://registry.npmjs.org/decamelize/-/decamelize-6.0.1.tgz#e858c37870153e1f733e92347ac3a3f009081ca7"
   integrity sha512-G7Cqgaelq68XHJNGlZ7lrNQyhZGsFqpwtGFexqUv4IQdjKoSYF7ipZ9UuTJZUSQXFj/XaoBLuEVIVqr8EJngEQ==
 
 decimal.js@^10.4.3, decimal.js@^10.5.0:
@@ -11430,16 +11430,16 @@ functions-have-names@^1.2.3:
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
 geckodriver@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-6.1.0.tgz#a732f10779e9cde2860f75ab634a4d84bf2870d2"
-  integrity sha512-ZRXLa4ZaYTTgUO4Eefw+RsQCleugU2QLb1ME7qTYxxuRj51yAhfnXaItXNs5/vUzfIaDHuZ+YnSF005hfp07nQ==
+  version "6.1.1"
+  resolved "https://registry.npmjs.org/geckodriver/-/geckodriver-6.1.1.tgz#4097fd95cf49e1f8cc93b46b5eb8e8dda2abcd4d"
+  integrity sha512-/AcCyc9o9o6hUbudaSJM2iOtXbxSLqQPOb4GrPvEN40cjraUeaX/j5kH3mSgwiroyMn7qzx2wM61AQ2XY8j3sA==
   dependencies:
     "@wdio/logger" "^9.18.0"
     "@zip.js/zip.js" "^2.8.11"
     decamelize "^6.0.1"
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7.0.6"
-    modern-tar "^0.7.2"
+    modern-tar "^0.7.3"
 
 generator-function@^2.0.0:
   version "2.0.1"
@@ -12246,7 +12246,7 @@ https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
 
 https-proxy-agent@^7.0.6:
   version "7.0.6"
-  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.6.tgz#da8dfeac7da130b05c2ba4b59c9b6cd66611a6b9"
+  resolved "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-7.0.6.tgz#da8dfeac7da130b05c2ba4b59c9b6cd66611a6b9"
   integrity sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==
   dependencies:
     agent-base "^7.1.2"
@@ -15040,10 +15040,10 @@ mock-fs@^4.12.0:
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.14.0.tgz#ce5124d2c601421255985e6e94da80a7357b1b18"
   integrity sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw==
 
-modern-tar@^0.7.2:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/modern-tar/-/modern-tar-0.7.3.tgz#6c302e229040f37fd359e37d1930fdd6ff9fc57c"
-  integrity sha512-4W79zekKGyYU4JXVmB78DOscMFaJth2gGhgfTl2alWE4rNe3nf4N2pqenQ0rEtIewrnD79M687Ouba3YGTLOvg==
+modern-tar@0.3.4, modern-tar@^0.7.3:
+  version "0.3.4"
+  resolved "https://registry.npmjs.org/modern-tar/-/modern-tar-0.3.4.tgz#4723d4b0ef0e96afeab65b4c10e6c55820860877"
+  integrity sha512-BBQDjmhLJekFGhcG0C44sAl5/78UmqWa9ZJ2YqCj00NVixH3U8VjryzLIokKap0mo/pmIIJJXjZhM6bizi/6Pw==
 
 module-details-from-path@^1.0.3:
   version "1.0.3"
@@ -21357,20 +21357,10 @@ zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-validation-error/-/zod-validation-error-4.0.2.tgz#bc605eba49ce0fcd598c127fee1c236be3f22918"
   integrity sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==
 
-zod@^3.22.0, zod@^3.23.8, zod@^3.24.1, zod@^3.25.32, zod@^3.25.76:
-  version "3.25.76"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
-  integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
-
-"zod@^3.25 || ^4.0":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.2.1.tgz#07f0388c7edbfd5f5a2466181cb4adf5b5dbd57b"
-  integrity sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==
-
-"zod@^3.25.0 || ^4.0.0":
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
-  integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
+zod@4.6.7, zod@^3.22.0, zod@^3.23.8, zod@^3.24.1, "zod@^3.25 || ^4.0", "zod@^3.25.0 || ^4.0.0", zod@^3.25.32, zod@^3.25.76:
+  version "4.6.7"
+  resolved "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz#e806cf64a7f4e37635ce9f2f52c04c3766f75e5b"
+  integrity sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==
 
 zrender@6.1.0:
   version "6.1.0"
