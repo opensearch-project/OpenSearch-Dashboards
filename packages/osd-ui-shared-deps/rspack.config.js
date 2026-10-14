@@ -39,6 +39,7 @@ const { getSwcLoaderConfig } = require('@osd/utils');
 const UiSharedDeps = require('./index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+const MONACO_DOMPURIFY_SHIM = Path.resolve(__dirname, 'monaco_dompurify.js');
 
 const targets = ['last 2 versions', 'ie >= 11'];
 
@@ -202,6 +203,11 @@ exports.getRspackConfig = ({ dev = false } = {}) => ({
   },
 
   plugins: [
+    new rspack.NormalModuleReplacementPlugin(/[\/\\]dompurify[\/\\]dompurify\.js$/, (resource) => {
+      if (/[\/\\]node_modules[\/\\]monaco-editor[\/\\]/.test(resource.context)) {
+        resource.request = MONACO_DOMPURIFY_SHIM;
+      }
+    }),
     new rspack.CssExtractRspackPlugin({}),
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',
