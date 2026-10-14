@@ -22,6 +22,7 @@ import {
   VariableOptionType,
   NormalizedVariableOption,
   DistributiveOmit,
+  isAllMarker,
 } from './types';
 import {
   buildVariableOptionsFromQueryResult,
@@ -39,10 +40,10 @@ import { normalizePersistedVariables } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
 /**
- * Maximum number of options to display for a variable.
- * This prevents performance issues with large option lists in the UI.
+ * Max options rendered at once in the selector. Runtime state keeps the full
+ * list so search and "All" cover every value.
  */
-const MAX_DISPLAY_OPTIONS = 100;
+export const MAX_DISPLAY_OPTIONS = 100;
 
 /**
  * Minimal telemetry sink so this service can report feature usage without
@@ -279,8 +280,13 @@ export class VariableService {
 
       // When switching from multi to single, trim current to first value
       if (updates.multi === false && existing.multi === true && updatedVariable.current) {
-        updatedVariable.current =
-          updatedVariable.current.length > 0 ? [updatedVariable.current[0]] : undefined;
+        const current = this.clearAllMarker(updatedVariable.current);
+        updatedVariable.current = current?.length ? [current[0]] : undefined;
+      }
+
+      // "All" no longer exists as an option, so drop the marker.
+      if (updates.includeAll === false && existing.includeAll === true) {
+        updatedVariable.current = this.clearAllMarker(updatedVariable.current);
       }
 
       // When sort changes, re-sort the existing options
@@ -444,13 +450,14 @@ export class VariableService {
         return;
       }
 
-      // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
-      const limitedOptions = options.slice(0, MAX_DISPLAY_OPTIONS);
-      const sortedOptions = this.sortVariableOptions(limitedOptions, queryVariable.sort);
-      const preservedCurrent = this.resolveCurrentValueForQuery(
-        queryVariable.current,
-        this.getOptionValues(sortedOptions)
-      );
+      const sortedOptions = this.sortVariableOptions(options, queryVariable.sort);
+      // Keep the "All" marker as-is so it tracks whatever the new options are.
+      const preservedCurrent = isAllMarker(queryVariable.current)
+        ? queryVariable.current
+        : this.resolveCurrentValueForQuery(
+            queryVariable.current,
+            this.getOptionValues(sortedOptions)
+          );
 
       this.updateRuntimeState(id, {
         options: sortedOptions,
@@ -521,9 +528,7 @@ export class VariableService {
 
   private deriveCustomRuntimeState(variable: CustomVariable): VariableState {
     const normalizedOptions = this.normalizeCustomOptions(variable.customOptions ?? []);
-    // Limit to MAX_DISPLAY_OPTIONS before sorting to preserve existing behavior.
-    const limitedOptions = normalizedOptions.slice(0, MAX_DISPLAY_OPTIONS);
-    const sortedOptions = this.sortVariableOptions(limitedOptions, variable.sort);
+    const sortedOptions = this.sortVariableOptions(normalizedOptions, variable.sort);
 
     return {
       options: sortedOptions,
@@ -617,6 +622,10 @@ export class VariableService {
     return options.length > 0 ? [options[0]] : undefined;
   }
 
+  private clearAllMarker(currentVal: string[] | undefined): string[] | undefined {
+    return isAllMarker(currentVal) ? undefined : currentVal;
+  }
+
   private buildVariable(id: string, input: DistributiveOmit<Variable, 'id' | 'current'>): Variable {
     const base = {
       id,
@@ -631,6 +640,7 @@ export class VariableService {
     const optionMeta = {
       multi: input.multi,
       includeAll: input.includeAll,
+      customAllValue: input.customAllValue,
       allowCustomValue: input.allowCustomValue,
       sort: input.sort,
     };

@@ -281,6 +281,55 @@ describe('VariableInterpolationService', () => {
     });
   });
 
+  describe('interpolate — "All" selected (__all__ marker)', () => {
+    const makeAllVar = (overrides: Partial<CustomVariableWithState> = {}) =>
+      makeMultiVar({ includeAll: true, current: ['__all__'], ...overrides });
+
+    it('expands to the full runtime option list for PPL', () => {
+      const svc = new VariableInterpolationService(() => [makeAllVar()]);
+      expect(svc.interpolate('where region IN $region', 'PPL')).toBe(
+        "where region IN ('us-east', 'us-west', 'eu-west')"
+      );
+    });
+
+    it('always reflects the current options, not the stored value', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeAllVar({ options: [{ value: 'a' }, { value: 'b' }] }),
+      ]);
+      // Stored current is just the marker; expansion uses whatever options exist now.
+      expect(svc.interpolate('$region', 'PPL')).toBe("('a', 'b')");
+    });
+
+    it('expands PromQL All to regex alternation like other languages', () => {
+      const svc = new VariableInterpolationService(() => [makeAllVar()]);
+      expect(svc.interpolate('{region=~"$region"}', 'PROMQL')).toBe(
+        '{region=~"(us-east|us-west|eu-west)"}'
+      );
+    });
+
+    it('substitutes a custom all value directly, without escaping', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeAllVar({ customAllValue: '.*prod.*' }),
+      ]);
+      expect(svc.interpolate('{region=~"$region"}', 'PROMQL')).toBe('{region=~".*prod.*"}');
+    });
+
+    it('ignores customAllValue when "All" is not selected', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ includeAll: true, customAllValue: '.*', current: ['us-east'] }),
+      ]);
+      expect(svc.interpolate('$region', 'PPL')).toBe("('us-east')");
+    });
+
+    it('does not treat the marker as "All" for single-select variables', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeCustomVar({ multi: false, current: ['__all__'] }),
+      ]);
+      // Not multi → marker is just a literal value, no expansion.
+      expect(svc.interpolate('$service')).toBe('__all__');
+    });
+  });
+
   describe('getCurrentValues', () => {
     it('should return name-value map', () => {
       const svc = new VariableInterpolationService(() => [
@@ -301,6 +350,8 @@ describe('VariableInterpolationService', () => {
           value: 'us-east,us-west',
           multi: true,
           values: ['us-east', 'us-west'],
+          optionType: undefined,
+          isAll: false,
         },
       ]);
     });

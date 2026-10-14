@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VariableWithState, VariableOptionType } from './types';
+import { VariableWithState, VariableOptionType, isAllMarker } from './types';
 
 /**
  * Variable value with metadata for interpolation
@@ -14,6 +14,10 @@ export interface VariableValue {
   multi?: boolean;
   values?: string[];
   optionType?: VariableOptionType;
+  /** "All" is selected; `values` holds the expanded option list. */
+  isAll?: boolean;
+  /** Raw replacement used instead of `values` when "All" is selected. */
+  customAllValue?: string;
 }
 
 /**
@@ -141,6 +145,10 @@ export class VariableInterpolationService implements IVariableInterpolationServi
           return match;
         }
 
+        if (variable.isAll && variable.customAllValue) {
+          return variable.customAllValue;
+        }
+
         if (variable.multi) {
           return this.formatMultiValue(variable.values ?? [], lang, variable.optionType, rawValue);
         }
@@ -171,13 +179,20 @@ export class VariableInterpolationService implements IVariableInterpolationServi
   getVariables(): VariableValue[] {
     const variables = this.getVariablesFn();
 
-    return variables.map((v) => ({
-      name: v.name,
-      value: (v.current ?? []).join(','),
-      multi: v.multi,
-      values: v.multi ? v.current : undefined,
-      optionType: v.optionType,
-    }));
+    return variables.map((v) => {
+      const isAll = !!v.multi && isAllMarker(v.current);
+      const values = isAll ? v.options.map((o) => o.value) : v.current;
+
+      return {
+        name: v.name,
+        value: (values ?? []).join(','),
+        multi: v.multi,
+        values: v.multi ? values : undefined,
+        optionType: v.optionType,
+        isAll,
+        customAllValue: v.customAllValue,
+      };
+    });
   }
 
   /**
