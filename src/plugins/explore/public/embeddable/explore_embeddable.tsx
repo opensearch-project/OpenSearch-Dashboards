@@ -55,7 +55,10 @@ import {
   convertStringsToMappings,
   isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
-import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
+import {
+  normalizeResultRows,
+  normalizeSearchHits,
+} from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
@@ -586,8 +589,9 @@ export class ExploreEmbeddable
     const rawRows = resp.hits.hits;
     const dataFrame = searchSource.getDataFrame();
     const fieldSchema = dataFrame?.schema;
+    const normalizedRows = normalizeSearchHits(rawRows);
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      rawRows,
+      normalizedRows,
       fieldSchema ?? []
     );
 
