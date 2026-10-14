@@ -14,31 +14,23 @@ const createHit = (source: Record<string, unknown>) => ({
 
 describe('convert_field_type_transformation', () => {
   const instance = createConvertFieldTypeTransformation();
+  type TestHit = ReturnType<typeof createHit>;
+  type TestConfig = Parameters<typeof instance.transformationMethod>[1];
+  const transform = (data: TestHit[], config: TestConfig) =>
+    instance.transformationMethod(data, config).rows;
 
   describe('transformationMethod', () => {
     const data = [createHit({ count: '42', flag: 'true', timestamp: '2024-01-15', obj: { a: 1 } })];
 
-    it('returns original data when config is incomplete', () => {
-      const result = instance.transformationMethod(data, { rules: [] });
-      expect(result).toEqual(data);
-    });
-
-    it('converts string to number', () => {
-      const result = instance.transformationMethod(data, {
-        rules: [{ field: 'count', targetType: 'number' }],
-      });
-      expect((result[0]._source as Record<string, unknown>).count).toBe(42);
-    });
-
     it('converts string to boolean', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         rules: [{ field: 'flag', targetType: 'boolean' }],
       });
       expect((result[0]._source as Record<string, unknown>).flag).toBe(true);
     });
 
     it('converts to date ISO string', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         rules: [{ field: 'timestamp', targetType: 'date' }],
       });
       const val = (result[0]._source as Record<string, unknown>).timestamp as string;
@@ -47,7 +39,7 @@ describe('convert_field_type_transformation', () => {
     });
 
     it('converts object to string via JSON.stringify', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         rules: [{ field: 'obj', targetType: 'string' }],
       });
       expect((result[0]._source as Record<string, unknown>).obj).toBe('{"a":1}');
@@ -55,7 +47,7 @@ describe('convert_field_type_transformation', () => {
 
     it('returns null for non-numeric string converted to number', () => {
       const testData = [createHit({ value: 'abc' })];
-      const result = instance.transformationMethod(testData, {
+      const result = transform(testData, {
         rules: [{ field: 'value', targetType: 'number' }],
       });
       expect((result[0]._source as Record<string, unknown>).value).toBeNull();
@@ -63,7 +55,7 @@ describe('convert_field_type_transformation', () => {
 
     it('handles boolean conversion edge cases', () => {
       const testData = [createHit({ a: '0', b: '1', c: '', d: 'false' })];
-      const result = instance.transformationMethod(testData, {
+      const result = transform(testData, {
         rules: [
           { field: 'a', targetType: 'boolean' },
           { field: 'b', targetType: 'boolean' },
@@ -79,7 +71,7 @@ describe('convert_field_type_transformation', () => {
     });
 
     it('applies multiple conversion rules', () => {
-      const result = instance.transformationMethod(data, {
+      const result = transform(data, {
         rules: [
           { field: 'count', targetType: 'number' },
           { field: 'flag', targetType: 'boolean' },
@@ -89,47 +81,82 @@ describe('convert_field_type_transformation', () => {
       expect(source.count).toBe(42);
       expect(source.flag).toBe(true);
     });
-
-    it('skips rules with undefined field', () => {
-      const result = instance.transformationMethod(data, {
-        rules: [{ field: undefined, targetType: 'number' }],
-      });
-      expect(result).toEqual(data);
-    });
   });
 
-  describe('transformSchema', () => {
-    it('updates schema types for converted fields', () => {
-      const schema = [
-        { name: 'count', type: 'keyword' },
-        { name: 'name', type: 'keyword' },
-      ];
-      const result = instance.transformSchema!(schema, {
-        rules: [{ field: 'count', targetType: 'number' }],
-      });
-      expect(result[0].type).toBe('number');
-      expect(result[1].type).toBe('keyword');
-    });
-
-    it('returns schema unchanged when config is incomplete', () => {
-      const schema = [{ name: 'count', type: 'keyword' }];
-      const result = instance.transformSchema!(schema, { rules: [] });
-      expect(result).toEqual(schema);
-    });
-  });
-
-  describe('validateConfig', () => {
-    it('returns config unchanged when all fields exist', () => {
+  describe('execution diagnostics', () => {
+    it('reports applied when all fields exist', () => {
       const config = { rules: [{ field: 'count', targetType: 'number' as const }] };
-      const fields = [{ name: 'count' }, { name: 'name' }];
-      expect(instance.validateConfig!(config, fields)).toEqual(config);
+      const data = [createHit({ count: '42', name: 'Alice' })];
+
+      expect(instance.transformationMethod(data, config)).toEqual({
+        rows: [createHit({ count: 42, name: 'Alice' })],
+        status: 'applied',
+        issues: [],
+        typeOverrides: { count: 'number' },
+      });
     });
 
-    it('resets field for rules referencing removed fields', () => {
+    it('applies available conversion rules and reports unavailable rules', () => {
+      const config = {
+        rules: [
+          { field: 'count', targetType: 'string' as const },
+          { field: 'removed', targetType: 'number' as const },
+        ],
+      };
+      const data = [createHit({ count: 42 })];
+      const result = instance.transformationMethod(data, config);
+
+      expect(result).toMatchObject({
+        rows: [createHit({ count: '42' })],
+        status: 'partially_applied',
+        issues: [{ code: 'missing_fields', fields: ['removed'] }],
+        typeOverrides: { count: 'string' },
+      });
+    });
+
+    it('converts only rows containing the configured field', () => {
+      const config = { rules: [{ field: 'count', targetType: 'number' as const }] };
+      const data = [createHit({ count: '42' }), createHit({ name: 'missing count' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: [createHit({ count: 42 }), createHit({ name: 'missing count' })],
+        status: 'partially_applied',
+        issues: [{ code: 'missing_fields', fields: ['count'] }],
+        typeOverrides: { count: 'number' },
+      });
+    });
+
+    it('skips when all configured fields are missing', () => {
       const config = { rules: [{ field: 'removed', targetType: 'number' as const }] };
-      const fields = [{ name: 'count' }];
-      const result = instance.validateConfig!(config, fields);
-      expect(result.rules[0].field).toBeUndefined();
+      const data = [createHit({ count: '42' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'missing_fields', fields: ['removed'] }],
+      });
+    });
+
+    it('reports string type intent for ISO date values converted to strings', () => {
+      const config = { rules: [{ field: 'timestamp', targetType: 'string' as const }] };
+      const data = [createHit({ timestamp: '2024-01-15T00:00:00Z' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'applied',
+        typeOverrides: { timestamp: 'string' },
+      });
+    });
+
+    it('skips when there are no complete conversion rules', () => {
+      const config = { rules: [] };
+      const data = [createHit({ count: '42' })];
+
+      expect(instance.transformationMethod(data, config)).toMatchObject({
+        rows: data,
+        status: 'skipped',
+        issues: [{ code: 'invalid_config' }],
+      });
     });
   });
 
