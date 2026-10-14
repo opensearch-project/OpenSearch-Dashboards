@@ -83,9 +83,6 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
             data-test-subj="exitFullScreenModeLogo"
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={this.props.logos.Mark[colorScheme].url} size="l" />
-              </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
                 <div>
                   <EuiText size="s" className="dshExitFullScreenButton__text">
