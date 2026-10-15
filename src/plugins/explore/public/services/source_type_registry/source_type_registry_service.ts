@@ -238,8 +238,10 @@ export interface SourceTypeMetricsResourceClient {
 export interface SourceTypeRegistrySetup {
   register: (definition: SourceTypeDefinition) => void;
   /**
-   * Names a registered source (the built-in one included) the way this deployment knows it, on
-   * one flavor or, without a flavor, on all of them. Replaces its `label` / `flavorLabels`.
+   * Names a registered source (the built-in one included) the way this deployment knows it.
+   * With a flavor, the label replaces the source's label on that flavor, `flavorLabels`
+   * included. Without one, it replaces `label` only: a flavor with its own `flavorLabels` entry
+   * keeps it unless a label is also set for that flavor.
    */
   setLabel: (sourceTypeId: string, label: string, flavor?: ExploreFlavor) => void;
 }
@@ -248,6 +250,8 @@ export class SourceTypeRegistryService {
   private readonly sourceTypes = new Map<string, SourceTypeDefinition>();
   // Labels set with `setLabel`, by source id, then by flavor ('' for every flavor).
   private readonly labelOverrides = new Map<string, Map<string, string>>();
+  // Called with every source, already registered or still to come (see `onRegister`).
+  private readonly registerListeners: Array<(definition: SourceTypeDefinition) => void> = [];
 
   constructor() {
     this.register(openSearchSourceType);
@@ -266,6 +270,17 @@ export class SourceTypeRegistryService {
       }
     }
     this.sourceTypes.set(definition.id, definition);
+    this.registerListeners.forEach((listener) => listener(definition));
+  }
+
+  /**
+   * Calls `listener` with each registered source now, and with each one registered later. Sources
+   * may register from their plugin's `start`, which runs after Explore's, so anything Explore
+   * derives from the registry at start has to follow later registrations too.
+   */
+  public onRegister(listener: (definition: SourceTypeDefinition) => void): void {
+    this.registerListeners.push(listener);
+    this.sourceTypes.forEach((definition) => listener(definition));
   }
 
   public get(id: string): SourceTypeDefinition | undefined {

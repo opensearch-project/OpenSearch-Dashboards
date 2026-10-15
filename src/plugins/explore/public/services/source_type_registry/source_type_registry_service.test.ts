@@ -451,4 +451,18 @@ describe('SourceTypeRegistryService', () => {
       expect(registry.getLanguageGuide(undefined)).toEqual({});
     });
   });
+
+  it('tells a register listener about sources registered before and after it subscribes', () => {
+    registry.register(fakeSource({ id: 'early', datasetTypes: ['EARLY'] }));
+    const listener = jest.fn();
+    registry.onRegister(listener);
+    expect(listener.mock.calls.map(([definition]) => definition.id)).toEqual([
+      OPENSEARCH_SOURCE_TYPE_ID,
+      'early',
+    ]);
+
+    registry.register(fakeSource({ id: 'late', datasetTypes: ['LATE'] }));
+    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'late' }));
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
 });

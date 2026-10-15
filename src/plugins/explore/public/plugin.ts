@@ -800,12 +800,13 @@ export class ExplorePlugin implements Plugin<
   /**
    * Tells the data plugin which resource client serves each registered source's datasets, so
    * PromQL autocomplete lists a source's metrics and labels the way its metric browser does.
-   * Sources register in setup, so every one is known by start.
+   * Covers sources registered after this runs too: a plugin may register from its own `start`
+   * (e.g. behind a capability), and plugins that depend on Explore start after it.
    */
   private registerSourceResourceClients(plugins: ExploreStartDependencies) {
     const factory = plugins.data.resourceClientFactory;
     if (!factory) return;
-    this.sourceTypeRegistry.getAll().forEach(({ id, datasetTypes, metricsResourceClientId }) => {
+    this.sourceTypeRegistry.onRegister(({ id, datasetTypes, metricsResourceClientId }) => {
       if (id === OPENSEARCH_SOURCE_TYPE_ID || !metricsResourceClientId) return;
       datasetTypes.forEach((datasetType) =>
         factory.setClientForDatasetType(datasetType, metricsResourceClientId)

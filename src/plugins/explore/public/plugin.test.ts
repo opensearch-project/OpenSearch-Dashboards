@@ -576,6 +576,26 @@ describe('ExplorePlugin', () => {
       ]);
     });
 
+    it('maps a source registered after start, as a plugin starting after Explore would', () => {
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+      plugin.start(coreStart, deps);
+      expect(setClientForDatasetType).not.toHaveBeenCalled();
+
+      (plugin as any).sourceTypeRegistry.register({
+        id: 'late-source',
+        label: 'Late Source',
+        datasetTypes: ['LATE_TYPE'],
+        metricsResourceClientId: 'late-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+
+      expect(setClientForDatasetType).toHaveBeenCalledWith('LATE_TYPE', 'late-metrics');
+    });
+
     it('should not register Ask AI embeddable action when contextProvider is not available', () => {
       const startDepsWithoutContextProvider = {
         ...startDeps,

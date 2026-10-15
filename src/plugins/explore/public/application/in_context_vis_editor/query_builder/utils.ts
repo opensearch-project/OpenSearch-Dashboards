@@ -116,9 +116,20 @@ export const getPreloadedQueryState = async (
   }
 
   if (minimalDataset) {
+    // The requested (saved) language wins when the dataset's type can run it: a dataset's own
+    // `language` is only its default, and a source can offer another language on the same
+    // dataset (e.g. its own SQL dialect next to PromQL). Otherwise keep the dataset's default.
+    const supportedLanguages = services.data.query.queryString
+      .getDatasetService?.()
+      ?.getType(minimalDataset.type)
+      ?.supportedLanguages(minimalDataset);
+    const language =
+      languageType && supportedLanguages?.includes(languageType)
+        ? languageType
+        : minimalDataset.language || languageType || 'PPL';
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: minimalDataset.language || languageType || 'PPL',
+      language,
     });
 
     // override the initial query to be an empty string

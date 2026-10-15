@@ -268,6 +268,37 @@ describe("a registered Metrics source's own language", () => {
       'metrics'
     );
   });
+
+  // The dataset carries PROMQL as its default, but the visualization was saved in MY_SQL.
+  const withDatasetType = (supported: string[]) => {
+    const services = buildServices();
+    (services.data.dataViews.get as jest.Mock).mockResolvedValue({ signalType: 'metrics' });
+    services.data.query.queryString.getDatasetService = () => ({
+      getType: () => ({ supportedLanguages: () => supported }),
+    });
+    return services;
+  };
+  const datasetWithDefault = { ...metricsDataset, language: 'PROMQL' };
+
+  it("reopens a saved visualization in its saved language, not the dataset's default", async () => {
+    const services = withDatasetType(['PROMQL', 'MY_SQL']);
+
+    await getPreloadedQueryState(services, 'MY_SQL' as SupportLanguageType, datasetWithDefault);
+
+    expect(services.data.query.queryString.getInitialQueryByDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ language: 'MY_SQL' })
+    );
+  });
+
+  it("keeps the dataset's default when its type can't run the saved language", async () => {
+    const services = withDatasetType(['PROMQL']);
+
+    await getPreloadedQueryState(services, 'MY_SQL' as SupportLanguageType, datasetWithDefault);
+
+    expect(services.data.query.queryString.getInitialQueryByDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ language: 'PROMQL' })
+    );
+  });
 });
 
 describe('getPreloadedQueryState', () => {
