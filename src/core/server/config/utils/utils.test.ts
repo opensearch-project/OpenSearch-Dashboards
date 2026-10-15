@@ -10,7 +10,7 @@ import {
   mergeConfigs,
   pathToString,
 } from './utils';
-import { Request } from 'hapi__hapi';
+import { Request } from '@hapi/hapi';
 import { loggerMock } from '../../logging/logger.mock';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
 

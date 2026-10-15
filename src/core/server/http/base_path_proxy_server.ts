@@ -173,16 +173,29 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: async (request: Request) => ({
-            uri: Url.format({
-              hostname: request.server.info.host,
-              port: this.devConfig.basePathProxyTargetPort,
-              protocol: request.server.info.protocol,
-              pathname: `${this.httpConfig.basePath}/${request.params.osdPath}`,
-              query: request.query,
-            }),
-            headers: request.headers,
-          }),
+          mapUri: async (request: Request) => {
+            // The h2o2 v10 ProxyTarget interface expects headers to be
+            // { [key: string]: string }; join array values with a comma to
+            // preserve all values.
+            const requestHeaders = request.headers as Record<string, string | string[] | undefined>;
+            const headers: { [key: string]: string } = {};
+            Object.entries(requestHeaders).forEach(([key, value]) => {
+              if (value !== undefined) {
+                headers[key] = Array.isArray(value) ? value.join(', ') : value;
+              }
+            });
+
+            return {
+              uri: Url.format({
+                hostname: request.server.info.host,
+                port: this.devConfig.basePathProxyTargetPort,
+                protocol: request.server.info.protocol,
+                pathname: `${this.httpConfig.basePath}/${request.params.osdPath}`,
+                query: request.query as Record<string, string | string[]>,
+              }),
+              headers,
+            };
+          },
         },
       },
       method: '*',
@@ -205,7 +218,10 @@ export class BasePathProxyServer {
     // same URL, but with valid basepath.
     this.server.route({
       handler: (request, responseToolkit) => {
-        const { oldBasePath, osdPath = '' } = request.params;
+        const { oldBasePath, osdPath = '' } = request.params as {
+          oldBasePath: string;
+          osdPath?: string;
+        };
 
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
