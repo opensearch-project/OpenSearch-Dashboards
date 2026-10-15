@@ -4,6 +4,7 @@
  */
 
 import {
+  VisualizationFullMetadata,
   visualizationRegistry,
   VisualizationRegistry,
 } from '../components/visualizations/visualization_registry';
@@ -20,6 +21,7 @@ import { createPieConfig } from '../components/visualizations/pie/pie_vis_config
 import { createStateTimelineConfig } from '../components/visualizations/state_timeline/state_timeline_config';
 import { createScatterConfig } from '../components/visualizations/scatter/scatter_vis_config';
 import { createTableConfig } from '../components/visualizations/table/table_vis_config';
+import { createSankeyConfig } from '../components/visualizations/sankey/sankey_vis_config';
 
 /**
  * Service interface for the visualization registry
@@ -44,6 +46,11 @@ export interface VisualizationRegistryServiceStart {
    * Get a visualization by type
    */
   getVisualization: (chartType: string) => VisualizationType<any> | undefined;
+
+  /**
+   * Get full metadata for each visualization
+   */
+  getVisualizationsFullMetadata: () => VisualizationFullMetadata[];
 }
 
 export class VisualizationRegistryService {
@@ -62,6 +69,7 @@ export class VisualizationRegistryService {
       createLineConfig(),
       createMetricConfig(),
       createPieConfig(),
+      createSankeyConfig(),
       createScatterConfig(),
       createStateTimelineConfig(),
       createTableConfig(),
@@ -83,6 +91,9 @@ export class VisualizationRegistryService {
       },
       getVisualization: (chartType) => {
         return this.registry.getVisualization(chartType);
+      },
+      getVisualizationsFullMetadata: () => {
+        return this.registry.getVisualizationsFullMetadata();
       },
     };
   }

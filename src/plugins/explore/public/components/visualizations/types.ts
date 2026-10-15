@@ -121,6 +121,8 @@ export interface ValueAxis {
 export enum AxisRole {
   X = 'x',
   Y = 'y',
+  SOURCE = 'source',
+  TARGET = 'target',
   COLOR = 'color',
   /** @deprecated Use splitField on ChartConfig instead */
   FACET = 'facet',

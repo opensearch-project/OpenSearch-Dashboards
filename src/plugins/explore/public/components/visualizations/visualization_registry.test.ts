@@ -22,11 +22,13 @@ describe('VisualizationRegistry', () => {
   const makeVisType = (
     type: string,
     name: string,
-    rules: Array<VisRule<any>>
+    rules: Array<VisRule<any>>,
+    metadata?: { description: string }
   ): VisualizationType<any> => ({
     type: type as any,
     name,
     icon: `vis${name}`,
+    metadata,
     getRules: () => rules,
     ui: {
       style: {
@@ -81,6 +83,41 @@ describe('VisualizationRegistry', () => {
 
     it('should return empty array when no visualizations registered', () => {
       expect(registry.getAvailableChartTypes()).toEqual([]);
+    });
+  });
+
+  describe('getVisualizationsFullMetadata', () => {
+    it('returns assistant metadata for visualizations that opt in', () => {
+      registry.registerVisualization(
+        makeVisType('line', 'Line', [], {
+          description: 'Show trends over time.',
+        })
+      );
+
+      expect(registry.getVisualizationsFullMetadata()).toEqual([
+        {
+          type: 'line',
+          name: 'Line',
+          description: 'Show trends over time.',
+        },
+      ]);
+    });
+
+    it('excludes visualizations without assistant metadata', () => {
+      registry.registerVisualization(makeVisType('line', 'Line', []));
+      registry.registerVisualization(
+        makeVisType('custom', 'Custom', [], {
+          description: 'Custom chart guidance.',
+        })
+      );
+
+      expect(registry.getVisualizationsFullMetadata()).toEqual([
+        {
+          type: 'custom',
+          name: 'Custom',
+          description: 'Custom chart guidance.',
+        },
+      ]);
     });
   });
 

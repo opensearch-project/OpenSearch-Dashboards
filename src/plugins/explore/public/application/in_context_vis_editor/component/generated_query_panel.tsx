@@ -28,6 +28,7 @@ export const QueryPanelGeneratedQuery = () => {
 
   const onEditClick = () => {
     setEditorText(lastExecutedTranslatedQuery);
+    queryBuilder.updateQueryState({ query: lastExecutedTranslatedQuery });
 
     queryBuilder.updateQueryEditorState({
       editorMode: EditorMode.Query,
