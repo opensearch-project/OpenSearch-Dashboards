@@ -18,6 +18,7 @@ import {
 import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 import { getQueryLabel } from '../../../../../data/common';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import {
@@ -51,9 +52,11 @@ export const MetricMultiQueryPanelEditor: React.FC = () => {
   const { queryState, queryBuilder } = useQueryBuilderState();
 
   const dataConnectionId = queryState.dataset?.id ?? '';
+  const resourceClientId =
+    getSourceTypeRegistry().getMetricsResourceClientId(queryState.dataset) ?? 'prometheus';
   const client = useMemo(
-    () => new PrometheusClient(services, dataConnectionId),
-    [services, dataConnectionId]
+    () => new PrometheusClient(services, dataConnectionId, resourceClientId),
+    [services, dataConnectionId, resourceClientId]
   );
 
   const languageTitle = useMemo(() => {

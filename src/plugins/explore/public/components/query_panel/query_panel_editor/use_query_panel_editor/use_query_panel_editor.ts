@@ -51,6 +51,7 @@ import {
   PPL_LINT_FIX_EXPLORE_HOST,
   setActivePPLLintFixSession,
 } from '../../actions/ppl_lint_fix_session';
+import { getSourceTypeRegistry } from '../../../../services/source_type_registry';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -113,10 +114,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const {
-    data: {
-      dataViews,
-      query: { queryString },
-    },
+    data: { dataViews },
     keyboardShortcut,
   } = services;
   const { updateDecorations, clearDecorations } = useMultiQueryDecorations();
@@ -125,9 +123,8 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   const editorTextRef = useRef(editorText);
   const queryLanguage = queryState.language;
   const languageTitle = useMemo(() => {
-    const languageService = queryString.getLanguageService();
-    return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
-  }, [queryLanguage, queryString]);
+    return getSourceTypeRegistry().getLanguageLabel(queryLanguage, queryState.dataset);
+  }, [queryLanguage, queryState.dataset]);
 
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
   const isQueryMode = !isPromptMode;

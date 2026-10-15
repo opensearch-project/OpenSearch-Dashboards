@@ -8,15 +8,13 @@ import { useSelector } from 'react-redux';
 import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
 import { useDatasetContext } from '../../../../context';
 import { LoadingSpinner } from '../../../../legacy/discover/application/components/loading_spinner/loading_spinner';
-import {
-  defaultPrepareQueryString,
-  shouldSkipQueryExecution,
-} from '../../../../utils/state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../../../../utils/state_management/actions/query_actions';
 import { selectQueryStatusMapByKey } from '../../../../utils/state_management/selectors';
 import { RootState } from '../../../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { MetricsEmptyState } from '../../explore/components/metrics_empty_state';
+import { getSourceTypeRegistry } from '../../../../../services/source_type_registry';
 
 export const BottomRightContainer = () => {
   const { dataset } = useDatasetContext();
@@ -46,17 +44,53 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (shouldSkipQueryExecution(query)) {
+  // Any language's empty query gets the empty state here, including a registered source's
+  // language that runs an empty query (shouldSkipQueryExecution only covers PromQL and SQL).
+  const isEmptyQuery = typeof query.query !== 'string' || !query.query.trim();
+  if (isEmptyQuery) {
+    // Introduce the active language as this source runs it, so PromQL on Prometheus reads
+    // differently from PromQL on another store.
+    const languageId = query.language;
+    const registry = getSourceTypeRegistry();
+    const languageTitle = registry.getLanguageLabel(languageId, dataset);
+    const guide = registry.getLanguageGuide(languageId, dataset);
+    const sampleQueries = guide.sampleQueries ?? [];
+    // Mirrors the query panel: the PromQL rows have a builder and a code mode; a source's own
+    // editor or the single code editor may have neither.
+    const usesPromQLRows = registry.usesPromQLRows(languageId, dataset);
     return (
       <CanvasPanel>
         <MetricsEmptyState
           title={i18n.translate('explore.metricsQuery.emptyTitle', {
-            defaultMessage: 'Write a PromQL query to visualize metrics',
+            defaultMessage: 'Write a {language} query to visualize metrics',
+            values: { language: languageTitle },
           })}
-          body={i18n.translate('explore.metricsQuery.emptyBody', {
-            defaultMessage:
-              'Build a query with the builder, switch to code mode, or adapt the samples below by replacing their metric and label names with your own.',
+          description={guide.description}
+          body={
+            usesPromQLRows
+              ? sampleQueries.length
+                ? i18n.translate('explore.metricsQuery.emptyBody', {
+                    defaultMessage:
+                      'Build a query with the builder, switch to code mode, or adapt the samples below by replacing their metric and label names with your own.',
+                  })
+                : i18n.translate('explore.metricsQuery.emptyBodyNoSamples', {
+                    defaultMessage: 'Build a query with the builder, or switch to code mode.',
+                  })
+              : sampleQueries.length
+                ? i18n.translate('explore.metricsQuery.emptyBodySourceEditor', {
+                    defaultMessage:
+                      'Write a query in the editor above, or adapt the samples below by replacing their metric and label names with your own.',
+                  })
+                : i18n.translate('explore.metricsQuery.emptyBodySourceEditorNoSamples', {
+                    defaultMessage: 'Write a query in the editor above.',
+                  })
+          }
+          sampleQueries={sampleQueries}
+          sampleQueriesTitle={i18n.translate('explore.metricsQuery.sampleQueriesTitle', {
+            defaultMessage: 'Sample {language} queries',
+            values: { language: languageTitle },
           })}
+          codeLanguage={guide.codeLanguage ?? 'text'}
         />
       </CanvasPanel>
     );

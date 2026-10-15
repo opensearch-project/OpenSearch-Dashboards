@@ -43,6 +43,19 @@ jest.mock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
   useEditorFocus: () => mockFocusOnEditor,
   useEditorRef: () => mockEditorRef,
+  // The real switch, on the mocked editor hooks below.
+  useSwitchSourceType: (...args: unknown[]) =>
+    jest
+      .requireActual(
+        '../../../../application/hooks/editor_hooks/use_switch_source_type/use_switch_source_type'
+      )
+      .useSwitchSourceType(...args),
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_clear_editors', () => ({
+  useClearEditors: () => mockClearEditors,
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_editor_focus', () => ({
+  useEditorFocus: () => mockFocusOnEditor,
 }));
 
 // Mock getServices to provide language title
@@ -233,6 +246,36 @@ describe('LanguageToggle', () => {
 
     // Which url it resolves to is the link's own concern, covered in its unit test.
     expect(screen.getByTestId('exploreQueryPanelLearnMore')).toBeInTheDocument();
+  });
+
+  it('describes the selected language as the active source runs it', () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'cloud',
+      label: 'Cloud',
+      datasetTypes: ['CLOUD'],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { SQL: { description: 'Query Cloud metrics using Cloud SQL.' } },
+    });
+    setSourceTypeRegistry(registry);
+    mockSelectQueryLanguage.mockReturnValue('SQL');
+    mockGetLanguage.mockReturnValue({ title: 'SQL' });
+    mockGetTab.mockReturnValue({ supportedLanguages: ['SQL'] });
+
+    // OpenSearch's own SQL reads as before: its registered title and no description.
+    const { unmount } = renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(screen.queryByTestId('queryPanelFooterLanguageDescription')).not.toBeInTheDocument();
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveTextContent('SQL');
+    unmount();
+
+    // The same SQL chip on the other source's dataset.
+    mockSelectDataset.mockReturnValue(testDataset('cloud-1', 'CLOUD'));
+    renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(screen.getByTestId('queryPanelFooterLanguageDescription')).toHaveTextContent(
+      'Query Cloud metrics using Cloud SQL.'
+    );
   });
 
   it('hides the documentation link in prompt mode, where no language chip is selected', () => {
@@ -500,6 +543,24 @@ describe('LanguageToggle', () => {
         expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
       });
       expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+    });
+
+    it("drops the previous language's query options when a language chip is clicked", async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      const sql = await screen.findByTestId('queryPanelFooterLanguageToggle-SQL');
+      fireEvent.click(sql);
+
+      await waitFor(() =>
+        expect(mockSetQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ language: 'SQL', queryOptions: undefined })
+        )
+      );
+      expect(mockSetQuery.mock.calls[0][0]).toHaveProperty('queryOptions', undefined);
     });
 
     it('should HIDE SQL option when feature flag is disabled, even if tab supports SQL', async () => {
@@ -973,10 +1034,12 @@ describe('LanguageToggle', () => {
       fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
 
       await waitFor(() => {
+        // The previous language's query options don't carry over.
         expect(mockSetQuery).toHaveBeenCalledWith({
           language: 'FakeQL',
           query: '',
           dataset: fakeDataset,
+          queryOptions: undefined,
         });
       });
       expect(resolve).toHaveBeenCalledWith({
