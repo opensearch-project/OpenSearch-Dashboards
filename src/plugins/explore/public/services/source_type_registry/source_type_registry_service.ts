@@ -174,14 +174,62 @@ export interface SourceTypeDefinition {
   /**
    * Metrics page: the id of the data plugin resource client (`resourceClientFactory`) that the
    * Explore tab's metric browser and the PromQL builder use for this source's datasets. The client
-   * must implement the Prometheus resource calls (metric metadata, labels, label values, series).
-   * Without one, the Metrics page offers only its Query tab for this source, and PromQL gets a
-   * single code editor instead of the builder rows. The built-in source uses `prometheus`.
+   * implements {@link SourceTypeMetricsResourceClient} (metric metadata, labels, label values,
+   * series). Without one, the Metrics page offers only its Query tab for this source, and PromQL
+   * gets a single code editor instead of the builder rows. The built-in source uses `prometheus`.
+   *
+   * The PromQL itself (the browser's charts and the PromQL rows) runs through query_enhancements'
+   * PromQL search strategy, which uses the server query manager registered with
+   * `registerQueryManager` under the dataset's type, else the Prometheus manager. A source that
+   * lists PromQL registers both.
    *
    * Not covered yet: PromQL autocomplete in the code editors (the data plugin's PromQL code
    * completion) still asks the `prometheus` client, so on another source it offers keywords only.
    */
   metricsResourceClientId?: string;
+}
+
+/** A time range as the metric browser passes it (date math, e.g. `now-15m`). */
+export interface SourceTypeMetricsTimeRange {
+  from: string;
+  to: string;
+}
+
+/**
+ * The resource client a source registers in the data plugin's `resourceClientFactory` and names
+ * with `metricsResourceClientId`: the Prometheus resource calls the metric browser and the PromQL
+ * builder make for the source's datasets.
+ */
+export interface SourceTypeMetricsResourceClient {
+  getMetrics(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    timeRange?: SourceTypeMetricsTimeRange
+  ): Promise<string[]>;
+  getMetricMetadata(
+    dataConnectionId: string,
+    meta: Record<string, unknown> | undefined,
+    metric?: string,
+    timeRange?: SourceTypeMetricsTimeRange
+  ): Promise<Record<string, Array<{ type?: string; help?: string; unit?: string }>>>;
+  getSeries(
+    dataConnectionId: string,
+    match: string,
+    meta?: Record<string, unknown>,
+    timeRange?: SourceTypeMetricsTimeRange
+  ): Promise<Array<Record<string, string>>>;
+  getLabels(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    metric?: string,
+    timeRange?: SourceTypeMetricsTimeRange
+  ): Promise<string[]>;
+  getLabelValues(
+    dataConnectionId: string,
+    meta: Record<string, unknown> | undefined,
+    label: string,
+    timeRange?: SourceTypeMetricsTimeRange
+  ): Promise<string[]>;
 }
 
 export interface SourceTypeRegistrySetup {

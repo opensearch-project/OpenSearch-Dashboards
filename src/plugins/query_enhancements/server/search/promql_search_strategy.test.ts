@@ -9,6 +9,7 @@ import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../d
 import { SearchUsage } from '../../../data/server';
 import { promqlSearchStrategyProvider } from './promql_search_strategy';
 import { prometheusManager } from '../connections/managers/prometheus_manager';
+import { queryManagerService } from '../connections/query_manager_service';
 
 jest.mock('../connections/managers/prometheus_manager', () => ({
   prometheusManager: {
@@ -1763,6 +1764,58 @@ describe('promqlSearchStrategy', () => {
       expect(callArgs.body.options.start).toBeDefined();
       expect(callArgs.body.options.end).toBeDefined();
       expect(callArgs.body.options.step).toBeDefined();
+    });
+  });
+  describe('query manager', () => {
+    const response = {
+      queryId: 'query-1',
+      sessionId: 'session-1',
+      results: {
+        'my-dataset': { resultType: 'matrix', result: [{ metric: {}, values: [[1638316800, 1]] }] },
+      },
+    };
+    const myManager = { query: jest.fn() };
+    queryManagerService.register('MY_DATASET_TYPE', myManager as any);
+
+    const search = (dataset: Record<string, string>) =>
+      promqlSearchStrategyProvider(config$, logger, usage).search(
+        emptyRequestHandlerContext,
+        {
+          body: {
+            query: { query: 'up', dataset, language: 'PROMQL' },
+            timeRange: { from: '2021-12-01T00:00:00.000Z', to: '2021-12-01T01:00:00.000Z' },
+          },
+        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+    it("runs a dataset's PromQL on the manager registered for its type", async () => {
+      myManager.query.mockResolvedValue(response);
+
+      await search({ id: 'my-dataset', type: 'MY_DATASET_TYPE' });
+
+      expect(myManager.query).toHaveBeenCalledWith(
+        emptyRequestHandlerContext,
+        expect.anything(),
+        expect.objectContaining({
+          dataconnection: 'my-dataset',
+          body: expect.objectContaining({ query: 'up' }),
+        })
+      );
+      expect(prometheusManager.query).not.toHaveBeenCalled();
+    });
+
+    it('uses the Prometheus manager for a type with no manager of its own', async () => {
+      mockPrometheusManagerQuery({
+        ...response,
+        results: { 'prom-1': response.results['my-dataset'] },
+      });
+
+      await search({ id: 'prom-1', type: 'PROMETHEUS' });
+      await search({ id: 'prom-1' } as Record<string, string>);
+
+      expect(prometheusManager.query).toHaveBeenCalledTimes(2);
+      expect(myManager.query).not.toHaveBeenCalled();
     });
   });
 });

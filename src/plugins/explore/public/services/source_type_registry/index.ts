@@ -10,6 +10,8 @@ export {
   SourceTypeDependencies,
   SourceTypeLanguageGuide,
   SourceTypeLanguageSettings,
+  SourceTypeMetricsResourceClient,
+  SourceTypeMetricsTimeRange,
   SourceTypeQueryEditorProps,
   SourceTypeQueryStatus,
   SourceTypeRegistrySetup,

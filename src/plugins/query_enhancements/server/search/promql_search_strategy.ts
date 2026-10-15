@@ -23,6 +23,18 @@ import {
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
+import { queryManagerService } from '../connections/query_manager_service';
+import type { BaseConnectionManager } from '../connections/managers/base_connection_manager';
+
+type PromQLQueryManager = BaseConnectionManager<unknown, PromQLQueryParams, PromQLQueryResponse>;
+
+/**
+ * The query manager for a dataset's PromQL: the one registered (`registerQueryManager`) under the
+ * dataset's type, so a PromQL-compatible store can serve its own datasets, else Prometheus.
+ */
+export const resolvePromQLQueryManager = (datasetType?: string): PromQLQueryManager =>
+  ((datasetType && queryManagerService.getManager(datasetType)) as
+    PromQLQueryManager | undefined) ?? prometheusManager;
 
 function normalizeResult(
   resultType: string | undefined,
@@ -80,6 +92,7 @@ export const promqlSearchStrategyProvider = (
         const { body: requestBody } = request;
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
+        const manager = resolvePromQLQueryManager(dataset?.type);
 
         const requestOptions = requestBody.options as PromQLSearchOptions | undefined;
         const { maxDataPoints, perQueryOptions } = requestOptions ?? {};
@@ -140,6 +153,7 @@ export const promqlSearchStrategyProvider = (
           plans,
           shared,
           datasetId,
+          manager,
           logger
         );
 
@@ -245,6 +259,7 @@ async function executeMultipleQueries(
   plans: QueryPlan[],
   shared: SharedExecOptions,
   datasetId: string,
+  manager: PromQLQueryManager,
   logger: Logger
 ): Promise<LabeledQueryResult[]> {
   const promises = plans.map(async (plan): Promise<LabeledQueryResult> => {
@@ -270,7 +285,7 @@ async function executeMultipleQueries(
     };
 
     try {
-      const queryRes = await prometheusManager.query(context, request, params);
+      const queryRes = await manager.query(context, request, params);
 
       return {
         label: plan.label,

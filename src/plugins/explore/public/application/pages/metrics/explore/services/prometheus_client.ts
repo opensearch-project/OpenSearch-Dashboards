@@ -7,48 +7,15 @@ import { ExploreServices } from '../../../../../types';
 import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from '../types';
 import { LRUCache } from './lru_cache';
 import { escapeLabelValue } from './query_generator';
+import type { SourceTypeMetricsResourceClient } from '../../../../../services/source_type_registry';
 
 export interface QueryRangeSeries {
   metric: Record<string, string>;
   values: Array<[number, string]>;
 }
 
-interface TimeRange {
-  from: string;
-  to: string;
-}
-
-interface PrometheusResourceClientLike {
-  getMetrics(
-    dataConnectionId: string,
-    meta?: Record<string, unknown>,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-  getMetricMetadata(
-    dataConnectionId: string,
-    meta: Record<string, unknown> | undefined,
-    metric?: string,
-    timeRange?: TimeRange
-  ): Promise<Record<string, Array<{ type?: string; help?: string; unit?: string }>>>;
-  getSeries(
-    dataConnectionId: string,
-    match: string,
-    meta?: Record<string, unknown>,
-    timeRange?: TimeRange
-  ): Promise<Array<Record<string, string>>>;
-  getLabels(
-    dataConnectionId: string,
-    meta?: Record<string, unknown>,
-    metric?: string,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-  getLabelValues(
-    dataConnectionId: string,
-    meta: Record<string, unknown> | undefined,
-    label: string,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-}
+// The contract a source's metrics resource client implements (`metricsResourceClientId`).
+type PrometheusResourceClientLike = SourceTypeMetricsResourceClient;
 
 interface PrometheusSearchHit {
   _source?: {
