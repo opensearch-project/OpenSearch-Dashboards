@@ -41,7 +41,7 @@ const mockProps = () => ({
 });
 
 describe('ExitFullScreenButton', () => {
-  it("is rendered without the mark logo by default", () => {
+  it('is rendered without the mark logo by default', () => {
     const props = {
       ...mockProps(),
     };
@@ -53,7 +53,7 @@ describe('ExitFullScreenButton', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it("is rendered without the mark logo when light color-scheme is applied", () => {
+  it('is rendered without the mark logo when light color-scheme is applied', () => {
     const props = {
       ...mockProps(),
       logos: { ...getLogosMock.default, colorScheme: ColorScheme.LIGHT },
@@ -66,7 +66,7 @@ describe('ExitFullScreenButton', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it("is rendered without the mark logo when dark color-scheme is applied", () => {
+  it('is rendered without the mark logo when dark color-scheme is applied', () => {
     const props = {
       ...mockProps(),
       logos: { ...getLogosMock.default, colorScheme: ColorScheme.DARK },
