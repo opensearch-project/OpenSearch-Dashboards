@@ -85,7 +85,11 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
-import { SourceTypeRegistryService, setSourceTypeRegistry } from './services/source_type_registry';
+import {
+  OPENSEARCH_SOURCE_TYPE_ID,
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from './services/source_type_registry';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
@@ -793,9 +797,26 @@ export class ExplorePlugin implements Plugin<
     };
   }
 
+  /**
+   * Tells the data plugin which resource client serves each registered source's datasets, so
+   * PromQL autocomplete lists a source's metrics and labels the way its metric browser does.
+   * Sources register in setup, so every one is known by start.
+   */
+  private registerSourceResourceClients(plugins: ExploreStartDependencies) {
+    const factory = plugins.data.resourceClientFactory;
+    if (!factory) return;
+    this.sourceTypeRegistry.getAll().forEach(({ id, datasetTypes, metricsResourceClientId }) => {
+      if (id === OPENSEARCH_SOURCE_TYPE_ID || !metricsResourceClientId) return;
+      datasetTypes.forEach((datasetType) =>
+        factory.setClientForDatasetType(datasetType, metricsResourceClientId)
+      );
+    });
+  }
+
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
+    this.registerSourceResourceClients(plugins);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     // Register a dataset filter based on minDataSourceEngineVersions from the manifest.

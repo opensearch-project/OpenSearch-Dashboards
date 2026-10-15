@@ -49,6 +49,12 @@ const queryLanguageSectionTitle = i18n.translate(
   }
 );
 
+const queryLanguageForSourceSectionTitle = (source: string) =>
+  i18n.translate('explore.queryPanelFooter.languageToggle.queryLanguageForSourceSectionTitle', {
+    defaultMessage: 'Query language for {source}',
+    values: { source },
+  });
+
 const openPickerAriaLabel = i18n.translate('explore.queryPanelFooter.languageToggle.ariaLabel', {
   defaultMessage: 'Select source type and query language',
 });
@@ -234,11 +240,27 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
-  // What the selected language queries on the active source, so e.g. OpenSearch SQL and another
-  // source's SQL read differently. None in prompt mode, where no language chip is selected.
-  const languageDescription = isPromptMode
-    ? undefined
-    : getSourceTypeRegistry().getLanguageGuide(language, activeDataset).description;
+  // A source that describes its languages (so e.g. OpenSearch SQL and another source's SQL read
+  // differently) gets them as a list of rows, each with its name, tag and description, so they can
+  // be compared before picking one. Otherwise they stay compact chips.
+  const languageGuides = useMemo(
+    () =>
+      supportedLanguages.map((langId) => ({
+        langId,
+        guide: getSourceTypeRegistry().getLanguageGuide(langId, activeDataset),
+      })),
+    [supportedLanguages, activeDataset]
+  );
+  const describesLanguages = languageGuides.some(({ guide }) => !!guide.description || !!guide.tag);
+
+  // A registered source's languages are introduced as that source's ("Query language for ...").
+  const queryLanguageTitle = useMemo(() => {
+    const registry = getSourceTypeRegistry();
+    const activeSource = registry.getForDataset(activeDataset);
+    return activeSource.id === OPENSEARCH_SOURCE_TYPE_ID
+      ? queryLanguageSectionTitle
+      : queryLanguageForSourceSectionTitle(registry.getLabel(activeSource, flavorId));
+  }, [activeDataset, flavorId]);
 
   // The active source's icon, else the one its dataset type declares for the dataset picker.
   const triggerIcon = useMemo(() => {
@@ -273,6 +295,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
       // The test subject keeps the registered title so it doesn't change with a source's label.
       const title = languageService.getLanguage(langId)?.title ?? langId;
       const label = getSourceTypeRegistry().getLanguageLabel(langId, activeDataset);
+      const guide = languageGuides.find((g) => g.langId === langId)?.guide;
       const isSelected = !isPromptMode && langId === language;
       return (
         <button
@@ -288,17 +311,47 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
             }
           }}
           aria-current={isSelected ? 'true' : undefined}
-          className={classNames('exploreLanguagePicker__chip', {
-            ['exploreLanguagePicker__chip--selected']: isSelected,
-          })}
+          className={classNames(
+            describesLanguages ? 'exploreLanguagePicker__language' : 'exploreLanguagePicker__chip',
+            {
+              ['exploreLanguagePicker__language--selected']: describesLanguages && isSelected,
+              ['exploreLanguagePicker__chip--selected']: !describesLanguages && isSelected,
+            }
+          )}
           data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
         >
-          {label}
+          {describesLanguages ? (
+            <>
+              <span className="exploreLanguagePicker__languageHeader">
+                <span className="exploreLanguagePicker__languageName">{label}</span>
+                {guide?.tag && (
+                  <span
+                    className="exploreLanguagePicker__languageTag"
+                    data-test-subj={`queryPanelFooterLanguageTag-${title}`}
+                  >
+                    {guide.tag}
+                  </span>
+                )}
+              </span>
+              {guide?.description && (
+                <span
+                  className="exploreLanguagePicker__languageDescription"
+                  data-test-subj={`queryPanelFooterLanguageRowDescription-${title}`}
+                >
+                  {guide.description}
+                </span>
+              )}
+            </>
+          ) : (
+            label
+          )}
         </button>
       );
     });
   }, [
     supportedLanguages,
+    languageGuides,
+    describesLanguages,
     languageService,
     isPromptMode,
     language,
@@ -422,21 +475,20 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
               className="exploreLanguagePicker__sectionTitle exploreLanguagePicker__sectionTitle--flush"
               id={queryLanguageTitleId}
             >
-              {queryLanguageSectionTitle}
+              {queryLanguageTitle}
             </div>
-            {/* One wrapping row: the AI chip flows with the languages rather
-                than being pinned to its own line. */}
-            <div className="exploreLanguagePicker__chips">
-              {languageChips}
-              {aiChip}
-            </div>
-            {languageDescription && (
-              <p
-                className="exploreLanguagePicker__description"
-                data-test-subj="queryPanelFooterLanguageDescription"
-              >
-                {languageDescription}
-              </p>
+            {describesLanguages ? (
+              <>
+                <div className="exploreLanguagePicker__languages">{languageChips}</div>
+                {aiChip && <div className="exploreLanguagePicker__chips">{aiChip}</div>}
+              </>
+            ) : (
+              // One wrapping row: the AI chip flows with the languages rather than being pinned
+              // to its own line.
+              <div className="exploreLanguagePicker__chips">
+                {languageChips}
+                {aiChip}
+              </div>
             )}
             <LearnMoreLink />
           </div>

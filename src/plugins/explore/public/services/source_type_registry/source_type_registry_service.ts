@@ -41,6 +41,11 @@ export interface SourceTypeSampleQuery {
 export interface SourceTypeLanguageGuide {
   /** The language's name on this source. Defaults to the language's registered title. */
   label?: string;
+  /**
+   * A short qualifier shown next to the label in the language picker, e.g. which of the source's
+   * data the language reaches.
+   */
+  tag?: string;
   /** One sentence on what the language queries on this source. */
   description?: string;
   /** The language's docs for this source; replaces the language's own "Learn more" link. */
@@ -182,9 +187,7 @@ export interface SourceTypeDefinition {
    * PromQL search strategy, which uses the server query manager registered with
    * `registerQueryManager` under the dataset's type, else the Prometheus manager. A source that
    * lists PromQL registers both.
-   *
-   * Not covered yet: PromQL autocomplete in the code editors (the data plugin's PromQL code
-   * completion) still asks the `prometheus` client, so on another source it offers keywords only.
+   * PromQL autocomplete in the code editors lists metrics and labels through this client too.
    */
   metricsResourceClientId?: string;
 }
@@ -333,8 +336,8 @@ export class SourceTypeRegistryService {
     if (!languageId) return {};
     const settings = this.settingsFor(languageId, dataset);
     if (settings) {
-      const { label, description, docLink, sampleQueries, codeLanguage } = settings;
-      return { label, description, docLink, sampleQueries, codeLanguage };
+      const { label, tag, description, docLink, sampleQueries, codeLanguage } = settings;
+      return { label, tag, description, docLink, sampleQueries, codeLanguage };
     }
     return BUILT_IN_LANGUAGE_GUIDES[languageId] ?? {};
   }

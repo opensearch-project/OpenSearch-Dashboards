@@ -352,6 +352,7 @@ describe('SourceTypeRegistryService', () => {
           datasetTypes: ['CLOUD'],
           languageSettings: {
             PROMQL: {
+              tag: 'Recent metrics',
               description: 'Cloud PromQL',
               docLink: { title: 'Cloud docs', url: 'https://cloud.test' },
               sampleQueries: [{ label: 'up', query: 'up' }],
@@ -376,6 +377,7 @@ describe('SourceTypeRegistryService', () => {
 
     it("uses a source's own guide on its datasets", () => {
       expect(registry.getLanguageGuide('PROMQL', { type: 'CLOUD' })).toEqual({
+        tag: 'Recent metrics',
         description: 'Cloud PromQL',
         docLink: { title: 'Cloud docs', url: 'https://cloud.test' },
         sampleQueries: [{ label: 'up', query: 'up' }],
