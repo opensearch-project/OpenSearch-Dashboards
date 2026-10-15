@@ -17,6 +17,7 @@ import {
   IndexPatternSpec,
   UI_SETTINGS,
 } from '../../../../common';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -145,7 +146,7 @@ export class DatasetService {
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
         // A saved dataset must be served from its saved object; a temporary view rebuilt from
         // type.fetchFields would drop persisted field metadata and shadow it in the shared cache.
-        if (await this.loadPersistedDataView(dataset, services)) {
+        if (await this.loadPersistedDataView(dataset, services, signalType)) {
           return;
         }
 
@@ -231,28 +232,52 @@ export class DatasetService {
    */
   private async loadPersistedDataView(
     dataset: Dataset,
-    services: Partial<IDataPluginServices>
+    services: Partial<IDataPluginServices>,
+    signalType?: string
   ): Promise<boolean> {
     const dataViews = services.data?.dataViews;
-    if (!dataViews || !dataset.id || this.adHocDatasetIds.has(dataset.id)) {
+    // Ids built by the dataset selector (`<dataSourceId>::<index>`) can never be saved-object ids.
+    if (
+      !dataViews ||
+      !dataset.id ||
+      dataset.id.includes('::') ||
+      this.adHocDatasetIds.has(dataset.id)
+    ) {
       return false;
     }
 
     // Saved-object-backed views carry a version; temporary cached views do not.
-    const cached = await dataViews.get(dataset.id, true);
-    if (cached?.version) {
-      return true;
+    let persisted = await dataViews.get(dataset.id, true);
+    if (!persisted?.version) {
+      try {
+        // Evict any temporary view so get() loads the saved object instead of returning it.
+        dataViews.clearCache(dataset.id, false);
+        persisted = await dataViews.get(dataset.id);
+      } catch (error) {
+        // Only a missing saved object marks the id as ad-hoc; transient failures are retried on
+        // the next call and use the temporary view meanwhile.
+        if (error instanceof SavedObjectNotFound) {
+          this.adHocDatasetIds.add(dataset.id);
+        }
+        return false;
+      }
+      if (!persisted?.version) {
+        return false;
+      }
+
+      // Datasets saved before fetchFields kept `searchable` have no searchable flags at all;
+      // refresh them in memory so filtering works without a manual "Refresh field list".
+      const savedFields = persisted.fields.getAll().filter((field) => !field.scripted);
+      if (savedFields.length && savedFields.every((field) => field.spec.searchable === undefined)) {
+        await dataViews.refreshFields(persisted);
+      }
     }
 
-    try {
-      // Evict any temporary view so get() loads the saved object instead of returning it.
-      dataViews.clearCache(dataset.id, false);
-      const persisted = await dataViews.get(dataset.id);
-      return Boolean(persisted?.version);
-    } catch {
-      this.adHocDatasetIds.add(dataset.id);
-      return false;
+    // Older saved objects may predate persisted signalType; keep the caller's value in that case.
+    if (!persisted.signalType && (signalType ?? dataset.signalType)) {
+      persisted.signalType = signalType ?? dataset.signalType;
     }
+    return true;
   }
 
   public async saveDataset(

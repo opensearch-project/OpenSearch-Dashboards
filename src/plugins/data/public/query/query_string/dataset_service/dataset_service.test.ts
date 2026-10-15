@@ -13,6 +13,7 @@ import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
 import { waitFor } from '@testing-library/dom';
 import { DuplicateDataViewError } from '../../../../common/data_views/errors/duplicate_data_view';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -201,32 +202,54 @@ describe('DatasetService', () => {
         data: { ...dataPluginMock.createStartContract(), dataViews },
       }) as unknown as IDataPluginServices;
 
-    test('loads the saved object instead of caching a temporary view', async () => {
-      const dataViews = {
-        get: jest
-          .fn()
-          .mockResolvedValueOnce(undefined)
-          .mockResolvedValueOnce({ id: 'saved-dataset', version: 'v1' }),
-        clearCache: jest.fn(),
-      };
+    const buildSavedView = (
+      fieldSpecs: Array<Record<string, unknown>> = [{ name: 'message', searchable: true }],
+      extra: Record<string, unknown> = {}
+    ) => ({
+      id: 'saved-dataset',
+      version: 'v1',
+      fields: {
+        getAll: () => fieldSpecs.map((spec) => ({ scripted: false, spec })),
+      },
+      ...extra,
+    });
+
+    const buildAdHocDataViews = (lookupError: Error) => ({
+      get: jest
+        .fn()
+        .mockImplementation((_id: string, onlyCheckCache?: boolean) =>
+          onlyCheckCache ? Promise.resolve(undefined) : Promise.reject(lookupError)
+        ),
+      clearCache: jest.fn(),
+    });
+
+    beforeEach(() => {
       mockType.fetchFields.mockClear();
       service.registerType(mockType);
+    });
+
+    test('loads the saved object instead of caching a temporary view', async () => {
+      const dataViews = {
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(buildSavedView()),
+        clearCache: jest.fn(),
+        refreshFields: jest.fn(),
+      };
 
       await service.cacheDataset(savedDataset, buildServices(dataViews));
 
       expect(dataViews.get).toHaveBeenNthCalledWith(1, 'saved-dataset', true);
       expect(dataViews.clearCache).toHaveBeenCalledWith('saved-dataset', false);
       expect(dataViews.get).toHaveBeenNthCalledWith(2, 'saved-dataset');
+      expect(dataViews.refreshFields).not.toHaveBeenCalled();
       expect(mockType.fetchFields).not.toHaveBeenCalled();
       expect(indexPatterns.create).not.toHaveBeenCalled();
     });
 
     test('keeps an already cached saved-object view without refetching', async () => {
       const dataViews = {
-        get: jest.fn().mockResolvedValue({ id: 'saved-dataset', version: 'v1' }),
+        get: jest.fn().mockResolvedValue(buildSavedView()),
         clearCache: jest.fn(),
       };
-      service.registerType(mockType);
 
       await service.cacheDataset(savedDataset, buildServices(dataViews));
 
@@ -235,19 +258,49 @@ describe('DatasetService', () => {
       expect(indexPatterns.create).not.toHaveBeenCalled();
     });
 
-    test('falls back to a temporary view for ad-hoc datasets and remembers them', async () => {
+    test('refreshes saved fields in memory when none carry searchable', async () => {
+      const savedView = buildSavedView([{ name: 'message' }, { name: 'level' }]);
       const dataViews = {
-        get: jest
-          .fn()
-          .mockImplementation((_id: string, onlyCheckCache?: boolean) =>
-            onlyCheckCache ? Promise.resolve(undefined) : Promise.reject(new Error('not found'))
-          ),
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(savedView),
         clearCache: jest.fn(),
-        create: jest.fn().mockResolvedValue({ id: 'saved-dataset' }),
-        saveToCache: jest.fn(),
+        refreshFields: jest.fn(),
       };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.refreshFields).toHaveBeenCalledWith(savedView);
+      expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('fills in signalType when the saved object has none', async () => {
+      const savedView = buildSavedView();
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews), true, 'logs');
+
+      expect(savedView).toHaveProperty('signalType', 'logs');
+    });
+
+    test('keeps the saved signalType over the caller value', async () => {
+      const savedView = buildSavedView(undefined, { signalType: 'traces' });
+      const dataViews = {
+        get: jest.fn().mockResolvedValue(savedView),
+        clearCache: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews), true, 'logs');
+
+      expect(savedView).toHaveProperty('signalType', 'traces');
+    });
+
+    test('remembers datasets without a saved object and skips the lookup next time', async () => {
+      const dataViews = buildAdHocDataViews(
+        new SavedObjectNotFound('index-pattern', 'saved-dataset')
+      );
       const services = buildServices(dataViews);
-      service.registerType(mockType);
 
       await service.cacheDataset(savedDataset, services);
       expect(indexPatterns.create).toHaveBeenCalledTimes(1);
@@ -256,6 +309,30 @@ describe('DatasetService', () => {
       await service.cacheDataset(savedDataset, services);
       expect(indexPatterns.create).toHaveBeenCalledTimes(2);
       expect(dataViews.get).toHaveBeenCalledTimes(2);
+    });
+
+    test('retries the lookup after a transient failure', async () => {
+      const dataViews = buildAdHocDataViews(new Error('Internal Server Error'));
+      const services = buildServices(dataViews);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+
+      await service.cacheDataset(savedDataset, services);
+      expect(indexPatterns.create).toHaveBeenCalledTimes(2);
+      expect(dataViews.get).toHaveBeenCalledTimes(4);
+    });
+
+    test('skips the lookup for ad-hoc selector ids', async () => {
+      const dataViews = buildAdHocDataViews(new Error('should not be called'));
+
+      await service.cacheDataset(
+        { ...savedDataset, id: 'data-source-id::logs-2026' },
+        buildServices(dataViews)
+      );
+
+      expect(dataViews.get).not.toHaveBeenCalled();
+      expect(indexPatterns.create).toHaveBeenCalledTimes(1);
     });
   });
 
