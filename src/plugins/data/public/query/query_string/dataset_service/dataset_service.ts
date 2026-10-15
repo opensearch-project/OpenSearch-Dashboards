@@ -17,6 +17,7 @@ import {
   IndexPatternSpec,
   UI_SETTINGS,
 } from '../../../../common';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -36,6 +37,8 @@ export class DatasetService {
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
   private datasetFilters: AppDatasetFilter[] = [];
+  // Dataset ids confirmed to have no saved object, so cacheDataset skips the lookup next time.
+  private adHocDatasetIds: Set<string> = new Set();
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -141,6 +144,12 @@ export class DatasetService {
     try {
       const asyncType = type?.meta.isFieldLoadAsync ?? false;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+        // A saved dataset must be served from its saved object; a temporary view rebuilt from
+        // type.fetchFields would drop persisted field metadata and shadow it in the shared cache.
+        if (await this.loadPersistedDataView(dataset, services, signalType)) {
+          return;
+        }
+
         const fetchedFields = asyncType
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);
@@ -215,6 +224,64 @@ export class DatasetService {
     } catch (error) {
       throw new Error(`Failed to load dataset: ${dataset?.id}`);
     }
+  }
+
+  /**
+   * Ensures the cache holds the saved-object-backed data view when the dataset has been saved.
+   * Returns false for ad-hoc datasets that have no saved object.
+   */
+  private async loadPersistedDataView(
+    dataset: Dataset,
+    services: Partial<IDataPluginServices>,
+    signalType?: string
+  ): Promise<boolean> {
+    const dataViews = services.data?.dataViews;
+    // Ids built by the dataset selector (`<dataSourceId>::<index>`) can never be saved-object ids.
+    if (
+      !dataViews ||
+      !dataset.id ||
+      dataset.id.includes('::') ||
+      this.adHocDatasetIds.has(dataset.id)
+    ) {
+      return false;
+    }
+
+    // Saved-object-backed views carry a version; temporary cached views do not.
+    let persisted = await dataViews.get(dataset.id, true);
+    if (!persisted?.version) {
+      try {
+        // Evict any temporary view so get() loads the saved object instead of returning it.
+        dataViews.clearCache(dataset.id, false);
+        persisted = await dataViews.get(dataset.id);
+      } catch (error) {
+        // Only a missing saved object marks the id as ad-hoc; transient failures are retried on
+        // the next call and use the temporary view meanwhile.
+        if (error instanceof SavedObjectNotFound) {
+          this.adHocDatasetIds.add(dataset.id);
+        }
+        return false;
+      }
+      if (!persisted?.version) {
+        return false;
+      }
+
+      // Datasets saved from the stripped fetchFields output persist every field as
+      // `searchable: false` with no `esTypes`; refresh them in memory so filtering works without
+      // a manual "Refresh field list". Real mappings always carry esTypes.
+      const savedFields = persisted.fields.getAll().filter((field) => !field.scripted);
+      if (
+        savedFields.length &&
+        savedFields.every((field) => !field.spec.searchable && !field.spec.esTypes?.length)
+      ) {
+        await dataViews.refreshFields(persisted);
+      }
+    }
+
+    // Older saved objects may predate persisted signalType; keep the caller's value in that case.
+    if (!persisted.signalType && (signalType ?? dataset.signalType)) {
+      persisted.signalType = signalType ?? dataset.signalType;
+    }
+    return true;
   }
 
   public async saveDataset(
