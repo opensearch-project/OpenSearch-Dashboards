@@ -11,7 +11,8 @@ import type { AppDispatch } from '../../../../utils/state_management/store';
 /**
  * Makes `promql` the active PromQL query when another language is active, so a query the metric
  * browser builds doesn't run as, say, a source's SQL-like metrics language. The other language's
- * query options are dropped, as when switching with the language picker. A no-op on PromQL.
+ * query options are dropped, as when switching languages or sources with the language picker. A
+ * no-op on PromQL.
  */
 export const switchToPromQL = (
   services: ExploreServices,

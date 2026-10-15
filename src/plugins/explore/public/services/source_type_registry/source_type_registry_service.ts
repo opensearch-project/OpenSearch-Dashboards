@@ -374,6 +374,19 @@ export class SourceTypeRegistryService {
     );
   }
 
+  /**
+   * Whether a language queries metrics: PromQL, or a language a registered source offered on the
+   * Metrics flavor lists. Such a query needs a metrics dataset and keeps its query options.
+   */
+  public isMetricsLanguage(languageId?: string): boolean {
+    if (languageId === 'PROMQL') return true;
+    if (!languageId || BUILT_IN_LANGUAGES.includes(languageId)) return false;
+    return this.getAll(ExploreFlavor.Metrics).some(
+      (sourceType) =>
+        sourceType.id !== OPENSEARCH_SOURCE_TYPE_ID && !!sourceType.languageSettings?.[languageId]
+    );
+  }
+
   /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */
   public supportsHistogram(languageId?: string, dataset?: { type?: string }): boolean {
     const settings = this.settingsFor(languageId, dataset);

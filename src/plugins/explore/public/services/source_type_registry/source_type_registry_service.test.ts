@@ -111,6 +111,22 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getMetricsResourceClientId({ type: 'QUERY_ONLY' })).toBeUndefined();
   });
 
+  it('treats PromQL and the languages Metrics sources list as metrics languages', () => {
+    registry.register(
+      fakeSource({ flavors: [ExploreFlavor.Metrics], languageSettings: { MY_SQL: {} } })
+    );
+    registry.register(
+      fakeSource({ id: 'logs', datasetTypes: ['LOGS'], languageSettings: { MY_LOGS_QL: {} } })
+    );
+
+    expect(registry.isMetricsLanguage('PROMQL')).toBe(true);
+    expect(registry.isMetricsLanguage('MY_SQL')).toBe(true);
+    expect(registry.isMetricsLanguage('MY_LOGS_QL')).toBe(false);
+    expect(registry.isMetricsLanguage('PPL')).toBe(false);
+    expect(registry.isMetricsLanguage('SQL')).toBe(false);
+    expect(registry.isMetricsLanguage(undefined)).toBe(false);
+  });
+
   it('shows the PromQL rows only for PromQL on a source with a metrics resource client', () => {
     const MyEditor = () => null;
     registry.register(

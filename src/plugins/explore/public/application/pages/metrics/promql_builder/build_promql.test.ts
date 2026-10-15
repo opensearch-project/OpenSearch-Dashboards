@@ -292,6 +292,40 @@ describe('metric names PromQL cannot take bare', () => {
     expect(buildPromQL(parsed.state)).toBe(query);
   });
 
+  it.each([
+    [`foo{a='x,"y"=z'}`, [['a', '=', 'x,"y"=z']], 'foo{a="x,\\"y\\"=z"}'],
+    [`foo{msg='sum by ("x")'}`, [['msg', '=', 'sum by ("x")']], 'foo{msg="sum by (\\"x\\")"}'],
+    ['foo{a="sum by (\\"x\\")"}', [['a', '=', 'sum by ("x")']], 'foo{a="sum by (\\"x\\")"}'],
+    [`foo{'k8s.pod'='p'}`, [['k8s.pod', '=', 'p']], 'foo{"k8s.pod"="p"}'],
+  ])('reads strings whole whatever their quotes: %s', (query, filters, rebuilt) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters.map((f) => [f.label, f.op, f.value])).toEqual(filters);
+    expect(buildPromQL(parsed.state)).toBe(rebuilt);
+    expect(buildPromQL(parsePromQL(rebuilt).state)).toBe(rebuilt);
+  });
+
+  it.each([
+    ['foo{a=~"x\\\\.y"}', 'x\\.y'],
+    ['foo{a="say \\"hi\\""}', 'say "hi"'],
+    ['foo{"service.name"=~"api\\\\..*"}', 'api\\..*'],
+    ["foo{a='it\\'s'}", "it's"],
+  ])('decodes escaped values once, so they survive the builder: %s', (query, value) => {
+    const parsed = parsePromQL(query);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.labelFilters[0].value).toBe(value);
+    const rebuilt = buildPromQL(parsed.state);
+    expect(parsePromQL(rebuilt).state.labelFilters[0].value).toBe(value);
+    expect(buildPromQL(parsePromQL(rebuilt).state)).toBe(rebuilt);
+  });
+
+  it.each(['foo{a="bad \\q escape"}', 'foo{a="line\\nbreak"}'])(
+    'keeps a value the builder cannot write back in code mode: %s',
+    (query) => {
+      expect(parsePromQL(query).canBuild).toBe(false);
+    }
+  );
+
   it('parses the __name__ form back into the builder', () => {
     const parsed = parsePromQL('avg({__name__="ClusterStatus.red", DomainName="d"})');
     expect(parsed.canBuild).toBe(true);

@@ -15,6 +15,11 @@ import {
   handleAgentError,
 } from './utils';
 import { SupportLanguageType } from './query_builder';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 import { AgentError, ProhibitedQueryError } from '../../../components/query_panel/utils/error';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { fetchFirstAvailableDataset } from '../../../application/utils/state_management/utils/redux_persistence';
@@ -209,6 +214,59 @@ describe('resolveDatasetByLanguage', () => {
     const result = await resolveDatasetByLanguage(services, SupportLanguageType.ppl);
 
     expect(result).toBe(availableDataset);
+  });
+});
+
+describe("a registered Metrics source's own language", () => {
+  const metricsDataset = {
+    id: 'my-metrics',
+    title: 'My metrics',
+    type: 'MY_DATASET_TYPE',
+    signalType: 'metrics',
+  };
+  beforeEach(() => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'my-source',
+      label: 'My Source',
+      datasetTypes: ['MY_DATASET_TYPE'],
+      flavors: [ExploreFlavor.Metrics],
+      languageSettings: { MY_SQL: {} },
+      resolveDefaultDataset: async () => undefined,
+    });
+    setSourceTypeRegistry(registry);
+  });
+  afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+  it('needs a metrics dataset, like PromQL', () => {
+    expect(getRequiredSignalType('MY_SQL' as SupportLanguageType)).toBe('metrics');
+  });
+
+  it("keeps a saved visualization's metrics dataset", async () => {
+    const services = buildServices();
+    (services.data.dataViews.get as jest.Mock).mockResolvedValue({ signalType: 'metrics' });
+
+    const result = await resolveDatasetByLanguage(
+      services,
+      'MY_SQL' as SupportLanguageType,
+      metricsDataset
+    );
+
+    expect(result).toBe(metricsDataset);
+    expect(fetchFirstAvailableDataset).not.toHaveBeenCalled();
+  });
+
+  it('falls back to a metrics dataset, not a logs index pattern', async () => {
+    const services = buildServices();
+    (fetchFirstAvailableDataset as jest.Mock).mockResolvedValue(metricsDataset);
+
+    await resolveDatasetByLanguage(services, 'MY_SQL' as SupportLanguageType, mockDataset);
+
+    expect(fetchFirstAvailableDataset).toHaveBeenCalledWith(
+      services,
+      ExploreFlavor.Metrics,
+      'metrics'
+    );
   });
 });
 

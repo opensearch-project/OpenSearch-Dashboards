@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiIcon, EuiPopover, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
+import type { Query } from '../../../../../../data/common';
 import {
   selectActiveTabId,
   selectDataset,
@@ -116,7 +117,15 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
       const newQueryString =
         newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
 
-      queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
+      // setQuery merges, so drop the previous language's options (e.g. PromQL's per-query legend and
+      // step, and max data points): they don't apply to the new one. Query has no `queryOptions`
+      // in its type; languages such as PromQL keep their options there.
+      queryString.setQuery({
+        query: newQueryString,
+        language: newLanguage,
+        dataset,
+        queryOptions: undefined,
+      } as Partial<Query>);
       languageSvc.setUserQueryLanguage(newLanguage);
       dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
       scheduleTimeout(focusOnEditor);
