@@ -214,10 +214,16 @@ export const buildRootSpansQuery = (
  * handler), else its root. Both carry aggregated tokens, so keeping both would count them twice.
  */
 export const preferAiRoots = (rows: BaseRow[]): BaseRow[] => {
-  const markedTraces = new Set(
-    rows.filter((r) => isMarkedAiRoot(r.rawDocument)).map((r) => r.traceId)
-  );
-  return rows.filter((r) => !markedTraces.has(r.traceId) || isMarkedAiRoot(r.rawDocument));
+  const marked = rows.filter((r) => isMarkedAiRoot(r.rawDocument));
+  const markedTraces = new Set(marked.map((r) => r.traceId));
+  // A marked root wins over marked spans below it (they can both be marked when a trace's
+  // children were flushed before its root arrived).
+  const markedRootTraces = new Set(marked.filter((r) => !r.parentSpanId).map((r) => r.traceId));
+  return rows.filter((r) => {
+    if (!markedTraces.has(r.traceId)) return true;
+    if (!isMarkedAiRoot(r.rawDocument)) return false;
+    return !markedRootTraces.has(r.traceId) || !r.parentSpanId;
+  });
 };
 
 /** Every span in the given traces, for the session detail flyout. */

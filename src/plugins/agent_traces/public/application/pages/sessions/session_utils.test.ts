@@ -108,6 +108,18 @@ describe('session_utils', () => {
       expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['agent', 'root']);
     });
 
+    it('keeps a marked root over marked spans below it', () => {
+      const row = (spanId: string, parentSpanId: string) =>
+        ({
+          traceId: 't1',
+          spanId,
+          parentSpanId,
+          rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+        }) as any;
+      const rows = [row('root', ''), row('child', 'root')];
+      expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['root']);
+    });
+
     it('extracts the source command', () => {
       expect(getSourceCommand('source = idx | where a = 1')).toBe('source = idx');
       expect(getSourceCommand('source = idx')).toBe('source = idx');
