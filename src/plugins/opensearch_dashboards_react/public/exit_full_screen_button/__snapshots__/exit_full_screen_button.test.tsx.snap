@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExitFullScreenButton is rendered using the dark theme's mark by default 1`] = `
+exports[`ExitFullScreenButton is rendered without the mark logo by default 1`] = `
 <div>
   <EuiScreenReaderOnly>
     <p
@@ -22,14 +22,6 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark by default
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIcon
-            size="l"
-            type="/ui/logos/opensearch_mark_on_dark.svg"
-          />
-        </EuiFlexItem>
         <EuiFlexItem
           data-test-subj="exitFullScreenModeText"
           grow={false}
@@ -59,7 +51,7 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark by default
 </div>
 `;
 
-exports[`ExitFullScreenButton is rendered using the dark theme's mark when light color-scheme is applied 1`] = `
+exports[`ExitFullScreenButton is rendered without the mark logo when light color-scheme is applied 1`] = `
 <div>
   <EuiScreenReaderOnly>
     <p
@@ -81,14 +73,6 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark when light
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIcon
-            size="l"
-            type="/ui/logos/opensearch_mark_on_dark.svg"
-          />
-        </EuiFlexItem>
         <EuiFlexItem
           data-test-subj="exitFullScreenModeText"
           grow={false}
@@ -118,7 +102,7 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark when light
 </div>
 `;
 
-exports[`ExitFullScreenButton is rendered using the light theme's mark when dark color-scheme is applied 1`] = `
+exports[`ExitFullScreenButton is rendered without the mark logo when dark color-scheme is applied 1`] = `
 <div>
   <EuiScreenReaderOnly>
     <p
@@ -140,14 +124,6 @@ exports[`ExitFullScreenButton is rendered using the light theme's mark when dark
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIcon
-            size="l"
-            type="/ui/logos/opensearch_mark_on_light.svg"
-          />
-        </EuiFlexItem>
         <EuiFlexItem
           data-test-subj="exitFullScreenModeText"
           grow={false}
