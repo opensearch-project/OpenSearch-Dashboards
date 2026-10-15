@@ -56,6 +56,7 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)       | Amazon               |
 | Viraj Sanghvi             | [virajsanghvi](https://github.com/virajsanghvi) | Amazon               |
 | Paul Sebastian            | [paulstn](https://github.com/paulstn)           | Amazon               |
+| Craig Perkins         | [cwperks](https://github.com/cwperks)               | Amazon               |
 
 ## Responsibilities
 
