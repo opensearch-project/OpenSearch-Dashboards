@@ -43,6 +43,7 @@ import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
+import { isMarkedAiRoot } from '../../../utils/ai_root';
 import './trace_details_flyout.scss';
 
 export interface TraceDetailsProps {
@@ -66,6 +67,23 @@ export const sessionIdOf = (rows: Array<TraceRow | undefined>): string | undefin
   return undefined;
 };
 
+/** The earliest span marked as the agent root, if any. */
+const findAiRoot = (rows: TraceRow[]): TraceRow | undefined => {
+  let found: TraceRow | undefined;
+  const visit = (row: TraceRow) => {
+    if (
+      isMarkedAiRoot(row.rawDocument) &&
+      (!found ||
+        String(row.rawDocument?.startTime ?? '') < String(found.rawDocument?.startTime ?? ''))
+    ) {
+      found = row;
+    }
+    (row.children as TraceRow[] | undefined)?.forEach(visit);
+  };
+  rows.forEach(visit);
+  return found;
+};
+
 export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   trace,
   onClose,
@@ -75,8 +93,10 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   onOpenSession,
   navigation,
 }) => {
+  // Header span: the marked AI root when the trace has one (an agent behind an HTTP handler, or a
+  // trace whose root was not exported), so name, latency and tokens are the agent's own.
   const rootTrace = useMemo(() => {
-    if (fullTree && fullTree.length > 0) return fullTree[0];
+    if (fullTree && fullTree.length > 0) return findAiRoot(fullTree) ?? fullTree[0];
     return trace;
   }, [fullTree, trace]);
 

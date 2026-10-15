@@ -8,6 +8,7 @@ import { usePPLQueryDeps } from '../../traces/hooks/use_ppl_query_deps';
 import { transformPPLDataToTraceHits } from '../../traces/trace_details/traces/ppl_to_trace_hits';
 import { TraceRow, buildFullSpanTree, hitsToAgentSpans } from '../../traces/hooks/tree_utils';
 import { buildSessionSpansQuery, getSourceCommand, rawStart } from '../session_utils';
+import { isMarkedAiRoot } from '../../../utils/ai_root';
 
 export interface SessionTrace {
   traceId: string;
@@ -79,9 +80,17 @@ export const useSessionDetail = (
         const result: SessionTrace[] = [];
         for (const [traceId, traceSpans] of byTrace) {
           const tree = buildFullSpanTree(traceSpans, formatTs) as TraceRow[];
-          const root = tree.find((r) => !r.parentSpanId) ?? tree[0];
+          const all = flatten(tree);
+          // The agent span carries the trace's messages and tokens: prefer the marked AI root
+          // (an agent behind an HTTP handler, or a trace whose root was not exported).
+          const root =
+            all
+              .filter((r) => isMarkedAiRoot(r.rawDocument))
+              .sort((a, b) => rawStart(a).localeCompare(rawStart(b)))[0] ??
+            tree.find((r) => !r.parentSpanId) ??
+            tree[0];
           if (!root) continue;
-          result.push({ traceId, root, tree, spans: flatten(tree) });
+          result.push({ traceId, root, tree, spans: all });
         }
         result.sort((a, b) => rawStart(a.root).localeCompare(rawStart(b.root)));
 

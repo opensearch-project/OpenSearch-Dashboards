@@ -136,6 +136,29 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
   });
+
+  it('heads the flyout with the marked AI root under a non-GenAI root', () => {
+    const agent: TraceRow = {
+      ...mockTrace,
+      id: 'agent-1',
+      spanId: 'agent-span-1',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Travel Planner',
+      totalTokens: 180,
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+    };
+    const httpRoot: TraceRow = {
+      ...mockTrace,
+      name: 'POST /runs',
+      totalTokens: 360,
+      children: [agent],
+    };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={agent} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Travel Planner')).toBeInTheDocument();
+    expect(screen.queryByText('Trace: POST /runs')).not.toBeInTheDocument();
+  });
 });
 
 describe('sessionIdOf', () => {
