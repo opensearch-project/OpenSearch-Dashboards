@@ -45,7 +45,7 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
   protected handleError(
     type: string,
     { entryKey, reason, value }: Record<string, any>,
-    path: string[]
+    path: Array<string | number>
   ) {
     switch (type) {
       case 'any.required':

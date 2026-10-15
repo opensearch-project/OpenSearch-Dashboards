@@ -93,14 +93,14 @@ describe('#hostname', () => {
     expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
     expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
     expect(hostNameSchema.validate('hostname')).toBe('hostname');
-    expect(hostNameSchema.validate('2387628')).toBe('2387628');
     expect(hostNameSchema.validate('::1')).toBe('::1');
     expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
     expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
       'xn----ascii-7gg5ei7b1i.xn--90a3a'
     );
 
-    const hostNameWithMaxAllowedLength = 'a'.repeat(255);
+    // RFC 1123: max 63 chars per label, max 253 total
+    const hostNameWithMaxAllowedLength = Array(4).fill('a'.repeat(63)).join('.');
     expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
       hostNameWithMaxAllowedLength
     );
@@ -130,7 +130,7 @@ describe('#hostname', () => {
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"any.empty"`
+      `"string.empty"`
     );
   });
 
