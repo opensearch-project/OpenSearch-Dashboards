@@ -44,7 +44,7 @@ import { setIsQueryEditorDirty } from '../../../application/utils/state_manageme
 import { setQueryOptions } from '../../../application/utils/state_management/slices/query/query_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
-import { RootState } from '../../../application/utils/state_management/store';
+import type { AppDispatch, RootState } from '../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { getQueryLabel, Query } from '../../../../../data/common';
 import { parsePromQL } from './promql_builder';
@@ -75,7 +75,7 @@ import type { RowStepReadout } from './query_panel';
 
 export const MetricsQueryPanel: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const queryIsLoading = useSelector(selectIsLoading);
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
@@ -94,7 +94,6 @@ export const MetricsQueryPanel: React.FC = () => {
     const editorText =
       editorRef.current?.getValue() ??
       String(services.data.query.queryString.getQuery().query || '');
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(onEditorRunActionCreator(services, editorText));
   }, [dispatch, services, editorRef]);
 
@@ -228,7 +227,6 @@ export const MetricsQueryPanel: React.FC = () => {
     (query?: string) => {
       if (query !== undefined) syncSourceQuery(query);
       const text = query ?? String(queryString.getQuery().query || '');
-      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, text));
     },
     [syncSourceQuery, queryString, dispatch, services]
