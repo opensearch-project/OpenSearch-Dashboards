@@ -64,6 +64,26 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getLabel(fakeSource(), ExploreFlavor.Metrics)).toBe('Fake');
   });
 
+  it('lets a plugin name a source the way its deployment knows it', () => {
+    const setup = registry.setup();
+    setup.register(fakeSource({ flavorLabels: { [ExploreFlavor.Logs]: 'Fake logs' } }));
+    const openSearch = registry.get(OPENSEARCH_SOURCE_TYPE_ID)!;
+
+    setup.setLabel(OPENSEARCH_SOURCE_TYPE_ID, 'My Prometheus', ExploreFlavor.Metrics);
+    expect(registry.getLabel(openSearch, ExploreFlavor.Metrics)).toBe('My Prometheus');
+    expect(registry.getLabel(openSearch, ExploreFlavor.Logs)).toBe('OpenSearch');
+
+    // Without a flavor it replaces the label, but a flavor's own label still wins on that flavor.
+    setup.setLabel('fake', 'My Fake');
+    expect(registry.getLabel(registry.get('fake')!, ExploreFlavor.Metrics)).toBe('My Fake');
+    expect(registry.getLabel(registry.get('fake')!, ExploreFlavor.Logs)).toBe('Fake logs');
+    expect(registry.getLabel(registry.get('fake')!)).toBe('My Fake');
+
+    expect(() => setup.setLabel('missing', 'x')).toThrow(
+      'Explore source type "missing" is not registered'
+    );
+  });
+
   it('tells whether a dataset belongs to a registered source offered on a flavor', () => {
     registry.setup().register(fakeSource({ flavors: [ExploreFlavor.Metrics] }));
 

@@ -237,10 +237,17 @@ export interface SourceTypeMetricsResourceClient {
 
 export interface SourceTypeRegistrySetup {
   register: (definition: SourceTypeDefinition) => void;
+  /**
+   * Names a registered source (the built-in one included) the way this deployment knows it, on
+   * one flavor or, without a flavor, on all of them. Replaces its `label` / `flavorLabels`.
+   */
+  setLabel: (sourceTypeId: string, label: string, flavor?: ExploreFlavor) => void;
 }
 
 export class SourceTypeRegistryService {
   private readonly sourceTypes = new Map<string, SourceTypeDefinition>();
+  // Labels set with `setLabel`, by source id, then by flavor ('' for every flavor).
+  private readonly labelOverrides = new Map<string, Map<string, string>>();
 
   constructor() {
     this.register(openSearchSourceType);
@@ -290,7 +297,23 @@ export class SourceTypeRegistryService {
 
   /** A source's label on a flavor. */
   public getLabel(sourceType: SourceTypeDefinition, flavor?: ExploreFlavor | null): string {
-    return (flavor && sourceType.flavorLabels?.[flavor]) || sourceType.label;
+    const overrides = this.labelOverrides.get(sourceType.id);
+    return (
+      (flavor && overrides?.get(flavor)) ||
+      (flavor && sourceType.flavorLabels?.[flavor]) ||
+      overrides?.get('') ||
+      sourceType.label
+    );
+  }
+
+  /** See {@link SourceTypeRegistrySetup.setLabel}. */
+  public setLabel(sourceTypeId: string, label: string, flavor?: ExploreFlavor): void {
+    if (!this.sourceTypes.has(sourceTypeId)) {
+      throw new Error(`Explore source type "${sourceTypeId}" is not registered`);
+    }
+    const overrides = this.labelOverrides.get(sourceTypeId) ?? new Map<string, string>();
+    overrides.set(flavor ?? '', label);
+    this.labelOverrides.set(sourceTypeId, overrides);
   }
 
   /** Whether a dataset belongs to a registered (non-OpenSearch) source offered on a flavor. */
@@ -440,6 +463,7 @@ export class SourceTypeRegistryService {
   public setup(): SourceTypeRegistrySetup {
     return {
       register: (definition) => this.register(definition),
+      setLabel: (sourceTypeId, label, flavor) => this.setLabel(sourceTypeId, label, flavor),
     };
   }
 }
