@@ -44,6 +44,7 @@ import {
   QUERY_EDITOR_STATE_KEY,
   ActiveBottomPanelTab,
 } from '../types';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -205,7 +206,10 @@ export class QueryBuilder {
     const finalQueryState = {
       ...preloadedQueryState,
       query: finalQuery,
-      ...(languageType === SupportLanguageType.promQL && queryOptions ? { queryOptions } : {}),
+      // Metrics languages (PromQL, or a registered Metrics source's own) keep their options.
+      ...(getSourceTypeRegistry().isMetricsLanguage(languageType) && queryOptions
+        ? { queryOptions }
+        : {}),
     };
 
     this.updateQueryState(finalQueryState);
@@ -294,10 +298,9 @@ export class QueryBuilder {
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
 
-          const cleanQuery =
-            newQuery?.language === SupportLanguageType.promQL
-              ? newQuery
-              : { ...newQuery, queryOptions: undefined };
+          const cleanQuery = getSourceTypeRegistry().isMetricsLanguage(newQuery?.language)
+            ? newQuery
+            : { ...newQuery, queryOptions: undefined };
 
           // sync query state with global queryStringManager
           this.getServices().data.query.queryString.setQuery(cleanQuery);

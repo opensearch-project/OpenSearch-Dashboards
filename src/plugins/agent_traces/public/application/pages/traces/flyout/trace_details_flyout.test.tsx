@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
-import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { TraceDetailsFlyout, TraceDetailsProps, sessionIdOf } from './trace_details_flyout';
 import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
@@ -29,7 +29,12 @@ jest.mock('../flow/trace_flow_view', () => ({
 }));
 
 jest.mock('./trace_tree_view', () => ({
-  TraceTreeView: () => <div data-test-subj="mock-tree-view">Tree View</div>,
+  TraceTreeView: ({ expandedNodes, onCollapseAll }: any) => (
+    <div data-test-subj="mock-tree-view">
+      Tree View <span data-test-subj="mock-expanded">{expandedNodes.size}</span>
+      <button onClick={onCollapseAll}>Collapse all</button>
+    </div>
+  ),
 }));
 
 jest.mock('./timeline_gantt', () => ({
@@ -130,5 +135,30 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
     expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
+  });
+});
+
+describe('sessionIdOf', () => {
+  it('returns the first span session id, flat or nested', () => {
+    expect(
+      sessionIdOf([
+        { rawDocument: { attributes: {} } } as any,
+        { rawDocument: { attributes: { gen_ai: { conversation: { id: 'sess-1' } } } } } as any,
+        { rawDocument: { attributes: { 'gen_ai.conversation.id': 'sess-2' } } } as any,
+      ])
+    ).toBe('sess-1');
+    expect(sessionIdOf([undefined, { rawDocument: {} } as any])).toBeUndefined();
+  });
+
+  it("keeps the user's collapsed tree when the same tree is sent again", () => {
+    const child = { ...mockTrace, id: 'child', spanId: 'child', parentSpanId: 'span-1' };
+    const tree = () => [{ ...mockTrace, children: [child] }] as TraceRow[];
+    const { rerender } = render(<TraceDetailsFlyout {...defaultProps} fullTree={tree()} />);
+    expect(screen.getByTestId('mock-expanded')).not.toHaveTextContent(/^0$/);
+    fireEvent.click(screen.getByText('Collapse all'));
+    expect(screen.getByTestId('mock-expanded')).toHaveTextContent(/^0$/);
+    // The traces table re-sends the tree (new array, same spans), e.g. on a cache sync.
+    rerender(<TraceDetailsFlyout {...defaultProps} fullTree={tree()} />);
+    expect(screen.getByTestId('mock-expanded')).toHaveTextContent(/^0$/);
   });
 });

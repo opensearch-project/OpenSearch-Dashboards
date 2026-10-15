@@ -47,7 +47,9 @@ export const validateDataViewDataSourceReference = (
 ) => {
   const references = dataView.references;
   if (dataSourceId) {
-    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
+    // Name-tolerant so a legacy engine-typed ref is recognized as the same dataset (reused, not
+    // duplicated); the id must still match, so this can't cross data sources.
+    return references.some((ref) => ref.id === dataSourceId && isDataSourceReference(ref));
   } else {
     return references.length === 0;
   }
@@ -84,8 +86,12 @@ export const concatDataSourceWithDataView = (dataSourceTitle: string, dataViewTi
   return dataSourceTitle.concat(DATA_SOURCE_DATA_VIEW_DELIMITER).concat(dataViewTitle);
 };
 
+// Match by name or type (tolerating legacy engine-typed refs); require a non-empty id.
+export const isDataSourceReference = (ref: DataViewSavedObjectReference) =>
+  !!ref.id && (ref.name === 'dataSource' || ref.type === 'data-source');
+
 export const getDataSourceReference = (references: DataViewSavedObjectReference[]) => {
-  return references.find((ref) => ref.type === 'data-source');
+  return references.find(isDataSourceReference);
 };
 
 /**

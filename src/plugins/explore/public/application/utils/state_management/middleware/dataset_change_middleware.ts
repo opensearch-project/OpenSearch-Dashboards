@@ -17,6 +17,7 @@ import {
   setPatternsField,
   setUsingRegexPatterns,
   setActiveTab,
+  setHideEmptyFields,
 } from '../slices';
 import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
@@ -59,6 +60,9 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(clearLastExecutedData());
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
+      // Which fields are empty is a property of the old dataset's results, so the opt-in doesn't
+      // carry over: a new dataset starts from every column shown.
+      store.dispatch(setHideEmptyFields(false));
       store.dispatch(setBreakdownField(undefined));
       store.dispatch(resetLegacyStateActionCreator(services) as unknown as AnyAction);
 

@@ -266,4 +266,92 @@ describe('gantt_data_adapter', () => {
     // 100000000 nanoseconds = 100 milliseconds
     expect(span1.duration).toBe(100);
   });
+
+  describe('dependencyLabel', () => {
+    const base = {
+      traceId: 'trace-1',
+      startTime: '2023-01-01T10:00:00.000Z',
+      endTime: '2023-01-01T10:00:00.010Z',
+      durationInNanos: 10000000,
+      'status.code': 0,
+    };
+    const labels = (spans: Array<Record<string, unknown>>) =>
+      Object.fromEntries(
+        convertToVegaGanttData(spans.map((s) => ({ ...base, ...s })) as any).values.map((v) => [
+          v.spanId,
+          v.dependencyLabel,
+        ])
+      );
+
+    it('labels database, messaging and external calls, and leaves service spans blank', () => {
+      expect(
+        labels([
+          {
+            spanId: 'root',
+            parentSpanId: '',
+            serviceName: 'cart',
+            name: 'GetCart',
+            kind: 'SPAN_KIND_SERVER',
+          },
+          {
+            spanId: 'db',
+            parentSpanId: 'root',
+            serviceName: 'cart',
+            name: 'HGET',
+            kind: 'SPAN_KIND_CLIENT',
+            attributes: { db_system: 'redis', 'server.address': 'valkey-cart' },
+          },
+          {
+            spanId: 'mq',
+            parentSpanId: 'root',
+            serviceName: 'cart',
+            name: 'orders publish',
+            kind: 'SPAN_KIND_PRODUCER',
+            attributes: { 'messaging.system': 'kafka', 'messaging.destination.name': 'orders' },
+          },
+          {
+            spanId: 'ext',
+            parentSpanId: 'root',
+            serviceName: 'cart',
+            name: 'chat',
+            kind: 'SPAN_KIND_CLIENT',
+            attributes: { 'server.address': 'api.openai.com', 'server.port': 443 },
+          },
+          {
+            spanId: 'ip',
+            parentSpanId: 'root',
+            serviceName: 'cart',
+            name: 'GET',
+            kind: 'SPAN_KIND_CLIENT',
+            attributes: { 'server.address': '172.18.0.4' },
+          },
+        ])
+      ).toEqual({ root: '', db: 'Database', mq: 'Messaging', ext: 'External', ip: '' });
+    });
+
+    it('labels an external CLIENT span unless it reached a SERVER span (backend rule)', () => {
+      const client = (spanId: string, url: string) => ({
+        spanId,
+        parentSpanId: '',
+        serviceName: 'agent',
+        name: 'invoke',
+        kind: 'SPAN_KIND_CLIENT',
+        attributes: { 'http.url': url },
+      });
+      expect(
+        labels([
+          client('same', 'http://tools-api:8000/invoke'),
+          { spanId: 'tool', parentSpanId: 'same', serviceName: 'agent', name: 'tool' },
+          client('cross', 'http://weather-agent:8000/invoke'),
+          {
+            spanId: 'srv',
+            parentSpanId: 'cross',
+            serviceName: 'weather-agent',
+            name: 'POST',
+            kind: 'SPAN_KIND_SERVER',
+          },
+        ])
+      ).toMatchObject({ same: 'External', cross: '' });
+    });
+  });
 });

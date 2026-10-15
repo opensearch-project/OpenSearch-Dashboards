@@ -29,7 +29,13 @@ export const getFilteredDisplayedColumnNames = (
     rawResults && dataset ? defaultResultsProcessor(rawResults, dataset) : null;
 
   // Use the same core logic as the hook
-  return processDisplayedColumnNames(columns, dataset, services.uiSettings, processedResults);
+  return processDisplayedColumnNames(
+    columns,
+    dataset,
+    services.uiSettings,
+    processedResults,
+    state.ui?.hideEmptyFields ?? true
+  );
 };
 
 /**

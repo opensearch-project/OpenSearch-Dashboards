@@ -130,7 +130,8 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    const button = screen.getByText('Add to dashboard');
+    // Icon-only button: the name lives on aria-label, not in visible text.
+    const button = screen.getByLabelText('Add to dashboard');
     expect(button).toBeInTheDocument();
 
     fireEvent.click(button);
@@ -153,7 +154,7 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    fireEvent.click(screen.getByText('Add to dashboard'));
+    fireEvent.click(screen.getByLabelText('Add to dashboard'));
     fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {
@@ -178,7 +179,7 @@ describe('SaveAndAddButtonWithModal', () => {
       </Provider>
     );
 
-    fireEvent.click(screen.getByText('Add to dashboard'));
+    fireEvent.click(screen.getByLabelText('Add to dashboard'));
     fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {

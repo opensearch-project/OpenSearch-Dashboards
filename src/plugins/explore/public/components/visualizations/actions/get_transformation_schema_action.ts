@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { limitConfigSchema } from '../../data_transformations/transformations/limit_transformation';
-import { sortByConfigSchema } from '../../data_transformations/transformations/sortby_transformation';
-import { filterConfigSchema } from '../../data_transformations/transformations/filter_transformation';
-import { filterFieldsConfigSchema } from '../../data_transformations/transformations/filter_fields_transformation';
-import { convertFieldTypeConfigSchema } from '../../data_transformations/transformations/convert_field_type_transformation';
-import { groupByConfigSchema } from '../../data_transformations/transformations/group_by_transformation';
-import { extractFieldsConfigSchema } from '../../data_transformations/transformations/extract_fields_transformation';
-import { addFieldConfigSchema } from '../../data_transformations/transformations/add_field_transformation';
+import { getTransformationConfigSchemaRegistry } from '../../data_transformations';
 import { TransformationConfigSchema } from '../../data_transformations/types';
 import { GetTransformationSchemaMeta } from './utils';
 
@@ -18,21 +11,9 @@ let schemaRegistry: Record<string, TransformationConfigSchema> | undefined;
 
 function getSchemaRegistry(): Record<string, TransformationConfigSchema> {
   if (!schemaRegistry) {
-    const candidates: Record<string, TransformationConfigSchema | undefined> = {
-      limit: limitConfigSchema,
-      sort_by: sortByConfigSchema,
-      filter: filterConfigSchema,
-      filter_fields: filterFieldsConfigSchema,
-      convert_field_type: convertFieldTypeConfigSchema,
-      group_by: groupByConfigSchema,
-      extract_fields: extractFieldsConfigSchema,
-      add_field: addFieldConfigSchema,
-    };
-
-    schemaRegistry = Object.fromEntries(
-      Object.entries(candidates).filter(([, schema]) => Boolean(schema))
-    ) as Record<string, TransformationConfigSchema>;
+    schemaRegistry = getTransformationConfigSchemaRegistry();
   }
+
   return schemaRegistry;
 }
 

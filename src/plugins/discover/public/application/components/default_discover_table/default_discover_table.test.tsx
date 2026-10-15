@@ -40,6 +40,7 @@ describe('DefaultDiscoverTable', () => {
       { name: 'textField', type: 'text' },
       { name: 'longField', type: 'long' },
       { name: '@timestamp', type: 'date' },
+      { name: 'created_at', type: 'date' },
     ],
     coreMock.createSetup()
   );
@@ -52,6 +53,7 @@ describe('DefaultDiscoverTable', () => {
         textField: `value${key}`,
         longField: key,
         '@timestamp': new Date((1720000000 + key) * 1000),
+        created_at: new Date((1720000000 + key) * 1000),
       },
     };
   });
@@ -60,7 +62,7 @@ describe('DefaultDiscoverTable', () => {
     // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <DefaultDiscoverTable
-        columns={['textField', 'longField', '@timestamp']}
+        columns={['textField', 'longField', '@timestamp', 'created_at']}
         rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}
         indexPattern={indexPattern}
         sort={[]}
@@ -154,5 +156,20 @@ describe('DefaultDiscoverTable', () => {
       );
       expect(progressSentinel).toBeInTheDocument();
     });
+  });
+
+  it('should apply eui-textNoWrap to all fields of type date to prevent wrapping', () => {
+    const { container } = render(getDefaultDiscoverTable());
+    const firstRow = container.querySelector('tbody tr');
+    expect(firstRow).toBeInTheDocument();
+    const cells = firstRow!.querySelectorAll('td[data-test-subj="docTableField"]');
+    // columns: ['textField', 'longField', '@timestamp', 'created_at']
+    // textField and longField break
+    expect(cells[0].className).toContain('eui-textBreakAll');
+    expect(cells[1].className).toContain('eui-textBreakAll');
+    // @timestamp (timeFieldName) does not wrap
+    expect(cells[2].className).toContain('eui-textNoWrap');
+    // created_at (additional date field) does not wrap
+    expect(cells[3].className).toContain('eui-textNoWrap');
   });
 });
