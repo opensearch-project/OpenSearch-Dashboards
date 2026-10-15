@@ -57,7 +57,6 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   }
 
   public render() {
-    const colorScheme = this.props.logos.colorScheme !== 'dark' ? 'dark' : 'light';
     return (
       <div>
         <EuiScreenReaderOnly>
