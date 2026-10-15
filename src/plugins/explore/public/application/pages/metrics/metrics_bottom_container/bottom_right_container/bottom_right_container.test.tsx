@@ -54,7 +54,6 @@ jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('../../../../utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
-  shouldSkipQueryExecution: jest.fn(() => false),
 }));
 
 // Mock onEditorRunActionCreator

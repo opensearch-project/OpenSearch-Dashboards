@@ -177,6 +177,9 @@ export interface SourceTypeDefinition {
    * must implement the Prometheus resource calls (metric metadata, labels, label values, series).
    * Without one, the Metrics page offers only its Query tab for this source, and PromQL gets a
    * single code editor instead of the builder rows. The built-in source uses `prometheus`.
+   *
+   * Not covered yet: PromQL autocomplete in the code editors (the data plugin's PromQL code
+   * completion) still asks the `prometheus` client, so on another source it offers keywords only.
    */
   metricsResourceClientId?: string;
 }
@@ -308,6 +311,19 @@ export class SourceTypeRegistryService {
    */
   public getMetricsResourceClientId(dataset?: { type?: string }): string | undefined {
     return this.getForDataset(dataset).metricsResourceClientId;
+  }
+
+  /**
+   * Whether a metrics query editor shows the PromQL builder rows for a language: PromQL on a
+   * source with a metrics resource client for the builder to call, unless the source brings its
+   * own editor for PromQL. Otherwise the editor is the source's own or a single code editor.
+   */
+  public usesPromQLRows(languageId?: string, dataset?: { type?: string }): boolean {
+    return (
+      languageId === 'PROMQL' &&
+      !this.getLanguageSettings(languageId, dataset)?.metricsQueryEditor &&
+      !!this.getMetricsResourceClientId(dataset)
+    );
   }
 
   /** Whether Explore should run its histogram query. Built-in languages keep their behavior. */

@@ -11,6 +11,9 @@ import { EditorMode, QueryExecutionStatus } from '../../utils/state_management/t
 import { QueryPanelWidgets } from './query_panel_widget';
 import { QueryPanelEditor } from './query_editor';
 import { MetricMultiQueryPanelEditor } from './metric_multi_query_editor';
+import { SourceQueryPanelEditor } from './source_query_panel_editor';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
+import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { QueryPanelGeneratedQuery } from './generated_query_panel';
 import { PPLBuilder } from '../../pages/logs/ppl_builder';
 import { ModeButtonGroup } from '../../pages/logs/ppl_builder/mode_button_group';
@@ -40,6 +43,16 @@ export const QueryPanel = ({
     handleBuilderChange,
     handleBuilderRun,
   } = useVisualizationEditorPPLBuilder(isPPLQueryMode);
+
+  // Same editor as on the Metrics page: a source's own editor for its language, the PromQL rows
+  // only where the source has a metrics resource client for them, else a single code editor.
+  const {
+    queryState: { language, dataset },
+  } = useQueryBuilderState();
+  const registry = getSourceTypeRegistry();
+  const sourceQueryEditor = registry.getLanguageSettings(language, dataset)?.metricsQueryEditor;
+  const usesPromQLRows =
+    languageType === SupportLanguageType.promQL && registry.usesPromQLRows(language, dataset);
 
   const isLoading =
     queryEditorState?.queryStatus.status === QueryExecutionStatus.LOADING ||
@@ -71,13 +84,15 @@ export const QueryPanel = ({
                   onQueryChange={handleBuilderChange}
                   onRun={handleBuilderRun}
                 />
-              ) : languageType !== SupportLanguageType.promQL || isPromptMode ? (
+              ) : !isPromptMode && sourceQueryEditor ? (
+                <SourceQueryPanelEditor editor={sourceQueryEditor} />
+              ) : !isPromptMode && usesPromQLRows ? (
+                <MetricMultiQueryPanelEditor />
+              ) : (
                 <>
                   <QueryPanelEditor />
                   <QueryPanelGeneratedQuery />
                 </>
-              ) : (
-                <MetricMultiQueryPanelEditor />
               )}
             </div>
           </EuiFlexItem>

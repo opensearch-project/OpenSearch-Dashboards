@@ -8,10 +8,7 @@ import { useSelector } from 'react-redux';
 import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
 import { useDatasetContext } from '../../../../context';
 import { LoadingSpinner } from '../../../../legacy/discover/application/components/loading_spinner/loading_spinner';
-import {
-  defaultPrepareQueryString,
-  shouldSkipQueryExecution,
-} from '../../../../utils/state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../../../../utils/state_management/actions/query_actions';
 import { selectQueryStatusMapByKey } from '../../../../utils/state_management/selectors';
 import { RootState } from '../../../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
@@ -50,7 +47,7 @@ export const BottomRightContainer = () => {
   // Any language's empty query gets the empty state here, including a registered source's
   // language that runs an empty query (shouldSkipQueryExecution only covers PromQL and SQL).
   const isEmptyQuery = typeof query.query !== 'string' || !query.query.trim();
-  if (isEmptyQuery || shouldSkipQueryExecution(query)) {
+  if (isEmptyQuery) {
     // Introduce the active language as this source runs it, so PromQL on Prometheus reads
     // differently from PromQL on another store.
     const languageId = query.language;
@@ -60,10 +57,7 @@ export const BottomRightContainer = () => {
     const sampleQueries = guide.sampleQueries ?? [];
     // Mirrors the query panel: the PromQL rows have a builder and a code mode; a source's own
     // editor or the single code editor may have neither.
-    const usesPromQLRows =
-      languageId === 'PROMQL' &&
-      !registry.getLanguageSettings(languageId, dataset)?.metricsQueryEditor &&
-      !!registry.getMetricsResourceClientId(dataset);
+    const usesPromQLRows = registry.usesPromQLRows(languageId, dataset);
     return (
       <CanvasPanel>
         <MetricsEmptyState

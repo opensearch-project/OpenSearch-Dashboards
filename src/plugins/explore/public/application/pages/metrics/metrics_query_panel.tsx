@@ -117,7 +117,7 @@ export const MetricsQueryPanel: React.FC = () => {
     () => getSourceTypeRegistry().getLanguageSettings(queryLanguage, dataset)?.metricsQueryEditor,
     [queryLanguage, dataset]
   );
-  const usesPromQLRows = queryLanguage === 'PROMQL' && !sourceQueryEditor && !!resourceClientId;
+  const usesPromQLRows = getSourceTypeRegistry().usesPromQLRows(queryLanguage, dataset);
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);

@@ -34,6 +34,7 @@ import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
 import { MetricQueryGenerator } from './services/query_generator';
+import { switchToPromQL } from './utils/switch_to_promql';
 import { calculateStep } from '../../../../../../query_enhancements/common/metrics';
 import { ExplorationLevel, ExplorationState } from './types';
 
@@ -185,8 +186,10 @@ export const MetricsExploreTab = () => {
     return () => client.abort();
   }, [client]);
 
+  const activeLanguage = queryState.language;
   const executePromQL = useCallback(
     (promql: string) => {
+      switchToPromQL(services, reduxDispatch, activeLanguage, promql);
       setEditorText(promql);
       reduxDispatch(setMetricsPageMode('query'));
       reduxDispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID));
@@ -194,7 +197,7 @@ export const MetricsExploreTab = () => {
       reduxDispatch(clearLastExecutedData());
       reduxDispatch(runQueryActionCreator(services, promql));
     },
-    [reduxDispatch, services, setEditorText]
+    [activeLanguage, reduxDispatch, services, setEditorText]
   );
 
   function renderContent() {

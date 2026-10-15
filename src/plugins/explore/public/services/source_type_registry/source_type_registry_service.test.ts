@@ -111,6 +111,34 @@ describe('SourceTypeRegistryService', () => {
     expect(registry.getMetricsResourceClientId({ type: 'QUERY_ONLY' })).toBeUndefined();
   });
 
+  it('shows the PromQL rows only for PromQL on a source with a metrics resource client', () => {
+    const MyEditor = () => null;
+    registry.register(
+      fakeSource({
+        id: 'browsable',
+        datasetTypes: ['BROWSABLE'],
+        metricsResourceClientId: 'my-metrics',
+        languageSettings: { MY_SQL: { metricsQueryEditor: MyEditor } },
+      })
+    );
+    registry.register(fakeSource({ id: 'queryOnly', datasetTypes: ['QUERY_ONLY'] }));
+    registry.register(
+      fakeSource({
+        id: 'ownEditor',
+        datasetTypes: ['OWN_EDITOR'],
+        metricsResourceClientId: 'my-metrics',
+        languageSettings: { PROMQL: { metricsQueryEditor: MyEditor } },
+      })
+    );
+
+    expect(registry.usesPromQLRows('PROMQL', { type: 'PROMETHEUS' })).toBe(true);
+    expect(registry.usesPromQLRows('PROMQL', undefined)).toBe(true);
+    expect(registry.usesPromQLRows('PROMQL', { type: 'BROWSABLE' })).toBe(true);
+    expect(registry.usesPromQLRows('MY_SQL', { type: 'BROWSABLE' })).toBe(false);
+    expect(registry.usesPromQLRows('PROMQL', { type: 'QUERY_ONLY' })).toBe(false);
+    expect(registry.usesPromQLRows('PROMQL', { type: 'OWN_EDITOR' })).toBe(false);
+  });
+
   it('rejects a dataset type another source already owns', () => {
     registry.register(fakeSource());
 
