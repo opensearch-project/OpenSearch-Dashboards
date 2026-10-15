@@ -41,43 +41,40 @@ const mockProps = () => ({
 });
 
 describe('ExitFullScreenButton', () => {
-  it("is rendered using the dark theme's mark by default", () => {
+  it("is rendered without the mark logo by default", () => {
     const props = {
       ...mockProps(),
     };
     const component = shallow(<ExitFullScreenButton {...props} />);
-    // In light color-scheme, the button has a dark background
     const icons = component.find(`EuiIcon[type="${props.logos.Mark.dark.url}"]`);
 
-    expect(icons.length).toEqual(1);
+    expect(icons.length).toEqual(0);
 
     expect(component).toMatchSnapshot();
   });
 
-  it("is rendered using the dark theme's mark when light color-scheme is applied", () => {
+  it("is rendered without the mark logo when light color-scheme is applied", () => {
     const props = {
       ...mockProps(),
       logos: { ...getLogosMock.default, colorScheme: ColorScheme.LIGHT },
     };
     const component = shallow(<ExitFullScreenButton {...props} />);
-    // In light color-scheme, the button has a dark background
     const icons = component.find(`EuiIcon[type="${props.logos.Mark.dark.url}"]`);
 
-    expect(icons.length).toEqual(1);
+    expect(icons.length).toEqual(0);
 
     expect(component).toMatchSnapshot();
   });
 
-  it("is rendered using the light theme's mark when dark color-scheme is applied", () => {
+  it("is rendered without the mark logo when dark color-scheme is applied", () => {
     const props = {
       ...mockProps(),
       logos: { ...getLogosMock.default, colorScheme: ColorScheme.DARK },
     };
     const component = shallow(<ExitFullScreenButton {...props} />);
-    // In light color-scheme, the button has a dark background
     const icons = component.find(`EuiIcon[type="${props.logos.Mark.light.url}"]`);
 
-    expect(icons.length).toEqual(1);
+    expect(icons.length).toEqual(0);
 
     expect(component).toMatchSnapshot();
   });
