@@ -334,6 +334,21 @@ describe('VariableService', () => {
       expect(withState[0].current).toEqual(['staging']);
     });
 
+    it('should preserve the "All" marker when customOptions change', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
+        'dashboard-123'
+      );
+
+      await service.updateVariable('custom-1', {
+        customOptions: ['dev', 'staging', 'prod', 'new'],
+      } as any);
+
+      const withState = service.getVariablesWithState();
+      // Marker is kept so "All" still tracks the new option list, not reset to 'dev'.
+      expect(withState[0].current).toEqual(['$__all']);
+    });
+
     it('should preserve current by value when custom option labels change', async () => {
       const { service } = createService(
         [
@@ -631,6 +646,15 @@ describe('VariableService', () => {
       const { service } = createService([makeCustomVariable()]);
       service.updateVariableValue('custom-1', ['prod']);
       expect(service.getVariables()[0].current).toEqual(['prod']);
+    });
+
+    it('should drop the "All" marker when concrete values are also present', () => {
+      const { service } = createService([
+        makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] }),
+      ]);
+      // A mixed ['$__all', 'p99'] must never persist, or '$__all' leaks as a literal.
+      service.updateVariableValue('custom-1', ['$__all', 'p99']);
+      expect(service.getVariables()[0].current).toEqual(['p99']);
     });
 
     it('should throw for unknown id', () => {
@@ -1892,23 +1916,23 @@ describe('VariableService', () => {
     });
   });
 
-  describe('"All" marker (__all__)', () => {
+  describe('"All" marker ($__all)', () => {
     it('preserves the marker across a query refresh so it tracks new options', async () => {
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['x', 'y', 'z']));
       const { service } = createService([
-        makeQueryVariable({ multi: true, includeAll: true, current: ['__all__'] }),
+        makeQueryVariable({ multi: true, includeAll: true, current: ['$__all'] }),
       ]);
 
       await service.refreshVariableOptions('query-1');
 
       // current stays as the marker; options reflect the fresh query result.
-      expect(getCurrentValues(service).service).toEqual(['__all__']);
+      expect(getCurrentValues(service).service).toEqual(['$__all']);
       expect(getOptionValues(service.getVariablesWithState()[0].options)).toEqual(['x', 'y', 'z']);
     });
 
     it('clears the marker when includeAll is turned off', async () => {
       const { service } = createService(
-        [makeCustomVariable({ multi: true, includeAll: true, current: ['__all__'] })],
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
         'dashboard-123'
       );
 
@@ -1919,7 +1943,7 @@ describe('VariableService', () => {
 
     it('clears the marker when switching from multi to single', async () => {
       const { service } = createService(
-        [makeCustomVariable({ multi: true, includeAll: true, current: ['__all__'] })],
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
         'dashboard-123'
       );
 

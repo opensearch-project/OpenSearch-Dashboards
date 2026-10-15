@@ -189,8 +189,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
 
   const commitCustomValue = useCallback(() => {
     if (!pendingCustomValue) return;
+    // "All" is mutually exclusive with concrete values, so committing a custom
+    // value exits "All" rather than appending to the marker.
+    const base = isAllSelected ? [] : selectedValues;
     const next = variable.multi
-      ? Array.from(new Set([...selectedValues, pendingCustomValue]))
+      ? Array.from(new Set([...base, pendingCustomValue]))
       : [pendingCustomValue];
     onValuesChange(variable.id, next);
     // Keep the search term: the value now renders as a checked row that still
@@ -199,7 +202,14 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       setIsOpen(false);
       setSearchTerm('');
     }
-  }, [pendingCustomValue, variable.multi, variable.id, selectedValues, onValuesChange]);
+  }, [
+    pendingCustomValue,
+    variable.multi,
+    variable.id,
+    selectedValues,
+    isAllSelected,
+    onValuesChange,
+  ]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {

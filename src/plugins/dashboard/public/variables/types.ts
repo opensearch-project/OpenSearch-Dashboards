@@ -6,7 +6,7 @@
 import { Dataset } from '../../../data/common';
 
 /** Stored in `current` when "All" is selected; expanded to the live options at query time. */
-export const ALL_OPTION_VALUE = '__all__';
+export const ALL_OPTION_VALUE = '$__all';
 
 export const isAllMarker = (current?: string[]): boolean =>
   current?.length === 1 && current[0] === ALL_OPTION_VALUE;

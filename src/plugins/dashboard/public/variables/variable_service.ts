@@ -23,6 +23,7 @@ import {
   NormalizedVariableOption,
   DistributiveOmit,
   isAllMarker,
+  ALL_OPTION_VALUE,
 } from './types';
 import {
   buildVariableOptionsFromQueryResult,
@@ -271,11 +272,15 @@ export class VariableService {
           ...this.getRuntimeState(id),
           ...this.deriveRuntimeState(updatedVariable),
         };
-        updatedVariable.current = this.resolveCurrentValueForCustom(
-          updatedVariable.current,
-          newRuntimeState.options,
-          updatedVariable.multi
-        );
+        // Keep the "All" marker as-is so it tracks the new option list, instead
+        // of reconciling it away to the first option (it is not a real option).
+        updatedVariable.current = isAllMarker(updatedVariable.current)
+          ? updatedVariable.current
+          : this.resolveCurrentValueForCustom(
+              updatedVariable.current,
+              newRuntimeState.options,
+              updatedVariable.multi
+            );
       }
 
       // When switching from multi to single, trim current to first value
@@ -374,7 +379,10 @@ export class VariableService {
 
     const variable = currentVariables[index];
     const updatedVariables = [...currentVariables];
-    updatedVariables[index] = { ...variable, current: value } as Variable;
+    updatedVariables[index] = {
+      ...variable,
+      current: this.normalizeAllSelection(value),
+    } as Variable;
     this.variables$.next(updatedVariables);
     // Telemetry: record variable change.
     this.recordTelemetry('variable_value_changed', { type: variable.type });
@@ -624,6 +632,17 @@ export class VariableService {
 
   private clearAllMarker(currentVal: string[] | undefined): string[] | undefined {
     return isAllMarker(currentVal) ? undefined : currentVal;
+  }
+
+  /**
+   * The "All" marker is mutually exclusive with concrete values. If both arrive
+   * together, keep the concrete picks so the marker never leaks as a literal.
+   */
+  private normalizeAllSelection(value: string[]): string[] {
+    if (value.length > 1 && value.includes(ALL_OPTION_VALUE)) {
+      return value.filter((v) => v !== ALL_OPTION_VALUE);
+    }
+    return value;
   }
 
   private buildVariable(id: string, input: DistributiveOmit<Variable, 'id' | 'current'>): Variable {

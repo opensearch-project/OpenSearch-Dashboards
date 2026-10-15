@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VariableWithState, VariableOptionType, isAllMarker } from './types';
+import { VariableWithState, VariableOptionType, isAllMarker, ALL_OPTION_VALUE } from './types';
 
 /**
  * Variable value with metadata for interpolation
@@ -180,8 +180,11 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     const variables = this.getVariablesFn();
 
     return variables.map((v) => {
-      const isAll = !!v.multi && isAllMarker(v.current);
-      const values = isAll ? v.options.map((o) => o.value) : v.current;
+      const isAll = !!v.multi && !!v.includeAll && isAllMarker(v.current);
+      const expanded = isAll ? v.options.map((o) => o.value) : v.current;
+      // The marker is internal state; never let it reach a rendered query, even
+      // from a mixed or legacy `current` that bypassed write-time normalization.
+      const values = expanded?.filter((val) => val !== ALL_OPTION_VALUE);
 
       return {
         name: v.name,

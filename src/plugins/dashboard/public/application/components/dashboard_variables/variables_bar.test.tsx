@@ -534,7 +534,7 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
     ]);
   });
 
-  it('keeps custom values when "All" is checked', () => {
+  it('replaces the selection with the "All" marker when "All" is checked', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({
         allowCustomValue: true,
@@ -551,16 +551,16 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
       getProps().onChange(check(options, allIndex));
     });
 
-    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['__all__']);
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['$__all']);
   });
 
-  it('keeps custom values when "All" is unchecked', () => {
+  it('clears the selection when "All" is unchecked', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({
         allowCustomValue: true,
         multi: true,
         includeAll: true,
-        current: ['__all__'],
+        current: ['$__all'],
       }),
     ]);
     const getProps = openSelector(component);
@@ -574,6 +574,28 @@ describe('VariablesBar — allowCustomValue: committed values in the list', () =
     });
 
     expect(updateVariableValue).toHaveBeenCalledWith('custom-1', []);
+  });
+
+  it('exits "All" to just the custom value when one is committed under "All"', () => {
+    const { component, updateVariableValue } = mountBar([
+      makeCustomVariable({
+        allowCustomValue: true,
+        multi: true,
+        includeAll: true,
+        current: ['$__all'],
+      }),
+    ]);
+    const getProps = openSelector(component);
+
+    act(() => {
+      getProps().searchProps.onSearch!('p99');
+    });
+    act(() => {
+      getProps().searchProps.onKeyDown(keyEvent('Enter'));
+    });
+
+    // Not ['$__all', 'p99'] — the marker must never coexist with a concrete value.
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['p99']);
   });
 
   it('counts custom values in the multi-select badge', () => {
@@ -622,7 +644,7 @@ describe('VariablesBar — "All" semantics and client-side search', () => {
   const realRows = (options: SelectableOption[]) =>
     options.filter((option) => option.key?.startsWith('__value:'));
 
-  it('stores the __all__ marker when "All" is clicked', () => {
+  it('stores the $__all marker when "All" is clicked', () => {
     const { component, updateVariableValue } = mountBar([
       makeCustomVariable({ multi: true, includeAll: true, current: ['dev'] }),
     ]);
@@ -634,11 +656,11 @@ describe('VariablesBar — "All" semantics and client-side search', () => {
       getProps().onChange(check(options, allIndex));
     });
 
-    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['__all__']);
+    expect(updateVariableValue).toHaveBeenCalledWith('custom-1', ['$__all']);
   });
 
   it('shows every option as checked and the total count while "All" is active', () => {
-    const { component } = mountBar([makeLargeVariable({ current: ['__all__'] })]);
+    const { component } = mountBar([makeLargeVariable({ current: ['$__all'] })]);
     const getProps = openSelector(component);
 
     expect(realRows(getProps().options).every((option) => option.checked === 'on')).toBe(true);
@@ -648,7 +670,7 @@ describe('VariablesBar — "All" semantics and client-side search', () => {
 
   it('exits "All" and keeps every option except the one unchecked', () => {
     const { component, updateVariableValue } = mountBar([
-      makeLargeVariable({ current: ['__all__'] }),
+      makeLargeVariable({ current: ['$__all'] }),
     ]);
     const getProps = openSelector(component);
 

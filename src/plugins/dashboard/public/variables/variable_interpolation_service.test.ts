@@ -281,9 +281,9 @@ describe('VariableInterpolationService', () => {
     });
   });
 
-  describe('interpolate — "All" selected (__all__ marker)', () => {
+  describe('interpolate — "All" selected ($__all marker)', () => {
     const makeAllVar = (overrides: Partial<CustomVariableWithState> = {}) =>
-      makeMultiVar({ includeAll: true, current: ['__all__'], ...overrides });
+      makeMultiVar({ includeAll: true, current: ['$__all'], ...overrides });
 
     it('expands to the full runtime option list for PPL', () => {
       const svc = new VariableInterpolationService(() => [makeAllVar()]);
@@ -321,12 +321,20 @@ describe('VariableInterpolationService', () => {
       expect(svc.interpolate('$region', 'PPL')).toBe("('us-east')");
     });
 
-    it('does not treat the marker as "All" for single-select variables', () => {
+    it('never emits the marker as a literal for single-select variables', () => {
       const svc = new VariableInterpolationService(() => [
-        makeCustomVar({ multi: false, current: ['__all__'] }),
+        makeCustomVar({ multi: false, current: ['$__all'] }),
       ]);
-      // Not multi → marker is just a literal value, no expansion.
-      expect(svc.interpolate('$service')).toBe('__all__');
+      // Not multi, so no expansion; the internal marker must still not leak.
+      expect(svc.interpolate('$service')).toBe('');
+    });
+
+    it('strips the marker from a mixed current and keeps the concrete values', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ includeAll: true, current: ['$__all', 'us-east'] }),
+      ]);
+      // A mixed state must never leak '$__all' into the query.
+      expect(svc.interpolate('$region', 'PPL')).toBe("('us-east')");
     });
   });
 
