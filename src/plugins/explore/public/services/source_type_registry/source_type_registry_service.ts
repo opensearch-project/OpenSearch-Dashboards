@@ -41,6 +41,11 @@ export interface SourceTypeSampleQuery {
 export interface SourceTypeLanguageGuide {
   /** The language's name on this source. Defaults to the language's registered title. */
   label?: string;
+  /**
+   * A short qualifier shown next to the label in the language picker, e.g. which of the source's
+   * data the language reaches.
+   */
+  tag?: string;
   /** One sentence on what the language queries on this source. */
   description?: string;
   /** The language's docs for this source; replaces the language's own "Learn more" link. */
@@ -182,9 +187,7 @@ export interface SourceTypeDefinition {
    * PromQL search strategy, which uses the server query manager registered with
    * `registerQueryManager` under the dataset's type, else the Prometheus manager. A source that
    * lists PromQL registers both.
-   *
-   * Not covered yet: PromQL autocomplete in the code editors (the data plugin's PromQL code
-   * completion) still asks the `prometheus` client, so on another source it offers keywords only.
+   * PromQL autocomplete in the code editors lists metrics and labels through this client too.
    */
   metricsResourceClientId?: string;
 }
@@ -234,10 +237,21 @@ export interface SourceTypeMetricsResourceClient {
 
 export interface SourceTypeRegistrySetup {
   register: (definition: SourceTypeDefinition) => void;
+  /**
+   * Names a registered source (the built-in one included) the way this deployment knows it.
+   * With a flavor, the label replaces the source's label on that flavor, `flavorLabels`
+   * included. Without one, it replaces `label` only: a flavor with its own `flavorLabels` entry
+   * keeps it unless a label is also set for that flavor.
+   */
+  setLabel: (sourceTypeId: string, label: string, flavor?: ExploreFlavor) => void;
 }
 
 export class SourceTypeRegistryService {
   private readonly sourceTypes = new Map<string, SourceTypeDefinition>();
+  // Labels set with `setLabel`, by source id, then by flavor ('' for every flavor).
+  private readonly labelOverrides = new Map<string, Map<string, string>>();
+  // Called with every source, already registered or still to come (see `onRegister`).
+  private readonly registerListeners: Array<(definition: SourceTypeDefinition) => void> = [];
 
   constructor() {
     this.register(openSearchSourceType);
@@ -256,6 +270,17 @@ export class SourceTypeRegistryService {
       }
     }
     this.sourceTypes.set(definition.id, definition);
+    this.registerListeners.forEach((listener) => listener(definition));
+  }
+
+  /**
+   * Calls `listener` with each registered source now, and with each one registered later. Sources
+   * may register from their plugin's `start`, which runs after Explore's, so anything Explore
+   * derives from the registry at start has to follow later registrations too.
+   */
+  public onRegister(listener: (definition: SourceTypeDefinition) => void): void {
+    this.registerListeners.push(listener);
+    this.sourceTypes.forEach((definition) => listener(definition));
   }
 
   public get(id: string): SourceTypeDefinition | undefined {
@@ -287,7 +312,23 @@ export class SourceTypeRegistryService {
 
   /** A source's label on a flavor. */
   public getLabel(sourceType: SourceTypeDefinition, flavor?: ExploreFlavor | null): string {
-    return (flavor && sourceType.flavorLabels?.[flavor]) || sourceType.label;
+    const overrides = this.labelOverrides.get(sourceType.id);
+    return (
+      (flavor && overrides?.get(flavor)) ||
+      (flavor && sourceType.flavorLabels?.[flavor]) ||
+      overrides?.get('') ||
+      sourceType.label
+    );
+  }
+
+  /** See {@link SourceTypeRegistrySetup.setLabel}. */
+  public setLabel(sourceTypeId: string, label: string, flavor?: ExploreFlavor): void {
+    if (!this.sourceTypes.has(sourceTypeId)) {
+      throw new Error(`Explore source type "${sourceTypeId}" is not registered`);
+    }
+    const overrides = this.labelOverrides.get(sourceTypeId) ?? new Map<string, string>();
+    overrides.set(flavor ?? '', label);
+    this.labelOverrides.set(sourceTypeId, overrides);
   }
 
   /** Whether a dataset belongs to a registered (non-OpenSearch) source offered on a flavor. */
@@ -333,8 +374,8 @@ export class SourceTypeRegistryService {
     if (!languageId) return {};
     const settings = this.settingsFor(languageId, dataset);
     if (settings) {
-      const { label, description, docLink, sampleQueries, codeLanguage } = settings;
-      return { label, description, docLink, sampleQueries, codeLanguage };
+      const { label, tag, description, docLink, sampleQueries, codeLanguage } = settings;
+      return { label, tag, description, docLink, sampleQueries, codeLanguage };
     }
     return BUILT_IN_LANGUAGE_GUIDES[languageId] ?? {};
   }
@@ -437,6 +478,7 @@ export class SourceTypeRegistryService {
   public setup(): SourceTypeRegistrySetup {
     return {
       register: (definition) => this.register(definition),
+      setLabel: (sourceTypeId, label, flavor) => this.setLabel(sourceTypeId, label, flavor),
     };
   }
 }
