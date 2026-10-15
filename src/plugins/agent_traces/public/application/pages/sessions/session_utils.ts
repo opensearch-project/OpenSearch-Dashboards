@@ -13,6 +13,7 @@ import {
   previewOutputMessages,
   readAttribute,
 } from '../traces/hooks/genai_message_preview';
+import { AI_ROOT_FIELD, isMarkedAiRoot } from '../../utils/ai_root';
 
 /** Backtick-quoted session id field for use in PPL. */
 export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
@@ -192,11 +193,32 @@ export const buildTraceSessionMapQuery = (
     sessionIds
   )}) | stats count() as spans by traceId, ${SESSION_FIELD_PPL} | head ${limit}`;
 
-/** Root spans of the given traces (they carry per-trace input, output and token totals). */
-export const buildRootSpansQuery = (source: string, traceIds: string[]): string =>
-  `${source} | where parentSpanId = "" and traceId in (${inList(
-    traceIds
-  )}) | sort startTime | head ${Math.max(1, traceIds.length)}`;
+/**
+ * Root spans of the given traces (they carry per-trace input, output and token totals). With
+ * `withAiRoots`, also the AI-root spans marked under non-GenAI roots; see `preferAiRoots`.
+ */
+export const buildRootSpansQuery = (
+  source: string,
+  traceIds: string[],
+  withAiRoots = false
+): string =>
+  `${source} | where ${
+    withAiRoots ? `(parentSpanId = "" or \`${AI_ROOT_FIELD}\` = true)` : 'parentSpanId = ""'
+  } and traceId in (${inList(traceIds)}) | sort startTime | head ${Math.max(
+    1,
+    traceIds.length * (withAiRoots ? 4 : 1)
+  )}`;
+
+/**
+ * One set of rows per trace: the marked AI roots when the trace has any (an agent behind an HTTP
+ * handler), else its root. Both carry aggregated tokens, so keeping both would count them twice.
+ */
+export const preferAiRoots = (rows: BaseRow[]): BaseRow[] => {
+  const markedTraces = new Set(
+    rows.filter((r) => isMarkedAiRoot(r.rawDocument)).map((r) => r.traceId)
+  );
+  return rows.filter((r) => !markedTraces.has(r.traceId) || isMarkedAiRoot(r.rawDocument));
+};
 
 /** Every span in the given traces, for the session detail flyout. */
 export const buildSessionSpansQuery = (
