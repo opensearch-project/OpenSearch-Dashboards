@@ -111,8 +111,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(unknowns === 'allow')
-      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+      .options({
+        allowUnknown: unknowns === 'allow',
+        stripUnknown: unknowns === 'ignore',
+      });
 
     super(schema, typeOptions);
     this.props = props;
@@ -211,10 +213,8 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
         return `could not parse object value from json input`;
-      case 'object.allowUnknown':
+      case 'object.unknown':
         return `definition for this key is missing`;
-      case 'object.child':
-        return reason[0];
     }
   }
 

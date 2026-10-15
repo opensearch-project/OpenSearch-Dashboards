@@ -188,10 +188,7 @@ describe('lib/config/config', function () {
           run();
         } catch (err) {
           expect(err).toHaveProperty('name', 'ValidationError');
-          expect(err).toHaveProperty(
-            'message',
-            'child "test" fails because [child "enable" fails because ["enable" must be a boolean]]'
-          );
+          expect(err).toHaveProperty('message', '"test.enable" must be a boolean');
           expect(err).not.toHaveProperty('details');
           expect(err).not.toHaveProperty('_object');
         }

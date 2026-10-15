@@ -14,7 +14,10 @@
       "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"],
       "@opensearch-project/opensearch-next": [
         "node_modules/@opensearch-project/opensearch-next/api/new"
-      ]
+      ],
+      // see typings/hapi_inert.d.ts and typings/hapi_h2o2.d.ts
+      "@hapi/inert": ["typings/hapi_inert.d.ts"],
+      "@hapi/h2o2": ["typings/hapi_h2o2.d.ts"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

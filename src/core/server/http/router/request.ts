@@ -104,7 +104,7 @@ export interface OpenSearchDashboardsRequestEvents {
  * `hapi` request object, supported during migration process only for backward compatibility.
  * @public
  */
-export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type LegacyRequest = Request;
 
 /**
  * OpenSearch Dashboards specific abstraction for an incoming request.
@@ -219,7 +219,7 @@ export class OpenSearchDashboardsRequest<
       (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
 
     this.url = request.url;
-    this.headers = deepFreeze({ ...request.headers });
+    this.headers = deepFreeze({ ...request.headers }) as Headers;
     this.isSystemRequest =
       request.headers['osd-system-request'] === 'true' ||
       // Remove support for `osd-system-api` in 8.x. Used only by legacy platform.

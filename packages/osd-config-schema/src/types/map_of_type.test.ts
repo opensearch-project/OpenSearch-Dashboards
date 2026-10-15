@@ -58,7 +58,7 @@ test('fails if string input cannot be parsed', () => {
 test('fails with correct type if parsed input is not an object', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   expect(() => type.validate('[1,2,3]')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Map] or [object] but got [Array]"`
+    `"expected value of type [Map] or [object] but got [string]"`
   );
 });
 

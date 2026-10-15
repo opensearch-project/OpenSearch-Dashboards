@@ -5,7 +5,7 @@
 
 import _ from 'lodash';
 import { Logger } from '@osd/logging';
-import { Request } from 'hapi__hapi';
+import { Request } from '@hapi/hapi';
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigIdentifier } from '../types';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';

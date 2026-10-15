@@ -1252,8 +1252,7 @@ export class LegacyOpenSearchErrorHelpers {
 }
 
 // @public @deprecated (undocumented)
-export interface LegacyRequest extends Request {
-}
+export type LegacyRequest = Request;
 
 // @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {

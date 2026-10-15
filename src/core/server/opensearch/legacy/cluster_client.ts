@@ -274,7 +274,21 @@ export class LegacyClusterClient implements ILegacyClusterClient {
 
   private getHeaders(request?: ScopeableRequest): Record<string, string | string[] | undefined> {
     if (!isRealRequest(request)) {
-      return request && request.headers ? request.headers : {};
+      if (!request || !request.headers) return {};
+      // Convert readonly arrays to mutable arrays.
+      // Preserve array semantics for multi-value headers (e.g., Set-Cookie, Accept)
+      // unlike base_path_proxy_server.ts which joins arrays with ', ' for h2o2 compatibility
+      const headers: Record<string, string | string[] | undefined> = {};
+      Object.entries(request.headers).forEach(([key, value]) => {
+        if (value !== undefined) {
+          if (Array.isArray(value)) {
+            headers[key] = Array.from(value) as string[];
+          } else {
+            headers[key] = value as string;
+          }
+        }
+      });
+      return headers;
     }
     const authHeaders = this.getAuthHeaders(request);
     const requestHeaders = ensureRawRequest(request).headers;

@@ -46,7 +46,7 @@ describe('navigation settings', () => {
         `"Must be a relative URL."`
       );
       expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
+        `"value.startsWith is not a function"`
       );
     });
   });
@@ -57,11 +57,9 @@ describe('navigation settings', () => {
     it('should only accept valid values', () => {
       expect(() => validate('modern')).not.toThrow();
       expect(() => validate('legacy')).not.toThrow();
-      expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [modern]
-- [1]: expected value to equal [legacy]"
-`);
+      expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(
+        `"SchemaTypeError: expected value to equal [legacy]"`
+      );
     });
   });
 });
