@@ -38,16 +38,17 @@ export const TableVisApp = ({
 
   const tableUiState: TableUiState = getTableUIState(handlers.uiState as PersistedState);
   const showNoResult = table ? table.rows.length === 0 : tableGroups?.length === 0;
+  const isColumnSplit = direction === 'column';
 
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
         <VisualizationContainer className="tableVis" showNoResult={showNoResult}>
           <EuiFlexGroup
-            className="visTable"
+            className={`visTable${isColumnSplit ? ' visTable--splitColumns' : ''}`}
             data-test-subj="visTable"
-            direction={direction === 'column' ? 'row' : 'column'}
-            alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
+            direction={isColumnSplit ? 'row' : 'column'}
+            alignItems={isColumnSplit ? 'flexStart' : 'stretch'}
           >
             {table ? (
               <TableVisComponent

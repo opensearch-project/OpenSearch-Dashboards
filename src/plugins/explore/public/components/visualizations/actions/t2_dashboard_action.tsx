@@ -22,6 +22,7 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { RenderProps } from '../../../../../context_provider/public';
 import { DataPublicPluginStart, TimeRange } from '../../../../../data/public';
 import { RenderChartConfig } from '../../../components/visualizations/types';
+import { visualizationRegistry } from '../../../components/visualizations/visualization_registry';
 import { UrlTransformationState } from '../../../components/data_transformations';
 import { SavedExploreLoader } from '../../../types/saved_explore_types';
 import {
@@ -31,7 +32,7 @@ import {
   PreparedQuery,
   checkTimeRangeArgsUsable,
 } from './auto_visualization_action';
-import { TextToDashboardMeta } from './utils';
+import { createTextToDashboardMeta } from './utils';
 import { getDashboardVersion } from '../../../application/legacy/discover/opensearch_dashboards_services';
 
 interface VisualizationConfig {
@@ -469,7 +470,7 @@ export function registerT2DashboardAction(
   };
 
   registerAction({
-    ...TextToDashboardMeta,
+    ...createTextToDashboardMeta(visualizationRegistry),
     useCustomRenderer: true,
     handler: async (args: TextToDashboardArgs): Promise<TextToDashboardResult> => {
       const resolvedTimeRange = getAbsoluteTimeRange(data, args);

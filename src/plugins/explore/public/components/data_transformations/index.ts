@@ -57,4 +57,8 @@ export { TransformPanel } from './transform_panel';
 export type { TransformPanelProps } from './transform_panel';
 export { TransformSelectorButton } from './transform_selector_overlay';
 export { useTransformationService } from './use_transformation_service';
-export { registerAllTransformations } from './register_all_transformations';
+export {
+  getAllTransformationDefinitions,
+  getTransformationConfigSchemaRegistry,
+  registerAllTransformations,
+} from './register_all_transformations';
