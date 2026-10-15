@@ -265,10 +265,14 @@ export class DatasetService {
         return false;
       }
 
-      // Datasets saved before fetchFields kept `searchable` have no searchable flags at all;
-      // refresh them in memory so filtering works without a manual "Refresh field list".
+      // Datasets saved from the stripped fetchFields output persist every field as
+      // `searchable: false` with no `esTypes`; refresh them in memory so filtering works without
+      // a manual "Refresh field list". Real mappings always carry esTypes.
       const savedFields = persisted.fields.getAll().filter((field) => !field.scripted);
-      if (savedFields.length && savedFields.every((field) => field.spec.searchable === undefined)) {
+      if (
+        savedFields.length &&
+        savedFields.every((field) => !field.spec.searchable && !field.spec.esTypes?.length)
+      ) {
         await dataViews.refreshFields(persisted);
       }
     }

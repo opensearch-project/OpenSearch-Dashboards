@@ -6,7 +6,7 @@
 import { DatasetService } from './dataset_service';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { DEFAULT_DATA, DataStorage, Dataset, UI_SETTINGS } from 'src/plugins/data/common';
-import { DataStructure } from '../../../../common';
+import { DataStructure, IndexPatternField } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
@@ -202,14 +202,21 @@ describe('DatasetService', () => {
         data: { ...dataPluginMock.createStartContract(), dataViews },
       }) as unknown as IDataPluginServices;
 
+    // Round-trip specs through the real field serializer so fixtures match what a saved object
+    // stores (e.g. `searchable` is always a boolean, undefined `esTypes` is dropped).
+    const toSavedSpec = (spec: Record<string, unknown>) =>
+      JSON.parse(JSON.stringify(new IndexPatternField(spec as any, spec.name as string)));
+
     const buildSavedView = (
-      fieldSpecs: Array<Record<string, unknown>> = [{ name: 'message', searchable: true }],
+      fieldSpecs: Array<Record<string, unknown>> = [
+        { name: 'message', type: 'string', esTypes: ['text'], searchable: true },
+      ],
       extra: Record<string, unknown> = {}
     ) => ({
       id: 'saved-dataset',
       version: 'v1',
       fields: {
-        getAll: () => fieldSpecs.map((spec) => ({ scripted: false, spec })),
+        getAll: () => fieldSpecs.map((spec) => ({ scripted: false, spec: toSavedSpec(spec) })),
       },
       ...extra,
     });
@@ -258,8 +265,13 @@ describe('DatasetService', () => {
       expect(indexPatterns.create).not.toHaveBeenCalled();
     });
 
-    test('refreshes saved fields in memory when none carry searchable', async () => {
-      const savedView = buildSavedView([{ name: 'message' }, { name: 'level' }]);
+    test('refreshes saved fields in memory when they were saved from stripped fetchFields', async () => {
+      // What the INDEXES fetchFields output used to be: no searchable, no esTypes.
+      const savedView = buildSavedView([
+        { name: 'message', type: 'string', aggregatable: false },
+        { name: 'level', type: 'string', aggregatable: true },
+      ]);
+      expect(savedView.fields.getAll()[0].spec).toMatchObject({ searchable: false });
       const dataViews = {
         get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(savedView),
         clearCache: jest.fn(),
@@ -270,6 +282,21 @@ describe('DatasetService', () => {
 
       expect(dataViews.refreshFields).toHaveBeenCalledWith(savedView);
       expect(indexPatterns.create).not.toHaveBeenCalled();
+    });
+
+    test('does not refresh saved fields that carry real mapping types', async () => {
+      const savedView = buildSavedView([
+        { name: 'payload', type: 'object', esTypes: ['object'], searchable: false },
+      ]);
+      const dataViews = {
+        get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(savedView),
+        clearCache: jest.fn(),
+        refreshFields: jest.fn(),
+      };
+
+      await service.cacheDataset(savedDataset, buildServices(dataViews));
+
+      expect(dataViews.refreshFields).not.toHaveBeenCalled();
     });
 
     test('fills in signalType when the saved object has none', async () => {
