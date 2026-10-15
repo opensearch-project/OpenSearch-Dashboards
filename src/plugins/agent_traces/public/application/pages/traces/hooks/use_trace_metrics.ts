@@ -13,6 +13,7 @@ import { extractSpanFilterQuery } from '../table_shared';
 import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 import { aiRootCondition, ensureAiRootFieldChecked } from '../../../utils/ai_root';
 import { getSourceCommand } from '../../sessions/session_utils';
+import { shadowedAiRootsExclusion } from './shadowed_ai_roots';
 
 export interface TraceMetrics {
   totalTraces: number;
@@ -76,7 +77,12 @@ const doFetchMetrics = async (
   await ensureAiRootFieldChecked(pplService, datasetParam, getSourceCommand(sourceOnlyQuery));
   // AI roots: a GenAI trace root, or a span marked as the agent root (usually the outermost GenAI
   // span under a non-GenAI root; an SDK may mark a non-GenAI span, so the filter keeps those too).
-  const rootCase = aiRootCondition(datasetParam.id);
+  const shadowed = await shadowedAiRootsExclusion(
+    pplService,
+    datasetParam,
+    getSourceCommand(sourceOnlyQuery)
+  );
+  const rootCase = `(${aiRootCondition(datasetParam.id)})${shadowed}`;
   const spanFilter = `where ${isGenAiSpan} OR (${rootCase})`;
   // Row-level filters only (where, eval, ...): a filter placed after eval still applies.
   const { filterQuery: whereQuery } = extractSpanFilterQuery(filteredQuery);

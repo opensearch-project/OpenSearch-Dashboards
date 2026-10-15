@@ -14,7 +14,7 @@ import { Dataset } from '../../../../data/common';
 export const AI_ROOT_FIELD = 'attributes.derived.gen_ai.is_root';
 
 const OPERATION_FIELD = '`attributes.gen_ai.operation.name`';
-const AI_ROOT_FIELD_PPL = `\`${AI_ROOT_FIELD}\``;
+export const AI_ROOT_FIELD_PPL = `\`${AI_ROOT_FIELD}\``;
 
 /** A trace root that is a GenAI span. */
 export const GENAI_ROOT_CONDITION = `parentSpanId = "" AND isnotnull(${OPERATION_FIELD})`;

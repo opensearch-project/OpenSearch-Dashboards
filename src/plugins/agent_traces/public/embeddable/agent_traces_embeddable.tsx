@@ -464,10 +464,13 @@ export class AgentTracesEmbeddable
         this.savedQuery.dataset,
         defaultPrepareQueryString({ ...this.savedQuery, query: '' })
       );
-      searchSource.setField('query', {
-        ...searchSource.getField('query')!,
-        query: prepareRootSpansQuery(this.savedQuery),
-      });
+      const currentQuery = searchSource.getField('query');
+      if (currentQuery) {
+        searchSource.setField('query', {
+          ...currentQuery,
+          query: prepareRootSpansQuery(this.savedQuery),
+        });
+      }
     }
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
