@@ -13,6 +13,7 @@ import {
   mergeThresholdsWithBase,
   locateThreshold,
 } from '../style_panel/threshold/threshold_utils';
+import { resolveThresholds } from '../utils/utils';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { formatDecimal } from '../utils/data_transformation';
 
@@ -158,11 +159,17 @@ export const buildGaugeRenderData = ({
     calculatedValue
   );
 
+  const resolvedThresholds = resolveThresholds(
+    styles?.thresholdOptions?.thresholds,
+    styles?.thresholdOptions?.thresholdMode,
+    { min: minBase, max: maxBase }
+  );
+
   const { textColor, mergedThresholds } = mergeThresholdsWithBase(
     minBase,
     maxBase,
     styles.thresholdOptions?.baseColor,
-    styles.thresholdOptions?.thresholds,
+    resolvedThresholds,
     calculatedValue
   );
 
