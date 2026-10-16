@@ -41,6 +41,7 @@ export {
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
+export { SavedObjectAnnotationClient } from './saved_object_annotation_client';
 export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service';
 export {
   SavedObjectsBaseOptions,
