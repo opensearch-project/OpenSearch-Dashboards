@@ -64,6 +64,7 @@ import {
   StateDeltaEvent,
   StepStartedEvent,
   StepFinishedEvent,
+  CustomEvent,
   Message,
   Tool,
   RunAgentInput,
@@ -74,6 +75,7 @@ import { MCPServerConfig } from '../types/mcp_types';
 import { Logger } from '../utils/logger';
 import { AGUIAuditLogger } from '../utils/ag_ui_audit_logger';
 import { TextMessageManager } from './managers/text_message_manager';
+import { isFirstRunOfTurn, createLeadingTitleScanner } from '../utils/conversation_title';
 
 export interface BaseAGUIConfig {
   port?: number;
@@ -412,15 +414,41 @@ export class BaseAGUIAdapter {
     // Track accumulated text to detect multi-line PPL queries
     let accumulatedText = '';
 
+    // Detect the leading CONVERSATION_TITLE: line inline, as the response
+    // streams, and emit it once as a CUSTOM event. Gated on the first run of the
+    // conversation's first human turn -- the only run for which the title is
+    // requested (react_graph_nodes.ts asks for it only when iterations === 0 &&
+    // isFirstRunOfTurn). The scanner is a request-local closure that buffers only
+    // the leading line, so it needs no turn-scoped buffer in the message manager
+    // and cannot interleave with a concurrent request's title.
+    const scanForTitle = isFirstRunOfTurn(messages)
+      ? createLeadingTitleScanner((title) => {
+          this.emitAndAuditEvent(
+            {
+              type: EventType.CUSTOM,
+              name: 'conversation_title',
+              data: title,
+              timestamp: Date.now(),
+            } as CustomEvent,
+            observer,
+            threadId,
+            runId
+          );
+          this.logger.info('Emitted conversation title from inline response', { title });
+        })
+      : undefined;
+
     try {
       // Create callbacks to convert agent events to AG UI events
       const callbacks: StreamingCallbacks = {
         onTextStart: (text: string) => {
           accumulatedText = text; // Start accumulating text
+          scanForTitle?.(text);
           this.textMessageManager.emitContent(text, observer, threadId, runId);
         },
         onTextDelta: (delta: string) => {
           accumulatedText += delta; // Continue accumulating text
+          scanForTitle?.(delta);
 
           // Check for PPL query in accumulated text (for multi-line queries)
           const pplQuery = this.detectPPLQuery(accumulatedText);
@@ -445,6 +473,14 @@ export class BaseAGUIAdapter {
           this.textMessageManager.emitContent(delta, observer, threadId, runId);
         },
         onToolUseStart: (toolName: string, toolUseId: string, input: any) => {
+          // A tool call ends the current text block. On a tool-calling turn the
+          // model streams the leading CONVERSATION_TITLE: line with no trailing
+          // newline and then goes straight to the tool call, so feed the scanner
+          // a newline here to close the title line at the block boundary --
+          // otherwise it would fuse with the post-tool answer block and never
+          // match. (No-op once the title has already been captured.)
+          scanForTitle?.('\n');
+
           // Track tool execution count
           this.toolCallsPending++;
 
@@ -560,6 +596,12 @@ export class BaseAGUIAdapter {
           );
         },
         onTurnComplete: () => {
+          // Close the title line at the end of the turn, covering the rare case
+          // of a title with no trailing newline and no tool call (a newline
+          // otherwise arrives naturally once the answer body streams). No-op if
+          // the title was already captured.
+          scanForTitle?.('\n');
+
           // Turn completed - emit any pending state deltas before message ends
           if (this.pendingStateDeltas.length > 0) {
             this.logger.debug('Emitting pending STATE_DELTA events', {
