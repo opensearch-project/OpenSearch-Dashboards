@@ -238,8 +238,8 @@
     "chalk": "^4.1.0",
     "chokidar": "^3.4.2",
     "color": "1.0.3",
-    "commander": "^3.0.2",
-    "core-js": "^3.6.5",
+    "commander": "^14.0.3",
+    "core-js": "^3.50.0",
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dompurify": "^3.4.16",
@@ -474,7 +474,7 @@
     "jest-environment-jsdom": "^30.4.1",
     "jest-location-mock": "^4.0.1",
     "jimp": "^1.6.1",
-    "jquery": "^3.5.0",
+    "jquery": "^3.7.1",
     "json-stringify-pretty-compact": "1.2.0",
     "json5": "^2.2.3",
     "leaflet": "1.5.1",
@@ -541,7 +541,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=14.20.1 <23",
+    "node": ">=20 <23",
     "yarn": "^1.22.10"
   }
 }

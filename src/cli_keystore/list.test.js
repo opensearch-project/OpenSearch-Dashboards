@@ -47,8 +47,9 @@ jest.mock('fs', () => ({
 }));
 
 import sinon from 'sinon';
+import { Command } from 'commander';
 import { Keystore } from '../legacy/server/keystore';
-import { list } from './list';
+import { list, listCli } from './list';
 import { Logger } from '../cli_plugin/lib/logger';
 
 describe('OpenSearch Dashboards keystore', () => {
@@ -81,6 +82,19 @@ describe('OpenSearch Dashboards keystore', () => {
         Logger.prototype.error,
         "ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one."
       );
+    });
+
+    it('honors the silent option from the CLI', () => {
+      Logger.prototype.log.restore();
+      sandbox.stub(process.stdout, 'write');
+
+      const keystore = new Keystore('/data/test.keystore');
+      const program = new Command();
+      listCli(program, keystore);
+
+      program.parse(['node', 'keystore', 'list', '--silent']);
+
+      sinon.assert.notCalled(process.stdout.write);
     });
   });
 

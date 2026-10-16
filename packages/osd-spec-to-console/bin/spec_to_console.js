@@ -30,25 +30,28 @@
 
 const fs = require('fs');
 const path = require('path');
-const program = require('commander');
+const { Command } = require('commander');
 const glob = require('glob');
 const chalk = require('chalk');
 
 const packageJSON = require('../package.json');
 const convert = require('../lib/convert');
 
+const program = new Command();
 program
   .version(packageJSON.version)
-  .option('-g --glob []', 'Files to convert')
-  .option('-d --directory []', 'Output directory')
+  .option('-g, --glob <glob>', 'Files to convert')
+  .option('-d, --directory <directory>', 'Output directory')
   .parse(process.argv);
 
-if (!program.glob) {
+const options = program.opts();
+
+if (!options.glob) {
   console.error('Expected input');
   process.exit(1);
 }
 
-const files = glob.sync(program.glob);
+const files = glob.sync(options.glob);
 const totalFilesCount = files.length;
 let convertedFilesCount = 0;
 
@@ -69,11 +72,11 @@ files.forEach((file) => {
   }
   const output = JSON.stringify(convertedSpec, null, 2);
   ++convertedFilesCount;
-  if (program.directory) {
+  if (options.directory) {
     const outputName = path.basename(file);
-    const outputPath = path.resolve(program.directory, outputName);
+    const outputPath = path.resolve(options.directory, outputName);
     try {
-      fs.mkdirSync(program.directory, { recursive: true });
+      fs.mkdirSync(options.directory, { recursive: true });
       fs.writeFileSync(outputPath, output + '\n');
     } catch (e) {
       console.log('Cannot write file ', e);

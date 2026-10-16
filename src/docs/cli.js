@@ -39,11 +39,13 @@ cmd
   .option('--open', 'open the docs in the browser', false)
   .parse(process.argv);
 
+const options = cmd.opts();
+
 try {
-  execFileSync(buildDocsScript(cmd), buildDocsArgs(cmd));
+  execFileSync(buildDocsScript(options), buildDocsArgs(options));
 } catch (err) {
   if (err.code === 'ENOENT') {
-    console.error(`elastic/docs repo must be cloned to ${cmd.docrepo}`);
+    console.error(`elastic/docs repo must be cloned to ${options.docrepo}`);
   } else {
     console.error(err.stack);
   }
