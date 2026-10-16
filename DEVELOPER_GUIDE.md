@@ -78,6 +78,20 @@ The project uses multiple files to manage the Node.js version for different purp
 | `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
 | `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
 
+#### Install Chrome and ChromeDriver (browser tests only)
+
+Unit tests do not need a browser, but the Selenium based functional tests and the Cypress tests drive a real one, so they need Google Chrome plus a matching [`chromedriver`](https://www.npmjs.com/package/chromedriver) on the machine that runs them. You can skip this step until you want to run browser tests.
+
+`chromedriver` is a dev dependency, so `yarn osd bootstrap` installs the version that is pinned in `package.json`. That version has to match the major version of the locally installed Chrome, otherwise the browser fails to start when the tests run. To align the two, run:
+
+```bash
+$ node scripts/upgrade_chromedriver.js
+```
+
+The script detects the major version of the locally installed Chrome (or Chromium) and rewrites the `chromedriver` entry in `package.json`, keeping a copy of the original as `package.json.bak`. Run `yarn osd bootstrap` afterwards so that the new version is installed. Passing `--install` instead makes the script run `yarn add --dev chromedriver@^<major version>` directly. CI runs the same script before the functional tests.
+
+See [TESTING.md](TESTING.md) for the remaining requirements of the browser tests, such as a desktop environment or `export TEST_BROWSER_HEADLESS=1` for headless runs.
+
 ### Fork and clone OpenSearch Dashboards
 
 All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
