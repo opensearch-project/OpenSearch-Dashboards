@@ -37,6 +37,10 @@ export enum StorageKeys {
   WIDTH = 'widths',
 }
 
+/** Bytes a key/value pair occupies in web storage, which stores UTF-16. */
+export const storedByteLength = (key: string, serializedValue: string): number =>
+  (key.length + serializedValue.length) * 2;
+
 export class Storage {
   constructor(
     private readonly engine: IStorageEngine,
@@ -78,6 +82,17 @@ export class Storage {
     } else {
       return _default;
     }
+  }
+
+  /**
+   * Stored size of an entry without decoding it. Sizing a whole keyspace via
+   * get() would cost a parse per key on every write. Absent key returns 0.
+   */
+  rawByteLength(key: string) {
+    const encodedKey = this.encodeKey(key);
+    const raw = this.engine.getItem(encodedKey);
+    if (raw === null) return 0;
+    return storedByteLength(encodedKey, raw);
   }
 
   delete(key: string) {
