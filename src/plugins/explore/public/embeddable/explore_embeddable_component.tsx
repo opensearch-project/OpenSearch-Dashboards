@@ -3,133 +3,137 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
-// TODO: refactor it to now use legacy getServices
-import {
-  getDocViewsRegistry,
-  getServices,
-} from '../application/legacy/discover/opensearch_dashboards_services';
+import { getDocViewsRegistry } from '../application/legacy/discover/opensearch_dashboards_services';
 import { DataTable } from '../components/data_table/data_table';
 import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
+import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
-import { SAMPLE_SIZE_SETTING } from '../../common';
+import { ExploreEmbeddableContent, ExploreEmbeddableViewProps } from './explore_embeddable_state';
 
-interface ExploreEmbeddableProps {
-  searchProps: SearchProps;
-}
+type LogsContent = Extract<ExploreEmbeddableContent, { kind: 'logs' }>;
+type ExploreEmbeddableDataTableProps = Pick<
+  ExploreEmbeddableViewProps,
+  'selectedColumns' | 'hideTimeColumn' | 'onAddColumn' | 'onRemoveColumn' | 'onFilter'
+> & {
+  content: LogsContent;
+};
 
-export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddableProps) => {
-  const services = getServices();
-
-  // Get docViewsRegistry for DataTable
+const ExploreEmbeddableDataTable = ({
+  content,
+  selectedColumns,
+  hideTimeColumn,
+  onAddColumn,
+  onRemoveColumn,
+  onFilter,
+}: ExploreEmbeddableDataTableProps) => {
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
-
-  // Convert columns to LegacyDisplayedColumn format for DataTable
   const displayedColumns = useMemo(() => {
-    if (!searchProps.columns || !searchProps.indexPattern) {
-      return [];
-    }
+    // Preserve the current argument order and effective display behavior. Correcting the legacy
+    // helper call is a separate product-semantic change, not part of this structural refactor.
     return getLegacyDisplayedColumns(
-      searchProps.columns,
-      searchProps.indexPattern,
-      !searchProps.displayTimeColumn,
-      false // isShortDots
+      selectedColumns ?? [],
+      content.dataset,
+      !hideTimeColumn,
+      false
     );
-  }, [searchProps.columns, searchProps.indexPattern, searchProps.displayTimeColumn]);
+  }, [content.dataset, hideTimeColumn, selectedColumns]);
 
-  // Get sample size from UI settings
-  const sampleSize = services.uiSettings.get(SAMPLE_SIZE_SETTING);
+  return (
+    <DataTable
+      columns={displayedColumns}
+      rows={content.rows}
+      dataset={content.dataset}
+      hits={content.hits}
+      sampleSize={content.sampleSize}
+      isShortDots={false}
+      showPagination={true}
+      docViewsRegistry={docViewsRegistry}
+      onRemoveColumn={onRemoveColumn}
+      onAddColumn={onAddColumn}
+      onFilter={onFilter}
+    />
+  );
+};
 
-  // Create an adapter function to convert between the two filter function signatures
-  const handleFilter = useMemo(() => {
-    if (!searchProps.onFilter || !searchProps.indexPattern) {
-      return () => {};
-    }
+const hasResults = (content: ExploreEmbeddableContent) => {
+  switch (content.kind) {
+    case 'logs':
+    case 'table':
+      return content.rows.length > 0;
+    case 'chart':
+      return content.data.transformedData.length > 0;
+  }
+};
 
-    return (mapping: any, value: unknown, mode: '+' | '-') => {
-      // Convert FieldMapping to IFieldType
-      let fieldName: string;
-      if (typeof mapping === 'string') {
-        fieldName = mapping;
-      } else if (mapping && typeof mapping === 'object' && 'name' in mapping) {
-        fieldName = mapping.name;
-      } else {
-        return;
-      }
+const renderContent = (
+  content: ExploreEmbeddableContent,
+  {
+    onAddColumn,
+    onRemoveColumn,
+    onFilter,
+    selectedColumns,
+    hideTimeColumn,
+    onSelectTimeRange,
+    crosshairGroup,
+  }: ExploreEmbeddableViewProps
+) => {
+  if (!hasResults(content)) {
+    return <VisualizationNoResults />;
+  }
 
-      const field = searchProps.indexPattern?.getFieldByName(fieldName);
-      if (!field) {
-        return;
-      }
-
-      // Convert value to string array
-      const values = Array.isArray(value) ? value.map(String) : [String(value)];
-
-      // Convert mode to operator
-      const operator = mode === '+' ? '+' : '-';
-
-      searchProps.onFilter!(field, values, operator);
-    };
-  }, [searchProps]);
-
-  const getEmbeddableContent = () => {
-    if (searchProps?.error) {
+  switch (content.kind) {
+    case 'logs':
       return (
-        <EuiFlexItem>
-          <VisualizationRequestError
-            error={searchProps.error.message || searchProps.error.name || 'An error occurred'}
-          />
-        </EuiFlexItem>
-      );
-    }
-
-    if (searchProps?.rows?.length === 0) {
-      return (
-        <EuiFlexItem>
-          <VisualizationNoResults />
-        </EuiFlexItem>
-      );
-    }
-
-    if (searchProps.activeTab === 'logs') {
-      return (
-        <DataTable
-          columns={displayedColumns}
-          rows={searchProps.rows || []}
-          dataset={searchProps.indexPattern!}
-          hits={searchProps.hits}
-          sampleSize={sampleSize}
-          isShortDots={false}
-          showPagination={true}
-          docViewsRegistry={docViewsRegistry}
-          onRemoveColumn={searchProps.onRemoveColumn}
-          onAddColumn={searchProps.onAddColumn}
-          onFilter={handleFilter}
+        <ExploreEmbeddableDataTable
+          content={content}
+          selectedColumns={selectedColumns}
+          hideTimeColumn={hideTimeColumn}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          onFilter={onFilter}
         />
       );
-    }
-
-    if (searchProps.chartType === 'table') {
+    case 'table':
       return (
         <TableVis
-          columns={searchProps.tableData?.columns ?? []}
-          rows={searchProps.tableData?.rows ?? []}
-          styleOptions={searchProps.styleOptions as TableChartStyle}
+          columns={content.columns}
+          rows={content.rows}
+          styleOptions={content.config.styles as TableChartStyle}
           disableActions={true}
         />
       );
-    }
+    case 'chart':
+      return (
+        <CommonVisualizationRender
+          query={content.query}
+          visualizationData={content.data}
+          visConfig={content.config}
+          showRawTable={false}
+          timeRange={content.timeRange}
+          onSelectTimeRange={onSelectTimeRange}
+          crosshairGroup={crosshairGroup}
+        />
+      );
+  }
+};
 
-    if (searchProps.chartRender) {
-      return searchProps.chartRender();
-    }
+const ExploreEmbeddableView = (props: ExploreEmbeddableViewProps) => {
+  const { state } = props;
 
-    return null;
-  };
+  let content: React.ReactNode = null;
+  if (state.status === 'error') {
+    content = (
+      <VisualizationRequestError
+        error={state.error.message || state.error.name || 'An error occurred'}
+      />
+    );
+  } else {
+    content = renderContent(state.content, props);
+  }
 
   return (
     <EuiFlexGroup
@@ -140,8 +144,10 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       style={{ overflowX: 'auto' }}
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
-        {getEmbeddableContent()}
+        {content}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+export const ExploreEmbeddableComponent = React.memo(ExploreEmbeddableView);

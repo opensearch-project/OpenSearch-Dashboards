@@ -123,6 +123,7 @@ interface TestContainerInput extends ContainerInput {
   filters?: any[];
   query?: any;
   timeRange?: any;
+  isVisible?: boolean;
 }
 
 class TestDashboardContainer extends Container<{}, TestContainerInput> {
@@ -158,6 +159,7 @@ class TestDashboardContainer extends Container<{}, TestContainerInput> {
       filters: this.input.filters,
       query: this.input.query,
       timeRange: this.input.timeRange,
+      isVisible: this.input.isVisible,
     } as Partial<EmbeddableInput>;
   }
 
@@ -204,12 +206,19 @@ function createMockServices() {
 }
 
 function createMockSearchSource(overrides: any = {}) {
+  const indexPattern = {
+    id: 'test-index',
+    getFieldByName: jest.fn((name: string) => ({ name, sortable: true })),
+    fields: {
+      getByName: jest.fn((name: string) => ({ name })),
+    },
+  };
   const base: any = {
     setField: jest.fn().mockReturnThis(),
     setFields: jest.fn().mockReturnThis(),
     setParent: jest.fn().mockReturnThis(),
     getField: jest.fn((field) => {
-      if (field === 'index') return { id: 'test-index' };
+      if (field === 'index') return indexPattern;
       if (field === 'query') return { query: 'test', language: 'PPL' };
       return null;
     }),
@@ -282,6 +291,35 @@ describe('ExploreEmbeddable', () => {
     );
   });
 
+  const createEmbeddableForTest = (
+    id: string,
+    savedExploreOverrides: Record<string, unknown> = {},
+    inputOverrides: Partial<ExploreInput> = {}
+  ) => {
+    const localContainer = createTestContainer(id);
+    const localServices = createMockServices();
+    const savedExplore = {
+      ...mockSavedExplore,
+      ...savedExploreOverrides,
+    };
+    const instance = new ExploreEmbeddable(
+      {
+        savedExplore,
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: localServices.filterManager,
+        services: localServices,
+        editApp: 'explore/logs',
+      },
+      { ...mockInput, ...inputOverrides, id },
+      mockExecuteTriggerActions,
+      localContainer
+    );
+    return { instance, localContainer, savedExplore };
+  };
+
   afterEach(() => {
     embeddable.destroy();
     container.destroy();
@@ -334,14 +372,8 @@ describe('ExploreEmbeddable', () => {
     expect(typeof embeddable.getInspectorAdapters().data.setTabularLoader).toBe('function');
   });
 
-  test('initializes search props correctly', () => {
-    // @ts-ignore - accessing private property for testing
-    const searchProps = embeddable.searchProps;
-
-    expect(searchProps).toBeDefined();
-    expect(searchProps?.title).toBe('Test Explore');
-    expect(searchProps?.description).toBe('Test description');
-    expect(searchProps?.displayTimeColumn).toBe(false);
+  test('has no view state before the panel is mounted or explicitly fetched', () => {
+    expect((embeddable as any).state).toBeUndefined();
   });
 
   test('cleans up when destroy is called', () => {
@@ -370,43 +402,72 @@ describe('ExploreEmbeddable', () => {
   });
 
   test('handles fetch correctly', async () => {
-    // @ts-ignore
-    await embeddable.fetch();
+    await (embeddable as any).fetch();
 
     expect(mockSavedExplore.searchSource.fetch).toHaveBeenCalled();
     expect(embeddable.getOutput().loading).toBe(false);
     expect(embeddable.getOutput().error).toBeUndefined();
+    expect((embeddable as any).state).toEqual(
+      expect.objectContaining({
+        status: 'ready',
+        content: expect.objectContaining({ kind: 'logs' }),
+      })
+    );
   });
 
-  test('reload calls updateHandler with force=true', () => {
-    // @ts-ignore
-    const spy = jest.spyOn(embeddable as any, 'updateHandler').mockResolvedValue(undefined);
-    embeddable.reload();
-    expect(spy).toHaveBeenCalledWith(expect.anything(), true);
+  test('uses the same React component type across state transitions', () => {
+    (embeddable as any).root = mockRoot;
+
+    (embeddable as any).transitionToReady({
+      kind: 'logs',
+      dataset: (embeddable as any).indexPattern,
+      sampleSize: 500,
+      rows: [],
+      hits: 0,
+    });
+    const readyElement = mockRender.mock.calls.at(-1)?.[0];
+
+    (embeddable as any).transitionToError({
+      name: 'Error',
+      message: 'failed',
+    });
+    const errorElement = mockRender.mock.calls.at(-1)?.[0];
+
+    expect(errorElement.type).toBe(readyElement.type);
   });
 
-  test('reload does nothing when searchProps does not exist', () => {
-    // @ts-ignore
-    embeddable.searchProps = undefined;
-    // @ts-ignore
-    const spy = jest.spyOn(embeddable as any, 'updateHandler');
+  test('reload requests a forced input refresh', () => {
+    const spy = jest.spyOn(embeddable as any, 'handleInputChange').mockResolvedValue(undefined);
     embeddable.reload();
-    expect(spy).not.toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith(true);
+  });
+
+  test('output changes do not trigger data fetches', () => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+
+    (embeddable as any).updateOutput({ loading: true });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   test('onContainerError aborts and updates output', () => {
-    // @ts-ignore
-    embeddable.abortController = { abort: jest.fn() };
-    // @ts-ignore
-    embeddable.renderComplete = { dispatchError: jest.fn() };
-    const updateSpy = jest.spyOn(embeddable as any, 'updateOutput');
+    const abort = jest.fn();
+    (embeddable as any).abortController = { abort };
     const error = new Error('test error');
 
     embeddable.onContainerError(error);
 
-    // @ts-ignore
-    expect(embeddable.abortController.abort).toHaveBeenCalled();
-    expect(updateSpy).toHaveBeenCalledWith({ loading: false, error });
+    expect(abort).toHaveBeenCalled();
+    expect(embeddable.getOutput()).toEqual(
+      expect.objectContaining({
+        loading: false,
+        error: { name: 'Error', message: 'test error' },
+      })
+    );
+    expect((embeddable as any).state).toEqual({
+      status: 'error',
+      error: { name: 'Error', message: 'test error' },
+    });
   });
 
   test('destroy is idempotent', () => {
@@ -418,75 +479,66 @@ describe('ExploreEmbeddable', () => {
   });
 
   test('onContainerError works when abortController is undefined', () => {
-    // @ts-ignore
-    embeddable.abortController = undefined;
-    // @ts-ignore
-    embeddable.renderComplete = { dispatchError: jest.fn() };
-    const updateSpy = jest.spyOn(embeddable as any, 'updateOutput');
+    (embeddable as any).abortController = undefined;
     const error = new Error('test error');
 
     embeddable.onContainerError(error);
 
-    // @ts-ignore
-    expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
-    expect(updateSpy).toHaveBeenCalledWith({ loading: false, error });
+    expect(embeddable.getOutput().error).toEqual({
+      name: 'Error',
+      message: 'test error',
+    });
   });
 
-  test('renderComponent does nothing if searchProps is undefined', () => {
-    // @ts-ignore
-    embeddable.searchProps = undefined;
-    // @ts-ignore
-    expect(() => embeddable.renderComponent(mockNode, undefined)).not.toThrow();
+  test('renderComponent does nothing before state and root are available', () => {
+    expect(() => (embeddable as any).renderComponent()).not.toThrow();
   });
 
   test('destroy handles missing resources gracefully', () => {
-    // @ts-ignore
-    embeddable.subscription = undefined;
-    // @ts-ignore
-    embeddable.autoRefreshFetchSubscription = undefined;
-    // @ts-ignore
-    embeddable.abortController = undefined;
-    // @ts-ignore
-    embeddable.searchProps = undefined;
-    // @ts-ignore
-    embeddable.node = undefined;
+    (embeddable as any).inputSubscription = undefined;
+    (embeddable as any).autoRefreshFetchSubscription = undefined;
+    (embeddable as any).abortController = undefined;
+    (embeddable as any).node = undefined;
     expect(() => embeddable.destroy()).not.toThrow();
   });
 
   test('handles column actions correctly', () => {
     const updateInputSpy = jest.spyOn(embeddable, 'updateInput');
-    // @ts-ignore
-    const searchProps = embeddable.searchProps;
 
-    searchProps?.onAddColumn?.('column3');
+    (embeddable as any).onAddColumn('column3');
     expect(updateInputSpy).toHaveBeenCalledWith(
       expect.objectContaining({ columns: expect.anything() })
     );
 
-    searchProps?.onRemoveColumn?.('column1');
+    (embeddable as any).onRemoveColumn('column1');
     expect(updateInputSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ columns: expect.anything() })
-    );
-
-    searchProps?.onMoveColumn?.('column1', 1);
-    expect(updateInputSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ columns: expect.anything() })
-    );
-
-    searchProps?.onSetColumns?.(['column3', 'column4']);
-    expect(updateInputSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ columns: expect.anything() })
+      expect.objectContaining({
+        columns: expect.anything(),
+        sort: [],
+      })
     );
   });
 
-  test('handles filter action correctly', async () => {
-    // @ts-ignore
-    const searchProps = embeddable.searchProps;
-    await searchProps?.onFilter?.({ name: 'field1' } as any, ['value1'], 'is');
+  test('updates log columns without refetching the result set', async () => {
+    (embeddable as any).root = mockRoot;
+    (embeddable as any).node = mockNode;
+    await (embeddable as any).handleInputChange(true);
+    mockRender.mockClear();
+    mockSavedExplore.searchSource.fetch.mockClear();
+
+    embeddable.updateInput({ columns: ['column3'] });
+
+    expect(mockSavedExplore.searchSource.fetch).not.toHaveBeenCalled();
+    expect(mockRender.mock.calls.at(-1)?.[0].props.selectedColumns).toEqual(['column3']);
+  });
+
+  test('handles filter action correctly', () => {
+    (embeddable as any).onFilter('field1', 'value1', '+');
+
     expect(mockExecuteTriggerActions).toHaveBeenCalled();
   });
 
-  test('onFilter returns early when indexPattern is not available', async () => {
+  test('onFilter returns early when indexPattern is not available', () => {
     const mockServices = createMockServices();
     const noIndexContainer = createTestContainer('no-index-filter-emb');
     const noIndexSearchSource = createMockSearchSource({
@@ -514,18 +566,7 @@ describe('ExploreEmbeddable', () => {
       noIndexContainer
     );
 
-    // Manually set searchProps to enable onFilter testing
-    // @ts-ignore
-    embeddableNoIndex.searchProps = {
-      onFilter: async (field: any, value: any, operator: any) => {
-        const indexPattern = noIndexSearchSource.getField('index');
-        if (!indexPattern) return;
-      },
-    };
-
-    // @ts-ignore
-    const searchProps = embeddableNoIndex.searchProps;
-    await searchProps?.onFilter?.({ name: 'field1' } as any, ['value1'], 'is');
+    (embeddableNoIndex as any).onFilter('field1', 'value1', '+');
 
     expect(mockExecuteTriggerActionsLocal).not.toHaveBeenCalled();
 
@@ -560,28 +601,25 @@ describe('ExploreEmbeddable', () => {
       noIndexContainer
     );
 
-    // @ts-ignore
-    expect(embeddableNoIndex.searchProps).toBeDefined();
-    // @ts-ignore
-    expect(embeddableNoIndex.searchProps?.indexPattern).toBeNull();
+    expect((embeddableNoIndex as any).indexPattern).toBeUndefined();
 
     embeddableNoIndex.destroy();
     noIndexContainer.destroy();
   });
 
-  test('onAddColumn/onRemoveColumn/onMoveColumn/onSetColumns handle undefined columns gracefully', () => {
-    // @ts-ignore
-    const searchProps = embeddable.searchProps;
-    if (searchProps) {
-      searchProps.columns = undefined;
-      expect(() => searchProps.onAddColumn && searchProps.onAddColumn('col')).not.toThrow();
-      expect(() => searchProps.onRemoveColumn && searchProps.onRemoveColumn('col')).not.toThrow();
-      expect(() => searchProps.onMoveColumn && searchProps.onMoveColumn('col', 1)).not.toThrow();
-      expect(() => searchProps.onSetColumns && searchProps.onSetColumns(['a', 'b'])).not.toThrow();
-    }
+  test('column actions handle missing columns gracefully', () => {
+    const { instance, localContainer } = createEmbeddableForTest('no-columns-emb', {
+      columns: undefined,
+    });
+
+    expect(() => (instance as any).onAddColumn('col')).not.toThrow();
+    expect(() => (instance as any).onRemoveColumn('col')).not.toThrow();
+
+    instance.destroy();
+    localContainer.destroy();
   });
 
-  test('renders successfully even without index pattern', () => {
+  test('reports a render error when the logs view has no index pattern', async () => {
     const mockServices = createMockServices();
     const noIndexContainer = createTestContainer('no-index-emb');
     const noIndexSearchSource = createMockSearchSource({
@@ -607,70 +645,162 @@ describe('ExploreEmbeddable', () => {
       noIndexContainer
     );
 
-    // @ts-ignore
-    expect(emb.searchProps).toBeDefined();
-    expect(() => emb.render(mockNode)).not.toThrow();
+    await (emb as any).fetch();
+
+    expect((emb as any).state).toEqual({
+      status: 'error',
+      error: {
+        name: 'Error',
+        message: 'Cannot render the Explore logs table without a data view',
+      },
+    });
 
     emb.destroy();
     noIndexContainer.destroy();
   });
 
-  test('updateHandler skips fetch when node is not set', async () => {
-    // @ts-ignore
+  test('handleInputChange skips fetch when the panel is not mounted', async () => {
     const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
-    // @ts-ignore - no node set yet
-    embeddable.node = undefined;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps, true);
+    (embeddable as any).node = undefined;
+
+    await (embeddable as any).handleInputChange(true);
+
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  test('updateHandler fetches when node is set and force=true', async () => {
-    // @ts-ignore
+  test('handleInputChange fetches when the panel is mounted and force=true', async () => {
     const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
-    // @ts-ignore
-    embeddable.node = mockNode;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps, true);
+    (embeddable as any).node = mockNode;
+
+    await (embeddable as any).handleInputChange(true);
+
     expect(fetchSpy).toHaveBeenCalled();
   });
 
-  test('updateHandler skips fetch while not visible and records one is owed', async () => {
-    // @ts-ignore
+  test('handleInputChange skips fetch while not visible and records one is owed', async () => {
     const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
-    // @ts-ignore
-    embeddable.node = mockNode;
-    // @ts-ignore - set input directly to avoid retriggering the input subscription
-    embeddable.input.isVisible = false;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps, true);
+    (embeddable as any).node = mockNode;
+    // Set input directly to avoid retriggering the input subscription.
+    (embeddable as any).input.isVisible = false;
+
+    await (embeddable as any).handleInputChange(true);
+
     expect(fetchSpy).not.toHaveBeenCalled();
-    // @ts-ignore
-    expect(embeddable.pendingFetchOnResume).toBe(true);
+    expect((embeddable as any).pendingFetchOnResume).toBe(true);
   });
 
-  test('updateHandler runs the owed fetch once when the panel becomes visible', async () => {
-    // @ts-ignore
+  test('handleInputChange runs the owed fetch once when the panel becomes visible', async () => {
     const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
-    // @ts-ignore
-    embeddable.node = mockNode;
-    // Owe a fetch from a prior not-visible cycle; input is otherwise unchanged.
-    // @ts-ignore
-    embeddable.pendingFetchOnResume = true;
-    // @ts-ignore
-    embeddable.input.isVisible = true;
-    // @ts-ignore
-    await embeddable.updateHandler(embeddable.searchProps, false);
+    (embeddable as any).node = mockNode;
+    (embeddable as any).pendingFetchOnResume = true;
+    (embeddable as any).input.isVisible = true;
+
+    await (embeddable as any).handleInputChange();
+
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    // @ts-ignore
-    expect(embeddable.pendingFetchOnResume).toBe(false);
+    expect((embeddable as any).pendingFetchOnResume).toBe(false);
   });
 
-  test('fetch handles missing searchProps gracefully', async () => {
-    // @ts-ignore
-    embeddable.searchProps = undefined;
-    // @ts-ignore
-    await expect(embeddable.fetch()).resolves.toBeUndefined();
+  test('defers mounted panel refreshes while hidden and fetches once on expansion', () => {
+    const fetchSpy = jest.spyOn(embeddable as any, 'fetch').mockResolvedValue(undefined);
+    container.updateInput({ isVisible: false });
+    embeddable.render(mockNode);
+    embeddable.reload();
+    embeddable.reload();
+    container.updateInput({ timeRange: { from: 'now-1h', to: 'now' } });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    container.updateInput({ isVisible: true });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({ columns: ['column3'] });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('leaves the current view untouched while a refresh is loading', async () => {
+    const currentContent = {
+      kind: 'logs',
+      dataset: (embeddable as any).indexPattern,
+      sampleSize: 500,
+      rows: [],
+      hits: 0,
+    };
+    (embeddable as any).state = { status: 'ready', content: currentContent };
+    (embeddable as any).root = mockRoot;
+    mockRender.mockClear();
+
+    let resolveFetch!: (value: any) => void;
+    mockSavedExplore.searchSource.fetch.mockImplementationOnce(
+      () => new Promise((resolve) => (resolveFetch = resolve))
+    );
+
+    const refresh = (embeddable as any).fetch();
+    await Promise.resolve();
+
+    expect((embeddable as any).state).toEqual({
+      status: 'ready',
+      content: currentContent,
+    });
+    expect(mockRender).not.toHaveBeenCalled();
+    expect(embeddable.getOutput().loading).toBe(true);
+
+    resolveFetch({
+      hits: { hits: [], total: 0 },
+    });
+    await refresh;
+
+    expect(mockRender).toHaveBeenCalledTimes(1);
+    expect(embeddable.getOutput().loading).toBe(false);
+  });
+
+  test('ignores a stale response after a newer refresh starts', async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockSavedExplore.searchSource.fetch
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+
+    const firstRefresh = (embeddable as any).fetch();
+    await Promise.resolve();
+    const secondRefresh = (embeddable as any).fetch();
+    await Promise.resolve();
+
+    resolveFirst({
+      hits: {
+        hits: [
+          {
+            _index: 'test-index',
+            _id: 'stale',
+            _score: null,
+            _source: {},
+          },
+        ],
+        total: 1,
+      },
+    });
+    await firstRefresh;
+    expect((embeddable as any).state).toBeUndefined();
+    expect(embeddable.getOutput().loading).toBe(true);
+
+    resolveSecond({
+      hits: {
+        hits: [
+          {
+            _index: 'test-index',
+            _id: 'current',
+            _score: null,
+            _source: {},
+          },
+        ],
+        total: 1,
+      },
+    });
+    await secondRefresh;
+
+    expect((embeddable as any).state.content.rows[0]._id).toBe('current');
   });
 
   test('fetch handles empty data by skipping visualization processing', async () => {
@@ -684,17 +814,62 @@ describe('ExploreEmbeddable', () => {
       unknownColumns: [],
     });
 
-    mockSavedExplore.visualization = JSON.stringify({
-      chartType: 'line',
-      axesMapping: { x: 'field1', y: 'field2' },
+    const { instance, localContainer } = createEmbeddableForTest('empty-chart-emb', {
+      visualization: JSON.stringify({
+        chartType: 'line',
+        axesMapping: { x: 'field1', y: 'field2' },
+      }),
+      uiState: JSON.stringify({ activeTab: 'visualization' }),
     });
-    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
 
-    // @ts-ignore
-    await embeddable.fetch();
+    await (instance as any).fetch();
 
-    expect(embeddable.getOutput().error).toBeUndefined();
-    expect(embeddable.getOutput().loading).toBe(false);
+    expect(instance.getOutput().error).toBeUndefined();
+    expect(instance.getOutput().loading).toBe(false);
+    expect((instance as any).state).toEqual(
+      expect.objectContaining({
+        status: 'ready',
+        content: expect.objectContaining({
+          kind: 'chart',
+          data: expect.objectContaining({ transformedData: [] }),
+        }),
+      })
+    );
+
+    instance.destroy();
+    localContainer.destroy();
+  });
+
+  test('chart content uses the saved panel query instead of the dashboard query', async () => {
+    const panelQuery = {
+      query: 'SELECT * FROM logs',
+      language: 'SQL',
+      dataset: { id: 'panel-dataset', type: 'INDEXES', title: 'logs' },
+    };
+    const searchSource = createMockSearchSource({
+      getField: jest.fn((field: string) => (field === 'query' ? panelQuery : undefined)),
+      fetch: jest.fn().mockResolvedValue({ hits: { hits: [], total: 0 } }),
+    });
+    const { instance, localContainer } = createEmbeddableForTest(
+      'panel-query-chart-emb',
+      {
+        searchSource,
+        visualization: JSON.stringify({ chartType: 'line' }),
+        uiState: JSON.stringify({ activeTab: 'visualization' }),
+      },
+      { query: { query: '', language: 'PPL' } }
+    );
+
+    await (instance as any).fetch();
+
+    expect(instance.getOutput().error).toBeUndefined();
+    expect((instance as any).state.content.query).toEqual({
+      language: 'SQL',
+      dataset: panelQuery.dataset,
+    });
+
+    instance.destroy();
+    localContainer.destroy();
   });
 
   test('calls setTabularLoader with correct columns and rows when visualization data exists', async () => {
@@ -720,8 +895,7 @@ describe('ExploreEmbeddable', () => {
       'setTabularLoader'
     );
 
-    // @ts-ignore
-    await embeddable.fetch();
+    await (embeddable as any).fetch();
 
     expect(setTabularLoaderSpy).toHaveBeenCalledWith(expect.any(Function), {
       returnsFormattedValues: true,
@@ -767,8 +941,7 @@ describe('ExploreEmbeddable', () => {
       'setTabularLoader'
     );
 
-    // @ts-ignore
-    await embeddable.fetch();
+    await (embeddable as any).fetch();
 
     const loader: any = setTabularLoaderSpy.mock.calls[0][0];
     const result = loader();
@@ -790,17 +963,33 @@ describe('ExploreEmbeddable', () => {
       'adaptLegacyData'
     );
 
-    mockSavedExplore.visualization = JSON.stringify({
-      chartType: 'line',
-      axesMapping: { x: 'field1', y: 'field2' },
-      thresholdLines: [],
+    const mockNormalizeResultRows =
+      await import('../components/visualizations/utils/normalize_result_rows');
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [{ field1: 'a', field2: 10 }],
+      numericalColumns: [{ id: 1, name: 'field2', column: 'field2', schema: 'numerical' } as any],
+      categoricalColumns: [
+        { id: 0, name: 'field1', column: 'field1', schema: 'categorical' } as any,
+      ],
+      dateColumns: [],
+      unknownColumns: [],
     });
-    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
 
-    // @ts-ignore
-    await embeddable.fetch();
+    const { instance, localContainer } = createEmbeddableForTest('legacy-chart-emb', {
+      visualization: JSON.stringify({
+        chartType: 'line',
+        axesMapping: { x: 'field1', y: 'field2' },
+        params: { thresholdLines: [] },
+      }),
+      uiState: JSON.stringify({ activeTab: 'visualization' }),
+    });
+
+    await (instance as any).fetch();
 
     expect(adaptLegacyDataSpy).toHaveBeenCalled();
+
+    instance.destroy();
+    localContainer.destroy();
   });
 
   describe('variable interpolation in panel metadata', () => {
@@ -1140,12 +1329,14 @@ describe('ExploreEmbeddable', () => {
         parent
       );
 
-      const updateHandlerSpy = jest.spyOn(emb as any, 'updateHandler').mockResolvedValue(undefined);
+      const handleInputChangeSpy = jest
+        .spyOn(emb as any, 'handleInputChange')
+        .mockResolvedValue(undefined);
 
       // Same value as initial — skipped
       // @ts-ignore
       emb.handleVariablesChange();
-      expect(updateHandlerSpy).not.toHaveBeenCalled();
+      expect(handleInputChangeSpy).not.toHaveBeenCalled();
 
       // New value — refetches
       (mockInterpolation.interpolate as jest.Mock).mockReturnValue(
@@ -1153,7 +1344,8 @@ describe('ExploreEmbeddable', () => {
       );
       // @ts-ignore
       emb.handleVariablesChange();
-      expect(updateHandlerSpy).toHaveBeenCalledTimes(1);
+      expect(handleInputChangeSpy).toHaveBeenCalledTimes(1);
+      expect(handleInputChangeSpy).toHaveBeenCalledWith(true);
       expect(searchSource.setField).toHaveBeenCalledWith(
         'query',
         expect.objectContaining({ query: "source = logs | where env = 'staging'" })
