@@ -43,6 +43,7 @@ import { TraceHit } from './trace_details/traces/ppl_to_trace_hits';
 import { selectIsLoading } from '../../utils/state_management/selectors/query_editor/query_editor';
 import { RootState } from '../../utils/state_management/store';
 import { useTraceMetricsContext } from './hooks/use_trace_metrics';
+import { isMarkedAiRoot } from '../../utils/ai_root';
 
 /** Maps UI column field names to PPL index field names */
 export const PPL_SORT_FIELDS: Record<string, string> = {
@@ -199,7 +200,7 @@ export const TableEmptyState: React.FC<{
 
 /** Convert an OpenSearchSearchHit _source to a BaseRow for metadata.
  *  The _source from OpenSearch uses flat dotted keys, so we unflatten first.
- *  When `markExpandable` is true, root spans (no parentSpanId) are expandable. */
+ *  When `markExpandable` is true, root spans (no parentSpanId) and AI roots are expandable. */
 export const hitToBaseRow = (
   hit: OpenSearchSearchHit<Record<string, any>>,
   formatTs: (ts: string) => string,
@@ -208,7 +209,9 @@ export const hitToBaseRow = (
   const source = unflattenSource(hit._source || {}) as TraceHit;
   const span = traceHitToAgentSpan(source, 0);
   const row = spanToRow(span, 0, formatTs);
-  row.isExpandable = options?.markExpandable ? !source.parentSpanId : false;
+  row.isExpandable = options?.markExpandable
+    ? !source.parentSpanId || isMarkedAiRoot(source as Record<string, unknown>)
+    : false;
   row.level = 0;
   return row;
 };
