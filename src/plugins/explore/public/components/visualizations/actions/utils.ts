@@ -172,7 +172,7 @@ export function createAutoVisMeta(visualizationRegistry: VisualizationRegistry) 
   return {
     name: AUTO_VISUALIZATION_TOOL_NAME,
     description:
-      'Creates a visualization from a PPL query and its result column schema. This tool does NOT ' +
+      'Creates a visualization preview from a PPL query and its result column schema. This tool does NOT ' +
       'execute the query itself — it resolves the axes mapping from the provided columns, renders a ' +
       'chart preview, and provides an editor link.' +
       '\n\nWORKFLOW (follow in order):' +
@@ -191,7 +191,10 @@ export function createAutoVisMeta(visualizationRegistry: VisualizationRegistry) 
       'needed type ids at once, then pass the filled-in transformations array to this tool. ' +
       `You MUST do this before sending any transformations. Do NOT invent config keys. ` +
       '\n\nAVAILABLE TRANSFORMATION TYPES (pick one, then call get_transformation_schema for details):' +
-      buildTransformationBrief(transformations),
+      buildTransformationBrief(transformations) +
+      '\n\nAFTER THIS TOOL RUNS: this tool only renders a chart preview inside the chat and does ' +
+      'NOT save the visualization or add a panel to any dashboard. Instead, the user needs to ' +
+      'click "Open in Editor" and then "Save and back" in the editor to add the panel manually.',
 
     parameters: {
       type: 'object',
