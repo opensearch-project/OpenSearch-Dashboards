@@ -403,6 +403,201 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       });
     });
   });
+
+  describe('should handle SQL plugin missing when MDS is disabled', () => {
+    const noHandlerError = {
+      body: {
+        error: 'no handler found for uri [/_plugins/_query/_datasources] and method [GET]',
+      },
+      response: { status: 400 },
+    };
+
+    const mockDirectQueryGet = (result: Promise<unknown>) => {
+      mockedContext.http.get.mockImplementation((path: string) => {
+        if (String(path).includes('/api/directquery/dataconnections')) {
+          return result;
+        }
+        return Promise.resolve({ status: { statuses: [] } });
+      });
+    };
+
+    const mountTable = async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={false}
+              history={history}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
+            />
+          ),
+          {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+    };
+
+    beforeEach(() => {
+      mockedContext.notifications.toasts.addDanger.mockClear();
+      mockedContext.http.get.mockReset();
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(Promise.resolve([]));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should show unavailable prompt instead of a fetch toast when SQL plugin is missing', async () => {
+      mockDirectQueryGet(Promise.reject(noHandlerError));
+
+      await mountTable();
+
+      expect(component.find('[data-test-subj="directQueryDataSourcesUnavailable"]').exists()).toBe(
+        true
+      );
+      expect(component.find(tableIdentifier).exists()).toBe(false);
+      expect(mockedContext.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('should show empty table without a toast when SQL plugin returns no connections', async () => {
+      mockDirectQueryGet(Promise.resolve([]));
+
+      await mountTable();
+
+      expect(component.find('[data-test-subj="directQueryDataSourcesUnavailable"]').exists()).toBe(
+        false
+      );
+      expect(component.find(tableIdentifier).prop('items')).toEqual([]);
+      expect(component.find(tableIdentifier).prop('message')).toBe(
+        'No direct query connections found.'
+      );
+      expect(mockedContext.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('should list saved-object connections when SQL plugin is missing', async () => {
+      mockDirectQueryGet(Promise.reject(noHandlerError));
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(
+        Promise.resolve([
+          {
+            type: 'data-connection',
+            id: 'cloudwatch-1',
+            attributes: {
+              connectionId: 'CloudWatch Conn',
+              type: DataConnectionType.CloudWatch,
+            },
+          },
+        ])
+      );
+
+      await mountTable();
+
+      expect(component.find('[data-test-subj="directQueryDataSourcesUnavailable"]').exists()).toBe(
+        false
+      );
+      expect(component.find(tableIdentifier).prop('items')).toEqual(
+        expect.arrayContaining([expect.objectContaining({ title: 'CloudWatch Conn' })])
+      );
+      expect(mockedContext.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('should toast fetch error for 401/403', async () => {
+      mockDirectQueryGet(
+        Promise.reject({
+          body: { message: 'Unauthorized' },
+          response: { status: 401 },
+        })
+      );
+
+      await mountTable();
+
+      expect(component.find('[data-test-subj="directQueryDataSourcesUnavailable"]').exists()).toBe(
+        false
+      );
+      expect(mockedContext.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Could not fetch data sources'
+      );
+    });
+
+    it('should toast fetch error for 5xx failures', async () => {
+      mockDirectQueryGet(
+        Promise.reject({
+          body: { message: 'Internal server error' },
+          response: { status: 500 },
+        })
+      );
+
+      await mountTable();
+
+      expect(mockedContext.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Could not fetch data sources'
+      );
+    });
+  });
+
+  describe('should handle SQL plugin missing when MDS is enabled', () => {
+    const noHandlerError = {
+      body: {
+        error: 'no handler found for uri [/_plugins/_query/_datasources] and method [GET]',
+      },
+      response: { status: 400 },
+    };
+
+    it('should show unavailable prompt instead of a fetch toast when SQL plugin is missing', async () => {
+      mockedContext.notifications.toasts.addDanger.mockClear();
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve([]));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue(false);
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(Promise.resolve([]));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.reject(noHandlerError));
+
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
+            />
+          ),
+          {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+
+      expect(component.find('[data-test-subj="directQueryDataSourcesUnavailable"]').exists()).toBe(
+        true
+      );
+      expect(mockedContext.notifications.toasts.addDanger).not.toHaveBeenCalledWith(
+        'Cannot fetch data sources'
+      );
+      expect(mockedContext.notifications.toasts.addDanger).not.toHaveBeenCalledWith(
+        'Could not fetch data sources'
+      );
+    });
+  });
 });
 
 describe('FetchDirectQueryConnections', () => {

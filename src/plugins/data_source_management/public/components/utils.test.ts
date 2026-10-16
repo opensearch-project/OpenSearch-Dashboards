@@ -24,6 +24,7 @@ import {
   setDataSourceSelection,
   getDefaultDataSourceId,
   getDefaultDataSourceId$,
+  fetchDataSourceConnections,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import { UiSettingScope } from '../../../../core/public';
@@ -789,6 +790,59 @@ describe('DataSourceManagement: Utils.ts', () => {
       const result$ = getDefaultDataSourceId$(uiSettings);
       expect(result$).toBeInstanceOf(Observable);
       expect(result$).toEqual(id$);
+    });
+  });
+
+  describe('fetchDataSourceConnections', () => {
+    const noHandlerError = {
+      body: {
+        error: 'no handler found for uri [/_plugins/_query/_datasources] and method [GET]',
+      },
+      response: { status: 400 },
+    };
+
+    test('should rethrow when SQL plugin is missing for Direct Query table', async () => {
+      const http = { get: jest.fn().mockRejectedValue(noHandlerError) } as any;
+      const notifications = notificationServiceMock.createStartContract();
+
+      await expect(
+        fetchDataSourceConnections([], http, notifications, true, false, false)
+      ).rejects.toEqual(noHandlerError);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    test('should not toast when SQL plugin is missing for non-table callers', async () => {
+      const http = { get: jest.fn().mockRejectedValue(noHandlerError) } as any;
+      const notifications = notificationServiceMock.createStartContract();
+
+      const result = await fetchDataSourceConnections(
+        [],
+        http,
+        notifications,
+        // Association modal passes a mode string, which is truthy but not `true`.
+        'DirectQueryConnections' as any,
+        false,
+        false
+      );
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'local_cluster' })])
+      );
+    });
+
+    test('should toast generic error when fetch returns 5xx', async () => {
+      const http = {
+        get: jest.fn().mockRejectedValue({
+          body: { message: 'Internal server error' },
+          response: { status: 500 },
+        }),
+      } as any;
+      const notifications = notificationServiceMock.createStartContract();
+
+      await expect(
+        fetchDataSourceConnections([], http, notifications, true, false, false)
+      ).resolves.toEqual([]);
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith('Cannot fetch data sources');
     });
   });
 });
