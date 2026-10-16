@@ -96,3 +96,30 @@
 .osdQueryBar--hideEmpty:empty {
   display: none;
 }
+
+.euiQuickSelectPopover__sectionItem {
+  &:not(:last-of-type) {
+    margin-bottom: $ouiSizeXS;
+  }
+
+  .euiLink {
+    font-weight: $ouiFontWeightRegular;
+    font-size: $ouiFontSizeXS;
+  }
+}
+
+// EuiFlexGrid gutterSmall adds margin: 4px on all sides of each FlexItem.
+// Keep left/right at 4px to compensate the parent's margin: -4px, but zero
+// out top/bottom so vertical spacing only comes from the sectionItem rule above.
+.euiFlexGrid--gutterSmall > .euiQuickSelectPopover__sectionItem {
+  margin-top: 0;
+  margin-bottom: 0;
+
+  &:not(:last-of-type) {
+    margin-bottom: $ouiSizeXS;
+  }
+}
+
+.euiQuickSelect__applyButton {
+  font-size: $ouiFontSizeS !important;
+}

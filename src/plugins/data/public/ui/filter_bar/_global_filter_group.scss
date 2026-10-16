@@ -40,6 +40,7 @@
 
 .globalFilterBar__addButton {
   min-height: $euiSizeL + $euiSizeXS; // same height as the badges
+  font-size: $euiFontSizeS !important;
 }
 
 .globalFilterGroup__branch {
