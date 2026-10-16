@@ -137,6 +137,69 @@ describe('TraceDetailsFlyout', () => {
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
   });
 
+  it('heads the flyout with the clicked agent when two agents share an HTTP root', () => {
+    const agent = (id: string, name: string, startTime: string): TraceRow => ({
+      ...mockTrace,
+      id,
+      spanId: id,
+      parentSpanId: 'span-1',
+      name,
+      rawDocument: { startTime, attributes: { 'derived.gen_ai.is_root': true } },
+    });
+    const weather = agent('weather', 'invoke_agent Weather Agent', '1');
+    const events = agent('events', 'invoke_agent Events Agent', '2');
+    const httpRoot: TraceRow = { ...mockTrace, name: 'POST /runs', children: [weather, events] };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={events} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Events Agent')).toBeInTheDocument();
+  });
+
+  it('heads the flyout with the GenAI root when an inner span is marked', () => {
+    const inner: TraceRow = {
+      ...mockTrace,
+      id: 'inner',
+      spanId: 'inner',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Sub Agent',
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+    };
+    const genAiRoot: TraceRow = {
+      ...mockTrace,
+      name: 'invoke_agent Orchestrator',
+      rawDocument: { attributes: { 'gen_ai.operation.name': 'invoke_agent' } },
+      children: [inner],
+    };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={genAiRoot} fullTree={[genAiRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Orchestrator')).toBeInTheDocument();
+  });
+
+  it('heads the flyout with the nearest agent when a child span is clicked', () => {
+    const chat: TraceRow = {
+      ...mockTrace,
+      id: 'chat',
+      spanId: 'chat',
+      parentSpanId: 'agent',
+      name: 'chat',
+    };
+    const agent: TraceRow = {
+      ...mockTrace,
+      id: 'agent',
+      spanId: 'agent',
+      parentSpanId: 'span-1',
+      name: 'invoke_agent Travel Planner',
+      rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+      children: [chat],
+    };
+    const httpRoot: TraceRow = { ...mockTrace, name: 'POST /runs', children: [agent] };
+
+    render(<TraceDetailsFlyout {...defaultProps} trace={chat} fullTree={[httpRoot]} />);
+
+    expect(screen.getByText('Trace: invoke_agent Travel Planner')).toBeInTheDocument();
+  });
+
   it('heads the flyout with the marked AI root under a non-GenAI root', () => {
     const agent: TraceRow = {
       ...mockTrace,

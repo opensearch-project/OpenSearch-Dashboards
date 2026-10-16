@@ -43,7 +43,7 @@ import { FlyoutHistoryNav } from './flyout_history_nav';
 import { FlyoutNavigation } from './trace_flyout_state';
 import { readAttribute } from '../hooks/genai_message_preview';
 import { SessionRow } from '../../sessions/session_utils';
-import { isMarkedAiRoot } from '../../../utils/ai_root';
+import { aiRootsOf, isAiRootRow } from '../../../utils/ai_root';
 import './trace_details_flyout.scss';
 
 export interface TraceDetailsProps {
@@ -67,21 +67,30 @@ export const sessionIdOf = (rows: Array<TraceRow | undefined>): string | undefin
   return undefined;
 };
 
-/** The earliest span marked as the agent root, if any. */
-const findAiRoot = (rows: TraceRow[]): TraceRow | undefined => {
-  let found: TraceRow | undefined;
-  const visit = (row: TraceRow) => {
-    if (
-      isMarkedAiRoot(row.rawDocument) &&
-      (!found ||
-        String(row.rawDocument?.startTime ?? '') < String(found.rawDocument?.startTime ?? ''))
-    ) {
-      found = row;
-    }
-    (row.children as TraceRow[] | undefined)?.forEach(visit);
-  };
-  rows.forEach(visit);
-  return found;
+/** Every span of a tree, depth first. */
+const flattenRows = (rows: TraceRow[], out: TraceRow[] = []): TraceRow[] => {
+  for (const row of rows) {
+    out.push(row);
+    flattenRows((row.children as TraceRow[] | undefined) ?? [], out);
+  }
+  return out;
+};
+
+/**
+ * The span the flyout is about: the clicked row when it represents its trace (an AI root),
+ * else its nearest AI-root ancestor, else the trace's AI root (`aiRootsOf`), else the top span.
+ */
+export const headerSpanOf = (trace: TraceRow, fullTree: TraceRow[]): TraceRow => {
+  const all = flattenRows(fullTree);
+  const bySpanId = new Map(all.map((r) => [r.spanId, r]));
+  const seen = new Set<string>();
+  let current: TraceRow | undefined = bySpanId.get(trace.spanId) ?? trace;
+  while (current && !seen.has(current.spanId)) {
+    if (isAiRootRow(current)) return current;
+    seen.add(current.spanId);
+    current = current.parentSpanId ? bySpanId.get(current.parentSpanId) : undefined;
+  }
+  return aiRootsOf(all)[0] ?? fullTree[0];
 };
 
 export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
@@ -93,10 +102,10 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   onOpenSession,
   navigation,
 }) => {
-  // Header span: the marked AI root when the trace has one (an agent behind an HTTP handler, or a
-  // trace whose root was not exported), so name, latency and tokens are the agent's own.
+  // Header span: the agent the row represents (see headerSpanOf), so name, latency and tokens
+  // are that agent's own, also for parallel agents behind one HTTP root.
   const rootTrace = useMemo(() => {
-    if (fullTree && fullTree.length > 0) return findAiRoot(fullTree) ?? fullTree[0];
+    if (fullTree && fullTree.length > 0) return headerSpanOf(trace, fullTree);
     return trace;
   }, [fullTree, trace]);
 

@@ -108,6 +108,24 @@ describe('session_utils', () => {
       expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['agent', 'root']);
     });
 
+    it('keeps a GenAI root over a span an SDK marked below it', () => {
+      const rows = [
+        {
+          traceId: 't1',
+          spanId: 'root',
+          parentSpanId: '',
+          rawDocument: { attributes: { 'gen_ai.operation.name': 'invoke_agent' } },
+        },
+        {
+          traceId: 't1',
+          spanId: 'inner',
+          parentSpanId: 'root',
+          rawDocument: { attributes: { 'derived.gen_ai.is_root': true } },
+        },
+      ] as any;
+      expect(preferAiRoots(rows).map((r) => r.spanId)).toEqual(['root']);
+    });
+
     it('keeps a marked root over marked spans below it', () => {
       const row = (spanId: string, parentSpanId: string) =>
         ({

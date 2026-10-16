@@ -13,7 +13,7 @@ import {
   previewOutputMessages,
   readAttribute,
 } from '../traces/hooks/genai_message_preview';
-import { AI_ROOT_FIELD, isMarkedAiRoot } from '../../utils/ai_root';
+import { AI_ROOT_FIELD, aiRootsOf } from '../../utils/ai_root';
 
 /** Backtick-quoted session id field for use in PPL. */
 export const SESSION_FIELD_PPL = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
@@ -210,20 +210,24 @@ export const buildRootSpansQuery = (
   )}`;
 
 /**
- * One set of rows per trace: the marked AI roots when the trace has any (an agent behind an HTTP
- * handler), else its root. Both carry aggregated tokens, so keeping both would count them twice.
+ * The rows that represent each trace (`aiRootsOf`): its GenAI or marked root, else its marked
+ * spans (an agent behind an HTTP handler; several for parallel agents), else the fetched root.
+ * Both the HTTP root and the marked spans carry aggregated tokens, so keeping both would count
+ * them twice.
  */
 export const preferAiRoots = (rows: BaseRow[]): BaseRow[] => {
-  const marked = rows.filter((r) => isMarkedAiRoot(r.rawDocument));
-  const markedTraces = new Set(marked.map((r) => r.traceId));
-  // A marked root wins over marked spans below it (they can both be marked when a trace's
-  // children were flushed before its root arrived).
-  const markedRootTraces = new Set(marked.filter((r) => !r.parentSpanId).map((r) => r.traceId));
-  return rows.filter((r) => {
-    if (!markedTraces.has(r.traceId)) return true;
-    if (!isMarkedAiRoot(r.rawDocument)) return false;
-    return !markedRootTraces.has(r.traceId) || !r.parentSpanId;
-  });
+  const byTrace = new Map<string, BaseRow[]>();
+  for (const row of rows) {
+    const list = byTrace.get(row.traceId) ?? [];
+    list.push(row);
+    byTrace.set(row.traceId, list);
+  }
+  const kept = new Set<BaseRow>();
+  for (const traceRows of byTrace.values()) {
+    const roots = aiRootsOf(traceRows);
+    (roots.length > 0 ? roots : traceRows).forEach((r) => kept.add(r));
+  }
+  return rows.filter((r) => kept.has(r));
 };
 
 /** Every span in the given traces, for the session detail flyout. */
