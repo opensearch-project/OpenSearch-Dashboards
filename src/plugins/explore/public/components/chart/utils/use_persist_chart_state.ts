@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useEffectOnce } from 'react-use';
+import { safeSetItem } from '@osd/std';
 
 export type DiscoverChartToggleId = 'histogram' | 'summary';
 
@@ -22,14 +23,14 @@ export const usePersistedChartState = (defaultState: DiscoverChartToggleId = 'hi
       );
 
       if (!isValidState(storedValue)) {
-        localStorage.setItem('exploreChartState', toggleIdSelected);
+        safeSetItem(localStorage, 'exploreChartState', toggleIdSelected);
       }
     }
   });
 
   const updateToggleId = (newState: DiscoverChartToggleId) => {
     setToggleIdSelected(newState);
-    localStorage.setItem('exploreChartState', newState);
+    safeSetItem(localStorage, 'exploreChartState', newState);
   };
 
   return { toggleIdSelected, updateToggleId };

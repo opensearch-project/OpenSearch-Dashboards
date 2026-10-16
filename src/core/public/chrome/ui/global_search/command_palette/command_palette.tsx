@@ -23,6 +23,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KeyboardShortcutStart } from '../../../../keyboard_shortcut';
+import { isImeComposing } from '../../../../utils';
 import {
   GlobalSearchCommand,
   GlobalSearchResult,
@@ -267,6 +268,9 @@ export const GlobalSearchCommandPalette = ({
   );
 
   const onKeyDown = (event: KeyboardEvent) => {
+    // Escape, arrows and Enter pressed while composing belong to the IME (e.g. candidate selection).
+    if (isImeComposing(event)) return;
+
     if (event.key === 'Escape') {
       event.preventDefault();
       event.stopPropagation();
@@ -293,7 +297,7 @@ export const GlobalSearchCommandPalette = ({
       return;
     }
 
-    if (event.key === 'Enter' && activeResultIndex >= 0 && !event.nativeEvent.isComposing) {
+    if (event.key === 'Enter' && activeResultIndex >= 0) {
       event.preventDefault();
       event.stopPropagation();
       executeResult(results[activeResultIndex].result);

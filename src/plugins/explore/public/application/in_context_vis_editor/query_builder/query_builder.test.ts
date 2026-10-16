@@ -19,6 +19,11 @@ import {
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 
 const mockQuery = {
   query: 'source=logs | head 10',
@@ -534,6 +539,61 @@ describe('QueryBuilder', () => {
       });
 
       expect(setTimeSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("a registered Metrics source's own language", () => {
+    const dataset = { id: 'my-metrics', title: 'My metrics', type: 'MY_DATASET_TYPE' } as any;
+    beforeEach(() => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'my-source',
+        label: 'My Source',
+        datasetTypes: ['MY_DATASET_TYPE'],
+        flavors: [ExploreFlavor.Metrics],
+        languageSettings: { MY_SQL: {} },
+        resolveDefaultDataset: async () => undefined,
+      });
+      setSourceTypeRegistry(registry);
+      (getPreloadedQueryState as jest.Mock).mockResolvedValue({
+        query: '',
+        language: 'MY_SQL',
+        dataset,
+      });
+    });
+    afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+    it('keeps the saved query options on init and passes them to the query string', async () => {
+      await builder.init({
+        savedQueryState: {
+          query: 'SELECT 1',
+          language: 'MY_SQL',
+          dataset,
+          queryOptions: { maxDataPoints: 50 },
+        },
+      });
+
+      expect(builder.queryState$.value.queryOptions).toEqual({ maxDataPoints: 50 });
+      expect(services.data.query.queryString.setQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ language: 'MY_SQL', queryOptions: { maxDataPoints: 50 } })
+      );
+
+      builder.updateQueryOptions({ maxDataPoints: 75 });
+      expect(services.data.query.queryString.setQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ queryOptions: { maxDataPoints: 75 } })
+      );
+    });
+
+    it('still drops query options for a logs language', async () => {
+      (getPreloadedQueryState as jest.Mock).mockResolvedValue(mockQuery);
+      await builder.init({
+        savedQueryState: { ...mockQuery, queryOptions: { maxDataPoints: 50 } },
+      });
+
+      expect(builder.queryState$.value.queryOptions).toBeUndefined();
+      expect(services.data.query.queryString.setQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ language: 'PPL', queryOptions: undefined })
+      );
     });
   });
 

@@ -85,7 +85,11 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
-import { SourceTypeRegistryService, setSourceTypeRegistry } from './services/source_type_registry';
+import {
+  OPENSEARCH_SOURCE_TYPE_ID,
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from './services/source_type_registry';
 import { abortAllStreamingQueries } from './application/utils/streaming/streaming_abort_registry';
 import { releaseInFlightJobs } from './application/utils/streaming/release_jobs_on_unload';
 import { setServices } from './services/services';
@@ -810,9 +814,27 @@ export class ExplorePlugin implements Plugin<
     };
   }
 
+  /**
+   * Tells the data plugin which resource client serves each registered source's datasets, so
+   * PromQL autocomplete lists a source's metrics and labels the way its metric browser does.
+   * Covers sources registered after this runs too: a plugin may register from its own `start`
+   * (e.g. behind a capability), and plugins that depend on Explore start after it.
+   */
+  private registerSourceResourceClients(plugins: ExploreStartDependencies) {
+    const factory = plugins.data.resourceClientFactory;
+    if (!factory) return;
+    this.sourceTypeRegistry.onRegister(({ id, datasetTypes, metricsResourceClientId }) => {
+      if (id === OPENSEARCH_SOURCE_TYPE_ID || !metricsResourceClientId) return;
+      datasetTypes.forEach((datasetType) =>
+        factory.setClientForDatasetType(datasetType, metricsResourceClientId)
+      );
+    });
+  }
+
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
+    this.registerSourceResourceClients(plugins);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     // Register a dataset filter based on minDataSourceEngineVersions from the manifest.

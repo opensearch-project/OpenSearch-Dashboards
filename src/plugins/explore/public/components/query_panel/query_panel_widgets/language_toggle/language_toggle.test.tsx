@@ -43,6 +43,19 @@ jest.mock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
   useEditorFocus: () => mockFocusOnEditor,
   useEditorRef: () => mockEditorRef,
+  // The real switch, on the mocked editor hooks below.
+  useSwitchSourceType: (...args: unknown[]) =>
+    jest
+      .requireActual(
+        '../../../../application/hooks/editor_hooks/use_switch_source_type/use_switch_source_type'
+      )
+      .useSwitchSourceType(...args),
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_clear_editors', () => ({
+  useClearEditors: () => mockClearEditors,
+}));
+jest.mock('../../../../application/hooks/editor_hooks/use_editor_focus', () => ({
+  useEditorFocus: () => mockFocusOnEditor,
 }));
 
 // Mock getServices to provide language title
@@ -233,6 +246,89 @@ describe('LanguageToggle', () => {
 
     // Which url it resolves to is the link's own concern, covered in its unit test.
     expect(screen.getByTestId('exploreQueryPanelLearnMore')).toBeInTheDocument();
+  });
+
+  it('describes the selected language as the active source runs it', () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'cloud',
+      label: 'Cloud',
+      datasetTypes: ['CLOUD'],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: { SQL: { description: 'Query Cloud metrics using Cloud SQL.' } },
+    });
+    setSourceTypeRegistry(registry);
+    mockSelectQueryLanguage.mockReturnValue('SQL');
+    mockGetLanguage.mockReturnValue({ title: 'SQL' });
+    mockGetTab.mockReturnValue({ supportedLanguages: ['SQL'] });
+
+    // OpenSearch's own SQL reads as before: a chip with its registered title, no description.
+    const { unmount } = renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(
+      screen.queryByTestId('queryPanelFooterLanguageRowDescription-SQL')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveTextContent('SQL');
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveClass(
+      'exploreLanguagePicker__chip'
+    );
+    expect(screen.getByRole('group', { name: 'Query language' })).toBeInTheDocument();
+    unmount();
+
+    // The same SQL on the other source's dataset: a row with the source's description.
+    mockSelectDataset.mockReturnValue(testDataset('cloud-1', 'CLOUD'));
+    renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+    expect(screen.getByTestId('queryPanelFooterLanguageRowDescription-SQL')).toHaveTextContent(
+      'Query Cloud metrics using Cloud SQL.'
+    );
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toHaveClass(
+      'exploreLanguagePicker__language',
+      'exploreLanguagePicker__language--selected'
+    );
+  });
+
+  it("lists a source's described languages as rows with their tags, under the source's name", () => {
+    const registry = new SourceTypeRegistryService();
+    registry.register({
+      id: 'my-source',
+      label: 'My Source',
+      datasetTypes: ['MY_DATASET_TYPE'],
+      resolveDefaultDataset: async () => undefined,
+      languageSettings: {
+        PROMQL: {
+          tag: 'Recent metrics',
+          description: 'For metrics sent through the new pipeline.',
+        },
+        MY_SQL: { label: 'My SQL', tag: 'Every metric', description: 'For every metric.' },
+      },
+    });
+    setSourceTypeRegistry(registry);
+    mockSelectDataset.mockReturnValue(testDataset('my-1', 'MY_DATASET_TYPE'));
+    mockSelectQueryLanguage.mockReturnValue('PROMQL');
+    mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+    mockGetTab.mockReturnValue({ supportedLanguages: ['PROMQL', 'MY_SQL'] });
+
+    renderWithProvider(<LanguageToggle />);
+    fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+
+    expect(screen.getByRole('group', { name: 'Query language for My Source' })).toBeInTheDocument();
+    expect(screen.getByTestId('queryPanelFooterLanguageTag-PROMQL')).toHaveTextContent(
+      'Recent metrics'
+    );
+    expect(screen.getByTestId('queryPanelFooterLanguageRowDescription-PROMQL')).toHaveTextContent(
+      'For metrics sent through the new pipeline.'
+    );
+    const mySql = screen.getByTestId('queryPanelFooterLanguageToggle-MY_SQL');
+    expect(mySql).toHaveTextContent('My SQL');
+    expect(screen.getByTestId('queryPanelFooterLanguageTag-MY_SQL')).toHaveTextContent(
+      'Every metric'
+    );
+    expect(mySql).not.toHaveClass('exploreLanguagePicker__language--selected');
+    expect(screen.getByTestId('queryPanelFooterLanguageToggle-PROMQL')).toHaveAttribute(
+      'aria-current',
+      'true'
+    );
   });
 
   it('hides the documentation link in prompt mode, where no language chip is selected', () => {
@@ -500,6 +596,24 @@ describe('LanguageToggle', () => {
         expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
       });
       expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+    });
+
+    it("drops the previous language's query options when a language chip is clicked", async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle'));
+      const sql = await screen.findByTestId('queryPanelFooterLanguageToggle-SQL');
+      fireEvent.click(sql);
+
+      await waitFor(() =>
+        expect(mockSetQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ language: 'SQL', queryOptions: undefined })
+        )
+      );
+      expect(mockSetQuery.mock.calls[0][0]).toHaveProperty('queryOptions', undefined);
     });
 
     it('should HIDE SQL option when feature flag is disabled, even if tab supports SQL', async () => {
@@ -973,10 +1087,12 @@ describe('LanguageToggle', () => {
       fireEvent.click(screen.getByTestId('queryPanelFooterSourceType-Fake'));
 
       await waitFor(() => {
+        // The previous language's query options don't carry over.
         expect(mockSetQuery).toHaveBeenCalledWith({
           language: 'FakeQL',
           query: '',
           dataset: fakeDataset,
+          queryOptions: undefined,
         });
       });
       expect(resolve).toHaveBeenCalledWith({
