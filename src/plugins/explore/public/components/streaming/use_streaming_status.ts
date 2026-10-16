@@ -19,18 +19,20 @@ export interface StreamingStatus {
 /**
  * Streaming progress for a query, or an inert value when nothing is streaming.
  *
- * Defaults to the results query, which is what page-level controls track regardless of the active tab.
- * Pass `cacheKeyOverride` to follow a specific query instead: only the results query is streamed, so a
- * consumer displaying another query's numbers must not annotate them with this one's progress.
+ * `cacheKeyOverride` selects what to follow:
+ *   - omitted (undefined): the results query, which is what page-level controls track;
+ *   - a key: that specific query, for a consumer showing its numbers;
+ *   - null: nothing, for a consumer whose key could not be resolved and must not fall back to the
+ *     results query and mis-annotate a different query with its progress.
  *
  * `defaultPrepareQueryString` throws for languages it does not handle, and this runs on every render of
  * the page including before the query slice is populated, so it is guarded.
  */
-export const useStreamingStatus = (cacheKeyOverride?: string): StreamingStatus => {
+export const useStreamingStatus = (cacheKeyOverride?: string | null): StreamingStatus => {
   const query = useSelector((state: RootState) => state.query);
 
   const cacheKey = useMemo(() => {
-    if (cacheKeyOverride !== undefined) return cacheKeyOverride;
+    if (cacheKeyOverride !== undefined) return cacheKeyOverride ?? undefined;
     try {
       return query ? defaultPrepareQueryString(query) : undefined;
     } catch {

@@ -19,6 +19,14 @@ describe('buildTimeFilterWhereClause', () => {
     expect(clause).not.toContain('TIMESTAMP(');
   });
 
+  // The bounds are passed through as UTC with milliseconds, matching the interceptor; re-parsing
+  // through a local-time formatter used to shift them and drop the .SSS.
+  it('carries the UTC bounds verbatim, to the millisecond', () => {
+    const clause = buildTimeFilterWhereClause('@timestamp', RANGE);
+    expect(clause).toContain("'2026-09-15 00:00:00.000'");
+    expect(clause).toContain("'2026-09-16 00:00:00.000'");
+  });
+
   it('wraps literals in TIMESTAMP() for Open Distro engines, which reject bare strings', () => {
     const clause = buildTimeFilterWhereClause('@timestamp', RANGE, 'Elasticsearch');
     expect(clause).toContain("TIMESTAMP('");

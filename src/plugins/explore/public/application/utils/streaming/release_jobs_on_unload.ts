@@ -15,14 +15,19 @@ import { RootState } from '../state_management/store';
  */
 
 /**
- * Every job id the page knows of, including completed ones: a finished job holds its result until
- * `keep_alive` lapses. Releasing twice is harmless, as the route reports that as cancelled.
+ * Every job the page knows of, including completed ones: a finished job holds its result until
+ * `keep_alive` lapses. Releasing twice is harmless, as the route reports that as cancelled. The
+ * `dataSourceId` is carried so the DELETE reaches the job's own cluster — without it the route
+ * falls back to the local cluster, where a remote job 404s and leaks.
  */
-export const collectInFlightJobIds = (state: RootState): string[] => {
+export const collectInFlightJobs = (
+  state: RootState
+): Array<{ jobId: string; dataSourceId?: string }> => {
   const statuses = state?.queryEditor?.queryStatusMap ?? {};
   return Object.values(statuses)
-    .map((status) => status?.streaming?.jobId)
-    .filter((jobId): jobId is string => typeof jobId === 'string' && jobId.length > 0);
+    .map((status) => status?.streaming)
+    .filter((s): s is NonNullable<typeof s> => typeof s?.jobId === 'string' && s.jobId.length > 0)
+    .map((s) => ({ jobId: s.jobId as string, dataSourceId: s.dataSourceId }));
 };
 
 export interface ReleaseInFlightJobsArgs {
@@ -36,9 +41,10 @@ export interface ReleaseInFlightJobsArgs {
  * teardown, and `sendBeacon` cannot be used because it only issues POST while the route is a DELETE.
  */
 export const releaseInFlightJobs = ({ state, prependBasePath }: ReleaseInFlightJobsArgs): void => {
-  for (const jobId of collectInFlightJobIds(state)) {
+  for (const { jobId, dataSourceId } of collectInFlightJobs(state)) {
     try {
-      fetch(prependBasePath(`${PPL_STREAM_API.JOB}/${encodeURIComponent(jobId)}`), {
+      const query = dataSourceId ? `?dataSourceId=${encodeURIComponent(dataSourceId)}` : '';
+      fetch(prependBasePath(`${PPL_STREAM_API.JOB}/${encodeURIComponent(jobId)}${query}`), {
         method: 'DELETE',
         keepalive: true,
         headers: { 'osd-xsrf': 'true' },

@@ -66,14 +66,33 @@ describe('StreamRowAccumulator', () => {
     expect(acc.nextOffset).toBe(2);
   });
 
-  it('advances the generation on replacement so row ids do not carry over', () => {
+  it('advances the generation when a replacement changes the rows, so ids do not carry over', () => {
+    const acc = new StreamRowAccumulator(100);
+    acc.absorb(window_(0, 5));
+    const before = acc.rowGeneration;
+
+    // Re-served at offset 0, same length but different content (event_id 100..104).
+    const changed = {
+      schema,
+      datarows: Array.from({ length: 5 }, (_, i) => [`2026-09-15 10:00:00`, 100 + i]),
+      window: { offset: 0, count: 5 },
+      update_mode: 'REPLACE',
+    } as any;
+    acc.absorb(changed);
+
+    expect(acc.rowGeneration).toBe(before + 1);
+  });
+
+  // The engine re-serves offset 0 every poll in the provisional phase; bumping on an identical
+  // re-serve would remount the whole table each interval.
+  it('does not advance the generation when the re-served rows are identical', () => {
     const acc = new StreamRowAccumulator(100);
     acc.absorb(window_(0, 5));
     const before = acc.rowGeneration;
 
     acc.absorb(window_(0, 5, 'REPLACE'));
 
-    expect(acc.rowGeneration).toBe(before + 1);
+    expect(acc.rowGeneration).toBe(before);
   });
 
   it('does not advance the generation on the first window, which replaces nothing', () => {

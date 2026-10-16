@@ -27,16 +27,6 @@ const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
   'i'
 );
 
-/** Local two-digit date formatting, matching `formatDate` in query_enhancements/common. */
-const formatDate = (dateString: string): string => {
-  const d = new Date(dateString);
-  const pad = (n: number) => `0${n}`.slice(-2);
-  return (
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
-    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-  );
-};
-
 /**
  * Open Distro PPL rejects a bare string compared against a timestamp and needs `TIMESTAMP(...)`.
  * Applied only there: on OpenSearch the wrapper forces a per-value script filter that trips the
@@ -47,16 +37,26 @@ export const buildTimeFilterWhereClause = (
   timeRange: TimeRange,
   engineType?: string
 ): string => {
+  // Used as they come: formatTimePickerDate already emits DATE_FORMAT in UTC. Re-parsing through a
+  // local-time formatter shifts the bound (notably across a DST gap) and drops the milliseconds.
   const { fromDate, toDate } = formatTimePickerDate(timeRange, DATE_FORMAT);
   const wrap = getDataSourceEngineCapabilities(engineType).usesOpenDistroSqlPpl
     ? (literal: string) => `TIMESTAMP('${literal}')`
     : (literal: string) => `'${literal}'`;
-  return `WHERE \`${timeFieldName}\` >= ${wrap(formatDate(fromDate))} AND \`${timeFieldName}\` <= ${wrap(
-    formatDate(toDate)
+  return `WHERE \`${timeFieldName}\` >= ${wrap(fromDate)} AND \`${timeFieldName}\` <= ${wrap(
+    toDate
   )}`;
 };
 
-/** Inserts a where command directly after the source clause. */
+/**
+ * Inserts a where command directly after the source clause.
+ *
+ * Kept byte-identical to `PPLFilterUtils.insertWhereCommand`, which the standard (interceptor) path
+ * uses: the streaming and non-streaming paths must enrich a query the same way or one query returns
+ * different results depending on whether streaming is on. That shared implementation splits on a
+ * bare `|`, which mis-handles a `|` inside a string literal or bracketed subquery; the bug is
+ * tracked against the util so both paths can be fixed together rather than diverging here.
+ */
 export const insertWhereCommand = (query: string, whereCommand: string): string => {
   if (!whereCommand) return query;
   const commands = query.split('|');

@@ -46,6 +46,16 @@ export const STREAMING_MAX_HELD_ROWS = 100_000;
  */
 const ROWS_PER_POLL = 10_000;
 
+/** The route rejects count < 1, so a status-only poll asks for the smallest allowed window. */
+const STATUS_ONLY_POLL_COUNT = 1;
+
+/**
+ * Rows to request on the next poll. Once the held-row cap is reached the accumulator keeps nothing
+ * more, so a full window would be fetched and discarded; poll for status only instead.
+ */
+export const streamingPollCount = (rowsPerPoll: number, heldRowCapReached: boolean): number =>
+  heldRowCapReached ? STATUS_ONLY_POLL_COUNT : rowsPerPoll;
+
 export interface ExecuteStreamingQueryArgs {
   services: ExploreServices;
   cacheKey: string;
@@ -64,15 +74,16 @@ export interface ExecuteStreamingQueryArgs {
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(new DOMException('Aborted', 'AbortError'));
-      },
-      { once: true }
-    );
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      // Detach from the run-lifetime signal; { once: true } only fires on abort, not on this path.
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 
 const isAbort = (error: unknown): boolean => (error as { name?: string })?.name === 'AbortError';
@@ -147,6 +158,9 @@ export const executeStreamingQuery = createAsyncThunk<
 
       const streaming: StreamingQueryStatus = {
         jobId,
+        // Persisted so release-on-unload can target the job's cluster; a remote job released
+        // against the local cluster 404s and silently leaks until keep_alive.
+        dataSourceId,
         sequence: snapshot.sequence,
         updateMode: snapshot.update_mode as PPLStreamUpdateMode | undefined,
         total: snapshot.total ?? 0,
@@ -266,6 +280,15 @@ export const executeStreamingQuery = createAsyncThunk<
 
       // Fast path: the query finished inside the submit timeout, so there is no job to poll.
       if (!submitted.id) {
+        // Mirror the poll loop: a job can finish terminally within the submit window.
+        if (submitted.status === 'FAILED') {
+          failWith(streamJobError(submitted.error));
+          return;
+        }
+        if (submitted.status === 'CANCELLED') {
+          finalise(true);
+          return;
+        }
         if (!asHistogram) rows.absorb(submitted);
         publish(submitted, false);
         return;
@@ -284,13 +307,18 @@ export const executeStreamingQuery = createAsyncThunk<
       while (!signal.aborted) {
         await sleep(STREAMING_POLL_INTERVAL_MS, signal);
 
+        // Once the held-row cap is reached, absorb() keeps nothing, so asking for a full window
+        // just transfers and parses rows to discard them every interval. Drop to the smallest
+        // window the route allows and keep polling only to observe progress and terminal status.
+        const pollCount = streamingPollCount(ROWS_PER_POLL, !asHistogram && rows.isFull);
+
         // An aggregation always re-reads from the start: its snapshots are whole bucket sets, and
         // advancing would ask for a later slice of one.
         const snapshot = await stream.poll({
           id: jobId,
           withLongNumeralsSupport,
           offset: asHistogram || updateMode === 'REPLACE' ? 0 : rows.nextOffset,
-          count: ROWS_PER_POLL,
+          count: pollCount,
           dataSourceId,
           signal,
         });

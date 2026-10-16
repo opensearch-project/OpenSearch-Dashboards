@@ -10,6 +10,24 @@ import {
   splitHighlightColumn,
 } from './snapshot_to_result';
 
+/** Shallow per-field equality over two row sets, to tell a real replacement from a re-served page. */
+const sameRows = (
+  a: Array<Record<string, unknown>>,
+  b: Array<Record<string, unknown>>
+): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const ra = a[i];
+    const rb = b[i];
+    const keys = Object.keys(ra);
+    if (keys.length !== Object.keys(rb).length) return false;
+    for (const k of keys) {
+      if (ra[k] !== rb[k]) return false;
+    }
+  }
+  return true;
+};
+
 /**
  * Holds the rows a streaming run has fetched, and the cursor for the next window to request.
  *
@@ -67,10 +85,13 @@ export class StreamRowAccumulator {
     const at = snapshot.window?.offset ?? 0;
 
     if (at === 0) {
-      const replacing = this.rows.length > 0;
-      this.rows = incoming.slice(0, this.maxRows);
+      const next = incoming.slice(0, this.maxRows);
+      // Only a content change invalidates the synthesised row ids; the engine re-serves offset 0
+      // every poll during the provisional phase, so bumping unconditionally would remount the
+      // whole table each interval even when the rows are identical.
+      if (this.rows.length > 0 && !sameRows(this.rows, next)) this.generation += 1;
+      this.rows = next;
       this.highlights = highlights.slice(0, this.maxRows);
-      if (replacing) this.generation += 1;
       return this.rows.length;
     }
 

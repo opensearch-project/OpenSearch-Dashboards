@@ -10,6 +10,7 @@ import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_sl
 import {
   executeStreamingQuery,
   isStreamUnavailable,
+  streamingPollCount,
   STREAMING_POLL_INTERVAL_MS,
 } from './streaming_query_actions';
 
@@ -126,6 +127,31 @@ describe('executeStreamingQuery', () => {
     expect(results).toHaveLength(1);
     expect(results[0].results.hits.hits).toHaveLength(1);
     expect(statuses[statuses.length - 1].status.status).toBe('ready');
+  });
+
+  it('reports a FAILED fast-path result as an error, not an empty success', async () => {
+    mockSubmit.mockResolvedValue(
+      snapshot({ status: 'FAILED', error: { type: 'E', reason: 'boom', details: 'd' } })
+    );
+
+    const { statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
+
+    expect(mockPoll).not.toHaveBeenCalled();
+    expect(final.status).toBe('error');
+    expect(final.error?.message.reason).toBe('boom');
+  });
+
+  it('reports a CANCELLED fast-path result as stopped, not an empty success', async () => {
+    mockSubmit.mockResolvedValue(snapshot({ status: 'CANCELLED' }));
+
+    const { results, statuses } = await run();
+    const final = statuses[statuses.length - 1].status;
+
+    // Cancelled before any snapshot was published, so it finalises as stopped with no rendered result.
+    expect(mockPoll).not.toHaveBeenCalled();
+    expect(results).toHaveLength(0);
+    expect(final.streaming).toBeUndefined();
   });
 
   it('accumulates APPEND rows across polls and advances the offset', async () => {
@@ -250,6 +276,49 @@ describe('executeStreamingQuery', () => {
     const finalHits = results[results.length - 1].results.hits.hits;
     // The second snapshot's value must win despite identical total/size.
     expect(finalHits[0]._source.event_id).toBe(999);
+  });
+
+  // Each sleep() attaches an abort listener (named onAbort) to the run-lifetime signal; { once: true }
+  // only detaches on fire, so without explicit removal every poll would leak one. Assert every
+  // sleep listener that was added is also removed. Other code may register its own abort listeners,
+  // so this filters to sleep's by function name rather than requiring all listeners to balance.
+  it('does not leak sleep abort listeners across poll iterations', async () => {
+    const origAdd = AbortSignal.prototype.addEventListener;
+    const origRemove = AbortSignal.prototype.removeEventListener;
+    const isSleepListener = (l: unknown) => typeof l === 'function' && l.name === 'onAbort';
+    const added: unknown[] = [];
+    const removed: unknown[] = [];
+    const addSpy = jest
+      .spyOn(AbortSignal.prototype, 'addEventListener')
+      .mockImplementation(function (this: AbortSignal, type: any, listener: any, options: any) {
+        if (type === 'abort' && isSleepListener(listener)) added.push(listener);
+        return origAdd.call(this, type, listener, options);
+      });
+    const removeSpy = jest
+      .spyOn(AbortSignal.prototype, 'removeEventListener')
+      .mockImplementation(function (this: AbortSignal, type: any, listener: any, options: any) {
+        if (type === 'abort' && isSleepListener(listener)) removed.push(listener);
+        return origRemove.call(this, type, listener, options);
+      });
+
+    try {
+      mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+      // Several running polls, then terminate, so the loop calls sleep() repeatedly.
+      mockPoll
+        .mockResolvedValueOnce(snapshot({ id: 'job-1', status: 'RUNNING' }))
+        .mockResolvedValueOnce(snapshot({ id: 'job-1', status: 'RUNNING' }))
+        .mockResolvedValueOnce(snapshot({ id: 'job-1', status: 'RUNNING' }))
+        .mockResolvedValue(snapshot({ id: 'job-1', status: 'SUCCEEDED', total: 0, size: 0 }));
+
+      await run();
+
+      // At least a few sleeps ran, and every listener they added was also removed.
+      expect(added.length).toBeGreaterThan(1);
+      expect(removed).toEqual(added);
+    } finally {
+      addSpy.mockRestore();
+      removeSpy.mockRestore();
+    }
   });
 
   // `total` plateaus as soon as the engine finishes scanning, so gating on its growth stranded the
@@ -671,6 +740,38 @@ describe('executeStreamingQuery', () => {
     await promise;
   });
 
+  // The LOADING claim is guarded by isCurrent so a superseded run cannot report over its successor.
+  // Its caller must therefore register this run's token before dispatch; otherwise isCurrent sees a
+  // prior run and this claim is skipped, and the key never reports LOADING.
+  it('suppresses the LOADING claim when the run is already superseded', async () => {
+    let resolveSubmit: (v: any) => void = () => {};
+    mockSubmit.mockReturnValue(new Promise((r) => (resolveSubmit = r)));
+
+    const dispatched: any[] = [];
+    const dispatch: jest.Mock = jest.fn((action: any) => {
+      dispatched.push(action);
+      return typeof action === 'function' ? action(dispatch, () => ({})) : action;
+    });
+    const thunk = executeStreamingQuery({
+      services,
+      cacheKey: 'ck',
+      queryString: 'source=logs',
+      isCurrent: () => false,
+    } as any);
+    const promise = thunk(dispatch, () => ({}) as any, undefined);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const loading = dispatched.find(
+      (a) => a?.type === setIndividualQueryStatus.type && a.payload?.status?.status === 'loading'
+    );
+    expect(loading).toBeUndefined();
+
+    resolveSubmit(snapshot({ status: 'SUCCEEDED' }));
+    jest.advanceTimersByTime(STREAMING_POLL_INTERVAL_MS);
+    await promise;
+  });
+
   // A finished job is served as one REPLACE snapshot carrying only the requested window, so without
   // paging the table showed ROWS_PER_POLL rows and silently dropped the rest.
   it('pages through rows the terminal snapshot did not serve', async () => {
@@ -857,5 +958,17 @@ describe('executeStreamingQuery against a stateful engine', () => {
 
     expect(results[results.length - 1].results.hits.total).toBe(40);
     expect(statuses[statuses.length - 1].status.streaming.total).toBe(40);
+  });
+});
+
+describe('streamingPollCount', () => {
+  it('asks for a full row window while the held-row cap has not been reached', () => {
+    expect(streamingPollCount(10_000, false)).toBe(10_000);
+  });
+
+  // Past the cap the accumulator keeps nothing, so fetching a full window every interval is pure
+  // waste; shrink to the smallest window the route allows and poll only for status/progress.
+  it('shrinks to a status-only window once the held-row cap is reached', () => {
+    expect(streamingPollCount(10_000, true)).toBe(1);
   });
 });

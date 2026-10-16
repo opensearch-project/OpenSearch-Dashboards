@@ -44,6 +44,8 @@ export interface StreamingQueryStatus {
   aborted?: boolean;
   /** Absent on the fast path, where the query completed before a job was created. */
   jobId?: string;
+  /** The job's cluster, so release-on-unload can target a remote data source rather than local. */
+  dataSourceId?: string;
   sequence?: number;
   updateMode?: 'APPEND' | 'REPLACE';
   /** Accumulator size: rows the engine has committed, i.e. "rows found so far". */

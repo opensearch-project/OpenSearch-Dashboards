@@ -61,6 +61,15 @@ describe('useStreamingStatus', () => {
     expect(useStreamingStatus('absent-key').isPolling).toBe(false);
   });
 
+  it('follows nothing for a null override, rather than falling back to the results query', () => {
+    // A tab whose query key failed to resolve must not be annotated with the results query's progress.
+    const { cacheKey, streaming, isPolling } = useStreamingStatus(null);
+
+    expect(cacheKey).toBeUndefined();
+    expect(streaming).toBeUndefined();
+    expect(isPolling).toBe(false);
+  });
+
   it('returns an inert value instead of throwing for an unsupported language', () => {
     mockPrepareThrows = true;
 

@@ -352,11 +352,17 @@ const getStreamingConfig = async (
     const aggId = findDateHistogramAggId(histogramConfig?.aggs as Record<string, unknown>);
     if (!aggId || !histogramConfig?.finalInterval) return { tableQuery };
 
+    // A breakdown histogram is a multi-series `timechart ... by <field>`, which the single-series
+    // snapshot mapping (one bucket + one count column) cannot read: it would collapse every series
+    // into one wrong count. Leave the histogram to the synchronous path until streamed breakdown
+    // series are supported; the table still streams.
+    if (state.queryEditor.breakdownField) return { tableQuery };
+
     return {
       tableQuery,
       histogram: {
-        // The chart reads this key, not the data table's.
-        cacheKey: prepareHistogramCacheKey(query, !!state.queryEditor.breakdownField),
+        // No breakdown on this path (handled above), so the plain histogram cache key.
+        cacheKey: prepareHistogramCacheKey(query),
         aggId,
         // The aggregation itself, so it runs as its own streaming job.
         queryString: buildPPLHistogramQuery(
@@ -441,6 +447,12 @@ export const executeQueries = createAsyncThunk<
     if (streamingConfig) {
       // Identifies this run so a superseded one cannot publish over, or unregister, its successor.
       const tableToken = {};
+      // Register before dispatch so the token owns the key when executeStreamingQuery's synchronous
+      // LOADING claim runs isCurrentStreamingRun(); registering after would let that claim be skipped
+      // while a prior run for the same key still holds the token. The real abort is patched in once
+      // the thunk returns the promise.
+      let abortTable: () => void = () => undefined;
+      registerStreamingAbort(dataTableCacheKey, () => abortTable(), tableToken);
       const run = dispatch(
         executeStreamingQuery({
           services,
@@ -451,7 +463,7 @@ export const executeQueries = createAsyncThunk<
           isCurrent: () => isCurrentStreamingRun(dataTableCacheKey, tableToken),
         })
       );
-      registerStreamingAbort(dataTableCacheKey, () => run.abort(), tableToken);
+      abortTable = () => run.abort();
       run
         .finally(() => unregisterStreamingAbort(dataTableCacheKey, tableToken))
         .catch(() => undefined);
@@ -478,6 +490,10 @@ export const executeQueries = createAsyncThunk<
       if (streamingConfig.histogram && needsHistogramQuery) {
         const histogramKey = streamingConfig.histogram.cacheKey;
         const histogramToken = {};
+        // Register before dispatch, as with the table run above, so the LOADING claim's
+        // isCurrentStreamingRun() sees this token rather than a prior run's.
+        let abortHistogram: () => void = () => undefined;
+        registerStreamingAbort(histogramKey, () => abortHistogram(), histogramToken);
         const histogramRun = dispatch(
           executeStreamingQuery({
             services,
@@ -489,7 +505,7 @@ export const executeQueries = createAsyncThunk<
             isCurrent: () => isCurrentStreamingRun(histogramKey, histogramToken),
           })
         );
-        registerStreamingAbort(histogramKey, () => histogramRun.abort(), histogramToken);
+        abortHistogram = () => histogramRun.abort();
         // If submit fails the chart has nothing, so run the standard histogram query instead.
         // Not awaited, so the chain is terminated here rather than left floating.
         histogramRun

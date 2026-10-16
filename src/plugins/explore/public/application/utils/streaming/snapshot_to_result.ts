@@ -4,9 +4,6 @@
  */
 
 /*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- *
  * Converts a streaming PPL snapshot into the `ISearchResult` the results table already renders.
  *
  * The synchronous path reaches the same shape via `createDataFrame` and `convertResult`; streaming

@@ -3,40 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { collectInFlightJobIds, releaseInFlightJobs } from './release_jobs_on_unload';
+import { collectInFlightJobs, releaseInFlightJobs } from './release_jobs_on_unload';
 
 const stateWith = (statuses: Record<string, unknown>) =>
   ({ queryEditor: { queryStatusMap: statuses } }) as any;
 
-describe('collectInFlightJobIds', () => {
-  it('collects ids of runs still polling', () => {
+describe('collectInFlightJobs', () => {
+  it('collects runs still polling, with their data source', () => {
     expect(
-      collectInFlightJobIds(
+      collectInFlightJobs(
         stateWith({
           table: { streaming: { isPolling: true, jobId: 'job-1' } },
-          histogram: { streaming: { isPolling: true, jobId: 'job-2' } },
+          histogram: { streaming: { isPolling: true, jobId: 'job-2', dataSourceId: 'ds-1' } },
         })
       )
-    ).toEqual(['job-1', 'job-2']);
+    ).toEqual([
+      { jobId: 'job-1', dataSourceId: undefined },
+      { jobId: 'job-2', dataSourceId: 'ds-1' },
+    ]);
   });
 
   it('includes finished runs, whose job still holds its result until keep_alive lapses', () => {
     expect(
-      collectInFlightJobIds(stateWith({ a: { streaming: { isPolling: false, jobId: 'job-1' } } }))
-    ).toEqual(['job-1']);
+      collectInFlightJobs(stateWith({ a: { streaming: { isPolling: false, jobId: 'job-1' } } }))
+    ).toEqual([{ jobId: 'job-1', dataSourceId: undefined }]);
   });
 
   it('ignores the fast path, which never created a job', () => {
-    expect(collectInFlightJobIds(stateWith({ a: { streaming: { isPolling: true } } }))).toEqual([]);
+    expect(collectInFlightJobs(stateWith({ a: { streaming: { isPolling: true } } }))).toEqual([]);
   });
 
   it('ignores non-streaming queries', () => {
-    expect(collectInFlightJobIds(stateWith({ a: { status: 'loading' } }))).toEqual([]);
+    expect(collectInFlightJobs(stateWith({ a: { status: 'loading' } }))).toEqual([]);
   });
 
   it('tolerates an empty or absent status map', () => {
-    expect(collectInFlightJobIds(stateWith({}))).toEqual([]);
-    expect(collectInFlightJobIds({} as any)).toEqual([]);
+    expect(collectInFlightJobs(stateWith({}))).toEqual([]);
+    expect(collectInFlightJobs({} as any)).toEqual([]);
   });
 });
 
@@ -72,6 +75,19 @@ describe('releaseInFlightJobs', () => {
     });
 
     expect(fetchMock.mock.calls[0][0]).toBe('/api/enhancements/ppl/stream/job/a%2Fb%2Bc%3D');
+  });
+
+  it('targets the job data source, so a remote job is released against its own cluster', () => {
+    releaseInFlightJobs({
+      state: stateWith({
+        a: { streaming: { isPolling: true, jobId: 'job-1', dataSourceId: 'ds/1' } },
+      }),
+      prependBasePath: (path) => path,
+    });
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      '/api/enhancements/ppl/stream/job/job-1?dataSourceId=ds%2F1'
+    );
   });
 
   it('does nothing when there is no job to release', () => {

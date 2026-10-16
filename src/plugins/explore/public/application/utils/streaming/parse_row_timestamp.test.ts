@@ -35,6 +35,9 @@ describe('parseRowTimestamp', () => {
       ['2026-09-15 10:00:00.5', 500],
       ['2026-09-15 10:00:00.05', 50],
       ['2026-09-15 10:00:00.123', 123],
+      // Sub-millisecond precision truncates to ms rather than falling through to local-time Date.parse.
+      ['2026-09-15 10:00:00.123456', 123],
+      ['2026-09-15 10:00:00.1', 100],
     ])('reads %p as %p milliseconds', (value, ms) => {
       expect(parseRowTimestamp(value)).toBe(Date.UTC(2026, 8, 15, 10, 0, 0, ms));
     });

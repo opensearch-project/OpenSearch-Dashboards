@@ -14,7 +14,7 @@ export const parseRowTimestamp = (value: unknown): number | undefined => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
   if (typeof value !== 'string') return undefined;
 
-  const sqlLike = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/.exec(
+  const sqlLike = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?$/.exec(
     value.trim()
   );
   if (sqlLike) {
@@ -26,7 +26,8 @@ export const parseRowTimestamp = (value: unknown): number | undefined => {
       Number(hh),
       Number(mi),
       Number(ss),
-      frac ? Number(frac.padEnd(3, '0')) : 0
+      // Any fractional precision, truncated to milliseconds: '123456' -> 123, '1' -> 100.
+      frac ? Number(frac.slice(0, 3).padEnd(3, '0')) : 0
     );
   }
 

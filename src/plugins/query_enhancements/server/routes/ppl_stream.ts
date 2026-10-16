@@ -197,7 +197,12 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         query: schema.object({ dataSourceId: schema.maybe(schema.string()) }),
       },
     },
-    requireFeature('pplStreaming', logger, async (context, req, res) => {
+    // Deliberately NOT behind requireFeature: this is the only path by which the client releases a
+    // server-side job (on completion, abort, or page unload). Gating it means that once the flag is
+    // turned off, any job still in flight can no longer be cancelled — the client swallows the 403
+    // and the job holds its result in cluster heap until keep_alive lapses. Cancel is cleanup, never
+    // a feature surface, so it must always succeed; only submit/poll are gated.
+    async (context, req, res) => {
       const { id } = req.params;
       try {
         const client = await resolveOpenSearchClient(context, req.query.dataSourceId);
@@ -221,6 +226,6 @@ export function registerPPLStreamRoutes(router: IRouter, logger: Logger) {
         logger.debug(`PPL stream cancel error for ${id}: ${message}`);
         return res.custom({ statusCode: coerceStatusCode(status), body: message });
       }
-    })
+    }
   );
 }

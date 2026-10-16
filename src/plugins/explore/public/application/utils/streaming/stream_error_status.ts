@@ -4,9 +4,6 @@
  */
 
 /*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- *
  * Maps a streaming failure onto the error shape the non-streaming path produces.
  *
  * The backend reports a failed job's cause under `error` on the snapshot, and an HTTP failure under
