@@ -47,6 +47,14 @@ jest.mock('./table_row_btn_collapse', () => ({
   ),
 }));
 
+jest.mock('./table_row_btn_copy', () => ({
+  DocViewTableRowBtnCopy: ({ onClick }: any) => (
+    <button data-test-subj="copyValueButton" onClick={onClick}>
+      Copy Value
+    </button>
+  ),
+}));
+
 jest.mock('./table_row_icon_no_mapping', () => ({
   DocViewTableRowIconNoMapping: () => <span data-test-subj="noMappingIcon">No Mapping Icon</span>,
 }));
@@ -215,5 +223,40 @@ describe('DocViewTableRow', () => {
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('alert("xss")');
     expect(html).toContain('Safe content');
+  });
+
+  it('renders copy value button and copies string value to clipboard when clicked', () => {
+    const mockWriteText = jest.fn();
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: mockWriteText,
+      },
+    });
+
+    render(
+      <DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw="test string payload" />
+    );
+
+    const copyBtn = screen.getByTestId('copyValueButton');
+    expect(copyBtn).toBeInTheDocument();
+
+    fireEvent.click(copyBtn);
+    expect(mockWriteText).toHaveBeenCalledWith('test string payload');
+  });
+
+  it('copies object value formatted as JSON to clipboard when clicked', () => {
+    const mockWriteText = jest.fn();
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: mockWriteText,
+      },
+    });
+
+    const objRaw = { foo: 'bar', count: 123 };
+    render(<DocViewTableRow {...defaultProps} onFilter={mockOnFilter} valueRaw={objRaw} />);
+
+    const copyBtn = screen.getByTestId('copyValueButton');
+    fireEvent.click(copyBtn);
+    expect(mockWriteText).toHaveBeenCalledWith(JSON.stringify(objRaw, null, 2));
   });
 });
