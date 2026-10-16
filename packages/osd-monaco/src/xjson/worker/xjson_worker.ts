@@ -29,7 +29,7 @@
  */
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import * as monaco from 'monaco-editor/editor/editor.api.js';
 import { createParser, Parser, ParseResult } from '../grammar';
 
 export class XJsonWorker {

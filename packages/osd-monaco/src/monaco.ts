@@ -31,26 +31,23 @@
 /* eslint-disable @osd/eslint/module_migration */
 
 // Import the monaco-editor package directly
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-
-// Import CSS for Monaco editor icons
-import 'monaco-editor/min/vs/editor/editor.main.css';
+import * as monaco from 'monaco-editor/editor/editor.api.js';
 
 // Import worker-related modules
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/editor/browser/services/editorWorkerService';
+import 'monaco-editor/base/common/worker/webWorker.js';
+import 'monaco-editor/editor/browser/services/editorWorkerService.js';
 
 // Import core editor functionality
-import 'monaco-editor/esm/vs/editor/browser/coreCommands';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditor/codeEditorWidget';
+import 'monaco-editor/editor/browser/coreCommands.js';
+import 'monaco-editor/editor/browser/widget/codeEditor/codeEditorWidget.js';
 
 // Import editor features
-import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations'; // For word-wise char navigation
-import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController'; // For autocomplete
-import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution'; // For hover
-import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints'; // For parameter hints
-import 'monaco-editor/esm/vs/editor/contrib/format/browser/formatActions'; // For document formatting
-import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment'; // For comment/uncomment support
-import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions'; // For quick-fix lightbulb + editor.action.quickFix
+import 'monaco-editor/editor/contrib/wordOperations/browser/wordOperations.js'; // For word-wise char navigation
+import 'monaco-editor/editor/contrib/suggest/browser/suggestController.js'; // For autocomplete
+import 'monaco-editor/editor/contrib/hover/browser/hoverContribution.js'; // For hover
+import 'monaco-editor/editor/contrib/parameterHints/browser/parameterHints.js'; // For parameter hints
+import 'monaco-editor/editor/contrib/format/browser/formatActions.js'; // For document formatting
+import 'monaco-editor/editor/contrib/comment/browser/comment.js'; // For comment/uncomment support
+import 'monaco-editor/editor/contrib/codeAction/browser/codeActionContributions.js'; // For quick-fix lightbulb + editor.action.quickFix
 
 export { monaco };

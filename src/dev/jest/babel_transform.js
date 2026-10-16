@@ -28,7 +28,21 @@
  * under the License.
  */
 
+const importMetaToFileUrl = ({ template }) => ({
+  visitor: {
+    MetaProperty(path, state) {
+      if (!/[\/\\]node_modules[\/\\]monaco-editor[\/\\]/.test(state.filename || '')) return;
+      if (path.node.meta.name === 'import' && path.node.property.name === 'meta') {
+        path.replaceWith(
+          template.expression.ast`({ url: require('url').pathToFileURL(__filename).href })`
+        );
+      }
+    },
+  },
+});
+
 module.exports = require('babel-jest').default.createTransformer({
+  plugins: [importMetaToFileUrl],
   presets: [
     [
       require.resolve('@osd/babel-preset/node_preset'),
