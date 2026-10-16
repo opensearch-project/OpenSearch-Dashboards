@@ -59,6 +59,8 @@ const TopNav = ({
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
+  const showWriteControls =
+    services.application.capabilities?.dashboard?.showWriteControls !== false;
 
   // Get nav actions for direct function calls
   const keyboardNavActions = getNavActions(
@@ -118,7 +120,7 @@ const TopNav = ({
 
   // Register/unregister save shortcut based on edit mode
   useEffect(() => {
-    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
+    if (showWriteControls && currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
       keyboardShortcut.register({
         id: 'save_dashboard',
         pluginId: 'dashboard',
@@ -140,11 +142,11 @@ const TopNav = ({
         });
       };
     }
-  }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
+  }, [currentAppState?.viewMode, keyboardShortcut, handleSave, showWriteControls]);
 
   // Register/unregister add shortcut based on edit mode
   useEffect(() => {
-    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
+    if (showWriteControls && currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
       keyboardShortcut.register({
         id: 'add_panel_to_dashboard',
         pluginId: 'dashboard',
@@ -166,21 +168,34 @@ const TopNav = ({
         });
       };
     }
-  }, [currentAppState?.viewMode, keyboardShortcut, handleAddPanel]);
+  }, [currentAppState?.viewMode, keyboardShortcut, handleAddPanel, showWriteControls]);
 
-  // Register dashboard edit mode keyboard shortcut
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'toggle_dashboard_edit',
-    pluginId: 'dashboard',
-    name: i18n.translate('dashboard.topNav.toggleEditModeShortcut', {
-      defaultMessage: 'Toggle edit mode',
-    }),
-    category: i18n.translate('dashboard.topNav.panelLayoutCategory', {
-      defaultMessage: 'Panel / layout',
-    }),
-    keys: 'shift+e',
-    execute: handleToggleDashboardEdit,
-  });
+  // Register/unregister the edit shortcut based on write access.
+  useEffect(() => {
+    if (!showWriteControls || !keyboardShortcut) {
+      return;
+    }
+
+    keyboardShortcut.register({
+      id: 'toggle_dashboard_edit',
+      pluginId: 'dashboard',
+      name: i18n.translate('dashboard.topNav.toggleEditModeShortcut', {
+        defaultMessage: 'Toggle edit mode',
+      }),
+      category: i18n.translate('dashboard.topNav.panelLayoutCategory', {
+        defaultMessage: 'Panel / layout',
+      }),
+      keys: 'shift+e',
+      execute: handleToggleDashboardEdit,
+    });
+
+    return () => {
+      keyboardShortcut.unregister({
+        id: 'toggle_dashboard_edit',
+        pluginId: 'dashboard',
+      });
+    };
+  }, [handleToggleDashboardEdit, keyboardShortcut, showWriteControls]);
 
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage');
 
