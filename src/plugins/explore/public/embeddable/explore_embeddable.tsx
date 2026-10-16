@@ -708,9 +708,9 @@ export class ExploreEmbeddable
     }
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = transformedRows;
+    this.searchProps.rows = uiState.activeTab === 'logs' ? rawRows : transformedRows;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = transformedRows.length;
+    this.searchProps.hits = rawRows.length;
     this.searchProps.isLoading = false;
 
     // Update shared panel data store so the global fetch_panel_data tool returns fresh data
