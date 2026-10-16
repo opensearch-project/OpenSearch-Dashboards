@@ -65,6 +65,7 @@ export const processTraceAggregationResults = ({
     : {
         hits: { hits: [], total: 0, max_score: 0 },
         fieldCounts: {},
+        nonEmptyFieldCounts: {},
         dataset,
         elapsedMs: 0,
       };

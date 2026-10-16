@@ -87,7 +87,9 @@ export class CorrelationService {
     try {
       const allCorrelationsResponse = await this.savedObjectsClient.find({
         type: 'correlations',
-        fields: ['correlations', 'references'],
+        // 'entities' is required: checkCorrelationsForLogs reads attributes.entities to
+        // identify the linked log datasets. Omitting it returns empty log-dataset lists.
+        fields: ['correlations', 'entities', 'references'],
         perPage: size,
       });
 
@@ -133,19 +135,30 @@ export class CorrelationService {
 
       // Format the dataset object using the actual fields from the response
       const attributes = indexPattern.attributes as IndexPatternAttributes;
+      // Guarded parse: a malformed stored value degrades to "no mappings" instead of throwing.
+      let schemaMappings;
+      try {
+        schemaMappings = attributes?.schemaMappings
+          ? JSON.parse(attributes.schemaMappings)
+          : undefined;
+      } catch {
+        schemaMappings = undefined;
+      }
       const logDataset: Dataset = {
         id: indexPattern.id,
         timeFieldName: attributes?.timeFieldName || 'time',
         title: attributes?.title || 'Unknown Title',
         type: attributes?.type || 'INDEX_PATTERN',
-        schemaMappings: attributes?.schemaMappings
-          ? JSON.parse(attributes.schemaMappings)
-          : undefined,
+        schemaMappings,
       };
 
       // Extract datasource information from the log dataset's references if it exists
       if (indexPattern.references && indexPattern.references.length > 0) {
-        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        // Match by reference name as well as type, tolerating datasets whose reference `type`
+        // was persisted as the engine type ('OpenSearch', ...) rather than 'data-source'.
+        const dataSourceRef = indexPattern.references.find(
+          (ref) => ref.name === 'dataSource' || ref.type === 'data-source'
+        );
         if (dataSourceRef) {
           try {
             // Fetch the actual data source details

@@ -651,7 +651,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                      
                     <a
                       class="euiLink euiLink--primary"
-                      href="https://opensearch.org/docs/mocked-test-branch/opensearch/index/"
+                      href="https://opensearch.org/docs/mocked-test-branch/about/"
                       rel="noopener noreferrer"
                       style="font-weight: normal;"
                       target="_blank"
@@ -1247,7 +1247,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                      
                     <a
                       class="euiLink euiLink--primary"
-                      href="https://opensearch.org/docs/mocked-test-branch/opensearch/index/"
+                      href="https://opensearch.org/docs/mocked-test-branch/about/"
                       rel="noopener noreferrer"
                       style="font-weight: normal;"
                       target="_blank"

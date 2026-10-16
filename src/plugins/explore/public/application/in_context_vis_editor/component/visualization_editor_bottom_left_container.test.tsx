@@ -26,7 +26,7 @@ jest.mock('../../../components/data_transformations', () => {
       clearPipeline: jest.fn(),
       pipeline$: mockObs,
       getPipeline$: () => mockObs,
-      stageSchemas$: mockMapObs,
+      stageFields$: mockMapObs,
     }),
     TransformPanel: () => null,
   };

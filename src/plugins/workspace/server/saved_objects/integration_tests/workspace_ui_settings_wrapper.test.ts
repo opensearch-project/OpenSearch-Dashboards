@@ -49,7 +49,7 @@ describe('workspace ui settings saved object client wrapper', () => {
       attributes: { name: 'test workspace', features: ['use-case-all'] },
     });
     testWorkspace = res.body.result;
-  }, 30000);
+  });
 
   afterAll(async () => {
     await opensearchServer.stop();

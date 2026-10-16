@@ -46,6 +46,16 @@ const patchFile = async (file, patch) => {
   await fs.writeFile(file, fileContent);
 };
 
+const assertFileIncludes = async (file, snippets) => {
+  console.log(`Verifying ${file}`);
+  const fileContent = await fs.readFile(file, 'utf8');
+  for (const snippet of snippets) {
+    if (!fileContent.includes(snippet)) {
+      throw new Error(`Expected patched content in ${file}: ${snippet}`);
+    }
+  }
+};
+
 const run = async () => {
   const promises = await removeUnwantedFolders('node_modules', [
     'demo',
@@ -104,6 +114,78 @@ const run = async () => {
   );
 
   promises.push(
+    patchFile('node_modules/deepmerge/index.js', {
+      // CVE-2026-93753: explicitly reject prototype-poisoning keys instead of
+      // relying on target shape checks.
+      from: `// Protects from prototype poisoning and unexpected merging up the prototype chain.
+function propertyIsUnsafe(target, key) {
+\treturn propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+}`,
+      to: `function isPrototypePoisoningKey(key) {
+\treturn key === '__proto__' || key === 'constructor' || key === 'prototype'
+}
+
+// Protects from prototype poisoning and unexpected merging up the prototype chain.
+function propertyIsUnsafe(target, key) {
+\treturn isPrototypePoisoningKey(key)
+\t\t|| (propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t\t&& Object.propertyIsEnumerable.call(target, key))) // and also unsafe if they're nonenumerable.
+}`,
+    })
+  );
+
+  promises.push(
+    patchFile('node_modules/deepmerge/dist/cjs.js', {
+      // CVE-2026-93753: explicitly reject prototype-poisoning keys instead of
+      // relying on target shape checks.
+      from: `// Protects from prototype poisoning and unexpected merging up the prototype chain.
+function propertyIsUnsafe(target, key) {
+\treturn propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+}`,
+      to: `function isPrototypePoisoningKey(key) {
+\treturn key === '__proto__' || key === 'constructor' || key === 'prototype'
+}
+
+// Protects from prototype poisoning and unexpected merging up the prototype chain.
+function propertyIsUnsafe(target, key) {
+\treturn isPrototypePoisoningKey(key)
+\t\t|| (propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t\t&& Object.propertyIsEnumerable.call(target, key))) // and also unsafe if they're nonenumerable.
+}`,
+    })
+  );
+
+  promises.push(
+    patchFile('node_modules/deepmerge/dist/umd.js', {
+      // CVE-2026-93753: explicitly reject prototype-poisoning keys instead of
+      // relying on target shape checks.
+      from: `\t// Protects from prototype poisoning and unexpected merging up the prototype chain.
+\tfunction propertyIsUnsafe(target, key) {
+\t\treturn propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t\t&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+\t}`,
+      to: `\tfunction isPrototypePoisoningKey(key) {
+\t\treturn key === '__proto__' || key === 'constructor' || key === 'prototype'
+\t}
+
+\t// Protects from prototype poisoning and unexpected merging up the prototype chain.
+\tfunction propertyIsUnsafe(target, key) {
+\t\treturn isPrototypePoisoningKey(key)
+\t\t\t|| (propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+\t\t\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+\t\t\t\t\t&& Object.propertyIsEnumerable.call(target, key))) // and also unsafe if they're nonenumerable.
+\t}`,
+    })
+  );
+
+  promises.push(
     patchFile('node_modules/kbn-handlebars/target/types/packages/kbn-handlebars/src/utils.js', {
       // kbn-handlebars calls new Function() at startup to probe for unsafe-eval support,
       // which fires a CSP violation report on every page load. Since our CSP forbids
@@ -124,6 +206,18 @@ const run = async () => {
   );
 
   await Promise.all(promises);
+
+  await Promise.all([
+    assertFileIncludes('node_modules/deepmerge/index.js', [
+      "key === '__proto__' || key === 'constructor' || key === 'prototype'",
+    ]),
+    assertFileIncludes('node_modules/deepmerge/dist/cjs.js', [
+      "key === '__proto__' || key === 'constructor' || key === 'prototype'",
+    ]),
+    assertFileIncludes('node_modules/deepmerge/dist/umd.js', [
+      "key === '__proto__' || key === 'constructor' || key === 'prototype'",
+    ]),
+  ]);
 };
 
 run().catch((err) => {

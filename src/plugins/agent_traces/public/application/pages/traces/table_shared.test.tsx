@@ -14,6 +14,8 @@ import {
   TableEmptyState,
   hitToBaseRow,
   DataTableInfoBar,
+  extractSpanFilterQuery,
+  splitPplCommands,
 } from './table_shared';
 
 describe('table_shared', () => {
@@ -324,5 +326,72 @@ describe('table_shared', () => {
       fireEvent.click(switchEl);
       expect(onWrapChange).toHaveBeenCalledWith(true);
     });
+  });
+});
+
+describe('splitPplCommands', () => {
+  it('splits on top-level pipes only', () => {
+    expect(splitPplCommands("source = t | where name = 'a|b' | where `x|y` = 1")).toEqual([
+      'source = t',
+      "where name = 'a|b'",
+      'where `x|y` = 1',
+    ]);
+  });
+
+  it('keeps escaped quotes inside string literals', () => {
+    expect(splitPplCommands('source = t | where msg = "a\\"| b" | head 5')).toEqual([
+      'source = t',
+      'where msg = "a\\"| b"',
+      'head 5',
+    ]);
+    expect(splitPplCommands("source = t | where msg = 'it\\'s | ok' | head 5")).toEqual([
+      'source = t',
+      "where msg = 'it\\'s | ok'",
+      'head 5',
+    ]);
+    // An escaped backslash does not escape the closing quote.
+    expect(splitPplCommands('source = t | where p = "c:\\\\" | head 5')).toEqual([
+      'source = t',
+      'where p = "c:\\\\"',
+      'head 5',
+    ]);
+  });
+});
+
+describe('extractSpanFilterQuery', () => {
+  it('keeps row-level commands in order, including filters after eval', () => {
+    expect(extractSpanFilterQuery('source = t | eval x = 1 | where x = 2')).toEqual({
+      filterQuery: 'source = t | eval x = 1 | where x = 2',
+      ignoredCommands: [],
+    });
+  });
+
+  it('stops at the first reshaping command so later filters never reference missing fields', () => {
+    // Fields made by stats/rename do not exist on span rows.
+    expect(extractSpanFilterQuery('source=t | stats count() as c by x | where c > 5')).toEqual({
+      filterQuery: 'source=t',
+      ignoredCommands: ['stats', 'where'],
+    });
+    expect(extractSpanFilterQuery('source=t | rename a as b | where b = 1')).toEqual({
+      filterQuery: 'source=t',
+      ignoredCommands: ['rename', 'where'],
+    });
+    expect(extractSpanFilterQuery('source=t | where a = 1 | fields a | where a = 2')).toEqual({
+      filterQuery: 'source=t | where a = 1',
+      ignoredCommands: ['fields', 'where'],
+    });
+  });
+
+  it('keeps filters across sort', () => {
+    expect(extractSpanFilterQuery('source=t | where a = 1 | sort - b | where c = 2')).toEqual({
+      filterQuery: 'source=t | where a = 1 | where c = 2',
+      ignoredCommands: [],
+    });
+  });
+
+  it('reports reshaping commands and drops sort silently', () => {
+    expect(
+      extractSpanFilterQuery('source = t | where a = 1 | sort - b | stats count() by c | head 5')
+    ).toEqual({ filterQuery: 'source = t | where a = 1', ignoredCommands: ['stats', 'head'] });
   });
 });

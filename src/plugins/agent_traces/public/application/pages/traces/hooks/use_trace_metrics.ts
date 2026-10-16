@@ -9,7 +9,8 @@ import { PPLService } from '../trace_details/data_fetching/ppl_request_helpers';
 import { Dataset } from '../../../../../../data/common';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
-import { splitPplWhereAndTail } from '../table_shared';
+import { extractSpanFilterQuery } from '../table_shared';
+import { AGENT_TRACES_SESSION_ID_FIELD } from '../../../../../common';
 
 export interface TraceMetrics {
   totalTraces: number;
@@ -21,6 +22,8 @@ export interface TraceMetrics {
   latencyP99Nanos: number;
   errorTraces: number;
   errorSpans: number;
+  /** Distinct gen_ai.conversation.id values; null when unavailable (e.g. field not mapped). */
+  totalSessions: number | null;
 }
 
 export interface UseTraceMetricsResult {
@@ -68,13 +71,14 @@ const doFetchMetrics = async (
   filteredQuery: string
 ): Promise<TraceMetrics> => {
   const genAiFilter = `where isnotnull(\`attributes.gen_ai.operation.name\`)`;
-  const { whereQuery } = splitPplWhereAndTail(filteredQuery);
+  // Row-level filters only (where, eval, ...): a filter placed after eval still applies.
+  const { filterQuery: whereQuery } = extractSpanFilterQuery(filteredQuery);
 
   // Run all queries in parallel
   // Note: User non-where commands (head, sort, etc.) are intentionally excluded from stats queries.
   // When a user types `| head 10`, it limits the data display but should not affect aggregate counts
   // or statistics. The UI hides the "of X total" text when head is detected (see queryEndsWithHead).
-  const [countStats, filteredStats, filteredCounts] = await Promise.all([
+  const [countStats, filteredStats, filteredCounts, sessionStats] = await Promise.all([
     // Query A — Counts (source-only, no user filter):
     // Total Traces, Total Spans, and their error counts are unaffected by user query filters
     (async () => {
@@ -97,6 +101,18 @@ const doFetchMetrics = async (
       const response = await pplService.executeQuery(datasetParam, query);
       return parseStatsResponse(response);
     })(),
+    // Query D — Total Sessions (source-only, like Total Traces). Isolated with its own
+    // catch: indices without the session field would otherwise fail the whole batch.
+    (async () => {
+      try {
+        const sessionField = `\`${AGENT_TRACES_SESSION_ID_FIELD}\``;
+        const query = `${sourceOnlyQuery} | where isnotnull(${sessionField}) | stats distinct_count(${sessionField}) as total_sessions`;
+        const response = await pplService.executeQuery(datasetParam, query);
+        return parseStatsResponse(response);
+      } catch {
+        return {} as ReturnType<typeof parseStatsResponse>;
+      }
+    })(),
   ]);
 
   return {
@@ -109,6 +125,7 @@ const doFetchMetrics = async (
     latencyP99Nanos: filteredStats.p99_latency ?? 0,
     errorTraces: countStats.error_traces ?? 0,
     errorSpans: countStats.error_spans ?? 0,
+    totalSessions: sessionStats.total_sessions ?? null,
   };
 };
 
