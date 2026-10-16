@@ -18,6 +18,8 @@ import {
 import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
+import { ROW_SEPARATORS_SETTING } from '../../../common';
+import { useExploreUiSetting } from './use_explore_ui_setting';
 
 export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
@@ -61,6 +63,7 @@ const DataTableUI = ({
   wrapCellText,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
+  const showRowSeparators = useExploreUiSetting(ROW_SEPARATORS_SETTING, false);
 
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
@@ -175,7 +178,9 @@ const DataTableUI = ({
       ) : null}
       <table
         data-test-subj="docTable"
-        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}`}
+        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}${
+          showRowSeparators ? ' explore-table--separators' : ''
+        }`}
       >
         <thead>
           <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />
