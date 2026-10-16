@@ -11,6 +11,7 @@ import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_s
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
 import { formatUnitValue } from '../style_panel/unit/collection';
 import { DEFAULT_GRID } from '../constants';
+import { TooltipFormatFn, getEncodedValue } from '../utils/tooltip';
 
 // Uses Interquartile Range method to find robust min/max values by excluding statistical outliers
 // 1.5 × IQR rule is a common method to identify outliers in a dataset
@@ -300,3 +301,23 @@ export const assembleHeatmapSpec = <T extends BaseChartStyle>(
 
   return { ...state, spec: { ...spec, grid } };
 };
+
+export const heatmapTooltipFormatter: TooltipFormatFn =
+  ({ renderTooltipContent: renderContent }) =>
+  (params: any) => {
+    // dimensionNames is like : [ "OriginWeather", "DestWeather", "avg_delay" ]
+    // tooltipEncode is like: { "x":[0], "y":[1], "value":[2]}
+    const dimensionNames: string[] = params.dimensionNames ?? [];
+    const tooltipEncode = params.encode;
+
+    return renderContent({
+      rows: Object.keys(tooltipEncode).map((encode) => {
+        const indexOfEncode = tooltipEncode[encode][0];
+        return {
+          marker: params.marker,
+          label: dimensionNames[indexOfEncode],
+          value: getEncodedValue(params, encode),
+        };
+      }),
+    });
+  };

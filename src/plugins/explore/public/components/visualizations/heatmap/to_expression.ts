@@ -6,7 +6,11 @@
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { AxisRole, VisColumn, AggregationType } from '../types';
 import { getAxisConfig } from '../utils/utils';
-import { assembleHeatmapSpec, createHeatmapSeries } from './heatmap_chart_utils';
+import {
+  assembleHeatmapSpec,
+  createHeatmapSeries,
+  heatmapTooltipFormatter,
+} from './heatmap_chart_utils';
 
 import {
   pipe,
@@ -16,7 +20,6 @@ import {
   buildVisMap,
 } from '../utils/echarts_spec';
 import { convertTo2DArray, aggregateByGroups, transform } from '../utils/data_transformation';
-import { heatmapTooltipFormatter } from '../utils/tooltip';
 
 export const createRegularHeatmap = (
   transformedData: Array<Record<string, any>>,

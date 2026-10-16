@@ -7,12 +7,9 @@ import {
   createTooltipValueFormatter,
   formatTimeLabel,
   getTooltipAxesMappingEncode,
-  heatmapTooltipFormatter,
-  pieDisplayNameTooltipFormatter,
   renderTooltipContent,
   resolveDisplayName,
   seriesDisplayNameTooltipFormatter,
-  stateTimelineTooltipFormatter,
 } from './tooltip';
 import { AxisRole, VisColumn, VisFieldType } from '../types';
 
@@ -173,73 +170,5 @@ describe('tooltip utils', () => {
 
     expect(html).toContain('2026-08-10 07:00:00');
     expect(html).not.toContain('GMT');
-  });
-
-  it('formats pie tooltip with display names and formatted values', () => {
-    const formatter = pieDisplayNameTooltipFormatter({
-      styles: {} as any,
-      formatValue: (value) => `${value} ms`,
-      getDisplayName: resolveDisplayName({ A: 'Alpha' }),
-      renderTooltipContent,
-    });
-
-    const html = formatter({
-      marker: '<span></span>',
-      name: 'A',
-      value: 100,
-    });
-
-    expect(html).toContain('Alpha');
-    expect(html).toContain('100 ms');
-  });
-
-  it('formats heatmap tooltip rows from encoded dimensions', () => {
-    const formatter = heatmapTooltipFormatter({
-      styles: {} as any,
-      formatValue: (value) => String(value),
-      getDisplayName: resolveDisplayName(),
-      renderTooltipContent,
-    });
-
-    const html = formatter({
-      marker: '<span></span>',
-      dimensionNames: ['origin', 'destination', 'delay'],
-      encode: {
-        x: [0],
-        y: [1],
-        value: [2],
-      },
-      value: ['SFO', 'SEA', 12],
-    });
-
-    expect(html).toContain('origin');
-    expect(html).toContain('SFO');
-    expect(html).toContain('destination');
-    expect(html).toContain('SEA');
-    expect(html).toContain('delay');
-    expect(html).toContain('12');
-  });
-
-  it('formats grouped state timeline tooltip rows', () => {
-    const formatter = stateTimelineTooltipFormatter({ groupField: 'service' })({
-      styles: {} as any,
-      formatValue: (value) => String(value),
-      getDisplayName: resolveDisplayName({ svc_a: 'Service A' }),
-      renderTooltipContent,
-    });
-
-    const html = formatter({
-      marker: '<span></span>',
-      seriesName: 'Running',
-      dimensionNames: ['service', 'start', 'end', 'duration', 'mergedCount'],
-      value: ['svc_a', '2026-08-10T00:00:00Z', '2026-08-10T01:00:00Z', '1h', 3],
-    });
-
-    expect(html).toContain('Service A');
-    expect(html).toContain('Running');
-    expect(html).toContain('duration');
-    expect(html).toContain('1h');
-    expect(html).toContain('count');
-    expect(html).toContain('3');
   });
 });

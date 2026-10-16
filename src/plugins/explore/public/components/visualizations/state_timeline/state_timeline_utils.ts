@@ -11,8 +11,7 @@ import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
 import { getColors } from '../theme/default_colors';
 import { createSeriesLegendItem, getLegendColor, LegendItem } from '../utils/legend';
-
-import { escapeTooltipText, sanitizeTooltipHtml } from '../utils/tooltip';
+import { TooltipFormatFn } from '../utils/tooltip';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -568,4 +567,49 @@ export const createStateTimeLineSpec =
     newState.legendItems = legendItems;
 
     return newState;
+  };
+
+export const stateTimelineTooltipFormatter =
+  ({ groupField }: { groupField?: string }): TooltipFormatFn =>
+  ({ getDisplayName, renderTooltipContent: renderContent }) =>
+  (params: any) => {
+    const dimensionNames: string[] = params.dimensionNames ?? [];
+    const valueOf = (field: string) => params.value?.[dimensionNames.indexOf(field)];
+
+    const commonRows = [
+      { label: 'start', value: valueOf('start') },
+      { label: 'end', value: valueOf('end') },
+      { label: 'duration', value: valueOf('duration') },
+      { label: 'count', value: valueOf('mergedCount') },
+    ];
+
+    if (groupField) {
+      const groupValue = valueOf(groupField);
+
+      return renderContent({
+        rows: [
+          {
+            label: getDisplayName(groupValue),
+            value: '',
+          },
+          {
+            marker: params.marker,
+            label: params.seriesName,
+            value: '',
+          },
+          ...commonRows,
+        ],
+      });
+    }
+
+    return renderContent({
+      rows: [
+        {
+          marker: params.marker,
+          label: getDisplayName(params.seriesName),
+          value: '',
+        },
+        ...commonRows,
+      ],
+    });
   };

@@ -15,6 +15,7 @@ import {
 } from '../utils/legend';
 import { normalizeEmptyValue } from '../utils/data_transformation';
 import { formatUnitValue } from '../style_panel/unit/collection';
+import { TooltipFormatFn, getEncodedValue } from '../utils/tooltip';
 
 export const createPieSeries =
   <T extends BaseChartStyle>({
@@ -97,3 +98,16 @@ export const createPieSeries =
 
     return { ...state, series, legendItems };
   };
+
+export const pieDisplayNameTooltipFormatter: TooltipFormatFn =
+  ({ formatValue, getDisplayName, renderTooltipContent: renderContent }) =>
+  (params: any) =>
+    renderContent({
+      rows: [
+        {
+          marker: params.marker,
+          label: getDisplayName(params.name),
+          value: formatValue(params.value),
+        },
+      ],
+    });

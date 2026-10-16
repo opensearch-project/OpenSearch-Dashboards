@@ -105,7 +105,7 @@ export const createTooltipValueFormatter = <T extends BaseChartStyle>({
       .join(' ');
 };
 
-const getEncodedValue = (row: any, axis?: string) => {
+export const getEncodedValue = (row: any, axis?: string) => {
   if (!axis) return undefined;
 
   const index = row.encode?.[axis]?.[0];
@@ -133,84 +133,6 @@ export const seriesDisplayNameTooltipFormatter: TooltipFormatFn =
           value: formatValue(value),
         };
       }),
-    });
-  };
-
-export const pieDisplayNameTooltipFormatter: TooltipFormatFn =
-  ({ formatValue, getDisplayName, renderTooltipContent: renderContent }) =>
-  (params: any) =>
-    renderContent({
-      rows: [
-        {
-          marker: params.marker,
-          label: getDisplayName(params.name),
-          value: formatValue(params.value),
-        },
-      ],
-    });
-
-export const heatmapTooltipFormatter: TooltipFormatFn =
-  ({ renderTooltipContent: renderContent }) =>
-  (params: any) => {
-    // dimensionNames is like : [ "OriginWeather", "DestWeather", "avg_delay" ]
-    // tooltipEncode is like: { "x":[0], "y":[1], "value":[2]}
-    const dimensionNames: string[] = params.dimensionNames ?? [];
-    const tooltipEncode = params.encode;
-
-    return renderContent({
-      rows: Object.keys(tooltipEncode).map((encode) => {
-        const indexOfEncode = tooltipEncode[encode][0];
-        return {
-          marker: params.marker,
-          label: dimensionNames[indexOfEncode],
-          value: getEncodedValue(params, encode),
-        };
-      }),
-    });
-  };
-
-export const stateTimelineTooltipFormatter =
-  ({ groupField }: { groupField?: string }): TooltipFormatFn =>
-  ({ getDisplayName, renderTooltipContent: renderContent }) =>
-  (params: any) => {
-    const dimensionNames: string[] = params.dimensionNames ?? [];
-    const valueOf = (field: string) => params.value?.[dimensionNames.indexOf(field)];
-
-    const commonRows = [
-      { label: 'start', value: valueOf('start') },
-      { label: 'end', value: valueOf('end') },
-      { label: 'duration', value: valueOf('duration') },
-      { label: 'count', value: valueOf('mergedCount') },
-    ];
-
-    if (groupField) {
-      const groupValue = valueOf(groupField);
-
-      return renderContent({
-        rows: [
-          {
-            label: getDisplayName(groupValue),
-            value: '',
-          },
-          {
-            marker: params.marker,
-            label: params.seriesName,
-            value: '',
-          },
-          ...commonRows,
-        ],
-      });
-    }
-
-    return renderContent({
-      rows: [
-        {
-          marker: params.marker,
-          label: getDisplayName(params.seriesName),
-          value: '',
-        },
-        ...commonRows,
-      ],
     });
   };
 

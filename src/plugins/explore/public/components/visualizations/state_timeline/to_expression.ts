@@ -12,10 +12,10 @@ import {
   groupByMergedLabel,
   createStateTimeLineSpec,
   getStateTimeLineLegendNameDomain,
+  stateTimelineTooltipFormatter,
 } from './state_timeline_utils';
 import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
 import { LegendItem } from '../utils/legend';
-import { stateTimelineTooltipFormatter } from '../utils/tooltip';
 import {
   convertTo2DArray,
   transform,
