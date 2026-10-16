@@ -328,6 +328,29 @@ describe('ToolResultRenderer', () => {
     });
   });
 
+  describe('markdown clip notice', () => {
+    // The tip is gated on a source row count (> 10 content rows), so no DOM
+    // measurement is involved — build tables with more/fewer rows to drive it.
+    const makeTable = (rowCount: number): string => {
+      const header = '| Name | Value |\n|------|-------|';
+      const body = Array.from({ length: rowCount }, (_, i) => `| n${i} | v${i} |`).join('\n');
+      return `${header}\n${body}`;
+    };
+
+    it('should show a "more rows available" tip when the table has more rows than fit', () => {
+      // 15 data rows > the 10-row preview cap.
+      render(<ToolResultRenderer result={makeTable(15)} />);
+      expect(screen.getByText(/More rows available/)).toBeInTheDocument();
+      expect(screen.getByText(/fullscreen button above/)).toBeInTheDocument();
+    });
+
+    it('should NOT show the tip when the row count fits within the cap', () => {
+      // 3 data rows (header + 3 rows = 4 content rows) is well under the cap.
+      render(<ToolResultRenderer result={makeTable(3)} />);
+      expect(screen.queryByText(/More rows available/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('fallback', () => {
     it('should render plain text in code block', () => {
       const result = 'Plain text result without any special formatting';
@@ -439,6 +462,42 @@ describe('ToolResultRenderer', () => {
         (el) => el.textContent?.length === 50000
       );
       expect(modalCode).toBeDefined();
+    });
+  });
+
+  describe('CodeBlock row-clip notice', () => {
+    // Plain (non-markdown, non-JSON) multi-line text with more lines than the
+    // preview cap but well under the char-truncation limit -- routed to a
+    // CodeBlock and clipped by CSS, so it should get the "more rows" tip.
+    const manyShortLines = (count: number): string =>
+      Array.from({ length: count }, (_, i) => `line ${i}`).join('\n');
+
+    it('should show the "more rows available" tip when a short-char block has more lines than fit', () => {
+      const result = manyShortLines(30);
+      expect(result.length).toBeLessThan(5000); // not char-truncated
+      render(<ToolResultRenderer result={result} />);
+      expect(screen.getByText(/More rows available/)).toBeInTheDocument();
+      expect(screen.getByText(/fullscreen button above/)).toBeInTheDocument();
+      // The row-clip case is NOT char truncation, so the char-count notice
+      // must not appear and the built-in copy (full content) is retained.
+      expect(screen.queryByText(/characters truncated/)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Copy full tool result')).not.toBeInTheDocument();
+    });
+
+    it('should NOT show the tip when a block fits within the line cap', () => {
+      const result = manyShortLines(5);
+      render(<ToolResultRenderer result={result} />);
+      expect(screen.queryByText(/More rows available/)).not.toBeInTheDocument();
+    });
+
+    it('should show the char-truncation notice (not the row tip) when a block is char-truncated', () => {
+      // 600 long lines: exceeds both the line cap and the char limit. The
+      // char-truncation path wins; the two notices are mutually exclusive.
+      const result = Array.from({ length: 600 }, (_, i) => `line ${i} padding-padding`).join('\n');
+      expect(result.length).toBeGreaterThan(5000);
+      render(<ToolResultRenderer result={result} />);
+      expect(screen.getByText(/characters truncated/)).toBeInTheDocument();
+      expect(screen.queryByText(/More rows available/)).not.toBeInTheDocument();
     });
   });
 
