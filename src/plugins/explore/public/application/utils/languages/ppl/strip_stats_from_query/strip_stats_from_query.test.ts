@@ -228,4 +228,65 @@ describe('stripStatsFromQuery', () => {
       query: 'source=logs | where user in [ source=admins | top 5 role ]',
     });
   });
+
+  it.each([
+    ['chart', 'source=logs | chart count() by machine.os'],
+    ['timechart', 'source=logs | timechart span=1h count()'],
+    ['transpose', 'source=logs | transpose'],
+    ['xyseries', 'source=logs | xyseries a b c'],
+    ['timewrap', 'source=logs | timechart span=1h count() | timewrap 1d'],
+    ['patterns', 'source=logs | patterns message mode=aggregation'],
+  ])('should strip the broader aggregating command: %s', (_name, queryString) => {
+    const query: Query = {
+      query: queryString,
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    // Everything from the first aggregating command onward is removed, leaving the document source
+    // (plus any preceding non-aggregating pipes).
+    const result = stripStatsFromQuery(query);
+    expect(result.query).toBe('source=logs');
+  });
+
+  it('should preserve preceding non-aggregating pipes when stripping a broader command', () => {
+    const query: Query = {
+      query: 'source=logs | where status=200 | chart count() by machine.os',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(query);
+    expect(result.query).toBe('source=logs | where status=200');
+  });
+
+  // Label-mode `patterns` (default or explicit) returns ~one row per document plus a pattern field
+  // and is histogram-compatible, so it must NOT be stripped -- the Logs tab keeps the pattern
+  // column. Only `patterns ... mode=aggregation` is stripped (covered above).
+  it.each([
+    ['default (label) mode', 'source=logs | patterns message'],
+    ['explicit label mode', 'source=logs | patterns message mode=label'],
+    [
+      'label mode with method and new_field',
+      'source=logs | patterns message method=brain mode=label new_field=pat',
+    ],
+    ['brain method, no explicit mode', 'source=logs | patterns message method=brain'],
+  ])('does not strip label-mode patterns: %s', (_name, queryString) => {
+    const query: Query = {
+      query: queryString,
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(query);
+    expect(result.query).toBe(queryString);
+  });
+
+  // Only the aggregation-mode patterns pipe is stripped; a preceding label-mode patterns is kept.
+  it('strips aggregation-mode patterns but keeps a preceding label-mode patterns', () => {
+    const query: Query = {
+      query: 'source=logs | patterns message new_field=p1 | patterns p1 mode=aggregation',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(query);
+    expect(result.query).toBe('source=logs | patterns message new_field=p1');
+  });
 });
