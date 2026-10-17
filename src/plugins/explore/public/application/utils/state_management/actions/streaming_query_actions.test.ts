@@ -802,6 +802,29 @@ describe('executeStreamingQuery', () => {
     expect(mockPoll).toHaveBeenNthCalledWith(3, expect.objectContaining({ offset: 20 }));
   });
 
+  // A flaky poll while paging the tail of an already-completed query must not discard the rows
+  // already held or flip the successful result to an error.
+  it('keeps the completed result when paging the tail fails', async () => {
+    const row = (n: number) => [`2026-09-15 10:00:0${n % 10}`, n];
+    const terminal = snapshot({
+      id: 'job-1',
+      status: 'SUCCEEDED',
+      update_mode: 'REPLACE',
+      at: 0,
+      datarows: [...Array(10).keys()].map(row),
+      size: 10,
+      total: 25,
+    });
+    mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));
+    mockPoll.mockResolvedValueOnce(terminal).mockRejectedValue(new Error('tail poll exploded'));
+
+    const { results, statuses } = await run();
+
+    expect(statuses[statuses.length - 1].status.status).toBe('ready');
+    expect(results[results.length - 1].results.hits.hits).toHaveLength(10);
+    expect(statuses.some((s) => s.status.status === 'error')).toBe(false);
+  });
+
   it('releases the job once it completes, instead of leaving it to keep_alive', async () => {
     // Rows are held client-side from that point, so the retained result is pure heap cost.
     mockSubmit.mockResolvedValue(snapshot({ id: 'job-1' }));

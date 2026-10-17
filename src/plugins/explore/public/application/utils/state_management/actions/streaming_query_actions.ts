@@ -343,7 +343,14 @@ export const executeStreamingQuery = createAsyncThunk<
 
         const terminal = isTerminalPPLStreamStatus(snapshot.status);
         if (terminal && !asHistogram && rows.heldRows.length < (snapshot.total ?? 0)) {
-          await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
+          // A failure paging the tail of an already-completed query must not discard the rows
+          // already held; publish the terminal snapshot with what we have, as the expired-job path
+          // does. An abort still propagates, to be handled as a cancellation below.
+          try {
+            await fetchCommittedRows(snapshot.total ?? 0, withLongNumeralsSupport);
+          } catch (drainError) {
+            if (isAbort(drainError)) throw drainError;
+          }
         }
 
         publish(snapshot, !terminal);

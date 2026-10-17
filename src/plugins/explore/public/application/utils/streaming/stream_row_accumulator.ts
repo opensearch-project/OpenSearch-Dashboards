@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import type { PPLStreamSnapshot } from '../../../../../query_enhancements/common';
 import {
   FieldValueFormatter,
@@ -10,23 +11,12 @@ import {
   splitHighlightColumn,
 } from './snapshot_to_result';
 
-/** Shallow per-field equality over two row sets, to tell a real replacement from a re-served page. */
-const sameRows = (
-  a: Array<Record<string, unknown>>,
-  b: Array<Record<string, unknown>>
-): boolean => {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    const ra = a[i];
-    const rb = b[i];
-    const keys = Object.keys(ra);
-    if (keys.length !== Object.keys(rb).length) return false;
-    for (const k of keys) {
-      if (ra[k] !== rb[k]) return false;
-    }
-  }
-  return true;
-};
+/**
+ * Structural equality, to tell a real replacement from a re-served page. Deep, not reference: a
+ * nested field value is a fresh object each poll, so `===` would always report a difference.
+ */
+const sameRows = (a: Array<Record<string, unknown>>, b: Array<Record<string, unknown>>): boolean =>
+  isEqual(a, b);
 
 /**
  * Holds the rows a streaming run has fetched, and the cursor for the next window to request.

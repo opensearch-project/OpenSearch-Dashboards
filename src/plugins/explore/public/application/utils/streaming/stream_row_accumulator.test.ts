@@ -95,6 +95,28 @@ describe('StreamRowAccumulator', () => {
     expect(acc.rowGeneration).toBe(before);
   });
 
+  // A nested field value is a fresh object each poll, so reference equality would wrongly see every
+  // re-serve as a change and remount the table.
+  it('does not advance the generation when identical rows carry a nested field', () => {
+    const nested = (updateMode: string) =>
+      ({
+        schema: [
+          { name: '@timestamp', type: 'timestamp' },
+          { name: 'geo', type: 'geo_point' },
+        ],
+        datarows: [['2026-09-15 10:00:00', { lat: 1, lon: 2 }]],
+        window: { offset: 0, count: 1 },
+        update_mode: updateMode,
+      }) as any;
+    const acc = new StreamRowAccumulator(100);
+    acc.absorb(nested('REPLACE'));
+    const before = acc.rowGeneration;
+
+    acc.absorb(nested('REPLACE'));
+
+    expect(acc.rowGeneration).toBe(before);
+  });
+
   it('does not advance the generation on the first window, which replaces nothing', () => {
     const acc = new StreamRowAccumulator(100);
     acc.absorb(window_(0, 5));
