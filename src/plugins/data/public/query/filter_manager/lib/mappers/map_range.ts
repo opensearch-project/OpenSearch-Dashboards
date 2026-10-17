@@ -49,12 +49,28 @@ const getFormattedValueFn = (left: any, right: any) => {
   };
 };
 
+const getFormattedPhraseValueFn = (value: any) => {
+  return (formatter?: FilterValueFormatter) => (formatter ? formatter.convert(value) : value);
+};
+
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
 
 function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
+  const exactDateValue =
+    filter.meta.type === FILTERS.PHRASE ? filter.meta.params?.query : undefined;
+
+  if (exactDateValue !== undefined) {
+    return {
+      type: FILTERS.PHRASE,
+      key,
+      value: getFormattedPhraseValueFn(exactDateValue),
+      params: { query: exactDateValue },
+    };
+  }
+
   const params: any = isScriptedRange
     ? get(filter, 'script.script.params')
     : getRangeByKey(filter, key);
