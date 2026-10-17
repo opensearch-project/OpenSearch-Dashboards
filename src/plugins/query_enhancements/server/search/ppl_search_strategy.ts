@@ -122,12 +122,23 @@ export const pplSearchStrategyProvider = (
           const aggFetchSize = await context.core.uiSettings.client.get<number>(
             AGGREGATION_SAMPLE_SIZE_SETTING
           );
-          const aggRequest = { ...request, body: { ...request.body, fetchSize: aggFetchSize } };
+          // Initialise once before the loop so results from every key accumulate instead of being
+          // reset to {} on each iteration (which previously left only the last key in aggs).
+          (dataFrame as IDataFrameWithAggs).aggs = {};
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            aggRequest.body.query = { ...aggRequest.body.query, query: aggQueryString };
-            const rawAggs: any = await pplFacet.describeQuery(context, aggRequest);
+            // Build a fresh, fully-isolated request per iteration.  A single shallow spread of
+            // `body` is not sufficient because `query` is a nested object — mutating it on the
+            // shared copy corrupted the original query string for all subsequent iterations.
+            const iterRequest = {
+              ...request,
+              body: {
+                ...request.body,
+                fetchSize: aggFetchSize,
+                query: { ...request.body.query, query: aggQueryString },
+              },
+            };
+            const rawAggs: any = await pplFacet.describeQuery(context, iterRequest);
             if (!rawAggs.success) continue;
-            (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
               return {
                 key: hit[1],
