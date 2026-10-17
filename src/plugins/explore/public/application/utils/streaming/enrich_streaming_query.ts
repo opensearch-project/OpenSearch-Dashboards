@@ -21,7 +21,17 @@ import {
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
 
-const SORT_BLOCKING_COMMANDS = ['sort', 'stats', 'head', 'rare', 'top', 'rename'];
+// chart and timechart emit their own time column, so a trailing sort on the dataset field fails.
+const SORT_BLOCKING_COMMANDS = [
+  'sort',
+  'stats',
+  'head',
+  'rare',
+  'top',
+  'rename',
+  'chart',
+  'timechart',
+];
 const SORT_BLOCKING_COMMAND_REGEX = new RegExp(
   `\\|\\s*(${SORT_BLOCKING_COMMANDS.join('|')})\\b`,
   'i'

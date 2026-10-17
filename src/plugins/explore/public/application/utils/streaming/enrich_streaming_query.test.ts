@@ -76,6 +76,8 @@ describe('canAppendDefaultSort', () => {
     'rare a',
     'top a',
     'rename a as b',
+    'chart count() over a',
+    'timechart span=1h count()',
   ])('declines when the query contains | %s', (cmd) => {
     expect(canAppendDefaultSort(`source=logs | ${cmd}`)).toBe(false);
   });
