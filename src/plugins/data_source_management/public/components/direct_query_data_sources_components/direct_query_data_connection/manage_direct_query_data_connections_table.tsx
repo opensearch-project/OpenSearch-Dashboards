@@ -27,6 +27,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
+import { WorkspaceObject } from 'src/core/public';
 import {
   DataSourceConnectionType,
   DataSourceManagementContext,
@@ -49,6 +50,15 @@ import {
   DataConnectionType,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../../../../data_source/common';
+import { getDirectQueryConnectionFlowManagePath } from '../../direct_query_connection_flow/constants';
+import {
+  DirectQueryConnectionFlow,
+  findOwningDirectQueryConnectionFlow,
+  getVisibleDirectQueryConnectionFlows,
+} from '../../../direct_query_connection_flow_registry';
+
+const EMPTY_WORKSPACE_LIST$ = of<WorkspaceObject[]>([]);
+const NO_FLOWS: DirectQueryConnectionFlow[] = [];
 
 interface DirectQueryDataConnectionsProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -67,6 +77,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     navigation,
     workspaces,
     overlays,
+    directQueryConnectionFlowRegistry,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const { HeaderControl } = navigation.ui;
   const workspaceClient = useObservable(workspaces.client$);
@@ -75,6 +86,36 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+
+  // Flow-specific behaviour (row links, Workspaces column) is only enabled when at least one
+  // registered direct query connection flow is visible, consistent with the header buttons and
+  // the flow mount point (flow routes only exist for users who can manage data sources).
+  const hasRegisteredFlows = canManageDataSource && !!directQueryConnectionFlowRegistry?.hasFlows();
+  // `undefined` while flow visibility is being resolved.
+  const [visibleFlows, setVisibleFlows] = useState<DirectQueryConnectionFlow[] | undefined>(
+    hasRegisteredFlows ? undefined : NO_FLOWS
+  );
+  useEffect(() => {
+    if (!hasRegisteredFlows || !directQueryConnectionFlowRegistry) {
+      setVisibleFlows(NO_FLOWS);
+      return;
+    }
+    let cancelled = false;
+    getVisibleDirectQueryConnectionFlows(directQueryConnectionFlowRegistry.getAllFlows()).then(
+      (flows) => {
+        if (!cancelled) {
+          setVisibleFlows(flows.length ? flows : NO_FLOWS);
+        }
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRegisteredFlows, directQueryConnectionFlowRegistry]);
+  const flowsEnabled = !!visibleFlows?.length;
+  const workspaceList = useObservable(
+    flowsEnabled && workspaces?.workspaceList$ ? workspaces.workspaceList$ : EMPTY_WORKSPACE_LIST$
+  );
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const canAssociateDataSource =
     !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
@@ -157,13 +198,38 @@ export const ManageDirectQueryDataConnectionsTable = ({
     const fetchDirectQueryConnections = async (): Promise<DataSourceTableItem[]> => {
       try {
         const dataConnectionSavedObjects = await getDataConnections(savedObjects.client);
-        return dataConnectionSavedObjects.map((obj) => ({
-          id: obj.id,
-          title: obj.attributes.connectionId,
-          type: obj.attributes.type,
-          // This represents this is data connection type saved object not data source type saved object
-          objectType: DATA_CONNECTION_SAVED_OBJECT_TYPE,
-        }));
+        return dataConnectionSavedObjects.map((obj) => {
+          const item: DataSourceTableItem = {
+            id: obj.id,
+            title: obj.attributes.connectionId,
+            type: obj.attributes.type,
+            // This represents this is data connection type saved object not data source type saved object
+            objectType: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          };
+          const description = obj.attributes?.description;
+          if (typeof description === 'string') {
+            item.description = description;
+          }
+          if (visibleFlows?.length) {
+            const owningFlow = findOwningDirectQueryConnectionFlow(visibleFlows, {
+              id: obj.id,
+              attributes: obj.attributes,
+              workspaces: obj.workspaces,
+            });
+            if (owningFlow) {
+              item.directQueryConnectionFlowId = owningFlow.id;
+              // The owning flow may label its type (the Type column and filter follow); the
+              // stored attributes.type is left as is.
+              const typeLabel =
+                typeof owningFlow.typeLabel === 'string' ? owningFlow.typeLabel.trim() : '';
+              if (typeLabel) {
+                item.type = typeLabel;
+              }
+            }
+            item.workspaces = obj.workspaces;
+          }
+          return item;
+        });
       } catch (error: any) {
         return [];
       }
@@ -188,7 +254,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     };
 
     fetchAllData();
-  }, [http, savedObjects, notifications, featureFlagStatus]);
+  }, [http, savedObjects, notifications, featureFlagStatus, visibleFlows]);
 
   /* Delete selected data sources*/
   const onClickDelete = () => {
@@ -349,6 +415,10 @@ export const ManageDirectQueryDataConnectionsTable = ({
   };
 
   useEffect(() => {
+    if (visibleFlows === undefined) {
+      // wait until flow visibility is known so rows are only fetched (and linked) once
+      return;
+    }
     fetchDataSources();
     isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
       setObservabilityDashboardsExists
@@ -380,6 +450,30 @@ export const ManageDirectQueryDataConnectionsTable = ({
       sortable: true,
       truncateText: true,
       render: (name: string, record: DataSourceTableItem) => {
+        if (record.directQueryConnectionFlowId) {
+          const flowLocation = {
+            pathname: getDirectQueryConnectionFlowManagePath(
+              record.directQueryConnectionFlowId,
+              record.id
+            ),
+          };
+          return (
+            // href keeps "open in new tab"; onClick navigates in the app without a reload.
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButtonEmpty
+              size="xs"
+              href={history.createHref(flowLocation)}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                history.push(flowLocation);
+              }}
+              flush="left"
+              data-test-subj={`directQueryConnectionFlowLink-${record.id}`}
+            >
+              {name}
+            </EuiButtonEmpty>
+          );
+        }
         const path =
           record.connectionType === DataSourceConnectionType.OpenSearchConnection
             ? record.id
@@ -435,6 +529,21 @@ export const ManageDirectQueryDataConnectionsTable = ({
       truncateText: true,
       mobileOptions: {
         show: false,
+      },
+    },
+    flowsEnabled && {
+      field: 'workspaces',
+      name: i18n.translate('dataSourcesManagement.directQueryTable.workspacesField', {
+        defaultMessage: 'Workspaces',
+      }),
+      truncateText: true,
+      render: (workspaceIds?: string[]) => {
+        if (!workspaceIds?.length) {
+          return '—';
+        }
+        return workspaceIds
+          .map((id) => workspaceList?.find((workspace) => workspace.id === id)?.name ?? id)
+          .join(', ');
       },
     },
     featureFlagStatus && {

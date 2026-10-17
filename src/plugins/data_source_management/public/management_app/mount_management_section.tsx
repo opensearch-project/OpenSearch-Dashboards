@@ -16,6 +16,8 @@ import { ManagementAppMountParams } from '../../../management/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from '../auth_registry';
+import { IDirectQueryConnectionFlowRegistry } from '../direct_query_connection_flow_registry';
+import { DirectQueryConnectionFlowMountPoint } from '../components/direct_query_connection_flow/direct_query_connection_flow_mount_point';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
 import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
@@ -36,22 +38,21 @@ export async function mountManagementSection(
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
   },
   authMethodsRegistry: AuthenticationMethodRegistry,
-  featureFlagStatus: boolean
+  featureFlagStatus: boolean,
+  directQueryConnectionFlowRegistry?: IDirectQueryConnectionFlowRegistry
 ) {
-  const [
-    {
-      chrome,
-      application,
-      savedObjects,
-      uiSettings,
-      notifications,
-      overlays,
-      http,
-      docLinks,
-      workspaces,
-    },
-    { navigation },
-  ] = await getStartServices();
+  const [coreStart, { navigation }] = await getStartServices();
+  const {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    http,
+    docLinks,
+    workspaces,
+  } = coreStart;
 
   const deps: DataSourceManagementContext = {
     chrome,
@@ -66,6 +67,7 @@ export async function mountManagementSection(
     setBreadcrumbs: params.setBreadcrumbs,
     authenticationMethodRegistry: authMethodsRegistry,
     workspaces,
+    ...(directQueryConnectionFlowRegistry?.hasFlows() ? { directQueryConnectionFlowRegistry } : {}),
   };
 
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
@@ -106,6 +108,14 @@ export async function mountManagementSection(
             <ConfigureDirectQueryDataSourceWithRouter
               notifications={notifications}
               useNewUX={useNewUX}
+            />
+          </Route>
+        )}
+        {canManageDataSource && directQueryConnectionFlowRegistry?.hasFlows() && (
+          <Route path={['/flows/:flowId', '/flows/:flowId/*']}>
+            <DirectQueryConnectionFlowMountPoint
+              registry={directQueryConnectionFlowRegistry}
+              core={coreStart}
             />
           </Route>
         )}

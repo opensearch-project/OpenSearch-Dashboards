@@ -24,6 +24,7 @@ import {
   getRenderAssociatedObjectsDetailsFlyout,
 } from './plugin';
 import { AuthenticationMethodRegistry } from './auth_registry';
+import { DirectQueryConnectionFlowRegistry } from './direct_query_connection_flow_registry';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;
@@ -33,6 +34,7 @@ describe('#dataSourceManagement', () => {
   beforeEach(() => {
     mockDataSourceManagementPluginStart = {
       getAuthenticationMethodRegistry: jest.fn(() => new AuthenticationMethodRegistry()),
+      getDirectQueryConnectionFlowRegistry: jest.fn(() => new DirectQueryConnectionFlowRegistry()),
     };
 
     coreSetup = {
@@ -107,6 +109,43 @@ describe('#dataSourceManagement', () => {
     expect(() => {
       setup?.registerAuthenticationMethod(createAuthenticationMethod({ name: 'typeB' }));
     }).toThrow('cannot call `registerAuthenticationMethod` after data source management startup.');
+  });
+
+  it('can register a direct query connection flow and read it from the start registry', () => {
+    const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    const flow = {
+      id: 'example-flow',
+      title: 'Example connection',
+      buttonLabel: 'Connect example data source',
+      mount: jest.fn(() => jest.fn()),
+    };
+    expect(setup.registerDirectQueryConnectionFlow).toBeInstanceOf(Function);
+    setup.registerDirectQueryConnectionFlow(flow);
+    const registry = doStart().getDirectQueryConnectionFlowRegistry();
+    expect(registry.hasFlows()).toBe(true);
+    expect(registry.getFlow('example-flow')).toEqual(flow);
+  });
+
+  it('exposes an empty direct query connection flow registry when nothing is registered', () => {
+    const { doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    const registry = doStart().getDirectQueryConnectionFlowRegistry();
+    expect(registry.hasFlows()).toBe(false);
+    expect(registry.getAllFlows()).toEqual([]);
+  });
+
+  it('should throw error if registering a direct query connection flow after startup', () => {
+    const { setup, doStart } = testDataSourceManagementPlugin(coreSetup, coreStart);
+    doStart();
+    expect(() => {
+      setup.registerDirectQueryConnectionFlow({
+        id: 'late',
+        title: 'Late',
+        buttonLabel: 'Late',
+        mount: jest.fn(),
+      });
+    }).toThrow(
+      'cannot call `registerDirectQueryConnectionFlow` after data source management startup.'
+    );
   });
 
   it('should register application in the management section', () => {

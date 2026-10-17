@@ -32,6 +32,11 @@ import {
   IAuthenticationMethodRegistry,
   AuthenticationMethodRegistry,
 } from './auth_registry';
+import {
+  DirectQueryConnectionFlow,
+  DirectQueryConnectionFlowRegistry,
+  IDirectQueryConnectionFlowRegistry,
+} from './direct_query_connection_flow_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
@@ -81,6 +86,11 @@ export interface DataSourceManagementSetupDependencies {
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
+  /**
+   * Registers a pluggable direct query connection flow rendered by the data sources app under
+   * `/flows/<id>`. Must be called during setup; throws after data source management startup.
+   */
+  registerDirectQueryConnectionFlow: (flow: DirectQueryConnectionFlow) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
     getDataSourceMenu: <T>() => React.ComponentType<
@@ -94,6 +104,7 @@ export interface DataSourceManagementPluginSetup {
 
 export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
+  getDirectQueryConnectionFlowRegistry: () => IDirectQueryConnectionFlowRegistry;
 }
 
 /**
@@ -109,6 +120,7 @@ export class DataSourceManagementPlugin implements Plugin<
 > {
   private started: boolean = false;
   private authMethodsRegistry: IAuthenticationMethodRegistry = new AuthenticationMethodRegistry();
+  private directQueryConnectionFlowRegistry = new DirectQueryConnectionFlowRegistry();
   private dataSourceSelection: DataSourceSelectionService = new DataSourceSelectionService();
   private featureFlagStatus: boolean = false;
   private bannerId: string | null = null;
@@ -156,7 +168,8 @@ export class DataSourceManagementPlugin implements Plugin<
           core.getStartServices,
           params,
           this.authMethodsRegistry,
-          this.featureFlagStatus
+          this.featureFlagStatus,
+          this.directQueryConnectionFlowRegistry
         );
       },
     });
@@ -184,7 +197,8 @@ export class DataSourceManagementPlugin implements Plugin<
               wrapInPage: true,
             },
             this.authMethodsRegistry,
-            this.featureFlagStatus
+            this.featureFlagStatus,
+            this.directQueryConnectionFlowRegistry
           );
         },
       });
@@ -215,6 +229,15 @@ export class DataSourceManagementPlugin implements Plugin<
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
+    const registerDirectQueryConnectionFlow = (flow: DirectQueryConnectionFlow) => {
+      if (this.started) {
+        throw new Error(
+          'cannot call `registerDirectQueryConnectionFlow` after data source management startup.'
+        );
+      }
+      this.directQueryConnectionFlowRegistry.registerDirectQueryConnectionFlow(flow);
+    };
+
     if (dataSource!.noAuthenticationTypeEnabled) {
       registerAuthenticationMethod(noAuthCredentialAuthMethod);
     }
@@ -231,6 +254,7 @@ export class DataSourceManagementPlugin implements Plugin<
 
     return {
       registerAuthenticationMethod,
+      registerDirectQueryConnectionFlow,
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {
@@ -422,6 +446,7 @@ export class DataSourceManagementPlugin implements Plugin<
 
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
+      getDirectQueryConnectionFlowRegistry: () => this.directQueryConnectionFlowRegistry,
     };
   }
 

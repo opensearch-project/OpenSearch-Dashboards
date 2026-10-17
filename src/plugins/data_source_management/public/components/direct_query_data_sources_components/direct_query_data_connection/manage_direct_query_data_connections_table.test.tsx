@@ -21,18 +21,20 @@ import {
   DataConnectionType,
 } from '../../../../../data_source/common';
 import { waitFor } from '@testing-library/dom';
+import { DirectQueryConnectionFlowRegistry } from '../../../direct_query_connection_flow_registry';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
 const confirmModalIdentifier = 'EuiConfirmModal';
 
+const mockedContext = {
+  ...mockManagementPlugin.createDataSourceManagementContext(),
+  application: { capabilities: { dataSource: { canManage: true } } },
+};
+let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+const history = scopedHistoryMock.create() as unknown as ScopedHistory;
+
 describe('ManageDirectQueryDataConnectionsTable', () => {
-  const mockedContext = {
-    ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canManage: true } } },
-  };
-  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   describe('should get direct query connections failed', () => {
     beforeEach(async () => {
       jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.reject());
@@ -267,6 +269,59 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     it('should render normally', () => {
       expect(component).toMatchSnapshot();
       expect(utils.getDataConnections).toHaveBeenCalled();
+    });
+
+    it('should include the description of data-connection rows', async () => {
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(
+        Promise.resolve([
+          {
+            type: 'data-connection',
+            id: 'described',
+            attributes: {
+              connectionId: 'Described',
+              type: 'example-direct-query' as DataConnectionType,
+              description: 'My example connection',
+            },
+          },
+          {
+            type: 'data-connection',
+            id: 'undescribed',
+            attributes: {
+              connectionId: 'Undescribed',
+              type: 'example-direct-query' as DataConnectionType,
+            },
+          },
+        ] as any)
+      );
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
+            />
+          ),
+          {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+      const tableRows: any[] = component.find('EuiInMemoryTable').prop('items');
+      expect(tableRows.find((row) => row.id === 'described')).toEqual(
+        expect.objectContaining({ description: 'My example connection' })
+      );
+      expect(tableRows.find((row) => row.id === 'undescribed')).not.toHaveProperty('description');
+      expect(component.text()).toContain('My example connection');
     });
 
     it('should handle errors correctly', async () => {
@@ -530,5 +585,247 @@ describe('GetDataConnections', () => {
     await expect(utils.getDataConnections(mockSavedObjectsClient)).rejects.toThrow(
       'Failed to fetch data connections'
     );
+  });
+
+  describe('direct query connection flows', () => {
+    const flowConnection = {
+      type: 'data-connection',
+      id: 'flow-1',
+      attributes: {
+        connectionId: 'Flow-owned connection',
+        type: 'example-direct-query' as DataConnectionType,
+        ownerPlugin: 'example',
+      },
+      workspaces: ['ws1', 'unknown-ws'],
+    };
+    const legacyConnection = {
+      type: 'data-connection',
+      id: 'legacy-1',
+      attributes: {
+        connectionId: 'Unowned connection',
+        type: 'example-direct-query' as DataConnectionType,
+      },
+    };
+
+    const mountTable = async (services: any, flowHistory: ScopedHistory) => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={flowHistory}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
+            />
+          ),
+          {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: { services },
+          }
+        );
+      });
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      component.update();
+    };
+
+    const findRow = (text: string) =>
+      component.find('tr').filterWhere((tr) => tr.text().includes(text));
+
+    beforeEach(() => {
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve([]));
+      jest.spyOn(utils, 'fetchDataSourceConnections').mockReturnValue(Promise.resolve([]));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: false } as any);
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve([flowConnection, legacyConnection] as any));
+    });
+
+    it('links owned rows to the flow manage page and adds a Workspaces column', async () => {
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-flow',
+        title: 'Example connection',
+        buttonLabel: 'Connect example data source',
+        mount: jest.fn(),
+        ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+      });
+      const workspaces = {
+        ...mockedContext.workspaces,
+        workspaceList$: new BehaviorSubject([{ id: 'ws1', name: 'Workspace One' }]),
+      };
+      const flowHistory = scopedHistoryMock.create() as unknown as ScopedHistory;
+      (flowHistory.createHref as jest.Mock).mockImplementation(
+        ({ pathname }: { pathname: string }) => `/app/dataSources${pathname}`
+      );
+
+      await mountTable(
+        { ...mockedContext, workspaces, directQueryConnectionFlowRegistry: registry },
+        flowHistory
+      );
+
+      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
+      expect(tableRows).toContainEqual(
+        expect.objectContaining({
+          id: 'flow-1',
+          directQueryConnectionFlowId: 'example-flow',
+          workspaces: ['ws1', 'unknown-ws'],
+        })
+      );
+      expect(tableRows.find((row) => row.id === 'legacy-1')?.directQueryConnectionFlowId).toBe(
+        undefined
+      );
+
+      const link = component.find('a[data-test-subj="directQueryConnectionFlowLink-flow-1"]');
+      expect(link.exists()).toBe(true);
+      expect(link.prop('href')).toBe('/app/dataSources/flows/example-flow/manage/flow-1');
+      link.simulate('click');
+      expect(flowHistory.push).toHaveBeenCalledWith({
+        pathname: '/flows/example-flow/manage/flow-1',
+      });
+
+      // Non-owned rows keep the existing plain-text rendering
+      expect(
+        findRow('Unowned connection')
+          .find('[data-test-subj^="directQueryConnectionFlowLink"]')
+          .exists()
+      ).toBe(false);
+
+      expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(true);
+      expect(findRow('Flow-owned connection').text()).toContain('Workspace One, unknown-ws');
+      expect(findRow('Unowned connection').text()).toContain('—');
+    });
+
+    it.each([
+      ['a typeLabel', 'Example data connection', 'Example data connection'],
+      ['no typeLabel', undefined, 'example-direct-query' as DataConnectionType],
+      ['a blank typeLabel', '  ', 'example-direct-query' as DataConnectionType],
+    ])('shows the owning flow %s in the Type column', async (_name, typeLabel, expected) => {
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-typed-flow',
+        title: 'Example data connection',
+        buttonLabel: 'Connect example data connection',
+        ...(typeLabel !== undefined ? { typeLabel } : {}),
+        mount: jest.fn(),
+        ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+      });
+      await mountTable({ ...mockedContext, directQueryConnectionFlowRegistry: registry }, history);
+
+      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
+      expect(tableRows.find((row) => row.id === 'flow-1')?.type).toBe(expected);
+      // Rows the flow does not own keep their stored type.
+      expect(tableRows.find((row) => row.id === 'legacy-1')?.type).toBe(
+        'example-direct-query' as DataConnectionType
+      );
+      expect(findRow('Flow-owned connection').text()).toContain(expected);
+      // The stored saved object attribute is not changed.
+      expect(flowConnection.attributes.type).toBe('example-direct-query' as DataConnectionType);
+    });
+
+    const expectNoFlowBehaviour = () => {
+      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
+      expect(tableRows.length).toBeGreaterThan(0);
+      tableRows.forEach((row) => {
+        expect(row).not.toHaveProperty('directQueryConnectionFlowId');
+        expect(row).not.toHaveProperty('workspaces');
+      });
+      expect(component.find('a[data-test-subj^="directQueryConnectionFlowLink-"]')).toHaveLength(0);
+      expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(false);
+    };
+
+    it.each([
+      ['resolves false', () => Promise.resolve(false)],
+      ['rejects', () => Promise.reject(new Error('probe failed'))],
+    ])(
+      'does not add flow links or the Workspaces column when the only flow isVisible %s',
+      async (_, isVisible) => {
+        const registry = new DirectQueryConnectionFlowRegistry();
+        registry.registerDirectQueryConnectionFlow({
+          id: 'example-flow',
+          title: 'Example connection',
+          buttonLabel: 'Connect example data source',
+          isVisible: isVisible as () => Promise<boolean>,
+          mount: jest.fn(),
+          ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+        });
+        (utils.getDataConnections as jest.Mock).mockClear();
+        await mountTable(
+          { ...mockedContext, directQueryConnectionFlowRegistry: registry },
+          history
+        );
+        expectNoFlowBehaviour();
+        // rows are fetched once, after flow visibility is resolved
+        expect(utils.getDataConnections).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('only links rows owned by a visible flow', async () => {
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'hidden-flow',
+        title: 'Hidden',
+        buttonLabel: 'Hidden',
+        isVisible: () => false,
+        mount: jest.fn(),
+        ownsConnection: () => true,
+      });
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-flow',
+        title: 'Example connection',
+        buttonLabel: 'Connect example data source',
+        isVisible: () => Promise.resolve(true),
+        mount: jest.fn(),
+        ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+      });
+      await mountTable({ ...mockedContext, directQueryConnectionFlowRegistry: registry }, history);
+      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
+      expect(tableRows.find((row) => row.id === 'flow-1')?.directQueryConnectionFlowId).toBe(
+        'example-flow'
+      );
+      expect(tableRows.find((row) => row.id === 'legacy-1')?.directQueryConnectionFlowId).toBe(
+        undefined
+      );
+      expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(true);
+    });
+
+    it('does not add flow links or the Workspaces column without canManage', async () => {
+      const registry = new DirectQueryConnectionFlowRegistry();
+      registry.registerDirectQueryConnectionFlow({
+        id: 'example-flow',
+        title: 'Example connection',
+        buttonLabel: 'Connect example data source',
+        mount: jest.fn(),
+        ownsConnection: (so) => so.attributes.ownerPlugin === 'example',
+      });
+      await mountTable(
+        {
+          ...mockedContext,
+          application: { capabilities: { dataSource: { canManage: false } } },
+          directQueryConnectionFlowRegistry: registry,
+        },
+        history
+      );
+      expectNoFlowBehaviour();
+    });
+
+    it('does not add flow links or the Workspaces column when no flow is registered', async () => {
+      await mountTable(
+        {
+          ...mockedContext,
+          directQueryConnectionFlowRegistry: new DirectQueryConnectionFlowRegistry(),
+        },
+        history
+      );
+      const tableRows = component.find('EuiInMemoryTable').prop('items') as DataSourceTableItem[];
+      tableRows.forEach((row) => {
+        expect(row).not.toHaveProperty('directQueryConnectionFlowId');
+        expect(row).not.toHaveProperty('workspaces');
+      });
+      expect(component.find('a[data-test-subj^="directQueryConnectionFlowLink-"]')).toHaveLength(0);
+      expect(component.find('th').someWhere((th) => th.text().includes('Workspaces'))).toBe(false);
+    });
   });
 });
