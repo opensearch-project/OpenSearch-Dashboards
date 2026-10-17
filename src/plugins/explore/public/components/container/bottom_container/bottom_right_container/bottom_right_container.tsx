@@ -46,11 +46,17 @@ export const BottomRightContainer = () => {
   const dataTableStatus = useSelector((state: RootState) => {
     return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
-
-  // A polling source can stream rows while its query runs; show them instead of the spinner.
-  const hasStreamedRows = useSelector((state: RootState) => {
+  // Two kinds of query deliver rows before they finish, and both stay LOADING for their whole run:
+  // a polling source reporting scan progress, and a streaming PPL job. Either way the spinner below
+  // would replace the results area for the entire query and hide rows that are already renderable.
+  const hasPartialResults = useSelector((state: RootState) => {
     const key = defaultPrepareQueryString(query);
-    return !!state.queryEditor.queryStatusMap[key]?.progress && !!state.results[key]?.hasResults;
+    const tableStatus = selectQueryStatusMapByKey(state, key);
+    const polling = !!tableStatus?.progress && !!state.results[key]?.hasResults;
+    const streaming = Boolean(
+      tableStatus?.streaming?.isPolling || state.queryEditor.overallQueryStatus.streaming?.isPolling
+    );
+    return polling || streaming;
   });
 
   if (dataset == null) {
@@ -101,7 +107,7 @@ export const BottomRightContainer = () => {
   if (
     status === QueryExecutionStatus.LOADING &&
     dataTableStatus === QueryExecutionStatus.LOADING &&
-    !hasStreamedRows
+    !hasPartialResults
   ) {
     return (
       <CanvasPanel>
@@ -111,11 +117,11 @@ export const BottomRightContainer = () => {
   }
 
   if (
+    hasPartialResults ||
     dataTableStatus === QueryExecutionStatus.READY ||
     dataTableStatus === QueryExecutionStatus.ERROR ||
     status === QueryExecutionStatus.READY ||
-    status === QueryExecutionStatus.ERROR ||
-    hasStreamedRows
+    status === QueryExecutionStatus.ERROR
   ) {
     return (
       <CanvasPanel>

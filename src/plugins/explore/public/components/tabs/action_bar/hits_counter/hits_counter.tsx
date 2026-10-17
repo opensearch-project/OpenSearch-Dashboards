@@ -35,6 +35,8 @@ import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { formatDuration } from './format_duration';
+import { formatStreamingAnnotation } from './format_streaming_annotation';
+import { StreamingQueryStatus } from '../../../../application/utils/state_management/types';
 
 export interface HitsCounterProps {
   /**
@@ -73,6 +75,11 @@ export interface HitsCounterProps {
    * turns the setting off, so the hidden columns come back
    */
   onShowHiddenColumns?: () => void;
+  /**
+   * progress of the streaming query behind these results; absent for a non-streaming query, whose
+   * readout is then unchanged
+   */
+  streaming?: StreamingQueryStatus;
 }
 
 export function HitsCounter({
@@ -85,15 +92,22 @@ export function HitsCounter({
   rowsCountOverride,
   hiddenColumnCount = 0,
   onShowHiddenColumns,
+  streaming,
 }: HitsCounterProps) {
   const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
+  // elapsedMs is republished on every streaming snapshot, so the duration ticks while polling.
   const duration = formatDuration(elapsedMs);
-  const durationSegment = duration ? (
-    <>
-      {' · '}
-      <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>
-    </>
-  ) : null;
+  const annotation = formatStreamingAnnotation(streaming);
+  const durationSegment =
+    duration || annotation ? (
+      <>
+        {' · '}
+        {duration && <strong data-test-subj="discoverQueryElapsedMs">{duration}</strong>}
+        {annotation && (
+          <span data-test-subj="discoverQueryStreamingAnnotation">{` (${annotation})`}</span>
+        )}
+      </>
+    ) : null;
 
   return (
     <I18nProvider>
