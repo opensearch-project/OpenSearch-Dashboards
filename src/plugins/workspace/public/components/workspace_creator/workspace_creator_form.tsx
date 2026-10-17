@@ -5,6 +5,7 @@
 
 import { EuiSpacer, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { getUseCaseFeatureConfig } from '../../../../../core/public';
 import {
   useWorkspaceForm,
   WorkspaceUseCase,
@@ -114,6 +115,9 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                   assignedDataSourceConnections={formData.selectedDataSourceConnections}
                   data-test-subj={`workspaceForm-dataSourcePanel`}
                   showDataSourceManagement={true}
+                  workspaceFeatures={
+                    formData.useCase ? [getUseCaseFeatureConfig(formData.useCase)] : undefined
+                  }
                 />
               </EuiPanel>
             </>

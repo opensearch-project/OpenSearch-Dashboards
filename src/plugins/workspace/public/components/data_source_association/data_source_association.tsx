@@ -40,6 +40,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
     useOpenSearchDashboards().services;
   const workspaceClient = useObservable(workspaces?.client$ ?? of(null));
   const currentWorkspaceId = useObservable(workspaces?.currentWorkspaceId$ ?? of(null));
+  const currentWorkspace = useObservable(workspaces?.currentWorkspace$ ?? of(null));
 
   const closePopover = useCallback(() => {
     setIsOpen(false);
@@ -117,6 +118,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
               handleAssignDataSourceConnections={onAssociateDataSource}
               mode={mode}
               logos={chrome.logos}
+              workspaceFeatures={currentWorkspace?.features}
             />
           )
         );
@@ -131,6 +133,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
       closePopover,
       excludedDataSourceIds,
       onAssociateDataSource,
+      currentWorkspace,
     ]
   );
 

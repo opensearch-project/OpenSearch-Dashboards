@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useState, useCallback, useRef } from 'react';
+import { Fragment, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
 import {
   EuiText,
@@ -33,6 +33,7 @@ import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import { dataSourceAssociationFilters } from '../../services/data_source_association_filters';
 import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
@@ -226,6 +227,11 @@ export interface AssociationDataSourceModalProps {
   closeModal: () => void;
   handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void> | void;
   logos: Logos;
+  /**
+   * Features of the workspace the connections would be associated with (undefined when unknown);
+   * passed to the registered association filters.
+   */
+  workspaceFeatures?: string[];
 }
 
 export const AssociationDataSourceModal = (props: AssociationDataSourceModalProps) => {
@@ -245,13 +251,25 @@ export const AssociationDataSourceModalContent = ({
   excludedConnectionIds,
   handleAssignDataSourceConnections,
   logos,
+  workspaceFeatures,
 }: AssociationDataSourceModalProps) => {
-  const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
+  const [fetchedConnections, setFetchedConnections] = useState<DataSourceConnection[]>([]);
   const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
   const [options, setOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const mountedRef = useRef(false);
+  // A stable key, so a new array with the same features does not recompute the options.
+  const workspaceFeaturesKey = workspaceFeatures?.join(',');
+  // Connections that plugins report cannot be associated with this workspace are not offered.
+  const allConnections = useMemo(
+    () =>
+      fetchedConnections.filter((connection) =>
+        dataSourceAssociationFilters.isAssociable(connection, workspaceFeatures)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fetchedConnections, workspaceFeaturesKey]
+  );
 
   useEffect(() => {
     mountedRef.current = true;
@@ -284,7 +302,7 @@ export const AssociationDataSourceModalContent = ({
         fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
       )
       .then((connections) => {
-        setAllConnections(connections);
+        setFetchedConnections(connections);
       })
       .finally(() => {
         setIsLoading(false);

@@ -10,7 +10,11 @@ import { NavigationPublicPluginStart } from '../../../plugins/navigation/public'
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
 import type { AddCollaboratorsModal } from './components/add_collaborators_modal';
-import { UseCaseService, WorkspaceCollaboratorTypesService } from './services';
+import {
+  DataSourceAssociationFilter,
+  UseCaseService,
+  WorkspaceCollaboratorTypesService,
+} from './services';
 import { DataPublicPluginStart } from '../../../plugins/data/public';
 
 export type Services = CoreStart & {
@@ -56,4 +60,9 @@ export interface WorkspacePluginSetup {
   ui: {
     AddCollaboratorsModal: typeof AddCollaboratorsModal;
   };
+  /**
+   * Hides data source connections that a plugin knows cannot be associated with a workspace from
+   * the "Associate data sources" modal (e.g. connections allowed only in some use cases).
+   */
+  registerDataSourceAssociationFilter: (filter: DataSourceAssociationFilter) => void;
 }

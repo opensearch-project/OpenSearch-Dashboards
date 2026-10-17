@@ -69,7 +69,12 @@ import {
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
 import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
-import { WorkspaceCollaboratorTypesService, UseCaseService } from './services';
+import {
+  DataSourceAssociationFilter,
+  dataSourceAssociationFilters,
+  WorkspaceCollaboratorTypesService,
+  UseCaseService,
+} from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { WorkspaceValidationService } from './services/workspace_validation_service';
@@ -637,6 +642,9 @@ export class WorkspacePlugin implements Plugin<
       collaboratorTypes: this.collaboratorTypes,
       ui: {
         AddCollaboratorsModal,
+      },
+      registerDataSourceAssociationFilter: (filter: DataSourceAssociationFilter) => {
+        dataSourceAssociationFilters.register(filter);
       },
     };
   }

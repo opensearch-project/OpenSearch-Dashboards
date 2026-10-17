@@ -51,6 +51,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
 import { WorkspaceTitleDisplay } from './components/workspace_name/workspace_name';
+import { dataSourceAssociationFilters } from './services/data_source_association_filters';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(WORKSPACE_USE_CASE_PREFIX);
@@ -230,6 +231,7 @@ export const getDataSourcesList = (
           'dataSourceEngineType',
           'type',
           'connectionId',
+          ...dataSourceAssociationFilters.getRequestedFields(),
         ],
         perPage: 10000,
         workspaces: targetWorkspaces,
@@ -250,6 +252,10 @@ export const getDataSourcesList = (
           const type = source.type;
           // This is a field only for detail type of data connection in order not to mix with saved object type.
           const connectionType = source.get('type');
+          const requestedFields = dataSourceAssociationFilters.getRequestedFields();
+          const attributes = requestedFields.length
+            ? Object.fromEntries(requestedFields.map((field) => [field, source.get(field)]))
+            : undefined;
           return {
             id,
             title,
@@ -259,6 +265,7 @@ export const getDataSourcesList = (
             workspaces,
             type,
             connectionType,
+            ...(attributes ? { attributes } : {}),
           };
         });
       } else {
@@ -313,6 +320,7 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
         name: ds.title,
         description: ds.description,
         relatedConnections: [],
+        ...(ds.attributes ? { attributes: ds.attributes } : {}),
       };
     });
   const dataConnections = dataSources
@@ -324,6 +332,7 @@ export const convertDataSourcesToOpenSearchAndDataConnections = (
         connectionType: DataSourceConnectionType.DataConnection,
         name: ds.title,
         description: ds.description,
+        ...(ds.attributes ? { attributes: ds.attributes } : {}),
       };
     });
   return {

@@ -29,6 +29,8 @@ export interface SelectDataSourcePanelProps {
   assignedDataSourceConnections: DataSourceConnection[];
   onChange: (value: DataSourceConnection[]) => void;
   showDataSourceManagement: boolean;
+  /** Features of the workspace being created (for the association filters). */
+  workspaceFeatures?: string[];
 }
 
 export const SelectDataSourcePanel = ({
@@ -36,6 +38,7 @@ export const SelectDataSourcePanel = ({
   assignedDataSourceConnections,
   savedObjects,
   showDataSourceManagement,
+  workspaceFeatures,
 }: SelectDataSourcePanelProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
@@ -200,6 +203,7 @@ export const SelectDataSourcePanel = ({
           mode={toggleIdSelected}
           notifications={notifications}
           logos={chrome.logos}
+          workspaceFeatures={workspaceFeatures}
         />
       )}
     </div>
