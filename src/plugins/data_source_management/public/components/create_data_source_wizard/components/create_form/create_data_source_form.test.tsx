@@ -13,6 +13,7 @@ import { CreateDataSourceForm } from './create_data_source_form';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   AuthType,
+  jwtAuthMethod,
   noAuthCredentialAuthMethod,
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
@@ -259,6 +260,73 @@ describe('Datasource Management: Create Datasource form', () => {
     blurOnField(passwordIdentifier);
     // @ts-ignore
     expect(component.find(passwordIdentifier).first().props().isInvalid).toBe(false);
+  });
+});
+
+describe('Datasource Management: Create Datasource form with JWT auth type', () => {
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const mockSubmitHandler = jest.fn();
+  const mockTestConnectionHandler = jest.fn();
+  const mockCancelHandler = jest.fn();
+
+  const changeTextFieldValue = (testSubjId: string, value: string) => {
+    component.find(testSubjId).last().simulate('change', { target: { value } });
+  };
+
+  beforeEach(() => {
+    mockSubmitHandler.mockClear();
+    mockTestConnectionHandler.mockClear();
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    // JWT only: it is then the default selection, so no super-select interaction is needed.
+    mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(jwtAuthMethod);
+
+    component = mount(
+      wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
+        <CreateDataSourceForm
+          handleTestConnection={mockTestConnectionHandler}
+          handleSubmit={mockSubmitHandler}
+          handleCancel={mockCancelHandler}
+          existingDatasourceNamesList={['dup20']}
+        />
+      ),
+      {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+  });
+
+  test('should render no credential fields, since the token comes from the request', () => {
+    const { username, password } = {
+      username: component.find(usernameIdentifier).first(),
+      password: component.find(passwordIdentifier).first(),
+    };
+
+    expect(component.find(authTypeIdentifier).first().prop('valueOfSelected')).toBe(AuthType.JWT);
+    expect(username.exists()).toBeFalsy();
+    expect(password.exists()).toBeFalsy();
+  });
+
+  test('should create data source with no credentials when the other fields are valid', () => {
+    changeTextFieldValue(titleIdentifier, 'test');
+    changeTextFieldValue(descriptionIdentifier, 'test');
+    changeTextFieldValue(endpointIdentifier, 'https://test.com');
+
+    findTestSubject(component, 'createDataSourceTestConnectionButton').simulate('click');
+    findTestSubject(component, 'createDataSourceButton').simulate('click');
+
+    expect(mockTestConnectionHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ auth: { type: AuthType.JWT, credentials: {} } })
+    );
+    expect(mockSubmitHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({ auth: { type: AuthType.JWT } })
+    );
   });
 });
 

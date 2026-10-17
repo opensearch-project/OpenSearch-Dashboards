@@ -92,7 +92,7 @@ export const performDataSourceFormValidation = (
 
   /* Credential Validation */
 
-  if (formValues?.auth?.type === AuthType.NoAuth) {
+  if (formValues?.auth?.type === AuthType.NoAuth || formValues?.auth?.type === AuthType.JWT) {
     return true;
   } else if (formValues?.auth?.type === AuthType.UsernamePasswordType) {
     /* Username */

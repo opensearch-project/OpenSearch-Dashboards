@@ -298,7 +298,7 @@ describe(`Test connection ${URL}`, () => {
       .expect(400);
     expect(result.body.error).toEqual('Bad Request');
     expect(result.body.message).toContain(
-      `Must not be no_auth or username_password or sigv4 for registered auth types`
+      `Must not be no_auth or username_password or sigv4 or jwt for registered auth types`
     );
   });
 
@@ -312,7 +312,7 @@ describe(`Test connection ${URL}`, () => {
       .expect(400);
     expect(result.body.error).toEqual('Bad Request');
     expect(result.body.message).toContain(
-      `Must not be no_auth or username_password or sigv4 for registered auth types`
+      `Must not be no_auth or username_password or sigv4 or jwt for registered auth types`
     );
   });
 
@@ -326,7 +326,7 @@ describe(`Test connection ${URL}`, () => {
       .expect(400);
     expect(result.body.error).toEqual('Bad Request');
     expect(result.body.message).toContain(
-      `Must not be no_auth or username_password or sigv4 for registered auth types`
+      `Must not be no_auth or username_password or sigv4 or jwt for registered auth types`
     );
   });
 
