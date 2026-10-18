@@ -112,4 +112,42 @@ describe('loadQueryActionCreator', () => {
 
     expect(calls).toEqual(['clearLastExecutedData', 'setEditorTextWithQuery', 'runQuery']);
   });
+
+  it('only fills the editor when the dataset type requires an explicit Run', async () => {
+    const explicitServices = {
+      data: {
+        query: {
+          queryString: {
+            getQuery: () => ({ query: '', dataset: undefined }),
+            getDatasetService: () => ({
+              getType: (type: string) =>
+                type === 'EXPLICIT_RUN_TYPE' ? { meta: { requiresExplicitRun: true } } : undefined,
+            }),
+          },
+        },
+      },
+    } as any;
+    const getState = () =>
+      ({ query: { dataset: { id: 'd', title: 'd', type: 'EXPLICIT_RUN_TYPE' } } }) as any;
+
+    await loadQueryActionCreator(
+      explicitServices,
+      mockSetEditorTextWithQuery,
+      testQuery
+    )(mockDispatch, getState);
+
+    expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
+    expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+  });
+
+  it('still runs a loaded query of any other dataset type', async () => {
+    const getState = () =>
+      ({ query: { dataset: { id: 'i', title: 'i', type: 'INDEX_PATTERN' } } }) as any;
+    await loadQueryActionCreator(
+      mockServices,
+      mockSetEditorTextWithQuery,
+      testQuery
+    )(mockDispatch, getState);
+    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testQuery);
+  });
 });

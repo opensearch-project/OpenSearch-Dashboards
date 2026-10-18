@@ -29,6 +29,7 @@ import { useTimeFilter } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
+import { datasetRequiresExplicitRun } from '../../../../application/utils/requires_explicit_run';
 import { useEditorText, useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './save_query.scss';
 
@@ -153,6 +154,15 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
       dispatch(clearResults());
+      // A dataset type that requires an explicit Run waits for the user.
+      if (
+        datasetRequiresExplicitRun(
+          services.data?.query?.queryString,
+          savedQuery.attributes.query?.dataset
+        )
+      ) {
+        return;
+      }
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },

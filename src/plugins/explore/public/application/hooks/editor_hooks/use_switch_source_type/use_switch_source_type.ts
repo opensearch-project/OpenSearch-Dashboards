@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { EMPTY_QUERY, Query } from '../../../../../../data/common';
+import { Dataset, EMPTY_QUERY, Query } from '../../../../../../data/common';
 import { ExploreFlavor } from '../../../../../common';
 import { getServices } from '../../../../services/services';
 import {
@@ -17,13 +17,15 @@ import {
 import { setQueryWithHistory } from '../../../utils/state_management/slices';
 import type { AppDispatch } from '../../../utils/state_management/store';
 import { onEditorRunActionCreator } from '../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
+import { datasetRequiresExplicitRun } from '../../../utils/requires_explicit_run';
 import { useClearEditors } from '../use_clear_editors';
 import { useEditorFocus } from '../use_editor_focus';
 
 /**
  * Switches the query panel to a source type: opens the source's default dataset with an empty
- * editor in the dataset's language, then runs it. The language pill's "Source type" column and
- * the Metrics page's source switch both use this, so they behave the same.
+ * editor in the dataset's language, then runs it, unless the dataset's type requires an explicit
+ * Run (meta.requiresExplicitRun). The language pill's "Source type" column and the Metrics page's
+ * source switch both use this, so they behave the same.
  *
  * The previous source's query options (e.g. PromQL's per-query step and legend, and max data
  * points) are dropped: they belong to the previous language.
@@ -59,11 +61,12 @@ export const useSwitchSourceType = (flavor: ExploreFlavor | null) => {
       const services = getServices();
       const queryString = services.data.query.queryString;
       const languageService = queryString.getLanguageService();
-      const applyAndRun = (language: string) => {
+      const applyAndRun = (language: string, dataset?: Dataset) => {
         languageService.setUserQueryLanguage(language);
         dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
         clearEditors();
         schedule(focusOnEditor);
+        if (datasetRequiresExplicitRun(queryString, dataset)) return;
         schedule(() =>
           dispatch(onEditorRunActionCreator(services, queryString.getQuery().query as string))
         );
@@ -110,7 +113,7 @@ export const useSwitchSourceType = (flavor: ExploreFlavor | null) => {
         queryString.setQuery(
           withoutQueryOptions({ ...initialQuery, query: EMPTY_QUERY.QUERY, dataset: target })
         );
-        applyAndRun(initialQuery.language);
+        applyAndRun(initialQuery.language, target);
       } catch (error) {
         services.notifications?.toasts.addError(error as Error, {
           title: i18n.translate('explore.sourceType.switchError', {

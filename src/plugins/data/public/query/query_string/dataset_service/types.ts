@@ -66,7 +66,8 @@ export interface DatasetTypeConfig {
     searchOnLoad?: boolean;
     /**
      * Optional. When true, Explore never runs a query for a dataset of this type on its own: not on
-     * page load, when the dataset is selected or switched, or when a saved search is opened. Queries
+     * page load, when the dataset is selected or switched (including a source type or query
+     * language switch), on a new search, or when a saved search or saved query is opened. Queries
      * run only when the user asks (Run, or a time range update). Use it for engines where every
      * query has a cost. Defaults to false.
      */
