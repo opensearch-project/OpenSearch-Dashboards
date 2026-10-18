@@ -64,6 +64,13 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
+    /**
+     * Optional. When true, Explore never runs a query for a dataset of this type on its own: not on
+     * page load, when the dataset is selected or switched, or when a saved search is opened. Queries
+     * run only when the user asks (Run, or a time range update). Use it for engines where every
+     * query has a cost. Defaults to false.
+     */
+    requiresExplicitRun?: boolean;
     /** Optional supportsTimeFilter determines if a time field is supported */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */

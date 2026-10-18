@@ -13,6 +13,7 @@ import { useCurrentExploreId } from './use_current_explore_id';
 import { useDatasetContext } from '../../context';
 import { selectActiveTabId } from '../state_management/selectors';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
+import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 
 /**
  * Hook to handle initial query execution on page load
@@ -30,6 +31,9 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   activeTabIdRef.current = activeTabId;
 
   const shouldSearchOnPageLoad = useMemo(() => {
+    if (datasetRequiresExplicitRun(services?.data?.query?.queryString, queryState.dataset)) {
+      return false;
+    }
     if (queryState.dataset && services?.data?.query?.queryString) {
       const datasetService = services.data.query.queryString.getDatasetService();
       const typeConfig = datasetService.getType(queryState.dataset.type);

@@ -22,6 +22,7 @@ import {
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
+import { datasetRequiresExplicitRun } from '../requires_explicit_run';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 
@@ -47,6 +48,7 @@ export const useInitPage = () => {
         // Sync query from saved object to data plugin (explore doesn't use filters)
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
         const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
+        let restoredDataset;
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
@@ -57,6 +59,7 @@ export const useInitPage = () => {
             query: queryFromUrl.query || queryFromSavedSearch.query,
           };
           if (query) {
+            restoredDataset = query.dataset;
             dispatch(setQueryState(query));
             setEditorText(query.query);
           }
@@ -118,8 +121,12 @@ export const useInitPage = () => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
-        dispatch(executeQueries({ services }));
+        // A dataset type can require an explicit Run (meta.requiresExplicitRun): opening the saved
+        // search then shows its query without running it.
+        if (!datasetRequiresExplicitRun(services.data.query.queryString, restoredDataset)) {
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
+          dispatch(executeQueries({ services }));
+        }
       }
     }
     if (error) {

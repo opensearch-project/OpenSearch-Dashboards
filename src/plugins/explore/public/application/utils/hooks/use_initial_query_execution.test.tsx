@@ -452,6 +452,32 @@ describe('useInitialQueryExecution', () => {
       expect(mockClearResults).not.toHaveBeenCalled();
       expect(result.current.isInitialized).toBe(false);
     });
+
+    it('does not run on page load for a dataset type that requires an explicit run, even if searchOnLoad is true', () => {
+      const servicesWithDatasetConfig = {
+        ...mockServices,
+        data: {
+          ...mockServices.data,
+          query: {
+            ...mockServices.data.query,
+            queryString: {
+              ...mockServices.data.query.queryString,
+              getDatasetService: jest.fn().mockReturnValue({
+                getType: jest.fn().mockReturnValue({
+                  meta: { searchOnLoad: true, requiresExplicitRun: true },
+                }),
+              }),
+            },
+          },
+        },
+        uiSettings: { ...mockServices.uiSettings, get: jest.fn().mockReturnValue(true) },
+      } as any;
+
+      const { result } = renderHookWithProvider(servicesWithDatasetConfig);
+
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
+    });
   });
 
   describe('edge cases', () => {
