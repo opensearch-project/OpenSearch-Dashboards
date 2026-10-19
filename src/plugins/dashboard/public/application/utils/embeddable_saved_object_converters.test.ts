@@ -28,9 +28,11 @@
  * under the License.
  */
 
+import { isEqual } from 'lodash';
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
+  normalizeSavedDashboardPanel,
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel } from '../../types';
 import { DashboardPanelState } from '../embeddable';
@@ -145,4 +147,37 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
 
   const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
   expect(converted.hasOwnProperty('id')).toBe(false);
+});
+
+test('normalizeSavedDashboardPanel fills in a missing embeddableConfig only', () => {
+  const panel = {
+    type: 'explore',
+    id: 'abc',
+    panelIndex: '1',
+    gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
+    version: '3.0.0',
+  } as any;
+  // A panel another app saved without one matches what the dashboard writes for it.
+  expect(normalizeSavedDashboardPanel(panel)).toEqual({ ...panel, embeddableConfig: {} });
+  const withConfig = { ...panel, embeddableConfig: { title: 'x' } };
+  expect(normalizeSavedDashboardPanel(withConfig)).toBe(withConfig);
+  expect(normalizeSavedDashboardPanel(undefined)).toBeUndefined();
+});
+
+test('a panel saved without embeddableConfig reads as unchanged after a load, as the dashboard checks it', () => {
+  // What Explore's "Save and Add to Dashboard" used to save.
+  const saved = {
+    version: '3.0.0',
+    id: 'abc',
+    type: 'explore',
+    panelIndex: '1',
+    gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
+  } as any;
+  const roundTripped = convertPanelStateToSavedDashboardPanel(
+    convertSavedDashboardPanelToPanelState(saved),
+    '3.0.0'
+  );
+  // The dashboard compares the panel it shows with the saved one; a plain compare flags it.
+  expect(isEqual(roundTripped, saved)).toBe(false);
+  expect(isEqual(roundTripped, normalizeSavedDashboardPanel(saved))).toBe(true);
 });

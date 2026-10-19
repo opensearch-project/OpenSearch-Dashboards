@@ -66,6 +66,19 @@ describe('addToDashboard', () => {
     expect(mockSave).toHaveBeenCalled();
   });
 
+  it('saves the new panel with the embeddableConfig the dashboard writes for its own panels', async () => {
+    const dashboard: any = { ...mockDashboardBase, panelsJSON: '[]' };
+    mockGet.mockResolvedValue(dashboard);
+    await addToDashboard(dashboardService as any, { id: 'new-viz', type: 'explore' }, 'existing', {
+      existingDashboardId: '123',
+    });
+    // Without it the dashboard reads the panel as changed when it opens and asks to discard.
+    expect(JSON.parse(dashboard.panelsJSON)[0]).toMatchObject({
+      id: 'new-viz',
+      embeddableConfig: {},
+    });
+  });
+
   it('creates a new dashboard with correct panel and URL', async () => {
     mockGet.mockResolvedValue({
       ...mockDashboardBase,
