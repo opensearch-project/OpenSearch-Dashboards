@@ -46,5 +46,8 @@ declare module 'rison-node' {
   export const encode: <Input extends RisonValue>(input: Input) => string;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
+  export const encode_uri: <Input extends RisonValue>(input: Input) => string;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export const encode_object: <Input extends RisonObject>(input: Input) => string;
 }

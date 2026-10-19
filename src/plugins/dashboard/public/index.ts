@@ -80,6 +80,7 @@ export {
   NormalizedVariableOption,
   VariableWithState,
   VariableState,
+  ALL_OPTION_VALUE,
 } from './variables/types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
