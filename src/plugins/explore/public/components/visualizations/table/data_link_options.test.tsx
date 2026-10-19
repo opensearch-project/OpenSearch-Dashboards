@@ -52,6 +52,20 @@ describe('DataLinkModal', () => {
     expect(saveBtn).toBeDisabled();
   });
 
+  it('lists the supported placeholders in the URL help text', () => {
+    render(
+      <DataLinkModal
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        availableFields={[{ label: 'Num1', value: 'num1' }]}
+      />
+    );
+
+    expect(screen.getByText(/__data\.fields\.name/)).toBeInTheDocument();
+    expect(screen.getByText(/\$variable/)).toBeInTheDocument();
+    expect(screen.getByText(/:rison/)).toBeInTheDocument();
+  });
+
   it('saves link with valid input', async () => {
     const handleSave = jest.fn();
 
