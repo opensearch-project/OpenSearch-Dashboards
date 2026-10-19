@@ -29,17 +29,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/styles';
 import { EuiButtonIcon } from '@elastic/eui';
 import { startAttachmentDownload } from '@logrhythm/nm-web-shared/services/session_files';
 import { toastNotifications } from '../services/notifications';
 import FileDownloadModal from './file_download/file_download_modal';
 
-const useStyles = makeStyles({
-  buttonWrapper: {
-    cursor: 'pointer',
-  },
-}, { name: 'AttachDownload' });
+const buttonWrapperStyle: React.CSSProperties = { cursor: 'pointer' };
 
 export interface AttachDownloadProps {
   session: string;
@@ -49,8 +44,6 @@ export interface AttachDownloadProps {
 
 const AttachDownload = (props: AttachDownloadProps) => {
   const { session, fileName, captured } = props;
-
-  const classes = useStyles();
 
   const [downloadId, setDownloadId] = useState('');
   const [fileNames, setFileNames] = useState<string[]>([]);
@@ -96,7 +89,7 @@ const AttachDownload = (props: AttachDownloadProps) => {
 
   return (
     <>
-      <div className={classes.buttonWrapper}>
+      <div style={buttonWrapperStyle}>
         <EuiButtonIcon
           disabled={fileNames.length === 0}
           iconType="importAction"

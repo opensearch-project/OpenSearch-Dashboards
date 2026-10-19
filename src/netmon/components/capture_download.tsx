@@ -29,22 +29,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/styles';
 import { EuiButtonIcon, EuiCheckbox } from '@elastic/eui';
 import SelectedCaptureSessions from '@logrhythm/nm-web-shared/services/selected_capture_sessions';
 import { startPcapDownload } from '@logrhythm/nm-web-shared/services/session_files';
 import { toastNotifications } from '../services/notifications';
 import FileDownloadModal from './file_download/file_download_modal';
 
-const useStyles = makeStyles({
-  contentWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  buttonWrapper: {
-    cursor: 'pointer',
-  },
-}, { name: 'CaptureDownload' });
+const styles = {
+  contentWrapper: { display: 'flex', alignItems: 'center' } as React.CSSProperties,
+  buttonWrapper: { cursor: 'pointer' } as React.CSSProperties,
+};
 
 export interface AttachDownloadProps {
   session: string;
@@ -52,8 +46,6 @@ export interface AttachDownloadProps {
 
 const CaptureDownload = (props: AttachDownloadProps) => {
   const { session } = props;
-
-  const classes = useStyles();
 
   const [downloadId, setDownloadId] = useState('');
   const [isSelected, setIsSelected] = useState(false);
@@ -81,8 +73,8 @@ const CaptureDownload = (props: AttachDownloadProps) => {
 
   return (
     <>
-      <div className={classes.contentWrapper}>
-        <div className={classes.buttonWrapper}>
+      <div style={styles.contentWrapper}>
+        <div style={styles.buttonWrapper}>
           <EuiButtonIcon
             iconType="importAction"
             color="primary"
