@@ -787,6 +787,11 @@ export function Header({
           }
           #osd-top-nav-helper { display: none !important; }
 
+          /* Remove nm-web-shared analyzeNotificationWrapper padding-top that overflows
+             the fixed navbar container and blocks clicks in the Capture Dashboard
+             log window search area. */
+          .alert-bar-margin { padding-top: 0 !important; }
+
           /* Prevent Administration/User Options/Help items from wrapping to next line,
              and vertically center them within the 50px navbar. */
           .navbar-right {
