@@ -165,8 +165,7 @@ export const EditIndexPattern = withRouter(
         if (isConfirmed) {
           const previousFields = indexPattern.fields.getAll().map((field) => field.spec);
           try {
-            await data.indexPatterns.refreshFields(indexPattern);
-            await data.indexPatterns.updateSavedObject(indexPattern);
+            await data.indexPatterns.refreshFieldsAndSave(indexPattern);
           } catch (err) {
             // Keep the in-memory (cached) pattern in sync with what is actually saved
             indexPattern.fields.replaceAll(previousFields);

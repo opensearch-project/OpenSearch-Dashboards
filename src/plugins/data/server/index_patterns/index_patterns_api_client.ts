@@ -37,4 +37,10 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   async getFieldsForWildcard(options: GetFieldsOptions = {}) {
     throw new Error('IndexPatternsApiServer - getFieldsForWildcard not defined');
   }
+  async refreshFields(
+    id: string,
+    options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'> = {}
+  ): Promise<never> {
+    throw new Error('IndexPatternsApiServer - refreshFields not defined');
+  }
 }

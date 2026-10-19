@@ -137,6 +137,10 @@ export interface GetFieldsOptions {
 export interface IIndexPatternsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptions) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  refreshFields: (
+    id: string,
+    options: Pick<GetFieldsOptions, 'metaFields' | 'dataSourceId'>
+  ) => Promise<{ fields: FieldSpec[]; version: string }>;
 }
 
 export type { SavedObject };

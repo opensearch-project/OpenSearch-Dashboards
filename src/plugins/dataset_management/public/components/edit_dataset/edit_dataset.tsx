@@ -121,8 +121,7 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       if (isConfirmed) {
         const previousFields = dataset.fields.getAll().map((field) => field.spec);
         try {
-          await data.dataViews.refreshFields(dataset);
-          await data.dataViews.updateSavedObject(dataset);
+          await data.dataViews.refreshFieldsAndSave(dataset);
         } catch (err) {
           // Keep the in-memory (cached) dataset in sync with what is actually saved
           dataset.fields.replaceAll(previousFields);
