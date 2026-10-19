@@ -224,6 +224,59 @@ describe('TableVis', () => {
     jest.clearAllMocks();
   });
 
+  const lastRenderCellValue = () => {
+    const calls = (jest.mocked(EuiDataGrid) as jest.Mock).mock.calls;
+    return calls[calls.length - 1][0].renderCellValue;
+  };
+
+  test('passes the row at the grid index and the variables to CellValue', () => {
+    const variables = [{ name: 'env', value: 'prod' }];
+    render(<TableVis rows={mockRows} columns={mockColumns} variables={variables} />);
+
+    const cell = lastRenderCellValue()({
+      rowIndex: 1,
+      columnId: 'column1',
+      setCellProps: jest.fn(),
+    });
+    expect(cell.props.row).toEqual({ column1: 20, column2: 'value2-2' });
+    expect(cell.props.variables).toBe(variables);
+  });
+
+  test('passes no row for an index outside the rows', () => {
+    render(<TableVis rows={mockRows} columns={mockColumns} />);
+
+    const cell = lastRenderCellValue()({
+      rowIndex: 5,
+      columnId: 'column1',
+      setCellProps: jest.fn(),
+    });
+    expect(cell.props.row).toBeUndefined();
+  });
+
+  test('passes the filtered row, not the unfiltered one', async () => {
+    render(
+      <TableVis
+        rows={mockRows}
+        columns={mockColumns}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 10, showColumnFilter: true }}
+      />
+    );
+    const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
+    act(() => {
+      setFilters({ column1: { values: [20], operator: '=' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    const cell = lastRenderCellValue()({
+      rowIndex: 0,
+      columnId: 'column1',
+      setCellProps: jest.fn(),
+    });
+    expect(cell.props.row).toEqual({ column1: 20, column2: 'value2-2' });
+  });
+
   test('renders with default props', () => {
     render(<TableVis rows={mockRows} columns={mockColumns} />);
     expect(screen.getByTestId('mockEuiDataGrid')).toHaveAttribute(

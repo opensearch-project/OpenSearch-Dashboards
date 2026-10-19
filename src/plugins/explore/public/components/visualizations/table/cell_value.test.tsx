@@ -143,6 +143,101 @@ describe('CellValue', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
+  it('resolves row fields and dashboard variables in a link', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Open',
+        url: '/app?s=${__data.fields.service}&e=${__value.text}&env=$env',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(
+      <CellValue
+        {...baseProps}
+        dataLinks={links}
+        row={{ col1: 'TestValue', service: 'checkout' }}
+        variables={[{ name: 'env', value: 'prod' }]}
+      />
+    );
+    const link = screen.getByRole('link', { name: 'TestValue' });
+    expect(link).toHaveAttribute('href', '/app?s=checkout&e=TestValue&env=prod');
+  });
+
+  it('shows plain text, with the reason, when a placeholder cannot be resolved', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Open',
+        url: '/app?s=${__data.fields.missing}&env=$unknown',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} dataLinks={links} row={{ col1: 'TestValue' }} />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('TestValue')).toHaveAttribute(
+      'title',
+      'No link: ${__data.fields.missing}, $unknown could not be resolved for this row'
+    );
+  });
+
+  it('does not render a link with a script scheme', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Bad',
+        // eslint-disable-next-line no-script-url
+        url: 'javascript:alert(1)',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} dataLinks={links} />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('TestValue')).not.toHaveAttribute('title');
+  });
+
+  it('keeps only the links that resolve when a cell has several', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Resolved',
+        url: '/a/${__value.text}',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+      {
+        id: '2',
+        title: 'Unresolved',
+        url: '/b/${__data.fields.missing}',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} dataLinks={links} />);
+    // One usable link renders directly, without a popover.
+    expect(screen.getByRole('link', { name: 'TestValue' })).toHaveAttribute('href', '/a/TestValue');
+  });
+
+  it('replaces every occurrence of the clicked value', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Open',
+        url: '/a/${__value.text}/b/${__value.text}',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} dataLinks={links} />);
+    expect(screen.getByRole('link', { name: 'TestValue' })).toHaveAttribute(
+      'href',
+      '/a/TestValue/b/TestValue'
+    );
+  });
+
   it('renders boolean value as text inside a single link', () => {
     const links: DataLink[] = [
       {
@@ -196,6 +291,47 @@ describe('CellValue', () => {
       expect(setPopoverOpen).toHaveBeenCalledWith(true);
       expect(screen.getByText('Google')).toBeInTheDocument();
       expect(screen.getByText('Bing')).toBeInTheDocument();
+    });
+  });
+
+  it('resolves row fields and dashboard variables in every popover link', async () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Service',
+        url: '/service?name=${__data.fields.service}&env=$env',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+      {
+        id: '2',
+        title: 'Endpoint',
+        url: '/endpoint?path=${__value.text}&env=${env}',
+        openInNewTab: true,
+        fields: ['col1'],
+      },
+    ];
+
+    render(
+      <CellValue
+        {...baseProps}
+        dataLinks={links}
+        isPopoverOpen={true}
+        setPopoverOpen={jest.fn()}
+        row={{ col1: 'TestValue', service: 'checkout' }}
+        variables={[{ name: 'env', value: 'prod' }]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Service' })).toHaveAttribute(
+        'href',
+        '/service?name=checkout&env=prod'
+      );
+      expect(screen.getByRole('link', { name: 'Endpoint' })).toHaveAttribute(
+        'href',
+        '/endpoint?path=TestValue&env=prod'
+      );
     });
   });
 
