@@ -46,6 +46,12 @@ $euiCollapsibleNavWidth: $euiSize * 20;
   }
 }
 
+// Override nm-web-shared navbar padding that shifts the Capture Dashboard
+// content down, hiding the panel title and breaking the log window search.
+.alert-bar-margin {
+  padding-top: 0 !important;
+}
+
 // A necessary hack so that the above focus policy doesn't pollute some EUI
 // entrenched inputs.
 .euiComboBox {
