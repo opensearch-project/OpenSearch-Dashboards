@@ -10,6 +10,8 @@ import { ExploreServices } from '../../../types';
 import { setQueryWithHistory } from '../state_management/slices';
 import { selectQuery } from '../state_management/selectors';
 import { SavedExplore } from '../../../saved_explore';
+import { getSourceTypeRegistry } from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 
 interface UseInitializeMetricsDatasetOptions {
   services: ExploreServices;
@@ -25,7 +27,15 @@ export const useInitializeMetricsDataset = ({
 
   useEffectOnce(() => {
     const initializeDataset = async () => {
-      if (savedExplore || (currentQuery.dataset && currentQuery.dataset.type === 'PROMETHEUS')) {
+      if (
+        savedExplore ||
+        (currentQuery.dataset && currentQuery.dataset.type === 'PROMETHEUS') ||
+        // A Metrics-flavor source's dataset (with its own language) is kept as is.
+        getSourceTypeRegistry().isRegisteredSourceDataset(
+          currentQuery.dataset,
+          ExploreFlavor.Metrics
+        )
+      ) {
         return;
       }
 

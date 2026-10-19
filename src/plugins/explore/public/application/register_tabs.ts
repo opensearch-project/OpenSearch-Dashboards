@@ -18,6 +18,7 @@ import {
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_METRICS_TABLE_TAB_ID,
   ENABLE_EXPERIMENTAL_SETTING,
   EXPLORE_STATISTICS_TAB_ID,
 } from '../../common';
@@ -61,7 +62,7 @@ export const registerBuiltInTabs = (
     });
 
     tabRegistry.registerTab({
-      id: 'metrics',
+      id: EXPLORE_METRICS_TABLE_TAB_ID,
       label: i18n.translate('explore.metricsTab.tableLabel', {
         defaultMessage: 'Table',
       }),

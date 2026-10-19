@@ -17,3 +17,8 @@
     outline-offset: 2px;
   }
 }
+
+.metricsEmptyState__sampleCode code {
+  // Label matchers like {"@instrumentation.@name"="..."} have no spaces to break at.
+  overflow-wrap: anywhere;
+}

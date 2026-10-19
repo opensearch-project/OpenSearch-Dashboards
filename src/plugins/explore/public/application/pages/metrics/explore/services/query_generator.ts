@@ -10,6 +10,60 @@ export function escapeLabelValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+// A metric name PromQL accepts bare.
+const PROMQL_METRIC_NAME = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
+// A label name PromQL accepts bare.
+const PROMQL_LABEL_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+/**
+ * A label name as PromQL needs it: bare when it can be, else quoted (Prometheus 3 UTF-8 names,
+ * e.g. OTel's `"service.name"` or `"k8s.namespace.name"`).
+ */
+export function formatLabelName(name: string): string {
+  return PROMQL_LABEL_NAME.test(name) ? name : `"${escapeLabelValue(name)}"`;
+}
+
+/**
+ * The selector for a metric and its label matchers. A name PromQL can't take bare (a leading
+ * digit, a dot, as in many non-Prometheus metric names such as `2xx` or `CPU.usage`) goes in a
+ * `__name__` matcher instead: `{__name__="2xx"}`.
+ */
+export function metricSelector(name: string, matchers: string[], separator = ', '): string {
+  if (PROMQL_METRIC_NAME.test(name)) {
+    return matchers.length ? `${name}{${matchers.join(separator)}}` : name;
+  }
+  return `{${[`__name__="${escapeLabelValue(name)}"`, ...matchers].join(separator)}}`;
+}
+
+/**
+ * A histogram whose samples are histograms (native/OTel exponential histograms), not `_bucket`
+ * series: the metadata says histogram, but the name is a series of its own. These need histogram
+ * functions (`histogram_avg`); aggregations such as `avg` skip histogram samples, and
+ * `histogram_quantile(... by (le))` expects classic buckets. A backend only reports such a series
+ * when it stores native histograms; `histogram_avg` needs Prometheus 2.50 or later.
+ */
+export function isNativeHistogram(name: string, type: MetricType): boolean {
+  return (
+    (type === MetricType.HISTOGRAM || type === MetricType.GAUGE_HISTOGRAM) &&
+    !/_(bucket|count|sum)$/.test(name)
+  );
+}
+
+/**
+ * The average of a native histogram over the step, weighted across series: a counter histogram
+ * is cumulative, so it is rated first (as `sum(rate(...))` is for a counter); a gauge histogram
+ * already holds the current distribution.
+ */
+function nativeHistogramAverage(
+  selector: string,
+  type: MetricType,
+  rate: string,
+  by?: string
+): string {
+  const samples = type === MetricType.GAUGE_HISTOGRAM ? selector : `rate(${selector}[${rate}])`;
+  return `histogram_avg(sum${by ? ` by (${by})` : ''} (${samples}))`;
+}
+
 // Assumed Prometheus scrape interval when building rate windows. 60s covers
 // typical deployments (15s–60s scrapes) without requiring per-datasource config.
 const ASSUMED_SCRAPE_SEC = 60;
@@ -24,6 +78,7 @@ export class MetricQueryGenerator {
   forMetric(name: string, type: MetricType, stepSec: number, filters: LabelFilter[] = []): string {
     const selector = this.buildSelector(name, filters);
     const rate = this.rateInterval(stepSec);
+    if (isNativeHistogram(name, type)) return nativeHistogramAverage(selector, type, rate);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
         return `sum(rate(${selector}[${rate}]))`;
@@ -52,21 +107,22 @@ export class MetricQueryGenerator {
   ): string {
     const selector = this.buildSelector(name, filters);
     const rate = this.rateInterval(stepSec);
+    const by = formatLabelName(label);
+    if (isNativeHistogram(name, type)) return nativeHistogramAverage(selector, type, rate, by);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
-        return `sum by (${label}) (rate(${selector}[${rate}]))`;
+        return `sum by (${by}) (rate(${selector}[${rate}]))`;
       case MetricType.HISTOGRAM:
-        return `histogram_quantile(0.95, sum by (${label}, le) (rate(${selector}[${rate}])))`;
+        return `histogram_quantile(0.95, sum by (${by}, le) (rate(${selector}[${rate}])))`;
       default:
-        return `avg by (${label}) (${selector})`;
+        return `avg by (${by}) (${selector})`;
     }
   }
 
   private buildSelector(name: string, filters: LabelFilter[]): string {
     const labelMatchers = filters
       .filter((f) => f.enabled !== false)
-      .map((f) => `${f.name}${f.operator}"${escapeLabelValue(f.value)}"`)
-      .join(',');
-    return labelMatchers ? `${name}{${labelMatchers}}` : name;
+      .map((f) => `${formatLabelName(f.name)}${f.operator}"${escapeLabelValue(f.value)}"`);
+    return metricSelector(name, labelMatchers, ',');
   }
 }

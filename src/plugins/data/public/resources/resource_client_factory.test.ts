@@ -79,4 +79,31 @@ describe('ResourceClientFactory', () => {
       expect(clientA).not.toBe(clientB);
     });
   });
+
+  describe('getForDatasetType', () => {
+    const prometheusClient = { id: 'prometheus' } as unknown as BaseResourceClient;
+    const myClient = { id: 'my-metrics' } as unknown as BaseResourceClient;
+
+    beforeEach(() => {
+      factory.register('prometheus', () => prometheusClient);
+      factory.register('my-metrics', () => myClient);
+    });
+
+    it('returns the client set for the dataset type', () => {
+      factory.setClientForDatasetType('MY_DATASET_TYPE', 'my-metrics');
+      expect(factory.getForDatasetType('MY_DATASET_TYPE', 'prometheus')).toBe(myClient);
+    });
+
+    it('falls back for a dataset type with no client of its own', () => {
+      factory.setClientForDatasetType('MY_DATASET_TYPE', 'my-metrics');
+      expect(factory.getForDatasetType('PROMETHEUS', 'prometheus')).toBe(prometheusClient);
+      expect(factory.getForDatasetType(undefined, 'prometheus')).toBe(prometheusClient);
+    });
+
+    it('returns undefined instead of throwing when the client is not registered', () => {
+      factory.setClientForDatasetType('OTHER_TYPE', 'unregistered');
+      expect(factory.getForDatasetType('OTHER_TYPE', 'prometheus')).toBeUndefined();
+      expect(factory.getForDatasetType(undefined, 'unregistered')).toBeUndefined();
+    });
+  });
 });

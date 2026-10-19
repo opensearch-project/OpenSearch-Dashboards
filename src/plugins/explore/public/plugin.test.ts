@@ -547,6 +547,55 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it("maps each registered source's dataset types to its metrics resource client", () => {
+      const sourceTypes = (plugin as any).sourceTypeRegistry;
+      sourceTypes.register({
+        id: 'my-source',
+        label: 'My Source',
+        datasetTypes: ['MY_DATASET_TYPE', 'MY_OTHER_TYPE'],
+        metricsResourceClientId: 'my-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+      sourceTypes.register({
+        id: 'no-client',
+        label: 'No client',
+        datasetTypes: ['NO_CLIENT_TYPE'],
+        resolveDefaultDataset: async () => undefined,
+      });
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+
+      plugin.start(coreStart, deps);
+
+      expect(setClientForDatasetType.mock.calls).toEqual([
+        ['MY_DATASET_TYPE', 'my-metrics'],
+        ['MY_OTHER_TYPE', 'my-metrics'],
+      ]);
+    });
+
+    it('maps a source registered after start, as a plugin starting after Explore would', () => {
+      const setClientForDatasetType = jest.fn();
+      const deps = {
+        ...startDeps,
+        data: { ...startDeps.data, resourceClientFactory: { setClientForDatasetType } },
+      } as unknown as ExploreStartDependencies;
+      plugin.start(coreStart, deps);
+      expect(setClientForDatasetType).not.toHaveBeenCalled();
+
+      (plugin as any).sourceTypeRegistry.register({
+        id: 'late-source',
+        label: 'Late Source',
+        datasetTypes: ['LATE_TYPE'],
+        metricsResourceClientId: 'late-metrics',
+        resolveDefaultDataset: async () => undefined,
+      });
+
+      expect(setClientForDatasetType).toHaveBeenCalledWith('LATE_TYPE', 'late-metrics');
+    });
+
     it('should not register Ask AI embeddable action when contextProvider is not available', () => {
       const startDepsWithoutContextProvider = {
         ...startDeps,

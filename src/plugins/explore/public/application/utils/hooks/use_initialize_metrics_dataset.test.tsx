@@ -11,6 +11,11 @@ import { useInitializeMetricsDataset } from './use_initialize_metrics_dataset';
 import { ExploreServices } from '../../../types';
 import { queryReducer } from '../state_management/slices';
 import { setQueryWithHistory } from '../state_management/slices';
+import {
+  SourceTypeRegistryService,
+  setSourceTypeRegistry,
+} from '../../../services/source_type_registry';
+import { ExploreFlavor } from '../../../../common';
 
 // Mock setQueryWithHistory action
 jest.mock('../state_management/slices', () => ({
@@ -132,6 +137,58 @@ describe('useInitializeMetricsDataset', () => {
 
       expect(mockFetch).not.toHaveBeenCalled();
       expect(mockDispatch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the dataset belongs to a registered source', () => {
+    const register = (flavors: ExploreFlavor[]) => {
+      const registry = new SourceTypeRegistryService();
+      registry.register({
+        id: 'external',
+        label: 'External',
+        datasetTypes: ['EXTERNAL_METRICS'],
+        flavors,
+        resolveDefaultDataset: async () => undefined,
+        languageSettings: { 'External QL': {} },
+      });
+      setSourceTypeRegistry(registry);
+    };
+
+    afterEach(() => setSourceTypeRegistry(new SourceTypeRegistryService()));
+
+    it('keeps a Metrics-flavor source dataset and its language', async () => {
+      register([ExploreFlavor.Metrics]);
+      const mockServices = createMockServices();
+      const existingDataset = { id: 'external-1', type: 'EXTERNAL_METRICS' };
+
+      await act(async () => {
+        renderHookWithProvider(mockServices, existingDataset, undefined, 'External QL');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('replaces a dataset whose source is not offered on Metrics', async () => {
+      register([ExploreFlavor.Logs]);
+      const mockServices = createMockServices();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      await act(async () => {
+        renderHookWithProvider(
+          mockServices,
+          { id: 'external-1', type: 'EXTERNAL_METRICS' },
+          undefined,
+          'External QL'
+        );
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
+      expect(mockSetQueryWithHistory).toHaveBeenCalledWith(
+        expect.objectContaining({ dataset: undefined, language: 'PROMQL' })
+      );
+      expect(mockFetch).toHaveBeenCalled();
     });
   });
 
