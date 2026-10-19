@@ -19,6 +19,12 @@ interface FindRulesByColumnsResult {
   exact: MatchedVisRules[];
 }
 
+export interface VisualizationFullMetadata {
+  type: string;
+  name: string;
+  description: string;
+}
+
 /**
  * Registry for visualization rules and configurations.
  * This class is designed to be used as a service that can be accessed by other plugins.
@@ -43,6 +49,27 @@ export class VisualizationRegistry {
       }
     }
     return availableChartTypes;
+  }
+
+  /**
+   * Get full metadata for registered visualizations
+   */
+  getVisualizationsFullMetadata(): VisualizationFullMetadata[] {
+    const visualizationsFullMetadata: VisualizationFullMetadata[] = [];
+    for (const [, vis] of this.visualizations) {
+      const description = vis.metadata?.description?.trim();
+      if (!description || visualizationsFullMetadata.some((t) => t.type === vis.type)) {
+        continue;
+      }
+
+      visualizationsFullMetadata.push({
+        type: vis.type,
+        name: vis.name,
+        description,
+      });
+    }
+
+    return visualizationsFullMetadata;
   }
 
   getAxesMappingByRule(

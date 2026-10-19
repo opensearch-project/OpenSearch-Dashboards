@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiIcon, EuiPopover, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import { Dataset, EMPTY_QUERY } from '../../../../../../data/common';
+import type { Query } from '../../../../../../data/common';
 import {
   selectActiveTabId,
   selectDataset,
@@ -18,7 +18,7 @@ import {
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
-import { useClearEditors, useEditorFocus } from '../../../../application/hooks';
+import { useEditorFocus, useSwitchSourceType } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { getServices } from '../../../../services/services';
@@ -49,6 +49,12 @@ const queryLanguageSectionTitle = i18n.translate(
   }
 );
 
+const queryLanguageForSourceSectionTitle = (source: string) =>
+  i18n.translate('explore.queryPanelFooter.languageToggle.queryLanguageForSourceSectionTitle', {
+    defaultMessage: 'Query language for {source}',
+    values: { source },
+  });
+
 const openPickerAriaLabel = i18n.translate('explore.queryPanelFooter.languageToggle.ariaLabel', {
   defaultMessage: 'Select source type and query language',
 });
@@ -67,7 +73,6 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
   const activeTabId = useSelector(selectActiveTabId);
   const activeDataset = useSelector(selectDataset);
   const focusOnEditor = useEditorFocus();
-  const clearEditors = useClearEditors();
   const dispatch = useDispatch();
   const flavorId = useFlavorId();
 
@@ -118,7 +123,15 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
       const newQueryString =
         newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
 
-      queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
+      // setQuery merges, so drop the previous language's options (e.g. PromQL's per-query legend and
+      // step, and max data points): they don't apply to the new one. Query has no `queryOptions`
+      // in its type; languages such as PromQL keep their options there.
+      queryString.setQuery({
+        query: newQueryString,
+        language: newLanguage,
+        dataset,
+        queryOptions: undefined,
+      } as Partial<Query>);
       languageSvc.setUserQueryLanguage(newLanguage);
       dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
       scheduleTimeout(focusOnEditor);
@@ -128,73 +141,20 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     [closePopover, focusOnEditor, dispatch, scheduleTimeout]
   );
 
-  // Switch the active source by selecting a dataset. Mirrors DatasetSelectWidget's
-  // handleDatasetSelect (cache the dataView, set the initial query for the dataset, push to
-  // history) and then auto-runs, matching the language-switch behavior above.
-  const switchToDataset = useCallback(
-    async (dataset: Dataset) => {
-      const services = getServices();
-      const queryString = services.data.query.queryString;
-      // The dataset picker caches the dataView inside its own component; here we bypass the
-      // picker, so cache it ourselves or query execution can't resolve the dataView.
-      try {
-        const { storage, ...datasetServices } = services;
-        await queryString.getDatasetService().cacheDataset(dataset, datasetServices);
-      } catch {
-        // Non-fatal: execution will surface a clearer error if the dataView truly can't load.
-      }
-      // getInitialQueryByDataset derives the language from dataset.language, which each source
-      // type's resolveDefaultDataset sets so a language left over from the previous source isn't
-      // coerced to the index-pattern type's kuery default.
-      const initialQuery = queryString.getInitialQueryByDataset(dataset);
-      // Start from an empty editor, like a dataset pick: the previous text is in another language.
-      queryString.setQuery({ ...initialQuery, query: EMPTY_QUERY.QUERY, dataset });
-      queryString.getLanguageService().setUserQueryLanguage(initialQuery.language);
-      dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
-      clearEditors();
-      scheduleTimeout(focusOnEditor);
-      scheduleTimeout(() =>
-        dispatch(onEditorRunActionCreator(services, queryString.getQuery().query as string))
-      );
-    },
-    [dispatch, focusOnEditor, scheduleTimeout, clearEditors]
-  );
-
+  const switchSourceType = useSwitchSourceType(flavorId);
   const onSourceTypeClick = useCallback(
-    async (sourceType: SourceTypeDefinition) => {
+    (sourceType: SourceTypeDefinition) => {
       closePopover();
-      const services = getServices();
-      try {
-        const target = await sourceType.resolveDefaultDataset({
-          data: services.data,
-          flavor: flavorId,
-        });
-        if (!target) {
-          services.notifications?.toasts.addWarning({
-            title: i18n.translate('explore.queryPanelFooter.sourceType.noDataset', {
-              defaultMessage: 'No {sourceType} dataset found to query',
-              values: { sourceType: sourceType.label },
-            }),
-          });
-          return;
-        }
-        await switchToDataset(target);
-      } catch (error) {
-        services.notifications?.toasts.addError(error, {
-          title: i18n.translate('explore.queryPanelFooter.sourceType.switchError', {
-            defaultMessage: 'Could not switch source type',
-          }),
-        });
-      }
+      return switchSourceType(sourceType);
     },
-    [closePopover, switchToDataset, flavorId]
+    [closePopover, switchSourceType]
   );
 
   const languageService = getServices().data.query.queryString.getLanguageService();
 
   const languageTitle = useMemo(() => {
-    return languageService.getLanguage(language)?.title ?? language;
-  }, [language, languageService]);
+    return getSourceTypeRegistry().getLanguageLabel(language, activeDataset);
+  }, [language, activeDataset]);
 
   // Source types offered for this flavor (OpenSearch always is). Builder-only workspaces get only
   // sources whose languages the visual builder supports.
@@ -280,6 +240,28 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
+  // A source that describes its languages (so e.g. OpenSearch SQL and another source's SQL read
+  // differently) gets them as a list of rows, each with its name, tag and description, so they can
+  // be compared before picking one. Otherwise they stay compact chips.
+  const languageGuides = useMemo(
+    () =>
+      supportedLanguages.map((langId) => ({
+        langId,
+        guide: getSourceTypeRegistry().getLanguageGuide(langId, activeDataset),
+      })),
+    [supportedLanguages, activeDataset]
+  );
+  const describesLanguages = languageGuides.some(({ guide }) => !!guide.description || !!guide.tag);
+
+  // A registered source's languages are introduced as that source's ("Query language for ...").
+  const queryLanguageTitle = useMemo(() => {
+    const registry = getSourceTypeRegistry();
+    const activeSource = registry.getForDataset(activeDataset);
+    return activeSource.id === OPENSEARCH_SOURCE_TYPE_ID
+      ? queryLanguageSectionTitle
+      : queryLanguageForSourceSectionTitle(registry.getLabel(activeSource, flavorId));
+  }, [activeDataset, flavorId]);
+
   // The active source's icon, else the one its dataset type declares for the dataset picker.
   const triggerIcon = useMemo(() => {
     const registry = getSourceTypeRegistry();
@@ -310,8 +292,10 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
     // `supportedLanguages` is already narrowed to the active dataset type's languages (see the
     // effect above), so each source shows only the languages it can run.
     return supportedLanguages.map((langId) => {
-      const langConfig = languageService.getLanguage(langId);
-      const title = langConfig?.title ?? langId;
+      // The test subject keeps the registered title so it doesn't change with a source's label.
+      const title = languageService.getLanguage(langId)?.title ?? langId;
+      const label = getSourceTypeRegistry().getLanguageLabel(langId, activeDataset);
+      const guide = languageGuides.find((g) => g.langId === langId)?.guide;
       const isSelected = !isPromptMode && langId === language;
       return (
         <button
@@ -327,16 +311,54 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
             }
           }}
           aria-current={isSelected ? 'true' : undefined}
-          className={classNames('exploreLanguagePicker__chip', {
-            ['exploreLanguagePicker__chip--selected']: isSelected,
-          })}
+          className={classNames(
+            describesLanguages ? 'exploreLanguagePicker__language' : 'exploreLanguagePicker__chip',
+            {
+              ['exploreLanguagePicker__language--selected']: describesLanguages && isSelected,
+              ['exploreLanguagePicker__chip--selected']: !describesLanguages && isSelected,
+            }
+          )}
           data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
         >
-          {title}
+          {describesLanguages ? (
+            <>
+              <span className="exploreLanguagePicker__languageHeader">
+                <span className="exploreLanguagePicker__languageName">{label}</span>
+                {guide?.tag && (
+                  <span
+                    className="exploreLanguagePicker__languageTag"
+                    data-test-subj={`queryPanelFooterLanguageTag-${title}`}
+                  >
+                    {guide.tag}
+                  </span>
+                )}
+              </span>
+              {guide?.description && (
+                <span
+                  className="exploreLanguagePicker__languageDescription"
+                  data-test-subj={`queryPanelFooterLanguageRowDescription-${title}`}
+                >
+                  {guide.description}
+                </span>
+              )}
+            </>
+          ) : (
+            label
+          )}
         </button>
       );
     });
-  }, [supportedLanguages, languageService, isPromptMode, language, onItemClick, onLanguageClick]);
+  }, [
+    supportedLanguages,
+    languageGuides,
+    describesLanguages,
+    languageService,
+    isPromptMode,
+    language,
+    onItemClick,
+    onLanguageClick,
+    activeDataset,
+  ]);
 
   const aiChip = useMemo(() => {
     if (!promptModeIsAvailable || hideAI) {
@@ -428,7 +450,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
                     })}
                     data-test-subj={`queryPanelFooterSourceType-${sourceType.label}`}
                   >
-                    {sourceType.label}
+                    {getSourceTypeRegistry().getLabel(sourceType, flavorId)}
                   </button>
                 );
               })
@@ -440,7 +462,7 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
                 aria-current="true"
                 data-test-subj={`queryPanelFooterSourceType-${sourceTypes[0]?.label}`}
               >
-                {sourceTypes[0]?.label}
+                {sourceTypes[0] && getSourceTypeRegistry().getLabel(sourceTypes[0], flavorId)}
               </div>
             )}
           </div>
@@ -453,14 +475,21 @@ export const LanguageToggle = ({ hideAI = false, builderOnly = false }: Language
               className="exploreLanguagePicker__sectionTitle exploreLanguagePicker__sectionTitle--flush"
               id={queryLanguageTitleId}
             >
-              {queryLanguageSectionTitle}
+              {queryLanguageTitle}
             </div>
-            {/* One wrapping row: the AI chip flows with the languages rather
-                than being pinned to its own line. */}
-            <div className="exploreLanguagePicker__chips">
-              {languageChips}
-              {aiChip}
-            </div>
+            {describesLanguages ? (
+              <>
+                <div className="exploreLanguagePicker__languages">{languageChips}</div>
+                {aiChip && <div className="exploreLanguagePicker__chips">{aiChip}</div>}
+              </>
+            ) : (
+              // One wrapping row: the AI chip flows with the languages rather than being pinned
+              // to its own line.
+              <div className="exploreLanguagePicker__chips">
+                {languageChips}
+                {aiChip}
+              </div>
+            )}
             <LearnMoreLink />
           </div>
         </div>

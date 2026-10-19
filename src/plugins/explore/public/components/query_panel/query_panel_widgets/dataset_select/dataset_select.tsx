@@ -104,11 +104,11 @@ export const DatasetSelectWidget = () => {
   const isRegisteredSource = activeSourceTypeId !== OPENSEARCH_SOURCE_TYPE_ID;
 
   const supportedTypes = useMemo(() => {
-    if (flavorId === ExploreFlavor.Metrics) return ['PROMETHEUS'];
-
     if (isRegisteredSource) {
       return getSourceTypeRegistry().get(activeSourceTypeId)?.datasetTypes;
     }
+
+    if (flavorId === ExploreFlavor.Metrics) return ['PROMETHEUS'];
 
     return (
       services.supportedTypes || [

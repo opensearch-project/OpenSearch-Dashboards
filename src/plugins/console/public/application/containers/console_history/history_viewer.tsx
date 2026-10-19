@@ -32,6 +32,7 @@ import { useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { DevToolsSettings } from '../../../services';
+import { MAX_ENTRY_DATA_CHARS } from '../../../services/history';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
 // @ts-ignore
@@ -63,7 +64,15 @@ export function HistoryViewer({ settings, req }: Props) {
   if (viewerRef.current) {
     const { current: viewer } = viewerRef;
     if (req) {
-      const s = req.method + ' ' + req.endpoint + '\n' + (req.data || '');
+      // An omitted body would otherwise look identical to a request that never
+      // had one, so say so rather than let the user restore and run it blind.
+      const body = req.dataOmitted
+        ? i18n.translate('console.historyPage.bodyNotSavedViewerNote', {
+            defaultMessage: '# Body not saved: history keeps bodies under {limit} KB',
+            values: { limit: Math.floor(MAX_ENTRY_DATA_CHARS / 1024) },
+          })
+        : req.data || '';
+      const s = req.method + ' ' + req.endpoint + '\n' + body;
       viewer.update(s, inputMode);
       viewer.clearSelection();
     } else {

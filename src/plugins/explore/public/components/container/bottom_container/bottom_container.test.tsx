@@ -130,6 +130,17 @@ describe('BottomContainer', () => {
 
       expect(screen.queryByTestId('exploreFieldsFlyout')).not.toBeInTheDocument();
     });
+
+    it('keeps the fields flyout open while Escape confirms an IME composition', () => {
+      renderAtWidth(NARROW);
+      fireEvent.click(screen.getByTestId('exploreFieldsFlyoutToggle'));
+
+      fireEvent.keyDown(window, { key: 'Escape', isComposing: true });
+      expect(screen.getByTestId('exploreFieldsFlyout')).toBeInTheDocument();
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByTestId('exploreFieldsFlyout')).not.toBeInTheDocument();
+    });
   });
 
   describe('resizing', () => {

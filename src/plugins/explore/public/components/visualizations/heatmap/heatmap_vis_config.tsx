@@ -128,6 +128,9 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
   name: 'Heatmap',
   type: 'heatmap',
   icon: 'heatmap',
+  metadata: {
+    description: 'Density or intensity across two categorical dimensions.',
+  },
   getRules: () => {
     const rules: Array<VisRule<'heatmap'>> = [
       {

@@ -21,6 +21,7 @@ import { i18n } from '@osd/i18n';
 import { GlobalSearchCommand, GlobalSearchResult } from '../../global_search';
 import { GlobalSearchResultGroup, runGlobalSearch } from '../../global_search/run_global_search';
 import { KeyStringParser } from '../../../keyboard_shortcut/key_parser';
+import { isImeComposing } from '../../../utils';
 import './header_search_bar.scss';
 
 const keyStringParser = new KeyStringParser();
@@ -292,7 +293,7 @@ export const HeaderSearchBar = ({
         style={{ paddingRight: 32 }}
         value={searchValue}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'Enter' && !isImeComposing(e)) {
             enterKeyDownRef.current = true;
           }
         }}

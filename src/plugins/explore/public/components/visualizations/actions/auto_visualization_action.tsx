@@ -39,7 +39,7 @@ import {
   UrlTransformationState,
 } from '../../../components/data_transformations';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { AutoVisMeta } from './utils';
+import { createAutoVisMeta } from './utils';
 
 export const AUTO_VISUALIZATION_TOOL_NAME = 'auto_create_visualization';
 
@@ -687,7 +687,7 @@ export function registerAutoVisualizationAction(
   };
 
   registerAction({
-    ...AutoVisMeta,
+    ...createAutoVisMeta(visualizationRegistry),
     useCustomRenderer: true,
     handler: async (args: AutoVisualizationArgs) => {
       try {

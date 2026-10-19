@@ -334,6 +334,21 @@ describe('VariableService', () => {
       expect(withState[0].current).toEqual(['staging']);
     });
 
+    it('should preserve the "All" marker when customOptions change', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
+        'dashboard-123'
+      );
+
+      await service.updateVariable('custom-1', {
+        customOptions: ['dev', 'staging', 'prod', 'new'],
+      } as any);
+
+      const withState = service.getVariablesWithState();
+      // Marker is kept so "All" still tracks the new option list, not reset to 'dev'.
+      expect(withState[0].current).toEqual(['$__all']);
+    });
+
     it('should preserve current by value when custom option labels change', async () => {
       const { service } = createService(
         [
@@ -631,6 +646,15 @@ describe('VariableService', () => {
       const { service } = createService([makeCustomVariable()]);
       service.updateVariableValue('custom-1', ['prod']);
       expect(service.getVariables()[0].current).toEqual(['prod']);
+    });
+
+    it('should drop the "All" marker when concrete values are also present', () => {
+      const { service } = createService([
+        makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] }),
+      ]);
+      // A mixed ['$__all', 'p99'] must never persist, or '$__all' leaks as a literal.
+      service.updateVariableValue('custom-1', ['$__all', 'p99']);
+      expect(service.getVariables()[0].current).toEqual(['p99']);
     });
 
     it('should throw for unknown id', () => {
@@ -1798,7 +1822,7 @@ describe('VariableService', () => {
   });
 
   describe('option limit', () => {
-    it('should limit query variable options to 100', async () => {
+    it('should keep all query variable options in runtime state', async () => {
       const options = Array.from({ length: 150 }, (_, i) => `option-${i}`);
       mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(options));
 
@@ -1813,21 +1837,21 @@ describe('VariableService', () => {
       await service.refreshVariableOptions('query-1');
 
       const vars = service.getVariablesWithState();
-      expect(vars[0].options.length).toBe(100);
+      expect(vars[0].options.length).toBe(150);
       expect(vars[0].options[0].value).toBe('option-0');
-      expect(vars[0].options[99].value).toBe('option-99');
+      expect(vars[0].options[149].value).toBe('option-149');
     });
 
-    it('should limit custom variable options to 100', () => {
+    it('should keep all custom variable options in runtime state', () => {
       const customOptions = Array.from({ length: 150 }, (_, i) => `option-${i}`);
       const { service } = createService([
         makeCustomVariable({ name: 'large', customOptions, current: ['option-0'] }),
       ]);
 
       const vars = service.getVariablesWithState();
-      expect(vars[0].options.length).toBe(100);
+      expect(vars[0].options.length).toBe(150);
       expect(vars[0].options[0].value).toBe('option-0');
-      expect(vars[0].options[99].value).toBe('option-99');
+      expect(vars[0].options[149].value).toBe('option-149');
     });
 
     it('should not truncate options when count is less than 100', async () => {
@@ -1847,8 +1871,7 @@ describe('VariableService', () => {
       expect(vars[0].options).toEqual([{ value: 'a' }, { value: 'b' }, { value: 'c' }]);
     });
 
-    it('should limit to 100 before sorting for query variables', async () => {
-      // Create 150 options in reverse alphabetical order
+    it('should sort all options across the full list for query variables', async () => {
       const options = Array.from(
         { length: 150 },
         (_, i) => `option-${String(149 - i).padStart(3, '0')}`
@@ -1867,15 +1890,12 @@ describe('VariableService', () => {
       await service.refreshVariableOptions('query-1');
 
       const vars = service.getVariablesWithState();
-      // Should have first 100 options (unsorted: option-149 to option-050) then sorted
-      expect(vars[0].options.length).toBe(100);
-      // After limiting to first 100 (option-149 to option-050) and sorting, first should be option-050
-      expect(vars[0].options[0].value).toBe('option-050');
-      expect(vars[0].options[99].value).toBe('option-149');
+      expect(vars[0].options.length).toBe(150);
+      expect(vars[0].options[0].value).toBe('option-000');
+      expect(vars[0].options[149].value).toBe('option-149');
     });
 
-    it('should limit to 100 before sorting for custom variables', () => {
-      // Create 150 options in reverse alphabetical order
+    it('should sort all options across the full list for custom variables', () => {
       const customOptions = Array.from(
         { length: 150 },
         (_, i) => `option-${String(149 - i).padStart(3, '0')}`
@@ -1890,10 +1910,46 @@ describe('VariableService', () => {
       ]);
 
       const vars = service.getVariablesWithState();
-      // Should have first 100 options (unsorted: option-149 to option-050) then sorted
-      expect(vars[0].options.length).toBe(100);
-      expect(vars[0].options[0].value).toBe('option-050');
-      expect(vars[0].options[99].value).toBe('option-149');
+      expect(vars[0].options.length).toBe(150);
+      expect(vars[0].options[0].value).toBe('option-000');
+      expect(vars[0].options[149].value).toBe('option-149');
+    });
+  });
+
+  describe('"All" marker ($__all)', () => {
+    it('preserves the marker across a query refresh so it tracks new options', async () => {
+      mockExecuteVariableQuery.mockResolvedValue(makeQueryResult(['x', 'y', 'z']));
+      const { service } = createService([
+        makeQueryVariable({ multi: true, includeAll: true, current: ['$__all'] }),
+      ]);
+
+      await service.refreshVariableOptions('query-1');
+
+      // current stays as the marker; options reflect the fresh query result.
+      expect(getCurrentValues(service).service).toEqual(['$__all']);
+      expect(getOptionValues(service.getVariablesWithState()[0].options)).toEqual(['x', 'y', 'z']);
+    });
+
+    it('clears the marker when includeAll is turned off', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
+        'dashboard-123'
+      );
+
+      await service.updateVariable('custom-1', { includeAll: false } as any);
+
+      expect(getCurrentValues(service).env).toEqual([]);
+    });
+
+    it('clears the marker when switching from multi to single', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, includeAll: true, current: ['$__all'] })],
+        'dashboard-123'
+      );
+
+      await service.updateVariable('custom-1', { multi: false } as any);
+
+      expect(getCurrentValues(service).env).toEqual([]);
     });
   });
 

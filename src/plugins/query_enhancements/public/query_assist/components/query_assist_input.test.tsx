@@ -100,4 +100,15 @@ describe('<QueryAssistInput /> spec', () => {
     const suggestionsComponent = component.getByTestId('suggestions-component');
     expect(suggestionsComponent).toBeEmptyDOMElement();
   });
+
+  it('should keep suggestions open on an Enter that belongs to an IME composition', () => {
+    const { component } = renderQueryAssistInput();
+    const inputElement = component.getByTestId('query-assist-input-field-text') as HTMLInputElement;
+    fireEvent.click(inputElement);
+    fireEvent.keyDown(inputElement, { key: 'Enter', keyCode: 229, isComposing: true });
+    expect(component.getByTestId('suggestions-component')).not.toBeEmptyDOMElement();
+
+    fireEvent.keyDown(inputElement, { key: 'Enter', code: 'Enter' });
+    expect(component.getByTestId('suggestions-component')).toBeEmptyDOMElement();
+  });
 });

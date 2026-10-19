@@ -7,48 +7,15 @@ import { ExploreServices } from '../../../../../types';
 import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from '../types';
 import { LRUCache } from './lru_cache';
 import { escapeLabelValue } from './query_generator';
+import type { SourceTypeMetricsResourceClient } from '../../../../../services/source_type_registry';
 
 export interface QueryRangeSeries {
   metric: Record<string, string>;
   values: Array<[number, string]>;
 }
 
-interface TimeRange {
-  from: string;
-  to: string;
-}
-
-interface PrometheusResourceClientLike {
-  getMetrics(
-    dataConnectionId: string,
-    meta?: Record<string, unknown>,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-  getMetricMetadata(
-    dataConnectionId: string,
-    meta: Record<string, unknown> | undefined,
-    metric?: string,
-    timeRange?: TimeRange
-  ): Promise<Record<string, Array<{ type?: string; help?: string; unit?: string }>>>;
-  getSeries(
-    dataConnectionId: string,
-    match: string,
-    meta?: Record<string, unknown>,
-    timeRange?: TimeRange
-  ): Promise<Array<Record<string, string>>>;
-  getLabels(
-    dataConnectionId: string,
-    meta?: Record<string, unknown>,
-    metric?: string,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-  getLabelValues(
-    dataConnectionId: string,
-    meta: Record<string, unknown> | undefined,
-    label: string,
-    timeRange?: TimeRange
-  ): Promise<string[]>;
-}
+// The contract a source's metrics resource client implements (`metricsResourceClientId`).
+type PrometheusResourceClientLike = SourceTypeMetricsResourceClient;
 
 interface PrometheusSearchHit {
   _source?: {
@@ -66,9 +33,14 @@ export class PrometheusClient {
   private activeControllers = new Set<AbortController>();
   private aborted = false;
 
+  /**
+   * @param resourceClientId The data plugin resource client to call: `prometheus` for Prometheus
+   *   connections, or the one a registered source names in `metricsResourceClientId`.
+   */
   constructor(
     private services: ExploreServices,
-    public readonly dataConnectionId: string
+    public readonly dataConnectionId: string,
+    private readonly resourceClientId: string = 'prometheus'
   ) {}
 
   abort(): void {
@@ -87,9 +59,10 @@ export class PrometheusClient {
   }
 
   private getResourceClient(): PrometheusResourceClientLike {
-    const rc =
-      this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>('prometheus');
-    if (!rc) throw new Error('Prometheus resource client is not registered');
+    const rc = this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>(
+      this.resourceClientId
+    );
+    if (!rc) throw new Error(`Resource client "${this.resourceClientId}" is not registered`);
     return rc;
   }
 
@@ -255,7 +228,9 @@ export class PrometheusClient {
     searchSource.setFields({
       index: dataView,
       size: 2000,
-      query: { ...queryState, query: promql },
+      // The browser's queries are PromQL whatever language the editor is on (a source can offer
+      // others, e.g. SQL), so they must run through the PromQL search interceptor.
+      query: { ...queryState, query: promql, language: 'PROMQL' },
       highlightAll: false,
       version: false,
     });

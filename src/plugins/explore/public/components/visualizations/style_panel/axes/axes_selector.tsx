@@ -34,6 +34,12 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.Y]: i18n.translate('explore.visualize.axisSelectLabelY', {
     defaultMessage: 'Y-Axis',
   }),
+  [AxisRole.SOURCE]: i18n.translate('explore.visualize.axisSelectLabelSource', {
+    defaultMessage: 'Source',
+  }),
+  [AxisRole.TARGET]: i18n.translate('explore.visualize.axisSelectLabelTarget', {
+    defaultMessage: 'Target',
+  }),
   [AxisRole.COLOR]: i18n.translate('explore.visualize.axisSelectLabelColor', {
     defaultMessage: 'Color',
   }),
