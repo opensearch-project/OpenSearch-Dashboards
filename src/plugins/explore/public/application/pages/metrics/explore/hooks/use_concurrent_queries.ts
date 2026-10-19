@@ -14,11 +14,16 @@ const DEBOUNCE_MS = 200;
  * Manages a queue of keys, fires up to `concurrency` requests at a time,
  * and updates results incrementally as each completes. Integrates with
  * IntersectionObserver via the returned `onVisibilityChange` callback.
+ *
+ * While `enabled` is false nothing is fetched: visibility is still tracked, and the keys in the
+ * viewport are fetched once `enabled` turns true (pass `enabled` in `deps` too so the switch
+ * re-queues them).
  */
 export function useConcurrentQueries<T>(
   fetchFn: (key: string, signal: AbortSignal) => Promise<T>,
   deps: readonly unknown[],
-  concurrency = DEFAULT_CONCURRENCY
+  concurrency = DEFAULT_CONCURRENCY,
+  enabled = true
 ) {
   const [results, setResults] = useState<Map<string, T>>(new Map());
   const [errors, setErrors] = useState<Map<string, string>>(new Map());
@@ -37,6 +42,8 @@ export function useConcurrentQueries<T>(
   });
 
   const drainRef = useRef<() => void>(() => {});
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
 
   const scheduleFlush = useCallback(() => {
     const s = stateRef.current;
@@ -67,6 +74,7 @@ export function useConcurrentQueries<T>(
 
   const drain = useCallback(() => {
     const s = stateRef.current;
+    if (!enabledRef.current) return;
     while (s.inflight.size + s.pending.size < concurrency && s.queue.length > 0) {
       const key = s.queue.shift()!;
       if (s.fetched.has(key) || s.inflight.has(key) || s.pending.has(key)) continue;
@@ -74,6 +82,7 @@ export function useConcurrentQueries<T>(
 
       const timer = setTimeout(() => {
         s.pending.delete(key);
+        if (!enabledRef.current) return;
         if (!s.viewport.has(key) || s.fetched.has(key)) {
           drainRef.current();
           return;
